@@ -12,8 +12,6 @@ our custom window.
 """
 
 # std imports
-import collections
-import math
 import numpy as np
 
 # 3rd party imports
@@ -24,8 +22,8 @@ except ImportError:
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
-from mantid.kernel import Logger, ConfigService
-from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot, get_plot_fig,\
+from mantid.kernel import Logger
+from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot,\
                                        create_subplots,raise_if_not_sequence
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
@@ -40,6 +38,7 @@ LOGGER = Logger("workspace.plotting.functions")
 # -----------------------------------------------------------------------------
 # 'Public' Functions
 # -----------------------------------------------------------------------------
+
 
 def can_overplot():
     """
@@ -72,6 +71,7 @@ def current_figure_or_none():
         return plt.gcf()
     else:
         return None
+
 
 def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False):
     """
@@ -195,6 +195,7 @@ def pcolormesh_on_axis(ax, ws):
         lbl.set_rotation(45)
 
     return pcm
+
 
 def _validate_pcolormesh_inputs(workspaces):
     """Raises a ValueError if any arguments have the incorrect types"""
