@@ -163,6 +163,5 @@ class _compatabilityTest(TestCase):
         plot_mock.assert_called_once_with([ws_name],wksp_indices=wksp_indices,errors=False, waterfall=None,
                      fig=fake_window, overplot=True, plot_kwargs={'axis': MantidAxType.BIN})
 
-
 if __name__ == '__main__':
     main()
