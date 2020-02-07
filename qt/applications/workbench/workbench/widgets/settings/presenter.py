@@ -80,7 +80,7 @@ class SettingsPresenter(object):
 
     def view_closing(self):
         """
-        Saes te mantid settings and updates updates te parent
+        Saves the mantid settings and updates updates the parent
         """
         if not self.ask_before_close or self.view.ask_before_close():
             ConfigService.saveConfig(ConfigService.getUserFilename())
