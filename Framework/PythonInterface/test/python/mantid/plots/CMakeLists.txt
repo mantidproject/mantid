@@ -5,6 +5,7 @@ add_subdirectory(modest_image)
 set(TEST_PY_FILES
     datafunctionsTest.py axesfunctionsTest.py axesfunctions3DTest.py
     plotfunctionsTest.py plots__init__Test.py ScalesTest.py UtilityTest.py
+    _compatabilityTest.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
