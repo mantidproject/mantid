@@ -70,7 +70,9 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
     if normalize_by_bin_width is not None:
         return normalize_by_bin_width, kwargs
     distribution = kwargs.get('distribution', None)
-    if distribution or (hasattr(workspace, 'isDistribution') and workspace.isDistribution()):
+    axis = kwargs.get('axis', None)
+    if axis == MantidAxType.BIN or distribution or \
+            (hasattr(workspace, 'isDistribution') and workspace.isDistribution()):
         return False, kwargs
     elif distribution is False:
         return True, kwargs
