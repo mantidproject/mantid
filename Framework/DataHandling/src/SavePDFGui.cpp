@@ -82,6 +82,17 @@ void SavePDFGui::exec() {
   // --------- write the header in the style of
   //#Comment: neutron, Qmin=0.5, Qmax=31.42, Qdamp=0.017659, Qbroad= 0.0191822,
   // Temperature = 300
+  writeMetaData(out, inputWS);
+
+  // --------- write the data
+  writeWSData(out, inputWS);
+  
+  // --------- close the file
+  out.close();
+}
+
+void SavePDFGui::writeMetaData(std::ofstream &out,
+                               API::MatrixWorkspace_const_sptr inputWS) {
   out << "#Comment: neutron";
   auto run = inputWS->run();
   if (run.hasProperty("Qmin")) {
@@ -106,8 +117,10 @@ void SavePDFGui::exec() {
   // out << "#P0  -22.03808    1.10131 2556.26392    0.03422    1.50  0.5985\n";
   // // TODO
   out << "#L r G(r) dr dG(r)\n";
+}
 
-  // --------- write the data
+void SavePDFGui::writeWSData(std::ofstream &out,
+                                 API::MatrixWorkspace_const_sptr inputWS) {
   const auto &x = inputWS->x(0);
   const auto &y = inputWS->y(0);
   const auto &dy = inputWS->e(0);
@@ -126,10 +139,6 @@ void SavePDFGui::exec() {
           << "  " << dy[i] << "\n";
     }
   }
-  
-
-  // --------- close the file
-  out.close();
 }
 
 } // namespace DataHandling
