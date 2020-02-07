@@ -13,7 +13,14 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** SavePDFGui : TODO: DESCRIPTION
+/** SavePDFGui : Saves a workspace containing a pair distrebution function in 
+a format readable by the PDFgui package.
+
+Required Properties:
+<UL>
+<LI> InputWorkspace - An input workspace with units of Atomic Distance </LI>
+<LI> Filename - The filename to use for the saved data </LI>
+</UL>
  */
 class DLLExport SavePDFGui : public API::Algorithm {
 public:

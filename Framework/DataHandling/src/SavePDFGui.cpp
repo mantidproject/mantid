@@ -43,7 +43,7 @@ const std::string SavePDFGui::summary() const {
 void SavePDFGui::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                         Direction::Input),
-                  "An input workspace.");
+                  "An input workspace with units of Atomic Distance.");
   declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, ".gr"),
                   "The filename to use for the saved data");
