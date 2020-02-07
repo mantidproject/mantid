@@ -10,7 +10,7 @@
 from __future__ import absolute_import
 
 # std imports
-from unittest import TestCase, main
+import unittest
 
 # third party imports
 import matplotlib
@@ -44,7 +44,7 @@ def workspace_names_dummy_func(workspaces):
     return workspaces
 
 
-class FunctionsTest(TestCase):
+class FunctionsTest(unittest.TestCase):
 
     _test_ws = None
 
@@ -210,4 +210,4 @@ class FunctionsTest(TestCase):
             self.assertEqual(ax.get_title(), err_ax.get_title())
 
 if __name__ == '__main__':
-    main()
+    unittest.main()

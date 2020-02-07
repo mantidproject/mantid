@@ -10,7 +10,7 @@
 from __future__ import absolute_import
 
 # std imports
-from unittest import TestCase, main
+import unittest
 
 # third party imports
 import matplotlib
@@ -23,7 +23,7 @@ from mantid.py3compat.mock import patch
 from mantid.plots._compatability import plotSpectrum, plotBin
 from mantid.plots.utility import MantidAxType
 
-class compatabilityTest(TestCase):
+class compatabilityTest(unittest.TestCase):
 
     @patch('mantid.plots._compatability.plot')
     def test_plotSpectrum_calls_plot_with_a_string(self, plot_mock):
@@ -164,4 +164,4 @@ class compatabilityTest(TestCase):
                      fig=fake_window, overplot=True, plot_kwargs={'axis': MantidAxType.BIN})
 
 if __name__ == '__main__':
-    main()
+    unittest.main()
