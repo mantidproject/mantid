@@ -23,7 +23,7 @@ from mantid.py3compat.mock import patch
 from mantid.plots._compatability import plotSpectrum, plotBin
 from mantid.plots.utility import MantidAxType
 
-class _compatabilityTest(TestCase):
+class compatabilityTest(TestCase):
 
     @patch('mantid.plots._compatability.plot')
     def test_plotSpectrum_calls_plot_with_a_string(self, plot_mock):
