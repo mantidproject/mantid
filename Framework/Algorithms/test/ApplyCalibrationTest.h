@@ -22,6 +22,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -55,37 +56,50 @@ public:
     dataStore.add(wsName, ws);
 
     // Create Calibration Table
-    ITableWorkspace_sptr posTableWs =
+    ITableWorkspace_sptr calTableWs =
         WorkspaceFactory::Instance().createTable();
-    posTableWs->addColumn("int", "Detector ID");
-    posTableWs->addColumn("V3D", "Detector Position");
+    calTableWs->addColumn("int", "Detector ID");
+    calTableWs->addColumn("V3D", "Detector Position");
+    calTableWs->addColumn("double", "Detector Y Coordinate");
+    calTableWs->addColumn("double", "Detector Height");
+    calTableWs->addColumn("double", "Detector Width");
 
     for (int i = 0; i < ndets; ++i) {
-      TableRow row = posTableWs->appendRow();
-      row << i + 1 << V3D(1.0, 0.01 * i, 2.0);
+      TableRow row = calTableWs->appendRow();
+      //  detector-ID  position  Y-coordinate  Height  Width
+      row << i + 1 << V3D(1.0, 0.01 * i, 2.0) << 0.04 * i << 0.04  <<  0.05;
     }
     TS_ASSERT_THROWS_NOTHING(appCalib.setPropertyValue("Workspace", wsName));
     TS_ASSERT_THROWS_NOTHING(appCalib.setProperty<ITableWorkspace_sptr>(
-        "PositionTable", posTableWs));
+            "CalibrationTable", calTableWs));
     TS_ASSERT_THROWS_NOTHING(appCalib.execute());
 
     TS_ASSERT(appCalib.isExecuted());
 
     const auto &spectrumInfo = ws->spectrumInfo();
+    const auto &componentInfo = ws->componentInfo();
 
     int id = spectrumInfo.detector(0).getID();
     V3D newPos = spectrumInfo.position(0);
+    V3D scaleFactor = componentInfo.scaleFactor(0);
+
     TS_ASSERT_EQUALS(id, 1);
     TS_ASSERT_DELTA(newPos.X(), 1.0, 0.0001);
     TS_ASSERT_DELTA(newPos.Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos.Z(), 2.0, 0.0001);
+    TS_ASSERT_DELTA(scaleFactor.Y(), 2.0, 0.0001);  // original height was 0.02
+    TS_ASSERT_DELTA(scaleFactor.X(), 0.5, 0.0001);  // original width was 0.1
 
     id = spectrumInfo.detector(ndets - 1).getID();
     newPos = spectrumInfo.position(ndets - 1);
+    scaleFactor = componentInfo.scaleFactor(0);
+
     TS_ASSERT_EQUALS(id, ndets);
     TS_ASSERT_DELTA(newPos.X(), 1.0, 0.0001);
-    TS_ASSERT_DELTA(newPos.Y(), 0.01 * (ndets - 1), 0.0001);
+    TS_ASSERT_DELTA(newPos.Y(), 0.04 * (ndets - 1), 0.0001);
     TS_ASSERT_DELTA(newPos.Z(), 2.0, 0.0001);
+    TS_ASSERT_DELTA(scaleFactor.Y(), 2.0, 0.0001);
+    TS_ASSERT_DELTA(scaleFactor.X(), 0.5, 0.0001);
 
     dataStore.remove(wsName);
   }
@@ -115,18 +129,19 @@ public:
 
     // Create Calibration Table
     int firstDetectorID = 34208002;
-    ITableWorkspace_sptr posTableWs =
+    ITableWorkspace_sptr calTableWs =
         WorkspaceFactory::Instance().createTable();
-    posTableWs->addColumn("int", "Detector ID");
-    posTableWs->addColumn("V3D", "Detector Position");
+    calTableWs->addColumn("int", "Detector ID");
+    calTableWs->addColumn("V3D", "Detector Position");
 
     for (int i = 0; i < ndets; ++i) {
-      TableRow row = posTableWs->appendRow();
+      TableRow row = calTableWs->appendRow();
+      //               detector ID
       row << firstDetectorID + 10 * i << V3D(1.0, 0.01 * i, 2.0);
     }
     TS_ASSERT_THROWS_NOTHING(appCalib.setPropertyValue("Workspace", wsName));
     TS_ASSERT_THROWS_NOTHING(appCalib.setProperty<ITableWorkspace_sptr>(
-        "PositionTable", posTableWs));
+            "CalibrationTable", calTableWs));
     TS_ASSERT_THROWS_NOTHING(appCalib.execute());
 
     TS_ASSERT(appCalib.isExecuted());
