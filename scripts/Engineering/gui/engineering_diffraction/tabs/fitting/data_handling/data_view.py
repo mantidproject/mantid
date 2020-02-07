@@ -65,8 +65,10 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.table_selection.setRowCount(0)
 
     def remove_selected(self):
-        for row in reversed(sorted(self.get_selected_rows())):
+        selected = self.get_selected_rows()
+        for row in reversed(sorted(selected)):
             self.remove_table_row(row)
+        return selected
 
     # =================
     # Component Getters

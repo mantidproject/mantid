@@ -16,13 +16,13 @@ class FittingDataPresenter(object):
         self.view = view
         self.worker = None
 
-        self.row_numbers = {}  # {ws_name: table_row}
+        self.row_numbers = TwoWayRowDict()  # {ws_name: table_row} and {table_row: ws_name}
 
         # Connect view signals to local methods
         self.view.set_on_load_clicked(self.on_load_clicked)
         self.view.set_enable_button_connection(self._enable_load_button)
-        self.view.set_on_remove_selected_clicked(self._remove_selected_table_rows)
-        self.view.set_on_remove_all_clicked(self._remove_all_table_rows)
+        self.view.set_on_remove_selected_clicked(self._remove_selected_tracked_workspaces)
+        self.view.set_on_remove_all_clicked(self._remove_all_tracked_workspaces)
 
     def on_load_clicked(self):
         if self._validate():
@@ -68,9 +68,19 @@ class FittingDataPresenter(object):
 
     def _on_worker_success(self, _):
         self._remove_all_table_rows()
-        self.row_numbers = {}
+        self.row_numbers.clear()
         for i, name in enumerate(self.get_loaded_workspaces()):
             self._add_row_to_table(name, i)
+
+    def _remove_selected_tracked_workspaces(self):
+        row_numbers = self._remove_selected_table_rows()
+        for row_no in row_numbers:
+            ws_name = self.row_numbers.pop(row_no)
+            self.get_loaded_workspaces().pop(ws_name)
+
+    def _remove_all_tracked_workspaces(self):
+        self.clear_workspaces()
+        self._remove_all_table_rows()
 
     def _enable_load_button(self, enabled):
         self.view.set_load_button_enabled(enabled)
@@ -111,7 +121,27 @@ class FittingDataPresenter(object):
         self.view.remove_table_row(row_no)
 
     def _remove_selected_table_rows(self):
-        self.view.remove_selected()
+        return self.view.remove_selected()
 
     def _remove_all_table_rows(self):
         self.view.remove_all()
+
+
+class TwoWayRowDict(dict):
+    """
+    Two way dictionary used to map rows to workspaces and vice versa.
+    """
+    def __setitem__(self, key, value):
+        if key in self:
+            del self[key]
+        if value in self:
+            del self[value]
+        dict.__setitem__(self, key, value)
+        dict.__setitem__(self, value, key)
+
+    def __delitem__(self, key):
+        dict.__delitem__(self, key)
+        dict.__delitem__(self, self[key])
+
+    def __len__(self):
+        return dict.__len__(self) / 2
