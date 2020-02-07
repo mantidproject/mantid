@@ -44,9 +44,9 @@ class MessageDisplay(MessageDisplay_cpp):
 
     def readSettings(self, qsettings):
         super(MessageDisplay, self).readSettings(qsettings)
-        self.setShowFrameworkOutput(self.ReadSettingSafely(qsettings, SHOW_FRAMEWORK_OUTPUT_KEY, True,bool))
-        self.setShowActiveScriptOutput(self.ReadSettingSafely(qsettings, SHOW_ACTIVE_SCRIPT_OUTPUT_KEY, True,bool))
-        self.setShowAllScriptOutput(self.ReadSettingSafely(qsettings, SHOW_ALL_SCRIPT_OUTPUT_KEY, False,bool))
+        self.setShowFrameworkOutput(self.ReadSettingSafely(qsettings, SHOW_FRAMEWORK_OUTPUT_KEY, True, bool))
+        self.setShowActiveScriptOutput(self.ReadSettingSafely(qsettings, SHOW_ACTIVE_SCRIPT_OUTPUT_KEY, True, bool))
+        self.setShowAllScriptOutput(self.ReadSettingSafely(qsettings, SHOW_ALL_SCRIPT_OUTPUT_KEY, False, bool))
 
     def ReadSettingSafely(self,qsettings,key,default,type):
         """
