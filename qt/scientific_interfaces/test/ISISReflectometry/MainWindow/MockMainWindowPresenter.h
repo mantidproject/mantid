@@ -18,6 +18,13 @@ public:
   MOCK_METHOD1(settingsChanged, void(int));
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
+  MOCK_CONST_METHOD0(isWarnDiscardChangesChecked, bool());
+  MOCK_METHOD0(isCloseEventPrevented, bool());
+  MOCK_CONST_METHOD1(isCloseBatchPrevented, bool(int));
+  MOCK_CONST_METHOD1(isOverwriteBatchPrevented, bool(int));
+  MOCK_CONST_METHOD1(isBatchUnsaved, bool(int));
+  MOCK_METHOD0(isAnyBatchUnsaved, bool());
+
   MOCK_CONST_METHOD0(notifyOptionsChanged, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());

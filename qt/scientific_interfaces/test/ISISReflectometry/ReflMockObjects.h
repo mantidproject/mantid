@@ -83,11 +83,14 @@ public:
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
+  MOCK_CONST_METHOD0(isWarnDiscardChangesChecked, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
   MOCK_CONST_METHOD0(rowProcessingProperties, AlgorithmRuntimeProps());
   MOCK_CONST_METHOD0(requestClose, bool());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
   MOCK_CONST_METHOD0(instrumentName, std::string());
+  MOCK_CONST_METHOD0(isBatchUnsaved, bool());
+  MOCK_METHOD1(setBatchUnsaved, void(bool));
 };
 
 class MockRunsPresenter : public IRunsPresenter {
@@ -114,11 +117,14 @@ public:
   MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
+  MOCK_METHOD0(notifyTableChanged, void());
   MOCK_METHOD0(settingsChanged, void());
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
+  MOCK_CONST_METHOD0(isOverwritingTablePrevented, bool());
+  MOCK_CONST_METHOD0(isOverwriteBatchPrevented, bool());
   MOCK_CONST_METHOD0(percentComplete, int());
   MOCK_METHOD0(notifySearchComplete, void());
 };
@@ -240,6 +246,7 @@ public:
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
+  MOCK_METHOD0(askUserDiscardChanges, bool());
   MOCK_METHOD1(askUserForLoadFileName, std::string(const std::string &));
   MOCK_METHOD1(askUserForSaveFileName, std::string(const std::string &));
 };

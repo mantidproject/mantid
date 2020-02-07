@@ -232,8 +232,10 @@ public:
     auto runsTable = makeRunsTableWithContent();
     ON_CALL(m_view, getSearchString())
         .WillByDefault(Return(autoReductionSearch));
+    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
+        .WillByDefault(Return(true));
     expectAutoreductionSettingsChanged();
-    expectRunsTableWithContent(runsTable);
     expectUserRespondsYes();
     expectCheckForNewRuns();
     presenter.resumeAutoreduction();
@@ -244,8 +246,11 @@ public:
     auto presenter = makePresenter();
     ON_CALL(m_view, getSearchString())
         .WillByDefault(Return(autoReductionSearch));
+    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(false));
+    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
+        .WillByDefault(Return(true));
     expectAutoreductionSettingsChanged();
-    EXPECT_CALL(m_messageHandler, askUserYesNo(_, _)).Times(0);
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
     expectCheckForNewRuns();
     presenter.resumeAutoreduction();
     verifyAndClear();
@@ -255,9 +260,11 @@ public:
     auto presenter = makePresenter();
     ON_CALL(m_view, getSearchString())
         .WillByDefault(Return(autoReductionSearch));
+    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
+        .WillByDefault(Return(true));
     auto runsTable = makeRunsTableWithContent();
     expectAutoreductionSettingsChanged();
-    expectRunsTableWithContent(runsTable);
     expectUserRespondsNo();
     expectDoNotStartAutoreduction();
     presenter.resumeAutoreduction();
@@ -769,13 +776,13 @@ private:
   }
 
   void expectUserRespondsYes() {
-    EXPECT_CALL(m_messageHandler, askUserYesNo(_, _))
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
         .Times(1)
         .WillOnce(Return(true));
   }
 
   void expectUserRespondsNo() {
-    EXPECT_CALL(m_messageHandler, askUserYesNo(_, _))
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
         .Times(1)
         .WillOnce(Return(false));
   }

@@ -77,15 +77,8 @@ void MainWindowPresenter::notifyNewBatchRequested() {
 }
 
 void MainWindowPresenter::notifyCloseBatchRequested(int batchIndex) {
-  if (m_batchPresenters[batchIndex]->isAutoreducing() ||
-      m_batchPresenters[batchIndex]->isProcessing()) {
-    m_messageHandler->giveUserCritical(
-        "Cannot close batch while processing or autoprocessing is in progress",
-        "Error");
-    return;
-  }
-
-  if (m_batchPresenters[batchIndex]->requestClose()) {
+  if (!isCloseBatchPrevented(batchIndex) &&
+      m_batchPresenters[batchIndex]->requestClose()) {
     m_batchPresenters.erase(m_batchPresenters.begin() + batchIndex);
     m_view->removeBatch(batchIndex);
   }
@@ -99,6 +92,11 @@ void MainWindowPresenter::notifyShowSlitCalculatorRequested() {
   m_slitCalculator->setCurrentInstrumentName(instrumentName());
   m_slitCalculator->processInstrumentHasBeenChanged();
   m_slitCalculator->show();
+}
+
+void MainWindowPresenter::notifyOptionsChanged() const {
+  // TODO Implement with round precision
+  return;
 }
 
 void MainWindowPresenter::notifyAnyBatchAutoreductionResumed() {
@@ -161,8 +159,56 @@ bool MainWindowPresenter::isAnyBatchAutoreducing() const {
   return false;
 }
 
-void MainWindowPresenter::notifyOptionsChanged() const {
-  // TODO implement with round precision
+bool MainWindowPresenter::isWarnDiscardChangesChecked() const {
+  return m_optionsDialogPresenter->getBoolOption(
+      std::string("WarnDiscardChanges"));
+}
+
+bool MainWindowPresenter::isCloseEventPrevented() {
+  if (isAnyBatchProcessing() || isAnyBatchAutoreducing())
+    return true;
+  else if (isWarnDiscardChangesChecked() && isAnyBatchUnsaved()) {
+    return !m_messageHandler->askUserDiscardChanges();
+  }
+  return false;
+}
+
+bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
+  if (m_batchPresenters[batchIndex]->isAutoreducing() ||
+      m_batchPresenters[batchIndex]->isProcessing()) {
+    m_messageHandler->giveUserCritical(
+        "Cannot close batch while processing or autoprocessing is in progress",
+        "Error");
+    return true;
+  } else if (isWarnDiscardChangesChecked() && isBatchUnsaved(batchIndex)) {
+    return !m_messageHandler->askUserDiscardChanges();
+  }
+  return false;
+}
+
+bool MainWindowPresenter::isOverwriteBatchPrevented(int tabIndex) const {
+  if (isWarnDiscardChangesChecked() && isBatchUnsaved(tabIndex)) {
+    return !m_messageHandler->askUserDiscardChanges();
+  }
+  return false;
+}
+
+/** Checks whether there are any unsaved changed in the specified batch */
+bool MainWindowPresenter::isBatchUnsaved(int batchIndex) const {
+  return m_batchPresenters[batchIndex]->isBatchUnsaved();
+}
+
+/** Checks whether there are unsaved changes in any batch and returns a bool */
+bool MainWindowPresenter::isAnyBatchUnsaved() {
+  for (auto it = m_batchPresenters.begin(); it != m_batchPresenters.end();
+       ++it) {
+    auto batchIndex =
+        static_cast<int>(std::distance(m_batchPresenters.begin(), it));
+    if (isBatchUnsaved(batchIndex)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
@@ -201,9 +247,12 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
     return;
   auto map = m_encoder->encodeBatch(m_view, tabIndex, false);
   m_fileHandler->saveJSONToFile(filename, map);
+  m_batchPresenters[tabIndex].get()->setBatchUnsaved(false);
 }
 
 void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
+  if (isOverwriteBatchPrevented(tabIndex))
+    return;
   auto filename = m_messageHandler->askUserForLoadFileName("JSON (*.json)");
   if (filename == "")
     return;
@@ -218,6 +267,7 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
     return;
   }
   m_decoder->decodeBatch(m_view, tabIndex, map);
+  m_batchPresenters[tabIndex].get()->setBatchUnsaved(false);
 }
 
 void MainWindowPresenter::disableSaveAndLoadBatch() {
