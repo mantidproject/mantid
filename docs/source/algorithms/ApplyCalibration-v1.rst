@@ -55,7 +55,7 @@ Usage
 
 
    # Apply Calibration to Workspace
-   ApplyCalibration ( Workspace=ws, PositionTable=calibTable)
+   ApplyCalibration ( Workspace=ws, CalibrationTable=calibTable)
 
    # Show positions after calibration
    for i in spectra:

@@ -51,5 +51,5 @@ calibrationTable = tube.calibrate( CalibInstWS, 'WISH/panel03', known_pos, func_
 print("Got calibration (new positions of detectors)")
 
 #Apply the calibration
-mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
+mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 print("Applied calibration")

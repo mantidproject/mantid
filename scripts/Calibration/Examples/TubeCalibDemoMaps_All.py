@@ -102,7 +102,7 @@ def minimalInput(filename):
     # == Get the calibration and put results into calibration table ==
     calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor)
     # == Apply the Calibation ==
-    mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
+    mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 
 
 def provideTheExpectedValue(filename):
@@ -130,7 +130,7 @@ def provideTheExpectedValue(filename):
     calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
                                       fitPar=fitPar)
     # == Apply the Calibation ==
-    mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
+    mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 
 
 def changeMarginAndExpectedValue(filename):
@@ -172,7 +172,7 @@ def changeMarginAndExpectedValue(filename):
     calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
                                                  fitPar=fitPar, plotTube=[1, 10, 100], outputPeak=True, margin=10)
     # == Apply the Calibation ==
-    mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
+    mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 
     tube.savePeak(peakTable, 'TubeDemoMaps01.txt')
 
@@ -222,7 +222,7 @@ def improvingCalibrationSingleTube(filename):
                                                  fitPar=fitPar, outputPeak=True, plotTube=[18, 19, 20],
                                                  rangeList=[18, 19, 20])
 
-    mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
+    mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 
     # reload to reset the calibration applied
     CalibInstWS = loadingStep(filename)
@@ -239,7 +239,7 @@ def improvingCalibrationSingleTube(filename):
                                                  fitPar=fitPar, outputPeak=True, rangeList=[18, 19, 20],
                                                  overridePeaks=overridePeaks)
 
-    mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
+    mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
     # check using the InstrumentView and you will see that it is better than before
 
 
@@ -294,7 +294,7 @@ def improvingCalibrationOfListOfTubes(filename):
     calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
                                                  fitPar=fitPar, outputPeak=True, overridePeaks=define_peaks)
 
-    mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
+    mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 
 
 def calibrateB2Window(filename):
@@ -334,7 +334,7 @@ def calibrateB2Window(filename):
                                                  fitPar=fitPar, outputPeak=True, plotTube=[b2_range[0], b2_range[-1]],
                                                  rangeList=b2_range)
 
-    mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
+    mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 
 
 def findThoseTubesThatNeedSpecialCareForCalibration(filename):
@@ -505,7 +505,7 @@ def completeCalibration(filename):
                                                   calibTable=calibrationTable,  # it will append to the calibTable
                                                   rangeList=b2_window)
 
-    mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
+    mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 
     # == Save workspace ==
     # mantid.SaveNexusProcessed(CalibInstWS, path+'TubeCalibDemoMapsResult.nxs', "Result of Running TCDemoMaps.py")

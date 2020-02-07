@@ -235,7 +235,7 @@ class EnggFocus(PythonAlgorithm):
         """
         alg = self.createChildAlgorithm('ApplyCalibration')
         alg.setProperty('Workspace', wks)
-        alg.setProperty('PositionTable', detector_positions)
+        alg.setProperty('CalibrationTable', detector_positions)
         alg.execute()
 
     def _convert_to_distribution(self, wks):

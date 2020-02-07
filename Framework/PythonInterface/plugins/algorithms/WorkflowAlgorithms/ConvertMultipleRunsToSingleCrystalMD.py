@@ -205,7 +205,7 @@ class ConvertMultipleRunsToSingleCrystalMD(DataProcessorAlgorithm):
         if self._load_inst:
             LoadInstrument(Workspace=ws_name, Filename=self.getProperty("LoadInstrument").value, RewriteSpectraMap=False)
         if self._apply_cal:
-            ApplyCalibration(Workspace=ws_name, PositionTable=self.getProperty("ApplyCalibration").value)
+            ApplyCalibration(Workspace=ws_name, CalibrationTable=self.getProperty("ApplyCalibration").value)
         if self._detcal:
             LoadIsawDetCal(InputWorkspace=ws_name, Filename=self.getProperty("DetCal").value)
         if self._copy_params:

@@ -364,7 +364,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         self.log().notice("Applying calibration on the input workspace")
         alg = self.createChildAlgorithm('ApplyCalibration')
         alg.setProperty('Workspace', ws)
-        alg.setProperty('PositionTable', detPos)
+        alg.setProperty('CalibrationTable', detPos)
         alg.execute()
 
     def _V3D_from_spherical(self, R, polar, azimuth):
