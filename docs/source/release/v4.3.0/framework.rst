@@ -24,6 +24,7 @@ Improvements
 - Prevent units that are not suitable for :ref:`ConvertUnits <algm-ConvertUnits>` being entered as the target unit.
 - Fixed an uncaught exception when plotting logs on single spectrum workspaces in mantidworkbench
 - Save the units for single value logs in :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>`
+- Ties set to peaks in crystal field fits now work correctly.
 
 Algorithms
 ----------

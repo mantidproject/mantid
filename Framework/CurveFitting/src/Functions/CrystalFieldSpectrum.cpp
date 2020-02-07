@@ -142,9 +142,16 @@ std::string CrystalFieldSpectrum::writeToString(
     // Print peak's parameters
     for (size_t i = 0; i < peak.nParams(); i++) {
       const ParameterTie *tie = peak.getTie(i);
+      std::ostringstream paramString;
+      paramString << "f" << ip << "." << peak.parameterName(i) << '='
+                  << peak.getParameter(i);
       if (!tie || !tie->isDefault()) {
-        ostr << ",f" << ip << "." << peak.parameterName(i) << '='
-             << peak.getParameter(i);
+        ostr << ',' << paramString.str();
+        if (tie && !tie->isDefault()) {
+          ties.emplace_back(tie->asString());
+        } else if (peak.isFixed(i)) {
+          ties.emplace_back(paramString.str());
+        }
       }
     }
   } // for peaks

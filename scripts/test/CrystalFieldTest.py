@@ -884,6 +884,25 @@ class CrystalFieldFitTest(unittest.TestCase):
         fun = FunctionFactory.createInitialized(s)
         self.assertNotEqual(fun, None)
 
+    def test_ties_do_not_change_during_fit(self):
+        from CrystalField import CrystalField, CrystalFieldFit
+        from CrystalField.fitting import makeWorkspace
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=50, FWHM=0.9)
+        x, y = cf.getSpectrum()
+        ws = makeWorkspace(x, y)
+
+        cf.peaks.tieAll('FWHM=2.1', 3)
+
+        fit = CrystalFieldFit(Model=cf, InputWorkspace=ws)
+        fit.fit()
+
+        self.assertEqual(cf.peaks.param[0]['FWHM'], 2.1)
+        self.assertEqual(cf.peaks.param[1]['FWHM'], 2.1)
+        self.assertEqual(cf.peaks.param[2]['FWHM'], 2.1)
+        self.assertNotEqual(cf.peaks.param[3]['FWHM'], 2.1)
+
     def test_all_peak_ties_single_spectrum_range(self):
         from CrystalField import CrystalField, CrystalFieldFit, Background, Function
         from mantid.simpleapi import FunctionFactory
