@@ -103,6 +103,8 @@ class BeamCentrePresenter(object):
         self._view.set_run_button_to_normal()
 
     def on_run_clicked(self):
+        self._work_handler.wait_for_done()
+
         # Get the state information for the first row.
         state = self._parent_presenter.get_state_for_row(0)
 

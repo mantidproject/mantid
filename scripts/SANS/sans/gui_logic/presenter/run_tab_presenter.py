@@ -37,11 +37,11 @@ from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
-from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter)
+from sans.gui_logic.presenter.masking_table_presenter import MaskingTablePresenter
 from sans.gui_logic.presenter.presenter_common import PresenterCommon
 from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
 from sans.gui_logic.presenter.settings_adjustment_presenter import SettingsAdjustmentPresenter
-from sans.gui_logic.presenter.settings_diagnostic_presenter import (SettingsDiagnosticPresenter)
+from sans.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
 from sans.sans_batch import SANSCentreFinder
 from sans.user_file.user_file_reader import UserFileReader
 from ui.sans_isis import SANSSaveOtherWindow
@@ -138,7 +138,7 @@ class RunTabPresenter(PresenterCommon):
             self._presenter.on_instrument_changed()
 
         def on_row_inserted(self):
-            self._presenter.on_row_inserted()
+            self._presenter.on_row_appended()
 
         def on_rows_removed(self, rows):
             self._presenter.on_rows_removed(rows)
@@ -175,7 +175,7 @@ class RunTabPresenter(PresenterCommon):
         def on_processing_error(self, error):
             self._presenter.on_processing_error(error)
 
-    def __init__(self, facility, model=None, table_model=None, view=None):
+    def __init__(self, facility, model=None, table_model=None, view=None, ):
         # We don't have access to state model really at this point
         super(RunTabPresenter, self).__init__(view, None)
 
@@ -456,12 +456,6 @@ class RunTabPresenter(PresenterCommon):
     def _add_multiple_rows_to_table_model(self, rows):
         self._table_model.add_multiple_table_entries(table_index_model_list=rows)
 
-    def _replace_row_in_table_model(self, row, index):
-        """
-        Adds a row to the table
-        """
-        self._table_model.replace_table_entry(index, row)
-
     def on_update_rows(self):
         self.update_view_from_table_model()
 
@@ -488,6 +482,7 @@ class RunTabPresenter(PresenterCommon):
         self._view.set_row_tooltip('', index)
         self._beam_centre_presenter.on_update_rows()
         self._masking_table_presenter.on_update_rows()
+        self.update_view_from_table_model()
 
     def on_instrument_changed(self):
         self._setup_instrument_specific_settings()
@@ -754,11 +749,12 @@ class RunTabPresenter(PresenterCommon):
     def num_rows(self):
         return self._table_model.get_number_of_rows()
 
-    def on_row_inserted(self):
+    def on_row_appended(self):
         """
         Insert a row at a selected point
         """
         self._table_model.append_table_entry(RowEntries())
+        self.update_view_from_table_model()
 
     def on_insert_row(self):
         """
@@ -773,23 +769,27 @@ class RunTabPresenter(PresenterCommon):
         else:
             self._table_model.append_table_entry(empty_row)
 
+        self.update_view_from_table_model()
+
     def on_erase_rows(self):
         """
         Make all selected rows empty.
         """
         selected_rows = self._view.get_selected_rows()
-        if len(selected_rows) == 1 and self._table_model.get_number_of_rows() == 1:
+        if not selected_rows or len(selected_rows) == self._table_model.get_number_of_rows():
             self._table_model.clear_table_entries()
         else:
             for row in selected_rows:
                 empty_row = RowEntries()
                 self._table_model.replace_table_entries([row], [empty_row])
+        self.update_view_from_table_model()
 
     def on_rows_removed(self, row_indices):
         """
         Remove rows from the table
         """
         self._table_model.remove_table_entries(row_indices)
+        self.update_view_from_table_model()
 
     def on_copy_rows_requested(self):
         selected_rows = self._view.get_selected_rows()
@@ -809,6 +809,8 @@ class RunTabPresenter(PresenterCommon):
             selected_rows = selected_rows if selected_rows else [self.num_rows()]
             replacement_table_index_models = self._clipboard
             self._table_model.replace_table_entries(selected_rows, replacement_table_index_models)
+
+            self.update_view_from_table_model()
 
     def on_manage_directories(self):
         self._view.show_directory_manager()

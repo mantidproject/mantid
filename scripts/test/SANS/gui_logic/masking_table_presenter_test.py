@@ -25,6 +25,7 @@ class MaskingTablePresenterTest(unittest.TestCase):
         parent_presenter = create_run_tab_presenter_mock(use_fake_state=False)
         view = create_mock_masking_table()
         presenter = MaskingTablePresenter(parent_presenter)
+        presenter._work_handler = mock.Mock()
 
         presenter.set_view(view)
 
