@@ -38,6 +38,8 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
           SLOT(setModelWorkspace(const QString &)));
   connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
           SIGNAL(dataChanged()));
+  connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
+          SLOT(updateRanges()));
 
   connect(m_view, SIGNAL(addClicked()), this,
           SIGNAL(requestedAddWorkspaceDialog()));
@@ -272,6 +274,9 @@ void IndirectFitDataPresenter::addDataToModel(
 void IndirectFitDataPresenter::setSingleModelData(const std::string &name) {
   m_model->clearWorkspaces();
   addModelData(name);
+}
+
+void IndirectFitDataPresenter::updateRanges() {
   auto const dataIndex = TableDatasetIndex{0};
   auto const spectra = m_model->getSpectra(dataIndex);
   if (!spectra.empty()) {

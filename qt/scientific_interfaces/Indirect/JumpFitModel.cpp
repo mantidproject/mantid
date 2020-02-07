@@ -55,9 +55,12 @@ findAxisLabels(MatrixWorkspace const *workspace, Predicate const &predicate) {
   return std::make_pair(std::vector<std::string>(), std::vector<std::size_t>());
 }
 
-Spectra createSpectra(std::size_t spectrum) {
-  return Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{spectrum},
-                 MantidQt::CustomInterfaces::IDA::WorkspaceIndex{spectrum});
+std::string createSpectra(std::vector<std::size_t> spectrum) {
+  std::string spectra = "";
+  for (auto spec : spectrum) {
+    spectra.append(std::to_string(spec) + ",");
+  }
+  return spectra;
 }
 
 std::string getHWHMName(const std::string &resultName) {
@@ -199,12 +202,12 @@ createHWHMWorkspace(MatrixWorkspace_sptr workspace, const std::string &hwhmName,
   return hwhmWorkspace;
 }
 
-boost::optional<std::size_t>
-getFirstSpectrum(const JumpFitParameters &parameters) {
+boost::optional<std::vector<std::size_t>>
+getSpectrum(const JumpFitParameters &parameters) {
   if (!parameters.widthSpectra.empty())
-    return parameters.widthSpectra.front();
+    return parameters.widthSpectra;
   else if (!parameters.eisfSpectra.empty())
-    return parameters.eisfSpectra.front();
+    return parameters.eisfSpectra;
   return boost::none;
 }
 } // namespace
@@ -218,7 +221,7 @@ void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
   const auto name = getHWHMName(workspace->getName());
   const auto parameters = addJumpFitParameters(workspace.get(), name);
 
-  const auto spectrum = getFirstSpectrum(parameters);
+  const auto spectrum = getSpectrum(parameters);
   if (!spectrum)
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
 
@@ -227,10 +230,8 @@ void JumpFitModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
 
   const auto hwhmWorkspace =
       createHWHMWorkspace(workspace, name, parameters.widthSpectra);
-  IndirectFittingModel::addNewWorkspace(
-      hwhmWorkspace,
-      Spectra(WorkspaceIndex{0},
-              WorkspaceIndex{static_cast<int>(hwhmWorkspace->getNumberHistograms()) - 1}));
+  IndirectFittingModel::addNewWorkspace(hwhmWorkspace,
+                                        Spectra(createSpectra(spectrum.get())));
 }
 
 void JumpFitModel::removeWorkspace(TableDatasetIndex index) {
@@ -272,7 +273,7 @@ void JumpFitModel::setActiveWidth(std::size_t widthIndex,
   if (parametersIt != m_jumpParameters.end() &&
       parametersIt->second.widthSpectra.size() > widthIndex) {
     const auto &widthSpectra = parametersIt->second.widthSpectra;
-    setSpectra(createSpectra(widthSpectra[widthIndex]), dataIndex);
+    setSpectra(createSpectra(widthSpectra), dataIndex);
   } else
     throw std::runtime_error("Invalid width index specified.");
 }
@@ -283,7 +284,7 @@ void JumpFitModel::setActiveEISF(std::size_t eisfIndex,
   if (parametersIt != m_jumpParameters.end() &&
       parametersIt->second.eisfSpectra.size() > eisfIndex) {
     const auto &eisfSpectra = parametersIt->second.eisfSpectra;
-    setSpectra(createSpectra(eisfSpectra[eisfIndex]), dataIndex);
+    setSpectra(createSpectra(eisfSpectra), dataIndex);
   } else
     throw std::runtime_error("Invalid EISF index specified.");
 }
