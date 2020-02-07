@@ -15,7 +15,8 @@ from mantidqt.widgets.workspacedisplay.table.model \
     import TableWorkspaceDisplayModel
 from mantidqt.widgets.workspacedisplay.table.presenter \
     import TableWorkspaceDataPresenter
-from .peakrepresentation import create_peakrepresentation
+from .colors import PeakRepresentationColorSelection
+from .representation import create_peakrepresentation
 
 
 class PeaksViewerPresenter(object):
@@ -35,7 +36,8 @@ class PeaksViewerPresenter(object):
         super(PeaksViewerPresenter, self).__init__()
         self._raise_error_if_workspace_incompatible(peaks_ws)
         self._peaks_table_presenter = \
-            TableWorkspaceDataPresenter(TableWorkspaceDisplayModel(peaks_ws), view.table_view)
+            TableWorkspaceDataPresenter(TableWorkspaceDisplayModel(peaks_ws),
+                                        view.table_view)
 
         view.subscribe(self)
         view.set_title(peaks_ws.name())
@@ -58,8 +60,6 @@ class PeaksViewerPresenter(object):
             info.append(create_peakrepresentation(peak))
 
         return info
-        # return map(create_peakrepresentation,
-        #            self._peaks_table_presenter.model.ws)
 
     # private api
     @staticmethod
