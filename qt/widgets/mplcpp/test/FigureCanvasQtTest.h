@@ -52,8 +52,10 @@ public:
 
   void testAddLegend() {
     FigureCanvasQt canvas{111};
-    canvas.gca().plot({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5}, QString("ro"),
-                      QString("Line1"));
+    // This return is needed for compatability with mpl 1.5 so that Line2D
+    // object reference is kept alive.
+    auto line = canvas.gca().plot({1, 2, 3, 4, 5}, {1, 2, 3, 4, 5},
+                                  QString("ro"), QString("Line1"));
     auto legend = canvas.gca().legend(true);
 
     if (PyObject_HasAttrString(legend.pyobj().ptr(), "get_draggable"))
