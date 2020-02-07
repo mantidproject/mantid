@@ -10,7 +10,6 @@ import copy
 
 from mantid.kernel import Logger
 from sans.gui_logic.models.beam_centre_model import BeamCentreModel
-from sans.gui_logic.presenter.GenericWorkHandlerListener import GenericWorkHandlerListener
 from ui.sans_isis.beam_centre import BeamCentre
 from ui.sans_isis.work_handler import WorkHandler
 
@@ -64,21 +63,7 @@ class BeamCentrePresenter(object):
         self._view.on_update_instrument(instrument)
 
     def on_update_rows(self):
-        def print_err(err):
-            self._logger.warning("Unable to set beam details {0}".format(err))
-
-        def on_success(_):
-            self._logger.debug("Finished getting beam centre details for inst")
-            self._view.set_options(self._beam_centre_model)
-
-        if self._parent_presenter.num_rows() == 0:
-            return
-
-        listener = GenericWorkHandlerListener(error_callback=print_err, success_callback=on_success)
-
-        kwargs = {"instrument": self._parent_presenter.instrument,
-                  "row_entry": self._parent_presenter.get_row(0)}
-        self._work_handler.process(caller=listener, func=self._beam_centre_model.reset_inst_defaults, id=0, **kwargs)
+        self._beam_centre_model.reset_inst_defaults(self._parent_presenter.instrument)
 
     def on_processing_finished_centre_finder(self, result):
         # Enable button

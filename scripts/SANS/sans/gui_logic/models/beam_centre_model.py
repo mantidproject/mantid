@@ -4,10 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.kernel import (Logger)
+from mantid.kernel import Logger
 from sans.common.enums import (FindDirectionEnum, DetectorType, SANSInstrument)
-from sans.common.file_information import get_instrument_paths_for_sans_file
-from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
 class BeamCentreModel(object):
@@ -35,20 +33,19 @@ class BeamCentreModel(object):
         self.update_lab = True
         self.update_hab = True
 
+        self.reset_inst_defaults(instrument=SANSInstrument.NO_INSTRUMENT)
+
         self.SANSCentreFinder = SANSCentreFinder
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
-    def reset_inst_defaults(self, instrument, row_entry):
+    def reset_inst_defaults(self, instrument):
         if instrument is SANSInstrument.LOQ:
-            file_information = row_entry.file_information
-            instrument_file_path = get_instrument_paths_for_sans_file(file_information=file_information)
-            r_range = get_named_elements_from_ipf_file(instrument_file_path[1],
-                                                       ["beam_centre_radius_min", "beam_centre_radius_max"], float)
+            self._r_min = 96
+            self._r_max = 216
 
-            self._r_min = r_range["beam_centre_radius_min"]
-            self._r_max = r_range["beam_centre_radius_max"]
+            # TODO HAB on LOQ prefers 96-750
         else:
             # All other instruments hard-code this as follows
             self._r_min = 60

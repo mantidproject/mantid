@@ -58,41 +58,9 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.parent_presenter.num_rows.return_value = 1
         self.parent_presenter.instrument = SANSInstrument.SANS2D
 
-        mock_row = mock.Mock()
-        self.parent_presenter.get_row.return_value = mock_row
-
         self.presenter.on_update_rows()
 
-        self.WorkHandler.process.assert_called_with(caller=mock.ANY,
-                                                    func=self.BeamCentreModel.reset_inst_defaults,
-                                                    id=mock.ANY,
-                                                    # Kwargs:
-                                                    instrument=SANSInstrument.SANS2D, row_entry=mock_row)
-
-    def test_that_model_reset_to_defaults_for_instrument_is_called_on_update_rows(self):
-        self.parent_presenter.num_rows.return_value = 1
-        self.parent_presenter.get_row.return_value = mock.Mock()
-
-        self.presenter.on_update_rows()
-
-        mock_args = self.WorkHandler.process.call_args
-        args, kwargs = mock_args
-        self.assertTrue('caller' in kwargs)
-
-        callback = kwargs['caller']
-        self.assertTrue(isinstance(callback, WorkHandler.WorkListener))
-
-        # Check the success path
-        self.presenter._logger = mock.Mock()
-        callback.on_processing_finished(None)
-        self.view.set_options.assert_called_with(mock.ANY)
-        self.presenter._logger.debug.assert_called_with(mock.ANY)
-
-        # Check the failure path
-        self.presenter._logger = mock.Mock()
-        callback.on_processing_error("Foo")
-        self.presenter._logger.warning.assert_called_with(mock.ANY)
-
+        self.BeamCentreModel.reset_inst_defaults.assert_called_with(SANSInstrument.SANS2D)
 
     def test_that_set_scaling_is_called_on_update_instrument(self):
         self.presenter.set_view(self.view)
