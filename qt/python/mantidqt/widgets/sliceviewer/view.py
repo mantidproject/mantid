@@ -245,13 +245,11 @@ class SliceViewerView(QWidget):
                               row_span, col_span)
         return self.peaks_tools
 
-    def draw_peak(self, x, y, alpha, color):
+    def draw_peak(self, peak_info):
         """
-        :param peak_info: A list of PeakRepresentation objects
+        :param peak_info: A PeakRepresentation object
         """
-        self.ax.scatter(x, y, alpha=alpha, color=color,
-                        marker=self.PEAK_CENTER_MARKER,
-                        s=self.PEAK_CENTER_MARKER_SIZE_PTS_SQ)
+        peak_info.draw(self.ax)
 
     # event handlers
     def closeEvent(self, event):
