@@ -9,9 +9,10 @@
 from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib.collections import PolyCollection
+from matplotlib.lines import Line2D
 
 from mantid.plots.legend import LegendProperties
-from mantid.plots import datafunctions, Line2D, MantidAxes
+from mantid.plots import datafunctions, MantidAxes
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
