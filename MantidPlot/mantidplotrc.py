@@ -28,6 +28,10 @@ if __name__ == '__main__':
     # Import MantidPlot python commands
     import mantidplot
     from mantidplot import *
+    #cache plotSpectrum and plotBin as the wrill be overwritten when we import simpleapi
+    _plotSpectrum_saved = plotSpectrum
+    _plotBin_saved = plotBin
+    
     try:
         # The MantidPlot namespace is not ready for the python3-style range function
         # so we ensure we revert back to the current built-in version
@@ -43,6 +47,13 @@ if __name__ == '__main__':
     from mantid.geometry import *
     from mantid.api import *
     from mantid.simpleapi import *
+
+    #restore the mantidplot plotSpectrum and plotBin
+    #they have just been overwritten by the workbench variants
+    plotSpectrum = _plotSpectrum_saved
+    plotBin = _plotBin_saved
+    del _plotSpectrum_saved
+    del _plotBin_saved
 
     # Common imports (here for backwards compatibility)
     import os
