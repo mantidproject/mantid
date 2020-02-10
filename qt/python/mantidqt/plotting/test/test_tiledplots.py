@@ -24,7 +24,8 @@ import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.py3compat import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
-from mantidqt.plotting.functions import (manage_workspace_names, plot_from_names, get_plot_fig)
+from mantid.plots.plotfunctions import manage_workspace_names, get_plot_fig
+from mantidqt.plotting.functions import plot_from_names
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
