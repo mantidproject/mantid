@@ -218,6 +218,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             ui.wkspIndicesValid.setToolTip("Not in " + ui.wkspIndices.placeholderText())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
+        if self._advanced:
+            ui.advanced_options_widget._validate_custom_logs()
+
     def _on_specnums_changed(self):
         ui = self._ui
         ui.wkspIndices.clear()
@@ -232,6 +235,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             ui.specNumsValid.setVisible(True)
             ui.specNumsValid.setToolTip("Not in " + ui.specNums.placeholderText())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
+
+        if self._advanced:
+            ui.advanced_options_widget._validate_custom_logs()
 
     def _on_plot_type_changed(self, new_index):
         if self._overplot:
@@ -268,6 +274,15 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                         self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText("Workspace index")
                 else:
                     self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, "Workspace name")
+
+            # Changing plot type may change what a valid input for spectrum numbers / workspace indices is so whichever
+            # currently contains input is rechecked.
+            if self._ui.specNums.text() != "":
+                self._on_specnums_changed()
+            elif self._ui.wkspIndices.text() != "":
+                self._on_wkspindices_changed()
+            else:
+                self._ui.advanced_options_widget._validate_custom_logs()
 
     def _parse_wksp_indices(self):
         if self._ui.plotType.currentText() == "Contour" or self._ui.plotType.currentText() == "Surface":
@@ -349,9 +364,12 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
         ui.setupUi(self)
 
         ui.plot_axis_label_line_edit.setText(ui.log_value_combo_box.currentText())
+        ui.logs_valid.setIcon(red_asterisk())
+        ui.logs_valid.hide()
 
         ui.log_value_combo_box.currentTextChanged.connect(self._log_value_changed)
         ui.error_bars_check_box.clicked.connect(self._toggle_errors)
+        ui.custom_log_line_edit.textEdited.connect(self._validate_custom_logs)
 
         self.ui = ui
         self._parent = parent
@@ -360,7 +378,17 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
     def _log_value_changed(self, text):
         self.ui.custom_log_line_edit.setEnabled(text == "Custom")
         self.ui.custom_log_line_edit.clear()
+        #self.ui.custom_log_line_edit.setVisible(text == "Custom")
         self.ui.plot_axis_label_line_edit.setText(text)
+
+        if text != "Custom":
+            self.ui.logs_valid.hide()
+            # If the custom log values were the only thing stopping the input from being valid then the OK button can
+            # be re-enabled
+            if not self._parent._ui.specNumsValid.isVisible() and not self._parent._ui.wkspIndicesValid.isVisible():
+                self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+        else:
+            self._validate_custom_logs()
 
     def _toggle_errors(self, enable):
         if self._parent.selection:
@@ -400,6 +428,69 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
                 self.ui.log_value_combo_box.addItem(log_name)
 
         self.ui.log_value_combo_box.addItem("Custom")
+
+    def _validate_custom_logs(self):
+        if self.ui.log_value_combo_box.currentText() == "Custom":
+            valid_options = True
+            values = self.ui.custom_log_line_edit.text().split(',')
+            first_value = True
+            previous_value = 0.0
+
+            for value in values:
+                ok = False
+                try:
+                    current_value = float(value)
+                except ValueError:
+                    self.ui.logs_valid.show()
+                    self.ui.logs_valid.setToolTip(f"A custom log value is not valid: {value}")
+                    valid_options = False
+                    break
+
+                if first_value:
+                    first_value = False
+                    previous_value = current_value
+                else:
+                    if previous_value < current_value:
+                        previous_value = current_value
+                    else:
+                        self.ui.logs_valid.setToolTip("The custom log values must be in numerical order and distinct.")
+                        valid_options = False
+                        break
+
+            if valid_options:
+                number_of_custom_log_values = len(values)
+                number_of_workspaces = len(self._parent._workspaces)
+
+                plot_type = self._parent._ui.plotType.currentText()
+                if (plot_type == "Surface" or plot_type == "Contour") \
+                        and number_of_custom_log_values != number_of_workspaces:
+                    self.ui.logs_valid.show()
+                    self.ui.logs_valid.setToolTip(f"The number of custom log values ({number_of_custom_log_values}) is "
+                                                  f"not equal to the number of workspaces ({number_of_workspaces}).")
+                    valid_options = False
+                else:
+                    if self._parent.selection:
+                        if self._parent.selection.wksp_indices:
+                            index_length = len(self._parent.selection.wksp_indices)
+                        elif self._parent.selection.spectra:
+                            index_length = len(self._parent.selection.spectra)
+                    else:
+                        index_length = 0
+
+                    number_of_plots = number_of_workspaces * index_length
+
+                    if number_of_custom_log_values != number_of_plots:
+                        self.ui.logs_valid.show()
+                        self.ui.logs_valid.setToolTip(f"The number of custom log values ({number_of_custom_log_values}) "
+                                                      f"is not equal to the number of plots ({number_of_plots}).")
+
+                        valid_options = False
+
+            if valid_options:
+                self.ui.logs_valid.hide()
+                self.ui.logs_valid.setToolTip("")
+
+            self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(valid_options)
 
 
 
