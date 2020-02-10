@@ -1,150 +1,154 @@
 .. _03_workspaces:
 
-==========
-Workspaces 
-==========
+=================================================================
+"What is a Bin?", What is a Workspace?"" and the "Power of Rebin" 
+=================================================================
 
-Workspaces come in several forms, but the most common by far is the
-:ref:`MatrixWorkspace` which represents XYE data for one
-or more spectra. The MatrixWorkspace itself can be sub-grouped into
-:ref:`EventWorkspace` and :ref:`Workspace2D`.
+Most data within Mantid are Histogram-like, so imagine a plot: There is an X-axis with a measured/calculated 
+unit, such as Time-of-Flight (TOF) in μs. The Y-axis is the Counts (How many neutrons / positrons were detected 
+at each TOF value?) and will have the inverse unit of the X-axis, such as (μs):sup:`-1`.
 
-.. figure:: /images/MatrixWorkspaceHierachy.png
-   :alt: MatrixWorkspaceHierachy.png
-   :width: 300px
+But in a Histogram we cut the X-axis into set range blocks, and plot the Total Count (Y) within each block (range in X). Each set range or block is referred to as a "Bin". The Bins may be of equal length or varying length (see right). 
+
+If Algorithms are the verbs of Mantid, then Workspaces are the nouns. 
+Workspaces are used to store data within Mantid, and when you manipulate data, 
+you output to a new Workspace.
+
+Workspaces come in several forms, but the most common two are the :ref:`Workspace2D` and the :ref:`EventWorkspace`. Their data are in an XYE format (the genereal Mantid term is :ref:`MatrixWorkspace`)
+containing 1 or more spectra.
+
 
 Workspace2D
 ===========
 
-A Workspace2D consists of a workspace with 1 or more spectra. Typically,
-each spectrum will be a histogram. For each spectrum X, Y (counts) and E
-(error) data is stored as a separate array.
+A :ref:`Workspace2D` is histogrammed data, with one or more spectra. For each spectrum X, Y (counts) and E
+(error) data is stored. 
 
-|MBC_Workspace2D.png|
+.. figure:: /images/MBC_Workspace2D.png
+   :width: 600px
+   :alt: Workspace2D
 
-Each workspace has two axes, the Spectrum axis and the X-axis. Where
-an axis holds a known unit type, it may be converted to another set of
-units.
+When the Matrix table of a Workspace is displayed (via right-click > "Show Data"):
+- Each row is a different Spectra. 
+- Each vertical column in X-data is (usually) the edges of each Bin
+- Each vertical column in Y-data is the number of Counts in that Bin
+- Each vertical column in E-data is the Error of the Y-data for that Bin
 
-|MBC_axes_annotated.png|
+Note as the X-data refers to the Bin boundaries, there is one more column in the X-data, than the Y or E data.
+(An aside: if the X-data refers to Bin-centers, then it will have the same number of columns as Y and E)
 
-Rebinning a Workspace2D is a one-way process when the rebinning leads to
-a coarser structure.
 
-Ragged Workspaces
------------------
+Correct Binning
+---------------
 
-Converting x-axis units can lead to a ragged workspace, in which bin
-boundaries are not consistent across the spectra. Some algorithms will
-not accept input workspaces that are ragged. The fix to this is to apply
-Rebin to the Ragged workspace structure, as the example below shows.
+Where bin boundaries are set along the X-axis deteremines, how long or short bins are. The overall arrangement 
+of bins for a spectrum is called its **binning**. Converting units can lead to a *ragged workspace*, with inconsistent binning 
+between different spectra! A Colorfill plot of ragged data looks poor and often algorithms will not accept a ragged input. 
 
-#. run **Load** on *GEM38370_Focussed.nxs* setting the
-   **OutputWorkspace** to be *ws*
-#. run **ConvertUnits** on *ws* setting **OutputWorkspace** to *lambda*,
-   **Target**\ =\ *Wavelength*, **EMode**\ =\ *Elastic*. Plotting this
-   in the *Color Fill Plot* demonstrates the ragged X-bins.
+To fix this **Rebin** the ragged workspace with regular binning:
 
-   |MBC_Ragged.png|
+#. **Load** the *GEM38370_Focussed.nxs* file, naming the **OutputWorkspace** to be *ws*
+#. Execute the Algorithm **ConvertUnits** with *ws* as the InputWorkspace, *ws_lambda* as the **OutputWorkspace**,
+   **Target**\ =\ *Wavelength*, **EMode**\ =\ *Elastic*. 
+#. Plotting the *ws_lambda* Workspace as a Colorfill demonstrates the ragged X-bins :-( .
 
-#. run **Rebin** on *lambda* setting **Params** to *0.5* and
-   **OutputWorkspace** to *Rebinned*. Plotting this in the *Color Fill
-   Plot* demonstrates that uniform binning across all spectra has been
-   achieved.
+.. figure:: /images/MBC_Ragged.png
+   :width: 400px
+   :alt: Ragged
 
-   |MBC_Rebinned.png|
+
+#. Execute the **Rebin** Algorithm on *ws_lambda* setting **Params** to *0.5* (setting the width of each bin to 0.5  Å) and
+   **OutputWorkspace** to *Rebinned*. Plot this as a Colorfill to show uniform binning across all spectra has been
+   achieved! :-)
+
+.. figure:: /images/MBC_Rebinned.png
+   :width: 400px
+   :alt: Rebinned
+
 
 Event Workspaces
 ================
 
 An :ref:`EventWorkspace` stores information about each
-individual event observation in detectors. More specifically, at a
-neutron spallation source, this means that the time of arrival and
-detector ID of each individual neutron is recorded. Only fairly recent
+individual particle detection. More specifically, at a
+neutron spallation source, this means that the Time of arrival and
+Detector ID of each individual neutron is recorded. Only fairly recent
 advances in computer and acquisition hardware have made storing this
 detailed knowledge a practical solution. For example at the SNS facility
-all data, except for data collected in monitors, are stored in this way.
+all data, except for data collected in monitors, are as Event data.
 
 Event specifies “when” and “where”
 
 **Pulse time** – when the proton pulse happened in absolute time
 
-**Time-of-flight** – time for the neutron to travel from moderator to
+**Time-of-flight** – time interval for the neutron to travel from moderator to
 the detector
 
-Basic Example
--------------
+
+
+Binning of Event Workspaces
+---------------------------
 
 .. figure:: /images/Binning_example.png
    :alt: Binning_example.png
    :width: 500px
 
-Rebinning
----------
+This extra information that Event Data has over Workspace2D (histogram) data
+means that rebinning is simply moving the Bin edges and summing the number of Counts 
+within the new Bin. While this can be done for Workspace2D (histogram) data, any split bins are averaged.
 
--  Rebinning is essentially free and can be conducted in-place. This is
-   because the data does not need to change, only the overlaying
-   histogramming.
+On the other hand, EventWorkspaces know (to a certain precision) exactly the Time of Arrival value for each particle
+and so if bins were split they would be split more "correctly".
+
+Note: If you Execute **Rebin** on an EventWorkspace *AND* the PreserveEvents box is not ticked, it will be converted to a Workspace2D.
 
 Performance
 -----------
 
--  Each event list is separate
--  Sorting events is O(n) = n log(n)
--  Histogramming is O(n) = n
--  Only histogram as needed
+Operating on an EventWorkspace is slower than on a Workspace2D, or ut more techincally:
+
+- Each event list is separate
+- Sorting events is O(n) = n log(n)
+- Histogramming is O(n) = n
+- Only convert an EventWorkspace to a Workspace2D (histogram) when performance is a concern.
+
+.. figure:: /images/Rebin_example.png
+   :alt: Rebin_example.png
+   :width: 800px
 
 Example of Workspace usage
 ==========================
 
 #. Load the event data HYS_11388_event.nxs
-#. Execute the 'SumSpectra' algorithm
-#. Rebin with Params=300 and plot, ensure PreserveEvents=True
+#. Execute the **SumSpectra** algorithm and output to a sensible workspace name such as "HYS_sum" 
+#. Rebin this summed Workspace with Params=10 (the width of each bin) with the box ticked to Preserve Events. 
+#. Rebin again to binwidths of 100, 300 and 1000.
+#. Observe that as the bins get larger, finer detail is "lost". It's nice to see rebinning graphically.
 
-   |MBC_Rebin_Coarse.png|
+**Keep these workspace open for the next page.**
 
-#. Rebin with Params=100, the plot will automatically update, ensure
-   PreserveEvents=True
+.. figure:: /images/peaksworkspace.png
+   :alt: PeaksWorkspace
+   :width: 300px
 
-   |MBC_Rebin_MED.png|
+TableWorkspaces
+===============
 
-#. Rebin with Params=10 the plot will automatically update, ensure
-   PreserveEvents=True
+A :ref:`Table Workspaces` has columns of mixed data, like a spreadsheet. It can store text or calculated/measured values, which may relate to data from an experiment. An example is the output fit parameters from fitting within Mantid.
 
-   |MBC_Rebin_Fine.png|
+A :ref:`PeaksWorkspace` is a special type of TableWorkspace with additional support for Single Crystal peaks.
+See right for an example of a PeaksWorkspace.
 
-Keep the workspace open for the next section.
 
-Other Workspace Types
-=====================
+OtherWorkspace Types
+====================
 
--  GroupWorkspaces store a collection of other workspaces in a group,
-   this can be created manually and is often used in multi-period data.
-   Either the whole group or individual members can be processed using
-   algorithms.
--  TableWorkspaces stores data as cells. Columns determine the type of
-   the data, for example double precision float, while each entry
-   appears as a new row. This is analogous to a Microsoft Excel
-   Spreadsheet.
--  PeaksWorkspace is a special type of TableWorkspace with additional
-   support for Single Crystal peaks.
--  :ref:`MDWorkspace` will be covered later in this course
+-  A :ref:`WorkspaceGroup` allows you to organise Workspaces into groups.
+   To create a group simply select more than one workspace in the Workspace Toolbox and click the "**Group**" button.
+   Either the whole group or individual members can be processed when using algorithms.
+
+-  :ref:`MDWorkspace` is a more complex, multi-dimension type of workspace.
 
 .. raw:: mediawiki
 
    {{SlideNavigationLinks|MBC_Algorithms|Mantid_Basic_Course|MBC_History}}
-
-.. |MBC_Workspace2D.png| image:: /images/MBC_Workspace2D.png
-   :width: 400px
-.. |MBC_axes_annotated.png| image:: /images/MBC_axes_annotated.png
-   :width: 400px
-.. |MBC_Ragged.png| image:: /images/MBC_Ragged.png
-   :width: 300px
-.. |MBC_Rebinned.png| image:: /images/MBC_Rebinned.png
-   :width: 300px
-.. |MBC_Rebin_Coarse.png| image:: /images/MBC_Rebin_Coarse.png
-   :width: 400px
-.. |MBC_Rebin_MED.png| image:: /images/MBC_Rebin_MED.png
-   :width: 400px
-.. |MBC_Rebin_Fine.png| image:: /images/MBC_Rebin_Fine.png
-   :width: 400px
