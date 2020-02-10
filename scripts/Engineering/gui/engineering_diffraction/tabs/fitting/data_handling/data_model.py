@@ -28,6 +28,9 @@ class FittingDataModel(object):
     def get_loaded_workspaces(self):
         return self._loaded_workspaces
 
+    def get_sample_log_from_ws(self, ws_name, log_name):
+        return self._loaded_workspaces[ws_name].getSampleDetails().getLogData(log_name).value
+
     @staticmethod
     def _generate_workspace_name(filepath):
         return path.splitext(path.split(filepath)[1])[0]
