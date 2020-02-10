@@ -13,7 +13,7 @@ import mantid.api
 # local imports
 from .model import SliceViewerModel, WS_TYPE
 from .view import SliceViewerView
-from .peaksviewer.presenter import PeaksViewerCollectionPresenter
+from .peaksviewer import PeaksViewerModel, PeaksViewerCollectionPresenter
 
 
 class SliceViewer(object):
@@ -120,9 +120,7 @@ class SliceViewer(object):
         peak_info = self._peaks_tool_presenter.peaks_info()
         view = self.view
         for peak in peak_info:
-            center = peak.center
-            view.draw_peak(center.X(), center.Y(),
-                           peak.alpha, peak.color)
+            view.draw_peak(peak)
 
     # private api
     def _create_peaks_tool_presenter(self, workspaces):
@@ -131,5 +129,5 @@ class SliceViewer(object):
         :param workspaces: A list of workspaces
         """
         self._peaks_tool_presenter = \
-            PeaksViewerCollectionPresenter(workspaces,
+            PeaksViewerCollectionPresenter(map(PeaksViewerModel, workspaces),
                                            self.view.attach_peaks_tools())

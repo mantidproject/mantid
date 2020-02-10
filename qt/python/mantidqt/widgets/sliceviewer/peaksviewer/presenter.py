@@ -15,7 +15,6 @@ from mantidqt.widgets.workspacedisplay.table.model \
     import TableWorkspaceDisplayModel
 from mantidqt.widgets.workspacedisplay.table.presenter \
     import TableWorkspaceDataPresenter
-from .colors import PeakRepresentationColorSelection
 from .representation import create_peakrepresentation
 
 
@@ -23,17 +22,20 @@ class PeaksViewerPresenter(object):
     """Controls a PeaksViewerView with a given model to display
     the peaks table and interaction controls for single workspace.
     """
+
     class Event(Enum):
         PeaksListChanged = 1
 
-    def __init__(self, peaks_ws, view):
+    def __init__(self, model, view):
         """
         Constructs the view for the given PeaksWorkspace
-        :param peaks_ws: A handle to the PeaksWorkspace to display
+        :param model: A handle to the view-model wrapper for PeaksWorkspace to be displayed
         :param view: A view object with a subscribe method to register this presenter
                      as a listener for view events
         """
         super(PeaksViewerPresenter, self).__init__()
+        self._model = model
+        peaks_ws = model.peaks_workspace
         self._raise_error_if_workspace_incompatible(peaks_ws)
         self._peaks_table_presenter = \
             TableWorkspaceDataPresenter(TableWorkspaceDisplayModel(peaks_ws),
@@ -57,7 +59,7 @@ class PeaksViewerPresenter(object):
         """
         info = []
         for peak in self._peaks_table_presenter.model.ws:
-            info.append(create_peakrepresentation(peak))
+            info.append(create_peakrepresentation(peak, self._model.marker_color))
 
         return info
 
@@ -74,28 +76,26 @@ class PeaksViewerPresenter(object):
 class PeaksViewerCollectionPresenter(object):
     """Controls a widget comprising of multiple PeasViewerViews to display and
     interact with multiple PeaksWorkspaces"""
-
-    def __init__(self, peaks_workspaces, view):
+    def __init__(self, models, view):
         """
-        :param peaks_workspaces: An iterable of PeakWorkspace objects.
+        :param models: An iterable of PeakWorkspace model objects.
         :param view: View displaying the model information
         """
         self._view = view
         self._child_presenters = []
-        for peaks_ws in peaks_workspaces:
-            self.append_peaksworkspace(peaks_ws)
+        for model in models:
+            self.append_peaksworkspace(model)
 
     @property
     def view(self):
         return self._view
 
-    def append_peaksworkspace(self, peaks_ws):
+    def append_peaksworkspace(self, model):
         """
         Create and append a view for the given workspace
-        :param peaks_workspaces: A PeakWorkspace object.
+        :param model: A PeakWorkspace model object.
         """
-        self._child_presenters.append(PeaksViewerPresenter(peaks_ws,
-                                                           self._view.append_peaksviewer()))
+        self._child_presenters.append(PeaksViewerPresenter(model, self._view.append_peaksviewer()))
 
     def peaks_info(self):
         """
