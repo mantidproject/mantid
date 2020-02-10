@@ -18,8 +18,8 @@ from mantid.py3compat.mock import create_autospec, ANY, MagicMock
 
 # local imports
 from mantidqt.widgets.sliceviewer.peaksviewer.representation \
-    import PeakRepresentationNoShape, PeakRepresentationSphere, \
-    create_peakrepresentation
+    import (PeakRepresentationNoShape, PeakRepresentationEllipsoid,
+            PeakRepresentationSphere, create_peakrepresentation)
 
 
 class PeakRepresentationTest(unittest.TestCase):
@@ -36,12 +36,8 @@ class PeakRepresentationTest(unittest.TestCase):
 
         no_shape.draw(axes)
 
-        axes.scatter.assert_called_once_with(center.X(),
-                                             center.Y(),
-                                             alpha=alpha,
-                                             color=marker_color,
-                                             marker=ANY,
-                                             s=ANY)
+        axes.scatter.assert_called_once_with(
+            center.X(), center.Y(), alpha=alpha, color=marker_color, marker=ANY, s=ANY)
         self._verify_expected_attributes(no_shape, center, alpha, marker_color)
 
     def test_spherical_representation_draw_creates_circle_of_expected_radius(self):
@@ -57,19 +53,32 @@ class PeakRepresentationTest(unittest.TestCase):
         self._verify_expected_attributes(sphere, center, alpha, marker_color)
 
     def test_create_returns_simple_representation_for_non_integrated_peak(self):
-        self._verify_common_representation_attributes(expected_cls=PeakRepresentationNoShape,
-                                                      peak_shape="none",
-                                                      shape_json={})
+        self._verify_common_representation_attributes(
+            expected_cls=PeakRepresentationNoShape, peak_shape="none", shape_json={})
 
     def test_create_returns_sphere_representation_for_spherically_integrated_peak(self):
-        self._verify_common_representation_attributes(expected_cls=PeakRepresentationSphere,
-                                                      peak_shape="spherical",
-                                                      shape_json={'radius': 1.5})
+        radius = 1.5
+        representation = \
+            self._verify_common_representation_attributes(expected_cls=PeakRepresentationSphere,
+                                                          peak_shape="spherical",
+                                                          shape_json={'radius': radius})
+        self.assertEqual(representation.radius, radius)
+
+    def test_create_returns_ellipsoid_representation_for_ellipsoidally_integrated_peak(self):
+        width, height = 0.75, 1.5
+        representation = \
+            self._verify_common_representation_attributes(expected_cls=PeakRepresentationEllipsoid,
+                                                          peak_shape="ellipsoidal",
+                                                          shape_json={'radius0': 0.5*width,
+                                                                      'radius1': 0.5*height})
+        self.assertEqual(representation.width, width)
+        self.assertEqual(representation.height, height)
 
     def test_create_is_case_insensitive_when_matching_shape_name(self):
-        self._verify_common_representation_attributes(expected_cls=PeakRepresentationSphere,
-                                                      peak_shape="SpHericaL",
-                                                      shape_json={'radius': 1.5})
+        self._verify_common_representation_attributes(
+            expected_cls=PeakRepresentationSphere,
+            peak_shape="SpHericaL",
+            shape_json={'radius': 1.5})
 
     # private
     def _verify_common_representation_attributes(self, expected_cls, peak_shape, shape_json):

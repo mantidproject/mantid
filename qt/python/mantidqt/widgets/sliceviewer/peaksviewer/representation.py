@@ -13,7 +13,7 @@ from json import loads as json_loads
 from six import with_metaclass
 
 # 3rdparty imports
-from matplotlib.patches import Circle
+from matplotlib.patches import Ellipse
 
 # default transparency
 PEAK_ALPHA = 0.8
@@ -21,6 +21,7 @@ PEAK_ALPHA = 0.8
 
 class PeakRepresentation(with_metaclass(ABCMeta)):
     """Describes representation of Peak for display"""
+
     def __init__(self, center, alpha, marker_color):
         """
         :param center: A V3D defining the center
@@ -76,25 +77,92 @@ class PeakRepresentationNoShape(PeakRepresentation):
         :return: The new Artist/Artists added
         """
         center = self.center
-        return ax.scatter(center.X(),
-                          center.Y(),
-                          alpha=self.alpha,
-                          color=self.marker_color,
-                          marker=self.MARKER,
-                          s=self.MARKER_SIZE_PTS_SQ)
+        return ax.scatter(
+            center.X(),
+            center.Y(),
+            alpha=self.alpha,
+            color=self.marker_color,
+            marker=self.MARKER,
+            s=self.MARKER_SIZE_PTS_SQ)
 
 
-class PeakRepresentationSphere(PeakRepresentation):
-    """Describes a view of a Peak that has been integrated with a Spherical shape"""
-    def __init__(self, radius, center, alpha, marker_color):
+class PeakRepresentationEllipsoid(PeakRepresentation):
+    """Describes a 2D view of a Peak that has been integrated with an Ellipsoid shape"""
+
+    def __init__(self, width, height, angle, center, alpha, marker_color):
         """
-        :param radius of the circle in units of the Axes
+        :param width: Length of horizontal axis
+        :param height: Length of vertical axis
         :param center: A V3D defining the center
         :param alpha: A float between 0.0, 1.0 defining the transparency of the line
         :param marker_color: A str code defining the color of the peak marker
         """
-        super(PeakRepresentationSphere, self).__init__(center, alpha, marker_color)
-        self._radius = radius
+        super(PeakRepresentationEllipsoid, self).__init__(center, alpha, marker_color)
+        self._angle = angle
+        self._height = height
+        self._width = width
+
+    @property
+    def width(self):
+        return self._width
+
+    @property
+    def height(self):
+        return self._height
+
+    @classmethod
+    def create(cls, center, peak_shape, marker_color):
+        """
+        Create an instance of PeakRepresentationEllipsoid from the given peak object.
+        :param center: Center of ellipsoid
+        :param peak_shape: Reference to a PeakShapeEllipsoid object
+        :param marker_color: String describing color
+        :return: A new instance of this class
+        """
+
+        def value_or_error(props, key):
+            try:
+                return props[key]
+            except KeyError:
+                raise RuntimeError("Unable to find '{}' property for given PeakShape".format(key))
+
+        properties = json_loads(peak_shape.toJSON())
+        return PeakRepresentationEllipsoid(
+            center=center,
+            width=2 * value_or_error(properties, "radius0"),
+            height=2 * value_or_error(properties, "radius1"),
+            angle=0.0,
+            alpha=PEAK_ALPHA,
+            marker_color=marker_color)
+
+    def draw(self, ax):
+        """
+        Override base class method to draw spherical integration region with a background
+        indicated by a dotted circle
+        :param ax: An Axes object to accept the draw command
+        :return: The new Artist/Artists added
+        """
+        center = self.center
+        return ax.add_patch(
+            Ellipse((center.X(), center.Y()),
+                    width=self._width,
+                    height=self._height,
+                    facecolor='none',
+                    edgecolor=self.marker_color))
+
+
+class PeakRepresentationSphere(PeakRepresentationEllipsoid):
+    """Describes a view of a Peak that has been integrated with a Spherical shape.
+    Uses PeakRepresentationEllipsoid to draw.
+    """
+
+    def __init__(self, radius, center, alpha, marker_color):
+        """
+        See PeakRepresentationEllipsoid for description of other parameters
+        :param radius: Radius of circle
+        """
+        super(PeakRepresentationSphere, self).__init__(2 * radius, 2 * radius, 0.0, center, alpha,
+                                                       marker_color)
 
     @classmethod
     def create(cls, center, peak_shape, marker_color):
@@ -107,31 +175,17 @@ class PeakRepresentationSphere(PeakRepresentation):
         """
         properties = json_loads(peak_shape.toJSON())
         try:
-            return PeakRepresentationSphere(center=center,
-                                            radius=properties["radius"],
-                                            alpha=PEAK_ALPHA,
-                                            marker_color=marker_color)
+            return PeakRepresentationSphere(
+                radius=properties["radius"],
+                center=center,
+                alpha=PEAK_ALPHA,
+                marker_color=marker_color)
         except KeyError:
             raise RuntimeError("Unable to find 'radius' property for given PeakShape")
 
     @property
     def radius(self):
-        return self._radius
-
-    def draw(self, ax):
-        """
-        Override bse class method to draw spherical integration region with a background
-        indicated by a dotted circle
-        :param ax: An Axes object to accept the draw command
-        :return: The new Artist/Artists added
-        """
-        center = self.center
-        return ax.add_patch(
-            Circle((center.X(), center.Y()),
-                   radius=self.radius,
-                   alpha=self.alpha,
-                   facecolor='none',
-                   edgecolor=self.marker_color))
+        return 0.5 * self._width
 
 
 # map shape names to representation classes
@@ -139,6 +193,7 @@ class PeakRepresentationSphere(PeakRepresentation):
 _PEAK_REPRESENTATIONS = {
     "none": PeakRepresentationNoShape,
     "spherical": PeakRepresentationSphere,
+    "ellipsoidal": PeakRepresentationEllipsoid
 }
 
 
