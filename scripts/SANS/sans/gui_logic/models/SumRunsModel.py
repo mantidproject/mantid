@@ -8,7 +8,7 @@ import SANSadd2
 from ui.sans_isis.work_handler import WorkHandler
 
 
-class RunSummation(object):
+class SumRunsModel(object):
     def __init__(self, work_handler, view=None):
         self._work_handler = work_handler
         self._view = view
@@ -27,7 +27,7 @@ class RunSummation(object):
             self._presenter.on_processing_finished(error)
 
     def __call__(self, run_selection, settings, base_file_name):
-        self._work_handler.process(RunSummation.Listener(self), self.run, 0, run_selection, settings, base_file_name)
+        self._work_handler.process(SumRunsModel.Listener(self), self.run, 0, run_selection, settings, base_file_name)
 
     def run(self, run_selection, settings, base_file_name):
         run_selection = self._run_selection_as_path_list(run_selection)
