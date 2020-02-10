@@ -113,7 +113,7 @@ def get_legend_cmds(ax, ax_object_var):
     """Get command axes.set_legend"""
     if ax.legend_:
         return ["{ax_obj}.legend().{draggable_method}".format(ax_obj=ax_object_var,
-                                                                draggable_method=SET_DRAGGABLE_METHOD)]
+                                                              draggable_method=SET_DRAGGABLE_METHOD)]
     return []
 
 
