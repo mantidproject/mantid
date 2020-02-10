@@ -135,7 +135,8 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.presenter.rename_workspace("name1", "new")
 
         self.assertEqual({"new": "ws1", "name2": "ws2"}, model_dict)
-        self.assertEqual({"new": 1, "name2": 0}, self.presenter.row_numbers)
+        self.assertTrue("new" in self.presenter.row_numbers)
+        self.assertFalse("name1" is self.presenter.row_numbers)
 
     def test_rename_workspace_not_tracked(self):
         model_dict = {"name1": "ws1", "name2": "ws2"}
@@ -162,10 +163,11 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.model.get_loaded_workspaces.return_value = model_dict
         self.presenter.row_numbers = {"name1": 0, "name2": 1}
 
-        self.presenter.replace_workspace("name1", "new")
+        self.presenter.replace_workspace("name1", "newWs")
 
-        self.assertEqual({"name1": "new", "name2": "ws2"}, model_dict)
-        self.assertEqual({"name1": 0, "name2": 1}, self.presenter.row_numbers)
+        self.assertEqual({"name1": "newWs", "name2": "ws2"}, model_dict)
+        self.assertTrue("name1" in self.presenter.row_numbers)
+        self.assertTrue("name2" in self.presenter.row_numbers)
 
     def test_replace_workspace_not_tracked(self):
         model_dict = {"name1": "ws1", "name2": "ws2"}
