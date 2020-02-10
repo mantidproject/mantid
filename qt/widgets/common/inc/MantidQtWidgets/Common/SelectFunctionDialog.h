@@ -37,6 +37,8 @@ public:
   ~SelectFunctionDialog() override;
   /// Return selected function
   QString getFunction() const;
+  /// Clear the text in the search box
+  void clearSearchBoxText() const;
 
 protected:
   /// Ui elements form
@@ -48,6 +50,9 @@ private:
   constructFunctionTree(const std::map<std::string, std::vector<std::string>>
                             &categoryFunctionsMap,
                         const std::vector<std::string> &restrictions);
+
+private slots:
+  void searchBoxChanged(const QString &text);
 };
 
 } // namespace MantidWidgets

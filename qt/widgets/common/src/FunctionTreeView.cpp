@@ -1170,6 +1170,7 @@ void FunctionTreeView::addFunctionBegin() {
     connect(m_selectFunctionDialog, SIGNAL(finished(int)), this,
             SLOT(addFunctionEnd(int)));
   }
+  m_selectFunctionDialog->clearSearchBoxText();
   m_selectedFunctionProperty = prop;
   m_selectFunctionDialog->open();
 }

@@ -170,7 +170,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
     def _on_search_box_selection_changed(self, text):
         """
         Called when text in the search box is changed by the user or script.
-        :param text: New text in the search box.
+        :param text: New text in the search box .
         """
         # if the function is called without text, avoid doing anything
         if text == '':

@@ -18,6 +18,7 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QCompleter>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -60,6 +61,15 @@ SelectFunctionDialog::SelectFunctionDialog(
     }
   }
 
+  // Set up the search box
+  m_form->searchBox->completer()->setCompletionMode(
+      QCompleter::PopupCompletion);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+  m_form->searchBox->completer()->setFilterMode(Qt::MatchContains);
+#endif
+  connect(m_form->searchBox, SIGNAL(editTextChanged(const QString &)), this,
+          SLOT(searchBoxChanged(const QString &)));
+
   // Construct the QTreeWidget based on the map information of categories and
   // their respective fit functions.
   constructFunctionTree(categories, restrictions);
@@ -67,6 +77,8 @@ SelectFunctionDialog::SelectFunctionDialog(
   connect(m_form->fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),
           this, SLOT(accept()));
   m_form->fitTree->setToolTip("Select a function type and press OK.");
+
+  m_form->searchBox->setCurrentIndex(-1);
 }
 
 /**
@@ -106,6 +118,7 @@ void SelectFunctionDialog::constructFunctionTree(
           for (const auto &function : entry.second) {
             QTreeWidgetItem *fit = new QTreeWidgetItem(catItem);
             fit->setText(0, QString::fromStdString(function));
+            m_form->searchBox->addItem(QString::fromStdString(function));
           }
         }
       } else {
@@ -141,6 +154,7 @@ void SelectFunctionDialog::constructFunctionTree(
               for (const auto &function : entry.second) {
                 QTreeWidgetItem *fit = new QTreeWidgetItem(catItem);
                 fit->setText(0, QString::fromStdString(function));
+                m_form->searchBox->addItem(QString::fromStdString(function));
               }
             }
           }
@@ -156,16 +170,32 @@ SelectFunctionDialog::~SelectFunctionDialog() { delete m_form; }
  * Return selected function
  */
 QString SelectFunctionDialog::getFunction() const {
+  const auto searchText = m_form->searchBox->currentText();
   QList<QTreeWidgetItem *> items(m_form->fitTree->selectedItems());
-  if (items.size() != 1) {
-    return "";
+  if (items.size() == 1 && items[0]->parent() != nullptr) {
+    return items[0]->text(0);
+  } else if (m_form->searchBox->findText(searchText) >= 0) {
+    return searchText;
   }
+  return "";
+}
 
-  if (items[0]->parent() == nullptr) {
-    return "";
+void SelectFunctionDialog::clearSearchBoxText() const {
+  m_form->searchBox->clearEditText();
+}
+
+/**
+ * Called when the text in the search box changes
+ */
+void SelectFunctionDialog::searchBoxChanged(const QString &text) {
+  if (text.isEmpty()) {
+    return;
   }
+  m_form->fitTree->setCurrentIndex(QModelIndex());
 
-  return items[0]->text(0);
+  const auto index = m_form->searchBox->findText(text);
+  if (index >= 0)
+    m_form->searchBox->setCurrentIndex(index);
 }
 
 } // namespace MantidWidgets
