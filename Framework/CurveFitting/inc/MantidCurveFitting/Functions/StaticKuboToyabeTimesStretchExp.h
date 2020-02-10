@@ -30,7 +30,7 @@ public:
     return "StaticKuboToyabeTimesStretchExp";
   }
 
-  const std::string category() const override { return "MuonGeneric"; }
+  const std::string category() const override { return "Muon\\MuonGeneric"; }
 
 protected:
   void function1D(double *out, const double *xValues,
