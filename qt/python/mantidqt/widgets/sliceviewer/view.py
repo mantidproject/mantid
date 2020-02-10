@@ -228,7 +228,7 @@ class SliceViewerView(QWidget):
     # peaks tools
     def query_peaks_to_overlay(self):
         """Display a dialog to the user to ask which peaks to overlay"""
-        return "peaksws",
+        return "peaksws_sphere_nobkgd",
 
     def attach_peaks_tools(self):
         """

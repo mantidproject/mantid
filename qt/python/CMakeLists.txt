@@ -134,6 +134,7 @@ if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
       mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
       mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
       mantidqt/widgets/sliceviewer/peaksviewer/test/test_colors.py
+      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
       mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksrepresentation.py
       mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py
       mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewercollection_presenter.py

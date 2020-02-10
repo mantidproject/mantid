@@ -29,6 +29,9 @@ if __name__ == "__main__":
                        LorentzCorrection='1', MinValues=[-15, -15, -15], MaxValues=[15, 15, 15],
                        SplitInto='2', SplitThreshold='50', MaxRecursionDepth='14')
     peaksws = Load(training_data_dir + '/peaks_qLab.nxs')
+    IntegratePeaksMD(InputWorkspace=mdws, PeaksWorkspace=peaksws, PeakRadius=0.5,
+                     OutputWorkspace='peaksws_sphere_nobkgd')
+
     app = QApplication([])
     sv = SliceViewer(mdws)
     sv.overlay_peaks_workspace()

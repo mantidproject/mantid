@@ -12,7 +12,7 @@ class PeakRepresentationColorSelection(object):
     """Defines behaviour for selection of colors for the
     PeakRepresentation objects"""
 
-    def __init__(self, color, background_color):
+    def __init__(self, color):
         """
         :param color: The initial selected color
         """
@@ -24,10 +24,3 @@ class PeakRepresentationColorSelection(object):
         :returns: str describing the color
         """
         return self._selected_color
-
-    # @property
-    # def background_color(self):
-    #     """Returns the current color selection
-    #     :returns: str describing the color
-    #     """
-    #     return self._selected_color

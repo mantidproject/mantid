@@ -68,7 +68,6 @@ class PeaksViewerView(QWidget):
 class PeaksViewerCollectionView(QWidget):
     """Display a collection of PeaksViewerView objects in a scrolling view.
     """
-
     def __init__(self, parent=None):
         """
         :param parent: An optional parent widget
