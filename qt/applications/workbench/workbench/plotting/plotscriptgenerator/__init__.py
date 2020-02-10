@@ -24,9 +24,9 @@ from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retr
 FIG_VARIABLE = "fig"
 AXES_VARIABLE = "axes"
 if hasattr(Legend, "set_draggable"):
-    SET_DRAGGABLE_METHOD = "set_draggable"
+    SET_DRAGGABLE_METHOD = "set_draggable(True)"
 else:
-    SET_DRAGGABLE_METHOD = "draggable"
+    SET_DRAGGABLE_METHOD = "draggable()"
 
 
 def generate_script(fig, exclude_headers=False):
@@ -44,7 +44,7 @@ def generate_script(fig, exclude_headers=False):
         axes.set_xlabel and axes.set_ylabel()
         axes.set_xlim() and axes.set_ylim()
         axes.set_xscale() and axes.set_yscale()
-        axes.legend().draggable()     (if legend present)
+        axes.legend().draggable(true)     (if legend present)
         plt.show()
 
     :param fig: A matplotlib.pyplot.Figure object you want to create a script from
@@ -71,7 +71,7 @@ def generate_script(fig, exclude_headers=False):
     cmds.extend(generate_workspace_retrieval_commands(fig) + [''])
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds.extend(plot_commands)
-    cmds.append("plt.show()")
+    cmds.append("fig.show()")
     return '\n'.join(cmds)
 
 
@@ -112,7 +112,7 @@ def get_title_cmds(ax, ax_object_var):
 def get_legend_cmds(ax, ax_object_var):
     """Get command axes.set_legend"""
     if ax.legend_:
-        return ["{ax_obj}.legend().{draggable_method}()".format(ax_obj=ax_object_var,
+        return ["{ax_obj}.legend().{draggable_method}".format(ax_obj=ax_object_var,
                                                                 draggable_method=SET_DRAGGABLE_METHOD)]
     return []
 
