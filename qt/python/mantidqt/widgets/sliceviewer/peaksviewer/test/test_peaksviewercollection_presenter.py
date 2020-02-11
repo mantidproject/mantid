@@ -12,9 +12,9 @@ import unittest
 
 # 3rdparty imports
 from mantid.dataobjects import PeaksWorkspace
-from mantid.py3compat.mock import call, create_autospec, patch, MagicMock
+from mantid.py3compat.mock import call, create_autospec, patch, ANY, MagicMock
 from mantidqt.widgets.sliceviewer.peaksviewer \
-    import PeaksViewerCollectionPresenter, PeaksViewerModel
+    import PeaksViewerPresenter, PeaksViewerCollectionPresenter, PeaksViewerModel
 
 
 def create_mock_peaks_workspace():
@@ -26,37 +26,33 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
 
     # -------------------- success tests -----------------------------
     @patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.PeaksViewerPresenter")
-    def test_presenter_constructs_PeaksViewerPresenter_per_workspace(self, mock_single_presenter):
+    def test_append_constructs_PeaksViewerPresenter(self, mock_single_presenter):
+        peaks_workspace = PeaksViewerModel(create_mock_peaks_workspace())
+        mock_collection_view = MagicMock()
+        mock_peaks_view = MagicMock()
+        mock_collection_view.append_peaksviewer.return_value = mock_peaks_view
+
+        presenter = PeaksViewerCollectionPresenter(mock_collection_view)
+        presenter.append_peaksworkspace(peaks_workspace)
+
+        mock_single_presenter.assert_has_calls([call(peaks_workspace, mock_peaks_view)])
+        self.assertEqual(1, presenter.view.append_peaksviewer.call_count)
+
+    def test_notify_called_for_each_subpresenter(self):
         peak_workspaces = (PeaksViewerModel(create_mock_peaks_workspace()) for _ in range(2))
-        mock_view = MagicMock()
 
-        presenter = PeaksViewerCollectionPresenter(peak_workspaces, mock_view)
-
-        mock_single_presenter.assert_has_calls([call(peaks_ws) for peaks_ws in peak_workspaces])
-        self.assertEqual(2, presenter.view.append_peaksviewer.call_count)
-
-    def test_peaks_info_returns_combined_PeakRepresentation_for_each_workspace(self):
-        peak_workspaces = (PeaksViewerModel(create_mock_peaks_workspace()) for _ in range(2))
-
-        class PeaksViewerPresenterMock(MagicMock):
-            """Mock created when PeaksViewerPresenterMock is a called.
-            Changes the number of mock Peaks returned by PeaksViewerPresenter.peaks_info"""
-            child_count = 0
-            # number of "peaks" return by successive calls
-            npeaks = (3, 4)
-
-            def peaks_info(self):
-                peaks = [MagicMock() for _ in range(self.npeaks[self.child_count])]
-                self.__class__.child_count += 1
-                return peaks
-
-        with patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.PeaksViewerPresenter",
-                   new_callable=PeaksViewerPresenterMock):
+        with patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.PeaksViewerPresenter"
+                   ) as presenter_mock:
             view = MagicMock()
-            presenter = PeaksViewerCollectionPresenter(peak_workspaces, view)
-            peaks_info = presenter.peaks_info()
-
-        self.assertEqual(7, len(list(peaks_info)))
+            # make each call to to mock_presenter return a new mock object
+            presenter_mock.side_effect = [MagicMock(), MagicMock()]
+            presenter = PeaksViewerCollectionPresenter(view)
+            child_presenters = []
+            for peaks_ws in peak_workspaces:
+                child_presenters.append(presenter.append_peaksworkspace(peaks_ws))
+            presenter.notify(PeaksViewerPresenter.Event.OverlayPeaks)
+            for child in child_presenters:
+                child.notify.assert_called_once_with(PeaksViewerPresenter.Event.OverlayPeaks)
 
 
 if __name__ == '__main__':

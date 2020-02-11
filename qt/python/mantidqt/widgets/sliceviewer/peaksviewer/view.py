@@ -20,11 +20,15 @@ class PeaksViewerView(QWidget):
     """
     TITLE_PREFIX = "Workspace: "
 
-    def __init__(self, parent=None):
+    def __init__(self, painter, sliceinfo_provider, parent=None):
         """
+        :param painter: An object responsible for draw the peaks representations
+        :param sliceinfo_provider: An object responsible for providing access to current slice information
         :param parent: An optional parent widget
         """
         super(PeaksViewerView, self).__init__(parent)
+        self._painter = painter
+        self._sliceinfo = sliceinfo_provider
         self._group_box = None
         self._presenter = None
         self._table_view = None
@@ -34,18 +38,44 @@ class PeaksViewerView(QWidget):
     def table_view(self):
         return self._table_view
 
-    def subscribe(self, presenter):
+    @property
+    def sliceinfo(self):
+        """Return information regarding the current slice"""
+        return self._sliceinfo
+
+    def clear_peaks(self, peaks):
+        """Clear all peaks from display"""
+        for peak in peaks:
+            peak.remove(self._painter)
+
+    def draw_peaks(self, peaks):
         """
-        :param presenter: An object to handle GUI events.
+        Draw a single peak using the supplied painter
+        :param peaks: An iterable of PeakRepresentations to display
         """
-        self._presenter = presenter
-        self._table_view.subscribe(presenter)
+        for peak in peaks:
+            peak.draw(self._painter)
+
+    def update_peaks(self, peaks):
+        """
+        Update existing peak represetations
+        :param peaks: An iterable of PeakRepresentations to display
+        """
+        for peak in peaks:
+            peak.repaint(self._painter)
 
     def set_title(self, name):
         """
         :param name: Set the name label for the workspace
         """
         self._group_box.setTitle(self.TITLE_PREFIX + name)
+
+    def subscribe(self, presenter):
+        """
+        :param presenter: An object to handle GUI events.
+        """
+        self._presenter = presenter
+        self._table_view.subscribe(presenter)
 
     # private api
     def _setup_ui(self):
@@ -68,11 +98,16 @@ class PeaksViewerView(QWidget):
 class PeaksViewerCollectionView(QWidget):
     """Display a collection of PeaksViewerView objects in a scrolling view.
     """
-    def __init__(self, parent=None):
+
+    def __init__(self, painter, sliceinfo_provider, parent=None):
         """
+        :param painter: An object responsible for draw the peaks representations
+        :param sliceinfo_provider: An object responsible for providing access to current slice information
         :param parent: An optional parent widget
         """
         super(PeaksViewerCollectionView, self).__init__(parent)
+        self._painter = painter
+        self._sliceinfo_provider = sliceinfo_provider
         self._setup_ui()
 
     def append_peaksviewer(self):
@@ -80,7 +115,7 @@ class PeaksViewerCollectionView(QWidget):
         Append a view widget to end of the current list of views
         :param peaks_view: A reference to a single view widget for a PeaksWorkspace
         """
-        child_view = PeaksViewerView(self)
+        child_view = PeaksViewerView(self._painter, self._sliceinfo_provider, parent=self)
         self._peaks_layout.addWidget(child_view)
         return child_view
 
