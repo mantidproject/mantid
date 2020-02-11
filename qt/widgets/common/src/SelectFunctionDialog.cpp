@@ -172,7 +172,7 @@ SelectFunctionDialog::~SelectFunctionDialog() { delete m_form; }
 QString SelectFunctionDialog::getFunction() const {
   const auto searchText = m_form->searchBox->currentText();
   QList<QTreeWidgetItem *> items(m_form->fitTree->selectedItems());
-  if (items.size() == 1 && items[0]->parent() != nullptr) {
+  if (items.size() == 1 && items[0]->childCount() == 0) {
     return items[0]->text(0);
   } else if (m_form->searchBox->findText(searchText) >= 0) {
     return searchText;
