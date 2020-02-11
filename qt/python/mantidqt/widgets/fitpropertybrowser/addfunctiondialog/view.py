@@ -24,11 +24,10 @@ class AddFunctionDialogView(QDialog):
 
     def _setup_ui(self, function_names):
         self.ui = load_ui(__file__, 'add_function_dialog.ui', self)
-        function_box = self.ui.functionBox
         if function_names:
             self.ui.functionBox.addItems(function_names)
-        function_box.completer().setCompletionMode(QCompleter.PopupCompletion)
-        function_box.completer().setFilterMode(Qt.MatchContains)
+        self.ui.functionBox.completer().setCompletionMode(QCompleter.PopupCompletion)
+        self.ui.functionBox.completer().setFilterMode(Qt.MatchContains)
         self.ui.errorMessage.hide()
 
     def is_text_in_function_list(self, function):
