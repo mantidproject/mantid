@@ -23,7 +23,7 @@ Powder Diffraction
 - The create_total_scattering_pdf merging banks no longer matches spectra with scale, it now only matches with offset.
 - The Polaris create_total_scattering_pdf can now be given an parameter `output_binning` that will be used to rebin the output_pdf.
 - The polaris create_total_scattering_pdf function can now accept a `pdf_type` argument to set the pdf_output type.
-- The polaris create_total_scattering_pdf function can now accept a `freq_params` argument to perfomr a fourier filter on the run.
+- The polaris create_total_scattering_pdf function can now accept a `freq_params` argument to perform a fourier filter on the run.
 - :ref:`HRPDSlabCanAbsorption <algm-HRPDSlabCanAbsorption-v1>` now accepts any thickness parameter and not those in a specified list.
 
 Engineering Diffraction

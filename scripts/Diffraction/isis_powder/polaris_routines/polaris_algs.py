@@ -190,16 +190,29 @@ def _determine_chopper_mode(ws):
         raise ValueError("Chopper frequency not in log data. Please specify a chopper mode")
 
 
-def fast_fourier_filter(input_ws, freq_params=None):
+def fast_fourier_filter(ws, freq_params=None):
     if not freq_params:
         return
     # This is a simple fourier filter using the FFTSmooth to get a WS with only the low radius components, then
     # subtracting that from the merged WS
 
-    x_range = input_ws.dataX(0)
-    lower_index = round(2 * np.pi / (freq_params[0] * 2 * (x_range[1] - x_range[0])))
-    tmp = mantid.FFTSmooth(InputWorkspace=input_ws, Filter="Zeroing", Params=str(lower_index), StoreInADS=False, IgnoreXBins=True)
-    mantid.Minus(LHSWorkspace=input_ws, RHSWorkspace=tmp, OutputWorkspace=input_ws)
+    x_range = ws.dataX(0)
+    # The param p in FFTSmooth defined such that if the input ws has Nx bins then in the fourier space ws it will cut of
+    # all frequencies in bins nk=Nk/p and above, calculated by p = pi/(k_c*dQ) when k_c is the cutoff frequency desired.
+    # The input ws of FFTSmooth has binning [x_min, dx, x_max], with Nx bins.
+    # FFTSmooth doubles the length of the input ws and preforms an FFT with output ws binning
+    # [0, dk, k_max]=[0, 1/2*(x_max-x_min), 1/(2*dx)], and Nk=Nx bins.
+    # k_max/k_c = Nk/nk
+    # 1/(k_c*2*dx) = p
+    # because FFT uses sin(2*pi*k*x) while PDFFourierTransform uses sin(Q*r) we need to include a factor of 2*pi
+    # p = pi/(k_c*dQ)
+    lower_freq_param = round(np.pi / (freq_params[0] * (x_range[1] - x_range[0])))
+    # This is giving the FFTSmooth the data in the form of S(Q)-1, later we use PDFFourierTransform with Q(S(Q)-1)
+    # it does not matter which we use in this case.
+    tmp = mantid.FFTSmooth(InputWorkspace=ws, Filter="Zeroing", Params=str(lower_freq_param), StoreInADS=False,
+                           IgnoreXBins=True)
+    mantid.Minus(LHSWorkspace=ws, RHSWorkspace=tmp, OutputWorkspace=ws)
     if len(freq_params) > 1:
-        upper_index = round(2 * np.pi / (freq_params[1] * 2 * (x_range[1] - x_range[0])))
-        mantid.FFTSmooth(InputWorkspace=input_ws, OutputWorkspace=input_ws, Filter="Zeroing", Params=str(upper_index), IgnoreXBins=True)
+        upper_freq_param = round(np.pi / (freq_params[1] * (x_range[1] - x_range[0])))
+        mantid.FFTSmooth(InputWorkspace=ws, OutputWorkspace=ws, Filter="Zeroing",
+                         Params=str(upper_freq_param), IgnoreXBins=True)
