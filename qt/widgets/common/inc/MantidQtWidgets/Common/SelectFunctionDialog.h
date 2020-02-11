@@ -27,7 +27,8 @@ namespace MantidWidgets {
 /**
  * Select a function type out of a list of available ones.
  */
-class EXPORT_OPT_MANTIDQT_COMMON SelectFunctionDialog : public API::MantidDialog {
+class EXPORT_OPT_MANTIDQT_COMMON SelectFunctionDialog
+    : public API::MantidDialog {
   Q_OBJECT
 
 public:
