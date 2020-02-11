@@ -44,7 +44,7 @@ def generate_script(fig, exclude_headers=False):
         axes.set_xlabel and axes.set_ylabel()
         axes.set_xlim() and axes.set_ylim()
         axes.set_xscale() and axes.set_yscale()
-        axes.legend().draggable(True)     (if legend present, or just draggable() for earlier matplotlib versions)
+        axes.legend().set_draggable(True)     (if legend present, or just draggable() for earlier matplotlib versions)
         plt.show()
 
     :param fig: A matplotlib.pyplot.Figure object you want to create a script from
