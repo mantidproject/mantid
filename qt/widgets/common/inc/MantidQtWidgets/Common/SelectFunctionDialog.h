@@ -11,6 +11,7 @@
 // Includes
 //--------------------------------------------------
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 
 #include <QDialog>
 #include <QTreeWidgetItem>
@@ -26,7 +27,7 @@ namespace MantidWidgets {
 /**
  * Select a function type out of a list of available ones.
  */
-class EXPORT_OPT_MANTIDQT_COMMON SelectFunctionDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON SelectFunctionDialog : public API::MantidDialog {
   Q_OBJECT
 
 public:
@@ -57,6 +58,7 @@ private slots:
   void functionDoubleClicked(QTreeWidgetItem *item);
   void acceptFunction();
   void rejectFunction();
+  void helpClicked() const;
 };
 
 } // namespace MantidWidgets
