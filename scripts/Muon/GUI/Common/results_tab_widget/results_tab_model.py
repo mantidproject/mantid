@@ -289,8 +289,7 @@ class ResultsTabModel(object):
     def _on_new_fit_performed(self):
         """Called when a new fit has been added to the context.
         The function name is set to the name fit if it is the first time"""
-        if self.selected_fit_function() is None:
-            self._update_selected_fit_function()
+        self._update_selected_fit_function()
 
     def _update_selected_fit_function(self):
         """

@@ -40,6 +40,7 @@ class FittingTabPresenter(object):
         self.fitting_calculation_model = None
         self.update_selected_workspace_list_for_fit()
         self.fit_function_changed_notifier = GenericObservable()
+        self.fit_parameter_changed_notifier = GenericObservable()
         self.fit_type_changed_notifier = GenericObservable()
         self.gui_context_observer = GenericObserverWithArgPassing(
             self.handle_gui_changes_made)
@@ -56,6 +57,8 @@ class FittingTabPresenter(object):
 
         self.update_view_from_model_observer = GenericObserverWithArgPassing(
             self.update_view_from_model)
+
+        self.update_model_from_view()
 
     @property
     def selected_data(self):
@@ -160,7 +163,6 @@ class FittingTabPresenter(object):
         self.model.change_plot_guess(self.view.plot_guess, parameters)
 
     def handle_fit_clicked(self):
-        self.context.fitting_context.number_of_fits = 0
         if self._tf_asymmetry_mode:
             self.perform_tf_asymmetry_fit()
         else:
@@ -201,11 +203,13 @@ class FittingTabPresenter(object):
         value = self.view.start_time
         index = self.view.get_index_for_start_end_times()
         self.update_start_x(index, value)
+        self.update_model_from_view()
 
     def handle_end_x_updated(self):
         value = self.view.end_time
         index = self.view.get_index_for_start_end_times()
         self.update_end_x(index, value)
+        self.update_model_from_view()
 
     def handle_fit_name_changed_by_user(self):
         self.automatically_update_fit_name = False
@@ -227,12 +231,13 @@ class FittingTabPresenter(object):
             self._fit_function = [func.clone() for func in self._get_fit_function()]
 
         self.clear_fit_information()
+
         if self.automatically_update_fit_name:
             name = self._get_fit_function()[0]
             self.view.function_name = self.model.get_function_name(name)
             self.model.function_name = self.view.function_name
 
-        self.model.update_stored_fit_function(self._fit_function[0])
+        self.update_model_from_view()
 
         self.fit_function_changed_notifier.notify_subscribers()
 
@@ -297,6 +302,7 @@ class FittingTabPresenter(object):
 
         self.update_fit_status_information_in_view()
         self.handle_display_workspace_changed()
+        self.fit_function_changed_notifier.notify_subscribers()
 
     def handle_function_parameter_changed(self):
         if not self.view.is_simul_fit():
@@ -304,6 +310,9 @@ class FittingTabPresenter(object):
             self._fit_function[index] = self._get_fit_function()[index]
         else:
             self._fit_function = self._get_fit_function()
+
+        self.update_model_from_view()
+        self.fit_parameter_changed_notifier.notify_subscribers()
 
     def handle_undo_fit_clicked(self):
         self._fit_function = self._fit_function_cache
@@ -341,7 +350,6 @@ class FittingTabPresenter(object):
             if self.view.is_simul_fit():
                 self._number_of_fits_cached += 1
                 simultaneous_fit_parameters = self.get_multi_domain_fit_parameters()
-                print(simultaneous_fit_parameters)
                 global_parameters = self.view.get_global_parameters()
                 calculation_function = functools.partial(
                     self.model.do_simultaneous_fit,
@@ -469,7 +477,7 @@ class FittingTabPresenter(object):
 
         selected_workspaces = list(set(self._check_data_exists(selected_workspaces)))
         if len(selected_workspaces) > 1:  # sort the list to preserve order
-            selected_workspaces.sort(key=self._workspace_list_sorter)
+            selected_workspaces.sort(key=self.model.workspace_list_sorter)
 
         return selected_workspaces
 
@@ -607,13 +615,16 @@ class FittingTabPresenter(object):
             self.selected_data = []
 
     def update_model_from_view(self):
-        if self.view.is_simul_fit():
-            fit_type = "Simul"
-        else:
-            fit_type = "Single"
-        fit_by = self.view.simultaneous_fit_by
-        self.model.update_model_from_view(fit_type, fit_by)
-        self.model.update_stored_fit_function(self._fit_function[0])
+        self.model.update_model_fit_options(self._get_fit_type(),
+                                            self.view.simultaneous_fit_by,
+                                            self._fit_function[0],
+                                            self.start_x[0],
+                                            self.end_x[0],
+                                            self.view.minimizer,
+                                            self.view.evaluation_type,
+                                            self.view.fit_to_raw,
+                                            self.view.get_global_parameters(),
+                                            self.view.tf_asymmetry_mode)
 
     def get_parameters_for_tf_function_calculation(self, fit_function):
         mode = 'Construct' if self.view.tf_asymmetry_mode else 'Extract'
@@ -622,6 +633,13 @@ class FittingTabPresenter(object):
         return {'InputFunction': fit_function,
                 'WorkspaceList': workspace_list,
                 'Mode': mode}
+
+    def _get_fit_type(self):
+        if self.view.is_simul_fit():
+            fit_type = "Simul"
+        else:
+            fit_type = "Single"
+        return fit_type
 
     def _get_selected_groups_and_pairs(self):
         return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
@@ -636,24 +654,6 @@ class FittingTabPresenter(object):
                 groups_and_pairs = [self.view.simultaneous_fit_by_specifier]
 
         return runs, groups_and_pairs
-
-    def _transform_grp_or_pair_to_float(self, workspace_name):
-        grp_or_pair_name = get_group_or_pair_from_name(workspace_name)
-        if grp_or_pair_name not in self._grppair_index:
-            self._grppair_index[grp_or_pair_name] = len(self._grppair_index)
-
-        grp_pair_values = list(self._grppair_index.values())
-        if len(self._grppair_index) > 1:
-            return ((self._grppair_index[grp_or_pair_name] - grp_pair_values[0]) /
-                    (grp_pair_values[-1] - grp_pair_values[0])) * 0.99
-        else:
-
-            return 0.99
-
-    def _workspace_list_sorter(self, workspace_name):
-        run_number = get_run_number_from_workspace_name(workspace_name, self.context.data_context.instrument)
-        grp_pair_number = self._transform_grp_or_pair_to_float(workspace_name)
-        return int(run_number) + grp_pair_number
 
     @staticmethod
     def check_workspaces_are_tf_asymmetry_compliant(workspace_list):

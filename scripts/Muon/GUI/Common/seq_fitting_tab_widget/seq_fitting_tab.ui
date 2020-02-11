@@ -14,7 +14,7 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
-   <item row="5" column="0" colspan="2">
+   <item row="8" column="0" colspan="3">
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -27,6 +27,27 @@
        </sizepolicy>
       </property>
      </widget>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QRadioButton" name="previous_fit_values_radio">
+       <property name="text">
+        <string>Parameters from previous fit</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="5" column="1">
+    <widget class="QRadioButton" name="initial_fit_values_radio">
+     <property name="text">
+      <string>Initial parameters for each fit</string>
+     </property>
     </widget>
    </item>
    <item row="0" column="0">
@@ -43,22 +64,17 @@
     </widget>
    </item>
    <item row="2" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QRadioButton" name="radioButton">
-       <property name="text">
-        <string>Parameters from previous fit</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QRadioButton" name="previous_fit_vals_radio">
-       <property name="text">
-        <string>Initial values for every fit</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <layout class="QGridLayout" name="gridLayout"/>
+   </item>
+   <item row="0" column="2">
+    <widget class="QCheckBox" name="plot_fit_results_checkbox">
+     <property name="text">
+      <string>Plot fit results</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item row="0" column="1">
     <widget class="QPushButton" name="fit_selected_button">

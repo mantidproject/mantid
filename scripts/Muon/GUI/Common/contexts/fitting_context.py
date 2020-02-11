@@ -141,7 +141,7 @@ class FitParameters(object):
 
     def __eq__(self, other):
         return self._parameter_workspace == other._parameter_workspace and \
-            self._global_parameters == other._global_parameters
+               self._global_parameters == other._global_parameters
 
     def __ne__(self, other):
         return not self == other
@@ -207,9 +207,9 @@ class FitInformation(object):
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
         return self.parameter_workspace_name == other.parameter_workspace_name and \
-            self.fit_function_name == other.fit_function_name and \
-            self.input_workspaces == other.input_workspaces and \
-            self.output_workspace_names == other.output_workspace_names
+               self.fit_function_name == other.fit_function_name and \
+               self.input_workspaces == other.input_workspaces and \
+               self.output_workspace_names == other.output_workspace_names
 
     @property
     def parameters(self):
@@ -301,6 +301,7 @@ class FittingContext(object):
         # Register callbacks with this object to observe when new fits
         # are added
         self.new_fit_notifier = Observable()
+        self.fit_removed_notifier = Observable()
         self.plot_guess_notifier = Observable()
         self._number_of_fits = 0
         self._number_of_fits_cache = 0
@@ -334,11 +335,23 @@ class FittingContext(object):
         Add a new fit to the context. Subscribers are notified of the update.
         :param fit: A new FitInformation object
         """
-        if fit in self.fit_list:
-            self.fit_list.pop(self.fit_list.index(fit))
-        self.fit_list.append(fit)
-        self._number_of_fits += 1
-        self.new_fit_notifier.notify_subscribers()
+        if fit not in self.fit_list:
+            self.fit_list.append(fit)
+            self._number_of_fits += 1
+        else:
+            self.update_fit(fit)
+
+        self.new_fit_notifier.notify_subscribers(fit)
+
+    def update_fit(self, updated_fit):
+        """
+        Updates a fit that is currently stored in the context
+        :param updated_fit: A FitInformation object
+        """
+        for fit in self.fit_list:
+            if updated_fit == fit:
+                fit._fit_parameters = updated_fit._fit_parameters
+                return
 
     def notify_plot_guess_changed(self, plot_guess, guess_ws):
         self.plot_guess = plot_guess
@@ -369,7 +382,7 @@ class FittingContext(object):
     def remove_workspace_by_name(self, workspace_name):
         list_of_fits_to_remove = []
         for fit in self.fit_list:
-            if workspace_name in fit.output_workspace_names or workspace_name==fit.parameter_workspace_name:
+            if workspace_name in fit.output_workspace_names or workspace_name == fit.parameter_workspace_name:
                 self._number_of_fits_cache = 0
                 list_of_fits_to_remove.append(fit)
 
@@ -378,6 +391,14 @@ class FittingContext(object):
             if index >= len(self.fit_list) - self._number_of_fits:
                 self._number_of_fits -= 1
             self.fit_list.remove(fit)
+
+    def remove_fits_from_stored_fit_list(self, fits):
+        for fit in fits:
+            if fit in self.fit_list:
+                self.fit_list.remove(fit)
+                self._number_of_fits -= 1
+                self.fit_removed_notifier.notify_subscribers(fit)
+        self.new_fit_notifier.notify_subscribers()
 
     def log_names(self, filter_fn=None):
         """
@@ -393,6 +414,8 @@ class FittingContext(object):
 
     def clear(self):
         self.fit_list = []
+        self.number_of_fits = 0
+        self.new_fit_notifier.notify_subscribers()
 
     def remove_latest_fit(self, number_of_fits_to_remove):
         self.fit_list = self.fit_list[:-number_of_fits_to_remove]

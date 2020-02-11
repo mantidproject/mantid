@@ -15,8 +15,8 @@ class FittingTabWidget(object):
     def __init__(self, context, parent):
         self.fitting_tab_view = FittingTabView(parent)
         self.fitting_tab_model = FittingTabModel(context)
-
         self.fitting_tab_presenter = FittingTabPresenter(self.fitting_tab_view, self.fitting_tab_model, context)
+
         self.fitting_tab_view.set_slot_for_select_workspaces_to_fit(self.fitting_tab_presenter.handle_select_fit_data_clicked)
         self.fitting_tab_view.set_slot_for_display_workspace_changed(self.fitting_tab_presenter.handle_display_workspace_changed)
         self.fitting_tab_view.set_slot_for_display_workspace_changed(self.fitting_tab_presenter.handle_plot_guess_changed)
@@ -27,6 +27,8 @@ class FittingTabWidget(object):
         self.fitting_tab_view.set_slot_for_fit_button_clicked(self.fitting_tab_presenter.handle_fit_clicked)
         self.fitting_tab_view.set_slot_for_start_x_updated(self.fitting_tab_presenter.handle_start_x_updated)
         self.fitting_tab_view.set_slot_for_end_x_updated(self.fitting_tab_presenter.handle_end_x_updated)
+        self.fitting_tab_view.set_slot_for_fit_options_changed(self.fitting_tab_presenter.update_model_from_view)
+
         self.fitting_tab_view.function_browser.functionStructureChanged.connect(
             self.fitting_tab_presenter.handle_function_structure_changed)
         self.fitting_tab_view.function_browser.functionStructureChanged.connect(

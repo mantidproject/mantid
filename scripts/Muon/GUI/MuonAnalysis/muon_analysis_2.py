@@ -196,6 +196,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_tab.fitting_tab_presenter.fit_function_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.fit_function_updated_observer)
 
+        self.fitting_tab.fitting_tab_presenter.fit_parameter_changed_notifier.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.fit_parameter_updated_observer)
+
         self.fitting_tab.fitting_tab_presenter.fit_type_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.fit_type_changed_observer)
 
@@ -287,6 +290,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.results_tab.results_tab_presenter.new_fit_performed_observer)
 
         self.fitting_context.new_fit_notifier.add_subscriber(self.dockable_plot_widget.presenter.fit_observer)
+
+        self.fitting_context.fit_removed_notifier.add_subscriber(self.dockable_plot_widget.presenter.
+                                                                 fit_removed_observer)
 
         self.fitting_context.plot_guess_notifier.add_subscriber(
             self.dockable_plot_widget.presenter.plot_guess_observer)

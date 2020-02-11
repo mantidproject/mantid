@@ -170,6 +170,9 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
 
         self.model.get_fit_workspace_names_from_groups_and_runs.assert_called_once_with([run], ["bwd", "fwd", "top"])
 
+    def test_fit_uses_table_values_for_fit(self):
+        self.view.get_entry_fit_parameters = mock.MagicMock(return_value=[0.25, 0.35, 0.6])
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

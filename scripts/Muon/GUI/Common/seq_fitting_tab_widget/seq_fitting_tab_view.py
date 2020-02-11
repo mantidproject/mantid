@@ -17,6 +17,7 @@ allowed_minimizers = ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletch
                       'SteepestDescent', 'Trust Region']
 
 default_columns = {"Run": 0, "Groups/Pairs": 1, "Fit quality": 2}
+default_fit_status = "No fit"
 
 
 class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
@@ -47,12 +48,7 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.fit_results_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.fit_results_table.blockSignals(False)
 
-        # row manipulation options
-        self.fit_results_table.verticalHeader().setSectionsMovable(True)
-        self.fit_results_table.verticalHeader().setDragEnabled(True)
-        self.fit_results_table.verticalHeader().setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
-
-        self.fit_results_table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectItems)
+        self.fit_results_table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.fit_results_table.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 
     def set_fit_table_workspaces(self, runs, group_and_pairs):
@@ -69,7 +65,7 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
             self.fit_results_table.setItem(i, default_columns["Run"], runItem)
             self.fit_results_table.setItem(i, default_columns["Groups/Pairs"], groupItem)
 
-            fitItem = QtWidgets.QTableWidgetItem("N/A")
+            fitItem = QtWidgets.QTableWidgetItem(default_fit_status)
             fitItem.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
             self.fit_results_table.setItem(i, default_columns["Fit quality"], fitItem)
 
@@ -89,11 +85,20 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
             for j, parameter in enumerate(parameter_values):
                 parameterItem = QtWidgets.QTableWidgetItem(str(parameter))
                 self.fit_results_table.setItem(i, len(default_columns) + j, parameterItem)
+                self.fit_results_table.item(i, default_columns["Fit quality"]).setText("No fit")
+                self.fit_results_table.item(i, default_columns["Fit quality"]).setForeground(QtGui.QBrush(
+                                                                                             QtCore.Qt.black))
 
     def set_fit_function_parameters(self, row, parameter_values):
         for j, parameter in enumerate(parameter_values):
             parameter_item = self.fit_results_table.item(row, len(default_columns) + j)
             parameter_item.setText("{0:.5f}".format(parameter))
+
+    def set_fit_quality_to_default(self):
+        for i in range(self.get_number_of_entries()):
+            fit_quality_item = self.fit_results_table.item(i, default_columns["Fit quality"])
+            fit_quality_item.setForeground(QtGui.QBrush(QtCore.Qt.black))
+            fit_quality_item.setText(default_fit_status)
 
     def set_fit_quality(self, row, fit_status, fit_quality):
         fit_quality_item = self.fit_results_table.item(row, default_columns["Fit quality"])
@@ -113,16 +118,37 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         group_and_pairs = self.fit_results_table.item(row_index, default_columns["Groups/Pairs"]).text()
         return run_numbers, group_and_pairs
 
+    def get_fit_quality_from_fit_table_row(self, row_index):
+        if row_index > self.fit_results_table.rowCount():
+            return None
+
+        fit_quality = self.fit_results_table.item(row_index, default_columns["Fit quality"]).text()
+        return fit_quality
+
+    def get_entry_fit_parameter_values(self, row_index):
+        if row_index > self.fit_results_table.rowCount():
+            return []
+
+        parameter_values = []
+        for j in range(len(default_columns), self.fit_results_table.columnCount()):
+            parameter_item = self.fit_results_table.item(row_index, j)
+            parameter_values += [float(parameter_item.text())]
+        return parameter_values
+
     def get_number_of_entries(self):
         return self.fit_results_table.rowCount()
 
     def get_selected_row(self):
         return self.fit_results_table.selectionModel().currentIndex().row()
 
+    def is_plotting_checked(self):
+        return self.plot_fit_results_checkbox.isChecked()
+
+    def use_initial_values_for_fits(self):
+        return self.initial_fit_values_radio.isChecked()
+
     def setup_slot_for_fit_selected_button(self, slot):
         self.fit_selected_button.clicked.connect(slot)
 
     def setup_slot_for_sequential_fit_button(self, slot):
         self.seq_fit_button.clicked.connect(slot)
-
-
