@@ -22,35 +22,7 @@ from mantidqt.widgets.sliceviewer.peaksviewer.representation \
             PeakRepresentationSphere, create_peakrepresentation)
 
 
-class PeakRepresentationTest(unittest.TestCase):
-    def test_representation_attributes_read_only(self):
-        representation = PeakRepresentationNoShape(V3D(), 1.0, 'w')
-
-        for name, value in (("alpha", 2), ("center", [1, 2, 3]), ('marker_color', 'b')):
-            self.assertRaises(AttributeError, setattr, representation, name, value)
-
-    def test_noshape_representation_draw_creates_scatter_point(self):
-        center, alpha, marker_color = V3D(0.0, 1.0, -1.0), 0.5, 'b'
-        no_shape = PeakRepresentationNoShape(center, alpha, marker_color)
-        axes = MagicMock()
-
-        no_shape.draw(axes)
-
-        axes.scatter.assert_called_once_with(
-            center.X(), center.Y(), alpha=alpha, color=marker_color, marker=ANY, s=ANY)
-        self._verify_expected_attributes(no_shape, center, alpha, marker_color)
-
-    def test_spherical_representation_draw_creates_circle_of_expected_radius(self):
-        center, alpha, marker_color = V3D(0.0, 1.0, -1.0), 0.5, 'b'
-        radius = 1.3
-        sphere = PeakRepresentationSphere(radius, center, alpha, marker_color)
-        axes = MagicMock()
-
-        sphere.draw(axes)
-
-        axes.add_patch.assert_called_once_with(ANY)
-        self.assertEqual(radius, sphere.radius)
-        self._verify_expected_attributes(sphere, center, alpha, marker_color)
+class CreatePeakRepresentationTest(unittest.TestCase):
 
     def test_create_returns_simple_representation_for_non_integrated_peak(self):
         self._verify_common_representation_attributes(
