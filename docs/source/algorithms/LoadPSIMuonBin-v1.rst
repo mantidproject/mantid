@@ -27,6 +27,8 @@ is plottable.
 
 The times are automatically offset by the value for first good data, such that the pulse is at approximatly time equals zero. This is to be consistant with ISIS measurment data.
 
+If no group name is recorded in the data file a name of `group_specNum` will be used, where `specNum` is the spectrum number.
+
 Errors
 ######
 

@@ -206,30 +206,25 @@ def load_workspace_from_filename(filename,
         alg.execute()
 
     workspace = AnalysisDataService.retrieve(alg.getProperty("OutputWorkspace").valueAsStr)
-    print("fsdaf", workspace)
     if is_workspace_group(workspace):
-        print("multi")
         # handle multi-period data
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in workspace.getNames()]
         run = get_run_from_multi_period_data(workspace)
-        if not psi_data:
-            load_result["DataDeadTimeTable"] = AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()[0]
-            for index, deadtime_table in enumerate(AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()):
-                if index == 0:
-                    load_result["DataDeadTimeTable"] = deadtime_table
-                else:
-                    DeleteWorkspace(Workspace=deadtime_table)
 
-            load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
-            UnGroupWorkspace(load_result["DeadTimeTable"])
-            load_result["DeadTimeTable"] = None
-            UnGroupWorkspace(workspace.name())
-        else:
-            load_result["DataDeadTimeTable"] = None
-            load_result["FirstGoodData"] = round(load_result["FirstGoodData"], 2)
+        load_result["DataDeadTimeTable"] = AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()[0]
+        for index, deadtime_table in enumerate(AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()):
+            if index == 0:
+                load_result["DataDeadTimeTable"] = deadtime_table
+            else:
+                DeleteWorkspace(Workspace=deadtime_table)
+
+        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
+        UnGroupWorkspace(load_result["DeadTimeTable"])
+        load_result["DeadTimeTable"] = None
+        UnGroupWorkspace(workspace.name())
+
     else:
-        print("single", output_properties)
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(load_result["OutputWorkspace"])]

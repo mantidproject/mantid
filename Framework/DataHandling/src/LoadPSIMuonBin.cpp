@@ -591,6 +591,9 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     if (m_header.labelsOfHistograms[i] == "")
       break;
     std::string name = m_header.labelsOfHistograms[i];
+	// if no name is present (or just empty space)
+	// replace with default name:
+	// group_specNum
     std::string label =
         (name.size() > 0 && name.find_first_not_of(" ") == std::string::npos)
             ? "group_" + std::to_string(i+1)
