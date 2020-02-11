@@ -29,7 +29,10 @@
      <item>
       <widget class="QComboBox" name="functionBox">
        <property name="editable">
-        <bool>false</bool>
+        <bool>true</bool>
+       </property>
+       <property name="insertPolicy">
+        <enum>QComboBox::NoInsert</enum>
        </property>
       </widget>
      </item>

@@ -8,7 +8,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QDialog
+from qtpy.QtWidgets import QDialog, QCompleter
 
 from mantid import logger
 from mantidqt.utils.qt import load_ui
@@ -32,6 +32,8 @@ class AddFunctionDialog(QDialog):
         function_box = self.ui.functionBox
         if function_names:
             self.ui.functionBox.addItems(function_names)
+        function_box.completer().setCompletionMode(QCompleter.PopupCompletion)
+        function_box.completer().setFilterMode(Qt.MatchContains)
 
     def action_add_function(self):
         current_function = self.ui.functionBox.currentText()

@@ -203,6 +203,7 @@ class FitInteractiveTool(QObject):
         to click on the canvas to where the peak should be placed.
         """
         dialog = AddFunctionDialog(self.canvas, self.peak_names)
+        dialog.ui.functionBox.setCurrentText(self.current_peak_type)
         dialog.function_added.connect(self.action_peak_added)
         dialog.open()
 
