@@ -66,10 +66,14 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         self.search_box = None
         self.tree = None
         self.algorithm_progress_widget = None
+        self.get_selected_workspace_fn = None
         QWidget.__init__(self, parent)
         IAlgorithmSelectorView.__init__(self, include_hidden)
 
         self.afo = AlgorithmSelectorFactoryObserver(self)
+
+    def set_get_selected_workspace_fn(self,get_selected_workspace_fn):
+        self.get_selected_workspace_fn = get_selected_workspace_fn
 
     def observeUpdate(self, toggle):
         """
@@ -252,7 +256,20 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         Send a signal to a subscriber to execute the selected algorithm
         """
         algorithm = self.get_selected_algorithm()
+        presets = {}
+        enabled = []
         if algorithm is not None:
+            if self.get_selected_workspace_fn:
+                selected_ws_names = self.get_selected_workspace_fn()
+                if selected_ws_names:
+                    selected = selected_ws_names[0]
+                    property_name = self.presenter.find_input_workspace_property(algorithm)
+                    if property_name:
+                        presets[property_name] = selected
+                        # Keep it enabled
+                        enabled.append(property_name)
+
             manager = InterfaceManager()
-            dialog = manager.createDialogFromName(algorithm.name, algorithm.version)
+            dialog = manager.createDialogFromName(algorithm.name, algorithm.version, None,
+                                                  False, presets,"",enabled)
             dialog.show()
