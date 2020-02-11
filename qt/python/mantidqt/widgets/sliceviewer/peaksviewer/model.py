@@ -7,11 +7,15 @@
 #  This file is part of the mantid workbench.
 from __future__ import (absolute_import, division, unicode_literals)
 
+# local imports
+from mantidqt.widgets.workspacedisplay.table.model \
+    import TableWorkspaceDisplayModel
+
 # constants
 DEFAULT_MARKER_COLOR = 'white'
 
 
-class PeaksViewerModel(object):
+class PeaksViewerModel(TableWorkspaceDisplayModel):
     """View model for PeaksViewer
     Extends PeaksWorkspace functionality to include color selection
     """
@@ -22,7 +26,7 @@ class PeaksViewerModel(object):
         if not hasattr(peaks_ws, 'getNumberPeaks'):
             raise ValueError("Expected a PeaksWorkspace type but found a {}".format(type(peaks_ws)))
 
-        self._peaks_ws = peaks_ws
+        super(PeaksViewerModel, self).__init__(peaks_ws)
         self._marker_color = DEFAULT_MARKER_COLOR
 
     @property
@@ -31,4 +35,4 @@ class PeaksViewerModel(object):
 
     @property
     def peaks_workspace(self):
-        return self._peaks_ws
+        return self.ws
