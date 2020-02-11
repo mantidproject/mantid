@@ -15,7 +15,7 @@ Description
    might undergo significant changes, should instrument scientists
    decide to do so.
 
-Finds the calibration parameters DIFA, DIFC and TZERO (as defined in GSAS)
+This algorithm finds the calibration parameters DIFA, DIFC and TZERO (as defined in GSAS)
 from a list of peaks fitted to a diffraction pattern. The peaks can be
 fitted to a Mantid workspace spectrum using the algorithm
 :ref:`EnggFitPeaks <algm-EnggFitPeaks>` which produces a table with
