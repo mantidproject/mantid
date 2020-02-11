@@ -37,6 +37,8 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
 
         self.setup_default_fit_results_table()
 
+        self.plot_fit_results_checkbox.setVisible(False)
+
     def warning_popup(self, message):
         warning(message, parent=self)
 

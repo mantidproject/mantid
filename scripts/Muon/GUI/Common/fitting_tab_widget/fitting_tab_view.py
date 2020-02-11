@@ -297,7 +297,6 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         table_utils.setRowName(self.fit_options_table, 0, "Time Start")
         self.time_start = table_utils.addDoubleToTable(self.fit_options_table, 0.0, 0, 1)
 
-
         table_utils.setRowName(self.fit_options_table, 1, "Time End")
         self.time_end = table_utils.addDoubleToTable(self.fit_options_table, 15.0, 1, 1)
 
@@ -315,5 +314,3 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
         table_utils.setRowName(self.fit_options_table, 5, "Evaluate Function As")
         self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, 5, ['CentrePoint', 'Histogram'])
-
-

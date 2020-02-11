@@ -42,18 +42,35 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.view.set_fit_table_function_parameters.assert_called_once_with(['A', 'Sigma', 'Frequency', 'Phi'],
                                                                             [0.2, 0.2, 0.1, 0])
 
+    def test_handle_fit_started_updates_view(self):
+        self.presenter.handle_fit_started()
+
+        self.view.seq_fit_button.setEnabled.assert_called_once_with(False)
+        self.view.fit_selected_button.setEnabled.assert_called_once_with(False)
+
+    def test_handle_fit_error_informs_view(self):
+        error = 'Input workspace not defined'
+
+        self.presenter.handle_fit_error(error)
+
+        self.view.warning_popup.assert_called_once_with(error)
+        self.view.seq_fit_button.setEnabled.assert_called_once_with(True)
+        self.view.fit_selected_button.setEnabled.assert_called_once_with(True)
+
     @mock.patch("functools.partial")
     def test_handle_single_fit_correctly_sets_up_fit(self, mock_fit_function):
         workspace = "EMU20884; Group; fwd; Asymmetry"
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         self.model.fit_function = fit_function
         self.model.evaluate_single_fit = mock.MagicMock()
+        self.view.is_plotting_checked.return_value = False
+        self.view.get_entry_fit_parameter_values.return_value = [0.2, 0.2, 0.1, 0]
 
         self.presenter.get_workspaces_for_entry_in_fit_table = mock.MagicMock(return_value=workspace)
 
         self.presenter.handle_single_fit_requested()
 
-        mock_fit_function.assert_called_once_with(self.model.evaluate_single_fit, workspace, False)
+        mock_fit_function.assert_called_once_with(self.model.evaluate_single_fit, workspace, False, [0.2, 0.2, 0.1, 0])
 
     @mock.patch("functools.partial")
     def test_handle_single_fit_does_nothing_if_fit_function_is_none(self, mock_fit_function):
@@ -72,19 +89,6 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.presenter.handle_single_fit_requested()
 
         mock_fit_function.assert_not_called()
-
-    def test_handle_single_fit_started_updates_view(self):
-        self.presenter.handle_single_fit_started()
-
-        self.view.fit_selected_button.setEnabled.assert_called_once_with(False)
-
-    def test_handle_single_fit_error_informs_view(self):
-        error = 'Input workspace not defined'
-
-        self.presenter.handle_single_fit_error(error)
-
-        self.view.warning_popup.assert_called_once_with(error)
-        self.view.fit_selected_button.setEnabled.assert_called_once_with(True)
 
     def test_handle_single_fit_finished_updates_view(self):
         self.presenter.selected_row = 0
@@ -107,12 +111,14 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.model.evaluate_sequential_fit = mock.MagicMock()
         self.view.get_number_of_entries = mock.MagicMock(return_value=number_of_entries)
         self.presenter.get_workspaces_for_entry_in_fit_table = mock.MagicMock(return_value=workspaces)
+        self.view.is_plotting_checked.return_value = False
+        self.view.use_initial_values_for_fits.return_value = False
 
         self.presenter.handle_sequential_fit_requested()
 
         self.assertEqual(self.presenter.get_workspaces_for_entry_in_fit_table.call_count, number_of_entries)
         mock_fit_function.assert_called_once_with(self.model.evaluate_sequential_fit, [workspaces] * number_of_entries,
-                                                  False)
+                                                  False, False)
 
     @mock.patch("functools.partial")
     def test_handle_sequential_fit_does_nothing_if_fit_function_is_none(self, mock_fit_function):
@@ -121,19 +127,6 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.presenter.handle_sequential_fit_requested()
 
         mock_fit_function.assert_not_called()
-
-    def test_handle_sequential_fit_started_updates_view(self):
-        self.presenter.handle_seq_fit_started()
-
-        self.view.seq_fit_button.setEnabled.assert_called_once_with(False)
-
-    def test_handle_sequential_fit_error_informs_view(self):
-        error = 'Input workspace not defined'
-
-        self.presenter.handle_seq_fit_error(error)
-
-        self.view.warning_popup.assert_called_once_with(error)
-        self.view.seq_fit_button.setEnabled.assert_called_once_with(True)
 
     def test_handle_sequential_fit_finished_updates_view(self):
         number_of_entries = 3

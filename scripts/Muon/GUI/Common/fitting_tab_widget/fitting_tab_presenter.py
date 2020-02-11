@@ -302,6 +302,7 @@ class FittingTabPresenter(object):
 
         self.update_fit_status_information_in_view()
         self.handle_display_workspace_changed()
+        self.update_model_from_view()
         self.fit_function_changed_notifier.notify_subscribers()
 
     def handle_function_parameter_changed(self):
@@ -398,8 +399,7 @@ class FittingTabPresenter(object):
             self.view.warning_popup(error)
 
     def get_parameters_for_tf_single_fit_calculation(self):
-        workspace, workspace_directory = self.model.create_fitted_workspace_name(self.view.display_workspace,
-                                                                                 self.view.fit_object)
+        workspace, _ = self.model.create_fitted_workspace_name(self.view.display_workspace)
 
         return {
             'InputFunction': self._current_fit_function(),
@@ -413,8 +413,8 @@ class FittingTabPresenter(object):
         }
 
     def get_multi_domain_tf_fit_parameters(self):
-        workspace, workspace_directory = self.model.create_multi_domain_fitted_workspace_name(
-            self.view.display_workspace, self.view.fit_object)
+        workspace, _ = self.model.create_multi_domain_fitted_workspace_name(
+            self.view.display_workspace)
         return {
             'InputFunction': self.view.fit_object,
             'ReNormalizedWorkspaceList': self.selected_data,
