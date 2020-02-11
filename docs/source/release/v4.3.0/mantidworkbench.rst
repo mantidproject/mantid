@@ -36,7 +36,7 @@ Improvements
 - Default values for algorithm properties now appear as placeholder (greyed-out) text on custm algorithm dialogs.
 - The context menu for WorkspaceGroups now contains plotting options so you can plot all of the workspaces in the group.
 - A warning now appears if you attempt to plot more than ten spectra.
-- Algorithm Dialogs will now use the selected workspace as the InputWorkspace when running an algorithm from the Algorithms toolbox, as Mantidplot did.
+- Algorithm dialogs will now use the selected workspace as the InputWorkspace when running an algorithm from the algorithms toolbox, as Mantidplot did.
 
 Bugfixes
 ########
