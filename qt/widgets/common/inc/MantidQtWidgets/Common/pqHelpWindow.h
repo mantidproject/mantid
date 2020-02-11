@@ -98,7 +98,7 @@ public slots:
   virtual void printPage();
 
   /// Check if the url is an existing page
-  bool isExistingPage(const QUrl& url);
+  bool isExistingPage(const QUrl &url);
 
 signals:
   /// fired to relay warning messages from the help system.
