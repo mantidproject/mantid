@@ -4,17 +4,25 @@
 Displaying And Navigating 
 =========================
 
+.. raw:: html
+
+    <style> .red {color:#FF0000; font-weight:bold} </style>
+    <style> .green {color:#008000; font-weight:bold} </style>    
+    <style> .blue {color:#0000FF; font-weight:bold} </style> 
+    <style> .orange {color:#FF8C00; font-weight:bold} </style> 
+
+.. role:: red
+.. role:: blue
+.. role:: green
+
 Opening the Instrument View
 ===========================
 
 To see the Instrument View
 
-#. Load a data set
-#. Right-click on the workspace and select Show Instrument
+#. Load a data set, such as MUSR00015189 (as this is a WorkspaceGroup, reveal the Workspaces by clicking on the small triangle)
+#. Right-click on the workspace in the Workspaces Toolbox and select "Show Instrument"
 
-.. figure:: /images/ShowInstrumentOption.png
-   :alt: ShowInstrumentOption.png
-   :width: 200px
 
 Different projections
 =====================
@@ -49,9 +57,9 @@ Navigating in 3D
 
 In the 3D view:
 
--  The X axis is red.
--  The Y axis is green.
--  The Z axis is blue.
+-  :red:`The X axis is red.`
+-  :green:`The Y axis is green.`
+-  :blue:`The Z axis is blue.`
 
 Rotate the instrument by left-clicking and dragging.
 
@@ -63,7 +71,7 @@ and dragging up and down.
 Zooming in 2D
 =============
 
-In an unwrapped view to zoom in select an area by left-clicking and
+In an unwrapped view (such as cylindrical) to zoom in select an area by left-clicking and
 dragging.
 
 Right click to zoom out.

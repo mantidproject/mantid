@@ -12,16 +12,19 @@ The Toolbar
 
 | |PickTabToolButtons.png|
 
-- |PickTabZoomButton.png| - Navigate in the instrument display window.
+- |PickTabZoomButton.png| - Navigate in the instrument display window (Zoom).
 - |PickTabEditButton.png| - Edit a shape.
 - |PickTabEllipseButton.png| - Draw an ellipse.
 - |PickTabRectButton.png| - Draw a rectangle.
 - |PickTabElRingButton.png| - Draw an elliptical ring.
 - |PickTabRectRingButton.png| - Draw a rectangular ring.
+- |PickTabArbitraryShape.png| - Draw an arbitrary shape.
 - |PickTabPickPixelButton.png| - Select a single detector.
 - |PickTabPickTubeButton.png| - Select a tube/bank.
 - |PickTabAddPeakButton.png| - Add a single crystal peak.
 - |PickTabEraseButton.png| - Erase a peak.
+- |PickTabCPCompare.png| - Compare single crystal peaks.
+- |PickTabCPAlign.png| - Crystal Peak alignment tool.
 
 Picking a Single Detector
 =========================
@@ -40,8 +43,8 @@ Picking a Tube
 The Tube selection tool |PickTube.png| is useful for tube instruments.
 When it's on the mini-plot displays the integrated data in the whole
 tube. The integration is done either over the detectors in the tube (Sum
-option) or over time (Integrate). To switch between the option use the
-context menu of the mini-plot:
+option) or over time (Integrate). To switch between the options, right-click on the mini-plot 
+to display the following menu:
 
 .. figure:: /images/SumIntegrateMenu.png
    :alt: SumIntegrateMenu.png
@@ -144,3 +147,6 @@ the shapes and plots them vs time of flight.
 .. |PickSingleDetector.png| image:: /images/PickSingleDetector.png
 .. |PickTube.png| image:: /images/PickTube.png
 .. |MiniplotIntegrate.png| image:: /images/MiniplotIntegrate.png
+.. |PickTabCPCompare.png| image:: /images/PickTabCPCompare.png
+.. |PickTabCPAlign.png| image:: /images/PickTabCPAlign.png
+.. |PickTabArbitraryShape.png| image:: /images/PickTabArbitraryShape.png

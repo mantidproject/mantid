@@ -4,10 +4,8 @@
 Introduction 
 ============
 
-Introduction
-============
 
-The Instrument View is a widget for displaying instrument geometry. It
+Instrument View is a widget for displaying data on the instrument geometry. It
 consists of three elements:
 
 -  the controls panel
@@ -23,12 +21,12 @@ to their functions
 
 -  Render
 -  Pick
--  Mask/Group
--  Instrument Tree
+-  Draw
+-  Instrument
 
-The display window show the instrument detector coloured according to
-the integrated counts in a workspace. The integration range is adjusted
-using the data integration slider.
+The display window shows the instrument detector coloured according to
+the (integrated) counts in a workspace. The integration range is adjusted
+using the data slider at the bottom.
 
 .. raw:: mediawiki
 

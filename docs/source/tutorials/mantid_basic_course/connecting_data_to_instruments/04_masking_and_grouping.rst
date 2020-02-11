@@ -14,7 +14,7 @@ the data.
 .. figure:: /images/MaskTabToolButtons.png
    :alt: MaskTabToolButtons.png
 
-Use these radio-buttons to switch between masking and grouping
+Use these radio-buttons to switch between setting regions as masks, regions of interest, or groups
 functions.
 
 .. figure:: /images/MaskOrGroup.png
@@ -23,6 +23,10 @@ functions.
 The shapes ready for masking have red border 
 
 |MaskRedRing.png|
+
+Shapes marked as Regions of Interest have a yellow border
+
+|ROIYellowcircle.png|
 
 The shapes ready for grouping have blue border 
 
@@ -62,8 +66,25 @@ are available from the "Apply and Save" menu.
 .. figure:: /images/ApplyAndSaveMenu.png
    :alt: ApplyAndSaveMenu.png
 
-If masking is applied to the data (by clicking |ApplyToDataButton.png|)
-it cannot be undone.
+Region of Interest
+==================
+
+Marking a region of interest is essentially masking everything else.
+It therefore works in a similar way to masking, it can be saved to a workspace or file
+and it can be applied to the current View or to the underlying Workspace.
+
+.. figure:: /images/ApplyAndSaveROI.png
+   :alt: ApplyAndSaveROI.png
+
+
+*Word of Warning*: If masking (or setting of ROI) is applied to the data (by clicking |ApplyToDataButton.png|, near the bottom left of Instrument View window)
+it **cannot be undone**! 
+
+
+.. figure:: /images/Fullmaskview.png
+   :align: center
+   :alt: Fullmaskview.png
+
 
 .. raw:: mediawiki
 
@@ -73,3 +94,4 @@ it cannot be undone.
 .. |GroupBlueRing.png| image:: /images/GroupBlueRing.png
 .. |ClearAllButton.png| image:: /images/ClearAllButton.png
 .. |ApplyToDataButton.png| image:: /images/ApplyToDataButton.png
+.. |ROIYellowcircle.png| image:: /images/ROIYellowcircle.png
