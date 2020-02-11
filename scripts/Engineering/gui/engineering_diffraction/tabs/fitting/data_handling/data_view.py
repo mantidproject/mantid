@@ -85,7 +85,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         return self.check_addToPlot.isChecked()
 
     def get_selected_rows(self):
-        return list(set(index.row() for index in self.table_selection.selectedIndexes()))
+        return set(index.row() for index in self.table_selection.selectedIndexes())
 
     # =================
     # State Getters
