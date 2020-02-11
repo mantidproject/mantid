@@ -141,7 +141,7 @@ class FitParameters(object):
 
     def __eq__(self, other):
         return self._parameter_workspace == other._parameter_workspace and \
-               self._global_parameters == other._global_parameters
+            self._global_parameters == other._global_parameters
 
     def __ne__(self, other):
         return not self == other
@@ -207,9 +207,9 @@ class FitInformation(object):
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
         return self.parameter_workspace_name == other.parameter_workspace_name and \
-               self.fit_function_name == other.fit_function_name and \
-               self.input_workspaces == other.input_workspaces and \
-               self.output_workspace_names == other.output_workspace_names
+            self.fit_function_name == other.fit_function_name and \
+            self.input_workspaces == other.input_workspaces and \
+            self.output_workspace_names == other.output_workspace_names
 
     @property
     def parameters(self):

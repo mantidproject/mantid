@@ -10,7 +10,7 @@ from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import Workspace
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name, get_group_or_pair_from_name
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name
 from mantid.api import MultiDomainFunction, AnalysisDataService
 import functools
 import re

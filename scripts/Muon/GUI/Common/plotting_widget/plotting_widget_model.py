@@ -232,8 +232,6 @@ class PlotWidgetModel(object):
         for workspace in workspaces_to_remove:
             self.remove_workspace_from_plot(workspace, axes)
 
-
-
     def autoscale_axes(self, axes, xlimits):
         ymin, ymax = self._get_autoscale_y_limits(axes, xlimits[0], xlimits[1])
         plt.setp(axes, xlim=xlimits, ylim=[ymin, ymax])
