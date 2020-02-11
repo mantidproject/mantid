@@ -35,15 +35,17 @@ class PeaksViewerPresenter(object):
         """
         super(PeaksViewerPresenter, self).__init__()
         self._model = model
-        peaks_ws = model.peaks_workspace
-        self._raise_error_if_workspace_incompatible(peaks_ws)
+        self._raise_error_if_workspace_incompatible(model.peaks_workspace)
         self._peaks_table_presenter = \
-            TableWorkspaceDataPresenter(TableWorkspaceDisplayModel(peaks_ws),
-                                        view.table_view)
+            TableWorkspaceDataPresenter(model, view.table_view)
 
         view.subscribe(self)
-        view.set_title(peaks_ws.name())
+        view.set_title(model.peaks_workspace.name())
         self.notify(PeaksViewerPresenter.Event.PeaksListChanged)
+
+    @property
+    def model(self):
+        return self._model
 
     def notify(self, event):
         """
@@ -53,13 +55,15 @@ class PeaksViewerPresenter(object):
         if event == PeaksViewerPresenter.Event.PeaksListChanged:
             self._peaks_table_presenter.refresh()
 
-    def peaks_info(self):
+    def peaks_info(self, slicepoint):
         """
         Returns a list of PeakRepresentation objects describing the peaks in the model
+        :param slicepoint: float giving the current slice point in the slicing dimension
         """
         info = []
-        for peak in self._peaks_table_presenter.model.ws:
-            info.append(create_peakrepresentation(peak, self._model.marker_color))
+        for peak in self.model.ws:
+            info.append(create_peakrepresentation(peak, slicepoint,
+                                                  self.model.marker_color))
 
         return info
 
