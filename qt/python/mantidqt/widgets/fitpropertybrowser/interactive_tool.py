@@ -7,10 +7,10 @@
 from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtCore import QObject, Signal, Slot
-from qtpy.QtWidgets import QInputDialog
 
 from mantidqt.plotting.markers import PeakMarker, RangeMarker
 from .mouse_state_machine import StateMachine
+from .addfunctiondialog import AddFunctionDialog
 
 
 class FitInteractiveTool(QObject):
@@ -202,33 +202,31 @@ class FitInteractiveTool(QObject):
         A QAction callback. Start a dialog to choose a peak function name. After that the tool will expect the user
         to click on the canvas to where the peak should be placed.
         """
-        selected_name = QInputDialog.getItem(self.canvas, 'Fit', 'Select peak function', self.peak_names,
-                                             self.peak_names.index(self.current_peak_type), False)
-        if selected_name[1]:
-            self.peak_type_changed.emit(selected_name[0])
-            self.mouse_state.transition_to('add_peak')
+        dialog = AddFunctionDialog(self.canvas, self.peak_names)
+        dialog.function_added.connect(self.action_peak_added)
+        dialog.open()
+
+    def action_peak_added(self, function_name):
+        self.peak_type_changed.emit(function_name)
+        self.mouse_state.transition_to('add_peak')
 
     def add_background_dialog(self):
         """
         A QAction callback. Start a dialog to choose a background function name. The new function is added to the
         browser.
         """
-        current_index = self.background_names.index(self.default_background)
-        if current_index < 0:
-            current_index = 0
-        selected_name = QInputDialog.getItem(self.canvas, 'Fit', 'Select background function', self.background_names,
-                                             current_index, False)
-        if selected_name[1]:
-            self.add_background_requested.emit(selected_name[0])
+        dialog = AddFunctionDialog(self.canvas, self.background_names)
+        dialog.function_added.connect(self.add_background_requested)
+        dialog.open()
 
     def add_other_dialog(self):
         """
         A QAction callback. Start a dialog to choose a name of a function except a peak or a background. The new
         function is added to the browser.
         """
-        selected_name = QInputDialog.getItem(self.canvas, 'Fit', 'Select function', self.other_names, 0, False)
-        if selected_name[1]:
-            self.add_other_requested.emit(selected_name[0])
+        dialog = AddFunctionDialog(self.canvas, self.other_names)
+        dialog.function_added.connect(self.add_other_requested)
+        dialog.open()
 
     def add_peak_marker(self, x, y_top, y_bottom=0.0, fwhm=None):
         """
