@@ -11,11 +11,10 @@ from __future__ import (absolute_import, division, unicode_literals)
 import unittest
 
 # 3rdparty imports
-from mantid.api import MatrixWorkspace
 from mantid.dataobjects import PeaksWorkspace
 from mantid.py3compat.mock import call, create_autospec, patch, MagicMock
-from mantidqt.widgets.sliceviewer.peaksviewer.presenter \
-    import PeaksViewerPresenter, PeaksViewerCollectionPresenter, TableWorkspaceDataPresenter
+from mantidqt.widgets.sliceviewer.peaksviewer \
+    import PeaksViewerCollectionPresenter, PeaksViewerModel
 
 
 def create_mock_peaks_workspace():
@@ -28,7 +27,7 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
     # -------------------- success tests -----------------------------
     @patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.PeaksViewerPresenter")
     def test_presenter_constructs_PeaksViewerPresenter_per_workspace(self, mock_single_presenter):
-        peak_workspaces = (create_mock_peaks_workspace() for _ in range(2))
+        peak_workspaces = (PeaksViewerModel(create_mock_peaks_workspace()) for _ in range(2))
         mock_view = MagicMock()
 
         presenter = PeaksViewerCollectionPresenter(peak_workspaces, mock_view)
@@ -37,7 +36,7 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
         self.assertEqual(2, presenter.view.append_peaksviewer.call_count)
 
     def test_peaks_info_returns_combined_PeakRepresentation_for_each_workspace(self):
-        peak_workspaces = (create_mock_peaks_workspace() for _ in range(2))
+        peak_workspaces = (PeaksViewerModel(create_mock_peaks_workspace()) for _ in range(2))
 
         class PeaksViewerPresenterMock(MagicMock):
             """Mock created when PeaksViewerPresenterMock is a called.
@@ -58,13 +57,6 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
             peaks_info = presenter.peaks_info()
 
         self.assertEqual(7, len(list(peaks_info)))
-
-    # -------------------- failure tests -----------------------------
-    def test_presenter_constructed_with_non_peaksworkspace_raises_error(self):
-        self.assertRaises(ValueError,
-                          PeaksViewerCollectionPresenter,
-                          [create_mock_peaks_workspace(), 2],
-                          MagicMock())
 
 
 if __name__ == '__main__':
