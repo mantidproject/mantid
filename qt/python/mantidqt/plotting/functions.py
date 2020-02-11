@@ -22,9 +22,11 @@ except ImportError:
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
-from mantid.kernel import Logger
 from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot,\
                                        create_subplots,raise_if_not_sequence
+from mantid.kernel import Logger, ConfigService
+from mantid.plots import helperfunctions, MantidAxes
+from mantid.plots.utility import get_single_workspace_log_value
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
 
@@ -102,8 +104,25 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
     elif selection == 'colorfill':
         return pcolormesh_from_names(names)
 
+    log_values = None
+
     if advanced:
         errors = selection.errors
+
+        nums = selection.spectra if selection.spectra is not None else selection.wksp_indices
+
+        if selection.log_name not in ['Workspace name', 'Workspace index']:
+            log_values = []
+            counter = 0
+            for workspace in workspaces:
+                for _ in nums:
+                    if selection.custom_log_values is not None:
+                        log_values.append(
+                            get_single_workspace_log_value(counter, log_values=selection.custom_log_values))
+                        counter += 1
+                    else:
+                        log_values.append(
+                            get_single_workspace_log_value(1, matrix_ws=workspace, log_name=selection.log_name))
 
     if selection.plot_type == selection.Surface or selection.plot_type == selection.Contour:
         plot_type = "surface" if selection.plot_type == selection.Surface else "contour"
@@ -118,7 +137,7 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
         return plot(selection.workspaces, spectrum_nums=selection.spectra,
                     wksp_indices=selection.wksp_indices,
                     errors=errors, overplot=overplot, fig=fig, tiled=selection.plot_type == selection.Tiled,
-                    waterfall=selection.plot_type == selection.Waterfall)
+                    waterfall=selection.plot_type == selection.Waterfall, log_values=log_values)
 
 
 def pcolormesh_from_names(names, fig=None, ax=None):

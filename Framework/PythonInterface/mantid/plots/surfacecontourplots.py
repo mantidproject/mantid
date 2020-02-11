@@ -11,6 +11,7 @@
 from typing import List
 
 from mantid.api import MatrixWorkspace, NumericAxis, Workspace, WorkspaceFactory
+from mantid.plots.utility import get_single_workspace_log_value
 from mantidqt.plotting.functions import pcolormesh
 
 
@@ -103,19 +104,6 @@ def create_workspace_for_group_plot\
     matrix_ws.replaceAxis(1, log_values_axis)
 
     return matrix_ws
-
-
-def get_single_workspace_log_value(ws_index, *, log_values=None, matrix_ws=None, log_name=None):
-    if log_values is None:
-        if log_name == "Workspace index" or log_name == "":
-            return ws_index
-
-        return matrix_ws.run().getPropertyAsSingleValueWithTimeAveragedMean(log_name)
-    else:
-        if ws_index >= len(log_values):
-            return 0
-
-        return log_values[ws_index]
 
 
 def group_contents_have_same_x(workspaces, index):
