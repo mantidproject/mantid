@@ -139,6 +139,16 @@ def legend_set_draggable(legend, state, use_blit=False, update='loc'):
     getattr(legend, SET_DRAGGABLE_METHOD)(state, use_blit, update)
 
 
+def get_current_cmap(object):
+    """Utility function to support varying get_cmap api across
+    the versions of matplotlib we support.
+    """
+    if hasattr(object, "cmap"):
+        return object.cmap
+    else:
+        return object.get_cmap()
+
+
 def mpl_version_info():
     """Returns a namedtuple of (major,minor,patch)"""
     return MATPLOTLIB_VERSION_INFO
