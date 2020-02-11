@@ -1171,7 +1171,6 @@ class MantidAxes(Axes):
         """
         cb = colorbar
         cb.mappable = mappable
-        cb.set_clim(mappable.get_clim())
         mappable.colorbar = cb
         mappable.colorbar_cid = mappable.callbacksSM.connect('changed', cb.on_mappable_changed)
         cb.update_normal(mappable)
