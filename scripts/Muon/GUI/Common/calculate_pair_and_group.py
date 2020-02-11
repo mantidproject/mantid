@@ -63,6 +63,7 @@ def _get_pre_processing_params(context, run, rebin):
         if context.gui_context['TimeZeroFromFile']:
             time_offset = 0.0
         else:
+            print("baa",context.data_context.get_loaded_data_for_run(run)["TimeZero"] ,context.gui_context['TimeZero'],context.data_context.get_loaded_data_for_run(run)["TimeZero"] - context.gui_context['TimeZero']   )
             time_offset = context.data_context.get_loaded_data_for_run(run)["TimeZero"] - context.gui_context['TimeZero']
         pre_process_params["TimeOffset"] = time_offset
     except KeyError:
@@ -83,7 +84,6 @@ def _get_pre_processing_params(context, run, rebin):
             pre_process_params["DeadTimeTable"] = dead_time_table
     except KeyError:
         pass
-
     return pre_process_params
 
 
@@ -121,6 +121,7 @@ def _get_MuonGroupingCounts_parameters(context, group_name, run):
     group = context.group_pair_context[group_name]
     if group:
         params["GroupName"] = group_name
+        print("dsaf", group_name)
         params["Grouping"] = ",".join([str(i) for i in group.detectors])
 
     return params

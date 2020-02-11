@@ -41,7 +41,7 @@ class MuonWorkspaceWrapper(object):
         self._workspace = None
         self._directory_structure = ""
         self._workspace_name = ""
-
+        print(workspace, "moo")
         if isinstance(workspace, Workspace):
             self.workspace = workspace
         else:

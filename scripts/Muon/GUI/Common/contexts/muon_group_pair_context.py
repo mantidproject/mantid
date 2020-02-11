@@ -52,8 +52,11 @@ def get_default_grouping(workspace, instrument, main_field_direction):
         try:
             if isinstance(workspace, WorkspaceGroup):
                 grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
+                print("d", grouping_file)
             else:
                 grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
+                print("e", grouping_file)
+
         except IndexError:
             return [], [], ''
     else:

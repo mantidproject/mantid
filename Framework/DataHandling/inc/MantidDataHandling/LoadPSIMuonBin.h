@@ -86,6 +86,7 @@ private:
   void readInHeader(Mantid::Kernel::BinaryStreamReader &streamReader);
   void readInHistograms(Mantid::Kernel::BinaryStreamReader &streamReader);
   void generateUnknownAxis();
+  void makeDeadTimeTable(const size_t &numSpec);
 
   // Temperature file processing
   void readInTemperatureFile(DataObjects::Workspace2D_sptr &ws);

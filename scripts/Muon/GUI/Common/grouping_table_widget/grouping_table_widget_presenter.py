@@ -105,6 +105,7 @@ class GroupingTablePresenter(object):
         self._view.disable_updates()
         assert isinstance(group, MuonGroup)
         entry = [str(group.name), state, run_utils.run_list_to_string(group.detectors, False), str(group.n_detectors)]
+        self._view.warning_popup("moo")
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
 

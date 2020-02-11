@@ -206,7 +206,9 @@ def load_workspace_from_filename(filename,
         alg.execute()
 
     workspace = AnalysisDataService.retrieve(alg.getProperty("OutputWorkspace").valueAsStr)
+    print("fsdaf", workspace)
     if is_workspace_group(workspace):
+        print("multi")
         # handle multi-period data
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in workspace.getNames()]
@@ -227,17 +229,16 @@ def load_workspace_from_filename(filename,
             load_result["DataDeadTimeTable"] = None
             load_result["FirstGoodData"] = round(load_result["FirstGoodData"], 2)
     else:
+        print("single", output_properties)
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(load_result["OutputWorkspace"])]
         run = int(workspace.getRunNumber())
-        if not psi_data:
-            load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
-            load_result["DeadTimeTable"] = None
-            load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
-        else:
-            load_result["DataDeadTimeTable"] = None
-            load_result["FirstGoodData"] = round(load_result["FirstGoodData"], 2)
+
+        load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
+        load_result["DeadTimeTable"] = None
+        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
+        
 
     return load_result, run, filename, psi_data
 
@@ -256,7 +257,7 @@ def create_load_algorithm(filename, property_dictionary):
     else:
         alg = mantid.AlgorithmManager.create("LoadMuonNexus")
         alg.setProperties(property_dictionary)
-        alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
+    alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
 
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
