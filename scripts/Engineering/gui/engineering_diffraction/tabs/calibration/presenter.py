@@ -146,8 +146,7 @@ class CalibrationPresenter(object):
         self.view.set_calibrate_button_enabled(enabled)
         self.view.set_check_plot_output_enabled(enabled)
 
-    def _on_error(self, failure_info):
-        logger.warning(str(failure_info))
+    def _on_error(self, _):
         self.emit_enable_button_signal()
 
     def _on_success(self, success_info):

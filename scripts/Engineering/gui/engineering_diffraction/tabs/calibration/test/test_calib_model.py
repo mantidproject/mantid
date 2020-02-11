@@ -187,9 +187,9 @@ class CalibrationModelTest(unittest.TestCase):
         self.assertEqual(write_file.call_count, 3)
         write_file.assert_called_with("test/" + filename, [0], [1],
                                       bank_names=['South'],
-                                      ceria_run=sample_path,
+                                      ceria_run="20",
                                       template_file="template_ENGINX_241391_236516_South_bank.prm",
-                                      vanadium_run=vanadium_path)
+                                      vanadium_run="10")
 
     def test_generate_table_workspace_name(self):
         self.assertEqual(self.model._generate_table_workspace_name(20),
