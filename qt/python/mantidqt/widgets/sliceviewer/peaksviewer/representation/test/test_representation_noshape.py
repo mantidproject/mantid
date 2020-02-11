@@ -9,39 +9,63 @@ from __future__ import (absolute_import, division, unicode_literals)
 
 # std imports
 import unittest
-import json
 
 # 3rdparty imports
-from mantid.api import IPeak
 from mantid.kernel import V3D
-from mantid.py3compat.mock import create_autospec, ANY, MagicMock
+from mantid.py3compat.mock import ANY, MagicMock
 
 # local imports
 from mantidqt.widgets.sliceviewer.peaksviewer.representation \
-    import (PeakRepresentationNoShape, PeakRepresentationEllipsoid,
-            PeakRepresentationSphere, create_peakrepresentation)
+    import PeakRepresentationNoShape
 
 
 class PeakRepresentationNoShapeTest(unittest.TestCase):
-    def test_representation_attributes_read_only(self):
-        representation = PeakRepresentationNoShape(V3D(), 1.0, 'w')
+    def test_constructor_stores_expected_attributes(self):
+        x, y, z, alpha, marker_color = 0.0, 1.0, -1.0, 0.5, 'b'
 
-        for name, value in (("alpha", 2), ("center", [1, 2, 3]), ('marker_color', 'b')):
+        representation = PeakRepresentationNoShape(x, y, z, alpha, marker_color)
+
+        self._verify_expected_attributes(representation, V3D(x, y, z), alpha, marker_color)
+
+    def test_representation_attributes_read_only(self):
+        representation = PeakRepresentationNoShape(0, 0, 0, 1.0, 'w')
+
+        for name, value in (("alpha", 2), ("x", 2), ("y", 0.1), ("z", 3), ('marker_color', 'b')):
             self.assertRaises(AttributeError, setattr, representation, name, value)
 
     def test_noshape_representation_draw_creates_scatter_point(self):
-        center, alpha, marker_color = V3D(0.0, 1.0, -1.0), 0.5, 'b'
-        no_shape = PeakRepresentationNoShape(center, alpha, marker_color)
-        axes = MagicMock()
+        x, y, z, alpha, marker_color = 0.0, 1.0, -1.0, 0.5, 'b'
+        no_shape = PeakRepresentationNoShape(x, y, z, alpha, marker_color)
+        painter = MagicMock()
 
-        no_shape.draw(axes)
+        no_shape.draw(painter)
 
-        axes.scatter.assert_called_once_with(center.X(),
-                                             center.Y(),
-                                             alpha=alpha,
-                                             color=marker_color,
-                                             marker=ANY,
-                                             s=ANY)
+        painter.scatter.assert_called_once_with(x,
+                                                y,
+                                                alpha=alpha,
+                                                color=marker_color,
+                                                marker=ANY,
+                                                s=ANY)
+
+    def test_noshape_create_computes_alpha(self):
+        x, y, z = -1, 2, 3
+        # center = V3D(x, y, z)
+        mock_shape = MagicMock()
+        marker_color = 'w'
+        slicepoint, dimwidth = 3.2, 30
+
+        representation = PeakRepresentationNoShape.create(x, y, z, slicepoint, dimwidth, mock_shape,
+                                                          marker_color)
+
+        self.assertAlmostEqual(0.4444, representation.alpha, places=4)
+
+    # private
+    def _verify_expected_attributes(self, representation, center, alpha, marker_color):
+        self.assertEqual(center.X(), representation.x)
+        self.assertEqual(center.Y(), representation.y)
+        self.assertEqual(center.Z(), representation.z)
+        self.assertAlmostEqual(alpha, representation.alpha, places=4)
+        self.assertEqual(marker_color, representation.marker_color)
 
 
 if __name__ == "__main__":

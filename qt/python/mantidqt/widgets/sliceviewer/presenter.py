@@ -13,7 +13,7 @@ import mantid.api
 # local imports
 from .model import SliceViewerModel, WS_TYPE
 from .view import SliceViewerView
-from .peaksviewer import PeaksViewerModel, PeaksViewerCollectionPresenter
+from .peaksviewer import PeaksViewerModel, PeaksViewerPresenter, PeaksViewerCollectionPresenter
 
 
 class SliceViewer(object):
@@ -25,7 +25,7 @@ class SliceViewer(object):
         :param model: A model to define slicing operations. If None uses SliceViewerModel
         :param view: A view to display the operations. If None uses SliceViewerView
         """
-        self._peaks_tool_presenter = None
+        self._peaks_presenter = None
         self.model = model if model else SliceViewerModel(ws)
 
         if self.model.get_ws_type() == WS_TYPE.MDH:
@@ -52,35 +52,50 @@ class SliceViewer(object):
         """
         Tell the view to display a new plot of an MDHistoWorkspace
         """
-        self.view.plot_MDH(self.model.get_ws(), slicepoint=self.view.dimensions.get_slicepoint())
+        self.view.plot_MDH(self.model.get_ws(), slicepoint=self.get_slicepoint())
 
     def new_plot_MDE(self):
         """
         Tell the view to display a new plot of an MDEventWorkspace
         """
-        self.view.plot_MDH(self.model.get_ws(slicepoint=self.view.dimensions.get_slicepoint(),
-                                             bin_params=self.view.dimensions.get_bin_params()))
+        self.view.plot_MDH(
+            self.model.get_ws(
+                slicepoint=self.get_slicepoint(), bin_params=self.view.dimensions.get_bin_params()))
 
     def new_plot_matrix(self):
-        """
-        Tell the view to display a new plot of an MatrixWorkspace
-        """
+        """Tell the view to display a new plot of an MatrixWorkspace"""
         self.view.plot_matrix(self.model.get_ws(), normalize=self.normalization)
+
+    def get_slicepoint(self):
+        """Returns the current slicepoint as a list of 3 elements.
+           None indicates that dimension is being displayed"""
+        return self.view.dimensions.get_slicepoint()
+
+    def get_slicerange(self):
+        """Returns the range of the dimension sliced through."""
+        return self.view.dimensions.get_slicerange()
+
+    def slicepoint_changed(self):
+        """Indicates the slicepoint has been updated"""
+        self._peaks_view_presenter.notify(PeaksViewerPresenter.Event.SlicePointChanged)
+        self.update_plot_data()
 
     def update_plot_data_MDH(self):
         """
         Update the view to display an updated MDHistoWorkspace slice/cut
         """
-        self.view.update_plot_data(self.model.get_data(self.view.dimensions.get_slicepoint(),
-                                                       self.view.dimensions.transpose))
+        self.view.update_plot_data(
+            self.model.get_data(self.get_slicepoint(), self.view.dimensions.transpose))
 
     def update_plot_data_MDE(self):
         """
         Update the view to display an updated MDEventWorkspace slice/cut
         """
-        self.view.update_plot_data(self.model.get_data(slicepoint=self.view.dimensions.get_slicepoint(),
-                                                       bin_params=self.view.dimensions.get_bin_params(),
-                                                       transpose=self.view.dimensions.transpose))
+        self.view.update_plot_data(
+            self.model.get_data(
+                self.get_slicepoint(),
+                bin_params=self.view.dimensions.get_bin_params(),
+                transpose=self.view.dimensions.transpose))
 
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
@@ -113,21 +128,18 @@ class SliceViewer(object):
           - Displays peaks on data display
         """
         peaks_workspaces = [
-            self.model.get_peaksworkspace(name)
-            for name in self.view.query_peaks_to_overlay()
+            self.model.get_peaksworkspace(name) for name in self.view.query_peaks_to_overlay()
         ]
-        self._create_peaks_tool_presenter(peaks_workspaces)
-        peak_info = self._peaks_tool_presenter.peaks_info()
-        view = self.view
-        for peak in peak_info:
-            view.draw_peak(peak)
+        presenter = self._peaks_view_presenter
+        for ws in peaks_workspaces:
+            presenter.append_peaksworkspace(PeaksViewerModel(ws))
+        presenter.notify(PeaksViewerPresenter.Event.OverlayPeaks)
 
     # private api
-    def _create_peaks_tool_presenter(self, workspaces):
-        """
-        Create the presenter for the PeaksViewer view
-        :param workspaces: A list of workspaces
-        """
-        self._peaks_tool_presenter = \
-            PeaksViewerCollectionPresenter(map(PeaksViewerModel, workspaces),
-                                           self.view.attach_peaks_tools())
+    @property
+    def _peaks_view_presenter(self):
+        if self._peaks_presenter is None:
+            self._peaks_presenter = \
+                PeaksViewerCollectionPresenter(self.view.peaks_view)
+
+        return self._peaks_presenter

@@ -119,7 +119,7 @@ class SliceViewerTest(unittest.TestCase):
                                                  normalize=mantid.api.MDNormalization.VolumeNormalization)
 
     @mock.patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.TableWorkspaceDataPresenter")
-    @mock.patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.TableWorkspaceDisplayModel")
+    @mock.patch("mantidqt.widgets.sliceviewer.presenter.PeaksViewerModel")
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.PeaksViewerCollectionPresenter",
                 spec=PeaksViewerCollectionPresenter)
     def test_overlay_peaks_workspaces_attaches_view_and_draws_peaks(self, mock_peaks_presenter, _, __):

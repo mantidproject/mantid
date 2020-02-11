@@ -11,20 +11,19 @@ from __future__ import (absolute_import, division, unicode_literals)
 from mantid.py3compat.enum import Enum
 
 # local imports
-from mantidqt.widgets.workspacedisplay.table.model \
-    import TableWorkspaceDisplayModel
 from mantidqt.widgets.workspacedisplay.table.presenter \
     import TableWorkspaceDataPresenter
-from .representation import create_peakrepresentation
 
 
 class PeaksViewerPresenter(object):
     """Controls a PeaksViewerView with a given model to display
     the peaks table and interaction controls for single workspace.
     """
-
     class Event(Enum):
         PeaksListChanged = 1
+        OverlayPeaks = 2
+        SlicePointChanged = 3
+        SliceInfoChanged = 4
 
     def __init__(self, model, view):
         """
@@ -39,6 +38,7 @@ class PeaksViewerPresenter(object):
         self._peaks_table_presenter = \
             TableWorkspaceDataPresenter(model, view.table_view)
 
+        self._view = view
         view.subscribe(self)
         view.set_title(model.peaks_workspace.name())
         self.notify(PeaksViewerPresenter.Event.PeaksListChanged)
@@ -52,20 +52,34 @@ class PeaksViewerPresenter(object):
         Notification of an event that the presenter should react to
         :param event:
         """
-        if event == PeaksViewerPresenter.Event.PeaksListChanged:
+        PresenterEvent = PeaksViewerPresenter.Event
+        if event == PresenterEvent.SlicePointChanged:
+            self._update_peaks()
+        elif event == PresenterEvent.SliceInfoChanged or event == PresenterEvent.OverlayPeaks:
+            self._overlay_peaks()
+        elif event == PresenterEvent.PeaksListChanged:
             self._peaks_table_presenter.refresh()
+        else:
+            from mantid.kernel import logger
+            logger.warning("PeaksViewer: Unknown event detected: {}".format(event))
 
-    def peaks_info(self, slicepoint):
+    def _overlay_peaks(self):
         """
-        Returns a list of PeakRepresentation objects describing the peaks in the model
-        :param slicepoint: float giving the current slice point in the slicing dimension
+        Respond to request to overlay PeaksWorkspace.
+          - Query current slicing information
+          - Compute peaks representations
+          - Draw overlays.
         """
-        info = []
-        for peak in self.model.ws:
-            info.append(create_peakrepresentation(peak, slicepoint,
-                                                  self.model.marker_color))
+        self._view.clear_peaks(self.model.visible_peaks)
+        peak_representations = self.model.compute_peak_representations(self._view.sliceinfo)
+        self._view.draw_peaks(peak_representations)
 
-        return info
+    def _update_peaks(self):
+        """
+        Respond to a change that only requires updating PeakRepresentation properties such
+        as transparency
+        """
+        self._view.update_peaks(self.model.update_peak_representations(self._view.sliceinfo))
 
     # private api
     @staticmethod
@@ -80,15 +94,12 @@ class PeaksViewerPresenter(object):
 class PeaksViewerCollectionPresenter(object):
     """Controls a widget comprising of multiple PeasViewerViews to display and
     interact with multiple PeaksWorkspaces"""
-    def __init__(self, models, view):
+    def __init__(self, view):
         """
-        :param models: An iterable of PeakWorkspace model objects.
         :param view: View displaying the model information
         """
         self._view = view
         self._child_presenters = []
-        for model in models:
-            self.append_peaksworkspace(model)
 
     @property
     def view(self):
@@ -98,15 +109,13 @@ class PeaksViewerCollectionPresenter(object):
         """
         Create and append a view for the given workspace
         :param model: A PeakWorkspace model object.
+        :returns: The child presenter
         """
-        self._child_presenters.append(PeaksViewerPresenter(model, self._view.append_peaksviewer()))
+        presenter = PeaksViewerPresenter(model, self._view.append_peaksviewer())
+        self._child_presenters.append(presenter)
+        return presenter
 
-    def peaks_info(self):
-        """
-        Returns the position of all of the peaks along with an alpha value
-        """
-        peaks_info = []
-        for child in self._child_presenters:
-            peaks_info.extend(child.peaks_info())
-
-        return peaks_info
+    def notify(self, event):
+        """Dispatch notification to all subpresenters"""
+        for presenter in self._child_presenters:
+            presenter.notify(event)

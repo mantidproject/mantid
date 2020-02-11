@@ -8,5 +8,5 @@
 from __future__ import (absolute_import, division, unicode_literals)
 
 from .model import PeaksViewerModel
-from .presenter import PeaksViewerCollectionPresenter
+from .presenter import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 from .view import PeaksViewerCollectionView

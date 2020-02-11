@@ -19,6 +19,7 @@ from .dimensionwidget import DimensionWidget
 from .samplingimage import imshow_sampling
 from .toolbar import SliceViewerNavigationToolbar
 from .peaksviewer.view import PeaksViewerCollectionView
+from .peaksviewer.representation.painter import MplPainter
 
 import numpy as np
 
@@ -27,10 +28,6 @@ from qtpy.QtWidgets import QComboBox, QGridLayout, QLabel, QHBoxLayout, QVBoxLay
 
 
 class SliceViewerView(QWidget):
-    PEAK_CENTER_MARKER = 'x'
-    # size in points^2.
-    PEAK_CENTER_MARKER_SIZE_PTS_SQ = 150
-
     def __init__(self, presenter, dims_info, can_normalise, parent=None):
         super(SliceViewerView, self).__init__(parent)
 
@@ -47,7 +44,7 @@ class SliceViewerView(QWidget):
         self.dimensions_layout = QHBoxLayout()
         self.dimensions = DimensionWidget(dims_info, parent=self)
         self.dimensions.dimensionsChanged.connect(self.presenter.new_plot)
-        self.dimensions.valueChanged.connect(self.presenter.update_plot_data)
+        self.dimensions.valueChanged.connect(self.presenter.slicepoint_changed)
         self.dimensions_layout.addWidget(self.dimensions)
 
         self.colorbar_layout = QVBoxLayout()
@@ -84,30 +81,38 @@ class SliceViewerView(QWidget):
         self.mpl_toolbar.linePlotsClicked.connect(self.line_plots_toggle)
         self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
 
+        #  peaks viewer off by default
+        self._peaks_view = None
+
         # layout
         self.layout = QGridLayout(self)
         self.layout.addLayout(self.dimensions_layout, 0, 0)
         self.layout.addWidget(self.mpl_toolbar, 1, 0)
         self.layout.addLayout(self.mpl_layout, 2, 0)
 
-        # optional peaks
-        self.peaks_tools = None
-
         self.show()
+
+    @property
+    def peaks_view(self):
+        """Lazily instantiates PeaksViewer and returns it"""
+        if self._peaks_view is None:
+            self._peaks_view = PeaksViewerCollectionView(MplPainter(self.ax), self.presenter)
+            from_row, from_col, row_span, col_span = 0, 1, -1, 1
+            self.layout.addWidget(self._peaks_view, from_row, from_col, row_span, col_span)
+
+        return self._peaks_view
 
     def create_axes(self):
         self.fig.clf()
         if self.line_plots:
-            gs = gridspec.GridSpec(2, 2,
-                                   width_ratios=[1, 4],
-                                   height_ratios=[4, 1],
-                                   wspace=0.0, hspace=0.0)
+            gs = gridspec.GridSpec(
+                2, 2, width_ratios=[1, 4], height_ratios=[4, 1], wspace=0.0, hspace=0.0)
             self.ax = self.fig.add_subplot(gs[1], projection='mantid')
             self.ax.xaxis.set_visible(False)
             self.ax.yaxis.set_visible(False)
-            self.axx=self.fig.add_subplot(gs[3], sharex=self.ax)
+            self.axx = self.fig.add_subplot(gs[3], sharex=self.ax)
             self.axx.yaxis.tick_right()
-            self.axy=self.fig.add_subplot(gs[0], sharey=self.ax)
+            self.axy = self.fig.add_subplot(gs[0], sharey=self.ax)
             self.axy.xaxis.tick_top()
         else:
             self.ax = self.fig.add_subplot(111, projection='mantid')
@@ -118,9 +123,13 @@ class SliceViewerView(QWidget):
         clears the plot and creates a new one using a MDHistoWorkspace
         """
         self.ax.clear()
-        self.im = self.ax.imshow(ws, origin='lower', aspect='auto',
-                                 transpose=self.dimensions.transpose,
-                                 norm=self.colorbar.get_norm(), **kwargs)
+        self.im = self.ax.imshow(
+            ws,
+            origin='lower',
+            aspect='auto',
+            transpose=self.dimensions.transpose,
+            norm=self.colorbar.get_norm(),
+            **kwargs)
         self.draw_plot()
 
     def plot_matrix(self, ws, **kwargs):
@@ -128,10 +137,15 @@ class SliceViewerView(QWidget):
         clears the plot and creates a new one using a MatrixWorkspace
         """
         self.ax.clear()
-        self.im = imshow_sampling(self.ax, ws, origin='lower', aspect='auto',
-                                  interpolation='none',
-                                  transpose=self.dimensions.transpose,
-                                  norm=self.colorbar.get_norm(), **kwargs)
+        self.im = imshow_sampling(
+            self.ax,
+            ws,
+            origin='lower',
+            aspect='auto',
+            interpolation='none',
+            transpose=self.dimensions.transpose,
+            norm=self.colorbar.get_norm(),
+            **kwargs)
         self.im._resample_image()
         self.draw_plot()
 
@@ -139,7 +153,7 @@ class SliceViewerView(QWidget):
         self.ax.set_title('')
         self.colorbar.set_mappable(self.im)
         self.colorbar.update_clim()
-        self.mpl_toolbar.update() # clear nav stack
+        self.mpl_toolbar.update()  # clear nav stack
         self.clear_line_plots()
         self.canvas.draw_idle()
 
@@ -211,9 +225,9 @@ class SliceViewerView(QWidget):
             return
         i, j = point.astype(int)
         if 0 <= i < arr.shape[0]:
-            self.plot_x_line(np.linspace(xmin, xmax, arr.shape[1]), arr[i,:])
+            self.plot_x_line(np.linspace(xmin, xmax, arr.shape[1]), arr[i, :])
         if 0 <= j < arr.shape[1]:
-            self.plot_y_line(np.linspace(ymin, ymax, arr.shape[0]), arr[:,j])
+            self.plot_y_line(np.linspace(ymin, ymax, arr.shape[0]), arr[:, j])
 
     def set_normalization(self, ws, **kwargs):
         normalize_by_bin_width, _ = get_normalize_by_bin_width(ws, self.ax, **kwargs)
@@ -226,30 +240,23 @@ class SliceViewerView(QWidget):
             self.norm_opts.setCurrentIndex(0)
 
     # peaks tools
-    def query_peaks_to_overlay(self):
-        """Display a dialog to the user to ask which peaks to overlay"""
-        return "peaksws_sphere_nobkgd",
-
-    def attach_peaks_tools(self):
-        """
-        Create (if necessary) the view of PeaksWorkspace tools
-        and attach it here
-        :return: The PeaksViewerCollectionView
-        """
-        if self.peaks_tools is not None:
-            return self.peaks_tools
-
-        self.peaks_tools = PeaksViewerCollectionView()
-        from_row, from_col, row_span, col_span = 0, 1, -1, 1
-        self.layout.addWidget(self.peaks_tools, from_row, from_col,
-                              row_span, col_span)
-        return self.peaks_tools
-
     def draw_peak(self, peak_info):
         """
         :param peak_info: A PeakRepresentation object
         """
-        peak_info.draw(self.ax)
+        return peak_info.draw(self.ax)
+
+    def query_peaks_to_overlay(self):
+        """Display a dialog to the user to ask which peaks to overlay"""
+        return "peaksws",
+
+    def set_peaks_viewer_visible(self, on):
+        """
+        Set the visiblity of the PeaksViewer.
+        :param on: If True make the view visible, else make it invisible
+        :return: The PeaksViewerCollectionView
+        """
+        self.peaks_view.set_visible(on)
 
     # event handlers
     def closeEvent(self, event):

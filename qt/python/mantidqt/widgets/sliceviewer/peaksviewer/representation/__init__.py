@@ -21,15 +21,17 @@ _PEAK_REPRESENTATIONS = {
 }
 
 
-def create_peakrepresentation(peak, marker_color):
+def create_peakrepresentation(peak, slicepoint, slicerange, marker_color):
     """
     A factory function to create an appropriate PeakRepresentation
     object for a peak.
     :param peak: A Peak object
+    :param slicepoint: float giving current slice point
+    :param slicerange: 2-tuple giving (min/max) values of the slicing dimension
     :param marker_color: A str representing the color of the peak shape marker
     :returns: A PeakRepresentation object describing the Peak aspects
               important for display
     """
     peak_shape = peak.getPeakShape()
     cls = _PEAK_REPRESENTATIONS[peak_shape.shapeName().lower()]
-    return cls.create(peak.getQLabFrame(), peak_shape, marker_color)
+    return cls.create(peak.getQLabFrame(), slicepoint, slicerange, peak_shape, marker_color)
