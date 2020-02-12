@@ -36,10 +36,10 @@ Improvements
 - Default values for algorithm properties now appear as placeholder (greyed-out) text on custm algorithm dialogs.
 - The context menu for WorkspaceGroups now contains plotting options so you can plot all of the workspaces in the group.
 - A warning now appears if you attempt to plot more than ten spectra.
+- The Save menu action in the workspaces toolbox to save using version 1 of the SaveAscii algorithm has been removed as no one was using it and it only added confusion. The option to save using the most recent version of SaveASCII is still available.
 
 Bugfixes
 ########
-
 - Fixed an issue with Workspace History where unrolling consecutive workflow algorithms would result in only one of the algorithms being unrolled.
 - Fixed a couple of errors in the python scripts generated from plots for newer versions of Matplotlib.
 - Colorbar scale no longer vanish on colorfill plots with a logarithmic scale
