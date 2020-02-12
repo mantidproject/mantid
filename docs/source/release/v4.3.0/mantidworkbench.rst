@@ -49,5 +49,6 @@ Bugfixes
 - Fix crash when loading a script with syntax errors
 - The Show Instruments right click menu option is now disabled for workspaces that have had their spectrum axis converted to another axis using :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`.  Once this axis has been converetd the workspace loses it's link between the data values and the detectors they were recorded on so we cannot display it in the instrument view.
 - MonitorLiveData now appears promptly in the algorithm details window, allowing live data sessions to be cancelled.
+- Figure options on bin plots open without throwing an error.
 
 :ref:`Release 4.3.0 <v4.3.0>`
