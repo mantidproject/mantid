@@ -202,17 +202,16 @@ void LoadPSIMuonBin::exec() {
   auto firstGoodDataSpecIndex = static_cast<int>(
       *std::max_element(m_header.firstGood, m_header.firstGood + 16));
 
-  setProperty("FirstGoodData",
-              outputWorkspace->x(0)[firstGoodDataSpecIndex]);
+  setProperty("FirstGoodData", outputWorkspace->x(0)[firstGoodDataSpecIndex]);
 
-  // Time zero is when the pulse starts. 
+  // Time zero is when the pulse starts.
   // The pulse should be at t=0 to be like ISIS data
   // manually offset the data
   for (auto specNum = 0u; specNum < m_histograms.size(); ++specNum) {
     auto xData = outputWorkspace->mutableX(specNum);
-    for (auto j = 0; j < xData.size();j++) {
+    for (auto j = 0; j < xData.size(); j++) {
       xData[j] = xData[j] - absTimeZero;
-	}
+    }
     outputWorkspace->mutableX(specNum) = xData;
   }
 }
@@ -591,16 +590,16 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     if (m_header.labelsOfHistograms[i] == "")
       break;
     std::string name = m_header.labelsOfHistograms[i];
-	// if no name is present (or just empty space)
-	// replace with default name:
-	// group_specNum
+    // if no name is present (or just empty space)
+    // replace with default name:
+    // group_specNum
     std::string label =
         (name.size() > 0 && name.find_first_not_of(" ") == std::string::npos)
-            ? "group_" + std::to_string(i+1)
+            ? "group_" + std::to_string(i + 1)
             : m_header.labelsOfHistograms[i];
 
-    addToSampleLog("Label Spectra " + std::to_string(i),
-                   label, outputWorkspace);
+    addToSampleLog("Label Spectra " + std::to_string(i), label,
+                   outputWorkspace);
   }
 
   addToSampleLog("Orientation", m_header.orientation, outputWorkspace);
