@@ -107,12 +107,13 @@ public:
   }
 
   /**
-   * Load a *.raw file and reset the detector position, width, and height for the first two spectra
+   * Load a *.raw file and reset the detector position, width, and height for
+   * the first two spectra
    */
   void testCalibrateRawFile() {
     // Create a calibration table
     ITableWorkspace_sptr calTableWs =
-            WorkspaceFactory::Instance().createTable();
+        WorkspaceFactory::Instance().createTable();
     calTableWs->addColumn("int", "Detector ID");
     calTableWs->addColumn("V3D", "Detector Position");
     calTableWs->addColumn("double", "Detector Y Coordinate");
@@ -126,39 +127,47 @@ public:
     loader.initialize();
     loader.setPropertyValue("Filename", "HRP39180.RAW");
     loader.setPropertyValue("OutputWorkspace", wsName);
-    loader.setPropertyValue("SpectrumMin", "1");  // Spectrum number, not workspace index
-    loader.setPropertyValue("SpectrumMax", "9");//std::to_string(nSpectra));
+    loader.setPropertyValue("SpectrumMin",
+                            "1"); // Spectrum number, not workspace index
+    loader.setPropertyValue("SpectrumMax", "9"); // std::to_string(nSpectra));
     loader.execute();
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
-    MatrixWorkspace_sptr workspace = dataStore.retrieveWS<MatrixWorkspace>(wsName);
+    MatrixWorkspace_sptr workspace =
+        dataStore.retrieveWS<MatrixWorkspace>(wsName);
     const auto &detectorInfo = workspace->detectorInfo();
     const auto &componentInfo = workspace->componentInfo();
 
-    // Populate the calibration table with some final detector positions, widths, and heights
-    const std::vector<V3D> positions{V3D(0.20, 0.0, 0.42), V3D(0.53, 0.0, 0.75)};
+    // Populate the calibration table with some final detector positions,
+    // widths, and heights
+    const std::vector<V3D> positions{V3D(0.20, 0.0, 0.42),
+                                     V3D(0.53, 0.0, 0.75)};
     const std::vector<double> yCoords{0.31, 0.64};
     const std::vector<double> widths{0.008, 0.007};
     const std::vector<double> heights{0.041, 0.039};
-    for(size_t i=0; i < nSpectra; i++) {
+    for (size_t i = 0; i < nSpectra; i++) {
       IDetector_const_sptr detector = workspace->getDetector(i);
       const auto detectorID = detector->getID();
       TableRow row = calTableWs->appendRow();
       // insert data in the same order in which table columns were declared
       // detector-ID  position  Y-coordinate  Width Height
-      row << detectorID << positions[i] << yCoords[i] << widths[i] << heights[i];
+      row << detectorID << positions[i] << yCoords[i] << widths[i]
+          << heights[i];
     }
 
     // Apply the calibration to the workspace
     ApplyCalibration calibrationAlgorithm;
     calibrationAlgorithm.initialize();
     TS_ASSERT(calibrationAlgorithm.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(calibrationAlgorithm.setPropertyValue("Workspace", wsName));
-    TS_ASSERT_THROWS_NOTHING(calibrationAlgorithm.setProperty<ITableWorkspace_sptr>("CalibrationTable", calTableWs));
+    TS_ASSERT_THROWS_NOTHING(
+        calibrationAlgorithm.setPropertyValue("Workspace", wsName));
+    TS_ASSERT_THROWS_NOTHING(
+        calibrationAlgorithm.setProperty<ITableWorkspace_sptr>(
+            "CalibrationTable", calTableWs));
     TS_ASSERT_THROWS_NOTHING(calibrationAlgorithm.execute());
     TS_ASSERT(calibrationAlgorithm.isExecuted());
 
     // Assert the calibration
-    for(size_t i=0; i < nSpectra; i++) {
+    for (size_t i = 0; i < nSpectra; i++) {
       // assert detector position
       IDetector_const_sptr detector = workspace->getDetector(i);
       const auto detectorID = detector->getID();
@@ -169,7 +178,8 @@ public:
       // assert detector width and height
       const auto detectorIndex = detectorInfo.indexOf(detectorID);
       const auto &scaleFactor = componentInfo.scaleFactor(detectorIndex);
-      const auto &box = componentInfo.shape(detectorIndex).getBoundingBox().width();
+      const auto &box =
+          componentInfo.shape(detectorIndex).getBoundingBox().width();
       TS_ASSERT_DELTA(scaleFactor.X() * box.X(), widths[i], 0.0001);
       TS_ASSERT_DELTA(scaleFactor.Y() * box.Y(), heights[i], 0.0001);
     }
