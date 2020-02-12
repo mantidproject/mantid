@@ -142,32 +142,33 @@ MCInteractionVolume::generatePoint(Kernel::PseudoRandomNumberGenerator &rng) {
 }
 
 /**
- * Calculate the attenuation correction factor the volume given a start and
- * end point.
+ * Calculate a before scatter and after scatter track based on a scatter point
+ * in the volume given a start and end point.
  * @param rng A reference to a PseudoRandomNumberGenerator producing
  * random number between [0,1]
  * @param startPos Origin of the initial track
  * @param endPos Final position of neutron after scattering (assumed to be
  * outside of the "volume")
- * @param lambdaBefore Wavelength, in \f$\\A^-1\f$, before scattering
- * @param lambdaAfter Wavelength, in \f$\\A^-1\f$, after scattering
- * @return The fraction of the beam that has been attenuated. A negative number
- * indicates the track was not valid.
+ * @param beforeScatter Out parameter to return generated before scatter track
+ * @param afterScatter Out parameter to return generated after scatter track
+ * @return Whether before/after tracks were successfully generated
  */
-double MCInteractionVolume::calculateAbsorption(
+bool MCInteractionVolume::calculateBeforeAfterTrack(
     Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
-    const Kernel::V3D &endPos, double lambdaBefore, double lambdaAfter) {
+    const Kernel::V3D &endPos, Geometry::Track &beforeScatter,
+    Geometry::Track &afterScatter) {
   // Generate scatter point. If there is an environment present then
   // first select whether the scattering occurs on the sample or the
   // environment. The attenuation for the path leading to the scatter point
   // is calculated in reverse, i.e. defining the track from the scatter pt
   // backwards for simplicity with how the Track object works. This avoids
   // having to understand exactly which object the scattering occurred in.
+  V3D scatterPos;
 
-  V3D scatterPos = generatePoint(rng);
+  scatterPos = generatePoint(rng);
 
   const auto toStart = normalize(startPos - scatterPos);
-  Track beforeScatter(scatterPos, toStart);
+  beforeScatter = Track(scatterPos, toStart);
   int nlinks = m_sample->interceptSurface(beforeScatter);
   if (m_env) {
     nlinks += m_env->interceptSurfaces(beforeScatter);
@@ -175,8 +176,32 @@ double MCInteractionVolume::calculateAbsorption(
   // This should not happen but numerical precision means that it can
   // occasionally occur with tracks that are very close to the surface
   if (nlinks == 0) {
-    return -1.0;
+    return false;
   }
+
+  // Now track to final destination
+  const V3D scatteredDirec = normalize(endPos - scatterPos);
+  afterScatter = Track(scatterPos, scatteredDirec);
+  m_sample->interceptSurface(afterScatter);
+  if (m_env) {
+    m_env->interceptSurfaces(afterScatter);
+  }
+  return true;
+}
+
+/**
+ * Calculate the attenuation correction factor the volume given a before
+ * and after track.
+ * @param beforeScatter Before scatter track
+ * @param afterScatter After scatter track
+ * @param lambdaBefore Lambda before scattering
+ * @param lambdaAfter Lambda after scattering
+ * @return Absorption factor
+ */
+double MCInteractionVolume::calculateAbsorption(const Track &beforeScatter,
+                                                const Track &afterScatter,
+                                                double lambdaBefore,
+                                                double lambdaAfter) const {
 
   // Function to calculate total attenuation for a track
   auto calculateAttenuation = [](const Track &path, double lambda) {
@@ -189,13 +214,6 @@ double MCInteractionVolume::calculateAbsorption(
     return factor;
   };
 
-  // Now track to final destination
-  const V3D scatteredDirec = normalize(endPos - scatterPos);
-  Track afterScatter(scatterPos, scatteredDirec);
-  m_sample->interceptSurface(afterScatter);
-  if (m_env) {
-    m_env->interceptSurfaces(afterScatter);
-  }
   return calculateAttenuation(beforeScatter, lambdaBefore) *
          calculateAttenuation(afterScatter, lambdaAfter);
 }

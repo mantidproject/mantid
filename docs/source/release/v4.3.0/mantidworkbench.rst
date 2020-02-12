@@ -42,7 +42,7 @@ Improvements
 Bugfixes
 ########
 - Fixed an issue with Workspace History where unrolling consecutive workflow algorithms would result in only one of the algorithms being unrolled.
-
+- Fixed a couple of errors in the python scripts generated from plots for newer versions of Matplotlib.
 - Colorbar scale no longer vanish on colorfill plots with a logarithmic scale
 - Figure options no longer causes a crash when using 2d plots created from a script.
 - Running an algorithm that reduces the number of spectra on an active plot (eg SumSpectra) no longer causes an error
