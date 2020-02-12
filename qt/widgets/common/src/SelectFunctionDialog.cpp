@@ -21,6 +21,7 @@
 #include <QCompleter>
 #include <QGridLayout>
 #include <QGroupBox>
+#include <QIcon>
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -43,6 +44,8 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent)
 SelectFunctionDialog::SelectFunctionDialog(
     QWidget *parent, const std::vector<std::string> &restrictions)
     : QDialog(parent), m_form(new Ui::SelectFunctionDialog) {
+  setModal(true);
+  setWindowIcon(QIcon(":/images/MantidIcon.ico"));
   m_form->setupUi(this);
   m_form->errorMessage->hide();
 
@@ -76,7 +79,7 @@ SelectFunctionDialog::SelectFunctionDialog(
   constructFunctionTree(categories, restrictions);
 
   connect(m_form->fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),
-          this, SLOT(acceptFunction()));
+          this, SLOT(functionDoubleClicked(QTreeWidgetItem *)));
   m_form->fitTree->setToolTip("Select a function type and press OK.");
 
   connect(m_form->buttonBox, SIGNAL(accepted()), this, SLOT(acceptFunction()));
@@ -200,6 +203,11 @@ void SelectFunctionDialog::searchBoxChanged(const QString &text) {
   const auto index = m_form->searchBox->findText(text);
   if (index >= 0)
     m_form->searchBox->setCurrentIndex(index);
+}
+
+void SelectFunctionDialog::functionDoubleClicked(QTreeWidgetItem *item) {
+  if (item->childCount() == 0)
+    acceptFunction();
 }
 
 void SelectFunctionDialog::acceptFunction() {

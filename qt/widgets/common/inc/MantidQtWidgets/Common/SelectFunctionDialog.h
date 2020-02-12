@@ -13,6 +13,7 @@
 #include "DllOption.h"
 
 #include <QDialog>
+#include <QTreeWidgetItem>
 #include <map>
 
 namespace Ui {
@@ -53,6 +54,7 @@ private:
 
 private slots:
   void searchBoxChanged(const QString &text);
+  void functionDoubleClicked(QTreeWidgetItem *item);
   void acceptFunction();
   void rejectFunction();
 };
