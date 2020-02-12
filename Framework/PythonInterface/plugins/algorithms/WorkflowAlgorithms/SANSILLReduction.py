@@ -225,7 +225,7 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws : the input workspace
         """
         normalise_by = self.getPropertyValue('NormaliseBy')
-        monID = 100000 if self._instrument != 'D33' else 500000
+        monID = 100000 if (self._instrument != 'D33' and self._instrument != 'D16') else 500000
         if normalise_by == 'Monitor':
             mon = ws + '_mon'
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
