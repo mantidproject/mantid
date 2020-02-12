@@ -74,31 +74,33 @@ class CalibrationModel(object):
                     bank_name = str(i + 1)
                 else:
                     bank_name = bank
+                difa = output[i].DIFA
                 difc = output[i].DIFC
                 tzero = output[i].TZERO
-                self._generate_difc_tzero_workspace(difc, tzero, bank_name)
+                self._generate_tof_fit_workspace(difa, difc, tzero, bank_name)
             if bank is None and spectrum_numbers is None:
-                self._plot_difc_tzero()
+                self._plot_tof_fit()
             elif spectrum_numbers is None:
-                self._plot_difc_tzero_single_bank_or_custom(bank)
+                self._plot_tof_fit_single_bank_or_custom(bank)
             else:
-                self._plot_difc_tzero_single_bank_or_custom("cropped")
+                self._plot_tof_fit_single_bank_or_custom("cropped")
+        difa = [i.DIFC for i in output]
         difc = [i.DIFC for i in output]
         tzero = [i.TZERO for i in output]
 
         params_table = []
 
         for i in range(len(difc)):
-            params_table.append([i, difc[i], 0.0, tzero[i]])
+            params_table.append([i, difc[i], difa[i], tzero[i]])
         self.update_calibration_params_table(params_table)
 
         calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
-        self.create_output_files(calib_dir, difc, tzero, sample_path, vanadium_path, instrument,
+        self.create_output_files(calib_dir, difa, difc, tzero, sample_path, vanadium_path, instrument,
                                  bank, spectrum_numbers)
         if rb_num:
             user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num,
                                        "Calibration", "")
-            self.create_output_files(user_calib_dir, difc, tzero, sample_path, vanadium_path,
+            self.create_output_files(user_calib_dir, difa, difc, tzero, sample_path, vanadium_path,
                                      instrument, bank, spectrum_numbers)
 
     def load_existing_gsas_parameters(self, file_path):
@@ -162,20 +164,21 @@ class CalibrationModel(object):
         fig.show()
 
     @staticmethod
-    def _generate_difc_tzero_workspace(difc, tzero, bank):
+    def _generate_tof_fit_workspace(difa, difc, tzero, bank):
         bank_ws = Ads.retrieve(CalibrationModel._generate_table_workspace_name(bank))
 
         x_val = []
         y_val = []
         y2_val = []
 
+        difa_to_plot = difa
         difc_to_plot = difc
         tzero_to_plot = tzero
 
         for irow in range(0, bank_ws.rowCount()):
             x_val.append(bank_ws.cell(irow, 0))
             y_val.append(bank_ws.cell(irow, 5))
-            y2_val.append(x_val[irow] * difc_to_plot + tzero_to_plot)
+            y2_val.append(pow(x_val[irow], 2) * difa_to_plot + x_val[irow] * difc_to_plot + tzero_to_plot)
 
         ws1 = CreateWorkspace(DataX=x_val,
                               DataY=y_val,
@@ -183,7 +186,7 @@ class CalibrationModel(object):
                               YUnitLabel="Fitted Peaks Centre(TOF, us)")
         ws2 = CreateWorkspace(DataX=x_val, DataY=y2_val)
 
-        output_ws = "engggui_difc_zero_peaks_bank_" + str(bank)
+        output_ws = "engggui_tof_peaks_bank_" + str(bank)
         if Ads.doesExist(output_ws):
             DeleteWorkspace(output_ws)
 
@@ -192,9 +195,9 @@ class CalibrationModel(object):
         DeleteWorkspace(ws2)
 
     @staticmethod
-    def _plot_difc_tzero():
-        bank_1_ws = Ads.retrieve("engggui_difc_zero_peaks_bank_1")
-        bank_2_ws = Ads.retrieve("engggui_difc_zero_peaks_bank_2")
+    def _plot_tof_fit():
+        bank_1_ws = Ads.retrieve("engggui_tof_peaks_bank_1")
+        bank_2_ws = Ads.retrieve("engggui_tof_peaks_bank_2")
         # Create plot
         fig = plt.figure()
         gs = gridspec.GridSpec(1, 2)
@@ -204,13 +207,14 @@ class CalibrationModel(object):
         for ax, ws, bank in zip([plot_bank_1, plot_bank_2], [bank_1_ws, bank_2_ws], [1, 2]):
             ax.plot(ws, wkspIndex=0, linestyle="", marker="o", markersize="3")
             ax.plot(ws, wkspIndex=1, linestyle="--", marker="o", markersize="3")
-            ax.set_title("Engg Gui Difc Zero Peaks Bank " + str(bank))
-            ax.legend(("Peaks Fitted", "DifC/TZero Fitted Straight Line"))
+            ax.set_title("Engg Gui TOF Peaks Bank " + str(bank))
+            ax.legend(("Peaks Fitted", "TOF Quadratic Fit"))
             ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
+            ax.set_ylabel("Fitted Peaks Centre(TOF, us")
         fig.show()
 
     @staticmethod
-    def _plot_difc_tzero_single_bank_or_custom(bank):
+    def _plot_tof_fit_single_bank_or_custom(bank):
         bank_ws = Ads.retrieve("engggui_difc_zero_peaks_bank_" + str(bank))
 
         ax = plot([bank_ws], [0],
@@ -272,11 +276,12 @@ class CalibrationModel(object):
             output[0] = run_engg_calibrate(kwargs)
         return output
 
-    def create_output_files(self, calibration_dir, difc, tzero, sample_path, vanadium_path,
+    def create_output_files(self, calibration_dir, difa, difc, tzero, sample_path, vanadium_path,
                             instrument, bank, spectrum_numbers):
         """
         Create output files from the algorithms in the specified directory
         :param calibration_dir: The directory to save the files into.
+        :param difa: DIFA values from calibration algorithm
         :param difc: DIFC values from the calibration algorithm.
         :param tzero: TZERO values from the calibration algorithm.
         :param sample_path: The path to the sample data file.
@@ -296,29 +301,29 @@ class CalibrationModel(object):
             kwargs["template_file"] = NORTH_BANK_TEMPLATE_FILE
             kwargs["bank_names"] = ["North"]
 
-        def generate_output_file(difc_list, tzero_list, bank_name, kwargs_to_pass):
+        def generate_output_file(difa_list, difc_list, tzero_list, bank_name, kwargs_to_pass):
             file_path = calibration_dir + self._generate_output_file_name(vanadium_path, sample_path, instrument,
                                                                           bank=bank_name)
-            write_ENGINX_GSAS_iparam_file(file_path, difc_list, tzero_list, **kwargs_to_pass)
+            write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, **kwargs_to_pass)
 
         if not path.exists(calibration_dir):
             makedirs(calibration_dir)
 
         if bank is None and spectrum_numbers is None:
-            generate_output_file(difc, tzero, "all", kwargs)
+            generate_output_file(difa, difc, tzero, "all", kwargs)
             north_kwargs()
-            generate_output_file([difc[0]], [tzero[0]], "north", kwargs)
+            generate_output_file([difa[0]], [difc[0]], [tzero[0]], "north", kwargs)
             south_kwargs()
-            generate_output_file([difc[1]], [tzero[1]], "south", kwargs)
+            generate_output_file([difa[1]], [difc[1]], [tzero[1]], "south", kwargs)
         elif bank == "1":
             north_kwargs()
-            generate_output_file([difc[0]], [tzero[0]], "north", kwargs)
+            generate_output_file([difa[0]], [difc[0]], [tzero[0]], "north", kwargs)
         elif bank == "2":
             south_kwargs()
-            generate_output_file([difc[0]], [tzero[0]], "south", kwargs)
+            generate_output_file([difa[0]], [difc[0]], [tzero[0]], "south", kwargs)
         elif bank is None:  # Custom cropped files use the north bank template.
             north_kwargs()
-            generate_output_file([difc[0]], [tzero[0]], "cropped", kwargs)
+            generate_output_file([difa[0]], [difc[0]], [tzero[0]], "cropped", kwargs)
 
     @staticmethod
     def get_info_from_file(file_path):

@@ -40,7 +40,7 @@ spectrum) and has a log entry named "difc", where the GSAS DIFC
 parameter is expected. Otherwise the conversion of units is done as in
 the Mantid :ref:`ConvertUnits <algm-ConvertUnits>`.
 
-.. seealso:: :ref:`EnggFitDIFCFromPeaks <algm-EnggFitDIFCFromPeaks>`.
+.. seealso:: :ref:`EnggFitTOFFromPeaks <algm-EnggFitTOFFromPeaks>`.
 
 This algorithm currently fits (single) peaks of type
 :ref:`Back2BackExponential <func-BackToBackExponential>`. Other

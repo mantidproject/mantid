@@ -82,54 +82,54 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '._plot_vanadium_curves')
-    @patch(class_path + '._generate_difc_tzero_workspace')
-    @patch(class_path + '._plot_difc_tzero')
+    @patch(class_path + '._generate_tof_fit_workspace')
+    @patch(class_path + '._plot_tof_fit')
     @patch(class_path + '.run_calibration')
-    def test_plotting_check(self, calib, plot_difc_zero, gen_difc, plot_van, van, sample,
+    def test_plotting_check(self, calib, plot_tof, gen_tof, plot_van, van, sample,
                             output_files, update_table):
         calib.return_value = [MagicMock(), MagicMock()]
         van.return_value = ("A", "B")
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
         plot_van.assert_not_called()
-        plot_difc_zero.assert_not_called()
-        gen_difc.assert_not_called()
+        plot_tof.assert_not_called()
+        gen_tof.assert_not_called()
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, True, "ENGINX")
         plot_van.assert_called_once()
-        self.assertEqual(gen_difc.call_count, 2)
-        self.assertEqual(plot_difc_zero.call_count, 1)
+        self.assertEqual(gen_tof.call_count, 2)
+        self.assertEqual(plot_tof.call_count, 1)
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '._plot_vanadium_curves')
-    @patch(class_path + '._generate_difc_tzero_workspace')
-    @patch(class_path + '._plot_difc_tzero')
-    @patch(class_path + '._plot_difc_tzero_single_bank_or_custom')
+    @patch(class_path + '._generate_tof_fit_workspace')
+    @patch(class_path + '._plot_tof_fit')
+    @patch(class_path + '._plot_tof_fit_single_bank_or_custom')
     @patch(class_path + '.run_calibration')
-    def test_plotting_check_cropped(self, calib, plot_difc_zero_cus, plot_difc_zero, gen_difc,
+    def test_plotting_check_cropped(self, calib, plot_tof_cus, plot_tof_fit, gen_tof,
                                     plot_van, van, sample, output_files, update_table):
         calib.return_value = [MagicMock()]
         van.return_value = ("A", "B")
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
         plot_van.assert_not_called()
-        plot_difc_zero_cus.assert_not_called()
-        plot_difc_zero.assert_not_called()
-        gen_difc.assert_not_called()
+        plot_tof_cus.assert_not_called()
+        plot_tof_fit.assert_not_called()
+        gen_tof.assert_not_called()
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, True, "ENGINX", bank=1)
         plot_van.assert_called_once()
-        self.assertEqual(gen_difc.call_count, 1)
-        plot_difc_zero.assert_not_called()
-        self.assertEqual(plot_difc_zero_cus.call_count, 1)
+        self.assertEqual(gen_tof.call_count, 1)
+        plot_tof_fit.assert_not_called()
+        self.assertEqual(plot_tof_cus.call_count, 1)
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '._plot_vanadium_curves')
-    @patch(class_path + '._plot_difc_tzero')
+    @patch(class_path + '._plot_tof_fit')
     @patch(class_path + '.run_calibration')
-    def test_present_RB_number_results_in_user_output_files(self, calib, plot_difc_zero, plot_van,
+    def test_present_RB_number_results_in_user_output_files(self, calib, plot_tof, plot_van,
                                                             van, sample, output_files,
                                                             update_table):
         van.return_value = ("A", "B")
@@ -145,9 +145,9 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '._plot_vanadium_curves')
-    @patch(class_path + '._plot_difc_tzero')
+    @patch(class_path + '._plot_tof_fit')
     @patch(class_path + '.run_calibration')
-    def test_absent_run_number_results_in_no_user_output_files(self, calib, plot_difc_zero,
+    def test_absent_run_number_results_in_no_user_output_files(self, calib, plot_tof,
                                                                plot_van, van, sample, output_files,
                                                                update_table):
         van.return_value = ("A", "B")
@@ -176,7 +176,7 @@ class CalibrationModelTest(unittest.TestCase):
         filename = "output"
         output_name.return_value = filename
 
-        self.model.create_output_files("test/", [0, 0], [1, 1],
+        self.model.create_output_files("test/", [2, 2], [0, 0], [1, 1],
                                        sample_path,
                                        vanadium_path,
                                        "ENGINX",
@@ -185,7 +185,7 @@ class CalibrationModelTest(unittest.TestCase):
 
         self.assertEqual(make_dirs.call_count, 1)
         self.assertEqual(write_file.call_count, 3)
-        write_file.assert_called_with("test/" + filename, [0], [1],
+        write_file.assert_called_with("test/" + filename, [2], [0], [1],
                                       bank_names=['South'],
                                       ceria_run="20",
                                       template_file="template_ENGINX_241391_236516_South_bank.prm",
