@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/ApplyCalibration.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
@@ -54,51 +55,62 @@ void ApplyCalibration::exec() {
       columnNames.end()) {
     auto &detectorInfo = inputWS->mutableDetectorInfo();
     ColumnVector<V3D> detPos = CalTable->getVector("Detector Position");
+    PARALLEL_FOR_NO_WSP_CHECK()
     for (size_t i = 0; i < numDetector; ++i) {
       const auto index = detectorInfo.indexOf(detectorID[i]);
       detectorInfo.setPosition(index, detPos[i]);
     }
   }
 
-  // Bar scan calibration: pixel Y-coordinate and height
-  if (std::find(columnNames.begin(), columnNames.end(),
-                "Detector Y Coordinate") != columnNames.end()) {
+  // Bar scan calibration: pixel Y-coordinate
+  if (std::find(columnNames.begin(), columnNames.end(),"Detector Y Coordinate") != columnNames.end()) {
+    // the detectorInfo index of a particular pixel detector is the same as the
+    // componentInfo index for the same pixel detector
+    auto &detectorInfo = inputWS->mutableDetectorInfo();
+    ColumnVector<double> yCoordinate = CalTable->getVector("Detector Y Coordinate");
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (size_t i = 0; i < numDetector; ++i) {
+      const auto index = detectorInfo.indexOf(detectorID[i]);
+      V3D xyz = detectorInfo.position(index);
+      detectorInfo.setPosition(index, V3D(xyz.X(), yCoordinate[i], xyz.Z()));
+    }
+  }
+
+   // Apparent tube width calibration along X-coordinate
+  if (std::find(columnNames.begin(), columnNames.end(), "Detector Width") != columnNames.end()) {
+    auto &detectorInfo = inputWS->detectorInfo();
+    auto &componentInfo = inputWS->mutableComponentInfo();
+    ColumnVector<double> widths = CalTable->getVector("Detector Width");
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (size_t i = 0; i < numDetector; ++i) {
+      const auto index = detectorInfo.indexOf(detectorID[i]);
+      double nominalWidth = componentInfo.shape(index).getBoundingBox().width().X();
+      V3D oldScaleFactor = componentInfo.scaleFactor(index);
+      componentInfo.setScaleFactor(
+        index,
+        V3D(widths[i] / nominalWidth, oldScaleFactor.Y(), oldScaleFactor.Z()));
+    }
+  }
+
+  // Bar scan calibration: pixel height
+  if (std::find(columnNames.begin(), columnNames.end(),"Detector Height") != columnNames.end()) {
     // the detectorInfo index of a particular pixel detector is the same as the
     // componentInfo index for the same pixel detector
     auto &detectorInfo = inputWS->mutableDetectorInfo();
     auto &componentInfo = inputWS->mutableComponentInfo();
-    ColumnVector<double> yCoordinate =
-        CalTable->getVector("Detector Y Coordinate");
     ColumnVector<double> height = CalTable->getVector("Detector Height");
+    PARALLEL_FOR_NO_WSP_CHECK()
     for (size_t i = 0; i < numDetector; ++i) {
-      // update pixel's Y coordinate
       const auto index = detectorInfo.indexOf(detectorID[i]);
-      V3D xyz = detectorInfo.position(index);
-      detectorInfo.setPosition(index, V3D(xyz.X(), yCoordinate[i], xyz.Z()));
       // update pixel height along Y coordinate
-      double nominalHeight = componentInfo.boundingBox(index).width().Y();
+      double nominalHeight = componentInfo.shape(index).getBoundingBox().width().Y();
       V3D oldScaleFactor = componentInfo.scaleFactor(index);
-      componentInfo.setScaleFactor(index, V3D(oldScaleFactor.X(),
-                                              height[i] / nominalHeight,
-                                              oldScaleFactor.Z()));
+      componentInfo.setScaleFactor(
+              index,
+              V3D(oldScaleFactor.X(), height[i] / nominalHeight, oldScaleFactor.Z()));
     }
   }
 
-  // Apparent tube width calibration along X-coordinate
-  if (std::find(columnNames.begin(), columnNames.end(), "Detector Width") !=
-      columnNames.end()) {
-    auto &detectorInfo = inputWS->mutableDetectorInfo();
-    auto &componentInfo = inputWS->mutableComponentInfo();
-    ColumnVector<double> width = CalTable->getVector("Detector Width");
-    for (size_t i = 0; i < numDetector; ++i) {
-      const auto index = detectorInfo.indexOf(detectorID[i]);
-      double nominalWidth = componentInfo.boundingBox(index).width().X();
-      V3D oldScaleFactor = componentInfo.scaleFactor(index);
-      componentInfo.setScaleFactor(
-          index,
-          V3D(width[i] / nominalWidth, oldScaleFactor.Y(), oldScaleFactor.Z()));
-    }
-  }
 }
 
 } // namespace Algorithms
