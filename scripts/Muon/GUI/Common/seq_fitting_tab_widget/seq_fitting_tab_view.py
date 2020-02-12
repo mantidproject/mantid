@@ -9,6 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy import QtWidgets, QtCore, QtGui
 from mantidqt.utils.qt import load_ui
 from Muon.GUI.Common.message_box import warning
+from mantidqt.utils.observer_pattern import GenericObservable
+
 
 ui_seq_fitting_tab, _ = load_ui(__file__, "seq_fitting_tab.ui")
 
@@ -48,6 +50,7 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.fit_results_table.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 
     def set_fit_table_workspaces(self, runs, group_and_pairs):
+        self.fit_results_table.blockSignals(True)
         self.fit_results_table.clearContents()
         self.fit_results_table.setRowCount(0)
 
@@ -64,6 +67,7 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
             fitItem = QtWidgets.QTableWidgetItem(default_fit_status)
             fitItem.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
             self.fit_results_table.setItem(i, default_columns["Fit quality"], fitItem)
+        self.fit_results_table.blockSignals(False)
 
     def set_fit_table_function_parameters(self, fit_function_parameters, parameter_values):
         self.fit_results_table.blockSignals(True)
@@ -77,26 +81,33 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.fit_results_table.blockSignals(False)
 
     def initialise_fit_function_parameters(self, parameter_values):
+        self.fit_results_table.blockSignals(True)
         for i in range(self.get_number_of_entries()):
-            for j, parameter in enumerate(parameter_values):
+            for j, parameter in enumerate(parameter_values[i]):
                 parameterItem = QtWidgets.QTableWidgetItem(str(parameter))
                 self.fit_results_table.setItem(i, len(default_columns) + j, parameterItem)
                 self.fit_results_table.item(i, default_columns["Fit quality"]).setText("No fit")
                 self.fit_results_table.item(i, default_columns["Fit quality"]).setForeground(QtGui.QBrush(
                                                                                              QtCore.Qt.black))
+        self.fit_results_table.blockSignals(False)
 
     def set_fit_function_parameters(self, row, parameter_values):
+        self.fit_results_table.blockSignals(True)
         for j, parameter in enumerate(parameter_values):
             parameter_item = self.fit_results_table.item(row, len(default_columns) + j)
             parameter_item.setText("{0:.5f}".format(parameter))
+        self.fit_results_table.blockSignals(False)
 
     def set_fit_quality_to_default(self):
+        self.fit_results_table.blockSignals(True)
         for i in range(self.get_number_of_entries()):
             fit_quality_item = self.fit_results_table.item(i, default_columns["Fit quality"])
             fit_quality_item.setForeground(QtGui.QBrush(QtCore.Qt.black))
             fit_quality_item.setText(default_fit_status)
+        self.fit_results_table.blockSignals(False)
 
     def set_fit_quality(self, row, fit_status, fit_quality):
+        self.fit_results_table.blockSignals(True)
         fit_quality_item = self.fit_results_table.item(row, default_columns["Fit quality"])
         fit_quality_item.setText("{0:.3f}".format(fit_quality))
         if fit_status == 'success':
@@ -105,6 +116,7 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
             fit_quality_item.setForeground(QtGui.QBrush(QtCore.Qt.black))
         else:
             fit_quality_item.setForeground(QtGui.QBrush(QtCore.Qt.red))
+        self.fit_results_table.blockSignals(False)
 
     def get_workspace_info_from_fit_table_row(self, row_index):
         if row_index > self.fit_results_table.rowCount():
@@ -148,3 +160,7 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
 
     def setup_slot_for_sequential_fit_button(self, slot):
         self.seq_fit_button.clicked.connect(slot)
+
+    def setup_slot_for_table_parameter_changed(self,slot):
+        self.fit_results_table.cellChanged.connect(slot)
+

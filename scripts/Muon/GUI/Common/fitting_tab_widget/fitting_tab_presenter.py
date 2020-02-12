@@ -144,8 +144,8 @@ class FittingTabPresenter(object):
             self.view.disable_simul_fit_options()
 
         self.update_model_from_view()
-        self.fit_function_changed_notifier.notify_subscribers()
         self.fit_type_changed_notifier.notify_subscribers()
+        self.fit_function_changed_notifier.notify_subscribers()
 
     def handle_plot_guess_changed(self):
         if self.view.is_simul_fit():
@@ -333,10 +333,9 @@ class FittingTabPresenter(object):
             else:
                 self.view.simul_fit_by_specifier.setEnabled(True)
                 self.view.select_workspaces_to_fit_button.setEnabled(False)
-            self.update_model_from_view()
-            self.fit_type_changed_notifier.notify_subscribers()
-        else:
-            return
+        self.update_model_from_view()
+        self.fit_type_changed_notifier.notify_subscribers()
+        self.fit_function_changed_notifier.notify_subscribers()
 
     def handle_fit_specifier_changed(self):
         self.selected_data = self.get_workspace_selected_list()

@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
-from mantidqt.utils.observer_pattern import GenericObserver
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
 import functools
@@ -28,6 +28,7 @@ class SeqFittingTabPresenter(object):
         self.fit_type_changed_observer = GenericObserver(self.handle_selected_workspaces_changed)
         self.fit_function_updated_observer = GenericObserver(self.handle_fit_function_updated)
         self.fit_parameter_updated_observer = GenericObserver(self.handle_fit_function_parameter_changed)
+        self.fit_parameter_changed_in_view = GenericObserverWithArgPassing(self.handle_updated_fit_parameter_in_table)
 
     def create_thread(self, callback):
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
@@ -36,15 +37,22 @@ class SeqFittingTabPresenter(object):
     def handle_fit_function_updated(self):
         if self.model.fit_function is None:
             self.model.clear_fit_information()
-            self.view.set_fit_table_function_parameters([], [])
+            # self.view.set_fit_table_function_parameters([], [])
             self.view.set_fit_quality_to_default()
             return
 
+        self.model.clear_fit_information()
+        parameter_values = []
         number_of_parameters = self.model.fit_function.nParams()
         parameters = [self.model.fit_function.parameterName(i) for i in range(number_of_parameters)]
-        parameter_values = [self.model.fit_function.getParameterValue(parameters[i]) for i in
-                            range(number_of_parameters)]
-        self.model.clear_fit_information()
+        print(parameters)
+        # get parameters for each fit
+        for i in range(self.view.get_number_of_entries()):
+            ws_names = self.get_workspaces_for_entry_in_fit_table(i)
+            fit_function = self.model.get_ws_fit_function(ws_names)
+            parameter_values.append([fit_function.getParameterValue(parameters[i]) for i in
+                                    range(number_of_parameters)])
+        print(parameter_values)
         self.view.set_fit_table_function_parameters(parameters, parameter_values)
 
     def handle_fit_function_parameter_changed(self):
@@ -137,6 +145,14 @@ class SeqFittingTabPresenter(object):
         self.view.seq_fit_button.setEnabled(True)
         self.view.fit_selected_button.setEnabled(True)
 
+    def handle_updated_fit_parameter_in_table(self, row, column):
+        # make sure its a parameter we changed
+        if column < 3:
+            return
+        workspaces = self.get_workspaces_for_entry_in_fit_table(row)
+        params = self.view.get_entry_fit_parameter_values(row)
+        self.model.update_ws_fit_function_parameters(workspaces, params)
+
     def get_workspaces_for_entry_in_fit_table(self, entry):
         runs, group_and_pairs = self.view.get_workspace_info_from_fit_table_row(entry)
         separated_runs = runs.split(';')
@@ -144,3 +160,6 @@ class SeqFittingTabPresenter(object):
         workspace_names = self.model.get_fit_workspace_names_from_groups_and_runs(separated_runs,
                                                                                   separated_group_and_pairs)
         return workspace_names
+
+
+
