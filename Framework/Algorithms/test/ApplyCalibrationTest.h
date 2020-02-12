@@ -38,17 +38,19 @@ using Mantid::Geometry::IDetector_const_sptr;
 
 class ApplyCalibrationTest : public CxxTest::TestSuite {
 public:
-  void testName() { TS_ASSERT_EQUALS(appCalib.name(), "ApplyCalibration") }
+  void testName() {
+      ApplyCalibration appCalib;
+      TS_ASSERT_EQUALS(appCalib.name(), "ApplyCalibration")
+  }
 
   void testInit() {
+    ApplyCalibration appCalib;
     appCalib.initialize();
     TS_ASSERT(appCalib.isInitialized())
   }
 
   void testSimple() {
-
     int ndets = 3;
-
     // Create workspace with paremeterised instrument and put into data store
     Workspace2D_sptr ws =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(ndets, 10,
@@ -63,14 +65,16 @@ public:
     calTableWs->addColumn("int", "Detector ID");
     calTableWs->addColumn("V3D", "Detector Position");
     calTableWs->addColumn("double", "Detector Y Coordinate");
-    calTableWs->addColumn("double", "Detector Height");
-    calTableWs->addColumn("double", "Detector Width");
 
     for (int i = 0; i < ndets; ++i) {
+      IDetector_const_sptr detector = ws->getDetector(i);
       TableRow row = calTableWs->appendRow();
-      //  detector-ID  position  Y-coordinate  Height  Width
-      row << i + 1 << V3D(1.0, 0.01 * i, 2.0) << 0.04 * i << 0.04 << 0.05;
+      //  detector-ID  position  Y-coordinate
+      row << detector->getID() << V3D(1.0, 0.01 * i, 2.0) << 0.04 * i;
     }
+
+    ApplyCalibration appCalib;
+    appCalib.initialize();
     TS_ASSERT_THROWS_NOTHING(appCalib.setPropertyValue("Workspace", wsName));
     TS_ASSERT_THROWS_NOTHING(appCalib.setProperty<ITableWorkspace_sptr>(
         "CalibrationTable", calTableWs));
@@ -89,8 +93,6 @@ public:
     TS_ASSERT_DELTA(newPos.X(), 1.0, 0.0001);
     TS_ASSERT_DELTA(newPos.Y(), 0.0, 0.0001);
     TS_ASSERT_DELTA(newPos.Z(), 2.0, 0.0001);
-    TS_ASSERT_DELTA(scaleFactor.Y(), 2.0, 0.0001); // original height was 0.02
-    TS_ASSERT_DELTA(scaleFactor.X(), 0.5, 0.0001); // original width was 0.1
 
     id = spectrumInfo.detector(ndets - 1).getID();
     newPos = spectrumInfo.position(ndets - 1);
@@ -100,8 +102,6 @@ public:
     TS_ASSERT_DELTA(newPos.X(), 1.0, 0.0001);
     TS_ASSERT_DELTA(newPos.Y(), 0.04 * (ndets - 1), 0.0001);
     TS_ASSERT_DELTA(newPos.Z(), 2.0, 0.0001);
-    TS_ASSERT_DELTA(scaleFactor.Y(), 2.0, 0.0001);
-    TS_ASSERT_DELTA(scaleFactor.X(), 0.5, 0.0001);
 
     dataStore.remove(wsName);
   }
@@ -220,6 +220,9 @@ public:
       //               detector ID
       row << firstDetectorID + 10 * i << V3D(1.0, 0.01 * i, 2.0);
     }
+
+    ApplyCalibration appCalib;
+    appCalib.initialize();
     TS_ASSERT_THROWS_NOTHING(appCalib.setPropertyValue("Workspace", wsName));
     TS_ASSERT_THROWS_NOTHING(appCalib.setProperty<ITableWorkspace_sptr>(
         "CalibrationTable", calTableWs));
@@ -254,8 +257,6 @@ public:
     dataStore.remove(wsName);
   }
 
-private:
-  ApplyCalibration appCalib;
 };
 
 #endif /*APPLYCALIBRATIONTEST_H_*/
