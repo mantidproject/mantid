@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_widget import FittingDataWidget
+from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_widget import FittingPlotWidget
 
 
 class FittingPresenter(object):
@@ -13,3 +14,4 @@ class FittingPresenter(object):
         self.view = view
 
         self.data_widget = FittingDataWidget(self.view, view=self.view.get_data_widget())
+        self.plot_widget = FittingPlotWidget(self.view, view=self.view.get_plot_widget())

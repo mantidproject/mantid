@@ -19,3 +19,6 @@ class FittingView(QtWidgets.QWidget, Ui_fitting):
 
     def get_data_widget(self):
         return self.widget_data
+
+    def get_plot_widget(self):
+        return self.widget_plot

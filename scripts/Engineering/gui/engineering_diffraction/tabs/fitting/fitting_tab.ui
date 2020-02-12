@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>632</width>
-    <height>150</height>
+    <height>246</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -31,23 +31,43 @@ QGroupBox:title {
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="FittingDataView" name="widget_data" native="true"/>
-     </item>
-     <item>
-      <spacer name="verticalSpacer">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
+      <widget class="QScrollArea" name="scrollArea">
+       <property name="widgetResizable">
+        <bool>true</bool>
        </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::MinimumExpanding</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>20</width>
-         <height>0</height>
-        </size>
-       </property>
-      </spacer>
+       <widget class="QWidget" name="scrollAreaWidgetContents">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>596</width>
+          <height>424</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="FittingDataView" name="widget_data" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="FittingPlotView" name="widget_plot" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>400</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
      </item>
     </layout>
    </item>
@@ -58,6 +78,12 @@ QGroupBox:title {
    <class>FittingDataView</class>
    <extends>QWidget</extends>
    <header>Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_view</header>
+  </customwidget>
+  <customwidget>
+   <class>FittingPlotView</class>
+   <extends>QWidget</extends>
+   <header>Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_view</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
