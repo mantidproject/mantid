@@ -8,6 +8,7 @@
 from Engineering.gui.engineering_diffraction.tabs.common import create_error_message
 from mantid.simpleapi import logger
 from mantidqt.utils.asynchronous import AsyncTask
+from mantidqt.utils.observer_pattern import GenericObservable
 
 
 class FittingDataPresenter(object):
@@ -23,6 +24,12 @@ class FittingDataPresenter(object):
         self.view.set_enable_button_connection(self._enable_load_button)
         self.view.set_on_remove_selected_clicked(self._remove_selected_tracked_workspaces)
         self.view.set_on_remove_all_clicked(self._remove_all_tracked_workspaces)
+        self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
+
+        # Observable Setup
+        self.plot_added_notifier = GenericObservable()
+        self.plot_removed_notifier = GenericObservable()
+        self.all_plots_removed_notifier = GenericObservable()
 
     def on_load_clicked(self):
         if self._validate():
@@ -31,7 +38,8 @@ class FittingDataPresenter(object):
 
     def remove_workspace(self, ws_name):
         if ws_name in self.get_loaded_workspaces():
-            self.get_loaded_workspaces().pop(ws_name)
+            removed = self.get_loaded_workspaces().pop(ws_name)
+            self.plot_removed_notifier.notify_subscribers(removed)
             self._repopulate_table()
 
     def rename_workspace(self, old_name, new_name):
@@ -42,6 +50,7 @@ class FittingDataPresenter(object):
 
     def clear_workspaces(self):
         self.get_loaded_workspaces().clear()
+        self.all_plots_removed_notifier.notify_subscribers()
         self.row_numbers.clear()
         self._repopulate_table()
 
@@ -89,12 +98,21 @@ class FittingDataPresenter(object):
         row_numbers = self._remove_selected_table_rows()
         for row_no in row_numbers:
             ws_name = self.row_numbers.pop(row_no)
-            self.get_loaded_workspaces().pop(ws_name)
+            removed = self.get_loaded_workspaces().pop(ws_name)
+            self.plot_removed_notifier.notify_subscribers(removed)
         self._repopulate_table()
 
     def _remove_all_tracked_workspaces(self):
         self.clear_workspaces()
         self._remove_all_table_rows()
+
+    def _handle_table_cell_changed(self, row, col):
+        if col == 2 and row in self.row_numbers:  # Is from the plot check column
+            ws = self.model.get_loaded_workspaces()[self.row_numbers[row]]
+            if self.view.get_table_item(row, col).checkState() == 2:  # Plot Box is checked
+                self.plot_added_notifier.notify_subscribers(ws)
+            else:  # Plot box is unchecked
+                self.plot_removed_notifier.notify_subscribers(ws)
 
     def _enable_load_button(self, enabled):
         self.view.set_load_button_enabled(enabled)

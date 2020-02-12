@@ -87,6 +87,9 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def get_selected_rows(self):
         return set(index.row() for index in self.table_selection.selectedIndexes())
 
+    def get_table_item(self, row, col):
+        return self.table_selection.item(row, col)
+
     # =================
     # State Getters
     # =================

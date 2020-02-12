@@ -15,3 +15,10 @@ class FittingPresenter(object):
 
         self.data_widget = FittingDataWidget(self.view, view=self.view.get_data_widget())
         self.plot_widget = FittingPlotWidget(self.view, view=self.view.get_plot_widget())
+
+        self.data_widget.presenter.plot_removed_notifier.add_subscriber(
+            self.plot_widget.workspace_removed_observer)
+        self.data_widget.presenter.plot_added_notifier.add_subscriber(
+            self.plot_widget.workspace_added_observer)
+        self.data_widget.presenter.all_plots_removed_notifier.add_subscriber(
+            self.plot_widget.all_workspaces_removed_observer)
