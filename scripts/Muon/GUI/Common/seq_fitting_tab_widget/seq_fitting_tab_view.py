@@ -11,10 +11,6 @@ from mantidqt.utils.qt import load_ui
 from Muon.GUI.Common.message_box import warning
 
 ui_seq_fitting_tab, _ = load_ui(__file__, "seq_fitting_tab.ui")
-allowed_minimizers = ['Levenberg-Marquardt', 'BFGS', 'Conjugate gradient (Fletcher-Reeves imp.)',
-                      'Conjugate gradient (Polak-Ribiere imp.)',
-                      'Damped GaussNewton', 'Levenberg-MarquardtMD', 'Simplex',
-                      'SteepestDescent', 'Trust Region']
 
 default_columns = {"Run": 0, "Groups/Pairs": 1, "Fit quality": 2}
 default_fit_status = "No fit"
@@ -36,8 +32,6 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.fit_function = None
 
         self.setup_default_fit_results_table()
-
-        self.plot_fit_results_checkbox.setVisible(False)
 
     def warning_popup(self, message):
         warning(message, parent=self)

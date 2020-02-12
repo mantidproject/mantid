@@ -141,7 +141,7 @@ class FitParameters(object):
 
     def __eq__(self, other):
         return self._parameter_workspace == other._parameter_workspace and \
-            self._global_parameters == other._global_parameters
+               self._global_parameters == other._global_parameters
 
     def __ne__(self, other):
         return not self == other
@@ -207,9 +207,9 @@ class FitInformation(object):
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""
         return self.parameter_workspace_name == other.parameter_workspace_name and \
-            self.fit_function_name == other.fit_function_name and \
-            self.input_workspaces == other.input_workspaces and \
-            self.output_workspace_names == other.output_workspace_names
+               self.fit_function_name == other.fit_function_name and \
+               self.input_workspaces == other.input_workspaces and \
+               self.output_workspace_names == other.output_workspace_names
 
     @property
     def parameters(self):
@@ -301,6 +301,8 @@ class FittingContext(object):
         # Register callbacks with this object to observe when new fits
         # are added
         self.new_fit_notifier = Observable()
+        self.new_fit_results_notifier = Observable()
+        self.new_fit_plotting_notifier = Observable()
         self.fit_removed_notifier = Observable()
         self.plot_guess_notifier = Observable()
         self._number_of_fits = 0
@@ -320,7 +322,8 @@ class FittingContext(object):
                             fit_function_name,
                             input_workspace,
                             output_workspace_names,
-                            global_parameters=None):
+                            global_parameters=None,
+                            plot_fit=True):
         """
         Add a new fit information object based on the raw values.
         See FitInformation constructor for details are arguments.
@@ -328,12 +331,13 @@ class FittingContext(object):
         self.add_fit(
             FitInformation(parameter_workspace, fit_function_name,
                            input_workspace, output_workspace_names,
-                           global_parameters))
+                           global_parameters), plot_fit)
 
-    def add_fit(self, fit):
+    def add_fit(self, fit, plot_fit=True):
         """
         Add a new fit to the context. Subscribers are notified of the update.
         :param fit: A new FitInformation object
+        :param plot_fit: Whether the plot the new fit
         """
         if fit not in self.fit_list:
             self.fit_list.append(fit)
@@ -341,11 +345,14 @@ class FittingContext(object):
         else:
             self.update_fit(fit)
 
-        self.new_fit_notifier.notify_subscribers(fit)
+        self.new_fit_results_notifier.notify_subscribers(fit)
+
+        if plot_fit:
+            self.new_fit_plotting_notifier.notify_subscribers(fit)
 
     def update_fit(self, updated_fit):
         """
-        Updates a fit that is currently stored in the context
+        Updates fit parameters of a fit that is currently stored in the context
         :param updated_fit: A FitInformation object
         """
         for fit in self.fit_list:

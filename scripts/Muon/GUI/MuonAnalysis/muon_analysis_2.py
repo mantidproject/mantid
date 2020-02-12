@@ -286,10 +286,10 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
     def setup_fitting_notifier(self):
         """Connect fitting and results tabs to inform of new fits"""
-        self.fitting_context.new_fit_notifier.add_subscriber(
+        self.fitting_context.new_fit_results_notifier.add_subscriber(
             self.results_tab.results_tab_presenter.new_fit_performed_observer)
 
-        self.fitting_context.new_fit_notifier.add_subscriber(self.dockable_plot_widget.presenter.fit_observer)
+        self.fitting_context.new_fit_plotting_notifier.add_subscriber(self.dockable_plot_widget.presenter.fit_observer)
 
         self.fitting_context.fit_removed_notifier.add_subscriber(self.dockable_plot_widget.presenter.
                                                                  fit_removed_observer)
@@ -301,5 +301,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.closeEvent(event)
         self.dockable_plot_widget_window.widget().close()
         self.removeDockWidget(self.dockable_plot_widget_window)
-        self.context.ads_observer = None
         super(MuonAnalysisGui, self).closeEvent(event)
+        self.context.ads_observer = None
+

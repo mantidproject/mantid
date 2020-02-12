@@ -15,8 +15,10 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 @start_qapplication
 class FittingTabModelTest(unittest.TestCase):
+
     def setUp(self):
         self.model = FittingTabModel(setup_context())
+        self.model.context.ads_observer.unsubscribe()
 
     def test_convert_function_string_into_dict(self):
         trial_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
@@ -27,12 +29,11 @@ class FittingTabModelTest(unittest.TestCase):
 
     def test_create_fitted_workspace_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
-        trial_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc; Workspace'
         self.model.function_name = 'GausOsc'
 
-        name, directory = self.model.create_fitted_workspace_name(input_workspace_name, trial_function)
+        name, directory = self.model.create_fitted_workspace_name(input_workspace_name)
 
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)
@@ -80,16 +81,11 @@ class FittingTabModelTest(unittest.TestCase):
 
     def test_create_multi_domain_fitted_workspace_name(self):
         input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
-        trial_function = FunctionFactory.createInitialized(
-            'composite = MultiDomainFunction, NumDeriv = true;name = Polynomial,'
-            ' n = 0, A0 = 0,$domains = i;name = Polynomial, n = 0, A0 = 0,'
-            '$domains = i;name = Polynomial, n = 0, A0 = 0,$domains = i;'
-            'name = Polynomial, n = 0, A0 = 0,$domains = i')
         expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; Polynomial/'
         expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1+ ...; Fitted; Polynomial'
         self.model.function_name = 'Polynomial'
 
-        name, directory = self.model.create_multi_domain_fitted_workspace_name(input_workspace_name, trial_function)
+        name, directory = self.model.create_multi_domain_fitted_workspace_name(input_workspace_name)
 
         self.assertEqual(name, expected_workspace_name)
         self.assertEqual(directory, expected_directory_name)
@@ -97,19 +93,17 @@ class FittingTabModelTest(unittest.TestCase):
     def test_do_sequential_fit_correctly_delegates_to_do_single_fit(self):
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
         self.model.do_single_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
-        x_data = range(0, 100)
-        y_data = [5 + x * x for x in x_data]
-        workspace = CreateWorkspace(x_data, y_data)
-        parameter_dict = {'Function': trial_function, 'InputWorkspace': [workspace] * 5,
+        workspace = "MUSR1223"
+        parameter_dict = {'Function': trial_function, 'InputWorkspace': workspace,
                           'Minimizer': 'Levenberg-Marquardt',
-                          'StartX': [0.0] * 5, 'EndX': [100.0] * 5, 'EvaluationType': 'CentrePoint'}
-
-        self.model.do_sequential_fit(parameter_dict)
+                          'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'}
+        self.model.get_parameters_for_single_fit = mock.MagicMock(return_value=parameter_dict)
+        self.model.do_sequential_fit([workspace] * 5)
 
         self.assertEqual(self.model.do_single_fit.call_count, 5)
         self.model.do_single_fit.assert_called_with(
             {'Function': mock.ANY, 'InputWorkspace': workspace, 'Minimizer': 'Levenberg-Marquardt',
-             'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'})
+             'StartX': 0.0, 'EndX': 100.0, 'EvaluationType': 'CentrePoint'}, True)
 
     def test_do_simultaneous_fit_adds_single_input_workspace_to_fit_context_with_globals(self):
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
@@ -129,7 +123,7 @@ class FittingTabModelTest(unittest.TestCase):
     def test_do_simultaneous_fit_adds_multi_input_workspace_to_fit_context(self):
         # create function
         single_func = ';name=FlatBackground,$domains=i,A0=0'
-        multi_func = 'composite=MultiDomainFunction,NumDeriv=1' + single_func + single_func +";"
+        multi_func = 'composite=MultiDomainFunction,NumDeriv=1' + single_func + single_func + ";"
         trial_function = FunctionFactory.createInitialized(multi_func)
         x_data = range(0, 100)
         y_data = [5 + x * x for x in x_data]
@@ -137,7 +131,7 @@ class FittingTabModelTest(unittest.TestCase):
         workspace2 = CreateWorkspace(x_data, y_data)
         parameter_dict = {'Function': trial_function, 'InputWorkspace': [workspace1.name(), workspace2.name()],
                           'Minimizer': 'Levenberg-Marquardt',
-                          'StartX': [0.0]*2, 'EndX': [100.0]*2, 'EvaluationType': 'CentrePoint'}
+                          'StartX': [0.0] * 2, 'EndX': [100.0] * 2, 'EvaluationType': 'CentrePoint'}
         self.model.do_simultaneous_fit(parameter_dict, global_parameters=[])
 
         fit_context = self.model.context.fitting_context
@@ -246,7 +240,8 @@ class FittingTabModelTest(unittest.TestCase):
                                          EndX=parameters['EndX'],
                                          OutputWorkspace='__unknown_interface_fitting_guess')
         self.assertEqual(1, self.model.context.fitting_context.notify_plot_guess_changed.call_count)
-        self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(True, '__unknown_interface_fitting_guess')
+        self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(True,
+                                                                                        '__unknown_interface_fitting_guess')
 
 
 if __name__ == '__main__':
