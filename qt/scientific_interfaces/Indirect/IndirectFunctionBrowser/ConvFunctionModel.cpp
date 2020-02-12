@@ -134,8 +134,6 @@ void ConvFunctionModel::checkSingleFunction(IFunction_sptr fun,
   }
 }
 
-// void ConvFunctionModel::checkProductFunction(IFunction_sptr fun) {}
-
 IFunction_sptr ConvFunctionModel::getFitFunction() const {
   return m_model.getFitFunction();
 }
