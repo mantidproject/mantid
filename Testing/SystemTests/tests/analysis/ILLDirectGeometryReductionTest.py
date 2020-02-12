@@ -219,3 +219,50 @@ class IN5_Tube_Background(systemtesting.MantidSystemTest):
                 'OutputWorkspace':'Flat'}
         alg = create_algorithm('DirectILLTubeBackground', **args)
         assertRaisesNothing(self, alg.execute)
+
+
+class IN5_Mask_Non_Overlapping_Bins(systemtesting.MantidSystemTest):
+
+    def validate(self):
+        self.tolerance = 1e-7
+        self.tolerance_is_rel_err = True
+        return ['red', 'ILL_IN5_Tweak_sqw.nxs']
+
+    @staticmethod
+    def ecrase(ws):
+        import numpy as np
+        y = ws.extractY()
+        y_prime = np.full_like(y, 0.1)
+        for i in range(ws.getNumberHistograms()):
+            ws.setY(i, y_prime[i])
+
+    def runTest(self):
+
+        run = 'ILL/IN5/176053.nxs'
+
+        DirectILLCollectData(
+            Run=run,
+            Normalisation='Normalisation Time',
+            OutputIncidentEnergyWorkspace='Ei',
+            OutputElasticChannelWorkspace='Elc',
+            OutputWorkspace='raw',
+            OutputEPPWorkspace='Epp'
+        )
+
+        ws = Load(run)
+        self.ecrase(ws)
+
+        DirectILLCollectData(
+            InputWorkspace='ws',
+            Normalisation='Normalisation Time',
+            IncidentEnergyWorkspace='Ei',
+            ElasticChannelWorkspace='Elc',
+            OutputWorkspace='Eone'
+        )
+
+        DirectILLReduction(
+            InputWorkspace='Eone',
+            EnergyRebinning='a',
+            QBinningParams='',
+            OutputWorkspace='red'
+        )
