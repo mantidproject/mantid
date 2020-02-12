@@ -1382,20 +1382,19 @@ bool InstrumentWidgetMaskTab::saveMaskViewToProject(
 
     // get masked detector workspace from actor
     const auto &actor = m_instrWidget->getInstrumentActor();
-    auto outputWS = actor.getMaskMatrixWorkspace();
-
-    if (!outputWS)
-      return false; // no mask workspace was found
-
-    // save mask to file inside project folder
-    auto alg = AlgorithmManager::Instance().createUnmanaged("SaveMask", -1);
-    alg->setChild(true);
-    alg->setProperty("InputWorkspace",
-                     boost::dynamic_pointer_cast<Workspace>(outputWS));
-    alg->setPropertyValue("OutputFile", fileName);
-    alg->setLogging(false);
-    alg->execute();
-
+    if (actor.hasMaskWorkspace()) {
+      auto outputWS = actor.getMaskMatrixWorkspace();
+      // save mask to file inside project folder
+      auto alg = AlgorithmManager::Instance().createUnmanaged("SaveMask", -1);
+      alg->setChild(true);
+      alg->setProperty("InputWorkspace",
+                       boost::dynamic_pointer_cast<Workspace>(outputWS));
+      alg->setPropertyValue("OutputFile", fileName);
+      alg->setLogging(false);
+      alg->execute();
+    } else {
+      return false;
+    }
   } catch (...) {
     // just fail silently, if we can't save the mask then we should
     // give up at this point.
