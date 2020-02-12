@@ -44,6 +44,7 @@ SelectFunctionDialog::SelectFunctionDialog(
     QWidget *parent, const std::vector<std::string> &restrictions)
     : QDialog(parent), m_form(new Ui::SelectFunctionDialog) {
   m_form->setupUi(this);
+  m_form->errorMessage->hide();
 
   auto &factory = Mantid::API::FunctionFactory::Instance();
   auto registeredFunctions = factory.getFunctionNamesGUI();
@@ -75,8 +76,11 @@ SelectFunctionDialog::SelectFunctionDialog(
   constructFunctionTree(categories, restrictions);
 
   connect(m_form->fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),
-          this, SLOT(accept()));
+          this, SLOT(acceptFunction()));
   m_form->fitTree->setToolTip("Select a function type and press OK.");
+
+  connect(m_form->buttonBox, SIGNAL(accepted()), this, SLOT(acceptFunction()));
+  connect(m_form->buttonBox, SIGNAL(rejected()), this, SLOT(rejectFunction()));
 
   m_form->searchBox->setCurrentIndex(-1);
 }
@@ -196,6 +200,23 @@ void SelectFunctionDialog::searchBoxChanged(const QString &text) {
   const auto index = m_form->searchBox->findText(text);
   if (index >= 0)
     m_form->searchBox->setCurrentIndex(index);
+}
+
+void SelectFunctionDialog::acceptFunction() {
+  const auto func = getFunction();
+  if (func.isEmpty()) {
+    m_form->errorMessage->setText(
+        QString("<span style='color:red'> Function  not found</span> "));
+    m_form->errorMessage->show();
+  } else {
+    m_form->errorMessage->hide();
+    accept();
+  }
+}
+
+void SelectFunctionDialog::rejectFunction() {
+  m_form->errorMessage->hide();
+  reject();
 }
 
 } // namespace MantidWidgets

@@ -8,9 +8,8 @@ from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QDialog, QCompleter
+from qtpy.QtWidgets import QCompleter, QDialog, QLabel
 
-from mantid import logger
 from mantidqt.utils.qt import load_ui
 
 
@@ -25,7 +24,7 @@ class AddFunctionDialog(QDialog):
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self._setup_ui(function_names)
-        self.accepted.connect(self.action_add_function)
+        self.ui.buttonBox.accepted.connect(self.action_add_function)
 
     def _setup_ui(self, function_names):
         self.ui = load_ui(__file__, 'add_function_dialog.ui', self)
@@ -34,10 +33,13 @@ class AddFunctionDialog(QDialog):
             self.ui.functionBox.addItems(function_names)
         function_box.completer().setCompletionMode(QCompleter.PopupCompletion)
         function_box.completer().setFilterMode(Qt.MatchContains)
+        self.ui.errorMessage.hide()
 
     def action_add_function(self):
         current_function = self.ui.functionBox.currentText()
         if self.ui.functionBox.findText(current_function, Qt.MatchExactly) != -1:
             self.function_added.emit(current_function)
+            self.accept()
         else:
-            logger.warning("Function %s not found" % current_function)
+            self.ui.errorMessage.setText("<span style='color:red'> Function %s not found </span>" % current_function)
+            self.ui.errorMessage.show()

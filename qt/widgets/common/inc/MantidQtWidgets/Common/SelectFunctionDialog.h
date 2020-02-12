@@ -53,6 +53,8 @@ private:
 
 private slots:
   void searchBoxChanged(const QString &text);
+  void acceptFunction();
+  void rejectFunction();
 };
 
 } // namespace MantidWidgets
