@@ -8,7 +8,7 @@ from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QCompleter, QDialog, QLabel
+from qtpy.QtWidgets import QCompleter, QDialog
 
 from mantidqt.utils.qt import load_ui
 
