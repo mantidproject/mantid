@@ -44,7 +44,7 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent)
 SelectFunctionDialog::SelectFunctionDialog(
     QWidget *parent, const std::vector<std::string> &restrictions)
     : QDialog(parent), m_form(new Ui::SelectFunctionDialog) {
-  setModal(true);
+  setWindowModality(Qt::WindowModal);
   setWindowIcon(QIcon(":/images/MantidIcon.ico"));
   m_form->setupUi(this);
   m_form->errorMessage->hide();
