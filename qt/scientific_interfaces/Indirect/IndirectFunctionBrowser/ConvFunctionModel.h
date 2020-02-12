@@ -84,6 +84,9 @@ public:
   void setFitType(FitType fitType);
   void setDeltaFunction(bool);
   bool hasDeltaFunction() const;
+  void setTempCorrection(bool, double value);
+  bool hasTempCorrection() const;
+  double getTempValue() const;
   void setBackground(BackgroundType bgType);
   void removeBackground();
   bool hasBackground() const;
@@ -129,12 +132,14 @@ private:
   QStringList makeGlobalList() const;
   int getNumberOfPeaks() const;
   void checkConvolution(IFunction_sptr fun);
-  void checkComposite(IFunction_sptr fun);
+  void checkSingleFunction(IFunction_sptr fun, bool &isFitTypeSet);
 
   ConvolutionFunctionModel m_model;
   FitType m_fitType = FitType::None;
   BackgroundType m_backgroundType = BackgroundType::None;
   bool m_hasDeltaFunction = false;
+  bool m_hasTempCorrection = false;
+  double m_tempValue = 100.0;
   DataForParameterEstimationCollection m_estimationData;
   QList<ParamID> m_globals;
   FitSubType m_fitSubType;

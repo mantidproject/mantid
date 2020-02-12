@@ -42,6 +42,8 @@ extern std::unordered_map<std::string, FitType> FitTypeStringToEnum;
 
 enum class BackgroundType { None, Flat, Linear };
 
+enum class TempCorrectionType { None, Exponential };
+
 enum class ParamID {
   NONE,
   LOR1_AMPLITUDE,
@@ -58,6 +60,7 @@ enum class ParamID {
   TW_TAU,
   TW_CENTRE,
   DELTA_HEIGHT,
+  TEMPERATURE,
   SE_HEIGHT,
   SE_TAU,
   SE_BETA,
@@ -95,6 +98,11 @@ inline void applyToParamIDRange(ParamID from, ParamID to,
   for (auto i = from; i <= to; ++i)
     fun(i);
 }
+
+enum SubTypeIndex {
+  Fit = 0,
+  Background = 1,
+};
 
 struct TemplateSubType {
   virtual QString name() const = 0;
@@ -188,11 +196,18 @@ struct DeltaSubType : public TemplateSubTypeImpl<bool> {
   QString name() const override { return "Delta"; }
 };
 
+struct TempSubType : public TemplateSubTypeImpl<TempCorrectionType> {
+  QString name() const override { return "TempCorrection"; }
+};
+
 void applyToFitType(FitType fitType,
                     const std::function<void(ParamID)> &paramFun);
 void applyToBackground(BackgroundType bgType,
                        const std::function<void(ParamID)> &paramFun);
 void applyToDelta(bool deltaType, const std::function<void(ParamID)> &paramFun);
+
+void applyToTemp(TempCorrectionType tempCorrectionType,
+                 const std::function<void(ParamID)> &paramFun);
 
 } // namespace ConvTypes
 } // namespace IDA

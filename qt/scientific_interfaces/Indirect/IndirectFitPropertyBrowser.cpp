@@ -138,8 +138,8 @@ QStringList IndirectFitPropertyBrowser::getLocalParameters() const {
 
 void IndirectFitPropertyBrowser::syncFullBrowserWithTemplate() {
   auto const fun = m_templateBrowser->getFunction();
-  m_functionBrowser->setFunction(fun);
   if (fun) {
+    m_functionBrowser->setFunction(fun);
     m_functionBrowser->updateMultiDatasetParameters(
         *m_templateBrowser->getGlobalFunction());
     m_functionBrowser->setGlobalParameters(
@@ -151,8 +151,8 @@ void IndirectFitPropertyBrowser::syncFullBrowserWithTemplate() {
 
 void IndirectFitPropertyBrowser::syncTemplateBrowserWithFull() {
   auto const funStr = m_functionBrowser->getFunctionString();
-  m_templateBrowser->setFunction(funStr);
   if (auto const fun = m_functionBrowser->getGlobalFunction()) {
+    m_templateBrowser->setFunction(funStr);
     m_templateBrowser->updateMultiDatasetParameters(*fun);
     m_templateBrowser->setGlobalParameters(
         m_functionBrowser->getGlobalParameters());

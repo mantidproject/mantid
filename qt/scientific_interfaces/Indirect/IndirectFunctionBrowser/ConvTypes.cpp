@@ -56,6 +56,7 @@ std::map<ParamID, QString> g_paramName{
     {ParamID::TW_TAU, "Tau"},
     {ParamID::TW_CENTRE, "Centre"},
     {ParamID::DELTA_HEIGHT, "Height"},
+    {ParamID::TEMPERATURE, "Temp"},
     {ParamID::SE_HEIGHT, "Height"},
     {ParamID::SE_TAU, "Tau"},
     {ParamID::SE_BETA, "Beta"},
@@ -141,6 +142,17 @@ std::map<bool, TemplateSubTypeDescriptor> TemplateSubTypeImpl<bool>::g_typeMap{
       {ParamID::DELTA_HEIGHT, ParamID::DELTA_HEIGHT}}},
 };
 
+template <>
+std::map<TempCorrectionType, TemplateSubTypeDescriptor>
+    TemplateSubTypeImpl<TempCorrectionType>::g_typeMap{
+        {TempCorrectionType::None,
+         {"None", "", {ParamID::NONE, ParamID::NONE}}},
+        {TempCorrectionType::Exponential,
+         {"Temp Correction",
+          "UserFunction",
+          {ParamID::TEMPERATURE, ParamID::TEMPERATURE}}},
+    };
+
 QString paramName(ParamID id) { return g_paramName.at(id); }
 
 void applyToFitType(FitType fitType,
@@ -160,6 +172,13 @@ void applyToDelta(bool hasDeltaFunction,
                   const std::function<void(ParamID)> &paramFun) {
   applyToParamIDRange(DeltaSubType::g_typeMap[hasDeltaFunction].blocks.front(),
                       DeltaSubType::g_typeMap[hasDeltaFunction].blocks.back(),
+                      paramFun);
+}
+
+void applyToTemp(TempCorrectionType tempCorrectionType,
+                 const std::function<void(ParamID)> &paramFun) {
+  applyToParamIDRange(TempSubType::g_typeMap[tempCorrectionType].blocks.front(),
+                      TempSubType::g_typeMap[tempCorrectionType].blocks.back(),
                       paramFun);
 }
 

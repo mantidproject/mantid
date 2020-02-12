@@ -23,6 +23,7 @@ ConvFunctionModel::ConvFunctionModel() {}
 void ConvFunctionModel::clearData() {
   m_fitType = FitType::None;
   m_hasDeltaFunction = false;
+  m_hasTempCorrection = false;
   m_backgroundType = BackgroundType::None;
   m_model.clear();
 }
@@ -30,7 +31,10 @@ void ConvFunctionModel::clearData() {
 void ConvFunctionModel::setModel() {
   m_model.setModel(buildBackgroundFunctionString(), m_fitResolutions,
                    buildPeaksFunctionString(), m_hasDeltaFunction, m_qValues,
-                   m_isQDependentFunction);
+                   m_isQDependentFunction, m_hasTempCorrection, m_tempValue);
+  if (m_hasTempCorrection && !m_globals.contains(ParamID::TEMPERATURE)) {
+    m_globals.push_back(ParamID::TEMPERATURE);
+  }
   m_model.setGlobalParameters(makeGlobalList());
 }
 
@@ -38,7 +42,6 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
   clearData();
   if (!fun)
     return;
-
   bool isBackgroundSet = false;
   if (fun->name() == "Convolution") {
     checkConvolution(fun);
@@ -77,53 +80,57 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
         throw std::runtime_error("Function has wrong structure.");
       }
       isResolutionSet = true;
-    } else if (name == "CompositeFunction") {
-      checkComposite(innerFunction);
-    } else if (FitTypeStringToEnum.count(name) == 1) {
-      if (isFitTypeSet) {
+    } else if (name == "ProductFunction") {
+      if (innerFunction->getFunction(0)->name() != "UserFunction" ||
+          innerFunction->getFunction(0)->nParams() != 1 ||
+          !innerFunction->getFunction(0)->hasParameter("Temp")) {
         throw std::runtime_error("Function has wrong structure.");
       }
-      m_fitType = FitTypeStringToEnum[name];
-      m_isQDependentFunction = FitTypeQDepends[m_fitType];
-      isFitTypeSet = true;
-    } else if (name == "DeltaFunction") {
-      m_hasDeltaFunction = true;
+      m_hasTempCorrection = true;
+      if (boost::dynamic_pointer_cast<CompositeFunction>(
+              innerFunction->getFunction(1)))
+        checkConvolution(innerFunction->getFunction(1));
+      else
+        checkSingleFunction(innerFunction->getFunction(1), isFitTypeSet);
+    }
+
+    else if (name == "CompositeFunction") {
+      checkConvolution(innerFunction);
     } else {
-      clear();
-      throw std::runtime_error("Function has wrong structure.");
+      checkSingleFunction(innerFunction, isFitTypeSet);
     }
   }
 }
 
-void ConvFunctionModel::checkComposite(IFunction_sptr fun) {
-  bool isFitTypeSet = false;
-  for (size_t i = 0; i < fun->nFunctions(); ++i) {
-    auto innerFunction = fun->getFunction(i);
-    auto const name = innerFunction->name();
-    if (name == "Lorentzian") {
-      if (isFitTypeSet && m_fitType != FitType::OneLorentzian) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      if (isFitTypeSet)
-        m_fitType = FitType::TwoLorentzians;
-      else
-        m_fitType = FitType::OneLorentzian;
-      m_isQDependentFunction = false;
-      isFitTypeSet = true;
-
-    } else if (FitTypeStringToEnum.count(name) == 1) {
-      if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
-      }
-      m_fitType = FitTypeStringToEnum[name];
-      m_isQDependentFunction = FitTypeQDepends[m_fitType];
-      isFitTypeSet = true;
-    } else if (name == "DeltaFunction") {
-      m_hasDeltaFunction = true;
-    } else {
-      clear();
+void ConvFunctionModel::checkSingleFunction(IFunction_sptr fun,
+                                            bool &isFitTypeSet) {
+  assert(fun->nFunctions() == 0);
+  auto const name = fun->name();
+  if (name == "Lorentzian") {
+    if (isFitTypeSet && m_fitType != FitType::OneLorentzian) {
       throw std::runtime_error("Function has wrong structure.");
     }
+    if (isFitTypeSet)
+      m_fitType = FitType::TwoLorentzians;
+    else
+      m_fitType = FitType::OneLorentzian;
+    m_isQDependentFunction = false;
+    isFitTypeSet = true;
+
+  } else if (FitTypeStringToEnum.count(name) == 1) {
+    if (isFitTypeSet) {
+      throw std::runtime_error(
+          "Function has wrong structure. More than one fit type set");
+    }
+    m_fitType = FitTypeStringToEnum[name];
+    m_isQDependentFunction = FitTypeQDepends[m_fitType];
+    isFitTypeSet = true;
+  } else if (name == "DeltaFunction") {
+    m_hasDeltaFunction = true;
+  } else {
+    clear();
+    throw std::runtime_error(
+        "Function has wrong structure. Function not recognized");
   }
 }
 
@@ -224,6 +231,20 @@ void ConvFunctionModel::setDeltaFunction(bool on) {
   setModel();
   setCurrentValues(oldValues);
 }
+
+void ConvFunctionModel::setTempCorrection(bool on, double value) {
+  auto oldValues = getCurrentValues();
+  m_hasTempCorrection = on;
+  m_tempValue = value;
+  setModel();
+  setCurrentValues(oldValues);
+}
+
+bool ConvFunctionModel::hasTempCorrection() const {
+  return m_hasTempCorrection;
+}
+
+double ConvFunctionModel::getTempValue() const { return m_tempValue; }
 
 bool ConvFunctionModel::hasDeltaFunction() const { return m_hasDeltaFunction; }
 
@@ -542,6 +563,8 @@ boost::optional<QString> ConvFunctionModel::getPrefix(ParamID name) const {
     return m_model.backgroundPrefix();
   } else if (name == ParamID::DELTA_HEIGHT) {
     return m_model.deltaFunctionPrefix();
+  } else if (name == ParamID::TEMPERATURE) {
+    return m_model.tempFunctionPrefix();
   } else {
     auto const prefixes = m_model.peakPrefixes();
     if (!prefixes)
@@ -590,6 +613,9 @@ void ConvFunctionModel::applyParameterFunction(
   applyToFitType(m_fitType, paramFun);
   applyToBackground(m_backgroundType, paramFun);
   applyToDelta(m_hasDeltaFunction, paramFun);
+  auto tempType = m_hasTempCorrection ? TempCorrectionType::Exponential
+                                      : TempCorrectionType::None;
+  applyToTemp(tempType, paramFun);
 }
 
 boost::optional<ParamID>

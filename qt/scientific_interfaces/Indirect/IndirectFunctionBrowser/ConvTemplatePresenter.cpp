@@ -7,8 +7,9 @@
 #include "ConvTemplatePresenter.h"
 #include "ConvTemplateBrowser.h"
 #include "MantidQtWidgets/Common/EditLocalParameterDialog.h"
-
+#include <QInputDialog>
 #include <cmath>
+#include <float.h>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -29,7 +30,7 @@ ConvTemplatePresenter::ConvTemplatePresenter(ConvTemplateBrowser *view)
 }
 
 void ConvTemplatePresenter::setSubType(size_t subTypeIndex, int typeIndex) {
-  if (subTypeIndex == 0) {
+  if (subTypeIndex == SubTypeIndex::Fit) {
     m_model.setFitType(static_cast<FitType>(typeIndex));
   } else {
     m_model.setBackground(static_cast<BackgroundType>(typeIndex));
@@ -56,6 +57,30 @@ void ConvTemplatePresenter::setDeltaFunction(bool on) {
   emit functionStructureChanged();
 }
 
+void ConvTemplatePresenter::setTempCorrection(bool on) {
+  if (on == m_model.hasTempCorrection())
+    return;
+  double temp = m_model.getTempValue();
+  if (on) {
+    bool ok;
+    temp = QInputDialog::getDouble(m_view, "Temperature", "Set Temperature",
+                                   temp, 0.0,
+                                   std::numeric_limits<double>::max(), 3, &ok);
+    if (!ok)
+      return;
+  }
+  m_model.setTempCorrection(on, temp);
+  if (on)
+    m_view->addTempCorrection(temp);
+  else
+    m_view->removeTempCorrection();
+
+  setErrorsEnabled(false);
+  updateViewParameterNames();
+  updateViewParameters();
+  emit functionStructureChanged();
+}
+
 void ConvTemplatePresenter::setNumberOfDatasets(int n) {
   m_model.setNumberDomains(n);
 }
@@ -66,8 +91,17 @@ int ConvTemplatePresenter::getNumberOfDatasets() const {
 
 void ConvTemplatePresenter::setFunction(const QString &funStr) {
   m_model.setFunctionString(funStr);
-  m_view->setSubType(0, static_cast<int>(m_model.getFitType()));
-  m_view->setSubType(1, static_cast<int>(m_model.getBackgroundType()));
+
+  m_view->updateTemperatureCorrectionAndDelta(m_model.hasTempCorrection(),
+                                              m_model.hasDeltaFunction());
+
+  m_view->setSubType(SubTypeIndex::Fit, static_cast<int>(m_model.getFitType()));
+  m_view->setSubType(SubTypeIndex::Background,
+                     static_cast<int>(m_model.getBackgroundType()));
+  m_view->setEnum(SubTypeIndex::Fit, static_cast<int>(m_model.getFitType()));
+  m_view->setEnum(SubTypeIndex::Background,
+                  static_cast<int>(m_model.getBackgroundType()));
+
   setErrorsEnabled(false);
   updateViewParameterNames();
   updateViewParameters();
@@ -96,9 +130,6 @@ QStringList ConvTemplatePresenter::getLocalParameters() const {
 
 void ConvTemplatePresenter::setGlobalParameters(const QStringList &globals) {
   m_model.setGlobalParameters(globals);
-  // if (m_model.hasStretchExponential()) {
-  //  m_view->setGlobalParametersQuiet(globals);
-  //}
 }
 
 void ConvTemplatePresenter::setGlobal(const QString &parName, bool on) {

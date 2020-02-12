@@ -57,9 +57,11 @@ void ConvTemplateBrowser::createProperties() {
 
   createFunctionParameterProperties();
   createDeltaFunctionProperties();
+  createTempCorrectionProperties();
 
   m_browser->addProperty(m_subTypeProperties[0]);
   m_browser->addProperty(m_deltaFunctionOn);
+  m_browser->addProperty(m_tempCorrectionOn);
   m_browser->addProperty(m_subTypeProperties[1]);
 
   m_parameterManager->blockSignals(false);
@@ -111,8 +113,12 @@ void ConvTemplateBrowser::setGlobalParameters(const QStringList &globals) {
 void ConvTemplateBrowser::intChanged(QtProperty *) {}
 
 void ConvTemplateBrowser::boolChanged(QtProperty *prop) {
+  if (!m_emitBoolChange)
+    return;
   if (prop == m_deltaFunctionOn) {
     m_presenter.setDeltaFunction(m_boolManager->value(prop));
+  } else if (prop == m_tempCorrectionOn) {
+    m_presenter.setTempCorrection(m_boolManager->value(prop));
   }
 }
 
@@ -121,8 +127,8 @@ void ConvTemplateBrowser::setQValues(const std::vector<double> &qValues) {
 }
 
 void ConvTemplateBrowser::addDeltaFunction() {
+  ScopedFalse _boolBlock(m_emitBoolChange);
   m_deltaFunctionOn->addSubProperty(m_deltaFunctionHeight);
-  ScopedFalse _false(m_emitBoolChange);
   m_boolManager->setValue(m_deltaFunctionOn, true);
 }
 
@@ -132,7 +138,40 @@ void ConvTemplateBrowser::removeDeltaFunction() {
   m_boolManager->setValue(m_deltaFunctionOn, false);
 }
 
+void ConvTemplateBrowser::addTempCorrection(double value) {
+  ScopedFalse _boolBlock(m_emitBoolChange);
+
+  m_tempCorrectionOn->addSubProperty(m_temperature);
+  m_boolManager->setValue(m_tempCorrectionOn, true);
+  m_parameterManager->setValue(m_temperature, value);
+  m_parameterManager->setGlobal(m_temperature, true);
+}
+
+void ConvTemplateBrowser::updateTemperatureCorrectionAndDelta(
+    bool tempCorrection, bool deltaFunction) {
+  ScopedFalse _boolBlock(m_emitBoolChange);
+  ScopedFalse _paramBlock(m_emitParameterValueChange);
+
+  if (tempCorrection)
+    addTempCorrection(100.0);
+  else
+    removeTempCorrection();
+
+  if (deltaFunction)
+    addDeltaFunction();
+  else
+    removeDeltaFunction();
+}
+
+void ConvTemplateBrowser::removeTempCorrection() {
+  m_tempCorrectionOn->removeSubProperty(m_temperature);
+  ScopedFalse _false(m_emitBoolChange);
+  m_boolManager->setValue(m_tempCorrectionOn, false);
+}
+
 void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
+  if (!m_emitEnumChange)
+    return;
   auto const index = m_enumManager->value(prop);
   auto propIt =
       std::find(m_subTypeProperties.begin(), m_subTypeProperties.end(), prop);
@@ -143,10 +182,7 @@ void ConvTemplateBrowser::enumChanged(QtProperty *prop) {
   }
 }
 
-void ConvTemplateBrowser::globalChanged(QtProperty *, const QString &name,
-                                        bool on) {
-  std::cerr << "Global " << name.toStdString() << ' ' << on << std::endl;
-}
+void ConvTemplateBrowser::globalChanged(QtProperty *, const QString &, bool) {}
 
 void ConvTemplateBrowser::parameterChanged(QtProperty *prop) {
   auto isGlobal = m_parameterManager->isGlobal(prop);
@@ -199,9 +235,7 @@ void ConvTemplateBrowser::setErrorsEnabled(bool enabled) {
 
 void ConvTemplateBrowser::clear() {}
 
-void ConvTemplateBrowser::popupMenu(const QPoint &) {
-  std::cerr << "Popup" << std::endl;
-}
+void ConvTemplateBrowser::popupMenu(const QPoint &) {}
 
 void ConvTemplateBrowser::setParameterPropertyValue(QtProperty *prop,
                                                     double value,
@@ -260,6 +294,11 @@ void ConvTemplateBrowser::createFunctionParameterProperties() {
   }
 }
 
+void ConvTemplateBrowser::setEnum(size_t subTypeIndex, int enumIndex) {
+  ScopedFalse _false(m_emitEnumChange);
+  m_enumManager->setValue(m_subTypeProperties[subTypeIndex], enumIndex);
+}
+
 void ConvTemplateBrowser::createDeltaFunctionProperties() {
   m_deltaFunctionOn = m_boolManager->addProperty("Delta Function");
   m_deltaFunctionHeight =
@@ -269,6 +308,14 @@ void ConvTemplateBrowser::createDeltaFunctionProperties() {
                                      "Delta Function Height");
   m_parameterMap[m_deltaFunctionHeight] = ParamID::DELTA_HEIGHT;
   m_parameterReverseMap[ParamID::DELTA_HEIGHT] = m_deltaFunctionHeight;
+}
+
+void ConvTemplateBrowser::createTempCorrectionProperties() {
+  m_tempCorrectionOn = m_boolManager->addProperty("Temp Correction");
+  m_temperature = m_parameterManager->addProperty("Temperature");
+  m_parameterManager->setDescription(m_temperature, "Temperature");
+  m_parameterMap[m_temperature] = ParamID::TEMPERATURE;
+  m_parameterReverseMap[ParamID::TEMPERATURE] = m_temperature;
 }
 
 void ConvTemplateBrowser::setSubType(size_t subTypeIndex, int typeIndex) {
