@@ -39,8 +39,8 @@ using Mantid::Geometry::IDetector_const_sptr;
 class ApplyCalibrationTest : public CxxTest::TestSuite {
 public:
   void testName() {
-      ApplyCalibration appCalib;
-      TS_ASSERT_EQUALS(appCalib.name(), "ApplyCalibration")
+    ApplyCalibration appCalib;
+    TS_ASSERT_EQUALS(appCalib.name(), "ApplyCalibration")
   }
 
   void testInit() {
@@ -256,7 +256,6 @@ public:
 
     dataStore.remove(wsName);
   }
-
 };
 
 #endif /*APPLYCALIBRATIONTEST_H_*/

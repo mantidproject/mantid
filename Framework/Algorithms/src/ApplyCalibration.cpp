@@ -55,7 +55,7 @@ void ApplyCalibration::exec() {
       columnNames.end()) {
     auto &detectorInfo = inputWS->mutableDetectorInfo();
     ColumnVector<V3D> detPos = CalTable->getVector("Detector Position");
-    //PARALLEL_FOR_NO_WSP_CHECK()
+    // PARALLEL_FOR_NO_WSP_CHECK()
     for (size_t i = 0; i < numDetector; ++i) {
       const auto index = detectorInfo.indexOf(detectorID[i]);
       detectorInfo.setPosition(index, detPos[i]);
@@ -70,7 +70,7 @@ void ApplyCalibration::exec() {
     auto &detectorInfo = inputWS->mutableDetectorInfo();
     ColumnVector<double> yCoordinate =
         CalTable->getVector("Detector Y Coordinate");
-    //PARALLEL_FOR_NO_WSP_CHECK()
+    // PARALLEL_FOR_NO_WSP_CHECK()
     for (size_t i = 0; i < numDetector; ++i) {
       const auto index = detectorInfo.indexOf(detectorID[i]);
       V3D xyz = detectorInfo.position(index);
@@ -84,7 +84,7 @@ void ApplyCalibration::exec() {
     auto &detectorInfo = inputWS->detectorInfo();
     auto &componentInfo = inputWS->mutableComponentInfo();
     ColumnVector<double> widths = CalTable->getVector("Detector Width");
-    //PARALLEL_FOR_NO_WSP_CHECK()
+    // PARALLEL_FOR_NO_WSP_CHECK()
     for (size_t i = 0; i < numDetector; ++i) {
       const auto index = detectorInfo.indexOf(detectorID[i]);
       double nominalWidth =
@@ -104,7 +104,7 @@ void ApplyCalibration::exec() {
     auto &detectorInfo = inputWS->mutableDetectorInfo();
     auto &componentInfo = inputWS->mutableComponentInfo();
     ColumnVector<double> height = CalTable->getVector("Detector Height");
-    //PARALLEL_FOR_NO_WSP_CHECK()
+    // PARALLEL_FOR_NO_WSP_CHECK()
     for (size_t i = 0; i < numDetector; ++i) {
       const auto index = detectorInfo.indexOf(detectorID[i]);
       // update pixel height along Y coordinate
