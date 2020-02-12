@@ -264,7 +264,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs)
 
     # Can't have a waterfall plot with only one line.
-    if len(nums) * len(workspaces) == 1 and waterfall:
+    if len(nums)*len(workspaces) == 1 and waterfall:
         waterfall = False
 
     # The plot's initial xlim and ylim are used to offset each curve in a waterfall plot.
