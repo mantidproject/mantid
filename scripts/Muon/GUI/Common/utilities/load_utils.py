@@ -233,7 +233,6 @@ def load_workspace_from_filename(filename,
         load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
         load_result["DeadTimeTable"] = None
         load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
-        
 
     return load_result, run, filename, psi_data
 
