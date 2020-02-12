@@ -140,7 +140,10 @@ set(
         IndirectFunctionBrowser/MSDFunctionModel.h
         JumpFitModel.h
         MSDFitModel.h
+        Notifier.h
+        IFQFitObserver.h
         ParameterEstimation.h
+        FQFitTypes.h
 )
 
 set(
@@ -555,6 +558,9 @@ set(
         IndirectFunctionBrowser/ConvFunctionModel.h
         JumpFitModel.h
         MSDFitModel.h
+        Notifier.h
+        IFQFitObserver.h
+        FQFitTypes.h
 )
 
 set(

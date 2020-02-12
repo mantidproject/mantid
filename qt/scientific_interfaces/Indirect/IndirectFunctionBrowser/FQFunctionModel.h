@@ -25,107 +25,38 @@ namespace IDA {
 using namespace Mantid::API;
 using namespace MantidWidgets;
 
-class MANTIDQT_INDIRECT_DLL FQFunctionModel : public IFunctionModel {
+class MANTIDQT_INDIRECT_DLL FQFunctionModel : public FunctionModel {
 public:
-FQFunctionModel();
-void setFunction(IFunction_sptr fun) override;
-IFunction_sptr getFitFunction() const override;
-bool hasFunction() const override;
-void addFunction(const QString &prefix, const QString &funStr) override;
-void removeFunction(const QString &prefix) override;
-void setParameter(const QString &paramName, double value) override;
-void setParameterError(const QString &paramName, double value) override;
-double getParameter(const QString &paramName) const override;
-double getParameterError(const QString &paramName) const override;
-QString getParameterDescription(const QString &paramName) const override;
-QStringList getParameterNames() const override;
-IFunction_sptr getSingleFunction(int index) const override;
-IFunction_sptr getCurrentFunction() const override;
-void setNumberDomains(int) override;
-void setDatasetNames(const QStringList &names) override;
-QStringList getDatasetNames() const override;
-int getNumberDomains() const override;
-void setCurrentDomainIndex(int i) override;
-int currentDomainIndex() const override;
-void changeTie(const QString &paramName, const QString &tie) override;
-void addConstraint(const QString &functionIndex,
-                   const QString &constraint) override;
-void removeConstraint(const QString &paramName) override;
-QStringList getGlobalParameters() const override;
-void setGlobalParameters(const QStringList &globals) override;
-bool isGlobal(const QString &parName) const override;
-void setGlobal(const QString &parName, bool on);
-QStringList getLocalParameters() const override;
-void updateMultiDatasetParameters(const IFunction &fun) override;
-void updateParameters(const IFunction &fun) override;
+  FQFunctionModel();
+  void setFunction(IFunction_sptr fun) override;
+  void removeFunction(const QString &prefix) override;
+  void addFunction(const QString &prefix, const QString &funStr) override;
+  void setGlobalParameters(const QStringList &globals) override;
+  void setGlobal(const QString &parName, bool on);
 
-double getLocalParameterValue(const QString &parName, int i) const override;
-bool isLocalParameterFixed(const QString &parName, int i) const override;
-QString getLocalParameterTie(const QString &parName, int i) const override;
-QString getLocalParameterConstraint(const QString &parName,
-                                    int i) const override;
-void setLocalParameterValue(const QString &parName, int i,
-                            double value) override;
-void setLocalParameterValue(const QString &parName, int i, double value,
-                            double error) override;
-void setLocalParameterFixed(const QString &parName, int i,
-                            bool fixed) override;
-void setLocalParameterTie(const QString &parName, int i,
-                          const QString &tie) override;
-void setLocalParameterConstraint(const QString &parName, int i,
-                                 const QString &constraint) override;
-QString setBackgroundA0(double value) override;
+  QMap<int, std::string> getParameterDescriptionMap() const;
+  QMap<int, QString> getParameterNameMap() const;
 
-void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
-void setFitType(const QString &name);
-void removeFitType();
-bool hasGaussianType() const;
-bool hasPetersType() const;
-bool hasYiType() const;
-void
-updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
+  using FunctionModel::getParameter;
+  using FunctionModel::getParameterDescription;
+  using FunctionModel::getParameterError;
+  using FunctionModel::setParameter;
+  using FunctionModel::updateMultiDatasetParameters;
+  void setFitType(const QString &name);
+  QString getFitType();
+  void removeFitType();
 
-enum class ParamID {
-  GAUSSIAN_HEIGHT,
-  GAUSSIAN_FQ,
-  PETERS_HEIGHT,
-  PETERS_FQ,
-  PETERS_BETA,
-  YI_HEIGHT,
-  YI_FQ,
-  YI_SIGMA
-};
-QMap<ParamID, double> getCurrentValues() const;
-QMap<ParamID, double> getCurrentErrors() const;
-QMap<int, QString> getParameterNameMap() const;
-QMap<int, std::string> getParameterDescriptionMap() const;
+  void
+  updateParameterEstimationData(DataForParameterEstimationCollection &&data);
 
 private:
-void clearData();
-QString buildFunctionString() const;
-boost::optional<QString> getFitTypePrefix() const;
-void setParameter(ParamID name, double value);
-boost::optional<double> getParameter(ParamID name) const;
-boost::optional<double> getParameterError(ParamID name) const;
-boost::optional<QString> getParameterName(ParamID name) const;
-boost::optional<QString> getParameterDescription(ParamID name) const;
-boost::optional<QString> getPrefix(ParamID name) const;
-void setCurrentValues(const QMap<ParamID, double> &);
-void applyParameterFunction(std::function<void(ParamID)> paramFun) const;
-boost::optional<ParamID> getParameterId(const QString &parName);
-std::string buildGaussianFunctionString() const;
-std::string buildPetersFunctionString() const;
-std::string buildYiFunctionString() const;
-void addGlobal(const QString &parName);
-void removeGlobal(const QString &parName);
-QStringList makeGlobalList() const;
-
-FunctionModel m_model;
-QString m_fitType;
-DataForParameterEstimationCollection m_estimationData;
-QList<ParamID> m_globals;
-std::string m_resolutionName;
-TableDatasetIndex m_resolutionIndex;
+  QString m_fitType;
+  DataForParameterEstimationCollection m_estimationData;
+  QMap<QString, IFunction_sptr> m_functionStore;
+  QMap<QString, QStringList> m_globalParameterStore;
+  std::string m_resolutionName;
+  TableDatasetIndex m_resolutionIndex;
 };
 
 } // namespace IDA

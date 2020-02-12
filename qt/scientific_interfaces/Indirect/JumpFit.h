@@ -11,7 +11,6 @@
 #include "JumpFitModel.h"
 #include "ui_JumpFit.h"
 
-
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/TextAxis.h"
 

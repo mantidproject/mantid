@@ -7,9 +7,12 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_JUMPFITDATAPRESENTER_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_JUMPFITDATAPRESENTER_H_
 
+#include "IFQFitObserver.h"
 #include "IndirectFitDataPresenter.h"
+#include "IndirectFunctionBrowser/FQTemplateBrowser.h"
 #include "JumpFitAddWorkspaceDialog.h"
 #include "JumpFitModel.h"
+#include "Notifier.h"
 
 #include <QComboBox>
 #include <QSpacerItem>
@@ -24,7 +27,8 @@ class MANTIDQT_INDIRECT_DLL JumpFitDataPresenter
 public:
   JumpFitDataPresenter(JumpFitModel *model, IIndirectFitDataView *view,
                        QComboBox *cbParameterType, QComboBox *cbParameter,
-                       QLabel *lbParameterType, QLabel *lbParameter);
+                       QLabel *lbParameterType, QLabel *lbParameter,
+                       FQTemplateBrowser *fQTemplateBrowser);
 
 private slots:
   void hideParameterComboBoxes();
@@ -41,6 +45,8 @@ private slots:
   void setActiveParameterType(const std::string &type);
   void updateActiveDataIndex();
   void setSingleModelSpectrum(int index);
+  void handleParameterTypeChanged(const QString &parameter);
+  void handleSpectrumSelectionChanged(int parameterIndex);
 
 private:
   void setAvailableParameters(const std::vector<std::string> &parameters);
@@ -65,6 +71,7 @@ private:
   QLabel *m_lbParameterType;
   QLabel *m_lbParameter;
   JumpFitModel *m_jumpModel;
+  Notifier<IFQFitObserver> m_notifier;
 };
 
 } // namespace IDA

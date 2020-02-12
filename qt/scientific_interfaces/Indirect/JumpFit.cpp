@@ -46,13 +46,15 @@ JumpFit::JumpFit(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
+  auto templateBrowser = new FQTemplateBrowser;
   setFitDataPresenter(std::make_unique<JumpFitDataPresenter>(
       m_jumpFittingModel, m_uiForm->fitDataView, m_uiForm->cbParameterType,
-      m_uiForm->cbParameter, m_uiForm->lbParameterType, m_uiForm->lbParameter));
+      m_uiForm->cbParameter, m_uiForm->lbParameterType, m_uiForm->lbParameter,
+      templateBrowser));
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-  auto templateBrowser = new FQTemplateBrowser;
+
   m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 
@@ -64,15 +66,15 @@ void JumpFit::setupFitTab() {
   m_uiForm->svSpectrumView->hideSpectrumSelector();
   m_uiForm->svSpectrumView->hideMaskSpectrumSelector();
 
-//  addFunctions(getWidthFunctions());
-//  addFunctions(getEISFFunctions());
+  //  addFunctions(getWidthFunctions());
+  //  addFunctions(getEISFFunctions());
 
   m_uiForm->cbParameter->setEnabled(false);
 
   // Handle plotting and saving
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-//  connect(this, SIGNAL(functionChanged()), this,
-//          SLOT(updateModelFitTypeString()));
+  //  connect(this, SIGNAL(functionChanged()), this,
+  //          SLOT(updateModelFitTypeString()));
   connect(m_uiForm->cbParameterType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(updateAvailableFitTypes()));
   connect(this, SIGNAL(updateAvailableFitTypes()), this,
@@ -80,19 +82,20 @@ void JumpFit::setupFitTab() {
 }
 
 void JumpFit::updateAvailableFitTypes() {
-//  auto const parameter = m_uiForm->cbParameterType->currentText().toStdString();
-//  clearFitTypeComboBox();
-//  if (parameter == "Width")
-//    addFunctions(getWidthFunctions());
-//  else if (parameter == "EISF")
-//    addFunctions(getEISFFunctions());
+  //  auto const parameter =
+  //  m_uiForm->cbParameterType->currentText().toStdString();
+  //  clearFitTypeComboBox();
+  //  if (parameter == "Width")
+  //    addFunctions(getWidthFunctions());
+  //  else if (parameter == "EISF")
+  //    addFunctions(getEISFFunctions());
 }
 
 void JumpFit::addFunctions(std::vector<std::string> const &functions) {
-//  auto &factory = FunctionFactory::Instance();
-//  for (auto const &function : functions)
-//    addComboBoxFunctionGroup(QString::fromStdString(function),
-//                             {factory.createFunction(function)});
+  //  auto &factory = FunctionFactory::Instance();
+  //  for (auto const &function : functions)
+  //    addComboBoxFunctionGroup(QString::fromStdString(function),
+  //                             {factory.createFunction(function)});
 }
 
 void JumpFit::updateModelFitTypeString() {

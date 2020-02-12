@@ -9,6 +9,7 @@
 
 #include "DllConfig.h"
 #include "FQFunctionModel.h"
+#include "IFQFitObserver.h"
 #include "ParameterEstimation.h"
 
 #include <QMap>
@@ -31,54 +32,55 @@ class FQTemplateBrowser;
  *
  */
 class MANTIDQT_INDIRECT_DLL FQTemplatePresenter : public QObject {
-Q_OBJECT
+  Q_OBJECT
 public:
-explicit FQTemplatePresenter(FQTemplateBrowser *view);
-void setFitType(const QString &name);
+  explicit FQTemplatePresenter(FQTemplateBrowser *view);
+  void setFitType(const QString &name);
 
-void setNumberOfDatasets(int);
-int getNumberOfDatasets() const;
-int getCurrentDataset();
-void setFunction(const QString &funStr);
-IFunction_sptr getGlobalFunction() const;
-IFunction_sptr getFunction() const;
-QStringList getGlobalParameters() const;
-QStringList getLocalParameters() const;
-void setGlobalParameters(const QStringList &globals);
-void setGlobal(const QString &parName, bool on);
-void updateMultiDatasetParameters(const IFunction &fun);
-void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
-void updateParameters(const IFunction &fun);
-void setCurrentDataset(int i);
-void setDatasetNames(const QStringList &names);
-void setViewParameterDescriptions();
-void setErrorsEnabled(bool enabled);
-void
-updateParameterEstimationData(DataForParameterEstimationCollection &&data);
+  void setNumberOfDatasets(int);
+  int getNumberOfDatasets() const;
+  int getCurrentDataset();
+  void setFunction(const QString &funStr);
+  IFunction_sptr getGlobalFunction() const;
+  IFunction_sptr getFunction() const;
+  QStringList getGlobalParameters() const;
+  QStringList getLocalParameters() const;
+  void setGlobalParameters(const QStringList &globals);
+  void setGlobal(const QString &parName, bool on);
+  void updateMultiDatasetParameters(const IFunction &fun);
+  void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
+  void updateParameters(const IFunction &fun);
+  void setCurrentDataset(int i);
+  void setDatasetNames(const QStringList &names);
+  void setViewParameterDescriptions();
+  void setErrorsEnabled(bool enabled);
+  void
+  updateParameterEstimationData(DataForParameterEstimationCollection &&data);
 
 signals:
-void functionStructureChanged();
+  void functionStructureChanged();
 
 private slots:
-void editLocalParameter(const QString &parName);
-void editLocalParameterFinish(int result);
-void viewChangedParameterValue(const QString &parName, double value);
+  void handleDataTypeChanged(DataType);
+  void editLocalParameter(const QString &parName);
+  void editLocalParameterFinish(int result);
+  void viewChangedParameterValue(const QString &parName, double value);
 
 private:
-void updateViewParameters();
-QStringList getDatasetNames() const;
-double getLocalParameterValue(const QString &parName, int i) const;
-bool isLocalParameterFixed(const QString &parName, int i) const;
-QString getLocalParameterTie(const QString &parName, int i) const;
-QString getLocalParameterConstraint(const QString &parName, int i) const;
-void setLocalParameterValue(const QString &parName, int i, double value);
-void setLocalParameterFixed(const QString &parName, int i, bool fixed);
-void setLocalParameterTie(const QString &parName, int i, const QString &tie);
-void updateViewParameterNames();
-void updateView();
-FQTemplateBrowser *m_view;
-FQFunctionModel m_model;
-EditLocalParameterDialog *m_editLocalParameterDialog;
+  void updateViewParameters();
+  QStringList getDatasetNames() const;
+  double getLocalParameterValue(const QString &parName, int i) const;
+  bool isLocalParameterFixed(const QString &parName, int i) const;
+  QString getLocalParameterTie(const QString &parName, int i) const;
+  QString getLocalParameterConstraint(const QString &parName, int i) const;
+  void setLocalParameterValue(const QString &parName, int i, double value);
+  void setLocalParameterFixed(const QString &parName, int i, bool fixed);
+  void setLocalParameterTie(const QString &parName, int i, const QString &tie);
+  void updateViewParameterNames();
+  void updateView();
+  FQTemplateBrowser *m_view;
+  FQFunctionModel m_model;
+  EditLocalParameterDialog *m_editLocalParameterDialog;
 };
 
 } // namespace IDA

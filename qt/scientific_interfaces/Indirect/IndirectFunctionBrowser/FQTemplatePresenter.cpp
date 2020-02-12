@@ -22,30 +22,23 @@ using namespace MantidWidgets;
 FQTemplatePresenter::FQTemplatePresenter(FQTemplateBrowser *view)
     : QObject(view), m_view(view) {
   connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this,
-      SLOT(editLocalParameter(const QString &)));
+          SLOT(editLocalParameter(const QString &)));
   connect(m_view, SIGNAL(parameterValueChanged(const QString &, double)), this,
-      SLOT(viewChangedParameterValue(const QString &, double)));
+          SLOT(viewChangedParameterValue(const QString &, double)));
+  connect(m_view, SIGNAL(dataTypeChanged(DataType)), this,
+          SLOT(handleDataTypeChanged(DataType)));
 }
 
 void FQTemplatePresenter::setFitType(const QString &name) {
   m_view->clear();
-  m_model.removeFitType();
-
-  if (name == "None") {
-    // do nothing
-  } else if (name == "Gaussian") {
-    m_view->addGaussian();
-    m_model.setFitType("FQGauss");
-  } else if (name == "Peters") {
-    m_view->addPeters();
-    m_model.setFitType("FQPeters");
-  } else if (name == "Yi") {
-    m_view->addYi();
-    m_model.setFitType("FQYi");
-  } else {
-    throw std::logic_error("Browser doesn't support fit type " +
-                           name.toStdString());
+  m_model.setFitType(name);
+  if (name == "None")
+    return;
+  auto functionParameters = m_model.getParameterNames();
+  for (auto &parameter : functionParameters) {
+    m_view->addParameter(parameter, m_model.getParameterDescription(parameter));
   }
+
   setErrorsEnabled(false);
   updateView();
   emit functionStructureChanged();
@@ -67,16 +60,16 @@ void FQTemplatePresenter::setFunction(const QString &funStr) {
   m_model.setFunctionString(funStr);
   m_view->clear();
   setErrorsEnabled(false);
-  if (m_model.hasGaussianType()) {
-    m_view->addGaussian();
-  }
-  if (m_model.hasPetersType()) {
-    m_view->addPeters();
-  }
-  if (m_model.hasYiType()) {
-    m_view->addYi();
-  }
-  updateViewParameterNames();
+  // if (m_model.hasGaussianType()) {
+  //   m_view->addGaussian();
+  // }
+  // if (m_model.hasPetersType()) {
+  //   m_view->addPeters();
+  // }
+  // if (m_model.hasYiType()) {
+  //   m_view->addYi();
+  // }
+  // updateViewParameterNames();
   updateViewParameters();
   emit functionStructureChanged();
 }
@@ -146,28 +139,12 @@ void FQTemplatePresenter::updateParameterEstimationData(
 }
 
 void FQTemplatePresenter::updateViewParameters() {
-  static std::map<FQFunctionModel::ParamID,
-      void (FQTemplateBrowser::*)(double, double)>
-      setters{
-      {FQFunctionModel::ParamID::GAUSSIAN_HEIGHT,
-                                          &FQTemplateBrowser::setGaussianHeight},
-      {FQFunctionModel::ParamID::GAUSSIAN_FQ,
-                                          &FQTemplateBrowser::setGaussianFQ},
-      {FQFunctionModel::ParamID::PETERS_HEIGHT,
-                                          &FQTemplateBrowser::setPetersHeight},
-      {FQFunctionModel::ParamID::PETERS_FQ,
-                                          &FQTemplateBrowser::setPetersFQ},
-      {FQFunctionModel::ParamID::PETERS_BETA,
-                                          &FQTemplateBrowser::setPetersBeta},
-      {FQFunctionModel::ParamID::YI_HEIGHT,
-                                          &FQTemplateBrowser::setYiHeight},
-      {FQFunctionModel::ParamID::YI_FQ, &FQTemplateBrowser::setYiFQ},
-      {FQFunctionModel::ParamID::YI_SIGMA,
-                                          &FQTemplateBrowser::setYiSigma}};
-  const auto values = m_model.getCurrentValues();
-  const auto errors = m_model.getCurrentErrors();
-  for (auto const &name : values.keys()) {
-    (m_view->*setters.at(name))(values[name], errors[name]);
+  if (m_model.getFitType() == "None")
+    return;
+  for (auto parameterName : m_model.getParameterNames()) {
+    m_view->setParameterValue(parameterName,
+                              m_model.getParameter(parameterName),
+                              m_model.getParameterError(parameterName));
   }
 }
 
@@ -176,33 +153,32 @@ QStringList FQTemplatePresenter::getDatasetNames() const {
 }
 
 double FQTemplatePresenter::getLocalParameterValue(const QString &parName,
-                                                    int i) const {
+                                                   int i) const {
   return m_model.getLocalParameterValue(parName, i);
 }
 
 bool FQTemplatePresenter::isLocalParameterFixed(const QString &parName,
-                                                 int i) const {
+                                                int i) const {
   return m_model.isLocalParameterFixed(parName, i);
 }
 
 QString FQTemplatePresenter::getLocalParameterTie(const QString &parName,
-                                                   int i) const {
+                                                  int i) const {
   return m_model.getLocalParameterTie(parName, i);
 }
 
-QString
-FQTemplatePresenter::getLocalParameterConstraint(const QString &parName,
-                                                  int i) const {
+QString FQTemplatePresenter::getLocalParameterConstraint(const QString &parName,
+                                                         int i) const {
   return m_model.getLocalParameterConstraint(parName, i);
 }
 
 void FQTemplatePresenter::setLocalParameterValue(const QString &parName, int i,
-                                                  double value) {
+                                                 double value) {
   m_model.setLocalParameterValue(parName, i, value);
 }
 
 void FQTemplatePresenter::setLocalParameterTie(const QString &parName, int i,
-                                                const QString &tie) {
+                                               const QString &tie) {
   m_model.setLocalParameterTie(parName, i, tie);
 }
 
@@ -210,13 +186,10 @@ void FQTemplatePresenter::updateViewParameterNames() {
   m_view->updateParameterNames(m_model.getParameterNameMap());
 }
 
-void FQTemplatePresenter::updateView() {
-  updateViewParameterNames();
-  updateViewParameters();
-}
+void FQTemplatePresenter::updateView() { updateViewParameters(); }
 
 void FQTemplatePresenter::setLocalParameterFixed(const QString &parName, int i,
-                                                  bool fixed) {
+                                                 bool fixed) {
   m_model.setLocalParameterFixed(parName, i, fixed);
 }
 
@@ -269,7 +242,7 @@ void FQTemplatePresenter::editLocalParameterFinish(int result) {
 }
 
 void FQTemplatePresenter::viewChangedParameterValue(const QString &parName,
-                                                     double value) {
+                                                    double value) {
   if (parName.isEmpty())
     return;
   if (m_model.isGlobal(parName)) {
@@ -286,6 +259,11 @@ void FQTemplatePresenter::viewChangedParameterValue(const QString &parName,
     setLocalParameterValue(parName, i, value);
   }
   emit functionStructureChanged();
+}
+
+void FQTemplatePresenter::handleDataTypeChanged(DataType dataType) {
+  m_view->setDataType(dataType);
+  setFitType("None");
 }
 
 } // namespace IDA

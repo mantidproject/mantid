@@ -697,8 +697,9 @@ QStringList IndirectFitAnalysisTab::getDatasetNames() const {
     auto const name =
         QString::fromStdString(m_fittingModel->getWorkspace(index)->getName());
     auto const numberSpectra = m_fittingModel->getNumberOfSpectra(index);
-    for (int j{0}; j < numberSpectra.value; ++j) {
-      datasetNames << name + " (" + QString::number(j) + ")";
+    auto const spectra = m_fittingModel->getSpectra(index);
+    for (auto spectrum : spectra) {
+      datasetNames << name + " (" + QString::number(spectrum.value) + ")";
     }
   }
   return datasetNames;
