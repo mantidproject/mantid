@@ -84,7 +84,7 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         AddSampleLogMultiple(Workspace=self._workspace,
                              LogNames=names,
                              LogValues=values,
-                             ParseTypes=False,
+                             ParseType=False,
                              LogTypes=types
                              )
 
@@ -116,8 +116,8 @@ class AddSampleLogMultipleTest(unittest.TestCase):
 
         AddSampleLogMultiple(Workspace=self._workspace,
                              LogNames=names,
-                             LogValues=values
-                             ParseTypes=False,
+                             LogValues=values,
+                             ParseType=False,
                              LogTypes=types)
 
         self._validate_sample_logs(names, values, types)
@@ -195,7 +195,7 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                           LogValues=values)
 
 
-   def test_validation_differing_types(self):
+    def test_validation_differing_types(self):
         """
         Test validation for differing numbers of log names and log types.
         """
@@ -206,12 +206,12 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                           AddSampleLogMultiple,
                           Workspace=self._workspace,
                           LogNames=names,
-                          LogValues=values
-                          ParseTypes=True,
+                          LogValues=values,
+                          ParseType=True,
                           LogTypes=types)
 
 
-   def test_validation_differing_types(self):
+    def test_validation_differing_types(self):
         """
         Test validation for differing numbers of log names and log types.
         """
@@ -223,12 +223,12 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                           AddSampleLogMultiple,
                           Workspace=self._workspace,
                           LogNames=names,
-                          LogValues=values
-                          ParseTypes=False,
+                          LogValues=values,
+                          ParseType=False,
                           LogTypes=types)
 
 
-   def test_validation_invalid_types(self):
+    def test_validation_invalid_types(self):
         """
         Test validation for differing numbers of log names and log types.
         """
@@ -240,8 +240,8 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                           AddSampleLogMultiple,
                           Workspace=self._workspace,
                           LogNames=names,
-                          LogValues=values
-                          ParseTypes=False,
+                          LogValues=values,
+                          ParseType=False,
                           LogTypes=types)
 
 

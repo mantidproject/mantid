@@ -93,7 +93,7 @@ class AddSampleLogMultiple(PythonAlgorithm):
         num_names = len(log_names)
         num_values = len(log_values)
         num_units = len(log_units)
-        num_types = len(num_types)
+        num_types = len(log_types)
 
         # Ensure there is at least 1 log name
         if num_names == 0:
