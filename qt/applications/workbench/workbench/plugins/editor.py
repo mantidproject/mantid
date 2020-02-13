@@ -35,9 +35,9 @@ if sys.version_info < (3,0):
                        os.linesep + os.linesep
 
 DEFAULT_CONTENT += "# import mantid algorithms, numpy and matplotlib" + os.linesep + \
-"from mantid.simpleapi import *" + os.linesep + \
-"import matplotlib.pyplot as plt" + os.linesep + \
-"import numpy as np" + os.linesep + os.linesep
+                   "from mantid.simpleapi import *" + os.linesep + \
+                   "import matplotlib.pyplot as plt" + os.linesep + \
+                   "import numpy as np" + os.linesep + os.linesep
 
 # Accepted extensions for drag-and-drop to editor
 ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']

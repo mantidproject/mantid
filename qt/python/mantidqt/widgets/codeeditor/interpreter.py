@@ -95,7 +95,6 @@ class EditorIO(object):
             self.editor.setFileName(filename)
 
         try:
-            a= self.editor.text()
             with io.open(filename, 'w', encoding='utf8', newline='') as f:
                 f.write(self.editor.text())
             self.editor.setModified(False)
@@ -226,11 +225,11 @@ class PythonFileInterpreter(QWidget):
         self.replace_text(SPACE_CHAR * TAB_WIDTH, TAB_CHAR)
 
     def set_whitespace_visible(self):
-        self.editor.setEolVisibility(True);
+        self.editor.setEolVisibility(True)
         self.editor.setWhitespaceVisibility(CodeEditor.WsVisible)
 
     def set_whitespace_invisible(self):
-        self.editor.setEolVisibility(False);
+        self.editor.setEolVisibility(False)
         self.editor.setWhitespaceVisibility(CodeEditor.WsInvisible)
 
     def toggle_comment(self):
