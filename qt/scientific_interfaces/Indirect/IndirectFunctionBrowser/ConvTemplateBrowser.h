@@ -4,12 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INDIRECT_IQTTEMPLATEBROWSER_H_
-#define INDIRECT_IQTTEMPLATEBROWSER_H_
+#ifndef INDIRECT_CONVTEMPLATEBROWSER_H_
+#define INDIRECT_CONVTEMPLATEBROWSER_H_
 
+#include "ConvTemplatePresenter.h"
+#include "ConvTypes.h"
 #include "DllConfig.h"
 #include "FunctionTemplateBrowser.h"
-#include "IqtTemplatePresenter.h"
 
 #include <QMap>
 #include <QWidget>
@@ -20,38 +21,22 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+using namespace ConvTypes;
 /**
  * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
  * and set properties that can be used to generate a fit function.
  *
  */
-class MANTIDQT_INDIRECT_DLL IqtTemplateBrowser
+class MANTIDQT_INDIRECT_DLL ConvTemplateBrowser
     : public FunctionTemplateBrowser {
   Q_OBJECT
 public:
-  explicit IqtTemplateBrowser(QWidget *parent = nullptr);
-  void addExponentialOne();
-  void removeExponentialOne();
-  void addExponentialTwo();
-  void removeExponentialTwo();
-  void addStretchExponential();
-  void removeStretchExponential();
-  void addFlatBackground();
-  void removeBackground();
-
-  void setExp1Height(double, double);
-  void setExp1Lifetime(double, double);
-  void setExp2Height(double, double);
-  void setExp2Lifetime(double, double);
-  void setStretchHeight(double, double);
-  void setStretchLifetime(double, double);
-  void setStretchStretching(double, double);
-  void setA0(double, double);
-
+  explicit ConvTemplateBrowser(QWidget *parent = nullptr);
   void setFunction(const QString &funStr) override;
   IFunction_sptr getGlobalFunction() const override;
   IFunction_sptr getFunction() const override;
   void setNumberOfDatasets(int) override;
+  int getCurrentDataset() override;
   int getNumberOfDatasets() const override;
   void setDatasetNames(const QStringList &names) override;
   QStringList getGlobalParameters() const override;
@@ -61,19 +46,24 @@ public:
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   void updateParameters(const IFunction &fun) override;
   void setCurrentDataset(int i) override;
-  int getCurrentDataset() override;
   void updateParameterNames(const QMap<int, QString> &parameterNames) override;
-  void updateParameterDescriptions(
-      const QMap<int, std::string> &parameterNames); // override;
   void setErrorsEnabled(bool enabled) override;
   void clear() override;
   void updateParameterEstimationData(
       DataForParameterEstimationCollection &&data) override;
   void setBackgroundA0(double value) override;
-  void setResolution(std::string const &, TableDatasetIndex const &) override {}
-  void
-  setResolution(const std::vector<std::pair<std::string, int>> &) override {}
-  void setQValues(const std::vector<double> &) override {}
+  void setResolution(std::string const &name,
+                     TableDatasetIndex const &index) override;
+  void setResolution(
+      const std::vector<std::pair<std::string, int>> &fitResolutions) override;
+  void addDeltaFunction();
+  void removeDeltaFunction();
+  void addTempCorrection(double value);
+  void removeTempCorrection();
+  void setQValues(const std::vector<double> &qValues) override;
+  void setEnum(size_t subTypeIndex, int fitType);
+  void updateTemperatureCorrectionAndDelta(bool tempCorrection,
+                                           bool deltaFunction);
 
 protected slots:
   void intChanged(QtProperty *) override;
@@ -86,39 +76,42 @@ protected slots:
 private:
   void createProperties() override;
   void popupMenu(const QPoint &) override;
-  double getParameterPropertyValue(QtProperty *prop) const;
   void setParameterPropertyValue(QtProperty *prop, double value, double error);
   void setGlobalParametersQuiet(const QStringList &globals);
-  void setTieIntensitiesQuiet(bool on);
-  void updateState();
+  void createFunctionParameterProperties();
+  void createDeltaFunctionProperties();
+  void createTempCorrectionProperties();
+  void setSubType(size_t subTypeIndex, int typeIndex);
+  void setParameterValueQuiet(ParamID id, double value, double error);
 
-  QtProperty *m_numberOfExponentials;
-  QtProperty *m_exp1Height = nullptr;
-  QtProperty *m_exp1Lifetime = nullptr;
-  QtProperty *m_exp2Height = nullptr;
-  QtProperty *m_exp2Lifetime = nullptr;
-  QtProperty *m_stretchExponential;
-  QtProperty *m_stretchExpHeight = nullptr;
-  QtProperty *m_stretchExpLifetime = nullptr;
-  QtProperty *m_stretchExpStretching = nullptr;
-  QtProperty *m_background;
-  QtProperty *m_A0 = nullptr;
-  QtProperty *m_tieIntensities = nullptr;
-  QMap<QtProperty *, int> m_parameterMap;
+  std::vector<std::unique_ptr<TemplateSubType>> m_templateSubTypes;
+  // Map fit type to a list of function parameters (QtProperties for those
+  // parameters)
+  std::vector<QMap<int, QList<QtProperty *>>> m_subTypeParameters;
+  std::vector<QList<QtProperty *>> m_currentSubTypeParameters;
+  std::vector<QtProperty *> m_subTypeProperties;
+
+  QtProperty *m_deltaFunctionOn;
+  QtProperty *m_deltaFunctionHeight;
+
+  QtProperty *m_tempCorrectionOn;
+  QtProperty *m_temperature;
+
+  QMap<QtProperty *, ParamID> m_parameterMap;
+  QMap<ParamID, QtProperty *> m_parameterReverseMap;
   QMap<QtProperty *, QString> m_actualParameterNames;
   QMap<QtProperty *, std::string> m_parameterDescriptions;
 
 private:
-  IqtTemplatePresenter m_presenter;
+  ConvTemplatePresenter m_presenter;
   bool m_emitParameterValueChange = true;
-  bool m_emitIntChange = true;
   bool m_emitBoolChange = true;
   bool m_emitEnumChange = true;
-  friend class IqtTemplatePresenter;
+  friend class ConvTemplatePresenter;
 };
 
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /*INDIRECT_IQTTEMPLATEBROWSER_H_*/
+#endif /*INDIRECT_CONVTEMPLATEBROWSER_H_*/
