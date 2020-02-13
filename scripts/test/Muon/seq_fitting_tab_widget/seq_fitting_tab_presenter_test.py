@@ -11,13 +11,20 @@ from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter import SeqFittingTabPresenter
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from qtpy import QtWidgets
+
+
+def wait_for_thread(thread_model):
+    if thread_model:
+        thread_model._thread.wait()
+        QtWidgets.QApplication.instance().processEvents()
+
 
 
 @start_qapplication
 class SeqFittingTabPresenterTest(unittest.TestCase):
     def setUp(self):
         self.context = setup_context()
-
         self.view = mock.MagicMock()
         self.model = mock.MagicMock()
         self.presenter = SeqFittingTabPresenter(self.view, self.model, self.context)
@@ -68,7 +75,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.model.fit_function = fit_function
         self.model.evaluate_single_fit = mock.MagicMock()
         self.view.is_plotting_checked.return_value = False
-
+        self.presenter.create_thread = mock.MagicMock()
         self.presenter.get_workspaces_for_entry_in_fit_table = mock.MagicMock(return_value=workspace)
 
         self.presenter.handle_single_fit_requested()
@@ -116,6 +123,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.presenter.get_workspaces_for_entry_in_fit_table = mock.MagicMock(return_value=workspaces)
         self.view.is_plotting_checked.return_value = False
         self.view.use_initial_values_for_fits.return_value = False
+        self.presenter.create_thread = mock.MagicMock()
 
         self.presenter.handle_sequential_fit_requested()
 

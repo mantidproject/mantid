@@ -704,7 +704,6 @@ class FittingTabPresenterTest(unittest.TestCase):
             '__MUSR22725; Group; fwd; Asymmetry_unnorm'])
 
         result = self.presenter.get_parameters_for_tf_single_fit_calculation()
-        print("out of tis tst")
 
         self.assertEqual(result, {'EndX': 15.0,
                                   'InputFunction': None,
