@@ -72,7 +72,7 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
 
         self.afo = AlgorithmSelectorFactoryObserver(self)
 
-    def set_get_selected_workspace_fn(self,get_selected_workspace_fn):
+    def set_get_selected_workspace_fn(self, get_selected_workspace_fn):
         self.get_selected_workspace_fn = get_selected_workspace_fn
 
     def observeUpdate(self, toggle):
@@ -271,5 +271,5 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
 
             manager = InterfaceManager()
             dialog = manager.createDialogFromName(algorithm.name, algorithm.version, None,
-                                                  False, presets,"",enabled)
+                                                  False, presets, "", enabled)
             dialog.show()

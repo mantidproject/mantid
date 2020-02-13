@@ -85,7 +85,7 @@ class AlgorithmSelectorModel(object):
 
     def find_input_workspace_property(self, algorithm):
         algm_manager = AlgorithmManager.Instance()
-        alg_instance = algm_manager.createUnmanaged(algorithm[0],algorithm[1])
+        alg_instance = algm_manager.createUnmanaged(algorithm[0], algorithm[1])
         alg_instance.initialize()
         for prop in alg_instance.getProperties():
             if isinstance(prop, IWorkspaceProperty):
