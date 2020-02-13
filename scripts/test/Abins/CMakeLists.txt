@@ -17,6 +17,7 @@ set ( TEST_PY_FILES
    AbinsLoadDMOL3Test.py
    AbinsLoadGAUSSIANTest.py
    AbinsPowderDataTest.py
+   AbinsSDataTest.py
   )
 
 pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.scripts

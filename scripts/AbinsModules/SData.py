@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
+from mantid.kernel import logger as mantid_logger
 import AbinsModules
 from AbinsModules import AbinsConstants, AbinsParameters
 
@@ -76,7 +77,7 @@ class SData(AbinsModules.GeneralData):
         """
         return self._data
 
-    def check_thresholds(self, return_cases=False):
+    def check_thresholds(self, return_cases=False, logger=None):
         """
         Compare the S data values to minimum thresholds and warn if the threshold appears large relative to the data
 
@@ -90,7 +91,9 @@ class SData(AbinsModules.GeneralData):
             ``(atom_key, order_number, max(S))``. Otherwise, the method returns ``None``.
 
         """
-        from mantid.kernel import logger
+
+        if logger is None:
+            logger = mantid_logger
 
         warning_cases = []
         absolute_threshold = AbinsParameters.sampling['s_absolute_threshold']
