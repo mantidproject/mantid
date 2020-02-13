@@ -29,6 +29,18 @@ Improvements
     histogram bins. (Previously the values would correspond to one
     bin-edge.)
 
+- In Abins the iterative thresholding system, which was used to
+  suppress high-intensity terms at high quantum orders, has been
+  removed.
+  - Instead, a user warning is printed at the end of the calculation
+    (before writing files) if the threshold for small values (set in
+    AbinsParameters.sampling) was large compared to the data.
+  - This will lead to performance improvements for systems with
+    large second-order contributions.
+  - Calculation of third- and fourth-order spectra is disabled while
+    the implementation of these terms is reviewed. Benchmarking has
+    shown that the results of these terms are unreasonably large, and
+    are not recommended for production calculations.
 
 BugFixes
 ########
