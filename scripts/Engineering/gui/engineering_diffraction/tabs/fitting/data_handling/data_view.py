@@ -50,13 +50,16 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_load_button_enabled(self, enabled):
         self.button_load.setEnabled(enabled)
 
-    def add_table_row(self, run_no, bank):
+    def add_table_row(self, run_no, bank, checked):
         row_no = self.table_selection.rowCount()
         self.table_selection.insertRow(row_no)
         self.table_selection.setItem(row_no, 0, QtWidgets.QTableWidgetItem(str(run_no)))
         self.table_selection.setItem(row_no, 1, QtWidgets.QTableWidgetItem(str(bank)))
         check_box = QtWidgets.QTableWidgetItem()
-        check_box.setCheckState(QtCore.Qt.Unchecked)
+        if checked:
+            check_box.setCheckState(QtCore.Qt.Checked)
+        else:
+            check_box.setCheckState(QtCore.Qt.Unchecked)
         self.table_selection.setItem(row_no, 2, check_box)
 
     def remove_table_row(self, row_no):

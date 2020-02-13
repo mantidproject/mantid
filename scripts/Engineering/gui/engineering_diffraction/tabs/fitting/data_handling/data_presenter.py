@@ -18,6 +18,7 @@ class FittingDataPresenter(object):
         self.worker = None
 
         self.row_numbers = TwoWayRowDict()  # {ws_name: table_row} and {table_row: ws_name}
+        self.plotted = set()  # List of plotted workspace names
 
         # Connect view signals to local methods
         self.view.set_on_load_clicked(self.on_load_clicked)
@@ -40,17 +41,24 @@ class FittingDataPresenter(object):
         if ws_name in self.get_loaded_workspaces():
             removed = self.get_loaded_workspaces().pop(ws_name)
             self.plot_removed_notifier.notify_subscribers(removed)
+            self.plotted.discard(ws_name)
             self._repopulate_table()
 
     def rename_workspace(self, old_name, new_name):
-        if old_name in self.get_loaded_workspaces():
-            self.get_loaded_workspaces()[new_name] = self.get_loaded_workspaces().pop(
-                old_name)
+        loaded_workspaces = self.get_loaded_workspaces()
+        if old_name in loaded_workspaces:
+            ws = loaded_workspaces.pop(old_name)
+            loaded_workspaces[new_name] = ws
+            if old_name in self.plotted:
+                self.all_plots_removed_notifier.notify_subscribers()
+                for ws_name in self.plotted:
+                    self.plot_added_notifier.notify_subscribers(loaded_workspaces[ws_name])
             self._repopulate_table()
 
     def clear_workspaces(self):
         self.get_loaded_workspaces().clear()
         self.all_plots_removed_notifier.notify_subscribers()
+        self.plotted.clear()
         self.row_numbers.clear()
         self._repopulate_table()
 
@@ -90,7 +98,8 @@ class FittingDataPresenter(object):
                 bank = self.model.get_sample_log_from_ws(name, "bankid")
                 if bank == 0:
                     bank = "cropped"
-                self._add_row_to_table(name, i, run_no, bank)
+                checked = name in self.plotted
+                self._add_row_to_table(name, i, run_no, bank, checked)
             except RuntimeError:
                 self._add_row_to_table(name, i)
 
@@ -100,6 +109,7 @@ class FittingDataPresenter(object):
             ws_name = self.row_numbers.pop(row_no)
             removed = self.get_loaded_workspaces().pop(ws_name)
             self.plot_removed_notifier.notify_subscribers(removed)
+            self.plotted.discard(ws_name)
         self._repopulate_table()
 
     def _remove_all_tracked_workspaces(self):
@@ -109,10 +119,13 @@ class FittingDataPresenter(object):
     def _handle_table_cell_changed(self, row, col):
         if col == 2 and row in self.row_numbers:  # Is from the plot check column
             ws = self.model.get_loaded_workspaces()[self.row_numbers[row]]
+            ws_name = self.row_numbers[row]
             if self.view.get_table_item(row, col).checkState() == 2:  # Plot Box is checked
                 self.plot_added_notifier.notify_subscribers(ws)
+                self.plotted.add(ws_name)
             else:  # Plot box is unchecked
                 self.plot_removed_notifier.notify_subscribers(ws)
+                self.plotted.discard(ws_name)
 
     def _enable_load_button(self, enabled):
         self.view.set_load_button_enabled(enabled)
@@ -138,21 +151,21 @@ class FittingDataPresenter(object):
             return False
         return True
 
-    def _add_row_to_table(self, ws_name, row, run_no=None, bank=None):
+    def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, checked=False):
         words = ws_name.split("_")
         if run_no is not None and bank is not None:
-            self.view.add_table_row(run_no, bank)
+            self.view.add_table_row(run_no, bank, checked)
             self.row_numbers[ws_name] = row
         elif len(words) == 4 and words[2] == "bank":
             logger.notice("No sample logs present, determining information from workspace name.")
-            self.view.add_table_row(words[1], words[3])
+            self.view.add_table_row(words[1], words[3], checked)
             self.row_numbers[ws_name] = row
         else:
             logger.warning(
                 "The workspace '{}' was not in the correct naming format. Files should be named in the following way: "
                 "INSTRUMENT_RUNNUMBER_bank_BANK. Using workspace name as identifier.".format(ws_name)
             )
-            self.view.add_table_row(ws_name, "N/A")
+            self.view.add_table_row(ws_name, "N/A", checked)
             self.row_numbers[ws_name] = row
 
     def _remove_table_row(self, row_no):
