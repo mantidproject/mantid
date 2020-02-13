@@ -754,8 +754,8 @@ class Abins(PythonAlgorithm):
 
         # check 2D resolution
         resolution_2d = abins.parameters.instruments['TwoDMap']['resolution']
-        if not isinstance(resolution_2d, float):
-            raise RuntimeError("Invalid value of abins.instruments"
+        if not (isinstance(resolution_2d, float) and resolution_2d > 0):
+            raise RuntimeError("Invalid value of abins.parameters.instruments"
                                "['TwoDMap']['resolution']"
                                + message_end)
 
