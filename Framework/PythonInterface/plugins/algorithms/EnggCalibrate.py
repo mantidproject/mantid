@@ -181,7 +181,7 @@ class EnggCalibrate(PythonAlgorithm):
 
         fitted_peaks = fit_alg.getProperty('FittedPeaks').value
 
-        difc_alg = self.createChildAlgorithm('EnggFitDIFCFromPeaks')
+        difc_alg = self.createChildAlgorithm('EnggFitTOFFromPeaks')
         difc_alg.setProperty('FittedPeaks', fitted_peaks)
         prog.report("Performing fit")
         difc_alg.execute()

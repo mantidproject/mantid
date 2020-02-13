@@ -26,6 +26,9 @@ namespace ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaults {
 public:
+  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 9;
+  using ValueArray = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
+
   enum Column {
     // 0-based column indices for cells in a row. The Actual values are
     // important here so set them explicitly
@@ -40,8 +43,25 @@ public:
     RUN_SPECTRA = 8
   };
 
-  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 9;
-  using ValueArray = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
+  // The property name associated with each column. Unfortunately in
+  // QtBatchView we are still using ReflectometryReductionOneAuto to get the
+  // tooltips rather than ReflectometryISISLoadAndProcess. If we change it we
+  // will break the Encoder and Decoder unit tests because C++ tests cannot use
+  // python algorithms. The code needs to be reorganised to avoid creating the
+  // algorithm, or the tests rewritten in python. This only affects tooltips
+  // for a couple of the properties so is not an urgent fix, so for now just
+  // make the properties here match RROA.
+  static auto constexpr ColumnPropertyName =
+      std::array<const char *, OPTIONS_TABLE_COLUMN_COUNT>{
+          "ThetaIn",
+          "FirstTransmissionRun",  // FirstTransmissionRunList in RILAP
+          "SecondTransmissionRun", // SecondTransmissionRunList in RILAP
+          "TransmissionProcessingInstructions",
+          "MomentumTransferMin",
+          "MomentumTransferMax",
+          "MomentumTransferStep",
+          "ScaleFactor",
+          "ProcessingInstructions"};
 
   PerThetaDefaults(
       boost::optional<double> theta, TransmissionRunPair tranmissionRuns,

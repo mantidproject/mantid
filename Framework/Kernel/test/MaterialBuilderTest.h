@@ -99,7 +99,7 @@ public:
     TS_ASSERT_EQUALS(mat.totalScatterXSection(), 2.3)
     TS_ASSERT_EQUALS(mat.cohScatterXSection(), 0.5)
     TS_ASSERT_EQUALS(mat.incohScatterXSection(), 5.0)
-    TS_ASSERT_EQUALS(mat.absorbXSection(), 0.23)
+    TS_ASSERT_DELTA(mat.absorbXSection(), 0.23, 1e-8)
   }
 
   void test_Number_Density_Set_By_Formula_ZParameter_And_Cell_Volume() {

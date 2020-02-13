@@ -403,7 +403,7 @@ if(ENABLE_CPACK)
         "${CPACK_RPM_PACKAGE_REQUIRES},"
         "boost169-python3,"
         "python36-numpy,python36-scipy,python36-h5py,python36-PyCifRW,"
-        "python36-six,python36-PyYAML,python36-requests,"
+        "python36-six,python36-PyYAML,python36-requests,python36-toml,"
         "python36-ipython,python36-ipython-notebook"
       )
       if(ENABLE_MANTIDPLOT)
@@ -510,6 +510,7 @@ if(ENABLE_CPACK)
           "python3-matplotlib,"
           "python3-qtpy,"
           "python3-scipy,"
+          "python3-toml,"
           "python3-pycifrw (>= 4.2.1),"
           "python3-yaml,"
           "ipython3-qtconsole") # transitional package for bionic

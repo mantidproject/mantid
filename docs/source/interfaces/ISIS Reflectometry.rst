@@ -755,7 +755,9 @@ exist.
   *The per-angle defaults table*
 
 Entries in the per-angle defaults table are similar to the table on the Runs
-tab. Default transmission runs can be specified and each input can take a
+tab. Hover over a table cell to see a tooltip describing what the value is for.
+
+Default transmission runs can be specified and each input can take a
 single run/workspace or a number of runs/workspaces that will be summed before
 processing. Specific spectra of interest can be specified for the input runs
 and separate spectra, if required, can be specified for the transmission runs -

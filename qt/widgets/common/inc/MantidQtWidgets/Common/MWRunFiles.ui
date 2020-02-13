@@ -156,6 +156,9 @@
    </item>
    <item>
     <widget class="QPushButton" name="browseBtn">
+     <property name="focusPolicy">
+      <enum>Qt::ClickFocus</enum>
+     </property>
      <property name="text">
       <string>Browse</string>
      </property>

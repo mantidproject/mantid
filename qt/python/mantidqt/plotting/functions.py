@@ -38,6 +38,8 @@ PROJECTION = 'mantid'
 # See https://matplotlib.org/api/_as_gen/matplotlib.figure.SubplotParams.html#matplotlib.figure.SubplotParams
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
+COLORPLOT_MIN_WIDTH = 8
+COLORPLOT_MIN_HEIGHT = 7
 LOGGER = Logger("workspace.plotting.functions")
 
 MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
@@ -262,7 +264,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs)
 
     # Can't have a waterfall plot with only one line.
-    if len(nums) == 1 and waterfall:
+    if len(nums)*len(workspaces) == 1 and waterfall:
         waterfall = False
 
     # The plot's initial xlim and ylim are used to offset each curve in a waterfall plot.
@@ -277,7 +279,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         fig.canvas.set_window_title(figure_title(workspaces, fig.number))
     else:
         if ax.is_waterfall():
-            for i in range(len(nums)):
+            for i in range(len(nums)*len(workspaces)):
                 errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(ax)
                 helperfunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines())-(i+1))
 
@@ -407,6 +409,10 @@ def pcolormesh(workspaces, fig=None):
     fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
     fig.colorbar(pcm, ax=axes.ravel().tolist(), pad=0.06)
     fig.canvas.set_window_title(figure_title(workspaces, fig.number))
+    #assert a minimum size, otherwise we can lose axis labels
+    size = fig.get_size_inches()
+    if (size[0] <= COLORPLOT_MIN_WIDTH) or (size[1] <= COLORPLOT_MIN_HEIGHT):
+        fig.set_size_inches(COLORPLOT_MIN_WIDTH, COLORPLOT_MIN_HEIGHT, forward=True)
     fig.canvas.draw()
     fig.show()
     return fig

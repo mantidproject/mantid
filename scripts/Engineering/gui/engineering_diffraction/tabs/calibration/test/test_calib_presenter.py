@@ -119,13 +119,11 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.set_check_plot_output_enabled.assert_called_with(True)
 
     @patch(tab_path + ".presenter.CalibrationPresenter.emit_enable_button_signal")
-    @patch(tab_path + ".presenter.logger.warning")
-    def test_on_error_posts_to_logger_and_enables_controls(self, logger, emit):
+    def test_on_error_posts_to_logger_and_enables_controls(self, emit):
         fail_info = 2024278
 
         self.presenter._on_error(fail_info)
 
-        logger.assert_called_with(str(fail_info))
         self.assertEqual(emit.call_count, 1)
 
     def test_validation_of_run_numbers(self):
