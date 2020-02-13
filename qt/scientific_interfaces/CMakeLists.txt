@@ -76,6 +76,11 @@ set(TEST_FILES
     test/ISISReflectometry/Common/EncoderTest.h
 )
 
+set(CXXTEST_EXTRA_HEADER_INCLUDE
+    ${CMAKE_CURRENT_LIST_DIR}/test/ScientificInterfacesTestInitialization.h)
+
+find_package(BoostPython REQUIRED)
+
 mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                  QT_VERSION 4
                  SRC ${TEST_FILES}
@@ -83,6 +88,7 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ../../Framework/DataObjects/inc
                    ../../Framework/TestHelpers/inc
                    inc
+                   ${PYTHON_INCLUDE_PATH}
                  TEST_HELPER_SRCS
                    ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
                    ../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
@@ -95,6 +101,8 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ${TCMALLOC_LIBRARIES_LINKTIME}
                    ${CORE_MANTIDLIBS}
                    DataObjects
+                   PythonInterfaceCore
+                   ${PYTHON_LIBRARIES}
                    ${GMOCK_LIBRARIES}
                    ${GTEST_LIBRARIES}
                    ${POCO_LIBRARIES}
@@ -139,8 +147,6 @@ set(QT5_TEST_FILES
     test/ISISReflectometry/Common/DecoderTest.h
     test/ISISReflectometry/Common/EncoderTest.h
 )
-
-find_package(BoostPython REQUIRED)
 
 mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                  QT_VERSION 5
