@@ -303,4 +303,3 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.removeDockWidget(self.dockable_plot_widget_window)
         super(MuonAnalysisGui, self).closeEvent(event)
         self.context.ads_observer = None
-

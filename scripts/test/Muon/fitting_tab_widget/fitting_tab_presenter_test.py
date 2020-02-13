@@ -605,7 +605,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.function_browser.setFunction(str(fit_function))
         self.presenter.selected_data = new_workspace_list
         fit_function_2 = FunctionFactory.createInitialized('name=GausOsc,A=1.0,Sigma=2.5,Frequency=0.1,Phi=0')
-        self.presenter.model.calculate_tf_function.return_value = fit_function_2
+        self.presenter.model.convert_to_tf_function.return_value = fit_function_2
 
         self.view.tf_asymmetry_mode = True
 
@@ -620,7 +620,7 @@ class FittingTabPresenterTest(unittest.TestCase):
                               'MUSR22725; Group; fwd; fwd']
         self.presenter.selected_data = new_workspace_list
         fit_function_2 = self.view.fit_object.clone()
-        self.presenter.model.calculate_tf_function.return_value = fit_function_2
+        self.presenter.model.convert_to_tf_function.return_value = fit_function_2
 
         self.view.tf_asymmetry_mode = True
 
@@ -630,12 +630,13 @@ class FittingTabPresenterTest(unittest.TestCase):
     def test_handle_asymmetry_mode_correctly_keeps_globals_for_simultaneous_fit(self):
         self.view.function_browser.setFunction(EXAMPLE_MULTI_DOMAIN_FUNCTION)
         self.view.simul_fit_checkbox.setChecked(True)
-        print(self.view.function_browser.getNumberOfDatasets())
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                               'MUSR22725; Group; fwd; fwd']
         self.presenter.selected_data = new_workspace_list
+
         fit_function_2 = FunctionFactory.createInitialized(EXAMPLE_TF_ASYMMETRY_FUNCTION)
-        self.presenter.model.calculate_tf_function.return_value = fit_function_2
+        self.presenter.model.convert_to_tf_function.return_value = fit_function_2
+
         self.view.function_browser.setGlobalParameters(['A'])
 
         self.view.tf_asymmetry_mode = True
@@ -653,7 +654,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.tf_asymmetry_mode_checkbox.blockSignals(False)
         self.view.is_simul_fit = mock.MagicMock(return_value=False)
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        self.presenter.model.calculate_tf_function.return_value = fit_function
+        self.presenter.model.convert_to_tf_function.return_value = fit_function
 
         self.view.tf_asymmetry_mode = False
 
@@ -673,7 +674,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.tf_asymmetry_mode_checkbox.blockSignals(False)
         self.view.is_simul_fit = mock.MagicMock(return_value=True)
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        self.presenter.model.calculate_tf_function.return_value = fit_function
+        self.presenter.model.convert_to_tf_function.return_value = fit_function
 
         self.view.tf_asymmetry_mode = False
 
@@ -688,7 +689,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         fit_function_2 = FunctionFactory.createInitialized(EXAMPLE_TF_ASYMMETRY_FUNCTION)
         self.view.function_browser.setFunction(str(fit_function))
         self.presenter.selected_data = new_workspace_list
-        self.presenter.model.calculate_tf_function.return_value = fit_function_2
+        self.presenter.model.convert_to_tf_function.return_value = fit_function_2
         self.view.tf_asymmetry_mode = True
         self.presenter.handle_fit_clicked()
         wait_for_thread(self.presenter.calculation_thread)

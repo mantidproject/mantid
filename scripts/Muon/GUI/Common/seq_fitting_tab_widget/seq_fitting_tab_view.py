@@ -10,7 +10,6 @@ from qtpy import QtWidgets, QtCore, QtGui
 from mantidqt.utils.qt import load_ui
 from Muon.GUI.Common.message_box import warning
 
-
 ui_seq_fitting_tab, _ = load_ui(__file__, "seq_fitting_tab.ui")
 
 default_columns = {"Run": 0, "Groups/Pairs": 1, "Fit quality": 2}
@@ -87,14 +86,14 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
                 self.fit_results_table.setItem(i, len(default_columns) + j, parameterItem)
                 self.fit_results_table.item(i, default_columns["Fit quality"]).setText("No fit")
                 self.fit_results_table.item(i, default_columns["Fit quality"]).setForeground(QtGui.QBrush(
-                                                                                             QtCore.Qt.black))
+                    QtCore.Qt.black))
         self.fit_results_table.blockSignals(False)
 
     def set_fit_function_parameters(self, row, parameter_values):
         self.fit_results_table.blockSignals(True)
         for j, parameter in enumerate(parameter_values):
             parameter_item = self.fit_results_table.item(row, len(default_columns) + j)
-            parameter_item.setText("{0:.5f}".format(parameter))
+            parameter_item.setText("{:.6f}".format(parameter))
         self.fit_results_table.blockSignals(False)
 
     def set_fit_quality_to_default(self):
@@ -160,6 +159,5 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
     def setup_slot_for_sequential_fit_button(self, slot):
         self.seq_fit_button.clicked.connect(slot)
 
-    def setup_slot_for_table_parameter_changed(self,slot):
+    def setup_slot_for_table_parameter_changed(self, slot):
         self.fit_results_table.cellChanged.connect(slot)
-

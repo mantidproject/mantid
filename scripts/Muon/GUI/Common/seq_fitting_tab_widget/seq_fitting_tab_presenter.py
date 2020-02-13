@@ -163,6 +163,3 @@ class SeqFittingTabPresenter(object):
         workspace_names = self.model.get_fit_workspace_names_from_groups_and_runs(separated_runs,
                                                                                   separated_group_and_pairs)
         return workspace_names
-
-
-

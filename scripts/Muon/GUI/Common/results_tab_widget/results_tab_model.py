@@ -55,7 +55,7 @@ class ResultsTabModel(object):
 
         self._update_selected_fit_function()
         self._new_fit_observer = GenericObserver(self._on_new_fit_performed)
-        fitting_context.new_fit_notifier.add_subscriber(self._new_fit_observer)
+        fitting_context.new_fit_results_notifier.add_subscriber(self._new_fit_observer)
 
     def results_table_name(self):
         """Return the current name of the results table"""
