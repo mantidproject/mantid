@@ -123,6 +123,40 @@ void ReflectometryWorkflowBase2::initMonitorProperties() {
 
 /** Initialize properties related to transmission normalization
  */
+void ReflectometryWorkflowBase2::initBackgroundProperties() {
+
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "SubtractBackground", false, Direction::Input),
+                  "If true then perform background subtraction");
+  declareProperty(
+      std::make_unique<PropertyWithValue<std::string>>(
+          "BackgroundProcessingInstructions", "", Direction::Input),
+      "These processing instructions will be passed to the background "
+      "subtraction algorithm");
+
+  auto algBkg = AlgorithmManager::Instance().createUnmanaged(
+      "ReflectometryBackgroundSubtraction");
+  algBkg->initialize();
+  copyProperty(algBkg, "BackgroundCalculationMethod");
+  copyProperty(algBkg, "DegreeOfPolynomial");
+  copyProperty(algBkg, "CostFunction");
+
+  setPropertySettings("BackgroundProcessingInstructions",
+                      std::make_unique<Kernel::EnabledWhenProperty>(
+                          "SubtractBackground", IS_EQUAL_TO, "1"));
+  setPropertySettings("BackgroundCalculationMethod",
+                      std::make_unique<Kernel::EnabledWhenProperty>(
+                          "SubtractBackground", IS_EQUAL_TO, "1"));
+
+  setPropertyGroup("SubtractBackground", "Background");
+  setPropertyGroup("BackgroundProcessingInstructions", "Background");
+  setPropertyGroup("BackgroundCalculationMethod", "Background");
+  setPropertyGroup("DegreeOfPolynomial", "Background");
+  setPropertyGroup("CostFunction", "Background");
+}
+
+/** Initialize properties related to transmission normalization
+ */
 void ReflectometryWorkflowBase2::initTransmissionProperties() {
 
   declareProperty(
@@ -254,6 +288,25 @@ void ReflectometryWorkflowBase2::initDebugProperties() {
                   "purposes.");
   declareProperty("Debug", false,
                   "Whether to enable the output of extra workspaces.");
+}
+
+/** Validate background properties, if given
+ *
+ * @return :: A map with results of validation
+ */
+std::map<std::string, std::string>
+ReflectometryWorkflowBase2::validateBackgroundProperties() const {
+
+  std::map<std::string, std::string> results;
+
+  const bool subtractBackground = getProperty("SubtractBackground");
+  const std::string summationType = getProperty("SummationType");
+  if (subtractBackground && summationType == "SumInQ") {
+    results["SubtractBackground"] =
+        "Background subtraction is not implemented if summing in Q";
+  }
+
+  return results;
 }
 
 /** Validate reduction properties, if given

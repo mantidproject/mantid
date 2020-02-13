@@ -156,16 +156,10 @@ void ReflectometryReductionOne2::init() {
                       Direction::Input),
                   "Wavelength maximum in angstroms");
 
-  // Init properties for monitors
   initMonitorProperties();
-
-  // Init properties for transmission normalization
+  initBackgroundProperties();
   initTransmissionProperties();
-
-  // Init properties for algorithmic corrections
   initAlgorithmicProperties();
-
-  // Init properties for diagnostics
   initDebugProperties();
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
@@ -185,6 +179,9 @@ std::map<std::string, std::string>
 ReflectometryReductionOne2::validateInputs() {
 
   std::map<std::string, std::string> results;
+
+  const auto background = validateBackgroundProperties();
+  results.insert(background.begin(), background.end());
 
   const auto reduction = validateReductionProperties();
   results.insert(reduction.begin(), reduction.end());
@@ -400,7 +397,10 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     g_log.debug("Extracting ROI\n");
     result = makeDetectorWS(result, false, false);
     outputDebugWorkspace(result, wsName, "_lambda", debug, step);
-    // todo: background subtraction
+    // Background subtraction
+    result = backgroundSubtraction(result);
+    outputDebugWorkspace(result, wsName, "_lambda_subtracted_bkg", debug, step);
+    // Sum in lambda
     if (m_sum) {
       g_log.debug("Summing in wavelength\n");
       result = makeDetectorWS(result, m_convertUnits, true);
@@ -460,6 +460,31 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
   }
 
   return IvsLam;
+}
+
+MatrixWorkspace_sptr ReflectometryReductionOne2::backgroundSubtraction(
+    MatrixWorkspace_sptr detectorWS) {
+  bool subtractBackground = getProperty("SubtractBackground");
+  if (!subtractBackground)
+    return detectorWS;
+  auto alg = this->createChildAlgorithm("ReflectometryBackgroundSubtraction");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", detectorWS);
+  alg->setProperty("ProcessingInstructions",
+                   getPropertyValue("BackgroundProcessingInstructions"));
+  alg->setProperty("BackgroundCalculationMethod",
+                   getPropertyValue("BackgroundCalculationMethod"));
+  alg->setProperty("DegreeOfPolynomial",
+                   getPropertyValue("DegreeOfPolynomial"));
+  alg->setProperty("CostFunction", getPropertyValue("CostFunction"));
+  // For our case, the peak range is the same as the main processing
+  // instructions, and we do the summation separately so don't sum the peak
+  alg->setProperty("InputWorkspaceIndexType", "SpectrumNumber");
+  alg->setProperty("PeakRange", getPropertyValue("ProcessingInstructions"));
+  alg->setProperty("SumPeak", false);
+  alg->execute();
+  MatrixWorkspace_sptr corrected = alg->getProperty("OutputWorkspace");
+  return corrected;
 }
 
 /**

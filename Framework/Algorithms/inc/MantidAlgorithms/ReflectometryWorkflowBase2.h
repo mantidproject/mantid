@@ -29,6 +29,8 @@ protected:
   void initMonitorProperties();
   /// Initialize direct beam properties
   void initDirectBeamProperties();
+  /// Initialize background subtraction properties
+  void initBackgroundProperties();
   /// Initialize transmission properties
   void initTransmissionProperties();
   /// Initialize properties for stitching transmission runs
@@ -39,6 +41,8 @@ protected:
   void initMomentumTransferProperties();
   /// Initialize properties for diagnostics
   void initDebugProperties();
+  /// Validate background-type properties
+  std::map<std::string, std::string> validateBackgroundProperties() const;
   /// Validate reduction-type properties
   std::map<std::string, std::string> validateReductionProperties() const;
   /// Validate direct beam properties
