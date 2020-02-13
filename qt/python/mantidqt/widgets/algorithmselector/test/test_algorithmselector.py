@@ -179,7 +179,7 @@ class WidgetTest(unittest.TestCase):
             item_pos = widget.tree.visualItemRect(selected_item).center()
             QTest.mouseDClick(widget.tree.viewport(), Qt.LeftButton,
                               Qt.NoModifier, pos=item_pos)
-            createDialog.assert_called_once_with('Load', 1)
+            createDialog.assert_called_once_with('Load', 1, None, False, {}, '', [])
 
     def test_sorting_of_algorithms(self):
         widget = AlgorithmSelectorWidget()
