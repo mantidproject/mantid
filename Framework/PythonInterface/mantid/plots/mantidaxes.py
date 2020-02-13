@@ -261,9 +261,13 @@ class MantidAxes(Axes):
             raise ValueError("Artist '{}' is not tracked and so does not have "
                              "an associated workspace.".format(artist))
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
-        workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
-        if any(workspace.readE(workspace_index) != 0):
-            return True
+        if artist.axes.creation_args[0].get('axis', None) == MantidAxType.BIN:
+            if any([workspace.readE(i)[spec_num] != 0 for i in range(0, workspace.getNumberHistograms())]):
+                return True
+        else:
+            workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
+            if any(workspace.readE(workspace_index) != 0):
+                return True
         return False
 
     def get_tracked_artists(self):
@@ -365,7 +369,10 @@ class MantidAxes(Axes):
         kwargs['distribution'] = not self.get_artist_normalization_state(artist)
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
         self.remove_artists_if(lambda art: art == artist)
-        workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
+        if kwargs.get('axis', None) == MantidAxType.BIN:
+            workspace_index = spec_num
+        else:
+            workspace_index = workspace.getIndexFromSpectrumNumber(spec_num)
         self._remove_matching_curve_from_creation_args(workspace.name(), workspace_index, spec_num)
 
         if errorbars:
