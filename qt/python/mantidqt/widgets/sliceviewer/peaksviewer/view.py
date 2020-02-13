@@ -28,7 +28,7 @@ class PeaksViewerView(QWidget):
         """
         super(PeaksViewerView, self).__init__(parent)
         self._painter = painter
-        self._sliceinfo = sliceinfo_provider
+        self._sliceinfo_provider = sliceinfo_provider
         self._group_box = None
         self._presenter = None
         self._table_view = None
@@ -41,7 +41,7 @@ class PeaksViewerView(QWidget):
     @property
     def sliceinfo(self):
         """Return information regarding the current slice"""
-        return self._sliceinfo
+        return self._sliceinfo_provider.get_sliceinfo()
 
     def clear_peaks(self, peaks):
         """Clear all peaks from display"""
@@ -98,7 +98,6 @@ class PeaksViewerView(QWidget):
 class PeaksViewerCollectionView(QWidget):
     """Display a collection of PeaksViewerView objects in a scrolling view.
     """
-
     def __init__(self, painter, sliceinfo_provider, parent=None):
         """
         :param painter: An object responsible for draw the peaks representations

@@ -23,7 +23,6 @@ class PeaksViewerPresenter(object):
         PeaksListChanged = 1
         OverlayPeaks = 2
         SlicePointChanged = 3
-        SliceInfoChanged = 4
 
     def __init__(self, model, view):
         """
@@ -55,13 +54,17 @@ class PeaksViewerPresenter(object):
         PresenterEvent = PeaksViewerPresenter.Event
         if event == PresenterEvent.SlicePointChanged:
             self._update_peaks()
-        elif event == PresenterEvent.SliceInfoChanged or event == PresenterEvent.OverlayPeaks:
+        elif event == PresenterEvent.OverlayPeaks:
             self._overlay_peaks()
         elif event == PresenterEvent.PeaksListChanged:
             self._peaks_table_presenter.refresh()
         else:
             from mantid.kernel import logger
             logger.warning("PeaksViewer: Unknown event detected: {}".format(event))
+
+    def _clear_peaks(self):
+        """Clear all peaks from this view"""
+        self._view.clear_peaks(self.model.take_peak_representations())
 
     def _overlay_peaks(self):
         """
@@ -70,7 +73,7 @@ class PeaksViewerPresenter(object):
           - Compute peaks representations
           - Draw overlays.
         """
-        self._view.clear_peaks(self.model.visible_peaks)
+        self._clear_peaks()
         peak_representations = self.model.compute_peak_representations(self._view.sliceinfo)
         self._view.draw_peaks(peak_representations)
 

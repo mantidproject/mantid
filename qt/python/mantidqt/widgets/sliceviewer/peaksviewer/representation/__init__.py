@@ -9,29 +9,29 @@ from __future__ import (absolute_import, division, unicode_literals)
 
 # local imports
 from .noshape import PeakRepresentationNoShape
-from .ellipsoid import PeakRepresentationEllipsoid
-from .spherical import PeakRepresentationSphere
 
 # map shape names to representation classes
 # the strings need to match whatever Peak.getPeakShape.shapeName returns
 _PEAK_REPRESENTATIONS = {
     "none": PeakRepresentationNoShape,
-    "spherical": PeakRepresentationSphere,
-    "ellipsoid": PeakRepresentationEllipsoid
+    "spherical": PeakRepresentationNoShape,
+    "ellipsoid": PeakRepresentationNoShape
 }
 
 
-def create_peakrepresentation(peak, slicepoint, slicerange, marker_color):
+def create_peakrepresentation(x, y, z, slicepoint, slicedim_width, peak_shape, marker_color):
     """
     A factory function to create an appropriate PeakRepresentation
     object for a peak.
-    :param peak: A Peak object
+    :param x: X position of peak in slice plane
+    :param x: Y position of peak in slice plane
+    :param z: Z position of peak out of slice plane
     :param slicepoint: float giving current slice point
-    :param slicerange: 2-tuple giving (min/max) values of the slicing dimension
+    :param slicedim_width: Total width of the slicing dimension
+    :param peak_shape: A reference to the object describing the PeakShape
     :param marker_color: A str representing the color of the peak shape marker
     :returns: A PeakRepresentation object describing the Peak aspects
               important for display
     """
-    peak_shape = peak.getPeakShape()
     cls = _PEAK_REPRESENTATIONS[peak_shape.shapeName().lower()]
-    return cls.create(peak.getQLabFrame(), slicepoint, slicerange, peak_shape, marker_color)
+    return cls.create(x, y, z, slicepoint, slicedim_width, peak_shape, marker_color)

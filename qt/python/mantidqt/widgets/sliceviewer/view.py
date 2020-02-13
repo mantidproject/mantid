@@ -43,7 +43,7 @@ class SliceViewerView(QWidget):
         # Dimension widget
         self.dimensions_layout = QHBoxLayout()
         self.dimensions = DimensionWidget(dims_info, parent=self)
-        self.dimensions.dimensionsChanged.connect(self.presenter.new_plot)
+        self.dimensions.dimensionsChanged.connect(self.presenter.dimensions_changed)
         self.dimensions.valueChanged.connect(self.presenter.slicepoint_changed)
         self.dimensions_layout.addWidget(self.dimensions)
 
@@ -105,8 +105,12 @@ class SliceViewerView(QWidget):
     def create_axes(self):
         self.fig.clf()
         if self.line_plots:
-            gs = gridspec.GridSpec(
-                2, 2, width_ratios=[1, 4], height_ratios=[4, 1], wspace=0.0, hspace=0.0)
+            gs = gridspec.GridSpec(2,
+                                   2,
+                                   width_ratios=[1, 4],
+                                   height_ratios=[4, 1],
+                                   wspace=0.0,
+                                   hspace=0.0)
             self.ax = self.fig.add_subplot(gs[1], projection='mantid')
             self.ax.xaxis.set_visible(False)
             self.ax.yaxis.set_visible(False)
@@ -123,13 +127,12 @@ class SliceViewerView(QWidget):
         clears the plot and creates a new one using a MDHistoWorkspace
         """
         self.ax.clear()
-        self.im = self.ax.imshow(
-            ws,
-            origin='lower',
-            aspect='auto',
-            transpose=self.dimensions.transpose,
-            norm=self.colorbar.get_norm(),
-            **kwargs)
+        self.im = self.ax.imshow(ws,
+                                 origin='lower',
+                                 aspect='auto',
+                                 transpose=self.dimensions.transpose,
+                                 norm=self.colorbar.get_norm(),
+                                 **kwargs)
         self.draw_plot()
 
     def plot_matrix(self, ws, **kwargs):
@@ -137,15 +140,14 @@ class SliceViewerView(QWidget):
         clears the plot and creates a new one using a MatrixWorkspace
         """
         self.ax.clear()
-        self.im = imshow_sampling(
-            self.ax,
-            ws,
-            origin='lower',
-            aspect='auto',
-            interpolation='none',
-            transpose=self.dimensions.transpose,
-            norm=self.colorbar.get_norm(),
-            **kwargs)
+        self.im = imshow_sampling(self.ax,
+                                  ws,
+                                  origin='lower',
+                                  aspect='auto',
+                                  interpolation='none',
+                                  transpose=self.dimensions.transpose,
+                                  norm=self.colorbar.get_norm(),
+                                  **kwargs)
         self.im._resample_image()
         self.draw_plot()
 
