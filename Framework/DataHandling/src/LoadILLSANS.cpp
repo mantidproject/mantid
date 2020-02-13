@@ -79,7 +79,11 @@ int LoadILLSANS::confidence(Kernel::NexusDescriptor &descriptor) const {
       ((descriptor.pathExists("/entry0/reactor_power") &&
         descriptor.pathExists("/entry0/instrument_name")) ||
        (descriptor.pathExists("/entry0/instrument/name") &&
-        descriptor.pathExists("/entry0/acquisition_mode")))) {
+        descriptor.pathExists("/entry0/acquisition_mode") &&
+        !descriptor.pathExists(
+            "/entry0/instrument/Detector")))) // serves to remove the TOF
+                                              // instruments
+  {
     return 80;
   } else {
     return 0;
