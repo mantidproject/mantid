@@ -6,25 +6,20 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, unicode_literals)
 
-from qtpy.QtCore import Qt, Signal
+from qtpy.QtCore import Qt
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QCompleter, QDialog
 
 from mantidqt.utils.qt import load_ui
 
 
-class AddFunctionDialog(QDialog):
-    """
-    Dialog to add function to fit property browser
-    """
-    function_added = Signal(str)
+class AddFunctionDialogView(QDialog):
 
     def __init__(self, parent = None, function_names = None):
-        super(AddFunctionDialog, self).__init__(parent)
+        super(AddFunctionDialogView, self).__init__(parent)
         self.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self._setup_ui(function_names)
-        self.ui.buttonBox.accepted.connect(self.action_add_function)
 
     def _setup_ui(self, function_names):
         self.ui = load_ui(__file__, 'add_function_dialog.ui', self)
@@ -35,11 +30,10 @@ class AddFunctionDialog(QDialog):
         function_box.completer().setFilterMode(Qt.MatchContains)
         self.ui.errorMessage.hide()
 
-    def action_add_function(self):
-        current_function = self.ui.functionBox.currentText()
-        if self.ui.functionBox.findText(current_function, Qt.MatchExactly) != -1:
-            self.function_added.emit(current_function)
-            self.accept()
-        else:
-            self.ui.errorMessage.setText("<span style='color:red'> Function %s not found </span>" % current_function)
-            self.ui.errorMessage.show()
+    def acceptFunction(self, function):
+        self.function_added.emit(function)
+        self.accept()
+
+    def set_error_message(self, text):
+        self.ui.errorMessage.setText("<span style='color:red'> %s </span>" % text)
+        self.ui.errorMessage.show()

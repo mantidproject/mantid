@@ -10,7 +10,7 @@ from qtpy.QtCore import QObject, Signal, Slot
 
 from mantidqt.plotting.markers import PeakMarker, RangeMarker
 from .mouse_state_machine import StateMachine
-from .addfunctiondialog import AddFunctionDialog
+from .addfunctiondialog.presenter import AddFunctionDialog
 
 
 class FitInteractiveTool(QObject):
@@ -203,9 +203,9 @@ class FitInteractiveTool(QObject):
         to click on the canvas to where the peak should be placed.
         """
         dialog = AddFunctionDialog(self.canvas, self.peak_names)
-        dialog.ui.functionBox.setCurrentText(self.current_peak_type)
+        dialog.view.ui.functionBox.setCurrentText(self.current_peak_type)
         dialog.function_added.connect(self.action_peak_added)
-        dialog.open()
+        dialog.view.open()
 
     def action_peak_added(self, function_name):
         self.peak_type_changed.emit(function_name)
@@ -218,7 +218,7 @@ class FitInteractiveTool(QObject):
         """
         dialog = AddFunctionDialog(self.canvas, self.background_names)
         dialog.function_added.connect(self.add_background_requested)
-        dialog.open()
+        dialog.view.open()
 
     def add_other_dialog(self):
         """
@@ -227,7 +227,7 @@ class FitInteractiveTool(QObject):
         """
         dialog = AddFunctionDialog(self.canvas, self.other_names)
         dialog.function_added.connect(self.add_other_requested)
-        dialog.open()
+        dialog.view.open()
 
     def add_peak_marker(self, x, y_top, y_bottom=0.0, fwhm=None):
         """
