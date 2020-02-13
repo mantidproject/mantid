@@ -41,6 +41,7 @@ class AddSampleLogMultiple(PythonAlgorithm):
 
         self.declareProperty(StringArrayProperty('LogTypes', ''),
                              doc='Comma separated list of types the log values will be.')
+
     def PyExec(self):
         workspace = self.getProperty('Workspace').value
         log_names = self.getProperty('LogNames').value
