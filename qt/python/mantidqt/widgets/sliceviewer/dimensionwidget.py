@@ -171,7 +171,7 @@ class Dimension(QWidget):
         self.spinbox.setDecimals(3)
         self.spinbox.setRange(self.get_bin_center(0), self.get_bin_center(self.nbins - 1))
         self.spinbox.setSingleStep(self.width)
-        self.spinbox.valueChanged.connect(self.spinbox_changed)
+        self.spinbox.editingFinished.connect(self.spinbox_changed)
 
         self.layout.addWidget(self.name)
         self.layout.addWidget(self.x)
@@ -236,7 +236,6 @@ class Dimension(QWidget):
     def spinbox_changed(self):
         self.value = self.spinbox.value()
         self.update_slider()
-        self.valueChanged.emit()
 
     def slider_changed(self):
         self.value = self.get_bin_center(self.slider.value())
