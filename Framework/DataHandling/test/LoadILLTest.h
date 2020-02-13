@@ -106,6 +106,9 @@ public:
     std::string result = "LoadILLTOF";
 
     checkLoader(filename, result);
+
+    filename = "189171.nxs";
+    checkLoader(filename, result);
   }
 
   void test_loadTOF_IN6() {
@@ -113,11 +116,17 @@ public:
     std::string result = "LoadILLTOF";
 
     checkLoader(filename, result);
+    filename = "220010.nxs";
+    checkLoader(filename, result);
   }
 
   void test_loadTOF_PANTHER() {
     std::string filename = "001036.nxs";
     std::string result = "LoadILLTOF";
+
+    checkLoader(filename, result);
+
+    filename = "001723.nxs";
 
     checkLoader(filename, result);
   }
