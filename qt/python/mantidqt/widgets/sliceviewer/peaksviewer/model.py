@@ -13,7 +13,7 @@ from mantidqt.widgets.workspacedisplay.table.model \
 from .representation import create_peakrepresentation
 
 # constants
-DEFAULT_MARKER_COLOR = 'white'
+DEFAULT_MARKER_COLOR = 'red'
 
 
 class PeaksViewerModel(TableWorkspaceDisplayModel):
