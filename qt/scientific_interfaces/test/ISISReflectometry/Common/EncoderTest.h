@@ -11,7 +11,7 @@
 #include "../../../ISISReflectometry/GUI/Common/Encoder.h"
 #include "../ReflMockObjects.h"
 #include "CoderCommonTester.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidPythonInterface/core/WrapPython.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -27,7 +27,10 @@ public:
   static EncoderTest *createSuite() { return new EncoderTest(); }
   static void destroySuite(EncoderTest *suite) { delete suite; }
 
-  void setUp() override { Mantid::API::FrameworkManager::Instance(); }
+  EncoderTest() {
+    PyRun_SimpleString("import mantid.api as api\n"
+                       "api.FrameworkManager.Instance()");
+  }
 
   void test_encoder() {
     CoderCommonTester tester;

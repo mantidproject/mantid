@@ -11,7 +11,7 @@
 #include "../../../ISISReflectometry/GUI/Common/Decoder.h"
 #include "../ReflMockObjects.h"
 #include "CoderCommonTester.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidPythonInterface/core/WrapPython.h"
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 
 #include <cxxtest/TestSuite.h>
@@ -168,7 +168,10 @@ public:
   static DecoderTest *createSuite() { return new DecoderTest(); }
   static void destroySuite(DecoderTest *suite) { delete suite; }
 
-  void setUp() override { Mantid::API::FrameworkManager::Instance(); }
+  DecoderTest() {
+    PyRun_SimpleString("import mantid.api as api\n"
+                       "api.FrameworkManager.Instance()");
+  }
 
   void test_decode() {
     CoderCommonTester tester;
