@@ -527,12 +527,19 @@ class SANSILLReduction(PythonAlgorithm):
                         self._apply_transmission(ws, transmission_ws)
                     solid_angle = self._make_solid_angle_name(ws)
                     cache = self.getProperty('CacheSolidAngle').value
-                    if cache:
-                        if not mtd.doesExist(solid_angle):
-                            SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle,
-                                       Method=self._get_solid_angle_method(self._instrument))
-                    else:
-                        SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle,
+                    if (cache and not mtd.doesExist(solid_angle)) or not cache:
+                        if self._instrument == "D16":
+                            run = mtd[ws].getRun()
+                            distance = run.getLogData("Det.value").value/1000
+                            CloneWorkspace(InputWorkspace=ws, OutputWorkspace=solid_angle)
+                            MoveInstrumentComponent(Workspace=solid_angle, X=0, Y=0, Z=distance,
+                                                    RelativePosition=False, ComponentName="detector")
+                            RotateInstrumentComponent(Workspace=solid_angle, X=0, Y=1, Z=0, angle=0,
+                                                      RelativeRotation=False, ComponentName="detector")
+                            input_solid = solid_angle
+                        else:
+                            input_solid = ws
+                        SolidAngle(InputWorkspace=input_solid, OutputWorkspace=solid_angle,
                                    Method=self._get_solid_angle_method(self._instrument))
                     Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws, WarnOnZeroDivide=False)
                     if not cache:
