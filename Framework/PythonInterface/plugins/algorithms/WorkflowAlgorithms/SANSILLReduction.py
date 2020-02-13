@@ -333,15 +333,6 @@ class SANSILLReduction(PythonAlgorithm):
             Processes the sample
             @param ws: input workspace
         """
-        reference_ws = self.getProperty('ReferenceInputWorkspace').value
-        coll_ws = None
-        if reference_ws:
-            if not self._check_processed_flag(reference_ws, 'Sample'):
-                self.log().warning('Reference input workspace is not processed as sample.')
-            Divide(LHSWorkspace=ws, RHSWorkspace=reference_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
-            Scale(InputWorkspace=ws, Factor=self.getProperty('WaterCrossSection').value, OutputWorkspace=ws)
-            self._mask(ws, reference_ws)
-            coll_ws = reference_ws
         sensitivity_in = self.getProperty('SensitivityInputWorkspace').value
         if sensitivity_in:
             if not self._check_processed_flag(sensitivity_in, 'Sensitivity'):
@@ -357,15 +348,61 @@ class SANSILLReduction(PythonAlgorithm):
                 DeleteWorkspace(flux_ws)
             else:
                 Divide(LHSWorkspace=ws, RHSWorkspace=flux_in, OutputWorkspace=ws, WarnOnZeroDivide=False)
-        if coll_ws:
-            self._check_distances_match(mtd[ws], coll_ws)
-            sample_coll = mtd[ws].getRun().getLogData('collimation.actual_position').value
-            ref_coll = coll_ws.getRun().getLogData('collimation.actual_position').value
-            flux_factor = (sample_coll ** 2) / (ref_coll ** 2)
-            self.log().notice('Flux factor is: ' + str(flux_factor))
-            Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
-            ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
-                                 NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
+            AddSampleLog(Workspace=ws, LogText='True', LogType='String', LogName='NormalisedByFlux')
+            self._do_rescale_flux(ws, flux_in)
+        reference_ws = self.getProperty('ReferenceInputWorkspace').value
+        if reference_ws:
+            if not self._check_processed_flag(reference_ws, 'Sample'):
+                self.log().warning('Reference input workspace is not processed as sample.')
+            Divide(LHSWorkspace=ws, RHSWorkspace=reference_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
+            Scale(InputWorkspace=ws, Factor=self.getProperty('WaterCrossSection').value, OutputWorkspace=ws)
+            self._mask(ws, reference_ws)
+            self._rescale_flux(ws, reference_ws)
+        ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
+                             NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
+
+    def _rescale_flux(self, ws, ref_ws):
+        """
+            This adjusts the absolute scale after normalising by water
+            If both sample and water runs are normalised by flux, there is nothing to do
+            If one is normalised, the other is not, we log a warning
+            If neither is normalised by flux, we have to rescale by the factor
+            @param ws : the workspace to scale (sample)
+            @param ref_ws : the reference workspace (water)
+        """
+        message = 'Sample and water runs are not consistent in terms of flux normalisation; ' \
+                  'the absolute scale will not be correct. ' \
+                  'Make sure they are either both normalised or both not normalised by flux.' \
+                  'Consider specifying the sample flux also to water reduction.' \
+                  'Even if it would be at different distance, it will be rescaled correctly.'
+        run = mtd[ws].getRun()
+        run_ref = ref_ws.getRun()
+        has_log = run.hasProperty('NormalisedByFlux')
+        has_log_ref = run_ref.hasProperty('NormalisedByFlux')
+        if has_log != has_log_ref:
+            raise RuntimeError(message)
+        if has_log and has_log_ref:
+            log_val = run.getLogData('NormalisedByFlux').value
+            log_val_ref = run_ref.getLogData('NormalisedByFlux').value
+            if log_val != log_val_ref:
+                raise RuntimeError(message)
+            elif log_val == 'False':
+                self._do_rescale_flux(ws, ref_ws)
+        else:
+            self._do_rescale_flux(ws, ref_ws)
+
+    def _do_rescale_flux(self, ws, ref_ws):
+        """
+            Scales ws by the magic flux factor wrt the reference
+            @ws : input workspace to scale (sample)
+            @ref_ws : reference workspace (water)
+        """
+        self._check_distances_match(mtd[ws], ref_ws)
+        sample_l2 = mtd[ws].getRun().getLogData('L2').value
+        ref_l2 = ref_ws.getRun().getLogData('L2').value
+        flux_factor = (sample_l2 ** 2) / (ref_l2 ** 2)
+        self.log().notice('Flux factor is: ' + str(flux_factor))
+        Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
 
     def _apply_absorber(self, ws, absorber_ws):
         """

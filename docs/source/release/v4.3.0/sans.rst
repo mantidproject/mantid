@@ -15,6 +15,7 @@ Improved
 - :ref:`MaskBTP <algm-MaskBTP>` now handles both old and new instrument definitions for BIOSANS and GPSANS
 - :ref:`SANSILLReduction <algm-SANSILLReduction>` and :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` are improved to better handle the absolute scale normalisation.
 - :ref:`SANSILLIntegration <algm-SANSILLIntegration>` will now offer to produce I(Q) for separate detector components separately, which is useful for D33.
+- :ref:`SANSILLReduction <algm-SANSILLReduction>` will now allow for correct absolute scale normalisation even in circumstances when, for example, there is no flux measurement for the water run configuration.
 - Data with invalid proton charge logs will now be fixed before performing
   slicing. A warning is emitted when this happens.
 - ISIS SANS history for top level algorithms now works correctly. A user
