@@ -59,7 +59,7 @@ def cfpstrmaker(x, pref='B'):
 
 def getSymmAllowedParam(sym_str):
     if 'T' in sym_str or 'O' in sym_str:
-        return ['B40', 'B44', 'B60', 'B64']
+        return ['B40', 'B60']
     if any([sym_str == val for val in ['C1', 'Ci']]):
         return sum([cfpstrmaker(i) for i in range(7)] +
                    [cfpstrmaker(i, 'IB') for i in range(1, 7)],[])
@@ -214,10 +214,15 @@ class CrystalField(object):
             elif key not in free_parameters:
                 raise RuntimeError('Unknown attribute/parameters %s' % key)
 
+        # Cubic is a special case where B44=5*B40, B64=-21*B60
+        is_cubic = self.Symmetry.startswith('T') or self.Symmetry.startswith('O')
+        symm_allowed_par = getSymmAllowedParam(self.Symmetry)
+
         for param in CrystalField.field_parameter_names:
             if param in free_parameters:
                 self.function.setParameter(param, free_parameters[param])
-            symm_allowed_par = getSymmAllowedParam(self.Symmetry)
+            if is_cubic and (param == 'B44' or param == 'B64'):
+                continue
             if param not in symm_allowed_par:
                 self.function.fixParameter(param)
             else:
