@@ -353,7 +353,7 @@ def sum_spectra(parent, ws):
     return alg.getProperty('OutputWorkspace').value
 
 
-def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None, ceria_run=241391, vanadium_run=236516,
+def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bank_names=None, ceria_run=241391, vanadium_run=236516,
                                   template_file=None):
     """
     Produces and writes an ENGIN-X instrument parameter file for GSAS
@@ -366,10 +366,12 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None, cer
     .prm, .ipar, etc.
 
     @param output_file :: name of the file where to write the output
+    @param difa :: list of DIFA values, one per bank, to pass on to GSAS
     @param difc :: list of DIFC values, one per bank, to pass on to GSAS
                    (as produced by EnggCalibrate)
     @param tzero :: list of TZERO values, one per bank, to pass on to GSAS
                     (also from EnggCalibrate)
+    @param bank_names :: Names of each bank to be added to the file
     @param ceria_run :: number of the ceria (CeO2) run used for this calibration.
                         this number goes in the file and should also be used to
                         name the file
@@ -385,8 +387,8 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None, cer
         raise ValueError("The parameters difc and tzero must be lists, with as many elements as "
                          "banks")
 
-    if len(difc) != len(tzero):
-        raise ValueError("The lengths of the difc and tzero lists must be the same")
+    if len(difc) != len(tzero) and len(difc) != len(difa):
+        raise ValueError("The lengths of the difa, difc and tzero lists must be the same")
 
     # Defaults for a "both banks" file
     if not template_file:
@@ -418,10 +420,9 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None, cer
                     "INS    CALIB",  # calibration run numbers (Vanadium and Ceria)
                     "INS    INCBM"   # A his file for open genie (with ceria run number in the name)
                     ]
-        difa = 0.0
         # the ljust(80) ensures a length of 80 characters for the lines (GSAS rules...)
         replacements = [("INS  {0} ICONS  {1:.2f}    {2:.2f}    {3:.2f}".
-                         format(b_idx + 1, difc[b_idx], difa, tzero[b_idx])).ljust(80) + '\n',
+                         format(b_idx + 1, difc[b_idx], difa[b_idx], tzero[b_idx])).ljust(80) + '\n',
                         ("INS    CALIB   {0}   {1} ceo2".
                          format(ceria_run, vanadium_run)).ljust(80) + '\n',
                         ("INS    INCBM  ob+mon_{0}_North_and_South_banks.his".

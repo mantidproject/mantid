@@ -11,4 +11,6 @@ Direct Geometry Changes
 
 * New ``NOW4`` instrument definition for SNS
 
+- For Panther and IN5 the :ref:`DirectILLReduction <algm-DirectILLReduction-v1>` will now correctly mask the non-overlapping bins before grouping the pixels onto Debye-Scherrer rings.
+
 :ref:`Release 4.3.0 <v4.3.0>`

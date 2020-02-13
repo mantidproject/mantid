@@ -415,8 +415,6 @@ void WorkspaceTreeWidget::handleShowSaveAlgorithm() {
       m_saveFileType = SaveFileType::Nexus;
     else if (actionName.compare("ASCII") == 0)
       m_saveFileType = SaveFileType::ASCII;
-    else if (actionName.compare("ASCII v1"))
-      m_saveFileType = SaveFileType::ASCIIv1;
   }
 
   m_presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
@@ -439,8 +437,6 @@ void WorkspaceTreeWidget::saveWorkspace(const std::string &wsName,
   case SaveFileType::Nexus:
     algorithmName = "SaveNexus";
     break;
-  case SaveFileType::ASCIIv1:
-    version = 1;
   case SaveFileType::ASCII:
     algorithmName = "SaveAscii";
     break;
@@ -1180,7 +1176,6 @@ void WorkspaceTreeWidget::workspaceSelected() {
     // Add some save algorithms
     addSaveMenuOption("SaveNexus", "Nexus");
     addSaveMenuOption("SaveAscii", "ASCII");
-    addSaveMenuOption("SaveAscii.1", "ASCII v1");
 
     // Set the button to show the menu
     m_saveButton->setMenu(m_saveMenu);
