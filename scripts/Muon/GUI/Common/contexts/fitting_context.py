@@ -300,7 +300,6 @@ class FittingContext(object):
         self.fit_list = fit_list if fit_list is not None else []
         # Register callbacks with this object to observe when new fits
         # are added
-        self.new_fit_notifier = Observable()
         self.new_fit_results_notifier = Observable()
         self.new_fit_plotting_notifier = Observable()
         self.fit_removed_notifier = Observable()
@@ -400,12 +399,13 @@ class FittingContext(object):
             self.fit_list.remove(fit)
 
     def remove_fits_from_stored_fit_list(self, fits):
+        removed_fits = []
         for fit in fits:
             if fit in self.fit_list:
                 self.fit_list.remove(fit)
+                removed_fits += [fit]
                 self._number_of_fits -= 1
-                self.fit_removed_notifier.notify_subscribers(fit)
-        self.new_fit_notifier.notify_subscribers()
+        self.fit_removed_notifier.notify_subscribers(removed_fits)
 
     def log_names(self, filter_fn=None):
         """
@@ -420,14 +420,12 @@ class FittingContext(object):
         ]
 
     def clear(self):
-        self.fit_list = []
-        self.number_of_fits = 0
-        self.new_fit_notifier.notify_subscribers()
+        fits_to_remove = self.fit_list.copy()
+        self.remove_fits_from_stored_fit_list(fits_to_remove)
 
     def remove_latest_fit(self, number_of_fits_to_remove):
         self.fit_list = self.fit_list[:-number_of_fits_to_remove]
         self._number_of_fits = self._number_of_fits_cache
-        self.new_fit_notifier.notify_subscribers()
 
     @property
     def number_of_fits(self):

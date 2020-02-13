@@ -341,11 +341,13 @@ class PlotWidgetPresenter(HomeTabSubWidget):
                                                            'label': label + fit_function + ': Diff'})
         self._view.force_redraw()
 
-    def handle_fit_removed(self, fit):
-        list_of_workspaces_to_remove = fit.output_workspace_names
-        for workspace in list_of_workspaces_to_remove:
-            if workspace in self._model.plotted_fit_workspaces:
-                self._model.remove_workspace_from_plot(workspace, self._view.get_axes())
+    def handle_fit_removed(self, fits):
+        for fit in fits:
+            list_of_workspaces_to_remove = fit.output_workspace_names
+            for workspace in list_of_workspaces_to_remove:
+                if workspace in self._model.plotted_fit_workspaces:
+                    self._model.remove_workspace_from_plot(workspace, self._view.get_axes())
+        self._view.force_redraw()
 
     def handle_rebin_options_set(self):
         if self.context._do_rebin():

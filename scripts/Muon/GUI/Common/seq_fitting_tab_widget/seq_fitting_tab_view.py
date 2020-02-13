@@ -75,7 +75,8 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         # rescale columns
         self.scale_fit_table_columns(self.fit_results_table.horizontalHeader(), self.fit_results_table.columnCount())
         # set table fit parameters
-        self.initialise_fit_function_parameters(parameter_values)
+        if parameter_values is not None:
+            self.initialise_fit_function_parameters(parameter_values)
         self.fit_results_table.blockSignals(False)
 
     def initialise_fit_function_parameters(self, parameter_values):

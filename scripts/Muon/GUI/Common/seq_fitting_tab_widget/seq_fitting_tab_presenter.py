@@ -37,7 +37,7 @@ class SeqFittingTabPresenter(object):
     def handle_fit_function_updated(self):
         if self.model.fit_function is None:
             self.model.clear_fit_information()
-            # self.view.set_fit_table_function_parameters([], [])
+            self.view.set_fit_table_function_parameters([], None)
             self.view.set_fit_quality_to_default()
             return
 

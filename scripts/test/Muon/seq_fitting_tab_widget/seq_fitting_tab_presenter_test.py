@@ -17,7 +17,6 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context
 class SeqFittingTabPresenterTest(unittest.TestCase):
     def setUp(self):
         self.context = setup_context()
-        context = self.context
 
         self.view = mock.MagicMock()
         self.model = mock.MagicMock()
