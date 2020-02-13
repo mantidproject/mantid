@@ -10,7 +10,6 @@ from mantid.api import FunctionFactory, MultiDomainFunction
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy import QtWidgets
-
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
@@ -682,7 +681,6 @@ class FittingTabPresenterTest(unittest.TestCase):
 
     def test_handle_fit_with_tf_asymmetry_mode_calls_CalculateMuonAsymmetry(self):
         self.presenter.model.get_function_name.return_value = 'GausOsc'
-        self.presenter.model.create_fitted_workspace_name.return_value = ('workspace', 'workspace directory')
         self.presenter.handle_finished = mock.MagicMock()
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry']
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
@@ -696,8 +694,9 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.assertEqual(self.presenter.handle_finished.call_count, 1)
 
-    def test_get_parameters_for_tf_single_fit_calculation(self):
-        self.presenter.model.create_fitted_workspace_name.return_value = ('workspace', 'workspace directory')
+    @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_presenter.create_fitted_workspace_name')
+    def test_get_parameters_for_tf_single_fit_calculation(self, mock_create_fitted_workspace_name):
+        mock_create_fitted_workspace_name.return_value = ('workspace', 'workspace directory')
         self.context.group_pair_context.get_unormalisised_workspace_list = mock.MagicMock(return_value=
         [
             '__MUSR22725; Group; top; Asymmetry_unnorm',
@@ -705,6 +704,7 @@ class FittingTabPresenterTest(unittest.TestCase):
             '__MUSR22725; Group; fwd; Asymmetry_unnorm'])
 
         result = self.presenter.get_parameters_for_tf_single_fit_calculation()
+        print("out of tis tst")
 
         self.assertEqual(result, {'EndX': 15.0,
                                   'InputFunction': None,
