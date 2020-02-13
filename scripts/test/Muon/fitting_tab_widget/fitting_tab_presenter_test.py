@@ -630,6 +630,7 @@ class FittingTabPresenterTest(unittest.TestCase):
     def test_handle_asymmetry_mode_correctly_keeps_globals_for_simultaneous_fit(self):
         self.view.function_browser.setFunction(EXAMPLE_MULTI_DOMAIN_FUNCTION)
         self.view.simul_fit_checkbox.setChecked(True)
+        print(self.view.function_browser.getNumberOfDatasets())
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                               'MUSR22725; Group; fwd; fwd']
         self.presenter.selected_data = new_workspace_list

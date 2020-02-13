@@ -45,14 +45,13 @@ class SeqFittingTabPresenter(object):
         parameter_values = []
         number_of_parameters = self.model.fit_function.nParams()
         parameters = [self.model.fit_function.parameterName(i) for i in range(number_of_parameters)]
-        print(parameters)
         # get parameters for each fit
         for i in range(self.view.get_number_of_entries()):
             ws_names = self.get_workspaces_for_entry_in_fit_table(i)
             fit_function = self.model.get_ws_fit_function(ws_names)
             parameter_values.append([fit_function.getParameterValue(parameters[i]) for i in
                                     range(number_of_parameters)])
-        print(parameter_values)
+
         self.view.set_fit_table_function_parameters(parameters, parameter_values)
 
     def handle_fit_function_parameter_changed(self):
@@ -78,11 +77,9 @@ class SeqFittingTabPresenter(object):
 
         self.selected_row = self.view.get_selected_row()
         workspace_names = self.get_workspaces_for_entry_in_fit_table(self.selected_row)
-        parameter_values = self.view.get_entry_fit_parameter_values(self.selected_row)
 
         calculation_function = functools.partial(
-            self.model.evaluate_single_fit, workspace_names, self.view.is_plotting_checked(),
-            parameter_values)
+            self.model.evaluate_single_fit, workspace_names, self.view.is_plotting_checked())
         self.calculation_thread = self.create_thread(
             calculation_function)
 
@@ -102,6 +99,9 @@ class SeqFittingTabPresenter(object):
         self.view.seq_fit_button.setEnabled(True)
 
     def handle_single_fit_finished(self):
+        if self.fitting_calculation_model.result is None:
+            return
+
         fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
         number_of_parameters = fit_function.nParams()
         parameters = [fit_function.parameterName(i) for i in range(number_of_parameters)]
@@ -132,6 +132,9 @@ class SeqFittingTabPresenter(object):
         self.calculation_thread.start()
 
     def handle_seq_fit_finished(self):
+        if self.fitting_calculation_model.result is None:
+            return
+
         fit_functions, fit_statuses, fit_chi_squareds = self.fitting_calculation_model.result
         count = 0
         for fit_function, fit_status, fit_chi_squared in zip(fit_functions, fit_statuses, fit_chi_squareds):

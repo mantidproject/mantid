@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy import QtWidgets, QtCore, QtGui
 from mantidqt.utils.qt import load_ui
 from Muon.GUI.Common.message_box import warning
-from mantidqt.utils.observer_pattern import GenericObservable
 
 
 ui_seq_fitting_tab, _ = load_ui(__file__, "seq_fitting_tab.ui")

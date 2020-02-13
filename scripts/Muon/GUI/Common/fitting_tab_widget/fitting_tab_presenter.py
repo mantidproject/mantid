@@ -246,7 +246,7 @@ class FittingTabPresenter(object):
             tf_asymmetry_parameters = self.get_parameters_for_tf_function_calculation(original_fit_function)
 
             try:
-                tf_function = self.model.calculate_tf_function(tf_asymmetry_parameters)
+                tf_function = self.model.convert_to_tf_function(tf_asymmetry_parameters)
             except RuntimeError:
                 self.view.warning_popup('The input function was not of the form N*(1+f)+A*exp(-lambda*t)')
                 return tf_asymmetry_parameters['InputFunction']
@@ -279,7 +279,6 @@ class FittingTabPresenter(object):
             if self.automatically_update_fit_name:
                 self.view.function_name = self.view.function_name.replace(',TFAsymmetry', '')
                 self.model.function_name = self.view.function_name
-
         if not self.view.is_simul_fit():
             for index, fit_function in enumerate(self._fit_function):
                 fit_function = fit_function if fit_function else self.view.fit_object.clone()
@@ -459,6 +458,8 @@ class FittingTabPresenter(object):
         else:
             self.selected_data = self.get_workspace_selected_list()
 
+        self.update_model_from_view()
+
     def get_workspace_selected_list(self):
         if self.context._frequency_context is not None:
             freq = self.context._frequency_context.plot_type
@@ -547,7 +548,6 @@ class FittingTabPresenter(object):
                 self._fit_function = single_domain_fit_functions
             else:
                 self._fit_function = [None] * len(self._start_x)
-        self.model.update_stored_fit_function(self._fit_function[0])
 
     def _get_fit_function(self):
         if self.view.is_simul_fit():

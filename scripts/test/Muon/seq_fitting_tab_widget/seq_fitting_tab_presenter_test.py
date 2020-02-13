@@ -17,6 +17,7 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context
 class SeqFittingTabPresenterTest(unittest.TestCase):
     def setUp(self):
         self.context = setup_context()
+        context = self.context
 
         self.view = mock.MagicMock()
         self.model = mock.MagicMock()
@@ -27,6 +28,8 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         group_pair_list = ["fwd", "bwd"]
         self.presenter.model.get_runs_groups_and_pairs_for_fits = mock.MagicMock(
             return_value=[run_list, group_pair_list])
+        self.model.get_ws_fit_function = mock.MagicMock()
+        self.presenter.get_workspaces_for_entry_in_fit_table = mock.MagicMock()
 
         self.presenter.handle_selected_workspaces_changed()
 
@@ -36,11 +39,13 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
     def test_handle_fit_function_changed_correctly_updates_fit_table_parameters(self):
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         self.model.fit_function = fit_function
+        self.model.get_ws_fit_function = mock.MagicMock(return_value=fit_function)
+        self.presenter.get_workspaces_for_entry_in_fit_table = mock.MagicMock()
 
         self.presenter.handle_fit_function_updated()
 
         self.view.set_fit_table_function_parameters.assert_called_once_with(['A', 'Sigma', 'Frequency', 'Phi'],
-                                                                            [0.2, 0.2, 0.1, 0])
+                                                                            [[0.2, 0.2, 0.1, 0]])
 
     def test_handle_fit_started_updates_view(self):
         self.presenter.handle_fit_started()
@@ -64,13 +69,12 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.model.fit_function = fit_function
         self.model.evaluate_single_fit = mock.MagicMock()
         self.view.is_plotting_checked.return_value = False
-        self.view.get_entry_fit_parameter_values.return_value = [0.2, 0.2, 0.1, 0]
 
         self.presenter.get_workspaces_for_entry_in_fit_table = mock.MagicMock(return_value=workspace)
 
         self.presenter.handle_single_fit_requested()
 
-        mock_fit_function.assert_called_once_with(self.model.evaluate_single_fit, workspace, False, [0.2, 0.2, 0.1, 0])
+        mock_fit_function.assert_called_once_with(self.model.evaluate_single_fit, workspace, False)
 
     @mock.patch("functools.partial")
     def test_handle_single_fit_does_nothing_if_fit_function_is_none(self, mock_fit_function):
