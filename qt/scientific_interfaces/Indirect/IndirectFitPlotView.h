@@ -120,6 +120,7 @@ public:
   void setHWHMRangeVisible(bool visible) override;
 
   void displayMessage(const std::string &message) const override;
+  void disableSpectrumPlotSelection() override;
 
 public slots:
   void clearTopPreview() override;

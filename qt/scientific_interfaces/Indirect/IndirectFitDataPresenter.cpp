@@ -35,11 +35,7 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
           SIGNAL(multipleDataViewSelected()));
 
   connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
-          SLOT(setModelWorkspace(const QString &)));
-  connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
-          SIGNAL(dataChanged()));
-  connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
-          SLOT(updateRanges()));
+          SLOT(handleSampleLoaded(const QString &)));
 
   connect(m_view, SIGNAL(addClicked()), this,
           SIGNAL(requestedAddWorkspaceDialog()));
@@ -182,6 +178,13 @@ void IndirectFitDataPresenter::updateDataInTable(TableDatasetIndex dataIndex) {
 
 void IndirectFitDataPresenter::setResolutionHidden(bool hide) {
   m_view->setResolutionHidden(hide);
+}
+
+void IndirectFitDataPresenter::handleSampleLoaded(
+    const QString &workspaceName) {
+  setModelWorkspace(workspaceName);
+  emit dataChanged();
+  updateRanges();
 }
 
 void IndirectFitDataPresenter::setModelWorkspace(const QString &name) {

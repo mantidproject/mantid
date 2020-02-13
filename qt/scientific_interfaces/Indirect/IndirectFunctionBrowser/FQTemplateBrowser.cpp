@@ -164,7 +164,7 @@ void FQTemplateBrowser::setParameterValue(QString parameterName,
                                           double parameterValue,
                                           double parameterError) {
   m_parameterManager->setValue(m_parameterMap[parameterName], parameterValue);
-  m_parameterManager->setValue(m_parameterMap[parameterName], parameterError);
+  m_parameterManager->setError(m_parameterMap[parameterName], parameterError);
 }
 
 void FQTemplateBrowser::setCurrentDataset(int i) {

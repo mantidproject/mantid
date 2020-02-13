@@ -10,6 +10,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
+#include <iostream>
 #include <map>
 
 namespace MantidQt {
@@ -26,6 +27,7 @@ FQFunctionModel::FQFunctionModel() {
 
   for (auto functionName : functionList) {
     auto function = FunctionFactory::Instance().createFunction(functionName);
+    std::cout << function->asString() << std::endl;
     m_functionStore.insert(QString::fromStdString(functionName), function);
     m_globalParameterStore.insert(QString::fromStdString(functionName),
                                   QStringList());
@@ -106,11 +108,10 @@ void FQFunctionModel::removeFunction(const QString &prefix) {
 void FQFunctionModel::setFitType(const QString &name) {
   if (m_function) {
     m_globalParameterStore[m_fitType] = getGlobalParameters();
-    m_functionStore[m_fitType] = m_function->clone();
   }
   m_fitType = name;
   setGlobalParameters(m_globalParameterStore[name]);
-  FunctionModel::setFunction(m_functionStore[name]);
+  FunctionModel::setFunction(m_functionStore[name]->clone());
 }
 
 QString FQFunctionModel::getFitType() { return m_fitType; }

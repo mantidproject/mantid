@@ -48,6 +48,9 @@ private slots:
   void handleParameterTypeChanged(const QString &parameter);
   void handleSpectrumSelectionChanged(int parameterIndex);
 
+signals:
+  void spectrumChanged(WorkspaceIndex);
+
 private:
   void setAvailableParameters(const std::vector<std::string> &parameters);
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;

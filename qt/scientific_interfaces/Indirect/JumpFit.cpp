@@ -47,11 +47,14 @@ JumpFit::JumpFit(QWidget *parent)
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
   auto templateBrowser = new FQTemplateBrowser;
+  setPlotView(m_uiForm->pvFitPlotView);
   setFitDataPresenter(std::make_unique<JumpFitDataPresenter>(
       m_jumpFittingModel, m_uiForm->fitDataView, m_uiForm->cbParameterType,
       m_uiForm->cbParameter, m_uiForm->lbParameterType, m_uiForm->lbParameter,
       templateBrowser));
-  setPlotView(m_uiForm->pvFitPlotView);
+  connect(m_dataPresenter.get(), SIGNAL(spectrumChanged(WorkspaceIndex)),
+          m_plotPresenter.get(),
+          SLOT(handlePlotSpectrumChanged(WorkspaceIndex)));
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
 

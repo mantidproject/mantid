@@ -193,11 +193,13 @@ void JumpFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
 }
 
 void JumpFitDataPresenter::handleSpectrumSelectionChanged(int parameterIndex) {
-  setSingleModelSpectrum(parameterIndex);
+  // setSingleModelSpectrum(parameterIndex);
+  auto spectra =
+      m_jumpModel->getSpectra(m_dataIndex)[TableRowIndex{parameterIndex}];
   m_notifier.notify([&parameterIndex](IFQFitObserver &obs) {
     obs.spectrumChanged(parameterIndex);
   });
-  emit dataChanged();
+  emit spectrumChanged(spectra);
 }
 
 void JumpFitDataPresenter::setModelSpectrum(int index) {

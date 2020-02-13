@@ -100,6 +100,7 @@ protected:
 
 private slots:
   void addData();
+  void handleSampleLoaded(const QString &);
 
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog>
