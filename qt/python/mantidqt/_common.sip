@@ -175,6 +175,7 @@ public:
   void setSelection(int lineFrom, int indexFrom, int lineTo, int indexTo);
   void setTabWidth(int width);
   void setText(const QString &text);
+  void setEolVisibility(bool state);
   void setWhitespaceVisibility(WhitespaceVisibility mode);
   void updateCompletionAPI(const QStringList & completions);
 
