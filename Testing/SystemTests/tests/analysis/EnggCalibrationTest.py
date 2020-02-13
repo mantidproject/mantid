@@ -255,34 +255,62 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
         # Note that the reference values are given with 12 digits more for reference than
         # for assert-comparison purposes (comparisons are not that picky, by far)
         single_spectrum_delta = 5e-3
-        self.assertTrue(rel_err_less_delta(self.pos_table.cell(100, 3), 1.73157775402, single_spectrum_delta))
         self.assertTrue(rel_err_less_delta(self.pos_table.cell(400, 4), 1.65264105797, single_spectrum_delta))
         self.assertTrue(rel_err_less_delta(self.pos_table.cell(200, 5), -0.296705961227, single_spectrum_delta))
-        # DIFA column
-        self.assertTrue(rel_err_less_delta(self.pos_table.cell(133, 7), -27.229156494, single_spectrum_delta))
-        # DIFC column
-        self.assertTrue(rel_err_less_delta(self.pos_table.cell(610, 8), 18684.5429688, single_spectrum_delta))
-        # TZERO column
-        self.assertTrue(abs(self.pos_table.cell(1199, 9)) < 20)
+        if systemtesting.using_gsl_v1():  # Different fitting for gsl_v1 (RHEL 7)
+            self.assertTrue(rel_err_less_delta(self.pos_table.cell(100, 3), 1.73157775402, single_spectrum_delta))
+            # DIFA column
+            self.assertTrue(rel_err_less_delta(self.pos_table.cell(133, 7), -27.229156494, single_spectrum_delta))
+            # DIFC column
+            self.assertTrue(rel_err_less_delta(self.pos_table.cell(610, 8), 18684.5429688, single_spectrum_delta))
+            # TZERO column
+            self.assertTrue(abs(self.pos_table.cell(1199, 9)) < 20)
 
-        # === check difc, zero parameters for GSAS produced by EnggCalibrate
-        # Bank 1
-        self.assertTrue(rel_err_less_delta(self.difa, 19.527099828, exdelta_special),
-                        "difa parameter for bank 1 is not what was expected, got: %f" % self.difa)
-        self.assertTrue(rel_err_less_delta(self.difc, 18383.536587, exdelta_special),
-                        "difc parameter for bank 1 is not what was expected, got: %f" % self.difc)
-        if "darwin" != sys.platform:
-            self.assertTrue(abs(self.zero) < 40,
-                            "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
+            # === check difc, zero parameters for GSAS produced by EnggCalibrate
+            # Bank 1
+            self.assertTrue(rel_err_less_delta(self.difa, 19.527099828, exdelta_special),
+                            "difa parameter for bank 1 is not what was expected, got: %f" % self.difa)
+            self.assertTrue(rel_err_less_delta(self.difc, 18383.536587, exdelta_special),
+                            "difc parameter for bank 1 is not what was expected, got: %f" % self.difc)
+            if "darwin" != sys.platform:
+                self.assertTrue(abs(self.zero) < 40,
+                                "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
 
-        # Bank 2
-        self.assertTrue(rel_err_less_delta(self.difa_b2, -2.9592743210, exdelta_special),
-                        "difa parameter for bank 2 is not what was expected, got: %f" % self.difa_b2)
-        self.assertTrue(rel_err_less_delta(self.difc_b2, 18401.514556, exdelta_special),
-                        "difc parameter for bank 2 is not what was expected, got: %f" % self.difc_b2)
-        if "darwin" != sys.platform:
-            self.assertTrue(abs(self.zero_b2) < 20,
-                            "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
+            # Bank 2
+            self.assertTrue(rel_err_less_delta(self.difa_b2, -2.9592743210, exdelta_special),
+                            "difa parameter for bank 2 is not what was expected, got: %f" % self.difa_b2)
+            self.assertTrue(rel_err_less_delta(self.difc_b2, 18401.514556, exdelta_special),
+                            "difc parameter for bank 2 is not what was expected, got: %f" % self.difc_b2)
+            if "darwin" != sys.platform:
+                self.assertTrue(abs(self.zero_b2) < 20,
+                                "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
+        else:
+            self.assertTrue(rel_err_less_delta(self.pos_table.cell(100, 3), 1.68769443035, single_spectrum_delta))
+            # DIFA column
+            self.assertTrue(rel_err_less_delta(self.pos_table.cell(133, 7), -18.6453819275, single_spectrum_delta))
+            # DIFC column
+            self.assertTrue(rel_err_less_delta(self.pos_table.cell(610, 8), 18684.5429688, single_spectrum_delta))
+            # TZERO column
+            self.assertTrue(abs(self.pos_table.cell(1199, 9)) < 15)
+
+            # === check difc, zero parameters for GSAS produced by EnggCalibrate
+            # Bank 1
+            self.assertTrue(rel_err_less_delta(self.difa, 2.3265842459, exdelta_special),
+                            "difa parameter for bank 1 is not what was expected, got: %f" % self.difa)
+            self.assertTrue(rel_err_less_delta(self.difc, 18440.5718578, exdelta_special),
+                            "difc parameter for bank 1 is not what was expected, got: %f" % self.difc)
+            if "darwin" != sys.platform:
+                self.assertTrue(abs(self.zero) < 40,
+                                "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
+
+            # Bank 2
+            self.assertTrue(rel_err_less_delta(self.difa_b2, 3.9220236519, exdelta_special),
+                            "difa parameter for bank 2 is not what was expected, got: %f" % self.difa_b2)
+            self.assertTrue(rel_err_less_delta(self.difc_b2, 18382.7105215, exdelta_special),
+                            "difc parameter for bank 2 is not what was expected, got: %f" % self.difc_b2)
+            if "darwin" != sys.platform:
+                self.assertTrue(abs(self.zero_b2) < 10,
+                                "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
 
         # === peaks used to fit the difc and zero parameters ===
         expected_peaks = [1.1046, 1.3528, 1.5621, 1.6316, 2.7057]
