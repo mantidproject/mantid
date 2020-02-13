@@ -262,10 +262,9 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
             if self.get_selected_workspace_fn:
                 selected_ws_names = self.get_selected_workspace_fn()
                 if selected_ws_names:
-                    selected = selected_ws_names[0]
                     property_name = self.presenter.find_input_workspace_property(algorithm)
                     if property_name:
-                        presets[property_name] = selected
+                        presets[property_name] = selected_ws_names[0]
                         # Keep it enabled
                         enabled.append(property_name)
 
