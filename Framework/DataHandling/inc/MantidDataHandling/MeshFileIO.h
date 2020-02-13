@@ -48,8 +48,6 @@ protected:
       return val / 100;
     case ScaleUnits::millimetres:
       return val / 1000;
-    case ScaleUnits::metres:
-      return val;
     default:
       return val;
     }
@@ -63,8 +61,6 @@ protected:
     case ScaleUnits::millimetres:
       value = value * 1000;
       break;
-    case ScaleUnits::metres:
-      break;
     default:; // do nothing
     }
     return float(value);
@@ -74,7 +70,7 @@ protected:
   std::vector<uint32_t> m_triangle;
   std::vector<Kernel::V3D> m_vertices;
 
-  inline void setScaleType(const ScaleUnits scaleType) {
+  void setScaleType(const ScaleUnits scaleType) {
     if (m_scaleType == ScaleUnits::undefined) {
       m_scaleType = scaleType;
     }

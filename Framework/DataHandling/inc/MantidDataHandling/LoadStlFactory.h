@@ -7,7 +7,6 @@
 #ifndef MANTID_DATAHANDLING_LOADSTLFACTORY_H_
 #define MANTID_DATAHANDLING_LOADSTLFACTORY_H_
 
-//#include "MantidDataHandling/LoadStl.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadAsciiStl.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
