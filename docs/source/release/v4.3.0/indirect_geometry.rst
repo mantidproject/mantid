@@ -32,6 +32,7 @@ Improvements
 - In Abins the iterative thresholding system, which was used to
   suppress high-intensity terms at high quantum orders, has been
   removed.
+
   - Instead, a user warning is printed at the end of the calculation
     (before writing files) if the threshold for small values (set in
     AbinsParameters.sampling) was large compared to the data.
