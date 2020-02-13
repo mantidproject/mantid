@@ -55,8 +55,8 @@ class GeneralSettingsTest(unittest.TestCase):
     def test_setup_facilities_with_valid_combination(self, mock_ConfigService):
         self.assertEqual(0, mock_ConfigService.mock_instrument.name.call_count)
         presenter = GeneralSettings(None)
-        mock_ConfigService.setFacility.assert_called_once_with(mock_ConfigService.mock_facility.name())
-        self.assertEqual(2, mock_ConfigService.getFacility.call_count)
+        self.assertEqual(0, mock_ConfigService.setFacility.call_count)
+        self.assertEqual(3, mock_ConfigService.getFacility.call_count)
         self.assertEqual(2, mock_ConfigService.mock_facility.name.call_count)
         self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
 
@@ -66,7 +66,9 @@ class GeneralSettingsTest(unittest.TestCase):
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_setup_facilities_with_invalid_default_facility_chooses_first(self, mock_ConfigService):
-        mock_ConfigService.getFacility.side_effect = [RuntimeError("Invalid facility name"), mock_ConfigService.mock_facility]
+        mock_ConfigService.getFacility.side_effect = [RuntimeError("Invalid facility name"),
+                                                      mock_ConfigService.mock_facility,
+                                                      mock_ConfigService.mock_facility]
         presenter = GeneralSettings(None)
 
         self.assertEqual(mock_ConfigService.mock_facility.name(),

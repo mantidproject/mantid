@@ -85,14 +85,14 @@ Usage
    ws_name = 'ws_focussed'
    Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)
 
-   # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
+   # Using precalculated Vanadium corrections. To calculate from scratch see EnggVanadiumCorrections
    van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
    van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
 
    pos_table, peaks_info = EnggCalibrateFull(Workspace=ws_name,
                                              VanIntegrationWorkspace=van_integ_ws,
                                              VanCurvesWorkspace=van_curves_ws,
-                                             ExpectedPeaks=[1.097, 2.1], Bank='1')
+                                             ExpectedPeaks=[1.097, 1.28, 2.1], Bank='1')
 
    det_id = pos_table.column(0)[0]
    cal_pos =  pos_table.column(2)[0]
@@ -113,7 +113,7 @@ Output:
 .. testoutput:: ExCalFull
 
    Det ID: 100001
-   Calibrated position: (1.506,0.000,0.002)
+   Calibrated position: (8.510,0.000,0.009)
    Is the detector position calibrated now in the original workspace instrument? True
 
 **Example - Calculate corrected positions for EngingX, saving in a file:**
@@ -135,7 +135,7 @@ Output:
    pos_table, peaks_info = EnggCalibrateFull(Workspace=ws_name,
                                              VanIntegrationWorkspace=van_integ_ws,
                                              VanCurvesWorkspace=van_curves_ws,
-                                             ExpectedPeaks=[1.097, 2.1], Bank='1',
+                                             ExpectedPeaks=[1.097, 1.28, 2.1], Bank='1',
                                              OutDetPosFilename=pos_filename)
 
    det_id = pos_table.column(0)[0]
@@ -152,9 +152,9 @@ Output:
       for i,row in enumerate(reader):
          cal_pos = pos_table.column(2)[i]
          detector_pos_list = row[2].strip("[]").split(',')
-         calibOK = calibOK and (float(detector_pos_list[0]) - cal_pos.getX()) < 1e-6 and\
-                               (float(detector_pos_list[1]) - cal_pos.getY()) < 1e-6 and\
-                               (float(detector_pos_list[2]) - cal_pos.getZ()) < 1e-6
+         calibOK = calibOK and (float(detector_pos_list[0]) - cal_pos.getX()) < 2e-6 and\
+                               (float(detector_pos_list[1]) - cal_pos.getY()) < 2e-6 and\
+                               (float(detector_pos_list[2]) - cal_pos.getZ()) < 2e-6
          if not calibOK: break
    print("Does the calibration file have the expected values? {}".format(calibOK))
 
@@ -171,7 +171,7 @@ Output:
 .. testoutput:: ExCalFullWithOutputFile
 
    Det ID: 100001
-   Calibrated position: (1.506,0.000,0.002)
+   Calibrated position: (8.510,0.000,0.009)
    Got details on the peaks fitted for 1 detector(s)
    Was the file created? True
    Does the calibration file have the expected values? True

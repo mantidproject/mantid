@@ -33,6 +33,8 @@ from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
 # See https://matplotlib.org/api/_as_gen/matplotlib.figure.SubplotParams.html#matplotlib.figure.SubplotParams
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
+COLORPLOT_MIN_WIDTH = 8
+COLORPLOT_MIN_HEIGHT = 7
 LOGGER = Logger("workspace.plotting.functions")
 
 # -----------------------------------------------------------------------------
@@ -173,6 +175,10 @@ def pcolormesh(workspaces, fig=None):
     fig.subplots_adjust(wspace=SUBPLOT_WSPACE, hspace=SUBPLOT_HSPACE)
     fig.colorbar(pcm, ax=axes.ravel().tolist(), pad=0.06)
     fig.canvas.set_window_title(figure_title(workspaces, fig.number))
+    #assert a minimum size, otherwise we can lose axis labels
+    size = fig.get_size_inches()
+    if (size[0] <= COLORPLOT_MIN_WIDTH) or (size[1] <= COLORPLOT_MIN_HEIGHT):
+        fig.set_size_inches(COLORPLOT_MIN_WIDTH, COLORPLOT_MIN_HEIGHT, forward=True)
     fig.canvas.draw()
     fig.show()
     return fig

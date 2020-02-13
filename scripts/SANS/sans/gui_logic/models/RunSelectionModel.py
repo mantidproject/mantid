@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class RunSelection(object):
+class RunSelectionModel(object):
     def __init__(self, on_change, runs = None):
         self._on_change = on_change
         self._runs = runs if runs is not None else []

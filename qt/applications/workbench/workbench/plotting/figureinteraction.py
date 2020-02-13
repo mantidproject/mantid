@@ -25,7 +25,7 @@ from matplotlib.collections import Collection
 # third party imports
 from mantid.api import AnalysisDataService as ads
 from mantid.plots import datafunctions, MantidAxes
-from mantid.plots.utility import zoom
+from mantid.plots.utility import zoom, MantidAxType
 from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
@@ -706,8 +706,9 @@ class FigureInteraction(object):
         :return: bool
         """
         plotted_normalized = []
+        axis = ax.creation_args[0].get('axis', None)
         for workspace_name, artists in ax.tracked_workspaces.items():
-            if not ads.retrieve(workspace_name).isDistribution() and ax.data_replaced:
+            if axis != MantidAxType.BIN and not ads.retrieve(workspace_name).isDistribution() and ax.data_replaced:
                 plotted_normalized += [a.is_normalized for a in artists]
             else:
                 return False

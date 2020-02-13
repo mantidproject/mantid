@@ -76,7 +76,7 @@ class FocusPresenterTest(unittest.TestCase):
         self.view.set_plot_output_enabled.assert_called_with(True)
 
     @patch(tab_path + ".presenter.FocusPresenter.emit_enable_button_signal")
-    def test_on_worker_error_posts_to_logger_and_enables_controls(self, emit):
+    def test_on_worker_error_enables_controls(self, emit):
         fail_info = 2024278
 
         self.presenter._on_worker_error(fail_info)

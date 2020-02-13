@@ -13,6 +13,7 @@ New Features
 ############
 
 - Mantid is now built against Python 3. Windows/macOS bundle Python 3.8 & 3.7 respectively. Ubuntu & Red Hat use system Python 3.6.
+- Users at ORNL have a more rhobust usage of ``vglrun`` when using mantidplot/mantidworkbench remotely through thin-linc
 
 Concepts
 --------
@@ -24,6 +25,7 @@ Improvements
 - Prevent units that are not suitable for :ref:`ConvertUnits <algm-ConvertUnits>` being entered as the target unit.
 - Fixed an uncaught exception when plotting logs on single spectrum workspaces in mantidworkbench
 - Save the units for single value logs in :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>`
+- Error bars on calculated normalized fits are now correct.
 
 Algorithms
 ----------
@@ -35,7 +37,7 @@ Improvements
 - :ref:`SaveAscii <algm-SaveAscii>` can now save table workspaces, and :ref:`LoadAscii <algm-LoadAscii>` can load them again.
 - :ref:`TotScatCalculateSelfScattering <algm-TotScatCalculateSelfScattering>` will calculate a normalized self scattering correction for foccues total scattering data.
 - :ref:`MatchAndMergeWorkspaces <algm-MatchAndMergeWorkspaces>` will merge workspaces in a workspace group withing weighting from a set of limits for each workspace and using `MatchSpectra <algm-MatchSpectra>`.
-- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Sampling of scattering points during MC simulation now takes into account relative volume of sample and environment components.
+- :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Sampling of scattering points during MC simulation now takes into account relative volume of sample and environment components. The calculation also now reuses the same set of simulated tracks to calculate the attenuation for different wavelengths. A new parameter ResimulateTracksForDifferentWavelengths has been added to control this behaviour with a default value of false. NOTE: This has been inserted in the middle of the parameter list so any usage of positional parameters with this algorithm will need to be adjusted
 
 
 Data Objects

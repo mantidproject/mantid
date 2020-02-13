@@ -78,7 +78,7 @@ class BinningFromMonitors(object):
         return False
 
 
-class SummationSettings(object):
+class SummationSettingsModel(object):
     def __init__(self, initial_type):
         self._save_directory = ConfigService.getString('defaultsave.directory')
         self._type_factory_dict = {BinningType.SAVE_AS_EVENT_DATA: SaveAsEventData(),

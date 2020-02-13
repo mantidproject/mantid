@@ -458,22 +458,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
-  void testSaveSingleWorkspaceASCIIv1() {
-    using SaveFileType = IWorkspaceDockView::SaveFileType;
-    ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::ASCIIv1);
-    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
-
-    EXPECT_CALL(*mockView.get(), getSelectedWorkspace()).WillOnce(Return(ws1));
-    EXPECT_CALL(*mockView.get(), getSaveFileType()).Times(Exactly(1));
-    EXPECT_CALL(*mockView.get(),
-                saveWorkspace(ws1->getName(), SaveFileType::ASCIIv1))
-        .Times(Exactly(1));
-
-    presenter->notifyFromView(ViewNotifiable::Flag::SaveSingleWorkspace);
-
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
-  }
-
   void testSaveSingleWorkspaceASCII() {
     using SaveFileType = IWorkspaceDockView::SaveFileType;
     ::testing::DefaultValue<SaveFileType>::Set(SaveFileType::ASCII);

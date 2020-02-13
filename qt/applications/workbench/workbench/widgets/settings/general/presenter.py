@@ -100,7 +100,9 @@ class GeneralSettings(object):
         When the facility is changed, refreshes all available instruments that can be selected in the dropdown.
         :param new_facility: The name of the new facility that was selected
         """
-        ConfigService.setFacility(new_facility)
+        current_value = ConfigService.getFacility().name()
+        if new_facility != current_value:
+            ConfigService.setFacility(new_facility)
         # refresh the instrument selection to contain instruments about the selected facility only
         self.view.instrument.clear()
         self.view.instrument.addItems(
@@ -158,7 +160,9 @@ class GeneralSettings(object):
         ConfigService.setString(self.CRYSTALLOGRAPY_CONV, "Crystallography" if state == Qt.Checked else "Inelastic")
 
     def action_instrument_changed(self, new_instrument):
-        ConfigService.setString(self.INSTRUMENT, new_instrument)
+        current_value = ConfigService.getString(self.INSTRUMENT)
+        if new_instrument != current_value:
+            ConfigService.setString(self.INSTRUMENT, new_instrument)
 
     def action_show_invisible_workspaces(self, state):
         ConfigService.setString(self.SHOW_INVISIBLE_WORKSPACES, str(bool(state)))
