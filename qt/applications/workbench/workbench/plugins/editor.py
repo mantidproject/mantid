@@ -12,6 +12,7 @@ from __future__ import (absolute_import, unicode_literals)
 # system imports
 import os.path as osp
 import os
+import sys
 
 # third-party library imports
 from qtpy.QtWidgets import QVBoxLayout
@@ -26,16 +27,17 @@ from ..plugins.base import PluginWidget
 
 
 # Initial content
-DEFAULT_CONTENT = "# The following line helps with future compatibility with Python 3" + os.linesep + \
-"# print must now be used as a function, e.g print('Hello','World')" + os.linesep + \
-"from __future__ import (absolute_import, division, print_function, unicode_literals)" + os.linesep + \
-os.linesep + \
-"# import mantid algorithms, numpy and matplotlib" + os.linesep + \
+DEFAULT_CONTENT = ""
+if sys.version_info < (3,0):
+    DEFAULT_CONTENT += "# The following line helps with future compatibility with Python 3" + os.linesep + \
+                       "# print must now be used as a function, e.g print('Hello','World')" + os.linesep + \
+                       "from __future__ import (absolute_import, division, print_function, unicode_literals)" + \
+                       os.linesep + os.linesep
+
+DEFAULT_CONTENT += "# import mantid algorithms, numpy and matplotlib" + os.linesep + \
 "from mantid.simpleapi import *" + os.linesep + \
-os.linesep + \
 "import matplotlib.pyplot as plt" + os.linesep + \
-os.linesep + \
-"import numpy as np" + os.linesep
+"import numpy as np" + os.linesep + os.linesep
 
 # Accepted extensions for drag-and-drop to editor
 ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']
