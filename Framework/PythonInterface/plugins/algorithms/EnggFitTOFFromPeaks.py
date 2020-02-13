@@ -9,7 +9,7 @@ from mantid.kernel import *
 from mantid.api import *
 
 
-class EnggFitDIFCFromPeaks(PythonAlgorithm):
+class EnggFitTOFFromPeaks(PythonAlgorithm):
 
     def category(self):
         return "Diffraction\\Engineering;Diffraction\\Fitting"
@@ -35,13 +35,12 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
 
         self.declareProperty('OutParametersTable', '', direction=Direction.Input,
                              doc='Name for a table workspace with the fitted values calculated by '
-                             'this algorithm (DIFC and TZERO calibration parameters) for GSAS. '
-                             'These two parameters are added as two columns in a single row. If not given, '
+                             'this algorithm (DIFA, DIFC and TZERO calibration parameters) for GSAS. '
+                             'These three parameters are added as three columns in a single row. If not given, '
                              'the table workspace is not created.')
 
         self.declareProperty('DIFA', 0.0, direction = Direction.Output,
-                             doc='Fitted DIFA value. This parameter is not effectively considered and it '
-                             'is always zero in this version of the algorithm.')
+                             doc='Fitted DIFA calibration parameter')
 
         self.declareProperty('DIFC', 0.0, direction = Direction.Output,
                              doc="Fitted DIFC calibration parameter")
@@ -55,9 +54,9 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
         peaks = self.getProperty('FittedPeaks').value
 
         # Better than failing to fit the linear function
-        if 1 == peaks.rowCount():
-            errors['FittedPeaks'] = ('Only one peak was given in the input peaks table. This is not enough '
-                                     'to fit the output parameters difc and zero. Please check the list of '
+        if peaks.rowCount() < 3:
+            errors['FittedPeaks'] = ('Less than three peaks were given in the input peaks table. This is not enough '
+                                     'to fit the output parameters difa, difc and zero. Please check the list of '
                                      'expected peaks given and if it is appropriate for the workspace')
         return errors
 
@@ -65,7 +64,7 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
 
         peaks = self.getProperty('FittedPeaks').value
 
-        difa, difc, tzero = self._fit_difc_tzero(peaks)
+        difa, difc, tzero = self._fit_dSpacingTOF(peaks)
 
         out_tbl_name = self.getPropertyValue('OutParametersTable')
         self._produce_outputs(difa, difc, tzero, out_tbl_name)
@@ -73,25 +72,25 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
         self.log().information("Fitted {0} peaks in total. DIFA: {1}, DIFC: {2}, TZERO: {3}".
                                format(peaks.rowCount(), difa, difc, tzero))
 
-    def _fit_difc_tzero(self, fitted_peaks_table):
+    def _fit_dSpacingTOF(self, fitted_peaks_table):
         """
         Fits a linear function to the dSpacing-TOF relationship and
-        returns the fitted (DIFA=0), DIFC and TZERO values. If the
-        table passed has less than 2 peaks this raises an exception,
-        as it is not possible to fit the difc, zero parameters.
+        returns the fitted DIFA, DIFC and TZERO values. If the
+        table passed has less than 3 peaks this raises an exception,
+        as it is not possible to fit the difa, difc, zero parameters.
 
         @param fitted_peaks_table :: table with one row per fitted peak, expecting column 'dSpacing'
         as x values and column 'X0' as y values.
 
-        @returns DIFA, DIFC and TZERO parameters as defined in GSAS and GSAS-II. The difc and zero
-        parameters are obtained from fitting a linear background (in _fit_dSpacing_to_ToF) to the
+        @returns DIFA, DIFC and TZERO parameters as defined in GSAS and GSAS-II. The difa, difc and zero
+        parameters are obtained from fitting a quadratic background (in _fit_dSpacing_to_ToF) to the
         peaks fitted individually that have been passed in the input table
 
         """
 
         num_peaks = fitted_peaks_table.rowCount()
-        if num_peaks < 2:
-            raise ValueError('Cannot fit a linear function with less than two peaks. Got a table of ' +
+        if num_peaks < 3:
+            raise ValueError('Cannot fit a quadratic function with less than three peaks. Got a table of ' +
                              'peaks with ' + str(num_peaks) + ' peaks')
 
         convert_tbl_alg = self.createChildAlgorithm('ConvertTableToMatrixWorkspace')
@@ -103,7 +102,7 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
 
         # Fit the curve to get linear coefficients of TOF <-> dSpacing relationship for the detector
         fit_alg = self.createChildAlgorithm('Fit')
-        fit_alg.setProperty('Function', 'name=LinearBackground')
+        fit_alg.setProperty('Function', 'name=Quadratic')
         fit_alg.setProperty('InputWorkspace', d_tof_conversion_ws)
         fit_alg.setProperty('WorkspaceIndex', 0)
         fit_alg.setProperty('CreateOutput', True)
@@ -112,14 +111,14 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
 
         tzero = param_table.cell('Value', 0)  # A0
         difc = param_table.cell('Value', 1)  # A1
-        difa = 0.0  # Not fitted, we may add an option for this later on
+        difa = param_table.cell('Value', 2)  # A2
 
         return difa, difc, tzero
 
     def _produce_outputs(self, difa, difc, tzero, tbl_name):
         """
         Fills in the output properties as requested via the input
-        properties. Sets the output difz/difc/tzero values. It can
+        properties. Sets the output difa/difc/tzero values. It can
         also produces a table with these parameters if required in the
         inputs.
 
@@ -143,4 +142,4 @@ class EnggFitDIFCFromPeaks(PythonAlgorithm):
             self.log().information("Output parameters added into a table workspace: %s" % tbl_name)
 
 
-AlgorithmFactory.subscribe(EnggFitDIFCFromPeaks)
+AlgorithmFactory.subscribe(EnggFitTOFFromPeaks)

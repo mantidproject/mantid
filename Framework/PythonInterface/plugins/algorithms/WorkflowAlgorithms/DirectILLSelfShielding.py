@@ -124,7 +124,7 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                              defaultValue=Property.EMPTY_INT,
                              validator=greaterThanTwoInt,
                              direction=Direction.Input,
-                             doc='Number of wavelength points where the simulation is performed (default: all).')
+                             doc='Number of wavelength points where the simulation is performed (no longer used).')
         self.declareProperty(name=common.PROP_EVENTS_PER_WAVELENGTH,
                              defaultValue=300,
                              validator=positiveInt,
@@ -155,7 +155,6 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                     Target='Wavelength',
                                     EMode='Direct',
                                     EnableLogging=self._subalgLogging)
-        wavelengthPoints = self.getProperty(common.PROP_NUMBER_OF_SIMULATION_WAVELENGTHS).value
         eventsPerPoint =self.getProperty(common.PROP_EVENTS_PER_WAVELENGTH).value
         correctionWSName = self._names.withSuffix('correction')
         useFullInstrument = self.getProperty(common.PROP_SIMULATION_INSTRUMENT).value == common.SIMULATION_INSTRUMENT_FULL
@@ -163,7 +162,6 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
             correctionWS = MonteCarloAbsorption(InputWorkspace=wavelengthWS,
                                                 OutputWorkspace=correctionWSName,
                                                 SparseInstrument=False,
-                                                NumberOfWavelengthPoints=wavelengthPoints,
                                                 Interpolation='CSpline',
                                                 EnableLogging=self._subalgLogging,
                                                 EventsPerPoint=eventsPerPoint,
@@ -176,7 +174,6 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                                 SparseInstrument=True,
                                                 NumberOfDetectorRows=rows,
                                                 NumberOfDetectorColumns=columns,
-                                                NumberOfWavelengthPoints=wavelengthPoints,
                                                 Interpolation='CSpline',
                                                 EnableLogging=self._subalgLogging,
                                                 EventsPerPoint=eventsPerPoint,

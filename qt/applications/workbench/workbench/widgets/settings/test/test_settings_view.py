@@ -33,6 +33,9 @@ class MockWorkspaceWidget(QWidget):
         self.deleteLater()
         super(MockWorkspaceWidget, self).closeEvent(event)
 
+    def config_updated(self):
+        return self
+
     def __enter__(self):
         return self
 

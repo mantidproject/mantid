@@ -47,7 +47,6 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
             'SimulationInstrument': 'Sparse Instrument',
             'SparseInstrumentRows': 3,
             'SparseInstrumentColumns': 2,
-            'NumberOfSimulatedWavelengths': 3,
             'rethrow': True
         }
         run_algorithm('DirectILLSelfShielding', **kwargs)

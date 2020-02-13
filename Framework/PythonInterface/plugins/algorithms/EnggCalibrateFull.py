@@ -241,7 +241,7 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         @returns the DIFA, DIFC, TZERO calibration parameters of GSAS
         """
-        alg = self.createChildAlgorithm('EnggFitDIFCFromPeaks')
+        alg = self.createChildAlgorithm('EnggFitTOFFromPeaks')
         alg.setProperty('FittedPeaks', fitted_peaks_table)
         alg.execute()
 

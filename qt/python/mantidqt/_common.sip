@@ -905,6 +905,7 @@ public:
     void setText(const QString&);
     void setUserInput(const QVariant &);
     void setReadOnly(bool readOnly);
+    void setFileExtensions(const QStringList &extensions);
     void findFiles(bool isModified);
 
 signals:
