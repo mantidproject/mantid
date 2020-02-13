@@ -57,20 +57,18 @@ int FQTemplatePresenter::getCurrentDataset() {
 }
 
 void FQTemplatePresenter::setFunction(const QString &funStr) {
-  m_model.setFunctionString(funStr);
   m_view->clear();
+  m_model.setFunctionString(funStr);
+
+  if (m_model.getFitType() == "None")
+    return;
+  auto functionParameters = m_model.getParameterNames();
+  for (auto &parameter : functionParameters) {
+    m_view->addParameter(parameter, m_model.getParameterDescription(parameter));
+  }
+  m_view->setEnumValue(m_model.getEnumIndex());
   setErrorsEnabled(false);
-  // if (m_model.hasGaussianType()) {
-  //   m_view->addGaussian();
-  // }
-  // if (m_model.hasPetersType()) {
-  //   m_view->addPeters();
-  // }
-  // if (m_model.hasYiType()) {
-  //   m_view->addYi();
-  // }
-  // updateViewParameterNames();
-  updateViewParameters();
+  updateView();
   emit functionStructureChanged();
 }
 
@@ -105,12 +103,6 @@ void FQTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
   updateViewParameters();
 }
 
-void FQTemplatePresenter::updateMultiDatasetParameters(
-    const ITableWorkspace &paramTable) {
-  m_model.updateMultiDatasetParameters(paramTable);
-  updateViewParameters();
-}
-
 void FQTemplatePresenter::updateParameters(const IFunction &fun) {
   m_model.updateParameters(fun);
   updateViewParameters();
@@ -123,10 +115,6 @@ void FQTemplatePresenter::setCurrentDataset(int i) {
 
 void FQTemplatePresenter::setDatasetNames(const QStringList &names) {
   m_model.setDatasetNames(names);
-}
-
-void FQTemplatePresenter::setViewParameterDescriptions() {
-  m_view->updateParameterDescriptions(m_model.getParameterDescriptionMap());
 }
 
 void FQTemplatePresenter::setErrorsEnabled(bool enabled) {
@@ -180,10 +168,6 @@ void FQTemplatePresenter::setLocalParameterValue(const QString &parName, int i,
 void FQTemplatePresenter::setLocalParameterTie(const QString &parName, int i,
                                                const QString &tie) {
   m_model.setLocalParameterTie(parName, i, tie);
-}
-
-void FQTemplatePresenter::updateViewParameterNames() {
-  m_view->updateParameterNames(m_model.getParameterNameMap());
 }
 
 void FQTemplatePresenter::updateView() { updateViewParameters(); }
@@ -262,7 +246,8 @@ void FQTemplatePresenter::viewChangedParameterValue(const QString &parName,
 }
 
 void FQTemplatePresenter::handleDataTypeChanged(DataType dataType) {
-  m_view->setDataType(dataType);
+  m_model.setDataType(dataType);
+  m_view->setDataType(m_model.getFunctionList());
   setFitType("None");
 }
 

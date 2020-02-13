@@ -9,6 +9,7 @@
 #define MANTID_FQFUNCTIONMODEL_H
 
 #include "DllConfig.h"
+#include "IFQFitObserver.h"
 #include "IndexTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -29,23 +30,14 @@ class MANTIDQT_INDIRECT_DLL FQFunctionModel : public FunctionModel {
 public:
   FQFunctionModel();
   void setFunction(IFunction_sptr fun) override;
-  void removeFunction(const QString &prefix) override;
-  void addFunction(const QString &prefix, const QString &funStr) override;
-  void setGlobalParameters(const QStringList &globals) override;
-  void setGlobal(const QString &parName, bool on);
 
-  QMap<int, std::string> getParameterDescriptionMap() const;
-  QMap<int, QString> getParameterNameMap() const;
-
-  void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
-  using FunctionModel::getParameter;
-  using FunctionModel::getParameterDescription;
-  using FunctionModel::getParameterError;
-  using FunctionModel::setParameter;
-  using FunctionModel::updateMultiDatasetParameters;
   void setFitType(const QString &name);
   QString getFitType();
   void removeFitType();
+  void setDataType(DataType dataType);
+  QStringList getFunctionList();
+  int getEnumIndex();
+  void setGlobal(const QString &name, bool isGlobal);
 
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
@@ -57,6 +49,7 @@ private:
   QMap<QString, QStringList> m_globalParameterStore;
   std::string m_resolutionName;
   TableDatasetIndex m_resolutionIndex;
+  DataType m_dataType;
 };
 
 } // namespace IDA

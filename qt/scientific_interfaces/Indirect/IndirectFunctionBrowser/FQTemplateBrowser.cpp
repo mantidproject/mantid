@@ -29,15 +29,6 @@
 
 #include <limits>
 
-QStringList widthFits = QStringList(
-    {"None", "ChudleyElliot", "HallRoss", "FickDiffusion", "TeixeiraWater"});
-
-QStringList eisfFits = QStringList(
-    {"None", "EISFDiffCylinder", "EISFDiffSphere", "EISFDiffSphereAlkyl"});
-
-std::unordered_map<DataType, QStringList> dataTypeFitTypeMap(
-    {{DataType::WIDTH, widthFits}, {DataType::EISF, eisfFits}});
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -59,17 +50,22 @@ void FQTemplateBrowser::createProperties() {
 
   m_fitType = m_enumManager->addProperty("Fit Type");
   m_browser->addProperty(m_fitType);
-  setDataType(DataType::WIDTH);
+  updateDataType(DataType::WIDTH);
 
   m_parameterManager->blockSignals(false);
   m_enumManager->blockSignals(false);
   m_boolManager->blockSignals(false);
 }
 
-void FQTemplateBrowser::setDataType(DataType dataType) {
+void FQTemplateBrowser::setDataType(QStringList allowedFunctionsList) {
   ScopedFalse _false(m_emitEnumChange);
-  m_enumManager->setEnumNames(m_fitType, dataTypeFitTypeMap[dataType]);
+  m_enumManager->setEnumNames(m_fitType, allowedFunctionsList);
   m_enumManager->setValue(m_fitType, 0);
+}
+
+void FQTemplateBrowser::setEnumValue(int enumIndex) {
+  ScopedFalse _false(m_emitEnumChange);
+  m_enumManager->setValue(m_fitType, enumIndex);
 }
 
 void FQTemplateBrowser::addParameter(QString parameterName,
@@ -152,9 +148,7 @@ void FQTemplateBrowser::updateMultiDatasetParameters(const IFunction &fun) {
 }
 
 void FQTemplateBrowser::updateMultiDatasetParameters(
-    const ITableWorkspace &paramTable) {
-  m_presenter.updateMultiDatasetParameters(paramTable);
-}
+    const ITableWorkspace &paramTable) {}
 
 void FQTemplateBrowser::updateParameters(const IFunction &fun) {
   m_presenter.updateParameters(fun);

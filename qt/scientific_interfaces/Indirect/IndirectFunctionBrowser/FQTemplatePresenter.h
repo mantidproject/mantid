@@ -48,11 +48,9 @@ public:
   void setGlobalParameters(const QStringList &globals);
   void setGlobal(const QString &parName, bool on);
   void updateMultiDatasetParameters(const IFunction &fun);
-  void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
   void updateParameters(const IFunction &fun);
   void setCurrentDataset(int i);
   void setDatasetNames(const QStringList &names);
-  void setViewParameterDescriptions();
   void setErrorsEnabled(bool enabled);
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
@@ -76,7 +74,6 @@ private:
   void setLocalParameterValue(const QString &parName, int i, double value);
   void setLocalParameterFixed(const QString &parName, int i, bool fixed);
   void setLocalParameterTie(const QString &parName, int i, const QString &tie);
-  void updateViewParameterNames();
   void updateView();
   FQTemplateBrowser *m_view;
   FQFunctionModel m_model;

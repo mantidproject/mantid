@@ -185,6 +185,7 @@ void IndirectFitDataPresenter::handleSampleLoaded(
   setModelWorkspace(workspaceName);
   emit dataChanged();
   updateRanges();
+  emit dataChanged();
 }
 
 void IndirectFitDataPresenter::setModelWorkspace(const QString &name) {

@@ -63,7 +63,8 @@ public:
   void addParameter(QString parameterName, QString parameterDescription);
   void setParameterValue(QString parameterName, double parameterValue,
                          double parameterError);
-  void setDataType(DataType dataType);
+  void setDataType(QStringList allowedFunctionsList);
+  void setEnumValue(int enumIndex);
 
 signals:
   void dataTypeChanged(DataType dataType);
