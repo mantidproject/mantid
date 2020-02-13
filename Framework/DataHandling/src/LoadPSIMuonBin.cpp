@@ -209,7 +209,7 @@ void LoadPSIMuonBin::exec() {
   // manually offset the data
   for (auto specNum = 0u; specNum < m_histograms.size(); ++specNum) {
     auto xData = outputWorkspace->mutableX(specNum);
-    for (auto j = 0; j < xData.size(); j++) {
+    for (size_t j = 0; j < xData.size(); j++) {
       xData[j] = xData[j] - absTimeZero;
     }
     outputWorkspace->mutableX(specNum) = xData;
@@ -227,7 +227,7 @@ void LoadPSIMuonBin::makeDeadTimeTable(const size_t &numSpec) {
   deadTimeTable->addColumn("int", "spectrum");
   deadTimeTable->addColumn("double", "dead-time");
 
-  for (int i = 0; i < numSpec; i++) {
+  for (size_t i = 0; i < numSpec; i++) {
     Mantid::API::TableRow row = deadTimeTable->appendRow();
     row << i + 1 << 0.0;
   }
