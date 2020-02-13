@@ -27,29 +27,6 @@ class FittingTabModelTest(unittest.TestCase):
 
         self.assertEqual(name, 'GausOsc')
 
-    def test_create_fitted_workspace_name(self):
-        input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
-        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc/'
-        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc; Workspace'
-        self.model.function_name = 'GausOsc'
-
-        name, directory = self.model.create_fitted_workspace_name(input_workspace_name)
-
-        self.assertEqual(name, expected_workspace_name)
-        self.assertEqual(directory, expected_directory_name)
-
-    def test_create_parameter_table_name(self):
-        input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
-        trial_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; GausOsc/'
-        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted Parameters; GausOsc'
-        self.model.function_name = 'GausOsc'
-
-        name, directory = self.model.create_parameter_table_name(input_workspace_name, trial_function)
-
-        self.assertEqual(name, expected_workspace_name)
-        self.assertEqual(directory, expected_directory_name)
-
     def test_do_single_fit_and_return_functions_correctly(self):
         x_data = range(0, 100)
         y_data = [5 + x * x for x in x_data]
@@ -78,17 +55,6 @@ class FittingTabModelTest(unittest.TestCase):
 
         self.assertTrue(AnalysisDataService.doesExist(workspace_name))
         self.assertTrue(AnalysisDataService.doesExist('root'))
-
-    def test_create_multi_domain_fitted_workspace_name(self):
-        input_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1'
-        expected_directory_name = 'MUSR22725; Group; top; Asymmetry; #1; Fitted; Polynomial/'
-        expected_workspace_name = 'MUSR22725; Group; top; Asymmetry; #1+ ...; Fitted; Polynomial'
-        self.model.function_name = 'Polynomial'
-
-        name, directory = self.model.create_multi_domain_fitted_workspace_name(input_workspace_name)
-
-        self.assertEqual(name, expected_workspace_name)
-        self.assertEqual(directory, expected_directory_name)
 
     def test_do_sequential_fit_correctly_delegates_to_do_single_fit(self):
         trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')

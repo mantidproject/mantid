@@ -7,12 +7,12 @@
 from __future__ import (absolute_import, division, unicode_literals)
 
 from Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_simultaneous_Fit, run_CalculateMuonAsymmetry
-import mantid
-from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import *
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from mantid.simpleapi import (RenameWorkspace, ConvertFitFunctionForMuonTFAsymmetry, CalculateMuonAsymmetry,
                               CopyLogs, EvaluateFunction)
 from mantid.api import AnalysisDataService
+import mantid
 
 MUON_ANALYSIS_SUFFIX = ' MA'
 FREQUENCY_DOMAIN_ANALYSIS_SUFFIX = ' FD'
@@ -126,8 +126,8 @@ class FittingTabModel(object):
 
     def _handle_single_fit_results(self, input_workspace, fit_function, fitting_parameters_table, output_workspace,
                                    covariance_matrix, plot_fit=True):
-        workspace_name, workspace_directory = self.create_fitted_workspace_name(input_workspace)
-        table_name, table_directory = self.create_parameter_table_name(input_workspace, fit_function)
+        workspace_name, workspace_directory = create_fitted_workspace_name(input_workspace, self.function_name)
+        table_name, table_directory = create_parameter_table_name(input_workspace, self.function_name)
 
         self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
         self.add_workspace_to_ADS(covariance_matrix, workspace_name + '_CovarianceMatrix', table_directory)
@@ -301,10 +301,10 @@ class FittingTabModel(object):
     def _handle_simultaneous_fit_results(self, input_workspace_list, fit_function, fitting_parameters_table,
                                          output_workspace, global_parameters, covariance_matrix, plot_fit=True):
         if len(input_workspace_list) > 1:
-            table_name, table_directory = self.create_parameter_table_name(input_workspace_list[0] + '+ ...',
-                                                                           fit_function)
-            workspace_name, workspace_directory = self.create_multi_domain_fitted_workspace_name(
-                input_workspace_list[0])
+            table_name, table_directory = create_parameter_table_name(input_workspace_list[0] + '+ ...',
+                                                                      self.function_name)
+            workspace_name, workspace_directory = create_multi_domain_fitted_workspace_name(
+                input_workspace_list[0], self.function_name)
             self.add_workspace_to_ADS(output_workspace, workspace_name, '')
 
             workspace_name = self.rename_members_of_fitted_workspace_group(workspace_name,
@@ -312,8 +312,9 @@ class FittingTabModel(object):
                                                                            fit_function)
             self.add_workspace_to_ADS(covariance_matrix, workspace_name[0] + '_CovarianceMatrix', table_directory)
         else:
-            table_name, table_directory = self.create_parameter_table_name(input_workspace_list[0], fit_function)
-            workspace_name, workspace_directory = self.create_fitted_workspace_name(input_workspace_list[0])
+            table_name, table_directory = create_parameter_table_name(input_workspace_list[0], self.function_name)
+            workspace_name, workspace_directory = create_fitted_workspace_name(input_workspace_list[0],
+                                                                               self.function_name)
             self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
             self.add_workspace_to_ADS(covariance_matrix, workspace_name + '_CovarianceMatrix', table_directory)
             workspace_name = [workspace_name]
@@ -333,7 +334,7 @@ class FittingTabModel(object):
         self.context.ads_observer.observeRename(False)
         output_workspace_list = []
         for index, workspace_name in enumerate(AnalysisDataService.retrieve(group_workspace).getNames()):
-            new_name, _ = self.create_fitted_workspace_name(inputworkspace_list[index])
+            new_name, _ = create_fitted_workspace_name(inputworkspace_list[index], self.function_name)
 
             new_name += '; Simultaneous'
             output_workspace_list.append(new_name)
@@ -350,24 +351,6 @@ class FittingTabModel(object):
         workspace_wrapper.show(directory + name)
         self.context.ads_observer.observeRename(True)
         return workspace_wrapper
-
-    def create_fitted_workspace_name(self, input_workspace_name):
-        directory = input_workspace_name + '; Fitted;' + self.function_name + '/'
-        name = input_workspace_name + '; Fitted;' + self.function_name + '; Workspace'
-
-        return name, directory
-
-    def create_multi_domain_fitted_workspace_name(self, input_workspace):
-        directory = input_workspace + '; Fitted;' + self.function_name + '/'
-        name = input_workspace + '+ ...; Fitted;' + self.function_name
-
-        return name, directory
-
-    def create_parameter_table_name(self, input_workspace_name, function_name):
-        directory = input_workspace_name + '; Fitted;' + self.function_name + '/'
-        name = input_workspace_name + '; Fitted Parameters;' + self.function_name
-
-        return name, directory
 
     def add_fit_to_context(self, parameter_workspace, function,
                            input_workspace, output_workspace_name, global_parameters=None, plot_fit=True):
@@ -556,7 +539,7 @@ class FittingTabModel(object):
 
     def get_parameters_for_single_tf_fit(self, workspace):
         # workspace is the name of the input workspace
-        fit_workspace_name, _ = self.create_fitted_workspace_name(workspace)
+        fit_workspace_name, _ = create_fitted_workspace_name(workspace, self.function_name)
         return {
             'InputFunction': self.get_ws_fit_function([workspace]),
             'ReNormalizedWorkspaceList': workspace,
@@ -571,7 +554,7 @@ class FittingTabModel(object):
     def get_parameters_for_simultaneous_tf_fit(self, workspaces):
         # workspaces is a list containing the N workspaces which form the simultaneous fit
         # creates a workspace name based on the first entry in the workspace list
-        fit_workspaces, _ = self.create_multi_domain_fitted_workspace_name(workspaces[0])
+        fit_workspaces, _ = create_multi_domain_fitted_workspace_name(workspaces[0], self.function_name)
         return {
             'InputFunction': self.get_ws_fit_function(workspaces),
             'ReNormalizedWorkspaceList': workspaces,
@@ -583,7 +566,7 @@ class FittingTabModel(object):
         }
 
     def get_parameters_for_tf_single_fit_calculation(self, workspace):
-        fit_workspace, _ = self.create_fitted_workspace_name(workspace)
+        fit_workspace, _ = create_fitted_workspace_name(workspace, self.function_name)
         return {
             'InputFunction': self.fit_function,
             'ReNormalizedWorkspaceList': workspace,

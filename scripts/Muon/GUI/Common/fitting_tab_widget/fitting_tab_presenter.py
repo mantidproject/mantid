@@ -10,7 +10,8 @@ from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import Workspace
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name
+from Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name, \
+    create_fitted_workspace_name, create_multi_domain_fitted_workspace_name
 from mantid.api import MultiDomainFunction, AnalysisDataService
 import functools
 import re
@@ -397,7 +398,7 @@ class FittingTabPresenter(object):
             self.view.warning_popup(error)
 
     def get_parameters_for_tf_single_fit_calculation(self):
-        workspace, _ = self.model.create_fitted_workspace_name(self.view.display_workspace)
+        workspace, _ = create_fitted_workspace_name(self.view.display_workspace, self.model.function_name)
 
         return {
             'InputFunction': self._current_fit_function(),
@@ -411,8 +412,8 @@ class FittingTabPresenter(object):
         }
 
     def get_multi_domain_tf_fit_parameters(self):
-        workspace, _ = self.model.create_multi_domain_fitted_workspace_name(
-            self.view.display_workspace)
+        workspace, _ = create_multi_domain_fitted_workspace_name(
+            self.view.display_workspace, self.model.function_name)
         return {
             'InputFunction': self.view.fit_object,
             'ReNormalizedWorkspaceList': self.selected_data,

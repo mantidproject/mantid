@@ -191,3 +191,24 @@ def get_maxent_workspace_group_name(insertion_workspace_name, instrument, worksp
 
 def get_fit_workspace_directory(group_name, suffix, base_name, workspace_suffix):
     return base_name + '/' + group_name + workspace_suffix + '/' + group_name + suffix + workspace_suffix + '/'
+
+
+def create_fitted_workspace_name(input_workspace_name, function_name):
+    directory = input_workspace_name + '; Fitted;' + function_name + '/'
+    name = input_workspace_name + '; Fitted;' + function_name + '; Workspace'
+
+    return name, directory
+
+
+def create_multi_domain_fitted_workspace_name(input_workspace, function_name):
+    directory = input_workspace + '; Fitted;' + function_name + '/'
+    name = input_workspace + '+ ...; Fitted;' + function_name
+
+    return name, directory
+
+
+def create_parameter_table_name(input_workspace_name, function_name):
+    directory = input_workspace_name + '; Fitted;' + function_name + '/'
+    name = input_workspace_name + '; Fitted Parameters;' + function_name
+
+    return name, directory
