@@ -12,7 +12,7 @@ from __future__ import absolute_import, division, unicode_literals
 # 3rdparty imports
 
 # local imports
-from .base import PEAK_ALPHA, PeakRepresentation
+from .base import PeakRepresentation
 
 
 class PeakRepresentationNoShape(PeakRepresentation):
@@ -24,18 +24,22 @@ class PeakRepresentationNoShape(PeakRepresentation):
     _painted = None
 
     @classmethod
-    def create(cls, center, slicepoint, slicerange, _, marker_color):
+    def create(cls, x, y, z, slicepoint, slicedim_width, _, marker_color):
         """
         Create an instance of PeakRepresentationSphere from the given set of attributes
         :param center: A V3D giving the center of the Peak
         :param slicepoint: float giving current slice point
-        :param slicerange: 2-tuple giving (min/max) values of the slicing dimension
+        :param slicedim_width: 2-tuple giving (min/max) values of the slicing dimension
         :param _: A PeakShape object describing the shape properties (unused)
         :param marker_color: A string indicating the color of the marker
         :return: A new instance of this class
         """
-        alpha = PeakRepresentation.compute_alpha(center, slicepoint, slicerange)
-        return PeakRepresentationNoShape(center=center, alpha=alpha, marker_color=marker_color)
+        return PeakRepresentationNoShape(x=x,
+                                         y=y,
+                                         z=z,
+                                         alpha=PeakRepresentation.compute_alpha(
+                                             z, slicepoint, slicedim_width),
+                                         marker_color=marker_color)
 
     def draw(self, painter):
         """
@@ -44,14 +48,12 @@ class PeakRepresentationNoShape(PeakRepresentation):
         :return: The objects added
         """
         if self.alpha > 0.0:
-            center = self.center
-            self._painted = painter.scatter(
-                center.X(),
-                center.Y(),
-                alpha=self.alpha,
-                color=self.marker_color,
-                marker=self.MARKER,
-                s=self.MARKER_SIZE_PTS_SQ)
+            self._painted = painter.scatter(self.x,
+                                            self.y,
+                                            alpha=self.alpha,
+                                            color=self.marker_color,
+                                            marker=self.MARKER,
+                                            s=self.MARKER_SIZE_PTS_SQ)
         else:
             self._painted = None
 
@@ -85,10 +87,10 @@ class PeakRepresentationNoShape(PeakRepresentation):
                 painter.remove(painted)
                 self._painted = None
 
-    def update_alpha(self, slicepoint, slicerange):
+    def update_alpha(self, slicepoint, slicedim_width):
         """Update transparency value based on slicepoint
         :param painter: A Painter object to interact with the draw destination
         :param slicepoint: float giving current slice point
-        :param slicerange: 2-tuple giving (min/max) values of the slicing dimension
+        :param slicedim_width: 2-tuple giving (min/max) values of the slicing dimension
         """
-        self._alpha = PeakRepresentation.compute_alpha(self.center, slicepoint, slicerange)
+        self._alpha = PeakRepresentation.compute_alpha(self.z, slicepoint, slicedim_width)

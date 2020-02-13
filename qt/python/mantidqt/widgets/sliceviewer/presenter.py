@@ -7,6 +7,9 @@
 #  This file is part of the mantid workbench.
 #
 #
+# std imports
+from collections import namedtuple
+
 # 3rdparty imports
 import mantid.api
 
@@ -14,6 +17,9 @@ import mantid.api
 from .model import SliceViewerModel, WS_TYPE
 from .view import SliceViewerView
 from .peaksviewer import PeaksViewerModel, PeaksViewerPresenter, PeaksViewerCollectionPresenter
+
+# Encapsulate information about the current slice paramters
+SliceInfo = namedtuple("SliceInfo", ("indices", "point", "range"))
 
 
 class SliceViewer(object):
@@ -59,21 +65,28 @@ class SliceViewer(object):
         Tell the view to display a new plot of an MDEventWorkspace
         """
         self.view.plot_MDH(
-            self.model.get_ws(
-                slicepoint=self.get_slicepoint(), bin_params=self.view.dimensions.get_bin_params()))
+            self.model.get_ws(slicepoint=self.get_slicepoint(),
+                              bin_params=self.view.dimensions.get_bin_params()))
 
     def new_plot_matrix(self):
         """Tell the view to display a new plot of an MatrixWorkspace"""
         self.view.plot_matrix(self.model.get_ws(), normalize=self.normalization)
+
+    def get_sliceinfo(self):
+        """Returns a SliceInfo object describing the current slice"""
+        return SliceInfo(indices=self.view.dimensions.get_indices(),
+                         point=self.view.dimensions.get_slicepoint(),
+                         range=self.view.dimensions.get_slicerange())
 
     def get_slicepoint(self):
         """Returns the current slicepoint as a list of 3 elements.
            None indicates that dimension is being displayed"""
         return self.view.dimensions.get_slicepoint()
 
-    def get_slicerange(self):
-        """Returns the range of the dimension sliced through."""
-        return self.view.dimensions.get_slicerange()
+    def dimensions_changed(self):
+        """Indicates that the dimensions have changed"""
+        self.new_plot()
+        self._peaks_view_presenter.notify(PeaksViewerPresenter.Event.OverlayPeaks)
 
     def slicepoint_changed(self):
         """Indicates the slicepoint has been updated"""
@@ -92,10 +105,9 @@ class SliceViewer(object):
         Update the view to display an updated MDEventWorkspace slice/cut
         """
         self.view.update_plot_data(
-            self.model.get_data(
-                self.get_slicepoint(),
-                bin_params=self.view.dimensions.get_bin_params(),
-                transpose=self.view.dimensions.transpose))
+            self.model.get_data(self.get_slicepoint(),
+                                bin_params=self.view.dimensions.get_bin_params(),
+                                transpose=self.view.dimensions.transpose))
 
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change

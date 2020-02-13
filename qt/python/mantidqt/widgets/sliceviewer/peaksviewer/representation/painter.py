@@ -19,7 +19,6 @@ class Painter(with_metaclass(ABCMeta)):
     Interface defined for types capable of drawing
     representations of different shapes
     """
-
     @abstractmethod
     def remove(self, artifact):
         """
@@ -42,7 +41,6 @@ class MplPainter(Painter):
     """
     Implementation of a PeakPainter that uses matplotlib to draw
     """
-
     def __init__(self, axes):
         """
         :param axes: A matplotlib.axes.Axes instance to draw on
@@ -56,7 +54,11 @@ class MplPainter(Painter):
         Remove the painted artifact from the drawn destination
         :param artist: The Artist drawn on the axes
         """
-        artist.remove()
+        try:
+            artist.remove()
+        except ValueError:
+            # May have already been removed by a figure/axes clear
+            pass
 
     def scatter(self, x, y, **kwargs):
         """Draw a scatter point at the given location

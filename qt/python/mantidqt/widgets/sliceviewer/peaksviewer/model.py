@@ -20,7 +20,6 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     """View model for PeaksViewer
     Extends PeaksWorkspace functionality to include color selection
     """
-
     def __init__(self, peaks_ws):
         """
         :param peaks_ws: A pointer to the PeaksWorkspace
@@ -49,20 +48,40 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         Create a list of PeakRepresentation object describing each Peak.
         :param sliceinfo: Object describing current slicing information
         """
-        slicepoint, slicerange = sliceinfo.get_slicepoint()[2], sliceinfo.get_slicerange()
+        diminfo = sliceinfo.indices
+        slicepoint = sliceinfo.point[diminfo[2]]
+        dimrange = sliceinfo.range
+        slicedim_width = dimrange[1] - dimrange[0]
         info = []
         for peak in self.ws:
-            info.append(create_peakrepresentation(peak, slicepoint, slicerange, self.marker_color))
+            qlab = peak.getQLabFrame()
+            # TODO: transformation
+            qframe = qlab
+            x, y, z = qframe[diminfo[0]], qframe[diminfo[1]], qframe[diminfo[2]]
+            info.append(
+                create_peakrepresentation(x, y, z, slicepoint, slicedim_width, peak.getPeakShape(),
+                                          self.marker_color))
         self._visible_peaks = info
         return info
+
+    def take_peak_representations(self):
+        """Return the current set of peaks and remove them from the model
+        :return: A list of the current peaks
+        """
+        peaks = self._visible_peaks
+        self._visible_peaks = []
+        return peaks
 
     def update_peak_representations(self, sliceinfo):
         """
         Update the internal list of PeakRepresentation objects describing each Peak.
         :param sliceinfo: Object describing current slicing information
         """
-        slicepoint, slicerange = sliceinfo.get_slicepoint()[2], sliceinfo.get_slicerange()
+        diminfo = sliceinfo.indices
+        slicepoint = sliceinfo.point[diminfo[2]]
+        dimrange = sliceinfo.range
+        slicedim_width = dimrange[1] - dimrange[0]
         for peak in self.visible_peaks:
-            peak.update_alpha(slicepoint, slicerange)
+            peak.update_alpha(slicepoint, slicedim_width)
 
         return self.visible_peaks
