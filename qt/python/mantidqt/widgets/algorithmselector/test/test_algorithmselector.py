@@ -162,14 +162,14 @@ class WidgetTest(unittest.TestCase):
             widget = AlgorithmSelectorWidget()
             self._select_in_tree(widget, 'DoStuff v.2')
             widget.execute_button.click()
-            createDialog.assert_called_once_with('DoStuff', 2)
+            createDialog.assert_called_once_with('DoStuff', 2, None, False, {}, '', [])
 
     def test_run_dialog_opens_on_return_press(self):
         with patch(createDialogFromName_func_name) as createDialog:
             widget = AlgorithmSelectorWidget()
             self._select_in_tree(widget, 'DoStuff v.2')
             QTest.keyClick(widget.search_box, Qt.Key_Return)
-            createDialog.assert_called_once_with('DoStuff', 2)
+            createDialog.assert_called_once_with('DoStuff', 2, None, False, {}, '', [])
 
     def test_run_dialog_opens_on_double_click(self):
         with patch(createDialogFromName_func_name) as createDialog:
