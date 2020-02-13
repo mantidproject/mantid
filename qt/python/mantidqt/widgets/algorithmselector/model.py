@@ -88,7 +88,6 @@ class AlgorithmSelectorModel(object):
         alg_instance = algm_manager.createUnmanaged(algorithm[0], algorithm[1])
         alg_instance.initialize()
         for prop in alg_instance.getProperties():
-            if isinstance(prop, IWorkspaceProperty):
-                if prop.direction in [Direction.Input, Direction.InOut]:
+            if isinstance(prop, IWorkspaceProperty) and prop.direction in [Direction.Input, Direction.InOut]:
                     return prop.name
         return None
