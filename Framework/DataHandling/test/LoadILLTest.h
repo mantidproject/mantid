@@ -35,6 +35,7 @@ public:
     ConfigService::Instance().appendDataSearchSubDir("ILL/IN4/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/IN5/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/IN6/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/IN16B/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/PANTHER/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D17/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/Figaro/");
@@ -52,97 +53,57 @@ public:
     TS_ASSERT_EQUALS(alg.getPropertyValue("LoaderName"), resultLoader)
   }
 
-  void test_LoadSANS_D11() {
-    std::string filename = "010560.nxs";
-    std::string result = "LoadILLSANS";
-
-    checkLoader(filename, result);
-  }
+  void test_LoadSANS_D11() { checkLoader("010560.nxs", "LoadILLSANS"); }
 
   void test_LoadSANS_D33() {
-    std::string filename = "002294.nxs";
-    std::string result = "LoadILLSANS";
-
-    checkLoader(filename, result);
+    checkLoader("002294.nxs", "LoadILLSANS");
+    checkLoader("042610.nxs", "LoadILLSANS"); // D33 TOF
   }
 
-  void test_LoadSANS_D22() {
-    std::string filename = "192068.nxs";
-    std::string result = "LoadILLSANS";
-
-    checkLoader(filename, result);
-  }
+  void test_LoadSANS_D22() { checkLoader("192068.nxs", "LoadILLSANS"); }
 
   void test_LoadDiffraction_D2B() {
-    std::string filename = "535401.nxs";
-    std::string result = "LoadILLDiffraction";
-
-    checkLoader(filename, result);
+    checkLoader("535401.nxs", "LoadILLDiffraction");
   }
 
   void test_LoadDiffraction_D20() {
-    std::string filename = "967100.nxs";
-    std::string result = "LoadILLDiffraction";
-
-    checkLoader(filename, result);
+    checkLoader("967076.nxs", "LoadILLDiffraction");
+    checkLoader("967087.nxs", "LoadILLDiffraction");
   }
 
   void test_loadIndirect_IN16B() {
-    std::string filename = "ILLIN16B_127500.nxs";
-    std::string result = "LoadILLIndirect";
-
-    checkLoader(filename, result);
+    checkLoader("090661.nxs", "LoadILLIndirect");    // one wing qens
+    checkLoader("083072.nxs", "LoadILLIndirect");    // one wing efws
+    checkLoader("083073.nxs", "LoadILLIndirect");    // one wing ifws
+    checkLoader("136558-136559", "LoadILLIndirect"); // two wings qens
+    checkLoader("143720.nxs", "LoadILLIndirect");    // two wings efws
+    checkLoader("170300.nxs", "LoadILLIndirect");    // two wings ifws
+    checkLoader("215962.nxs", "LoadILLIndirect");    // bats
   }
 
-  void test_loadTOF_IN4() {
-    std::string filename = "084446.nxs";
-    std::string result = "LoadILLTOF";
-
-    checkLoader(filename, result);
-  }
+  void test_loadTOF_IN4() { checkLoader("084446.nxs", "LoadILLTOF"); }
 
   void test_loadTOF_IN5() {
-    std::string filename = "104007.nxs";
-    std::string result = "LoadILLTOF";
-
-    checkLoader(filename, result);
-
-    filename = "189171.nxs";
-    checkLoader(filename, result);
+    checkLoader("104007.nxs", "LoadILLTOF");
+    checkLoader("189171.nxs", "LoadILLTOF");
   }
 
   void test_loadTOF_IN6() {
-    std::string filename = "164192.nxs";
-    std::string result = "LoadILLTOF";
-
-    checkLoader(filename, result);
-    filename = "220010.nxs";
-    checkLoader(filename, result);
+    checkLoader("164192.nxs", "LoadILLTOF");
+    checkLoader("220010.nxs", "LoadILLTOF");
   }
 
   void test_loadTOF_PANTHER() {
-    std::string filename = "001036.nxs";
-    std::string result = "LoadILLTOF";
-
-    checkLoader(filename, result);
-
-    filename = "001723.nxs";
-
-    checkLoader(filename, result);
+    checkLoader("001036.nxs", "LoadILLTOF");
+    checkLoader("001723.nxs", "LoadILLTOF");
   }
 
   void test_loadReflectometry_D17() {
-    std::string filename = "317370.nxs";
-    std::string result = "LoadILLReflectometry";
-
-    checkLoader(filename, result);
+    checkLoader("317370.nxs", "LoadILLReflectometry");
   }
 
   void test_loadReflectometry_FIGARO() {
-    std::string filename = "000002.nxs";
-    std::string result = "LoadILLReflectometry";
-
-    checkLoader(filename, result);
+    checkLoader("000002.nxs", "LoadILLReflectometry");
   }
 };
 
