@@ -1033,7 +1033,8 @@ set(TEST_FILES
 
 set(TEST_PY_FILES
     NormaliseToUnityTest.py
-    ReflectometryBackgroundSubtractionTest.py)
+    ReflectometryBackgroundSubtractionTest.py
+    ReflectometryReductionOne2PythonTest.py)
 
 if(COVERALLS)
   foreach(loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})

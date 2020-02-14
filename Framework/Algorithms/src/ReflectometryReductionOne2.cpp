@@ -470,6 +470,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::backgroundSubtraction(
   auto alg = this->createChildAlgorithm("ReflectometryBackgroundSubtraction");
   alg->initialize();
   alg->setProperty("InputWorkspace", detectorWS);
+  alg->setProperty("InputWorkspaceIndexType", "SpectrumNumber");
   alg->setProperty("ProcessingInstructions",
                    getPropertyValue("BackgroundProcessingInstructions"));
   alg->setProperty("BackgroundCalculationMethod",
@@ -479,7 +480,6 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::backgroundSubtraction(
   alg->setProperty("CostFunction", getPropertyValue("CostFunction"));
   // For our case, the peak range is the same as the main processing
   // instructions, and we do the summation separately so don't sum the peak
-  alg->setProperty("InputWorkspaceIndexType", "SpectrumNumber");
   alg->setProperty("PeakRange", getPropertyValue("ProcessingInstructions"));
   alg->setProperty("SumPeak", false);
   alg->execute();

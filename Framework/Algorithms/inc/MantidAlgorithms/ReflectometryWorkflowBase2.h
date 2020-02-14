@@ -97,14 +97,6 @@ protected:
   std::string
   convertToSpectrumNumber(const std::string &workspaceIndex,
                           Mantid::API::MatrixWorkspace_const_sptr ws) const;
-
-  std::string convertProcessingInstructionsToWorkspaceIndices(
-      const std::string &instructions,
-      Mantid::API::MatrixWorkspace_const_sptr ws) const;
-
-  std::string convertToWorkspaceIndex(const std::string &spectrumNumber,
-                                      MatrixWorkspace_const_sptr ws) const;
-
   std::string convertProcessingInstructionsToSpectrumNumbers(
       const std::string &instructions,
       Mantid::API::MatrixWorkspace_const_sptr ws) const;
