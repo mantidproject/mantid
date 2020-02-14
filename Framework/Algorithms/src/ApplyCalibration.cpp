@@ -10,9 +10,14 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid {
 namespace Algorithms {
+
+namespace {
+  Kernel::Logger logger("ApplyCalibration");
+}
 
 DECLARE_ALGORITHM(ApplyCalibration)
 
@@ -29,9 +34,14 @@ void ApplyCalibration::init() {
 
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-          "CalibrationTable", "", Direction::Input),
+          "CalibrationTable", "", Direction::Input, PropertyMode::Optional),
       "The name of the table workspace containing the new "
       "positions of detectors");
+
+  declareProperty(
+      std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+              "PositionTable", "", Direction::Input, PropertyMode::Optional),
+      "Deprecated: Use Property 'CalibrationTable'");
 }
 
 /** Executes the algorithm. Moving detectors of input workspace to positions
@@ -44,6 +54,16 @@ void ApplyCalibration::exec() {
   // Get pointers to the workspace, parameter map and table
   API::MatrixWorkspace_sptr inputWS = getProperty("Workspace");
   API::ITableWorkspace_sptr CalTable = getProperty("CalibrationTable");
+  API::ITableWorkspace_sptr PosTable = getProperty("PositionTable");
+
+  // Elucidate if using property PositionTable table instead of CalibrationTable
+  if(!CalTable && !PosTable){
+    throw std::runtime_error("Either CalibrationTable or PositionTable must be supplied");
+  }
+  if(PosTable && !CalTable){
+    logger.notice("Property 'PositionTable' has been deprecated. Please use 'CalibrationTable' in its place\n");
+    CalTable = PosTable;
+  }
 
   // initialize variables common to all calibrations
   std::vector<std::string> columnNames = CalTable->getColumnNames();

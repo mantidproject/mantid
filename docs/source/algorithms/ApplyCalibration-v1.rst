@@ -20,6 +20,8 @@ The CalibrationTable must have the column *Detector ID* (integer) and one or mor
 - columns *Detector Y Coordinate* (float) and *Detector Height* (float)
 - column *Detector Width* (float)
 
+Notice: The use of property "PositionTable" has been deprecated. Use property "CalibrationTable" instead.
+
 This algorithm is not appropriate for rectangular detectors and won't move them.
 
 Usage
