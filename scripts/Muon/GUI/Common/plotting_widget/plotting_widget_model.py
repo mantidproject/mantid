@@ -220,6 +220,10 @@ class PlotWidgetModel(object):
         self.plotted_workspaces_inverse_binning = {}
         self.plotted_fit_workspaces = []
 
+    def remove_fit_workspace(self, fit_workspace, axes):
+        if fit_workspace in self.plotted_fit_workspaces:
+            self.remove_workspace_from_plot(fit_workspace, axes)
+
     def _remove_all_data_workspaces_from_plot(self, axes):
         workspaces_to_remove = self.plotted_workspaces
         for workspace in workspaces_to_remove:

@@ -41,7 +41,9 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self.input_workspace_observer = GenericObserver(self.handle_data_updated)
         self.added_group_or_pair_observer = GenericObserverWithArgPassing(
             self.handle_added_or_removed_group_or_pair_to_plot)
-        self.fit_observer = GenericObserver(self.handle_fit_completed)
+        self.fit_observer = GenericObserverWithArgPassing(self.handle_fit_completed)
+        self.fit_removed_observer = GenericObserverWithArgPassing(self.handle_fit_removed)
+
         self.removed_group_pair_observer = GenericObserver(self.handle_removed_group_or_pair_to_plot)
         self.rebin_options_set_observer = GenericObserver(self.handle_rebin_options_set)
         self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
@@ -131,7 +133,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles the use raw workspaces being changed (e.g rebinned) in ads
         """
-        if workspace in self._model.plotted_workspaces:
+        if workspace in self._model.plotted_workspaces or workspace in self._model.plotted_fit_workspaces:
             ax = self.get_workspace_plot_axis(workspace)
             self._model.replace_workspace_plot(workspace, ax)
             self._model.autoscale_axes(self._view.get_axes(), self.get_x_limits())
@@ -244,6 +246,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self._model.number_of_axes = 1
             self.plot_all_selected_workspaces()
 
+        self._model.plotted_fit_workspaces = []
+
         self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
         self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
 
@@ -301,29 +305,24 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self._model.autoscale_axes(self._view.get_axes(), self.get_x_limits())
         self._view.force_redraw()
 
-    def handle_fit_completed(self):
+    def handle_fit_completed(self, fit):
         """
         When a new fit is done adds the fit to the plotted workspaces if appropriate
         """
-        if self.context.fitting_context.number_of_fits <= 1:
-            for workspace_name in self._model.plotted_fit_workspaces:
-                self._model.remove_workspace_from_plot(workspace_name, self._view.get_axes())
+        if fit is None:
+            return
 
-        if self.context.fitting_context.fit_list:
-            current_fit = self.context.fitting_context.fit_list[-1]
-            combined_ws_list = self._model.plotted_workspaces + list(
-                self._model.plotted_workspaces_inverse_binning.values())
-            list_of_output_workspaces_to_plot = [output for output, input in
-                                                 zip(current_fit.output_workspace_names, current_fit.input_workspaces)
-                                                 if input in combined_ws_list]
-            list_of_output_workspaces_to_plot = list_of_output_workspaces_to_plot if list_of_output_workspaces_to_plot \
-                else [current_fit.output_workspace_names[-1]]
-        else:
-            list_of_output_workspaces_to_plot = []
+        list_of_output_workspaces_to_plot = fit.output_workspace_names
+        # plot workspaces that are not currently plotted,
+        # as the ADS observer will handle any updates made to the workspaces
         for workspace_name in list_of_output_workspaces_to_plot:
+
+            if workspace_name in self._model.plotted_fit_workspaces:
+                continue
+
             label = self.get_workspace_legend_label(workspace_name)
             ax = self.get_workspace_plot_axis(workspace_name)
-            fit_function = current_fit.fit_function_name
+            fit_function = fit.fit_function_name
 
             self._model.add_workspace_to_plotted_fit_workspaces(workspace_name)
 
@@ -340,6 +339,14 @@ class PlotWidgetPresenter(HomeTabSubWidget):
                                               errors=False,
                                               plot_kwargs={'distribution': True, 'autoscale_on_update': False,
                                                            'label': label + fit_function + ': Diff'})
+        self._view.force_redraw()
+
+    def handle_fit_removed(self, fits):
+        for fit in fits:
+            list_of_workspaces_to_remove = fit.output_workspace_names
+            for workspace in list_of_workspaces_to_remove:
+                if workspace in self._model.plotted_fit_workspaces:
+                    self._model.remove_workspace_from_plot(workspace, self._view.get_axes())
         self._view.force_redraw()
 
     def handle_rebin_options_set(self):
@@ -429,7 +436,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         self._model.tiled_plot_positions.clear()
         self._model.clear_plot_model(self._view.get_axes())
-        self.context.fitting_context.clear()
 
         if self._view.get_tiled_by_type() == 'run':  # tile by run
             flattened_run_list = [item for sublist in self.context.data_context.current_runs for item in sublist]
@@ -445,7 +451,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
     def new_plot_figure(self, num_axes):
         self._model.clear_plot_model(self._view.get_axes())
-        self.context.fitting_context.clear()
         self._view.new_plot_figure(num_axes)
 
     def get_plot_title(self):

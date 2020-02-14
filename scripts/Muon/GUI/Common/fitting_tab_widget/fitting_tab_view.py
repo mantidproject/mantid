@@ -156,6 +156,9 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def set_slot_for_simul_fit_specifier_changed(self, slot):
         self.simul_fit_by_specifier.currentIndexChanged.connect(slot)
 
+    def set_slot_for_fit_options_changed(self, slot):
+        self.fit_options_table.cellChanged.connect(slot)
+
     @property
     def display_workspace(self):
         return str(self.parameter_display_combo.currentText())
@@ -284,7 +287,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def setup_fit_options_table(self):
         self.fit_options_table.setRowCount(6)
         self.fit_options_table.setColumnCount(2)
-        self.fit_options_table.setColumnWidth(0, 300)
+        self.fit_options_table.setColumnWidth(0, 150)
         self.fit_options_table.setColumnWidth(1, 300)
         self.fit_options_table.verticalHeader().setVisible(False)
         self.fit_options_table.horizontalHeader().setStretchLastSection(True)
@@ -299,7 +302,6 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
         table_utils.setRowName(self.fit_options_table, 2, "Minimizer")
         self.minimizer_combo = table_utils.addComboToTable(self.fit_options_table, 2, [])
-
         self.minimizer_combo.addItems(allowed_minimizers)
 
         table_utils.setRowName(self.fit_options_table, 3, "Fit To Raw Data")

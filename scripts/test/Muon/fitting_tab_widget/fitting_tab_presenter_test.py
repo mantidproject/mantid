@@ -10,7 +10,6 @@ from mantid.api import FunctionFactory, MultiDomainFunction
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy import QtWidgets
-
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
@@ -605,7 +604,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.function_browser.setFunction(str(fit_function))
         self.presenter.selected_data = new_workspace_list
         fit_function_2 = FunctionFactory.createInitialized('name=GausOsc,A=1.0,Sigma=2.5,Frequency=0.1,Phi=0')
-        self.presenter.model.calculate_tf_function.return_value = fit_function_2
+        self.presenter.model.convert_to_tf_function.return_value = fit_function_2
 
         self.view.tf_asymmetry_mode = True
 
@@ -620,7 +619,7 @@ class FittingTabPresenterTest(unittest.TestCase):
                               'MUSR22725; Group; fwd; fwd']
         self.presenter.selected_data = new_workspace_list
         fit_function_2 = self.view.fit_object.clone()
-        self.presenter.model.calculate_tf_function.return_value = fit_function_2
+        self.presenter.model.convert_to_tf_function.return_value = fit_function_2
 
         self.view.tf_asymmetry_mode = True
 
@@ -633,8 +632,10 @@ class FittingTabPresenterTest(unittest.TestCase):
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                               'MUSR22725; Group; fwd; fwd']
         self.presenter.selected_data = new_workspace_list
+
         fit_function_2 = FunctionFactory.createInitialized(EXAMPLE_TF_ASYMMETRY_FUNCTION)
-        self.presenter.model.calculate_tf_function.return_value = fit_function_2
+        self.presenter.model.convert_to_tf_function.return_value = fit_function_2
+
         self.view.function_browser.setGlobalParameters(['A'])
 
         self.view.tf_asymmetry_mode = True
@@ -652,7 +653,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.tf_asymmetry_mode_checkbox.blockSignals(False)
         self.view.is_simul_fit = mock.MagicMock(return_value=False)
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        self.presenter.model.calculate_tf_function.return_value = fit_function
+        self.presenter.model.convert_to_tf_function.return_value = fit_function
 
         self.view.tf_asymmetry_mode = False
 
@@ -672,7 +673,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.tf_asymmetry_mode_checkbox.blockSignals(False)
         self.view.is_simul_fit = mock.MagicMock(return_value=True)
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
-        self.presenter.model.calculate_tf_function.return_value = fit_function
+        self.presenter.model.convert_to_tf_function.return_value = fit_function
 
         self.view.tf_asymmetry_mode = False
 
@@ -680,22 +681,22 @@ class FittingTabPresenterTest(unittest.TestCase):
 
     def test_handle_fit_with_tf_asymmetry_mode_calls_CalculateMuonAsymmetry(self):
         self.presenter.model.get_function_name.return_value = 'GausOsc'
-        self.presenter.model.create_fitted_workspace_name.return_value = ('workspace', 'workspace directory')
         self.presenter.handle_finished = mock.MagicMock()
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry']
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         fit_function_2 = FunctionFactory.createInitialized(EXAMPLE_TF_ASYMMETRY_FUNCTION)
         self.view.function_browser.setFunction(str(fit_function))
         self.presenter.selected_data = new_workspace_list
-        self.presenter.model.calculate_tf_function.return_value = fit_function_2
+        self.presenter.model.convert_to_tf_function.return_value = fit_function_2
         self.view.tf_asymmetry_mode = True
         self.presenter.handle_fit_clicked()
         wait_for_thread(self.presenter.calculation_thread)
 
         self.assertEqual(self.presenter.handle_finished.call_count, 1)
 
-    def test_get_parameters_for_tf_single_fit_calculation(self):
-        self.presenter.model.create_fitted_workspace_name.return_value = ('workspace', 'workspace directory')
+    @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_presenter.create_fitted_workspace_name')
+    def test_get_parameters_for_tf_single_fit_calculation(self, mock_create_fitted_workspace_name):
+        mock_create_fitted_workspace_name.return_value = ('workspace', 'workspace directory')
         self.context.group_pair_context.get_unormalisised_workspace_list = mock.MagicMock(return_value=
         [
             '__MUSR22725; Group; top; Asymmetry_unnorm',
