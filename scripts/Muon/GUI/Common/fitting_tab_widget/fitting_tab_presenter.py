@@ -327,12 +327,8 @@ class FittingTabPresenter(object):
         self.manual_selection_made = False  # reset manual selection flag
         if self.view.is_simul_fit():
             self.update_selected_workspace_list_for_fit()
-            if self.view.simultaneous_fit_by == "Custom":
-                self.view.simul_fit_by_specifier.setEnabled(False)
-                self.view.select_workspaces_to_fit_button.setEnabled(True)
-            else:
-                self.view.simul_fit_by_specifier.setEnabled(True)
-                self.view.select_workspaces_to_fit_button.setEnabled(False)
+            self.view.simul_fit_by_specifier.setEnabled(True)
+            self.view.select_workspaces_to_fit_button.setEnabled(False)
         self.update_model_from_view()
         self.fit_type_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()

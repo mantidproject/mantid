@@ -73,7 +73,6 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def setup_simul_fit_combo_box(self):
         self.simul_fit_by_combo.addItem("Run")
         self.simul_fit_by_combo.addItem("Group/Pair")
-        self.simul_fit_by_combo.addItem("Custom")
 
     def set_datasets_in_function_browser(self, data_set_name_list):
         number_of_data_sets = self.function_browser.getNumberOfDatasets()
@@ -268,11 +267,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
 
     def enable_simul_fit_options(self):
         self.simul_fit_by_combo.setEnabled(True)
-        if self.simultaneous_fit_by == "Custom":
-            self.simul_fit_by_specifier.setEnabled(False)
-            self.select_workspaces_to_fit_button.setEnabled(True)
-        else:
-            self.simul_fit_by_specifier.setEnabled(True)
+        self.simul_fit_by_specifier.setEnabled(True)
 
     def is_simul_fit(self):
         return self.simul_fit_checkbox.isChecked()
