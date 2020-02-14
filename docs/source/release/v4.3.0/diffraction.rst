@@ -25,6 +25,7 @@ Powder Diffraction
 - The polaris create_total_scattering_pdf function can now accept a `pdf_type` argument to set the pdf_output type.
 - The polaris create_total_scattering_pdf function can now accept a `freq_params` argument to perfomr a fourier filter on the run.
 - :ref:`HRPDSlabCanAbsorption <algm-HRPDSlabCanAbsorption-v1>` now accepts any thickness parameter and not those in a specified list.
+- A SaveRDFProfile algorithm has been made that saves workspaces in a format readable by the RMCProfile package.
 
 Engineering Diffraction
 -----------------------
@@ -55,6 +56,7 @@ Powder Diffraction
 - A bug has been fixed that caused Polaris.focus to fail with `do_absorption_Corrections=True`.
 - A bug has been fixed that caused empty runs to be subtracted twice when specifying `sample_empty` in `Polaris.focus`.
 - A bug has been fixed that prevented lists being given for `q_lims` in polaris create_total_scattering_pdf while merging banks.
+- A bug has been fixed that caused SavePDF to fail when asked to save histogram data
 
 Engineering Diffraction
 -----------------------

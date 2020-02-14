@@ -10,6 +10,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/Unit.h"
 
@@ -43,9 +44,15 @@ const std::string SaveRMCProfile::summary() const {
 void SaveRMCProfile::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                         Direction::Input),
-                  "An input workspace with units of Q.");
+                  "An input workspace to be saved.");
+
+  declareProperty("InputType", "",
+                  "To identify what input function is being used.");
+
+  declareProperty("Title", "", "The title line for the output file.");
+
   declareProperty(std::make_unique<API::FileProperty>(
-                      "Filename", "", API::FileProperty::Save, ".gr"),
+                      "Filename", "", API::FileProperty::Save, ".fq"),
                   "The filename to use for the saved data");
 }
 
@@ -56,14 +63,12 @@ std::map<std::string, std::string> SaveRMCProfile::validateInputs() {
   // check for null pointers - this is to protect against workspace groups
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   if (!inputWS) {
-    return result;
+    result["InputWorkspace"] = "Workspace not found";
   }
 
   const auto nHist = static_cast<int>(inputWS->getNumberHistograms());
   if (nHist != 1) {
     result["InputWorkspace"] = "Workspace must contain only one spectrum";
-  } else if (std::string(inputWS->getAxis(0)->unit()->label()) != "Angstrom^-1") {
-    result["InputWorkspace"] = "Expected x-units of Angstrom^-1";
   }
 
   return result;
@@ -89,29 +94,29 @@ void SaveRMCProfile::exec() {
   out.close();
 }
 
-void SaveRMCProfile::writeMetaData(std::ofstream& out,
-	API::MatrixWorkspace_const_sptr inputWS) {
-  out << "#example comment";
+void SaveRMCProfile::writeMetaData(std::ofstream &out,
+                                   API::MatrixWorkspace_const_sptr inputWS) {
+  const auto &y = inputWS->y(0);
+  const std::string title = getProperty("Title");
+  const std::string inputType = getProperty("InputType");
+  out << y.size() << std::endl;
+  out << "rmc " << inputType << " #  " << title << std::endl;
+  std::cout << y.size() << std::endl;
+  std::cout << "rmc " << inputType << " #  " << title << std::endl;
 }
 
 void SaveRMCProfile::writeWSData(std::ofstream& out,
                                  API::MatrixWorkspace_const_sptr inputWS) {
   const auto &x = inputWS->x(0);
   const auto &y = inputWS->y(0);
-  const auto &dy = inputWS->e(0);
-  HistogramData::HistogramDx dx(y.size(), 0.0);
-  if (inputWS->sharedDx(0))
-    dx = inputWS->dx(0);
   const size_t length = x.size();
   if (x.size() == y.size()) {
     for (size_t i = 0; i < length; ++i) {
-      out << "  " << x[i] << "  " << y[i] << "  " << dx[i] << "  " << dy[i]
-          << "\n";
+      out << "  " << x[i] << "  " << y[i] << "\n";
     }
   } else {
     for (size_t i = 0; i < length - 1; ++i) {
-      out << "  " << (x[i] + x[i + 1]) / 2.0 << "  " << y[i] << "  " << dx[i]
-          << "  " << dy[i] << "\n";
+      out << "  " << (x[i] + x[i + 1]) / 2.0 << "  " << y[i] << "\n";
     }
   }
 }
