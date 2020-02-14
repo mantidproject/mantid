@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2020-02-04 10:05:23.746233" name="D16" valid-from="2020-01-01 00:00:00" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
+<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2020-02-14 09:15:03.025288" name="D16" valid-from="2020-01-01 00:00:00" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd">
   <!--
        This is the instrument definition file of the D16 high-resolution diffractometer 
        with variable vertical focusing at the ILL.
@@ -55,8 +55,8 @@
   </component>
   <type name="monitors">
     <component type="monitor">
-      <location name="monitor1" z="0.0"/>
-      <location name="monitor2" z="0.0"/>
+      <location name="monitor1" z="-1.0"/>
+      <location name="monitor2" z="-1.5"/>
     </component>
   </type>
   <!--MONITOR SHAPE-->
