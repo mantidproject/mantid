@@ -7,7 +7,7 @@
 """ A Test director """
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
-from sans.state.StateObjects.StateReductionMode import get_reduction_mode_builder
+from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.state.StateObjects.StateSliceEvent import get_slice_event_builder
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
 from sans.state.AllStates import get_all_states_builder
@@ -78,13 +78,13 @@ class TestDirector(object):
 
         # Build the SANSStateReduction
         if self.reduction_state is None:
-            reduction_builder = get_reduction_mode_builder(self.data_state)
-            reduction_builder.set_reduction_dimensionality(ReductionDimensionality.ONE_DIM)
-            reduction_builder.set_merge_fit_mode(FitModeForMerge.BOTH)
-            reduction_builder.set_merge_shift(324.2)
-            reduction_builder.set_merge_scale(3420.98)
-            self.reduction_state = reduction_builder.build()
-            self.reduction_state.reduction_mode = ReductionMode.MERGED
+            state_reduction = StateReductionMode()
+            state_reduction.reduction_dimensionality = ReductionDimensionality.ONE_DIM
+            state_reduction.merge_fit_mode = FitModeForMerge.BOTH
+            state_reduction.merge_shift = 324.2
+            state_reduction.merge_scale = 3420.98
+            state_reduction.reduction_mode = ReductionMode.MERGED
+            self.reduction_state = state_reduction
 
         # Build the SANSStateSliceEvent
         if self.slice_state is None:

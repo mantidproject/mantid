@@ -32,25 +32,11 @@ class StateReductionMode(metaclass=JsonSerializable):
         self.merge_min = None  # : Float
         self.merge_mask = False  # : Bool
 
-        # Set the detector names to empty strings
-        self.detector_names = {DetectorType.LAB.value: "",
-                               DetectorType.HAB.value: ""}
-
     def get_merge_strategy(self):
         return [ReductionMode.LAB, ReductionMode.HAB]
 
     def get_all_reduction_modes(self):
         return [ReductionMode.LAB, ReductionMode.HAB]
-
-    def get_detector_name_for_reduction_mode(self, reduction_mode):
-        if reduction_mode is ReductionMode.LAB:
-            bank_type = DetectorType.LAB.value
-        elif reduction_mode is ReductionMode.HAB:
-            bank_type = DetectorType.HAB.value
-        else:
-            raise RuntimeError("SANStateReductionISIS: There is no detector available for the"
-                               " reduction mode {0}.".format(reduction_mode))
-        return self.detector_names[bank_type]
 
     def validate(self):
         is_invalid = {}
@@ -61,58 +47,3 @@ class StateReductionMode(metaclass=JsonSerializable):
         if is_invalid:
             raise ValueError("StateReduction: The provided inputs are illegal. "
                              "Please see: {0}".format(json.dumps(is_invalid)))
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-# Builder
-# ----------------------------------------------------------------------------------------------------------------------
-def setup_detectors_from_ipf(reduction_info, data_info):
-    ipf_file_path = data_info.ipf_file_path
-
-    detector_names = {DetectorType.LAB.value: "low-angle-detector-name",
-                      DetectorType.HAB.value: "high-angle-detector-name"}
-
-    names_to_search = []
-    names_to_search.extend(list(detector_names.values()))
-
-    found_detector_names = get_named_elements_from_ipf_file(ipf_file_path, names_to_search, str)
-
-    for detector_type in list(reduction_info.detector_names.keys()):
-        try:
-            detector_name_tag = detector_names[detector_type]
-            detector_name = found_detector_names[detector_name_tag]
-        except KeyError:
-            continue
-        reduction_info.detector_names[detector_type] = detector_name
-
-
-class StateReductionModeBuilder(object):
-    @automatic_setters(StateReductionMode, exclusions=["detector_names"])
-    def __init__(self, data_info):
-        self.state = StateReductionMode()
-        setup_detectors_from_ipf(self.state, data_info)
-
-    # TODO this whole class is a shim around state, so we should remove it at a later date
-    def set_reduction_mode(self, val):
-        self.state.reduction_mode = val
-
-    def set_reduction_dimensionality(self, val):
-        self.state.reduction_dimensionality = val
-
-    def set_merge_fit_mode(self, val):
-        self.state.merge_fit_mode = val
-
-    def build(self):
-        self.state.validate()
-        return copy.copy(self.state)
-
-
-def get_reduction_mode_builder(data_info):
-    # The data state has most of the information that we require to define the reduction_mode.
-    # For the factory method, only the facility/instrument is of relevance.
-    facility = data_info.facility
-    if facility is SANSFacility.ISIS:
-        return StateReductionModeBuilder(data_info)
-    else:
-        raise NotImplementedError("StateReductionBuilder: Could not find any valid reduction builder for the "
-                                  "specified StateData object {0}".format(str(data_info)))

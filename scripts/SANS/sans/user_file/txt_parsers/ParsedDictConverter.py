@@ -19,7 +19,7 @@ from sans.state.StateObjects.StateData import StateData
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
-from sans.state.StateObjects.StateReductionMode import get_reduction_mode_builder
+from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.state.StateObjects.StateSave import StateSave
 from sans.state.StateObjects.StateScale import StateScale
 from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
@@ -780,15 +780,15 @@ class ParsedDictConverter(IStateParser):
 
     # We have taken the implementation originally provided, so we can't help the complexity
     def get_state_reduction_mode(self):  # noqa: C901
-        # TODO this state builder should be removed, by simply moving the detector/IDF processing to state Data
-        state_builder = get_reduction_mode_builder(self._data_info)
-        self._set_single_entry(state_builder.state, "reduction_mode", DetectorId.REDUCTION_MODE)
+        state = StateReductionMode()
+
+        self._set_single_entry(state, "reduction_mode", DetectorId.REDUCTION_MODE)
 
         # -------------------------------
         # Shift and rescale
         # -------------------------------
-        self._set_single_entry(state_builder.state, "merge_scale", DetectorId.RESCALE)
-        self._set_single_entry(state_builder.state, "merge_shift", DetectorId.SHIFT)
+        self._set_single_entry(state, "merge_scale", DetectorId.RESCALE)
+        self._set_single_entry(state, "merge_shift", DetectorId.SHIFT)
 
         # -------------------------------
         # User masking
@@ -803,9 +803,9 @@ class ParsedDictConverter(IStateParser):
             merge_max = merge_range.stop
             merge_mask = merge_range.use_fit
 
-        state_builder.set_merge_mask(merge_mask)
-        state_builder.set_merge_min(merge_min)
-        state_builder.set_merge_max(merge_max)
+        state.merge_mask = merge_mask
+        state.merge_min = merge_min
+        state.merge_max = merge_max
 
         # -------------------------------
         # Fitting merged
@@ -853,33 +853,33 @@ class ParsedDictConverter(IStateParser):
             return val
 
         if has_rescale_fit and has_shift_fit:
-            state_builder.set_merge_fit_mode(FitModeForMerge.BOTH)
+            state.merge_fit_mode = FitModeForMerge.BOTH
             min_q = get_min_q_boundary(q_range_min_scale, q_range_min_shift)
             max_q = get_max_q_boundary(q_range_max_scale, q_range_max_shift)
             if min_q:
-                state_builder.set_merge_range_min(min_q)
+                state.merge_range_min = min_q
             if max_q:
-                state_builder.set_merge_range_max(max_q)
+                state.merge_range_max = max_q
         elif has_rescale_fit and not has_shift_fit:
-            state_builder.set_merge_fit_mode(FitModeForMerge.SCALE_ONLY)
+            state.merge_fit_mode = FitModeForMerge.SCALE_ONLY
             if q_range_min_scale:
-                state_builder.set_merge_range_min(q_range_min_scale)
+                state.merge_range_min = q_range_min_scale
             if q_range_max_scale:
-                state_builder.set_merge_range_max(q_range_max_scale)
+                state.merge_range_max = q_range_max_scale
         elif not has_rescale_fit and has_shift_fit:
-            state_builder.set_merge_fit_mode(FitModeForMerge.SHIFT_ONLY)
+            state.merge_fit_mode = FitModeForMerge.SHIFT_ONLY
             if q_range_min_shift:
-                state_builder.set_merge_range_min(q_range_min_shift)
+                state.merge_range_min = q_range_min_shift
             if q_range_max_shift:
-                state_builder.set_merge_range_max(q_range_max_shift)
+                state.merge_range_max = q_range_max_shift
         else:
-            state_builder.set_merge_fit_mode(FitModeForMerge.NO_FIT)
+            state.merge_fit_mode = FitModeForMerge.NO_FIT
 
         # ------------------------
         # Reduction Dimensionality
         # ------------------------
-        self._set_single_entry(state_builder.state, "reduction_dimensionality", OtherId.REDUCTION_DIMENSIONALITY)
-        return state_builder.build()
+        self._set_single_entry(state, "reduction_dimensionality", OtherId.REDUCTION_DIMENSIONALITY)
+        return state
 
     def get_state_save(self):  # -> StateSave:
         state = StateSave()

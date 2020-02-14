@@ -40,9 +40,6 @@ class MockStateReduction(StateReductionMode):
     def get_merge_strategy(self):
         pass
 
-    def get_detector_name_for_reduction_mode(self, reduction_mode):
-        pass
-
     def get_all_reduction_modes(self):
         pass
 

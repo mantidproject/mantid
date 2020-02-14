@@ -320,31 +320,43 @@ def mask_angle(mask_info, workspace):
     return workspace
 
 
-def mask_beam_stop(mask_info, workspace, instrument, detector_names):
+def mask_beam_stop(mask_info, workspace):
     """
     The beam stop is being masked here.
 
     :param mask_info: a SANSStateMask object.
     :param workspace: the workspace which is to be masked.
-    :param instrument: the instrument associated with the current workspace.
     :return: a masked workspace
     """
     beam_stop_arm_width = mask_info.beam_stop_arm_width
     beam_stop_arm_angle = mask_info.beam_stop_arm_angle
     beam_stop_arm_pos1 = mask_info.beam_stop_arm_pos1
     beam_stop_arm_pos2 = mask_info.beam_stop_arm_pos2
-    if beam_stop_arm_width is not None and beam_stop_arm_angle is not None:
-        detector = workspace.getInstrument().getComponentByName(detector_names['LAB'])
-        z_position = detector.getPos().getZ()
-        start_point = [beam_stop_arm_pos1, beam_stop_arm_pos2, z_position]
-        line_mask = create_line_mask(start_point, 100., beam_stop_arm_width, beam_stop_arm_angle)
 
-        mask_name = "MaskDetectorsInShape"
-        mask_options = {"Workspace": workspace,
-                        "ShapeXML": line_mask}
-        mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
-        mask_alg.execute()
-        workspace = mask_alg.getProperty("Workspace").value
+    if not beam_stop_arm_width or not beam_stop_arm_angle:
+        return workspace
+
+    lab_ipf_key = "low-angle-detector-name"
+
+    lab_component_name = workspace.getInstrument().getStringParameter(lab_ipf_key)
+    if not lab_component_name:
+        raise KeyError("{0} was not found in the IPF file for this instrument")
+    lab_component_name = lab_component_name[0]
+
+    comp_info = workspace.componentInfo()
+    detector_index = comp_info.indexOfAny(lab_component_name)
+    detector_pos = comp_info.position(detector_index)
+    z_position = detector_pos.getZ()
+
+    start_point = [beam_stop_arm_pos1, beam_stop_arm_pos2, z_position]
+    line_mask = create_line_mask(start_point, 100., beam_stop_arm_width, beam_stop_arm_angle)
+
+    mask_name = "MaskDetectorsInShape"
+    mask_options = {"Workspace": workspace,
+                    "ShapeXML": line_mask}
+    mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
+    mask_alg.execute()
+    workspace = mask_alg.getProperty("Workspace").value
     return workspace
 
 
@@ -370,11 +382,9 @@ class NullMasker(Masker):
 
 
 class MaskerISIS(Masker):
-    def __init__(self, spectra_block, instrument, detector_names):
+    def __init__(self, spectra_block):
         super(MaskerISIS, self).__init__()
         self._spectra_block = spectra_block
-        self._instrument = instrument
-        self._detector_names = detector_names
 
     def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
         """
@@ -402,7 +412,7 @@ class MaskerISIS(Masker):
         workspace_to_mask = mask_angle(mask_info, workspace_to_mask)
 
         # Mask beam stop
-        return mask_beam_stop(mask_info, workspace_to_mask, self._instrument, self._detector_names)
+        return mask_beam_stop(mask_info, workspace_to_mask)
 
 
 def create_masker(state, detector_type):
@@ -418,14 +428,13 @@ def create_masker(state, detector_type):
 
     # TODO remove this shim
 
-    detector_names = state.reduction.detector_names
     if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or\
                     instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM:  # noqa
         run_number = data_info.sample_scatter_run_number
         file_name = data_info.sample_scatter
         _, ipf_path = get_instrument_paths_for_sans_file(file_name)
         spectra_block = SpectraBlock(ipf_path, run_number, instrument, detector_type)
-        masker = MaskerISIS(spectra_block, instrument, detector_names)
+        masker = MaskerISIS(spectra_block)
     else:
         masker = NullMasker()
         NotImplementedError("create_masker: Other instruments are not implemented yet.")
