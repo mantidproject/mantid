@@ -26,7 +26,7 @@ using namespace MantidWidgets;
 
 class MANTIDQT_INDIRECT_DLL MSDFunctionModel : public IFunctionModel {
 public:
-  MSDFunctionModel();
+  MSDFunctionModel() = default;
   void setFunction(IFunction_sptr fun) override;
   IFunction_sptr getFitFunction() const override;
   bool hasFunction() const override;

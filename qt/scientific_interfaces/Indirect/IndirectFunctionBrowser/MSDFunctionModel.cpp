@@ -9,7 +9,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
-#include <map>
+#include <unordered_map>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -19,7 +19,7 @@ using namespace MantidWidgets;
 using namespace Mantid::API;
 
 namespace {
-std::map<MSDFunctionModel::ParamID, QString> g_paramName{
+std::unordered_map<MSDFunctionModel::ParamID, QString> g_paramName{
     {MSDFunctionModel::ParamID::GAUSSIAN_HEIGHT, "Height"},
     {MSDFunctionModel::ParamID::GAUSSIAN_MSD, "Msd"},
     {MSDFunctionModel::ParamID::PETERS_HEIGHT, "Height"},
@@ -28,9 +28,11 @@ std::map<MSDFunctionModel::ParamID, QString> g_paramName{
     {MSDFunctionModel::ParamID::YI_HEIGHT, "Height"},
     {MSDFunctionModel::ParamID::YI_MSD, "Msd"},
     {MSDFunctionModel::ParamID::YI_SIGMA, "Sigma"}};
-}
 
-MSDFunctionModel::MSDFunctionModel() {}
+const std::string gauss = "MsdGauss";
+const std::string peters = "MsdPeters";
+const std::string yi = "MsdYi";
+} // namespace
 
 void MSDFunctionModel::clearData() {
   m_fitType.clear();
@@ -43,7 +45,7 @@ void MSDFunctionModel::setFunction(IFunction_sptr fun) {
     return;
   if (fun->nFunctions() == 0) {
     const auto name = fun->name();
-    if (name == "MsdGauss" || name == "MsdPeters" || name == "MsdYi") {
+    if (name == gauss || name == peters || name == yi) {
       m_fitType = QString::fromStdString(name);
     } else {
       throw std::runtime_error("Cannot set function " + name);
@@ -55,15 +57,15 @@ void MSDFunctionModel::setFunction(IFunction_sptr fun) {
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
     const auto f = fun->getFunction(i);
     const auto name = f->name();
-    if (name == "MsdGauss" || name == "MsdPeters" || name == "MsdYi") {
+    if (name == gauss || name == peters || name == yi) {
       if (isFitTypeSet) {
-        throw std::runtime_error("Function has wrong structure.");
+        throw std::runtime_error("More than one function not allowed.");
       }
       m_fitType = QString::fromStdString(name);
       isFitTypeSet = true;
     } else {
       clear();
-      throw std::runtime_error("Function has wrong structure.");
+      throw std::runtime_error("Function is not of an allowed type.");
     }
   }
   m_model.setFunction(fun);
@@ -85,7 +87,7 @@ void MSDFunctionModel::addFunction(const QString &prefix,
       FunctionFactory::Instance().createInitialized(funStr.toStdString());
   const auto name = fun->name();
   QString newPrefix;
-  if (name == "MsdGauss" || name == "MsdPeters" || name == "MsdYi") {
+  if (name == gauss || name == peters || name == yi) {
     setFitType(QString::fromStdString(name));
     newPrefix = *getFitTypePrefix();
   } else {
@@ -130,14 +132,16 @@ void MSDFunctionModel::removeFitType() {
 }
 
 bool MSDFunctionModel::hasGaussianType() const {
-  return m_fitType == "MsdGauss";
+  return m_fitType == QString::fromStdString(gauss);
 }
 
 bool MSDFunctionModel::hasPetersType() const {
-  return m_fitType == "MsdPeters";
+  return m_fitType == QString::fromStdString(peters);
 }
 
-bool MSDFunctionModel::hasYiType() const { return m_fitType == "MsdYi"; }
+bool MSDFunctionModel::hasYiType() const {
+  return m_fitType == QString::fromStdString(yi);
+}
 
 void MSDFunctionModel::updateParameterEstimationData(
     DataForParameterEstimationCollection &&data) {
@@ -454,16 +458,16 @@ void MSDFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
 
 void MSDFunctionModel::applyParameterFunction(
     std::function<void(ParamID)> paramFun) const {
-  if (m_fitType == "MsdGauss") {
+  if (m_fitType == QString::fromStdString(gauss)) {
     paramFun(ParamID::GAUSSIAN_HEIGHT);
     paramFun(ParamID::GAUSSIAN_MSD);
   }
-  if (m_fitType == "MsdPeters") {
+  if (m_fitType == QString::fromStdString(peters)) {
     paramFun(ParamID::PETERS_HEIGHT);
     paramFun(ParamID::PETERS_MSD);
     paramFun(ParamID::PETERS_BETA);
   }
-  if (m_fitType == "MsdYi") {
+  if (m_fitType == QString::fromStdString(yi)) {
     paramFun(ParamID::YI_HEIGHT);
     paramFun(ParamID::YI_MSD);
     paramFun(ParamID::YI_SIGMA);
@@ -495,13 +499,13 @@ std::string MSDFunctionModel::buildYiFunctionString() const {
 
 QString MSDFunctionModel::buildFunctionString() const {
   QStringList functions;
-  if (m_fitType == "MsdGauss") {
+  if (m_fitType == QString::fromStdString(gauss)) {
     functions << QString::fromStdString(buildGaussianFunctionString());
   }
-  if (m_fitType == "MsdPeters") {
+  if (m_fitType == QString::fromStdString(peters)) {
     functions << QString::fromStdString(buildPetersFunctionString());
   }
-  if (m_fitType == "MsdYi") {
+  if (m_fitType == QString::fromStdString(yi)) {
     functions << QString::fromStdString(buildYiFunctionString());
   }
   return functions.join(";");
@@ -513,6 +517,7 @@ boost::optional<QString> MSDFunctionModel::getFitTypePrefix() const {
   return QString();
 }
 
+// Backgrounds are not needed for MsD fit.
 QString MSDFunctionModel::setBackgroundA0(double) { return ""; }
 
 } // namespace IDA

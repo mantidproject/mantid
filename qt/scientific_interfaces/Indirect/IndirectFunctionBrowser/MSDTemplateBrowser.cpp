@@ -232,9 +232,9 @@ void MSDTemplateBrowser::enumChanged(QtProperty *prop) {
   }
 }
 
-void MSDTemplateBrowser::globalChanged(QtProperty *, const QString &, bool) {
-  //  std::cerr << "Global " << name.toStdString() << ' ' << on << std::endl;
-}
+// This slot needs to exist to fullfil the interface but we do not need to do
+// anything in this case.
+void MSDTemplateBrowser::globalChanged(QtProperty *, const QString &, bool) {}
 
 void MSDTemplateBrowser::parameterChanged(QtProperty *prop) {
   auto isGlobal = m_parameterManager->isGlobal(prop);
@@ -305,9 +305,9 @@ void MSDTemplateBrowser::updateParameterEstimationData(
   m_presenter.updateParameterEstimationData(std::move(data));
 }
 
-void MSDTemplateBrowser::popupMenu(const QPoint &) {
-  //  std::cerr << "Popup" << std::endl;
-}
+// This function needs to exist to fullfil the interface but does not
+// need to do anything in this case.
+void MSDTemplateBrowser::popupMenu(const QPoint &) {}
 
 void MSDTemplateBrowser::setParameterPropertyValue(QtProperty *prop,
                                                    double value, double error) {
