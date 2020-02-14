@@ -40,10 +40,10 @@ public:
                                   WorkspaceIndex spectrum) const;
   std::vector<std::string> getWidths(TableDatasetIndex dataIndex) const;
   std::vector<std::string> getEISF(TableDatasetIndex dataIndex) const;
-  boost::optional<std::size_t> getWidthSpectrum(std::size_t widthIndex,
-                                                TableDatasetIndex dataIndex) const;
-  boost::optional<std::size_t> getEISFSpectrum(std::size_t eisfIndex,
-                                               TableDatasetIndex dataIndex) const;
+  boost::optional<std::size_t>
+  getWidthSpectrum(std::size_t widthIndex, TableDatasetIndex dataIndex) const;
+  boost::optional<std::size_t>
+  getEISFSpectrum(std::size_t eisfIndex, TableDatasetIndex dataIndex) const;
   void setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIndex);
   void setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataIndex);
 

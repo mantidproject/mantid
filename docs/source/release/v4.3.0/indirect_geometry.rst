@@ -13,6 +13,7 @@ New
 ###
 
   - Simultaneous fitting has been added as an option on the convolutional fitting tab of data analysis.
+  - Simultaneous fitting has been added as an option on the FQ fitting tab of data analysis.
 
 Improvements
 ############
