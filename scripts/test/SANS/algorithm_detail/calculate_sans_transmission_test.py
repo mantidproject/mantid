@@ -10,7 +10,7 @@ import unittest
 from mantid.simpleapi import CloneWorkspace, DeleteWorkspace, Load, Rebin
 from sans.algorithm_detail.calculate_sans_transmission import calculate_transmission
 from sans.common.enums import (RebinType, RangeStepType, FitType)
-from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission_builder
+from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
 from sans.test_helper.test_director import TestDirector
 
 
@@ -96,75 +96,74 @@ class CalculateSansTransmissionTest(unittest.TestCase):
                    can_wavelength_low=None, can_wavelength_high=None):
         test_director = TestDirector()
         state = test_director.construct()
-        data_state = state.data
-        calculate_transmission_builder = get_calculate_transmission_builder(data_state)
+        instrument = state.data.instrument
+        calculate_transmission_obj = get_calculate_transmission(instrument)
         if transmission_radius_on_detector:
-            calculate_transmission_builder.set_transmission_radius_on_detector(transmission_radius_on_detector)
+            calculate_transmission_obj.transmission_radius_on_detector = transmission_radius_on_detector
         if transmission_roi_files:
-            calculate_transmission_builder.set_transmission_roi_files(transmission_roi_files)
+            calculate_transmission_obj.transmission_roi_files = transmission_roi_files
         if transmission_mask_files:
-            calculate_transmission_builder.set_transmission_mask_files(transmission_mask_files)
+            calculate_transmission_obj.transmission_mask_files = transmission_mask_files
         if transmission_monitor:
-            calculate_transmission_builder.set_transmission_monitor(transmission_monitor)
+            calculate_transmission_obj.transmission_monitor = transmission_monitor
 
         if incident_monitor:
-            calculate_transmission_builder.set_incident_monitor(incident_monitor)
+            calculate_transmission_obj.incident_monitor = incident_monitor
         if rebin_type:
-            calculate_transmission_builder.set_rebin_type(rebin_type)
+            calculate_transmission_obj.rebin_type = rebin_type
         if wavelength_low:
-            calculate_transmission_builder.set_wavelength_low([wavelength_low])
+            calculate_transmission_obj.wavelength_low = [wavelength_low]
         if wavelength_high:
-            calculate_transmission_builder.set_wavelength_high([wavelength_high])
+            calculate_transmission_obj.wavelength_high = [wavelength_high]
         if wavelength_step:
-            calculate_transmission_builder.set_wavelength_step(wavelength_step)
+            calculate_transmission_obj.wavelength_step = wavelength_step
         if wavelength_step_type:
-            calculate_transmission_builder.set_wavelength_step_type(wavelength_step_type)
+            calculate_transmission_obj.wavelength_step_type = wavelength_step_type
         if use_full_wavelength_range:
-            calculate_transmission_builder.set_use_full_wavelength_range(use_full_wavelength_range)
+            calculate_transmission_obj.use_full_wavelength_range = use_full_wavelength_range
         if wavelength_full_range_low:
-            calculate_transmission_builder.set_wavelength_full_range_low(wavelength_full_range_low)
+            calculate_transmission_obj.wavelength_full_range_low = wavelength_full_range_low
         if wavelength_full_range_high:
-            calculate_transmission_builder.set_wavelength_full_range_high(wavelength_full_range_high)
+            calculate_transmission_obj.wavelength_full_range_high = wavelength_full_range_high
 
         if prompt_peak_correction_min:
-            calculate_transmission_builder.set_prompt_peak_correction_min(prompt_peak_correction_min)
+            calculate_transmission_obj.prompt_peak_correction_min = prompt_peak_correction_min
         if prompt_peak_correction_max:
-            calculate_transmission_builder.set_prompt_peak_correction_max(prompt_peak_correction_max)
+            calculate_transmission_obj.prompt_peak_correction_max = prompt_peak_correction_max
         if prompt_peak_correction_min and prompt_peak_correction_max:
-            calculate_transmission_builder.set_prompt_peak_correction_enabled(True)
+            calculate_transmission_obj.prompt_peak_correction_enabled = True
 
         if background_TOF_general_start:
-            calculate_transmission_builder.set_background_TOF_general_start(background_TOF_general_start)
+            calculate_transmission_obj.background_TOF_general_start = background_TOF_general_start
         if background_TOF_general_stop:
-            calculate_transmission_builder.set_background_TOF_general_stop(background_TOF_general_stop)
+            calculate_transmission_obj.background_TOF_general_stop = background_TOF_general_stop
         if background_TOF_monitor_start:
-            calculate_transmission_builder.set_background_TOF_monitor_start(background_TOF_monitor_start)
+            calculate_transmission_obj.background_TOF_monitor_start = background_TOF_monitor_start
         if background_TOF_monitor_stop:
-            calculate_transmission_builder.set_background_TOF_monitor_stop(background_TOF_monitor_stop)
+            calculate_transmission_obj.background_TOF_monitor_stop = background_TOF_monitor_stop
         if background_TOF_roi_start:
-            calculate_transmission_builder.set_background_TOF_roi_start(background_TOF_roi_start)
+            calculate_transmission_obj.background_TOF_roi_start = background_TOF_roi_start
         if background_TOF_roi_stop:
-            calculate_transmission_builder.set_background_TOF_roi_stop(background_TOF_roi_stop)
+            calculate_transmission_obj.background_TOF_roi_stop = background_TOF_roi_stop
 
         if sample_fit_type:
-            calculate_transmission_builder.set_sample_fit_type(sample_fit_type)
+            calculate_transmission_obj.set_sample_fit_type(sample_fit_type)
         if sample_polynomial_order:
-            calculate_transmission_builder.set_sample_polynomial_order(sample_polynomial_order)
+            calculate_transmission_obj.set_sample_polynomial_order(sample_polynomial_order)
         if sample_wavelength_low:
-            calculate_transmission_builder.set_sample_wavelength_low(sample_wavelength_low)
+            calculate_transmission_obj.set_sample_wavelength_low(sample_wavelength_low)
         if sample_wavelength_high:
-            calculate_transmission_builder.set_sample_wavelength_high(sample_wavelength_high)
+            calculate_transmission_obj.set_sample_wavelength_high(sample_wavelength_high)
 
         if can_fit_type:
-            calculate_transmission_builder.set_can_fit_type(can_fit_type)
+            calculate_transmission_obj.set_can_fit_type(can_fit_type)
         if can_polynomial_order:
-            calculate_transmission_builder.set_can_polynomial_order(can_polynomial_order)
+            calculate_transmission_obj.set_can_polynomial_order(can_polynomial_order)
         if can_wavelength_low:
-            calculate_transmission_builder.set_can_wavelength_low(can_wavelength_low)
+            calculate_transmission_obj.set_can_wavelength_low(can_wavelength_low)
         if can_wavelength_high:
-            calculate_transmission_builder.set_can_wavelength_high(can_wavelength_high)
-        calculate_transmission = calculate_transmission_builder.build()
-        state.adjustment.calculate_transmission = calculate_transmission
+            calculate_transmission_obj.set_can_wavelength_high(can_wavelength_high)
+        state.adjustment.calculate_transmission = calculate_transmission_obj
         return state
 
     @staticmethod

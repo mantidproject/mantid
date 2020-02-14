@@ -263,7 +263,7 @@ class CommandInterfaceStateDirector(object):
             process_function = self._method_map[command_id]
             process_function(command)
 
-        user_commands = CommandInterfaceAdapter(data_info=data_state,
+        user_commands = CommandInterfaceAdapter(data_info=file_information,
                                                 processed_state=self._processed_state_settings)
         run_data_parser = StateRunDataBuilder(file_information=file_information)
 

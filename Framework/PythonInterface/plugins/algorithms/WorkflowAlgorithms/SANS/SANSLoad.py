@@ -132,7 +132,7 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
 
         workspaces, workspace_monitors = loader.execute(data_info=data, use_cached=use_cached,
                                                         publish_to_ads=publish_to_ads, progress=progress,
-                                                        parent_alg=self)
+                                                        parent_alg=self, adjustment_info=state.adjustment)
         progress.report("Loaded the data.")
 
         progress_move = Progress(self, start=0.8, end=1.0, nreports=2)

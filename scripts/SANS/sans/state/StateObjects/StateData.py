@@ -41,8 +41,6 @@ class StateData(metaclass=JsonSerializable):
         self.can_direct = None  # : Str()
         self.can_direct_period = StateData.ALL_PERIODS  # : Int (Positive)
 
-        self.calibration = None  # : Str()
-
         self.sample_scatter_run_number = None  # : Int (Positive)
         self.sample_scatter_is_multi_period = None  # : Bool
         self.idf_file_path = None  # : Str()

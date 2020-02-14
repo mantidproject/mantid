@@ -8,7 +8,7 @@ import unittest
 
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSFacility, SANSInstrument)
 from sans.state.StateObjects.StateCalculateTransmission import (StateCalculateTransmission, StateCalculateTransmissionLOQ,
-                                                                get_calculate_transmission_builder)
+                                                                get_calculate_transmission)
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
@@ -202,7 +202,7 @@ class StateCalculateTransmissionBuilderTest(unittest.TestCase):
         data_info = data_builder.build()
 
         # Act
-        builder = get_calculate_transmission_builder(data_info)
+        builder = get_calculate_transmission(data_info)
         self.assertTrue(builder)
 
         builder.set_prompt_peak_correction_min(12.0)

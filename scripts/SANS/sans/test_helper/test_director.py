@@ -15,7 +15,7 @@ from sans.state.StateObjects.StateWavelength import get_wavelength_builder
 from sans.state.StateObjects.StateSave import get_save_builder
 from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
 from sans.state.StateObjects.StateScale import get_scale_builder
-from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission_builder
+from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
 from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavelength_and_pixel_adjustment_builder
 from sans.state.StateObjects.StateAdjustment import get_adjustment_builder
 from sans.state.StateObjects.StateConvertToQ import get_convert_to_q_builder
@@ -127,6 +127,8 @@ class TestDirector(object):
             scale_builder.set_scale(4.0)
             self.scale_state = scale_builder.build()
 
+        instrument = self.data_state.instrument
+
         # Build the SANSAdjustmentState
         if self.adjustment_state is None:
             # NormalizeToMonitor
@@ -142,26 +144,25 @@ class TestDirector(object):
             normalize_to_monitor = normalize_to_monitor_builder.build()
 
             # CalculateTransmission
-            calculate_transmission_builder = get_calculate_transmission_builder(self.data_state)
-            calculate_transmission_builder.set_transmission_monitor(3)
-            calculate_transmission_builder.set_incident_monitor(2)
-            calculate_transmission_builder.set_wavelength_low([1.0])
-            calculate_transmission_builder.set_wavelength_high([10.0])
-            calculate_transmission_builder.set_wavelength_step(2.0)
-            calculate_transmission_builder.set_wavelength_step_type(RangeStepType.LIN)
-            calculate_transmission_builder.set_rebin_type(RebinType.REBIN)
-            calculate_transmission_builder.set_background_TOF_general_start(1000.)
-            calculate_transmission_builder.set_background_TOF_general_stop(2000.)
+            calculate_transmission_obj = get_calculate_transmission(instrument=instrument)
+            calculate_transmission_obj.transmission_monitor = 3
+            calculate_transmission_obj.incident_monitor = 2
+            calculate_transmission_obj.wavelength_low = [1.0]
+            calculate_transmission_obj.wavelength_high = [10.0]
+            calculate_transmission_obj.wavelength_step = 2.0
+            calculate_transmission_obj.wavelength_step_type = RangeStepType.LIN
+            calculate_transmission_obj.rebin_type = RebinType.REBIN
+            calculate_transmission_obj.background_TOF_general_start = 1000.
+            calculate_transmission_obj.background_TOF_general_stop = 2000.
 
-            calculate_transmission_builder.set_sample_fit_type(FitType.LINEAR)
-            calculate_transmission_builder.set_sample_polynomial_order(0)
-            calculate_transmission_builder.set_sample_wavelength_low(1.0)
-            calculate_transmission_builder.set_sample_wavelength_high(10.0)
-            calculate_transmission_builder.set_can_fit_type(FitType.POLYNOMIAL)
-            calculate_transmission_builder.set_can_polynomial_order(3)
-            calculate_transmission_builder.set_can_wavelength_low(10.0)
-            calculate_transmission_builder.set_can_wavelength_high(20.0)
-            calculate_transmission = calculate_transmission_builder.build()
+            calculate_transmission_obj.set_sample_fit_type(FitType.LINEAR)
+            calculate_transmission_obj.set_sample_polynomial_order(0)
+            calculate_transmission_obj.set_sample_wavelength_low(1.0)
+            calculate_transmission_obj.set_sample_wavelength_high(10.0)
+            calculate_transmission_obj.set_can_fit_type(FitType.POLYNOMIAL)
+            calculate_transmission_obj.set_can_polynomial_order(3)
+            calculate_transmission_obj.set_can_wavelength_low(10.0)
+            calculate_transmission_obj.set_can_wavelength_high(20.0)
 
             # Wavelength and pixel adjustment
             wavelength_and_pixel_builder = get_wavelength_and_pixel_adjustment_builder(self.data_state)
@@ -174,7 +175,7 @@ class TestDirector(object):
             # Adjustment
             adjustment_builder = get_adjustment_builder(self.data_state)
             adjustment_builder.set_normalize_to_monitor(normalize_to_monitor)
-            adjustment_builder.set_calculate_transmission(calculate_transmission)
+            adjustment_builder.set_calculate_transmission(calculate_transmission_obj)
             adjustment_builder.set_wavelength_and_pixel_adjustment(wavelength_and_pixel)
             self.adjustment_state = adjustment_builder.build()
 

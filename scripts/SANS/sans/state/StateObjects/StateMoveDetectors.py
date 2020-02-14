@@ -10,6 +10,7 @@
 
 import copy
 import json
+from typing import Dict
 
 from sans.common.enums import (CanonicalCoordinates, SANSInstrument, DetectorType)
 from sans.state.JsonSerializable import JsonSerializable
@@ -67,7 +68,7 @@ class StateMove(metaclass=JsonSerializable):
         super(StateMove, self).__init__()
 
         self.sample_offset = 0.0  # : Float
-        self.detectors = None  # : Dict
+        self.detectors: Dict[StateMoveDetectors] = {}
         self.monitor_names = None  # : Dict
 
         # The sample offset direction is Z for the ISIS instruments

@@ -36,7 +36,7 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
     # 1. Get relevant spectra
     detector_id_incident_monitor = get_detector_id_for_spectrum_number(transmission_ws,
                                                                        incident_monitor_spectrum_number)
-    detector_ids_roi, detector_id_transmission_monitor, detector_id_default_transmission_monitor = \
+    detector_ids_roi, detector_id_transmission_monitor = \
         _get_detector_ids_for_transmission_calculation(transmission_ws, calculate_transmission_state)
     all_detector_ids = [detector_id_incident_monitor]
 
@@ -44,8 +44,6 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
         all_detector_ids.extend(detector_ids_roi)
     elif detector_id_transmission_monitor is not None:
         all_detector_ids.append(detector_id_transmission_monitor)
-    elif detector_id_default_transmission_monitor is not None:
-        all_detector_ids.append(detector_id_default_transmission_monitor)
     else:
         raise RuntimeError("SANSCalculateTransmission: No region of interest or transmission monitor selected.")
 
@@ -60,7 +58,7 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
     # 3. Fit
     output_workspace, unfitted_transmission_workspace = \
         _perform_fit(transmission_ws, direct_ws, detector_ids_roi,
-                     detector_id_transmission_monitor, detector_id_default_transmission_monitor,
+                     detector_id_transmission_monitor,
                      detector_id_incident_monitor, calculate_transmission_state, data_type)
 
     return output_workspace, unfitted_transmission_workspace
@@ -68,7 +66,7 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
 
 def _perform_fit(transmission_workspace, direct_workspace,
                  transmission_roi_detector_ids, transmission_monitor_detector_id,
-                 transmission_monitor_detector_id_default, incident_monitor_detector_id,
+                 incident_monitor_detector_id,
                  calculate_transmission_state, data_type):
     """
     This performs the actual transmission calculation.
@@ -77,7 +75,6 @@ def _perform_fit(transmission_workspace, direct_workspace,
     :param direct_workspace: the corrected direct workspace
     :param transmission_roi_detector_ids: the roi detector ids
     :param transmission_monitor_detector_id: the transmission monitor detector id
-    :param transmission_monitor_detector_id_default: the default transmission monitor id
     :param incident_monitor_detector_id: the incident monitor id
     :param calculate_transmission_state: the state for the transmission calculation
     :param data_type: the data type which is currently being investigated, ie if it is a sample or a can run.
@@ -106,8 +103,6 @@ def _perform_fit(transmission_workspace, direct_workspace,
         trans_options.update({"TransmissionROI": transmission_roi_detector_ids})
     elif transmission_monitor_detector_id is not None:
         trans_options.update({"TransmissionMonitor": transmission_monitor_detector_id})
-    elif transmission_monitor_detector_id_default:
-        trans_options.update({"TransmissionMonitor": transmission_monitor_detector_id_default})
     else:
         raise RuntimeError("No transmission monitor has been provided.")
 
@@ -171,13 +166,7 @@ def _get_detector_ids_for_transmission_calculation(transmission_workspace, calcu
         detector_id_transmission_monitor = get_detector_id_for_spectrum_number(transmission_workspace,
                                                                                transmission_monitor_spectrum_number)
 
-    # Get the default transmission monitor detector id. This is our fallback if nothing else was specified.
-    default_transmission_monitor = calculate_transmission_state.default_transmission_monitor
-
-    detector_id_default_transmission_monitor = get_detector_id_for_spectrum_number(transmission_workspace,
-                                                                                   default_transmission_monitor)
-
-    return detector_ids_roi, detector_id_transmission_monitor, detector_id_default_transmission_monitor
+    return detector_ids_roi, detector_id_transmission_monitor
 
 
 def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_transmission_state, data_type):

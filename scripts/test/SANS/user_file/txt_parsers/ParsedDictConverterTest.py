@@ -26,7 +26,7 @@ class ParsedDictConverterTest(unittest.TestCase):
 
         user_file_path = create_user_file(sample_user_file)
 
-        parser = UserFileReaderAdapter(user_file_name=user_file_path, data_info=data_state)
+        parser = UserFileReaderAdapter(user_file_name=user_file_path, instrument=data_state.instrument)
         state = parser.get_all_states()
 
         # Assert

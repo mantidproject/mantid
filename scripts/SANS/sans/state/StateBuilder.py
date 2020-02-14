@@ -11,9 +11,9 @@ from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapt
 
 class StateBuilder(IStateParser):
     @staticmethod
-    def new_instance(file_information, data_information, user_filename):
-        run_data = StateRunDataBuilder(file_information=file_information)
-        user_file = UserFileReaderAdapter(data_info=data_information, user_file_name=user_filename)
+    def new_instance(file_information, instrument, user_filename):
+        run_data = RunDataStateBuilder(file_information=file_information)
+        user_file = UserFileReaderAdapter(instrument=instrument, user_file_name=user_filename)
         return StateBuilder(run_data_builder=run_data, i_state_parser=user_file)
 
     def __init__(self, i_state_parser, run_data_builder):
@@ -39,11 +39,11 @@ class StateBuilder(IStateParser):
     def get_state_data(self):  # -> StateData:
         return self._file_parser.get_state_data()
 
-    def get_state_mask_detectors(self):  # -> StateMaskDetectors:
-        return self._file_parser.get_state_mask_detectors()
+    def get_state_mask(self):  # -> StateMaskDetectors:
+        return self._file_parser.get_state_mask()
 
-    def get_state_move_detectors(self):  # -> StateMoveDetectors:
-        return self._file_parser.get_state_move_detectors()
+    def get_state_move(self):  # -> StateMoveDetectors:
+        return self._file_parser.get_state_move()
 
     def get_state_normalize_to_monitor(self):  # -> StateNormalizeToMonitor:
         return self._file_parser.get_state_normalize_to_monitor()
