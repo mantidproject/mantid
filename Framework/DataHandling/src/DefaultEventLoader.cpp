@@ -155,7 +155,7 @@ DefaultEventLoader::setupChunking(std::vector<std::string> &bankNames,
   return {bank0, bankn};
 }
 
-std::pair<int32_t, int32_t> DefaultEventLoader::getMinMaxDetID() {
+std::pair<int32_t, int32_t> DefaultEventLoader::getMinMaxDetID() const {
   int32_t min, max;
   m_ws.getInstrument()->getMinMaxDetectorIDs(min, max);
   return std::make_pair(min, max);

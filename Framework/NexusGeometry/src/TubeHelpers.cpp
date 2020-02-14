@@ -8,7 +8,6 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include <algorithm>
 #include <iterator>
-#include <tbb/parallel_sort.h>
 #include <tuple>
 #include <vector>
 

@@ -5,6 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/BankPulseTimes.h"
+#include "MantidKernel/Logger.h"
+#include "MantidNexus/NexusIOHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Types::Core;
@@ -15,6 +17,10 @@ using namespace Mantid::Types::Core;
 /// The first period
 const unsigned int BankPulseTimes::FirstPeriod = 1;
 
+namespace {
+/// static logger
+Mantid::Kernel::Logger g_log("BankPulseTimes");
+} // namespace
 //----------------------------------------------------------------------------------------------
 /** Constructor. Loads the pulse times from the bank entry of the file
  *
@@ -25,17 +31,8 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file,
                                const std::vector<int> &pNumbers)
     : periodNumbers(pNumbers) {
   file.openData("event_time_zero");
-  // Read the offset (time zero)
-  if (file.hasAttr("offset"))
-    file.getAttr("offset", startTime);
-  else if (file.hasAttr("start"))
-    file.getAttr("start", startTime);
-  else {
-    auto epoch = DateAndTime(DateAndTime::UNIX_EPOCH);
-    startTime = epoch.toISO8601String();
-  }
-  Mantid::Types::Core::DateAndTime start(startTime);
-  // Load the seconds offsets
+  auto start =
+      DateAndTime(Mantid::NeXus::NeXusIOHelper::readStartTimeOffset(file));
 
   const auto heldTimeZeroType = file.getInfo().type;
   // Nexus only requires event_time_zero to be a NXNumber, we support two

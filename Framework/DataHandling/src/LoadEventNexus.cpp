@@ -27,6 +27,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidNexus/NexusIOHelper.h"
 
 #include <H5Cpp.h>
 #include <boost/shared_array.hpp>
@@ -437,21 +438,12 @@ DateAndTime firstPulseTime(::NeXus::File &file, Kernel::Logger &logger) {
     std::string message =
         "event_time_zero has zero dimension. Cannot establish run "
         "start.";
-    logger.warning(message);
+    logger.error(message);
     throw std::runtime_error(message);
   }
 
-  DateAndTime offset;
-  std::string isooffset; // ISO8601 offset
-
-  if (file.hasAttr("offset")) {
-    file.getAttr("offset", isooffset);
-    offset = DateAndTime(isooffset);
-  } else if (file.hasAttr("start")) {
-    file.getAttr("start", isooffset);
-    offset = DateAndTime(isooffset);
-  } else
-    offset = DateAndTime(DateAndTime::UNIX_EPOCH);
+  auto offset =
+      DateAndTime(Mantid::NeXus::NeXusIOHelper::readStartTimeOffset(file));
 
   std::string units;
   if (file.hasAttr("units"))
@@ -485,7 +477,7 @@ DateAndTime firstPulseTime(::NeXus::File &file, Kernel::Logger &logger) {
     return absoluteFirst;
   } else {
     std::string message = "Unrecognised type for event_time_zero";
-    logger.warning(message);
+    logger.error(message);
     throw std::runtime_error(message);
   }
 } // namespace DataHandling
@@ -511,7 +503,7 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
         file.openData("total_counts");
         auto info = file.getInfo();
         file.closeData();
-        if (info.type == NeXus::UINT64) {
+        if (info.type == ::NeXus::UINT64) {
           uint64_t eventCount;
           file.readData("total_counts", eventCount);
           hasTotalCounts = true;
@@ -835,6 +827,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   bool haveWeights = false;
   auto firstPulseT = DateAndTime::maximum();
 
+  // No event data will be loaded if this fails
   if (!NexusDescriptor::findAndOpenParentGroup(*m_file, classType))
     g_log.warning()
         << "LoadEventNexus cannot find NXevent_data group. No event "

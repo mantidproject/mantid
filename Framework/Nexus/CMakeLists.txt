@@ -1,4 +1,8 @@
-set(SRC_FILES src/MuonNexusReader.cpp src/NexusClasses.cpp src/NexusFileIO.cpp)
+set(SRC_FILES 
+    src/MuonNexusReader.cpp 
+    src/NexusClasses.cpp 
+    src/NexusFileIO.cpp 
+    src/NexusIOHelper.cpp)
 
 set(INC_FILES
     inc/MantidNexus/MuonNexusReader.h

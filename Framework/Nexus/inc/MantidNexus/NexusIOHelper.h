@@ -188,6 +188,7 @@ T readNexusValue(::NeXus::File &file, std::string entry = "") {
                              file, info_and_close.second);
 }
 
+_declspec(dllexport) const std::string readStartTimeOffset(::NeXus::File &file);
 } // namespace NeXusIOHelper
 } // namespace NeXus
 } // namespace Mantid

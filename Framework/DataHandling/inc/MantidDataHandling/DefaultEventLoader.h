@@ -87,7 +87,7 @@ private:
   /// Map detector IDs to event lists.
   template <class T>
   void makeMapToEventLists(std::vector<std::vector<T>> &eventVectors);
-  std::pair<int32_t, int32_t> getMinMaxDetID();
+  std::pair<int32_t, int32_t> getMinMaxDetID() const;
 
   friend class ProcessBankData;
   friend class LoadBankFromDiskTask;

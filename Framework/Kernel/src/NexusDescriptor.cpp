@@ -294,7 +294,7 @@ bool NexusDescriptor::findAndOpenParentGroup(::NeXus::File &file,
       for (const auto &[name, type] : entries) {
         try {
           file.openGroup(name, type);
-        } catch (const std::exception &) {
+        } catch (const ::NeXus::Exception &) {
           continue;
         }
         if (findAndOpenParentGroup(file, className, classType))
