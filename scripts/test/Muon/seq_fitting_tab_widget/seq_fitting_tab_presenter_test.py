@@ -20,7 +20,6 @@ def wait_for_thread(thread_model):
         QtWidgets.QApplication.instance().processEvents()
 
 
-
 @start_qapplication
 class SeqFittingTabPresenterTest(unittest.TestCase):
     def setUp(self):
@@ -68,29 +67,28 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.view.seq_fit_button.setEnabled.assert_called_once_with(True)
         self.view.fit_selected_button.setEnabled.assert_called_once_with(True)
 
-    @mock.patch("functools.partial")
-    def test_handle_single_fit_correctly_sets_up_fit(self, mock_fit_function):
+    @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools.partial')
+    def test_handle_single_fit_correctly_sets_up_fit(self, mock_fit_function_wrapper):
         workspace = "EMU20884; Group; fwd; Asymmetry"
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         self.model.fit_function = fit_function
-        self.model.evaluate_single_fit = mock.MagicMock()
         self.view.is_plotting_checked.return_value = False
         self.presenter.create_thread = mock.MagicMock()
         self.presenter.get_workspaces_for_entry_in_fit_table = mock.MagicMock(return_value=workspace)
 
         self.presenter.handle_single_fit_requested()
 
-        mock_fit_function.assert_called_once_with(self.model.evaluate_single_fit, workspace, False)
+        mock_fit_function_wrapper.assert_called_once_with(self.model.evaluate_single_fit, workspace, False)
 
-    @mock.patch("functools.partial")
-    def test_handle_single_fit_does_nothing_if_fit_function_is_none(self, mock_fit_function):
+    @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools.partial')
+    def test_handle_single_fit_does_nothing_if_fit_function_is_none(self, mock_fit_function_wrapper):
         self.model.fit_function = None
 
         self.presenter.handle_single_fit_requested()
 
-        mock_fit_function.assert_not_called()
+        mock_fit_function_wrapper.assert_not_called()
 
-    @mock.patch("functools.partial")
+    @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools.partial')
     def test_handle_single_fit_does_nothing_if_no_fit_selected(self, mock_fit_function):
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         self.model.fit_function = fit_function
@@ -112,13 +110,12 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.view.set_fit_quality.assert_called_once_with(0, 'Success', 1.07)
         self.view.fit_selected_button.setEnabled.assert_called_once_with(True)
 
-    @mock.patch("functools.partial")
-    def test_handle_sequential_fit_correctly_sets_up_fit(self, mock_fit_function):
+    @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools.partial')
+    def test_handle_sequential_fit_correctly_sets_up_fit(self, mock_fit_function_wrapper):
         workspaces = ["EMU20884; Group; fwd; Asymmetry"]
         number_of_entries = 3
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         self.model.fit_function = fit_function
-        self.model.evaluate_sequential_fit = mock.MagicMock()
         self.view.get_number_of_entries = mock.MagicMock(return_value=number_of_entries)
         self.presenter.get_workspaces_for_entry_in_fit_table = mock.MagicMock(return_value=workspaces)
         self.view.is_plotting_checked.return_value = False
@@ -128,16 +125,17 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.presenter.handle_sequential_fit_requested()
 
         self.assertEqual(self.presenter.get_workspaces_for_entry_in_fit_table.call_count, number_of_entries)
-        mock_fit_function.assert_called_once_with(self.model.evaluate_sequential_fit, [workspaces] * number_of_entries,
-                                                  False, False)
+        mock_fit_function_wrapper.assert_called_once_with(self.model.evaluate_sequential_fit,
+                                                          [workspaces] * number_of_entries,
+                                                          False, False)
 
-    @mock.patch("functools.partial")
-    def test_handle_sequential_fit_does_nothing_if_fit_function_is_none(self, mock_fit_function):
+    @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools.partial')
+    def test_handle_sequential_fit_does_nothing_if_fit_function_is_none(self, mock_fit_function_wrapper):
         self.model.fit_function = None
 
         self.presenter.handle_sequential_fit_requested()
 
-        mock_fit_function.assert_not_called()
+        mock_fit_function_wrapper.assert_not_called()
 
     def test_handle_sequential_fit_finished_updates_view(self):
         number_of_entries = 3

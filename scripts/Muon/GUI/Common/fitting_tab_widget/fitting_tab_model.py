@@ -432,6 +432,8 @@ class FittingTabModel(object):
         if self.tf_asymmetry_mode:
             self.update_fit_function_map_with_tf_asym_data()
 
+    # This function creates a workspace string from a workspace_list taken from the fit input workspaces.
+    # This string is then used as a key in the ws_fit_function_map.
     def create_hashable_fit_workspace_names(self):
         runs, group_and_pairs = self.get_runs_groups_and_pairs_for_fits()
         list_of_workspace_lists = []
@@ -645,6 +647,8 @@ class FittingTabModel(object):
         grp_pair_number = self._transform_grp_or_pair_to_float(workspace_name)
         return int(run_number) + grp_pair_number
 
+    # Converts the workspace group or pair name to a float which is used in sorting the workspace list
+    # If there is only 1 group or pair selected this function returns 0 as the workspace list will be sorted by runs
     def _transform_grp_or_pair_to_float(self, workspace_name):
         grp_or_pair_name = get_group_or_pair_from_name(workspace_name)
         if grp_or_pair_name not in self._grppair_index:
@@ -653,9 +657,9 @@ class FittingTabModel(object):
         grp_pair_values = list(self._grppair_index.values())
         if len(self._grppair_index) > 1:
             return ((self._grppair_index[grp_or_pair_name] - grp_pair_values[0]) /
-                    (grp_pair_values[-1] - grp_pair_values[0])) * 0.999999
+                    (grp_pair_values[-1] - grp_pair_values[0])) * 0.99
         else:
-            return 0.999999
+            return 0
 
     def _get_selected_groups_and_pairs(self):
         return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
