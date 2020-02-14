@@ -16,7 +16,7 @@ namespace Mantid {
 namespace Algorithms {
 
 namespace {
-  Kernel::Logger logger("ApplyCalibration");
+Kernel::Logger logger("ApplyCalibration");
 }
 
 DECLARE_ALGORITHM(ApplyCalibration)
@@ -40,7 +40,7 @@ void ApplyCalibration::init() {
 
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
-              "PositionTable", "", Direction::Input, PropertyMode::Optional),
+          "PositionTable", "", Direction::Input, PropertyMode::Optional),
       "Deprecated: Use Property 'CalibrationTable'");
 }
 
@@ -57,11 +57,13 @@ void ApplyCalibration::exec() {
   API::ITableWorkspace_sptr PosTable = getProperty("PositionTable");
 
   // Elucidate if using property PositionTable table instead of CalibrationTable
-  if(!CalTable && !PosTable){
-    throw std::runtime_error("Either CalibrationTable or PositionTable must be supplied");
+  if (!CalTable && !PosTable) {
+    throw std::runtime_error(
+        "Either CalibrationTable or PositionTable must be supplied");
   }
-  if(PosTable && !CalTable){
-    logger.notice("Property 'PositionTable' has been deprecated. Please use 'CalibrationTable' in its place\n");
+  if (PosTable && !CalTable) {
+    logger.notice("Property 'PositionTable' has been deprecated. Please use "
+                  "'CalibrationTable' in its place\n");
     CalTable = PosTable;
   }
 
