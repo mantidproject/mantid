@@ -71,11 +71,13 @@ public:
     return new MeshObject(m_triangles, m_vertices, material);
   }
 
+  void setID(const std::string &id) override { m_id = id; }
   const std::string &id() const override { return m_id; }
 
   int getName() const override { return 0; }
 
   const Kernel::Material &material() const override;
+  void setMaterial(const Kernel::Material &material) override;
 
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;

@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidGeometry/Instrument/SampleEnvironmentSpec.h"
+#include "MantidDataHandling/SampleEnvironmentSpec.h"
 
 namespace Mantid {
-namespace Geometry {
+namespace DataHandling {
 
 /**
  * Constructor
@@ -22,24 +22,31 @@ SampleEnvironmentSpec::SampleEnvironmentSpec(std::string name)
  * @return A pointer to the retrieved Container instance
  * @throws std::invalid_argument
  */
-Container_const_sptr
+Geometry::Container_const_sptr
 SampleEnvironmentSpec::findContainer(const std::string &id) const {
-  auto indexIter = m_cans.find(id);
-  if (indexIter != m_cans.end())
-    return indexIter->second;
-  else
-    throw std::invalid_argument("SampleEnvironmentSpec::find() - Unable to "
-                                "find Container matching ID '" +
-                                id + "'");
+  // if there's only one can and an id wasn't specified then return it
+  if ((m_cans.size() == 1) && (id.empty())) {
+    return m_cans.begin()->second;
+  } else {
+
+    auto indexIter = m_cans.find(id);
+    if (indexIter != m_cans.end())
+      return indexIter->second;
+    else
+      throw std::invalid_argument("SampleEnvironmentSpec::find() - Unable to "
+                                  "find Container matching ID '" +
+                                  id + "'");
+  }
 }
 
 /**
  * Build a new SampleEnvironment instance from a given can ID
  * @return A new instance of a SampleEnvironment
  */
-SampleEnvironment_uptr
+Geometry::SampleEnvironment_uptr
 SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
-  auto env = std::make_unique<SampleEnvironment>(m_name, findContainer(canID));
+  auto env = std::make_unique<Geometry::SampleEnvironment>(
+      m_name, findContainer(canID));
   for (const auto &component : m_components) {
     env->add(component);
   }
@@ -51,7 +58,8 @@ SampleEnvironmentSpec::buildEnvironment(const std::string &canID) const {
  * @param can A pointer to a Container object
  * @throws std::invalid::argument if the id is empty
  */
-void SampleEnvironmentSpec::addContainer(const Container_const_sptr &can) {
+void SampleEnvironmentSpec::addContainer(
+    const Geometry::Container_const_sptr &can) {
   if (can->id().empty()) {
     throw std::invalid_argument(
         "SampleEnvironmentSpec::addContainer() - Container must "
@@ -64,9 +72,10 @@ void SampleEnvironmentSpec::addContainer(const Container_const_sptr &can) {
  * Add a non-can component to the specification
  * @param component A pointer to a Object
  */
-void SampleEnvironmentSpec::addComponent(const IObject_const_sptr &component) {
+void SampleEnvironmentSpec::addComponent(
+    const Geometry::IObject_const_sptr &component) {
   m_components.emplace_back(component);
 }
 
-} // namespace Geometry
+} // namespace DataHandling
 } // namespace Mantid

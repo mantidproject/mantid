@@ -7,7 +7,7 @@
 #ifndef MANTID_DATAHANDLING_LOADSTL_H_
 #define MANTID_DATAHANDLING_LOADSTL_H_
 #include "MantidDataHandling/LoadSampleShape.h"
-#include "MantidDataHandling/LoadShape.h"
+#include "MantidDataHandling/MeshFileIO.h"
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
@@ -43,13 +43,13 @@ struct V3DTrueComparator {
   }
 };
 
-class DLLExport LoadStl : public LoadShape {
+class DLLExport LoadStl : public MeshFileIO {
 public:
   LoadStl(std::string filename, ScaleUnits scaleType)
-      : LoadShape(scaleType), m_filename(filename), m_setMaterial(false) {}
+      : MeshFileIO(scaleType), m_filename(filename), m_setMaterial(false) {}
   LoadStl(std::string filename, ScaleUnits scaleType,
           ReadMaterial::MaterialParameters params)
-      : LoadShape(scaleType), m_filename(filename), m_setMaterial(true),
+      : MeshFileIO(scaleType), m_filename(filename), m_setMaterial(true),
         m_params(params) {}
   virtual std::unique_ptr<Geometry::MeshObject> readStl() = 0;
   virtual ~LoadStl() = default;

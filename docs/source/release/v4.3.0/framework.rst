@@ -40,6 +40,15 @@ Improvements
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Sampling of scattering points during MC simulation now takes into account relative volume of sample and environment components. The calculation also now reuses the same set of simulated tracks to calculate the attenuation for different wavelengths. A new parameter ResimulateTracksForDifferentWavelengths has been added to control this behaviour with a default value of false. NOTE: This has been inserted in the middle of the parameter list so any usage of positional parameters with this algorithm will need to be adjusted
 - :ref:`AddSampleLogMultiple <algm-AddSampleLogMultiple>` Add parameter LogTypes to specify the type of each log value.
 
+Data Handling
+-------------
+
+Improvements
+############
+
+- The sampleenvironment xml files that act as extensions to the Instrument Definition Files can now support stl file paths to load mesh geometries for environment components or the sample from an .stl file. This new feature can be used when running SetSample. A sample environment xml file has been created for Pearl
+
+
 Data Objects
 ------------
 

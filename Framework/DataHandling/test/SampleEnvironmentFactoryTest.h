@@ -4,11 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SAMPLEENVIRONMENTFACTORYTEST_H_
-#define MANTID_GEOMETRY_SAMPLEENVIRONMENTFACTORYTEST_H_
+#ifndef MANTID_DATAHANDLING_SAMPLEENVIRONMENTFACTORYTEST_H_
+#define MANTID_DATAHANDLING_SAMPLEENVIRONMENTFACTORYTEST_H_
 
+#include "MantidDataHandling/SampleEnvironmentFactory.h"
 #include "MantidGeometry/Instrument/Container.h"
-#include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
 #include <cxxtest/TestSuite.h>
@@ -16,8 +16,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/make_shared.hpp>
 
-using Mantid::Geometry::SampleEnvironmentFactory;
-using Mantid::Geometry::SampleEnvironmentSpecFileFinder;
+using Mantid::DataHandling::SampleEnvironmentFactory;
+using Mantid::DataHandling::SampleEnvironmentSpecFileFinder;
 
 //------------------------------------------------------------------------------
 // SampleEnvironmentFactory tests
@@ -77,10 +77,10 @@ public:
   //----------------------------------------------------------------------------
 private:
   class NullSampleEnvSpecFinder final
-      : public Mantid::Geometry::ISampleEnvironmentSpecFinder {
+      : public Mantid::DataHandling::ISampleEnvironmentSpecFinder {
   public:
     // Never finds anything
-    Mantid::Geometry::SampleEnvironmentSpec_uptr
+    Mantid::DataHandling::SampleEnvironmentSpec_uptr
     find(const std::string &, const std::string &,
          const std::string &) const override {
       throw std::runtime_error("Unable to find named specification");
@@ -88,9 +88,9 @@ private:
   };
 
   class TestSampleEnvSpecFinder final
-      : public Mantid::Geometry::ISampleEnvironmentSpecFinder {
+      : public Mantid::DataHandling::ISampleEnvironmentSpecFinder {
   public:
-    Mantid::Geometry::SampleEnvironmentSpec_uptr
+    Mantid::DataHandling::SampleEnvironmentSpec_uptr
     find(const std::string &, const std::string &,
          const std::string &) const override {
       // Just make one
@@ -106,7 +106,8 @@ private:
       large->setID("10mm");
 
       // Prepare a sample environment spec
-      auto spec = std::make_unique<SampleEnvironmentSpec>("CRYO001");
+      auto spec = std::make_unique<Mantid::DataHandling::SampleEnvironmentSpec>(
+          "CRYO001");
       spec->addContainer(small);
       spec->addContainer(large);
       return spec;
@@ -114,4 +115,4 @@ private:
   };
 };
 
-#endif /* MANTID_GEOMETRY_SAMPLEENVIRONMENTFACTORYTEST_H_ */
+#endif /* MANTID_DATAHANDLING_SAMPLEENVIRONMENTFACTORYTEST_H_ */

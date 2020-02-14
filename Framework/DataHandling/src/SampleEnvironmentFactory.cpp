@@ -4,8 +4,8 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
-#include "MantidGeometry/Instrument/SampleEnvironmentSpecParser.h"
+#include "MantidDataHandling/SampleEnvironmentFactory.h"
+#include "MantidDataHandling/SampleEnvironmentSpecParser.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
 
@@ -15,7 +15,7 @@
 #include <fstream>
 
 namespace Mantid {
-namespace Geometry {
+namespace DataHandling {
 
 //------------------------------------------------------------------------------
 // Anonyomous
@@ -73,7 +73,7 @@ SampleEnvironmentFactory::SampleEnvironmentFactory(
  * @param canName The name of a can within the spec
  * @return A new instance of the given environment
  */
-SampleEnvironment_uptr SampleEnvironmentFactory::create(
+Geometry::SampleEnvironment_uptr SampleEnvironmentFactory::create(
     const std::string &facility, const std::string &instrument,
     const std::string &specName, const std::string &canName) {
   assert(m_finder);
@@ -186,8 +186,8 @@ SampleEnvironmentSpecFileFinder::parseSpec(const std::string &name,
         filename + "'");
   }
   SampleEnvironmentSpecParser parser;
-  return parser.parse(name, reader);
+  return parser.parse(name, filename, reader);
 }
 
-} // namespace Geometry
+} // namespace DataHandling
 } // namespace Mantid
