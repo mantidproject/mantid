@@ -147,8 +147,7 @@ void FQTemplateBrowser::updateMultiDatasetParameters(const IFunction &fun) {
   m_presenter.updateMultiDatasetParameters(fun);
 }
 
-void FQTemplateBrowser::updateMultiDatasetParameters(
-    const ITableWorkspace &paramTable) {}
+void FQTemplateBrowser::updateMultiDatasetParameters(const ITableWorkspace &) {}
 
 void FQTemplateBrowser::updateParameters(const IFunction &fun) {
   m_presenter.updateParameters(fun);
@@ -165,11 +164,10 @@ void FQTemplateBrowser::setCurrentDataset(int i) {
   m_presenter.setCurrentDataset(i);
 }
 
-void FQTemplateBrowser::updateParameterNames(
-    const QMap<int, QString> &parameterNames) {}
+void FQTemplateBrowser::updateParameterNames(const QMap<int, QString> &) {}
 
 void FQTemplateBrowser::updateParameterDescriptions(
-    const QMap<int, std::string> &parameterDescriptions) {}
+    const QMap<int, std::string> &) {}
 
 void FQTemplateBrowser::setErrorsEnabled(bool enabled) {
   ScopedFalse _false(m_emitParameterValueChange);

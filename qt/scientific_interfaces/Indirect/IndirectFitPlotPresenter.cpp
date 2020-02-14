@@ -103,7 +103,7 @@ void IndirectFitPlotPresenter::handlePlotSpectrumChanged(
   updatePlots();
   updateFitRangeSelector();
   emit plotSpectrumChanged(spectrum);
-};
+}
 
 void IndirectFitPlotPresenter::watchADS(bool watch) { m_view->watchADS(watch); }
 

@@ -37,11 +37,7 @@ protected:
   void setRunIsRunning(bool running) override;
   void setRunEnabled(bool enable) override;
 
-private slots:
-  void updateAvailableFitTypes();
-
 private:
-  void addFunctions(std::vector<std::string> const &functions);
   EstimationDataSelector getEstimationDataSelector() const override;
 
   JumpFitModel *m_jumpFittingModel;

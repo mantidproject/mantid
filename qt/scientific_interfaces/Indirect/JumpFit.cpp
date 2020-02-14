@@ -24,18 +24,6 @@
 
 using namespace Mantid::API;
 
-namespace {
-
-std::vector<std::string> getEISFFunctions() {
-  return {"EISFDiffCylinder", "EISFDiffSphere", "EISFDiffSphereAlkyl"};
-}
-
-std::vector<std::string> getWidthFunctions() {
-  return {"ChudleyElliot", "HallRoss", "FickDiffusion", "TeixeiraWater"};
-}
-
-} // namespace
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -69,36 +57,13 @@ void JumpFit::setupFitTab() {
   m_uiForm->svSpectrumView->hideSpectrumSelector();
   m_uiForm->svSpectrumView->hideMaskSpectrumSelector();
 
-  //  addFunctions(getWidthFunctions());
-  //  addFunctions(getEISFFunctions());
-
   m_uiForm->cbParameter->setEnabled(false);
 
-  // Handle plotting and saving
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  //  connect(this, SIGNAL(functionChanged()), this,
-  //          SLOT(updateModelFitTypeString()));
   connect(m_uiForm->cbParameterType, SIGNAL(currentIndexChanged(int)), this,
           SLOT(updateAvailableFitTypes()));
   connect(this, SIGNAL(updateAvailableFitTypes()), this,
           SLOT(updateAvailableFitTypes()));
-}
-
-void JumpFit::updateAvailableFitTypes() {
-  //  auto const parameter =
-  //  m_uiForm->cbParameterType->currentText().toStdString();
-  //  clearFitTypeComboBox();
-  //  if (parameter == "Width")
-  //    addFunctions(getWidthFunctions());
-  //  else if (parameter == "EISF")
-  //    addFunctions(getEISFFunctions());
-}
-
-void JumpFit::addFunctions(std::vector<std::string> const &functions) {
-  //  auto &factory = FunctionFactory::Instance();
-  //  for (auto const &function : functions)
-  //    addComboBoxFunctionGroup(QString::fromStdString(function),
-  //                             {factory.createFunction(function)});
 }
 
 void JumpFit::updateModelFitTypeString() {

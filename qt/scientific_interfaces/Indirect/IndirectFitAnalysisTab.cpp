@@ -697,7 +697,7 @@ QStringList IndirectFitAnalysisTab::getDatasetNames() const {
     TableDatasetIndex index{i};
     auto const name =
         QString::fromStdString(m_fittingModel->getWorkspace(index)->getName());
-    auto const numberSpectra = m_fittingModel->getNumberOfSpectra(index);
+    m_fittingModel->getNumberOfSpectra(index);
     auto const spectra = m_fittingModel->getSpectra(index);
     for (auto spectrum : spectra) {
       datasetNames << name + " (" + QString::number(spectrum.value) + ")";
