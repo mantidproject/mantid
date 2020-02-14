@@ -49,7 +49,7 @@ class SeqFittingTabPresenter(object):
         for i in range(self.view.get_number_of_entries()):
             ws_names = self.get_workspaces_for_entry_in_fit_table(i)
             fit_function = self.model.get_ws_fit_function(ws_names)
-            parameter_values.append([fit_function.getParameterValue(parameters[i]) for i in
+            parameter_values.append([fit_function.getParameterValue(parameters[j]) for j in
                                     range(number_of_parameters)])
 
         self.view.set_fit_table_function_parameters(parameters, parameter_values)
@@ -136,15 +136,15 @@ class SeqFittingTabPresenter(object):
             return
 
         fit_functions, fit_statuses, fit_chi_squareds = self.fitting_calculation_model.result
-        count = 0
+        row_number = 0
         for fit_function, fit_status, fit_chi_squared in zip(fit_functions, fit_statuses, fit_chi_squareds):
             number_of_parameters = fit_function.nParams()
             parameters = [fit_function.parameterName(i) for i in range(number_of_parameters)]
             parameter_values = [fit_function.getParameterValue(parameters[i]) for i in
                                 range(number_of_parameters)]
-            self.view.set_fit_function_parameters(count, parameter_values)
-            self.view.set_fit_quality(count, fit_status, fit_chi_squared)
-            count += 1
+            self.view.set_fit_function_parameters(row_number, parameter_values)
+            self.view.set_fit_quality(row_number, fit_status, fit_chi_squared)
+            row_number += 1
         self.view.seq_fit_button.setEnabled(True)
         self.view.fit_selected_button.setEnabled(True)
 

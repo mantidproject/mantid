@@ -209,6 +209,118 @@ class FittingTabModelTest(unittest.TestCase):
         self.model.context.fitting_context.notify_plot_guess_changed.assert_called_with(True,
                                                                                         '__unknown_interface_fitting_guess')
 
+    def test_evaluate_single_fit_calls_correctly_for_single_fit(self):
+        self.model.fit_type = "Single"
+        workspace = ["MUSR:62260;bwd"]
+        plot_fit = True
+        trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
+        self.model.do_single_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
+        parameter_dict = {'Test': 0}
+        self.model.get_parameters_for_single_fit = mock.MagicMock(return_value=parameter_dict)
+
+        self.model.evaluate_single_fit(workspace, plot_fit)
+
+        self.model.do_single_fit.assert_called_once_with(parameter_dict, plot_fit)
+
+    def test_evaluate_single_fit_calls_correct_function_for_simultaneous_fit(self):
+        self.model.fit_type = "Simultaneous"
+        workspace = ["MUSR:62260;bwd"]
+        plot_fit = True
+        self.model.global_parameters = ['A0']
+        trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
+        self.model.do_simultaneous_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
+        parameter_dict = {'Test': 0}
+        self.model.get_parameters_for_simultaneous_fit = mock.MagicMock(return_value=parameter_dict)
+
+        self.model.evaluate_single_fit(workspace, plot_fit)
+
+        self.model.do_simultaneous_fit.assert_called_once_with(parameter_dict, ['A0'], plot_fit)
+
+    def test_evaluate_single_fit_calls_correctly_for_single_tf_fit(self):
+        self.model.fit_type = "Single"
+        self.model.tf_asymmetry_mode = True
+        workspace = ["MUSR:62260;bwd"]
+        plot_fit = True
+        trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
+        self.model.do_single_tf_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
+        parameter_dict = {'Test': 0}
+        self.model.get_parameters_for_single_tf_fit = mock.MagicMock(return_value=parameter_dict)
+
+        self.model.evaluate_single_fit(workspace, plot_fit)
+
+        self.model.do_single_tf_fit.assert_called_once_with(parameter_dict, plot_fit)
+
+    def test_evaluate_single_fit_calls_correct_function_for_simultaneous_tf_fit(self):
+        self.model.fit_type = "Simultaneous"
+        self.model.tf_asymmetry_mode = True
+        workspace = ["MUSR:62260;bwd"]
+        plot_fit = True
+        self.model.global_parameters = ['A0']
+        trial_function = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
+        self.model.do_simultaneous_tf_fit = mock.MagicMock(return_value=(trial_function, 'success', 0.56))
+        parameter_dict = {'Test': 0}
+        self.model.get_parameters_for_simultaneous_tf_fit = mock.MagicMock(return_value=parameter_dict)
+
+        self.model.evaluate_single_fit(workspace, plot_fit)
+
+        self.model.do_simultaneous_tf_fit.assert_called_once_with(parameter_dict, ['A0'], plot_fit)
+
+    def test_do_sequential_fit_calls_fetches_calls_single_fit_correctly(self):
+        workspace_list = ["MUSR62260;bwd", "MUSR62260;fwd"]
+        plot_fit = True
+        self.model.tf_asymmetry_mode = False
+        use_initial_values = True
+        self.model.do_single_fit = mock.MagicMock(return_value=("test", 'success', 0.56))
+
+        self.model.do_sequential_fit(workspace_list, plot_fit, use_initial_values)
+
+        self.assertEqual(self.model.do_single_fit.call_count, 2)
+
+    def test_do_sequential_fit_uses_previous_values_if_requested(self):
+        workspace_list = ["MUSR62260;bwd", "MUSR62260;fwd"]
+        plot_fit = True
+        self.model.tf_asymmetry_mode = False
+        use_initial_values = False
+        self.model.set_fit_function_parameter_values = mock.MagicMock()
+        trial_function_in = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
+        trial_function_out = FunctionFactory.createInitialized('name = Quadratic, A0 = 5, A1 = 5, A2 = 5')
+        self.model.do_single_fit = mock.MagicMock(return_value=(trial_function_out, 'success', 0.56))
+        parameter_dict = {'Function': trial_function_in}
+        self.model.get_parameters_for_single_fit = mock.MagicMock(return_value=parameter_dict)
+
+        self.model.do_sequential_fit(workspace_list, plot_fit, use_initial_values)
+
+        self.model.set_fit_function_parameter_values.assert_called_once_with(trial_function_in, [5, 5, 5])
+
+    def test_create_equivalent_workspace_name_returns_expected_name(self):
+        workspace_list = ["MUSR62260;bwd", "MUSR62260;fwd"]
+        expected_name = "MUSR62260;bwd-MUSR62260;fwd"
+
+        equiv_name = self.model.create_equivalent_workspace_name(workspace_list)
+
+        self.assertEqual(equiv_name, expected_name)
+
+    def test_get_ws_fit_function_returns_correct_function_for_single_fit(self):
+        workspace = ["MUSR62260;fwd"]
+        trial_function_1 = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
+        trial_function_2 = trial_function_1.clone()
+        self.model.ws_fit_function_map = {"MUSR62260;bwd": trial_function_1, "MUSR62260;fwd": trial_function_2}
+
+        return_function = self.model.get_ws_fit_function(workspace)
+
+        self.assertEqual(return_function, trial_function_2)
+
+    def test_get_ws_fit_function_returns_correct_function_if_simultaneous_fit(self):
+        workspaces = ["MUSR62260;fwd", "MUSR62260;bwd"]
+        trial_function_1 = FunctionFactory.createInitialized('name = Quadratic, A0 = 0, A1 = 0, A2 = 0')
+        trial_function_2 = trial_function_1.clone()
+        self.model.ws_fit_function_map = {"MUSR62260;fwd-MUSR62260;bwd": trial_function_1,
+                                          "MUSR62261;fwd-MUSR62261;bwd": trial_function_2}
+
+        return_function = self.model.get_ws_fit_function(workspaces)
+
+        self.assertEqual(return_function, trial_function_1)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
