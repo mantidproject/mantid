@@ -27,18 +27,14 @@ public:
   static void destroySuite(LoadILLTest *suite) { delete suite; }
 
   void setUp() override {
-    ConfigService::Instance().appendDataSearchSubDir("ILL/D11/");
-    ConfigService::Instance().appendDataSearchSubDir("ILL/D22/");
-    ConfigService::Instance().appendDataSearchSubDir("ILL/D33/");
-    ConfigService::Instance().appendDataSearchSubDir("ILL/D20/");
-    ConfigService::Instance().appendDataSearchSubDir("ILL/D2B/");
-    ConfigService::Instance().appendDataSearchSubDir("ILL/IN4/");
-    ConfigService::Instance().appendDataSearchSubDir("ILL/IN5/");
-    ConfigService::Instance().appendDataSearchSubDir("ILL/IN6/");
-    ConfigService::Instance().appendDataSearchSubDir("ILL/IN16B/");
-    ConfigService::Instance().appendDataSearchSubDir("ILL/PANTHER/");
-    ConfigService::Instance().appendDataSearchSubDir("ILL/D17/");
-    ConfigService::Instance().appendDataSearchSubDir("ILL/Figaro/");
+    std::string instrumentPaths[12] = {
+        "ILL/D11/",   "ILL/D22/",     "ILL/D33/", "ILL/D20/",
+        "ILL/D2B/",   "ILL/IN4/",     "ILL/IN5/", "ILL/IN6/",
+        "ILL/IN16B/", "ILL/PANTHER/", "ILL/D17/", "ILL/Figaro/"};
+
+    for (size_t i = 0; i < 12; i++) {
+      ConfigService::Instance().appendDataSearchSubDir(instrumentPaths[i]);
+    }
 
     ConfigService::Instance().setFacility("ILL");
   }
@@ -53,57 +49,57 @@ public:
     TS_ASSERT_EQUALS(alg.getPropertyValue("LoaderName"), resultLoader)
   }
 
-  void test_LoadSANS_D11() { checkLoader("010560.nxs", "LoadILLSANS"); }
+  void test_LoadSANS_D11() { checkLoader("010560", "LoadILLSANS"); }
 
   void test_LoadSANS_D33() {
-    checkLoader("002294.nxs", "LoadILLSANS");
-    checkLoader("042610.nxs", "LoadILLSANS"); // D33 TOF
+    checkLoader("002294", "LoadILLSANS");
+    checkLoader("042610", "LoadILLSANS"); // D33 TOF
   }
 
-  void test_LoadSANS_D22() { checkLoader("192068.nxs", "LoadILLSANS"); }
+  void test_LoadSANS_D22() { checkLoader("192068", "LoadILLSANS"); }
 
   void test_LoadDiffraction_D2B() {
-    checkLoader("535401.nxs", "LoadILLDiffraction");
+    checkLoader("535401", "LoadILLDiffraction");
   }
 
   void test_LoadDiffraction_D20() {
-    checkLoader("967076.nxs", "LoadILLDiffraction");
-    checkLoader("967087.nxs", "LoadILLDiffraction");
+    checkLoader("967076", "LoadILLDiffraction");
+    checkLoader("967087", "LoadILLDiffraction");
   }
 
   void test_loadIndirect_IN16B() {
-    checkLoader("090661.nxs", "LoadILLIndirect");    // one wing qens
-    checkLoader("083072.nxs", "LoadILLIndirect");    // one wing efws
-    checkLoader("083073.nxs", "LoadILLIndirect");    // one wing ifws
-    checkLoader("136558-136559", "LoadILLIndirect"); // two wings qens
-    checkLoader("143720.nxs", "LoadILLIndirect");    // two wings efws
-    checkLoader("170300.nxs", "LoadILLIndirect");    // two wings ifws
-    checkLoader("215962.nxs", "LoadILLIndirect");    // bats
+    checkLoader("090661", "LoadILLIndirect"); // one wing qens
+    checkLoader("083072", "LoadILLIndirect"); // one wing efws
+    checkLoader("083073", "LoadILLIndirect"); // one wing ifws
+    checkLoader("136558", "LoadILLIndirect"); // two wings qens
+    checkLoader("143720", "LoadILLIndirect"); // two wings efws
+    checkLoader("170300", "LoadILLIndirect"); // two wings ifws
+    checkLoader("215962", "LoadILLIndirect"); // bats
   }
 
-  void test_loadTOF_IN4() { checkLoader("084446.nxs", "LoadILLTOF"); }
+  void test_loadTOF_IN4() { checkLoader("084446", "LoadILLTOF"); }
 
   void test_loadTOF_IN5() {
-    checkLoader("104007.nxs", "LoadILLTOF");
-    checkLoader("189171.nxs", "LoadILLTOF");
+    checkLoader("104007", "LoadILLTOF");
+    checkLoader("189171", "LoadILLTOF");
   }
 
   void test_loadTOF_IN6() {
-    checkLoader("164192.nxs", "LoadILLTOF");
-    checkLoader("220010.nxs", "LoadILLTOF");
+    checkLoader("164192", "LoadILLTOF");
+    checkLoader("220010", "LoadILLTOF");
   }
 
   void test_loadTOF_PANTHER() {
-    checkLoader("001036.nxs", "LoadILLTOF");
-    checkLoader("001723.nxs", "LoadILLTOF");
+    checkLoader("001036", "LoadILLTOF");
+    checkLoader("001723", "LoadILLTOF");
   }
 
   void test_loadReflectometry_D17() {
-    checkLoader("317370.nxs", "LoadILLReflectometry");
+    checkLoader("317370", "LoadILLReflectometry");
   }
 
   void test_loadReflectometry_FIGARO() {
-    checkLoader("000002.nxs", "LoadILLReflectometry");
+    checkLoader("000002", "LoadILLReflectometry");
   }
 };
 
