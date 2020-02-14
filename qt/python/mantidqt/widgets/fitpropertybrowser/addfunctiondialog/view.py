@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, unicode_literals)
 
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QCompleter, QDialog
 
@@ -14,6 +14,7 @@ from mantidqt.utils.qt import load_ui
 
 
 class AddFunctionDialogView(QDialog):
+    function_added = Signal(str)
 
     def __init__(self, parent = None, function_names = None):
         super(AddFunctionDialogView, self).__init__(parent)
@@ -30,9 +31,8 @@ class AddFunctionDialogView(QDialog):
         function_box.completer().setFilterMode(Qt.MatchContains)
         self.ui.errorMessage.hide()
 
-    def acceptFunction(self, function):
-        self.function_added.emit(function)
-        self.accept()
+    def is_text_in_function_list(self, function):
+        return self.ui.functionBox.findText(function, Qt.MatchExactly) != -1
 
     def set_error_message(self, text):
         self.ui.errorMessage.setText("<span style='color:red'> %s </span>" % text)

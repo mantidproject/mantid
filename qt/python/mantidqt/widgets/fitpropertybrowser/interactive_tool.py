@@ -204,7 +204,7 @@ class FitInteractiveTool(QObject):
         """
         dialog = AddFunctionDialog(self.canvas, self.peak_names)
         dialog.view.ui.functionBox.setCurrentText(self.current_peak_type)
-        dialog.function_added.connect(self.action_peak_added)
+        dialog.view.function_added.connect(self.action_peak_added)
         dialog.view.open()
 
     def action_peak_added(self, function_name):
@@ -217,7 +217,7 @@ class FitInteractiveTool(QObject):
         browser.
         """
         dialog = AddFunctionDialog(self.canvas, self.background_names)
-        dialog.function_added.connect(self.add_background_requested)
+        dialog.view.function_added.connect(self.add_background_requested)
         dialog.view.open()
 
     def add_other_dialog(self):
@@ -226,7 +226,7 @@ class FitInteractiveTool(QObject):
         function is added to the browser.
         """
         dialog = AddFunctionDialog(self.canvas, self.other_names)
-        dialog.function_added.connect(self.add_other_requested)
+        dialog.view.function_added.connect(self.add_other_requested)
         dialog.view.open()
 
     def add_peak_marker(self, x, y_top, y_bottom=0.0, fwhm=None):
