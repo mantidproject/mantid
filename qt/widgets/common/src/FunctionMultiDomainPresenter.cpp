@@ -409,5 +409,19 @@ void FunctionMultiDomainPresenter::updateViewFromModel() {
   }
 }
 
+void FunctionMultiDomainPresenter::hideGlobals() {
+  auto treeView = dynamic_cast<FunctionTreeView *>(m_view);
+  if (treeView) {
+    treeView->hideGlobals();
+  }
+}
+
+void FunctionMultiDomainPresenter::showGlobals() {
+  auto treeView = dynamic_cast<FunctionTreeView *>(m_view);
+  if (treeView) {
+    treeView->showGlobals();
+  }
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -804,6 +804,9 @@ public:
     void removeDatasets(QList<int> indices);
     QStringList getDatasetNames() const;
     void setErrorsEnabled(bool enabled);
+    void hideGlobalCheckbox();
+    void showGlobalCheckbox();
+
     QStringList getGlobalParameters() const;
     void setGlobalParameters(const QStringList &globals);
     void clear();
@@ -905,6 +908,7 @@ public:
     void setText(const QString&);
     void setUserInput(const QVariant &);
     void setReadOnly(bool readOnly);
+    void setFileExtensions(const QStringList &extensions);
     void findFiles(bool isModified);
 
 signals:

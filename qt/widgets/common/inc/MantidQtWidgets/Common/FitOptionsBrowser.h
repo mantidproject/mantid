@@ -65,6 +65,7 @@ public:
   void setLogNames(const QStringList &logNames);
   void setParameterNamesForPlotting(const QStringList &parNames);
   QString getParameterToPlot() const;
+  bool addPropertyToBlacklist(QString);
 
 signals:
   void changedToSequentialFitting();
@@ -183,6 +184,7 @@ private:
   FittingType m_fittingType;
   /// Store special properties of the normal Fit
   QList<QtProperty *> m_simultaneousProperties;
+  QList<QtProperty *> m_blacklist;
 };
 
 } // namespace MantidWidgets

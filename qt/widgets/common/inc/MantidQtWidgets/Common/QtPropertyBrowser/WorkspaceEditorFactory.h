@@ -34,12 +34,14 @@ protected:
 class WorkspaceEditor : public WorkspaceSelector {
   Q_OBJECT
 public:
-  WorkspaceEditor(QtProperty *property, QWidget *parent);
+  WorkspaceEditor(QtProperty *property, QtStringPropertyManager *manager,
+                  QWidget *parent);
 protected slots:
   void updateProperty(const QString &text);
 
 private:
   QtProperty *m_property;
+  QtStringPropertyManager *m_manager;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

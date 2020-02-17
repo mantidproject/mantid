@@ -806,7 +806,7 @@ IndirectFittingModel::getFittingAlgorithm(FittingMode mode) const {
     if (m_activeFunction->getNumberDomains() == 0) {
       throw std::runtime_error("Function is undefined");
     }
-    return createSequentialFit(getFittingFunction()->getFunction(0));
+    return createSequentialFit(getFittingFunction());
   } else
     return createSimultaneousFit(getFittingFunction());
 }
@@ -868,7 +868,6 @@ IAlgorithm_sptr IndirectFittingModel::createSequentialFit(
   addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   fitAlgorithm->setProperty("Input", input);
   fitAlgorithm->setProperty("OutputWorkspace", sequentialFitOutputName());
-  fitAlgorithm->setProperty("PassWSIndexToFunction", true);
   fitAlgorithm->setProperty("LogName", getResultLogName());
 
   auto const firstWsIndex = initialFitData->getSpectrum(TableRowIndex{0});
@@ -949,6 +948,16 @@ IndirectFittingModel::getDataForParameterEstimation(
     }
   }
   return dataCollection;
+}
+
+std::vector<double> IndirectFittingModel::getQValuesForData() const {
+  std::vector<double> qValues;
+  for (auto &fitData : m_fittingData) {
+    auto indexQValues = fitData->getQValues();
+    qValues.insert(std::end(qValues), std::begin(indexQValues),
+                   std::end(indexQValues));
+  }
+  return qValues;
 }
 
 } // namespace IDA

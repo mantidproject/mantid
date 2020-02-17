@@ -217,8 +217,8 @@ private:
   // plots workspace according to the user selection
   void plotFocusedWorkspace(std::string outWSName);
 
-  void plotCalibWorkspace(std::vector<double> difc, std::vector<double> tzero,
-                          std::string specNos);
+  void plotCalibWorkspace(std::vector<double> difa, std::vector<double> difc,
+                          std::vector<double> tzero, std::string specNos);
 
   // algorithms to save the generated workspace
   void saveGSS(const RunLabel &runLabel, const std::string &inputWorkspace);
@@ -259,14 +259,15 @@ private:
   // generates the pycode string which can be passed to view
   std::string vanadiumCurvesPlotFactory();
 
-  std::string DifcZeroWorkspaceFactory(
-      const std::vector<double> &difc, const std::vector<double> &tzero,
-      const std::string &specNo, const std::string &customisedBankName) const;
+  std::string TOFFitWorkspaceFactory(
+      const std::vector<double> &difa, const std::vector<double> &difc,
+      const std::vector<double> &tzero, const std::string &specNo,
+      const std::string &customisedBankName) const;
 
-  std::string
-  plotDifcZeroWorkspace(const std::string &customisedBankName) const;
+  std::string plotTOFWorkspace(const std::string &customisedBankName) const;
 
   void writeOutCalibFile(const std::string &outFilename,
+                         const std::vector<double> &difa,
                          const std::vector<double> &difc,
                          const std::vector<double> &tzero,
                          const std::vector<std::string> &bankNames,

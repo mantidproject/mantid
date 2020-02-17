@@ -335,6 +335,7 @@ void IndirectFitPlotView::addBackgroundRangeSelector() {
   backRangeSelector->setVisible(false);
   backRangeSelector->setColour(Qt::darkGreen);
   backRangeSelector->setLowerBound(0.0);
+  backRangeSelector->setUpperBound(10.0);
 
   connect(backRangeSelector, SIGNAL(valueChanged(double)), this,
           SIGNAL(backgroundChanged(double)));
@@ -347,6 +348,7 @@ void IndirectFitPlotView::addBackgroundRangeSelector() {
 void IndirectFitPlotView::setBackgroundBounds() {
   auto backRangeSelector = m_topPlot->getSingleSelector("Background");
   backRangeSelector->setLowerBound(0.0);
+  backRangeSelector->setUpperBound(10.0);
 }
 
 void IndirectFitPlotView::addHWHMRangeSelector() {

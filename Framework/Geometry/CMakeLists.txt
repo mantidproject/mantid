@@ -69,9 +69,6 @@ set(SRC_FILES
     src/Instrument/RectangularDetector.cpp
     src/Instrument/ReferenceFrame.cpp
     src/Instrument/SampleEnvironment.cpp
-    src/Instrument/SampleEnvironmentFactory.cpp
-    src/Instrument/SampleEnvironmentSpec.cpp
-    src/Instrument/SampleEnvironmentSpecParser.cpp
     src/Instrument/StructuredDetector.cpp
     src/Instrument/XMLInstrumentParameter.cpp
     src/MDGeometry/CompositeImplicitFunction.cpp
@@ -224,9 +221,6 @@ set(INC_FILES
     inc/MantidGeometry/Instrument/RectangularDetector.h
     inc/MantidGeometry/Instrument/ReferenceFrame.h
     inc/MantidGeometry/Instrument/SampleEnvironment.h
-    inc/MantidGeometry/Instrument/SampleEnvironmentFactory.h
-    inc/MantidGeometry/Instrument/SampleEnvironmentSpec.h
-    inc/MantidGeometry/Instrument/SampleEnvironmentSpecParser.h
     inc/MantidGeometry/Instrument/StructuredDetector.h
     inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
     inc/MantidGeometry/Instrument_fwd.h
@@ -406,10 +400,6 @@ set(TEST_FILES
     RulesSurfPointTest.h
     RulesTest.h
     RulesUnionTest.h
-    SampleEnvironmentFactoryTest.h
-    SampleEnvironmentSpecFileFinderTest.h
-    SampleEnvironmentSpecParserTest.h
-    SampleEnvironmentSpecTest.h
     SampleEnvironmentTest.h
     ScalarUtilsTest.h
     ShapeFactoryTest.h

@@ -26,9 +26,11 @@ class SettingsView(base, form):
         self.sections.currentRowChanged.connect(self.presenter.action_section_changed)
 
     def closeEvent(self, event):
-        self.presenter.refresh_workspaces()
-        self.deleteLater()
-        super(SettingsView, self).closeEvent(event)
+        if not self.presenter.view_closing():
+            event.ignore()
+        else:
+            self.deleteLater()
+            super(SettingsView, self).closeEvent(event)
 
     def ask_before_close(self):
         reply = QMessageBox.question(self, self.presenter.ASK_BEFORE_CLOSE_TITLE,

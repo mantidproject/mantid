@@ -38,7 +38,7 @@ SAMPLE_SCRIPT = ("from mantid.api import AnalysisDataService\n"
                  "axes[1].set_xlim(...)\n"
                  "axes[1].set_ylim(...)\n"
                  "\n"
-                 "plt.show()")
+                 "fig.show()")
 
 
 class PlotScriptGeneratorTest(unittest.TestCase):
@@ -122,7 +122,7 @@ class PlotScriptGeneratorTest(unittest.TestCase):
         mock_ax = self._gen_mock_axes(legend_=True)
         mock_fig = Mock(get_axes=lambda: [mock_ax])
         if hasattr(Legend, "set_draggable"):
-            self.assertIn('.legend().set_draggable()', generate_script(mock_fig))
+            self.assertIn('.legend().set_draggable(True)', generate_script(mock_fig))
         else:
             self.assertIn('.legend().draggable()', generate_script(mock_fig))
 

@@ -35,17 +35,21 @@ Improvements
 - Double clicking on a workspace that only has a single bin of data (for example from a constant wavelength source) will now plot that bin, also for single bin workspaces a plot bin option has been added to the right click plot menu of the workspace.
 - Default values for algorithm properties now appear as placeholder (greyed-out) text on custm algorithm dialogs.
 - The context menu for WorkspaceGroups now contains plotting options so you can plot all of the workspaces in the group.
+- Most changes in the settings dialog now take place immediately, no longer needing a restart, such as hiding algorithm categories, interfaces or choosing wether to see invisible workspaces.
 - A warning now appears if you attempt to plot more than ten spectra.
+- The Save menu action in the workspaces toolbox to save using version 1 of the SaveAscii algorithm has been removed as no one was using it and it only added confusion. The option to save using the most recent version of SaveASCII is still available.
+- You can now search for functions when doing fits.
 
 Bugfixes
 ########
 - Fixed an issue with Workspace History where unrolling consecutive workflow algorithms would result in only one of the algorithms being unrolled.
-
+- Fixed a couple of errors in the python scripts generated from plots for newer versions of Matplotlib.
 - Colorbar scale no longer vanish on colorfill plots with a logarithmic scale
 - Figure options no longer causes a crash when using 2d plots created from a script.
 - Running an algorithm that reduces the number of spectra on an active plot (eg SumSpectra) no longer causes an error
 - Fix crash when loading a script with syntax errors
 - The Show Instruments right click menu option is now disabled for workspaces that have had their spectrum axis converted to another axis using :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`.  Once this axis has been converetd the workspace loses it's link between the data values and the detectors they were recorded on so we cannot display it in the instrument view.
 - MonitorLiveData now appears promptly in the algorithm details window, allowing live data sessions to be cancelled.
+- Figure options on bin plots open without throwing an error.
 
 :ref:`Release 4.3.0 <v4.3.0>`

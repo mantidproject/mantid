@@ -119,6 +119,10 @@ public:
   void clearErrors() override;
   /// Set a parameter that is responsible for the background level
   void setBackgroundA0(double value);
+  // hide the global options
+  void hideGlobalCheckbox();
+  // show the global options
+  void showGlobalCheckbox();
 
 signals:
   void parameterChanged(const QString &funcIndex, const QString &paramName);

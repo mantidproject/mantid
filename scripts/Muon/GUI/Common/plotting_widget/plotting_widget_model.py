@@ -113,11 +113,11 @@ class PlotWidgetModel(object):
         # check workspace exists -
         # retrieveWorkspaces expects a list of workspace names
         try:
-            workspaces = AnalysisDataService.Instance().retrieveWorkspaces([workspace_name], unrollGroups=True)
+            workspace = AnalysisDataService.Instance().retrieveWorkspaces([workspace_name], unrollGroups=True)
         except RuntimeError:
             return
 
-        self._do_single_plot(ax, workspaces, workspace_indices, errors,
+        self._do_single_plot(ax, workspace, workspace_indices, errors,
                              plot_kwargs)
         self._update_legend(ax)
 
@@ -219,6 +219,10 @@ class PlotWidgetModel(object):
         self.plotted_workspaces = []
         self.plotted_workspaces_inverse_binning = {}
         self.plotted_fit_workspaces = []
+
+    def remove_fit_workspace(self, fit_workspace, axes):
+        if fit_workspace in self.plotted_fit_workspaces:
+            self.remove_workspace_from_plot(fit_workspace, axes)
 
     def _remove_all_data_workspaces_from_plot(self, axes):
         workspaces_to_remove = self.plotted_workspaces

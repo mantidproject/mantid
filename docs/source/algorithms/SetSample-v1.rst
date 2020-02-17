@@ -29,10 +29,10 @@ respective argument.
 Environment
 ###########
 
-Specifies the sample environment kit to be used. There are two required keywords:
+Specifies the sample environment kit to be used. There are two keywords:
 
-- ``Name``: The name of the predefined kit
-- ``Container``: The id of the container within the predefined kit
+- ``Name``: The name of the predefined kit (required)
+- ``Container``: The id of the container within the predefined kit. (required if there is more than one container defined for the kit).
 
 See :ref:`SampleEnvironment` concept page for further details on how the creating
 a definition file.
@@ -66,12 +66,14 @@ procedure is used when trying to find a named definition, e.g ``CRYO-01``:
 Geometry
 ########
 
-Specifies the shape of the sample. This can be specified in 1 of 2 ways:
+Specifies the shape of the sample. This can be specified in the following ways:
 
-- if an environment is specified that already knows the geometry of the sample
-  then the fields of the known geometry container be customized. See :ref:`SampleEnvironment`
-  concept page for further details
-- a full definition of the shape.
+- a sample geometry can be defined in the environment definition file using either CSG or Mesh geometry.
+  If this approach is taken then the Geometry property can be left blank
+- if an environment is specified that already knows the geometry of the sample and that geometry 
+  is defined using a CSG shape (ie non-mesh shape) then the fields of the known geometry container
+  can be customized. See :ref:`SampleEnvironment` concept page for further details
+- a full definition of the shape can be supplied in this property.
 
 For defining the full shape a key called ``Shape`` specifying the desired shape is
 expected along with additional keys specifying the values (all values are assumed to
@@ -103,6 +105,9 @@ Usage
 
 The following example uses a test file called ``CRYO-01.xml`` in the
 ``[INSTALLDIR]/instrument/sampleenvironments/TEST_LIVE/ISIS_Histogram/`` directory.
+
+If the examples are run via the Mantid user interface then double instead of single quotes will need to be
+used for the dictionary parameters.
 
 **Example - Container with preset cylinderical sample geometry**
 

@@ -23,7 +23,7 @@ Powder Diffraction
 - The create_total_scattering_pdf merging banks no longer matches spectra with scale, it now only matches with offset.
 - The Polaris create_total_scattering_pdf can now be given an parameter `output_binning` that will be used to rebin the output_pdf.
 - The polaris create_total_scattering_pdf function can now accept a `pdf_type` argument to set the pdf_output type.
-- The polaris create_total_scattering_pdf function can now accept a `freq_params` argument to perfomr a fourier filter on the run.
+- The polaris create_total_scattering_pdf function can now accept a `freq_params` argument to perform a fourier filter on the run.
 - :ref:`HRPDSlabCanAbsorption <algm-HRPDSlabCanAbsorption-v1>` now accepts any thickness parameter and not those in a specified list.
 - A SaveRDFProfile algorithm has been made that saves workspaces in a format readable by the RMCProfile package.
 
@@ -57,6 +57,7 @@ Powder Diffraction
 - A bug has been fixed that caused empty runs to be subtracted twice when specifying `sample_empty` in `Polaris.focus`.
 - A bug has been fixed that prevented lists being given for `q_lims` in polaris create_total_scattering_pdf while merging banks.
 - A bug has been fixed that caused SavePDF to fail when asked to save histogram data
+- A bug has been fixed that prevented lists being given for `q_lims` in polaris create_total_scattering_pdf while merging banks.
 
 Engineering Diffraction
 -----------------------
@@ -67,6 +68,7 @@ Single Crystal Diffraction
 --------------------------
 
 - Support added for DEMAND (HB3A) to the algorithms :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ-v1>` and :ref:`FindPeaksMD <algm-FindPeaksMD-v1>` in order to handle additional goniometers.
+- Fixed PredictSatellitePeaks producing an empty table when using cross-terms with crystallography convention for sign of Q.
 
 Imaging
 -------

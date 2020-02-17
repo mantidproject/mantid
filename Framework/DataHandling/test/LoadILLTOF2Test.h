@@ -209,6 +209,17 @@ public:
       TS_ASSERT(value.first >= 0)
     }
   }
+
+  void test_PANTHER_load() {
+    // From the input test file.
+    const double tofDelay = 350;
+    const double tofChannelWidth = 4.88;
+    const size_t channelCount = 512;
+    const size_t histogramCount = 73729;
+    const size_t monitorCount = 1;
+    loadDataFile("ILL/PANTHER/001723.nxs", histogramCount, monitorCount,
+                 channelCount, tofDelay, tofChannelWidth);
+  }
 };
 
 //------------------------------------------------------------------------------

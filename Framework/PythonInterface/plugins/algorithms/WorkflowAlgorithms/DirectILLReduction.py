@@ -16,7 +16,7 @@ from mantid.kernel import (CompositeValidator, Direction, FloatArrayProperty, Fl
                            RebinParamsValidator, StringListValidator)
 from mantid.simpleapi import (BinWidthAtX, ConvertSpectrumAxis, ConvertToDistribution, ConvertUnits, CorrectKiKf,
                               DetectorEfficiencyCorUser, Divide, GenerateGroupingPowder, GroupDetectors, MaskDetectors,
-                              Rebin, Scale, SofQWNormalisedPolygon, Transpose)
+                              Rebin, Scale, SofQWNormalisedPolygon, Transpose, MaskNonOverlappingBins)
 import math
 import numpy
 import os
@@ -538,6 +538,13 @@ class DirectILLReduction(DataProcessorAlgorithm):
         else:
             params = self.getProperty(common.PROP_REBINNING_PARAMS_W).value
         rebinnedWS = _rebin(mainWS, params, self._names, self._subalgLogging)
+        # For PSD based instruments we have to mask all the bins that were
+        # out of range from the original ragged workspace in delta E.
+        # The mask is later respected by the detector grouping
+        # to get the normalisation right also in the non-overlapping regions.
+        if mainWS.getInstrument().getName() in ['IN5', 'PANTHER']:
+            rebinnedWS = MaskNonOverlappingBins(InputWorkspace=rebinnedWS, ComparisonWorkspace=mainWS, RaggedInputs='Ragged',
+                                                OutputWorkspace=rebinnedWS.name(), MaskPartiallyOverlapping=True)
         self._cleanup.cleanup(mainWS)
         return rebinnedWS
 

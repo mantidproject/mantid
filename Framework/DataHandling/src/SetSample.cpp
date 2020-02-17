@@ -7,13 +7,15 @@
 #include "MantidDataHandling/SetSample.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/CreateSampleShape.h"
+#include "MantidDataHandling/SampleEnvironmentFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
-#include "MantidGeometry/Instrument/SampleEnvironmentFactory.h"
+#include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
@@ -264,11 +266,6 @@ std::map<std::string, std::string> SetSample::validateInputs() {
       errors[PropertyNames::ENVIRONMENT] =
           "Environment flags require a non-empty 'Name' entry.";
     }
-
-    if (!existsAndNotEmptyString(*environArgs, SEArgs::CONTAINER)) {
-      errors[PropertyNames::ENVIRONMENT] =
-          "Environment flags require a non-empty 'Container' entry.";
-    }
   }
 
   // Validate as much of the shape information as possible
@@ -371,12 +368,13 @@ void SetSample::exec() {
 const Geometry::SampleEnvironment *SetSample::setSampleEnvironment(
     API::ExperimentInfo &exptInfo,
     const Kernel::PropertyManager_const_sptr &args) {
-  using Geometry::SampleEnvironmentFactory;
-  using Geometry::SampleEnvironmentSpecFileFinder;
   using Kernel::ConfigService;
 
   const std::string envName = args->getPropertyValue(SEArgs::NAME);
-  const std::string canName = args->getPropertyValue(SEArgs::CONTAINER);
+  std::string canName = "";
+  if (args->existsProperty(SEArgs::CONTAINER)) {
+    canName = args->getPropertyValue(SEArgs::CONTAINER);
+  }
   // The specifications need to be qualified by the facility and instrument.
   // Check instrument for name and then lookup facility if facility
   // is unknown then set to default facility & instrument.
@@ -436,8 +434,8 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment,
   // Any arguments in the args dict are assumed to be values that should
   // override the default set by the sampleEnv samplegeometry if it exists
   if (sampleEnv) {
-    if (sampleEnv->getContainer().hasSampleShape()) {
-      const auto &can = sampleEnv->getContainer();
+    const auto &can = sampleEnv->getContainer();
+    if (sampleEnv->getContainer().hasCustomizableSampleShape()) {
       Container::ShapeArgs shapeArgs;
       if (args) {
         const auto &props = args->getProperties();
@@ -457,6 +455,23 @@ void SetSample::setSampleShape(API::ExperimentInfo &experiment,
               boost::dynamic_pointer_cast<Geometry::CSGObject>(shapeObject)) {
         csgObj->setMaterial(mat);
       }
+      experiment.mutableSample().setShape(shapeObject);
+    } else if (sampleEnv->getContainer().hasFixedSampleShape()) {
+      auto shapeObject = can.getSampleShape();
+
+      // apply Goniometer rotation
+      // Rotate only implemented on mesh objects so far
+      if (typeid(shapeObject) ==
+          typeid(boost::shared_ptr<Geometry::MeshObject>)) {
+        const std::vector<double> rotationMatrix =
+            experiment.run().getGoniometer().getR();
+        boost::dynamic_pointer_cast<Geometry::MeshObject>(shapeObject)
+            ->rotate(rotationMatrix);
+      }
+
+      const auto mat = experiment.sample().getMaterial();
+      shapeObject->setMaterial(mat);
+
       experiment.mutableSample().setShape(shapeObject);
     } else {
       throw std::runtime_error("The can does not define the sample shape. "

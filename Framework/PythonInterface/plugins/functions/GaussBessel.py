@@ -14,7 +14,7 @@ import scipy.special as sp
 class GaussBessel(IFunction1D):
 
     def category(self):
-        return "MuonSpecific"
+        return "Muon\\MuonSpecific"
 
     def init(self):
         self.declareParameter("A0", 0.2, 'Amplitude')
