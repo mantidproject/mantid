@@ -29,9 +29,9 @@ std::unordered_map<MSDFunctionModel::ParamID, QString> g_paramName{
     {MSDFunctionModel::ParamID::YI_MSD, "Msd"},
     {MSDFunctionModel::ParamID::YI_SIGMA, "Sigma"}};
 
-const std::string gauss = "MsdGauss";
-const std::string peters = "MsdPeters";
-const std::string yi = "MsdYi";
+const std::string Gauss = "MsdGauss";
+const std::string Peters = "MsdPeters";
+const std::string Yi = "MsdYi";
 } // namespace
 
 void MSDFunctionModel::clearData() {
@@ -45,7 +45,7 @@ void MSDFunctionModel::setFunction(IFunction_sptr fun) {
     return;
   if (fun->nFunctions() == 0) {
     const auto name = fun->name();
-    if (name == gauss || name == peters || name == yi) {
+    if (name == Gauss || name == Peters || name == Yi) {
       m_fitType = QString::fromStdString(name);
     } else {
       throw std::runtime_error("Cannot set function " + name);
@@ -57,7 +57,7 @@ void MSDFunctionModel::setFunction(IFunction_sptr fun) {
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
     const auto f = fun->getFunction(i);
     const auto name = f->name();
-    if (name == gauss || name == peters || name == yi) {
+    if (name == Gauss || name == Peters || name == Yi) {
       if (isFitTypeSet) {
         throw std::runtime_error("More than one function not allowed.");
       }
@@ -87,7 +87,7 @@ void MSDFunctionModel::addFunction(const QString &prefix,
       FunctionFactory::Instance().createInitialized(funStr.toStdString());
   const auto name = fun->name();
   QString newPrefix;
-  if (name == gauss || name == peters || name == yi) {
+  if (name == Gauss || name == Peters || name == Yi) {
     setFitType(QString::fromStdString(name));
     newPrefix = *getFitTypePrefix();
   } else {
@@ -132,15 +132,15 @@ void MSDFunctionModel::removeFitType() {
 }
 
 bool MSDFunctionModel::hasGaussianType() const {
-  return m_fitType == QString::fromStdString(gauss);
+  return m_fitType == QString::fromStdString(Gauss);
 }
 
 bool MSDFunctionModel::hasPetersType() const {
-  return m_fitType == QString::fromStdString(peters);
+  return m_fitType == QString::fromStdString(Peters);
 }
 
 bool MSDFunctionModel::hasYiType() const {
-  return m_fitType == QString::fromStdString(yi);
+  return m_fitType == QString::fromStdString(Yi);
 }
 
 void MSDFunctionModel::updateParameterEstimationData(
@@ -458,16 +458,16 @@ void MSDFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
 
 void MSDFunctionModel::applyParameterFunction(
     std::function<void(ParamID)> paramFun) const {
-  if (m_fitType == QString::fromStdString(gauss)) {
+  if (m_fitType == QString::fromStdString(Gauss)) {
     paramFun(ParamID::GAUSSIAN_HEIGHT);
     paramFun(ParamID::GAUSSIAN_MSD);
   }
-  if (m_fitType == QString::fromStdString(peters)) {
+  if (m_fitType == QString::fromStdString(Peters)) {
     paramFun(ParamID::PETERS_HEIGHT);
     paramFun(ParamID::PETERS_MSD);
     paramFun(ParamID::PETERS_BETA);
   }
-  if (m_fitType == QString::fromStdString(yi)) {
+  if (m_fitType == QString::fromStdString(Yi)) {
     paramFun(ParamID::YI_HEIGHT);
     paramFun(ParamID::YI_MSD);
     paramFun(ParamID::YI_SIGMA);
@@ -499,13 +499,13 @@ std::string MSDFunctionModel::buildYiFunctionString() const {
 
 QString MSDFunctionModel::buildFunctionString() const {
   QStringList functions;
-  if (m_fitType == QString::fromStdString(gauss)) {
+  if (m_fitType == QString::fromStdString(Gauss)) {
     functions << QString::fromStdString(buildGaussianFunctionString());
   }
-  if (m_fitType == QString::fromStdString(peters)) {
+  if (m_fitType == QString::fromStdString(Peters)) {
     functions << QString::fromStdString(buildPetersFunctionString());
   }
-  if (m_fitType == QString::fromStdString(yi)) {
+  if (m_fitType == QString::fromStdString(Yi)) {
     functions << QString::fromStdString(buildYiFunctionString());
   }
   return functions.join(";");
