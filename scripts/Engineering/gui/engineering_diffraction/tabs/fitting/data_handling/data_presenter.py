@@ -120,7 +120,7 @@ class FittingDataPresenter(object):
         if col == 2 and row in self.row_numbers:  # Is from the plot check column
             ws = self.model.get_loaded_workspaces()[self.row_numbers[row]]
             ws_name = self.row_numbers[row]
-            if self.view.get_table_item(row, col).checkState() == 2:  # Plot Box is checked
+            if self.view.get_item_checked(row, col):  # Plot Box is checked
                 self.plot_added_notifier.notify_subscribers(ws)
                 self.plotted.add(ws_name)
             else:  # Plot box is unchecked

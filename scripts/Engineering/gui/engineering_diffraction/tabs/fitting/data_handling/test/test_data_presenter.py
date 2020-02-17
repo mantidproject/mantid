@@ -221,9 +221,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.assertEqual(0, self.presenter.plot_removed_notifier.notify_subscribers.call_count)
 
     def test_handle_table_cell_changed_checkbox_unticked(self):
-        mocked_table_item = mock.MagicMock()
-        mocked_table_item.checkState.return_value = 0
-        self.view.get_table_item.return_value = mocked_table_item
+        self.view.get_item_checked.return_value = False
         self.presenter.row_numbers = data_presenter.TwoWayRowDict()
         self.presenter.row_numbers["name1"] = 0
         self.presenter.row_numbers["name2"] = 1

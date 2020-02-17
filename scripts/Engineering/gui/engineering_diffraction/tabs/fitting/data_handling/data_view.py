@@ -93,6 +93,9 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def get_table_item(self, row, col):
         return self.table_selection.item(row, col)
 
+    def get_item_checked(self, row, col):
+        return self.get_table_item(row, col).checkState() == QtCore.Qt.Checked
+
     # =================
     # State Getters
     # =================
