@@ -127,7 +127,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    // do the checks, output should only contain the output from the 
+    // do the checks
     Poco::File outFile(outFilename);
     TS_ASSERT(outFile.isFile());
     TS_ASSERT_EQUALS(countLines(outFilename), 1006);

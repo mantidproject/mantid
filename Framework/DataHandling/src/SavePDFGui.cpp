@@ -86,7 +86,7 @@ void SavePDFGui::exec() {
 
   // --------- write the data
   writeWSData(out, inputWS);
-  
+
   // --------- close the file
   out.close();
 }
@@ -120,7 +120,7 @@ void SavePDFGui::writeMetaData(std::ofstream &out,
 }
 
 void SavePDFGui::writeWSData(std::ofstream &out,
-                                 API::MatrixWorkspace_const_sptr inputWS) {
+                             API::MatrixWorkspace_const_sptr inputWS) {
   const auto &x = inputWS->x(0);
   const auto &y = inputWS->y(0);
   const auto &dy = inputWS->e(0);

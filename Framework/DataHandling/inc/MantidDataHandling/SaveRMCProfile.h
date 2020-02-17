@@ -13,8 +13,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** SaveRMCProfile : Saves a workspace containing a spectral density in 
-a format readable by the RMCProfile package.
+/** SaveRMCProfile : Saves a workspace containing a spectral density in a format readable by the RMCProfile package.
 
 Required Properties:
 <UL>
@@ -37,9 +36,8 @@ private:
   void init() override;
   void exec() override;
   void writeMetaData(std::ofstream &out,
-                                     API::MatrixWorkspace_const_sptr inputWS);
-  void writeWSData(std::ofstream &out,
-                                   API::MatrixWorkspace_const_sptr inputWS);
+                     API::MatrixWorkspace_const_sptr inputWS);
+  void writeWSData(std::ofstream &out, API::MatrixWorkspace_const_sptr inputWS);
 };
 
 } // namespace DataHandling

@@ -32,7 +32,9 @@ const std::string SaveRMCProfile::name() const { return "SaveRMCProfile"; }
 int SaveRMCProfile::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string SaveRMCProfile::category() const { return "DataHandling\\Text"; }
+const std::string SaveRMCProfile::category() const {
+  return "DataHandling\\Text";
+}
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string SaveRMCProfile::summary() const {
@@ -89,7 +91,7 @@ void SaveRMCProfile::exec() {
 
   // --------- write the data
   writeWSData(out, inputWS);
-  
+
   // --------- close the file
   out.close();
 }
@@ -105,7 +107,7 @@ void SaveRMCProfile::writeMetaData(std::ofstream &out,
   std::cout << "rmc " << inputType << " #  " << title << std::endl;
 }
 
-void SaveRMCProfile::writeWSData(std::ofstream& out,
+void SaveRMCProfile::writeWSData(std::ofstream &out,
                                  API::MatrixWorkspace_const_sptr inputWS) {
   const auto &x = inputWS->x(0);
   const auto &y = inputWS->y(0);
