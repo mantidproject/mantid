@@ -110,19 +110,6 @@ class SliceViewerModel(object):
         else:
             raise ValueError("Unsupported workspace type")
 
-    def get_peaksworkspace(self, name):
-        """Return a handle to a PeaksWorkspace
-        :param name: The string name of a workspace in the ADS that should be a PeaksWorkspace
-        :raises ValueError: if the workspace exists but is not a PeaksWorkspace
-        :raises KeyError: if the workspace does not exist
-        :return: A workspace handle for a PeaksWorkspace
-        """
-        workspace = AnalysisDataService.Instance()[name]
-        if not hasattr(workspace, 'getNumberPeaks'):
-            raise ValueError("Requested workspace {} is not a PeaksWorkspace. Type={}".format(name,
-                                                                                              type(workspace)))
-        return workspace
-
     def can_normalize_workspace(self):
         if self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
             return True

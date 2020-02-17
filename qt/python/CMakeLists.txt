@@ -136,6 +136,8 @@ if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
       mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
       mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py
       mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewercollection_presenter.py
+      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksworkspaceselectormodel.py
+      mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksworkspaceselectorpresenter.py
       mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_createpeaksrepresentation.py
       mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_painter.py
       mantidqt/widgets/sliceviewer/peaksviewer/representation/test/test_representation_noshape.py

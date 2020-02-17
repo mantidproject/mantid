@@ -7,6 +7,9 @@
 #  This file is part of the mantid workbench.
 from __future__ import (absolute_import, division, unicode_literals)
 
+# 3rd party imports
+from mantid.api import AnalysisDataService
+
 # local imports
 from mantidqt.widgets.workspacedisplay.table.model \
     import TableWorkspaceDisplayModel
@@ -20,6 +23,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     """View model for PeaksViewer
     Extends PeaksWorkspace functionality to include color selection
     """
+
     def __init__(self, peaks_ws):
         """
         :param peaks_ws: A pointer to the PeaksWorkspace
@@ -85,3 +89,28 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
             peak.update_alpha(slicepoint, slicedim_width)
 
         return self.visible_peaks
+
+
+def create_peaksviewermodel(peaks_ws_name):
+    """
+    A factory function to create a PeaksViewerModel from the given workspace name
+    :param peaks_ws_name: A str giving a workspace name that is expected to be a PeaksWorkspace
+    :return: A new PeaksViewerModel object
+    :raises ValueError: if the workspace referred to by the name is not a PeaksWorkspace
+    """
+    return PeaksViewerModel(_get_peaksworkspace(peaks_ws_name))
+
+
+# Private
+def _get_peaksworkspace(name):
+    """Return a handle to a PeaksWorkspace
+    :param name: The string name of a workspace in the ADS that should be a PeaksWorkspace
+    :raises ValueError: if the workspace exists but is not a PeaksWorkspace
+    :raises KeyError: if the workspace does not exist
+    :return: A workspace handle for a PeaksWorkspace
+    """
+    workspace = AnalysisDataService.Instance()[name]
+    if not hasattr(workspace, 'getNumberPeaks'):
+        raise ValueError("Requested workspace {} is not a PeaksWorkspace. Type={}".format(name,
+                                                                                          type(workspace)))
+    return workspace

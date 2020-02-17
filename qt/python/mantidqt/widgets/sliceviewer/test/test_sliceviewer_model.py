@@ -8,7 +8,8 @@
 #
 #
 from mantid.api import AnalysisDataService, IPeaksWorkspace
-from mantid.simpleapi import CreateMDHistoWorkspace, CreateWorkspace, CreateMDWorkspace, CreatePeaksWorkspace, FakeMDEventData
+from mantid.simpleapi import CreateMDHistoWorkspace, CreateWorkspace, CreateMDWorkspace, CreatePeaksWorkspace, \
+    FakeMDEventData
 from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE
 from numpy.testing import assert_equal, assert_allclose
 import numpy as np
@@ -42,15 +43,14 @@ class SliceViewerModelTest(unittest.TestCase):
                                           OutputWorkspace='ws2d_histo')
 
     def test_model_MDH(self):
-
         model = SliceViewerModel(self.ws_MD_3D)
 
         self.assertEqual(model.get_ws(), self.ws_MD_3D)
         self.assertEqual(model.get_ws_type(), WS_TYPE.MDH)
 
-        assert_equal(model.get_data((None, 2, 2)), range(90,95))
-        assert_equal(model.get_data((1, 2, None)), range(18,118,25))
-        assert_equal(model.get_data((None, None, 0)), np.reshape(range(50,75), (5,5)).T)
+        assert_equal(model.get_data((None, 2, 2)), range(90, 95))
+        assert_equal(model.get_data((1, 2, None)), range(18, 118, 25))
+        assert_equal(model.get_data((None, None, 0)), np.reshape(range(50, 75), (5, 5)).T)
 
         dim_info = model.get_dim_info(0)
         self.assertEqual(dim_info['minimum'], -3)
@@ -74,10 +74,9 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['type'], 'MDH')
 
     def test_model_MDE(self):
-
         model = SliceViewerModel(self.ws_MDE_3D)
 
-        self.assertNotEqual(model.get_ws((0,0,0), (1,1,1)), self.ws_MDE_3D)
+        self.assertNotEqual(model.get_ws((0, 0, 0), (1, 1, 1)), self.ws_MDE_3D)
         self.assertEqual(model._get_ws(), self.ws_MDE_3D)
         self.assertEqual(model.get_ws_type(), WS_TYPE.MDE)
 
@@ -102,7 +101,7 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['units'], 'rlu')
         self.assertEqual(dim_info['type'], 'MDE')
 
-        mdh = model.get_ws((None,0,None), (3,0.001,3))
+        mdh = model.get_ws((None, 0, None), (3, 0.001, 3))
         assert_allclose(mdh.getSignalArray().squeeze(), [[0, 0, 0],
                                                          [0, 692.237618, 0],
                                                          [0, 118.362777, 0]])
@@ -123,16 +122,15 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(d2.getMinimum(), -5)
         self.assertEqual(d2.getMaximum(), 5)
 
-        assert_allclose(model.get_data((None,0,None), (3,0.001,3)), [[0, 0, 0],
-                                                                     [0, 692.237618, 0],
-                                                                     [0, 118.362777, 0]])
+        assert_allclose(model.get_data((None, 0, None), (3, 0.001, 3)), [[0, 0, 0],
+                                                                         [0, 692.237618, 0],
+                                                                         [0, 118.362777, 0]])
 
-        assert_allclose(model.get_data((None,0,None), (3,0.001,3), transpose=True), [[0, 0, 0],
-                                                                                     [0, 692.237618, 118.362777],
-                                                                                     [0, 0, 0]])
+        assert_allclose(model.get_data((None, 0, None), (3, 0.001, 3), transpose=True), [[0, 0, 0],
+                                                                                         [0, 692.237618, 118.362777],
+                                                                                         [0, 0, 0]])
 
     def test_model_matrix(self):
-
         model = SliceViewerModel(self.ws2d_histo)
 
         self.assertEqual(model.get_ws(), self.ws2d_histo)
@@ -180,29 +178,6 @@ class SliceViewerModelTest(unittest.TestCase):
     def test_MDE_workspaces_cannot_be_normalized(self):
         model = SliceViewerModel(self.ws_MDE_3D)
         self.assertFalse(model.can_normalize_workspace())
-
-    def test_getpeaksworkspace_returns_handle_if_exists_and_of_correct_type(self):
-        try:
-            model = SliceViewerModel(self.ws2d_histo)
-            name = 'peaks_ws'
-            CreatePeaksWorkspace(OutputWorkspace=name)
-
-            workspace = model.get_peaksworkspace(name)
-
-            self.assertEqual(name, workspace.name())
-            self.assertTrue(isinstance(workspace, IPeaksWorkspace))
-        finally:
-            AnalysisDataService.Instance().remove(name)
-
-    def test_getpeaksworkspace_raises_KeyError_if_workspace_missing(self):
-        model = SliceViewerModel(self.ws2d_histo)
-
-        self.assertRaises(KeyError, model.get_peaksworkspace, 'missing')
-
-    def test_getpeaksworkspace_raises_ValueError_if_workspace_type_incorrect(self):
-        model = SliceViewerModel(self.ws2d_histo)
-
-        self.assertRaises(ValueError, model.get_peaksworkspace, self.ws2d_histo.name())
 
 
 if __name__ == '__main__':

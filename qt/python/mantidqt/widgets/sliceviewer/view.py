@@ -18,6 +18,9 @@ from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from .dimensionwidget import DimensionWidget
 from .samplingimage import imshow_sampling
 from .toolbar import SliceViewerNavigationToolbar
+from .peaksviewer.workspaceselection import \
+    (PeaksWorkspaceSelectorModel, PeaksWorkspaceSelectorPresenter,
+     PeaksWorkspaceSelectorView)
 from .peaksviewer.view import PeaksViewerCollectionView
 from .peaksviewer.representation.painter import MplPainter
 
@@ -79,6 +82,7 @@ class SliceViewerView(QWidget):
         self.mpl_toolbar = SliceViewerNavigationToolbar(self.canvas, self)
         self.mpl_toolbar.gridClicked.connect(self.toggle_grid)
         self.mpl_toolbar.linePlotsClicked.connect(self.line_plots_toggle)
+        self.mpl_toolbar.peaksOverlayClicked.connect(self.peaks_overlay_clicked)
         self.mpl_toolbar.plotOptionsChanged.connect(self.colorbar.mappable_changed)
 
         #  peaks viewer off by default
@@ -242,15 +246,27 @@ class SliceViewerView(QWidget):
             self.norm_opts.setCurrentIndex(0)
 
     # peaks tools
+    def peaks_overlay_clicked(self):
+        """Peaks overlay button has been toggled
+        """
+        self.presenter.overlay_peaks_workspaces()
+
     def draw_peak(self, peak_info):
         """
         :param peak_info: A PeakRepresentation object
         """
         return peak_info.draw(self.ax)
 
-    def query_peaks_to_overlay(self):
-        """Display a dialog to the user to ask which peaks to overlay"""
-        return "peaksws",
+    def query_peaks_to_overlay(self, current_overlayed_names):
+        """Display a dialog to the user to ask which peaks to overlay
+        :param current_overlayed_names: A list of names that are currently overlayed
+        :returns: A list of workspace names to overlay on the display
+        """
+        model = PeaksWorkspaceSelectorModel(mantid.api.AnalysisDataService.Instance(),
+                                            checked_names=current_overlayed_names)
+        view = PeaksWorkspaceSelectorView(self)
+        presenter = PeaksWorkspaceSelectorPresenter(view, model)
+        return presenter.select_peaks_workspaces()
 
     def set_peaks_viewer_visible(self, on):
         """

@@ -98,6 +98,7 @@ class PeaksViewerView(QWidget):
 class PeaksViewerCollectionView(QWidget):
     """Display a collection of PeaksViewerView objects in a scrolling view.
     """
+
     def __init__(self, painter, sliceinfo_provider, parent=None):
         """
         :param painter: An object responsible for draw the peaks representations
@@ -117,6 +118,15 @@ class PeaksViewerCollectionView(QWidget):
         child_view = PeaksViewerView(self._painter, self._sliceinfo_provider, parent=self)
         self._peaks_layout.addWidget(child_view)
         return child_view
+
+    def remove_peaksviewer(self, widget):
+        """
+        Remove a PeaksViewer from the collection
+        :param widget: A reference to the PeaksViewerView
+        """
+        layout = self._peaks_layout
+        item = layout.takeAt(layout.indexOf(widget))
+        item.widget().deleteLater()
 
     # private api
     def _setup_ui(self):
