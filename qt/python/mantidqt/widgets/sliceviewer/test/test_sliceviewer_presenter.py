@@ -8,7 +8,8 @@
 #
 #
 import matplotlib
-matplotlib.use('Agg') # noqa: E402
+
+matplotlib.use('Agg')  # noqa: E402
 import unittest
 
 import mantid.api
@@ -31,7 +32,6 @@ class SliceViewerTest(unittest.TestCase):
         self.model.get_data = mock.Mock()
 
     def test_sliceviewer_MDH(self):
-
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDH)
 
         presenter = SliceViewer(None, model=self.model, view=self.view)
@@ -59,7 +59,6 @@ class SliceViewerTest(unittest.TestCase):
         self.assertEqual(self.view.update_plot_data.call_count, 1)
 
     def test_sliceviewer_MDE(self):
-
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDE)
 
         presenter = SliceViewer(None, model=self.model, view=self.view)
@@ -90,7 +89,6 @@ class SliceViewerTest(unittest.TestCase):
         self.assertEqual(self.view.update_plot_data.call_count, 1)
 
     def test_sliceviewer_matrix(self):
-
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MATRIX)
 
         presenter = SliceViewer(None, model=self.model, view=self.view)
@@ -119,17 +117,16 @@ class SliceViewerTest(unittest.TestCase):
                                                  normalize=mantid.api.MDNormalization.VolumeNormalization)
 
     @mock.patch("mantidqt.widgets.sliceviewer.peaksviewer.presenter.TableWorkspaceDataPresenter")
-    @mock.patch("mantidqt.widgets.sliceviewer.presenter.PeaksViewerModel")
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.PeaksViewerCollectionPresenter",
                 spec=PeaksViewerCollectionPresenter)
-    def test_overlay_peaks_workspaces_attaches_view_and_draws_peaks(self, mock_peaks_presenter, _, __):
+    def test_overlay_peaks_workspaces_attaches_view_and_draws_peaks(self, mock_peaks_presenter, _):
         presenter = SliceViewer(None, model=self.model, view=self.view)
-        self.model.get_peaksworkspace.return_value = mock.Mock(spec=mantid.api.IPeaksWorkspace)
 
         presenter.view.query_peaks_to_overlay.side_effect = ["peaks_workspace"]
-        presenter.overlay_peaks_workspace()
+        presenter.overlay_peaks_workspaces()
         presenter.view.query_peaks_to_overlay.assert_called_once()
         mock_peaks_presenter.assert_called_once()
+        mock_peaks_presenter.overlay_peaksworkspaces.asssert_called_once()
 
 
 if __name__ == '__main__':

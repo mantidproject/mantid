@@ -16,7 +16,7 @@ import mantid.api
 # local imports
 from .model import SliceViewerModel, WS_TYPE
 from .view import SliceViewerView
-from .peaksviewer import PeaksViewerModel, PeaksViewerPresenter, PeaksViewerCollectionPresenter
+from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 
 # Encapsulate information about the current slice paramters
 SliceInfo = namedtuple("SliceInfo", ("indices", "point", "range"))
@@ -65,8 +65,8 @@ class SliceViewer(object):
         Tell the view to display a new plot of an MDEventWorkspace
         """
         self.view.plot_MDH(
-            self.model.get_ws(slicepoint=self.get_slicepoint(),
-                              bin_params=self.view.dimensions.get_bin_params()))
+            self.model.get_ws(
+                slicepoint=self.get_slicepoint(), bin_params=self.view.dimensions.get_bin_params()))
 
     def new_plot_matrix(self):
         """Tell the view to display a new plot of an MatrixWorkspace"""
@@ -74,9 +74,10 @@ class SliceViewer(object):
 
     def get_sliceinfo(self):
         """Returns a SliceInfo object describing the current slice"""
-        return SliceInfo(indices=self.view.dimensions.get_indices(),
-                         point=self.view.dimensions.get_slicepoint(),
-                         range=self.view.dimensions.get_slicerange())
+        return SliceInfo(
+            indices=self.view.dimensions.get_indices(),
+            point=self.view.dimensions.get_slicepoint(),
+            range=self.view.dimensions.get_slicerange())
 
     def get_slicepoint(self):
         """Returns the current slicepoint as a list of 3 elements.
@@ -105,9 +106,10 @@ class SliceViewer(object):
         Update the view to display an updated MDEventWorkspace slice/cut
         """
         self.view.update_plot_data(
-            self.model.get_data(self.get_slicepoint(),
-                                bin_params=self.view.dimensions.get_bin_params(),
-                                transpose=self.view.dimensions.transpose))
+            self.model.get_data(
+                self.get_slicepoint(),
+                bin_params=self.view.dimensions.get_bin_params(),
+                transpose=self.view.dimensions.transpose))
 
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
@@ -132,20 +134,17 @@ class SliceViewer(object):
             self.normalization = mantid.api.MDNormalization.NoNormalization
         self.new_plot()
 
-    def overlay_peaks_workspace(self):
+    def overlay_peaks_workspaces(self):
         """
         Request activation of peak overlay tools.
-          - Asks user to select peaks workspace(s)
-          - Attaches peaks table viewer/tools
-          - Displays peaks on data display
+          - Asks user to select peaks workspace(s), taking into account any current selection
+          - Attaches peaks table viewer/tools if new workspaces requested. Removes any unselected
+          - Displays peaks on data display (if any left to display)
         """
-        peaks_workspaces = [
-            self.model.get_peaksworkspace(name) for name in self.view.query_peaks_to_overlay()
-        ]
-        presenter = self._peaks_view_presenter
-        for ws in peaks_workspaces:
-            presenter.append_peaksworkspace(PeaksViewerModel(ws))
-        presenter.notify(PeaksViewerPresenter.Event.OverlayPeaks)
+        names_overlayed = self._overlayed_peaks_workspaces()
+        names_to_overlay = self.view.query_peaks_to_overlay(names_overlayed)
+        if names_to_overlay or names_overlayed:
+            self._peaks_view_presenter.overlay_peaksworkspaces(names_to_overlay)
 
     # private api
     @property
@@ -155,3 +154,13 @@ class SliceViewer(object):
                 PeaksViewerCollectionPresenter(self.view.peaks_view)
 
         return self._peaks_presenter
+
+    def _overlayed_peaks_workspaces(self):
+        """
+        :return: A list of names of the current PeaksWorkspaces overlayed
+        """
+        current_workspaces = []
+        if self._peaks_presenter is not None:
+            current_workspaces = self._peaks_presenter.workspace_names()
+
+        return current_workspaces
