@@ -35,8 +35,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     def setup_figure(self):
         self.figure = Figure()
         self.figure.canvas = FigureCanvas(self.figure)
-        self.figure, _ = get_plot_fig(overplot=False, ax_properties=None, axes_num=1, fig=self.figure)
-        self.figure.add_subplot(projection="mantid")
+        self.figure.add_subplot(111, projection="mantid")
         self.figure.tight_layout()
         self.toolbar = FittingPlotToolbar(self.figure.canvas, self, False)
         self.vLayout_plot.addWidget(self.toolbar)
@@ -53,7 +52,8 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     # =================
 
     def clear_figure(self):
-        self.figure, axes = get_plot_fig(overplot=False, ax_properties=None, axes_num=1, fig=self.figure)
+        self.figure.clf()
+        self.figure.add_subplot(111, projection="mantid")
         self.figure.tight_layout()
         self.figure.canvas.draw()
 
