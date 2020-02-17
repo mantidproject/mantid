@@ -97,8 +97,8 @@ Output:
 
   Workspace has 2890 spectra
   Is detector 1001 a monitor? True
-  Workspace contains 33 logs
-  Workspace has property INT1: False
+  Workspace contains 35 logs
+  Workspace has property INT1: True
 
 
 **Example 2: load without the logs**
@@ -148,8 +148,8 @@ Output:
 
   Workspace has 2888 spectra
   Is detector 901000 a monitor? False
-  Workspace contains 33 logs
-  Workspace has property INT1: False
+  Workspace contains 35 logs
+  Workspace has property INT1: True
 
 **Example 4: load monitors separately**
 
