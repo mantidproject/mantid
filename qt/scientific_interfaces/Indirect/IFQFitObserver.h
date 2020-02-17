@@ -14,6 +14,7 @@ enum DataType {
 
 class IFQFitObserver {
 public:
+  virtual ~IFQFitObserver() = default;
   virtual void updateDataType(DataType) = 0;
   virtual void spectrumChanged(int) = 0;
 };

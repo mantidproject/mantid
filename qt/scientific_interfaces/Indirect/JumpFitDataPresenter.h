@@ -28,7 +28,7 @@ public:
   JumpFitDataPresenter(JumpFitModel *model, IIndirectFitDataView *view,
                        QComboBox *cbParameterType, QComboBox *cbParameter,
                        QLabel *lbParameterType, QLabel *lbParameter,
-                       FQTemplateBrowser *fQTemplateBrowser);
+                       IFQFitObserver *fQTemplateBrowser);
 
 private slots:
   void hideParameterComboBoxes();
