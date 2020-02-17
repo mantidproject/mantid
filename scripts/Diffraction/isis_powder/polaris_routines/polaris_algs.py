@@ -205,14 +205,14 @@ def fast_fourier_filter(ws, freq_params=None):
     # k_max/k_c = Nk/nk
     # 1/(k_c*2*dx) = p
     # because FFT uses sin(2*pi*k*x) while PDFFourierTransform uses sin(Q*r) we need to include a factor of 2*pi
-                         Params=str(upper_freq_param), IgnoreXBins=True)
-        mantid.FFTSmooth(InputWorkspace=ws, OutputWorkspace=ws, Filter="Zeroing",
-        upper_freq_param = round(np.pi / (freq_params[1] * (x_range[1] - x_range[0])))
-    if len(freq_params) > 1:
-    mantid.Minus(LHSWorkspace=ws, RHSWorkspace=tmp, OutputWorkspace=ws)
-                           IgnoreXBins=True)
-    tmp = mantid.FFTSmooth(InputWorkspace=ws, Filter="Zeroing", Params=str(lower_freq_param), StoreInADS=False,
-    # it does not matter which we use in this case.
-    # This is giving the FFTSmooth the data in the form of S(Q)-1, later we use PDFFourierTransform with Q(S(Q)-1)
-    lower_freq_param = round(np.pi / (freq_params[0] * (x_range[1] - x_range[0])))
     # p = pi/(k_c*dQ)
+    lower_freq_param = round(np.pi / (freq_params[0] * (x_range[1] - x_range[0])))
+    # This is giving the FFTSmooth the data in the form of S(Q)-1, later we use PDFFourierTransform with Q(S(Q)-1)
+    # it does not matter which we use in this case.
+    tmp = mantid.FFTSmooth(InputWorkspace=ws, Filter="Zeroing", Params=str(lower_freq_param), StoreInADS=False,
+                           IgnoreXBins=True)
+    mantid.Minus(LHSWorkspace=ws, RHSWorkspace=tmp, OutputWorkspace=ws)
+    if len(freq_params) > 1:
+        upper_freq_param = round(np.pi / (freq_params[1] * (x_range[1] - x_range[0])))
+        mantid.FFTSmooth(InputWorkspace=ws, OutputWorkspace=ws, Filter="Zeroing",
+                         Params=str(upper_freq_param), IgnoreXBins=True)

@@ -13,7 +13,8 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** SavePDFGui : Saves a workspace containing a pair distrebution function in a format readable by the PDFgui package.
+/** SavePDFGui : Saves a workspace containing a pair distrebution function in a
+format readable by the PDFgui package.
 
 Required Properties:
 <UL>

@@ -13,7 +13,8 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** SaveRMCProfile : Saves a workspace containing a spectral density in a format readable by the RMCProfile package.
+/** SaveRMCProfile : Saves a workspace containing a spectral density in a format
+readable by the RMCProfile package.
 
 Required Properties:
 <UL>
