@@ -18,8 +18,10 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QCompleter>
 #include <QGridLayout>
 #include <QGroupBox>
+#include <QIcon>
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -42,7 +44,10 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent)
 SelectFunctionDialog::SelectFunctionDialog(
     QWidget *parent, const std::vector<std::string> &restrictions)
     : QDialog(parent), m_form(new Ui::SelectFunctionDialog) {
+  setWindowModality(Qt::WindowModal);
+  setWindowIcon(QIcon(":/images/MantidIcon.ico"));
   m_form->setupUi(this);
+  m_form->errorMessage->hide();
 
   auto &factory = Mantid::API::FunctionFactory::Instance();
   auto registeredFunctions = factory.getFunctionNamesGUI();
@@ -60,13 +65,27 @@ SelectFunctionDialog::SelectFunctionDialog(
     }
   }
 
+  // Set up the search box
+  m_form->searchBox->completer()->setCompletionMode(
+      QCompleter::PopupCompletion);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+  m_form->searchBox->completer()->setFilterMode(Qt::MatchContains);
+#endif
+  connect(m_form->searchBox, SIGNAL(editTextChanged(const QString &)), this,
+          SLOT(searchBoxChanged(const QString &)));
+
   // Construct the QTreeWidget based on the map information of categories and
   // their respective fit functions.
   constructFunctionTree(categories, restrictions);
 
   connect(m_form->fitTree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),
-          this, SLOT(accept()));
+          this, SLOT(functionDoubleClicked(QTreeWidgetItem *)));
   m_form->fitTree->setToolTip("Select a function type and press OK.");
+
+  connect(m_form->buttonBox, SIGNAL(accepted()), this, SLOT(acceptFunction()));
+  connect(m_form->buttonBox, SIGNAL(rejected()), this, SLOT(rejectFunction()));
+
+  m_form->searchBox->setCurrentIndex(-1);
 }
 
 /**
@@ -106,6 +125,7 @@ void SelectFunctionDialog::constructFunctionTree(
           for (const auto &function : entry.second) {
             QTreeWidgetItem *fit = new QTreeWidgetItem(catItem);
             fit->setText(0, QString::fromStdString(function));
+            m_form->searchBox->addItem(QString::fromStdString(function));
           }
         }
       } else {
@@ -141,6 +161,7 @@ void SelectFunctionDialog::constructFunctionTree(
               for (const auto &function : entry.second) {
                 QTreeWidgetItem *fit = new QTreeWidgetItem(catItem);
                 fit->setText(0, QString::fromStdString(function));
+                m_form->searchBox->addItem(QString::fromStdString(function));
               }
             }
           }
@@ -156,16 +177,54 @@ SelectFunctionDialog::~SelectFunctionDialog() { delete m_form; }
  * Return selected function
  */
 QString SelectFunctionDialog::getFunction() const {
+  const auto searchText = m_form->searchBox->currentText();
   QList<QTreeWidgetItem *> items(m_form->fitTree->selectedItems());
-  if (items.size() != 1) {
-    return "";
+  if (items.size() == 1 && items[0]->childCount() == 0) {
+    return items[0]->text(0);
+  } else if (m_form->searchBox->findText(searchText) >= 0) {
+    return searchText;
   }
+  return "";
+}
 
-  if (items[0]->parent() == nullptr) {
-    return "";
+void SelectFunctionDialog::clearSearchBoxText() const {
+  m_form->searchBox->clearEditText();
+}
+
+/**
+ * Called when the text in the search box changes
+ */
+void SelectFunctionDialog::searchBoxChanged(const QString &text) {
+  if (text.isEmpty()) {
+    return;
   }
+  m_form->fitTree->setCurrentIndex(QModelIndex());
 
-  return items[0]->text(0);
+  const auto index = m_form->searchBox->findText(text);
+  if (index >= 0)
+    m_form->searchBox->setCurrentIndex(index);
+}
+
+void SelectFunctionDialog::functionDoubleClicked(QTreeWidgetItem *item) {
+  if (item->childCount() == 0)
+    acceptFunction();
+}
+
+void SelectFunctionDialog::acceptFunction() {
+  const auto func = getFunction();
+  if (func.isEmpty()) {
+    m_form->errorMessage->setText(
+        QString("<span style='color:red'> Function  not found</span> "));
+    m_form->errorMessage->show();
+  } else {
+    m_form->errorMessage->hide();
+    accept();
+  }
+}
+
+void SelectFunctionDialog::rejectFunction() {
+  m_form->errorMessage->hide();
+  reject();
 }
 
 } // namespace MantidWidgets

@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SelectFunctionDialog</class>
- <widget class="QDialog" name="SelectFunctionDialog">
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>305</width>
-    <height>264</height>
+    <width>254</width>
+    <height>89</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Select a function type</string>
+   <string>Fit</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -24,32 +27,20 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="functionLabel">
        <property name="text">
-        <string>Fit - Select function type</string>
+        <string> Select function</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="searchBox">
+      <widget class="QComboBox" name="functionBox">
        <property name="editable">
         <bool>true</bool>
        </property>
        <property name="insertPolicy">
         <enum>QComboBox::NoInsert</enum>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QTreeWidget" name="fitTree">
-       <attribute name="headerVisible">
-        <bool>false</bool>
-       </attribute>
-       <column>
-        <property name="text">
-         <string notr="true">1</string>
-        </property>
-       </column>
       </widget>
      </item>
     </layout>
@@ -71,7 +62,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>SelectFunctionDialog</receiver>
+   <receiver>Dialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

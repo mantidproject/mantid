@@ -38,6 +38,7 @@ Improvements
 - Most changes in the settings dialog now take place immediately, no longer needing a restart, such as hiding algorithm categories, interfaces or choosing wether to see invisible workspaces.
 - A warning now appears if you attempt to plot more than ten spectra.
 - The Save menu action in the workspaces toolbox to save using version 1 of the SaveAscii algorithm has been removed as no one was using it and it only added confusion. The option to save using the most recent version of SaveASCII is still available.
+- You can now search for functions when doing fits.
 
 Bugfixes
 ########
