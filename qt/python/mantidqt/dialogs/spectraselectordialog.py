@@ -346,7 +346,6 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
         ui = AdvancedPlottingOptionsWidgetUI()
         ui.setupUi(self)
 
-        ui.plot_axis_label_line_edit.setText(ui.log_value_combo_box.currentText())
         ui.logs_valid.setIcon(red_asterisk())
         ui.logs_valid.hide()
 
@@ -358,8 +357,10 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
         self.ui = ui
         self._parent = parent
         self._populate_log_combo_box()
+        ui.plot_axis_label_line_edit.setText(ui.log_value_combo_box.currentText())
 
     def _log_value_changed(self, text):
+        # Don't need to do anything while the combo box is being populated.
         if not self._parent._ui:
             return
 

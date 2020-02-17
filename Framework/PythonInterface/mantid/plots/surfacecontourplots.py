@@ -41,19 +41,6 @@ def plot(plot_type, plot_index, axis_name, log_name, custom_log_values, workspac
             ax.set_ylabel(axis_name)
             ax.set_title("Contour " + title)
 
-            # this forces the lines to look more like they do in MantidPlot but I'm not sure if that's actually necessary?
-            # for collection in ax.collections:
-            #     segments = collection.get_segments()
-            #     for point in segments:
-            #         for pair in point:
-            #             if 0.5 < pair[1] < 1:
-            #                 pair[1] = 0.5
-            #             elif 1 < pair[1] < 1.5:
-            #                 pair[1] = 1.5
-            #             else:
-            #                 pair[1] = round(pair[1]*2)/2
-            #     collection.set_segments(segments)
-
 def create_workspace_for_group_plot\
     (plot_type: str, workspaces: List[Workspace], plot_index: int, log_name: str, custom_log_values: List[float]) -> MatrixWorkspace:
     validate_workspace_choices(workspaces, plot_index)
@@ -82,7 +69,6 @@ def create_workspace_for_group_plot\
             else:
                 matrix_ws.applyPointsFromAnotherWorkspace(ws, plot_index, i)
 
-            # Y and E can be shared.
             matrix_ws.setY(i, ws.readY(plot_index))
             matrix_ws.setE(i, ws.readE(plot_index))
 
@@ -96,9 +82,6 @@ def create_workspace_for_group_plot\
         log_values_axis.setValue(i, log_values[i])
 
     matrix_ws.replaceAxis(1, log_values_axis)
-
-    from mantid.api import AnalysisDataService as ads
-    ads.addOrReplace("thing", matrix_ws)
 
     return matrix_ws
 
