@@ -47,3 +47,11 @@ Manage User Directories
 * Click "Browse To Directory" and navigate to the location of your data files
 * Do the same for the default save directory
 * Click "OK"
+
+Error Reporter
+==============
+
+You may find a bug at some stage using Mantid, and here is how to tell us about it! A name and email is required for us to solve the problem. Please give as much information as possible.
+
+.. figure:: /images/ErrorReporterTutorial.png
+   :alt: Error Reporter

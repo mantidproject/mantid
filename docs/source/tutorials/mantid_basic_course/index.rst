@@ -14,7 +14,8 @@ Mantid Basic Course
    algorithms_workspaces_and_histories/index
    connecting_data_to_instruments/index
    fitting_data/index
-   using_workbench/index
+   using_MantidPlot/index
+   useful/index
 
 This course gives a hands-on introduction to many of the important features of Mantid.
 You will learn how to load, process, visualise and analyse data using Mantid.
@@ -26,5 +27,6 @@ You will learn how to load, process, visualise and analyse data using Mantid.
 * :ref:`algorithms_workspaces_and_histories`
 * :ref:`connecting_data_to_instruments`  
 * :ref:`fitting_data`
-* :ref:`using_workbench`
+* :ref:`using_plot`
+* :ref:`useful`
 
