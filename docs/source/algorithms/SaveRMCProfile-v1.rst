@@ -21,9 +21,9 @@ Usage
     autotestdata\UsageData and the following tag unindented
     .. include:: ../usagedata-note.txt
 
-**Example - SavePDFGui**
+**Example - SaveRMCProfile**
 
-.. testcode:: SavePDFGuiExample
+.. testcode:: SaveRMCProfileExample
 
    # Create a host workspace
    ws = CreateWorkspace(DataX=range(0,3), DataY=range(0,3), UnitX="Angstrom")
@@ -33,18 +33,18 @@ Usage
    path = os.path.join(os.path.expanduser("~"), "saveRMCProfile.fq")
 
    # Save as G(r) file
-   SavePDFGui(ws, "G(r)", "Data_title, path)
+   SavePDFGui(ws, "G(r)", "Data_title", path)
 
    # Check that the file exists
    print(os.path.isfile(path))
 
 Output:
 
-.. testoutput:: SavePDFGuiExample
+.. testoutput:: SaveRMCProfileExample
 
     True
 
-.. testcleanup:: SavePDFGuiExample
+.. testcleanup:: SaveRMCProfileExample
 
    DeleteWorkspace(ws)
    import os

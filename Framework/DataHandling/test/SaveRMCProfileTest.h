@@ -92,7 +92,7 @@ public:
     // do the checks
     Poco::File outFile(outFilename);
     TS_ASSERT(outFile.isFile());
-    TS_ASSERT_EQUALS(countLines(outFilename), 1006);
+    TS_ASSERT_EQUALS(countLines(outFilename), 1002);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(wsName);
@@ -130,7 +130,7 @@ public:
     // do the checks
     Poco::File outFile(outFilename);
     TS_ASSERT(outFile.isFile());
-    TS_ASSERT_EQUALS(countLines(outFilename), 1006);
+    TS_ASSERT_EQUALS(countLines(outFilename), 1002);
 
     // remove the workspace group
     AnalysisDataService::Instance().deepRemoveGroup(groupName);
