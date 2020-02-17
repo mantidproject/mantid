@@ -18,7 +18,7 @@ class FittingPlotPresenterTest(unittest.TestCase):
     def setUp(self):
         self.model = mock.create_autospec(plot_model.FittingPlotModel)
         self.view = mock.create_autospec(plot_view.FittingPlotView)
-        self.presenter = plot_presenter.FittingPlotPresenter(self.model, self.view)
+        self.presenter = plot_presenter.FittingPlotPresenter(None, self.model, self.view)
 
     def test_add_workspace_to_plot(self):
         self.view.get_axes.return_value = ["axis1", "axis2"]
