@@ -122,6 +122,11 @@ public:
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);
 
+  // Hide global boxes
+  void hideGlobals();
+  // Show global boxes
+  void showGlobals();
+
 protected:
   /// Create the Qt property browser
   void createBrowser();

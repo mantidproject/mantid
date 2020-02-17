@@ -15,11 +15,11 @@ from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSI
 
 ui_workspace_selector, _ = load_ui(__file__, "workspace_selector.ui")
 
-frequency_domain = "Frequency Domain "
+frequency_domain = "Frequency "
 
 
 class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
-    def __init__(self, current_runs, instrument, current_workspaces, fit_to_raw, context, parent_widget=None):
+    def __init__(self, current_runs, instrument, current_workspaces, fit_to_raw, plot_type, context, parent_widget=None):
         super(QtWidgets.QDialog, self).__init__(parent=parent_widget)
         self.setupUi(self)
         self.current_runs = current_runs
@@ -52,8 +52,11 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
 
         self.time_domain_combo.currentIndexChanged.connect(self.time_or_freq)
         if self.context._frequency_context:
+            index = self.time_domain_combo.findText(plot_type)
+            if index == -1:
+                index = 0
             self.time_domain_combo.setEnabled(True)
-            self.time_domain_combo.setCurrentIndex(1)
+            self.time_domain_combo.setCurrentIndex(index)
 
     def get_workspace_list(self):
         filtered_list = self.context.get_names_of_workspaces_to_fit(runs='All', group_and_pair='All', phasequad=True,
@@ -122,8 +125,8 @@ class WorkspaceSelectorView(QtWidgets.QDialog, ui_workspace_selector):
         return self.phase_quad_checkbox.isChecked()
 
     @staticmethod
-    def get_selected_data(current_runs, instrument, current_workspaces, fit_to_raw, context, parent):
-        dialog = WorkspaceSelectorView(current_runs, instrument, current_workspaces, fit_to_raw, context, parent)
+    def get_selected_data(current_runs, instrument, current_workspaces, fit_to_raw, plot_type, context, parent):
+        dialog = WorkspaceSelectorView(current_runs, instrument, current_workspaces, fit_to_raw, plot_type, context, parent)
 
         result = dialog.exec_()
 

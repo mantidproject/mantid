@@ -26,6 +26,8 @@ Muon Analysis 2 and Frequency Domain Interfaces
   part due to the new tiled plotting feature.
 - Added a plotting options toolbar to the docked plotting in the Muon Analysis 2 and Frequency Domain interfaces. This toolbar
   can be used to autoscale the axes, change the axes limits, and control the plotting of errors.
+- Reworked the fitting tab to improve the user experience when doing single, and simultaneous fits.
+- Addition of a sequential fitting tab, enabling both sequential, and simultaneous sequential fits.
 
 Bug Fixes
 #########
