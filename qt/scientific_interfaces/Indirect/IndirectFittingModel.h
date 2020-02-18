@@ -24,6 +24,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 enum class FittingMode { SEQUENTIAL, SIMULTANEOUS };
+extern std::unordered_map<FittingMode, std::string> fitModeToName;
 
 class IndirectFittingModel;
 
@@ -140,6 +141,8 @@ public:
                             TableDatasetIndex index);
   DataForParameterEstimationCollection
   getDataForParameterEstimation(EstimationDataSelector selector) const;
+
+  std::vector<double> getQValuesForData() const;
 
 protected:
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;

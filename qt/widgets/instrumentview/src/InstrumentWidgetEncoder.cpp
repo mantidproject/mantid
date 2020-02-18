@@ -37,26 +37,29 @@ InstrumentWidgetEncoder::encode(const InstrumentWidget &obj,
                                 const QString &projectPath,
                                 const bool saveMask) {
   QMap<QString, QVariant> map;
-  m_projectPath = projectPath.toStdString();
-  m_saveMask = saveMask;
+  // there is no reference to the workspace if it is being replaced, so return
+  // the empty map
+  if (!obj.isWsBeingReplaced()) {
+    m_projectPath = projectPath.toStdString();
+    m_saveMask = saveMask;
 
-  map.insert(QString("workspaceName"), QVariant(obj.getWorkspaceName()));
+    map.insert(QString("workspaceName"), QVariant(obj.getWorkspaceName()));
 
-  map.insert(QString("surfaceType"), QVariant(obj.getSurfaceType()));
+    map.insert(QString("surfaceType"), QVariant(obj.getSurfaceType()));
 
-  map.insert(QString("currentTab"), QVariant(obj.getCurrentTab()));
+    map.insert(QString("currentTab"), QVariant(obj.getCurrentTab()));
 
-  QList<QVariant> energyTransferList;
-  energyTransferList.append(QVariant(obj.m_xIntegration->getMinimum()));
-  energyTransferList.append(QVariant(obj.m_xIntegration->getMaximum()));
-  map.insert(QString("energyTransfer"), QVariant(energyTransferList));
+    QList<QVariant> energyTransferList;
+    energyTransferList.append(QVariant(obj.m_xIntegration->getMinimum()));
+    energyTransferList.append(QVariant(obj.m_xIntegration->getMaximum()));
+    map.insert(QString("energyTransfer"), QVariant(energyTransferList));
 
-  map.insert(QString("surface"),
-             QVariant(this->encodeSurface(obj.getSurface())));
-  map.insert(QString("actor"),
-             QVariant(this->encodeActor(obj.m_instrumentActor)));
-  map.insert(QString("tabs"), QVariant(this->encodeTabs(obj)));
-
+    map.insert(QString("surface"),
+               QVariant(this->encodeSurface(obj.getSurface())));
+    map.insert(QString("actor"),
+               QVariant(this->encodeActor(obj.m_instrumentActor)));
+    map.insert(QString("tabs"), QVariant(this->encodeTabs(obj)));
+  }
   return map;
 }
 

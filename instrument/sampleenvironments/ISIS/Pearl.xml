@@ -1,0 +1,64 @@
+<environmentspec>
+  <materials>
+    <material id="Boron S-dough" formula="(B10)4-C" massdensity="2.52"/>
+	<material id="Sintered Diamond" formula="C0.8 Co0.2" massdensity="3.51"/>
+	<material id="TiZr Alloy" formula="Ti0.522 Zr0.478" massdensity="5.23"/>
+	<material id="Steel" formula="Fe" massdensity="8"/>
+  </materials>
+  <components>
+    <containers>
+	  <!--Pearl's container is actually in two parts. Just put one part in as container for now-->
+	  <container id="Gasket_inner" material="TiZr Alloy">
+	    <stlfile filename="Gasket_inner.stl" scale="mm">
+		  <rotation ydegrees="270"/>
+	    </stlfile>
+	    <samplestlfile filename="SampleRotatedAndTranslatedToOrigin.stl" scale="mm">
+	    </samplestlfile>		
+	  </container>
+	</containers>
+    <component id="B-sdough" material="Boron S-dough">
+	  <stlfile filename="B-sdough.stl" scale="mm">
+		<translation vector="0,0,-1.34114"/>
+	  </stlfile>
+	</component>
+    <component id="B-sdough" material="Boron S-dough">
+	  <stlfile filename="B-sdough.stl" scale="mm">
+		<translation vector="0,0,1.40384"/>
+		<rotation ydegrees="180"/>
+	  </stlfile>		
+	</component>
+    <component id="Anvil" material="Sintered Diamond">
+	    <stlfile filename="Anvil.stl" scale="mm">
+		<translation vector="0,0,-14.81"/>
+	  </stlfile>		
+	</component>
+    <component id="Anvil" material="Sintered Diamond">
+	    <stlfile filename="Anvil.stl" scale="mm">
+		<translation vector="0,0,14.82"/>
+		<rotation ydegrees="180"/>
+	  </stlfile>		
+	</component>
+    <component id="Gasket_outer" material="TiZr Alloy">
+	    <stlfile filename="Gasket_outer.stl" scale="mm">
+		<translation vector="0,0,-0.04"/>
+		<rotation ydegrees="90"/>
+	  </stlfile>		
+	</component>
+    <component id="Gasket_inner" material="TiZr Alloy">
+	  <stlfile filename="Gasket_inner.stl" scale="mm">
+		<rotation ydegrees="90"/>
+	  </stlfile>		
+	</component>
+    <component id="Fret" material="Steel">
+	  <stlfile filename="Fret.stl" scale="mm">
+		<translation vector="0,0,-14.71"/>
+	  </stlfile>		
+	</component>
+	<component id="Fret" material="Steel">
+	  <stlfile filename="Fret.stl" scale="mm">
+		<rotation ydegrees="180"/>	
+		<translation vector="0,0,14.72"/>
+	  </stlfile>		
+	</component>
+  </components>
+</environmentspec>

@@ -13,6 +13,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidQtWidgets/Common/ConvolutionFunctionModel.h"
 #include <cxxtest/TestSuite.h>
+#include <iostream>
 
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
@@ -20,13 +21,6 @@ using namespace Mantid::API;
 class ConvolutionFunctionModelTest : public CxxTest::TestSuite {
 
 public:
-  static ConvolutionFunctionModelTest *createSuite() {
-    return new ConvolutionFunctionModelTest;
-  }
-  static void destroySuite(ConvolutionFunctionModelTest *suite) {
-    delete suite;
-  }
-
   ConvolutionFunctionModelTest() {
     // To make sure API is initialized properly
     FrameworkManager::Instance();
@@ -35,6 +29,11 @@ public:
   void test_empty() {
     ConvolutionFunctionModel model;
     TS_ASSERT(!model.getFitFunction());
+  }
+
+  void test_clear() {
+    ConvolutionFunctionModel model;
+    model.clear();
   }
 
   void test_no_convolution() {
@@ -98,7 +97,7 @@ public:
     ConvolutionFunctionModel model;
     TS_ASSERT_THROWS_NOTHING(
         model.setFunctionString("name=LinearBackground;(composite=Convolution;"
-                                "name=Resolution;name=Gaussian)"));
+                                "name=Resolution;name=Lorentzian)"));
     TS_ASSERT_EQUALS(model.backgroundPrefix()->toStdString(), "f0.");
     TS_ASSERT_EQUALS(model.convolutionPrefix()->toStdString(), "f1.");
     TS_ASSERT_EQUALS(model.resolutionWorkspace(), "");
@@ -245,6 +244,312 @@ public:
     TS_ASSERT(!model.deltaFunctionPrefix());
     TS_ASSERT(model.peakPrefixes());
     TS_ASSERT_EQUALS(model.peakPrefixes()->at(0).toStdString(), "f1.");
+  }
+
+  void test_setModel_with_resolution_workspace_list_creates_correct_function() {
+    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
+
+    model.setModel("", fitResolutions, "", false, std::vector<double>(), false,
+                   false, 100.0);
+
+    auto fitFunctionAsString = model.getFitFunction()->asString();
+    TS_ASSERT_EQUALS(
+        fitFunctionAsString,
+        "composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
+        "FixResolution=true,NumDeriv=true,$domains=i;name=Resolution,Workspace="
+        "abc,WorkspaceIndex=1,X=(),Y=());(composite=Convolution,FixResolution="
+        "true,NumDeriv=true,$domains=i;name=Resolution,Workspace=abc,"
+        "WorkspaceIndex=2,X=(),Y=())");
+  }
+
+  void test_setModel_with_delta_function_correct() {
+    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
+
+    model.setModel("", fitResolutions, "", true, std::vector<double>(), false,
+                   false, 100.0);
+
+    auto fitFunctionAsString = model.getFitFunction()->asString();
+    std::cout << fitFunctionAsString << std::endl;
+    TS_ASSERT_EQUALS(
+        fitFunctionAsString,
+        "composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
+        "FixResolution=true,NumDeriv=true,$domains=i;name=Resolution,Workspace="
+        "abc,WorkspaceIndex=1,X=(),Y=();name=DeltaFunction,Height=1,Centre=0);("
+        "composite=Convolution,FixResolution="
+        "true,NumDeriv=true,$domains=i;name=Resolution,Workspace=abc,"
+        "WorkspaceIndex=2,X=(),Y=();name=DeltaFunction,Height=1,Centre=0)");
+  }
+
+  void test_setModel_with_delta_function_TeixeiraWaterSQE_correct() {
+    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
+
+    model.setModel("name=FlatBackground", fitResolutions,
+                   "name=TeixeiraWaterSQE", true, std::vector<double>(), false,
+                   false, 100.0);
+
+    auto fitFunctionAsString = model.getFitFunction()->asString();
+    std::cout << fitFunctionAsString << std::endl;
+    TS_ASSERT_EQUALS(
+        fitFunctionAsString,
+        "composite=MultiDomainFunction,NumDeriv=true;(composite="
+        "CompositeFunction,NumDeriv=false,$domains=i;name=FlatBackground,A0=0;("
+        "composite=Convolution,FixResolution=true,NumDeriv=true;name="
+        "Resolution,Workspace=abc,WorkspaceIndex=1,X=(),Y=();(name="
+        "TeixeiraWaterSQE,Q=8.9884656743115785e+307,WorkspaceIndex=2147483647,"
+        "Height=1,DiffCoeff=2.3,Tau=1.25,Centre=0;name=DeltaFunction,Height=1,"
+        "Centre=0)));(composite=CompositeFunction,NumDeriv=false,$domains=i;"
+        "name=FlatBackground,A0=0;(composite=Convolution,FixResolution=true,"
+        "NumDeriv=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=(),Y=()"
+        ";(name=TeixeiraWaterSQE,Q=8.9884656743115785e+307,WorkspaceIndex="
+        "2147483647,Height=1,DiffCoeff=2.3,Tau=1.25,Centre=0;name="
+        "DeltaFunction,Height=1,Centre=0)))");
+  }
+
+  void test_setModel_with_delta_function_TwoLorenztian_correct() {
+    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
+
+    model.setModel("name=FlatBackground", fitResolutions,
+                   "(name=Lorentzian;name=Lorentzian)", true,
+                   std::vector<double>(), false, false, 100.0);
+
+    auto fitFunctionAsString = model.getFitFunction()->asString();
+    TS_ASSERT_EQUALS(
+        fitFunctionAsString,
+        "composite=MultiDomainFunction,NumDeriv=true;(composite="
+        "CompositeFunction,NumDeriv=false,$domains=i;name=FlatBackground,A0=0;("
+        "composite=Convolution,FixResolution=true,NumDeriv=true;name="
+        "Resolution,Workspace=abc,WorkspaceIndex=1,X=(),Y=();(name=Lorentzian,"
+        "Amplitude=1,PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,"
+        "PeakCentre=0,FWHM=0;name=DeltaFunction,Height=1,Centre=0)));("
+        "composite=CompositeFunction,NumDeriv=false,$domains=i;name="
+        "FlatBackground,A0=0;(composite=Convolution,FixResolution=true,"
+        "NumDeriv=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=(),Y=()"
+        ";(name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0;name=Lorentzian,"
+        "Amplitude=1,PeakCentre=0,FWHM=0;name=DeltaFunction,Height=1,Centre=0))"
+        ")");
+  }
+
+  void test_setModel_with_delta_function_TwoLorenztian_correctWithTemp() {
+    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
+
+    model.setModel("name=FlatBackground", fitResolutions,
+                   "(name=Lorentzian;name=Lorentzian)", true,
+                   std::vector<double>(), false, true, 100.0);
+
+    auto fitFunctionAsString = model.getFitFunction()->asString();
+    TS_ASSERT_EQUALS(
+        fitFunctionAsString,
+        "composite=MultiDomainFunction,NumDeriv=true;(composite="
+        "CompositeFunction,NumDeriv=false,$domains=i;name=FlatBackground,A0=0;("
+        "composite=Convolution,FixResolution=true,NumDeriv=true;name="
+        "Resolution,Workspace=abc,WorkspaceIndex=1,X=(),Y=();(name="
+        "DeltaFunction,Height=1,Centre=0;(composite=ProductFunction,NumDeriv="
+        "false;name=UserFunction,Formula=x*11.606/Temp/(1-exp( "
+        "-(x*11.606/"
+        "Temp))),Temp=100,ties=(Temp=100);(name=Lorentzian,Amplitude=1,"
+        "PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0)))"
+        "));(composite=CompositeFunction,NumDeriv=false,$domains=i;name="
+        "FlatBackground,A0=0;(composite=Convolution,FixResolution=true,"
+        "NumDeriv=true;name=Resolution,Workspace=abc,WorkspaceIndex=2,X=(),Y=()"
+        ";(name=DeltaFunction,Height=1,Centre=0;(composite=ProductFunction,"
+        "NumDeriv=false;name=UserFunction,Formula=x*11.606/Temp/(1-exp( "
+        "-(x*11.606/"
+        "Temp))),Temp=100,ties=(Temp=100);(name=Lorentzian,Amplitude=1,"
+        "PeakCentre=0,FWHM=0;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0)))"
+        "))");
+  }
+
+  void test_component_prefixes_set_correctly_without_temp_correction() {
+    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
+
+    model.setModel("name=FlatBackground", fitResolutions,
+                   "(name=Lorentzian;name=Lorentzian)", true,
+                   std::vector<double>(), false, false, 100.0);
+
+    TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
+    TS_ASSERT_EQUALS(model.deltaFunctionPrefix().value().toStdString(),
+                     "f1.f1.f2.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(),
+                     "f1.f1.f0.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[1].toStdString(),
+                     "f1.f1.f1.");
+  }
+
+  void test_component_prefixes_set_correctly_with_temp_correction() {
+    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
+
+    model.setModel("name=FlatBackground", fitResolutions,
+                   "(name=Lorentzian;name=Lorentzian)", false,
+                   std::vector<double>(), false, true, 100.0);
+
+    TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(),
+                     "f1.f1.f1.f0.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[1].toStdString(),
+                     "f1.f1.f1.f1.");
+    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(),
+                     "f1.f1.f0.");
+  }
+
+  void test_component_prefixes_if_only_temp_set() {
+    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
+
+    model.setModel("", fitResolutions, "", false, std::vector<double>(), false,
+                   true, 100.0);
+
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "");
+    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(),
+                     "f1.f0.");
+  }
+
+  void test_component_prefixes_one_lorenzian_temp_set() {
+    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
+
+    model.setModel("name=FlatBackground", fitResolutions, "name=Lorentzian",
+                   false, std::vector<double>(), false, true, 100.0);
+    TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(),
+                     "f1.f1.f1.");
+    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(),
+                     "f1.f1.f0.");
+  }
+
+  void test_component_prefixes_if_temp_and_delta_set() {
+    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    algo->initialize();
+    algo->setPropertyValue("DataX", "1,2,3");
+    algo->setPropertyValue("DataY", "1,2,3");
+    algo->setPropertyValue("OutputWorkspace", "abc");
+    algo->execute();
+    ConvolutionFunctionModel model;
+    model.setNumberDomains(2);
+    auto pair1 = std::make_pair<std::string, int>("abc", 1);
+    auto pair2 = std::make_pair<std::string, int>("abc", 2);
+    auto fitResolutions = std::vector<std::pair<std::string, int>>();
+    fitResolutions.emplace_back(pair1);
+    fitResolutions.emplace_back(pair2);
+
+    model.setModel("name=FlatBackground", fitResolutions, "name=Lorentzian",
+                   true, std::vector<double>(), false, true, 100.0);
+    TS_ASSERT_EQUALS(model.backgroundPrefix().value().toStdString(), "f0.");
+    TS_ASSERT_EQUALS(model.convolutionPrefix().value().toStdString(), "f1.");
+    TS_ASSERT_EQUALS(model.peakPrefixes().value()[0].toStdString(),
+                     "f1.f1.f1.f1.");
+    TS_ASSERT_EQUALS(model.tempFunctionPrefix().value().toStdString(),
+                     "f1.f1.f1.f0.");
+    TS_ASSERT_EQUALS(model.deltaFunctionPrefix().value().toStdString(),
+                     "f1.f1.f0.");
   }
 };
 

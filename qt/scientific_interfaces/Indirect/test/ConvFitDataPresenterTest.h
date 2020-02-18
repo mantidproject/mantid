@@ -12,7 +12,7 @@
 
 #include "ConvFitDataPresenter.h"
 #include "ConvFitModel.h"
-#include "IIndirectFitDataViewLegacy.h"
+#include "IIndirectFitDataView.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -39,7 +39,7 @@ std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockConvFitDataView : public IIndirectFitDataViewLegacy {
+class MockConvFitDataView : public IIndirectFitDataView {
 public:
   /// Signals
   void emitResolutionLoaded(QString const &workspaceName) {
@@ -73,9 +73,12 @@ public:
 
   MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
+  MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
 
   /// Public slots
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
+  MOCK_METHOD1(setStartX, void(double));
+  MOCK_METHOD1(setEndX, void(double));
 };
 
 /// Mock object to mock the model
@@ -137,7 +140,7 @@ public:
 
   void
   test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), 1);
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
   }
 
   ///----------------------------------------------------------------------

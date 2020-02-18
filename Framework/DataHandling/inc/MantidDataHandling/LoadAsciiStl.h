@@ -19,7 +19,7 @@ class MeshObject;
 }
 namespace DataHandling {
 
-class DLLExport LoadAsciiStl : LoadStl {
+class DLLExport LoadAsciiStl : public LoadStl {
 public:
   LoadAsciiStl(std::string filename, ScaleUnits scaleType)
       : LoadStl(filename, scaleType) {}

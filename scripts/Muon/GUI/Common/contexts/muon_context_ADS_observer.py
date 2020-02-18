@@ -79,3 +79,4 @@ class MuonContextADSObserver(AnalysisDataServiceObserver):
         self.observeDelete(False)
         self.observeRename(False)
         self.observeClear(False)
+        self.observeReplace(False)

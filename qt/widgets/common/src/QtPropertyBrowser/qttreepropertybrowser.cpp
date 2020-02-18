@@ -728,6 +728,14 @@ void QtTreePropertyBrowserPrivate::setColumnSizes(int s0, int s1, int s2) {
   }
 }
 
+void QtTreePropertyBrowserPrivate::hideColumn(int col) {
+  m_treeWidget->header()->hideSection(col);
+}
+
+void QtTreePropertyBrowserPrivate::showColumn(int col) {
+  m_treeWidget->header()->showSection(col);
+}
+
 /**
     \class QtTreePropertyBrowser
 
@@ -1090,6 +1098,10 @@ void QtTreePropertyBrowser::editItem(QtBrowserItem *item) {
 void QtTreePropertyBrowser::setColumnSizes(int s0, int s1, int s2) {
   d_ptr->setColumnSizes(s0, s1, s2);
 }
+
+void QtTreePropertyBrowser::hideColumn(int col) { d_ptr->hideColumn(col); }
+
+void QtTreePropertyBrowser::showColumn(int col) { d_ptr->showColumn(col); }
 
 QTreeWidgetItem *QtTreePropertyBrowser::getItemWidget(QtBrowserItem *item) {
   return d_ptr->getItemWidget(item);

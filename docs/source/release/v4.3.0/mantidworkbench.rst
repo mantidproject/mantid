@@ -38,11 +38,15 @@ Improvements
 - Most changes in the settings dialog now take place immediately, no longer needing a restart, such as hiding algorithm categories, interfaces or choosing wether to see invisible workspaces.
 - A warning now appears if you attempt to plot more than ten spectra.
 - Algorithm dialogs will now use the selected workspace as the InputWorkspace when running an algorithm from the algorithms toolbox, as MantidPlot did.
+- Toggle Whitespace in the editor now shows line endings as well as spaces and tabs
 - The Save menu action in the workspaces toolbox to save using version 1 of the SaveAscii algorithm has been removed as no one was using it and it only added confusion. The option to save using the most recent version of SaveASCII is still available.
+- You can now search for functions when doing fits.
+- A help button has been added to the fitting add function dialog.
 
 Bugfixes
 ########
 - Fixed an issue with Workspace History where unrolling consecutive workflow algorithms would result in only one of the algorithms being unrolled.
+- Workbench now saves python files properly on windows and does not double up on line feed characters.
 - Fixed a couple of errors in the python scripts generated from plots for newer versions of Matplotlib.
 - Colorbar scale no longer vanish on colorfill plots with a logarithmic scale
 - Figure options no longer causes a crash when using 2d plots created from a script.
@@ -51,5 +55,6 @@ Bugfixes
 - The Show Instruments right click menu option is now disabled for workspaces that have had their spectrum axis converted to another axis using :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`.  Once this axis has been converetd the workspace loses it's link between the data values and the detectors they were recorded on so we cannot display it in the instrument view.
 - MonitorLiveData now appears promptly in the algorithm details window, allowing live data sessions to be cancelled.
 - Figure options on bin plots open without throwing an error.
+- The help button in fitting now finds the relevant page.
 
 :ref:`Release 4.3.0 <v4.3.0>`

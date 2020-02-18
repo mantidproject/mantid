@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SAMPLEENVIRONMENTSPEC_H_
-#define MANTID_GEOMETRY_SAMPLEENVIRONMENTSPEC_H_
+#ifndef MANTID_DATAHANDLING_SAMPLEENVIRONMENTSPEC_H_
+#define MANTID_DATAHANDLING_SAMPLEENVIRONMENTSPEC_H_
 
-#include "MantidGeometry/DllConfig.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 
@@ -16,7 +16,7 @@
 #include <vector>
 
 namespace Mantid {
-namespace Geometry {
+namespace DataHandling {
 
 /**
   Defines the properties of a named SampleEnvironment setup. It is used
@@ -24,11 +24,12 @@ namespace Geometry {
   configuration of SampleEnvironment. It can be read from XML by a
   SampleEnvironmentParser.
 */
-class MANTID_GEOMETRY_DLL SampleEnvironmentSpec {
+class MANTID_DATAHANDLING_DLL SampleEnvironmentSpec {
 public:
   // Convenience typedefs
-  using ContainerIndex = std::unordered_map<std::string, Container_const_sptr>;
-  using ComponentList = std::vector<IObject_const_sptr>;
+  using ContainerIndex =
+      std::unordered_map<std::string, Geometry::Container_const_sptr>;
+  using ComponentList = std::vector<Geometry::IObject_const_sptr>;
 
   SampleEnvironmentSpec(std::string name);
 
@@ -38,12 +39,13 @@ public:
   inline size_t ncans() const { return m_cans.size(); }
   /// @return The number of non-can components
   inline size_t ncomponents() const { return m_components.size(); }
-  Container_const_sptr findContainer(const std::string &id) const;
+  Geometry::Container_const_sptr findContainer(const std::string &id) const;
 
-  SampleEnvironment_uptr buildEnvironment(const std::string &canID) const;
+  Geometry::SampleEnvironment_uptr
+  buildEnvironment(const std::string &canID) const;
 
-  void addContainer(const Container_const_sptr &can);
-  void addComponent(const IObject_const_sptr &component);
+  void addContainer(const Geometry::Container_const_sptr &can);
+  void addComponent(const Geometry::IObject_const_sptr &component);
 
 private:
   std::string m_name;
@@ -57,7 +59,7 @@ using SampleEnvironmentSpec_uptr = std::unique_ptr<SampleEnvironmentSpec>;
 using SampleEnvironmentSpec_const_uptr =
     std::unique_ptr<const SampleEnvironmentSpec>;
 
-} // namespace Geometry
+} // namespace DataHandling
 } // namespace Mantid
 
-#endif /* MANTID_GEOMETRY_SAMPLEENVIRONMENTSPEC_H_ */
+#endif /* MANTID_DATAHANDLING_SAMPLEENVIRONMENTSPEC_H_ */

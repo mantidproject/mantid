@@ -15,7 +15,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <QDockWidget>
-
 #include <boost/optional.hpp>
 #include <unordered_map>
 
@@ -41,6 +40,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitPropertyBrowser : public QDockWidget {
 
 public:
   IndirectFitPropertyBrowser(QWidget *parent = nullptr);
+
   void init();
   void setFunctionTemplateBrowser(FunctionTemplateBrowser *templateBrowser);
   void setFunction(const QString &funStr);
@@ -52,7 +52,8 @@ public:
   int getPeakRadius() const;
   std::string costFunction() const;
   bool convolveMembers() const;
-  bool isHistogramFit() const;
+  std::string fitEvaluationType() const;
+  std::string fitType() const;
   bool ignoreInvalidData() const;
   void updateParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const IFunction &fun);
@@ -63,7 +64,8 @@ public:
   void setCurrentDataset(TableRowIndex i);
   TableRowIndex currentDataset() const;
   void updateFunctionBrowserData(TableRowIndex nData,
-                                 const QStringList &datasetNames);
+                                 const QStringList &datasetNames,
+                                 const std::vector<double> &qValues);
   void updatePlotGuess(MatrixWorkspace_const_sptr sampleWorkspace);
   void setErrorsEnabled(bool enabled);
   void
@@ -75,6 +77,8 @@ public slots:
   void sequentialFit();
   void setModelResolution(std::string const &name,
                           TableDatasetIndex const &index);
+  void setModelResolution(
+      const std::vector<std::pair<std::string, int>> &fitResolutions);
 
 protected slots:
   void clear();

@@ -85,6 +85,17 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
       nullptr, FitOptionsBrowser::SimultaneousAndSequential);
   m_fitOptionsBrowser->setObjectName("fitOptionsBrowser");
   m_fitOptionsBrowser->setCurrentFittingType(FitOptionsBrowser::Sequential);
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("CreateOutput"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("LogValue"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PassWSIndexToFunction"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("ConvolveMembers"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(
+      QString("OutputCompositeMembers"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("OutputWorkspace"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("IgnoreInvalidData"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("Output"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PeakRadius"));
+  m_fitOptionsBrowser->addPropertyToBlacklist(QString("PlotParameter"));
 }
 
 bool IndirectFitPropertyBrowser::isFullFunctionBrowserActive() const {
@@ -127,8 +138,8 @@ QStringList IndirectFitPropertyBrowser::getLocalParameters() const {
 
 void IndirectFitPropertyBrowser::syncFullBrowserWithTemplate() {
   auto const fun = m_templateBrowser->getFunction();
-  m_functionBrowser->setFunction(fun);
   if (fun) {
+    m_functionBrowser->setFunction(fun);
     m_functionBrowser->updateMultiDatasetParameters(
         *m_templateBrowser->getGlobalFunction());
     m_functionBrowser->setGlobalParameters(
@@ -140,8 +151,8 @@ void IndirectFitPropertyBrowser::syncFullBrowserWithTemplate() {
 
 void IndirectFitPropertyBrowser::syncTemplateBrowserWithFull() {
   auto const funStr = m_functionBrowser->getFunctionString();
-  m_templateBrowser->setFunction(funStr);
   if (auto const fun = m_functionBrowser->getGlobalFunction()) {
+    m_templateBrowser->setFunction(funStr);
     m_templateBrowser->updateMultiDatasetParameters(*fun);
     m_templateBrowser->setGlobalParameters(
         m_functionBrowser->getGlobalParameters());
@@ -234,11 +245,20 @@ std::string IndirectFitPropertyBrowser::costFunction() const {
   return m_fitOptionsBrowser->getProperty("CostFunction").toStdString();
 }
 
-bool IndirectFitPropertyBrowser::convolveMembers() const { return false; }
+bool IndirectFitPropertyBrowser::convolveMembers() const {
+  return m_fitOptionsBrowser->getProperty("ConvolveMembers").toStdString() !=
+         "0";
+}
 
-bool IndirectFitPropertyBrowser::isHistogramFit() const { return false; }
+std::string IndirectFitPropertyBrowser::fitEvaluationType() const {
+  return m_fitOptionsBrowser->getProperty("EvaluationType").toStdString();
+}
 
 bool IndirectFitPropertyBrowser::ignoreInvalidData() const { return false; }
+
+std::string IndirectFitPropertyBrowser::fitType() const {
+  return m_fitOptionsBrowser->getProperty("FitType").toStdString();
+}
 
 int IndirectFitPropertyBrowser::getNumberOfDatasets() const {
   return isFullFunctionBrowserActive()
@@ -333,11 +353,13 @@ TableRowIndex IndirectFitPropertyBrowser::currentDataset() const {
 }
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(
-    TableRowIndex nData, const QStringList &datasetNames) {
+    TableRowIndex nData, const QStringList &datasetNames,
+    const std::vector<double> &qValues) {
   m_functionBrowser->setNumberOfDatasets(nData.value);
   m_functionBrowser->setDatasetNames(datasetNames);
   m_templateBrowser->setNumberOfDatasets(nData.value);
   m_templateBrowser->setDatasetNames(datasetNames);
+  m_templateBrowser->setQValues(qValues);
 }
 
 void IndirectFitPropertyBrowser::setFitEnabled(bool) {}
@@ -360,6 +382,14 @@ void IndirectFitPropertyBrowser::setModelResolution(
     showFullFunctionBrowser(false);
   }
   m_templateBrowser->setResolution(name, index);
+}
+
+void IndirectFitPropertyBrowser::setModelResolution(
+    const std::vector<std::pair<std::string, int>> &fitResolutions) {
+  if (isFullFunctionBrowserActive()) {
+    showFullFunctionBrowser(false);
+  }
+  m_templateBrowser->setResolution(fitResolutions);
 }
 
 /**

@@ -10,26 +10,23 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 QWidget *WorkspaceEditorFactory::createEditorForManager(
-    QtStringPropertyManager * /*manager*/, QtProperty *property,
-    QWidget *parent) {
-  return new WorkspaceEditor(property, parent);
+    QtStringPropertyManager *manager, QtProperty *property, QWidget *parent) {
+  return new WorkspaceEditor(property, manager, parent);
 }
 
-WorkspaceEditor::WorkspaceEditor(QtProperty *property, QWidget *parent)
-    : WorkspaceSelector(parent), m_property(property) {
+WorkspaceEditor::WorkspaceEditor(QtProperty *property,
+                                 QtStringPropertyManager *manager,
+                                 QWidget *parent)
+    : WorkspaceSelector(parent), m_property(property), m_manager(manager) {
   this->insertItem(0, "");
-  updateProperty(this->itemText(0));
-  this->setCurrentIndex(0);
+  auto currentValue = m_manager->value(m_property);
+  this->setCurrentIndex(this->findText(currentValue));
   connect(this, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(updateProperty(const QString &)));
 }
 
 void WorkspaceEditor::updateProperty(const QString &text) {
-  QtStringPropertyManager *mgr =
-      dynamic_cast<QtStringPropertyManager *>(m_property->propertyManager());
-  if (mgr) {
-    mgr->setValue(m_property, text);
-  }
+  m_manager->setValue(m_property, text);
 }
 } // namespace MantidWidgets
 } // namespace MantidQt
