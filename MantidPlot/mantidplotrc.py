@@ -28,7 +28,7 @@ if __name__ == '__main__':
     # Import MantidPlot python commands
     import mantidplot
     from mantidplot import *
-    #cache plotSpectrum and plotBin as the wrill be overwritten when we import simpleapi
+    # cache plotSpectrum and plotBin as the will be overwritten when we import simpleapi
     _plotSpectrum_saved = plotSpectrum
     _plotBin_saved = plotBin
     

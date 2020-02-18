@@ -74,7 +74,7 @@ def add_md_workspace_with_data(dimensions=2):
     return function_wrapper
 
 
-class HelperFunctionsTest(unittest.TestCase):
+class DataFunctionsTest(unittest.TestCase):
     
     @classmethod
     def setUpClass(cls):

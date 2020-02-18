@@ -35,7 +35,7 @@ def plotSpectrum(workspaces, indices=None, distribution=None, error_bars=False,
                          divide by bin width. ``True`` means do not divide by bin width.
                          Applies only when the the workspace is a MatrixWorkspace histogram.
     :param error_bars: If true then error bars will be added for each curve
-    :param type: curve style for plot it 1: scatter/dots otherwiserline, default
+    :param type: curve style for plot it 1: scatter/dots otherwise line which is default
     :param window: If passed an existing plot then the plot will occur in that plot
     :param clearWindow: If true, and window set then the plot will be cleared before adding these curves
     :param waterfall: If true then a waterfall plot will be produced
@@ -48,9 +48,9 @@ def plotSpectrum(workspaces, indices=None, distribution=None, error_bars=False,
     if type==1:
         plot_kwargs["linestyle"] = "None"
         plot_kwargs["marker"] = "."
-    return plot(_assert_object_in_list(workspaces), wksp_indices=_assert_object_in_list(indices),
-                 errors=error_bars, spectrum_nums=_assert_object_in_list(spectrum_nums), waterfall = waterfall,
-                 fig=window, overplot=((window is not None) and not clearWindow), plot_kwargs=plot_kwargs)
+    return plot(_ensure_object_is_list(workspaces), wksp_indices=_ensure_object_is_list(indices),
+                errors=error_bars, spectrum_nums=_ensure_object_is_list(spectrum_nums), waterfall = waterfall,
+                fig=window, overplot=((window is not None) and not clearWindow), plot_kwargs=plot_kwargs)
 
 
 def plotBin(workspaces, indices, error_bars=False, type=None, window=None, clearWindow=None,
@@ -77,15 +77,15 @@ def plotBin(workspaces, indices, error_bars=False, type=None, window=None, clear
     if type==1:
         plot_kwargs["linestyle"] = "None"
         plot_kwargs["marker"] = "."
-    return plot(_assert_object_in_list(workspaces), wksp_indices=_assert_object_in_list(indices),
-                 errors=error_bars, plot_kwargs=plot_kwargs, fig = window, waterfall = waterfall,
-                 overplot = ((window is not None) and not clearWindow))
+    return plot(_ensure_object_is_list(workspaces), wksp_indices=_ensure_object_is_list(indices),
+                errors=error_bars, plot_kwargs=plot_kwargs, fig = window, waterfall = waterfall,
+                overplot = ((window is not None) and not clearWindow))
 
 
 # -----------------------------------------------------------------------------
 # 'Private' Functions
 # -----------------------------------------------------------------------------
-def _assert_object_in_list(object):
+def _ensure_object_is_list(object):
     """If the object is not a list itself it will be returned in a list"""
     if (object is None) or isinstance(object, list):
         return object
