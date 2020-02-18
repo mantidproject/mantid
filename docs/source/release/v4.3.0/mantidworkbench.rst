@@ -45,6 +45,7 @@ Bugfixes
 - Fixed a couple of errors in the python scripts generated from plots for newer versions of Matplotlib.
 - Colorbar scale no longer vanish on colorfill plots with a logarithmic scale
 - Figure options no longer causes a crash when using 2d plots created from a script.
+- You can now execute algorithms with multiple versions by double clicking on them in the algorithm toolbox, this will now execute them rather than opening the tree to show previous versions.  You can still click on the arrow to see and execute previous versions.
 - Running an algorithm that reduces the number of spectra on an active plot (eg SumSpectra) no longer causes an error
 - Fix crash when loading a script with syntax errors
 - The Show Instruments right click menu option is now disabled for workspaces that have had their spectrum axis converted to another axis using :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`.  Once this axis has been converetd the workspace loses it's link between the data values and the detectors they were recorded on so we cannot display it in the instrument view.
