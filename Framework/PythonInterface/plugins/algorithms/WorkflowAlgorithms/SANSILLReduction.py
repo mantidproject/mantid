@@ -117,7 +117,7 @@ class SANSILLReduction(PythonAlgorithm):
                              doc='Choose the normalisation type.')
 
         self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.),
-                             doc='Beam raduis [m]; used for beam center finding, transmission and flux calculations.')
+                             doc='Beam radius [m]; used for beam center finding, transmission and flux calculations.')
 
         self.setPropertySettings('BeamRadius',
                                  EnabledWhenProperty(beam, transmission, LogicOperator.Or))
@@ -218,6 +218,9 @@ class SANSILLReduction(PythonAlgorithm):
                              doc='Workspace to copy the mask from; for example, the bad detector edges.')
 
         self.setPropertySettings('DefaultMaskedInputWorkspace', sample)
+
+        self.declareProperty('ThetaDependent', True,
+                             doc='Whether or not to use 2theta dependent transmission correction')
 
     def _normalise(self, ws):
         """
@@ -374,7 +377,7 @@ class SANSILLReduction(PythonAlgorithm):
         """
             Subtracts the dark current
             @param ws: input workspace
-            @parma absorber_ws: dark current workspace
+            @param absorber_ws: dark current workspace
         """
         if not self._check_processed_flag(absorber_ws, 'Absorber'):
             self.log().warning('Absorber input workspace is not processed as absorber.')
@@ -402,6 +405,7 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws: input workspace
             @param transmission_ws: transmission workspace
         """
+        theta_dependent = self.getProperty('ThetaDependent').value
         if not self._check_processed_flag(transmission_ws, 'Transmission'):
             self.log().warning('Transmission input workspace is not processed as transmission.')
         if transmission_ws.blocksize() == 1:
@@ -409,14 +413,15 @@ class SANSILLReduction(PythonAlgorithm):
             transmission = transmission_ws.readY(0)[0]
             transmission_err = transmission_ws.readE(0)[0]
             ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
-                                        TransmissionError=transmission_err, OutputWorkspace=ws)
+                                        TransmissionError=transmission_err, ThetaDependent=theta_dependent,
+                                        OutputWorkspace=ws)
         else:
             # wavelenght dependent transmission, need to rebin
             transmission_rebinned = ws + '_tr_rebinned'
             RebinToWorkspace(WorkspaceToRebin=transmission_ws, WorkspaceToMatch=ws,
                              OutputWorkspace=transmission_rebinned)
             ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionWorkspace=transmission_rebinned,
-                                        OutputWorkspace=ws)
+                                        ThetaDependent=theta_dependent, OutputWorkspace=ws)
             DeleteWorkspace(transmission_rebinned)
 
     def _apply_container(self, ws, container_ws):
