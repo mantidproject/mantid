@@ -289,6 +289,7 @@ squared = sum*sum
 
         return executor, recv
 
+
 class CodeBlocksTest(unittest.TestCase):
     def test_block_splitting_simple_lines(self):
         code_str = r"""# make a dictionary from two lists
@@ -467,7 +468,7 @@ if KeyToAdd not in MyDict:
 
         # just the tab preceeding print is converted
         expected_blocks = ["if a=='this is a line with\tinternal\t tabs':\n" +
-                        "    print('another with\tinternal\t tabs')\n"]
+                                "    print('another with\tinternal\t tabs')\n"]
         self._compare_block_splitting(code_str, expected_blocks)
 
     def _compare_block_splitting(self, code_str, expected_blocks):
