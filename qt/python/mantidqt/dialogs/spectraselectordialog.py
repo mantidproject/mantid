@@ -171,6 +171,12 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
         self._parse_wksp_indices()
         ui.wkspIndicesValid.setVisible(not self._is_input_valid())
+        if self._is_input_valid():
+            ui.wkspIndicesValid.setVisible(False)
+            ui.wkspIndicesValid.setToolTip("")
+        else:
+            ui.wkspIndicesValid.setVisible(True)
+            ui.wkspIndicesValid.setToolTip("Not in " + ui.wkspIndices.placeholderText())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
     def _on_specnums_changed(self):
@@ -180,6 +186,13 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
         self._parse_spec_nums()
         ui.specNumsValid.setVisible(not self._is_input_valid())
+        if self._is_input_valid():
+            ui.specNumsValid.setVisible(False)
+            ui.specNumsValid.setToolTip("")
+        else:
+            ui.specNumsValid.setVisible(True)
+            ui.specNumsValid.setToolTip("Not in " + ui.specNums.placeholderText())
+        ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
     def _on_plot_type_changed(self, new_index):
