@@ -115,6 +115,9 @@ public slots:
   void onPerAngleDefaultsChanged(int row, int column);
 
 private:
+  void
+  initializeTableColumns(QTableWidget &table,
+                         Mantid::API::IAlgorithm_sptr algorithmForTooltips);
   void initializeTableItems(QTableWidget &table);
   void initializeTableRow(QTableWidget &table, int row);
   void initializeTableRow(QTableWidget &table, int row,
@@ -124,8 +127,8 @@ private:
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
 
   /// Initialise the interface
-  void initLayout();
-  void initOptionsTable();
+  void initLayout(Mantid::API::IAlgorithm_sptr algorithmForTooltips);
+  void initOptionsTable(Mantid::API::IAlgorithm_sptr algorithmForTooltips);
   void initFloodControls();
   void registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
   void registerExperimentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
@@ -175,6 +178,8 @@ private:
   std::unique_ptr<QShortcut> m_deleteShortcut;
   Ui::ExperimentWidget m_ui;
   ExperimentViewSubscriber *m_notifyee;
+  std::array<QString, PerThetaDefaults::OPTIONS_TABLE_COLUMN_COUNT>
+      m_columnToolTips;
 
   friend class Encoder;
   friend class Decoder;

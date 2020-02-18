@@ -109,7 +109,7 @@ public:
     // check it categories
     const std::vector<std::string> categories = out->categories();
     TS_ASSERT(categories.size() == 1);
-    TS_ASSERT(categories[0] == "MuonSpecific");
+    TS_ASSERT(categories[0] == "Muon\\MuonSpecific");
 
     AnalysisDataService::Instance().remove(wsName);
   }

@@ -15,7 +15,7 @@ import numpy as np
 class CropWorkspaceRagged(PythonAlgorithm):
 
     def category(self):
-        return 'Transforms\\Splitting;Workflow'
+        return 'Transforms\\Splitting'
 
     def seeAlso(self):
         return [ "CropWorkspace" ]

@@ -7,12 +7,8 @@
 #  This file is part of the mantid workbench.
 
 from __future__ import (absolute_import, unicode_literals)
-from numpy import arange
 
-from matplotlib.colors import LogNorm
-from matplotlib.ticker import LogLocator
-
-from mantid.kernel import logger
+from mantid.plots.helperfunctions import update_colorbar_scale
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_images_from_fig
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
@@ -40,26 +36,10 @@ class ImagesTabWidgetPresenter:
         image = self.get_selected_image()
         self.set_selected_image_label(props.label)
         image.set_cmap(props.colormap)
-        if props.vmin == 0:
-            props.vmin += 1e-6  # Avoid 0 log scale error
-        image.set_norm(SCALES[props.scale](vmin=props.vmin, vmax=props.vmax))
         if props.interpolation:
             image.set_interpolation(props.interpolation)
 
-        current_axis_images = get_images_from_fig(self.fig)[-1]
-
-        if current_axis_images.colorbar:
-            current_axis_images.colorbar.remove()
-
-        locator = None
-        if SCALES[props.scale] == LogNorm:
-            locator = LogLocator(subs=arange(1, 10))
-            if locator.tick_values(vmin=props.vmin,  vmax=props.vmax).size == 0:
-                locator = LogLocator()
-                logger.warning("Minor ticks on colorbar scale cannot be shown "
-                               "as the range between min value and max value is too large")
-
-        self.fig.colorbar(image, ticks=locator)
+        update_colorbar_scale(self.fig, image, SCALES[props.scale], props.vmin, props.vmax)
 
         if props.vmin > props.vmax:
             self.view.max_min_value_warning.setVisible(True)

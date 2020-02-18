@@ -7,12 +7,12 @@
 import unittest
 
 from sans.common.enums import BinningType
-from sans.gui_logic.models.summation_settings import SummationSettings
+from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 
 
 class SummationSettingsTestCase(unittest.TestCase):
     def setUpWithInitialType(self, initial_type):
-        self.summation_settings = SummationSettings(initial_type)
+        self.summation_settings = SummationSettingsModel(initial_type)
 
     def setUp(self):
         self.setUpWithInitialType(BinningType.CUSTOM)

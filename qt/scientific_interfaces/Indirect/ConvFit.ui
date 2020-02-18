@@ -22,7 +22,7 @@
      <property name="childrenCollapsible">
       <bool>false</bool>
      </property>
-     <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitDataViewLegacy" name="fitDataView" native="true">
+     <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitDataView" name="fitDataView" native="true">
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -38,12 +38,12 @@
           <enum>QLayout::SetNoConstraint</enum>
          </property>
          <item>
-          <widget class="MantidQt::MantidWidgets::IndirectFitPropertyBrowserLegacy" name="fitPropertyBrowser">
+          <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitPropertyBrowser" name="fitPropertyBrowser">
            <widget class="QWidget" name="dockWidgetContents_2"/>
           </widget>
          </item>
          <item>
-          <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitPlotViewLegacy" name="pvFitPlotView" native="true"/>
+          <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitPlotView" name="pvFitPlotView" native="true"/>
          </item>
         </layout>
        </item>
@@ -71,7 +71,7 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionViewLegacy" name="svSpectrumView" native="true">
+             <widget class="MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView" name="svSpectrumView" native="true">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>1</horstretch>
@@ -150,27 +150,27 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionViewLegacy</class>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectSpectrumSelectionView</class>
    <extends>QWidget</extends>
-   <header>IndirectSpectrumSelectionViewLegacy.h</header>
+   <header>IndirectSpectrumSelectionView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::MantidWidgets::IndirectFitPropertyBrowserLegacy</class>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectFitPropertyBrowser</class>
    <extends>QDockWidget</extends>
-   <header>MantidQtWidgets/Common/IndirectFitPropertyBrowserLegacy.h</header>
+   <header>IndirectFitPropertyBrowser.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::IndirectFitPlotViewLegacy</class>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectFitPlotView</class>
    <extends>QWidget</extends>
-   <header>IndirectFitPlotViewLegacy.h</header>
+   <header>IndirectFitPlotView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::IDA::IndirectFitDataViewLegacy</class>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectFitDataView</class>
    <extends>QWidget</extends>
-   <header>IndirectFitDataViewLegacy.h</header>
+   <header>IndirectFitDataView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

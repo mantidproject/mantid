@@ -78,7 +78,7 @@ class SettingsPresenter(object):
         try:
             all_keys = settings.keys() == SETTINGS_DICT.keys()
             save_location = str(settings["save_location"])
-            save_valid = save_location is not "" and save_location is not None
+            save_valid = save_location != "" and save_location is not None
             recalc_valid = settings["recalc_vanadium"] is not None
             return all_keys and save_valid and recalc_valid
         except KeyError:  # Settings contained invalid key.

@@ -30,7 +30,7 @@ public:
   std::string name() const override { return "MuonFInteraction"; }
 
   /// overwrite IFunction base class methods
-  const std::string category() const override { return "MuonSpecific"; }
+  const std::string category() const override { return "Muon\\MuonSpecific"; }
 
 protected:
   void function1D(double *out, const double *xValues,

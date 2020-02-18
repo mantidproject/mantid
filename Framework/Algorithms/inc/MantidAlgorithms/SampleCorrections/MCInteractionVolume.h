@@ -19,6 +19,7 @@ class Sample;
 namespace Geometry {
 class IObject;
 class SampleEnvironment;
+class Track;
 } // namespace Geometry
 
 namespace Kernel {
@@ -46,10 +47,14 @@ public:
                       Kernel::Logger &logger) = delete;
 
   const Geometry::BoundingBox &getBoundingBox() const;
-  double calculateAbsorption(Kernel::PseudoRandomNumberGenerator &rng,
-                             const Kernel::V3D &startPos,
-                             const Kernel::V3D &endPos, double lambdaBefore,
-                             double lambdaAfter);
+  bool calculateBeforeAfterTrack(Kernel::PseudoRandomNumberGenerator &rng,
+                                 const Kernel::V3D &startPos,
+                                 const Kernel::V3D &endPos,
+                                 Geometry::Track &beforeScatter,
+                                 Geometry::Track &afterScatter);
+  double calculateAbsorption(const Geometry::Track &beforeScatter,
+                             const Geometry::Track &afterScatter,
+                             double lambdaBefore, double lambdaAfter) const;
   void generateScatterPointStats();
   Kernel::V3D generatePoint(Kernel::PseudoRandomNumberGenerator &rng);
 

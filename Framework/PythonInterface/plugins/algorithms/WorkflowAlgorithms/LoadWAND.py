@@ -37,7 +37,7 @@ class LoadWAND(DataProcessorAlgorithm):
         issues = dict()
 
         if not self.getProperty("Filename").value:
-            if (self.getProperty("IPTS").value == Property.EMPTY_INT) or len(self.getProperty("RunNumbers").value) is 0:
+            if (self.getProperty("IPTS").value == Property.EMPTY_INT) or len(self.getProperty("RunNumbers").value) == 0:
                 issues["Filename"] = 'Must specify either Filename or IPTS AND RunNumbers'
 
         return issues

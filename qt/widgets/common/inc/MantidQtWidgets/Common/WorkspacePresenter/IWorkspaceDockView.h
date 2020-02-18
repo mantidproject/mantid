@@ -31,7 +31,7 @@ class IWorkspaceDockView {
 public:
   enum class SortDirection { Ascending, Descending };
   enum class SortCriteria { ByName, ByLastModified, ByMemorySize };
-  enum class SaveFileType { Nexus, ASCII, ASCIIv1 };
+  enum class SaveFileType { Nexus, ASCII };
 
   virtual ~IWorkspaceDockView(){};
 

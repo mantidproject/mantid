@@ -81,7 +81,7 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
 
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
-                    sample_details=None, output_binning=None, pdf_type="G(r)"):
+                    sample_details=None, output_binning=None, pdf_type="G(r)", freq_params=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
@@ -108,9 +108,12 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
         q_min, q_max = _load_qlims(q_lims)
         merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
                                                    CalculateScale=False)
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace=merged_ws, InputSofQType="S(Q)-1", PDFType=pdf_type,
+        fast_fourier_filter(merged_ws, freq_params)
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=True)
     else:
+        for ws in focused_ws:
+            fast_fourier_filter(ws, freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1",
                                                 PDFType=pdf_type, Filter=True)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
@@ -166,8 +169,8 @@ def _load_qlims(q_lims):
         except IOError as exc:
             raise RuntimeError("q_lims path is not valid: {}".format(exc))
     elif isinstance(q_lims, (list, tuple)) or isinstance(q_lims, np.ndarray):
-        q_min = q_lims[0, :]
-        q_max = q_lims[1, :]
+        q_min = q_lims[0]
+        q_max = q_lims[1]
     else:
         raise RuntimeError("q_lims type is not valid. Expected a string filename or an array.")
     return q_min, q_max
@@ -185,3 +188,31 @@ def _determine_chopper_mode(ws):
             return 'PDF', polaris_advanced_config.pdf_focused_cropping_values
     else:
         raise ValueError("Chopper frequency not in log data. Please specify a chopper mode")
+
+
+def fast_fourier_filter(ws, freq_params=None):
+    if not freq_params:
+        return
+    # This is a simple fourier filter using the FFTSmooth to get a WS with only the low radius components, then
+    # subtracting that from the merged WS
+
+    x_range = ws.dataX(0)
+    # The param p in FFTSmooth defined such that if the input ws has Nx bins then in the fourier space ws it will cut of
+    # all frequencies in bins nk=Nk/p and above, calculated by p = pi/(k_c*dQ) when k_c is the cutoff frequency desired.
+    # The input ws of FFTSmooth has binning [x_min, dx, x_max], with Nx bins.
+    # FFTSmooth doubles the length of the input ws and preforms an FFT with output ws binning
+    # [0, dk, k_max]=[0, 1/2*(x_max-x_min), 1/(2*dx)], and Nk=Nx bins.
+    # k_max/k_c = Nk/nk
+    # 1/(k_c*2*dx) = p
+    # because FFT uses sin(2*pi*k*x) while PDFFourierTransform uses sin(Q*r) we need to include a factor of 2*pi
+    # p = pi/(k_c*dQ)
+    lower_freq_param = round(np.pi / (freq_params[0] * (x_range[1] - x_range[0])))
+    # This is giving the FFTSmooth the data in the form of S(Q)-1, later we use PDFFourierTransform with Q(S(Q)-1)
+    # it does not matter which we use in this case.
+    tmp = mantid.FFTSmooth(InputWorkspace=ws, Filter="Zeroing", Params=str(lower_freq_param), StoreInADS=False,
+                           IgnoreXBins=True)
+    mantid.Minus(LHSWorkspace=ws, RHSWorkspace=tmp, OutputWorkspace=ws)
+    if len(freq_params) > 1:
+        upper_freq_param = round(np.pi / (freq_params[1] * (x_range[1] - x_range[0])))
+        mantid.FFTSmooth(InputWorkspace=ws, OutputWorkspace=ws, Filter="Zeroing",
+                         Params=str(upper_freq_param), IgnoreXBins=True)

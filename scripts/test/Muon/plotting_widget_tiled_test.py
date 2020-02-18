@@ -278,7 +278,7 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
         self.context.fitting_context.fit_list.__getitem__.return_value = fit_information
         self.context.fitting_context.number_of_fits = 1
 
-        self.presenter.handle_fit_completed()
+        self.presenter.handle_fit_completed(fit_information)
 
         # 2 fit workspaces per plotted workspace
         self.assertEqual(self.model.add_workspace_to_plot.call_count, 2 * len(self.group_workspace_list))

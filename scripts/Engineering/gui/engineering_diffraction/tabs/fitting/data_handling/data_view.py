@@ -22,6 +22,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.finder_data.setLabelText("Focused Run Files")
         self.finder_data.isForRunFiles(False)
         self.finder_data.allowMultipleFiles(True)
+        self.finder_data.setFileExtensions([".nxs"])
 
     # =================
     # Slot Connectors
@@ -33,12 +34,42 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_enable_button_connection(self, slot):
         self.sig_enable_load_button.connect(slot)
 
+    def set_on_remove_all_clicked(self, slot):
+        self.button_removeAll.clicked.connect(slot)
+
+    def set_on_remove_selected_clicked(self, slot):
+        self.button_removeSelected.clicked.connect(slot)
+
+    def set_on_table_cell_changed(self, slot):
+        self.table_selection.cellChanged.connect(slot)  # Row, Col
+
     # =================
     # Component Setters
     # =================
 
     def set_load_button_enabled(self, enabled):
         self.button_load.setEnabled(enabled)
+
+    def add_table_row(self, run_no, bank):
+        row_no = self.table_selection.rowCount()
+        self.table_selection.insertRow(row_no)
+        self.table_selection.setItem(row_no, 0, QtWidgets.QTableWidgetItem(str(run_no)))
+        self.table_selection.setItem(row_no, 1, QtWidgets.QTableWidgetItem(str(bank)))
+        check_box = QtWidgets.QTableWidgetItem()
+        check_box.setCheckState(QtCore.Qt.Unchecked)
+        self.table_selection.setItem(row_no, 2, check_box)
+
+    def remove_table_row(self, row_no):
+        self.table_selection.removeRow(row_no)
+
+    def remove_all(self):
+        self.table_selection.setRowCount(0)
+
+    def remove_selected(self):
+        selected = self.get_selected_rows()
+        for row in reversed(sorted(selected)):
+            self.remove_table_row(row)
+        return selected
 
     # =================
     # Component Getters
@@ -52,6 +83,9 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
     def get_add_to_plot(self):
         return self.check_addToPlot.isChecked()
+
+    def get_selected_rows(self):
+        return set(index.row() for index in self.table_selection.selectedIndexes())
 
     # =================
     # State Getters

@@ -36,6 +36,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
                                                                                 XLength=1, YLength=1)
             self.__class__._multi_spec_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=200,
                                                                                XLength=1, YLength=1)
+        SpectraSelectionDialog._check_number_of_plots = mock.Mock(return_value=True)
 
     def test_initial_dialog_setup(self):
         workspaces = [self._multi_spec_ws]

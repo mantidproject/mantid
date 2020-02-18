@@ -506,7 +506,7 @@ class CompositeFunctionWrapper(FunctionWrapper):
         comp = self.fun
         if (isinstance(nameorindex, str) and not comp.hasParameter(nameorindex)) \
                 or (isinstance(nameorindex, int) and nameorindex >= comp.nParams()):
-            raise AttributeError("Parameter %s not found" % nameorIndex)
+            raise AttributeError("Parameter %s not found" % nameorindex)
         item = comp[nameorindex]
         if isinstance(item, float):
             return  item
