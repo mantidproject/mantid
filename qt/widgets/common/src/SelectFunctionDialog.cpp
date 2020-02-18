@@ -12,6 +12,7 @@
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidQtWidgets/Common/HelpWindow.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -43,7 +44,7 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent)
  */
 SelectFunctionDialog::SelectFunctionDialog(
     QWidget *parent, const std::vector<std::string> &restrictions)
-    : QDialog(parent), m_form(new Ui::SelectFunctionDialog) {
+    : MantidDialog(parent), m_form(new Ui::SelectFunctionDialog) {
   setWindowModality(Qt::WindowModal);
   setWindowIcon(QIcon(":/images/MantidIcon.ico"));
   m_form->setupUi(this);
@@ -86,6 +87,8 @@ SelectFunctionDialog::SelectFunctionDialog(
   connect(m_form->buttonBox, SIGNAL(rejected()), this, SLOT(rejectFunction()));
 
   m_form->searchBox->setCurrentIndex(-1);
+
+  connect(m_form->helpButton, SIGNAL(clicked()), this, SLOT(helpClicked()));
 }
 
 /**
@@ -225,6 +228,15 @@ void SelectFunctionDialog::acceptFunction() {
 void SelectFunctionDialog::rejectFunction() {
   m_form->errorMessage->hide();
   reject();
+}
+
+void SelectFunctionDialog::helpClicked() const {
+  auto function = getFunction();
+  if (!function.isEmpty()) {
+    MantidQt::API::HelpWindow::showFitFunction(nullptr, function.toStdString());
+  } else { // No function selected open fit function index
+    MantidQt::API::HelpWindow::showFitFunction(nullptr, "");
+  }
 }
 
 } // namespace MantidWidgets
