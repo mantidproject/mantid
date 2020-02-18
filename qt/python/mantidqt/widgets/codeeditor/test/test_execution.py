@@ -290,7 +290,6 @@ squared = sum*sum
         return executor, recv
 
 class CodeBlocksTest(unittest.TestCase):
-
     def test_block_splitting_simple_lines(self):
         code_str = r"""# make a dictionary from two lists
 keys = ['a','b','c']
@@ -376,14 +375,14 @@ def UndefinedFunction4(a=0.0):
     print(a)
 elif b==1:
     print(b)
-else: 
+else:
     print (a+b)"""
         expected_blocks = [
             """if a==1:
     print(a)
 elif b==1:
     print(b)
-else: 
+else:
     print (a+b)
 """]
         self._compare_block_splitting(code_str, expected_blocks)
@@ -424,7 +423,7 @@ except:
         we="left a blank space"
     back="to the original loop"
 
-next='line after a gap'"""
+next='line after a gap'""" # noqa
         # not currently ideal blocking, but it does not fail
         expected_blocks = [
             """for i in range(10):
@@ -439,7 +438,7 @@ next='line after a gap'"""
     back="to the original loop"
 
 next='line after a gap'
-"""]
+"""] # noqa
         self._compare_block_splitting(code_str, expected_blocks)
 
     def test_block_splitting_handles_comment_lines(self):
@@ -467,7 +466,7 @@ if KeyToAdd not in MyDict:
                         "\tprint('another with\tinternal\t tabs')\n"
 
         # just the tab preceeding print is converted
-        expected_blocks = ["if a=='this is a line with\tinternal\t tabs':\n" + \
+        expected_blocks = ["if a=='this is a line with\tinternal\t tabs':\n" +
                         "    print('another with\tinternal\t tabs')\n"]
         self._compare_block_splitting(code_str, expected_blocks)
 

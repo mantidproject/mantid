@@ -188,7 +188,6 @@ def code_blocks(code_str):
     """Generator to produce blocks of executable code
     from the given code string.
     """
-    re_leading_tabs = re.compile(r"^(\ *\t+\ *)(.*?)$")
     lineno_cur = 0
     lines = code_str.splitlines()
     line_count = len(lines)

@@ -29,6 +29,7 @@ class InputSplitter(IPyInputSplitter):
     """
 
     non_coding_line_re = re.compile(r'^(\s*|\s+\#.*)*$') # whitespace or indented comment only lines
+
     def push(self, lines, next_lines):
         """Push one or more lines of input.
 
