@@ -127,7 +127,6 @@ std::string CrystalFieldSpectrum::writeToString(
     }
   }
 
-  std::vector<std::string> constraints;
   const auto &spectrum = dynamic_cast<const CompositeFunction &>(*m_target);
   for (size_t ip = 0; ip < spectrum.nFunctions(); ++ip) {
     const auto &peak = dynamic_cast<IPeakFunction &>(*spectrum.getFunction(ip));
