@@ -388,30 +388,6 @@ else:
 """]
         self._compare_block_splitting(code_str, expected_blocks)
 
-    def test_block_splitting_handles_blank_lines(self):
-        code_str = """print ("already defined:",dir())
-try:
-    x=UndefinedFunction4()
-except:
-
-    print ("need to define my own UndefinedFunction4")
-    def UndefinedFunction4(a=0.0):
-        return a*2
-print(UndefinedFunction4(3))"""
-        expected_blocks = [
-            'print ("already defined:",dir())\n',
-            """\ntry:
-    x=UndefinedFunction4()
-except:
-
-    print ("need to define my own UndefinedFunction4")
-    def UndefinedFunction4(a=0.0):
-        return a*2
-""",
-            '\n\n\n\n\n\n\n\nprint(UndefinedFunction4(3))\n'
-        ]
-        self._compare_block_splitting(code_str, expected_blocks)
-
     def test_block_splitting_handles_2_level_indents(self):
         code_str = """for i in range(10):
     print(i)
