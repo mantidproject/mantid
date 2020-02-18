@@ -15,7 +15,7 @@ from __future__ import (absolute_import, division, print_function)
 import copy
 
 from sans.common.file_information import SANSFileInformationBlank
-from sans.state.RunDataStateBuilder import RunDataStateBuilder
+from sans.state.StateRunDataBuilder import StateRunDataBuilder
 from sans.state.StateBuilder import StateBuilder
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.user_file.txt_parsers.CommandInterfaceAdapter import CommandInterfaceAdapter
@@ -77,7 +77,7 @@ class GuiStateDirector(object):
         # 4. Create the rest of the state based on the builder.
         settings = copy.deepcopy(state_gui_model.settings)
         command_interface = CommandInterfaceAdapter(data_info=data, processed_state=settings)
-        run_data_builder = RunDataStateBuilder(file_information=file_information)
+        run_data_builder = StateRunDataBuilder(file_information=file_information)
 
         state = StateBuilder(run_data_builder=run_data_builder, i_state_parser=command_interface).get_all_states()
         return state

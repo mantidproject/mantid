@@ -6,17 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-import mock
+from mantid.py3compat import mock
 
 from sans.state.IStateParser import IStateParser
-from sans.state.RunDataStateBuilder import RunDataStateBuilder
+from sans.state.StateRunDataBuilder import StateRunDataBuilder
 from sans.state.StateBuilder import StateBuilder
 
 
 class StateBuilderTest(unittest.TestCase):
     def setUp(self):
         self.file_parser = mock.create_autospec(spec=IStateParser)
-        self.data_parser = mock.create_autospec(spec=RunDataStateBuilder)
+        self.data_parser = mock.create_autospec(spec=StateRunDataBuilder)
         self.instance = StateBuilder(run_data_builder=self.data_parser, i_state_parser=self.file_parser)
 
     def test_builder_forwards_from_user_file_parser(self):

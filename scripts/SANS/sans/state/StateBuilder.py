@@ -5,14 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from sans.state.IStateParser import IStateParser
-from sans.state.RunDataStateBuilder import RunDataStateBuilder
+from sans.state.StateRunDataBuilder import StateRunDataBuilder
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
 class StateBuilder(IStateParser):
     @staticmethod
     def new_instance(file_information, data_information, user_filename):
-        run_data = RunDataStateBuilder(file_information=file_information)
+        run_data = StateRunDataBuilder(file_information=file_information)
         user_file = UserFileReaderAdapter(data_info=data_information, user_file_name=user_filename)
         return StateBuilder(run_data_builder=run_data, i_state_parser=user_file)
 

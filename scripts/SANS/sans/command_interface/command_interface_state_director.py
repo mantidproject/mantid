@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.py3compat import Enum
 from sans.common.enums import DataType
 from sans.common.file_information import SANSFileInformationFactory
-from sans.state.RunDataStateBuilder import RunDataStateBuilder
+from sans.state.StateRunDataBuilder import StateRunDataBuilder
 from sans.state.StateBuilder import StateBuilder
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.user_file.settings_tags import (MonId, monitor_spectrum, OtherId, SampleId, GravityId, SetId, position_entry,
@@ -267,7 +267,7 @@ class CommandInterfaceStateDirector(object):
 
         user_commands = CommandInterfaceAdapter(data_info=data_state,
                                                 processed_state=self._processed_state_settings)
-        run_data_parser = RunDataStateBuilder(file_information=file_information)
+        run_data_parser = StateRunDataBuilder(file_information=file_information)
 
         self._state_director = StateBuilder(i_state_parser=user_commands, run_data_builder=run_data_parser)
         return self._state_director.get_all_states()
