@@ -133,7 +133,7 @@ void IqtFunctionModel::addFunction(const QString &prefix,
     setBackground(QString::fromStdString(name));
     newPrefix = *getBackgroundPrefix();
   } else {
-    throw std::runtime_error("Cannot add funtion " + name);
+    throw std::runtime_error("Cannot add function " + name);
   }
   auto newFun = getFunctionWithPrefix(newPrefix, getSingleFunction(0));
   copyParametersAndErrors(*fun, *newFun);
