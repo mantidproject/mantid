@@ -41,6 +41,9 @@ Improvements
 
 Bugfixes
 ########
+- A few bugs associated with the script editor have been fixed:
+  - Previous versions would sometimes error with ```Syntax error: unexpected indent``` with some indented blocks of code, we have improved the sectioning of code ensure that we do not stop a block prematurely.
+  - We now only automatically convert tabs to spaces at the start of the line when executing python code (we have to do this otherwise python omplains).  This means that tabs within string literals will remain as tabs.
 - Fixed an issue with Workspace History where unrolling consecutive workflow algorithms would result in only one of the algorithms being unrolled.
 - Fixed a couple of errors in the python scripts generated from plots for newer versions of Matplotlib.
 - Colorbar scale no longer vanish on colorfill plots with a logarithmic scale
