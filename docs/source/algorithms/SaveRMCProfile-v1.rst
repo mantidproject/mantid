@@ -30,10 +30,10 @@ Usage
 
    # Create a filename
    import os
-   path = os.path.join(os.path.expanduser("~"), "saveRMCProfile.fq")
+   path = os.path.join(os.path.expanduser("~"), "SaveRMCProfile.fq")
 
    # Save as G(r) file
-   SavePDFGui(ws, "G(r)", "Data_title", path)
+   SaveRMCProfile(InputWorkspace=ws, InputType="G(r)", Title="Data_title", Filename=path)
 
    # Check that the file exists
    print(os.path.isfile(path))
@@ -49,7 +49,7 @@ Output:
    DeleteWorkspace(ws)
    import os
    try:
-       path = os.path.join(os.path.expanduser("~"), "saveRMCProfile.fq")
+       path = os.path.join(os.path.expanduser("~"), "SaveRMCProfile.fq")
        os.remove(path)
    except:
        pass
