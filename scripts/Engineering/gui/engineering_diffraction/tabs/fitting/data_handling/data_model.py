@@ -13,13 +13,16 @@ from mantid.simpleapi import Load, logger
 class FittingDataModel(object):
     def __init__(self):
         self._loaded_workspaces = {}  # Map stores using {WorkspaceName: Workspace}
+        self._last_added = []  # List of workspace names loaded in the last load action.
 
     def load_files(self, filenames_string):
+        self._last_added = []
         filenames = [name.strip() for name in filenames_string.split(",")]
         for filename in filenames:
             ws_name = self._generate_workspace_name(filename)
             try:
                 self._loaded_workspaces[ws_name] = Load(filename, OutputWorkspace=ws_name)
+                self._last_added.append(ws_name)
             except RuntimeError as e:
                 logger.error(
                     "Failed to load file: {}. Error: {}. \n Continuing loading of other files.".
@@ -27,6 +30,9 @@ class FittingDataModel(object):
 
     def get_loaded_workspaces(self):
         return self._loaded_workspaces
+
+    def get_last_added(self):
+        return self._last_added
 
     def get_sample_log_from_ws(self, ws_name, log_name):
         return self._loaded_workspaces[ws_name].getSampleDetails().getLogData(log_name).value

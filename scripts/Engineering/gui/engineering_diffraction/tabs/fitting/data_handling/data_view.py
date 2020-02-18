@@ -64,11 +64,11 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
         check_box = QtWidgets.QTableWidgetItem()
         check_box.setFlags(check_box.flags() & ~QtCore.Qt.ItemIsEditable)
+        self.table_selection.setItem(row_no, 2, check_box)
         if checked:
             check_box.setCheckState(QtCore.Qt.Checked)
         else:
             check_box.setCheckState(QtCore.Qt.Unchecked)
-        self.table_selection.setItem(row_no, 2, check_box)
 
     def remove_table_row(self, row_no):
         self.table_selection.removeRow(row_no)

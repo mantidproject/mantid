@@ -86,6 +86,8 @@ class FittingDataPresenter(object):
         self._emit_enable_button_signal()
 
     def _on_worker_success(self, _):
+        if self.view.get_add_to_plot():
+            self.plotted.update(self.model.get_last_added())
         self._repopulate_table()
 
     def _repopulate_table(self):
@@ -102,6 +104,7 @@ class FittingDataPresenter(object):
                 self._add_row_to_table(name, i, run_no, bank, checked)
             except RuntimeError:
                 self._add_row_to_table(name, i)
+            self._handle_table_cell_changed(i, 2)
 
     def _remove_selected_tracked_workspaces(self):
         row_numbers = self._remove_selected_table_rows()
