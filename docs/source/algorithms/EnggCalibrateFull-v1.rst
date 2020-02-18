@@ -153,9 +153,9 @@ Output:
       for i,row in enumerate(reader):
          cal_pos = pos_table.column(2)[i]
          detector_pos_list = row[2].strip("[]").split(',')
-         calibOK = calibOK and (float(detector_pos_list[0]) - cal_pos.getX()) < 2e-6 and\
-                               (float(detector_pos_list[1]) - cal_pos.getY()) < 2e-6 and\
-                               (float(detector_pos_list[2]) - cal_pos.getZ()) < 2e-6
+         calibOK = calibOK and (float(detector_pos_list[0]) - cal_pos.getX()) < 1e-5 and\
+                               (float(detector_pos_list[1]) - cal_pos.getY()) < 1e-5 and\
+                               (float(detector_pos_list[2]) - cal_pos.getZ()) < 1e-5
          if not calibOK: break
    print("Does the calibration file have the expected values? {}".format(calibOK))
 
