@@ -10,9 +10,10 @@
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
+import re
 
 # 3rd party imports
-from IPython.core.inputsplitter import InputSplitter as IPyInputSplitter
+from IPython.core.inputsplitter import num_ini_spaces, InputSplitter as IPyInputSplitter
 
 # local imports
 
@@ -27,7 +28,8 @@ class InputSplitter(IPyInputSplitter):
         regardless of whether the statement is a single line
     """
 
-    def push(self, lines):
+    non_coding_line_re = re.compile(r'^(\s*|\s+\#.*)*$') # whitespace or indented comment only lines
+    def push(self, lines, next_lines):
         """Push one or more lines of input.
 
         This stores the given lines and returns a status code indicating
@@ -49,6 +51,7 @@ class InputSplitter(IPyInputSplitter):
           this value is also stored as a private attribute (``_is_complete``), so it
           can be queried at any time.
         """
+
         self._store(lines)
         source = self.source
 
@@ -82,6 +85,12 @@ class InputSplitter(IPyInputSplitter):
             # given a complete code object)
             self._is_complete = self.code is not None
 
+            # find the next coding line
+            if len(next_lines) > 0:
+                next_line = self._get_next_coding_line(next_lines)
+                if num_ini_spaces(next_line) != 0:
+                    self._is_complete = False
+
         return self._is_complete
 
     def push_accepts_more(self):
@@ -113,3 +122,9 @@ class InputSplitter(IPyInputSplitter):
 
         # General fallback - accept more code
         return True
+
+    def _get_next_coding_line(self, next_lines):
+        for line in next_lines:
+            if self.non_coding_line_re.match(line) is None:
+                return line
+        return ""

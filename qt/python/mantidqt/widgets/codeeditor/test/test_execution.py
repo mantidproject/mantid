@@ -22,7 +22,7 @@ from qtpy.QtCore import QCoreApplication, QObject
 from mantid.py3compat import StringIO
 from mantid.py3compat.mock import patch
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.widgets.codeeditor.execution import PythonCodeExecution, _get_imported_from_future
+from mantidqt.widgets.codeeditor.execution import PythonCodeExecution, _get_imported_from_future, code_blocks
 
 
 class Receiver(QObject):
@@ -289,6 +289,194 @@ squared = sum*sum
 
         return executor, recv
 
+class CodeBlocksTest(unittest.TestCase):
+
+    def test_block_splitting_simple_lines(self):
+        code_str = r"""# make a dictionary from two lists
+keys = ['a','b','c']
+vals = list(range(3,9,2))
+MyDict = dict(list(zip(keys,vals)))
+print('\nKey ({0:s}) added to dictionary'.format(KeyToAdd))"""
+
+        expected_blocks = [
+            '# make a dictionary from two lists\n',
+            "\nkeys = ['a','b','c']\n",
+            '\n\nvals = list(range(3,9,2))\n',
+            '\n\n\nMyDict = dict(list(zip(keys,vals)))\n',
+            "\n\n\n\nprint('\\nKey ({0:s}) added to dictionary'.format(KeyToAdd))\n",
+        ]
+        self._compare_block_splitting(code_str, expected_blocks)
+
+    def test_block_splitting_string_handling(self):
+        code_str = r"""a="\n\n\tlots of whitespace\nhere!"
+b="inner 'quotes'"
+c=r"raw\n\tstring\n\nwith\nwith\tspaces"
+d=r'raw\n\tstring\n\nwith\nwith\tspaces but single\nquotes'"""
+
+        expected_blocks = [
+            r'a="\n\n\tlots of whitespace\nhere!"' + '\n',
+            "\nb=\"inner 'quotes'\"" + '\n',
+            '\n\n' + r'c=r"raw\n\tstring\n\nwith\nwith\tspaces"' + '\n',
+            "\n\n\n" + r"d=r'raw\n\tstring\n\nwith\nwith\tspaces but single\nquotes'" + '\n'
+        ]
+        self._compare_block_splitting(code_str, expected_blocks)
+
+    def test_block_splitting_string_handling_multiline(self):
+        code_str = """a=\"\"\"this
+is
+    a multine
+        string
+        comment
+    with
+varying
+    indentation\"\"\"
+print('and this is the next line')
+print('''one line multiline ''')
+print("and the last line")"""
+
+        expected_blocks = [
+            """a=\"\"\"this
+is
+    a multine
+        string
+        comment
+    with
+varying
+    indentation\"\"\"
+""",
+            "\n\n\n\n\n\n\n\nprint('and this is the next line')\n",
+            "\n\n\n\n\n\n\n\n\nprint('''one line multiline ''')\n",
+            '\n\n\n\n\n\n\n\n\n\nprint("and the last line")\n',
+        ]
+        self._compare_block_splitting(code_str, expected_blocks)
+
+    def test_block_splitting_handles_try_except(self):
+        code_str = """print ("already defined:",dir())
+try:
+    x=UndefinedFunction4()
+except:
+    print ("need to define my own UndefinedFunction4")
+def UndefinedFunction4(a=0.0):
+        return a*2
+"""
+        # not currently ideal blocking, but it does not fail
+        expected_blocks = [
+            'print ("already defined:",dir())\n',
+            """\ntry:
+    x=UndefinedFunction4()
+except:
+    print ("need to define my own UndefinedFunction4")
+def UndefinedFunction4(a=0.0):
+        return a*2
+"""]
+        self._compare_block_splitting(code_str, expected_blocks)
+
+    def test_block_splitting_handles_if(self):
+        code_str = """if a==1:
+    print(a)
+elif b==1:
+    print(b)
+else: 
+    print (a+b)"""
+        expected_blocks = [
+            """if a==1:
+    print(a)
+elif b==1:
+    print(b)
+else: 
+    print (a+b)
+"""]
+        self._compare_block_splitting(code_str, expected_blocks)
+
+    def test_block_splitting_handles_blank_lines(self):
+        code_str = """print ("already defined:",dir())
+try:
+    x=UndefinedFunction4()
+except:
+
+    print ("need to define my own UndefinedFunction4")
+    def UndefinedFunction4(a=0.0):
+        return a*2
+print(UndefinedFunction4(3))"""
+        expected_blocks = [
+            'print ("already defined:",dir())\n',
+            """\ntry:
+    x=UndefinedFunction4()
+except:
+
+    print ("need to define my own UndefinedFunction4")
+    def UndefinedFunction4(a=0.0):
+        return a*2
+""",
+            '\n\n\n\n\n\n\n\nprint(UndefinedFunction4(3))\n'
+        ]
+        self._compare_block_splitting(code_str, expected_blocks)
+
+    def test_block_splitting_handles_2_level_indents(self):
+        code_str = """for i in range(10):
+    print(i)
+    print(i+2)
+    for j in range(4):
+        print(j)
+        #pointless comment
+        a="nother line"
+        
+        we="left a blank space"
+    back="to the original loop"
+
+next='line after a gap'"""
+        # not currently ideal blocking, but it does not fail
+        expected_blocks = [
+            """for i in range(10):
+    print(i)
+    print(i+2)
+    for j in range(4):
+        print(j)
+        #pointless comment
+        a="nother line"
+        
+        we="left a blank space"
+    back="to the original loop"
+
+next='line after a gap'
+"""]
+        self._compare_block_splitting(code_str, expected_blocks)
+
+    def test_block_splitting_handles_comment_lines(self):
+        code_str = """# add a key if doesn't exist
+KeyToAdd = 'apple' # this is unicode (default str type in python 3)
+ValToAdd = 8.5
+if KeyToAdd not in MyDict:
+    # add the apple key
+    MyDict[KeyToAdd] = ValToAdd
+    print('Key ({0:s}) added to dictionary'.format(KeyToAdd))"""
+
+        expected_blocks = [
+            "# add a key if doesn't exist\n",
+            "\nKeyToAdd = 'apple' # this is unicode (default str type in python 3)\n",
+            '\n\nValToAdd = 8.5\n',
+            """\n\n\nif KeyToAdd not in MyDict:
+    # add the apple key
+    MyDict[KeyToAdd] = ValToAdd
+    print('Key ({0:s}) added to dictionary'.format(KeyToAdd))\n"""
+        ]
+        self._compare_block_splitting(code_str, expected_blocks)
+
+    def test_block_splitting_handles_tabs(self):
+        code_str = "if a=='this is a line with\tinternal\t tabs':\n" + \
+                        "\tprint('another with\tinternal\t tabs')\n"
+
+        # just the tab preceeding print is converted
+        expected_blocks = ["if a=='this is a line with\tinternal\t tabs':\n" + \
+                        "    print('another with\tinternal\t tabs')\n"]
+        self._compare_block_splitting(code_str, expected_blocks)
+
+    def _compare_block_splitting(self, code_str, expected_blocks):
+        block_num = 0
+        for block in code_blocks(code_str):
+            self.assertEqual(expected_blocks[block_num], block.code_str)
+            block_num += 1
+        self.assertEqual(len(expected_blocks), block_num)
 
 if __name__ == "__main__":
     unittest.main()

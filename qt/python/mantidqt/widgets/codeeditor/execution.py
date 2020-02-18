@@ -188,17 +188,17 @@ def code_blocks(code_str):
     """Generator to produce blocks of executable code
     from the given code string.
     """
+    re_leading_tabs = re.compile(r"^(\ *\t+\ *)(.*?)$")
     lineno_cur = 0
     lines = code_str.splitlines()
     line_count = len(lines)
     isp = InputSplitter()
     for line in lines:
         lineno_cur += 1
-        # IPython InputSplitter assumes that indentation is 4 spaces, not tabs.
-        # Accounting for that here, rather than using script-level "tabs to spaces"
-        # allows the user to keep tabs in their script if they wish.
-        line = line.replace("\t", " "*4)
-        isp.push(line)
+        # convert leading tabs into 4 spaces as push cannot handle mixed tabs and spaces" " * 4,
+        # only those at the start of the line, if you mix spaces, then tabs you deserve the error
+        line = re.sub('^\t', " " * 4, line)
+        isp.push(line, lines[lineno_cur:] if lineno_cur < line_count else [])
         # If we need more input to form a complete statement
         # or we are not at the end of the code then keep
         # going
@@ -214,4 +214,4 @@ def code_blocks(code_str):
             # consistent each executed block needs to have the statements
             # on the same line as they are in the real code so we prepend
             # blank lines to make this so
-            isp.push('\n' * lineno_cur)
+            isp.push('\n' * lineno_cur, [])
