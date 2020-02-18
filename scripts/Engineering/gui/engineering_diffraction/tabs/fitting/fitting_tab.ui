@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>632</width>
-    <height>246</height>
+    <width>622</width>
+    <height>747</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,8 +40,8 @@ QGroupBox:title {
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>596</width>
-          <height>424</height>
+          <width>600</width>
+          <height>725</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
