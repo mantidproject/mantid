@@ -50,9 +50,9 @@ class FittingDataPresenter(object):
             ws = loaded_workspaces.pop(old_name)
             loaded_workspaces[new_name] = ws
             if old_name in self.plotted:
-                self.all_plots_removed_notifier.notify_subscribers()
-                for ws_name in self.plotted:
-                    self.plot_added_notifier.notify_subscribers(loaded_workspaces[ws_name])
+                self.plotted.remove(old_name)
+                self.plotted.add(new_name)
+            self.all_plots_removed_notifier.notify_subscribers()
             self._repopulate_table()
 
     def clear_workspaces(self):
@@ -65,6 +65,8 @@ class FittingDataPresenter(object):
     def replace_workspace(self, name, workspace):
         if name in self.get_loaded_workspaces():
             self.get_loaded_workspaces()[name] = workspace
+            if name in self.plotted:
+                self.all_plots_removed_notifier.notify_subscribers()
             self._repopulate_table()
 
     def get_loaded_workspaces(self):
@@ -91,6 +93,10 @@ class FittingDataPresenter(object):
         self._repopulate_table()
 
     def _repopulate_table(self):
+        """
+        Populate the table with the information from the loaded workspaces.
+        Will also handle any workspaces that need to be plotted. 
+        """
         self._remove_all_table_rows()
         self.row_numbers.clear()
         workspaces = self.get_loaded_workspaces()
