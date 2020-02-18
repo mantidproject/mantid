@@ -107,6 +107,8 @@ public:
   Mantid::Kernel::V3D getSurfaceAxis(const int surfaceType) const;
   /// Get pointer to the projection surface
   boost::shared_ptr<ProjectionSurface> getSurface() const;
+  /// True if the workspace is being replaced
+  bool isWsBeingReplaced() const;
   /// True if the GL instrument display is currently on
   bool isGLEnabled() const;
   /// Toggle between the GL and simple instrument display widgets
@@ -338,6 +340,7 @@ private:
   /// Save tabs on the widget to a string
   std::string saveTabs() const;
 
+  bool m_wsReplace;
   QPushButton *m_help;
 };
 

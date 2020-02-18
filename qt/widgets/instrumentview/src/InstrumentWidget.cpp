@@ -72,6 +72,26 @@ using namespace MantidQt::API;
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace {
+/**
+ * An object to correctly set the flag marking workspace replacement
+ */
+struct WorkspaceReplacementFlagHolder {
+  /**
+   * @param :: reference to the workspace replacement flag
+   */
+  explicit WorkspaceReplacementFlagHolder(bool &replacementFlag)
+      : m_worskpaceReplacementFlag(replacementFlag) {
+    m_worskpaceReplacementFlag = true;
+  }
+  ~WorkspaceReplacementFlagHolder() { m_worskpaceReplacementFlag = false; }
+
+private:
+  WorkspaceReplacementFlagHolder();
+  bool &m_worskpaceReplacementFlag;
+};
+} // namespace
+
 // Name of the QSettings group to store the InstrumentWindw settings
 const char *InstrumentWidgetSettingsGroup = "Mantid/InstrumentWidget";
 
@@ -102,7 +122,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
       mViewChanged(false), m_blocked(false),
       m_instrumentDisplayContextMenuOn(false),
       m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}),
-      m_help(nullptr) {
+      m_wsReplace(false), m_help(nullptr) {
   setFocusPolicy(Qt::StrongFocus);
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   QSplitter *controlPanelLayout = new QSplitter(Qt::Horizontal);
@@ -1094,6 +1114,10 @@ ProjectionSurface_sptr InstrumentWidget::getSurface() const {
   return ProjectionSurface_sptr();
 }
 
+bool MantidQt::MantidWidgets::InstrumentWidget::isWsBeingReplaced() const {
+  return m_wsReplace;
+}
+
 /**
  * Set newly created projection surface
  * @param surface :: Pointer to the new surace.
@@ -1314,33 +1338,24 @@ bool InstrumentWidget::hasWorkspace(const std::string &wsName) const {
 
 void InstrumentWidget::handleWorkspaceReplacement(
     const std::string &wsName, const boost::shared_ptr<Workspace> workspace) {
-  // Replace current workspace
-  if (hasWorkspace(wsName)) {
-    if (m_instrumentActor) {
-      // Check if it's still the same workspace underneath (as well as having
-      // the same name)
-      auto matrixWS =
-          boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
-      if (!matrixWS || matrixWS->detectorInfo().size() == 0) {
-        emit preDeletingHandle();
-        close();
-        return;
-      }
-      // try to detect if the instrument changes (unlikely if the workspace
-      // hasn't, but theoretically possible)
-      bool resetGeometry =
-          matrixWS->detectorInfo().size() != m_instrumentActor->ndetectors();
-      try {
-        if (matrixWS == m_instrumentActor->getWorkspace() && !resetGeometry) {
-          m_instrumentActor->updateColors();
-          setupColorMap();
-          updateInstrumentView();
-        }
-      } catch (std::runtime_error &) {
-        resetInstrument(resetGeometry);
-      }
-    }
+  if (!hasWorkspace(wsName) || !m_instrumentActor) {
+    return;
   }
+  // Replace current workspace
+  WorkspaceReplacementFlagHolder wsReplace(m_wsReplace);
+  // Check if it's still the same workspace underneath (as well as having
+  // the same name)
+  auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
+  if (!matrixWS || matrixWS->detectorInfo().size() == 0) {
+    emit preDeletingHandle();
+    close();
+    return;
+  }
+  // try to detect if the instrument changes (unlikely if the workspace
+  // hasn't, but theoretically possible)
+  bool resetGeometry =
+      matrixWS->detectorInfo().size() != m_instrumentActor->ndetectors();
+  resetInstrument(resetGeometry);
 }
 
 /**
