@@ -90,7 +90,9 @@ public:
   virtual void initDraw() const = 0;
 
   virtual const Kernel::Material &material() const = 0;
+  virtual void setMaterial(const Kernel::Material &material) = 0;
   virtual const std::string &id() const = 0;
+  virtual void setID(const std::string &id) = 0;
 
   virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() const = 0;
 };

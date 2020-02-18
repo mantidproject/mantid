@@ -289,11 +289,12 @@ void MantidHelpWindow::showConcept(const QString &name) {
 void MantidHelpWindow::showFitFunction(const std::string &name) {
   if (bool(g_helpWindow)) {
     QString url(BASE_URL);
-    url += "fitfunctions/";
-    if (name.empty())
+    url += "fitting/fitfunctions/";
+    auto functionUrl = url + QString(name.c_str()) + ".html";
+    if (name.empty() || !g_helpWindow->isExistingPage(functionUrl))
       url += "index.html";
     else
-      url += QString(name.c_str()) + ".html";
+      url = functionUrl;
 
     this->showHelp(url);
   } else // qt-assistant disabled

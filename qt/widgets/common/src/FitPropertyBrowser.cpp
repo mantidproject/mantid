@@ -757,6 +757,9 @@ void FitPropertyBrowser::acceptFit() {
   if (!cf)
     return;
   auto function = m_fitSelector->getFunction();
+  if (function.isEmpty()) {
+    return;
+  }
   PropertyHandler *h = getHandler()->findHandler(cf);
   h->addFunction(function.toStdString());
   emit functionChanged();
@@ -3384,7 +3387,7 @@ QStringList FitPropertyBrowser::getParameterNames() const {
 void FitPropertyBrowser::functionHelp() {
   PropertyHandler *handler = currentHandler();
   if (handler) {
-    MantidQt::API::HelpWindow::showFitFunction(this->nativeParentWidget(),
+    MantidQt::API::HelpWindow::showFitFunction(nullptr,
                                                handler->ifun()->name());
   }
 }

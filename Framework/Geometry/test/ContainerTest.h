@@ -30,7 +30,7 @@ public:
   // ---------------------------------------------------------------------------
   void test_Default_Constructor_Has_No_Sample_Shape() {
     Container can;
-    TS_ASSERT_EQUALS(false, can.hasSampleShape());
+    TS_ASSERT_EQUALS(false, can.hasCustomizableSampleShape());
     TS_ASSERT_THROWS(can.createSampleShape(Container::ShapeArgs()),
                      const std::runtime_error &);
   }
@@ -43,7 +43,7 @@ public:
                       "<height val=\"0.05\" />"
                       "</cylinder>";
     Container can(xml);
-    TS_ASSERT_EQUALS(false, can.hasSampleShape());
+    TS_ASSERT_EQUALS(false, can.hasCustomizableSampleShape());
   }
 
   void test_SetSampleShape_Allows_Creating_Sample_Shape_Object() {

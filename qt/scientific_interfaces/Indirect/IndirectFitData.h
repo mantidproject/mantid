@@ -128,6 +128,7 @@ public:
   IndirectFitData &combine(IndirectFitData const &fitData);
 
   std::vector<double> excludeRegionsVector(WorkspaceIndex spectrum) const;
+  std::vector<double> getQValues() const;
 
   template <typename F> void applySpectra(F &&functor) const {
     ApplySpectra<F>(std::forward<F>(functor))(m_spectra);

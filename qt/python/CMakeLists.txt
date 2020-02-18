@@ -123,6 +123,7 @@ if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
       mantidqt/widgets/codeeditor/test/test_multifileinterpreter_view.py
       mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_presenter.py
       mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_view.py
+      mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogpresenter.py
       mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
       mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
       mantidqt/widgets/plotconfigdialog/axestabwidget/test/test_axestabwidgetpresenter.py

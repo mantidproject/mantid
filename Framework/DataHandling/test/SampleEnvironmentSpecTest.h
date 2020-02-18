@@ -9,13 +9,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Instrument/SampleEnvironmentSpec.h"
+#include "MantidDataHandling/SampleEnvironmentSpec.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/make_shared.hpp>
 
-using Mantid::Geometry::SampleEnvironmentSpec;
+using Mantid::DataHandling::SampleEnvironmentSpec;
 
 class SampleEnvironmentSpecTest : public CxxTest::TestSuite {
 public:

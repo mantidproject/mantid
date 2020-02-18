@@ -17,6 +17,7 @@ set(SRC_FILES
     src/Algorithms/NormaliseByPeakArea.cpp
     src/Algorithms/PawleyFit.cpp
     src/Algorithms/PlotPeakByLogValue.cpp
+    src/Algorithms/PlotPeakByLogValueHelper.cpp
     src/Algorithms/QENSFitSequential.cpp
     src/Algorithms/QENSFitSimultaneous.cpp
     src/Algorithms/RefinePowderInstrumentParameters.cpp
@@ -181,6 +182,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Algorithms/NormaliseByPeakArea.h
     inc/MantidCurveFitting/Algorithms/PawleyFit.h
     inc/MantidCurveFitting/Algorithms/PlotPeakByLogValue.h
+    inc/MantidCurveFitting/Algorithms/PlotPeakByLogValueHelper.h
     inc/MantidCurveFitting/Algorithms/QENSFitSequential.h
     inc/MantidCurveFitting/Algorithms/QENSFitSimultaneous.h
     inc/MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters.h
@@ -342,6 +344,7 @@ set(TEST_FILES
     Algorithms/NormaliseByPeakAreaTest.h
     Algorithms/PawleyFitTest.h
     Algorithms/PlotPeakByLogValueTest.h
+    Algorithms/PlotPeakByLogValueHelperTest.h
     Algorithms/QENSFitSequentialTest.h
     Algorithms/QENSFitSimultaneousTest.h
     Algorithms/RefinePowderInstrumentParameters3Test.h

@@ -4,20 +4,20 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SAMPLEENVIRONMENTFACTORY_H_
-#define MANTID_GEOMETRY_SAMPLEENVIRONMENTFACTORY_H_
+#ifndef MANTID_DATAHANDLING_SAMPLEENVIRONMENTFACTORY_H_
+#define MANTID_DATAHANDLING_SAMPLEENVIRONMENTFACTORY_H_
 
-#include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Instrument/SampleEnvironmentSpec.h"
+#include "MantidDataHandling/DllConfig.h"
+#include "MantidDataHandling/SampleEnvironmentSpec.h"
 
 namespace Mantid {
-namespace Geometry {
+namespace DataHandling {
 
 /**
  * Interface for a class responsible for finding a specification based on a
  * name.
  */
-class MANTID_GEOMETRY_DLL ISampleEnvironmentSpecFinder {
+class MANTID_DATAHANDLING_DLL ISampleEnvironmentSpecFinder {
 public:
   virtual ~ISampleEnvironmentSpecFinder() = default;
   virtual SampleEnvironmentSpec_uptr find(const std::string &facility,
@@ -35,15 +35,15 @@ using ISampleEnvironmentSpecFinder_uptr =
   The specifications are cached in a static lookup. The class is implemented
   using the monostate pattern
 */
-class MANTID_GEOMETRY_DLL SampleEnvironmentFactory {
+class MANTID_DATAHANDLING_DLL SampleEnvironmentFactory {
 public:
   SampleEnvironmentFactory() = default;
   SampleEnvironmentFactory(ISampleEnvironmentSpecFinder_uptr specFinder);
 
-  SampleEnvironment_uptr create(const std::string &facility,
-                                const std::string &instrument,
-                                const std::string &specName,
-                                const std::string &canName);
+  Geometry::SampleEnvironment_uptr create(const std::string &facility,
+                                          const std::string &instrument,
+                                          const std::string &specName,
+                                          const std::string &canName);
 
   size_t cacheSize() const;
   void clearCache();
@@ -58,7 +58,7 @@ private:
 /**
  * Class responsible for finding a specifications on disk.
  */
-class MANTID_GEOMETRY_DLL SampleEnvironmentSpecFileFinder final
+class MANTID_DATAHANDLING_DLL SampleEnvironmentSpecFileFinder final
     : public ISampleEnvironmentSpecFinder {
 public:
   SampleEnvironmentSpecFileFinder(const std::vector<std::string> &directories);
@@ -75,7 +75,7 @@ private:
   const std::vector<std::string> m_rootDirs;
 };
 
-} // namespace Geometry
+} // namespace DataHandling
 } // namespace Mantid
 
-#endif /* MANTID_GEOMETRY_SAMPLEENVIRONMENTFACTORY_H_ */
+#endif /* MANTID_DATAHANDLING_SAMPLEENVIRONMENTFACTORY_H_ */
