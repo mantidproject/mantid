@@ -7,11 +7,11 @@
 #ifndef ALGORITHMPROGRESSPRESENTER_H
 #define ALGORITHMPROGRESSPRESENTER_H
 
+#include "MantidKernel/Timer.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/IAlgorithmProgressWidget.h"
 #include "MantidQtWidgets/Common/DllOption.h"
-#include "MantidKernel/Timer.h"
 
 #include <QWidget>
 
