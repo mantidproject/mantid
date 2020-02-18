@@ -880,9 +880,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
         # A new user file. If a new user file is provided then this will overwrite all other settings from,
         # otherwise we might have cross-talk between user files.
         user_file = parsed_batch_entry.get(BatchReductionEntry.USER_FILE)
-
-        if user_file:
-            MaskFile(user_file)
+        MaskFile(user_file)
 
         # Sample scatter
         sample_scatter = parsed_batch_entry[BatchReductionEntry.SAMPLE_SCATTER]
