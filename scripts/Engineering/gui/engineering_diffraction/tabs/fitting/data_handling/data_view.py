@@ -53,9 +53,17 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def add_table_row(self, run_no, bank, checked):
         row_no = self.table_selection.rowCount()
         self.table_selection.insertRow(row_no)
-        self.table_selection.setItem(row_no, 0, QtWidgets.QTableWidgetItem(str(run_no)))
-        self.table_selection.setItem(row_no, 1, QtWidgets.QTableWidgetItem(str(bank)))
+
+        name_item = QtWidgets.QTableWidgetItem(str(run_no))
+        name_item.setFlags(name_item.flags() & ~QtCore.Qt.ItemIsEditable)
+        self.table_selection.setItem(row_no, 0, name_item)
+
+        bank_item = QtWidgets.QTableWidgetItem(str(bank))
+        bank_item.setFlags(name_item.flags() & ~QtCore.Qt.ItemIsEditable)
+        self.table_selection.setItem(row_no, 1, bank_item)
+
         check_box = QtWidgets.QTableWidgetItem()
+        check_box.setFlags(check_box.flags() & ~QtCore.Qt.ItemIsEditable)
         if checked:
             check_box.setCheckState(QtCore.Qt.Checked)
         else:
