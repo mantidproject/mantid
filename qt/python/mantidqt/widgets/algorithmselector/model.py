@@ -89,5 +89,5 @@ class AlgorithmSelectorModel(object):
         alg_instance.initialize()
         for prop in alg_instance.getProperties():
             if isinstance(prop, IWorkspaceProperty) and prop.direction in [Direction.Input, Direction.InOut]:
-                    return prop.name
+                return prop.name
         return None
