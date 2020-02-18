@@ -95,7 +95,7 @@ class FittingDataPresenter(object):
     def _repopulate_table(self):
         """
         Populate the table with the information from the loaded workspaces.
-        Will also handle any workspaces that need to be plotted. 
+        Will also handle any workspaces that need to be plotted.
         """
         self._remove_all_table_rows()
         self.row_numbers.clear()

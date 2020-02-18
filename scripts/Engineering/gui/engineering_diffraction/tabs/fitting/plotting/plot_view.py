@@ -7,7 +7,6 @@
 
 from qtpy import QtWidgets
 
-from mantidqt.plotting.functions import get_plot_fig
 from mantidqt.utils.qt import load_ui
 from matplotlib.figure import Figure
 from matplotlib.backends.qt_compat import is_pyqt5
