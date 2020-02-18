@@ -244,7 +244,7 @@ void MessageDisplay::append(const Message &msg) {
     if (msg.priority() <= Message::Priority::PRIO_ERROR) {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
       NotificationService::showMessage(
-          "Mantid Workbench",
+          parentWidget() ? parentWidget()->windowTitle() : "Mantid",
           "Sorry, there was an error, please look at the message display for "
           "details.",
           NotificationService::MessageIcon::Critical);
