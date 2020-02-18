@@ -12,13 +12,11 @@ from __future__ import (absolute_import, unicode_literals)
 # std imports
 
 # 3rdparty imports
-from mantid.kernel import logger
+from mantid.plots.helperfunctions import update_colorbar_scale
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
 from matplotlib.collections import QuadMesh
-from matplotlib.colors import LogNorm
-from matplotlib.ticker import LogLocator
-from numpy import arange
+from matplotlib.colors import LogNorm, Normalize
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
@@ -193,16 +191,10 @@ class ColorbarAxisEditor(AxisEditor):
 
     def changes_accepted(self):
         super(ColorbarAxisEditor, self).changes_accepted()
-        cb = self.images[0]
-        cb.set_clim(self.limit_min, self.limit_max)
+        scale = Normalize
         if isinstance(self.images[0].norm, LogNorm):
-            locator = LogLocator(subs=arange(1, 10))
-            if locator.tick_values(vmin=self.limit_min, vmax=self.limit_max).size == 0:
-                locator = LogLocator()
-                logger.warning("Minor ticks on colorbar scale cannot be shown "
-                               "as the range between min value and max value is too large")
-            cb.colorbar.locator = locator
-            cb.colorbar.update_ticks()
+            scale = LogNorm
+        update_colorbar_scale(self.canvas.figure, self.images[0], scale, self.limit_min, self.limit_max)
 
     def create_model(self):
         memento = AxisEditorModel()

@@ -26,11 +26,14 @@ Muon Analysis 2 and Frequency Domain Interfaces
   part due to the new tiled plotting feature.
 - Added a plotting options toolbar to the docked plotting in the Muon Analysis 2 and Frequency Domain interfaces. This toolbar
   can be used to autoscale the axes, change the axes limits, and control the plotting of errors.
+- Reworked the fitting tab to improve the user experience when doing single, and simultaneous fits.
+- Addition of a sequential fitting tab, enabling both sequential, and simultaneous sequential fits.
 
 Bug Fixes
 #########
 
 - The elemental analysis GUI can now handle legacy data which is missing a response dataset, e.g Delayed.
 - Fixed a bug with constraints in the Muon Analysis 2 GUI which would cause Mantid to crash.
+- Fixed a bug in Muon Analysis Old that prevented the muon fitting functions from appearing in the data analysis tab.
 
 :ref:`Release 4.3.0 <v4.3.0>`

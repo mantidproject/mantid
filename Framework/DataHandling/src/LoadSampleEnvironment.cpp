@@ -211,6 +211,17 @@ void LoadSampleEnvironment::exec() {
   const std::string scaleProperty = getPropertyValue("Scale");
   const ScaleUnits scaleType = getScaleType(scaleProperty);
 
+  bool isBinary;
+  if (LoadBinaryStl::isBinarySTL(filename)) {
+    isBinary = true;
+  } else if (LoadAsciiStl::isAsciiSTL(filename)) {
+    isBinary = false;
+  } else {
+    throw Exception::ParseError(
+        "Could not read file, did not match either STL Format", filename, 0);
+  }
+  std::unique_ptr<LoadStl> reader = nullptr;
+
   if (getProperty("SetMaterial")) {
     ReadMaterial::MaterialParameters params;
     params.chemicalSymbol = getPropertyValue("ChemicalFormula");
@@ -231,25 +242,29 @@ void LoadSampleEnvironment::exec() {
       params.numberDensityUnit =
           MaterialBuilder::NumberDensityUnit::FormulaUnits;
     }
-    binaryStlReader =
-        std::make_unique<LoadBinaryStl>(filename, scaleType, params);
-    asciiStlReader =
-        std::make_unique<LoadAsciiStl>(filename, scaleType, params);
+    if (isBinary) {
+      reader = std::make_unique<LoadBinaryStl>(filename, scaleType, params);
+    } else {
+      reader = std::make_unique<LoadAsciiStl>(filename, scaleType, params);
+    }
   } else {
-    binaryStlReader = std::make_unique<LoadBinaryStl>(filename, scaleType);
-    asciiStlReader = std::make_unique<LoadAsciiStl>(filename, scaleType);
+    if (isBinary) {
+      reader = std::make_unique<LoadBinaryStl>(filename, scaleType);
+    } else {
+      reader = std::make_unique<LoadAsciiStl>(filename, scaleType);
+    }
   }
 
-  if (binaryStlReader->isBinarySTL(filename)) {
-    environmentMesh = binaryStlReader->readStl();
-  } else if (asciiStlReader->isAsciiSTL(filename)) {
-    environmentMesh = asciiStlReader->readStl();
-  } else {
-    throw Exception::ParseError(
-        "Could not read file, did not match either STL Format", filename, 0);
-  }
-  environmentMesh = rotate(environmentMesh);
-  environmentMesh = translate(environmentMesh, scaleType);
+  environmentMesh = reader->readStl();
+
+  const double xRotation = DegreesToRadians(getProperty("xDegrees"));
+  const double yRotation = DegreesToRadians(getProperty("yDegrees"));
+  const double zRotation = DegreesToRadians(getProperty("zDegrees"));
+  environmentMesh =
+      reader->rotate(environmentMesh, xRotation, yRotation, zRotation);
+  const std::vector<double> translationVector =
+      getProperty("TranslationVector");
+  environmentMesh = reader->translate(environmentMesh, translationVector);
 
   std::string name = getProperty("EnvironmentName");
   const bool add = getProperty("Add");
@@ -293,115 +308,7 @@ void LoadSampleEnvironment::exec() {
   // Set output workspace
   setProperty("OutputWorkspace", outputWS);
   g_log.debug(debugString);
-}
-
-/**
- * translates the environment by a provided matrix
- * @param environmentMesh The environment to translate
- * @param scaleType The scale to use
- * @returns a shared pointer to the newly translated environment
- */
-boost::shared_ptr<MeshObject>
-LoadSampleEnvironment::translate(boost::shared_ptr<MeshObject> environmentMesh,
-                                 ScaleUnits scaleType) {
-  const std::vector<double> translationVector =
-      getProperty("TranslationVector");
-  std::vector<double> checkVector = std::vector<double>(3, 0.0);
-  if (translationVector != checkVector) {
-    if (translationVector.size() != 3) {
-      throw std::invalid_argument(
-          "Invalid Translation vector, must have exactly 3 dimensions");
-    }
-    V3D translate = createScaledV3D(translationVector[0], translationVector[1],
-                                    translationVector[2], scaleType);
-    environmentMesh->translate(translate);
-  }
-  return environmentMesh;
-}
-
-/**
- * Rotates the environment by a generated matrix
- * @param environmentMesh The environment to rotate
- * @returns a shared pointer to the newly rotated environment
- */
-boost::shared_ptr<MeshObject>
-LoadSampleEnvironment::rotate(boost::shared_ptr<MeshObject> environmentMesh) {
-  const std::vector<double> rotationMatrix = generateMatrix();
-  environmentMesh->rotate(rotationMatrix);
-  return environmentMesh;
-}
-
-/**
- * Generates a rotation Matrix applying the x rotation then y rotation, then z
- * rotation
- * @returns a matrix of doubles to use as the rotation matrix
- */
-Matrix<double> LoadSampleEnvironment::generateMatrix() {
-  Kernel::Matrix<double> xMatrix = generateXRotation();
-  Kernel::Matrix<double> yMatrix = generateYRotation();
-  Kernel::Matrix<double> zMatrix = generateZRotation();
-
-  return zMatrix * yMatrix * xMatrix;
-}
-
-/**
- * Generates the x component of the rotation matrix
- * using the xDegrees Property.
- * @returns a matrix of doubles to use as the x axis rotation matrix
- */
-Matrix<double> LoadSampleEnvironment::generateXRotation() {
-  const double xRotation = DegreesToRadians(getProperty("xDegrees"));
-  const double sinX = sin(xRotation);
-  const double cosX = cos(xRotation);
-  std::vector<double> matrixList = {1, 0, 0, 0, cosX, -sinX, 0, sinX, cosX};
-  return Kernel::Matrix<double>(matrixList);
-}
-
-/**
- * Generates the y component of the rotation matrix
- * using the yDegrees Property.
- * @returns a matrix of doubles to use as the y axis rotation matrix
- */
-Matrix<double> LoadSampleEnvironment::generateYRotation() {
-  const double yRotation = DegreesToRadians(getProperty("yDegrees"));
-  const double sinY = sin(yRotation);
-  const double cosY = cos(yRotation);
-  std::vector<double> matrixList = {cosY, 0, sinY, 0, 1, 0, -sinY, 0, cosY};
-  return Kernel::Matrix<double>(matrixList);
-}
-
-/**
- * Generates the z component of the rotation matrix
- * using the zDegrees Property.
- * @returns a matrix of doubles to use as the z axis rotation matrix
- */
-Matrix<double> LoadSampleEnvironment::generateZRotation() {
-  const double zRotation = DegreesToRadians(getProperty("zDegrees"));
-  const double sinZ = sin(zRotation);
-  const double cosZ = cos(zRotation);
-  std::vector<double> matrixList = {cosZ, -sinZ, 0, sinZ, cosZ, 0, 0, 0, 1};
-  return Kernel::Matrix<double>(matrixList);
-}
-
-Kernel::V3D LoadSampleEnvironment::createScaledV3D(double xVal, double yVal,
-                                                   double zVal,
-                                                   ScaleUnits scaleType) {
-  switch (scaleType) {
-  case ScaleUnits::centimetres:
-    xVal = xVal / 100;
-    yVal = yVal / 100;
-    zVal = zVal / 100;
-    break;
-  case ScaleUnits::millimetres:
-    xVal = xVal / 1000;
-    yVal = yVal / 1000;
-    zVal = zVal / 1000;
-    break;
-  case ScaleUnits::metres:
-    break;
-  }
-  return Kernel::V3D(double(xVal), double(yVal), double(zVal));
-}
+} // namespace DataHandling
 
 } // namespace DataHandling
 } // namespace Mantid

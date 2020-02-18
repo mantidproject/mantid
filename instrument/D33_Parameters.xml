@@ -2,7 +2,14 @@
 <parameter-file instrument = "D33">
 
   <component-link name="D33">
+    <!-- The name of the panels for separate I(Q) calculations, the names are from the IDF -->
+    <parameter name="detector_panels" type="string">
+      <value val="back_detector,front_detector_top,front_detector_bottom,front_detector_left,front_detector_right"/>
+    </parameter>
     <!-- Attenuation coefficients for 3 attenuators -->
+    <parameter name="att0" type="number">
+      <value val="1" />
+    </parameter>
     <parameter name="att1" type="number">
       <value val="112.8" />
     </parameter>

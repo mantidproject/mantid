@@ -11,19 +11,11 @@ Description
 
 This algorithms performs complete treatment of SANS data recorded with the ILL instruments D11, D22 and D33.
 This high level algorithm steers the reduction and performs the full set of corrections for a given sample run; measured with one or more detector distances.
-It has two operation modes: *ReduceSample* (default) and *ReduceWater* as follows:
 
-ReduceSample
-------------
-
-This mode is used to correct the sample measurement and convert it to Q-space, producing by default the azimuthal average curve :math:`I(Q)`.
-
-ReduceWater
------------
-
-This mode should be used to process water reference measurement in order to derive the relative inter-pixel sensitivity map of the detector.
-This mode will produce two outputs; the regular output will contain fully corrected water run, and there will be an additional output containing the sensitivity map itself.
-The sensitivity map can be saved out to a file and used for sample reductions.
+The sample measurement will be corrected for all the effects and converted to Q-space, producing by default the azimuthal average curve :math:`I(Q)`.
+One can use water reference measurement in order to derive the relative inter-pixel sensitivity map of the detector or the reduced water data for absolute normalisation of the subsequent samples.
+The regular output will contain fully corrected water run, and there will be an additional output containing the sensitivity map itself.
+The sensitivity map, as well as reduced water can be saved out to a file and used for sample reductions.
 
 Caching with ADS
 ----------------

@@ -2,6 +2,17 @@
 Reflectometry Changes
 =====================
 
+ISIS Reflectometry Interface
+############################
+
+Improved
+--------
+
+- The per-angle defaults table on the Experiment now has column-specific tooltips on the table cells.
+
+Algorithms
+##########
+
 New
 ---
 

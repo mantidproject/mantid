@@ -30,13 +30,13 @@ class SANSILLIntegrationTest(unittest.TestCase):
         mtd.clear()
 
     def test_monochromatic(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq')
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 88)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_monochromatic_with_wedges(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', NumberOfWedges=2, WedgeWorkspace='wedges')
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', NumberOfWedges=2, WedgeWorkspace='wedges', CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 88)
         self.assertTrue(mtd['iq'].hasDx(0))
@@ -49,7 +49,7 @@ class SANSILLIntegrationTest(unittest.TestCase):
             self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_monochromatic_cake(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputType='I(Phi,Q)', NumberOfWedges=36)
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputType='I(Phi,Q)', NumberOfWedges=36, CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'], 36)
         self.assertEqual(mtd['iq'].blocksize(), 88)
         azimuth_axis = mtd['iq'].getAxis(1)
@@ -69,31 +69,31 @@ class SANSILLIntegrationTest(unittest.TestCase):
         self.assertEqual(qy_axis.getUnit().unitID(), "MomentumTransfer")
 
     def test_with_bin_width(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=-0.1)
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=-0.1, CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 51)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_with_bin_range(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=[0.001,0.03])
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=[0.001,0.03], CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 73)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_with_bin_width_and_range(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=[0.001,-0.1,0.03])
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=[0.001,-0.1,0.03], CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_custom_binning(self):
         binning = [0.001,0.005,0.006,0.01,0.016]
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=binning)
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=binning, CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 2)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_resolution_binning(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', DefaultQBinning='ResolutionBased')
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', DefaultQBinning='ResolutionBased', CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 37)
         self.assertTrue(mtd['iq'].hasDx(0))
@@ -102,7 +102,7 @@ class SANSILLIntegrationTest(unittest.TestCase):
         # D33 VTOF
         SANSILLReduction(Run='093410', ProcessAs='Sample', OutputWorkspace='sample')
         # TOF resolution is not yet implemented
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', CalculateResolution='None')
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 217)
 

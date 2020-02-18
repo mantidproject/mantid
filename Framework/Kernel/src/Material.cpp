@@ -68,7 +68,8 @@ Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
  */
 Material::Material()
     : m_name(), m_chemicalFormula(), m_atomTotal(0.0), m_numberDensity(0.0),
-      m_temperature(0.0), m_pressure(0.0) {}
+      m_temperature(0.0), m_pressure(0.0), m_linearAbsorpXSectionByWL(0.0),
+      m_totalScatterXSection(0.0) {}
 
 /**
  * Construct a material object
@@ -85,6 +86,8 @@ Material::Material(const std::string &name, const ChemicalFormula &formula,
       m_temperature(temperature), m_pressure(pressure) {
   m_chemicalFormula.assign(formula.begin(), formula.end());
   this->countAtoms();
+  this->calculateLinearAbsorpXSectionByWL();
+  this->calculateTotalScatterXSection();
 }
 
 /**
@@ -109,6 +112,8 @@ Material::Material(const std::string &name,
   } else { // isotopic average
     m_chemicalFormula.emplace_back(atom, 1.);
   }
+  this->calculateLinearAbsorpXSectionByWL();
+  this->calculateTotalScatterXSection();
 }
 
 // update the total atom count
@@ -120,6 +125,61 @@ void Material::countAtoms() {
                                 });
 }
 
+/**
+ * Calculate the absorption cross section for a given wavelength
+ * according to Sears eqn 14. Store result as a cross section per wavelength
+ * to enable the result to be reused to calculate the cross section for
+ * specific wavelengths (assuming linear dependence on the wavelength)
+ * with the reference wavelength = NeutronAtom::ReferenceLambda angstroms.
+ */
+
+void Material::calculateLinearAbsorpXSectionByWL() {
+  double weightedTotal;
+
+  if (m_chemicalFormula.size() == 1) {
+    weightedTotal = m_chemicalFormula.front().atom->neutron.abs_scatt_xs;
+  } else {
+    weightedTotal =
+        std::accumulate(std::begin(m_chemicalFormula),
+                        std::end(m_chemicalFormula), 0.,
+                        [](double subtotal, const FormulaUnit &right) {
+                          return subtotal + right.atom->neutron.abs_scatt_xs *
+                                                right.multiplicity;
+                        }) /
+        m_atomTotal;
+  }
+
+  if (!std::isnormal(weightedTotal)) {
+    weightedTotal = 0.;
+  }
+
+  m_linearAbsorpXSectionByWL =
+      weightedTotal / PhysicalConstants::NeutronAtom::ReferenceLambda;
+}
+
+// calculate the total scattering x section (by wavelength) following Sears
+// eqn 13.
+void Material::calculateTotalScatterXSection() {
+  double weightedTotal;
+  if (m_chemicalFormula.size() == 1)
+    weightedTotal = m_chemicalFormula.front().atom->neutron.tot_scatt_xs;
+  else {
+    weightedTotal =
+        std::accumulate(std::begin(m_chemicalFormula),
+                        std::end(m_chemicalFormula), 0.,
+                        [](double subtotal, const FormulaUnit &right) {
+                          return subtotal + right.atom->neutron.tot_scatt_xs *
+                                                right.multiplicity;
+                        }) /
+        m_atomTotal;
+  }
+
+  if (!std::isnormal(weightedTotal)) {
+    m_totalScatterXSection = 0.;
+  } else {
+    m_totalScatterXSection = weightedTotal;
+  }
+}
 /**
  * Returns the name
  * @returns A string containing the name of the material
@@ -173,62 +233,20 @@ double Material::incohScatterXSection() const {
 }
 
 /**
- * Get the total scattering cross section following Sears eqn 13.
+ * Get the total scattering cross section
  *
  * @returns The value of the total scattering cross section.
  */
-double Material::totalScatterXSection() const {
-  if (m_chemicalFormula.size() == 1)
-    return m_chemicalFormula.front().atom->neutron.tot_scatt_xs;
-
-  const double weightedTotal =
-      std::accumulate(std::begin(m_chemicalFormula),
-                      std::end(m_chemicalFormula), 0.,
-                      [](double subtotal, const FormulaUnit &right) {
-                        return subtotal + right.atom->neutron.tot_scatt_xs *
-                                              right.multiplicity;
-                      }) /
-      m_atomTotal;
-
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal;
-  }
-}
+double Material::totalScatterXSection() const { return m_totalScatterXSection; }
 
 /**
  * Get the absorption cross section for a given wavelength
- * according to Sears eqn 14
- *
- * CURRENTLY This assumes a linear dependence on the wavelength with the
- * reference wavelength = NeutronAtom::ReferenceLambda angstroms.
- *
  * @param lambda :: The wavelength to evaluate the cross section
  * @returns The value of the absoprtion cross section at
  * the given wavelength
  */
 double Material::absorbXSection(const double lambda) const {
-  double weightedTotal;
-
-  if (m_chemicalFormula.size() == 1) {
-    weightedTotal = m_chemicalFormula.front().atom->neutron.abs_scatt_xs;
-  } else {
-    weightedTotal =
-        std::accumulate(std::begin(m_chemicalFormula),
-                        std::end(m_chemicalFormula), 0.,
-                        [](double subtotal, const FormulaUnit &right) {
-                          return subtotal + right.atom->neutron.abs_scatt_xs *
-                                                right.multiplicity;
-                        }) /
-        m_atomTotal;
-  }
-
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal * (lambda / NeutronAtom::ReferenceLambda);
-  }
+  return m_linearAbsorpXSectionByWL * lambda;
 }
 
 /**
@@ -252,6 +270,7 @@ double Material::linearAbsorpCoef(const double lambda) const {
 std::vector<double> Material::linearAbsorpCoef(
     std::vector<double>::const_iterator lambdaBegin,
     std::vector<double>::const_iterator lambdaEnd) const {
+
   const double linearCoefByWL =
       absorbXSection(PhysicalConstants::NeutronAtom::ReferenceLambda) * 100. *
       numberDensity() / PhysicalConstants::NeutronAtom::ReferenceLambda;
@@ -553,6 +572,8 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
         "Only know how to read version 1 or 2 for Material");
   }
   this->countAtoms();
+  this->calculateLinearAbsorpXSectionByWL();
+  this->calculateTotalScatterXSection();
 
   file->readData("number_density", m_numberDensity);
   file->readData("temperature", m_temperature);

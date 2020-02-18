@@ -757,6 +757,9 @@ void FitPropertyBrowser::acceptFit() {
   if (!cf)
     return;
   auto function = m_fitSelector->getFunction();
+  if (function.isEmpty()) {
+    return;
+  }
   PropertyHandler *h = getHandler()->findHandler(cf);
   h->addFunction(function.toStdString());
   emit functionChanged();

@@ -34,7 +34,7 @@ set(TEST_PY_FILES
     DSFinterpTest.py
     EnggCalibrateFullTest.py
     EnggCalibrateTest.py
-    EnggFitDIFCFromPeaksTest.py
+    EnggFitTOFFromPeaksTest.py
     EnggFitPeaksTest.py
     EnggFocusTest.py
     EnggSaveGSASIIFitResultsToHDF5Test.py

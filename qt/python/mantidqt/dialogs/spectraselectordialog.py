@@ -100,11 +100,16 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
     def _check_number_of_plots(self, selection):
         index_length = len(selection.wksp_indices) if selection.wksp_indices else len(selection.spectra)
-        if selection.plot_type == SpectraSelection.Tiled and len(selection.workspaces) * index_length > 25:
+        number_of_lines_to_plot = len(selection.workspaces) * index_length
+        if selection.plot_type == SpectraSelection.Tiled and number_of_lines_to_plot > 12:
             response = QMessageBox.warning(self, 'Mantid Workbench',
-                                           'You are attempting to create a tiled plot with more than 25 subplots,'
-                                           'this is not recommended as it may lead to performance issues.'
-                                           ' Do you wish to continue?', QMessageBox.Ok | QMessageBox.Cancel)
+                                           'Are you sure you want to plot {} subplots?'.format(number_of_lines_to_plot),
+                                           QMessageBox.Ok | QMessageBox.Cancel)
+            return response == QMessageBox.Ok
+        elif selection.plot_type != SpectraSelection.Tiled and number_of_lines_to_plot > 10:
+            response = QMessageBox.warning(self, 'Mantid Workbench', 'You selected {} spectra to plot. Are you sure '
+                                           'you want to plot this many?'.format(number_of_lines_to_plot),
+                                           QMessageBox.Ok | QMessageBox.Cancel)
             return response == QMessageBox.Ok
 
         return True

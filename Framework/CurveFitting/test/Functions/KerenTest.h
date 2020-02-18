@@ -49,7 +49,7 @@ public:
 
   void test_category() {
     Keren function;
-    TS_ASSERT_EQUALS("MuonSpecific", function.category());
+    TS_ASSERT_EQUALS("Muon\\MuonSpecific", function.category());
   }
 
   void test_relaxation() {

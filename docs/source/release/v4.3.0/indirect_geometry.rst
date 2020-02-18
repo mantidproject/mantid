@@ -9,6 +9,10 @@ Indirect Geometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+New
+###
+
+  - Simultaneous fitting has been added as an option on the convolutional fitting tab of data analysis.
 
 Improvements
 ############

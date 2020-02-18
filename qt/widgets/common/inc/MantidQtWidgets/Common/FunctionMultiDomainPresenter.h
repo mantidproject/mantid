@@ -73,6 +73,8 @@ public:
 
   void setColumnSizes(int s0, int s1, int s2);
   void setErrorsEnabled(bool enabled);
+  void hideGlobals();
+  void showGlobals();
 signals:
   void functionStructureChanged();
   void parameterChanged(const QString &funcIndex, const QString &paramName);

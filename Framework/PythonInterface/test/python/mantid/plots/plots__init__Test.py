@@ -19,6 +19,7 @@ from mantid.kernel import config
 from mantid.plots import helperfunctions
 from mantid.plots.legend import convert_color_to_hex
 from mantid.plots.plotfunctions import get_colorplot_extents
+from mantid.plots.utility import MantidAxType
 from mantid.py3compat.mock import Mock, patch
 from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace,
                               RemoveSpectra, AnalysisDataService as ADS)
@@ -269,6 +270,21 @@ class Plots__init__Test(unittest.TestCase):
         ax = fig.add_subplot(111, projection='3d')
         self.assertRaises(Exception, ax.plot_wireframe, self.ws2d_histo)
         self.assertRaises(Exception, ax.plot_surface, self.ws2d_histo)
+
+    def test_plot_is_not_normalized_for_bin_plots(self):
+        workspace = CreateWorkspace(DataX=[10, 20],
+                                    DataY=[2, 3, 4, 5, 6],
+                                    DataE=[1, 2, 1, 2, 1],
+                                    NSpec=5,
+                                    Distribution=False,
+                                    OutputWorkspace='workspace')
+        self.ax.plot(workspace, specNum=1, axis=MantidAxType.BIN, distribution=False)
+        self.ax.plot(workspace, specNum=1, axis=MantidAxType.BIN, distribution=True)
+        self.ax.plot(workspace, specNum=1, axis=MantidAxType.BIN)
+        ws_artists = self.ax.tracked_workspaces[workspace.name()]
+        self.assertFalse(ws_artists[0].is_normalized)
+        self.assertFalse(ws_artists[1].is_normalized)
+        self.assertFalse(ws_artists[2].is_normalized)
 
     def test_artists_normalization_state_labeled_correctly_for_dist_workspace(self):
         dist_ws = CreateWorkspace(DataX=[10, 20],

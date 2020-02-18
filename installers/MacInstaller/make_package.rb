@@ -54,6 +54,7 @@ BUNDLED_PY_MODULES_COMMON = [
   'sphinx',
   'sphinx_bootstrap_theme',
   'traitlets',
+  'toml',
   'urllib3',
   'wcwidth',
   'yaml',

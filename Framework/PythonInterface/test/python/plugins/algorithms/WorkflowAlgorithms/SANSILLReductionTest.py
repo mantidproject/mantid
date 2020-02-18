@@ -64,10 +64,10 @@ class SANSILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['can'], 'Container')
 
     def test_reference(self):
-        SANSILLReduction(Run='010453', ProcessAs='Reference', SensitivityOutputWorkspace='sens', OutputWorkspace='water')
+        SANSILLReduction(Run='010453', ProcessAs='Sample', SensitivityOutputWorkspace='sens', OutputWorkspace='water')
         self._check_output(mtd['water'], True, 1, 128*128+2)
         self._check_output(mtd['sens'], False, 1, 128*128+2)
-        self._check_process_flag(mtd['water'], 'Reference')
+        self._check_process_flag(mtd['water'], 'Sample')
         self._check_process_flag(mtd['sens'], 'Sensitivity')
 
     def test_sample(self):
@@ -102,9 +102,9 @@ class SANSILLReductionTest(unittest.TestCase):
     def test_reference_tof(self):
         # D33 VTOF
         # this is actually a sample run, not water, but is fine for this test
-        SANSILLReduction(Run='093410', ProcessAs='Reference', OutputWorkspace='ref')
+        SANSILLReduction(Run='093410', ProcessAs='Sample', OutputWorkspace='ref')
         self._check_output(mtd['ref'], True, 30, 256*256+2)
-        self._check_process_flag(mtd['ref'], 'Reference')
+        self._check_process_flag(mtd['ref'], 'Sample')
 
     def test_sample_tof(self):
         # D33 VTOF, Pluronic F127
