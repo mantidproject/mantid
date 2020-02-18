@@ -12,45 +12,54 @@ from typing import List
 
 from mantid.api import MatrixWorkspace, NumericAxis, Workspace, WorkspaceFactory
 from mantid.plots.utility import get_single_workspace_log_value
+from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import pcolormesh
 
-DEFAULT_LEVELS = [0.2, 0.4, 0.6, 0.8]
+import numpy as np
 
-def plot(plot_type, plot_index, axis_name, log_name, custom_log_values, workspaces):
+DEFAULT_CONTOUR_LEVELS = [0.2, 0.4, 0.6, 0.8]
+
+
+def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name: str, custom_log_values: List[float],
+         workspaces: List[Workspace]) -> None:
     if len(workspaces) > 0:
-        matrix_ws = create_workspace_for_group_plot(plot_type, workspaces, plot_index, log_name, custom_log_values)
+        matrix_ws = _create_workspace_for_group_plot(plot_type, workspaces, plot_index, log_name, custom_log_values)
 
-        title = "plot for {}, index {}".format([ws.name() for ws in workspaces], plot_index)
+        title = f"plot for {[ws.name() for ws in workspaces]}, index {plot_index}"
 
-        if plot_type == "surface":
+        if plot_type == SpectraSelection.Surface:
             import matplotlib.pyplot as plt
             fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
             surface = ax.plot_surface(matrix_ws, cmap='viridis')
+
             ax.set_title("Surface " + title)
+
             ax.set_ylabel(axis_name)
+            fig.colorbar(surface)
             fig.show()
-        elif plot_type == "contour":
+        elif plot_type == SpectraSelection.Contour:
             fig = pcolormesh([matrix_ws])
             ax = fig.get_axes()[0]
 
             array = fig.get_axes()[1].collections[0].get_array()
-            levels = [array.max() * value for value in DEFAULT_LEVELS]
+            levels = [array.max() * value for value in DEFAULT_CONTOUR_LEVELS]
 
             ax.contour(matrix_ws, levels=levels, colors='k', linewidths=0.5)
 
             ax.set_ylabel(axis_name)
             ax.set_title("Contour " + title)
 
-def create_workspace_for_group_plot\
-    (plot_type: str, workspaces: List[Workspace], plot_index: int, log_name: str, custom_log_values: List[float]) -> MatrixWorkspace:
-    validate_workspace_choices(workspaces, plot_index)
+
+def _create_workspace_for_group_plot(plot_type: SpectraSelection, workspaces: List[Workspace], plot_index: int,
+                                     log_name: str, custom_log_values: List[float]) -> MatrixWorkspace:
+    _validate_workspace_choices(workspaces, plot_index)
 
     number_of_workspaces = len(workspaces)
 
     first_ws = workspaces[0]
     first_blocksize = first_ws.blocksize()
 
-    if plot_type == "contour":
+    if plot_type == SpectraSelection.Contour:
         x_size = first_blocksize + 1
     else:
         x_size = first_blocksize
@@ -64,7 +73,7 @@ def create_workspace_for_group_plot\
     for i in range(number_of_workspaces):
         ws = workspaces[i]
         if isinstance(ws, MatrixWorkspace):
-            if plot_type == "contour":
+            if plot_type == SpectraSelection.Contour:
                 matrix_ws.applyBinEdgesFromAnotherWorkspace(ws, plot_index, i)
             else:
                 matrix_ws.applyPointsFromAnotherWorkspace(ws, plot_index, i)
@@ -86,9 +95,9 @@ def create_workspace_for_group_plot\
     return matrix_ws
 
 
-def group_contents_have_same_x(workspaces, index):
+def _group_contents_have_same_x(workspaces: List[Workspace], index: int) -> bool:
     # Check and retrieve X data for given workspace and spectrum
-    def get_x_data(index, spectrum):
+    def get_x_data(index: int, spectrum: int) -> np.ndarray:
         nonlocal workspaces
         ws = workspaces[index]
 
@@ -117,9 +126,9 @@ def group_contents_have_same_x(workspaces, index):
         return all_same_x
 
 
-def validate_workspace_choices(workspaces, spectrum):
+def _validate_workspace_choices(workspaces: List[Workspace], spectrum: int) -> None:
     if len(workspaces) == 0:
         raise RuntimeError("Must provide a non-empty WorkspaceGroup.")
 
-    if not group_contents_have_same_x(workspaces, spectrum):
+    if not _group_contents_have_same_x(workspaces, spectrum):
         raise RuntimeError("Input WorkspaceGroup must have same X data for all workspaces.")
