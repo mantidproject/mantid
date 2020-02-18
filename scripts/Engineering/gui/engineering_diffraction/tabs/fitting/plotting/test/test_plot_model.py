@@ -19,42 +19,40 @@ class FittingPlotModelTest(unittest.TestCase):
         self.model = plot_model.FittingPlotModel()
 
     def test_adding_workspace_to_plot(self):
-        self.assertEqual([], self.model.plotted_workspaces)
+        self.assertEqual(set(), self.model.plotted_workspaces)
         ax = mock.MagicMock()
 
         self.model.add_workspace_to_plot("mocked_ws", ax, {"linestyle": "x"})
 
-        self.assertEqual(["mocked_ws"], self.model.plotted_workspaces)
+        self.assertEqual({"mocked_ws"}, self.model.plotted_workspaces)
         ax.plot.assert_called_once_with("mocked_ws", linestyle="x")
 
     def test_removing_single_tracked_workspace_from_plot(self):
-        self.model.plotted_workspaces.append("mocked_ws")
+        self.model.plotted_workspaces.add("mocked_ws")
         ax = mock.MagicMock()
 
         self.model.remove_workspace_from_plot("mocked_ws", ax)
 
-        self.assertEqual([], self.model.plotted_workspaces)
+        self.assertEqual(set(), self.model.plotted_workspaces)
         ax.remove_workspace_artists.assert_called_once_with("mocked_ws")
 
     def test_removing_not_tracked_workspace_from_plot(self):
-        self.model.plotted_workspaces.append("mocked_ws")
+        self.model.plotted_workspaces.add("mocked_ws")
         ax = mock.MagicMock()
 
         self.model.remove_workspace_from_plot("whatever", ax)
 
-        self.assertEqual(["mocked_ws"], self.model.plotted_workspaces)
+        self.assertEqual({"mocked_ws"}, self.model.plotted_workspaces)
         ax.remove_workspace_artists.assert_not_called()
 
     def test_removing_all_workspaces_from_plot(self):
-        self.model.plotted_workspaces.extend(["mocked_ws", "mock_ws_2"])
+        self.model.plotted_workspaces.update({"mocked_ws", "mock_ws_2"})
         ax = mock.MagicMock()
 
         self.model.remove_all_workspaces_from_plot(ax)
 
-        self.assertEqual([], self.model.plotted_workspaces)
-        ax.remove_workspace_artists.assert_any_call("mocked_ws")
-        ax.remove_workspace_artists.assert_any_call("mock_ws_2")
-        self.assertEqual(2, ax.remove_workspace_artists.call_count)
+        self.assertEqual(set(), self.model.plotted_workspaces)
+        self.assertEqual(1, ax.cla.call_count)
 
 
 if __name__ == '__main__':

@@ -8,14 +8,14 @@
 
 class FittingPlotModel(object):
     def __init__(self):
-        self.plotted_workspaces = []
+        self.plotted_workspaces = set()
 
     def get_plotted_workspaces(self):
         return self.plotted_workspaces
 
     def add_workspace_to_plot(self, ws, ax, plot_kwargs):
         ax.plot(ws, **plot_kwargs)
-        self.plotted_workspaces.append(ws)
+        self.plotted_workspaces.add(ws)
 
     def remove_workspace_from_plot(self, ws, ax):
         if ws in self.plotted_workspaces:
@@ -27,7 +27,5 @@ class FittingPlotModel(object):
         ax.remove_workspace_artists(ws)
 
     def remove_all_workspaces_from_plot(self, ax):
-        for ws in self.plotted_workspaces:
-            self._remove_workspace_from_plot(ws, ax)
-        # Should already be empty, but just to be sure.
+        ax.cla()
         self.plotted_workspaces.clear()
