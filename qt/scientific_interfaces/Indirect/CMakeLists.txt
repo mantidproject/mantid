@@ -143,7 +143,6 @@ set(
         Notifier.h
         IFQFitObserver.h
         ParameterEstimation.h
-        FQFitTypes.h
 )
 
 set(
@@ -560,7 +559,6 @@ set(
         MSDFitModel.h
         Notifier.h
         IFQFitObserver.h
-        FQFitTypes.h
 )
 
 set(

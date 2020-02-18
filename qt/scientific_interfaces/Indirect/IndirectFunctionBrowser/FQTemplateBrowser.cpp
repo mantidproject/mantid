@@ -25,7 +25,6 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QVBoxLayout>
-#include <iostream>
 
 #include <limits>
 
@@ -218,9 +217,7 @@ void FQTemplateBrowser::updateDataType(DataType dataType) {
   emit dataTypeChanged(dataType);
 }
 
-void FQTemplateBrowser::spectrumChanged(int spec) {
-  std::cout << "Update spectrum to " << spec << std::endl;
-}
+void FQTemplateBrowser::spectrumChanged(int) {}
 
 } // namespace IDA
 } // namespace CustomInterfaces
