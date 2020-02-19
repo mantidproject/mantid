@@ -52,7 +52,7 @@ class UserConfig(object):
         for key in self.all_keys():
             try:
                 value = self.get(key)
-            except KeyError:
+            except (KeyError, TypeError):
                 continue
             if value == 'true':
                 self.set(key, True)

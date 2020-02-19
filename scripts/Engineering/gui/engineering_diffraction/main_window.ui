@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>640</width>
-    <height>197</height>
+    <height>253</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -128,6 +128,7 @@
   <tabstop>comboBox_instrument</tabstop>
   <tabstop>tab_main</tabstop>
   <tabstop>pushButton_help</tabstop>
+  <tabstop>btn_settings</tabstop>
   <tabstop>pushButton_close</tabstop>
  </tabstops>
  <resources/>

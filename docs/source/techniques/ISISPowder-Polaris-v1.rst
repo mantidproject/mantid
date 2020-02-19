@@ -167,16 +167,6 @@ create_total_scattering_pdf
 The *create_total_scattering_pdf* method allows a user to create a Pair Distribution Function (PDF)
 from focused POLARIS data, with a view performing further total scattering analysis.
 
-With no merging criteria specified, *merge_banks=False* a PDF will be generated for each bank within
-the focused_workspace. The type of PDF output can be set with the keyword argument `pdf_type`, with the
-option of `G(r)`, `g(r)`, `RDF(r)` (defaults to `G(r)`). If run with *merge_banks=True* a PDF will be
-generated based on the weighted sum of the detector banks performed using supplied Q limits
-*q_lims=q_limits*, Q_limits can be in the form of a numpy array with shape (2, x) where x is the number
-of detectors, or a string containing the directory of an appropriately formatted `.lim` file.
-
-This function can also be called with the argument `output_binning` which will rebin the output PDF as
-with the rebin algorithm.
-
 This function applies the placzek self scattering correction from
 :ref:CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering> before calculating the PDF
 
@@ -191,6 +181,19 @@ for example:
 
 Or the focused file must be in the output directory of the POLARIS instrument.
 
+The output PDF can be customized with the following parameters:
+
+- By calling with `pdf_type` the type of PDF output can be specified, with the option of `G(r)`,
+  `g(r)`, `RDF(r)` (defaults to `G(r)`).
+- By calling with `merge_banks=True` a PDF will be generated based on the weighted sum of the detector
+  banks performed using supplied Q limits `q_lims=q_limits`, q_limits can be in the form of an array or
+  with shape (2, x) where x is the number of detectors, or a string containing the directory
+  of an appropriately formatted `.lim` file. By default or specifically called with `merge_banks=False`
+  a PDF will be generated for each bank within the focused_workspace.
+- By calling with `output_binning` which will rebin the output PDF as with the rebin algorithm.
+- By calling with `freq_params` a fourier filter will be performed on the focused signal removing any
+  components from atomic distances outside of the parameters. The parameters must be given as list:
+  [lower], or [lower, upper].
 
 Example
 =======
@@ -198,7 +201,11 @@ Example
 ..  code-block:: python
 
   polaris_example.create_total_scattering_pdf(run_number='12345',
-                                              merge_banks=False)
+                                              merge_banks=True,
+                                              q_lims=[[2.5, 3, 4, 6, 7], [3.5, 5, 7, 11, 40]],
+                                              output_binning=[0,0.1,20],
+                                              pdf_type='G(r)',
+                                              freq_params=[1])
 
 .. _calibration_mapping_polaris-isis-powder-ref:
 

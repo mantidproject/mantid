@@ -11,19 +11,19 @@ from assert_called import assert_called
 from fake_signal import FakeSignal
 from mantid.kernel import ConfigService
 from mantid.py3compat import mock
+from sans.common.enums import SANSInstrument
+from sans.gui_logic.models import SumRunsModel
+from sans.gui_logic.models.SumRunsModel import SumRunsModel
+from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from sans.gui_logic.models.run_file import SummableRunFile
-from sans.gui_logic.models.run_selection import RunSelection
-from sans.gui_logic.models.run_summation import RunSummation
-from sans.gui_logic.models.summation_settings import SummationSettings
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter, AddRunsFilenameManager
-from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
-from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from ui.sans_isis.add_runs_page import AddRunsPage
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 
 
 class MockedOutAddRunsFilenameManager(AddRunsFilenameManager):
     def __init__(self):
+        super(MockedOutAddRunsFilenameManager, self).__init__("LOQ")
         self.instrument_string = "LOQ"
 
     def _get_leading_zeroes(self, run_number):
@@ -32,7 +32,7 @@ class MockedOutAddRunsFilenameManager(AddRunsFilenameManager):
         return 4*"0"
 
     def make_filename(self, run_numbers):
-        return "LOQ0000" + max(run_numbers) + "-add"
+        return "LOQ0000" + str(max(run_numbers)) + "-add"
 
 
 class AddRunsPagePresenterTestCase(unittest.TestCase):
@@ -45,58 +45,21 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
 
     def _make_mock_parent_view(self):
         mock_parent_view = mock.create_autospec(SANSDataProcessorGui, spec_set=True)
-        mock_parent_view.instrument.to_string.return_value = 'LOQ'
+        mock_parent_view.instrument = SANSInstrument.LOQ
         return mock_parent_view
-
-    def setUpMockChildPresenters(self):
-        self._summation_settings_presenter = \
-            self._make_mock_summation_settings_presenter()
-        self.run_selector_presenter = \
-            self._make_mock_run_selector_presenter()
 
     def setUpFakeChildViews(self):
         self.fake_run_selector_view = 'Fake Run Selector View'
         self.fake_summation_settings_view = 'Fake Summation Settings View'
 
-    def setUpMockChildPresentersWithDefaultSummationSettings(self):
-        self.setUpMockChildPresenters()
-        self._summation_settings = self._summation_settings_with_save_directory('/dev/null')
-        self._summation_settings_presenter.settings.return_value = self._summation_settings
-
-    def _just_use(self, presenter):
-        return lambda *args: presenter
-
-    def _make_mock_run_selector_presenter(self):
-        return mock.create_autospec(RunSelectorPresenter, spec_set=True)
-
-    def _make_mock_summation_settings_presenter(self):
-        return mock.create_autospec(SummationSettingsPresenter, spec_set=True)
-
-    def _just_use_run_selector_presenter(self):
-        return self._just_use(self.run_selector_presenter)
-
-    def _just_use_summation_settings_presenter(self):
-        return self._just_use(self._summation_settings_presenter)
-
-    def _make_mock_run_selection(self, iterable):
-        mock_runs = mock.create_autospec(RunSelection, spec_set=True)
-        mock_runs.__iter__.return_value = list(iterable)
-        return mock_runs
-
     def _make_mock_run_summation(self):
-        return mock.create_autospec(RunSummation, spec_set=True)
+        return mock.create_autospec(SumRunsModel, spec_set=True)
 
     def _make_fake_run(self, path, is_event_data=False):
         return SummableRunFile(path, path, is_event_data)
 
-    def _make_fake_histogram_run(self, path):
-        return self._make_fake_run(path, path, False)
-
-    def _make_fake_event_run(self, path):
-        return self._make_fake_run(path, path, True)
-
     def _summation_settings_with_save_directory(self, directory):
-        mock_summation_settings = mock.create_autospec(SummationSettings, spec_set=True)
+        mock_summation_settings = mock.create_autospec(SummationSettingsModel, spec_set=True)
         mock_summation_settings.save_directory = directory
         return mock_summation_settings
 
@@ -104,75 +67,31 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
 class InitializationTest(AddRunsPagePresenterTestCase):
     def setUp(self):
         self.setUpFakeChildViews()
-        self.setUpMockChildPresentersWithDefaultSummationSettings()
-        self.run_summation = self._make_mock_run_summation()
-        self.view = self._make_mock_view()
-        self._parent_view = self._make_mock_parent_view()
 
-    def _make_presenter_with_child_presenters(self,
-                                              run_selection,
-                                              summation_settings):
-        return AddRunsPagePresenter(self.run_summation,
-                                    run_selection,
-                                    summation_settings,
-                                    self.view,
-                                    None)
+    @mock.patch('sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel', autospec=True)
+    @mock.patch('sans.gui_logic.presenter.add_runs_presenter.RunSelectorPresenter', autospec=True)
+    def test_creates_run_selector_with_child_view(self, patched_presenter, patched_model):
+        view = self._make_mock_view()
+        parent_view = self._make_mock_parent_view()
 
-    def test_creates_run_selector_with_child_view(self):
-        self.view.run_selector_view.return_value = self.fake_run_selector_view
-        make_run_selector_presenter = \
-            mock.Mock(return_value=self.run_selector_presenter)
+        AddRunsPagePresenter(sum_runs_model=mock.Mock(), view=view, parent_view=parent_view)
 
-        self.presenter = self._make_presenter_with_child_presenters(
-            make_run_selector_presenter,
-            self._just_use_summation_settings_presenter())
+        patched_model.assert_called_once_with(mock.ANY)
+        patched_presenter.assert_called_once_with(mock.ANY, patched_model.return_value, mock.ANY, mock.ANY, view)
 
-        call_args = make_run_selector_presenter.call_args[0]
-        self.assertEqual(self.fake_run_selector_view, call_args[0])
-        self.assertEqual(self.view, call_args[2])
+    @mock.patch('sans.gui_logic.presenter.add_runs_presenter.SummationSettingsModel', autospec=True)
+    @mock.patch('sans.gui_logic.presenter.add_runs_presenter.SummationSettingsPresenter', autospec=True)
+    def test_creates_run_selector_with_child_view(self, patched_presenter, patched_model):
+        view = self._make_mock_view()
+        parent_view = self._make_mock_parent_view()
 
-    def test_creates_summation_settings_with_child_view(self):
-        self.view.summation_settings_view.return_value = \
-            self.fake_summation_settings_view
-        make_summation_settings_presenter = \
-            mock.Mock(return_value=self._summation_settings_presenter)
+        AddRunsPagePresenter(sum_runs_model=mock.Mock(), view=view, parent_view=parent_view)
 
-        self.presenter = self._make_presenter_with_child_presenters(
-                                 self._just_use_run_selector_presenter(),
-                                 make_summation_settings_presenter)
-
-        call_args = make_summation_settings_presenter.call_args[0]
-        self.assertEqual(self.fake_summation_settings_view, call_args[0])
-        self.assertEqual(self.view, call_args[1])
+        patched_model.assert_called_once_with(mock.ANY)
+        patched_presenter.assert_called_once_with(patched_model.return_value, mock.ANY, view)
 
 
-class SelectionMockingTestCase(AddRunsPagePresenterTestCase):
-    # Creates a factory function which stores the run summation
-    # change callback allowing us to notify the presenter when
-    # the view should be synchronised with the model.
-    def _capture_on_change_callback(self, presenter):
-        def run_selector_presenter_factory(view, callback, parent_view):
-            self._on_model_updated = callback
-            return presenter
-        return run_selector_presenter_factory
-
-    def _update_selection_model(self, new_selection):
-        self.run_selector_presenter.run_selection.return_value = new_selection
-        self._on_model_updated(new_selection)
-
-    def _make_mock_run_selection_from_paths(self, paths):
-        return self._make_mock_run_selection(self._make_fake_run(path) for path in paths)
-
-
-class SummationSettingsViewEnablednessTest(SelectionMockingTestCase):
-    def setUp(self):
-        self.setUpMockChildPresenters()
-        self._view = self._make_mock_view()
-        self._parent_view = self._make_mock_parent_view()
-        self._event_run = self._make_fake_event_run()
-        self._histogram_run = self._make_fake_histogram_run()
-        self._make_presenter()
-
+class SummationSettingsViewEnablednessTest(AddRunsPagePresenterTestCase):
     def _make_fake_event_run(self):
         run = mock.create_autospec(SummableRunFile, spec_set=True)
         run.display_name.return_value = '14'
@@ -185,91 +104,83 @@ class SummationSettingsViewEnablednessTest(SelectionMockingTestCase):
         run.is_event_data.return_value = False
         return run
 
-    def _just_use_summation_settings_presenter(self):
-        return self._just_use(self._summation_settings_presenter)
-
     def _make_presenter(self):
-        presenter = AddRunsPagePresenter(mock.Mock(),
-                                         self._capture_on_change_callback(self.run_selector_presenter),
-                                         self._just_use_summation_settings_presenter(),
-                                         self._view,
-                                         self._parent_view)
+        self.view = self._make_mock_view()
+        parent_view = self._make_mock_parent_view()
+        presenter = AddRunsPagePresenter(mock.Mock(), self.view, parent_view)
         presenter._get_filename_manager = mock.Mock(return_value=MockedOutAddRunsFilenameManager())
         return presenter
 
-    def xtest_disables_summation_settings_when_no_event_data(self):
-        runs = self._make_mock_run_selection([self._histogram_run,
-                                              self._histogram_run])
-        self._on_model_updated(runs)
-        assert_called(self._view.disable_summation_settings)
+    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
+    def test_enables_summation_settings_when_event_data(self, patched_init_run_selector):
+        histogram_run = self._make_fake_histogram_run()
+        runs = mock.MagicMock()
+        runs.has_any_runs.return_value = True
+        runs.__iter__.return_value = [histogram_run, histogram_run]
 
-    def test_enables_summation_settings_when_event_data(self):
-        runs = self._make_mock_run_selection([self._event_run,
-                                              self._event_run])
-        self._on_model_updated(runs)
-        assert_called(self._view.enable_summation_settings)
+        presenter = self._make_presenter()
+        presenter._handle_selection_changed(run_selection=runs)
+        assert_called(self.view.enable_summation_settings)
 
-    def test_enables_summation_settings_when_event_and_histogram_data(self):
-        runs = self._make_mock_run_selection([self._histogram_run,
-                                              self._event_run])
-        self._on_model_updated(runs)
-        assert_called(self._view.enable_summation_settings)
+    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
+    def test_enables_summation_settings_when_event_and_histogram_data(self, _):
+        histogram_run = self._make_fake_histogram_run()
+        event_run = self._make_fake_event_run()
+
+        runs = mock.MagicMock()
+        runs.has_any_runs.return_value = True
+        runs.__iter__.return_value = [event_run, histogram_run]
+
+        presenter = self._make_presenter()
+        presenter._handle_selection_changed(run_selection=runs)
+        assert_called(self.view.enable_summation_settings)
 
 
-class SummationConfigurationTest(SelectionMockingTestCase):
+class SummationConfigurationTest(AddRunsPagePresenterTestCase):
     def setUp(self):
-        self.setUpMockChildPresentersWithDefaultSummationSettings()
         self.view = self._make_mock_view()
         self.parent_view = self._make_mock_parent_view()
 
-    def _make_presenter(self,
-                        run_summation,
-                        run_selection,
-                        summation_settings):
-        presenter = AddRunsPagePresenter(run_summation,
-                                         run_selection,
-                                         summation_settings,
-                                         self.view,
-                                         self.parent_view)
-        presenter._get_filename_manager = mock.Mock(return_value=MockedOutAddRunsFilenameManager())
-        return presenter
+    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectorPresenter", autospec=True)
+    def test_passes_correct_config_when_summation_requested(self, patched_run_selector):
+        # Ensure we know the type that was returned by the constructor
+        run_selector_mock = mock.Mock()
+        patched_run_selector.return_value = run_selector_mock
 
-    def _just_use_summation_settings_presenter(self):
-        return self._just_use(self._summation_settings_presenter)
-
-    def test_passes_correct_config_when_summation_requested(self):
         ConfigService["defaultsave.directory"] = "someDir/"
         run_summation = mock.Mock()
 
-        self.presenter = self._make_presenter(
-            run_summation,
-            self._capture_on_change_callback(self.run_selector_presenter),
-            self._just_use_summation_settings_presenter())
+        presenter = AddRunsPagePresenter(run_summation, self.view, self.parent_view)
+        presenter._get_filename_manager = mock.Mock(return_value=MockedOutAddRunsFilenameManager())
 
-        fake_run_selection = self._make_mock_run_selection_from_paths(['3'])
-        self.run_selector_presenter.run_selection.return_value = fake_run_selection
-        self._on_model_updated(fake_run_selection)
+        mocked_run_selector = mock.MagicMock()
+        mocked_run_selector.has_any_runs.return_value = True
+        run_number_mock = mock.Mock()
+        run_number_mock.display_name.return_value = 3
+        mocked_run_selector.__iter__.return_value = [run_number_mock]
+
+        run_selector_mock.run_selection.return_value = mocked_run_selector
         self.view.sum.emit()
-        run_summation.assert_called_with(fake_run_selection,
-                                         self._summation_settings,
-                                         'LOQ00003-add')
+        run_summation.assert_called_with(mock.ANY, mock.ANY, 'LOQ00003-add')
 
-    def test_shows_error_when_empty_default_directory(self):
-        summation_settings_model = self._summation_settings_with_save_directory('')
-        self._summation_settings_presenter.settings.return_value = summation_settings_model
-        self.presenter = self._make_presenter(
-            mock.Mock(),
-            self._just_use_run_selector_presenter(),
-            self._just_use_summation_settings_presenter())
-        self.presenter.save_directory = ""
+    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
+    def test_shows_error_when_empty_default_directory(self, _):
+        view = self._make_mock_view()
+        presenter = AddRunsPagePresenter(mock.MagicMock(), view, mock.Mock())
+        presenter.save_directory = ""
 
-        self.view.sum.emit()
-        assert_called(self.view.no_save_directory)
+        view.sum.emit()
+        view.no_save_directory.assert_any_call()
 
 
-class BaseFileNameTest(SelectionMockingTestCase):
+def create_mocked_runs(start, len):
+    run_selection = [mock.Mock() for _ in range(len)]
+    for x, mock_instance in enumerate(run_selection):
+        mock_instance.display_name.return_value = start + x
+    return run_selection
+
+class BaseFileNameTest(AddRunsPagePresenterTestCase):
     def setUp(self):
-        self.setUpMockChildPresentersWithDefaultSummationSettings()
         self.view = self._make_mock_view()
         self.parent_view = self._make_mock_parent_view()
         ConfigService["defaultsave.directory"] = "someDir/"
@@ -277,112 +188,120 @@ class BaseFileNameTest(SelectionMockingTestCase):
     def tearDown(self):
         ConfigService["defaultsave.directory"] = ""
 
-    def _make_presenter(self,
-                        run_summation):
-        presenter = AddRunsPagePresenter(
-            run_summation,
-            self._capture_on_change_callback(self.run_selector_presenter),
-            self._just_use_summation_settings_presenter(),
-            self.view,
-            self.parent_view)
+    def _make_presenter(self, run_summation):
+        presenter = AddRunsPagePresenter(run_summation, self.view, self.parent_view)
         presenter._get_filename_manager = mock.Mock(return_value=MockedOutAddRunsFilenameManager())
         return presenter
 
-    def _just_use_summation_settings_presenter(self):
-        return self._just_use(self._summation_settings_presenter)
-
-    def _update_selection_model(self, new_selection):
-        self.run_selector_presenter.run_selection.return_value = new_selection
-        self._on_model_updated(new_selection)
-
-    def _base_file_name_arg(self, run_summation_mock):
-        return run_summation_mock.call_args[0][2]
-
-    def _retrieve_generated_name_for(self, run_paths):
-        run_summation = mock.Mock()
-        presenter = self._make_presenter(run_summation)
-        fake_run_selection = self._make_mock_run_selection_from_paths(run_paths)
-        self._update_selection_model(fake_run_selection)
-        self.view.sum.emit()
-        return self._base_file_name_arg(run_summation)
-
     def test_generates_correct_base_name(self):
-        generated_name = self._retrieve_generated_name_for(['1', '2', '3'])
-        self.assertEqual('LOQ00003-add', generated_name)
+        run_summation = mock.MagicMock()
+        presenter = self._make_presenter(run_summation)
+
+        run_summation.has_any_runs.return_value = True
+
+        run_selection = mock.Mock()
+        run_selection.display_name.return_value = 3
+        run_summation.__iter__.return_value = [run_selection]
+        returned = presenter._sum_base_file_name(run_summation)
+
+        self.assertEqual('LOQ00003-add', returned)
 
     def test_regenerates_correct_base_name_after_highest_removed(self):
-        run_summation = mock.Mock()
+        run_summation = mock.MagicMock()
         presenter = self._make_presenter(run_summation)
-        self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5', '6']))
-        self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5']))
-        self.view.sum.emit()
-        self.assertEqual('LOQ00005-add', self._base_file_name_arg(run_summation))
+
+        run_summation.has_any_runs.return_value = True
+
+        # Runs 4 / 5 / 6
+        run_selection = create_mocked_runs(start=4, len=3)
+
+        run_summation.__iter__.return_value = run_selection
+        returned = presenter._sum_base_file_name(run_summation)
+        self.assertEqual('LOQ00006-add', returned)
+
+        # Drop run 6
+        del run_selection[-1]
+        returned = presenter._sum_base_file_name(run_summation)
+
+        self.assertEqual('LOQ00005-add', returned)
 
     def test_correct_base_name_after_set_by_user(self):
         user_out_file_name = 'Output'
-        run_summation = mock.Mock()
+        run_summation = mock.MagicMock()
         presenter = self._make_presenter(run_summation)
-        self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5', '6']))
+
+        # Runs 4 / 5 / 6
+        run_selection = create_mocked_runs(start=4, len=3)
+
+        run_summation.__iter__.return_value = run_selection
 
         self.view.out_file_name.return_value = user_out_file_name
         self.view.outFileChanged.emit()
-        self.view.sum.emit()
-        self.assertEqual(user_out_file_name,
-                         self._base_file_name_arg(run_summation))
+
+        returned = presenter._sum_base_file_name(run_selection=run_selection)
+
+        self.assertEqual(returned, user_out_file_name)
 
     def test_base_name_not_reset_after_set_by_user(self):
-        run_summation = mock.Mock()
+        run_summation = mock.MagicMock()
         presenter = self._make_presenter(run_summation)
-        self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5', '6']))
+        # Runs 4 / 5 / 6
+        run_selection = create_mocked_runs(start=4, len=3)
 
         user_out_file_name = 'Output'
         self.view.out_file_name.return_value = user_out_file_name
         self.view.outFileChanged.emit()
 
-        self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '5']))
-        self.view.sum.emit()
-        self.assertEqual(user_out_file_name,
-                         self._base_file_name_arg(run_summation))
+        run_summation.__iter__.return_value = run_selection
+        returned = presenter._sum_base_file_name(run_selection=run_selection)
+        self.assertEqual(user_out_file_name, returned)
+
+        new_selection = mock.Mock()
+        new_selection.display_name.return_value = 1
+
+        run_summation.__iter__.return_value = run_selection
+        returned = presenter._sum_base_file_name(run_selection=run_selection)
+        self.assertEqual(user_out_file_name, returned)
 
     def test_sets_name_in_view_after_selection_update(self):
-        run_summation = mock.Mock()
+        run_summation = mock.MagicMock()
         presenter = self._make_presenter(run_summation)
-        self._update_selection_model(self._make_mock_run_selection_from_paths(['4', '6', '5']))
+        # Runs 4 / 5 / 6
+        run_selection = create_mocked_runs(start=4, len=3)
+
+        run_summation.__iter__.return_value = run_selection
+        presenter._refresh_view(run_selection=run_summation)
+
         self.view.set_out_file_name.assert_called_with('LOQ00006-add')
-        self._update_selection_model(self._make_mock_run_selection_from_paths(['5', '4']))
-        self.view.set_out_file_name.assert_called_with('LOQ00005-add')
 
 
-class SumButtonTest(SelectionMockingTestCase):
+class SumButtonTest(AddRunsPagePresenterTestCase):
     def setUp(self):
-        self.setUpMockChildPresentersWithDefaultSummationSettings()
         self.run_summation = self._make_mock_run_summation()
         self.view = self._make_mock_view()
         self.parent_view = self._make_mock_parent_view()
         self.presenter = self._make_presenter()
 
     def _make_presenter(self):
-        presenter = AddRunsPagePresenter(
-            self._make_mock_run_summation(),
-            self._capture_on_change_callback(self.run_selector_presenter),
-            self._just_use_summation_settings_presenter(),
-            self.view,
-            self.parent_view)
+        presenter = AddRunsPagePresenter(self._make_mock_run_summation(), self.view, self.parent_view)
         presenter._get_filename_manager = mock.Mock(return_value=MockedOutAddRunsFilenameManager())
         return presenter
 
     def test_enables_sum_button_when_row_added(self):
-        fake_run_selection = self._make_mock_run_selection_from_paths(['5'])
+        fake_run_list = create_mocked_runs(start=5, len=1)
+        fake_run_selection = mock.MagicMock()
+
         fake_run_selection.has_any_runs.return_value = True
-        self._update_selection_model(fake_run_selection)
+        fake_run_selection.__iter__.return_value = fake_run_list
+
+        self.presenter._handle_selection_changed(run_selection=fake_run_selection)
         assert_called(self.view.enable_sum)
 
     def test_disables_sum_button_when_no_rows(self):
-        fake_run_selection = self._make_mock_run_selection_from_paths(['5'])
-        fake_run_selection.has_any_runs.return_value = True
-        self._update_selection_model(fake_run_selection)
+        fake_run_selection = mock.Mock()
         fake_run_selection.has_any_runs.return_value = False
-        self._update_selection_model(fake_run_selection)
+
+        self.presenter._handle_selection_changed(run_selection=fake_run_selection)
         assert_called(self.view.disable_sum)
 
 
@@ -432,11 +351,9 @@ class AddRunsFilenameManagerTest(unittest.TestCase):
 
 class AddRunsDefaultSettingsTest(unittest.TestCase):
     def setUp(self):
-        self.presenter = AddRunsPagePresenter(mock.Mock(),
-                                              mock.Mock(),
-                                              mock.Mock(),
-                                              mock.Mock(),
-                                              mock.Mock())
+        mock_parent_view = mock.Mock()
+        mock_parent_view.instrument = SANSInstrument.LOQ
+        self.presenter = AddRunsPagePresenter(parent_view=mock_parent_view, sum_runs_model=mock.Mock(), view=mock.Mock())
 
     def test_that_presenter_calls_properties_handler_to_update_directory_on_directory_changed(self):
         new_dir_name = os.path.join("some", "dir", "path")

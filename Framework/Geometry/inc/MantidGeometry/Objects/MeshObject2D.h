@@ -80,7 +80,9 @@ public:
   void draw() const override;
   void initDraw() const override;
   const Kernel::Material &material() const override;
+  virtual void setMaterial(const Kernel::Material &material) override;
   const std::string &id() const override;
+  void setID(const std::string &id) override { m_id = id; };
   boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Id as static
   static const std::string Id;
@@ -106,6 +108,8 @@ private:
   std::vector<uint32_t> m_triangles;
   /// Vertices
   std::vector<Kernel::V3D> m_vertices;
+  /// optional string identifier
+  std::string m_id;
   /// Material composition
   Kernel::Material m_material;
   /// Bounding box

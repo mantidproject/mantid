@@ -220,9 +220,9 @@ def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, cali
         tzero = [output.TZERO]
         difa = [output.DIFA]
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [param_tbl_name],
-                         tzero, difc)
+                         tzero, difc, difa)
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
-                         "bank_{}".format(param_tbl_name), [param_tbl_name], tzero, difc)
+                         "bank_{}".format(param_tbl_name), [param_tbl_name], tzero, difc, difa)
     else:
         # work out which bank number to crop on, then calibrate
         if spec_nos.lower() == "north":
@@ -239,9 +239,9 @@ def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, cali
         tzero = [output.TZERO]
         difa = [output.DIFA]
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [spec_nos], tzero,
-                         difc)
+                         difc, difa)
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "bank_{}".format(spec_nos),
-                         [spec_nos], tzero, difc)
+                         [spec_nos], tzero, difc, difa)
     # create the table workspace containing the parameters
     create_params_table(difc, tzero, difa)
     create_difc_zero_workspace(difc, tzero, spec_nos, param_tbl_name)
@@ -263,7 +263,7 @@ def create_calibration_files(ceria_run, van_run, curve_van, int_van, calibration
     ceria_ws = simple.Load(Filename="ENGINX" + ceria_run, OutputWorkspace="eng_calib")
     difcs = []
     tzeros = []
-    difa = []
+    difas = []
     banks = 3
     bank_names = ["North", "South"]
     # loop through the banks, calibrating both
@@ -275,15 +275,15 @@ def create_calibration_files(ceria_run, van_run, curve_van, int_van, calibration
         # add the needed outputs to a list
         difcs.append(output.DIFC)
         tzeros.append(output.TZERO)
-        difa.append(output.DIFA)
+        difas.append(output.DIFA)
         # save out the ones needed for this loop
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
                          "bank_{}".format(bank_names[i - 1]), [bank_names[i - 1]],
-                         [tzeros[i - 1]], [difcs[i - 1]])
+                         [tzeros[i - 1]], [difcs[i - 1]], [difas[i - 1]])
     # save out the total version, then create the table of params
     save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names, tzeros,
-                     difcs)
-    create_params_table(difcs, tzeros, difa)
+                     difcs, difas)
+    create_params_table(difcs, tzeros, difas)
     create_difc_zero_workspace(difcs, tzeros, "", None)
 
 
@@ -300,7 +300,8 @@ def load_van_files(curves_van, ints_van):
     return van_curves_ws, van_integrated_ws
 
 
-def save_calibration(ceria_run, van_run, calibration_directory, calibration_general, name, bank_names, zeros, difcs):
+def save_calibration(ceria_run, van_run, calibration_directory, calibration_general, name, bank_names, zeros, difcs,
+                     difas):
     """
     save the calibration data
 
@@ -310,6 +311,7 @@ def save_calibration(ceria_run, van_run, calibration_directory, calibration_gene
     @param calibration_general :: the general calibration directory to save to
     @param name ::  the name of the banks being saved
     @param bank_names :: the list of banks to save
+    @param difas :: the list of difa values to save
     @param difcs :: the list of difc values to save
     @param zeros :: the list of tzero values to save
 
@@ -325,8 +327,8 @@ def save_calibration(ceria_run, van_run, calibration_directory, calibration_gene
         template_file = "template_ENGINX_241391_236516_North_bank.prm"
     # write out the param file to the users directory
 
-    Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname, bank_names=bank_names, difc=difcs, tzero=zeros,
-                                        ceria_run=ceria_run, vanadium_run=van_run,
+    Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname, bank_names=bank_names, difa=difas, difc=difcs,
+                                        tzero=zeros, ceria_run=ceria_run, vanadium_run=van_run,
                                         template_file=template_file)
     if not calibration_general == calibration_directory:
         # copy the param file to the general directory

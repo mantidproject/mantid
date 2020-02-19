@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef MANTID_DATAHANDLING_LOADOFF_H_
 #define MANTID_DATAHANDLING_LOADOFF_H_
-#include "MantidDataHandling/LoadShape.h"
+#include "MantidDataHandling/MeshFileIO.h"
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
@@ -24,7 +24,7 @@ namespace DataHandling {
 namespace {
 Mantid::Kernel::Logger g_log("LoadOff");
 }
-class DLLExport LoadOff : public LoadShape {
+class DLLExport LoadOff : public MeshFileIO {
 public:
   LoadOff(std::string filename, ScaleUnits scaleType);
   std::unique_ptr<Geometry::MeshObject> readOFFshape();

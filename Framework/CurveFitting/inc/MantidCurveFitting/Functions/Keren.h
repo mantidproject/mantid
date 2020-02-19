@@ -27,7 +27,7 @@ public:
   /// Name of function
   std::string name() const override { return "Keren"; }
   /// Category for function
-  const std::string category() const override { return "MuonSpecific"; }
+  const std::string category() const override { return "Muon\\MuonSpecific"; }
   /// Set active parameter
   void setActiveParameter(size_t i, double value) override;
   /// Get active parameter

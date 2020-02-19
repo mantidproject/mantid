@@ -25,7 +25,7 @@ Any temperature data loaded in from a separate file will be available
 from the resultant workspace's sample logs, as a number series that 
 is plottable.
 
-The times are automatically offset by the value for first good data, such that the pulse is at approximatly time equals zero. This is to be consistant with ISIS measurment data.
+The times are automatically offset by the value for first good data, such that the pulse is at approximatly time equals zero. This is to be consistant with ISIS measurement data.
 
 If no group name is recorded in the data file a name of `group_specNum` will be used, where `specNum` is the spectrum number.
 

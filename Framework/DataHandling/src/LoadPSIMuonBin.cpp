@@ -208,11 +208,10 @@ void LoadPSIMuonBin::exec() {
   // The pulse should be at t=0 to be like ISIS data
   // manually offset the data
   for (auto specNum = 0u; specNum < m_histograms.size(); ++specNum) {
-    auto xData = outputWorkspace->mutableX(specNum);
-    for (size_t j = 0; j < xData.size(); j++) {
-      xData[j] = xData[j] - absTimeZero;
+    auto &xData = outputWorkspace->mutableX(specNum);
+    for (auto &xValue : xData) {
+      xValue -= absTimeZero;
     }
-    outputWorkspace->mutableX(specNum) = xData;
   }
 }
 
@@ -223,13 +222,13 @@ void LoadPSIMuonBin::makeDeadTimeTable(const size_t &numSpec) {
       boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
           Mantid::API::WorkspaceFactory::Instance().createTable(
               "TableWorkspace"));
-
+  assert(deadTimeTable);
   deadTimeTable->addColumn("int", "spectrum");
   deadTimeTable->addColumn("double", "dead-time");
 
   for (size_t i = 0; i < numSpec; i++) {
     Mantid::API::TableRow row = deadTimeTable->appendRow();
-    row << i + 1 << 0.0;
+    row << static_cast<int>(i) + 1 << 0.0;
   }
   setProperty("DeadTimeTable", deadTimeTable);
 }
@@ -590,15 +589,14 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     if (m_header.labelsOfHistograms[i] == "")
       break;
     std::string name = m_header.labelsOfHistograms[i];
-    // if no name is present (or just empty space)
+    // if empty name is present (i.e. just empty space)
     // replace with default name:
     // group_specNum
-    std::string label =
-        (name.size() > 0 && name.find_first_not_of(" ") == std::string::npos)
-            ? "group_" + std::to_string(i + 1)
+    const bool isSpace = name.find_first_not_of(" ") == std::string::npos;
+    std::string label = isSpace ? "group_" + std::to_string(i + 1)
             : m_header.labelsOfHistograms[i];
 
-    addToSampleLog("Label Spectra " + std::to_string(i), label,
+    addToSampleLog("Label Spectra " + std::to_string(i), std::move(label),
                    outputWorkspace);
   }
 

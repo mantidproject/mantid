@@ -176,7 +176,7 @@ class AbinsCRYSTALTestScratch(systemtesting.MantidSystemTest, HelperTestingClass
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.case_from_scratch()
 
     def excludeInPullRequests(self):
@@ -263,8 +263,8 @@ class AbinsCRYSTALTestLargerOrder(systemtesting.MantidSystemTest, HelperTestingC
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CRYSTAL")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
-        self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_THREE)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_ONE)
+        self.case_restart_diff_order(AbinsConstants.QUANTUM_ORDER_TWO)
 
     def excludeInPullRequests(self):
         return True
@@ -343,7 +343,7 @@ class AbinsCASTEPNoH(systemtesting.MantidSystemTest, HelperTestingClass):
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("CASTEP")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.set_cross_section(cross_section="Total")
         self.case_from_scratch()
         self._wrk_1 = self._output_name
@@ -394,7 +394,7 @@ class AbinsDMOL3TestScratch(systemtesting.MantidSystemTest, HelperTestingClass):
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("DMOL3")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.set_cross_section(cross_section="Total")
         self.case_from_scratch()
 
@@ -422,7 +422,7 @@ class AbinsGAUSSIANestScratch(systemtesting.MantidSystemTest, HelperTestingClass
         self.ref_result = name + ".nxs"
         self.set_ab_initio_program("GAUSSIAN")
         self.set_name(name)
-        self.set_order(AbinsConstants.QUANTUM_ORDER_FOUR)
+        self.set_order(AbinsConstants.QUANTUM_ORDER_TWO)
         self.set_cross_section(cross_section="Incoherent")
         self.case_from_scratch()
 

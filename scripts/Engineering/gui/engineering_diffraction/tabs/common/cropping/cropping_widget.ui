@@ -25,6 +25,9 @@
      </item>
      <item row="0" column="1" colspan="2">
       <widget class="QComboBox" name="combo_bank">
+       <property name="focusPolicy">
+        <enum>Qt::StrongFocus</enum>
+       </property>
        <item>
         <property name="text">
          <string>1 (North)</string>
@@ -134,6 +137,10 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>combo_bank</tabstop>
+  <tabstop>edit_custom</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>661</width>
-    <height>236</height>
+    <width>673</width>
+    <height>305</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -107,6 +107,9 @@ QGroupBox:title {
               <height>0</height>
              </size>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
            </widget>
           </item>
           <item row="3" column="0" colspan="3">
@@ -133,6 +136,9 @@ QGroupBox:title {
               <height>0</height>
              </size>
             </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
            </widget>
           </item>
           <item row="0" column="0" colspan="3">
@@ -158,6 +164,9 @@ QGroupBox:title {
               <width>0</width>
               <height>0</height>
              </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
             </property>
            </widget>
           </item>
@@ -253,6 +262,11 @@ QGroupBox:title {
  </customwidgets>
  <tabstops>
   <tabstop>radio_newCalib</tabstop>
+  <tabstop>finder_vanadium</tabstop>
+  <tabstop>finder_sample</tabstop>
+  <tabstop>radio_loadCalib</tabstop>
+  <tabstop>finder_path</tabstop>
+  <tabstop>check_cropCalib</tabstop>
   <tabstop>check_plotOutput</tabstop>
   <tabstop>button_calibrate</tabstop>
  </tabstops>

@@ -212,12 +212,17 @@ def load_workspace_from_filename(filename,
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in workspace.getNames()]
         run = get_run_from_multi_period_data(workspace)
 
-        load_result["DataDeadTimeTable"] = AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()[0]
-        for index, deadtime_table in enumerate(AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()):
-            if index == 0:
-                load_result["DataDeadTimeTable"] = deadtime_table
-            else:
-                DeleteWorkspace(Workspace=deadtime_table)
+        deadtime_tables = AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()
+        load_result["DataDeadTimeTable"] = deadtime_tables[0]
+        for table in deadtime_tables[1:]:
+            DeleteWorkspace(Workspace=table)
+
+        #load_result["DataDeadTimeTable"] = AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()[0]
+        #for index, deadtime_table in enumerate(AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()):
+        #    if index == 0:
+        #        load_result["DataDeadTimeTable"] = deadtime_table
+        #    else:
+        #        DeleteWorkspace(Workspace=deadtime_table)
 
         load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
         UnGroupWorkspace(load_result["DeadTimeTable"])

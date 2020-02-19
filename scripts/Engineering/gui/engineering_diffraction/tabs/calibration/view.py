@@ -161,7 +161,14 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     # =================
 
     def setup_tabbing_order(self):
-        self.setTabOrder(self.radio_newCalib, self.finder_vanadium)
-        self.setTabOrder(self.finder_vanadium, self.finder_sample)
-        self.setTabOrder(self.finder_sample, self.check_plotOutput)
+        self.finder_vanadium.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.finder_sample.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.finder_path.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
+
+        self.setTabOrder(self.radio_newCalib, self.finder_vanadium.focusProxy())
+        self.setTabOrder(self.finder_vanadium.focusProxy(), self.finder_sample.focusProxy())
+        self.setTabOrder(self.finder_sample.focusProxy(), self.finder_path.focusProxy())
+        self.setTabOrder(self.finder_path.focusProxy(), self.check_cropCalib)
+        self.setTabOrder(self.check_cropCalib, self.widget_cropping)
+        self.setTabOrder(self.widget_cropping, self.check_plotOutput)
         self.setTabOrder(self.check_plotOutput, self.button_calibrate)

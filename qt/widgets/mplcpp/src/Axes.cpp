@@ -139,7 +139,11 @@ void Axes::setTitle(const char *label) {
 Artist Axes::legend(const bool draggable) {
   GlobalInterpreterLock lock;
   Artist legend{pyobj().attr("legend")()};
-  legend.pyobj().attr("draggable")(draggable);
+  const auto draggableAttr =
+      PyObject_HasAttrString(legend.pyobj().ptr(), "set_draggable")
+          ? "set_draggable"
+          : "draggable";
+  legend.pyobj().attr(draggableAttr)(draggable);
   return legend;
 }
 

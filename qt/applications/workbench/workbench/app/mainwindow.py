@@ -244,6 +244,10 @@ class MainWindow(QMainWindow):
         self.workspacewidget.workspacewidget.enableDeletePrompt(bool(prompt))
         self.widgets.append(self.workspacewidget)
 
+        #set the link between the algorithm and workspace widget
+        self.algorithm_selector.algorithm_selector.set_get_selected_workspace_fn(
+            self.workspacewidget.workspacewidget.getSelectedWorkspaceNames)
+
         # Set up the project, recovery and interface manager objects
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
         self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
@@ -397,6 +401,7 @@ class MainWindow(QMainWindow):
 
     def populate_interfaces_menu(self):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
+        self.interfaces_menu.clear()
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
         self.interface_list = self._discover_python_interfaces(interface_dir)
         self._discover_cpp_interfaces(self.interface_list)
@@ -658,6 +663,9 @@ class MainWindow(QMainWindow):
         """
         self.editor.load_settings_from_config(CONF)
         self.project.load_settings_from_config(CONF)
+        self.algorithm_selector.refresh()
+        self.populate_interfaces_menu()
+        self.workspacewidget.refresh_workspaces()
 
     def open_algorithm_descriptions_help(self):
         self.interface_manager.showAlgorithmHelp('')

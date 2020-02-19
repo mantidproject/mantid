@@ -64,7 +64,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
 int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
-  if (descriptor.pathExists("/entry0/data_scan")) {
+  if (descriptor.pathExists("/entry0/instrument/2theta")) {
     return 80;
   } else {
     return 0;
