@@ -235,6 +235,22 @@ def SetMergeQRange(q_min=None, q_max=None):
     _printMessage('#Set merge range values')
 
 
+def SetDetectorMaskFiles(filenames):
+    assert isinstance(filenames, str),\
+        "Expected a command seperated list of filenames, got %r instead" % filenames
+    ReductionSingleton().settings["MaskFiles"] = filenames
+    _printMessage('#Set masking file names to {0}'.format(filenames))
+
+
+def SetMonDirect(correction_file):
+    if not ReductionSingleton().instrument:
+        raise RuntimeError("You must create an instrument object first")
+
+    ReductionSingleton().instrument.cur_detector().correction_file = correction_file
+    ReductionSingleton().instrument.other_detector().correction_file = correction_file
+    _printMessage('#Set MonDirect to {0}'.format(correction_file))
+
+
 def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):
     """
         Sets the fit method to calculate the transmission fit and the wavelength range
