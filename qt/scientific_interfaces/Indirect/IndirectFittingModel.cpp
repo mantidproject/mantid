@@ -309,6 +309,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
+std::unordered_map<FittingMode, std::string> fitModeToName =
+    std::unordered_map<FittingMode, std::string>(
+        {{FittingMode::SEQUENTIAL, "Sequential"},
+         {FittingMode::SIMULTANEOUS, "Simultaneous"}});
+
 PrivateFittingData::PrivateFittingData() : m_data() {}
 
 PrivateFittingData::PrivateFittingData(PrivateFittingData &&privateData)

@@ -7,18 +7,23 @@
 #  This file is part of the mantid package
 from __future__ import absolute_import
 
-from collections import namedtuple
+# std imports
+import math
+import numpy as np
+import collections
 from contextlib import contextmanager
-
-from matplotlib import cm, __version__ as mpl_version_str
-from matplotlib.container import ErrorbarContainer
-from matplotlib.legend import Legend
-
 from enum import Enum
 
+# 3rd party imports
+from matplotlib.legend import Legend
+from matplotlib import cm, __version__ as mpl_version_str
+from matplotlib.container import ErrorbarContainer
 
+# -----------------------------------------------------------------------------
+# Constants
+# -----------------------------------------------------------------------------
 # matplotlib version information
-MPLVersionInfo = namedtuple("MPLVersionInfo", ("major", "minor", "patch"))
+MPLVersionInfo = collections.namedtuple("MPLVersionInfo", ("major", "minor", "patch"))
 MATPLOTLIB_VERSION_INFO = MPLVersionInfo._make(map(int, mpl_version_str.split(".")))
 
 

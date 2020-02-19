@@ -11,7 +11,7 @@ from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
 from sans.user_file.user_file_reader import UserFileReader
 from mantid.kernel import Logger
-from sans.state.state import State
+from sans.state.AllStates import AllStates
 
 sans_logger = Logger("SANS")
 
@@ -35,17 +35,16 @@ def create_states(state_model, table_model, instrument, facility, row_index=None
     for row in rows:
         if file_lookup:
             table_model.wait_for_file_information(row)
-        state = _create_row_state(row, table_model, state_model, facility, instrument, file_lookup,
-                                  gui_state_director, user_file)
-        if isinstance(state, State):
+        state = _create_row_state(row, table_model, state_model, facility, file_lookup, gui_state_director)
+        if isinstance(state, AllStates):
             states.update({row: state})
         elif isinstance(state, str):
             errors.update({row: state})
     return states, errors
 
 
-def _create_row_state(row, table_model, state_model, facility, instrument, file_lookup,
-                      gui_state_director, user_file):
+def _create_row_state(row, table_model, state_model, facility, file_lookup,
+                      gui_state_director):
     sans_logger.information("Generating state for row {}".format(row))
     state = None
 
@@ -62,11 +61,9 @@ def _create_row_state(row, table_model, state_model, facility, instrument, file_
             if row_user_file:
                 row_state_model = create_gui_state_from_userfile(row_user_file, state_model)
                 row_gui_state_director = GuiStateDirector(table_model, row_state_model, facility)
-                state = row_gui_state_director.create_state(row, instrument=instrument, file_lookup=file_lookup,
-                                                            user_file=row_user_file)
+                state = row_gui_state_director.create_state(row, file_lookup=file_lookup)
             else:
-                state = gui_state_director.create_state(row, instrument=instrument, file_lookup=file_lookup,
-                                                        user_file=user_file)
+                state = gui_state_director.create_state(row, file_lookup=file_lookup)
         return state
     except (ValueError, RuntimeError) as e:
         return "{}".format(str(e))

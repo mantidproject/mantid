@@ -8,7 +8,7 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from mantid.plots import MantidAxes
+from mantid.plots.mantidaxes import MantidAxes
 
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from matplotlib.legend import Legend

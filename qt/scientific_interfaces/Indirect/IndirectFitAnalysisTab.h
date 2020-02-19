@@ -38,6 +38,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitAnalysisTab
 public:
   IndirectFitAnalysisTab(IndirectFittingModel *model,
                          QWidget *parent = nullptr);
+  virtual ~IndirectFitAnalysisTab() override = default;
 
   void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
   void setPlotView(IIndirectFitPlotView *view);

@@ -15,14 +15,14 @@ from sans.common.constants import (SANS2D, LOQ, LARMOR)
 from sans.common.enums import (ReductionMode, ReductionDimensionality, OutputParts,
                                SANSInstrument, DetectorType, SANSFacility, DataType)
 from sans.common.general_functions import (quaternion_to_angle_and_axis, create_managed_non_child_algorithm,
-                                           create_unmanaged_algorithm, add_to_sample_log,
+                                           create_unmanaged_algorithm,
                                            get_standard_output_workspace_name, sanitise_instrument_name,
                                            get_reduced_can_workspace_from_ads, write_hash_into_reduced_can_workspace,
                                            convert_instrument_and_detector_type_to_bank_name,
                                            convert_bank_name_to_detector_type_isis,
                                            get_facility, parse_diagnostic_settings, get_transmission_output_name,
                                            get_output_name, parse_event_slice_setting)
-from sans.state.data import StateData
+from sans.state.StateObjects.StateData import StateData
 from sans.test_helper.test_director import TestDirector
 
 
@@ -117,51 +117,6 @@ class SANSFunctionsTest(unittest.TestCase):
         axis = V3D(0.0, 1.0, 0.0)
         # There shouldn't be an axis for angle 0
         self._do_test_quaternion(angle, axis)
-
-    def test_that_sample_log_is_added(self):
-        # Arrange
-        workspace = SANSFunctionsTest._create_sample_workspace()
-        log_name = "TestName"
-        log_value = "TestValue"
-        log_type = "String"
-
-        # Act
-        add_to_sample_log(workspace, log_name, log_value, log_type)
-
-        # Assert
-        run = workspace.run()
-        self.assertTrue(run.hasProperty(log_name))
-        self.assertEqual(run.getProperty(log_name).value, log_value)
-
-    def test_that_sample_log_raises_for_non_string_type_arguments(self):
-        # Arrange
-        workspace = SANSFunctionsTest._create_sample_workspace()
-        log_name = "TestName"
-        log_value = 123
-        log_type = "String"
-
-        # Act + Assert
-        try:
-            add_to_sample_log(workspace, log_name, log_value, log_type)
-            did_raise = False
-        except TypeError:
-            did_raise = True
-        self.assertTrue(did_raise)
-
-    def test_that_sample_log_raises_for_wrong_type_selection(self):
-        # Arrange
-        workspace = SANSFunctionsTest._create_sample_workspace()
-        log_name = "TestName"
-        log_value = "test"
-        log_type = "sdfsdfsdf"
-
-        # Act + Assert
-        try:
-            add_to_sample_log(workspace, log_name, log_value, log_type)
-            did_raise = False
-        except ValueError:
-            did_raise = True
-        self.assertTrue(did_raise)
 
     def test_that_unknown_reduction_mode_raises(self):
         # Arrange

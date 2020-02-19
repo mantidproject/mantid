@@ -10,7 +10,7 @@ ISIS Reflectometry Interface
 Improved
 --------
 
-- The per-angle defaults table on the Experiment now has column-specific tooltips on the table cells.
+- The per-angle defaults table on the Experiment now has column-specific tooltips on the table cells which correspond to the [ReflectometryISISLoadAndProcess](https://docs.mantidproject.org/nightly/algorithms/ReflectometryISISLoadAndProcess-v1.html?highlight=reflectometryisisloadandprocess) documentation
 
 Algorithms
 ##########

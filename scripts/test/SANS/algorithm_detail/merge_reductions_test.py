@@ -14,7 +14,7 @@ from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DataType, ReductionMode)
 from sans.common.enums import (ReductionDimensionality, FitModeForMerge)
 from sans.common.general_functions import create_unmanaged_algorithm
-from sans.state.reduction_mode import StateReductionMode
+from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.test_helper.test_director import TestDirector
 
 

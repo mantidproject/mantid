@@ -24,6 +24,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 enum class FittingMode { SEQUENTIAL, SIMULTANEOUS };
+extern std::unordered_map<FittingMode, std::string> fitModeToName;
 
 class IndirectFittingModel;
 

@@ -440,7 +440,6 @@ set(
   src/MuonFitDataSelector.cpp
   src/MuonFitPropertyBrowser.cpp
   src/MuonFunctionBrowser.cpp
-  src/NotificationService.cpp
   src/ProcessingAlgoWidget.cpp
   src/ProgressableView.cpp
   src/ProjectSavePresenter.cpp
@@ -553,7 +552,6 @@ set(
   inc/MantidQtWidgets/Common/MuonFitDataSelector.h
   inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
   inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
-  inc/MantidQtWidgets/Common/NotificationService.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h

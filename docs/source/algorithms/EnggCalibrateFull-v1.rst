@@ -111,9 +111,10 @@ Usage
 Output:
 
 .. testoutput:: ExCalFull
+   :options: +ELLIPSIS
 
    Det ID: 100001
-   Calibrated position: (8.510,0.000,0.009)
+   Calibrated position: ...
    Is the detector position calibrated now in the original workspace instrument? True
 
 **Example - Calculate corrected positions for EngingX, saving in a file:**
@@ -128,7 +129,7 @@ Output:
    # this test to run fast. Please user your (proper) run file.
    Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)
 
-   # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
+   # Using precalculated Vanadium corrections. To calculate from scratch see EnggVanadiumCorrections
    van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
    van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
 
@@ -152,9 +153,9 @@ Output:
       for i,row in enumerate(reader):
          cal_pos = pos_table.column(2)[i]
          detector_pos_list = row[2].strip("[]").split(',')
-         calibOK = calibOK and (float(detector_pos_list[0]) - cal_pos.getX()) < 2e-6 and\
-                               (float(detector_pos_list[1]) - cal_pos.getY()) < 2e-6 and\
-                               (float(detector_pos_list[2]) - cal_pos.getZ()) < 2e-6
+         calibOK = calibOK and (float(detector_pos_list[0]) - cal_pos.getX()) < 1e-5 and\
+                               (float(detector_pos_list[1]) - cal_pos.getY()) < 1e-5 and\
+                               (float(detector_pos_list[2]) - cal_pos.getZ()) < 1e-5
          if not calibOK: break
    print("Does the calibration file have the expected values? {}".format(calibOK))
 
@@ -169,9 +170,10 @@ Output:
 Output:
 
 .. testoutput:: ExCalFullWithOutputFile
+   :options: +ELLIPSIS
 
    Det ID: 100001
-   Calibrated position: (8.510,0.000,0.009)
+   Calibrated position: ...
    Got details on the peaks fitted for 1 detector(s)
    Was the file created? True
    Does the calibration file have the expected values? True

@@ -12,7 +12,7 @@ from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateSampleWorkspace, Rebin
 from sans.algorithm_detail.normalize_to_sans_monitor import normalize_to_monitor
 from sans.common.enums import (RebinType, RangeStepType)
-from sans.state.normalize_to_monitor import get_normalize_to_monitor_builder
+from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
 from sans.test_helper.test_director import TestDirector
 
 

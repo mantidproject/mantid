@@ -9,9 +9,9 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSFacility, SANSInstrument)
-from sans.state.calculate_transmission import (StateCalculateTransmission, StateCalculateTransmissionLOQ,
-                                               get_calculate_transmission_builder)
-from sans.state.data import get_data_builder
+from sans.state.StateObjects.StateCalculateTransmission import (StateCalculateTransmission, StateCalculateTransmissionLOQ,
+                                                                get_calculate_transmission_builder)
+from sans.state.StateObjects.StateData import get_data_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

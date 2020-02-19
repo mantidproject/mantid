@@ -7,7 +7,7 @@
 #pylint: disable=invalid-name
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.simpleapi import *
+from mantid.simpleapi import DeleteWorkspace, mtd
 import ISISCommandInterface as i
 import systemtesting
 
