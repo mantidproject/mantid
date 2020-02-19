@@ -896,6 +896,7 @@ public:
 
     QString getText();
     QString getFirstFilename() const;
+    QStringList getFilenames() const;
     void isForRunFiles(bool /*mode*/);
     void isForDirectory(bool /*mode*/);
     void allowMultipleFiles(bool /*allow*/);

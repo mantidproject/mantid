@@ -30,7 +30,7 @@ class FocusPresenterTest(unittest.TestCase):
         self.presenter.current_calibration = CalibrationInfo(vanadium_path="Fake/Path",
                                                              sample_path="Fake/Path",
                                                              instrument="ENGINX")
-        self.view.get_focus_filename.return_value = "305738"
+        self.view.get_focus_filenames.return_value = "305738"
         self.presenter.cropping_widget.get_bank.return_value = "2"
         self.presenter.cropping_widget.is_custom.return_value = False
         self.view.get_plot_output.return_value = True
@@ -46,7 +46,7 @@ class FocusPresenterTest(unittest.TestCase):
         self.presenter.current_calibration = CalibrationInfo(vanadium_path="Fake/Path",
                                                              sample_path="Fake/Path",
                                                              instrument="ENGINX")
-        self.view.get_focus_filename.return_value = "305738"
+        self.view.get_focus_filenames.return_value = "305738"
         self.presenter.cropping_widget.get_custom_spectra.return_value = "2-45"
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False

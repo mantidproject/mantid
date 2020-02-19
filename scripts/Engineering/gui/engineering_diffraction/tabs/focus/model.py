@@ -21,10 +21,10 @@ FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
 
 
 class FocusModel(object):
-    def focus_run(self, sample_path, banks, plot_output, instrument, rb_num, spectrum_numbers):
+    def focus_run(self, sample_paths, banks, plot_output, instrument, rb_num, spectrum_numbers):
         """
         Focus some data using the current calibration.
-        :param sample_path: The path to the data to be focused.
+        :param sample_paths: The paths to the data to be focused.
         :param banks: The banks that should be focused.
         :param plot_output: True if the output should be plotted.
         :param instrument: The instrument that the data came from.
@@ -36,8 +36,7 @@ class FocusModel(object):
             return
         integration_workspace = Ads.retrieve(vanadium_corrections.INTEGRATED_WORKSPACE_NAME)
         curves_workspace = Ads.retrieve(vanadium_corrections.CURVES_WORKSPACE_NAME)
-        sample_workspace = path_handling.load_workspace(sample_path)
-        output_workspaces = []
+        output_workspaces = []  # List of collated workspaces to plot.
         full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
                                       path_handling.ENGINEERING_PREFIX, "full_calibration")
         if full_calib_path is not None and path.exists(full_calib_path):
@@ -45,22 +44,31 @@ class FocusModel(object):
         else:
             full_calib_workspace = None
         if spectrum_numbers is None:
-            for name in banks:
-                output_workspace_name = FOCUSED_OUTPUT_WORKSPACE_NAME + str(name)
-                self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
-                                curves_workspace, name, full_calib_workspace)
-                output_workspaces.append(output_workspace_name)
-                # Save the output to the file system.
-                self._save_output(instrument, sample_path, name, output_workspace_name, rb_num)
+            for sample_path in sample_paths:
+                sample_workspace = path_handling.load_workspace(sample_path)
+                run_no = path_handling.get_run_number_from_path(sample_path, instrument)
+                workspaces_for_run = []
+                for name in banks:
+                    output_workspace_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + str(name)
+                    self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
+                                    curves_workspace, name, full_calib_workspace)
+                    workspaces_for_run.append(output_workspace_name)
+                    # Save the output to the file system.
+                    self._save_output(instrument, sample_path, name, output_workspace_name, rb_num)
+                output_workspaces.append(workspaces_for_run)
         else:
-            output_workspace_name = FOCUSED_OUTPUT_WORKSPACE_NAME + "cropped"
-            self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
-                            curves_workspace, None, full_calib_workspace, spectrum_numbers)
-            output_workspaces.append(output_workspace_name)
-            self._save_output(instrument, sample_path, "cropped", output_workspace_name, rb_num)
+            for sample_path in sample_paths:
+                sample_workspace = path_handling.load_workspace(sample_path)
+                run_no = path_handling.get_run_number_from_path(sample_path, instrument)
+                output_workspace_name = str(run_no) + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + "cropped"
+                self._run_focus(sample_workspace, output_workspace_name, integration_workspace,
+                                curves_workspace, None, full_calib_workspace, spectrum_numbers)
+                output_workspaces.append([output_workspace_name])
+                self._save_output(instrument, sample_path, "cropped", output_workspace_name, rb_num)
         # Plot the output
         if plot_output:
-            self._plot_focused_workspaces(output_workspaces)
+            for ws_names in output_workspaces:
+                self._plot_focused_workspaces(ws_names)
 
     @staticmethod
     def _run_focus(input_workspace,

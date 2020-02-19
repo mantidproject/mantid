@@ -40,20 +40,20 @@ class FocusPresenter(object):
         if not self._validate():
             return
         banks, spectrum_numbers = self._get_banks()
-        focus_path = self.view.get_focus_filename()
-        self.start_focus_worker(focus_path, banks, self.view.get_plot_output(), self.rb_num, spectrum_numbers)
+        focus_paths = self.view.get_focus_filenames()
+        self.start_focus_worker(focus_paths, banks, self.view.get_plot_output(), self.rb_num, spectrum_numbers)
 
-    def start_focus_worker(self, focus_path, banks, plot_output, rb_num, spectrum_numbers=None):
+    def start_focus_worker(self, focus_paths, banks, plot_output, rb_num, spectrum_numbers=None):
         """
         Focus data in a separate thread to stop the main GUI from hanging.
-        :param focus_path: The path to the file containing the data to focus.
+        :param focus_paths: List of paths to the files containing the data to focus.
         :param banks: A list of banks that are to be focused.
         :param plot_output: True if the output should be plotted.
         :param rb_num: The RB Number from the main window (often an experiment id)
         :param spectrum_numbers: Optional parameter to crop to a specific list of spectrum numbers.
         """
         self.worker = AsyncTask(self.model.focus_run,
-                                (focus_path, banks, plot_output, self.instrument, rb_num, spectrum_numbers),
+                                (focus_paths, banks, plot_output, self.instrument, rb_num, spectrum_numbers),
                                 error_cb=self._on_worker_error,
                                 finished_cb=self.emit_enable_button_signal)
         self.set_focus_controls_enabled(False)
