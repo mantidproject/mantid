@@ -64,7 +64,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.plotGuess.connect(self.plot_guess_slot, Qt.QueuedConnection)
         self.functionChanged.connect(self.function_changed_slot, Qt.QueuedConnection)
         # Update whether data needs to be normalised when a button on the Fit menu is clicked
-        self.getFitMenu().aboutToShow.connect(self._set_normalise_data_from_workspace_artist)
+        self.getFitMenu().aboutToShow.connect(self._set_normalise_data)
         self.sequentialFitDone.connect(self._sequential_fit_done_slot)
         self.workspaceClicked.connect(self.display_workspace)
 
@@ -109,16 +109,21 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             if ws_artists.workspace_index == self.workspaceIndex():
                 return ws_artists
 
-    def _set_normalise_data_from_workspace_artist(self):
+    def _set_normalise_data(self):
         """
         Set if the data should be normalised before fitting using the
         normalisation state of the active workspace artist.
+        If the workspace is a distribution normalisation is set to False so it is not normalised twice.
         """
-        if AnalysisDataService.doesExist(self.workspaceName()) \
-                and isinstance(AnalysisDataService.retrieve(self.workspaceName()), ITableWorkspace):
-            return
+        ws_is_distribution = False
+        if AnalysisDataService.doesExist(self.workspaceName()):
+            workspace = AnalysisDataService.retrieve(self.workspaceName())
+            if isinstance(workspace, ITableWorkspace):
+                return
+            if hasattr(workspace, 'isDistribution') and workspace.isDistribution():
+                ws_is_distribution = True
         ws_artist = self._get_selected_workspace_artist()
-        self.normaliseData(ws_artist.is_normalized)
+        self.normaliseData(ws_artist.is_normalized and not ws_is_distribution)
 
     def closeEvent(self, event):
         """
