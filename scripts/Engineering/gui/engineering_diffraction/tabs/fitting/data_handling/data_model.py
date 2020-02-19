@@ -21,8 +21,14 @@ class FittingDataModel(object):
         for filename in filenames:
             ws_name = self._generate_workspace_name(filename)
             try:
-                self._loaded_workspaces[ws_name] = Load(filename, OutputWorkspace=ws_name)
-                self._last_added.append(ws_name)
+                ws = Load(filename, OutputWorkspace=ws_name)
+                if ws.getNumberHistograms() == 1:
+                    self._loaded_workspaces[ws_name] = ws
+                    self._last_added.append(ws_name)
+                else:
+                    logger.warning(
+                        "Invalid number of spectra in workspace {}. Skipping loading of file.".
+                        format(ws_name))
             except RuntimeError as e:
                 logger.error(
                     "Failed to load file: {}. Error: {}. \n Continuing loading of other files.".
