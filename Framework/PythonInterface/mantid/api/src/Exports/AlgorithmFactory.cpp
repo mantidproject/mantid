@@ -10,6 +10,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/core/UninstallTrace.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -26,6 +27,7 @@
 using namespace Mantid::API;
 using namespace boost::python;
 using Mantid::PythonInterface::PythonObjectInstantiator;
+using Mantid::PythonInterface::UninstallTrace;
 
 GET_POINTER_SPECIALIZATION(AlgorithmFactoryImpl)
 
@@ -117,6 +119,7 @@ GNU_DIAG_OFF("cast-qual")
  *              or an instance of a class type derived from PythonAlgorithm
  */
 void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
+  UninstallTrace uninstallTrace;
   std::lock_guard<std::recursive_mutex> lock(PYALG_REGISTER_MUTEX);
 
   static auto *const pyAlgClass =
