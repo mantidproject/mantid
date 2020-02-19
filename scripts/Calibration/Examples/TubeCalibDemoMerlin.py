@@ -231,7 +231,7 @@ def calibrateMerlin(filename):
     analisePeakTable(peakTable, 'door3_peaks')
 
     # == Apply the Calibation ==
-    mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
+    mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
     print("Applied calibration")
 
     # == Save workspace ==
