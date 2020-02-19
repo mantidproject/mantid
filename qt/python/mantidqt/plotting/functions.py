@@ -24,8 +24,7 @@ except ImportError:
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.plots.plotfunctions import manage_workspace_names, figure_title, plot,\
                                        create_subplots,raise_if_not_sequence
-from mantid.kernel import Logger, ConfigService
-from mantid.plots import helperfunctions, MantidAxes
+from mantid.kernel import Logger
 from mantid.plots.utility import get_single_workspace_log_value
 from mantidqt.plotting.figuretype import figure_type, FigureType
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
@@ -129,7 +128,10 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
             plot_index = workspaces[0].getIndexFromSpectrumNumber(selection.spectra[0])
         else:
             plot_index = selection.wksp_indices[0]
-        return plot_contour_or_surface(selection.plot_type, int(plot_index), selection.axis_name, selection.log_name,
+
+        # import here to avoid circular import
+        from mantid.plots.surfacecontourplots import plot as plot_surface_or_contour
+        return plot_surface_or_contour(selection.plot_type, int(plot_index), selection.axis_name, selection.log_name,
                                        selection.custom_log_values, workspaces)
     else:
         return plot(selection.workspaces, spectrum_nums=selection.spectra,

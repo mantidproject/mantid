@@ -10,12 +10,13 @@
 
 from typing import List
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 from mantid.api import MatrixWorkspace, NumericAxis, Workspace, WorkspaceFactory
 from mantid.plots.utility import get_single_workspace_log_value
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import pcolormesh
-
-import numpy as np
 
 DEFAULT_CONTOUR_LEVELS = [0.2, 0.4, 0.6, 0.8]
 
@@ -25,17 +26,20 @@ def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name:
     if len(workspaces) > 0:
         matrix_ws = _create_workspace_for_group_plot(plot_type, workspaces, plot_index, log_name, custom_log_values)
 
-        title = f"plot for {[ws.name() for ws in workspaces]}, index {plot_index}"
+        title = f" plot for {[ws.name() for ws in workspaces]}, index {plot_index}"
 
         if plot_type == SpectraSelection.Surface:
-            import matplotlib.pyplot as plt
             fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
             surface = ax.plot_surface(matrix_ws, cmap='viridis')
 
-            ax.set_title("Surface " + title)
-
+            ax.set_title("Surface" + title)
             ax.set_ylabel(axis_name)
+
             fig.colorbar(surface)
+
+            # grid is enabled by default so set the toolbar button to be checked
+            fig.canvas.toolbar._actions['toggle_grid'].setChecked(True)
+
             fig.show()
         elif plot_type == SpectraSelection.Contour:
             fig = pcolormesh([matrix_ws])
@@ -47,7 +51,7 @@ def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name:
             ax.contour(matrix_ws, levels=levels, colors='k', linewidths=0.5)
 
             ax.set_ylabel(axis_name)
-            ax.set_title("Contour " + title)
+            ax.set_title("Contour" + title)
 
 
 def _create_workspace_for_group_plot(plot_type: SpectraSelection, workspaces: List[Workspace], plot_index: int,

@@ -290,7 +290,8 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             elif self._ui.wkspIndices.text() != "":
                 self._on_wkspindices_changed()
             else:
-                self._ui.advanced_options_widget._validate_custom_logs(self.ui.custom_log_line_edit.text())
+                self._ui.advanced_options_widget._validate_custom_logs(
+                    self._ui.advanced_options_widget.ui.custom_log_line_edit.text())
 
     def _parse_wksp_indices(self):
         if self._ui.plotType.currentText() == CONTOUR or self._ui.plotType.currentText() == SURFACE:
