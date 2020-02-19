@@ -594,7 +594,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     // group_specNum
     const bool isSpace = name.find_first_not_of(" ") == std::string::npos;
     std::string label = isSpace ? "group_" + std::to_string(i + 1)
-            : m_header.labelsOfHistograms[i];
+                                : m_header.labelsOfHistograms[i];
 
     addToSampleLog("Label Spectra " + std::to_string(i), std::move(label),
                    outputWorkspace);
