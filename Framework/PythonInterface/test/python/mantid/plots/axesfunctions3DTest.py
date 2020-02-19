@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import unittest
 
 import mantid.api
-import mantid.plots.plotfunctions3D as funcs
+import mantid.plots.axesfunctions3D as funcs
 from mantid.kernel import config
 from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, CreateMDHistoWorkspace,\
                              ConjoinWorkspaces

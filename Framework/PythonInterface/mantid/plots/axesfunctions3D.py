@@ -11,9 +11,9 @@ from __future__ import (absolute_import, division, print_function)
 
 import numpy
 
-from mantid.plots.helperfunctions import (get_axes_labels, get_normalization, get_distribution,
-                                          get_md_data2d_bin_centers, get_matrix_2d_data, get_md_data1d,
-                                          get_wksp_index_dist_and_label, get_spectrum, get_indices)
+from mantid.plots.datafunctions import (get_axes_labels, get_normalization, get_distribution,
+                                        get_md_data2d_bin_centers, get_matrix_2d_data, get_md_data1d,
+                                        get_wksp_index_dist_and_label, get_spectrum, get_indices)
 import mantid.dataobjects
 
 

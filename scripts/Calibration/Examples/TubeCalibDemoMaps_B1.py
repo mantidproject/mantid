@@ -58,7 +58,7 @@ calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, k
 print("Got calibration (new positions of detectors) ")
 
 # == Apply the Calibation ==
-mantid.ApplyCalibration(Workspace=CalibInstWS, PositionTable=calibrationTable)
+mantid.ApplyCalibration(Workspace=CalibInstWS, CalibrationTable=calibrationTable)
 print("Applied calibration")
 
 # == Save workspace ==
