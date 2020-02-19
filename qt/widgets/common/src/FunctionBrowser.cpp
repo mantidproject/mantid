@@ -92,7 +92,6 @@ void FunctionBrowser::setFunction(IFunction_sptr fun) {
 IFunction_sptr FunctionBrowser::getFunctionByIndex(const QString &index) {
   return m_presenter->getFunctionByIndex(index);
 }
-
 /**
  * Updates the function parameter value
  * @param paramName :: Fully qualified parameter name (includes function index)
@@ -343,6 +342,10 @@ QString FunctionBrowser::getFitFunctionString() const {
 void FunctionBrowser::setBackgroundA0(double value) {
   m_presenter->setBackgroundA0(value);
 }
+
+void FunctionBrowser::hideGlobalCheckbox() { m_presenter->hideGlobals(); }
+
+void FunctionBrowser::showGlobalCheckbox() { m_presenter->showGlobals(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

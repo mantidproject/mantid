@@ -7,21 +7,21 @@
 from __future__ import (absolute_import, division, print_function)
 import re
 
-
 group_str = "; Group; "
 pair_str = "; Pair Asym; "
 phaseQuad_str = '; PhaseQuad'
+TF_ASYMMETRY_PREFIX = "TFAsymmetry"
 
 
 def get_raw_data_workspace_name(instrument, run, multi_period, period='1', workspace_suffix=' MA'):
     if multi_period:
         return _base_run_name(instrument, run) + "_raw_data" + "_period_" + period + workspace_suffix
     else:
-        return _base_run_name(instrument, run) + "_raw_data"  + workspace_suffix
+        return _base_run_name(instrument, run) + "_raw_data" + workspace_suffix
 
 
 def get_deadtime_data_workspace_name(instrument, run, workspace_suffix=' MA'):
-    return _base_run_name(instrument, run) + "_deadtime"  + workspace_suffix
+    return _base_run_name(instrument, run) + "_deadtime" + workspace_suffix
 
 
 def _base_run_name(instrument, run=None):
@@ -30,8 +30,8 @@ def _base_run_name(instrument, run=None):
 
 def get_group_data_workspace_name(context, group_name, run, rebin):
     if context.data_context.is_multi_period():
-        name = context.data_context._base_run_name(run) +group_str + group_name + \
-            "; Counts; Periods; " + context.gui_context.period_string(run) + ";"
+        name = context.data_context._base_run_name(run) + group_str + group_name + \
+               "; Counts; Periods; " + context.gui_context.period_string(run) + ";"
     else:
         name = context.data_context._base_run_name(run) + group_str + group_name + "; Counts;"
 
@@ -46,7 +46,7 @@ def get_group_data_workspace_name(context, group_name, run, rebin):
 def get_group_asymmetry_name(context, group_name, run, rebin):
     if context.data_context.is_multi_period():
         name = context.data_context._base_run_name(run) + group_str + group_name + \
-            "; Asymmetry; Periods; " + context.gui_context.period_string(run) + ";"
+               "; Asymmetry; Periods; " + context.gui_context.period_string(run) + ";"
     else:
         name = context.data_context._base_run_name(run) + group_str + group_name + "; Asymmetry;"
 
@@ -57,15 +57,29 @@ def get_group_asymmetry_name(context, group_name, run, rebin):
     return name
 
 
+def get_pair_asymmetry_name(context, pair_name, run, rebin):
+    if context.data_context.is_multi_period():
+        name = context.data_context._base_run_name(run) + pair_str + pair_name + \
+               "; Periods; " + context.gui_context.period_string(run) + ";"
+    else:
+        name = context.data_context._base_run_name(run) + pair_str + pair_name + ";"
+
+    if rebin:
+        name += ' Rebin;'
+
+    name += context.workspace_suffix
+    return name
+
+
 def get_group_or_pair_from_name(name):
     if group_str in name:
-        index  = name.find(group_str)+len(group_str)
-        end = name.find(";",index)
+        index = name.find(group_str) + len(group_str)
+        end = name.find(";", index)
         group_found = name[index: end]
         return group_found.replace(" ", "")
     elif pair_str in name:
-        index  = name.find(pair_str)+len(pair_str)
-        end = name.find(";",index)
+        index = name.find(pair_str) + len(pair_str)
+        end = name.find(";", index)
         pair_found = name[index: end]
         return pair_found.replace(" ", "")
     return ""
@@ -78,7 +92,7 @@ def get_group_asymmetry_unnorm_name(context, group_name, run, rebin):
 def get_pair_data_workspace_name(context, pair_name, run, rebin):
     if context.data_context.is_multi_period():
         name = context.data_context._base_run_name(run) + pair_str + pair_name + "; Periods; " \
-            + context.gui_context.period_string(run) + ";"
+               + context.gui_context.period_string(run) + ";"
     else:
         name = context.data_context._base_run_name(run) + pair_str + pair_name + ";"
 
@@ -163,6 +177,11 @@ def get_maxent_workspace_name(input_workspace):
     return input_workspace + '; MaxEnt'
 
 
+def get_run_number_from_workspace_name(workspace_name, instrument):
+    run = re.findall(r'%s(\d+)' % instrument, workspace_name)
+    return run[0]
+
+
 def get_maxent_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):
     run = re.search('[0-9]+', insertion_workspace_name).group()
     group = get_base_run_name(run, instrument) + ' Maxent' + workspace_suffix + '/'
@@ -172,3 +191,24 @@ def get_maxent_workspace_group_name(insertion_workspace_name, instrument, worksp
 
 def get_fit_workspace_directory(group_name, suffix, base_name, workspace_suffix):
     return base_name + '/' + group_name + workspace_suffix + '/' + group_name + suffix + workspace_suffix + '/'
+
+
+def create_fitted_workspace_name(input_workspace_name, function_name):
+    directory = input_workspace_name + '; Fitted;' + function_name + '/'
+    name = input_workspace_name + '; Fitted;' + function_name + '; Workspace'
+
+    return name, directory
+
+
+def create_multi_domain_fitted_workspace_name(input_workspace, function_name):
+    directory = input_workspace + '; Fitted;' + function_name + '/'
+    name = input_workspace + '+ ...; Fitted;' + function_name
+
+    return name, directory
+
+
+def create_parameter_table_name(input_workspace_name, function_name):
+    directory = input_workspace_name + '; Fitted;' + function_name + '/'
+    name = input_workspace_name + '; Fitted Parameters;' + function_name
+
+    return name, directory

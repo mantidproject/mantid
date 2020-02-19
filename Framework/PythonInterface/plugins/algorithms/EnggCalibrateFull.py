@@ -241,7 +241,7 @@ class EnggCalibrateFull(PythonAlgorithm):
 
         @returns the DIFA, DIFC, TZERO calibration parameters of GSAS
         """
-        alg = self.createChildAlgorithm('EnggFitDIFCFromPeaks')
+        alg = self.createChildAlgorithm('EnggFitTOFFromPeaks')
         alg.setProperty('FittedPeaks', fitted_peaks_table)
         alg.execute()
 
@@ -364,7 +364,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         self.log().notice("Applying calibration on the input workspace")
         alg = self.createChildAlgorithm('ApplyCalibration')
         alg.setProperty('Workspace', ws)
-        alg.setProperty('PositionTable', detPos)
+        alg.setProperty('CalibrationTable', detPos)
         alg.execute()
 
     def _V3D_from_spherical(self, R, polar, azimuth):

@@ -12,22 +12,6 @@
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include <cxxtest/TestSuite.h>
 
-namespace {
-void setMatplotlibBackend() {
-  // Setup python and mantid python
-  Py_Initialize();
-  const MantidQt::Widgets::Common::Python::Object siteModule{
-      MantidQt::Widgets::Common::Python::NewRef(PyImport_ImportModule("site"))};
-  siteModule.attr("addsitedir")(
-      Mantid::Kernel::ConfigService::Instance().getPropertiesDir());
-
-  // Set matplotlib backend
-  auto mpl = MantidQt::Widgets::Common::Python::NewRef(
-      PyImport_ImportModule("matplotlib"));
-  mpl.attr("use")("Agg");
-}
-} // namespace
-
 class PlotterTestQt5 : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -35,12 +19,7 @@ public:
   static PlotterTestQt5 *createSuite() { return new PlotterTestQt5(); }
   static void destroySuite(PlotterTestQt5 *suite) { delete suite; }
 
-  void setUp() override {
-    Mantid::API::FrameworkManager::Instance();
-    setMatplotlibBackend();
-  }
-
-  void tearDown() override { Py_Finalize(); }
+  PlotterTestQt5() { Mantid::API::FrameworkManager::Instance(); }
 
   void testReflectometryPlot() {
     // Just test that it doesn't segfault when plotting as nothing is returned

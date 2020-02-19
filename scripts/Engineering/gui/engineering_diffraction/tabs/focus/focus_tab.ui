@@ -212,6 +212,7 @@ QGroupBox:title {
   </customwidget>
  </customwidgets>
  <tabstops>
+  <tabstop>check_cropFocus</tabstop>
   <tabstop>check_plotOutput</tabstop>
   <tabstop>button_focus</tabstop>
  </tabstops>

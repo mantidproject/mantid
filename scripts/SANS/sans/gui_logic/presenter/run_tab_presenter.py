@@ -57,7 +57,7 @@ if PYQT4:
     except ImportError:
         pass
 else:
-    from mantidqt.plotting.functions import get_plot_fig
+    from mantid.plots.plotfunctions import get_plot_fig
 
 row_state_to_colour_mapping = {RowState.UNPROCESSED: '#FFFFFF', RowState.PROCESSED: '#d0f4d0',
                                RowState.ERROR: '#accbff'}

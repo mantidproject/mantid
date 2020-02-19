@@ -38,6 +38,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitAnalysisTab
 public:
   IndirectFitAnalysisTab(IndirectFittingModel *model,
                          QWidget *parent = nullptr);
+  virtual ~IndirectFitAnalysisTab() override = default;
 
   void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
   void setPlotView(IIndirectFitPlotView *view);
@@ -112,6 +113,7 @@ protected slots:
   void updateParameterValues(
       const std::unordered_map<std::string, ParameterValue> &parameters);
   void updateFitBrowserParameterValues();
+  void updateFitBrowserParameterValuesFromAlg();
   void updateDataReferences();
   void updateResultOptions();
 

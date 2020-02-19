@@ -41,6 +41,7 @@ class MANTIDQT_INDIRECT_DLL FunctionTemplateBrowser : public QWidget {
   Q_OBJECT
 public:
   FunctionTemplateBrowser(QWidget *parent);
+  virtual ~FunctionTemplateBrowser() = default;
   void init();
 
   virtual void setFunction(const QString &funStr) = 0;
@@ -67,6 +68,9 @@ public:
   virtual void setBackgroundA0(double value) = 0;
   virtual void setResolution(std::string const &name,
                              TableDatasetIndex const &index) = 0;
+  virtual void setResolution(
+      const std::vector<std::pair<std::string, int>> &fitResolutions) = 0;
+  virtual void setQValues(const std::vector<double> &qValues) = 0;
 
 signals:
   void functionStructureChanged();

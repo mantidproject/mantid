@@ -13,7 +13,6 @@
 #include <vector>
 namespace Mantid {
 namespace DataHandling {
-enum class ScaleUnits { metres, centimetres, millimetres };
 
 namespace {
 
@@ -60,7 +59,7 @@ void SaveStl::writeHeader(Kernel::BinaryStreamWriter streamWriter) {
           "%Y-%b-%dT%H:%M:%S") +
       ":";
   std::string unitString;
-  switch (m_units) {
+  switch (m_scaleType) {
   case ScaleUnits::centimetres:
     unitString = "cm:";
     break;
@@ -70,6 +69,9 @@ void SaveStl::writeHeader(Kernel::BinaryStreamWriter streamWriter) {
   case ScaleUnits::metres:
     unitString = "m:";
     break;
+  default:
+    // not mandatory to have units in header so just output blank
+    unitString = ":";
   }
   const size_t emptySize = 80 - size_t(headerStart.size() + timeString.size() +
                                        4 + unitString.size());
@@ -121,27 +123,6 @@ void SaveStl::writeTriangle(Kernel::BinaryStreamWriter streamWriter,
     streamWriter << yVal;
     streamWriter << zVal;
   }
-}
-
-/**
- * Function to remove the current scaling set on this object from a double value
- * and return it as a float.
- *
- * @param value The double to remove the scale from.
- * @return float the new value without scaling.
- */
-float SaveStl::removeScale(double value) {
-  switch (m_units) {
-  case ScaleUnits::centimetres:
-    value = value * 100;
-    break;
-  case ScaleUnits::millimetres:
-    value = value * 1000;
-    break;
-  case ScaleUnits::metres:
-    break;
-  }
-  return float(value);
 }
 
 } // namespace DataHandling

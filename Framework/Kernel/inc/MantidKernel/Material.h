@@ -184,6 +184,10 @@ public:
 private:
   /// Update the total atom count
   void countAtoms();
+  /// Update the linear absorption x section (by wavelength)
+  void calculateLinearAbsorpXSectionByWL();
+  /// Update the total scatter x section
+  void calculateTotalScatterXSection();
 
   /// Material name
   std::string m_name;
@@ -197,6 +201,8 @@ private:
   double m_temperature;
   /// Pressure
   double m_pressure;
+  double m_linearAbsorpXSectionByWL;
+  double m_totalScatterXSection;
 };
 
 /// Typedef for a shared pointer

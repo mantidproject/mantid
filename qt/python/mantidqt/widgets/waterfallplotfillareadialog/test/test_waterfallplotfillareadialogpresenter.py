@@ -13,7 +13,7 @@ import unittest
 from matplotlib.collections import PolyCollection
 from matplotlib.pyplot import figure
 
-from mantid.plots import helperfunctions
+from mantid.plots import datafunctions
 from mantid.py3compat.mock import Mock
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 
@@ -40,7 +40,7 @@ class WaterfallPlotFillAreaDialogPresenterTest(unittest.TestCase):
         self.presenter.view.use_line_colour_radio_button.isChecked.return_value = True
         self.presenter.set_fill_enabled()
 
-        self.assertTrue(helperfunctions.waterfall_fill_is_line_colour(self.ax))
+        self.assertTrue(datafunctions.waterfall_fill_is_line_colour(self.ax))
 
     def test_enabling_fill_with_solid_colour_creates_fills_with_one_colour(self):
         self.presenter.view.enable_fill_group_box.isChecked.return_value = True

@@ -97,6 +97,9 @@ public slots:
   /// Prints the current open page
   virtual void printPage();
 
+  /// Check if the url is an existing page
+  bool isExistingPage(const QUrl &url);
+
 signals:
   /// fired to relay warning messages from the help system.
   void helpWarnings(const QString & /*_t1*/);

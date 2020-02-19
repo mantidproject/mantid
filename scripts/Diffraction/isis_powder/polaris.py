@@ -50,11 +50,7 @@ class Polaris(AbstractInst):
         return vanadium_d
 
     def create_total_scattering_pdf(self, **kwargs):
-        if 'q_lims' not in kwargs:
-            kwargs['q_lims'] = None
-        if 'output_binning' not in kwargs:
-            kwargs['output_binning'] = None
-        if 'pdf_type' not in kwargs or not kwargs['pdf_type'] in ['G(r)', 'g(r)', 'RDF(r)']:
+        if 'pdf_type' not in kwargs or kwargs['pdf_type'] not in ['G(r)', 'g(r)', 'RDF(r)']:
             kwargs['pdf_type'] = 'G(r)'
             logger.warning('PDF type not specified or is invalid, defaulting to G(r)')
         self._inst_settings.update_attributes(kwargs=kwargs)
@@ -69,7 +65,8 @@ class Polaris(AbstractInst):
                                                   cal_file_name=cal_file_name,
                                                   sample_details=self._sample_details,
                                                   output_binning=self._inst_settings.output_binning,
-                                                  pdf_type=self._inst_settings.pdf_type)
+                                                  pdf_type=self._inst_settings.pdf_type,
+                                                  freq_params=self._inst_settings.freq_params)
         return pdf_output
 
     def set_sample_details(self, **kwargs):
