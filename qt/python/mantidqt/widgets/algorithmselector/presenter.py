@@ -58,3 +58,6 @@ class AlgorithmSelectorPresenter(object):
     def refresh(self):
         algorithm_data = self.model.get_algorithm_data()
         self.view.populate_ui(algorithm_data)
+
+    def find_input_workspace_property(self, algorithm):
+        return self.model.find_input_workspace_property(algorithm)
