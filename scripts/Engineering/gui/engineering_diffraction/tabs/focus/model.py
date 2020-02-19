@@ -136,7 +136,7 @@ class FocusModel(object):
             path_handling.get_output_path(), "Focus",
             self._generate_output_file_name(instrument, sample_path, bank, ".gss"))
         SaveGSS(InputWorkspace=sample_workspace, Filename=gss_output_path)
-        if rb_num is not None:
+        if rb_num:
             gss_output_path = path.join(
                 path_handling.get_output_path(), "User", rb_num, "Focus",
                 self._generate_output_file_name(instrument, sample_path, bank, ".gss"))
@@ -148,7 +148,7 @@ class FocusModel(object):
             path_handling.get_output_path(), "Focus",
             self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
         SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
-        if rb_num is not None:
+        if rb_num:
             nexus_output_path = path.join(
                 path_handling.get_output_path(), "User", rb_num, "Focus",
                 self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
@@ -160,7 +160,7 @@ class FocusModel(object):
             path_handling.get_output_path(), "Focus",
             self._generate_output_file_name(instrument, sample_path, bank, ".dat"))
         SaveFocusedXYE(InputWorkspace=sample_workspace, Filename=xye_output_path, SplitFiles=False)
-        if rb_num is not None:
+        if rb_num:
             xye_output_path = path.join(
                 path_handling.get_output_path(), "User", rb_num, "Focus",
                 self._generate_output_file_name(instrument, sample_path, bank, ".dat"))
