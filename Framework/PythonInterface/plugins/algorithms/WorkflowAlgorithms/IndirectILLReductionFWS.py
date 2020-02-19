@@ -249,6 +249,8 @@ class IndirectILLReductionFWS(PythonAlgorithm):
             if peak_channels[1] >= blocksize:
                 raise RuntimeError('Manual peak channel {0} is out of range {1}'.format(peak_channels[1], blocksize))
             else:
+                AddSampleLogMultiple(Workspace=ws, LogNames=['ManualInelasticLeftPeak', 'ManualInelasticRightPeak'],
+                                     LogValues=str(peak_channels[0])+','+str(peak_channels[1]))
                 return peak_channels
         run = mtd[ws].getRun()
         if not run.hasProperty('MonitorLeftPeak') or not run.hasProperty('MonitorRightPeak'):
