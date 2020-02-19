@@ -19,7 +19,7 @@ from .view import SliceViewerView
 from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 
 # Encapsulate information about the current slice paramters
-SliceInfo = namedtuple("SliceInfo", ("indices", "point", "range"))
+SliceInfo = namedtuple("SliceInfo", ("indices", "frame", "point", "range"))
 
 
 class SliceViewer(object):
@@ -76,6 +76,7 @@ class SliceViewer(object):
         """Returns a SliceInfo object describing the current slice"""
         return SliceInfo(
             indices=self.view.dimensions.get_indices(),
+            frame=self.model.get_frame(),
             point=self.view.dimensions.get_slicepoint(),
             range=self.view.dimensions.get_slicerange())
 

@@ -8,7 +8,8 @@
 from __future__ import (absolute_import, division, unicode_literals)
 
 # 3rd party imports
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, SpecialCoordinateSystem
+from mantid.kernel import logger
 
 # local imports
 from mantidqt.widgets.workspacedisplay.table.model \
@@ -17,13 +18,18 @@ from .representation import create_peakrepresentation
 
 # constants
 DEFAULT_MARKER_COLOR = 'red'
+# map coordinate system to correct Peak getter
+FRAME_TO_PEAK_CENTER_ATTR = {
+    SpecialCoordinateSystem.QLab: 'getQLabFrame',
+    SpecialCoordinateSystem.QSample: 'getQSampleFrame',
+    SpecialCoordinateSystem.HKL: 'getHKL',
+}
 
 
 class PeaksViewerModel(TableWorkspaceDisplayModel):
     """View model for PeaksViewer
     Extends PeaksWorkspace functionality to include color selection
     """
-
     def __init__(self, peaks_ws):
         """
         :param peaks_ws: A pointer to the PeaksWorkspace
@@ -56,11 +62,15 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         slicepoint = sliceinfo.point[diminfo[2]]
         dimrange = sliceinfo.range
         slicedim_width = dimrange[1] - dimrange[0]
+        try:
+            peak_center_getter = FRAME_TO_PEAK_CENTER_ATTR[sliceinfo.frame]
+        except KeyError:
+            logger.warning("Unknown frame {}. Assuming QLab.".format(sliceinfo.frame))
+            peak_center_getter = FRAME_TO_PEAK_CENTER_ATTR[SpecialCoordinateSystem.QLab]
+
         info = []
         for peak in self.ws:
-            qlab = peak.getQLabFrame()
-            # TODO: transformation
-            qframe = qlab
+            qframe = getattr(peak, peak_center_getter)()
             x, y, z = qframe[diminfo[0]], qframe[diminfo[1]], qframe[diminfo[2]]
             info.append(
                 create_peakrepresentation(x, y, z, slicepoint, slicedim_width, peak.getPeakShape(),
@@ -111,6 +121,6 @@ def _get_peaksworkspace(name):
     """
     workspace = AnalysisDataService.Instance()[name]
     if not hasattr(workspace, 'getNumberPeaks'):
-        raise ValueError("Requested workspace {} is not a PeaksWorkspace. Type={}".format(name,
-                                                                                          type(workspace)))
+        raise ValueError("Requested workspace {} is not a PeaksWorkspace. Type={}".format(
+            name, type(workspace)))
     return workspace

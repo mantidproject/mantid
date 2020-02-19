@@ -36,11 +36,11 @@ class DimensionWidget(QWidget):
     window.show()
     app.exec_()
     """
+
     def __init__(self, dims_info, parent=None):
         super(DimensionWidget, self).__init__(parent)
 
         self.layout = QVBoxLayout(self)
-
         self.dims = []
         for n, dim in enumerate(dims_info):
             if dim['type'] == 'MDE':
@@ -121,6 +121,9 @@ class DimensionWidget(QWidget):
 
         return [xdim, ydim, zdim]
 
+    def get_frame(self):
+        """:return: A frame """
+
     def get_slicepoint(self):
         """:return: a list of 3 elements where None indicates a non-slice dimension and a
           float indicates the current slice point in that dimension.
@@ -157,6 +160,7 @@ class Dimension(QWidget):
     window.show()
     app.exec_()
     """
+
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
         super(Dimension, self).__init__(parent)
 
@@ -290,6 +294,7 @@ class DimensionMDE(Dimension):
     window.show()
     app.exec_()
     """
+
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
 
         # hack in a number_of_bins for MDEventWorkspace

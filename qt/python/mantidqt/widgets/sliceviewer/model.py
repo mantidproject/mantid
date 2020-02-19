@@ -8,7 +8,7 @@
 #
 #
 from mantid.plots.datafunctions import get_indices
-from mantid.api import AnalysisDataService, MatrixWorkspace, MultipleExperimentInfos
+from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.simpleapi import BinMD
 from enum import Enum
 import numpy as np
@@ -50,6 +50,10 @@ class SliceViewerModel(object):
 
     def _get_ws(self):
         return self._ws
+
+    def get_frame(self):
+        """Return the coordinate system of the workspace"""
+        return self._ws.getSpecialCoordinateSystem()
 
     def get_ws_MDE(self, slicepoint, bin_params):
         params = {}
