@@ -9,6 +9,13 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+New Features
+############
+
+Engineering Diffraction
+-----------------------
+- Introduction of Engineering Diffraction 2 interface. Currently supports calibration and focusing for ENGINX. 
+
 
 Improvements
 ############

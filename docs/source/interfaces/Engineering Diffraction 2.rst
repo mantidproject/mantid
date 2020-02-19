@@ -11,8 +11,9 @@ Interface Overview
 
 This custom interface will integrate several tasks related to engineering
 diffraction. In its current state it provides functionality for creating
-and loading calibration files, focusing ENGINX run files, and performing
-single peak fitting on focused run files.
+and loading calibration files and focusing ENGINX run files.
+
+Functionality for performing single peak fitting on focused run files is currently in progress.
 
 This interface is under active development.
 
@@ -66,7 +67,7 @@ to the same directory:
 If an RB number has been specified the files will also be saved to a user directory
 in the base directory:
 
-`<CHOSEN_OUTPUT_DIRECTORY>/User/RBNumber/Calibration/`
+`<CHOSEN_OUTPUT_DIRECTORY>/User/<RB_NUMBER>/Calibration/`
 
 Cropping
 ^^^^^^^^
@@ -97,12 +98,13 @@ Custom Spectra
 Focus
 -----
 
-This tab allows for the focusing of data files, by providing a run number or selecting the files
-manually using the browse button, by making use of the :ref:`EnggFocus<algm-EnggFocus>` algorithm.
+This tab allows for the focusing of data files by making use of the :ref:`EnggFocus<algm-EnggFocus>` algorithm.
 
-In order to use the tab, a new or existing calibration must be created or loaded.
+Files can be selected by providing a run number or selecting the files manually using the browse button.
 
-Currently, the focusing tab only supports one focusing mode:
+In order to use the tab, a new or existing calibration must be created or loaded (see above).
+
+The interface allows for two kinds of focusing:
 
 - **Normal Focusing:**
     A run number can be entered and both banks will be focused.
@@ -110,22 +112,28 @@ Currently, the focusing tab only supports one focusing mode:
 
 - **Cropped Focusing:**
     The entered workspace can be cropped to one of the two banks or to a user defined set of spectra.
-    Custom cropped workspaces will have the suffix "cropped".
+    Workspaces cropped using custom spectra lists will have the suffix "cropped".
 
-The focused data files are saved in NeXus format to:
+Ticking the "Plot Focused Workspace" checkbox will create a plot of the focused workspace when the algorithm is
+complete. The number of plots that are generated is dependent on the type of focusing done. Normal focusing generates
+a plot for each bank and cropped focusing generates a plot for the single bank or one for the chosen spectra.
 
-`Engineering_Mantid/Focus/`
+Clicking the focus button will begin the focusing algorithm for the selected run file. The button and plotting checkbox
+will be disabled until the fitting algorithm is complete.
 
-If an RB number has been specified the files will also be saved to a user directory
-in the base directory:
+The focused output files are saved in NeXus, GSS, and raw XYE format to:
 
-`Engineering_Mantid/User/RBNumber/Focus/`
+`<CHOSEN_OUTPUT_DIRECTORY>/Focus/`
+
+If an RB number has been specified the files will also be saved to a user directory:
+
+`<CHOSEN_OUTPUT_DIRECTORY>/User/<RB_NUMBER>/Focus/`
 
 Parameters
 ^^^^^^^^^^
 
 Sample Run Number
-    The run number or file path to the data file to be focused.
+    The run number of or file path to the data file to be focused.
     
 Bank/Spectra
     Select which bank to restrict the focusing to or allow for the entry of custom spectra. 
@@ -137,10 +145,20 @@ Custom Spectra
 Fitting
 -------
 
-This tab allows for single peak fitting of focused run files.
+**This tab is currently a work in progress!**
+
+This tab will allow for single peak fitting of focused run files.
 
 Focused run files can be loaded from the file system into mantid from the interface, which will keep track of all the
 workspaces that it has created from these files.
+
+The plan for the rest of the functionality is to allow for loaded workspaces to be plotted in the interface. Peaks
+could then be selected by clicking on the plot or by using a text field to enter peak centres in d-spacing.
+Once the peaks have been selected, they would be fitted using the :ref:`Pseudo-Voigt <func-PseudoVoigt>` and
+:ref:`BackToBackExponential <func-BackToBackExponential>` fit functions.
+
+The output from the fitting functions will be stored in a multidimensional file format, along with the sample logs for
+the runs that have been fitted.
 
 Parameters
 ^^^^^^^^^^
@@ -148,3 +166,6 @@ Parameters
 Focused Run Files
     A comma separated list of files to load. Selecting files from the file system using the browse button will do this
     for you.
+
+Peak Positions
+    A comma separated list of peak positions to be used when performing the fit.
