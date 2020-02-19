@@ -93,7 +93,7 @@ class TiledPlotsTest(TestCase):
         self.assertEqual(fig, initial_fig)
         self.assertEqual(6, len(fig.axes))
 
-    def test_get_plot_fig_with_no_figure_provided_and_overplot_is_true_returns_current_figure_unmodified(self):
+    def test_get_plot_fig_with_no_figure_provided_and_overplot_is_true_returns_new_figure(self):
         initial_fig = plt.Figure()
         set_figure_as_current_figure(initial_fig)
 

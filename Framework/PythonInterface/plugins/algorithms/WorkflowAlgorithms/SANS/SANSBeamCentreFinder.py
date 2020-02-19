@@ -173,14 +173,17 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             if verbose:
                 self._rename_and_group_workspaces(i, output_workspaces)
 
-            diff_left_right.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.LEFT],
-                                                             sample_quartiles[MaskingQuadrant.RIGHT]))
-            diff_top_bottom.append(self._calculate_residuals(sample_quartiles[MaskingQuadrant.TOP],
-                                                             sample_quartiles[MaskingQuadrant.BOTTOM]))
+            lr_results = self._calculate_residuals(sample_quartiles[MaskingQuadrant.LEFT],
+                                                   sample_quartiles[MaskingQuadrant.RIGHT])
+            tb_results = self._calculate_residuals(sample_quartiles[MaskingQuadrant.TOP],
+                                                   sample_quartiles[MaskingQuadrant.BOTTOM])
 
-            self.logger.notice("Itr {0}: ( {1:.3f}, {2:.3f} )  SX={3:.5f}  SY={4:.5f}".
-                               format(i, self.scale_1 * centre_lr, self.scale_2 * centre_tb,
-                                      diff_left_right[i], diff_top_bottom[i]))
+            self._print_results(lr_results=lr_results, tb_results=tb_results,
+                                centre_lr=centre_lr, centre_tb=centre_tb, iteration=i)
+
+            diff_left_right.append(lr_results.total_residual)
+            diff_top_bottom.append(tb_results.total_residual)
+
             if i == 0:
                 self._plot_current_result(output_workspaces)
             else:
@@ -204,6 +207,20 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
             if i == max_iterations:
                 self.logger.notice("Out of iterations, new coordinates may not be the best")
         return centre_lr_hold, centre_tb_hold
+
+    def _print_results(self, iteration, centre_lr, centre_tb, lr_results, tb_results):
+        scaled_lr = self.scale_1 * centre_lr
+        scaled_tb = self.scale_2 * centre_tb
+
+        avg_lr_residual = lr_results.total_residual / lr_results.num_points_considered
+        avg_tb_residual = tb_results.total_residual / tb_results.num_points_considered
+
+        iter_details = "Itr {:02d}: ({:7.3f}, {:7.3f})  SX={:<8.4f}\tSY={:<8.4f}\t Points: {:3d} (Unaligned: {:2d})" \
+            .format(iteration, scaled_lr, scaled_tb,
+                    avg_lr_residual, avg_tb_residual,
+                    lr_results.num_points_considered, lr_results.num_points_considered)
+
+        self.logger.notice(iter_details)
 
     def _plot_current_result(self, output_workspaces):
         if can_plot_beamcentrefinder():
@@ -353,18 +370,24 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         B_vals_dict = dict(zip(qvalsBX, yvalsBX))
 
         residue = 0.0
+        mismatched_points = 0
         for key in B_vals_dict:
             if key not in A_vals_dict:
                 A_vals_dict[key] = 0.0
+                mismatched_points += 1
 
         for key in A_vals_dict:
             if key not in B_vals_dict:
                 B_vals_dict[key] = 0.0
+                mismatched_points += 1
+
+        assert len(A_vals_dict) == len(B_vals_dict)
 
         for key in A_vals_dict and B_vals_dict:
             residue += pow(A_vals_dict[key] - B_vals_dict[key], 2)
 
-        return residue
+        return _ResidualsDetails(mismatched_points=mismatched_points, num_points_considered=len(A_vals_dict),
+                                 total_residual=residue)
 
     def _get_progress(self):
         return Progress(self, start=0.0, end=1.0, nreports=10)
@@ -372,6 +395,13 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
 
 class WorkspaceContainsNanValues(Exception):
     pass
+
+
+class _ResidualsDetails(object):
+    def __init__(self, num_points_considered, mismatched_points, total_residual):
+        self.num_points_considered = num_points_considered
+        self.mismatched_points = mismatched_points
+        self.total_residual = total_residual
 
 
 # Register algorithm with Mantid

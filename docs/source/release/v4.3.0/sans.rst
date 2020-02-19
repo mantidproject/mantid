@@ -42,5 +42,9 @@ Fixed
 - A zero monitor shift did not previously account for the position
   of the rear detector for Zoom. A 0.0mm offset now works correctly when
   processing data from the SANS GUI or command interface.
+- The Beam Centre Finder will now prints the average error in X, Y and the
+  number of points considered. This allows for direct comparisons of different
+  radius limits, which previously summed the difference across different
+  numbers of points.
 
 :ref:`Release 4.3.0 <v4.3.0>`
