@@ -25,12 +25,12 @@ class EllipsoidIntegr(systemtesting.MantidSystemTest):
     def runTest(self):
                                           # expected results with size determined
                                            # automatically from projected event sigmas
-        inti_auto = [ 89, 101, 24, 34, 9, 9, 5 ]
-        sigi_auto = [ 13.784, 18.1384, 13.1529, 9.94987, 5.83095, 10.2956, 10.2956]
+        inti_auto = [ 84, 103, 29, 29, 9, 10, 5 ]
+        sigi_auto = [ 14.1421, 17.9722, 12.9228, 10.3441, 5.7446, 10.1980, 10.2470]
                                             # expected results with fixed size
                                              # ellipsoids
-        inti_fixed = [ 88.5902, 97.4918, 22.4098, 34.4754, 8.40984, 10.7377, 4.59016 ]
-        sigi_fixed = [ 13.9656, 18.4523, 13.4335, 10.1106, 5.94223, 10.5231, 10.5375 ]
+        inti_fixed = [ 85.2459, 99.6393, 27.6557, 35.2786, 8.40984, 11.7868, 2.5409]
+        sigi_fixed = [ 14.3402, 18.2752, 13.1853, 10.5131, 5.8488, 10.4180, 10.4899 ]
 
                                               # first, load peaks into a peaks workspace
 
