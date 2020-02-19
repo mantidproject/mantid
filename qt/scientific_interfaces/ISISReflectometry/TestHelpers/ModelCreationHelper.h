@@ -82,6 +82,8 @@ MANTIDQT_ISISREFLECTOMETRY_DLL std::map<std::string, std::string>
 makeStitchOptions();
 MANTIDQT_ISISREFLECTOMETRY_DLL std::map<std::string, std::string>
 makeEmptyStitchOptions();
+MANTIDQT_ISISREFLECTOMETRY_DLL BackgroundSubtraction
+makeBackgroundSubtraction();
 MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections
 makePolarizationCorrections();
 MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections

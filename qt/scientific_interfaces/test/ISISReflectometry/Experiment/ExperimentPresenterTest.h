@@ -458,6 +458,19 @@ public:
                                      PerThetaDefaults::Column::RUN_SPECTRA);
   }
 
+  void testSetBackgroundProcessingInstructionsValid() {
+    OptionsTable const optionsTable = {
+        optionsRowWithBackgroundProcessingInstructions()};
+    runTestForValidPerAngleOptions(optionsTable);
+  }
+
+  void testSetBackgroundProcessingInstructionsInvalid() {
+    OptionsTable const optionsTable = {
+        optionsRowWithBackgroundProcessingInstructionsInvalid()};
+    runTestForInvalidPerAngleOptions(
+        optionsTable, 0, PerThetaDefaults::Column::BACKGROUND_SPECTRA);
+  }
+
   void testChangingSettingsNotifiesMainPresenter() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
@@ -543,30 +556,33 @@ public:
   }
 
   void testInstrumentChangedUpdatesPerThetaInView() {
-    auto perThetaDefaults = PerThetaDefaults(
-        boost::none, TransmissionRunPair(), boost::none,
-        RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"));
+    auto perThetaDefaults =
+        PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
+                         RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"),
+                         std::string("370-389,416-430"));
     auto model = makeModelWithPerThetaDefaults(std::move(perThetaDefaults));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     auto const expected = std::vector<PerThetaDefaults::ValueArray>{
         {"", "", "", "", "0.010000", "0.200000", "0.030000", "0.700000",
-         "390-415"}};
+         "390-415", "370-389,416-430"}};
     EXPECT_CALL(m_view, setPerAngleOptions(expected)).Times(1);
     presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesPerThetaInModel() {
-    auto model = makeModelWithPerThetaDefaults(PerThetaDefaults(
-        boost::none, TransmissionRunPair(), boost::none,
-        RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415")));
+    auto model = makeModelWithPerThetaDefaults(
+        PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
+                         RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"),
+                         std::string("370-389,416-430")));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
-    auto expected = PerThetaDefaults(boost::none, TransmissionRunPair(),
-                                     boost::none, RangeInQ(0.01, 0.03, 0.2),
-                                     0.7, std::string("390-415"));
+    auto expected =
+        PerThetaDefaults(boost::none, TransmissionRunPair(), boost::none,
+                         RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"),
+                         std::string("370-389,416-430"));
     TS_ASSERT_EQUALS(presenter.experiment().perThetaDefaults().size(), 1);
     TS_ASSERT_EQUALS(presenter.experiment().perThetaDefaults().front(),
                      expected);
@@ -599,11 +615,17 @@ public:
   void testInstrumentChangedUpdatesCorrectionInView() {
     auto model = makeModelWithCorrections(
         PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
-        FloodCorrections(FloodCorrectionType::ParameterFile));
+        FloodCorrections(FloodCorrectionType::ParameterFile),
+        BackgroundSubtraction(true, BackgroundSubtractionType::Polynomial, 3,
+                              CostFunctionType::UnweightedLeastSquares));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setPolarizationCorrectionOption(true)).Times(1);
     EXPECT_CALL(m_view, setFloodCorrectionType("ParameterFile")).Times(1);
+    EXPECT_CALL(m_view, setSubtractBackground(true));
+    EXPECT_CALL(m_view, setBackgroundSubtractionMethod("Polynomial"));
+    EXPECT_CALL(m_view, setPolynomialDegree(3));
+    EXPECT_CALL(m_view, setCostFunction("Unweighted least squares"));
     presenter.notifyInstrumentChanged("POLREF");
     verifyAndClear();
   }
@@ -611,7 +633,9 @@ public:
   void testInstrumentChangedUpdatesCorrectionInModel() {
     auto model = makeModelWithCorrections(
         PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
-        FloodCorrections(FloodCorrectionType::ParameterFile));
+        FloodCorrections(FloodCorrectionType::ParameterFile),
+        BackgroundSubtraction(true, BackgroundSubtractionType::Polynomial, 3,
+                              CostFunctionType::UnweightedLeastSquares));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
@@ -660,45 +684,46 @@ private:
   Experiment makeModelWithAnalysisMode(AnalysisMode analysisMode) {
     return Experiment(
         analysisMode, ReductionType::Normal, SummationType::SumInLambda, false,
-        false, makeEmptyPolarizationCorrections(), makeFloodCorrections(),
-        makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(),
-        makePerThetaDefaults());
+        false, BackgroundSubtraction(), makeEmptyPolarizationCorrections(),
+        makeFloodCorrections(), makeEmptyTransmissionStitchOptions(),
+        makeEmptyStitchOptions(), makePerThetaDefaults());
   }
 
   Experiment makeModelWithReduction(SummationType summationType,
                                     ReductionType reductionType,
                                     bool includePartialBins) {
-    return Experiment(
-        AnalysisMode::PointDetector, reductionType, summationType,
-        includePartialBins, false, makeEmptyPolarizationCorrections(),
-        makeFloodCorrections(), makeEmptyTransmissionStitchOptions(),
-        makeEmptyStitchOptions(), makePerThetaDefaults());
-  }
-
-  Experiment makeModelWithDebug(bool debug) {
-    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                      SummationType::SumInLambda, false, debug,
+    return Experiment(AnalysisMode::PointDetector, reductionType, summationType,
+                      includePartialBins, false, BackgroundSubtraction(),
                       makeEmptyPolarizationCorrections(),
                       makeFloodCorrections(),
                       makeEmptyTransmissionStitchOptions(),
                       makeEmptyStitchOptions(), makePerThetaDefaults());
   }
 
+  Experiment makeModelWithDebug(bool debug) {
+    return Experiment(
+        AnalysisMode::PointDetector, ReductionType::Normal,
+        SummationType::SumInLambda, false, debug, BackgroundSubtraction(),
+        makeEmptyPolarizationCorrections(), makeFloodCorrections(),
+        makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(),
+        makePerThetaDefaults());
+  }
+
   Experiment makeModelWithPerThetaDefaults(PerThetaDefaults perThetaDefaults) {
     auto perThetaList = std::vector<PerThetaDefaults>();
     perThetaList.emplace_back(std::move(perThetaDefaults));
-    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                      SummationType::SumInLambda, false, false,
-                      makeEmptyPolarizationCorrections(),
-                      makeFloodCorrections(),
-                      makeEmptyTransmissionStitchOptions(),
-                      makeEmptyStitchOptions(), std::move(perThetaList));
+    return Experiment(
+        AnalysisMode::PointDetector, ReductionType::Normal,
+        SummationType::SumInLambda, false, false, BackgroundSubtraction(),
+        makeEmptyPolarizationCorrections(), makeFloodCorrections(),
+        makeEmptyTransmissionStitchOptions(), makeEmptyStitchOptions(),
+        std::move(perThetaList));
   }
 
   Experiment makeModelWithTransmissionRunRange(RangeInLambda range) {
     return Experiment(
         AnalysisMode::PointDetector, ReductionType::Normal,
-        SummationType::SumInLambda, false, false,
+        SummationType::SumInLambda, false, false, BackgroundSubtraction(),
         makeEmptyPolarizationCorrections(), makeFloodCorrections(),
         TransmissionStitchOptions(std::move(range), std::string(), false),
         makeEmptyStitchOptions(), makePerThetaDefaults());
@@ -706,13 +731,14 @@ private:
 
   Experiment
   makeModelWithCorrections(PolarizationCorrections polarizationCorrections,
-                           FloodCorrections floodCorrections) {
-    return Experiment(AnalysisMode::PointDetector, ReductionType::Normal,
-                      SummationType::SumInLambda, false, false,
-                      std::move(polarizationCorrections),
-                      std::move(floodCorrections),
-                      makeEmptyTransmissionStitchOptions(),
-                      makeEmptyStitchOptions(), makePerThetaDefaults());
+                           FloodCorrections floodCorrections,
+                           BackgroundSubtraction backgroundSubtraction) {
+    return Experiment(
+        AnalysisMode::PointDetector, ReductionType::Normal,
+        SummationType::SumInLambda, false, false,
+        std::move(backgroundSubtraction), std::move(polarizationCorrections),
+        std::move(floodCorrections), makeEmptyTransmissionStitchOptions(),
+        makeEmptyStitchOptions(), makePerThetaDefaults());
   }
 
   ExperimentPresenter
@@ -853,13 +879,14 @@ private:
   OptionsRow optionsRowWithFirstAngle() { return {"0.5", "13463", ""}; }
   PerThetaDefaults defaultsWithFirstAngle() {
     return PerThetaDefaults(0.5, TransmissionRunPair("13463", ""), boost::none,
-                            RangeInQ(), boost::none, boost::none);
+                            RangeInQ(), boost::none, boost::none, boost::none);
   }
 
   OptionsRow optionsRowWithSecondAngle() { return {"2.3", "13463", "13464"}; }
   PerThetaDefaults defaultsWithSecondAngle() {
     return PerThetaDefaults(2.3, TransmissionRunPair("13463", "13464"),
-                            boost::none, RangeInQ(), boost::none, boost::none);
+                            boost::none, RangeInQ(), boost::none, boost::none,
+                            boost::none);
   }
   OptionsRow optionsRowWithWildcard() { return {"", "13463", "13464"}; }
   OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "13463"}; }
@@ -892,6 +919,12 @@ private:
   }
   OptionsRow optionsRowWithProcessingInstructionsInvalid() {
     return {"", "", "", "", "", "", "", "", "bad"};
+  }
+  OptionsRow optionsRowWithBackgroundProcessingInstructions() {
+    return {"", "", "", "", "", "", "", "", "", "1-4"};
+  }
+  OptionsRow optionsRowWithBackgroundProcessingInstructionsInvalid() {
+    return {"", "", "", "", "", "", "", "", "", "bad"};
   }
 
   void runTestForValidPerAngleOptions(OptionsTable const &optionsTable) {

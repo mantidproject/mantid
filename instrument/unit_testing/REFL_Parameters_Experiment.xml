@@ -69,6 +69,10 @@
     <value val="390-415"/>
   </parameter>
 
+  <parameter name="BackgroundProcessingInstructions" type="string">
+    <value val="370-389,416-430"/>
+  </parameter>
+
   <!-- Transmission overlap range -->
 
   <parameter name="TransRunStartOverlap">

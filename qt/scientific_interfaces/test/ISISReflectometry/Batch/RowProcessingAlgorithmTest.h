@@ -77,6 +77,7 @@ public:
     TS_ASSERT_EQUALS(result["MomentumTransferMax"], "1.300000");
     TS_ASSERT_EQUALS(result["ScaleFactor"], "0.900000");
     TS_ASSERT_EQUALS(result["ProcessingInstructions"], "4-6");
+    TS_ASSERT_EQUALS(result["BackgroundProcessingInstructions"], "2-3,7-8");
   }
 
   void testPerThetaDefaultsWithWildcardLookup() {
@@ -92,6 +93,7 @@ public:
     TS_ASSERT_EQUALS(result["MomentumTransferMax"], "1.100000");
     TS_ASSERT_EQUALS(result["ScaleFactor"], "0.700000");
     TS_ASSERT_EQUALS(result["ProcessingInstructions"], "1");
+    TS_ASSERT_EQUALS(result["BackgroundProcessingInstructions"], "3,7");
   }
 
   void testInstrumentSettings() {
