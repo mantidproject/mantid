@@ -1,6 +1,6 @@
 import matplotlib.image as mimage
 import matplotlib.colors
-from mantid.plots.plotfunctions import _setLabels2D
+from mantid.plots.axesfunctions import _setLabels2D
 import mantid.api
 import numpy as np
 

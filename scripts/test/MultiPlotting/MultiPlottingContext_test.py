@@ -85,7 +85,7 @@ class MultiPlottingContextTest(unittest.TestCase):
         no_lines = 1
 
         ws = mock.MagicMock()
-        with mock.patch("mantid.plots.plotfunctions.plot") as patch:
+        with mock.patch("mantid.plots.axesfunctions.plot") as patch:
             patch.return_value = tuple([line()])
 
             for name in names:
