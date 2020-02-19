@@ -218,6 +218,7 @@ def errorbar(axes, workspace, *args, **kwargs):
     if kwargs.pop('update_axes_labels', True):
         _setLabels1D(axes, workspace, indices,
                      normalize_by_bin_width=normalize_by_bin_width, axis=axis)
+    kwargs.pop('normalize_by_bin_width', None)
 
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
