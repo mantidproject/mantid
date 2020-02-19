@@ -12,8 +12,8 @@ from mantid.simpleapi import DeleteWorkspace
 from sans.algorithm_detail.convert_to_q import convert_workspace
 from sans.common.enums import (SANSFacility, ReductionDimensionality, RangeStepType, SANSInstrument)
 from sans.common.general_functions import (create_unmanaged_algorithm)
-from sans.state.convert_to_q import get_convert_to_q_builder
-from sans.state.data import get_data_builder
+from sans.state.StateObjects.StateConvertToQ import get_convert_to_q_builder
+from sans.state.StateObjects.StateData import get_data_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 from sans.test_helper.test_director import TestDirector
 

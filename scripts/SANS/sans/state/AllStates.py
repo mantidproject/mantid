@@ -14,21 +14,21 @@ from six import with_metaclass
 
 from sans.common.enums import SANSFacility
 from sans.state.JsonSerializable import JsonSerializable
+from sans.state.StateObjects.StateCompatibility import get_compatibility_builder
 # Note that the compatibility state is not part of the new reduction chain, but allows us to accurately compare
 # results obtained via the old and new reduction chain
 from sans.state.automatic_setters import automatic_setters
-from sans.state.compatibility import get_compatibility_builder
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class State(with_metaclass(JsonSerializable)):
+class AllStates(with_metaclass(JsonSerializable)):
 
     def __init__(self):
 
-        super(State, self).__init__()
+        super(AllStates, self).__init__()
         self.data = None  # : StateData
         self.move = None  # : StateMove
         self.reduction = None  # : StateReductionMode
@@ -75,11 +75,11 @@ class State(with_metaclass(JsonSerializable)):
             raise ValueError("State: There is an issue with your input. See: {0}".format(json.dumps(is_invalid)))
 
 
-class StateBuilder(object):
-    @automatic_setters(State)
+class AllStatesBuilder(object):
+    @automatic_setters(AllStates)
     def __init__(self):
-        super(StateBuilder, self).__init__()
-        self.state = State()
+        super(AllStatesBuilder, self).__init__()
+        self.state = AllStates()
 
     def build(self):
         # Make sure that the product is in a valid state, ie not incomplete
@@ -90,10 +90,10 @@ class StateBuilder(object):
 # ------------------------------------------
 # Factory method for SANStateDataBuilder
 # ------------------------------------------
-def get_state_builder(data_info):
+def get_all_states_builder(data_info):
     facility = data_info.facility
     if facility is SANSFacility.ISIS:
-        return StateBuilder()
+        return AllStatesBuilder()
     else:
         raise NotImplementedError("SANSStateBuilder: Could not find any valid state builder for the "
                                   "specified SANSStateData object {0}".format(str(data_info)))

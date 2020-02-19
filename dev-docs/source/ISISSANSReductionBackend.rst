@@ -333,13 +333,13 @@ beam_stop_arm_pos1     The x position of the beam stop arm                      
 beam_stop_arm_pos2     The y position of the beam stop arm                        *FloatParameter*          Y         N
 clear                  currently not used                                         *BoolParameter*           Y         N
 clear_time             currently not used                                         *BoolParameter*           Y         N
-detector               A dict of detector type to *StateMaskDetector* sub-states  *DictParameter*           N         Y
+detector               A dict of detector type to *StateMaskDetectors* sub-states  *DictParameter*           N         Y
 idf_path               The path to the IDF                                        *StringParameter*         N         Y
 ====================== ========================================================== ========================= ========= ===============
 
 Validation is applied to some of the entries.
 
-The detector-specific settings are stored in the *StateMaskDetector* which contains the following parameters:
+The detector-specific settings are stored in the *StateMaskDetectors* which contains the following parameters:
 
 ============================ ============ =============================== ========= ===============
 Name                           Comment      Type                          Optional? Auto-generated?

@@ -83,9 +83,9 @@ def is_spectrum_range_all_on_one_detector(start, stop, invalid_dict, start_name,
 # StateData
 # ------------------------------------------------
 
-class StateMaskDetector(with_metaclass(JsonSerializable)):
+class StateMaskDetectors(with_metaclass(JsonSerializable)):
     def __init__(self):
-        super(StateMaskDetector, self).__init__()
+        super(StateMaskDetectors, self).__init__()
         # Vertical strip masks
         self.single_vertical_strip_mask = None  # : List[Int] (Positive)
         self.range_vertical_strip_start = None  # : List[Int] (Positive)
@@ -167,7 +167,7 @@ class StateMaskDetector(with_metaclass(JsonSerializable)):
                     is_invalid, "spectrum_range_start", "spectrum_range_stop", "spectrum_range")
 
         if is_invalid:
-            raise ValueError("StateMaskDetector: The provided inputs are illegal. "
+            raise ValueError("StateMaskDetectors: The provided inputs are illegal. "
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
@@ -255,8 +255,8 @@ class StateMaskSANS2D(StateMask):
     def __init__(self):
         super(StateMaskSANS2D, self).__init__()
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMaskDetector(),
-                          DetectorType.HAB.value: StateMaskDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMaskDetectors(),
+                          DetectorType.HAB.value: StateMaskDetectors()}
 
     def validate(self):
         super(StateMaskSANS2D, self).validate()
@@ -266,8 +266,8 @@ class StateMaskLOQ(StateMask):
     def __init__(self):
         super(StateMaskLOQ, self).__init__()
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMaskDetector(),
-                          DetectorType.HAB.value: StateMaskDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMaskDetectors(),
+                          DetectorType.HAB.value: StateMaskDetectors()}
 
     def validate(self):
         super(StateMaskLOQ, self).validate()
@@ -277,7 +277,7 @@ class StateMaskLARMOR(StateMask):
     def __init__(self):
         super(StateMaskLARMOR, self).__init__()
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMaskDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMaskDetectors()}
 
     def validate(self):
         super(StateMaskLARMOR, self).validate()
@@ -287,7 +287,7 @@ class StateMaskZOOM(StateMask):
     def __init__(self):
         super(StateMaskZOOM, self).__init__()
         # Setup the detectors
-        self.detectors = {DetectorType.LAB.value: StateMaskDetector()}
+        self.detectors = {DetectorType.LAB.value: StateMaskDetectors()}
 
     def validate(self):
         super(StateMaskZOOM, self).validate()

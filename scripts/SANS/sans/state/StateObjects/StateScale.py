@@ -43,16 +43,17 @@ class StateScale(with_metaclass(JsonSerializable)):
     def validate(self):
         pass
 
+    def set_geometry_from_file(self, file_information):
+        # Get the geometry
+        self.height_from_file = file_information.get_height()
+        self.width_from_file = file_information.get_width()
+        self.thickness_from_file = file_information.get_thickness()
+        self.shape_from_file = file_information.get_shape()
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Builder
 # ----------------------------------------------------------------------------------------------------------------------
-def set_geometry_from_file(state, file_information):
-    # Get the geometry
-    state.height_from_file = file_information.get_height()
-    state.width_from_file = file_information.get_width()
-    state.thickness_from_file = file_information.get_thickness()
-    state.shape_from_file = file_information.get_shape()
 
 
 class StateScaleBuilder(object):
@@ -60,7 +61,7 @@ class StateScaleBuilder(object):
     def __init__(self, file_information):
         super(StateScaleBuilder, self).__init__()
         self.state = StateScale()
-        set_geometry_from_file(self.state, file_information)
+        self.state.set_geometry_from_file(file_information)
 
     def build(self):
         self.state.validate()

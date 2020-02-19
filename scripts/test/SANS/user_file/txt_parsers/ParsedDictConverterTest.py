@@ -1,31 +1,51 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import os
 import unittest
 
 from sans.common.configurations import Configurations
-from sans.common.enums import (SANSFacility, ReductionMode, RangeStepType, RebinType, DataType, FitType,
-                               DetectorType, SampleShape, SANSInstrument)
-from sans.state.data import get_data_builder
+from sans.common.enums import DetectorType, SANSInstrument, SANSFacility, ReductionMode, RangeStepType, RebinType, DataType, FitType
+from sans.state.StateObjects.StateData import get_data_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
-from sans.user_file.state_director import StateDirectorISIS
+from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
-# -----------------------------------------------------------------
-# --- Tests -------------------------------------------------------
-# -----------------------------------------------------------------
-class UserFileStateDirectorISISTest(unittest.TestCase):
+class ParsedDictConverterTest(unittest.TestCase):
+    def test_state_can_be_created_from_valid_user_file_with_data_information(self):
+        # Arrange
+        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
+        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
+        data_builder.set_sample_scatter("SANS2D00022024")
+        data_builder.set_sample_scatter_period(3)
+        data_state = data_builder.build()
+
+        user_file_path = create_user_file(sample_user_file)
+
+        parser = UserFileReaderAdapter(user_file_name=user_file_path, data_info=data_state)
+        state = parser.get_all_states()
+
+        # Assert
+        self._assert_data(state)
+        self._assert_move(state)
+        self._assert_mask(state)
+        self._assert_reduction(state)
+        self._assert_wavelength(state)
+        self._assert_scale(state)
+        self._assert_adjustment(state)
+        self._assert_convert_to_q(state)
+
+        # clean up
+        if os.path.exists(user_file_path):
+            os.remove(user_file_path)
+
     def _assert_data(self, state):
         data = state.data
         self.assertEqual(data.calibration,  "TUBE_SANS2D_BOTH_31681_25Sept15.nxs")
-        self.assertEqual(data.user_file,  "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger_FRONT.txt")
 
     def _assert_move(self, state):
         move = state.move
@@ -172,70 +192,10 @@ class UserFileStateDirectorISISTest(unittest.TestCase):
         # Assert wide angle correction
         self.assertTrue(state.adjustment.wide_angle_correction)
 
-    def test_state_can_be_created_from_valid_user_file_with_data_information(self):
-        # Arrange
-        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information,
-                                        user_file="USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger_FRONT.txt")
-        data_builder.set_sample_scatter("SANS2D00022024")
-        data_builder.set_sample_scatter_period(3)
-        data_state = data_builder.build()
-
-        director = StateDirectorISIS(data_state, file_information)
-        user_file_path = create_user_file(sample_user_file)
-
-        director.set_user_file(user_file_path)
-        state = director.construct()
-
-        # Assert
-        self._assert_data(state)
-        self._assert_move(state)
-        self._assert_mask(state)
-        self._assert_reduction(state)
-        self._assert_wavelength(state)
-        self._assert_scale(state)
-        self._assert_adjustment(state)
-        self._assert_convert_to_q(state)
-
-        # clean up
-        if os.path.exists(user_file_path):
-            os.remove(user_file_path)
-
-    def test_stat_can_be_created_from_valid_user_file_and_later_on_reset(self):
-        # Arrange
-        file_information = SANSFileInformationMock(instrument=SANSInstrument.SANS2D, run_number=22024)
-        data_builder = get_data_builder(SANSFacility.ISIS, file_information)
-        data_builder.set_sample_scatter("SANS2D00022024")
-        data_builder.set_sample_scatter_period(3)
-        data_state = data_builder.build()
-
-        director = StateDirectorISIS(data_state, file_information)
-        user_file_path = create_user_file(sample_user_file)
-        director.set_user_file(user_file_path)
-
-        # Set additional items
-        director.set_mask_builder_radius_min(0.001298)
-        director.set_mask_builder_radius_max(0.003298)
-        director.set_scale_builder_width(1.)
-        director.set_scale_builder_height(1.5)
-        director.set_scale_builder_thickness(12.)
-        director.set_scale_builder_shape(SampleShape.FLAT_PLATE)
-
-        # Act
-        state = director.construct()
-
-        # Assert
-        self.assertEqual(state.mask.radius_min,  0.001298)
-        self.assertEqual(state.mask.radius_max,  0.003298)
-        self.assertEqual(state.scale.width,  1.)
-        self.assertEqual(state.scale.height,  1.5)
-        self.assertEqual(state.scale.thickness,  12.)
-        self.assertEqual(state.scale.shape, SampleShape.FLAT_PLATE)
-
-        # clean up
-        if os.path.exists(user_file_path):
-            os.remove(user_file_path)
 
 
-if __name__ == "__main__":
+
+
+
+if __name__ == '__main__':
     unittest.main()

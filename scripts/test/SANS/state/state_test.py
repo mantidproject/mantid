@@ -9,20 +9,20 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from sans.common.enums import (SANSInstrument, SANSFacility)
-from sans.state.adjustment import (StateAdjustment)
-from sans.state.calculate_transmission import (StateCalculateTransmission)
-from sans.state.convert_to_q import (StateConvertToQ)
-from sans.state.data import (StateData)
-from sans.state.mask import (StateMask)
-from sans.state.move import (StateMove)
-from sans.state.normalize_to_monitor import (StateNormalizeToMonitor)
-from sans.state.reduction_mode import (StateReductionMode)
-from sans.state.save import (StateSave)
-from sans.state.scale import (StateScale)
-from sans.state.slice_event import (StateSliceEvent)
-from sans.state.state import (State)
-from sans.state.wavelength import (StateWavelength)
-from sans.state.wavelength_and_pixel_adjustment import (StateWavelengthAndPixelAdjustment)
+from sans.state.StateObjects.StateAdjustment import (StateAdjustment)
+from sans.state.StateObjects.StateCalculateTransmission import (StateCalculateTransmission)
+from sans.state.StateObjects.StateConvertToQ import (StateConvertToQ)
+from sans.state.StateObjects.StateData import (StateData)
+from sans.state.StateObjects.StateMaskDetectors import (StateMask)
+from sans.state.StateObjects.StateMoveDetectors import (StateMove)
+from sans.state.StateObjects.StateNormalizeToMonitor import (StateNormalizeToMonitor)
+from sans.state.StateObjects.StateReductionMode import (StateReductionMode)
+from sans.state.StateObjects.StateSave import (StateSave)
+from sans.state.StateObjects.StateScale import (StateScale)
+from sans.state.StateObjects.StateSliceEvent import (StateSliceEvent)
+from sans.state.AllStates import (AllStates)
+from sans.state.StateObjects.StateWavelength import (StateWavelength)
+from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import (StateWavelengthAndPixelAdjustment)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -105,7 +105,7 @@ class MockStateConvertToQ(StateConvertToQ):
 class StateTest(unittest.TestCase):
     @staticmethod
     def _get_state(entries):
-        state = State()
+        state = AllStates()
         default_entries = {"data": MockStateData(), "move": MockStateMove(), "reduction": MockStateReduction(),
                            "slice": MockStateSliceEvent(), "mask": MockStateMask(), "wavelength": MockStateWavelength(),
                            "save": MockStateSave(), "scale": MockStateScale(), "adjustment": MockStateAdjustment(),
