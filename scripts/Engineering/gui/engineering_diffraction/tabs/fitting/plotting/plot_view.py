@@ -59,7 +59,16 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     def update_figure(self):
         self.toolbar.update()
         self.figure.tight_layout()
+        self.update_legend(self.get_axes()[0])
         self.figure.canvas.draw()
+
+    def update_legend(self, ax):
+        if ax.get_lines():
+            ax.make_legend()
+            ax.get_legend().set_title("")
+        else:
+            if ax.get_legend():
+                ax.get_legend().remove()
 
     def display_all(self):
         for ax in self.get_axes():
