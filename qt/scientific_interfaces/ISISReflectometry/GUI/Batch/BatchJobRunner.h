@@ -74,10 +74,17 @@ private:
 
   std::vector<std::string> getWorkspacesToSave(Group const &group) const;
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;
+  std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Group>
+  getUnprocessedGroups();
+  std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Row>
+  getUnprocessedRows();
   const Group &
   getGroupFromPath(MantidWidgets::Batch::RowLocation rowLocation) const;
-  const Group &
-  getParentGroupFromPath(MantidWidgets::Batch::RowLocation rowLocation) const;
+  const Row &
+  getRowFromPath(MantidWidgets::Batch::RowLocation rowLocation) const;
+  const int getParentGroupIndexFromPath(
+      MantidWidgets::Batch::RowLocation rowLocation) const;
+  int getNumberOfInitialisedRowsInGroup(const int groupIndex) const;
   int getNumberOfInitialisedRowsInGroup(const Group &group) const;
 
   template <typename T> bool isSelected(T const &item);

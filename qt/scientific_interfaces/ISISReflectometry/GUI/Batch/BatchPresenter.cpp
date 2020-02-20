@@ -57,8 +57,6 @@ BatchPresenter::BatchPresenter(
   m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
 
-  m_unsavedBatchFlag = false;
-
   observePostDelete();
   observeRename();
   observeADSClear();
@@ -174,15 +172,14 @@ void BatchPresenter::resumeReduction() {
   m_jobRunner->notifyReductionResumed();
   // Get the algorithms to process
   auto algorithms = m_jobRunner->getAlgorithms();
-  if (algorithms.size() < 1) {
+  if (algorithms.size() < 1 ||
+      m_jobRunner->getProcessAll() &&
+          m_mainPresenter->isProcessAllPrevented() ||
+      m_jobRunner->getProcessPartial() &&
+          m_mainPresenter->isProcessPartialGroupPrevented()) {
     notifyReductionPaused();
     return;
   }
-  if (m_jobRunner->getProcessAll() && m_mainPresenter->isProcessAllPrevented())
-    return;
-  if (m_jobRunner->getProcessPartial() &&
-      m_mainPresenter->isProcessPartialGroupPrevented())
-    return;
   // Start processing
   notifyReductionResumed();
   startBatch(std::move(algorithms));

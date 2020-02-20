@@ -213,7 +213,7 @@ bool MainWindowPresenter::isProcessAllPrevented() const {
 }
 
 bool MainWindowPresenter::isProcessPartialGroupPrevented() const {
-  if (isWarnProcessAllChecked()) {
+  if (isWarnProcessPartialGroupChecked()) {
     return !m_messageHandler->askUserYesNo(
         "Some groups will not be fully processed. Continue?",
         "Process partial group?");

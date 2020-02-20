@@ -9,6 +9,7 @@
 #include "GroupProcessingAlgorithm.h"
 #include "RowProcessingAlgorithm.h"
 
+#include <algorithm>
 #include <numeric>
 
 namespace MantidQt {
@@ -94,36 +95,42 @@ void BatchJobRunner::notifyReductionResumed() {
     // Check whether a given group is in the selection. If not then check
     // the group's rows to determine if it will be partially processed.
     if (!m_processAll) {
-      // This comparator is needed to facilitate constructing a map with
-      // user-defined key types
-      auto comp = [](const Group &lhs, const Group &rhs) {
-        return lhs.rows().size() < rhs.rows().size();
-      };
       // If a group is selected then it won't be partially processed so we
       // only need to check those with selected rows
-      std::map<std::reference_wrapper<const Group>, size_t, decltype(comp)>
-          groupsWithSelectedRows(comp);
-      for (auto it = m_rowLocationsToProcess.begin();
-           it != m_rowLocationsToProcess.end(); ++it) {
+      std::map<const int, size_t> groupsWithSelectedRows;
+      // Also keep a list of unprocessed groups
+      auto unprocessedGroups = getUnprocessedGroups();
+      auto unprocessedRows = getUnprocessedRows();
+      for (auto it = m_rowLocationsToProcess.cbegin();
+           it != m_rowLocationsToProcess.cend(); ++it) {
         if (isGroupLocation(*it)) {
-          std::advance(
-              it, getNumberOfInitialisedRowsInGroup(getGroupFromPath(*it)) - 1);
+          unprocessedGroups.erase(std::remove(unprocessedGroups.begin(),
+                                              unprocessedGroups.end(),
+                                              getGroupFromPath(*it)),
+                                  unprocessedGroups.end());
+          m_processPartial = false;
           continue;
         } else
-          ++groupsWithSelectedRows[getParentGroupFromPath(*it)];
+          ++groupsWithSelectedRows[getParentGroupIndexFromPath(*it)];
+        unprocessedRows.erase(std::remove(unprocessedRows.begin(),
+                                          unprocessedRows.end(),
+                                          getRowFromPath(*it)),
+                              unprocessedRows.end());
       }
-      for (const auto &groupCountPair : groupsWithSelectedRows) {
-        m_processPartial =
-            static_cast<int>(groupCountPair.second) <
-            getNumberOfInitialisedRowsInGroup(groupCountPair.first.get());
-        m_processAll = !m_processPartial;
-        if (m_processPartial) {
-          break;
-        }
-      }
-      if (groupsWithSelectedRows.empty()) {
+      if (groupsWithSelectedRows.size() < unprocessedGroups.size()) {
+        m_processAll = false;
+      } else if (unprocessedGroups.size() == 0 || unprocessedRows.size() == 0) {
         m_processAll = true;
-        m_processPartial = !m_processAll;
+      }
+      if (!groupsWithSelectedRows.empty()) {
+        for (const auto groupIndexCountPair : groupsWithSelectedRows) {
+          m_processPartial =
+              static_cast<int>(groupIndexCountPair.second) <
+              getNumberOfInitialisedRowsInGroup(groupIndexCountPair.first);
+          if (m_processPartial) {
+            break;
+          }
+        }
       }
     }
   }
@@ -302,14 +309,55 @@ BatchJobRunner::getWorkspacesToSave(Row const &row) const {
   return workspaces;
 }
 
+std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Group>
+BatchJobRunner::getUnprocessedGroups() {
+  auto groups = m_batch.runsTable().reductionJobs().groups();
+  groups.erase(
+      std::remove_if(
+          groups.begin(), groups.end(),
+          [](MantidQt::CustomInterfaces::ISISReflectometry::Group &group)
+              -> bool { return group.complete(); }),
+      groups.end());
+  return groups;
+}
+
+std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Row>
+BatchJobRunner::getUnprocessedRows() {
+  auto groups = getUnprocessedGroups();
+  std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Row> rows;
+  std::for_each(groups.begin(), groups.end(), [&rows](auto &group) -> void {
+    std::for_each(group.rows().begin(), group.rows().end(),
+                  [&rows](auto &row) -> void { rows.emplace_back(row.get()); });
+  });
+  rows.erase(
+      std::remove_if(rows.begin(), rows.end(),
+                     [](MantidQt::CustomInterfaces::ISISReflectometry::Row &row)
+                         -> bool { return row.complete(); }),
+      rows.end());
+  return rows;
+}
+
 const Group &BatchJobRunner::getGroupFromPath(
     MantidWidgets::Batch::RowLocation rowLocation) const {
   return m_batch.runsTable().reductionJobs().getGroupFromPath(rowLocation);
 }
 
-const Group &BatchJobRunner::getParentGroupFromPath(
+const Row &BatchJobRunner::getRowFromPath(
     MantidWidgets::Batch::RowLocation rowLocation) const {
-  return m_batch.runsTable().reductionJobs().groups()[groupOf(rowLocation)];
+  return m_batch.runsTable().reductionJobs().getRowFromPath(rowLocation).get();
+}
+
+const int BatchJobRunner::getParentGroupIndexFromPath(
+    MantidWidgets::Batch::RowLocation rowLocation) const {
+  return groupOf(rowLocation);
+}
+
+int BatchJobRunner::getNumberOfInitialisedRowsInGroup(
+    const int groupIndex) const {
+  auto group = m_batch.runsTable().reductionJobs().groups()[groupIndex];
+  return static_cast<int>(std::count_if(
+      group.rows().cbegin(), group.rows().cend(),
+      [](const boost::optional<Row> &row) { return row.is_initialized(); }));
 }
 
 int BatchJobRunner::getNumberOfInitialisedRowsInGroup(
