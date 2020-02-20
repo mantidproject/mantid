@@ -10,6 +10,7 @@
 #include "DllOption.h"
 
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidQtWidgets/Common/IFunctionView.h"
 
 #include <QMap>
@@ -214,8 +215,8 @@ protected:
   /// Check if a parameter property has a upper bound
   bool hasUpperBound(QtProperty *prop) const;
   /// Get a constraint string
-  QString getConstraint(const QString &paramName, const double &lowerBound,
-                        const double &upperBound) const;
+  QString getConstraint(const QString &paramName, const double &lowerBound = Mantid::EMPTY_DBL(),
+                        const double &upperBound = Mantid::EMPTY_DBL()) const;
   /// Get a pair of function index (eg f0.f2.) and constraint expression given a
   /// parameter property
   std::pair<QString, QString> getFunctionAndConstraint(QtProperty *prop) const;
