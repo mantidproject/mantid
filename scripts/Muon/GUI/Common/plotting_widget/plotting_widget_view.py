@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy import QtWidgets
 import Muon.GUI.Common.message_box as message_box
 from matplotlib.figure import Figure
-from mantidqt.plotting.functions import get_plot_fig
+from mantid.plots.plotfunctions import get_plot_fig
 from matplotlib.backends.qt_compat import is_pyqt5
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 
