@@ -12,10 +12,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 
-from mantidqt import icons
-from mantidqt.interfacemanager import InterfaceManager
-from mantidqt.utils.qt import load_ui
-from mantidqt.widgets import jobtreeview, manageuserdirectories
 from qtpy import PYQT4
 from qtpy.QtCore import QRegExp
 from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
@@ -24,6 +20,10 @@ from six import with_metaclass
 
 from mantid.kernel import (Logger, UsageService, FeatureType)
 from mantid.py3compat import Enum
+from mantidqt import icons
+from mantidqt.interfacemanager import InterfaceManager
+from mantidqt.utils.qt import load_ui
+from mantidqt.widgets import jobtreeview, manageuserdirectories
 from reduction_gui.reduction.scripter import execute_script
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, ReductionMode, FitType)
@@ -32,8 +32,8 @@ from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
                                        load_file, load_property, set_setting,
                                        get_instrument_from_gui_selection)
-from sans.gui_logic.models.SumRunsModel import SumRunsModel
 from sans.gui_logic.models.RowEntries import RowEntries
+from sans.gui_logic.models.SumRunsModel import SumRunsModel
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 from ui.sans_isis.work_handler import WorkHandler
@@ -2198,7 +2198,9 @@ class SANSDataProcessorGui(QMainWindow,
         array[self._column_index_map["User File"]] = row_state_obj.user_file
 
         array[self._column_index_map["Sample Height"]] = row_state_obj.sample_height
-        array[self._column_index_map["Sample Shape"]] = row_state_obj.sample_shape
+
+        sample_shape = row_state_obj.sample_shape.value if row_state_obj.sample_shape else ""
+        array[self._column_index_map["Sample Shape"]] = sample_shape
         array[self._column_index_map["Sample Thickness"]] = row_state_obj.sample_thickness
         array[self._column_index_map["Sample Width"]] = row_state_obj.sample_width
 

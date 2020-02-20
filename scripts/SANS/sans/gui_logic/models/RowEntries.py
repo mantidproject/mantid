@@ -7,9 +7,10 @@
 
 from six import iteritems, iterkeys
 
-from sans.common.enums import RowState
+from sans.common.enums import RowState, SampleShape
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.models.RowOptionsModel import RowOptionsModel
+from mantid.kernel import Logger
 
 
 class _UserEntries(object):
@@ -29,7 +30,7 @@ class _UserEntries(object):
         self.user_file = None
 
         self.sample_height = None
-        self.sample_shape = None
+        self._sample_shape = None
         self.sample_thickness = None
         self.sample_width = None
 
@@ -45,6 +46,7 @@ class _UserEntries(object):
 class RowEntries(_UserEntries):
     _data_vars = vars(_UserEntries())
     _start_observing = False
+    _logger = Logger("Row Entry")
 
     def __init__(self, **kwargs):
         super(RowEntries, self).__init__()
@@ -73,6 +75,22 @@ class RowEntries(_UserEntries):
         assert isinstance(value, RowOptionsModel), \
             "Expected a RowOptionsModel, got %r" %value
         self._options = value
+
+    @property
+    def sample_shape(self):
+        return self._sample_shape
+
+    @sample_shape.setter
+    def sample_shape(self, val):
+        if val is SampleShape:
+            self._sample_shape = val
+            return
+
+        try:
+            self._sample_shape = SampleShape(val)
+        except ValueError as e:
+            self._logger.error(str(e))
+            self._sample_shape = None
 
     def is_multi_period(self):
         return any((self.sample_scatter_period, self.sample_transmission_period, self.sample_direct_period,
