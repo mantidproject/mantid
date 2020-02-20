@@ -1087,7 +1087,7 @@ class CrystalField(object):
 
     def _getFieldTies(self):
         ties = re.search(',ties=\((.*?)\)', str(self.crystalFieldFunction))
-        return ties.group(1) if ties else ''
+        return re.sub(FN_PATTERN, '', ties.group(1)).rstrip(',') if ties else ''
 
     def _getFieldConstraints(self):
         constraints = re.search('constraints=\((.*?)\)', str(self.crystalFieldFunction))
