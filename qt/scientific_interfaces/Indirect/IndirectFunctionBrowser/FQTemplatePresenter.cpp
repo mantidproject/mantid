@@ -100,17 +100,17 @@ void FQTemplatePresenter::setGlobal(const QString &parName, bool on) {
 
 void FQTemplatePresenter::updateMultiDatasetParameters(const IFunction &fun) {
   m_model.updateMultiDatasetParameters(fun);
-  updateViewParameters();
+  updateView();
 }
 
 void FQTemplatePresenter::updateParameters(const IFunction &fun) {
   m_model.updateParameters(fun);
-  updateViewParameters();
+  updateView();
 }
 
 void FQTemplatePresenter::setCurrentDataset(int i) {
   m_model.setCurrentDomainIndex(i);
-  updateViewParameters();
+  updateView();
 }
 
 void FQTemplatePresenter::setDatasetNames(const QStringList &names) {
@@ -124,16 +124,6 @@ void FQTemplatePresenter::setErrorsEnabled(bool enabled) {
 void FQTemplatePresenter::updateParameterEstimationData(
     DataForParameterEstimationCollection &&data) {
   m_model.updateParameterEstimationData(std::move(data));
-}
-
-void FQTemplatePresenter::updateViewParameters() {
-  if (m_model.getFitType() == "None")
-    return;
-  for (auto parameterName : m_model.getParameterNames()) {
-    m_view->setParameterValue(parameterName,
-                              m_model.getParameter(parameterName),
-                              m_model.getParameterError(parameterName));
-  }
 }
 
 QStringList FQTemplatePresenter::getDatasetNames() const {
@@ -170,7 +160,15 @@ void FQTemplatePresenter::setLocalParameterTie(const QString &parName, int i,
   m_model.setLocalParameterTie(parName, i, tie);
 }
 
-void FQTemplatePresenter::updateView() { updateViewParameters(); }
+void FQTemplatePresenter::updateView() {
+  if (m_model.getFitType() == "None")
+    return;
+  for (auto parameterName : m_model.getParameterNames()) {
+    m_view->setParameterValue(parameterName,
+                              m_model.getParameter(parameterName),
+                              m_model.getParameterError(parameterName));
+  }
+}
 
 void FQTemplatePresenter::setLocalParameterFixed(const QString &parName, int i,
                                                  bool fixed) {
@@ -221,7 +219,7 @@ void FQTemplatePresenter::editLocalParameterFinish(int result) {
     }
   }
   m_editLocalParameterDialog = nullptr;
-  updateViewParameters();
+  updateView();
   emit functionStructureChanged();
 }
 

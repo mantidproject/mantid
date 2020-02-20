@@ -65,7 +65,6 @@ private slots:
   void viewChangedParameterValue(const QString &parName, double value);
 
 private:
-  void updateViewParameters();
   QStringList getDatasetNames() const;
   double getLocalParameterValue(const QString &parName, int i) const;
   bool isLocalParameterFixed(const QString &parName, int i) const;
