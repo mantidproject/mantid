@@ -16,10 +16,6 @@ and a title for the data. The body of the file is of the form ``x y``.
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - SaveRMCProfile**
 
