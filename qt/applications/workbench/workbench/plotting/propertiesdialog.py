@@ -133,7 +133,11 @@ class AxisEditor(PropertiesEditorBase):
         self._memento = memento
         memento.min, memento.max = getattr(self.axes, 'get_{}lim'.format(self.axis_id))()
         memento.log = getattr(self.axes, 'get_{}scale'.format(self.axis_id))() != 'linear'
-        memento.grid = self.axis.majorTicks[0].gridOn
+        ticks =  self.axis.majorTicks[0]
+        if hasattr(ticks,"get_visible"):
+            memento.grid = ticks.get_visible()
+        else:
+            memento.grid = ticks.gridOn
 
         self._fill(memento)
 
