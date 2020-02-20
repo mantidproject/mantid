@@ -5,8 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
+import os
 import re
 import inspect
+
+import six
 from six import types
 from mantid.kernel import config
 from mantid.api import (AnalysisDataService, WorkspaceGroup)
@@ -23,6 +27,11 @@ from sans.common.enums import (DetectorType, FitType, RangeStepType, ReductionDi
                                ReductionMode, SANSFacility, SaveType, BatchReductionEntry, OutputMode, FindDirectionEnum)
 from sans.common.general_functions import (convert_bank_name_to_detector_type_isis, get_output_name,
                                            is_part_of_reduced_output_workspace_group)
+
+if six.PY2:
+    # This can be swapped with in box FileNotFoundError
+    FileNotFoundError = IOError
+
 
 # Disable plotting if running outside Mantidplot
 try:
@@ -319,11 +328,16 @@ def MaskFile(file_name):
 
     @param file_name: path to the user file.
     """
-    print_message('#Opening "' + file_name + '"')
+    if not file_name:
+        raise ValueError("An empty filename was passed to MaskFile")
 
-    # Get the full file path
-    file_name_full = find_full_file_path(file_name)
-    user_file_command = NParameterCommand(command_id=NParameterCommandId.USER_FILE, values=[file_name_full])
+    file_path = file_name if os.path.exists(file_name) else find_full_file_path(file_name)
+
+    if not file_path or not os.path.isfile(file_path):
+        raise FileNotFoundError("Could not find MaskFile: {0}".format(file_name))
+
+    print_message('#Opening "' + file_path + '"')
+    user_file_command = NParameterCommand(command_id=NParameterCommandId.USER_FILE, values=[file_path])
     director.add_command(user_file_command)
 
 
@@ -865,8 +879,9 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs=None, verbose=Fals
     for parsed_batch_entry in parsed_batch_entries:
         # A new user file. If a new user file is provided then this will overwrite all other settings from,
         # otherwise we might have cross-talk between user files.
-        if BatchReductionEntry.USER_FILE in list(parsed_batch_entry.keys()):
-            user_file = parsed_batch_entry[BatchReductionEntry.USER_FILE]
+        user_file = parsed_batch_entry.get(BatchReductionEntry.USER_FILE)
+
+        if user_file:
             MaskFile(user_file)
 
         # Sample scatter
