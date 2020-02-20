@@ -14,6 +14,8 @@ from Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_widge
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import Observer
 
+from qtpy.QtWidgets import QMessageBox
+
 
 class FocusPresenter(object):
     def __init__(self, model, view):
@@ -41,7 +43,8 @@ class FocusPresenter(object):
             return
         banks, spectrum_numbers = self._get_banks()
         focus_paths = self.view.get_focus_filenames()
-        self.start_focus_worker(focus_paths, banks, self.view.get_plot_output(), self.rb_num, spectrum_numbers)
+        if self._number_of_files_warning(focus_paths):
+            self.start_focus_worker(focus_paths, banks, self.view.get_plot_output(), self.rb_num, spectrum_numbers)
 
     def start_focus_worker(self, focus_paths, banks, plot_output, rb_num, spectrum_numbers=None):
         """
@@ -93,6 +96,16 @@ class FocusPresenter(object):
             create_error_message(self.view, "Check cropping values are valid.")
             return False
         return True
+
+    def _number_of_files_warning(self, paths):
+        if len(paths) > 10:  # Just a guess on the warning for now. May change in future.
+            response = QMessageBox.warning(
+                self.view, 'Engineering Diffraction - Warning',
+                'You are attempting to focus {} workspaces. This may take some time.\n\n Would you like to continue?'
+                .format(len(paths)), QMessageBox.Ok | QMessageBox.Cancel)
+            return response == QMessageBox.Ok
+        else:
+            return True
 
     def _on_worker_error(self, _):
         self.emit_enable_button_signal()
