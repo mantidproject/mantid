@@ -121,23 +121,15 @@ void SavePDFGui::writeMetaData(std::ofstream &out,
 
 void SavePDFGui::writeWSData(std::ofstream &out,
                              API::MatrixWorkspace_const_sptr inputWS) {
-  const auto &x = inputWS->x(0);
+  const auto &x = inputWS->points(0);
   const auto &y = inputWS->y(0);
   const auto &dy = inputWS->e(0);
   HistogramData::HistogramDx dx(y.size(), 0.0);
   if (inputWS->sharedDx(0))
     dx = inputWS->dx(0);
-  const size_t length = x.size();
-  if (x.size() == y.size()) {
-    for (size_t i = 0; i < length; ++i) {
-      out << "  " << x[i] << "  " << y[i] << "  " << dx[i] << "  " << dy[i]
-          << "\n";
-    }
-  } else {
-    for (size_t i = 0; i < length - 1; ++i) {
-      out << "  " << (x[i] + x[i + 1]) / 2.0 << "  " << y[i] << "  " << dx[i]
-          << "  " << dy[i] << "\n";
-    }
+  for (size_t i = 0; i < x.size(); ++i) {
+    out << "  " << x[i] << "  " << y[i] << "  " << dx[i] << "  " << dy[i]
+        << "\n";
   }
 }
 
