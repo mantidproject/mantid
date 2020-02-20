@@ -1,4 +1,4 @@
-.. _getting_started:
+.. _getting started:
 
 ==============================
 Setting Up and Getting Started

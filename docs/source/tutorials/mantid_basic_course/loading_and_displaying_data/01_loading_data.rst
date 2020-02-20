@@ -19,7 +19,7 @@ instrument:
 
    -  If you successfully added the "TrainingCourseData" directory 
       to the data search directories (see
-      :ref:`getting started`) then you can simply
+      :ref:`getting_started`) then you can simply
       enter the filename "MAR11060.raw" in the File textbox.
    -  Actually, typing "MAR11060" would be enough for Workbench to find
       the data.

@@ -14,4 +14,3 @@ only the selected part.
    :align: center
    :width: 900px
 
-.. raw:: mediawiki

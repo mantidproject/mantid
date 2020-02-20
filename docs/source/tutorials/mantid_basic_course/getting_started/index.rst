@@ -9,10 +9,10 @@ Getting Started
    :glob: 
    :maxdepth: 1
 
-   getting_started
+   getting started
    main_window
 
 **Sections** 
 
-* :ref:`getting_started`
+* :ref:`getting started`
 * :ref:`main_window`
