@@ -11,18 +11,18 @@ Preamble
 This document is tailored towards developers intending to test the Engineering Diffraction
 interface 2.
 
-Runs can also be loaded from the archive, however it is possible that different run numbers
+Runs can be loaded from the archive, however it is possible that different run numbers
 will be needed as older runs may be deleted.
 
 Overview
 ^^^^^^^^
 The Engineering Diffraction 2 interface allows scientists using the EnginX instrument to interactively
-process their data. There are 3 tabs from which are ordered according to the main steps performed.
+process their data. There are 3 tabs which are ordered according to the main steps performed.
 These are:
 
-- Calibration - This is where a vanadium and cerium run are entered to calibrate the subsequent data.
+- Calibration - This is where a vanadium and cerium oxide run are entered to calibrate the subsequent data.
 - Focus - Where are the data across multiple spectra are summed into a single spectrum for later steps.
-- Fitting - Currently a work in progress
+- Fitting - Currently a work in progress, no testing is required
 
 Test 1
 ^^^^^^
@@ -107,8 +107,8 @@ This test covers the Cropping ability
 
 3. Click calibrate.
 
-4. Go to focus tab and to the same with the Crop Focus.
+4. Go to focus tab and do the same with the Crop Focus.
 
 5. Change the RB number to custom.
 
-6. repeat steps 2-4 this time using Custom Spectra `1200-1400`
+6. Repeat steps 2-4 this time using Custom Spectra `1200-1400`
