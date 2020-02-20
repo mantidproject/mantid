@@ -17,17 +17,14 @@ import matplotlib
 
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
-import numpy as np
 
 # local imports
 # register mantid projection
-import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import config
 from mantid.plots import MantidAxes
-from mantid.py3compat import mock
 from mantid.plots.plotfunctions import (figure_title,
-                                         manage_workspace_names, plot)
+                                        manage_workspace_names, plot)
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
@@ -161,6 +158,13 @@ class FunctionsTest(unittest.TestCase):
         ax = plt.gca()
 
         self.assertFalse(ax.is_waterfall())
+
+    def test_overplotting_supports_first_time_plot(self):
+        # Note how we call overplot true first time round
+        starting_fig = plt.figure()
+        for _ in range(2):
+            plot([self._test_ws], wksp_indices=[1], overplot=True)
+        self.assertNotEqual(starting_fig, plt.figure(), "A new figure wasn't created")
 
     def test_overplotting_onto_waterfall_plot_maintains_waterfall(self):
         fig = plt.figure()
