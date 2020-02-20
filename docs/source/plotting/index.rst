@@ -734,7 +734,7 @@ So one needs to use :func:`mantid.plots.plotfunctions.plot<mantid.plots.plotfunc
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    ax.plot(w,LogName='ChopperStatus5')
    axt=ax.twiny()
-   plots.plotfunctions.plot(axt,w,LogName='ChopperStatus5', FullTime=True)
+   plots.axesfunctions.plot(axt,w,LogName='ChopperStatus5', FullTime=True)
    #fig.show()
 
 Complex plots
