@@ -123,7 +123,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             if hasattr(workspace, 'isDistribution') and workspace.isDistribution():
                 ws_is_distribution = True
         ws_artist = self._get_selected_workspace_artist()
-        self.normaliseData(ws_artist.is_normalized and not ws_is_distribution)
+        should_normalise_before_fit = ws_artist.is_normalized and not ws_is_distribution
+        self.normaliseData(should_normalise_before_fit)
 
     def closeEvent(self, event):
         """
