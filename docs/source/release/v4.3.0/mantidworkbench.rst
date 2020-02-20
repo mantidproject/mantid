@@ -100,5 +100,6 @@ Bugfixes
 - MonitorLiveData now appears promptly in the algorithm details window, allowing live data sessions to be cancelled.
 - Figure options on bin plots open without throwing an error.
 - The help button in fitting now finds the relevant page.
+- Overplots will be normalized by bin width if they are overplotting a curve from a workspace which is a distribution.
 
 :ref:`Release 4.3.0 <v4.3.0>`
