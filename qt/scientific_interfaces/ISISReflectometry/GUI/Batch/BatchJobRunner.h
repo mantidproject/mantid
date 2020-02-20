@@ -82,7 +82,7 @@ private:
   getGroupFromPath(MantidWidgets::Batch::RowLocation rowLocation) const;
   const Row &
   getRowFromPath(MantidWidgets::Batch::RowLocation rowLocation) const;
-  const int getParentGroupIndexFromPath(
+  int getParentGroupIndexFromPath(
       MantidWidgets::Batch::RowLocation rowLocation) const;
   int getNumberOfInitialisedRowsInGroup(const int groupIndex) const;
   int getNumberOfInitialisedRowsInGroup(const Group &group) const;
