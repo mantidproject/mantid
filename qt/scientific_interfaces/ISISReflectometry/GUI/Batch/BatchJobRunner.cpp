@@ -347,7 +347,7 @@ const Row &BatchJobRunner::getRowFromPath(
   return m_batch.runsTable().reductionJobs().getRowFromPath(rowLocation).get();
 }
 
-const int BatchJobRunner::getParentGroupIndexFromPath(
+int BatchJobRunner::getParentGroupIndexFromPath(
     MantidWidgets::Batch::RowLocation rowLocation) const {
   return groupOf(rowLocation);
 }

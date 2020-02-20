@@ -173,10 +173,10 @@ void BatchPresenter::resumeReduction() {
   // Get the algorithms to process
   auto algorithms = m_jobRunner->getAlgorithms();
   if (algorithms.size() < 1 ||
-      m_jobRunner->getProcessAll() &&
-          m_mainPresenter->isProcessAllPrevented() ||
-      m_jobRunner->getProcessPartial() &&
-          m_mainPresenter->isProcessPartialGroupPrevented()) {
+      (m_jobRunner->getProcessAll() &&
+       m_mainPresenter->isProcessAllPrevented()) ||
+      (m_jobRunner->getProcessPartial() &&
+       m_mainPresenter->isProcessPartialGroupPrevented())) {
     notifyReductionPaused();
     return;
   }
