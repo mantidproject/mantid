@@ -722,19 +722,19 @@ beginning of the run), but one can also plot absolute time using `FullTime=True`
 
 
 Note that the parasite axes in matplotlib do not accept the projection keyword.
-So one needs to use :func:`mantid.plots.plotfunctions.plot<mantid.plots.plotfunctions.plot>` instead.
+So one needs to use :func:`mantid.plots.axesfunctions.plot<mantid.plots.axesfunctions.plot>` instead.
 
 .. plot::
    :include-source:
 
    import matplotlib.pyplot as plt
-   from mantid import plots
+   import mantid.plots.axesfunctions as axesfuncs
    from mantid.simpleapi import Load
    w=Load('CNCS_7860')
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    ax.plot(w,LogName='ChopperStatus5')
    axt=ax.twiny()
-   plots.axesfunctions.plot(axt,w,LogName='ChopperStatus5', FullTime=True)
+   axesfuncs.plot(axt,w,LogName='ChopperStatus5', FullTime=True)
    #fig.show()
 
 Complex plots
