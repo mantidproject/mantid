@@ -2,6 +2,13 @@
 Reflectometry Changes
 =====================
 
+.. contents:: Table of Contents
+   :local:
+
+.. warning:: **Developers:** Sort changes under appropriate heading
+    putting new features at the top of the section, followed by
+    improvements, followed by bug fixes.
+
 ISIS Reflectometry Interface
 ############################
 
@@ -20,12 +27,7 @@ New
 
 - The new workflow algorithm :ref:`algm-ReflectometryILLAutoProcess` performs the complete data reduction for ILL reflectometers D17 and Figaro. Implements both coherent and incoherent summation types.
 
-.. contents:: Table of Contents
-   :local:
-
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
+- Options to perform background subtraction have been added to :ref:`algm-ReflectometryReductionOne`, :ref:`algm-ReflectometryReductionOneAuto` and :ref:`algm-ReflectometryISISLoadAndProcess`. This uses the :ref:`algm-ReflectometryBackgroundSubtraction` to perform the subtraction using one of three possible methods.
 
 Bug fixes
 ---------

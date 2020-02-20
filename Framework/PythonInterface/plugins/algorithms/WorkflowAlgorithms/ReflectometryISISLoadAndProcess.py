@@ -119,6 +119,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
         input_workspace = self._sliceWorkspace(input_workspace)
         # Perform the reduction
         alg = self._reduce(input_workspace, first_trans_workspace, second_trans_workspace)
+        # Set outputs and tidy TOF workspaces into a group
         self._finalize(alg)
         if len(inputWorkspaces) >= 2:
             inputWorkspaces.append(input_workspace)
@@ -134,12 +135,14 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
     def _declareSliceAlgorithmProperties(self):
         """Copy properties from the child slicing algorithm and add our own custom ones"""
         self.declareProperty(Prop.SLICE, False, doc='If true, slice the input workspace')
+        self.setPropertyGroup(Prop.SLICE, 'Slicing')
         whenSliceEnabled = EnabledWhenProperty(Prop.SLICE, PropertyCriterion.IsEqualTo, "1")
 
         self._slice_properties = ['TimeInterval', 'LogName', 'LogValueInterval', 'UseNewFilterAlgorithm']
         self.copyProperties('ReflectometrySliceEventWorkspace', self._slice_properties)
         for property in self._slice_properties:
             self.setPropertySettings(property, whenSliceEnabled)
+            self.setPropertyGroup(property, 'Slicing')
 
         self.declareProperty(name=Prop.NUMBER_OF_SLICES,
                              defaultValue=Property.EMPTY_INT,
@@ -147,6 +150,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
                              direction=Direction.Input,
                              doc='The number of uniform-length slices to slice the input workspace into')
         self.setPropertySettings(Prop.NUMBER_OF_SLICES, whenSliceEnabled)
+        self.setPropertyGroup(Prop.NUMBER_OF_SLICES, 'Slicing')
 
     def _declareReductionAlgorithmProperties(self):
         """Copy properties from the child reduction algorithm"""
@@ -157,8 +161,12 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             'DetectorCorrectionType', 'WavelengthMin', 'WavelengthMax', 'I0MonitorIndex',
             'MonitorBackgroundWavelengthMin', 'MonitorBackgroundWavelengthMax',
             'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
-            'NormalizeByIntegratedMonitors', 'Params', 'StartOverlap', 'EndOverlap',
-            'ScaleRHSWorkspace', 'TransmissionProcessingInstructions', 'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
+            'NormalizeByIntegratedMonitors',
+            'SubtractBackground', 'BackgroundProcessingInstructions', 'BackgroundCalculationMethod',
+            'DegreeOfPolynomial', 'CostFunction',
+            'Params', 'StartOverlap', 'EndOverlap', 'ScaleRHSWorkspace',
+            'TransmissionProcessingInstructions',
+            'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
             'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax', 'ScaleFactor',
             'PolarizationAnalysis', 'FloodCorrection',
             'FloodWorkspace', 'Debug']

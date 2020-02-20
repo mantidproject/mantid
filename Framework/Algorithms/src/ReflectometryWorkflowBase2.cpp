@@ -18,6 +18,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
 
@@ -36,6 +37,60 @@ int convertStringNumToInt(const std::string &string) {
     throw std::runtime_error(
         "Out of range value given for processing instructions");
   }
+}
+
+std::string convertToWorkspaceIndex(const std::string &spectrumNumber,
+                                    MatrixWorkspace_const_sptr ws) {
+  auto specNum = convertStringNumToInt(spectrumNumber);
+  std::string wsIdx = std::to_string(
+      ws->getIndexFromSpectrumNumber(static_cast<Mantid::specnum_t>(specNum)));
+  return wsIdx;
+}
+
+std::string
+convertProcessingInstructionsToWorkspaceIndices(const std::string &instructions,
+                                                MatrixWorkspace_const_sptr ws) {
+  std::string converted = "";
+  std::string currentNumber = "";
+  std::string ignoreThese = "-,:+";
+  for (const char instruction : instructions) {
+    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
+        ignoreThese.end()) {
+      // Found a spacer so add currentNumber to converted followed by separator
+      converted.append(convertToWorkspaceIndex(currentNumber, ws));
+      converted.push_back(instruction);
+      currentNumber = "";
+    } else {
+      currentNumber.push_back(instruction);
+    }
+  }
+  // Add currentNumber onto converted
+  converted.append(convertToWorkspaceIndex(currentNumber, ws));
+  return converted;
+}
+
+/** Convert processing instructions given as spectrum numbers to a vector of
+ * workspace indices
+ * @param instructions : the processing instructions in spectrum numbers in the
+ * grouping format used by GroupDetectors
+ * @param workspace : the workspace the instructions apply to
+ * @returns : a vector of indices of the requested spectra in the given
+ * workspace
+ */
+std::vector<size_t>
+getProcessingInstructionsAsIndices(std::string const &instructions,
+                                   MatrixWorkspace_sptr workspace) {
+  auto instructionsInWSIndex =
+      convertProcessingInstructionsToWorkspaceIndices(instructions, workspace);
+  auto groups =
+      Mantid::Kernel::Strings::parseGroups<size_t>(instructionsInWSIndex);
+  auto indices = std::vector<size_t>();
+  std::for_each(groups.cbegin(), groups.cend(),
+                [&indices](std::vector<size_t> const &groupIndices) -> void {
+                  indices.insert(indices.begin(), groupIndices.cbegin(),
+                                 groupIndices.cend());
+                });
+  return indices;
 }
 } // namespace
 
@@ -118,6 +173,40 @@ void ReflectometryWorkflowBase2::initMonitorProperties() {
   // Normalization by integrated monitors
   declareProperty("NormalizeByIntegratedMonitors", true,
                   "Normalize by dividing by the integrated monitors.");
+}
+
+/** Initialize properties related to transmission normalization
+ */
+void ReflectometryWorkflowBase2::initBackgroundProperties() {
+
+  declareProperty(std::make_unique<PropertyWithValue<bool>>(
+                      "SubtractBackground", false, Direction::Input),
+                  "If true then perform background subtraction");
+  declareProperty(
+      std::make_unique<PropertyWithValue<std::string>>(
+          "BackgroundProcessingInstructions", "", Direction::Input),
+      "These processing instructions will be passed to the background "
+      "subtraction algorithm");
+
+  auto algBkg = AlgorithmManager::Instance().createUnmanaged(
+      "ReflectometryBackgroundSubtraction");
+  algBkg->initialize();
+  copyProperty(algBkg, "BackgroundCalculationMethod");
+  copyProperty(algBkg, "DegreeOfPolynomial");
+  copyProperty(algBkg, "CostFunction");
+
+  setPropertySettings("BackgroundProcessingInstructions",
+                      std::make_unique<Kernel::EnabledWhenProperty>(
+                          "SubtractBackground", IS_EQUAL_TO, "1"));
+  setPropertySettings("BackgroundCalculationMethod",
+                      std::make_unique<Kernel::EnabledWhenProperty>(
+                          "SubtractBackground", IS_EQUAL_TO, "1"));
+
+  setPropertyGroup("SubtractBackground", "Background");
+  setPropertyGroup("BackgroundProcessingInstructions", "Background");
+  setPropertyGroup("BackgroundCalculationMethod", "Background");
+  setPropertyGroup("DegreeOfPolynomial", "Background");
+  setPropertyGroup("CostFunction", "Background");
 }
 
 /** Initialize properties related to transmission normalization
@@ -253,6 +342,25 @@ void ReflectometryWorkflowBase2::initDebugProperties() {
                   "purposes.");
   declareProperty("Debug", false,
                   "Whether to enable the output of extra workspaces.");
+}
+
+/** Validate background properties, if given
+ *
+ * @return :: A map with results of validation
+ */
+std::map<std::string, std::string>
+ReflectometryWorkflowBase2::validateBackgroundProperties() const {
+
+  std::map<std::string, std::string> results;
+
+  const bool subtractBackground = getProperty("SubtractBackground");
+  const std::string summationType = getProperty("SummationType");
+  if (subtractBackground && summationType == "SumInQ") {
+    results["SubtractBackground"] =
+        "Background subtraction is not implemented if summing in Q";
+  }
+
+  return results;
 }
 
 /** Validate reduction properties, if given
@@ -444,18 +552,45 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
  * to get a detector workspace in wavelength.
  * @param inputWS :: the input workspace in TOF
  * @param convert :: whether the result should be converted to wavelength
+ * @param sum :: whether the detectors should be summed into a single spectrum
  * @return :: the detector workspace in wavelength
  */
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
-                                           const bool convert) {
-  auto groupAlg = createChildAlgorithm("GroupDetectors");
-  groupAlg->initialize();
-  groupAlg->setProperty("GroupingPattern",
-                        m_processingInstructionsWorkspaceIndex);
-  groupAlg->setProperty("InputWorkspace", inputWS);
-  groupAlg->execute();
-  MatrixWorkspace_sptr detectorWS = groupAlg->getProperty("OutputWorkspace");
+                                           const bool convert, const bool sum) {
+  auto detectorWS = inputWS;
+
+  if (sum) {
+    // Use GroupDetectors to extract and sum the detectors of interest
+    auto groupAlg = createChildAlgorithm("GroupDetectors");
+    groupAlg->initialize();
+    groupAlg->setProperty("GroupingPattern",
+                          m_processingInstructionsWorkspaceIndex);
+    groupAlg->setProperty("InputWorkspace", detectorWS);
+    groupAlg->execute();
+    detectorWS = groupAlg->getProperty("OutputWorkspace");
+  } else if (!isDefault("BackgroundProcessingInstructions")) {
+    // Extract the detectors for the ROI and background. Note that if background
+    // instructions are not set then we require the whole workspace so there is
+    // nothing to do.
+    auto indices = getProcessingInstructionsAsIndices(m_processingInstructions,
+                                                      detectorWS);
+    auto bkgIndices = getProcessingInstructionsAsIndices(
+        getPropertyValue("BackgroundProcessingInstructions"), detectorWS);
+    indices.insert(indices.end(), bkgIndices.cbegin(), bkgIndices.cend());
+    std::sort(indices.begin(), indices.end());
+    indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
+    auto extractAlg = createChildAlgorithm("ExtractSpectra");
+    extractAlg->initialize();
+    extractAlg->setProperty("InputWorkspace", detectorWS);
+    extractAlg->setProperty("WorkspaceIndexList", indices);
+    extractAlg->execute();
+    detectorWS = extractAlg->getProperty("OutputWorkspace");
+    // Update the workspace indicies to match the new workspace
+    m_processingInstructionsWorkspaceIndex =
+        convertProcessingInstructionsToWorkspaceIndices(
+            m_processingInstructions, detectorWS);
+  }
 
   if (convert) {
     detectorWS = convertToWavelength(detectorWS);
@@ -718,36 +853,6 @@ ReflectometryWorkflowBase2::getRunNumber(MatrixWorkspace const &ws) const {
     return "_" + run.getPropertyValueAsType<std::string>("run_number");
   }
   return "";
-}
-
-std::string
-ReflectometryWorkflowBase2::convertProcessingInstructionsToWorkspaceIndices(
-    const std::string &instructions, MatrixWorkspace_const_sptr ws) const {
-  std::string converted = "";
-  std::string currentNumber = "";
-  std::string ignoreThese = "-,:+";
-  for (const char instruction : instructions) {
-    if (std::find(ignoreThese.begin(), ignoreThese.end(), instruction) !=
-        ignoreThese.end()) {
-      // Found a spacer so add currentNumber to converted followed by separator
-      converted.append(convertToWorkspaceIndex(currentNumber, ws));
-      converted.push_back(instruction);
-      currentNumber = "";
-    } else {
-      currentNumber.push_back(instruction);
-    }
-  }
-  // Add currentNumber onto converted
-  converted.append(convertToWorkspaceIndex(currentNumber, ws));
-  return converted;
-}
-
-std::string ReflectometryWorkflowBase2::convertToWorkspaceIndex(
-    const std::string &spectrumNumber, MatrixWorkspace_const_sptr ws) const {
-  auto specNum = convertStringNumToInt(spectrumNumber);
-  std::string wsIdx = std::to_string(
-      ws->getIndexFromSpectrumNumber(static_cast<specnum_t>(specNum)));
-  return wsIdx;
 }
 
 std::string

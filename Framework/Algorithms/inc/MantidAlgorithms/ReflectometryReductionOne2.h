@@ -68,6 +68,9 @@ private:
   Mantid::API::MatrixWorkspace_sptr
   transOrAlgCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS,
                        const bool detectorWSReduced);
+  // Performs background subtraction
+  Mantid::API::MatrixWorkspace_sptr
+  backgroundSubtraction(Mantid::API::MatrixWorkspace_sptr detectorWS);
   // Performs transmission corrections
   Mantid::API::MatrixWorkspace_sptr
   transmissionCorrection(Mantid::API::MatrixWorkspace_sptr detectorWS,

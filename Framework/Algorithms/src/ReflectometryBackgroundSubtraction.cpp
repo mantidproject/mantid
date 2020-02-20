@@ -179,7 +179,6 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(
   // will need to change if ISIS reflectometry get a 2D detector
   LRBgd->setProperty("LowResolutionRange", "0,0");
   LRBgd->setProperty("TypeOfDetector", "LinearDetector");
-  LRBgd->setProperty("OutputWorkspace", getPropertyValue("OutputWorkspace"));
   LRBgd->execute();
 
   Workspace_sptr outputWS = LRBgd->getProperty("OutputWorkspace");

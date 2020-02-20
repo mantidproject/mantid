@@ -297,16 +297,10 @@ void ReflectometryReductionOneAuto3::init() {
   declareProperty("WavelengthMax", Mantid::EMPTY_DBL(),
                   "Wavelength Max in angstroms", Direction::Input);
 
-  // Monitor properties
   initMonitorProperties();
-
-  // Init properties for transmission normalization
+  initBackgroundProperties();
   initTransmissionProperties();
-
-  // Init properties for algorithmic corrections
   initAlgorithmicProperties(true);
-
-  // Momentum transfer properties
   initMomentumTransferProperties();
 
   // Polarization correction
@@ -411,6 +405,16 @@ void ReflectometryReductionOneAuto3::exec() {
   bool transRunsFound = populateTransmissionProperties(alg);
   if (!transRunsFound)
     populateAlgorithmicCorrectionProperties(alg, instrument);
+
+  alg->setPropertyValue("SubtractBackground",
+                        getPropertyValue("SubtractBackground"));
+  alg->setPropertyValue("BackgroundProcessingInstructions",
+                        getPropertyValue("BackgroundProcessingInstructions"));
+  alg->setPropertyValue("BackgroundCalculationMethod",
+                        getPropertyValue("BackgroundCalculationMethod"));
+  alg->setPropertyValue("DegreeOfPolynomial",
+                        getPropertyValue("DegreeOfPolynomial"));
+  alg->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
 
   alg->setProperty("InputWorkspace", inputWS);
   alg->execute();
