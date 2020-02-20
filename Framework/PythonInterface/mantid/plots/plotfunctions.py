@@ -128,6 +128,8 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
     axes = [MantidAxes.from_mpl_axes(ax, ignore_artists=[Legend]) if not isinstance(ax, MantidAxes) else ax
             for ax in axes]
 
+    assert axes, "No axes are associated with this plot"
+
     if tiled:
         ws_index = [(ws, index) for ws in workspaces for index in nums]
         for index, ax in enumerate(axes):
@@ -263,12 +265,20 @@ def get_plot_fig(overplot=None, ax_properties=None, window_title=None, axes_num=
     :return: Matplotlib fig and axes objects
     """
     import matplotlib.pyplot as plt
+
     if fig and overplot:
         fig = fig
     elif fig:
         fig, _, _, _ = create_subplots(axes_num, fig)
     elif overplot:
+        # The create subplot below assumes no figure was passed in, this is ensured by the elif above
+        # but add an assert which prevents a future refactoring from breaking this assumption
+        assert not fig
         fig = plt.gcf()
+        if not fig.axes:
+            plt.close(fig)
+            # The user is likely trying to overplot on a non-existent plot, create one for them
+            fig, _, _, _ = create_subplots(axes_num)
     else:
         fig, _, _, _ = create_subplots(axes_num)
 
