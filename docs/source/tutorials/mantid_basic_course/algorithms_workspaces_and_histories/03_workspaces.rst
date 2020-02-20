@@ -148,7 +148,3 @@ OtherWorkspace Types
    Either the whole group or individual members can be processed when using algorithms.
 
 -  :ref:`MDWorkspace` is a more complex, multi-dimension type of workspace.
-
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Algorithms|Mantid_Basic_Course|MBC_History}}

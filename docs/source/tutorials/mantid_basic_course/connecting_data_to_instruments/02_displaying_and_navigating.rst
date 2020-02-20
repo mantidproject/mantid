@@ -75,7 +75,3 @@ In an unwrapped view (such as cylindrical) to zoom in select an area by left-cli
 dragging.
 
 Right click to zoom out.
-
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Connecting_Data_To_Instrument|Mantid_Basic_Course|MBC_Investigating_Data}}

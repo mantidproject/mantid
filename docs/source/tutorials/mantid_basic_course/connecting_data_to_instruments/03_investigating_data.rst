@@ -129,9 +129,6 @@ Sum selected detectors
 The mini-plot automatically sums the counts in the detectors covered by
 the shapes and plots them vs time of flight.
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Displaying_and_Navigating_Instrument|Mantid_Basic_Course|MBC_Masking_and_Grouping}}
 
 .. |PickTabToolButtons.png| image:: /images/PickTabToolButtons.png
 .. |PickTabZoomButton.png| image:: /images/PickTabZoomButton.png

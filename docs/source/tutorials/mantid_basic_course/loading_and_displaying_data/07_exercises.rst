@@ -54,7 +54,3 @@ Use of Python within Mantid is saved for a follow-up course as it is not require
 
 Now you've got the script loaded, click the green arrow button to run this script, and your plot will appear!
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Displaying_data_Formatting|Mantid_Basic_Course|MBC_Algorithms_History_EventWorkspace}}
-

@@ -64,7 +64,3 @@ Exercise 3 - now you choose the OutpuWorkspace names!
 .. figure:: /images/MBC_Alg_Example3.png
    :align: center
    :width: 700px
-
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Interfaces|Mantid_Basic_Course|MBC_Connecting_Data_To_Instrument}}

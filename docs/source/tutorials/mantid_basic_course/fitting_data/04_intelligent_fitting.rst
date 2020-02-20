@@ -31,9 +31,6 @@ Now add the IkedaCarpenterPV function, check you still have a LinearBackground a
    :alt: GEMIkedaCarpenterFit.png
    :width: 400px
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Fit_Model_Choices |Mantid_Basic_Course|MBC_Exercise_Intelligent_Fitting}}
 
 .. |GEMAsymmetricPeak.png| image:: /images/GEMAsymmetricPeak.png
    :width: 400px

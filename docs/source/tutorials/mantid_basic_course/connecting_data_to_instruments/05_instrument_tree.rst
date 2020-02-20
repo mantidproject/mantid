@@ -15,5 +15,3 @@ only the selected part.
    :width: 900px
 
 .. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Masking_and_Grouping|Mantid_Basic_Course|MBC_Exercise_Connecting_Data_To_Instrument}}

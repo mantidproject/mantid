@@ -91,9 +91,6 @@ A TabulatedFunction takes its values from a file or a workspace
 
 For more information on this, see `here <https://docs.mantidproject.org/nightly/fitting/fitfunctions/TabulatedFunction.html>`_.
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Complex_Case|Mantid_Basic_Course|MBC Intelligent Fitting }}
 
 .. |AddButton.png| image:: /images/AddButton.png
 .. |UseButton.png| image:: /images/UseButton.png

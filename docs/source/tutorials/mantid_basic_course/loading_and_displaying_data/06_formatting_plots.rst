@@ -86,6 +86,3 @@ if you wish to change the label of a curve in the Legend, then edit the "Set
 curve label" entry on the Curves tab. Then on the Legend tab you will see 
 Color and Font options.
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Displaying_data_in_multiple_workspaces|Mantid_Basic_Course|MBC_Exercise_Loading_And_Displaying_Data}}

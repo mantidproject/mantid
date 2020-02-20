@@ -1,4 +1,4 @@
-.. _getting started:
+.. _getting_started:
 
 ==============================
 Setting Up and Getting Started
@@ -53,5 +53,5 @@ Error Reporter
 
 You may find a bug at some stage using Mantid, and here is how to tell us about it! A name and email is required for us to solve the problem. Please give as much information as possible.
 
-.. figure:: /images/ErrorReporterTutorial.png
+.. figure:: /images/ErrorReporterTutorial.PNG
    :alt: Error Reporter

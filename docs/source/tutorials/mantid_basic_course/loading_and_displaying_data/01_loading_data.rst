@@ -10,7 +10,7 @@ Loading Data
 Loading a File
 ==============
 
-First, let's load the dataset MAR11060.raw collected on the ISIS MARI
+First, let's use the Workspaces Toolbox to load the dataset MAR11060.raw collected on the ISIS MARI
 instrument:
 
 #. In Workbench click on the the "Load" button (as shown highlighted in
@@ -71,7 +71,3 @@ single workspace:
 +-----------+--------------------------------------------------------+---------------+
 | \ ``-``\  | Sum a range of runs into one Workspace.                | ``INST1-4``   |
 +-----------+--------------------------------------------------------+---------------+
-
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Introduction|Mantid_Basic_Course|MBC_The_Workspace_Matrix}}

@@ -177,10 +177,6 @@ selecting the Fit option from the Fit menu:
 
 Now examine the results in the Fit Property Browser and the output workspaces, as before.
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Setup_And_Execute_First_Fit|Mantid_Basic_Course|MBC_Fit_Model_Choices }}
-
 .. |FirstStartMantidPlotFitting_MBC.png| image:: /images/FirstStartMantidPlotFitting_MBC.png
    :width: 500px
 .. |ChangePeakWidth.png| image:: /images/ChangePeakWidth.png

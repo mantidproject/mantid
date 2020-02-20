@@ -27,9 +27,9 @@ Both of these methods go straight to our User Support Officer.
 Error Reporter
 --------------
 
-At some stage you will inevitably see an Error Reporter. Please provide your name and email address, so we can investigate and solve your problem! Include as much detail as possible. If you can crash amntid, we want to know how!
+At some stage you will inevitably see an Error Reporter. Please provide your name and email address, so we can investigate and solve your problem! Include as much detail as possible. If you can crash mantid, we want to know how!
 
-.. figure:: /images/ErrorReporterTutorial.png
+.. figure:: /images/ErrorReporterTutorial.PNG
    :alt: Error Reporter
 
 

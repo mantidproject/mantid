@@ -38,9 +38,3 @@ enlarge plot window or set it to full screen to appreciate all of the spectra.
 .. figure:: /images/EMUTiledplot.png
    :align: center
    :width: 800px
-
-
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Displaying_data_2D|Mantid_Basic_Course|MBC_Displaying_data_Formatting}}
-

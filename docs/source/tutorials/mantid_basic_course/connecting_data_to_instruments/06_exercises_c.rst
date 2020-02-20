@@ -77,9 +77,6 @@ detector for a small angle dataset.
 
    |MaskWorkspaceView.png|
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Instrument_Tree|Mantid_Basic_Course|MBC_Setup_And_Execute_First_Fit}}
 
 .. |PickTabAddPeakButton.png| image:: /images/PickTabAddPeakButton.png
 .. |MBC_PickDemo.png| image:: /images/MBC_PickDemo.png

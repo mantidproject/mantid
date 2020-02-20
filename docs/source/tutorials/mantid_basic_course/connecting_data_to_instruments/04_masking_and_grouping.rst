@@ -86,10 +86,6 @@ it **cannot be undone**!
    :alt: Fullmaskview.png
 
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Investigating_Data|Mantid_Basic_Course|MBC_Instrument_Tree}}
-
 .. |MaskRedRing.png| image:: /images/MaskRedRing.png
 .. |GroupBlueRing.png| image:: /images/GroupBlueRing.png
 .. |ClearAllButton.png| image:: /images/ClearAllButton.png

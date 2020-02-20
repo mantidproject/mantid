@@ -98,10 +98,6 @@ C. **Output workspaces** will be created and available via the main Mantid Works
       :width: 300px
 
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Exercise_Connecting_Data_To_Instrument|Mantid_Basic_Course|MBC_Complex_Case }}
-
 .. |MUSRDataSet.png| image:: /images/MUSRDataSet.png
    :width: 400px
 .. |PeakFitToolbar.png| image:: /images/PeakFitToolbar.png

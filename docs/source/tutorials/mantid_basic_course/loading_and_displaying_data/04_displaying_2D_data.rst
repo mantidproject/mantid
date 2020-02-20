@@ -43,7 +43,3 @@ can rapidly look through the spectrum and bin data for any point in the
 .. figure:: /images/600px-ImageViewer.png
    :alt: Slice Viewer
    :align: center
-
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Displaying_data|Mantid_Basic_Course|MBC_Displaying_data_in_multiple_workspaces}}

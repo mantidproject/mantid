@@ -31,8 +31,5 @@ the GUI.
 #. To verify that history has been replayed either look at history or
    plot the spectrum again.
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Workspaces|Mantid_Basic_Course|MBC_Interfaces}}
 
 .. |ThisFilenameislying| image:: /images/HistoryRebinOfCNCS_7860_event.png

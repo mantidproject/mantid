@@ -98,9 +98,6 @@ Exercise 3
 
 |ExerciseFittingMBCfit_3MUSR.png|
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Intelligent_Fitting|Mantid_Basic_Course|MBC_Why_Live_Data}}
 
 .. |GemSinglePeak.png| image:: /images/GemSinglePeak.png
    :width: 500px

@@ -84,7 +84,3 @@ definition, and the remaining rows that are visible show histograms
 wired up to detectors with spectrum number 5-7 or equivalently detectors
 with IDs of 4101-3.
 
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Loading_Data|Mantid_Basic_Course|MBC_Displaying_data}}
-

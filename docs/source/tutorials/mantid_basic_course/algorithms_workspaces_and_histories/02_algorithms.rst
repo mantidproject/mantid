@@ -82,7 +82,3 @@ successful, new output workspaces will appear in the Workspace Toolbox.
 Algorithm outputs are sent to the Messages Box, on the right of the main 
 Mantid Workbench window. If the
 algorithm fails to complete, the error should appear in the Messages Box.
-
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Algorithms_History_EventWorkspace|Mantid_Basic_Course|MBC_Workspaces}}

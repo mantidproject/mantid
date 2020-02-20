@@ -38,8 +38,3 @@ A simple walkthrough
 .. figure:: /images/ISISSANSInterfaceplot.PNG
    :align: center
    :width: 400px
-
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_History|Mantid_Basic_Course|MBC_Exercise_Algorithms_History_EventWorkspace}}
-

@@ -16,7 +16,3 @@ a new workspace as the result.
 
 In this section we will introduce you to some basic types of workspaces,
 and some key algorithms to operate upon those workspaces.
-
-.. raw:: mediawiki
-
-   {{SlideNavigationLinks|MBC_Exercise_Loading_And_Displaying_Data|Mantid_Basic_Course|MBC_Algorithms}}
