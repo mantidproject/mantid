@@ -355,7 +355,7 @@ class IOmodule(object):
 
         # noinspection PyUnresolvedReferences,PyProtectedMember
         if isinstance(hdf_group, h5py._hl.dataset.Dataset):
-            return hdf_group.value
+            return hdf_group[()]
         elif all([self._get_subgrp_name(hdf_group[el].name).isdigit() for el in hdf_group.keys()]):
             structured_dataset_list = []
             # here we make an assumption about keys which have a numeric values; we assume that always : 1, 2, 3... Max
@@ -383,7 +383,7 @@ class IOmodule(object):
         for key, item in hdf_file[path].items():
             # noinspection PyUnresolvedReferences,PyProtectedMember,PyProtectedMember
             if isinstance(item, h5py._hl.dataset.Dataset):
-                ans[key] = item.value
+                ans[key] = item[()]
             elif isinstance(item, h5py._hl.group.Group):
                 ans[key] = cls._recursively_load_dict_contents_from_group(hdf_file, path + key + '/')
         return ans
