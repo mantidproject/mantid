@@ -47,9 +47,11 @@ void AlgorithmProgressDialogPresenter::algorithmStartedSlot(
   // original algorithm has already finished, before we got a shared pointer.
   // This ensures that the tracking only looks after an algorithm that has not
   // finished
-  if (algInstance) {
-    auto treeItem = m_view->addAlgorithm(algInstance);
-    m_progressBars.insert(std::make_pair(alg, treeItem));
+  if (m_progressBars.find(alg) == m_progressBars.end()) {
+    if (algInstance) {
+      auto treeItem = m_view->addAlgorithm(algInstance);
+      m_progressBars.insert(std::make_pair(alg, treeItem));
+    }
   }
 }
 /// This slot is triggered whenever an algorithm reports progress.
