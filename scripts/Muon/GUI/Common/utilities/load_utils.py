@@ -217,7 +217,6 @@ def load_workspace_from_filename(filename,
         for table in deadtime_tables[1:]:
             DeleteWorkspace(Workspace=table)
 
-        #load_result["DataDeadTimeTable"] = AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()[0]
         #for index, deadtime_table in enumerate(AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()):
         #    if index == 0:
         #        load_result["DataDeadTimeTable"] = deadtime_table
