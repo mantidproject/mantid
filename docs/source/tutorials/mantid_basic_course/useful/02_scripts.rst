@@ -1,15 +1,17 @@
-.. _03_Working_with_Python_in_Workbench:
+.. _02_scripts:
 
-================================
-Working with Python in Workbench
-================================
+===================
+Working with Python
+===================
 
-Within the Mantid Workbench you can make use of the script window or IPython prompt to manipulate data and build plots exactly to your specifications in ways that you would not 
+This is a quick summary of how to use python scripts in Workbench. To learn more about this, see the further tutorials on the `home page <https://www.mantidproject.org/Main_Page>`_. Even if you are a novice at Python, it is useful to know how to run a script as you can produce one within Mantid: from the "Generate a script" button on a plot toolbar, or from project recovery when you reopen Mantid after a crash.
+
+Within the Mantid you can make use of the script window or IPython prompt to manipulate data and build plots exactly to your specifications in ways that you would not 
 be able to with the interface alone.
 
 .. figure:: /images/Workbench_script_new.png
    :width: 700px
-   :alt: A view of the Workbench script window.
+   :alt: A view of the Workbench script window
    
 You can also use the IPython tab below the script editor to change to an inline Python interpreter. Both the python interpreter and scripts run thorugh Mantid are able to interact 
 with Mantid workspaces, plot and algorithms.
@@ -18,13 +20,6 @@ with Mantid workspaces, plot and algorithms.
 ==================
 
 By default any new script opened in Workbench will come with some default imports:
-
-.. code-block:: python
-
-   from __future__ import (absolute_import, division, print_function, unicode_literals)
-   
-This provideds compatability between scripts written in Python2 and Python3, notably 
-all print statements must not use brackets.
 
 .. code-block:: python
 

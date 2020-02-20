@@ -4,6 +4,12 @@
 Loading and Displaying Data 
 ===========================
 
+“A picture is worth a thousand words”, para-phrased from Henrik Ibsen: "A thousand words leave not the same deep impression as does a single deed." 
+
+Many others have written similar sentiments: Leonardo Di Caprio wrote that a poet would be "overcome by sleep and hunger before [being able to] describe with words what a painter is able to in an instant."
+
+And so the use of Plotting your Data!
+
 .. toctree:: 
    :hidden: 
    :glob: 
