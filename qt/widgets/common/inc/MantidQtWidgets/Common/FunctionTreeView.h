@@ -215,7 +215,8 @@ protected:
   /// Check if a parameter property has a upper bound
   bool hasUpperBound(QtProperty *prop) const;
   /// Get a constraint string
-  QString getConstraint(const QString &paramName, const double &lowerBound = Mantid::EMPTY_DBL(),
+  QString getConstraint(const QString &paramName,
+                        const double &lowerBound = Mantid::EMPTY_DBL(),
                         const double &upperBound = Mantid::EMPTY_DBL()) const;
   /// Get a pair of function index (eg f0.f2.) and constraint expression given a
   /// parameter property
