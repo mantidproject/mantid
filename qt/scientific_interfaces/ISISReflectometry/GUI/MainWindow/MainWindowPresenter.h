@@ -59,6 +59,8 @@ public:
   bool isAnyBatchAutoreducing() const override;
   bool isCloseEventPrevented() override;
   bool isOverwriteBatchPrevented(int tabIndex) const override;
+  bool isProcessAllPrevented() const override;
+  bool isProcessPartialGroupPrevented() const override;
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyAnyBatchReductionResumed() override;
@@ -96,6 +98,8 @@ private:
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
 
   bool isWarnDiscardChangesChecked() const override;
+  bool isWarnProcessAllChecked() const override;
+  bool isWarnProcessPartialGroupChecked() const override;
   bool isCloseBatchPrevented(int batchIndex) const override;
   bool isBatchUnsaved(int batchIndex) const override;
   bool isAnyBatchUnsaved() override;
