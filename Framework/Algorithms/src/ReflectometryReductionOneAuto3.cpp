@@ -412,6 +412,16 @@ void ReflectometryReductionOneAuto3::exec() {
   if (!transRunsFound)
     populateAlgorithmicCorrectionProperties(alg, instrument);
 
+  alg->setPropertyValue("SubtractBackground",
+                        getPropertyValue("SubtractBackground"));
+  alg->setPropertyValue("BackgroundProcessingInstructions",
+                        getPropertyValue("BackgroundProcessingInstructions"));
+  alg->setPropertyValue("BackgroundCalculationMethod",
+                        getPropertyValue("BackgroundCalculationMethod"));
+  alg->setPropertyValue("DegreeOfPolynomial",
+                        getPropertyValue("DegreeOfPolynomial"));
+  alg->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
+
   alg->setProperty("InputWorkspace", inputWS);
   alg->execute();
 
