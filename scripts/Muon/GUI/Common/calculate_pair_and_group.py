@@ -83,7 +83,6 @@ def _get_pre_processing_params(context, run, rebin):
             pre_process_params["DeadTimeTable"] = dead_time_table
     except KeyError:
         pass
-
     return pre_process_params
 
 

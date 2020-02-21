@@ -211,33 +211,26 @@ def load_workspace_from_filename(filename,
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(ws) for ws in workspace.getNames()]
         run = get_run_from_multi_period_data(workspace)
-        if not psi_data:
-            load_result["DataDeadTimeTable"] = AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()[0]
-            for index, deadtime_table in enumerate(AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()):
-                if index == 0:
-                    load_result["DataDeadTimeTable"] = deadtime_table
-                else:
-                    DeleteWorkspace(Workspace=deadtime_table)
 
-            load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
-            UnGroupWorkspace(load_result["DeadTimeTable"])
-            load_result["DeadTimeTable"] = None
-            UnGroupWorkspace(workspace.name())
-        else:
-            load_result["DataDeadTimeTable"] = None
-            load_result["FirstGoodData"] = round(load_result["FirstGoodData"], 2)
+        deadtime_tables = AnalysisDataService.retrieve(load_result["DeadTimeTable"]).getNames()
+        load_result["DataDeadTimeTable"] = deadtime_tables[0]
+        for table in deadtime_tables[1:]:
+            DeleteWorkspace(Workspace=table)
+
+        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
+        UnGroupWorkspace(load_result["DeadTimeTable"])
+        load_result["DeadTimeTable"] = None
+        UnGroupWorkspace(workspace.name())
+
     else:
         # single period data
         load_result = _get_algorithm_properties(alg, output_properties)
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(load_result["OutputWorkspace"])]
         run = int(workspace.getRunNumber())
-        if not psi_data:
-            load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
-            load_result["DeadTimeTable"] = None
-            load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
-        else:
-            load_result["DataDeadTimeTable"] = None
-            load_result["FirstGoodData"] = round(load_result["FirstGoodData"], 2)
+
+        load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
+        load_result["DeadTimeTable"] = None
+        load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result['TimeZero'], 2)
 
     return load_result, run, filename, psi_data
 
@@ -256,7 +249,7 @@ def create_load_algorithm(filename, property_dictionary):
     else:
         alg = mantid.AlgorithmManager.create("LoadMuonNexus")
         alg.setProperties(property_dictionary)
-        alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
+    alg.setProperty("DeadTimeTable", output_filename + '_deadtime_table')
 
     alg.initialize()
     alg.setAlwaysStoreInADS(True)

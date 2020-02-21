@@ -67,11 +67,8 @@ Unscripted and Final Testing (technical tasks)
 *  Run
    `open-release-testing <http://builds.mantidproject.org/view/All/job/open-release-testing/>`__
    to create the release branch and prepare build jobs
-*  Enable and update the release branch name for
-   `merge\_release\_into\_master <http://builds.mantidproject.org/view/All/job/merge_release_into_master/>`__
-*  Check state of all open pull requests for this milestone and update
-   the base branch to the new release branch accordingly.
-*  Create a skeleton set of release notes for the next version using the `python helper tool <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_
+*  Check state of all open pull requests for this milestone and decide which should be kept for the release, liase with PM on this. Move any pull requests not targeted for release out of the milestone and run `update-pr-base-branch.py <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__ to update the base branches of those pull requests.
+*  Create a skeleton set of release notes for the next version using the `python helper tool <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_ and open a pull request to put them on ``master``.
 *  Perform unscripted testing following the instructions described
    `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
 
