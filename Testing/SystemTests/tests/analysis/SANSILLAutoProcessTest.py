@@ -7,7 +7,8 @@
 from __future__ import (absolute_import, division, print_function)
 
 import systemtesting
-from mantid.simpleapi import SANSILLAutoProcess, config, mtd, GroupWorkspaces
+from mantid.simpleapi import SANSILLAutoProcess, config, mtd, GroupWorkspaces, SaveNexusProcessed
+import os
 
 
 class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
@@ -112,3 +113,79 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
         )
 
         GroupWorkspaces(InputWorkspaces=['iq', 'panels'], OutputWorkspace='out')
+
+
+class D16AutoProcessTest(systemtesting.MantidSystemTest):
+    """
+    Tests autoprocess with D16 data, with a scan on 2 consecutives gamma values.
+    """
+    def __init__(self):
+        super(D16AutoProcessTest, self).__init__()
+        self.setUp()
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D16'
+        config['logging.loggers.root.level'] = 'Warning'
+        config.appendDataSearchSubDir('ILL/D16/')
+
+    def cleanup(self):
+        mtd.clear()
+        os.remove('/tmp/water_reference_g0.nxs')
+        os.remove('/tmp/water_reference_g1.nxs')
+        os.remove('/tmp/water_reference_g2.nxs')
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        return ['iq', 'reference_results.nxs']
+
+    def runTest(self):
+        water = '3659, 3663, 3667'
+        sample = "3674, 3677, 3680"
+        transmission_sample = '3671'
+        beam = '3587'
+        transmission_water = '3655'
+        transmission_water_cell = '3592'
+        transmission_beam = '3587'
+        absorber = '3598, 3604, 3654'
+        empty_cell_water = '3618, 3623, 3646'
+        cell_background = '3676, 3679, 3682'
+        transmission_empty_cell = '3673'
+
+        SANSILLAutoProcess(SampleRuns=water,
+                           BeamRuns=beam,
+                           DefaultMaskFile="side_mask.nxs",
+                           MaskFiles="beam_mask.nxs, side_mask.nxs, side_mask.nxs",
+                           TransmissionBeamRuns=transmission_beam,
+                           SampleTransmissionRuns=transmission_water,
+                           ContainerTransmissionRuns=transmission_water_cell,
+                           OutputWorkspace='water',
+                           BeamRadius=1,
+                           ContainerRuns=empty_cell_water,
+                           ThetaDependent=False,
+                           WaterCrossSection=0.87,
+                           SampleThickness=0.2,
+                           AbsorberRuns=absorber)
+
+        SaveNexusProcessed('003659_Sample', '/tmp/water_reference_g0.nxs')
+        SaveNexusProcessed('003663_Sample', '/tmp/water_reference_g1.nxs')
+        SaveNexusProcessed('003667_Sample', '/tmp/water_reference_g2.nxs')
+
+        # process each sample
+        SANSILLAutoProcess(SampleRuns=sample,
+                           BeamRuns=beam,
+                           DefaultMaskFile="side_mask",
+                           MaskFiles="beam_mask, side_mask, side_mask",
+                           TransmissionBeamRuns=transmission_beam,
+                           OutputWorkspace='iq',
+                           ContainerTransmissionRuns=transmission_empty_cell,
+                           SampleTransmissionRuns=transmission_sample,
+                           ContainerRuns=cell_background,
+                           AbsorberRuns=absorber,
+                           ThetaDependent=False,
+                           WaterCrossSection=0.87,
+                           SampleThickness=0.2,
+                           BeamRadius=1,
+                           ReferenceFiles="/tmp/water_reference_g0.nxs, /tmp/water_reference_g1.nxs, /tmp/water_reference_g2.nxs")
+
