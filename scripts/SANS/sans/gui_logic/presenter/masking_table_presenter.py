@@ -122,7 +122,7 @@ class MaskingTablePresenter(object):
             self._presenter = presenter
 
         def on_row_changed(self):
-            self._presenter.on_row_changed()
+            pass
 
         def on_update_rows(self):
             self._presenter.on_update_rows()
@@ -147,12 +147,6 @@ class MaskingTablePresenter(object):
         self._work_handler = WorkHandler()
         self._logger = Logger("SANS")
 
-    def on_row_changed(self):
-        row_index = self._view.get_current_row()
-        state = self.get_state(row_index, file_lookup=False, suppress_warnings=True)
-        if state:
-            self.display_masking_information(state)
-
     def on_display(self):
         # Get the state information for the selected row.
         # Disable the button
@@ -163,17 +157,19 @@ class MaskingTablePresenter(object):
             state = self.get_state(row_index)
         except Exception as e:
             self.on_processing_error_masking_display(e)
-            raise Exception(str(e))  # propagate errors for run_tab_presenter to deal with
-        else:
-            if not state:
-                self._logger.information("You can only show a masked workspace if a user file has been loaded and there"
-                                         "valid sample scatter entry has been provided in the selected row.")
-                return
+            raise e  # propagate errors for run_tab_presenter to deal with
 
-            # Run the task
-            listener = MaskingTablePresenter.DisplayMaskListener(self)
-            state_copy = copy.copy(state)
-            self._work_handler.process(listener, load_and_mask_workspace, 0, state_copy, self.DISPLAY_WORKSPACE_NAME)
+        if not state:
+            self._logger.error("You can only show a masked workspace if a user file has been loaded and there"
+                               "valid sample scatter entry has been provided in the selected row.")
+            self._view.set_display_mask_button_to_normal()
+            return
+
+        # Run the task
+        self.display_masking_information(state)
+        listener = MaskingTablePresenter.DisplayMaskListener(self)
+        state_copy = copy.copy(state)
+        self._work_handler.process(listener, load_and_mask_workspace, 0, state_copy, self.DISPLAY_WORKSPACE_NAME)
 
     def on_processing_finished_masking_display(self, result):
         # Enable button
@@ -207,7 +203,6 @@ class MaskingTablePresenter(object):
 
         if new_row_index != -1:
             self.set_row(new_row_index)
-            self.on_row_changed()
 
     def set_row(self, index):
         self._view.set_row(index)

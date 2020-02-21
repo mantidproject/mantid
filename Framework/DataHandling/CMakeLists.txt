@@ -187,6 +187,7 @@ set(SRC_FILES
     src/SaveReflCustomAscii.cpp
     src/SaveReflThreeColumnAscii.cpp
     src/SaveReflectometryAscii.cpp
+    src/SaveRMCProfile.cpp
     src/SaveSESANS.cpp
     src/SaveSPE.cpp
     src/SaveSampleEnvironmentAndShape.cpp
@@ -390,6 +391,7 @@ set(INC_FILES
     inc/MantidDataHandling/SaveReflCustomAscii.h
     inc/MantidDataHandling/SaveReflThreeColumnAscii.h
     inc/MantidDataHandling/SaveReflectometryAscii.h
+    inc/MantidDataHandling/SaveRMCProfile.h
     inc/MantidDataHandling/SaveSESANS.h
     inc/MantidDataHandling/SaveSPE.h
     inc/MantidDataHandling/SaveSampleEnvironmentAndShape.h
@@ -581,6 +583,7 @@ set(TEST_FILES
     SaveReflCustomAsciiTest.h
     SaveReflThreeColumnAsciiTest.h
     SaveReflectometryAsciiTest.h
+    SaveRMCProfileTest.h
     SaveSESANSTest.h
     SaveSPETest.h
     SaveSampleEnvironmentAndShapeTest.h

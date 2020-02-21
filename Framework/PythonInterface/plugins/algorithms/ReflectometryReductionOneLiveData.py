@@ -48,13 +48,17 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             'DetectorCorrectionType', 'WavelengthMin', 'WavelengthMax', 'I0MonitorIndex',
             'MonitorBackgroundWavelengthMin', 'MonitorBackgroundWavelengthMax',
             'MonitorIntegrationWavelengthMin', 'MonitorIntegrationWavelengthMax',
-            'NormalizeByIntegratedMonitors', 'Params', 'StartOverlap', 'EndOverlap',
+            'NormalizeByIntegratedMonitors',
+            'SubtractBackground', 'BackgroundProcessingInstructions',
+            'BackgroundCalculationMethod', 'DegreeOfPolynomial', 'CostFunction',
+            'Params', 'StartOverlap', 'EndOverlap',
             'ScaleRHSWorkspace', 'TransmissionProcessingInstructions',
             'CorrectionAlgorithm', 'Polynomial', 'C0', 'C1',
             'MomentumTransferMin', 'MomentumTransferStep', 'MomentumTransferMax',
             'ScaleFactor', 'PolarizationAnalysis',
             'FloodCorrection', 'FloodWorkspace', 'Debug',
-            'OutputWorkspace']
+            'TimeInterval', 'LogValueInterval', 'LogName', 'UseNewFilterAlgorithm',
+            'ReloadInvalidWorkspaces', 'GroupTOFWorkspaces', 'OutputWorkspace']
         self.copyProperties('ReflectometryISISLoadAndProcess', self._child_properties)
 
     def PyExec(self):

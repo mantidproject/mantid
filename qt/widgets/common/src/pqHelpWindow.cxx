@@ -428,3 +428,8 @@ void pqHelpWindow::showHomePage(const QString &namespace_name) {
   }
   errorMissingPage(QUrl("Could not locate index.html"));
 }
+
+//-----------------------------------------------------------------------------
+bool pqHelpWindow::isExistingPage(const QUrl& url) {
+  return this->m_helpEngine->findFile(url).isValid();
+}

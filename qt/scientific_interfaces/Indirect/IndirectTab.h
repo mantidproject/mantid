@@ -66,7 +66,7 @@ class MANTIDQT_INDIRECT_DLL IndirectTab : public QObject, public IPyRunner {
 
 public:
   IndirectTab(QObject *parent = nullptr);
-  ~IndirectTab() override;
+  virtual ~IndirectTab() override = default;
 
   /// Get the suffixes used for an interface from the xml file
   QStringList getExtensions(std::string const &interfaceName) const;

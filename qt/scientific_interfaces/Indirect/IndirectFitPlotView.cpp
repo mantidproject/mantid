@@ -207,7 +207,16 @@ void IndirectFitPlotView::setMaximumSpectrum(int maximum) {
 
 void IndirectFitPlotView::setPlotSpectrum(WorkspaceIndex spectrum) {
   MantidQt::API::SignalBlocker blocker(m_plotForm->spPlotSpectrum);
+  MantidQt::API::SignalBlocker comboBlocker(m_plotForm->cbPlotSpectrum);
   m_plotForm->spPlotSpectrum->setValue(spectrum.value);
+  auto index =
+      m_plotForm->cbPlotSpectrum->findText(QString::number(spectrum.value));
+  m_plotForm->cbPlotSpectrum->setCurrentIndex(index);
+}
+
+void IndirectFitPlotView::disableSpectrumPlotSelection() {
+  m_plotForm->spPlotSpectrum->setEnabled(false);
+  m_plotForm->cbPlotSpectrum->setEnabled(false);
 }
 
 void IndirectFitPlotView::setBackgroundLevel(double value) {

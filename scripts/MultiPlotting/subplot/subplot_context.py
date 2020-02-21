@@ -53,10 +53,10 @@ class subplotContext(object):
             plot_kwargs = {'specNum': spec_num, 'distribution': distribution, 'color': color}
 
         # make plot/get label
-        line, = plots.plotfunctions.plot(self._subplot, ws, **plot_kwargs)
+        line, = plots.axesfunctions.plot(self._subplot, ws, **plot_kwargs)
         label = line.get_label()
         if self._errors:
-            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot, ws, **plot_kwargs)
+            line, cap_lines, bar_lines = plots.axesfunctions.errorbar(self._subplot, ws, **plot_kwargs)
             all_lines = [line]
             all_lines.extend(cap_lines)
             all_lines.extend(bar_lines)
@@ -81,7 +81,7 @@ class subplotContext(object):
         del self._lines[label]
         # replot the line
         if self._errors:
-            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot,
+            line, cap_lines, bar_lines = plots.axesfunctions.errorbar(self._subplot,
                                                                       self.get_ws(label),
                                                                       specNum=self.specNum[label],
                                                                       color=colour,
@@ -93,7 +93,7 @@ class subplotContext(object):
             all_lines.extend(bar_lines)
             self._lines[label] = all_lines
         else:
-            line, = plots.plotfunctions.plot(self._subplot,
+            line, = plots.axesfunctions.plot(self._subplot,
                                              self.get_ws(label),
                                              specNum=self.specNum[label],
                                              color=colour,

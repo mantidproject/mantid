@@ -24,7 +24,6 @@ set(
   IqtFitModelTest.h
   JumpFitDataPresenterTest.h
   JumpFitModelTest.h
-  MSDFitModelTest.h
 )
 
 mtd_add_qt_tests(

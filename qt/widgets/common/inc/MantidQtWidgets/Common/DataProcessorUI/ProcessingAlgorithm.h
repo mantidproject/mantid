@@ -28,11 +28,12 @@ public:
   // Constructor
   ProcessingAlgorithm(QString name, std::vector<QString> prefix,
                       std::size_t postprocessedOutputPrefixIndex,
-                      std::set<QString> blacklist = std::set<QString>());
+                      std::set<QString> blacklist = std::set<QString>(),
+                      const int version = -1);
   // Delegating constructor
   ProcessingAlgorithm(QString name, QString const &prefix,
                       std::size_t postprocessedOutputPrefixIndex,
-                      QString const &blacklist = "");
+                      QString const &blacklist = "", const int version = -1);
   // Destructor
   virtual ~ProcessingAlgorithm();
   // The number of output properties

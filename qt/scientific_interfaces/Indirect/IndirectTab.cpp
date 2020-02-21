@@ -154,8 +154,6 @@ IndirectTab::IndirectTab(QObject *parent)
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IndirectTab::~IndirectTab() {}
-
 void IndirectTab::runTab() {
   if (validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();

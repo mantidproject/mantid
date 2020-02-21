@@ -130,7 +130,7 @@ std::unique_ptr<QtEventView> QtBatchView::createEventTab() {
 
 IAlgorithm_sptr QtBatchView::createReductionAlg() {
   return Mantid::API::AlgorithmManager::Instance().create(
-      "ReflectometryReductionOneAuto");
+      "ReflectometryISISLoadAndProcess");
 }
 
 std::unique_ptr<QtSaveView> QtBatchView::createSaveTab() {

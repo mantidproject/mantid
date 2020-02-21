@@ -41,11 +41,12 @@ class FocusModelTest(unittest.TestCase):
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
 
-        self.model.focus_run("305761", banks, False, "ENGINX", "0", None)
+        self.model.focus_run(["305761"], banks, False, "ENGINX", "0", None)
+
         self.assertEqual(len(banks), run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
-                                     model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1], "test_wsp",
-                                     "test_wsp", banks[-1], None)
+                                     "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + banks[-1],
+                                     "test_wsp", "test_wsp", banks[-1], None)
 
     @patch(file_path + ".Ads")
     @patch(file_path + ".FocusModel._save_output")
@@ -56,11 +57,12 @@ class FocusModelTest(unittest.TestCase):
         spectra = "20-50"
         load_focus.return_value = "mocked_sample"
 
-        self.model.focus_run("305761", None, False, "ENGINX", "0", spectra)
+        self.model.focus_run(["305761"], None, False, "ENGINX", "0", spectra)
+
         self.assertEqual(1, run_focus.call_count)
         run_focus.assert_called_with("mocked_sample",
-                                     model.FOCUSED_OUTPUT_WORKSPACE_NAME + "cropped", "test_wsp",
-                                     "test_wsp", None, None, spectra)
+                                     "305761_" + model.FOCUSED_OUTPUT_WORKSPACE_NAME + "cropped",
+                                     "test_wsp", "test_wsp", None, None, spectra)
 
     @patch(file_path + ".Ads")
     @patch(file_path + ".FocusModel._save_output")
@@ -75,7 +77,8 @@ class FocusModelTest(unittest.TestCase):
         banks = ["1", "2"]
         load_focus.return_value = "mocked_sample"
 
-        self.model.focus_run("305761", banks, True, "ENGINX", "0", None)
+        self.model.focus_run(["305761"], banks, True, "ENGINX", "0", None)
+
         self.assertEqual(1, plot_focus.call_count)
 
     @patch(file_path + ".Ads")

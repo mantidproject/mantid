@@ -9,8 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from sans.common.enums import (SANSFacility, SaveType, SANSInstrument)
-from sans.state.data import (get_data_builder)
-from sans.state.save import (get_save_builder)
+from sans.state.StateObjects.StateData import (get_data_builder)
+from sans.state.StateObjects.StateSave import (get_save_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

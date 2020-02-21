@@ -57,6 +57,16 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         # Setup notifiers
         self.setup_calibration_notifier()
 
+        # Usage Reporting
+        try:
+            import mantid
+
+            # register startup
+            mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface,
+                                                     "Engineering Diffraction", False)
+        except ImportError:
+            pass
+
     def setup_settings(self):
         model = SettingsModel()
         view = SettingsView(self)

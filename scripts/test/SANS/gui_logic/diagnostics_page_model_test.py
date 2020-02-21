@@ -16,9 +16,6 @@ from sans.user_file.user_file_reader import UserFileReader
 
 
 class DiagnosticsPageModelTest(unittest.TestCase):
-    def setUp(self):
-        pass
-
     def test_that_create_state_creates_correct_state(self):
         user_file_path = create_user_file(sample_user_file)
         user_file_reader = UserFileReader(user_file_path)

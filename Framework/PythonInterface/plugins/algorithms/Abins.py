@@ -115,12 +115,12 @@ class Abins(PythonAlgorithm):
                              validator=StringListValidator(['Total', 'Incoherent', 'Coherent']),
                              doc="Scale the partial dynamical structure factors by the scattering cross section.")
 
+        # Abins is supposed to support excitations up to fourth-order. Order 3 and 4 are currently disabled while the
+        # weighting is being investigated; these intensities were unreasonably large in hydrogenous test cases
         self.declareProperty(name="QuantumOrderEventsNumber", defaultValue='1',
-                             validator=StringListValidator(['1', '2', '3', '4']),
+                             validator=StringListValidator(['1', '2']),
                              doc="Number of quantum order effects included in the calculation "
-                                 "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + "
-                                 "2nd order combinations, 3-> FUNDAMENTALS + first overtone + second overtone + 2nd "
-                                 "order combinations + 3rd order combinations etc...)")
+                                 "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations")
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", '', Direction.Output),
                              doc="Name to give the output workspace.")

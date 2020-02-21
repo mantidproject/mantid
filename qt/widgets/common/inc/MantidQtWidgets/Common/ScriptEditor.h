@@ -123,6 +123,8 @@ public slots:
   void padMargin();
   /// Set the marker state
   void setMarkerState(bool enabled);
+  /// Update the progress marker potentially from a separate thread
+  void updateProgressMarkerFromThread(int lineno, bool error = false);
   /// Update the progress marker
   void updateProgressMarker(int lineno, bool error = false);
   /// Mark the progress arrow as an error

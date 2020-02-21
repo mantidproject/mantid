@@ -244,6 +244,10 @@ class MainWindow(QMainWindow):
         self.workspacewidget.workspacewidget.enableDeletePrompt(bool(prompt))
         self.widgets.append(self.workspacewidget)
 
+        #set the link between the algorithm and workspace widget
+        self.algorithm_selector.algorithm_selector.set_get_selected_workspace_fn(
+            self.workspacewidget.workspacewidget.getSelectedWorkspaceNames)
+
         # Set up the project, recovery and interface manager objects
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
         self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
@@ -425,8 +429,7 @@ class MainWindow(QMainWindow):
         """Return a dictionary mapping a category to a set of named Python interfaces"""
         items = ConfigService['mantidqt.python_interfaces'].split()
         # list of custom interfaces that are not qt4/qt5 compatible
-        GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
-                         'Frequency_Domain_Analysis_Old.py']
+        GUI_BLACKLIST = ['Frequency_Domain_Analysis_Old.py']
 
         # detect the python interfaces
         interfaces = {}

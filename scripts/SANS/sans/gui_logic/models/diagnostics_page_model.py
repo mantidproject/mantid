@@ -15,9 +15,9 @@ from sans.common.enums import IntegralEnum, DetectorType, SANSDataType
 from sans.common.file_information import get_instrument_paths_for_sans_file
 from sans.common.general_functions import parse_diagnostic_settings
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
+from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.plotting import get_plotting_module
-from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
+from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
 
 
 def run_integral(integral_ranges, mask, integral, detector, state):
@@ -162,12 +162,9 @@ def get_detector_size_from_sans_file(state, detector):
 
 
 def create_state(state_model_with_view_update, file, period, facility):
-    table_row = TableIndexModel(file, period, '', '', '', '', '', '', '', '', '', '')
-    table = TableModel()
-    table.add_table_entry_no_thread_or_signal(0, table_row)
+    table_row = RowEntries(sample_scatter=file, sample_scatter_period=period)
+    gui_state_director = GuiStateDirector(state_model_with_view_update, facility)
 
-    gui_state_director = GuiStateDirector(table, state_model_with_view_update, facility)
-
-    state = gui_state_director.create_state(0)
+    state = gui_state_director.create_state(table_row)
 
     return state

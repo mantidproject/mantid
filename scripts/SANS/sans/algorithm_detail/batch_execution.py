@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 from copy import deepcopy
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
-from sans.common.general_functions import (add_to_sample_log, create_managed_non_child_algorithm,
+from sans.common.general_functions import (create_managed_non_child_algorithm,
                                            create_unmanaged_algorithm, get_output_name,
                                            get_base_name_from_multi_period_name, get_transmission_output_name)
 from sans.common.enums import (SANSDataType, SaveType, OutputMode, ReductionMode, DataType)
@@ -23,7 +23,7 @@ from sans.common.constants import (TRANS_SUFFIX, SANS_SUFFIX, ALL_PERIODS,
 from sans.common.file_information import (get_extension_for_file_type, SANSFileInformationFactory)
 from sans.gui_logic.plotting import get_plotting_module
 from sans.state.Serializer import Serializer
-from sans.state.data import StateData
+from sans.state.StateObjects.StateData import StateData
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -127,12 +127,9 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # -----------------------------------
         # Get the output of the algorithm
         # -----------------------------------
-        reduction_package.reduced_lab = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLAB",
-                                                                     add_logs=True, user_file=state.data.user_file)
-        reduction_package.reduced_hab = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHAB",
-                                                                     add_logs=True, user_file=state.data.user_file)
-        reduction_package.reduced_merged = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceMerged",
-                                                                        add_logs=True, user_file=state.data.user_file)
+        reduction_package.reduced_lab = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLAB")
+        reduction_package.reduced_hab = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceHAB")
+        reduction_package.reduced_merged = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceMerged")
 
         reduction_package.reduced_lab_can = get_workspace_from_algorithm(reduction_alg, "OutputWorkspaceLABCan")
         reduction_package.reduced_lab_can_count = get_workspace_from_algorithm(reduction_alg,
@@ -959,15 +956,13 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
                                  , "unfitted_transmission_can_name", "unfitted_transmission_can_base_name")
 
 
-def get_workspace_from_algorithm(alg, output_property_name, add_logs=False, user_file=""):
+def get_workspace_from_algorithm(alg, output_property_name):
     """
     Gets the output workspace from an algorithm. Since we don't run this as a child we need to get it from the
     ADS.
 
     :param alg: a handle to the algorithm from which we want to take the output workspace property.
     :param output_property_name: the name of the output property.
-    :param add_logs: optional bool. If true, then add logs to the retrieved workspace
-    :param user_file: optional string. If add_logs, add user_file to the property "User File"
     :return the workspace or None
     """
     output_workspace_name = alg.getProperty(output_property_name).valueAsStr
@@ -977,8 +972,6 @@ def get_workspace_from_algorithm(alg, output_property_name, add_logs=False, user
 
     if AnalysisDataService.doesExist(output_workspace_name):
         ws = AnalysisDataService.retrieve(output_workspace_name)
-        if add_logs:
-            add_to_sample_log(ws, "UserFile", user_file, "String")
         return ws
     else:
         return None

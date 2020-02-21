@@ -11,19 +11,19 @@
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
+
 from qtpy import PYQT4
 from qtpy.QtCore import QRegExp
 from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
 from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)
-
-from mantidqt import icons
-from mantidqt.interfacemanager import InterfaceManager
-from mantidqt.utils.qt import load_ui
-from mantidqt.widgets import jobtreeview, manageuserdirectories
 from six import with_metaclass
 
 from mantid.kernel import (Logger, UsageService, FeatureType)
 from mantid.py3compat import Enum
+from mantidqt import icons
+from mantidqt.interfacemanager import InterfaceManager
+from mantidqt.utils.qt import load_ui
+from mantidqt.widgets import jobtreeview, manageuserdirectories
 from reduction_gui.reduction.scripter import execute_script
 from sans.common.enums import (ReductionDimensionality, OutputMode, SaveType, SANSInstrument,
                                RangeStepType, ReductionMode, FitType)
@@ -32,6 +32,7 @@ from sans.gui_logic.gui_common import (get_reduction_mode_from_gui_selection,
                                        get_string_for_gui_from_reduction_mode, GENERIC_SETTINGS,
                                        load_file, load_property, set_setting,
                                        get_instrument_from_gui_selection)
+from sans.gui_logic.models.RowEntries import RowEntries
 from sans.gui_logic.models.SumRunsModel import SumRunsModel
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
@@ -59,7 +60,13 @@ class SANSDataProcessorGui(QMainWindow,
     INSTRUMENTS = None
     VARIABLE = "Variable"
 
-    MULTI_PERIOD_COLUMNS = [1, 3, 5, 7, 9, 11]
+    # This dictates the order displayed on the GUI
+    COLUMN_NAMES = ["Sample Scatter", "Sample Transmission", "Sample Direct",
+                    "Can Scatter", "Can Transmission", "Can Direct", "Output Name", "User File",
+                    "Sample Thickness", "Options", "Sample Shape", "Sample Height", "Sample Width",
+                    "SSP", "STP", "SDP", "CSP", "CTP", "CDP"]
+
+    MULTI_PERIOD_COLUMNS = ["SSP", "STP", "SDP", "CSP", "CTP", "CDP"]
 
     class RunTabListener(with_metaclass(ABCMeta, object)):
         """
@@ -111,7 +118,7 @@ class SANSDataProcessorGui(QMainWindow,
             pass
 
         @abstractmethod
-        def on_data_changed(self, row, column, new_value, old_value):
+        def on_data_changed(self, index, row):
             pass
 
         @abstractmethod
@@ -185,6 +192,8 @@ class SANSDataProcessorGui(QMainWindow,
                                                                             SANSInstrument.LOQ,
                                                                             SANSInstrument.LARMOR,
                                                                             SANSInstrument.ZOOM])
+
+        self._column_index_map = None
 
         self.instrument = SANSInstrument.NO_INSTRUMENT
 
@@ -276,7 +285,7 @@ class SANSDataProcessorGui(QMainWindow,
         # --------------------------------------------------------------------------------------------------------------
         # Main Tab
         # --------------------------------------------------------------------------------------------------------------
-        self.create_data_table(show_periods=False)
+        self.create_data_table()
 
         self._setup_main_tab()
 
@@ -381,18 +390,14 @@ class SANSDataProcessorGui(QMainWindow,
             self.wavelength_stacked_widget.setCurrentIndex(0)
             self.wavelength_step_label.setText(u'Step [\u00c5^-1]')
 
-    def create_data_table(self, show_periods):
+    def create_data_table(self):
         # Delete an already existing table
         if self.data_processor_table:
             self.data_processor_table.setParent(None)
 
-        self.data_processor_table = jobtreeview.JobTreeView(
-            ["Sample Scatter", "ssp", "Sample Transmission", "stp", "Sample Direct", "sdp",
-             "Can Scatter", "csp",
-             "Can Transmission", "ctp", "Can Direct", "cdp", "Output Name", "User File",
-             "Sample Thickness", "Sample Height", "Sample Width", "Sample Shape",
-             "Options"]
-            , self.cell(""), self)
+        self._column_index_map = {col_name: i for i, col_name in enumerate(self.COLUMN_NAMES)}
+        self.data_processor_table = jobtreeview.JobTreeView(self.COLUMN_NAMES, self.cell(""), self)
+        self.hide_period_columns()
 
         # Default QTreeView size is too small
         font = self.data_processor_table.font()
@@ -401,19 +406,12 @@ class SANSDataProcessorGui(QMainWindow,
 
         self.data_processor_table.setRootIsDecorated(False)
 
-        row_entry = [''] * 16
-        self.add_row(row_entry)
-        self._call_settings_listeners(lambda listener: listener.on_row_inserted(0, row_entry))
+        self.add_empty_row()
 
         self.table_signals = \
             jobtreeview.JobTreeViewSignalAdapter(self.data_processor_table, self)
         # The signal adapter subscribes to events from the table
         # and emits signals whenever it is notified.
-
-        if show_periods:
-            self.show_period_columns()
-        else:
-            self.hide_period_columns()
 
         self.data_processor_widget_layout.addWidget(self.data_processor_table)
         self.table_signals.cellTextChanged.connect(self._data_changed)
@@ -426,6 +424,9 @@ class SANSDataProcessorGui(QMainWindow,
         self.table_signals.pasteRowsRequested.connect(self._paste_rows_requested)
 
     def cell(self, text):
+        # Cell will only accept strings
+        text = str(text) if text else ''
+
         background_color = 'white'
         border_thickness = 1
         border_color = "black"
@@ -476,16 +477,14 @@ class SANSDataProcessorGui(QMainWindow,
 
     def _data_changed(self, row_location, column, old_value, new_value):
         row = row_location.rowRelativeToParent()
+        row_obj = self._convert_to_row_state(self.get_row(row_location))
+
         self._call_settings_listeners(
-            lambda listener: listener.on_data_changed(row, column, str(new_value), (old_value)))
+            lambda listener: listener.on_data_changed(row, row_obj))
 
     def _row_inserted(self, row_location):
         if row_location.depth() > 1:
             self.data_processor_table.removeRowAt(row_location)
-        else:
-            index = row_location.rowRelativeToParent()
-            row = self.get_row(row_location)
-            self._call_settings_listeners(lambda listener: listener.on_row_inserted(index, row))
 
     def _append_and_edit_at_child_row_requested(self):
         self.data_processor_table.appendAndEditAtChildRow()
@@ -627,7 +626,6 @@ class SANSDataProcessorGui(QMainWindow,
         """
         Load the batch file
         """
-
         UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Loaded Batch File"], False)
         load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)
@@ -1025,7 +1023,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @save_can.setter
     def save_can(self, value):
-        self._on_save_can_clicked.setChecked(value)
+        self._on_save_can_clicked(value)
 
     @property
     def progress_bar_minimum(self):
@@ -1113,7 +1111,8 @@ class SANSDataProcessorGui(QMainWindow,
 
     @instrument.setter
     def instrument(self, value):
-        assert (isinstance(value, Enum))
+        assert (isinstance(value, Enum)), \
+            "Expected InstrumentEnum, got %r" % value
         instrument_string = value.value
         self.instrument_type.setText("{}".format(instrument_string))
         self._instrument_changed()
@@ -2100,10 +2099,10 @@ class SANSDataProcessorGui(QMainWindow,
     # Table interaction
     # ----------------------------------------------------------------------------------------------
 
-    def get_cell(self, row, column, convert_to=None):
+    def get_cell(self, row, column):
         row_location = self.row([row])
         value = self.data_processor_table.cellAt(row_location, column).contentText()
-        return value if convert_to is None else convert_to(value)
+        return value
 
     def set_cell(self, value, row, column):
         value_as_str = str(value)
@@ -2111,14 +2110,17 @@ class SANSDataProcessorGui(QMainWindow,
         cell.setContentText(value_as_str)
         self.data_processor_table.setCellAt(row, column, cell)
 
-    def change_row_color(self, color, row):
-        row_location = self.row([row])
+    def change_row_color(self, color, row_index):
+        row_location = self.row([row_index])
         cell_data = self.data_processor_table.cellsAt(row_location)
         for index, cell in enumerate(cell_data):
             cell.setBackgroundColor(color)
             self.data_processor_table.setCellAt(row_location, index, cell)
 
     def set_row_tooltip(self, tool_tip, row):
+        if not tool_tip:
+            tool_tip = ''
+
         row_location = self.row([row])
         cell_data = self.data_processor_table.cellsAt(row_location)
         for index, cell in enumerate(cell_data):
@@ -2144,13 +2146,17 @@ class SANSDataProcessorGui(QMainWindow,
         row_locations = [self.row([x]) for x in row_locations]
         self.data_processor_table.setSelectedRowLocations(row_locations)
 
-    def add_row(self, value):
-        value = [self.cell(x) for x in value]
+    def add_row(self, row_entries):
+        value = [self.cell(x) for x in self._convert_from_row_state(row_entries)]
         self.data_processor_table.appendChildRowOf(self.row([]), value)
 
     def remove_rows(self, rows):
         rows = [self.row([item]) for item in rows]
         self.data_processor_table.removeRows(rows)
+
+    def add_empty_row(self):
+        value = [self.cell('') for _ in self._column_index_map]
+        self.data_processor_table.appendChildRowOf(self.row([]), value)
 
     def insert_empty_row(self, row_index):
         self.data_processor_table.insertChildRowOf(self.row([]), row_index)
@@ -2166,24 +2172,86 @@ class SANSDataProcessorGui(QMainWindow,
 
     def hide_period_columns(self):
         self.multi_period_check_box.setChecked(False)
+
         for col in self.MULTI_PERIOD_COLUMNS:
-            self.data_processor_table.hideColumn(col)
+            self.data_processor_table.hideColumn(self._column_index_map[col])
 
     def show_period_columns(self):
         self.multi_period_check_box.setChecked(True)
 
         for col in self.MULTI_PERIOD_COLUMNS:
-            self.data_processor_table.showColumn(col)
+            self.data_processor_table.showColumn(self._column_index_map[col])
+
+    def _convert_from_row_state(self, row_state_obj):
+        assert isinstance(row_state_obj, RowEntries)
+        array = ['' for _ in self._column_index_map]
+        array[self._column_index_map["Can Direct"]] = row_state_obj.can_direct
+        array[self._column_index_map["Can Scatter"]] = row_state_obj.can_scatter
+        array[self._column_index_map["Can Transmission"]] = row_state_obj.can_transmission
+
+        array[self._column_index_map["Sample Direct"]] = row_state_obj.sample_direct
+        array[self._column_index_map["Sample Scatter"]] = row_state_obj.sample_scatter
+        array[self._column_index_map["Sample Transmission"]] = row_state_obj.sample_transmission
+
+        array[self._column_index_map["Options"]] = row_state_obj.options.get_displayed_text()
+        array[self._column_index_map["Output Name"]] = row_state_obj.output_name
+        array[self._column_index_map["User File"]] = row_state_obj.user_file
+
+        array[self._column_index_map["Sample Height"]] = row_state_obj.sample_height
+
+        sample_shape = row_state_obj.sample_shape.value if row_state_obj.sample_shape else ""
+        array[self._column_index_map["Sample Shape"]] = sample_shape
+        array[self._column_index_map["Sample Thickness"]] = row_state_obj.sample_thickness
+        array[self._column_index_map["Sample Width"]] = row_state_obj.sample_width
+
+        array[self._column_index_map["CDP"]] = row_state_obj.can_direct_period
+        array[self._column_index_map["CSP"]] = row_state_obj.can_scatter_period
+        array[self._column_index_map["CTP"]] = row_state_obj.can_transmission_period
+
+        array[self._column_index_map["SDP"]] = row_state_obj.sample_direct_period
+        array[self._column_index_map["SSP"]] = row_state_obj.sample_scatter_period
+        array[self._column_index_map["STP"]] = row_state_obj.sample_transmission_period
+        return array
+
+    def _convert_to_row_state(self, row_array):
+        entry = RowEntries()
+        entry.can_direct = row_array[self._column_index_map["Can Direct"]]
+        entry.can_scatter = row_array[self._column_index_map["Can Scatter"]]
+        entry.can_transmission = row_array[self._column_index_map["Can Transmission"]]
+
+        entry.sample_direct = row_array[self._column_index_map["Sample Direct"]]
+        entry.sample_scatter = row_array[self._column_index_map["Sample Scatter"]]
+        entry.sample_transmission = row_array[self._column_index_map["Sample Transmission"]]
+
+        entry.output_name = row_array[self._column_index_map["Output Name"]]
+        entry.user_file = row_array[self._column_index_map["User File"]]
+
+        entry.sample_height = row_array[self._column_index_map["Sample Height"]]
+        entry.sample_shape = row_array[self._column_index_map["Sample Shape"]]
+        entry.sample_thickness = row_array[self._column_index_map["Sample Thickness"]]
+        entry.sample_width = row_array[self._column_index_map["Sample Width"]]
+
+        entry.can_direct_period = row_array[self._column_index_map["CDP"]]
+        entry.can_scatter_period = row_array[self._column_index_map["CSP"]]
+        entry.can_transmission_period = row_array[self._column_index_map["CTP"]]
+
+        entry.sample_direct_period = row_array[self._column_index_map["SDP"]]
+        entry.sample_scatter_period = row_array[self._column_index_map["SSP"]]
+        entry.sample_transmission_period = row_array[self._column_index_map["STP"]]
+
+        entry.options.set_user_options(row_array[self._column_index_map["Options"]])
+
+        return entry
 
     def show_geometry(self):
-        self.data_processor_table.showColumn(15)
-        self.data_processor_table.showColumn(16)
-        self.data_processor_table.showColumn(17)
+        self.data_processor_table.showColumn(self._column_index_map["Sample Shape"])
+        self.data_processor_table.showColumn(self._column_index_map["Sample Height"])
+        self.data_processor_table.showColumn(self._column_index_map["Sample Width"])
 
     def hide_geometry(self):
-        self.data_processor_table.hideColumn(15)
-        self.data_processor_table.hideColumn(16)
-        self.data_processor_table.hideColumn(17)
+        self.data_processor_table.hideColumn(self._column_index_map["Sample Shape"])
+        self.data_processor_table.hideColumn(self._column_index_map["Sample Height"])
+        self.data_processor_table.hideColumn(self._column_index_map["Sample Width"])
 
     def closeEvent(self, event):
         for child in self.children():

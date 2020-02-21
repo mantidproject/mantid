@@ -68,13 +68,6 @@ void updateFromMap(AlgorithmRuntimeProps &properties,
 std::string getOutputWorkspace(IAlgorithm_sptr algorithm,
                                std::string const &property) {
   auto const workspaceName = algorithm->getPropertyValue(property);
-  // The workspaces are not in the ADS by default, so add them
-  if (!workspaceName.empty()) {
-    Workspace_sptr workspace = algorithm->getProperty(property);
-    if (workspace)
-      Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName,
-                                                                workspace);
-  }
   return workspaceName;
 }
 } // namespace AlgorithmProperties

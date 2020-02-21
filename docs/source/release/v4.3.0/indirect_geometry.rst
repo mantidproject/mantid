@@ -13,6 +13,7 @@ New
 ###
 
   - Simultaneous fitting has been added as an option on the convolutional fitting tab of data analysis.
+  - Simultaneous fitting has been added as an option on the FQ fitting tab of data analysis.
 
 Improvements
 ############
@@ -29,11 +30,27 @@ Improvements
     histogram bins. (Previously the values would correspond to one
     bin-edge.)
 
+- In Abins the iterative thresholding system, which was used to
+  suppress high-intensity terms at high quantum orders, has been
+  removed.
+
+  - Instead, a user warning is printed at the end of the calculation
+    (before writing files) if the threshold for small values (set in
+    AbinsParameters.sampling) was large compared to the data.
+  - This will lead to performance improvements for systems with
+    large second-order contributions.
+  - Calculation of third- and fourth-order spectra is disabled while
+    the implementation of these terms is reviewed. Benchmarking has
+    shown that the results of these terms are unreasonably large, and
+    are not recommended for production calculations.
+
 BugFixes
 ########
 
 - The Abins file parser no longer fails to read data from non-periodic vibration calculations performed with CRYSTAL17.
 - :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` will now run also for fixed window scan reduced data and will not crash on workspace groups.
 - Fixed a bug crashing the ``Indirect ILL Data Reduction GUI`` when Run is clicked.
+- Indirect ILL reductions for BATS and Doppler QENS modes will now flag the outputs as distributions if the data is normalised by the monitor.
+- :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` will now allow for manual setting of the inelastic peak channels.
 
 :ref:`Release 4.3.0 <v4.3.0>`
