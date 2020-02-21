@@ -91,7 +91,7 @@ public:
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
-    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
     TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
     verifyAndClear();
   }
@@ -104,7 +104,7 @@ public:
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
-    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
     TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
     verifyAndClear();
   }
@@ -117,7 +117,7 @@ public:
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
-    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
     TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
     verifyAndClear();
   }
@@ -131,7 +131,7 @@ public:
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
-    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
     TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
     verifyAndClear();
   }
@@ -144,7 +144,7 @@ public:
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
-    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
     TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
     verifyAndClear();
   }
@@ -157,7 +157,7 @@ public:
     TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
     TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
     TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
-    TS_ASSERT_EQUALS(jobRunner.m_processAll, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
     TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
     verifyAndClear();
   }
