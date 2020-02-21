@@ -31,6 +31,7 @@ At some stage you will inevitably see an Error Reporter. Please provide your nam
 
 .. figure:: /images/ErrorReporterTutorial.PNG
    :alt: Error Reporter
+   :align: center
 
 
 Documentation

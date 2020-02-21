@@ -9,12 +9,18 @@ Intelligent Fitting
 Here we will tackle a more advanced aspect of Mantid fitting: 
 an Asymmetric peak!
 
-| Load the file GEM63437_focussed.nxs file and plot the *GEM63437_focussed_3*
-  workspace. Zoom into the region 4300 - 4900 microseconds (simply double-click on the X-axis and change the limits).
-| |GEMAsymmetricPeak.png|
+Load the file GEM63437_focussed.nxs file and plot the *GEM63437_focussed_3*
+workspace. Zoom into the region 4300 - 4900 microseconds (simply double-click on the X-axis and change the limits).
 
-| Try to fit it with a Gaussian (plus LinearBackground):
-| |GEMGaussianFit.png|
+.. figure:: /images/GEMAsymmetricPeak.png
+   :alt: GEMAsymmetricPeak.png
+   :align: center
+
+Try to fit it with a Gaussian (plus LinearBackground):
+
+.. figure:: /images/GEMGaussianFit.png
+   :alt: GEMGaussianFit.png
+   :align: center
 
 That's not a very good fit! 
 
@@ -29,10 +35,5 @@ Now add the IkedaCarpenterPV function, check you still have a LinearBackground a
 
 .. figure:: /images/GEMIkedaCarpenterFit.png
    :alt: GEMIkedaCarpenterFit.png
-   :width: 400px
+   :align: center
 
-
-.. |GEMAsymmetricPeak.png| image:: /images/GEMAsymmetricPeak.png
-   :width: 400px
-.. |GEMGaussianFit.png| image:: /images/GEMGaussianFit.png
-   :width: 400px

@@ -80,7 +80,7 @@ detector for a small angle dataset.
 
 .. |PickTabAddPeakButton.png| image:: /images/PickTabAddPeakButton.png
 .. |MBC_PickDemo.png| image:: /images/MBC_PickDemo.png
-   :width: 600px
+   :align: center
 .. |PickTabEraseButton.png| image:: /images/PickTabEraseButton.png
 .. |LOQForMasking.png| image:: /images/LOQForMasking.png
    :width: 200px

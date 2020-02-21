@@ -39,6 +39,7 @@ Loading, basic Plotting, and Showing Data work the same as in Workbench. But...
 - Overall Mantid settings hide within the top toolbar in "View > Preferences"
 
 Using Algorithms and managing Workspaces within their Toolboxes (however rearranged) works the same way, although...
+
 - There is no Plots Toolbox in Mantid Plot. 
 - The Messages Box is called the Results Box in Mantid Plot.
 

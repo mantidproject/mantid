@@ -178,14 +178,13 @@ selecting the Fit option from the Fit menu:
 Now examine the results in the Fit Property Browser and the output workspaces, as before.
 
 .. |FirstStartMantidPlotFitting_MBC.png| image:: /images/FirstStartMantidPlotFitting_MBC.png
-   :width: 500px
+   :align: center
 .. |ChangePeakWidth.png| image:: /images/ChangePeakWidth.png
-   :width: 400px
+   :align: center
 .. |SaveSetup.png| image:: /images/SaveSetup.png
-   :width: 300px
+   :align: center
 .. |ArrowRight.png| image:: /images/ArrowRight.png
-   :width: 100px
+   :align: center
 .. |SaveSetupDialog.png| image:: /images/SaveSetupDialog.png
-   :width: 100px
-.. |PeakFitToolbar.png| image:: /images/SaveSetupDialog.png
-   :width: 500px
+.. |PeakFitToolbar.png| image:: /images/PeakFitToolbar.png
+

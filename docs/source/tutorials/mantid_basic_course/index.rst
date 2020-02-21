@@ -9,7 +9,7 @@ Mantid Basic Course
    :glob: 
    :maxdepth: 2
 
-   getting_started/index
+   getting_started/_getting_started_index
    loading_and_displaying_data/index
    algorithms_workspaces_and_histories/index
    connecting_data_to_instruments/index

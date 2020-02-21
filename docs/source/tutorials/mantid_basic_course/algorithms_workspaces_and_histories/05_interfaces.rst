@@ -19,8 +19,7 @@ This interface is able to run an appropriate data reduction with multiple user o
 that can be altered as required. As with all our interfaces, it is able to speed up the process of analysing your data.
 
 .. figure:: /images/ISISSANSInterface.PNG
-   :alt: centre
-   :width: 400px
+   :alt: center
 
 A simple walkthrough
 --------------------
@@ -37,4 +36,4 @@ A simple walkthrough
 
 .. figure:: /images/ISISSANSInterfaceplot.PNG
    :align: center
-   :width: 400px
+   :width: 600px

@@ -12,5 +12,5 @@ only the selected part.
 .. figure:: /images/InstrumentTree.png
    :alt: InstrumentTree.png
    :align: center
-   :width: 900px
+   :width: 700px
 

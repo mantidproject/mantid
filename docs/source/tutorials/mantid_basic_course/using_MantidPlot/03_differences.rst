@@ -38,6 +38,6 @@ In Mantid Plot you can right-click on a workspace and show SliceViewer or Spectr
 
 .. figure:: /images/PlotSliceviewer.png
    :align: center
-   :width: 250px
+   :width: 800px
 
 A key feature of SpectrumViewer is the the peaks viewer functionality. It can show you where assigned peaks are in comparsion to the raw data. This is being added to Workbench very soon!

@@ -90,4 +90,5 @@ it **cannot be undone**!
 .. |GroupBlueRing.png| image:: /images/GroupBlueRing.png
 .. |ClearAllButton.png| image:: /images/ClearAllButton.png
 .. |ApplyToDataButton.png| image:: /images/ApplyToDataButton.png
-.. |ROIYellowcircle.png| image:: /images/ROIYellowcircle.png
+.. |ROIYellowcircle.png| image:: /images/ROIYellowcircle.png 
+   :width: 150px

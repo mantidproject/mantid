@@ -12,7 +12,8 @@ be able to with the interface alone.
 .. figure:: /images/Workbench_script_new.png
    :width: 700px
    :alt: A view of the Workbench script window
-   
+   :align: center
+
 You can also use the IPython tab below the script editor to change to an inline Python interpreter. Both the python interpreter and scripts run thorugh Mantid are able to interact 
 with Mantid workspaces, plot and algorithms.
 
@@ -48,8 +49,9 @@ the last time Mantid was shut down.
 From here you can run or abort your script, toggle options for accesability, and use the find and replace tool.
 
 .. figure:: /images/Workbench_script_options.png
-   :width: 700px
+   :width: 400px
    :alt: A view of the Workbench script options.
+   :align: center
 
 * Run: This executes the currently selected text in your script, if nothing is selected it will run the entire script. The green play button serves as a shortcut for this option.
 * Run All: This will run the entire script regardless of whether any text is selected.

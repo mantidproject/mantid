@@ -21,6 +21,7 @@ You will also find detailed instructions for installing Mantid on any of the abo
    :width: 500px
    :alt: Download page
    :target: https://download.mantidproject.org/
+   :align: center
 
 .. If / when First-Time Setup is added into Workbench,
    then feel free to add a section back in here about it
@@ -39,8 +40,9 @@ Manage User Directories
 =======================
 
 .. figure:: /images/ManageUserDirectories.PNG
-   :width: 700px
+   :width: 400px
    :alt: Manage User Directories
+   :align: center
 
 * Open Mantid Workbench
 * Select "File" > "Manage User Directories"
@@ -55,3 +57,4 @@ You may find a bug at some stage using Mantid, and here is how to tell us about 
 
 .. figure:: /images/ErrorReporterTutorial.PNG
    :alt: Error Reporter
+   :align: center

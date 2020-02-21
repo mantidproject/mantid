@@ -1,8 +1,8 @@
 .. _03_workspaces:
 
-=================================================================
-"What is a Bin?", What is a Workspace?"" and the "Power of Rebin" 
-=================================================================
+===========================================================
+What is a Bin?, What is a Workspace? and the Power of Rebin 
+===========================================================
 
 Most data within Mantid are Histogram-like, so imagine a plot: There is an X-axis with a measured/calculated 
 unit, such as Time-of-Flight (TOF) in μs. The Y-axis is the Counts (How many neutrons / positrons were detected 
@@ -27,6 +27,7 @@ A :ref:`Workspace2D` is histogrammed data, with one or more spectra. For each sp
 .. figure:: /images/MBC_Workspace2D.png
    :width: 600px
    :alt: Workspace2D
+   :align: center
 
 When the Matrix table of a Workspace is displayed (via right-click > "Show Data"):
 - Each row is a different Spectra. 
@@ -53,8 +54,9 @@ To fix this **Rebin** the ragged workspace with regular binning:
 #. Plotting the *ws_lambda* Workspace as a Colorfill demonstrates the ragged X-bins :-( .
 
 .. figure:: /images/MBC_Ragged.png
-   :width: 400px
+   :width: 600px
    :alt: Ragged
+   :align: center
 
 
 #. Execute the **Rebin** Algorithm on *ws_lambda* setting **Params** to *0.5* (setting the width of each bin to 0.5  Å) and
@@ -62,8 +64,9 @@ To fix this **Rebin** the ragged workspace with regular binning:
    achieved! :-)
 
 .. figure:: /images/MBC_Rebinned.png
-   :width: 400px
+   :width: 600px
    :alt: Rebinned
+   :align: center
 
 
 Event Workspaces
@@ -92,6 +95,7 @@ Binning of Event Workspaces
 .. figure:: /images/Binning_example.png
    :alt: Binning_example.png
    :width: 500px
+   :align: center
 
 This extra information that Event Data has over Workspace2D (histogram) data
 means that rebinning is simply moving the Bin edges and summing the number of Counts 
@@ -115,6 +119,7 @@ Operating on an EventWorkspace is slower than on a Workspace2D, or ut more techi
 .. figure:: /images/Rebin_example.png
    :alt: Rebin_example.png
    :width: 800px
+   :align: center
 
 Example of Workspace usage
 ==========================
@@ -129,7 +134,8 @@ Example of Workspace usage
 
 .. figure:: /images/peaksworkspace.png
    :alt: PeaksWorkspace
-   :width: 300px
+   :width: 600px
+   :align: center
 
 TableWorkspaces
 ===============

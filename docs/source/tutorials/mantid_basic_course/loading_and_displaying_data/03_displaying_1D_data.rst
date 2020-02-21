@@ -4,6 +4,11 @@
 Displaying 1D Data 
 ==================
 
+.. figure:: /images/SimpleGraph.png
+   :alt: Simple Graph
+   :width: 600px
+   :align: right
+
 The Simplest Plot
 =================
 
@@ -15,10 +20,6 @@ The Simplest Plot
 You should get a plot like this with three spectra corresponding to
 spectra 1-3 (which in this case these are the monitors on MARI):
 
-.. figure:: /images/SimpleGraph.png
-   :alt: Simple Graph
-   :width: 400px
-   :align: right
 
 Another way to plot
 ===================
@@ -46,7 +47,7 @@ Another way to plot
 
 .. figure:: /images/300px-MatrixDisplayRightClickOptions.png
    :align: center
-   :width: 400px
+   :width: 700px
 
 5. You will be presented with options for plotting the selected spectra,
    with and without errors. Select "Plot Spectra" (showing the values

@@ -32,11 +32,16 @@ In this exercise we will fit a simple Gaussian on a linear background.
    and the height.
 10. Adjust the width.
 
-|PreparedToFitGaussian.png|
+.. figure:: /images/PreparedToFitGaussian.png
+   :alt: PreparedToFitGaussian.png
+   :align: center
 
 11. Run Fit.
 
-|FittedGaussian.png|
+.. figure:: /images/FittedGaussian.png
+   :alt: FittedGaussian.png
+   :align: center
+
 
 Exercise 2
 ==========
@@ -61,7 +66,9 @@ Exercise 2
 #. Add an IkedaCarpenterPV peak to each of the three peaks, remembering to change the peak width (at least for the first one!)
 #. Display > "Plot guess" and what you should see is something similar to
 
-|ExerciseFittingMBCguess.png|
+.. figure:: /images/ExerciseFittingMBCguess.png
+   :alt: ExerciseFittingMBCguess.png
+   :align: center
 
 where the orange line is the guess
 
@@ -69,7 +76,9 @@ where the orange line is the guess
 #. Fit the data with the model, where the output should be something
    similar to:
 
-|ExerciseFittingMBCfit.png|
+.. figure:: /images/ExerciseFittingMBCfit.png
+   :alt: ExerciseFittingMBCfit.png
+   :align: center
 
 where the green line here is the Calculated fit
 
@@ -78,7 +87,9 @@ where the green line here is the Calculated fit
 #. Using the same background and peak fitting function as above, try to fit the
    region between about 2000 and 9400 microseconds. I advise displaying Plot Guess after adding the background and before adding any peaks, then use this to help alter the height, position and width of the peaks as you add them. Also, remember you can zoom in on the smaller peaks!.
 
-|ExerciseFittingMBCfit_2.png|
+.. figure:: /images/ExerciseFittingMBCfit_2.png
+   :alt: ExerciseFittingMBCfit_2.png
+   :align: center
 
 **Note** this will take a little longer to fit as it has almost 40
 independent parameters to optimise.
@@ -96,25 +107,14 @@ Exercise 3
 #. Set h = 5000 and **Tie** it to this value
 #. Fit the data.
 
-|ExerciseFittingMBCfit_3MUSR.png|
-
+.. figure:: /images/ExerciseFittingMBCfit_3MUSR.png
+   :alt: ExerciseFittingMBCfit_3MUSR.png
+   :align: center
 
 .. |GemSinglePeak.png| image:: /images/GemSinglePeak.png
    :width: 500px
 .. |ClearModel.png| image:: /images/ClearModel.png
    :width: 300px
 .. |AddBackgroundOption.png| image:: /images/AddBackgroundOption.png
-   :width: 500px
-.. |PreparedToFitGaussian.png| image:: /images/PreparedToFitGaussian.png
-   :width: 500px
-.. |FittedGaussian.png| image:: /images/FittedGaussian.png
-   :width: 500px
-.. |ExerciseFittingMBCguess.png| image:: /images/ExerciseFittingMBCguess.png
-   :width: 600px
-.. |ExerciseFittingMBCfit.png| image:: /images/ExerciseFittingMBCfit.png
-   :width: 600px
-.. |ExerciseFittingMBCfit_2.png| image:: /images/ExerciseFittingMBCfit_2.png
-   :width: 600px
-.. |ExerciseFittingMBCfit_3MUSR.png| image:: /images/ExerciseFittingMBCfit_3MUSR.png
    :width: 500px
 
