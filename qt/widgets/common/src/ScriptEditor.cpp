@@ -29,6 +29,7 @@
 #include <QSettings>
 #include <QShortcut>
 #include <QTextStream>
+#include <QThread>
 
 // Qscintilla
 #include <Qsci/qsciapis.h>
@@ -380,12 +381,30 @@ void ScriptEditor::setMarkerState(bool enabled) {
 
 /**
  * Update the arrow marker to point to the correct line and colour it
+ * depending on the error state. If the call is from a thread other than the
+ * application thread then the call is reperformed on that thread
+ * @param lineno :: The line to place the marker at. A negative number will
+ * clear all markers
+ * @param error :: If true, the marker will turn red
+ */
+void ScriptEditor::updateProgressMarkerFromThread(int lineno, bool error) {
+  if (QThread::currentThread() != QApplication::instance()->thread()) {
+    QMetaObject::invokeMethod(this, "updateProgressMarker", Qt::AutoConnection,
+                              Q_ARG(int, lineno), Q_ARG(bool, error));
+  } else {
+    updateProgressMarker(lineno, error);
+  }
+}
+
+/**
+ * Update the arrow marker to point to the correct line and colour it
  * depending on the error state
  * @param lineno :: The line to place the marker at. A negative number will
  * clear all markers
  * @param error :: If true, the marker will turn red
  */
 void ScriptEditor::updateProgressMarker(int lineno, bool error) {
+
   m_currentExecLine = lineno;
   if (error) {
     setMarkerBackgroundColor(g_error_colour, m_progressArrowKey);

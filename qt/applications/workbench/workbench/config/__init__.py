@@ -18,12 +18,15 @@ and use it to access the settings
 """
 from __future__ import (absolute_import, unicode_literals)
 
+# std imports
+import os
+import sys
+
 # third-party imports
 from qtpy.QtCore import QSettings
 
 # local imports
 from .user import UserConfig
-
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -31,6 +34,18 @@ from .user import UserConfig
 ORGANIZATION = 'mantidproject'
 ORG_DOMAIN = 'mantidproject.org'
 APPNAME = 'mantidworkbench'
+
+DEFAULT_SCRIPT_CONTENT = ""
+if sys.version_info < (3, 0):
+    DEFAULT_SCRIPT_CONTENT += "# The following line helps with future compatibility with Python 3" + os.linesep + \
+                              "# print must now be used as a function, e.g print('Hello','World')" + os.linesep + \
+                              "from __future__ import (absolute_import, division, print_function, unicode_literals)" + \
+                              os.linesep + os.linesep
+
+DEFAULT_SCRIPT_CONTENT += "# import mantid algorithms, numpy and matplotlib" + os.linesep + \
+                          "from mantid.simpleapi import *" + os.linesep + \
+                          "import matplotlib.pyplot as plt" + os.linesep + \
+                          "import numpy as np" + os.linesep + os.linesep
 
 # Iterable containing defaults for each configurable section of the code
 # General application settings are in the main section
