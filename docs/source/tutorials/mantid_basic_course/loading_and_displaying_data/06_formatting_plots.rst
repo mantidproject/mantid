@@ -10,6 +10,7 @@ Plot Toolbar
 .. figure:: /images/PlotToolbar.png
    :align: left
    :alt: Plot Toolbar
+
 The usual buttons on the Plot Toolbar:
 
 - Home: Rescales the Axes on the plot

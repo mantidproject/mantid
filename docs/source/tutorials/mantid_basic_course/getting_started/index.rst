@@ -9,7 +9,7 @@ Getting Started
    :glob: 
    :maxdepth: 1
 
-   getting started
+   getting_started
    main_window
 
 **Sections** 

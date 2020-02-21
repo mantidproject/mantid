@@ -24,7 +24,12 @@ Exercise 1
    should be shown in the instrument view. A workspace (PeaksWorkspace)
    called *SingleCrystalPeakTable* should also exist now in the
    Workspace Toolbox.
-   |MBC_PickDemo.png|
+
+.. figure:: /images/MBC_PickDemo.png
+   :alt: MBC_PickDemo.png
+   :align: center
+
+
 -  Double click the new PeaksWorkspace to open it as a table and verify
    that the TOF value is the same as shown in the mini-plot and the
    detector ID is the same as shown in the text area above the mini plot
@@ -79,8 +84,6 @@ detector for a small angle dataset.
 
 
 .. |PickTabAddPeakButton.png| image:: /images/PickTabAddPeakButton.png
-.. |MBC_PickDemo.png| image:: /images/MBC_PickDemo.png
-   :align: center
 .. |PickTabEraseButton.png| image:: /images/PickTabEraseButton.png
 .. |LOQForMasking.png| image:: /images/LOQForMasking.png
    :width: 200px

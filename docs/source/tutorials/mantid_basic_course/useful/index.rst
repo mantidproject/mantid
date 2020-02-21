@@ -15,6 +15,7 @@ A few final tips!
    01_save_settings
    02_scripts
    03_user_support
+   04_the_end
 
 
 **Sections** 
@@ -22,3 +23,4 @@ A few final tips!
 * :ref:`01_save_settings`
 * :ref:`02_scripts`
 * :ref:`03_user_support`
+* :ref:`04_the_end`

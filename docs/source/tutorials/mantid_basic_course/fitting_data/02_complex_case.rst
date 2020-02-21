@@ -32,7 +32,9 @@ Three things happens when you click on the Fit Toolbar button:
    -  Fit function items are adding to the plot, initially the two green vertical
    dashed lines
 
-|FirstStartMantidPlotFitting_MBC.png|
+.. figure:: /images/FirstStartMantidPlotFitting_MBC.png
+   :alt: FirstStartMantidPlotFitting_MBC.png
+   :align: center
 
 
 Select the Fitting range
@@ -73,7 +75,9 @@ Let's build a model consisting of a peak and a background function.
 2. Click on the central solid red line and drag it sideways and upwards to set the initial peak centre and height. Drag either one of the dashed red lines to set the initial 
    Full Width Half Maximum (FWHM) of the peak.
 
-|ChangePeakWidth.png|
+.. figure:: /images/ChangePeakWidth.png
+   :alt: ChangePeakWidth.png
+   :align: center
 
 3. Again, right-click on the plot, and choose 'Add background' --> select *FlatBackground*
 
@@ -177,14 +181,8 @@ selecting the Fit option from the Fit menu:
 
 Now examine the results in the Fit Property Browser and the output workspaces, as before.
 
-.. |FirstStartMantidPlotFitting_MBC.png| image:: /images/FirstStartMantidPlotFitting_MBC.png
-   :align: center
-.. |ChangePeakWidth.png| image:: /images/ChangePeakWidth.png
-   :align: center
 .. |SaveSetup.png| image:: /images/SaveSetup.png
-   :align: center
 .. |ArrowRight.png| image:: /images/ArrowRight.png
-   :align: center
 .. |SaveSetupDialog.png| image:: /images/SaveSetupDialog.png
 .. |PeakFitToolbar.png| image:: /images/PeakFitToolbar.png
 
