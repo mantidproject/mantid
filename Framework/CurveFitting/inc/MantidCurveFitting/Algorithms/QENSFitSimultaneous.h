@@ -65,6 +65,13 @@ private:
                           const std::string &outputWsName) const;
 
   std::string getOutputBaseName() const;
+  std::vector<std::string> getWorkspaceNames() const;
+  std::vector<std::string> getWorkspaceIndices() const;
+  void renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
+                        std::vector<std::string> const &spectra,
+                        std::string const &outputBaseName,
+                        std::string const &endOfSuffix,
+                        std::vector<std::string> const &inputWorkspaceNames);
 };
 
 } // namespace Algorithms

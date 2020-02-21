@@ -20,6 +20,7 @@ set(SRC_FILES
     src/Algorithms/PlotPeakByLogValueHelper.cpp
     src/Algorithms/QENSFitSequential.cpp
     src/Algorithms/QENSFitSimultaneous.cpp
+    src/Algorithms/QENSFitUtilities.cpp
     src/Algorithms/RefinePowderInstrumentParameters.cpp
     src/Algorithms/RefinePowderInstrumentParameters3.cpp
     src/Algorithms/SplineBackground.cpp
@@ -185,6 +186,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Algorithms/PlotPeakByLogValueHelper.h
     inc/MantidCurveFitting/Algorithms/QENSFitSequential.h
     inc/MantidCurveFitting/Algorithms/QENSFitSimultaneous.h
+    inc/MantidCurveFitting/Algorithms/QENSFitUtilities.h
     inc/MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters.h
     inc/MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters3.h
     inc/MantidCurveFitting/Algorithms/SplineBackground.h

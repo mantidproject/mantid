@@ -69,6 +69,7 @@ protected:
   /// Pointer to a domain creator
   boost::shared_ptr<API::IDomainCreator> m_domainCreator;
   std::vector<std::string> m_workspacePropertyNames;
+  std::vector<std::string> m_workspaceIndexPropertyNames;
 
   friend class API::IDomainCreator;
 };
