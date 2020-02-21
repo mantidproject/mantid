@@ -91,45 +91,30 @@ void BatchJobRunner::notifyReductionResumed() {
     // User has manually selected items so only process the selection (unless
     // autoreducing). Also reprocess failed items.
     m_processAll = m_isAutoreducing;
+    m_processPartial = false;
     m_reprocessFailed = !m_isAutoreducing;
-    // Check whether a given group is in the selection. If not then check
-    // the group's rows to determine if it will be partially processed.
     if (!m_processAll) {
-      // If a group is selected then it won't be partially processed so we
-      // only need to check those with selected rows
-      std::map<const int, size_t> groupsWithSelectedRows;
-      // Also keep a list of unprocessed groups
-      auto unprocessedGroups = getUnprocessedGroups();
-      auto unprocessedRows = getUnprocessedRows();
-      for (auto it = m_rowLocationsToProcess.cbegin();
-           it != m_rowLocationsToProcess.cend(); ++it) {
-        if (isGroupLocation(*it)) {
-          unprocessedGroups.erase(std::remove(unprocessedGroups.begin(),
-                                              unprocessedGroups.end(),
-                                              getGroupFromPath(*it)),
-                                  unprocessedGroups.end());
-          m_processPartial = false;
-          continue;
-        } else
-          ++groupsWithSelectedRows[getParentGroupIndexFromPath(*it)];
-        unprocessedRows.erase(std::remove(unprocessedRows.begin(),
-                                          unprocessedRows.end(),
-                                          getRowFromPath(*it)),
-                              unprocessedRows.end());
+      // Check whether a given group is in the selection. If not then check
+      // the group's rows to determine whether it will be partially processed,
+      // i.e. if it has some, but not all, rows selected
+      std::map<const int, size_t> selectedRowsPerGroup;
+      for (auto location : m_rowLocationsToProcess) {
+        auto const groupIdx = groupOf(location);
+        auto const totalRowsInGroup =
+            getNumberOfInitialisedRowsInGroup(groupIdx);
+        if (isGroupLocation(location)) {
+          selectedRowsPerGroup[groupIdx] = totalRowsInGroup;
+        } else if (selectedRowsPerGroup[groupIdx] < totalRowsInGroup) {
+          ++selectedRowsPerGroup[groupIdx];
+        }
       }
-      if (groupsWithSelectedRows.size() < unprocessedGroups.size()) {
-        m_processAll = false;
-      } else if (unprocessedGroups.size() == 0 || unprocessedRows.size() == 0) {
-        m_processAll = true;
-      }
-      if (!groupsWithSelectedRows.empty()) {
-        for (const auto groupIndexCountPair : groupsWithSelectedRows) {
-          m_processPartial =
-              static_cast<int>(groupIndexCountPair.second) <
-              getNumberOfInitialisedRowsInGroup(groupIndexCountPair.first);
-          if (m_processPartial) {
-            break;
-          }
+      for (const auto groupIndexCountPair : selectedRowsPerGroup) {
+        auto const groupIndex = groupIndexCountPair.first;
+        auto const numSelected = static_cast<int>(groupIndexCountPair.second);
+        m_processPartial =
+            numSelected < getNumberOfInitialisedRowsInGroup(groupIndex);
+        if (m_processPartial) {
+          break;
         }
       }
     }

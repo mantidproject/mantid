@@ -95,10 +95,7 @@ void MainWindowPresenter::notifyShowSlitCalculatorRequested() {
   m_slitCalculator->show();
 }
 
-void MainWindowPresenter::notifyOptionsChanged() const {
-  // TODO Implement with round precision
-  return;
-}
+void MainWindowPresenter::notifyOptionsChanged() const { optionsChanged(); }
 
 void MainWindowPresenter::notifyAnyBatchAutoreductionResumed() {
   for (const auto &batchPresenter : m_batchPresenters) {
@@ -235,24 +232,6 @@ bool MainWindowPresenter::isProcessPartialGroupPrevented() const {
   return false;
 }
 
-bool MainWindowPresenter::isProcessAllPrevented() const {
-  if (isWarnProcessAllChecked()) {
-    return !m_messageHandler->askUserYesNo(
-        "This will process all rows in the table. Continue?",
-        "Process all rows?");
-  }
-  return false;
-}
-
-bool MainWindowPresenter::isProcessPartialGroupPrevented() const {
-  if (isWarnProcessAllChecked()) {
-    return !m_messageHandler->askUserYesNo(
-        "Some groups will not be fully processed. Continue?",
-        "Process partial group?");
-  }
-  return false;
-}
-
 /** Checks whether there are any unsaved changed in the specified batch */
 bool MainWindowPresenter::isBatchUnsaved(int batchIndex) const {
   return m_batchPresenters[batchIndex]->isBatchUnsaved();
@@ -269,6 +248,17 @@ bool MainWindowPresenter::isAnyBatchUnsaved() {
     }
   }
   return false;
+}
+
+void MainWindowPresenter::optionsChanged() const {
+  // Set or reset the rounding precision of all batches accordingly
+  if (isRoundChecked()) {
+    for (auto &batchPresenter : m_batchPresenters)
+      batchPresenter->notifySetRoundPrecision(getRoundPrecision());
+  } else {
+    for (auto &batchPresenter : m_batchPresenters)
+      batchPresenter->notifyResetRoundPrecision();
+  }
 }
 
 void MainWindowPresenter::addNewBatch(IBatchView *batchView) {
