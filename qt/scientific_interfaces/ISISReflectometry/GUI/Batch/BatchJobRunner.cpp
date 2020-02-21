@@ -325,10 +325,13 @@ std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Row>
 BatchJobRunner::getUnprocessedRows() {
   auto groups = getUnprocessedGroups();
   std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Row> rows;
-  std::for_each(groups.begin(), groups.end(), [&rows](auto &group) -> void {
-    std::for_each(group.rows().begin(), group.rows().end(),
-                  [&rows](auto &row) -> void { rows.emplace_back(row.get()); });
-  });
+  for (const auto &group : groups) {
+    for (const auto &row : group.rows()) {
+      if (row.is_initialized()) {
+        rows.emplace_back(row.get());
+      }
+    }
+  }
   rows.erase(
       std::remove_if(rows.begin(), rows.end(),
                      [](MantidQt::CustomInterfaces::ISISReflectometry::Row &row)
