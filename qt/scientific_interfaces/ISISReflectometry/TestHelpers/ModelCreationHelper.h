@@ -44,6 +44,7 @@ makeRowWithOptionsCellFilled(double theta, ReductionOptionsMap options);
 /* Groups */
 MANTIDQT_ISISREFLECTOMETRY_DLL Group makeEmptyGroup();
 MANTIDQT_ISISREFLECTOMETRY_DLL Group makeGroupWithOneRow();
+MANTIDQT_ISISREFLECTOMETRY_DLL Group makeGroupWithOneRowAndOneEmptyRow();
 MANTIDQT_ISISREFLECTOMETRY_DLL Group makeGroupWithTwoRows();
 MANTIDQT_ISISREFLECTOMETRY_DLL Group makeGroupWithTwoRowsWithNonstandardNames();
 MANTIDQT_ISISREFLECTOMETRY_DLL Group
@@ -60,6 +61,8 @@ MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
 oneGroupWithARowWithInputQRangeModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
 oneGroupWithARowWithOutputQRangeModel();
+MANTIDQT_ISISREFLECTOMETRY_DLL
+ReductionJobs oneGroupWithARowWithInputQRangeModelMixedPrecision();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs oneGroupWithAnotherRowModel();
 MANTIDQT_ISISREFLECTOMETRY_DLL ReductionJobs
 oneGroupWithAnotherRunWithSameAngleModel();

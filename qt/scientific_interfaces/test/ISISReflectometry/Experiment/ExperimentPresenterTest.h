@@ -473,6 +473,13 @@ public:
     verifyAndClear();
   }
 
+  void testRestoreDefaultsWarnsDiscardChanges() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, isOperationPrevented()).Times(1);
+    presenter.notifyRestoreDefaultsRequested();
+    verifyAndClear();
+  }
+
   void testRestoreDefaultsUpdatesInstrument() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_mainPresenter, notifyUpdateInstrumentRequested()).Times(1);
