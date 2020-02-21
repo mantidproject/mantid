@@ -74,19 +74,7 @@ private:
 
   std::vector<std::string> getWorkspacesToSave(Group const &group) const;
   std::vector<std::string> getWorkspacesToSave(Row const &row) const;
-  std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Group>
-  getUnprocessedGroups();
-  std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Row>
-  getUnprocessedRows();
-  const Group &
-  getGroupFromPath(MantidWidgets::Batch::RowLocation rowLocation) const;
-  const Row &
-  getRowFromPath(MantidWidgets::Batch::RowLocation rowLocation) const;
-  int getParentGroupIndexFromPath(
-      MantidWidgets::Batch::RowLocation rowLocation) const;
-  int getNumberOfInitialisedRowsInGroup(const int groupIndex) const;
-  int getNumberOfInitialisedRowsInGroup(const Group &group) const;
-
+  size_t getNumberOfInitialisedRowsInGroup(const int groupIndex) const;
   template <typename T> bool isSelected(T const &item);
   bool hasSelectedRowsRequiringProcessing(Group const &group);
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>

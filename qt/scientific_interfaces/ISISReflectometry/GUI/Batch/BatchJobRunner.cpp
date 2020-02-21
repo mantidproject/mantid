@@ -99,18 +99,18 @@ void BatchJobRunner::notifyReductionResumed() {
       // i.e. if it has some, but not all, rows selected
       std::map<const int, size_t> selectedRowsPerGroup;
       for (auto location : m_rowLocationsToProcess) {
-        auto const groupIdx = groupOf(location);
+        auto const groupIndex = groupOf(location);
         auto const totalRowsInGroup =
-            getNumberOfInitialisedRowsInGroup(groupIdx);
+            getNumberOfInitialisedRowsInGroup(groupIndex);
         if (isGroupLocation(location)) {
-          selectedRowsPerGroup[groupIdx] = totalRowsInGroup;
-        } else if (selectedRowsPerGroup[groupIdx] < totalRowsInGroup) {
-          ++selectedRowsPerGroup[groupIdx];
+          selectedRowsPerGroup[groupIndex] = totalRowsInGroup;
+        } else if (selectedRowsPerGroup[groupIndex] < totalRowsInGroup) {
+          ++selectedRowsPerGroup[groupIndex];
         }
       }
       for (const auto groupIndexCountPair : selectedRowsPerGroup) {
         auto const groupIndex = groupIndexCountPair.first;
-        auto const numSelected = static_cast<int>(groupIndexCountPair.second);
+        auto const numSelected = groupIndexCountPair.second;
         m_processPartial =
             numSelected < getNumberOfInitialisedRowsInGroup(groupIndex);
         if (m_processPartial) {
@@ -294,62 +294,9 @@ BatchJobRunner::getWorkspacesToSave(Row const &row) const {
   return workspaces;
 }
 
-std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Group>
-BatchJobRunner::getUnprocessedGroups() {
-  auto groups = m_batch.runsTable().reductionJobs().groups();
-  groups.erase(
-      std::remove_if(
-          groups.begin(), groups.end(),
-          [](MantidQt::CustomInterfaces::ISISReflectometry::Group &group)
-              -> bool { return group.complete(); }),
-      groups.end());
-  return groups;
-}
-
-std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Row>
-BatchJobRunner::getUnprocessedRows() {
-  auto groups = getUnprocessedGroups();
-  std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Row> rows;
-  for (const auto &group : groups) {
-    for (const auto &row : group.rows()) {
-      if (row.is_initialized()) {
-        rows.emplace_back(row.get());
-      }
-    }
-  }
-  rows.erase(
-      std::remove_if(rows.begin(), rows.end(),
-                     [](MantidQt::CustomInterfaces::ISISReflectometry::Row &row)
-                         -> bool { return row.complete(); }),
-      rows.end());
-  return rows;
-}
-
-const Group &BatchJobRunner::getGroupFromPath(
-    MantidWidgets::Batch::RowLocation rowLocation) const {
-  return m_batch.runsTable().reductionJobs().getGroupFromPath(rowLocation);
-}
-
-const Row &BatchJobRunner::getRowFromPath(
-    MantidWidgets::Batch::RowLocation rowLocation) const {
-  return m_batch.runsTable().reductionJobs().getRowFromPath(rowLocation).get();
-}
-
-int BatchJobRunner::getParentGroupIndexFromPath(
-    MantidWidgets::Batch::RowLocation rowLocation) const {
-  return groupOf(rowLocation);
-}
-
-int BatchJobRunner::getNumberOfInitialisedRowsInGroup(
-    const int groupIndex) const {
+size_t
+BatchJobRunner::getNumberOfInitialisedRowsInGroup(const int groupIndex) const {
   auto group = m_batch.runsTable().reductionJobs().groups()[groupIndex];
-  return static_cast<int>(std::count_if(
-      group.rows().cbegin(), group.rows().cend(),
-      [](const boost::optional<Row> &row) { return row.is_initialized(); }));
-}
-
-int BatchJobRunner::getNumberOfInitialisedRowsInGroup(
-    const Group &group) const {
   return static_cast<int>(std::count_if(
       group.rows().cbegin(), group.rows().cend(),
       [](const boost::optional<Row> &row) { return row.is_initialized(); }));
