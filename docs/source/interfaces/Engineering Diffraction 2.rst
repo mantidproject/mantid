@@ -100,15 +100,15 @@ Focus
 
 This tab allows for the focusing of data files by making use of the :ref:`EnggFocus<algm-EnggFocus>` algorithm.
 
-Files can be selected by providing a run number or selecting the files manually using the browse button.
+Files can be selected by providing run numbers or selecting the files manually using the browse button.
 
 In order to use the tab, a new or existing calibration must be created or loaded (see above).
 
 The interface allows for two kinds of focusing:
 
 - **Normal Focusing:**
-    A run number can be entered and both banks will be focused.
-    The output workspaces will have a suffix denoting which bank they are for.
+    Run numbers can be entered and both banks will be focused for each workspace.
+    The output workspaces will have a prefix for the run they are for and a suffix denoting which bank they are for.
 
 - **Cropped Focusing:**
     The entered workspace can be cropped to one of the two banks or to a user defined set of spectra.
@@ -118,7 +118,7 @@ Ticking the "Plot Focused Workspace" checkbox will create a plot of the focused 
 complete. The number of plots that are generated is dependent on the type of focusing done. Normal focusing generates
 a plot for each bank and cropped focusing generates a plot for the single bank or one for the chosen spectra.
 
-Clicking the focus button will begin the focusing algorithm for the selected run file. The button and plotting checkbox
+Clicking the focus button will begin the focusing algorithm for the selected run files. The button and plotting checkbox
 will be disabled until the fitting algorithm is complete.
 
 The focused output files are saved in NeXus, GSS, and raw XYE format to:
@@ -133,7 +133,7 @@ Parameters
 ^^^^^^^^^^
 
 Sample Run Number
-    The run number of or file path to the data file to be focused.
+    The run numbers of or file paths to the data files to be focused.
     
 Bank/Spectra
     Select which bank to restrict the focusing to or allow for the entry of custom spectra. 
