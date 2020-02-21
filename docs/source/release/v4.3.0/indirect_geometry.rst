@@ -50,5 +50,6 @@ BugFixes
 - :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` will now run also for fixed window scan reduced data and will not crash on workspace groups.
 - Fixed a bug crashing the ``Indirect ILL Data Reduction GUI`` when Run is clicked.
 - Indirect ILL reductions for BATS and Doppler QENS modes will now flag the outputs as distributions if the data is normalised by the monitor.
+- :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` will now allow for manual setting of the inelastic peak channels.
 
 :ref:`Release 4.3.0 <v4.3.0>`
