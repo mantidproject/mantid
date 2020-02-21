@@ -52,12 +52,10 @@ class FittingDataPresenter(object):
             if old_name in self.plotted:
                 self.plotted.remove(old_name)
                 self.plotted.add(new_name)
-            self.all_plots_removed_notifier.notify_subscribers()
             self._repopulate_table()
 
     def clear_workspaces(self):
         self.get_loaded_workspaces().clear()
-        self.all_plots_removed_notifier.notify_subscribers()
         self.plotted.clear()
         self.row_numbers.clear()
         self._repopulate_table()
@@ -99,6 +97,7 @@ class FittingDataPresenter(object):
         """
         self._remove_all_table_rows()
         self.row_numbers.clear()
+        self.all_plots_removed_notifier.notify_subscribers()
         workspaces = self.get_loaded_workspaces()
         for i, name in enumerate(workspaces):
             try:

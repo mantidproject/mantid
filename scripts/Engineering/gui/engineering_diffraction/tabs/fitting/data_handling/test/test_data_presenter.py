@@ -74,6 +74,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.model.get_loaded_workspaces.return_value = model_dict
         self.model.get_sample_log_from_ws.return_value = "bankOrRunNumber"
         self.presenter.plot_added_notifier = mock.MagicMock()
+        self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter._on_worker_success("info")
 
@@ -87,6 +88,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.model.get_loaded_workspaces.return_value = model_dict
         self.model.get_sample_log_from_ws.side_effect = RuntimeError("No sample logs present")
         self.presenter.plot_added_notifier = mock.MagicMock()
+        self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter._on_worker_success("info")
 
@@ -101,6 +103,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.model.get_loaded_workspaces.return_value = model_dict
         self.model.get_sample_log_from_ws.side_effect = RuntimeError("No sample logs present")
         self.presenter.plot_added_notifier = mock.MagicMock()
+        self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter._on_worker_success("info")
 
@@ -115,6 +118,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.model.get_loaded_workspaces.return_value = model_dict
         self.presenter.row_numbers = {"name1": 0, "name2": 1}
         self.presenter.plot_removed_notifier = mock.MagicMock()
+        self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter.remove_workspace("name1")
 
@@ -171,6 +175,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         model_dict = {"name1": "ws1", "name2": "ws2"}
         self.model.get_loaded_workspaces.return_value = model_dict
         self.presenter.row_numbers = {"name1": 0, "name2": 1}
+        self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter.replace_workspace("name1", "newWs")
 
@@ -198,6 +203,7 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.view.remove_selected.return_value = [0, 2]
         self.presenter.plot_removed_notifier = mock.MagicMock()
         self.presenter.plot_added_notifier = mock.MagicMock()
+        self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter._remove_selected_tracked_workspaces()
 
