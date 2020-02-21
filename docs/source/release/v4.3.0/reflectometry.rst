@@ -27,8 +27,25 @@ New
 
 - The new workflow algorithm :ref:`algm-ReflectometryILLAutoProcess` performs the complete data reduction for ILL reflectometers D17 and Figaro. Implements both coherent and incoherent summation types.
 
-- Options to perform background subtraction have been added to :ref:`algm-ReflectometryReductionOne`, :ref:`algm-ReflectometryReductionOneAuto` and :ref:`algm-ReflectometryISISLoadAndProcess`. This uses the :ref:`algm-ReflectometryBackgroundSubtraction` to perform the subtraction using one of three possible methods.
+- New output properties have been added for the ISIS Reflectometry algorithms for transmission workspaces so that history is now attached to these outputs.
 
+  - The affected algorithms are: :ref:`algm-CreateTransmissionWorkspace`, :ref:`algm-ReflectometryReductionOne`, :ref:`algm-ReflectometryReductionOneAuto`, :ref:`algm-ReflectometryISISLoadAndProcess`.
+
+  - **Note that this may break existing scripts if you assign outputs directly to a python list**
+
+    e.g. if previously you called an algorithm as:
+    
+    ``IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)``
+    
+    then this will now need to be as follows (note that the optional ``IvsLam`` also needs to be added here because it is declared before the transmission output and the list must always be in the same order):
+    
+    ``IvsQ, IvsQ_unbinned, IvsLam, transLam = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)``
+
+    If your scripts use the output property instead then they will not be affected, e.g. calls like this will still work as before:
+    
+    ``ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7, OutputWorkspaceBinned='ivsq_bin')``
+
+  
 Bug fixes
 ---------
 

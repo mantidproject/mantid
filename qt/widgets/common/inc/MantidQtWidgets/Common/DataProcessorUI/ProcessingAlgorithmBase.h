@@ -33,7 +33,8 @@ public:
   // Constructor
   ProcessingAlgorithmBase(
       const QString &name,
-      const std::set<QString> &blacklist = std::set<QString>());
+      const std::set<QString> &blacklist = std::set<QString>(),
+      const int version = -1);
 
   // Destructor
   ~ProcessingAlgorithmBase();
@@ -59,6 +60,8 @@ private:
 
   // The name of this algorithm
   QString m_algName;
+  // The version of this algorithm
+  int m_version;
   // The blacklist
   std::set<QString> m_blacklist;
   // Input ws properties

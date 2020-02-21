@@ -157,7 +157,7 @@ Output:
 
     run = Load(Filename='INTER00013460.nxs')
     trans = Load(Filename='INTER00013463.nxs')
-    IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)
+    IvsQ, IvsQ_unbinned, IvsLam, TRANS = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)
 
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[96]))
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[97]))

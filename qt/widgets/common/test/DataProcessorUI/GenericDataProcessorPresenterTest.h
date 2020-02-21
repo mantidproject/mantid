@@ -175,7 +175,8 @@ private:
         std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"}, 1,
         std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
                           "OutputWorkspace", "OutputWorkspaceWavelength",
-                          "FirstTransmissionRun", "SecondTransmissionRun"});
+                          "FirstTransmissionRun", "SecondTransmissionRun"},
+        2);
   }
 
   PostprocessingAlgorithm createReflectometryPostprocessor() {
@@ -1680,8 +1681,8 @@ public:
         AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_dataB"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataA"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataB"));
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataA"));
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataB"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataA"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataB"));
     TS_ASSERT(
         AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataA_TOF_dataB"));
 
