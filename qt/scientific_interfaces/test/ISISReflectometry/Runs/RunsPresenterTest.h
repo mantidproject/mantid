@@ -209,7 +209,7 @@ public:
     auto presenter = makePresenter();
     ON_CALL(m_view, getSearchString())
         .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, getUnsavedBatchFlag()).WillByDefault(Return(true));
+    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
     expectAutoreductionSettingsChanged();
     expectUserRespondsYes();
     presenter.resumeAutoreduction();
@@ -220,8 +220,7 @@ public:
     auto presenter = makePresenter();
     ON_CALL(m_view, getSearchString())
         .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, getUnsavedBatchFlag())
-        .WillByDefault(Return(false));
+    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(false));
     expectAutoreductionSettingsChanged();
     EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
     presenter.resumeAutoreduction();

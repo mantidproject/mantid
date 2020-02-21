@@ -171,7 +171,7 @@ public:
         .WillByDefault(Return(true));
     auto presenter = makePresenter(std::move(optionsDialogPresenter));
     auto const batchIndex = 0;
-    ON_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+    ON_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved())
         .WillByDefault(Return(true));
     expectBatchIsNotAutoreducing(batchIndex);
     expectBatchIsNotProcessing(batchIndex);
@@ -189,7 +189,7 @@ public:
         .WillByDefault(Return(true));
     auto presenter = makePresenter(std::move(optionsDialogPresenter));
     auto const batchIndex = 0;
-    ON_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+    ON_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved())
         .WillByDefault(Return(false));
     expectBatchIsNotAutoreducing(batchIndex);
     expectBatchIsNotProcessing(batchIndex);
@@ -403,7 +403,7 @@ public:
         .WillByDefault(Return(true));
     auto presenter = makePresenter(std::move(optionsDialogPresenter));
     auto const batchIndex = 1;
-    ON_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+    ON_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved())
         .WillByDefault(Return(true));
     EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
     presenter.notifyLoadBatchRequested(batchIndex);
@@ -418,7 +418,7 @@ public:
         .WillByDefault(Return(true));
     auto presenter = makePresenter(std::move(optionsDialogPresenter));
     auto const batchIndex = 1;
-    ON_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+    ON_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved())
         .WillByDefault(Return(false));
     EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
     presenter.notifyLoadBatchRequested(batchIndex);
@@ -435,7 +435,7 @@ public:
     auto const filename = std::string("test.json");
     auto const map = QMap<QString, QVariant>();
     auto const batchIndex = 1;
-    ON_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+    ON_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved())
         .WillByDefault(Return(true));
     EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
         .Times(1)
@@ -459,7 +459,7 @@ public:
         .WillByDefault(Return(true));
     auto presenter = makePresenter(std::move(optionsDialogPresenter));
     auto const batchIndex = 1;
-    ON_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+    ON_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved())
         .WillByDefault(Return(true));
     EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
     presenter.isCloseEventPrevented();
@@ -482,7 +482,7 @@ public:
     for (auto batchPresenter : m_batchPresenters) {
       EXPECT_CALL(*batchPresenter, notifySetRoundPrecision(prec));
     }
-    presenter.optionsChanged();
+    presenter.notifyOptionsChanged();
     verifyAndClear();
   }
 
@@ -495,25 +495,7 @@ public:
     for (auto batchPresenter : m_batchPresenters) {
       EXPECT_CALL(*batchPresenter, notifyResetRoundPrecision());
     }
-    presenter.optionsChanged();
-    verifyAndClear();
-  }
-
-  void testBatchReturnsUnsavedBatchFlag() {
-    auto presenter = makePresenter();
-    m_batchPresenters[0]->setUnsavedBatchFlag(true);
-    EXPECT_CALL(*m_batchPresenters[0], getUnsavedBatchFlag())
-        .Times(1)
-        .WillOnce(Return(true));
-    TS_ASSERT_EQUALS(presenter.isBatchUnsaved(0), true);
-    verifyAndClear();
-  }
-
-  void testAnyBatchReturnsUnsavedBatchFlag() {
-    auto presenter = makePresenter();
-    ON_CALL(*m_batchPresenters[0], getUnsavedBatchFlag())
-        .WillByDefault(Return(true));
-    TS_ASSERT_EQUALS(presenter.isAnyBatchUnsaved(), true);
+    presenter.notifyOptionsChanged();
     verifyAndClear();
   }
 
@@ -636,13 +618,13 @@ private:
   }
 
   void expectBatchSaved(int batchIndex) {
-    EXPECT_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+    EXPECT_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved())
         .Times(1)
         .WillOnce(Return(false));
   }
 
   void expectBatchUnsaved(int batchIndex) {
-    EXPECT_CALL(*m_batchPresenters[batchIndex], getUnsavedBatchFlag())
+    EXPECT_CALL(*m_batchPresenters[batchIndex], isBatchUnsaved())
         .Times(1)
         .WillOnce(Return(true));
   }

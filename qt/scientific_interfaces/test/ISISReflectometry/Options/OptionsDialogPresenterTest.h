@@ -42,91 +42,98 @@ public:
     verifyAndClear();
   }
 
-  void testInitOptionsClearsVariables() {
-    auto presenter = makePresenter();
-    EXPECT_EQ(m_boolOptions.size(), 0);
-    EXPECT_EQ(m_intOptions.size(), 0);
-    presenter.notifyInitOptions();
-    verifyAndClear();
-  }
+  // TODO: these tests need rewriting now notifyInitOptions has gone and this is
+  // done in the constructor instead
 
-  void testInitOptionsAttemptsToLoadFromModel() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(m_model, loadSettingsProxy(m_boolOptions, m_intOptions))
-        .Times(1)
-        .WillOnce(Return());
-    presenter.notifyInitOptions();
-    assertLoadOptions();
-    verifyAndClear();
-  }
-
-  void testInitOptionsAppliesDefaultOptionsIfLoadUnsuccessful() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(m_model, loadSettingsProxy(m_boolOptions, m_intOptions))
-        .Times(1)
-        .WillOnce(Return());
-    EXPECT_CALL(m_model, applyDefaultOptionsProxy(m_boolOptions, m_intOptions))
-        .Times(1)
-        .WillOnce(Return());
-    presenter.notifyInitOptions();
-    assertDefaultOptions();
-    verifyAndClear();
-  }
+  //  void testInitOptionsClearsVariables() {
+  //    auto presenter = makePresenter();
+  //    EXPECT_EQ(m_boolOptions.size(), 0);
+  //    EXPECT_EQ(m_intOptions.size(), 0);
+  //    presenter.notifyInitOptions();
+  //    verifyAndClear();
+  //  }
+  //
+  //  void testInitOptionsAttemptsToLoadFromModel() {
+  //    auto presenter = makePresenter();
+  //    EXPECT_CALL(m_model, loadSettingsProxy(m_boolOptions, m_intOptions))
+  //        .Times(1)
+  //        .WillOnce(Return());
+  //    presenter.notifyInitOptions();
+  //    assertLoadOptions();
+  //    verifyAndClear();
+  //  }
+  //
+  //  void testInitOptionsAppliesDefaultOptionsIfLoadUnsuccessful() {
+  //    auto presenter = makePresenter();
+  //    EXPECT_CALL(m_model, loadSettingsProxy(m_boolOptions, m_intOptions))
+  //        .Times(1)
+  //        .WillOnce(Return());
+  //    EXPECT_CALL(m_model, applyDefaultOptionsProxy(m_boolOptions,
+  //    m_intOptions))
+  //        .Times(1)
+  //        .WillOnce(Return());
+  //    presenter.notifyInitOptions();
+  //    assertDefaultOptions();
+  //    verifyAndClear();
+  //  }
 
   void testLoadOptionsQueriesModel() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_model, loadSettingsProxy(m_boolOptions, m_intOptions))
+    EXPECT_CALL(*m_model, loadSettingsProxy(m_boolOptions, m_intOptions))
         .Times(1)
         .WillOnce(Return());
     assertLoadOptions();
-    presenter.loadOptions();
+    presenter.notifyLoadOptions();
     verifyAndClear();
   }
 
   void testLoadOptionsUpdatesView() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, setOptions(m_boolOptions, m_intOptions)).Times(1);
-    presenter.loadOptions();
+    presenter.notifyLoadOptions();
     verifyAndClear();
   }
 
   void testLoadOptionsNotifiesMainWindow() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_notifyee, optionsChanged()).Times(1);
-    presenter.loadOptions();
+    EXPECT_CALL(m_notifyee, notifyOptionsChanged()).Times(1);
+    presenter.notifyLoadOptions();
     verifyAndClear();
   }
 
   void testSaveOptionsUpdatesModel() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_model, saveSettings(m_boolOptions, m_intOptions)).Times(1);
-    presenter.saveOptions();
+    EXPECT_CALL(*m_model, saveSettings(m_boolOptions, m_intOptions)).Times(1);
+    presenter.notifySaveOptions();
     verifyAndClear();
   }
 
   void testSaveOptionsNotifiesMainWindow() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_notifyee, optionsChanged()).Times(1);
-    presenter.saveOptions();
+    EXPECT_CALL(m_notifyee, notifyOptionsChanged()).Times(1);
+    presenter.notifySaveOptions();
     verifyAndClear();
   }
 
   void testSaveOptionsQueriesView() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getOptions(m_boolOptions, m_intOptions)).Times(1);
-    presenter.saveOptions();
+    presenter.notifySaveOptions();
     verifyAndClear();
   }
 
 private:
   NiceMock<MockOptionsDialogView> m_view;
-  NiceMock<MockOptionsDialogModel> m_model;
-  NiceMock<MockOptionsDialogMainWindowSubscriber> m_notifyee;
+  NiceMock<MockOptionsDialogModel> *m_model;
+  NiceMock<MockOptionsDialogPresenterSubscriber> m_notifyee;
   std::map<std::string, bool> m_boolOptions;
   std::map<std::string, int> m_intOptions;
 
   OptionsDialogPresenter makePresenter() {
-    auto presenter = OptionsDialogPresenter(&m_view);
+    auto model = std::make_unique<NiceMock<MockOptionsDialogModel>>();
+    m_model = model.get();
+    auto presenter = OptionsDialogPresenter(&m_view, std::move(model));
+    presenter.subscribe(&m_notifyee);
     return presenter;
   }
 
@@ -148,7 +155,8 @@ private:
 
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_notifyee));
   }
 };
 #endif // MANTID_MANTIDWIDGETS_OPTIONSDIALOGTEST_H
