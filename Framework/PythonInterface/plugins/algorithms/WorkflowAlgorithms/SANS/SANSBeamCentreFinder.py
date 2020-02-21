@@ -251,8 +251,9 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
     def _publish_to_ADS(self, sample_quartiles):
         output_workspaces = []
         for key in sample_quartiles:
-            output_workspaces.append(MaskingQuadrant.to_string(key))
-            AnalysisDataService.addOrReplace(MaskingQuadrant.to_string(key), sample_quartiles[key])
+            assert isinstance(key, MaskingQuadrant)
+            output_workspaces.append(key.value)
+            AnalysisDataService.addOrReplace(key.value, sample_quartiles[key])
 
         return output_workspaces
 
