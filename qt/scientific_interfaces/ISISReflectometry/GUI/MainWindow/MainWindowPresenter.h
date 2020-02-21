@@ -98,11 +98,15 @@ private:
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
 
   bool isWarnDiscardChangesChecked() const override;
+  bool isRoundChecked() const override;
+  int &getRoundPrecision() const override;
+  boost::optional<int> roundPrecision() const override;
   bool isWarnProcessAllChecked() const override;
   bool isWarnProcessPartialGroupChecked() const override;
   bool isCloseBatchPrevented(int batchIndex) const override;
   bool isBatchUnsaved(int batchIndex) const override;
   bool isAnyBatchUnsaved() override;
+  void optionsChanged() const;
   void showHelp();
   void addNewBatch(IBatchView *batchView);
   void initNewBatch(IBatchPresenter *batchPresenter,

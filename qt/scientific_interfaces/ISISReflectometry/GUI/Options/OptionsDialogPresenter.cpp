@@ -68,7 +68,7 @@ void OptionsDialogPresenter::subscribe(
   m_notifyee = notifyee;
   // the following call is required after m_notifyee is set, rather than
   // in the constructor, in order to avoid a segfault since
-  // notifyLoadOptions() makes a call to m_notifyee->notifyOptionsChanges() but
+  // notifyLoadOptions() makes a call to m_notifyee->notifyOptionsChanged() but
   // m_notifyee would be nullptr
   notifyLoadOptions();
 }
