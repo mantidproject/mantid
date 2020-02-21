@@ -34,6 +34,7 @@ Muon Analysis 2 and Frequency Domain Interfaces
 - Fixed a bug that prevented PSI data from being loaded.
 - Reworked the fitting tab to improve the user experience when doing single, and simultaneous fits.
 - Addition of a sequential fitting tab, enabling both sequential, and simultaneous sequential fits.
+- Fixed a bug where Elemental analysis gave an error when loading data.
 
 Bug Fixes
 #########

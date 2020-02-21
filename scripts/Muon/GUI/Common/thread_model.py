@@ -107,7 +107,7 @@ class ThreadModel(QtWidgets.QWidget):
         self.setup_thread_and_start()
 
     def warning(self, message):
-        self._exception_callback(message)
+        self._exception_callback(self.model)
 
     def join(self):
         if self.exception is not None:

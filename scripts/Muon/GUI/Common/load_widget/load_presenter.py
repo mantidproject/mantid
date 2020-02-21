@@ -27,28 +27,34 @@ class LoadPresenter(object):
         self.view.on_spinbox_changed(self.update_models)
 
     def equalise_loaded_runs(self):
+        if self.co_model.loaded_runs == {} and self.load_model.loaded_runs == {}:
+            return
+        print(self.co_model.loaded_runs,self.load_model.loaded_runs)
         loaded_runs = max(
-            self.co_model.loaded_runs,
-            self.load_model.loaded_runs)
-        self.co_model.loaded_runs = loaded_runs
-        self.load_model.loaded_runs = loaded_runs
+            list(self.co_model.loaded_runs),
+            list(self.load_model.loaded_runs.keys()))
+        #self.co_model.loaded_runs = loaded_runs
+        #self.load_model.loaded_runs = loaded_runs
 
     def equalise_last_loaded_run(self):
+        if self.co_model.loaded_runs == {} and self.load_model.loaded_runs == {}:
+            return
         last_run = max(
-            self.co_model.last_loaded_runs,
-            self.load_model.last_loaded_runs)
-        self.co_model.last_loaded_runs = last_run
-        self.load_model.last_loaded_runs = last_run
+            list(self.co_model.loaded_runs),
+            list(self.load_model.loaded_runs))
+        #self.co_model.last_loaded_runs = last_run
+        #self.load_model.last_loaded_runs = last_run
 
     def update_models(self, run):
         self.load_model.set_run(run)
         self.co_model.set_run(run)
 
     def load_run(self):
-        self.load_thread = self.new_thread(self.load_model)
-        self.load_thread.threadWrapperSetUp(
-            self.disable_buttons, self.end_load_thread)
-        self.load_thread.start()
+        #self.load_thread = self.new_thread(self.load_model)
+        #self.load_thread.threadWrapperSetUp(
+        #    self.disable_buttons, self.end_load_thread)
+        #self.load_thread.start()
+        self.load_model.execute()
 
     def co_add_run(self):
         self.co_thread = self.new_thread(self.co_model)

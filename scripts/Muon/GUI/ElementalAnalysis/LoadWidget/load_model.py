@@ -16,6 +16,7 @@ class LoadModel(lutils.LModel):
         super(LoadModel, self).__init__()
 
     def execute(self):
+        print("bii")
         if self.run not in self.loaded_runs:
             self.load_run()
         else:

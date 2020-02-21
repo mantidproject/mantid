@@ -392,6 +392,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         try:
             self._generate_element_widgets()
         except ValueError:
+            return
             message_box.warning(
                 'The file does not contain correctly formatted data, resetting to default data file.'
                 'See "https://docs.mantidproject.org/nightly/interfaces/'

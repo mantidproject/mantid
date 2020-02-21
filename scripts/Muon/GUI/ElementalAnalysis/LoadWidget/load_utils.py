@@ -21,8 +21,8 @@ num_files_per_detector = 3
 class LModel(object):
     def __init__(self):
         self.run = 0
-        self.num_loaded_detectors ={}
-        self.loaded_runs = {}
+        self.num_loaded_detectors =dict()
+        self.loaded_runs = dict()
         self.last_loaded_runs = []
 
     def _load(self, inputs):
@@ -32,6 +32,7 @@ class LModel(object):
             workspace.getAxis(0).setUnit("Label").setLabel("Energy", "keV")
 
     def load_run(self):
+        print("moo")
         to_load = search_user_dirs(self.run)
         if not to_load:
             return None
@@ -50,10 +51,16 @@ class LModel(object):
             loaded_detectors[ws_name[0]] = 1
         num_loaded_detectors = len(loaded_detectors)
         self._load(workspaces)
-        self.loaded_runs[self.run] = merge_workspaces(self.run, workspaces.values())
-        self.num_loaded_detectors[self.run] = num_loaded_detectors
-        self.last_loaded_runs.append(self.run)
-        return self.loaded_runs[self.run]
+        print("hi", type(self.loaded_runs), self.run, self.loaded_runs)
+        self.loaded_runs.update({self.run: merge_workspaces(self.run, workspaces.values())})
+        #print("j")
+        #self.num_loaded_detectors[self.run] = num_loaded_detectors
+        #print("k")
+        #self.last_loaded_runs.append(self.run)
+        #print("m")
+        #a= self.loaded_runs[self.run]
+        #print("done")
+        return 
 
     def output(self):
         return
