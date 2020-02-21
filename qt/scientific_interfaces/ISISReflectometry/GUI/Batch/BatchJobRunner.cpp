@@ -111,6 +111,10 @@ void BatchJobRunner::notifyReductionResumed() {
       for (const auto groupIndexCountPair : selectedRowsPerGroup) {
         auto const groupIndex = groupIndexCountPair.first;
         auto const numSelected = static_cast<int>(groupIndexCountPair.second);
+                      groupIndex) != selectedGroups.end()) {
+          continue;
+        }
+        auto const numSelected = static_cast<int>(groupIndexCountPair.second);
         m_processPartial =
             numSelected < getNumberOfInitialisedRowsInGroup(groupIndex);
         if (m_processPartial) {
