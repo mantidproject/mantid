@@ -400,6 +400,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 self._reduce_one_wing_doppler(self._ws)
                 GroupWorkspaces(InputWorkspaces=[self._ws],OutputWorkspace=self._red_ws)
 
+        if self._normalise_to == 'Monitor':
+            for ws in mtd[self._red_ws]:
+                AddSampleLog(Workspace=ws, LogName="NormalisedTo", LogType="String",
+                             LogText="Monitor", EnableLogging=False)
+
         self.setProperty('OutputWorkspace',self._red_ws)
 
     def _create_elastic_channel_ws(self, epp_ws, run, epp_equator_ws=None):
