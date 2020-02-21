@@ -23,12 +23,14 @@ using testing::Return;
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
-class OptionsDialogTest : public CxxTest::TestSuite {
+class OptionsDialogPresenterTest : public CxxTest::TestSuite {
 public:
-  static OptionsDialogTest *createSuite() { return new OptionsDialogTest(); }
-  static void destroySuite(OptionsDialogTest *suite) { delete suite; }
+  static OptionsDialogPresenterTest *createSuite() {
+    return new OptionsDialogPresenterTest();
+  }
+  static void destroySuite(OptionsDialogPresenterTest *suite) { delete suite; }
 
-  OptionsDialogTest()
+  OptionsDialogPresenterTest()
       : m_view(), m_model(), m_boolOptions{{"WarnDiscardChanges", true},
                                            {"WarnProcessAll", true},
                                            {"WarnProcessPartialGroup ", true},
