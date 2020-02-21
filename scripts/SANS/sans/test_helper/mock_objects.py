@@ -24,13 +24,13 @@ from ui.sans_isis.beam_centre import BeamCentre
 
 def create_mock_settings_diagnostic_tab():
     view = mock.create_autospec(SettingsDiagnosticTab, spec_set=False)
-    view.get_current_row = mock.MagicMock(return_value=3)
+    view.get_current_row = mock.MagicMock(return_value=0)
     return view
 
 
 def create_mock_masking_table():
     view = mock.create_autospec(MaskingTable, spec_set=False)
-    view.get_current_row = mock.MagicMock(return_value=3)
+    view.get_current_row = mock.MagicMock(return_value=0)
     return view
 
 
@@ -251,7 +251,7 @@ class FakeState(with_metaclass(JsonSerializable)):
 
 
 def get_state_for_row_mock(row_index, file_lookup=True, suppress_warnings=False):
-    return FakeState() if row_index == 3 else ""
+    return FakeState()
 
 
 def get_state_for_row_mock_with_real_state(row_index, file_lookup=True, suppress_warnings=False):

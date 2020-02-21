@@ -98,23 +98,20 @@ def find_sans_file(file_name):
     :param file_name: a file name or a run number.
     :return: the full path.
     """
-    error_message = "Trying to find the SANS file {0}, but cannot find it. Make sure that " \
-                    "the relevant paths are added and the correct instrument is selected."
-    try:
-        full_path = find_full_file_path(file_name)
-        if not full_path and not file_name.endswith('.nxs'):
-            full_path = find_full_file_path(file_name + '.nxs')
-        if not full_path:
-            # TODO: If we only provide a run number for example 98843 for LOQ measurments, but have LARMOR specified as the
-            #       Mantid instrument, then the FileFinder will search itself to death. This is a general Mantid issue.
-            #       One way to handle this graceful would be a timeout option.
-            runs = FileFinder.findRuns(file_name)
-            if runs:
-                full_path = runs[0]
-    except RuntimeError:
-        raise RuntimeError(error_message.format(file_name))
+    full_path = find_full_file_path(file_name)
+    if not full_path and not file_name.endswith('.nxs'):
+        full_path = find_full_file_path(file_name + '.nxs')
+    if not full_path:
+        # TODO: If we only provide a run number for example 98843 for LOQ measurments, but have LARMOR specified as the
+        #       Mantid instrument, then the FileFinder will search itself to death. This is a general Mantid issue.
+        #       One way to handle this graceful would be a timeout option.
+        runs = FileFinder.findRuns(file_name)
+        if runs:
+            full_path = runs[0]
 
     if not full_path:
+        error_message = "Trying to find the SANS file {0}, but cannot find it. Make sure that " \
+                        "the relevant paths are added and the correct instrument is selected."
         raise RuntimeError(error_message.format(file_name))
     return full_path
 
@@ -836,7 +833,7 @@ class SANSFileInformationBlank(SANSFileInformation):
     as we should not be creating blank information states
     """
     def __init__(self):
-        super(SANSFileInformationBlank, self).__init__(full_file_name="0")
+        super(SANSFileInformationBlank, self).__init__(full_file_name="00000")
 
     def get_file_name(self):
         raise NotImplementedError("Trying to use blank FileInformation")

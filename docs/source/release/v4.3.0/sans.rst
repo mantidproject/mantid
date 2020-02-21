@@ -22,6 +22,20 @@ Improved
 - ISIS SANS history for top level algorithms now works correctly. A user
   can copy the history of a workspace to their clipboard or a file and the data
   will be reproduced on that machine without requiring editing of the script.
+- Batch CSV files can have their columns in any order and will load into
+  the SANS GUI correctly.
+
+Fixed
+#####
+- Tabbing between columns has been improved in the data GUI table. Users
+  can now single tab between unmodified columns, or double tab for modified.
+- Saving a CSV with sample geometry enabled, then reloading works correctly.
+- Hitting Shift+Enter on the top row no longer causes an exception
+
+Changes
+#######
+- Sample periods and geometry inputs have been move to the right of the table,
+  as part of the tabbing improvements.
 
 Fixed
 #####
