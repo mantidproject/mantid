@@ -393,7 +393,7 @@ class SANSILLReduction(PythonAlgorithm):
 
     def _do_rescale_flux(self, ws, ref_ws):
         """
-            Scales ws by the magic flux factor wrt the reference
+            Scales ws by the flux factor wrt the reference
             @ws : input workspace to scale (sample)
             @ref_ws : reference workspace (water)
         """
