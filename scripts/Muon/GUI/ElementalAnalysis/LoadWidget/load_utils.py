@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
+from collections import OrderedDict 
 
 import glob
 import os
@@ -21,8 +22,8 @@ num_files_per_detector = 3
 class LModel(object):
     def __init__(self):
         self.run = 0
-        self.num_loaded_detectors =dict()
-        self.loaded_runs = dict()
+        self.num_loaded_detectors =OrderedDict()
+        self.loaded_runs = OrderedDict()
         self.last_loaded_runs = []
 
     def _load(self, inputs):
@@ -54,13 +55,13 @@ class LModel(object):
         print("hi", type(self.loaded_runs), self.run, self.loaded_runs)
         self.loaded_runs.update({self.run: merge_workspaces(self.run, workspaces.values())})
         #print("j")
-        #self.num_loaded_detectors[self.run] = num_loaded_detectors
+        self.num_loaded_detectors[self.run] = num_loaded_detectors
         #print("k")
-        #self.last_loaded_runs.append(self.run)
+        self.last_loaded_runs.append(self.run)
         #print("m")
-        #a= self.loaded_runs[self.run]
+        a= self.loaded_runs[self.run]
         #print("done")
-        return 
+        return a
 
     def output(self):
         return
@@ -215,6 +216,7 @@ def get_filename(path, run):
 
 
 def replace_workspace_name_suffix(name, suffix):
+    print("rest",name)
     detector, run_type = name.split("_", 2)[:2]
     return "_".join([detector, run_type, suffix])
 
@@ -223,7 +225,8 @@ def flatten_run_data(*workspaces):
     out = []
     for workspace in workspaces:
         detectors = [mantid.mtd[detector] for detector in workspace]
-        out.append(sorted([_workspace.getName() for detector in detectors for _workspace in detector]))
+        out.append(sorted([detector.getName() for detector in detectors]))
+    print("sdfa", out)
     return out
 
 

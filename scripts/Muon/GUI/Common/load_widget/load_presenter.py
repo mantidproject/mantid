@@ -34,7 +34,8 @@ class LoadPresenter(object):
             list(self.co_model.loaded_runs),
             list(self.load_model.loaded_runs.keys()))
         #self.co_model.loaded_runs = loaded_runs
-        #self.load_model.loaded_runs = loaded_runs
+        #print("fdsafds ", loaded_runs)
+        #self.load_model.last_loaded_runs = loaded_runs
 
     def equalise_last_loaded_run(self):
         if self.co_model.loaded_runs == {} and self.load_model.loaded_runs == {}:
@@ -57,6 +58,8 @@ class LoadPresenter(object):
         self.load_model.execute()
 
     def co_add_run(self):
+        self.co_model.execute()
+        return
         self.co_thread = self.new_thread(self.co_model)
         self.co_thread.threadWrapperSetUp(
             self.disable_buttons, self.end_co_thread)

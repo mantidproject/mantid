@@ -359,6 +359,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def add_plot(self, checkbox):
         detector = checkbox.name
         last_run = self.load_widget.last_loaded_run()
+        print(last_run)
         # not using load_last_run prevents two calls to last_loaded_run()
         if last_run is not None:
             self.load_run(detector, last_run)
