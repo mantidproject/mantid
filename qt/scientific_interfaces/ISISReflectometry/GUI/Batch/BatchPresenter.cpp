@@ -57,6 +57,8 @@ BatchPresenter::BatchPresenter(
   m_instrumentPresenter->acceptMainPresenter(this);
   m_runsPresenter->acceptMainPresenter(this);
 
+  m_unsavedBatchFlag = false;
+
   observePostDelete();
   observeRename();
   observeADSClear();
@@ -337,6 +339,14 @@ bool BatchPresenter::isBatchUnsaved() const { return m_unsavedBatchFlag; }
 /** Set the state of unsaved changes in the current batch */
 void BatchPresenter::setBatchUnsaved(bool isUnsaved) {
   m_unsavedBatchFlag = isUnsaved;
+}
+
+void BatchPresenter::notifySetRoundPrecision(int &precision) {
+  m_runsPresenter->setRoundPrecision(precision);
+}
+
+void BatchPresenter::notifyResetRoundPrecision() {
+  m_runsPresenter->resetRoundPrecision();
 }
 
 /** Get the percent of jobs that have been completed out of the current
