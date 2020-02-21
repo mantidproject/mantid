@@ -19,6 +19,7 @@ This is quickly accessible through the top Toolbar in Mantid "Help > Mantid Foru
 .. figure:: /images/MantidHelpForum.png
    :alt: Mantid Help Forum
    :align: center
+
 2. Mantid Help email: mantid-help@mantidproject.org 
 
 Both of these methods go straight to our User Support Officer.

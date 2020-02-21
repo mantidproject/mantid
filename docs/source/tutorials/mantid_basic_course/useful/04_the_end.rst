@@ -10,6 +10,6 @@ You can continue on with our further courses on Basic Python and using Python wi
 
 Mantid is a world-wide collaboration:
 
-.. figure:: images/Training/Introduction/Mantid_collaboration.png
+.. figure:: /images/Training/Introduction/Mantid_collaboration.png
    :alt: Collaboration
    :align: center
