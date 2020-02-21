@@ -23,7 +23,7 @@ OptionsDialogPresenter::OptionsDialogPresenter(
   initOptions();
   m_view->subscribe(this);
 }
-}
+} // namespace ISISReflectometry
 
 /** Subscribe the view to this presenter */
 void OptionsDialogPresenter::notifySubscribeView() { m_view->subscribe(this); }
@@ -74,6 +74,6 @@ void OptionsDialogPresenter::subscribe(
   notifyLoadOptions();
 }
 
-} // namespace ISISReflectometry
 } // namespace CustomInterfaces
+} // namespace MantidQt
 } // namespace MantidQt

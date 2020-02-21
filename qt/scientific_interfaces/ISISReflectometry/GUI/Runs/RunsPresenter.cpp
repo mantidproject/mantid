@@ -255,7 +255,7 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
 
 void RunsPresenter::notifyTableChanged() { m_mainPresenter->setBatchUnsaved(); }
 
-}
+} // namespace ISISReflectometry
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 
@@ -568,6 +568,6 @@ void RunsPresenter::errorHandle(const IAlgorithm *alg,
   m_monitorAlg.reset();
   updateViewWhenMonitorStopped();
 }
-} // namespace ISISReflectometry
 } // namespace CustomInterfaces
+} // namespace MantidQt
 } // namespace MantidQt

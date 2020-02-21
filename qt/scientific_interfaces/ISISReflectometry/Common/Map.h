@@ -96,10 +96,10 @@ std::string optionalToString(boost::optional<T> maybeValue,
     }
     return optionalToString(maybeValue);
   }
-    return std::string();
-  }
+  return std::string();
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
+} // namespace MantidQt
 } // namespace MantidQt
 #endif // MANTID_ISISREFLECTOMETRY_MAP_H
