@@ -76,6 +76,7 @@ Single Crystal Diffraction
 
 - Support added for DEMAND (HB3A) to the algorithms :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ-v1>` and :ref:`FindPeaksMD <algm-FindPeaksMD-v1>` in order to handle additional goniometers.
 - Fixed PredictSatellitePeaks producing an empty table when using cross-terms with crystallography convention for sign of Q.
+- IntegrateEllipsoids and IntegrateEllipsoidsTwoStep now calculate the count-weighted variance as required for non Event mode data. 
 
 Imaging
 -------
