@@ -340,8 +340,11 @@ class IndirectILLReductionQENS(PythonAlgorithm):
 
         GroupWorkspaces(InputWorkspaces=self._ws_list,OutputWorkspace=self._red_ws)
 
-        # unhide the final workspaces, i.e. remove __ prefix
         for ws in mtd[self._red_ws]:
+            if ws.getRun().hasProperty("NormalisedTo"):
+                if ws.getRun().getLogData("NormalisedTo").value == "Monitor":
+                    ws.setDistribution(True)
+            # unhide the final workspaces, i.e. remove __ prefix
             RenameWorkspace(InputWorkspace=ws,OutputWorkspace=ws.getName()[2:])
 
         self.setProperty('OutputWorkspace',self._red_ws)
