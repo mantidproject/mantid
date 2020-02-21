@@ -92,345 +92,308 @@ void BatchJobRunner::notifyReductionResumed() {
     // autoreducing). Also reprocess failed items.
     m_processAll = m_isAutoreducing;
     m_processPartial = false;
-    // the group's rows to determine if it will be partially processed.
+    m_reprocessFailed = !m_isAutoreducing;
     if (!m_processAll) {
-      // This comparator is needed to facilitate constructing a map with
-      // user-defined key types
-      auto comp = [](const Group &lhs, const Group &rhs) {
-        return lhs.rows().size() < rhs.rows().size();
-      };
-      // If a group is selected then it won't be partially processed so we
-      // only need to check those with selected rows
-      std::map<std::reference_wrapper<const Group>, size_t, decltype(comp)>
-          groupsWithSelectedRows(comp);
-      for (auto it = m_rowLocationsToProcess.begin();
-           it != m_rowLocationsToProcess.end(); ++it) {
-        if (isGroupLocation(*it)) {
-          std::advance(
-              it, getNumberOfInitialisedRowsInGroup(getGroupFromPath(*it)) - 1);
-          continue;
-        } else
-          ++groupsWithSelectedRows[getParentGroupFromPath(*it)];
+      // Check whether a given group is in the selection. If not then check
+      // the group's rows to determine whether it will be partially processed,
+      // i.e. if it has some, but not all, rows selected
+      std::map<const int, size_t> selectedRowsPerGroup;
+      for (auto location : m_rowLocationsToProcess) {
+        auto const groupIdx = groupOf(location);
+        auto const totalRowsInGroup =
+            getNumberOfInitialisedRowsInGroup(groupIdx);
+        if (isGroupLocation(location)) {
+          selectedRowsPerGroup[groupIdx] = totalRowsInGroup;
+        } else if (selectedRowsPerGroup[groupIdx] < totalRowsInGroup) {
+          ++selectedRowsPerGroup[groupIdx];
+        }
       }
-      for (const auto &groupCountPair : groupsWithSelectedRows) {
+      for (const auto groupIndexCountPair : selectedRowsPerGroup) {
+        auto const groupIndex = groupIndexCountPair.first;
+        auto const numSelected = static_cast<int>(groupIndexCountPair.second);
         m_processPartial =
-            groupCountPair.second <
-            getNumberOfInitialisedRowsInGroup(groupCountPair.first.get());
-        if (m_processPartial)
+            numSelected < getNumberOfInitialisedRowsInGroup(groupIndex);
+        if (m_processPartial) {
           break;
-      }
-      if (groupsWithSelectedRows.empty())
-        m_processPartial = false;
-      m_reprocessFailed = !m_isAutoreducing;
-      if (!m_processAll) {
-        // Check whether a given group is in the selection. If not then check
-        // the group's rows to determine whether it will be partially processed,
-        // i.e. if it has some, but not all, rows selected
-        std::map<const int, size_t> selectedRowsPerGroup;
-        for (auto location : m_rowLocationsToProcess) {
-          auto const groupIdx = groupOf(location);
-          auto const totalRowsInGroup =
-              getNumberOfInitialisedRowsInGroup(groupIdx);
-          if (isGroupLocation(location)) {
-            selectedRowsPerGroup[groupIdx] = totalRowsInGroup;
-          } else if (selectedRowsPerGroup[groupIdx] < totalRowsInGroup) {
-            ++selectedRowsPerGroup[groupIdx];
-          }
-        }
-        for (const auto groupIndexCountPair : selectedRowsPerGroup) {
-          auto const groupIndex = groupIndexCountPair.first;
-          auto const numSelected = static_cast<int>(groupIndexCountPair.second);
-                      groupIndex) != selectedGroups.end()) {
-          continue;
-        }
-                      auto const numSelected =
-                          static_cast<int>(groupIndexCountPair.second);
-                      m_processPartial =
-                          numSelected <
-                          getNumberOfInitialisedRowsInGroup(groupIndex);
-                      if (m_processPartial) {
-                        break;
-                      }
         }
       }
     }
-    m_batch.resetSkippedItems();
+  }
+  m_batch.resetSkippedItems();
+}
+
+void BatchJobRunner::notifyReductionPaused() {
+  m_isProcessing = false;
+  m_rowLocationsToProcess.clear();
+}
+
+void BatchJobRunner::notifyAutoreductionResumed() {
+  m_isAutoreducing = true;
+  m_reprocessFailed = true;
+  m_processAll = true;
+  m_processPartial = false;
+  m_batch.resetSkippedItems();
+}
+
+void BatchJobRunner::notifyAutoreductionPaused() {
+  m_isAutoreducing = false;
+  m_rowLocationsToProcess.clear();
+}
+
+void BatchJobRunner::setReprocessFailedItems(bool reprocessFailed) {
+  m_reprocessFailed = reprocessFailed;
+}
+
+template <typename T> bool BatchJobRunner::isSelected(T const &item) {
+  return m_processAll || m_batch.isInSelection(item, m_rowLocationsToProcess);
+}
+
+bool BatchJobRunner::hasSelectedRowsRequiringProcessing(Group const &group) {
+  // If the group itself is selected, consider its rows to also be selected
+  auto processAllRowsInGroup = (m_processAll || isSelected(group));
+
+  for (auto const &row : group.rows()) {
+    if (row && (processAllRowsInGroup || isSelected(row.get())) &&
+        row->requiresProcessing(m_reprocessFailed))
+      return true;
   }
 
-  void BatchJobRunner::notifyReductionPaused() {
-    m_isProcessing = false;
-    m_rowLocationsToProcess.clear();
+  return false;
+}
+
+/** Get algorithms and related properties for processing a batch of rows and
+ * groups in the table
+ */
+std::deque<IConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
+  auto &groups =
+      m_batch.mutableRunsTable().mutableReductionJobs().mutableGroups();
+  for (auto &group : groups) {
+    // If the group is selected, process all of its rows
+    if (isSelected(group) && group.requiresProcessing(m_reprocessFailed))
+      return algorithmsForProcessingRowsInGroup(group, true);
+    // If the group has rows that are selected, process the selected rows
+    if (hasSelectedRowsRequiringProcessing(group))
+      return algorithmsForProcessingRowsInGroup(group, false);
+    // If the group's requires postprocessing, do it
+    if (isSelected(group) && group.requiresPostprocessing(m_reprocessFailed))
+      return algorithmForPostprocessingGroup(group);
   }
+  return std::deque<IConfiguredAlgorithm_sptr>();
+}
 
-  void BatchJobRunner::notifyAutoreductionResumed() {
-    m_isAutoreducing = true;
-    m_reprocessFailed = true;
-    m_processAll = true;
-    m_processPartial = false;
-    m_batch.resetSkippedItems();
+/** Add the algorithms and related properties for postprocessing a group
+ * @param group : the group to get the row algorithms for
+ * @returns : the list of configured algorithms
+ */
+std::deque<IConfiguredAlgorithm_sptr>
+BatchJobRunner::algorithmForPostprocessingGroup(Group &group) {
+  auto algorithm = createConfiguredAlgorithm(m_batch, group);
+  auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
+  algorithms.emplace_back(std::move(algorithm));
+  return algorithms;
+}
+
+/** Add the algorithms and related properties for processing all the rows
+ * in a group
+ * @param group : the group to get the row algorithms for
+ * @param processAll : if true, include all rows in the group;
+ * otherwise just include selected rows
+ * @returns : the list of configured algorithms
+ */
+std::deque<IConfiguredAlgorithm_sptr>
+BatchJobRunner::algorithmsForProcessingRowsInGroup(Group &group,
+                                                   bool processAll) {
+  auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
+  auto &rows = group.mutableRows();
+  for (auto &row : rows) {
+    if (row && row->requiresProcessing(m_reprocessFailed) &&
+        (processAll || isSelected(row.get())))
+      addAlgorithmForProcessingRow(row.get(), algorithms);
   }
+  return algorithms;
+}
 
-  void BatchJobRunner::notifyAutoreductionPaused() {
-    m_isAutoreducing = false;
-    m_rowLocationsToProcess.clear();
-  }
+/** Add the algorithm and related properties for processing a row
+ * @param row : the row to get the configured algorithm for
+ * @param algorithms : the list of configured algorithms to add this row to
+ * @returns : true if algorithms were added, false if there was nothing to do
+ */
+void BatchJobRunner::addAlgorithmForProcessingRow(
+    Row &row, std::deque<IConfiguredAlgorithm_sptr> &algorithms) {
+  auto algorithm = createConfiguredAlgorithm(m_batch, row);
+  algorithms.emplace_back(std::move(algorithm));
+}
 
-  void BatchJobRunner::setReprocessFailedItems(bool reprocessFailed) {
-    m_reprocessFailed = reprocessFailed;
-  }
+AlgorithmRuntimeProps BatchJobRunner::rowProcessingProperties() const {
+  return createAlgorithmRuntimeProps(m_batch);
+}
 
-  template <typename T> bool BatchJobRunner::isSelected(T const &item) {
-    return m_processAll || m_batch.isInSelection(item, m_rowLocationsToProcess);
-  }
+Item const &
+BatchJobRunner::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
+  auto jobAlgorithm =
+      boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  jobAlgorithm->item()->resetOutputs();
+  jobAlgorithm->item()->setRunning();
+  return *jobAlgorithm->item();
+}
 
-  bool BatchJobRunner::hasSelectedRowsRequiringProcessing(Group const &group) {
-    // If the group itself is selected, consider its rows to also be selected
-    auto processAllRowsInGroup = (m_processAll || isSelected(group));
+Item const &
+BatchJobRunner::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
+  auto jobAlgorithm =
+      boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
 
-    for (auto const &row : group.rows()) {
-      if (row && (processAllRowsInGroup || isSelected(row.get())) &&
-          row->requiresProcessing(m_reprocessFailed))
-        return true;
-    }
+  jobAlgorithm->updateItem();
+  jobAlgorithm->item()->setSuccess();
+  return *jobAlgorithm->item();
+}
 
-    return false;
-  }
+Item const &BatchJobRunner::algorithmError(IConfiguredAlgorithm_sptr algorithm,
+                                           std::string const &message) {
+  auto jobAlgorithm =
+      boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  auto *item = jobAlgorithm->item();
+  item->resetOutputs();
+  item->setError(message);
+  // Mark the item as skipped so we don't reprocess it in the current round of
+  // reductions.
+  item->setSkipped(true);
+  return *item;
+}
 
-  /** Get algorithms and related properties for processing a batch of rows and
-   * groups in the table
-   */
-  std::deque<IConfiguredAlgorithm_sptr> BatchJobRunner::getAlgorithms() {
-    auto &groups =
-        m_batch.mutableRunsTable().mutableReductionJobs().mutableGroups();
-    for (auto &group : groups) {
-      // If the group is selected, process all of its rows
-      if (isSelected(group) && group.requiresProcessing(m_reprocessFailed))
-        return algorithmsForProcessingRowsInGroup(group, true);
-      // If the group has rows that are selected, process the selected rows
-      if (hasSelectedRowsRequiringProcessing(group))
-        return algorithmsForProcessingRowsInGroup(group, false);
-      // If the group's requires postprocessing, do it
-      if (isSelected(group) && group.requiresPostprocessing(m_reprocessFailed))
-        return algorithmForPostprocessingGroup(group);
-    }
-    return std::deque<IConfiguredAlgorithm_sptr>();
-  }
+std::vector<std::string> BatchJobRunner::algorithmOutputWorkspacesToSave(
+    IConfiguredAlgorithm_sptr algorithm) const {
+  auto jobAlgorithm =
+      boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  auto item = jobAlgorithm->item();
 
-  /** Add the algorithms and related properties for postprocessing a group
-   * @param group : the group to get the row algorithms for
-   * @returns : the list of configured algorithms
-   */
-  std::deque<IConfiguredAlgorithm_sptr>
-  BatchJobRunner::algorithmForPostprocessingGroup(Group & group) {
-    auto algorithm = createConfiguredAlgorithm(m_batch, group);
-    auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
-    algorithms.emplace_back(std::move(algorithm));
-    return algorithms;
-  }
+  if (item->isGroup())
+    return getWorkspacesToSave(dynamic_cast<Group &>(*item));
+  else
+    return getWorkspacesToSave(dynamic_cast<Row &>(*item));
 
-  /** Add the algorithms and related properties for processing all the rows
-   * in a group
-   * @param group : the group to get the row algorithms for
-   * @param processAll : if true, include all rows in the group;
-   * otherwise just include selected rows
-   * @returns : the list of configured algorithms
-   */
-  std::deque<IConfiguredAlgorithm_sptr>
-  BatchJobRunner::algorithmsForProcessingRowsInGroup(Group & group,
-                                                     bool processAll) {
-    auto algorithms = std::deque<IConfiguredAlgorithm_sptr>();
-    auto &rows = group.mutableRows();
-    for (auto &row : rows) {
-      if (row && row->requiresProcessing(m_reprocessFailed) &&
-          (processAll || isSelected(row.get())))
-        addAlgorithmForProcessingRow(row.get(), algorithms);
-    }
-    return algorithms;
-  }
+  return std::vector<std::string>();
+}
 
-  /** Add the algorithm and related properties for processing a row
-   * @param row : the row to get the configured algorithm for
-   * @param algorithms : the list of configured algorithms to add this row to
-   * @returns : true if algorithms were added, false if there was nothing to do
-   */
-  void BatchJobRunner::addAlgorithmForProcessingRow(
-      Row & row, std::deque<IConfiguredAlgorithm_sptr> & algorithms) {
-    auto algorithm = createConfiguredAlgorithm(m_batch, row);
-    algorithms.emplace_back(std::move(algorithm));
-  }
+std::vector<std::string>
+BatchJobRunner::getWorkspacesToSave(Group const &group) const {
+  return std::vector<std::string>{group.postprocessedWorkspaceName()};
+}
 
-  AlgorithmRuntimeProps BatchJobRunner::rowProcessingProperties() const {
-    return createAlgorithmRuntimeProps(m_batch);
-  }
-
-  Item const &BatchJobRunner::algorithmStarted(
-      IConfiguredAlgorithm_sptr algorithm) {
-    auto jobAlgorithm =
-        boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-    jobAlgorithm->item()->resetOutputs();
-    jobAlgorithm->item()->setRunning();
-    return *jobAlgorithm->item();
-  }
-
-  Item const &BatchJobRunner::algorithmComplete(
-      IConfiguredAlgorithm_sptr algorithm) {
-    auto jobAlgorithm =
-        boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-
-    jobAlgorithm->updateItem();
-    jobAlgorithm->item()->setSuccess();
-    return *jobAlgorithm->item();
-  }
-
-  Item const &BatchJobRunner::algorithmError(
-      IConfiguredAlgorithm_sptr algorithm, std::string const &message) {
-    auto jobAlgorithm =
-        boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-    auto *item = jobAlgorithm->item();
-    item->resetOutputs();
-    item->setError(message);
-    // Mark the item as skipped so we don't reprocess it in the current round of
-    // reductions.
-    item->setSkipped(true);
-    return *item;
-  }
-
-  std::vector<std::string> BatchJobRunner::algorithmOutputWorkspacesToSave(
-      IConfiguredAlgorithm_sptr algorithm) const {
-    auto jobAlgorithm =
-        boost::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-    auto item = jobAlgorithm->item();
-
-    if (item->isGroup())
-      return getWorkspacesToSave(dynamic_cast<Group &>(*item));
-    else
-      return getWorkspacesToSave(dynamic_cast<Row &>(*item));
-
-    return std::vector<std::string>();
-  }
-
-  std::vector<std::string> BatchJobRunner::getWorkspacesToSave(
-      Group const &group) const {
-    return std::vector<std::string>{group.postprocessedWorkspaceName()};
-  }
-
-  std::vector<std::string> BatchJobRunner::getWorkspacesToSave(Row const &row)
-      const {
-    // Get the output workspaces for the given row. Note that we only save
-    // workspaces for the row if the group does not have postprocessing, because
-    // in that case users just want to see the postprocessed output instead.
-    auto workspaces = std::vector<std::string>();
-    auto const group = m_batch.runsTable().reductionJobs().getParentGroup(row);
-    if (group.hasPostprocessing())
-      return workspaces;
-
-    // We currently only save the binned workspace in Q
-    workspaces.emplace_back(row.reducedWorkspaceNames().iVsQBinned());
+std::vector<std::string>
+BatchJobRunner::getWorkspacesToSave(Row const &row) const {
+  // Get the output workspaces for the given row. Note that we only save
+  // workspaces for the row if the group does not have postprocessing, because
+  // in that case users just want to see the postprocessed output instead.
+  auto workspaces = std::vector<std::string>();
+  auto const group = m_batch.runsTable().reductionJobs().getParentGroup(row);
+  if (group.hasPostprocessing())
     return workspaces;
-  }
 
-  std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Group>
-  BatchJobRunner::getUnprocessedGroups() {
-    auto groups = m_batch.runsTable().reductionJobs().groups();
-    groups.erase(
-        std::remove_if(
-            groups.begin(), groups.end(),
-            [](MantidQt::CustomInterfaces::ISISReflectometry::Group &group)
-                -> bool { return group.complete(); }),
-        groups.end());
-    return groups;
-  }
+  // We currently only save the binned workspace in Q
+  workspaces.emplace_back(row.reducedWorkspaceNames().iVsQBinned());
+  return workspaces;
+}
 
-  std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Row>
-  BatchJobRunner::getUnprocessedRows() {
-    auto groups = getUnprocessedGroups();
-    std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Row> rows;
-    for (const auto &group : groups) {
-      for (const auto &row : group.rows()) {
-        if (row.is_initialized()) {
-          rows.emplace_back(row.get());
-        }
+std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Group>
+BatchJobRunner::getUnprocessedGroups() {
+  auto groups = m_batch.runsTable().reductionJobs().groups();
+  groups.erase(
+      std::remove_if(
+          groups.begin(), groups.end(),
+          [](MantidQt::CustomInterfaces::ISISReflectometry::Group &group)
+              -> bool { return group.complete(); }),
+      groups.end());
+  return groups;
+}
+
+std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Row>
+BatchJobRunner::getUnprocessedRows() {
+  auto groups = getUnprocessedGroups();
+  std::vector<MantidQt::CustomInterfaces::ISISReflectometry::Row> rows;
+  for (const auto &group : groups) {
+    for (const auto &row : group.rows()) {
+      if (row.is_initialized()) {
+        rows.emplace_back(row.get());
       }
     }
-    rows.erase(std::remove_if(
-                   rows.begin(), rows.end(),
-                   [](MantidQt::CustomInterfaces::ISISReflectometry::Row &row)
-                       -> bool { return row.complete(); }),
-               rows.end());
-    return rows;
+  }
+  rows.erase(
+      std::remove_if(rows.begin(), rows.end(),
+                     [](MantidQt::CustomInterfaces::ISISReflectometry::Row &row)
+                         -> bool { return row.complete(); }),
+      rows.end());
+  return rows;
+}
+
+const Group &BatchJobRunner::getGroupFromPath(
+    MantidWidgets::Batch::RowLocation rowLocation) const {
+  return m_batch.runsTable().reductionJobs().getGroupFromPath(rowLocation);
+}
+
+const Row &BatchJobRunner::getRowFromPath(
+    MantidWidgets::Batch::RowLocation rowLocation) const {
+  return m_batch.runsTable().reductionJobs().getRowFromPath(rowLocation).get();
+}
+
+int BatchJobRunner::getParentGroupIndexFromPath(
+    MantidWidgets::Batch::RowLocation rowLocation) const {
+  return groupOf(rowLocation);
+}
+
+int BatchJobRunner::getNumberOfInitialisedRowsInGroup(
+    const int groupIndex) const {
+  auto group = m_batch.runsTable().reductionJobs().groups()[groupIndex];
+  return static_cast<int>(std::count_if(
+      group.rows().cbegin(), group.rows().cend(),
+      [](const boost::optional<Row> &row) { return row.is_initialized(); }));
+}
+
+int BatchJobRunner::getNumberOfInitialisedRowsInGroup(
+    const Group &group) const {
+  return static_cast<int>(std::count_if(
+      group.rows().cbegin(), group.rows().cend(),
+      [](const boost::optional<Row> &row) { return row.is_initialized(); }));
+}
+
+boost::optional<Item const &>
+BatchJobRunner::notifyWorkspaceDeleted(std::string const &wsName) {
+  // Reset the state for the relevant row if the workspace was one of our
+  // outputs
+  auto item = m_batch.getItemWithOutputWorkspaceOrNone(wsName);
+  if (item.is_initialized()) {
+    item->resetState(false);
+    return boost::optional<Item const &>(item.get());
+  }
+  return boost::none;
+}
+
+boost::optional<Item const &>
+BatchJobRunner::notifyWorkspaceRenamed(std::string const &oldName,
+                                       std::string const &newName) {
+  // Update the workspace name in the model, if it is one of our outputs
+  auto item = m_batch.getItemWithOutputWorkspaceOrNone(oldName);
+  if (item.is_initialized()) {
+    item->renameOutputWorkspace(oldName, newName);
+    return boost::optional<Item const &>(item.get());
+  }
+  auto newItem = m_batch.getItemWithOutputWorkspaceOrNone(newName);
+  if (newItem.is_initialized()) {
+    newItem->resetState();
+    return boost::optional<Item const &>(newItem.get());
   }
 
-  const Group &BatchJobRunner::getGroupFromPath(
-      MantidWidgets::Batch::RowLocation rowLocation) const {
-    return m_batch.runsTable().reductionJobs().getGroupFromPath(rowLocation);
-  }
+  return boost::none;
+}
 
-  const Row &BatchJobRunner::getRowFromPath(
-      MantidWidgets::Batch::RowLocation rowLocation) const {
-    return m_batch.runsTable()
-        .reductionJobs()
-        .getRowFromPath(rowLocation)
-        .get();
-  }
+void BatchJobRunner::notifyAllWorkspacesDeleted() {
+  // All output workspaces will be deleted so reset all rows and groups
+  m_batch.resetState();
+}
 
-  int BatchJobRunner::getParentGroupIndexFromPath(
-      MantidWidgets::Batch::RowLocation rowLocation) const {
-    return groupOf(rowLocation);
-  }
-
-  int BatchJobRunner::getNumberOfInitialisedRowsInGroup(const int groupIndex)
-      const {
-    auto group = m_batch.runsTable().reductionJobs().groups()[groupIndex];
-    return static_cast<int>(std::count_if(
-        group.rows().cbegin(), group.rows().cend(),
-        [](const boost::optional<Row> &row) { return row.is_initialized(); }));
-  }
-
-  int BatchJobRunner::getNumberOfInitialisedRowsInGroup(const Group &group)
-      const {
-    return static_cast<int>(std::count_if(
-        group.rows().cbegin(), group.rows().cend(),
-        [](const boost::optional<Row> &row) { return row.is_initialized(); }));
-  }
-
-  boost::optional<Item const &> BatchJobRunner::notifyWorkspaceDeleted(
-      std::string const &wsName) {
-    // Reset the state for the relevant row if the workspace was one of our
-    // outputs
-    auto item = m_batch.getItemWithOutputWorkspaceOrNone(wsName);
-    if (item.is_initialized()) {
-      item->resetState(false);
-      return boost::optional<Item const &>(item.get());
-    }
-    return boost::none;
-  }
-
-  boost::optional<Item const &> BatchJobRunner::notifyWorkspaceRenamed(
-      std::string const &oldName, std::string const &newName) {
-    // Update the workspace name in the model, if it is one of our outputs
-    auto item = m_batch.getItemWithOutputWorkspaceOrNone(oldName);
-    if (item.is_initialized()) {
-      item->renameOutputWorkspace(oldName, newName);
-      return boost::optional<Item const &>(item.get());
-    }
-    auto newItem = m_batch.getItemWithOutputWorkspaceOrNone(newName);
-    if (newItem.is_initialized()) {
-      newItem->resetState();
-      return boost::optional<Item const &>(newItem.get());
-    }
-
-    return boost::none;
-  }
-
-  void BatchJobRunner::notifyAllWorkspacesDeleted() {
-    // All output workspaces will be deleted so reset all rows and groups
-    m_batch.resetState();
-  }
-
-  bool BatchJobRunner::getProcessPartial() const { return m_processPartial; }
-  bool BatchJobRunner::getProcessAll() const {
-    return m_processAll && !m_isAutoreducing;
-  }
-} // namespace ISISReflectometry
+bool BatchJobRunner::getProcessPartial() const { return m_processPartial; }
+bool BatchJobRunner::getProcessAll() const {
+  return m_processAll && !m_isAutoreducing;
+}
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
+} // namespace MantidQt

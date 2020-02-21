@@ -35,8 +35,6 @@ public:
   virtual bool isCloseEventPrevented() = 0;
   virtual bool isCloseBatchPrevented(int batchIndex) const = 0;
   virtual bool isOverwriteBatchPrevented(int tabIndex) const = 0;
-  virtual bool isProcessAllPrevented() const = 0;
-  virtual bool isProcessPartialGroupPrevented() const = 0;
   virtual bool isBatchUnsaved(int batchIndex) const = 0;
   virtual bool isAnyBatchUnsaved() = 0;
   virtual void notifyAnyBatchAutoreductionResumed() = 0;

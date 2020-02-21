@@ -57,22 +57,10 @@ public:
   // IMainWindowPresenter overrides
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
-  bool isWarnProcessAllChecked() const override;
-  bool isWarnProcessPartialGroupChecked() const override;
-  bool isRoundChecked() const override;
-  int &getRoundPrecision() const override;
-  boost::optional<int> roundPrecision() const override;
   bool isCloseEventPrevented() override;
   bool isOverwriteBatchPrevented(int tabIndex) const override;
   bool isProcessAllPrevented() const override;
   bool isProcessPartialGroupPrevented() const override;
-  bool isOperationPrevented(int tabIndex) const override;
-  bool isProcessAllPrevented() const override;
-  bool isProcessPartialGroupPrevented() const override;
-  bool isBatchUnsaved(int batchIndex) const override;
-  bool isAnyBatchUnsaved() override;
-  bool getUnsavedFlag() const override;
-  void setUnsavedFlag(bool isUnsaved) override;
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyAnyBatchReductionResumed() override;
