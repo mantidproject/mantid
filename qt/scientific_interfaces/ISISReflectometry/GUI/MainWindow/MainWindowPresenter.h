@@ -57,6 +57,8 @@ public:
   // IMainWindowPresenter overrides
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
+  bool isBatchUnsaved(int batchIndex) const override;
+  bool isAnyBatchUnsaved() override;
   bool isCloseEventPrevented() override;
   bool isOverwriteBatchPrevented(int tabIndex) const override;
   bool isProcessAllPrevented() const override;
@@ -104,8 +106,6 @@ private:
   bool isWarnProcessAllChecked() const override;
   bool isWarnProcessPartialGroupChecked() const override;
   bool isCloseBatchPrevented(int batchIndex) const override;
-  bool isBatchUnsaved(int batchIndex) const override;
-  bool isAnyBatchUnsaved() override;
   void optionsChanged() const;
   void showHelp();
   void addNewBatch(IBatchView *batchView);

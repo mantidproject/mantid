@@ -103,15 +103,28 @@ protected:
     return group;
   }
 
+  std::vector<MantidQt::MantidWidgets::Batch::RowLocation>
+  selectedRowLocations(BatchJobRunnerFriend &jobRunner) {
+    return jobRunner.m_batch.selectedRowLocations();
+  }
+
   void selectGroup(BatchJobRunnerFriend &jobRunner, int groupIndex) {
     jobRunner.m_rowLocationsToProcess.push_back(
         MantidQt::MantidWidgets::Batch::RowPath{groupIndex});
+    auto selectedRowLocation =
+        MantidQt::MantidWidgets::Batch::RowPath{groupIndex};
+    jobRunner.m_batch.mutableRunsTable().appendSelectedRowLocations(
+        selectedRowLocation);
   }
 
   void selectRow(BatchJobRunnerFriend &jobRunner, int groupIndex,
                  int rowIndex) {
     jobRunner.m_rowLocationsToProcess.push_back(
         MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex});
+    auto selectedPath =
+        MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
+    jobRunner.m_batch.mutableRunsTable().setSelectedRowLocations(
+        {selectedPath});
   }
 };
 

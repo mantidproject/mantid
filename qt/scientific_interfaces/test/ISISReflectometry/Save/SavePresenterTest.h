@@ -334,7 +334,7 @@ public:
 
   void testNotifyMainPresenterSettingsChanged() {
     auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, notifySettingsChanged());
+    EXPECT_CALL(m_mainPresenter, setBatchUnsaved(true));
     presenter.notifySettingsChanged();
     verifyAndClear();
   }
