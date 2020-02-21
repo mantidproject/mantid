@@ -613,6 +613,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=rebin_ws, OutputWorkspace=ws)
         if self._group_detectors:
             self._do_group_detectors(ws)
+        if self._normalise_to == 'Monitor':
+            mtd[ws].setDistribution(True)
         GroupWorkspaces(InputWorkspaces=[ws],OutputWorkspace=self._red_ws)
         DeleteWorkspaces([rebin_ws])
 
