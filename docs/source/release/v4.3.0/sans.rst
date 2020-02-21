@@ -22,4 +22,10 @@ Improved
   can copy the history of a workspace to their clipboard or a file and the data
   will be reproduced on that machine without requiring editing of the script.
 
+Fixed
+#####
+- A zero monitor shift did not previously account for the position
+  of the rear detector for Zoom. A 0.0mm offset now works correctly when
+  processing data from the SANS GUI or command interface.
+
 :ref:`Release 4.3.0 <v4.3.0>`
