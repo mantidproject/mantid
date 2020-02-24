@@ -26,7 +26,7 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPaneView{
 
 public:
-
+ 
   virtual void observeFitButton(Observer *listener)=0;
   virtual std::pair<double, double> getRange()=0;
   virtual Mantid::API::IFunction_sptr getFunction()=0;
