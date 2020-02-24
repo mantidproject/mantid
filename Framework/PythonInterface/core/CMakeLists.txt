@@ -11,7 +11,6 @@ set(
   src/GlobalInterpreterLock.cpp
   src/NDArray.cpp
   src/ReleaseGlobalInterpreterLock.cpp
-  src/UninstallTrace.cpp
   src/WrapperHelpers.cpp
   src/Converters/CloneToNDArray.cpp
   src/Converters/DateAndTime.cpp
@@ -40,7 +39,6 @@ set(
   inc/MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h
   inc/MantidPythonInterface/core/StlExportDefinitions.h
   inc/MantidPythonInterface/core/TypedValidatorExporter.h
-  inc/MantidPythonInterface/core/UninstallTrace.h
   inc/MantidPythonInterface/core/VersionCompat.h
   inc/MantidPythonInterface/core/WrapperHelpers.h
   inc/MantidPythonInterface/core/WrapPython.h

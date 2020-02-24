@@ -11,15 +11,8 @@ from __future__ import absolute_import, unicode_literals
 
 import __future__
 import ast
-
-try:
-    import builtins
-except ImportError:
-    import __main__
-
-    builtins = __main__.__builtins__
-import copy
 import os
+import re
 from io import BytesIO
 from lib2to3.pgen2.tokenize import detect_encoding
 
@@ -28,13 +21,11 @@ from qtpy.QtWidgets import QApplication
 
 from mantidqt.utils import AddedToSysPath
 from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTaskWithCallback
-from mantidqt.utils.qt import import_qt
-
-# Core object to execute the code with optinal progress tracking
-CodeExecution = import_qt('..._common', 'mantidqt.widgets.codeeditor.execution', 'CodeExecution')
+from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
 
 EMPTY_FILENAME_ID = '<string>'
 FILE_ATTR = '__file__'
+COMPILE_MODE = 'exec'
 
 
 def _get_imported_from_future(code_str):
@@ -53,7 +44,6 @@ def _get_imported_from_future(code_str):
         if isinstance(node, ast.ImportFrom):
             if node.module == '__future__':
                 future_imports.extend([import_alias.name for import_alias in node.names])
-                break
     return future_imports
 
 
@@ -83,14 +73,20 @@ class PythonCodeExecution(QObject):
     """
     sig_exec_success = Signal(object)
     sig_exec_error = Signal(object)
+    sig_exec_progress = Signal(int)
 
-    def __init__(self, editor=None):
+    def __init__(self, startup_code=None):
         """Initialize the object"""
         super(PythonCodeExecution, self).__init__()
-        self._editor = editor
+
         self._globals_ns = None
+
         self._task = None
+
         self.reset_context()
+
+        # the code is not executed initially so code completion won't work
+        # on variables until part is executed
 
     @property
     def globals_ns(self):
@@ -133,18 +129,34 @@ class PythonCodeExecution(QObject):
         is used
         :raises: Any error that the code generates
         """
-        if not filename:
+        if filename:
+            self.globals_ns[FILE_ATTR] = filename
+        else:
             filename = EMPTY_FILENAME_ID
-
-        self.globals_ns[FILE_ATTR] = filename
         flags = get_future_import_compiler_flags(code_str)
+        # This line checks the whole code string for syntax errors, so that no
+        # code blocks are executed if the script has invalid syntax.
+        try:
+            compile(code_str, filename, mode=COMPILE_MODE, dont_inherit=True, flags=flags)
+        except SyntaxError as e:  # Encoding declarations cause issues in compile calls. If found, remove them.
+            if "encoding declaration in Unicode string" in str(e):
+                code_str = re.sub("coding[=:]\s*([-\w.]+)", "", code_str, 1)
+                compile(code_str, filename, mode=COMPILE_MODE, dont_inherit=True, flags=flags)
+            else:
+                raise e
+
         with AddedToSysPath([os.path.dirname(filename)]):
-            executor = CodeExecution(self._editor)
-            executor.execute(code_str, filename, flags, self.globals_ns)
+            sig_progress = self.sig_exec_progress
+            for block in code_blocks(code_str):
+                sig_progress.emit(block.lineno)
+                # compile so we can set the filename
+                code_obj = compile(block.code_str, filename, mode=COMPILE_MODE,
+                                   dont_inherit=True, flags=flags)
+                exec (code_obj, self.globals_ns, self.globals_ns)
 
     def reset_context(self):
         # create new context for execution
-        self._globals_ns = copy.copy(builtins.globals())
+        self._globals_ns, self._namespace = {}, {}
 
     # --------------------- Callbacks -------------------------------
     def _on_success(self, task_result):
@@ -155,6 +167,51 @@ class PythonCodeExecution(QObject):
         self._reset_task()
         self.sig_exec_error.emit(task_error)
 
+    def _on_progress_updated(self, lineno):
+        self.sig_exec_progress(lineno)
+
     # --------------------- Private -------------------------------
     def _reset_task(self):
         self._task = None
+
+
+class CodeBlock(object):
+    """Holds an executable code object. It also stores the line number
+    of the first line within a larger group of code blocks"""
+
+    def __init__(self, code_str, lineno):
+        self.code_str = code_str
+        self.lineno = lineno
+
+
+def code_blocks(code_str):
+    """Generator to produce blocks of executable code
+    from the given code string.
+    """
+    lineno_cur = 0
+    lines = code_str.splitlines()
+    line_count = len(lines)
+    isp = InputSplitter()
+    for line in lines:
+        lineno_cur += 1
+        # IPython InputSplitter assumes that indentation is 4 spaces, not tabs.
+        # Accounting for that here, rather than using script-level "tabs to spaces"
+        # allows the user to keep tabs in their script if they wish.
+        line = line.replace("\t", " "*4)
+        isp.push(line)
+        # If we need more input to form a complete statement
+        # or we are not at the end of the code then keep
+        # going
+        if isp.push_accepts_more() and lineno_cur != line_count:
+            continue
+        else:
+            # Now we have a complete set of executable statements
+            # throw them at the execution engine
+            code = isp.source
+            isp.reset()
+            yield CodeBlock(code, lineno_cur)
+            # In order to keep the line numbering in error stack traces
+            # consistent each executed block needs to have the statements
+            # on the same line as they are in the real code so we prepend
+            # blank lines to make this so
+            isp.push('\n' * lineno_cur)

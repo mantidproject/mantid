@@ -11,6 +11,8 @@ from __future__ import (absolute_import, unicode_literals)
 
 # system imports
 import os.path as osp
+import os
+import sys
 
 # third-party library imports
 from qtpy.QtWidgets import QVBoxLayout
@@ -18,12 +20,24 @@ from qtpy.QtWidgets import QVBoxLayout
 # local package imports
 from mantid.kernel import logger
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
-from ..config import DEFAULT_SCRIPT_CONTENT
 from ..config.fonts import text_font
 from ..plugins.base import PluginWidget
 
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
+
+# Initial content
+DEFAULT_CONTENT = ""
+if sys.version_info < (3,0):
+    DEFAULT_CONTENT += "# The following line helps with future compatibility with Python 3" + os.linesep + \
+                       "# print must now be used as a function, e.g print('Hello','World')" + os.linesep + \
+                       "from __future__ import (absolute_import, division, print_function, unicode_literals)" + \
+                       os.linesep + os.linesep
+
+DEFAULT_CONTENT += "# import mantid algorithms, numpy and matplotlib" + os.linesep + \
+                   "from mantid.simpleapi import *" + os.linesep + \
+                   "import matplotlib.pyplot as plt" + os.linesep + \
+                   "import numpy as np" + os.linesep + os.linesep
 
 # Accepted extensions for drag-and-drop to editor
 ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']
@@ -44,7 +58,7 @@ class MultiFileEditor(PluginWidget):
 
         # layout
         self.editors = MultiPythonFileInterpreter(font=font,
-                                                  default_content=DEFAULT_SCRIPT_CONTENT,
+                                                  default_content=DEFAULT_CONTENT,
                                                   parent=self)
         layout = QVBoxLayout()
         layout.addWidget(self.editors)

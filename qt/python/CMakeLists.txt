@@ -91,6 +91,11 @@ if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
     mantidqt/utils/test/test_modal_tester.py
     mantidqt/utils/test/test_qt_utils.py
     mantidqt/utils/test/test_writetosignal.py
+    mantidqt/widgets/codeeditor/test/test_codeeditor.py
+    mantidqt/widgets/codeeditor/test/test_completion.py
+    mantidqt/widgets/codeeditor/test/test_errorformatter.py
+    mantidqt/widgets/codeeditor/test/test_execution.py
+    mantidqt/widgets/codeeditor/test/test_interpreter.py
     mantidqt/widgets/test/test_messagedisplay.py
     mantidqt/widgets/test/test_fitpropertybrowser.py
     mantidqt/widgets/test/test_fitpropertybrowserbase.py
@@ -113,11 +118,6 @@ if(ENABLE_WORKBENCH OR ENABLE_WORKBENCH)
       PYTHON_WIDGET_QT5_ONLY_TESTS
       mantidqt/widgets/algorithmselector/test/observer_test.py
       mantidqt/widgets/algorithmselector/test/test_algorithmselector.py
-      mantidqt/widgets/codeeditor/test/test_codeeditor.py
-      mantidqt/widgets/codeeditor/test/test_completion.py
-      mantidqt/widgets/codeeditor/test/test_execution.py
-      mantidqt/widgets/codeeditor/test/test_errorformatter.py
-      mantidqt/widgets/codeeditor/test/test_interpreter.py
       mantidqt/widgets/codeeditor/test/test_interpreter_view.py
       mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
       mantidqt/widgets/codeeditor/test/test_multifileinterpreter_view.py

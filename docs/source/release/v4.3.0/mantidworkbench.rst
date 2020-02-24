@@ -86,7 +86,6 @@ Improvements
 - The Save menu action in the workspaces toolbox to save using version 1 of the SaveAscii algorithm has been removed as no one was using it and it only added confusion. The option to save using the most recent version of SaveASCII is still available.
 - You can now search for functions when doing fits.
 - A help button has been added to the fitting add function dialog.
-- The progress reporting for scripts has been vastly improved and now reports at the line level.
 
 Bugfixes
 ########
@@ -104,6 +103,5 @@ Bugfixes
 - The help button in fitting now finds the relevant page.
 - Fixed an issue where fitting a distribution workspace was normalised twice.
 - Overplots will be normalized by bin width if they are overplotting a curve from a workspace which is a distribution.
-- Several bugs in the way Python scripts were parsed and executed, including blank lines after a colon and tabs in strings, have been fixed.
 
 :ref:`Release 4.3.0 <v4.3.0>`

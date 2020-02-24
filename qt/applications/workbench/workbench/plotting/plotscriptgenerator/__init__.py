@@ -12,7 +12,7 @@ from mantid.plots.mantidaxes import MantidAxes
 
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from matplotlib.legend import Legend
-from workbench.config import DEFAULT_SCRIPT_CONTENT
+from workbench.plugins.editor import DEFAULT_CONTENT
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
                                                          generate_axis_label_commands,
                                                          generate_set_title_command,
@@ -67,7 +67,7 @@ def generate_script(fig, exclude_headers=False):
     if not plot_commands:
         return
 
-    cmds = [] if exclude_headers else [DEFAULT_SCRIPT_CONTENT]
+    cmds = [] if exclude_headers else [DEFAULT_CONTENT]
     cmds.extend(generate_workspace_retrieval_commands(fig) + [''])
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds.extend(plot_commands)

@@ -2,8 +2,6 @@
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
-#include "frameobject.h"
-
 // Allows suppression of namespaces within the module
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::Batch;
@@ -106,6 +104,18 @@ public:
   void setSource(const QString &source);
 };
 
+%If (Qt_5_0_0 -)
+class AlgorithmProgressWidget : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
+%End
+
+public:
+    AlgorithmProgressWidget(QWidget *parent /TransferThis/ = 0);
+    void blockUpdates(bool block = true);
+};
+%End
+
 class ScriptEditor : QWidget {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/ScriptEditor.h"
@@ -175,6 +185,8 @@ public:
   void replaceAll(const QString &search, const QString &replace,
                               bool regex, bool caseSensitive, bool matchWords,
                               bool wrap, bool backward);
+
+
 public slots:
   void updateProgressMarker(int lineno, bool error);
   void zoomTo(int level);
@@ -188,33 +200,6 @@ signals:
 private:
   ScriptEditor(const ScriptEditor&);
 };
-
-%If (Qt_5_0_0 -)
-
-class AlgorithmProgressWidget : QWidget {
-%TypeHeaderCode
-#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
-%End
-
-public:
-  AlgorithmProgressWidget(QWidget *parent /TransferThis/ = 0);
-  void blockUpdates(bool block = true);
-};
-
-class CodeExecution {
-%TypeHeaderCode
-#include "MantidQtWidgets/Common/Python/CodeExecution.h"
-using MantidQt::Widgets::Common::Python::CodeExecution;
-%End
-
-public:
-  CodeExecution(ScriptEditor*);
-  SIP_PYOBJECT execute(const QString &, const QString &, int, SIP_PYOBJECT);
-private:
-  CodeExecution(const CodeExecution&);
-};
-
-%End // end >= Qt5
 
 
 class AlgorithmDialog: QDialog {
