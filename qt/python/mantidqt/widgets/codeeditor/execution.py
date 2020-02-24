@@ -31,7 +31,7 @@ from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTaskWithCallback
 from mantidqt.utils.qt import import_qt
 
 # Core object to execute the code with optinal progress tracking
-CodeExecution = import_qt('..._common', 'mantidqt.widgets.codeeditor.execution', 'CodeExecution')
+CodeExecution = import_qt('..._common', 'mantidqt.widgets.codeeditor', 'CodeExecution')
 
 EMPTY_FILENAME_ID = '<string>'
 FILE_ATTR = '__file__'
