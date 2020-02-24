@@ -571,7 +571,7 @@ class SANSILLReduction(PythonAlgorithm):
                     if (cache and not mtd.doesExist(solid_angle)) or not cache:
                         if self._instrument == "D16":
                             run = mtd[ws].getRun()
-                            distance = run.getLogData("Det.value").value/1000
+                            distance = int(run.getLogData('L2').value)
                             CloneWorkspace(InputWorkspace=ws, OutputWorkspace=solid_angle)
                             MoveInstrumentComponent(Workspace=solid_angle, X=0, Y=0, Z=distance,
                                                     RelativePosition=False, ComponentName="detector")
