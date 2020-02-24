@@ -24,6 +24,7 @@ Improved
   will be reproduced on that machine without requiring editing of the script.
 - Batch CSV files can have their columns in any order and will load into
   the SANS GUI correctly.
+- :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>` now supports gamma scans for D16 at the ILL.
 
 Fixed
 #####
