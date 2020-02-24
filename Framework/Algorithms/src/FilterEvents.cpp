@@ -186,7 +186,6 @@ void FilterEvents::init() {
   declareProperty("DescriptiveOutputNames", false,
                   "If selected, the names of the output workspaces will "
                   "include information about each slice.");
-
 }
 
 std::map<std::string, std::string> FilterEvents::validateInputs() {
