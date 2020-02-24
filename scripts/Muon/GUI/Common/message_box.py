@@ -10,8 +10,6 @@ from qtpy import QtWidgets
 
 
 def warning(error, parent=None):
-    raise Exception(error)
-    return
     if not parent:
         parent = QtWidgets.QWidget()
     QtWidgets.QMessageBox.warning(parent, "Error", str(error))

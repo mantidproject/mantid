@@ -54,7 +54,6 @@ class CoLoadModel(lutils.LModel):
         return out
 
     def co_load_run(self, workspace):
-
         run = lutils.hyphenise(self.co_runs)
         to_add = [
             self.add_runs(run1, run2, run)

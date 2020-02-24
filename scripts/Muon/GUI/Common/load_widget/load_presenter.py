@@ -23,18 +23,6 @@ class LoadPresenter(object):
         self.view.on_co_add_clicked(self.co_add_run)
         self.view.on_spinbox_changed(self.update_models)
 
-    def equalise_loaded_runs(self):
-        if self.co_model.loaded_runs == {} and self.load_model.loaded_runs == {}:
-            return
-        print(self.co_model.loaded_runs,self.load_model.loaded_runs)
-        loaded_runs = max(
-            list(self.co_model.loaded_runs.keys()),
-            list(self.load_model.loaded_runs.keys()))
-        #self.co_model.loaded_runs = loaded_runs
-        print("fdsafds ", loaded_runs,"hhh",self.co_model.loaded_runs.keys())
-        self._current_run = loaded_runs
-        #self.load_model.last_loaded_runs = loaded_runs
-
     def equalise_last_loaded_run(self, runs):
         if self.co_model.loaded_runs == {} and self.load_model.loaded_runs == {}:
             return
@@ -47,9 +35,6 @@ class LoadPresenter(object):
         if self.co_model.loaded_runs == {} and self.load_model.loaded_runs == {}:
             return
         self.equalise_last_loaded_run(self.load_model.loaded_runs.keys())
-
-        #self.co_model.last_loaded_runs = last_run
-        #self.load_model.last_loaded_runs = last_run
 
     def update_models(self, run):
         self.load_model.set_run(run)
