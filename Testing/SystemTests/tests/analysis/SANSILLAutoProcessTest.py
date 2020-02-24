@@ -116,12 +116,12 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
         GroupWorkspaces(InputWorkspaces=['iq', 'panels'], OutputWorkspace='out')
 
 
-class D16AutoProcessTest(systemtesting.MantidSystemTest):
+class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
     """
     Tests autoprocess with D16 data, with a scan on 3 consecutives gamma values.
     """
     def __init__(self):
-        super(D16AutoProcessTest, self).__init__()
+        super(D16_AutoProcess_Test, self).__init__()
         self.setUp()
 
     def setUp(self):
@@ -133,9 +133,8 @@ class D16AutoProcessTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         mtd.clear()
-        os.remove(gettempdir() + '/water_reference_g0.nxs')
-        os.remove(gettempdir() + '/water_reference_g1.nxs')
-        os.remove(gettempdir() + '/water_reference_g2.nxs')
+        for i in range(3):
+            os.remove(os.path.join(gettempdir(), 'water_reference_g' + str(i) + '.nxs'))
 
     def validate(self):
         self.tolerance = 1e-3
@@ -173,7 +172,7 @@ class D16AutoProcessTest(systemtesting.MantidSystemTest):
                            SampleThickness=0.2,
                            AbsorberRuns=absorber)
         tmp_dir = gettempdir()
-        water_dir = [tmp_dir + '/water_reference_g' + str(i) + '.nxs' for i in range(3)]
+        water_dir = [os.path.join(tmp_dir, 'water_reference_g' + str(i) + '.nxs') for i in range(3)]
         SaveNexusProcessed('003659_Sample', water_dir[0])
         SaveNexusProcessed('003663_Sample', water_dir[1])
         SaveNexusProcessed('003667_Sample', water_dir[2])
@@ -194,3 +193,5 @@ class D16AutoProcessTest(systemtesting.MantidSystemTest):
                            SampleThickness=0.2,
                            BeamRadius=1,
                            ReferenceFiles=",".join(water_dir))
+
+
