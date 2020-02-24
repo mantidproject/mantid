@@ -408,7 +408,6 @@ class SANSILLReduction(PythonAlgorithm):
         flux_factor = (sample_l2 ** 2) / (ref_l2 ** 2)
         self.log().notice('Flux factor is: ' + str(flux_factor))
         Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
->>>>>>> master
 
     def _apply_absorber(self, ws, absorber_ws):
         """

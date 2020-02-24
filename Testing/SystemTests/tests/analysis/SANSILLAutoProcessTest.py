@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import systemtesting
 from mantid.simpleapi import SANSILLAutoProcess, config, mtd, GroupWorkspaces, SaveNexusProcessed
 import os
+from tempfile import gettempdir
 
 
 class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
@@ -117,7 +118,7 @@ class D33_AutoProcess_Test(systemtesting.MantidSystemTest):
 
 class D16AutoProcessTest(systemtesting.MantidSystemTest):
     """
-    Tests autoprocess with D16 data, with a scan on 2 consecutives gamma values.
+    Tests autoprocess with D16 data, with a scan on 3 consecutives gamma values.
     """
     def __init__(self):
         super(D16AutoProcessTest, self).__init__()
@@ -128,17 +129,20 @@ class D16AutoProcessTest(systemtesting.MantidSystemTest):
         config['default.instrument'] = 'D16'
         config['logging.loggers.root.level'] = 'Warning'
         config.appendDataSearchSubDir('ILL/D16/')
+        config['algorithms.retained'] = '0'
 
     def cleanup(self):
         mtd.clear()
-        os.remove('/tmp/water_reference_g0.nxs')
-        os.remove('/tmp/water_reference_g1.nxs')
-        os.remove('/tmp/water_reference_g2.nxs')
+        os.remove(gettempdir() + '/water_reference_g0.nxs')
+        os.remove(gettempdir() + '/water_reference_g1.nxs')
+        os.remove(gettempdir() + '/water_reference_g2.nxs')
 
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
-        return ['iq', 'reference_results.nxs']
+        self.disableChecking.append("Instrument")
+
+        return ['iq', 'ILL_D16_scan.nxs']
 
     def runTest(self):
         water = '3659, 3663, 3667'
@@ -153,6 +157,7 @@ class D16AutoProcessTest(systemtesting.MantidSystemTest):
         cell_background = '3676, 3679, 3682'
         transmission_empty_cell = '3673'
 
+        # first process the water
         SANSILLAutoProcess(SampleRuns=water,
                            BeamRuns=beam,
                            DefaultMaskFile="side_mask.nxs",
@@ -167,12 +172,13 @@ class D16AutoProcessTest(systemtesting.MantidSystemTest):
                            WaterCrossSection=0.87,
                            SampleThickness=0.2,
                            AbsorberRuns=absorber)
+        tmp_dir = gettempdir()
+        water_dir = [tmp_dir + '/water_reference_g' + str(i) + '.nxs' for i in range(3)]
+        SaveNexusProcessed('003659_Sample', water_dir[0])
+        SaveNexusProcessed('003663_Sample', water_dir[1])
+        SaveNexusProcessed('003667_Sample', water_dir[2])
 
-        SaveNexusProcessed('003659_Sample', '/tmp/water_reference_g0.nxs')
-        SaveNexusProcessed('003663_Sample', '/tmp/water_reference_g1.nxs')
-        SaveNexusProcessed('003667_Sample', '/tmp/water_reference_g2.nxs')
-
-        # process each sample
+        # then process the sample
         SANSILLAutoProcess(SampleRuns=sample,
                            BeamRuns=beam,
                            DefaultMaskFile="side_mask",
@@ -187,5 +193,4 @@ class D16AutoProcessTest(systemtesting.MantidSystemTest):
                            WaterCrossSection=0.87,
                            SampleThickness=0.2,
                            BeamRadius=1,
-                           ReferenceFiles="/tmp/water_reference_g0.nxs, /tmp/water_reference_g1.nxs, /tmp/water_reference_g2.nxs")
-
+                           ReferenceFiles=",".join(water_dir))
