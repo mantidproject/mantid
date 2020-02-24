@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
-from collections import OrderedDict 
+from collections import OrderedDict
 
 import glob
 import os
