@@ -16,7 +16,6 @@ class LoadModel(lutils.LModel):
         super(LoadModel, self).__init__()
 
     def execute(self):
-        print("bii")
         if self.run not in self.loaded_runs:
             self.load_run()
         else:
@@ -50,22 +49,18 @@ class CoLoadModel(lutils.LModel):
 
     def add_runs(self, run1, run2, suffix):
         # prevent new suffix being appended to old one
-        print("fff", run1, run2)
-        out = run1+" "+run2
+        out = suffix+";" + run1.split(";")[1]
         mantid.Plus(run1, run2, OutputWorkspace=out)
         return out
 
     def co_load_run(self, workspace):
 
-
         run = lutils.hyphenise(self.co_runs)
-        print(self.workspace,run, ":D")
-        self.last_loaded_runs.append(run)
         to_add = [
             self.add_runs(run1, run2, run)
             for run1, run2 in zip(*lutils.flatten_run_data(self.workspace, workspace))
         ]
+        self.loaded_runs[run] = to_add
         overall_ws = mantid.GroupWorkspaces(to_add[0], OutputWorkspace=str(run))
-        overall_ws.add(to_add[1])
-        # need to finsih adding the other WS to group
-        # need to work out how to add n>3 ws correctly
+        for index in range(1, len(to_add)):
+            overall_ws.add(to_add[index])

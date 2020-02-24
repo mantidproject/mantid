@@ -16,13 +16,10 @@ class LoadPresenter(object):
         self.co_model = co_model
         self.load_thread = None
         self.co_thread = None
+        self._current_run = None
 
-        self.view.on_load_clicked(self.equalise_loaded_runs)
-        self.view.on_load_clicked(self.equalise_last_loaded_run)
         self.view.on_load_clicked(self.load_run)
         self.view.on_load_clicked(self.co_model.wipe_co_runs)
-        self.view.on_co_add_clicked(self.equalise_loaded_runs)
-        self.view.on_co_add_clicked(self.equalise_last_loaded_run)
         self.view.on_co_add_clicked(self.co_add_run)
         self.view.on_spinbox_changed(self.update_models)
 
@@ -31,18 +28,26 @@ class LoadPresenter(object):
             return
         print(self.co_model.loaded_runs,self.load_model.loaded_runs)
         loaded_runs = max(
-            list(self.co_model.loaded_runs),
+            list(self.co_model.loaded_runs.keys()),
             list(self.load_model.loaded_runs.keys()))
         #self.co_model.loaded_runs = loaded_runs
-        #print("fdsafds ", loaded_runs)
+        print("fdsafds ", loaded_runs,"hhh",self.co_model.loaded_runs.keys())
+        self._current_run = loaded_runs
         #self.load_model.last_loaded_runs = loaded_runs
 
-    def equalise_last_loaded_run(self):
+    def equalise_last_loaded_run(self, runs):
         if self.co_model.loaded_runs == {} and self.load_model.loaded_runs == {}:
             return
-        last_run = max(
-            list(self.co_model.loaded_runs),
-            list(self.load_model.loaded_runs))
+        self._current_run = list(runs)[-1]
+
+    def set_coadd_loaded_run(self):
+        self.equalise_last_loaded_run(self.co_model.loaded_runs.keys())
+
+    def set_loaded_run(self):
+        if self.co_model.loaded_runs == {} and self.load_model.loaded_runs == {}:
+            return
+        self.equalise_last_loaded_run(self.load_model.loaded_runs.keys())
+
         #self.co_model.last_loaded_runs = last_run
         #self.load_model.last_loaded_runs = last_run
 
@@ -51,15 +56,12 @@ class LoadPresenter(object):
         self.co_model.set_run(run)
 
     def load_run(self):
-        #self.load_thread = self.new_thread(self.load_model)
-        #self.load_thread.threadWrapperSetUp(
-        #    self.disable_buttons, self.end_load_thread)
-        #self.load_thread.start()
-        self.load_model.execute()
+        self.load_thread = self.new_thread(self.load_model)
+        self.load_thread.threadWrapperSetUp(
+            self.disable_buttons, self.end_load_thread)
+        self.load_thread.start()
 
     def co_add_run(self):
-        self.co_model.execute()
-        return
         self.co_thread = self.new_thread(self.co_model)
         self.co_thread.threadWrapperSetUp(
             self.disable_buttons, self.end_co_thread)
@@ -72,11 +74,13 @@ class LoadPresenter(object):
         self.view.enable_buttons()
 
     def end_load_thread(self):
+        self.set_loaded_run()
         self.enable_buttons()
         self.load_thread.deleteLater()
         self.load_thread = None
 
     def end_co_thread(self):
+        self.set_coadd_loaded_run()
         self.enable_buttons()
         self.co_thread.deleteLater()
         self.co_thread = None
@@ -86,7 +90,7 @@ class LoadPresenter(object):
 
     def last_loaded_run(self):
         try:
-            return self.load_model.last_loaded_runs[-1]
+            return self._current_run
         except IndexError:
             return None
 

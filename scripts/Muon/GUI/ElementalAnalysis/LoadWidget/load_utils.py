@@ -33,7 +33,6 @@ class LModel(object):
             workspace.getAxis(0).setUnit("Label").setLabel("Energy", "keV")
 
     def load_run(self):
-        print("moo")
         to_load = search_user_dirs(self.run)
         if not to_load:
             return None
@@ -52,16 +51,10 @@ class LModel(object):
             loaded_detectors[ws_name[0]] = 1
         num_loaded_detectors = len(loaded_detectors)
         self._load(workspaces)
-        print("hi", type(self.loaded_runs), self.run, self.loaded_runs)
         self.loaded_runs.update({self.run: merge_workspaces(self.run, workspaces.values())})
-        #print("j")
         self.num_loaded_detectors[self.run] = num_loaded_detectors
-        #print("k")
         self.last_loaded_runs.append(self.run)
-        #print("m")
-        a= self.loaded_runs[self.run]
-        #print("done")
-        return a
+        return self.loaded_runs[self.run]
 
     def output(self):
         return
@@ -216,7 +209,6 @@ def get_filename(path, run):
 
 
 def replace_workspace_name_suffix(name, suffix):
-    print("rest",name)
     detector, run_type = name.split("_", 2)[:2]
     return "_".join([detector, run_type, suffix])
 
@@ -226,7 +218,6 @@ def flatten_run_data(*workspaces):
     for workspace in workspaces:
         detectors = [mantid.mtd[detector] for detector in workspace]
         out.append(sorted([detector.getName() for detector in detectors]))
-    print("sdfa", out)
     return out
 
 
