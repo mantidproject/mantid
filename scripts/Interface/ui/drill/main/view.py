@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -9,32 +9,34 @@ from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import (QMainWindow, QWidget, QFileDialog, QSizePolicy)
 from qtpy.QtGui import QIcon
 from qtpy.QtCore import *
+from qtpy import uic
 from mantidqt.widgets import (manageuserdirectories, instrumentselector)
 from mantidqt.widgets.jobtreeview import *
 from mantidqt import icons
 from mantid.simpleapi import config, logger
-from .ui_main import Ui_MainWindow
 from .helpers import *
 from ..sans.job_tree_view import SansJobTreeView
 from ..sans.tab_view import SansTabView
 from ..refl.job_tree_view import ReflJobTreeView
 from ..refl.tab_view import ReflTabView
+import os
 
 
-class DrillView(QMainWindow, Ui_MainWindow):
+class DrillView(QMainWindow):
 
     sheet_view = None
     tab_view = None
 
     def __init__(self):
-        QMainWindow.__init__(self)
-        Ui_MainWindow.__init__(self)
-        self.setupUi(self)
+        super(DrillView, self).__init__()
+        here = os.path.dirname(os.path.realpath(__file__))
+        uic.loadUi(os.path.join(here, 'main.ui'), self)
         self.instrument = config['default.instrument']
         self.technique = getTechnique(self.instrument)
         self.setup_header()
         self.setup_center()
         self.setup_footer()
+        self.show()
 
     def setup_header(self):
         self.instrumentselector = instrumentselector.InstrumentSelector(self)
