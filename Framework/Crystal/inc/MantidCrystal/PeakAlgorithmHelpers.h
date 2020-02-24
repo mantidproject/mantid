@@ -14,6 +14,12 @@ class V3D;
 
 namespace Mantid::Crystal {
 
+/// return -1 if convention is "Crystallography" and 1 otherwise.
+double qConventionFactor(const std::string &convention);
+
+/// convenience overload to pull the convention from the config service
+double qConventionFactor();
+
 /// Tie together a modulated peak number with its offset
 using MNPOffset = std::tuple<double, double, double, Kernel::V3D>;
 

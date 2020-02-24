@@ -31,8 +31,7 @@ public:
   /// Constructor
   ErrorReporter(std::string application, Types::Core::time_duration startTime,
                 std::string exitCode, bool share, std::string name,
-                std::string email, std::string textBox,
-                std::string recoveryFile);
+                std::string email, std::string textBox, std::string stacktrace);
   /// Sends an error report
   int sendErrorReport();
 
@@ -44,23 +43,14 @@ protected:
 
 private:
   const std::string m_application;
-
-  /// Stores the exit code of mantid if it has crashed
   const std::string m_exitCode;
-  /// The time mantid has been running
   const Types::Core::time_duration m_upTime;
-  /// Whether to share additional information or not
   const bool m_share;
-  /// User provided name
   const std::string m_name;
-  /// User provided email
   const std::string m_email;
-  /// User provided text box
   const std::string m_textbox;
-  /// Target url
   std::string m_url;
-  /// recovery file path
-  const std::string m_recoveryFile;
+  const std::string m_stacktrace;
 };
 
 } // namespace Kernel

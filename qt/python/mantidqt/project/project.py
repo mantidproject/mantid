@@ -40,6 +40,8 @@ class Project(AnalysisDataServiceObserver):
         self.observeAll(True)
 
         self.project_file_ext = ".mtdproj"
+        self.mplot_project_file_ext = ".mantid"
+        self.valid_file_exts = [self.project_file_ext,self.mplot_project_file_ext]
 
         self.plot_gfm = globalfiguremanager_instance
         self.plot_gfm.add_observer(self)
@@ -179,7 +181,7 @@ class Project(AnalysisDataServiceObserver):
             # Sanity check
             _, file_ext = os.path.splitext(file_name)
 
-            if file_ext != ".mtdproj":
+            if file_ext not in self.valid_file_exts:
                 QMessageBox.warning(None, "Wrong file type!", "Please select a valid project file", QMessageBox.Ok)
 
             self._load(file_name)
@@ -197,7 +199,7 @@ class Project(AnalysisDataServiceObserver):
 
     def _load_file_dialog(self):
         return open_a_file_dialog(accept_mode=QFileDialog.AcceptOpen, file_mode=QFileDialog.ExistingFile,
-                                  file_filter="Project files ( *" + self.project_file_ext + ")")
+                                  file_filter="Project files ( *" + " *".join(self.valid_file_exts) + ")")
 
     def offer_save(self, parent):
         """

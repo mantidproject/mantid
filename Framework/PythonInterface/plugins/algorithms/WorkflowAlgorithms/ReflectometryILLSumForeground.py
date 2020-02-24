@@ -14,8 +14,8 @@ from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspac
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayProperty,
                            IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property,
                            StringListValidator)
-from mantid.simpleapi import (AddSampleLog, CropWorkspace, Divide, ExtractSingleSpectrum, RebinToWorkspace,
-                              ReflectometryBeamStatistics, ReflectometrySumInQ)
+from mantid.simpleapi import (CropWorkspace, Divide, ExtractSingleSpectrum, MoveInstrumentComponent, RebinToWorkspace,
+                              ReflectometryBeamStatistics, ReflectometrySumInQ, RotateInstrumentComponent)
 import numpy
 import ReflectometryILL_common as common
 
@@ -58,7 +58,8 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
-        return ['ReflectometryILLConvertToQ', 'ReflectometryILLPolarizationCor', 'ReflectometryILLPreprocess']
+        return ['ReflectometryILLConvertToQ', 'ReflectometryILLPolarizationCor',
+                'ReflectometryILLPreprocess', 'ReflectometryILLAutoProcess']
 
     def version(self):
         """Return the version of the algorithm."""
@@ -73,6 +74,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         self._names = utils.NameSource(wsPrefix, cleanupMode)
 
         ws = self._inputWS()
+
         processReflected = not self._directOnly()
         if processReflected:
             self._addBeamStatisticsToLogs(ws)
@@ -80,13 +82,12 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         sumType = self._sumType()
         if sumType == SumType.IN_LAMBDA:
             ws = self._sumForegroundInLambda(ws)
-            self._addSumTypeToLogs(ws, SumType.IN_LAMBDA)
             if processReflected:
                 ws = self._rebinToDirect(ws)
         else:
             ws = self._divideByDirect(ws)
             ws = self._sumForegroundInQ(ws)
-            self._addSumTypeToLogs(ws, SumType.IN_Q)
+        ws.run().addProperty(common.SampleLogs.SUM_TYPE, sumType, True)
         ws = self._applyWavelengthRange(ws)
 
         self._finalize(ws)
@@ -159,6 +160,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
     def validateInputs(self):
         """Validate the algorithm's input properties."""
         issues = dict()
+        ws = self.getProperty(Prop.INPUT_WS).value
+        if not ws.run().hasProperty(common.SampleLogs.LINE_POSITION):
+            issues[Prop.INPUT_WS] = 'Must have a sample log entry called {}'.format(common.SampleLogs.LINE_POSITION)
         if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
             if self.getProperty(Prop.SUM_TYPE).value == SumType.IN_Q:
                 issues[Prop.DIRECT_FOREGROUND_WS] = 'Direct foreground workspace is needed for summing in Q.'
@@ -183,8 +187,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         instrumentName = common.instrumentName(ws)
         pixelSize = common.pixelSize(instrumentName)
         detResolution = common.detectorResolution()
-        firstSlitSizeLog = common.slitSizeLogEntry(instrumentName, 1)
-        secondSlitSizeLog = common.slitSizeLogEntry(instrumentName, 2)
         ReflectometryBeamStatistics(
             ReflectedBeamWorkspace=ws,
             ReflectedForeground=reflectedForeground,
@@ -193,18 +195,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             PixelSize=pixelSize,
             DetectorResolution=detResolution,
             FirstSlitName='slit2',
-            FirstSlitSizeSampleLog=firstSlitSizeLog,
+            FirstSlitSizeSampleLog=common.SampleLogs.SLIT2WIDTH,
             SecondSlitName='slit3',
-            SecondSlitSizeSampleLog=secondSlitSizeLog,
-            EnableLogging=self._subalgLogging)
-
-    def _addSumTypeToLogs(self, ws, sumType):
-        """Add a sum type entry to sample logs."""
-        AddSampleLog(
-            Workspace=ws,
-            LogName=common.SampleLogs.SUM_TYPE,
-            LogText=sumType,
-            LogType='String',
+            SecondSlitSizeSampleLog=common.SampleLogs.SLIT3WIDTH,
             EnableLogging=self._subalgLogging)
 
     def _applyWavelengthRange(self, ws):
@@ -237,7 +230,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             OutputWorkspace=reflectivityWSName,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
-        reflectivityWS = common.correctForChopperOpenings(reflectivityWS, directWS, self._names, self._cleanup, self._subalgLogging)
         reflectivityWS.setYUnit('Reflectivity')
         reflectivityWS.setYUnitLabel('Reflectivity')
         return reflectivityWS
@@ -288,7 +280,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         foreground = self._foregroundIndices(ws)
         sumIndices = [i for i in range(foreground[0], foreground[2] + 1)]
         beamPosIndex = foreground[1]
-        foregroundWSName = self._names.withSuffix('foreground_grouped')
+        foregroundWSName = self._names.withSuffix('grouped')
         foregroundWS = ExtractSingleSpectrum(
             InputWorkspace=ws,
             OutputWorkspace=foregroundWSName,
@@ -303,7 +295,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 continue
             if i < 0 or i > maxIndex:
                 self.log().warning('Foreground partially out of the workspace.')
-            addeeWSName = self._names.withSuffix('foreground_addee')
+            addeeWSName = self._names.withSuffix('addee')
             addeeWS = ExtractSingleSpectrum(
                 InputWorkspace=ws,
                 OutputWorkspace=addeeWSName,
@@ -321,6 +313,44 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             self._cleanup.cleanup(addeeWS)
         self._cleanup.cleanup(ws)
         numpy.sqrt(foregroundEs, out=foregroundEs)
+        # Move the detector to the fractional linePosition
+        linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
+        instr = common.instrumentName(ws)
+        pixelSize = common.pixelSize(instr)
+        dist = pixelSize * (linePosition-beamPosIndex)
+
+        if dist != 0.:
+            detPoint1 = ws.spectrumInfo().position(0)
+            detPoint2 = ws.spectrumInfo().position(20)
+            beta = numpy.math.atan2((detPoint2[0] - detPoint1[0]), (detPoint2[2] - detPoint1[2]))
+            xvsy = numpy.math.sin(beta) * dist
+            mz = numpy.math.cos(beta) * dist
+            if instr == 'D17':
+                mx = xvsy
+                my = 0.0
+                rotationAxis = [0, 1, 0]
+            else:
+                mx = 0.0
+                my = xvsy
+                rotationAxis = [-1, 0, 0]
+            MoveInstrumentComponent(
+                Workspace=foregroundWS,
+                ComponentName='detector',
+                X=mx,
+                Y=my,
+                Z=mz,
+                RelativePosition=True
+            )
+            theta=foregroundWS.spectrumInfo().twoTheta(0) / 2.
+            RotateInstrumentComponent(
+                Workspace=foregroundWS,
+                ComponentName='detector',
+                X=rotationAxis[0],
+                Y=rotationAxis[1],
+                Z=rotationAxis[2],
+                Angle=theta,
+                RelativeRotation=True
+            )
         return foregroundWS
 
     def _sumForegroundInQ(self, ws):

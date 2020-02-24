@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidCrystal/PeakAlgorithmHelpers.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
@@ -38,24 +39,11 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace {
-/// Small helper function that return -1 if convention
-/// is "Crystallography" and 1 otherwise.
-double get_factor_for_q_convention(const std::string &convention) {
-  if (convention == "Crystallography") {
-    return -1.0;
-  }
-
-  return 1.0;
-}
-} // namespace
-
 /** Constructor
  */
 PredictPeaks::PredictPeaks()
     : m_runNumber(-1), m_inst(), m_pw(), m_sfCalculator(),
-      m_qConventionFactor(get_factor_for_q_convention(
-          ConfigService::Instance().getString("Q.convention"))) {
+      m_qConventionFactor(qConventionFactor()) {
   m_refConds = getAllReflectionConditions();
 }
 
@@ -510,7 +498,7 @@ void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(
    * for the convention stored in the workspace.
    */
   double peaks_q_convention_factor =
-      get_factor_for_q_convention(peaksWorkspace->getConvention());
+      qConventionFactor(peaksWorkspace->getConvention());
 
   for (int i = 0; i < static_cast<int>(peaksWorkspace->getNumberPeaks()); ++i) {
     IPeak &p = peaksWorkspace->getPeak(i);

@@ -50,6 +50,13 @@ void MeshObject::initialize() {
 const Kernel::Material &MeshObject::material() const { return m_material; }
 
 /**
+ * @param material :: material that is being set for the object
+ */
+void MeshObject::setMaterial(const Kernel::Material &material) {
+  m_material = material;
+}
+
+/**
  * Returns whether this object has a valid shape
  * @returns True if the entire MeshObject may enclose
  * one or more volumes.
@@ -385,7 +392,7 @@ int MeshObject::getPointInObject(Kernel::V3D &point) const {
  * @param maxAttempts The maximum number of attempts at generating a point
  * @return The generated point
  */
-Kernel::V3D
+boost::optional<Kernel::V3D>
 MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                   const size_t maxAttempts) const {
   const auto &bbox = getBoundingBox();
@@ -404,21 +411,17 @@ MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
  * @param activeRegion Restrict point generation to this sub-region of the
  * object
  * @param maxAttempts The maximum number of attempts at generating a point
- * @return The newly generated point
+ * @return The generated point
  */
-Kernel::V3D
+boost::optional<Kernel::V3D>
 MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                   const BoundingBox &activeRegion,
                                   const size_t maxAttempts) const {
 
   const auto point =
       RandomPoint::bounded(*this, rng, activeRegion, maxAttempts);
-  if (!point) {
-    throw std::runtime_error("Object::generatePointInObject() - Unable to "
-                             "generate point in object after " +
-                             std::to_string(maxAttempts) + " attempts");
-  }
-  return *point;
+
+  return point;
 }
 
 /**

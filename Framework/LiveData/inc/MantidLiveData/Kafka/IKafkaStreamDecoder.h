@@ -205,7 +205,7 @@ protected:
                         const boost::shared_ptr<T> &parent);
 
   template <typename T>
-  void loadInstrument(const std::string &name, boost::shared_ptr<T> workspace,
+  bool loadInstrument(const std::string &name, boost::shared_ptr<T> workspace,
                       const std::string &jsonGeometry = "");
 
   void checkRunMessage(

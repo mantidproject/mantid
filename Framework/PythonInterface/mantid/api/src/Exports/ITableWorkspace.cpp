@@ -362,10 +362,7 @@ void addRowFromDict(ITableWorkspace &self, const dict &rowItems) {
     // Wrong type of data for one of the columns
     if (PyErr_ExceptionMatches(PyExc_TypeError)) {
       std::ostringstream msg;
-      msg << "Wrong datatype <";
-      msg << std::string(
-          extract<std::string>(value.attr("__class__").attr("__name__")));
-      msg << "> for column <" << col->name() << "> ";
+      msg << "Wrong datatype for column <" << col->name() << "> ";
       msg << "(expected <" << col->type() << ">)";
       PyErr_SetString(PyExc_TypeError, msg.str().c_str());
     }
@@ -410,10 +407,7 @@ void addRowFromSequence(ITableWorkspace &self, const object &rowItems) {
       // Wrong type of data for one of the columns
       if (PyErr_ExceptionMatches(PyExc_TypeError)) {
         std::ostringstream msg;
-        msg << "Wrong datatype <";
-        msg << std::string(
-            extract<std::string>(value.attr("__class__").attr("__name__")));
-        msg << "> for column <" << col->name() << "> ";
+        msg << "Wrong datatype for column <" << col->name() << "> ";
         msg << "(expected <" << col->type() << ">)";
         PyErr_SetString(PyExc_TypeError, msg.str().c_str());
       }

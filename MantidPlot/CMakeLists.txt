@@ -420,7 +420,6 @@ include(UseQt4)
 # Do the sip generation.
 #
 
-include_directories(${PYTHON_INCLUDE_PATH})
 
 # We need to manually add all the headers that are in qti.sip so that the
 # dependencies are known to CMake
@@ -459,21 +458,23 @@ set(MANTIDQTPYTHON_SIP_INCLUDES
     ${CMAKE_CURRENT_BINARY_DIR}/../qt/python/mantidqtpython
     -I
     ${CMAKE_CURRENT_SOURCE_DIR}/../qt/python/mantidqtpython)
+if ( USE_PRIVATE_SIPPYQT4 )
+  set ( _sip_include_dir ${PYQT4_SIP_INCLUDE_DIR} )
+  set ( _sip_executable ${PYQT4_SIP_EXECUTABLE} )
+else ()
+  set ( _sip_include_dir ${SIP_INCLUDE_DIR} )
+  set ( _sip_executable ${SIP_EXECUTABLE} )
+endif ()
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${SIP_SRC_AUTO}
-                   COMMAND ${SIP_EXECUTABLE} -I ${PYQT4_SIP_DIR}
+                   COMMAND ${_sip_executable} -I ${PYQT4_SIP_DIR}
                            ${MANTIDQTPYTHON_SIP_INCLUDES} ${PYQT4_SIP_FLAGS} -c
                            ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -o ${SIP_SPEC}
-                   DEPENDS ${SIP_INCLUDE_DIR}/sip.h
-                           src/qti.sip
+                   DEPENDS src/qti.sip
                            ${QTI_SIP_HDRS}
                            ../qt/python/mantidqtpython/mantidqtpython_def.sip
                    COMMENT "Generating python bindings using sip")
 
-# Needed for sip.h header that can end up in a different place to to the main
-# Python include directory
-include_directories(SYSTEM ${SIP_INCLUDE_DIR})
-# Needed for sip generated files to find includes in src
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 #
 # Specify the files that we need to pass to Qt macros
@@ -671,9 +672,6 @@ enable_precompiled_headers(src/PrecompiledHeader.h ALL_SRC)
 
 qt4_wrap_ui(UI_HDRS ${UI_FILES})
 
-# The generated ui headers will go here:
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 #
 # Internal icon links
 #
@@ -687,19 +685,16 @@ qt4_add_resources(RES_FILES
 #
 # Add the dependencies
 #
-
+# This must come before ParaView so Python gets picked up from our third-party on Windows
+# and not the one Paraview is built with. Warnings from our external repo are all ignored
+# but the ones built by ParaView are not.
+include_directories(SYSTEM ${_sip_include_dir} ${PYTHON_INCLUDE_PATH})
 if(MAKE_VATES)
   include(${PARAVIEW_USE_FILE})
 endif()
 
-include_directories(SYSTEM ${MUPARSER_INCLUDE_DIR})
-include_directories(${ZLIB_INCLUDE_DIRS})
-
-include_directories(SYSTEM ${QWT5_INCLUDE_DIR})
 
 find_package(QwtPlot3d REQUIRED)
-include_directories(SYSTEM ${QWTPLOT3D_INCLUDE_DIR})
-
 find_package(QScintillaQt4 REQUIRED)
 
 #
@@ -801,20 +796,31 @@ add_executable(MantidPlot
                ${CONFIG_RESET_SCRIPT_FILE}
                ${IPYTHON_INSTALL_FILES})
 
-target_include_directories(MantidPlot
-                           PRIVATE ${SIP_INCLUDE_DIR}
-			           src
-                                   src/lib/include
-                                   src/lib/3rdparty/qtcolorpicker/src
-                                   ../qt/widgets/common/inc
-                                   ../qt/widgets/instrumentview/inc
-                                   ../qt/widgets/sliceviewer/inc
-                                   ../qt/widgets/spectrumviewer/inc
-                                   ../qt/widgets/factory/inc
-                                   ../Framework/PythonInterface/inc)
+
+# Sip must be before Python for the case of our private sip module for RHEL
+# so that it gets picked up before the system one if it exists
+target_include_directories(MantidPlot SYSTEM PRIVATE
+  ${MUPARSER_INCLUDE_DIR}
+  ${ZLIB_INCLUDE_DIRS}
+  ${QWT5_INCLUDE_DIR}
+  ${QWTPLOT3D_INCLUDE_DIR}
+)
+target_include_directories(MantidPlot PRIVATE
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  src
+  src/lib/include
+  src/lib/3rdparty/qtcolorpicker/src
+  ../qt/widgets/common/inc
+  ../qt/widgets/instrumentview/inc
+  ../qt/widgets/sliceviewer/inc
+  ../qt/widgets/spectrumviewer/inc
+  ../qt/widgets/factory/inc
+  ../Framework/PythonInterface/inc
+)
 
 # GCC 8 onwards needs to disable functional casting at the Python interface
-target_compile_options( MantidPlot PRIVATE 
+target_compile_options( MantidPlot PRIVATE
   $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,8.0>>:-Wno-cast-function-type> )
 
 # Library dependencies

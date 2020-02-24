@@ -44,9 +44,24 @@ class MessageDisplay(MessageDisplay_cpp):
 
     def readSettings(self, qsettings):
         super(MessageDisplay, self).readSettings(qsettings)
-        self.setShowFrameworkOutput(qsettings.value(SHOW_FRAMEWORK_OUTPUT_KEY, True))
-        self.setShowActiveScriptOutput(qsettings.value(SHOW_ACTIVE_SCRIPT_OUTPUT_KEY, True))
-        self.setShowAllScriptOutput(qsettings.value(SHOW_ALL_SCRIPT_OUTPUT_KEY, False))
+        self.setShowFrameworkOutput(self.ReadSettingSafely(qsettings, SHOW_FRAMEWORK_OUTPUT_KEY, True, bool))
+        self.setShowActiveScriptOutput(self.ReadSettingSafely(qsettings, SHOW_ACTIVE_SCRIPT_OUTPUT_KEY, True, bool))
+        self.setShowAllScriptOutput(self.ReadSettingSafely(qsettings, SHOW_ALL_SCRIPT_OUTPUT_KEY, False, bool))
+
+    def ReadSettingSafely(self,qsettings,key,default,type):
+        """
+        Reads a value from qsettings, returning the default if the value is missing or the type is wrong
+        :param qsettings: the qsettings object
+        :param key: the key to read
+        :param default: the default value
+        :param type: the type to check the returned value for
+        :return: The value from qsettings, or default if the value is missing or the type is wrong
+        """
+        try:
+            settingValue = qsettings.value(key, default)
+            return settingValue if isinstance(settingValue, type) else default
+        except TypeError:
+            return default
 
     def writeSettings(self, qsettings):
         super(MessageDisplay, self).writeSettings(qsettings)

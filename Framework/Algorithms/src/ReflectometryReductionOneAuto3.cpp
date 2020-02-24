@@ -297,16 +297,10 @@ void ReflectometryReductionOneAuto3::init() {
   declareProperty("WavelengthMax", Mantid::EMPTY_DBL(),
                   "Wavelength Max in angstroms", Direction::Input);
 
-  // Monitor properties
   initMonitorProperties();
-
-  // Init properties for transmission normalization
+  initBackgroundProperties();
   initTransmissionProperties();
-
-  // Init properties for algorithmic corrections
   initAlgorithmicProperties(true);
-
-  // Momentum transfer properties
   initMomentumTransferProperties();
 
   // Polarization correction
@@ -348,6 +342,11 @@ void ReflectometryReductionOneAuto3::init() {
                       "OutputWorkspaceWavelength", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output workspace in wavelength");
+  setPropertySettings(
+      "OutputWorkspaceWavelength",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+
+  initTransmissionOutputProperties();
 }
 
 /** Execute the algorithm.
@@ -358,8 +357,9 @@ void ReflectometryReductionOneAuto3::exec() {
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   auto instrument = inputWS->getInstrument();
+  bool const isDebug = getProperty("Debug");
 
-  IAlgorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
+  Algorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
@@ -367,7 +367,7 @@ void ReflectometryReductionOneAuto3::exec() {
   alg->setProperty("IncludePartialBins",
                    getPropertyValue("IncludePartialBins"));
   alg->setProperty("Diagnostics", getPropertyValue("Diagnostics"));
-  alg->setProperty("Debug", getPropertyValue("Debug"));
+  alg->setProperty("Debug", isDebug);
   double wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
@@ -412,6 +412,16 @@ void ReflectometryReductionOneAuto3::exec() {
   if (!transRunsFound)
     populateAlgorithmicCorrectionProperties(alg, instrument);
 
+  alg->setPropertyValue("SubtractBackground",
+                        getPropertyValue("SubtractBackground"));
+  alg->setPropertyValue("BackgroundProcessingInstructions",
+                        getPropertyValue("BackgroundProcessingInstructions"));
+  alg->setPropertyValue("BackgroundCalculationMethod",
+                        getPropertyValue("BackgroundCalculationMethod"));
+  alg->setPropertyValue("DegreeOfPolynomial",
+                        getPropertyValue("DegreeOfPolynomial"));
+  alg->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
+
   alg->setProperty("InputWorkspace", inputWS);
   alg->execute();
 
@@ -433,11 +443,15 @@ void ReflectometryReductionOneAuto3::exec() {
   }
 
   // Set the output workspace in wavelength, if debug outputs are enabled
-  const bool isDebug = getProperty("Debug");
-  if (isDebug || isChild()) {
+  if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
     MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
     setProperty("OutputWorkspaceWavelength", IvsLam);
   }
+
+  // Set the output transmission workspaces
+  setWorkspacePropertyFromChild(alg, "OutputWorkspaceTransmission");
+  setWorkspacePropertyFromChild(alg, "OutputWorkspaceFirstTransmission");
+  setWorkspacePropertyFromChild(alg, "OutputWorkspaceSecondTransmission");
 
   // Set other properties so they can be updated in the Reflectometry interface
   setProperty("ThetaIn", theta);

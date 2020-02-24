@@ -7,12 +7,31 @@
 #  This file is part of the mantid package
 from __future__ import absolute_import
 
+# std imports
+import math
+import numpy as np
+import collections
 from contextlib import contextmanager
+from enum import Enum
 
-from matplotlib import cm
+# 3rd party imports
+from matplotlib.legend import Legend
+from matplotlib import cm, __version__ as mpl_version_str
 from matplotlib.container import ErrorbarContainer
 
-from enum import Enum
+# -----------------------------------------------------------------------------
+# Constants
+# -----------------------------------------------------------------------------
+# matplotlib version information
+MPLVersionInfo = collections.namedtuple("MPLVersionInfo", ("major", "minor", "patch"))
+MATPLOTLIB_VERSION_INFO = MPLVersionInfo._make(map(int, mpl_version_str.split(".")))
+
+
+# Use the correct draggable method based on the matplotlib version
+if hasattr(Legend, "set_draggable"):
+    SET_DRAGGABLE_METHOD = "set_draggable"
+else:
+    SET_DRAGGABLE_METHOD = "draggable"
 
 
 # Any changes here must be reflected in the definition in
@@ -115,6 +134,29 @@ def get_autoscale_limits(ax, axis):
     if not ax._tight:
         locator = getattr(ax, '{}axis'.format(axis)).get_major_locator()
         return locator.view_limits(axis_min, axis_max)
+
+
+def legend_set_draggable(legend, state, use_blit=False, update='loc'):
+    """Utility function to support varying Legend api around draggable status across
+    the versions of matplotlib we support. Function arguments match those from matplotlib.
+    See matplotlib documentation for argument descriptions
+    """
+    getattr(legend, SET_DRAGGABLE_METHOD)(state, use_blit, update)
+
+
+def get_current_cmap(object):
+    """Utility function to support varying get_cmap api across
+    the versions of matplotlib we support.
+    """
+    if hasattr(object, "cmap"):
+        return object.cmap
+    else:
+        return object.get_cmap()
+
+
+def mpl_version_info():
+    """Returns a namedtuple of (major,minor,patch)"""
+    return MATPLOTLIB_VERSION_INFO
 
 
 def zoom_axis(ax, coord, x_or_y, factor):

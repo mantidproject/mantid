@@ -9,9 +9,9 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from sans.common.enums import (RangeStepType, DetectorType, SANSFacility, SANSInstrument)
-from sans.state.data import get_data_builder
-from sans.state.wavelength_and_pixel_adjustment import (StateWavelengthAndPixelAdjustment,
-                                                        get_wavelength_and_pixel_adjustment_builder)
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import (StateWavelengthAndPixelAdjustment,
+                                                                       get_wavelength_and_pixel_adjustment_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

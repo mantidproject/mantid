@@ -20,9 +20,9 @@ class WorkspaceFactoryTest(unittest.TestCase):
         return WorkspaceFactory.create("Workspace2D", NVectors=nhist,
                                        XLength=xlength, YLength=ylength)
 
-    def _verify(self, wksp, nhist, xlength, ylength):
+    def _verify(self, wksp, nhist, xlength, ylength, wsId="Workspace2D"):
         self.assertTrue(isinstance(wksp, MatrixWorkspace))
-        self.assertEqual(wksp.id(), "Workspace2D")
+        self.assertEqual(wksp.id(), wsId)
         self.assertEqual(wksp.getNumberHistograms(), nhist)
         self.assertEqual(len(wksp.readX(0)), xlength)
         self.assertEqual(wksp.blocksize(), ylength)
@@ -57,6 +57,13 @@ class WorkspaceFactoryTest(unittest.TestCase):
     def test_creating_a_peaksworkspace(self):
         peaks = WorkspaceFactory.createPeaks()
         self.assertTrue(isinstance(peaks, IPeaksWorkspace))
+
+    def test_creating_rebinnedoutput(self):
+        rebin = WorkspaceFactory.create("RebinnedOutput", 2, 6, 5)
+        self._verify(rebin, 2, 6, 5, wsId="RebinnedOutput")
+        fv = rebin.readF(1)
+        self.assertEqual(len(fv), 5)
+
 
 if __name__ == '__main__':
     unittest.main()

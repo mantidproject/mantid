@@ -14,7 +14,6 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/bind.hpp>
 #include <memory>
 #include <set>
 #include <unordered_set>

@@ -8,12 +8,13 @@
 #
 #
 from __future__ import (absolute_import, division, print_function)
+
 from matplotlib import gridspec
 from matplotlib.figure import Figure
 from matplotlib.transforms import Bbox, BboxTransform
 
 import mantid.api
-from mantid.plots.helperfunctions import get_normalize_by_bin_width
+from mantid.plots.datafunctions import get_normalize_by_bin_width
 from mantidqt.MPLwidgets import FigureCanvas
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from .dimensionwidget import DimensionWidget
@@ -149,14 +150,14 @@ class SliceViewerView(QWidget):
         self.presenter.line_plots()
 
     def clear_line_plots(self):
-        try: # clear old plots
+        try:  # clear old plots
             del self.xfig
             del self.yfig
         except AttributeError:
             pass
 
     def update_data_clim(self):
-        self.im.set_clim(self.colorbar.colorbar.get_clim()) # force clim update, needed for RHEL7
+        self.im.set_clim(self.colorbar.colorbar.mappable.get_clim())
         self.canvas.draw_idle()
 
     def update_line_plot_limits(self):

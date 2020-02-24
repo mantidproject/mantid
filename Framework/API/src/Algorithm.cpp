@@ -686,7 +686,7 @@ bool Algorithm::executeInternal() {
   } catch (CancelException &ex) {
     m_runningAsync = false;
     m_running = false;
-    getLogger().error() << this->name() << ": Execution terminated by user.\n";
+    getLogger().warning() << this->name() << ": Execution cancelled by user.\n";
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     this->unlockWorkspaces();

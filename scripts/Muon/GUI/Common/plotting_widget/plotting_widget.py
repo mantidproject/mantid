@@ -13,18 +13,14 @@ from Muon.GUI.Common.plotting_widget.plotting_widget_model import PlotWidgetMode
 
 class PlottingWidget(object):
     def __init__(self, context=None):
-        # initialise the view, presenter and model.
-        # view
         self.view = PlotWidgetView(parent=None)
-        # model
-        self.model = PlotWidgetModel(self.view.get_fig())
-        # presenter
+        self.model = PlotWidgetModel()
         self.presenter = PlotWidgetPresenter(self.view,
                                              self.model,
                                              context)
 
-        context.update_view_from_model_notifier.add_subscriber(self.presenter.workspace_deleted_from_ads_observer)
         context.update_plots_notifier.add_subscriber(self.presenter.workspace_replaced_in_ads_observer)
+        context.deleted_plots_notifier.add_subscriber(self.presenter.workspace_deleted_from_ads_observer)
 
     def close(self):
         self.view.close()

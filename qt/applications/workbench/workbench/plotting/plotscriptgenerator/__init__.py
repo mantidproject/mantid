@@ -8,10 +8,11 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from mantid.plots import MantidAxes
+from mantid.plots.mantidaxes import MantidAxes
 
 from mantidqt.widgets.plotconfigdialog import curve_in_ax
-from workbench.plugins.editor import DEFAULT_CONTENT
+from matplotlib.legend import Legend
+from workbench.config import DEFAULT_SCRIPT_CONTENT
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
                                                          generate_axis_label_commands,
                                                          generate_set_title_command,
@@ -22,6 +23,10 @@ from workbench.plotting.plotscriptgenerator.utils import generate_workspace_retr
 
 FIG_VARIABLE = "fig"
 AXES_VARIABLE = "axes"
+if hasattr(Legend, "set_draggable"):
+    SET_DRAGGABLE_METHOD = "set_draggable(True)"
+else:
+    SET_DRAGGABLE_METHOD = "draggable()"
 
 
 def generate_script(fig, exclude_headers=False):
@@ -39,7 +44,7 @@ def generate_script(fig, exclude_headers=False):
         axes.set_xlabel and axes.set_ylabel()
         axes.set_xlim() and axes.set_ylim()
         axes.set_xscale() and axes.set_yscale()
-        axes.legend().draggable()     (if legend present)
+        axes.legend().set_draggable(True)     (if legend present, or just draggable() for earlier matplotlib versions)
         plt.show()
 
     :param fig: A matplotlib.pyplot.Figure object you want to create a script from
@@ -62,11 +67,11 @@ def generate_script(fig, exclude_headers=False):
     if not plot_commands:
         return
 
-    cmds = [] if exclude_headers else [DEFAULT_CONTENT]
+    cmds = [] if exclude_headers else [DEFAULT_SCRIPT_CONTENT]
     cmds.extend(generate_workspace_retrieval_commands(fig) + [''])
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds.extend(plot_commands)
-    cmds.append("plt.show()")
+    cmds.append("fig.show()")
     return '\n'.join(cmds)
 
 
@@ -107,7 +112,8 @@ def get_title_cmds(ax, ax_object_var):
 def get_legend_cmds(ax, ax_object_var):
     """Get command axes.set_legend"""
     if ax.legend_:
-        return ["{ax_obj}.legend().draggable()".format(ax_obj=ax_object_var)]
+        return ["{ax_obj}.legend().{draggable_method}".format(ax_obj=ax_object_var,
+                                                              draggable_method=SET_DRAGGABLE_METHOD)]
     return []
 
 

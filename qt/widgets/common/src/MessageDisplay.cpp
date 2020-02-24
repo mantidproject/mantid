@@ -11,6 +11,9 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#include "MantidQtWidgets/Common/NotificationService.h"
+#endif
 
 #include <QAction>
 #include <QActionGroup>
@@ -238,8 +241,16 @@ void MessageDisplay::append(const Message &msg) {
     cursor.insertText(msg.text(), format(msg.priority()));
     moveCursorToEnd();
 
-    if (msg.priority() <= Message::Priority::PRIO_ERROR)
+    if (msg.priority() <= Message::Priority::PRIO_ERROR) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+      NotificationService::showMessage(
+          parentWidget() ? parentWidget()->windowTitle() : "Mantid",
+          "Sorry, there was an error, please look at the message display for "
+          "details.",
+          NotificationService::MessageIcon::Critical);
+#endif
       emit errorReceived(msg.text());
+    }
     if (msg.priority() <= Message::Priority::PRIO_WARNING)
       emit warningReceived(msg.text());
   }

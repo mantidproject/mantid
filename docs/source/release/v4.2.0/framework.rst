@@ -51,7 +51,7 @@ Algorithms
 - A new Poisson cost function has been added to :ref:`CalculateCostFunction <algm-CalculateCostFunction>`.
 - In :ref:`SaveAscii <algm-SaveAscii>` it is now possible to save out also the values of the spectrum axis.
 - :ref:`IndexPeaks <algm-IndexPeaks>` now has options to enter modulation vectors and additional information required for satellite peak indexing. As
-  a result :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` has been deprecated and will be removed in a future release.
+  a result ``IndexPeaksWithSatellites`` has been deprecated and will be removed in a future release.
 - :ref:`MaskAngle <algm-MaskAngle>` has an additional option of ``Angle='InPlane'``
 - The valiation in :ref:`SaveAscii <algm-SaveAscii>` has been improved to only accept MatrixWorkspaces.
 - The custom dialog for :ref:`CreateSampleShape <algm-CreateSampleShape>`

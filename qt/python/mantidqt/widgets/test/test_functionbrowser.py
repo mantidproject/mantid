@@ -1,5 +1,4 @@
 from __future__ import (absolute_import, division, print_function)
-from mock import MagicMock, call
 import unittest
 
 from qtpy.QtWidgets import QApplication
@@ -8,6 +7,7 @@ from qtpy.QtTest import QTest
 
 from mantid import FrameworkManager, FunctionFactory
 from mantid.fitfunctions import FunctionWrapper
+from mantid.py3compat.mock import MagicMock, call
 from mantidqt.utils.qt.testing.gui_window_test import (GuiWindowTest, not_on_windows, get_child, click_on)
 from mantidqt.widgets.functionbrowser import FunctionBrowser
 

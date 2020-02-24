@@ -27,10 +27,14 @@ class MockWorkspaceWidget(QWidget):
     def __init__(self):
         super(MockWorkspaceWidget, self).__init__(None)
         self.workspacewidget = MagicMock()
+        self.interface_list = MagicMock()
 
     def closeEvent(self, event):
         self.deleteLater()
         super(MockWorkspaceWidget, self).closeEvent(event)
+
+    def config_updated(self):
+        return self
 
     def __enter__(self):
         return self

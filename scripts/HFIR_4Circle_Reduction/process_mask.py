@@ -4,6 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import print_function
+
 import math
 import numpy
 import re
@@ -35,7 +37,7 @@ def parse_mask(xml_name):
     det_range_list = re.split(',', det_list_str)
 
     for det_range in det_range_list:
-        print det_range
+        print(det_range)
 
     # int_count = 0
 

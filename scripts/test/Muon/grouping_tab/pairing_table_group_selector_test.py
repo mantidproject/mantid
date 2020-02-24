@@ -67,10 +67,10 @@ class GroupSelectorTest(unittest.TestCase):
         self.presenter.add_pair(pair2)
 
     def get_group_1_selector_from_pair(self, row):
-        return self.view.pairing_table.cellWidget(row, 1)
+        return self.view.pairing_table.cellWidget(row, 2)
 
     def get_group_2_selector_from_pair(self, row):
-        return self.view.pairing_table.cellWidget(row, 2)
+        return self.view.pairing_table.cellWidget(row, 3)
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS : test the functionality around the combo boxes which allow the user to select the two groups that
@@ -123,7 +123,7 @@ class GroupSelectorTest(unittest.TestCase):
         self.get_group_1_selector_from_pair(0).setCurrentIndex(1)
 
         self.assertEqual(self.view.on_cell_changed.call_count, 1)
-        self.assertEqual(self.view.on_cell_changed.call_args_list[0][0], (0, 1))
+        self.assertEqual(self.view.on_cell_changed.call_args_list[0][0], (0, 2))
 
     def test_that_removing_groups_and_then_calling_update_removes_groups_from_selections(self):
         self.presenter.handle_add_pair_button_clicked()

@@ -1201,7 +1201,7 @@ class SpectraToMonitorsList(PropDescriptor):
             return None
 
         if isinstance(spectra_list, string_types):
-            if spectra_list.lower() is 'none':
+            if spectra_list.lower() == 'none':
                 result = None
             else:
                 spectra = spectra_list.split(',')

@@ -51,14 +51,7 @@ public:
   const IObject &getComponent(const size_t index) const;
 
   Geometry::BoundingBox boundingBox() const;
-  /// Select a random point within a component
-  Kernel::V3D generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
-                            const size_t maxAttempts) const;
-  /// Select a random point within a component that is also bound by a
-  /// given region
-  Kernel::V3D generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
-                            const BoundingBox &activeRegion,
-                            const size_t maxAttempts) const;
+
   bool isValid(const Kernel::V3D &point) const;
   int interceptSurfaces(Track &track) const;
 

@@ -2,7 +2,7 @@
 
 set(TEST_PY_FILES
     adjustment_test.py
-    state_base_test.py
+    JsonSerializerTest.py
     calculate_transmission_test.py
     convert_to_q_test.py
     data_test.py
@@ -15,6 +15,7 @@ set(TEST_PY_FILES
     slice_event_test.py
     save_test.py
     state_test.py
+    StateRunDataBuilderTest.py
     wavelength_test.py
     wavelength_and_pixel_adjustment_test.py)
 

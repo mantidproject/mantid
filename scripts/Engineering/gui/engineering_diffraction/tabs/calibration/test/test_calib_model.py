@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from mantid.py3compat.mock import patch
+from mantid.py3compat.mock import MagicMock
 from Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
 
 VANADIUM_NUMBER = "307521"
@@ -34,7 +35,7 @@ class CalibrationModelTest(unittest.TestCase):
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
     @patch(class_path + '.run_calibration')
-    @patch(class_path + '.load_sample')
+    @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     def test_EnggVanadiumCorrections_algorithm_is_called(self, van, load_sample, calib,
                                                          output_files, update_table):
@@ -44,7 +45,7 @@ class CalibrationModelTest(unittest.TestCase):
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
-    @patch(class_path + '.load_sample')
+    @patch(file_path + ".path_handling.load_workspace")
     @patch(class_path + '.run_calibration')
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     def test_fetch_vanadium_is_called(self, van_corr, calibrate_alg, load_sample, output_files,
@@ -53,34 +54,82 @@ class CalibrationModelTest(unittest.TestCase):
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
         self.assertEqual(van_corr.call_count, 1)
 
+    @patch(file_path + '.path.exists')
+    @patch(file_path + '.get_setting')
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
-    @patch(class_path + '.load_sample')
-    @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
-    @patch(class_path + '._plot_vanadium_curves')
-    @patch(class_path + '._generate_difc_tzero_workspace')
-    @patch(class_path + '._plot_difc_tzero')
+    @patch(file_path + '.LoadAscii')
+    @patch(file_path + ".path_handling.load_workspace")
     @patch(class_path + '.run_calibration')
-    def test_plotting_check(self, calib, plot_difc_zero, gen_difc, plot_van, van, sample,
-                            output_files, update_table):
-        van.return_value = ("A", "B")
+    @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
+    def test_having_full_calib_set_uses_file(self, van_corr, calibrate_alg, load_workspace, load_ascii,
+                                             output_files, update_table, setting, path):
+        path.return_value = True
+        setting.return_value = "mocked/out/path"
+        van_corr.return_value = ("mocked_integration", "mocked_curves")
+        load_workspace.return_value = "mocked_workspace"
+        load_ascii.return_value = "mocked_det_pos"
         self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
-        plot_van.assert_not_called()
-        plot_difc_zero.assert_not_called()
-        gen_difc.assert_not_called()
-        self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, True, "ENGINX")
-        plot_van.assert_called_once()
-        self.assertEqual(gen_difc.call_count, 2)
-        self.assertEqual(plot_difc_zero.call_count, 1)
+        calibrate_alg.assert_called_with("mocked_workspace",
+                                         "mocked_integration",
+                                         "mocked_curves",
+                                         None,
+                                         None,
+                                         full_calib_ws="mocked_det_pos")
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
-    @patch(class_path + '.load_sample')
+    @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '._plot_vanadium_curves')
-    @patch(class_path + '._plot_difc_tzero')
+    @patch(class_path + '._generate_tof_fit_workspace')
+    @patch(class_path + '._plot_tof_fit')
     @patch(class_path + '.run_calibration')
-    def test_present_RB_number_results_in_user_output_files(self, calib, plot_difc_zero, plot_van,
+    def test_plotting_check(self, calib, plot_tof, gen_tof, plot_van, van, sample,
+                            output_files, update_table):
+        calib.return_value = [MagicMock(), MagicMock()]
+        van.return_value = ("A", "B")
+        self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
+        plot_van.assert_not_called()
+        plot_tof.assert_not_called()
+        gen_tof.assert_not_called()
+        self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, True, "ENGINX")
+        plot_van.assert_called_once()
+        self.assertEqual(gen_tof.call_count, 2)
+        self.assertEqual(plot_tof.call_count, 1)
+
+    @patch(class_path + '.update_calibration_params_table')
+    @patch(class_path + '.create_output_files')
+    @patch(file_path + ".path_handling.load_workspace")
+    @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
+    @patch(class_path + '._plot_vanadium_curves')
+    @patch(class_path + '._generate_tof_fit_workspace')
+    @patch(class_path + '._plot_tof_fit')
+    @patch(class_path + '._plot_tof_fit_single_bank_or_custom')
+    @patch(class_path + '.run_calibration')
+    def test_plotting_check_cropped(self, calib, plot_tof_cus, plot_tof_fit, gen_tof,
+                                    plot_van, van, sample, output_files, update_table):
+        calib.return_value = [MagicMock()]
+        van.return_value = ("A", "B")
+        self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, False, "ENGINX")
+        plot_van.assert_not_called()
+        plot_tof_cus.assert_not_called()
+        plot_tof_fit.assert_not_called()
+        gen_tof.assert_not_called()
+        self.model.create_new_calibration(VANADIUM_NUMBER, CERIUM_NUMBER, True, "ENGINX", bank=1)
+        plot_van.assert_called_once()
+        self.assertEqual(gen_tof.call_count, 1)
+        plot_tof_fit.assert_not_called()
+        self.assertEqual(plot_tof_cus.call_count, 1)
+
+    @patch(class_path + '.update_calibration_params_table')
+    @patch(class_path + '.create_output_files')
+    @patch(file_path + ".path_handling.load_workspace")
+    @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
+    @patch(class_path + '._plot_vanadium_curves')
+    @patch(class_path + '._plot_tof_fit')
+    @patch(class_path + '.run_calibration')
+    def test_present_RB_number_results_in_user_output_files(self, calib, plot_tof, plot_van,
                                                             van, sample, output_files,
                                                             update_table):
         van.return_value = ("A", "B")
@@ -93,12 +142,12 @@ class CalibrationModelTest(unittest.TestCase):
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
-    @patch(class_path + '.load_sample')
+    @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '._plot_vanadium_curves')
-    @patch(class_path + '._plot_difc_tzero')
+    @patch(class_path + '._plot_tof_fit')
     @patch(class_path + '.run_calibration')
-    def test_absent_run_number_results_in_no_user_output_files(self, calib, plot_difc_zero,
+    def test_absent_run_number_results_in_no_user_output_files(self, calib, plot_tof,
                                                                plot_van, van, sample, output_files,
                                                                update_table):
         van.return_value = ("A", "B")
@@ -107,7 +156,7 @@ class CalibrationModelTest(unittest.TestCase):
 
     @patch(class_path + '.update_calibration_params_table')
     @patch(class_path + '.create_output_files')
-    @patch(class_path + '.load_sample')
+    @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + '.vanadium_corrections.fetch_correction_workspaces')
     @patch(class_path + '.run_calibration')
     def test_calibration_params_table_is_updated(self, calibrate_alg, vanadium_alg, load_sample,
@@ -127,20 +176,24 @@ class CalibrationModelTest(unittest.TestCase):
         filename = "output"
         output_name.return_value = filename
 
-        self.model.create_output_files("test/", [0, 0], [1, 1], sample_path, vanadium_path,
-                                       "ENGINX")
+        self.model.create_output_files("test/", [2, 2], [0, 0], [1, 1],
+                                       sample_path,
+                                       vanadium_path,
+                                       "ENGINX",
+                                       bank=None,
+                                       spectrum_numbers=None)
 
         self.assertEqual(make_dirs.call_count, 1)
         self.assertEqual(write_file.call_count, 3)
-        write_file.assert_called_with("test/" + filename, [0], [1],
+        write_file.assert_called_with("test/" + filename, [2], [0], [1],
                                       bank_names=['South'],
-                                      ceria_run=sample_path,
+                                      ceria_run="20",
                                       template_file="template_ENGINX_241391_236516_South_bank.prm",
-                                      vanadium_run=vanadium_path)
+                                      vanadium_run="10")
 
     def test_generate_table_workspace_name(self):
         self.assertEqual(self.model._generate_table_workspace_name(20),
-                         "engggui_calibration_bank_21")
+                         "engggui_calibration_bank_20")
 
     def test_generate_output_file_name_for_north_bank(self):
         filename = self.model._generate_output_file_name("test/20.raw", "test/10.raw", "ENGINX",
@@ -156,6 +209,11 @@ class CalibrationModelTest(unittest.TestCase):
         filename = self.model._generate_output_file_name("test/20.raw", "test/10.raw", "ENGINX",
                                                          "all")
         self.assertEqual(filename, "ENGINX_20_10_all_banks.prm")
+
+    def test_generate_output_file_name_for_cropped_bank(self):
+        filename = self.model._generate_output_file_name("test/20.raw", "test/10.raw", "ENGINX",
+                                                         "cropped")
+        self.assertEqual(filename, "ENGINX_20_10_cropped.prm")
 
     def test_generate_output_file_name_for_invalid_bank(self):
         self.assertRaises(ValueError, self.model._generate_output_file_name, "test/20.raw",
@@ -185,6 +243,91 @@ class CalibrationModelTest(unittest.TestCase):
         self.model.update_calibration_params_table(table)
 
         self.assertEqual(ads.retrieve.call_count, 0)
+
+    @patch("Engineering.gui.engineering_diffraction.tabs.calibration.model.EnggCalibrate")
+    def test_run_calibration_no_bank_no_spec_nums_no_full_calib(self, alg):
+        self.model.run_calibration("sample", "vanadium_int", "vanadium_curves", None, None)
+
+        alg.assert_any_call(InputWorkspace="sample",
+                            VanIntegrationWorkspace="vanadium_int",
+                            VanCurvesWorkspace="vanadium_curves",
+                            Bank="1",
+                            FittedPeaks="engggui_calibration_bank_1")
+        alg.assert_any_call(InputWorkspace="sample",
+                            VanIntegrationWorkspace="vanadium_int",
+                            VanCurvesWorkspace="vanadium_curves",
+                            Bank="2",
+                            FittedPeaks="engggui_calibration_bank_2")
+        self.assertEqual(2, alg.call_count)
+
+    @patch("Engineering.gui.engineering_diffraction.tabs.calibration.model.EnggCalibrate")
+    def test_run_calibration_no_bank_no_spec_nums_full_calib(self, alg):
+        self.model.run_calibration("sample",
+                                   "vanadium_int",
+                                   "vanadium_curves",
+                                   None,
+                                   None,
+                                   full_calib_ws="full")
+
+        alg.assert_any_call(InputWorkspace="sample",
+                            VanIntegrationWorkspace="vanadium_int",
+                            VanCurvesWorkspace="vanadium_curves",
+                            Bank="1",
+                            FittedPeaks="engggui_calibration_bank_1",
+                            DetectorPositions="full")
+        alg.assert_any_call(InputWorkspace="sample",
+                            VanIntegrationWorkspace="vanadium_int",
+                            VanCurvesWorkspace="vanadium_curves",
+                            Bank="2",
+                            FittedPeaks="engggui_calibration_bank_2",
+                            DetectorPositions="full")
+        self.assertEqual(2, alg.call_count)
+
+    @patch("Engineering.gui.engineering_diffraction.tabs.calibration.model.EnggCalibrate")
+    def test_run_calibration_bank_no_spec_nums_no_full_calib(self, alg):
+        self.model.run_calibration("sample", "vanadium_int", "vanadium_curves", "1", None)
+
+        alg.assert_any_call(InputWorkspace="sample",
+                            VanIntegrationWorkspace="vanadium_int",
+                            VanCurvesWorkspace="vanadium_curves",
+                            Bank="1",
+                            FittedPeaks="engggui_calibration_bank_1")
+        self.assertEqual(1, alg.call_count)
+
+    @patch("Engineering.gui.engineering_diffraction.tabs.calibration.model.EnggCalibrate")
+    def test_run_calibration_no_bank_spec_nums_no_full_calib(self, alg):
+        self.model.run_calibration("sample", "vanadium_int", "vanadium_curves", None, "1-5, 45-102")
+
+        alg.assert_any_call(InputWorkspace="sample",
+                            VanIntegrationWorkspace="vanadium_int",
+                            VanCurvesWorkspace="vanadium_curves",
+                            SpectrumNumbers="1-5, 45-102",
+                            FittedPeaks="engggui_calibration_bank_cropped")
+        self.assertEqual(1, alg.call_count)
+
+    @patch("Engineering.gui.engineering_diffraction.tabs.calibration.model.EnggCalibrate")
+    def test_run_calibration_bank_no_spec_nums_full_calib(self, alg):
+        self.model.run_calibration("sample", "vanadium_int", "vanadium_curves", "1", None, full_calib_ws="full")
+
+        alg.assert_any_call(InputWorkspace="sample",
+                            VanIntegrationWorkspace="vanadium_int",
+                            VanCurvesWorkspace="vanadium_curves",
+                            Bank="1",
+                            FittedPeaks="engggui_calibration_bank_1",
+                            DetectorPositions="full")
+        self.assertEqual(1, alg.call_count)
+
+    @patch("Engineering.gui.engineering_diffraction.tabs.calibration.model.EnggCalibrate")
+    def test_run_calibration_no_bank_spec_nums_full_calib(self, alg):
+        self.model.run_calibration("sample", "vanadium_int", "vanadium_curves", None, "45-102", full_calib_ws="full")
+
+        alg.assert_any_call(InputWorkspace="sample",
+                            VanIntegrationWorkspace="vanadium_int",
+                            VanCurvesWorkspace="vanadium_curves",
+                            SpectrumNumbers="45-102",
+                            FittedPeaks="engggui_calibration_bank_cropped",
+                            DetectorPositions="full")
+        self.assertEqual(1, alg.call_count)
 
 
 if __name__ == '__main__':

@@ -59,6 +59,7 @@ class MANTIDQT_INDIRECT_DLL IndirectDataAnalysisTab : public IndirectTab {
 public:
   /// Constructor
   IndirectDataAnalysisTab(QWidget *parent = nullptr);
+  virtual ~IndirectDataAnalysisTab() override = default;
 
   /// Set the presenter for the output plotting options
   void setOutputPlotOptionsPresenter(

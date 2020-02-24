@@ -708,7 +708,7 @@ TMDE(void MDGridBox)::splitContents(size_t index, Kernel::ThreadScheduler *ts) {
   if (ts) {
     // Create a task to split the newly created MDGridBox.
     ts->push(std::make_shared<Kernel::FunctionTask>(
-        boost::bind(&MDGridBox<MDE, nd>::splitAllIfNeeded, &*gridbox, ts)));
+        std::bind(&MDGridBox<MDE, nd>::splitAllIfNeeded, &*gridbox, ts)));
   } else {
     gridbox->splitAllIfNeeded(nullptr);
   }
@@ -761,7 +761,7 @@ TMDE(void MDGridBox)::splitAllIfNeeded(Kernel::ThreadScheduler *ts) {
           // So we create a task to split this MDBox,
           // Task is : this->splitContents(i, ts);
           ts->push(std::make_shared<Kernel::FunctionTask>(
-              boost::bind(&MDGridBox<MDE, nd>::splitContents, &*this, i, ts)));
+              std::bind(&MDGridBox<MDE, nd>::splitContents, &*this, i, ts)));
         }
       } else {
         // This box does NOT have enough events to be worth splitting, if it do
@@ -789,8 +789,8 @@ TMDE(void MDGridBox)::splitAllIfNeeded(Kernel::ThreadScheduler *ts) {
         else
           // Go parallel if this is a big enough gridbox.
           // Task is : gridBox->splitAllIfNeeded(ts);
-          ts->push(std::make_shared<Kernel::FunctionTask>(boost::bind(
-              &MDGridBox<MDE, nd>::splitAllIfNeeded, &*gridBox, ts)));
+          ts->push(std::make_shared<Kernel::FunctionTask>(
+              std::bind(&MDGridBox<MDE, nd>::splitAllIfNeeded, &*gridBox, ts)));
       }
     }
   }

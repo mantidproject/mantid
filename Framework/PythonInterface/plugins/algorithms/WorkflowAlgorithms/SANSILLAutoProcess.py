@@ -166,17 +166,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.reference = self.getPropertyValue('ReferenceFiles').split(',')
         self.output = self.getPropertyValue('OutputWorkspace')
         self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
-        self.reduction_type = self.getPropertyValue('ReductionType')
         self.normalise = self.getPropertyValue('NormaliseBy')
         self.radius = self.getProperty('BeamRadius').value
         self.dimensionality = len(self.sample)
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10 * self.dimensionality)
 
     def PyInit(self):
-
-        self.declareProperty('ReductionType', defaultValue='ReduceSample',
-                             validator=StringListValidator(['ReduceSample', 'ReduceWater']),
-                             doc='Choose whether to treat a sample or a water run to calculate sensitivity.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
@@ -288,7 +283,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.copyProperties('SANSILLIntegration',
                             ['OutputType', 'CalculateResolution', 'DefaultQBinning', 'BinningFactor', 'OutputBinning',
                              'NPixelDivision', 'NumberOfWedges', 'WedgeWorkspace', 'WedgeAngle', 'WedgeOffset',
-                             'AsymmetricWedges', 'MaxQxy', 'DeltaQ', 'IQxQyLogBinning'])
+                             'AsymmetricWedges', 'MaxQxy', 'DeltaQ', 'IQxQyLogBinning', 'PanelOutputWorkspaces'])
 
         self.setPropertyGroup('OutputType', 'Integration Options')
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
@@ -297,17 +292,26 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.setUp()
         outputs = []
+        panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
+        panel_output_groups = []
         for i in range(self.dimensionality):
             if self.sample[i] != EMPTY_TOKEN:
                 self.reduce(i)
-                outputs.append(self.output+'_'+str(i+1))
+                outputs.append(self.output+ '_' + str(i + 1))
+                panel_ws_group = panel_outputs + '_' + str(i + 1)
+                if mtd.doesExist(panel_ws_group) and panel_outputs:
+                    panel_output_groups.append(panel_ws_group)
             else:
                 self.log().information('Skipping empty token run.')
 
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=self.output)
         self.setProperty('OutputWorkspace', mtd[self.output])
-        if self.reduction_type == 'ReduceWater':
+        if self.output_sens:
             self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
+
+        if panel_outputs and len(panel_output_groups) != 0:
+            GroupWorkspaces(InputWorkspaces=panel_output_groups, OutputWorkspace=panel_outputs)
+            self.setProperty('PanelOutputWorkspaces', mtd[panel_outputs])
 
     def reduce(self, i):
 
@@ -416,17 +420,14 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         sens_input = ''
         ref_input = ''
-        flux_input = ''
-        if not self.reference[0]:
-            flux_input = flux_name
-            if self.sensitivity:
-                sens = self.sensitivity[i] if len(self.sensitivity) == self.dimensionality else self.sensitivity[0]
-                [load_sensitivity, sensitivity_name] = needs_loading(sens, 'Sensitivity')
-                sens_input = sensitivity_name
-                self.progress.report('Loading sensitivity')
-                if load_sensitivity:
-                    LoadNexusProcessed(Filename=sens, OutputWorkspace=sensitivity_name)
-        else:
+        if self.sensitivity:
+            sens = self.sensitivity[i] if len(self.sensitivity) == self.dimensionality else self.sensitivity[0]
+            [load_sensitivity, sensitivity_name] = needs_loading(sens, 'Sensitivity')
+            sens_input = sensitivity_name
+            self.progress.report('Loading sensitivity')
+            if load_sensitivity:
+                LoadNexusProcessed(Filename=sens, OutputWorkspace=sensitivity_name)
+        if self.reference:
             reference = self.reference[i] if len(self.reference) == self.dimensionality else self.reference[0]
             [load_reference, reference_name] = needs_loading(reference, 'Reference')
             ref_input = reference_name
@@ -437,48 +438,38 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         output = self.output + '_' + str(i + 1)
         [_, sample_name] = needs_processing(self.sample[i], 'Sample')
         self.progress.report('Processing sample at detector configuration '+str(i+1))
-        if self.reduction_type == 'ReduceSample':
-            SANSILLReduction(Run=self.sample[i],
-                             ProcessAs='Sample',
-                             OutputWorkspace=sample_name,
-                             ReferenceInputWorkspace=ref_input,
-                             AbsorberInputWorkspace=absorber_name,
-                             BeamInputWorkspace=beam_name,
-                             CacheSolidAngle=True,
-                             ContainerInputWorkspace=container_name,
-                             TransmissionInputWorkspace=sample_transmission_name,
-                             MaskedInputWorkspace=mask_name,
-                             DefaultMaskedInputWorkspace=default_mask_name,
-                             SensitivityInputWorkspace=sens_input,
-                             FluxInputWorkspace=flux_input,
-                             NormaliseBy=self.normalise,
-                             SampleThickness=self.getProperty('SampleThickness').value,
-                             WaterCrossSection=self.getProperty('WaterCrossSection').value)
-            SANSILLIntegration(InputWorkspace=sample_name,
-                               OutputWorkspace=output,
-                               OutputType=self.getPropertyValue('OutputType'),
-                               CalculateResolution=self.getPropertyValue('CalculateResolution'),
-                               DefaultQBinning=self.getPropertyValue('DefaultQBinning'),
-                               BinningFactor=self.getProperty('BinningFactor').value,
-                               OutputBinning=self.getPropertyValue('OutputBinning'),
-                               NPixelDivision=self.getProperty('NPixelDivision').value,
-                               NumberOfWedges=self.getProperty('NumberOfWedges').value,
-                               WedgeAngle=self.getProperty('WedgeAngle').value,
-                               WedgeOffset=self.getProperty('WedgeOffset').value,
-                               AsymmetricWedges=self.getProperty('AsymmetricWedges').value)
-        elif self.reduction_type == 'ReduceWater':
-            SANSILLReduction(Run=self.sample[i],
-                             ProcessAs='Reference',
-                             OutputWorkspace=output,
-                             AbsorberInputWorkspace=absorber_name,
-                             BeamInputWorkspace=beam_name,
-                             CacheSolidAngle=True,
-                             ContainerInputWorkspace=container_name,
-                             NormaliseBy=self.normalise,
-                             TransmissionInputWorkspace=sample_transmission_name,
-                             SensitivityOutputWorkspace=self.output_sens,
-                             MaskedInputWorkspace=mask_name,
-                             DefaultMaskedInputWorkspace=default_mask_name,
-                             SampleThickness=self.getProperty('SampleThickness').value)
+
+        SANSILLReduction(Run=self.sample[i],
+                         ProcessAs='Sample',
+                         OutputWorkspace=sample_name,
+                         ReferenceInputWorkspace=ref_input,
+                         AbsorberInputWorkspace=absorber_name,
+                         BeamInputWorkspace=beam_name,
+                         CacheSolidAngle=True,
+                         ContainerInputWorkspace=container_name,
+                         TransmissionInputWorkspace=sample_transmission_name,
+                         MaskedInputWorkspace=mask_name,
+                         DefaultMaskedInputWorkspace=default_mask_name,
+                         SensitivityInputWorkspace=sens_input,
+                         SensitivityOutputWorkspace=self.output_sens,
+                         FluxInputWorkspace=flux_name,
+                         NormaliseBy=self.normalise,
+                         SampleThickness=self.getProperty('SampleThickness').value,
+                         WaterCrossSection=self.getProperty('WaterCrossSection').value)
+        panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
+        panel_ws_group = panel_outputs + '_' + str(i + 1) if panel_outputs else ''
+        SANSILLIntegration(InputWorkspace=sample_name,
+                           OutputWorkspace=output,
+                           OutputType=self.getPropertyValue('OutputType'),
+                           CalculateResolution=self.getPropertyValue('CalculateResolution'),
+                           DefaultQBinning=self.getPropertyValue('DefaultQBinning'),
+                           BinningFactor=self.getProperty('BinningFactor').value,
+                           OutputBinning=self.getPropertyValue('OutputBinning'),
+                           NPixelDivision=self.getProperty('NPixelDivision').value,
+                           NumberOfWedges=self.getProperty('NumberOfWedges').value,
+                           WedgeAngle=self.getProperty('WedgeAngle').value,
+                           WedgeOffset=self.getProperty('WedgeOffset').value,
+                           AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
+                           PanelOutputWorkspaces=panel_ws_group)
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)

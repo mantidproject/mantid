@@ -9,25 +9,47 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+New Features
+############
+
+Engineering Diffraction
+-----------------------
+- Introduction of Engineering Diffraction 2 interface. Currently supports calibration and focusing for ENGINX. 
+
 
 Improvements
 ############
+
+- :ref:`LoadILLTOF2 <algm-LoadILLTOF-v2>` now supports data from PANTHER used in diffraction mode.
+- A unit `AtomicDistance` measured in units of Angstrom has been added to the unit factory to describe atomic structure.
 
 Powder Diffraction
 ------------------
 
 - The create_total_scattering_pdf merging banks now matches spectra to the spectrum with the largest x range.
 - The create_total_scattering_pdf merging banks no longer matches spectra with scale, it now only matches with offset.
+- The Polaris create_total_scattering_pdf can now be given an parameter `output_binning` that will be used to rebin the output_pdf.
+- The polaris create_total_scattering_pdf function can now accept a `pdf_type` argument to set the pdf_output type.
+- The polaris create_total_scattering_pdf function can now accept a `freq_params` argument to perform a fourier filter on the run.
 - :ref:`HRPDSlabCanAbsorption <algm-HRPDSlabCanAbsorption-v1>` now accepts any thickness parameter and not those in a specified list.
+- A SaveRDFProfile algorithm has been made that saves workspaces in a format readable by the RMCProfile package.
 
 Engineering Diffraction
 -----------------------
+
+- :ref:`EnggCalibrateFull <algm-EnggCalibrateFull-v1>` now uses the new :ref:`SaveAscii <algm-SaveAscii-v2>` to save its output files as TSVs, allowing them to be loaded back into mantid.
+- :ref:`FitPeaks <algm-FitPeaks-v1>` allows for specifying some of the peak parameters (e.g. only ``Mixing`` for :ref:`func-PseudoVoigt`) and observing the other parameters. The new functionality allows for more automated execution for peak functions other than :ref:`func-Gaussian`.
+- IDF for HFIR HB2B (HiDRA) has been added.
 
 Single Crystal Diffraction
 --------------------------
 
 - :ref:`PredictFractionalPeaks <algm-PredictFractionalPeaks-v1>` now accepts the same set of modulation vector properties as :ref:`IndexPeaks <algm-IndexPeaks-v1>`.
 - New algorithm :ref:`ConvertHFIRSCDtoMDE <algm-ConvertHFIRSCDtoMDE-v1>` for converting HFIR single crystal data (from WAND and DEMAND) into MDEventWorkspace in units Q_sample.
+- ``IndexPeaksWithsatellites`` has been deleted as it had been deprecated and superseded by :ref:`IndexPeaks <algm-IndexPeaks-v1>`.
+- The output peak workspace from :ref:`PredictFractionalPeaks<algm-PredictFractionalPeaks-v1>` now keeps the same lattice parameters as the input workspace. 
+- :ref:`SaveReflections <algm-SaveReflections>` now has the option to save peaks to separate files based on their associated modulation vectors
+  when using the Jana format.
 
 Imaging
 -------
@@ -39,6 +61,11 @@ Powder Diffraction
 ------------------
 
 - A bug has been fixed that prevented unicode strings being given as a lim file directory in polaris create_total_scattering_pdf merging banks.
+- A bug has been fixed that caused Polaris.focus to fail with `do_absorption_Corrections=True`.
+- A bug has been fixed that caused empty runs to be subtracted twice when specifying `sample_empty` in `Polaris.focus`.
+- A bug has been fixed that prevented lists being given for `q_lims` in polaris create_total_scattering_pdf while merging banks.
+- A bug has been fixed that caused SavePDF to fail when asked to save histogram data
+- A bug has been fixed that prevented lists being given for `q_lims` in polaris create_total_scattering_pdf while merging banks.
 
 Engineering Diffraction
 -----------------------
@@ -49,6 +76,8 @@ Single Crystal Diffraction
 --------------------------
 
 - Support added for DEMAND (HB3A) to the algorithms :ref:`ConvertWANDSCDtoQ <algm-ConvertWANDSCDtoQ-v1>` and :ref:`FindPeaksMD <algm-FindPeaksMD-v1>` in order to handle additional goniometers.
+- Fixed PredictSatellitePeaks producing an empty table when using cross-terms with crystallography convention for sign of Q.
+- IntegrateEllipsoids and IntegrateEllipsoidsTwoStep now calculate the count-weighted variance as required for non Event mode data. 
 
 Imaging
 -------

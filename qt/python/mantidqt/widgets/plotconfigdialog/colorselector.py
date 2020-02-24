@@ -8,20 +8,12 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
-from matplotlib import colors, rcParams
+from mantid.plots.legend import convert_color_to_hex
+from matplotlib import rcParams
 from qtpy.QtCore import QRegExp
 from qtpy.QtGui import QColor, QPalette, QRegExpValidator
 from qtpy.QtWidgets import (QWidget, QLineEdit, QPushButton, QHBoxLayout,
                             QColorDialog)
-
-
-def convert_color_to_hex(color):
-    """Convert a matplotlib color to its hex form"""
-    try:
-        return colors.cnames[color]
-    except (KeyError, TypeError):
-        rgb = colors.colorConverter.to_rgb(color)
-        return colors.rgb2hex(rgb)
 
 
 MPL_DEFAULT = convert_color_to_hex(rcParams['lines.color'])

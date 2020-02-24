@@ -4,229 +4,214 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
+#  This file is part of the mantid workbench.
+#
+#
+from __future__ import absolute_import
 
-import matplotlib
+# std imports
 import unittest
 
+# third party imports
+import matplotlib
+
 matplotlib.use('AGG')  # noqa
-
 import matplotlib.pyplot as plt
-import numpy as np
 
-import mantid.api
-import mantid.plots.plotfunctions as funcs
-from mantid.plots.utility import MantidAxType
+# local imports
+# register mantid projection
+from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import config
-from mantid.simpleapi import (CreateWorkspace, CreateEmptyTableWorkspace, DeleteWorkspace,
-                              CreateMDHistoWorkspace, ConjoinWorkspaces, AddTimeSeriesLog)
+from mantid.plots import MantidAxes
+from mantid.plots.plotfunctions import (figure_title,
+                                        manage_workspace_names, plot)
 
 
-class PlotFunctionsTest(unittest.TestCase):
+# Avoid importing the whole of mantid for a single mock of the workspace class
+class FakeWorkspace(object):
+    def __init__(self, name):
+        self._name = name
 
-    @classmethod
-    def setUpClass(cls):
-        cls.g1da = config['graph1d.autodistribution']
-        config['graph1d.autodistribution'] = 'On'
-        cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30],
-                                         DataY=[2, 3, 4, 5],
-                                         DataE=[1, 2, 3, 4],
-                                         NSpec=2,
-                                         Distribution=True,
-                                         YUnitLabel="Counts per $\\AA$",
-                                         UnitX='Wavelength',
-                                         VerticalAxisUnit='DeltaE',
-                                         VerticalAxisValues=[4, 6, 8],
-                                         OutputWorkspace='ws2d_histo')
-        cls.ws2d_histo_non_dist = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30],
-                                                  DataY=[2, 3, 4, 5],
-                                                  DataE=[1, 2, 3, 4],
-                                                  NSpec=2,
-                                                  Distribution=False,
-                                                  YUnitLabel='Counts',
-                                                  UnitX='Wavelength',
-                                                  OutputWorkspace='ws2d_histo_non_dist')
-        cls.ws2d_histo_rag = CreateWorkspace(DataX=[1, 2, 3, 4, 5, 2, 4, 6, 8, 10],
-                                             DataY=[2] * 8,
-                                             NSpec=2,
-                                             VerticalAxisUnit='DeltaE',
-                                             VerticalAxisValues=[5, 7, 9],
-                                             OutputWorkspace='ws2d_histo_rag')
-        cls.ws_MD_2d = CreateMDHistoWorkspace(Dimensionality=3,
-                                              Extents='-3,3,-10,10,-1,1',
-                                              SignalInput=range(25),
-                                              ErrorInput=range(25),
-                                              NumberOfEvents=10 * np.ones(25),
-                                              NumberOfBins='5,5,1',
-                                              Names='Dim1,Dim2,Dim3',
-                                              Units='MomentumTransfer,EnergyTransfer,Angstrom',
-                                              OutputWorkspace='ws_MD_2d')
-        cls.ws_MD_1d = CreateMDHistoWorkspace(Dimensionality=3,
-                                              Extents='-3,3,-10,10,-1,1',
-                                              SignalInput=range(5),
-                                              ErrorInput=range(5),
-                                              NumberOfEvents=10 * np.ones(5),
-                                              NumberOfBins='1,5,1',
-                                              Names='Dim1,Dim2,Dim3',
-                                              Units='MomentumTransfer,EnergyTransfer,Angstrom',
-                                              OutputWorkspace='ws_MD_1d')
-        cls.ws2d_point_uneven = CreateWorkspace(DataX=[10, 20, 30],
-                                                DataY=[1, 2, 3],
-                                                NSpec=1,
-                                                OutputWorkspace='ws2d_point_uneven')
-        wp = CreateWorkspace(DataX=[15, 25, 35, 45], DataY=[1, 2, 3, 4], NSpec=1)
-        ConjoinWorkspaces(cls.ws2d_point_uneven, wp, CheckOverlapping=False)
-        cls.ws2d_point_uneven = mantid.mtd['ws2d_point_uneven']
-        cls.ws2d_histo_uneven = CreateWorkspace(DataX=[10, 20, 30, 40],
-                                                DataY=[1, 2, 3],
-                                                NSpec=1,
-                                                OutputWorkspace='ws2d_histo_uneven')
-        AddTimeSeriesLog(cls.ws2d_histo, Name="my_log", Time="2010-01-01T00:00:00", Value=100)
-        AddTimeSeriesLog(cls.ws2d_histo, Name="my_log", Time="2010-01-01T00:30:00", Value=15)
-        AddTimeSeriesLog(cls.ws2d_histo, Name="my_log", Time="2010-01-01T00:50:00", Value=100.2)
+    def name(self):
+        return self._name
 
-    @classmethod
-    def tearDownClass(cls):
-        config['graph1d.autodistribution'] = cls.g1da
-        DeleteWorkspace('ws2d_histo')
-        DeleteWorkspace('ws2d_histo_non_dist')
-        DeleteWorkspace('ws_MD_2d')
-        DeleteWorkspace('ws_MD_1d')
-        DeleteWorkspace('ws2d_point_uneven')
 
-    def test_1d_plots(self):
-        fig, ax = plt.subplots()
-        funcs.plot(ax, self.ws2d_histo, 'rs', specNum=1)
-        funcs.plot(ax, self.ws2d_histo, specNum=2, linewidth=6)
-        funcs.plot(ax, self.ws_MD_1d, 'bo')
+@manage_workspace_names
+def workspace_names_dummy_func(workspaces):
+    return workspaces
 
-    def test_1d_log(self):
-        fig, ax = plt.subplots()
-        funcs.plot(ax, self.ws2d_histo, LogName='my_log')
-        ax1 = ax.twiny()
-        funcs.plot(ax1, self.ws2d_histo, LogName='my_log', FullTime=True)
 
-    def test_1d_errorbars(self):
-        fig, ax = plt.subplots()
-        funcs.errorbar(ax, self.ws2d_histo, 'rs', specNum=1)
-        funcs.errorbar(ax, self.ws2d_histo, specNum=2, linewidth=6)
-        funcs.errorbar(ax, self.ws_MD_1d, 'bo')
+class FunctionsTest(unittest.TestCase):
 
-    def test_1d_scatter(self):
-        fig, ax = plt.subplots()
-        funcs.scatter(ax, self.ws2d_histo, specNum=1)
-        funcs.scatter(ax, self.ws2d_histo, specNum=2)
-        funcs.scatter(ax, self.ws_MD_1d)
+    _test_ws = None
 
-    def test_2d_contours(self):
-        fig, ax = plt.subplots()
-        funcs.contour(ax, self.ws2d_histo_rag)
-        funcs.contourf(ax, self.ws2d_histo, vmin=0)
-        funcs.tricontour(ax, self.ws_MD_2d)
-        funcs.tricontourf(ax, self.ws_MD_2d)
-        self.assertRaises(ValueError, funcs.contour, ax, self.ws2d_point_uneven)
+    def setUp(self):
+        if self._test_ws is None:
+            self.__class__._test_ws = WorkspaceFactory.Instance().create(
+                "Workspace2D", NVectors=2, YLength=5, XLength=5)
 
-    def test_2d_pcolors(self):
-        fig, ax = plt.subplots()
-        funcs.pcolor(ax, self.ws2d_histo_rag)
-        funcs.tripcolor(ax, self.ws2d_histo, vmin=0)
-        funcs.pcolormesh(ax, self.ws_MD_2d)
-        funcs.pcolorfast(ax, self.ws2d_point_uneven, vmin=-1)
-        funcs.imshow(ax, self.ws2d_histo)
+    def tearDown(self):
+        AnalysisDataService.Instance().clear()
+        plt.close('all')
 
-    def _do_update_colorplot_datalimits(self, color_func):
-        fig, ax = plt.subplots()
-        mesh = color_func(ax, self.ws2d_histo)
-        ax.set_xlim(0.01, 0.05)
-        ax.set_ylim(-0.05, 0.05)
-        funcs.update_colorplot_datalimits(ax, mesh)
-        self.assertAlmostEqual(10.0, ax.get_xlim()[0])
-        from distutils.version import LooseVersion
+    def test_figure_title_with_single_string(self):
+        self.assertEqual("test-1", figure_title("test", 1))
 
-        # different results with 1.5.3 and 2.1.1
-        if color_func.__name__ != 'imshow' and LooseVersion(matplotlib.__version__) < LooseVersion("2"):
-            self.assertAlmostEqual(100.0, ax.get_xlim()[1])
+    def test_figure_title_with_list_of_strings(self):
+        self.assertEqual("first-10", figure_title(["first", "second"], 10))
+
+    def test_figure_title_with_single_workspace(self):
+        self.assertEqual("fake-5", figure_title(FakeWorkspace("fake"), 5))
+
+    def test_figure_title_with_workspace_list(self):
+        self.assertEqual("fake-10", figure_title((FakeWorkspace("fake"),
+                                                  FakeWorkspace("nextfake")), 10))
+
+    def test_figure_title_with_empty_list_raises_assertion(self):
+        with self.assertRaises(AssertionError):
+            figure_title([], 5)
+
+    def test_that_plot_can_accept_workspace_names(self):
+        ws_name1 = "some_workspace"
+        AnalysisDataService.Instance().addOrReplace(ws_name1, self._test_ws)
+
+        try:
+            result_workspaces = workspace_names_dummy_func([ws_name1])
+        except ValueError:
+            self.fail("Passing workspace names should not raise a value error.")
         else:
-            self.assertAlmostEqual(30.0, ax.get_xlim()[1])
-        self.assertAlmostEqual(4.0, ax.get_ylim()[0])
-        self.assertAlmostEqual(8.0, ax.get_ylim()[1])
+            # The list of workspace names we pass in should have been converted
+            # to a list of workspaces
+            self.assertNotEqual(result_workspaces, [ws_name1])
 
-    def test_update_colorplot_datalimits_for_pcolormesh(self):
-        self._do_update_colorplot_datalimits(funcs.pcolormesh)
+    def test_workspace_can_be_plotted_on_top_of_scripted_plots(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertEqual(len(ax.lines), 2)
 
-    def test_update_colorplot_datalimits_for_pcolor(self):
-        self._do_update_colorplot_datalimits(funcs.pcolor)
+    def test_title_preserved_when_workspace_plotted_on_scripted_plot(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        plt.title("My Title")
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertEqual("My Title", ax.get_title())
 
-    def test_update_colorplot_datalimits_for_imshow(self):
-        self._do_update_colorplot_datalimits(funcs.imshow)
+    def test_different_line_colors_when_plotting_over_scripted_fig(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        line_colors = [line.get_color() for line in ax.get_lines()]
+        self.assertNotEqual(line_colors[0], line_colors[1])
 
-    def test_1d_plots_with_unplottable_type_raises_attributeerror(self):
-        table = CreateEmptyTableWorkspace()
-        _, ax = plt.subplots()
-        self.assertRaises(AttributeError, funcs.plot, ax, table, wkspIndex=0)
-        self.assertRaises(AttributeError, funcs.errorbar, ax, table, wkspIndex=0)
+    def test_workspace_tracked_when_plotting_over_scripted_fig(self):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+        self.assertIn(ws.name(), ax.tracked_workspaces)
 
-    def test_2d_plots_with_unplottable_type_raises_attributeerror(self):
-        table = CreateEmptyTableWorkspace()
-        _, ax = plt.subplots()
-        self.assertRaises(AttributeError, funcs.pcolor, ax, table)
-        self.assertRaises(AttributeError, funcs.pcolormesh, ax, table)
-        self.assertRaises(AttributeError, funcs.pcolorfast, ax, table)
+    def test_from_mpl_axes_success_with_default_args(self):
+        plt.figure()
+        plt.plot([0, 1], [0, 1])
+        plt.plot([0, 2], [0, 2])
+        ax = plt.gca()
+        mantid_ax = MantidAxes.from_mpl_axes(ax)
+        self.assertEqual(len(mantid_ax.lines), 2)
+        self.assertIsInstance(mantid_ax, MantidAxes)
 
-    def test_1d_indices(self):
-        fig, ax = plt.subplots()
-        funcs.plot(ax, self.ws_MD_2d, indices=(slice(None), 0, 0))
-        funcs.plot(ax, self.ws_MD_2d, indices=(0, slice(None), 0))
-        funcs.plot(ax, self.ws_MD_2d, indices=(0, 0, slice(None)))
-        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d, indices=(0, slice(None), slice(None)))
-        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d)
-
-    def test_1d_slicepoint(self):
-        fig, ax = plt.subplots()
-        funcs.plot(ax, self.ws_MD_2d, slicepoint=(None, 0, 0))
-        funcs.plot(ax, self.ws_MD_2d, slicepoint=(0, None, 0))
-        funcs.plot(ax, self.ws_MD_2d, slicepoint=(0, 0, None))
-        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d, slicepoint=(0, None, None))
-        self.assertRaises(AssertionError, funcs.plot, ax, self.ws_MD_2d)
-
-    def test_1d_x_axes_label_spectrum_plot(self):
-        fig, ax = plt.subplots()
-        funcs.plot(ax, self.ws2d_histo_non_dist, 'rs', specNum=1, axis=MantidAxType.SPECTRUM)
-        self.assertEqual(ax.get_xlabel(), "Wavelength ($\\AA$)")
-
-    def test_1d_x_axes_label_bin_plot(self):
-        fig, ax = plt.subplots()
-        funcs.plot(ax, self.ws2d_histo_non_dist, 'rs', specNum=1, axis=MantidAxType.BIN)
-        self.assertEqual(ax.get_xlabel(), "Spectrum")
-
-    def test_1d_y_axes_label_auto_distribution_on(self):
-        fig, ax = plt.subplots()
-        funcs.plot(ax, self.ws2d_histo_non_dist, 'rs', specNum=1)
-        self.assertEqual(ax.get_ylabel(), "Counts ($\\AA$)$^{-1}$")
-
-    def test_1d_y_axes_label_distribution_workspace_auto_distribution_on(self):
-        fig, ax = plt.subplots()
-        funcs.plot(ax, self.ws2d_histo, 'rs', specNum=1)
-        self.assertEqual(ax.get_ylabel(), "Counts ($\\AA$)$^{-1}$")
-
-    def test_1d_y_axes_label_auto_distribution_off(self):
+    def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars(self):
+        auto_dist = config['graph1d.autodistribution']
         try:
             config['graph1d.autodistribution'] = 'Off'
-            fig, ax = plt.subplots()
-            funcs.plot(ax, self.ws2d_histo_non_dist, 'rs', specNum=1)
-            self.assertEqual(ax.get_ylabel(), "Counts")
+            self._compare_errorbar_labels_and_title()
         finally:
-            config['graph1d.autodistribution'] = 'On'
+            config['graph1d.autodistribution'] = auto_dist
 
-    def test_1d_y_axes_label_distribution_workspace_auto_distribution_off(self):
+    def test_that_plot_spectrum_has_same_y_label_with_and_without_errorbars_normalize_by_bin_width(self):
+        auto_dist = config['graph1d.autodistribution']
         try:
-            config['graph1d.autodistribution'] = 'Off'
-            fig, ax = plt.subplots()
-            funcs.plot(ax, self.ws2d_histo, 'rs', specNum=1)
-            self.assertEqual(ax.get_ylabel(), "Counts ($\\AA$)$^{-1}$")
-        finally:
             config['graph1d.autodistribution'] = 'On'
+            self._compare_errorbar_labels_and_title()
+        finally:
+            config['graph1d.autodistribution'] = auto_dist
 
+    def test_setting_waterfall_to_true_makes_waterfall_plot(self):
+        fig = plt.figure()
+        ws = self._test_ws
+        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+        ax = plt.gca()
+
+        self.assertTrue(ax.is_waterfall())
+
+    def test_cannot_make_waterfall_plot_with_one_line(self):
+        fig = plt.figure()
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, waterfall=True)
+        ax = plt.gca()
+
+        self.assertFalse(ax.is_waterfall())
+
+    def test_overplotting_supports_first_time_plot(self):
+        # Note how we call overplot true first time round
+        starting_fig = plt.figure()
+        for _ in range(2):
+            plot([self._test_ws], wksp_indices=[1], overplot=True)
+        self.assertNotEqual(starting_fig, plt.figure(), "A new figure wasn't created")
+
+    def test_overplotting_onto_waterfall_plot_maintains_waterfall(self):
+        fig = plt.figure()
+        ws = self._test_ws
+        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+        # Overplot one of the same lines.
+        plot([ws], wksp_indices=[0], fig=fig, overplot=True)
+        ax = plt.gca()
+
+        # Check that the lines which would be the same in a non-waterfall plot are different.
+        self.assertNotEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[2].get_xdata()[0])
+        self.assertNotEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[2].get_ydata()[0])
+
+    def test_overplotting_onto_waterfall_plot_with_filled_areas_adds_another_filled_area(self):
+        fig = plt.figure()
+        ws = self._test_ws
+        plot([ws], wksp_indices=[0, 1], fig=fig, waterfall=True)
+        ax = plt.gca()
+        ax.set_waterfall_fill(True)
+        plot([ws], wksp_indices=[0], fig=fig, overplot=True)
+
+        fills = [collection for collection in ax.collections
+                 if isinstance(collection, matplotlib.collections.PolyCollection)]
+
+        self.assertEqual(len(fills), 3)
+
+    # ------------- Failure tests -------------
+    def test_that_manage_workspace_names_raises_on_mix_of_workspaces_and_names(self):
+        ws = ["some_workspace", self._test_ws]
+        AnalysisDataService.Instance().addOrReplace("some_workspace", self._test_ws)
+        self.assertRaises(TypeError, workspace_names_dummy_func(ws))
+
+    # ------------- Private -------------------
+    def _compare_errorbar_labels_and_title(self):
+        ws = self._test_ws
+        ws.setYUnitLabel("MyLabel")
+        ws.getAxis(0).setUnit("TOF")
+        for distribution_ws in [True, False]:
+            ws.setDistribution(distribution_ws)
+            ax = plot([ws], wksp_indices=[1]).get_axes()[0]
+            err_ax = plot([ws], wksp_indices=[1], errors=True).get_axes()[0]
+            # Compare y-labels
+            self.assertEqual(ax.get_ylabel(), err_ax.get_ylabel())
+            # Compare x-labels
+            self.assertEqual(ax.get_xlabel(), err_ax.get_xlabel())
+            # Compare title
+            self.assertEqual(ax.get_title(), err_ax.get_title())
 
 if __name__ == '__main__':
     unittest.main()

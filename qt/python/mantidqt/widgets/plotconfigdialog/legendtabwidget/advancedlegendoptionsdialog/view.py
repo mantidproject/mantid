@@ -12,8 +12,8 @@ from qtpy.QtCore import Qt, QSize
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialog
 
+from mantid.plots.legend import LegendProperties
 from mantidqt.utils.qt import load_ui
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 
 class AdvancedLegendOptionsView(QDialog):

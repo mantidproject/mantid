@@ -27,26 +27,31 @@ function (find_pyqt major_version)
   if (NOT EXISTS ${_find_pyqt_py})
     message(FATAL_ERROR "Failed to find FindPyQt.py in \"${CMAKE_MODULE_PATH}\"")
   endif()
+
   execute_process (COMMAND ${PYTHON_EXECUTABLE} ${_find_pyqt_py} ${major_version}
     OUTPUT_VARIABLE _pyqt_config ERROR_VARIABLE _pyqt_config_err)
+  if(CMAKE_HOST_WIN32 AND major_version EQUAL 4 AND _pyqt_config_err MATCHES "Qt: Untested Windows version 10.0 detected!")
+    # Known warning on Windows 10 with Qt4 and Python 3
+    set(_pyqt_config_err "")
+  endif()
   if (_pyqt_config AND NOT _pyqt_config_err)
     string (REGEX MATCH "^pyqt_version:([^\n]+).*$" _dummy ${_pyqt_config})
-    set (PYQT${major_version}_VERSION "${CMAKE_MATCH_1}" CACHE STRING "PyQt${major_version}'s version as a 6-digit hexadecimal number")
+    set (PYQT${major_version}_VERSION "${CMAKE_MATCH_1}" CACHE STRING "PyQt${major_version}'s version as a 6-digit hexadecimal number" FORCE)
 
     string (REGEX MATCH ".*\npyqt_version_str:([^\n]+).*$" _dummy ${_pyqt_config})
-    set (PYQT${major_version}_VERSION_STR "${CMAKE_MATCH_1}" CACHE STRING "PyQt${major_version}'s version as a human-readable string")
+    set (PYQT${major_version}_VERSION_STR "${CMAKE_MATCH_1}" CACHE STRING "PyQt${major_version}'s version as a human-readable string" FORCE)
 
     string (REGEX MATCH ".*\npyqt_version_tag:([^\n]+).*$" _dummy ${_pyqt_config})
-    set (PYQT${major_version}_VERSION_TAG "${CMAKE_MATCH_1}" CACHE STRING "The Qt version tag used by PyQt${major_version}'s .sip files")
+    set (PYQT${major_version}_VERSION_TAG "${CMAKE_MATCH_1}" CACHE STRING "The Qt version tag used by PyQt${major_version}'s .sip files" FORCE)
 
     string (REGEX MATCH ".*\npyqt_sip_dir:([^\n]+).*$" _dummy ${_pyqt_config})
-    set (PYQT${major_version}_SIP_DIR "${CMAKE_MATCH_1}" CACHE PATH "The base directory where PyQt${major_version}'s .sip files are installed")
+    set (PYQT${major_version}_SIP_DIR "${CMAKE_MATCH_1}" CACHE PATH "The base directory where PyQt${major_version}'s .sip files are installed" FORCE)
 
     string (REGEX MATCH ".*\npyqt_sip_flags:([^\n]+).*$" _dummy ${_pyqt_config})
-    set (PYQT${major_version}_SIP_FLAGS "${CMAKE_MATCH_1}" CACHE STRING "The SIP flags used to build PyQt${major_version}")
+    set (PYQT${major_version}_SIP_FLAGS "${CMAKE_MATCH_1}" CACHE STRING "The SIP flags used to build PyQt${major_version}" FORCE)
 
     string (REGEX MATCH ".*\npyqt_pyuic:([^\n]+).*$" _dummy ${_pyqt_config})
-    set (PYQT${major_version}_PYUIC "${CMAKE_MATCH_1}" CACHE STRING "Location of the pyuic script")
+    set (PYQT${major_version}_PYUIC "${CMAKE_MATCH_1}" CACHE STRING "Location of the pyuic script" FORCE)
 
     if (NOT EXISTS "${PYQT${major_version}_SIP_DIR}/QtCore/QtCoremod.sip")
       message (FATAL_ERROR "Unable to find QtCore/QtCoremod.sip in ${PYQT${major_version}_SIP_DIR}. PyQt sip files are missing."

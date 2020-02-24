@@ -12,6 +12,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidCurveFitting/Algorithms/PlotPeakByLogValueHelper.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -42,26 +44,6 @@ Required Properties:
 class DLLExport PlotPeakByLogValue : public API::Algorithm {
   /** Structure to identify data for fitting
    */
-  struct InputData {
-    /// Constructor
-    InputData(const std::string &nam, int ix, int s, int p, double st = 0,
-              double en = 0)
-        : name(nam), i(ix), spec(s), period(p), start(st), end(en) {}
-    /// Copy constructor
-    InputData(const InputData &data)
-        : name(data.name), i(data.i), spec(data.spec), period(data.period),
-          start(data.start), end(data.end), ws(data.ws) {
-      indx.assign(data.indx.begin(), data.indx.end());
-    }
-    std::string name; ///< Name of a workspace or file
-    int i;            ///< Workspace index of the spectra to fit
-    int spec;         ///< Spectrum number to fit
-    int period;       ///< Period, needed if a file contains several periods
-    double start;     ///< starting axis value
-    double end;       ///< ending axis value
-    API::MatrixWorkspace_sptr ws; ///< shared pointer to the workspace
-    std::vector<int> indx; ///< a list of ws indices to fit if i and spec < 0
-  };
 
 public:
   /// Algorithm's name for identification overriding a virtual method
@@ -82,14 +64,37 @@ private:
   void init() override;
   void exec() override;
 
-  /// Get a workspace
-  InputData getWorkspace(const InputData &data);
-
   /// Set any WorkspaceIndex attributes in the fitting function
   void setWorkspaceIndexAttribute(API::IFunction_sptr fun, int wsIndex) const;
 
-  /// Create a list of input workspace names
-  std::vector<InputData> makeNames() const;
+  boost::shared_ptr<Algorithm> runSingleFit(bool createFitOutput,
+                                            bool outputCompositeMembers,
+                                            bool outputConvolvedMembers,
+                                            const API::IFunction_sptr &ifun,
+                                            const InputSpectraToFit &data);
+
+  double calculateLogValue(std::string logName, const InputSpectraToFit &data);
+
+  API::ITableWorkspace_sptr
+  createResultsTable(const std::string &logName,
+                     const API::IFunction_sptr &ifunSingle, bool &isDataName);
+
+  void appendTableRow(bool isDataName, API::ITableWorkspace_sptr &result,
+                      const API::IFunction *const ifun,
+                      const InputSpectraToFit &data, double logValue,
+                      double chi2) const;
+
+  void finaliseOutputWorkspaces(
+      bool createFitOutput,
+      const std::vector<API::MatrixWorkspace_sptr> &fitWorkspaces,
+      const std::vector<API::ITableWorkspace_sptr> &parameterWorkspaces,
+      const std::vector<API::ITableWorkspace_sptr> &covarianceWorkspaces);
+
+  API::IFunction_sptr setupFunction(bool individual, bool passWSIndexToFunction,
+                                    const API::IFunction_sptr &inputFunction,
+                                    const std::vector<double> &initialParams,
+                                    bool isMultiDomainFunction, int i,
+                                    const InputSpectraToFit &data) const;
 
   /// Create a minimizer string based on template string provided
   std::string getMinimizerString(const std::string &wsName,

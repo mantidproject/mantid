@@ -432,9 +432,9 @@ void IndexPeaks::exec() {
     auto &lattice = args.workspace->mutableSample().getOrientedLattice();
     lattice.setMaxOrder(args.satellites.maxOrder);
     lattice.setCrossTerm(args.satellites.crossTerms);
-    for (auto i = 0u; i < 3; ++i) {
-      lattice.setModVec1(args.satellites.modVectors[i]);
-    }
+    lattice.setModVec1(args.satellites.modVectors[0]);
+    lattice.setModVec2(args.satellites.modVectors[1]);
+    lattice.setModVec3(args.satellites.modVectors[2]);
   }
 
   CombinedIndexingStats indexingInfo;

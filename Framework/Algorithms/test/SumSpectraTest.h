@@ -342,28 +342,52 @@ public:
     RebinnedOutput_sptr output;
     output =
         AnalysisDataService::Instance().retrieveWS<RebinnedOutput>(outName);
-    TS_ASSERT(output);
-    TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(output->blocksize(), 6);
-    // Row with full acceptance
-    TS_ASSERT_EQUALS(output->y(0)[1], 1.);
-    TS_ASSERT_DELTA(output->e(0)[1], 0.40824829046386296, 1.e-5);
-    TS_ASSERT_EQUALS(output->dataF(0)[1], 6.);
-    // Row with limited, but non-zero acceptance, shouldn't have nans!
-    TS_ASSERT_DELTA(output->y(0)[5], 0.66666, 1.e-5);
-    TS_ASSERT_DELTA(output->e(0)[5], 0.47140452079103173, 1.e-5);
-    TS_ASSERT_EQUALS(output->dataF(0)[5], 3.);
 
-    TS_ASSERT(output->run().hasProperty("NumAllSpectra"))
-    TS_ASSERT(output->run().hasProperty("NumMaskSpectra"))
-    TS_ASSERT(output->run().hasProperty("NumZeroSpectra"))
+    auto evaluate = [&, nHist](RebinnedOutput_sptr &output) {
+      TS_ASSERT(output);
+      TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
+      TS_ASSERT_EQUALS(output->blocksize(), 6);
+      // Row with full acceptance
+      TS_ASSERT_EQUALS(output->y(0)[1], 1.);
+      TS_ASSERT_DELTA(output->e(0)[1], 0.40824829046386296, 1.e-5);
+      TS_ASSERT_EQUALS(output->dataF(0)[1], 6.);
+      // Row with limited, but non-zero acceptance, shouldn't have nans!
+      TS_ASSERT_DELTA(output->y(0)[5], 0.66666, 1.e-5);
+      TS_ASSERT_DELTA(output->e(0)[5], 0.47140452079103173, 1.e-5);
+      TS_ASSERT_EQUALS(output->dataF(0)[5], 3.);
 
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(nHist),
-                     output->run().getLogData("NumAllSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
-                     output->run().getLogData("NumMaskSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
-                     output->run().getLogData("NumZeroSpectra")->value())
+      TS_ASSERT(output->run().hasProperty("NumAllSpectra"))
+      TS_ASSERT(output->run().hasProperty("NumMaskSpectra"))
+      TS_ASSERT(output->run().hasProperty("NumZeroSpectra"))
+
+      TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(nHist),
+                       output->run().getLogData("NumAllSpectra")->value())
+      TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
+                       output->run().getLogData("NumMaskSpectra")->value())
+      TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
+                       output->run().getLogData("NumZeroSpectra")->value())
+    };
+
+    evaluate(output);
+
+    // unfinalize the workspace and confirm it gives the same results
+    // using a clean algorithm
+    ws->unfinalize();
+    AnalysisDataService::Instance().addOrReplace(inName, ws);
+    Mantid::Algorithms::SumSpectra alg3a;
+    if (!alg3a.isInitialized()) {
+      alg3a.initialize();
+    }
+    // Set the properties
+    alg3a.setPropertyValue("InputWorkspace", inName);
+    alg3a.setPropertyValue("OutputWorkspace", outName);
+    alg3a.setProperty("IncludeMonitors", false);
+    alg3a.setProperty("RemoveSpecialValues", true);
+    alg3a.execute();
+    TS_ASSERT(alg3a.isExecuted());
+    output =
+        AnalysisDataService::Instance().retrieveWS<RebinnedOutput>(outName);
+    evaluate(output);
   }
   void testExecNoLimitsWeighted() {
     Mantid::Algorithms::SumSpectra alg2;

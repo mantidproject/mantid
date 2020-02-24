@@ -62,7 +62,7 @@ from sans.common.constants import (EMPTY_NAME, SANS_SUFFIX, TRANS_SUFFIX, MONITO
 from sans.common.enums import (SANSFacility, SANSDataType, SANSInstrument)
 from sans.common.general_functions import (create_child_algorithm)
 from sans.common.log_tagger import (set_tag, has_tag, get_tag)
-from sans.state.data import (StateData)
+from sans.state.StateObjects.StateData import (StateData)
 from sans.algorithm_detail.calibration import apply_calibration
 
 

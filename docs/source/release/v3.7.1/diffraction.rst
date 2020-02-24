@@ -59,7 +59,7 @@ Engineering Diffraction
   parameters (whole pattern refinement) and/or fit peaks.
 
 - New algorithm added:
-  :ref:`EnggFitDIFCFromPeaks<algm-EnggFitDIFCFromPeaks>`, which forks
+  :ref:`EnggFitDIFCFromPeaks<algm-EnggFitTOFFromPeaks>`, which forks
   from the old
   :ref:`EnggFitPeaks<algm-EnggFitPeaks>`. :ref:`EnggFitPeaks<algm-EnggFitPeaks>`
   modified to fit peaks but not calibration parameters.

@@ -9,7 +9,7 @@ if ( LSB_CMD )
   string ( STRIP ${UNIX_DIST} UNIX_DIST )
   string ( REGEX REPLACE "RedHatEnterpriseClient" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
   string ( REGEX REPLACE "RedHatEnterpriseWorkstation" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
-  # Make Scientific Linux and CentOS look like RHEL6
+  # Make Scientific Linux and CentOS look like RHEL
   string ( REGEX REPLACE "Scientific" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
   string ( REGEX REPLACE "CentOS" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
   # get the codename

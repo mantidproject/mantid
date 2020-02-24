@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy import QtWidgets, PYQT4
+from qtpy import QtWidgets, PYQT4, QtCore, QtGui
+from Muon.GUI.Common.utilities.run_string_utils import run_string_regex
 from Muon.GUI.Common.message_box import warning, question
 from Muon.GUI.Common.utilities.muon_file_utils import show_file_browser_and_return_selection
 
@@ -26,8 +27,13 @@ class GroupingTabView(QtWidgets.QWidget):
         self.vertical_layout = None
         self.horizontal_layout_base = None
         self.horizontal_layout_description = None
+        self.horizontal_layout_1 = None
         self.description_label = None
         self.description_edit = None
+        self.summed_period_edit = None
+        self.period_label = None
+        self.subtracted_period_edit = None
+        self.minus_label = None
 
         self._grouping_table = grouping_table
         self._pairing_table = pairing_table
@@ -76,6 +82,37 @@ class GroupingTabView(QtWidgets.QWidget):
         self.vertical_layout.addWidget(self._grouping_table)
         self.vertical_layout.addWidget(self._pairing_table)
         self.vertical_layout.addItem(self.horizontal_layout_base)
+
+        # PERIOD DATA
+        self.period_label = QtWidgets.QLabel(self)
+        self.period_label.setObjectName("periodLabel")
+        self.period_label.setText("Data collected in n periods. Plot/analysis period(s) : ")
+
+        self.summed_period_edit = QtWidgets.QLineEdit(self)
+        self.summed_period_edit.setText("1")
+        reg_ex = QtCore.QRegExp(run_string_regex)
+        period_validator = QtGui.QRegExpValidator(reg_ex, self.summed_period_edit)
+        self.summed_period_edit.setValidator(period_validator)
+
+        self.minus_label = QtWidgets.QLabel(self)
+        self.minus_label.setObjectName("minusLabel")
+        self.minus_label.setText("-")
+
+        self.subtracted_period_edit = QtWidgets.QLineEdit(self)
+        self.subtracted_period_edit.setText("")
+        period_validator = QtGui.QRegExpValidator(reg_ex, self.subtracted_period_edit)
+        self.subtracted_period_edit.setValidator(period_validator)
+
+        self.horizontal_layout_1 = QtWidgets.QHBoxLayout()
+        self.horizontal_layout_1.setObjectName("horizontalLayout2")
+        self.horizontal_layout_1.addWidget(self.period_label)
+        self.horizontal_layout_1.addStretch(0)
+        self.horizontal_layout_1.addWidget(self.summed_period_edit)
+        self.horizontal_layout_1.addSpacing(10)
+        self.horizontal_layout_1.addWidget(self.minus_label)
+        self.horizontal_layout_1.addSpacing(10)
+        self.horizontal_layout_1.addWidget(self.subtracted_period_edit)
+        self.vertical_layout.addItem(self.horizontal_layout_1)
 
         self.setLayout(self.vertical_layout)
 
@@ -137,7 +174,7 @@ class GroupingTabView(QtWidgets.QWidget):
                     '',
                     'XML files (*.xml)'))
         else:
-            chosen_file, _filter =\
+            chosen_file, _filter = \
                 QtWidgets.QFileDialog.getSaveFileName(
                     self,
                     "Select file",
@@ -162,6 +199,7 @@ class GroupingTabView(QtWidgets.QWidget):
 
     def display_warning_box(self, message):
         warning(message, self)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Signal / slot connections
     # ------------------------------------------------------------------------------------------------------------------
@@ -186,3 +224,45 @@ class GroupingTabView(QtWidgets.QWidget):
 
     def on_save_grouping_button_clicked(self, slot):
         self.save_grouping_button.clicked.connect(slot)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Periods
+    # ------------------------------------------------------------------------------------------------------------------
+    def set_summed_periods(self, text):
+        self.summed_period_edit.setText(text)
+
+    def set_subtracted_periods(self, text):
+        self.subtracted_period_edit.setText(text)
+
+    def get_summed_periods(self):
+        return str(self.summed_period_edit.text())
+
+    def get_subtracted_periods(self):
+        return str(self.subtracted_period_edit.text())
+
+    def on_summed_periods_changed(self, slot):
+        self.summed_period_edit.editingFinished.connect(slot)
+
+    def on_subtracted_periods_changed(self, slot):
+        self.subtracted_period_edit.editingFinished.connect(slot)
+
+    def set_period_number_in_period_label(self, n_periods):
+        self.period_label.setText("Data collected in " + str(n_periods) + " periods. Plot/analysis period(s) : ")
+
+    def multi_period_widget_hidden(self, hidden=True):
+        self.periods_hidden(hidden)
+
+    def periods_hidden(self, hidden=True):
+        """
+        show/hide the multi-period data functionality.
+        """
+        if hidden:
+            self.period_label.hide()
+            self.summed_period_edit.hide()
+            self.minus_label.hide()
+            self.subtracted_period_edit.hide()
+        if not hidden:
+            self.period_label.setVisible(True)
+            self.summed_period_edit.setVisible(True)
+            self.minus_label.setVisible(True)
+            self.subtracted_period_edit.setVisible(True)

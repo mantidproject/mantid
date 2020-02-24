@@ -135,7 +135,7 @@ private:
   double fitIndividualPeak(size_t wi, API::IAlgorithm_sptr fitter,
                            const double expected_peak_center,
                            const std::pair<double, double> &fitwindow,
-                           const bool observe_peak_width,
+                           const bool observe_peak_params,
                            API::IPeakFunction_sptr peakfunction,
                            API::IBackgroundFunction_sptr bkgdfunc);
 
@@ -146,7 +146,7 @@ private:
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
                        double xmin, double xmax,
                        const double &expected_peak_center,
-                       bool observe_peak_width, bool estimate_background);
+                       bool observe_peak_shape, bool estimate_background);
 
   double fitFunctionMD(API::IFunction_sptr fit_function,
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
@@ -158,7 +158,7 @@ private:
                                    const std::pair<double, double> &fit_window,
                                    const size_t &ws_index,
                                    const double &expected_peak_center,
-                                   bool observe_peak_width,
+                                   bool observe_peak_shape,
                                    API::IPeakFunction_sptr peakfunction,
                                    API::IBackgroundFunction_sptr bkgdfunc);
 
@@ -198,8 +198,8 @@ private:
                              API::IBackgroundFunction_sptr bkgdfunction,
                              bool observe_peak_width);
 
-  bool decideToEstimatePeakWidth(const bool firstPeakInSpectrum,
-                                 API::IPeakFunction_sptr peak_function);
+  bool decideToEstimatePeakParams(const bool firstPeakInSpectrum,
+                                  API::IPeakFunction_sptr peak_function);
 
   /// observe peak center
   int observePeakCenter(const HistogramData::Histogram &histogram,

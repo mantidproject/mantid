@@ -388,7 +388,7 @@ int MeshObject2D::getPointInObject(Kernel::V3D &point) const {
   return this->isValid(point) ? 1 : 0;
 }
 
-Kernel::V3D MeshObject2D::generatePointInObject(
+boost::optional<Kernel::V3D> MeshObject2D::generatePointInObject(
     Kernel::PseudoRandomNumberGenerator & /*rng*/,
     const size_t /*unused*/) const {
   // How this would work for a finite plane is not clear. Points within the
@@ -397,7 +397,7 @@ Kernel::V3D MeshObject2D::generatePointInObject(
   throw std::runtime_error("Not implemented.");
 }
 
-Kernel::V3D MeshObject2D::generatePointInObject(
+boost::optional<Kernel::V3D> MeshObject2D::generatePointInObject(
     Kernel::PseudoRandomNumberGenerator & /*rng*/,
     const BoundingBox & /*activeRegion*/, const size_t /*unused*/) const {
 
@@ -408,6 +408,13 @@ Kernel::V3D MeshObject2D::generatePointInObject(
 }
 
 const Kernel::Material &MeshObject2D::material() const { return m_material; }
+
+/**
+ * @param material :: material that is being set for the object
+ */
+void MeshObject2D::setMaterial(const Kernel::Material &material) {
+  m_material = material;
+}
 
 const std::string &MeshObject2D::id() const { return MeshObject2D::Id; }
 

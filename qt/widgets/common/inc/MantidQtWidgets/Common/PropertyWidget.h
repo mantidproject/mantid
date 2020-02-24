@@ -54,6 +54,11 @@ class EXPORT_OPT_MANTIDQT_COMMON PropertyWidget : public QWidget {
   Q_OBJECT
 
 public:
+  /// Set the placeholder text of the given field based on the default value of
+  /// the given property.
+  static void setFieldPlaceholderText(Mantid::Kernel::Property *prop,
+                                      QLineEdit *field);
+
   enum Info { INVALID, REPLACE, RESTORE };
 
   PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = nullptr,
@@ -122,11 +127,6 @@ protected:
   /// Set the font of the given label based on the optional/required status of
   /// the given property.
   static void setLabelFont(Mantid::Kernel::Property *prop, QWidget *label);
-
-  /// Set the placeholder text of the given field based on the default value of
-  /// the given property.
-  static void setFieldPlaceholderText(Mantid::Kernel::Property *prop,
-                                      QLineEdit *field);
 
   /// Property being looked at. This is NOT owned by the widget
   Mantid::Kernel::Property *m_prop;

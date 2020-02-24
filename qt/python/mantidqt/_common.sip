@@ -2,6 +2,8 @@
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
+#include "frameobject.h"
+
 // Allows suppression of namespaces within the module
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::Batch;
@@ -104,18 +106,6 @@ public:
   void setSource(const QString &source);
 };
 
-%If (Qt_5_0_0 -)
-class AlgorithmProgressWidget : QWidget {
-%TypeHeaderCode
-#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
-%End
-
-public:
-    AlgorithmProgressWidget(QWidget *parent /TransferThis/ = 0);
-    void blockUpdates(bool block = true);
-};
-%End
-
 class ScriptEditor : QWidget {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/ScriptEditor.h"
@@ -175,6 +165,7 @@ public:
   void setSelection(int lineFrom, int indexFrom, int lineTo, int indexTo);
   void setTabWidth(int width);
   void setText(const QString &text);
+  void setEolVisibility(bool state);
   void setWhitespaceVisibility(WhitespaceVisibility mode);
   void updateCompletionAPI(const QStringList & completions);
 
@@ -184,8 +175,6 @@ public:
   void replaceAll(const QString &search, const QString &replace,
                               bool regex, bool caseSensitive, bool matchWords,
                               bool wrap, bool backward);
-
-
 public slots:
   void updateProgressMarker(int lineno, bool error);
   void zoomTo(int level);
@@ -199,6 +188,33 @@ signals:
 private:
   ScriptEditor(const ScriptEditor&);
 };
+
+%If (Qt_5_0_0 -)
+
+class AlgorithmProgressWidget : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
+%End
+
+public:
+  AlgorithmProgressWidget(QWidget *parent /TransferThis/ = 0);
+  void blockUpdates(bool block = true);
+};
+
+class CodeExecution {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Python/CodeExecution.h"
+using MantidQt::Widgets::Common::Python::CodeExecution;
+%End
+
+public:
+  CodeExecution(ScriptEditor*);
+  SIP_PYOBJECT execute(const QString &, const QString &, int, SIP_PYOBJECT);
+private:
+  CodeExecution(const CodeExecution&);
+};
+
+%End // end >= Qt5
 
 
 class AlgorithmDialog: QDialog {
@@ -371,6 +387,7 @@ class WorkspaceTreeWidgetSimple : WorkspaceTreeWidget {
 public:
   WorkspaceTreeWidgetSimple(bool viewOnly=false, QWidget *parent /TransferThis/ = nullptr);
   void refreshWorkspaces();
+  void enableDeletePrompt(bool enable);
 
 signals:
   void plotSpectrumClicked(const QStringList & workspaceNames);
@@ -468,6 +485,11 @@ public:
     void setDefaultPeakType(SIP_PYOBJECT);
 %MethodCode
     sipCpp->setDefaultPeakType(TO_CSTRING(a0));
+%End
+SIP_PYOBJECT defaultBackgroundType();
+%MethodCode
+    auto f = sipCpp->defaultBackgroundType();
+    sipRes = FROM_CSTRING(f.c_str());
 %End
     QStringList registeredPeaks() const;
     QStringList registeredBackgrounds() const;
@@ -798,6 +820,9 @@ public:
     void removeDatasets(QList<int> indices);
     QStringList getDatasetNames() const;
     void setErrorsEnabled(bool enabled);
+    void hideGlobalCheckbox();
+    void showGlobalCheckbox();
+
     QStringList getGlobalParameters() const;
     void setGlobalParameters(const QStringList &globals);
     void clear();
@@ -886,7 +911,10 @@ public:
 
     QString getText();
     QString getFirstFilename() const;
+    QStringList getFilenames() const;
     void isForRunFiles(bool /*mode*/);
+    void isForDirectory(bool /*mode*/);
+    void allowMultipleFiles(bool /*allow*/);
     bool isSearching() const;
     bool isValid();
     void liveButtonSetChecked(bool);
@@ -897,6 +925,7 @@ public:
     void setText(const QString&);
     void setUserInput(const QVariant &);
     void setReadOnly(bool readOnly);
+    void setFileExtensions(const QStringList &extensions);
     void findFiles(bool isModified);
 
 signals:

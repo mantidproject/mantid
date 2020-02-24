@@ -15,7 +15,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
 #include <algorithm>
-#include <boost/bind.hpp>
 
 namespace Mantid {
 

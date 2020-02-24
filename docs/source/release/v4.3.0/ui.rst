@@ -29,3 +29,8 @@ SliceViewer and Vates Simple Interface
 --------------------------------------
 
 :ref:`Release 4.3.0 <v4.3.0>`
+
+Bugs
+----
+
+- Fixed a bug on the instrument viewer where changing projection and back to Full 3D would display from the wrong point of view.

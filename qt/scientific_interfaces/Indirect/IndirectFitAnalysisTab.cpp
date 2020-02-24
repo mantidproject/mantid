@@ -159,6 +159,7 @@ void IndirectFitAnalysisTab::setFitDataPresenter(
 void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
   m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(
       m_fittingModel.get(), view, this);
+  m_plotPresenter->disableSpectrumPlotSelection();
 }
 
 void IndirectFitAnalysisTab::setSpectrumSelectionView(
@@ -385,7 +386,7 @@ void IndirectFitAnalysisTab::fitAlgorithmComplete(bool error) {
   enableOutputOptions(!error);
   m_fitPropertyBrowser->setErrorsEnabled(!error);
   if (!error) {
-    updateParameterValues();
+    updateFitBrowserParameterValuesFromAlg();
     setModelFitFunction();
   }
   m_spectrumPresenter->enableView();
@@ -421,24 +422,41 @@ void IndirectFitAnalysisTab::updateParameterValues(
 }
 
 void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
-  if (m_fittingAlgorithm) {
-    MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
-    if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
-      auto const paramWsName =
-          m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
-      auto paramWs =
-          AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
-              paramWsName);
-      auto rowCount = static_cast<int>(paramWs->rowCount());
-      if (TableRowIndex{rowCount} == m_fittingModel->getNumberOfDomains())
-        m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
-    } else {
-      IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
-      if (fun->getNumberDomains() > 1)
-        m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
-      else
-        m_fitPropertyBrowser->updateParameters(*fun);
+  IFunction_sptr fun = m_fittingModel->getFittingFunction();
+  if (fun->getNumberDomains() > 1)
+    m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
+  else
+    m_fitPropertyBrowser->updateParameters(*fun);
+}
+
+void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
+  try {
+    updateFitBrowserParameterValues();
+    if (m_fittingAlgorithm) {
+      MantidQt::API::SignalBlocker blocker(m_fitPropertyBrowser);
+      if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
+        auto const paramWsName =
+            m_fittingAlgorithm->getPropertyValue("OutputParameterWorkspace");
+        auto paramWs =
+            AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+                paramWsName);
+        auto rowCount = static_cast<int>(paramWs->rowCount());
+        if (TableRowIndex{rowCount} == m_fittingModel->getNumberOfDomains())
+          m_fitPropertyBrowser->updateMultiDatasetParameters(*paramWs);
+      } else {
+        IFunction_sptr fun = m_fittingAlgorithm->getProperty("Function");
+        if (fun->getNumberDomains() > 1)
+          m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
+        else
+          m_fitPropertyBrowser->updateParameters(*fun);
+      }
     }
+  } catch (const std::out_of_range &) {
+    g_log.warning(
+        "Warning issue updating parameter values in fit property browser");
+  } catch (const std::invalid_argument &) {
+    g_log.warning(
+        "Warning issue updating parameter values in fit property browser");
   }
 }
 
@@ -508,6 +526,7 @@ void IndirectFitAnalysisTab::singleFit(TableDatasetIndex dataIndex,
     m_plotPresenter->setFitSingleSpectrumIsFitting(true);
     enableFitButtons(false);
     enableOutputOptions(false);
+    m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
   }
 }
@@ -632,9 +651,14 @@ void IndirectFitAnalysisTab::setAlgorithmProperties(
                             m_fitPropertyBrowser->costFunction());
   fitAlgorithm->setProperty("IgnoreInvalidData",
                             m_fitPropertyBrowser->ignoreInvalidData());
+  fitAlgorithm->setProperty("EvaluationType",
+                            m_fitPropertyBrowser->fitEvaluationType());
+  fitAlgorithm->setProperty("PeakRadius",
+                            m_fitPropertyBrowser->getPeakRadius());
 
-  if (m_fitPropertyBrowser->isHistogramFit())
-    fitAlgorithm->setProperty("EvaluationType", "Histogram");
+  if (m_fittingModel->getFittingMode() == FittingMode::SEQUENTIAL) {
+    fitAlgorithm->setProperty("FitType", m_fitPropertyBrowser->fitType());
+  }
 }
 
 /*
@@ -673,9 +697,9 @@ QStringList IndirectFitAnalysisTab::getDatasetNames() const {
     TableDatasetIndex index{i};
     auto const name =
         QString::fromStdString(m_fittingModel->getWorkspace(index)->getName());
-    auto const numberSpectra = m_fittingModel->getNumberOfSpectra(index);
-    for (int j{0}; j < numberSpectra.value; ++j) {
-      datasetNames << name + " (" + QString::number(j) + ")";
+    auto const spectra = m_fittingModel->getSpectra(index);
+    for (auto spectrum : spectra) {
+      datasetNames << name + " (" + QString::number(spectrum.value) + ")";
     }
   }
   return datasetNames;
@@ -683,7 +707,8 @@ QStringList IndirectFitAnalysisTab::getDatasetNames() const {
 
 void IndirectFitAnalysisTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(
-      m_fittingModel->getNumberOfDomains(), getDatasetNames());
+      m_fittingModel->getNumberOfDomains(), getDatasetNames(),
+      m_fittingModel->getQValuesForData());
   m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
 }
 
@@ -707,7 +732,8 @@ void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(
   m_plotPresenter->updateAvailableSpectra();
   m_dataPresenter->updateSpectraInTable(i);
   m_fitPropertyBrowser->updateFunctionBrowserData(
-      m_fittingModel->getNumberOfDomains(), getDatasetNames());
+      m_fittingModel->getNumberOfDomains(), getDatasetNames(),
+      m_fittingModel->getQValuesForData());
   setModelFitFunction();
   updateParameterEstimationData();
 }

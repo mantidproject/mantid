@@ -64,11 +64,14 @@ public:
   void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin,
                       double &ymin, double &zmin) const override;
   int getPointInObject(Kernel::V3D &point) const override;
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const size_t) const override;
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const BoundingBox &activeRegion,
-                                    const size_t) const override;
+
+  boost::optional<Kernel::V3D>
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const size_t) const override;
+  boost::optional<Kernel::V3D>
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const BoundingBox &activeRegion,
+                        const size_t) const override;
   detail::ShapeInfo::GeometryShape shape() const override;
   const detail::ShapeInfo &shapeInfo() const override;
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
@@ -77,7 +80,9 @@ public:
   void draw() const override;
   void initDraw() const override;
   const Kernel::Material &material() const override;
+  virtual void setMaterial(const Kernel::Material &material) override;
   const std::string &id() const override;
+  void setID(const std::string &id) override { m_id = id; };
   boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Id as static
   static const std::string Id;
@@ -103,6 +108,8 @@ private:
   std::vector<uint32_t> m_triangles;
   /// Vertices
   std::vector<Kernel::V3D> m_vertices;
+  /// optional string identifier
+  std::string m_id;
   /// Material composition
   Kernel::Material m_material;
   /// Bounding box

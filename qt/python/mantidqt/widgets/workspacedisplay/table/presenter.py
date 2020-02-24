@@ -12,6 +12,7 @@ from functools import partial
 from qtpy.QtCore import Qt
 
 from mantid.kernel import logger
+from mantid.plots.utility import legend_set_draggable
 from mantidqt.widgets.observers.ads_observer import WorkspaceDisplayADSObserver
 from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from mantidqt.widgets.workspacedisplay.data_copier import DataCopier
@@ -358,7 +359,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
                 return
 
             ax.set_ylabel(column_label)
-        ax.legend().draggable()
+        legend_set_draggable(ax.legend(), True)
         fig.show()
 
     def _get_plot_function_from_type(self, ax, type):

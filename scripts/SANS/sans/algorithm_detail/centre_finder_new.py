@@ -15,6 +15,9 @@ from mantid.simpleapi import CreateEmptyTableWorkspace
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for the execution of a single batch iteration
 # ----------------------------------------------------------------------------------------------------------------------
+from sans.state.Serializer import Serializer
+
+
 def centre_finder_new(state, r_min = 0.06, r_max = 0.26, iterations = 10, position_1_start = 0.0, position_2_start = 0.0
                       , tolerance = 0.0001251, find_direction = FindDirectionEnum.ALL, verbose=False, component=DetectorType.LAB):
     """
@@ -153,8 +156,8 @@ def set_properties_for_beam_centre_algorithm(beam_centre_alg, reduction_package,
     # Go through the elements of the reduction package and set them on the beam centre algorithm
     # Set the SANSState
     state = reduction_package.state
-    state_dict = state.property_manager
-    beam_centre_alg.setProperty("SANSState", state_dict)
+    state_json = Serializer.to_json(state)
+    beam_centre_alg.setProperty("SANSState", state_json)
 
     # Set the input workspaces
     workspaces = reduction_package.workspaces

@@ -7,7 +7,10 @@
 #include "MantidQtWidgets/MplCpp/Colors.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+
 #include <boost/optional.hpp>
+
+#include <algorithm>
 #include <tuple>
 
 using boost::none;
@@ -204,6 +207,15 @@ PowerNorm::PowerNorm(double gamma) : NormalizeBase(createPowerNorm(gamma)) {}
  */
 PowerNorm::PowerNorm(double gamma, double vmin, double vmax)
     : NormalizeBase(createPowerNorm(gamma, std::make_tuple(vmin, vmax))) {}
+
+std::tuple<double, double>
+PowerNorm::autoscale(std::tuple<double, double> clim) {
+  // Clipping was removed in matplotlib v3.2.0rc2 (Upstream PR #10234) so
+  // autoscale will now map [-x,y] -> [0,1] which causes weird color bar scales
+  // We now manually clamp min value to 0 so we map from [0,n]->[0,1]
+  std::get<0>(clim) = std::max(0., std::get<0>(clim));
+  return NormalizeBase::autoscale(clim);
+}
 
 } // namespace MplCpp
 } // namespace Widgets

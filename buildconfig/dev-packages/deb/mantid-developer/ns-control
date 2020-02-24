@@ -3,7 +3,7 @@ Priority: optional
 Standards-Version: 3.9.2
 
 Package: mantid-developer
-Version: 1.4.1
+Version: 1.5
 Maintainer: Mantid Project <mantid-tech@mantidproject.org>
 Priority: optional
 Architecture: all
@@ -46,16 +46,16 @@ Depends: git,
   python-qt4-dbg,
   pyqt5-dev,
   pyqt5-dev-tools,
-  python-qtpy,
-  python-sphinx,
   python-dateutil,
-  python-sphinx-bootstrap-theme,
-  python-matplotlib,
   python-h5py,
-  python-yaml,
+  python-matplotlib,
   python-mock,
   python-psutil,
+  python-qtpy,
   python-requests,
+  python-sphinx,
+  python-sphinx-bootstrap-theme,
+  python-yaml,
   ipython-qtconsole (>=1.2.0),
   texlive,
   texlive-latex-extra,
@@ -75,13 +75,14 @@ Depends: git,
   python3-matplotlib,
   ipython3-qtconsole,
   python3-h5py,
-  python3-yaml,
   python3-mock,
   python3-psutil,
-  python3-requests
+  python3-requests,
+  python3-toml,
+  python3-yaml
 Description: Installs all packages required for a Mantid developer
  A metapackage which requires all the dependencies and tools that are
- required for Mantid development. It works for Ubuntu 16.04.
+ required for Mantid development. It works for Ubuntu 18.04.
  Some packages must be newer than those in the Ubuntu repository. Please
  follow instructions at http://www.mantidproject.org/Mantid_Prerequisites#Repositories
 Installed-Size: 0

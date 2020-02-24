@@ -9,11 +9,11 @@
 
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
-#include "boost/bind.hpp"
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>
 
 using namespace Mantid::Poldi;
+using namespace std::placeholders;
 
 class PoldiPeakTest : public CxxTest::TestSuite {
 public:
@@ -143,16 +143,15 @@ public:
     peaks.emplace_back(PoldiPeak::create(2.0, 20.0));
     peaks.emplace_back(PoldiPeak::create(3.0, 800.0));
 
-    std::sort(
-        peaks.begin(), peaks.end(),
-        boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::q));
+    std::sort(peaks.begin(), peaks.end(),
+              std::bind(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::q));
     TS_ASSERT_EQUALS(peaks[0]->q(), 3.0);
     TS_ASSERT_EQUALS(peaks[1]->q(), 2.0);
     TS_ASSERT_EQUALS(peaks[2]->q(), 1.0);
 
-    std::sort(peaks.begin(), peaks.end(),
-              boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2,
-                                &PoldiPeak::intensity));
+    std::sort(
+        peaks.begin(), peaks.end(),
+        std::bind(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::intensity));
     TS_ASSERT_EQUALS(peaks[0]->q(), 3.0);
     TS_ASSERT_EQUALS(peaks[1]->q(), 1.0);
     TS_ASSERT_EQUALS(peaks[2]->q(), 2.0);
@@ -165,14 +164,13 @@ public:
     peaks.emplace_back(PoldiPeak::create(3.0, 800.0));
 
     std::sort(peaks.begin(), peaks.end(),
-              boost::bind<bool>(&PoldiPeak::lessThan, _1, _2, &PoldiPeak::q));
+              std::bind(&PoldiPeak::lessThan, _1, _2, &PoldiPeak::q));
     TS_ASSERT_EQUALS(peaks[0]->q(), 1.0);
     TS_ASSERT_EQUALS(peaks[1]->q(), 2.0);
     TS_ASSERT_EQUALS(peaks[2]->q(), 3.0);
 
-    std::sort(
-        peaks.begin(), peaks.end(),
-        boost::bind<bool>(&PoldiPeak::lessThan, _1, _2, &PoldiPeak::intensity));
+    std::sort(peaks.begin(), peaks.end(),
+              std::bind(&PoldiPeak::lessThan, _1, _2, &PoldiPeak::intensity));
     TS_ASSERT_EQUALS(peaks[0]->q(), 2.0);
     TS_ASSERT_EQUALS(peaks[1]->q(), 1.0);
     TS_ASSERT_EQUALS(peaks[2]->q(), 3.0);

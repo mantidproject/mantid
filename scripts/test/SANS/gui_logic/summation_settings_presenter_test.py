@@ -10,7 +10,7 @@ from assert_called import assert_called
 from fake_signal import FakeSignal
 from mantid.py3compat import mock
 from sans.common.enums import BinningType
-from sans.gui_logic.models.summation_settings import SummationSettings
+from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from ui.sans_isis.summation_settings_widget import SummationSettingsWidget
 
@@ -30,7 +30,7 @@ class SummationSettingsPresenterTest(unittest.TestCase):
         return mock_view
 
     def _make_mock_settings(self):
-        return mock.create_autospec(SummationSettings)
+        return mock.create_autospec(SummationSettingsModel)
 
     def _make_presenter(self, summation_settings, view):
         return SummationSettingsPresenter(summation_settings, view, None)

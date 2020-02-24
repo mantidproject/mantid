@@ -133,7 +133,26 @@ KafkaEventStreamDecoder::KafkaEventStreamDecoder(
  * Destructor.
  * Stops capturing from the stream
  */
-KafkaEventStreamDecoder::~KafkaEventStreamDecoder() {}
+KafkaEventStreamDecoder::~KafkaEventStreamDecoder() {
+  /*
+   * IKafkaStreamDecoder::stopCapture is called again here as capture must be
+   * terminated before the KafkaEventStreamDecoder is destruced.
+   *
+   * Without this, a race condition occurs (over threads 1 and 2):
+   *  - KafkaEventStreamDecoder::~KafkaEventStreamDecoder is called and members
+   *    immediately destructed [1]
+   *  - IKafkaStreamDecoder::~IKafkaStreamDecoder is called [1]
+   *    - IKafkaStreamDecoder::m_interrupt set [on 1, visible to 2]
+   *    - Capture loop iteration completes and calls
+   *      KafkaEventStreamDecoder::flushIntermediateBuffer [2]
+   *      (this function attempts to access already deleted members of
+   *      KafkaEventStreamDecoder)
+   *
+   * By calling IKafkaStreamDecoder::stopCapture here it ensures that the
+   * capture has fully completed before local state is deleted.
+   */
+  stopCapture();
+}
 
 /**
  * Check if there is data available to extract
@@ -587,16 +606,10 @@ void KafkaEventStreamDecoder::initLocalCaches(
   }
 
   // Load the instrument if possible but continue if we can't
-  if (!instName.empty()) {
-    loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
-                                                jsonGeometry);
-    if (rawMsgBuffer.empty()) {
-      eventBuffer->rebuildSpectraMapping();
-    }
-  } else {
+  if (!loadInstrument<DataObjects::EventWorkspace>(instName, eventBuffer,
+                                                   jsonGeometry))
     g_log.warning(
-        "Empty instrument name received. Continuing without instrument");
-  }
+        "Instrument could not be loaded.Continuing without instrument");
 
   auto &mutableRun = eventBuffer->mutableRun();
   // Run start. Cache locally for computing frame times
@@ -616,11 +629,12 @@ void KafkaEventStreamDecoder::initLocalCaches(
       eventBuffer->getSpectrumToWorkspaceIndexVector(m_specToIdxOffset);
 
   // Buffers for each period
-  const size_t nperiods = runStartData.nPeriods;
+  size_t nperiods = runStartData.nPeriods;
   if (nperiods == 0) {
-    throw std::runtime_error(
-        "KafkaEventStreamDecoder - Message has n_periods==0. This is "
-        "an error by the data producer");
+    g_log.warning(
+        "KafkaEventStreamDecoder - Stream reports 0 periods. This is "
+        "an error by the data producer. Number of periods being set to 1.");
+    nperiods = 1;
   }
   {
     std::lock_guard<std::mutex> workspaceLock(m_mutex);

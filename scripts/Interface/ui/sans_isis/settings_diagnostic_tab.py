@@ -12,7 +12,6 @@ and helps the developer to identify issues.
 """
 
 from __future__ import (absolute_import, division, print_function)
-
 from abc import ABCMeta, abstractmethod
 import os
 from qtpy import QtWidgets
@@ -23,7 +22,6 @@ from mantidqt.utils.qt import load_ui
 from mantid import UsageService
 from mantid.kernel import FeatureType
 from sans.gui_logic.gui_common import (GENERIC_SETTINGS, JSON_SUFFIX, load_file)
-from sans.state.state_base import ENUM_TYPE_TAG
 
 if PY3:
     unicode = str
@@ -150,18 +148,8 @@ class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
                 item.addChild(child)
         else:
             child = QtWidgets.QTreeWidgetItem()
-            value = self.clean_class_type(value)
             child.setText(1, unicode(value))
             item.addChild(child)
-
-    def clean_class_type(self, value):
-        # TODO the UI should not be doing logic like this
-        if isinstance(value, str) and ENUM_TYPE_TAG in value:
-            # Only the last element is of interest
-            split_values = value.split("#")
-            return split_values[-1]
-        else:
-            return value
 
     def set_row(self, index):
         found_index = self.select_row_combo_box.findText(str(index))

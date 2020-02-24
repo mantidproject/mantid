@@ -224,6 +224,47 @@ class FunctionsTest(TestCase):
         finally:
             config['graph1d.autodistribution'] = auto_dist
 
+    def test_setting_waterfall_to_true_makes_waterfall_plot(self):
+        fig = plt.figure()
+        ws = self._test_ws
+        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+        ax = plt.gca()
+
+        self.assertTrue(ax.is_waterfall())
+
+    def test_cannot_make_waterfall_plot_with_one_line(self):
+        fig = plt.figure()
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, waterfall=True)
+        ax = plt.gca()
+
+        self.assertFalse(ax.is_waterfall())
+
+    def test_overplotting_onto_waterfall_plot_maintains_waterfall(self):
+        fig = plt.figure()
+        ws = self._test_ws
+        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+        # Overplot one of the same lines.
+        plot([ws], wksp_indices=[0], fig=fig, overplot=True)
+        ax = plt.gca()
+
+        # Check that the lines which would be the same in a non-waterfall plot are different.
+        self.assertNotEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[2].get_xdata()[0])
+        self.assertNotEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[2].get_ydata()[0])
+
+    def test_overplotting_onto_waterfall_plot_with_filled_areas_adds_another_filled_area(self):
+        fig = plt.figure()
+        ws = self._test_ws
+        plot([ws], wksp_indices=[0, 1], fig=fig, waterfall=True)
+        ax = plt.gca()
+        ax.set_waterfall_fill(True)
+        plot([ws], wksp_indices=[0], fig=fig, overplot=True)
+
+        fills = [collection for collection in ax.collections
+                 if isinstance(collection, matplotlib.collections.PolyCollection)]
+
+        self.assertEqual(len(fills), 3)
+
     # ------------- Failure tests -------------
 
     def test_plot_from_names_with_non_plottable_workspaces_returns_None(self):

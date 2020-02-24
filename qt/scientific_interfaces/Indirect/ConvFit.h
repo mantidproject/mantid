@@ -8,8 +8,9 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_CONVFIT_H_
 
 #include "ConvFitModel.h"
-#include "IndirectFitAnalysisTabLegacy.h"
-#include "IndirectSpectrumSelectionPresenterLegacy.h"
+#include "IndirectFitAnalysisTab.h"
+#include "IndirectSpectrumSelectionPresenter.h"
+#include "ParameterEstimation.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -18,7 +19,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport ConvFit : public IndirectFitAnalysisTabLegacy {
+class DLLExport ConvFit : public IndirectFitAnalysisTab {
   Q_OBJECT
 
 public:
@@ -29,7 +30,9 @@ public:
   bool hasResolution() const override { return true; }
 
 protected slots:
-  void setModelResolution(const QString &resolutionName);
+  void setModelResolution(const std::string &resolutionName);
+  void setModelResolution(const std::string &resolutionName,
+                          TableDatasetIndex index);
   void runClicked();
   void fitFunctionChanged();
 
@@ -40,6 +43,8 @@ protected:
 private:
   void setupFitTab() override;
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
+  EstimationDataSelector getEstimationDataSelector() const override;
+  void setStartAndEndHidden(bool hidden);
 
   std::string fitTypeString() const;
 

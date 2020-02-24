@@ -120,8 +120,7 @@ class ImagesTabWidgetPresenterTest(unittest.TestCase):
         presenter.apply_properties()
         self.assertEqual("New Label", img.get_label())
         self.assertEqual('jet', img.cmap.name)
-        # We should not get 0 as a log plot with a colour fill bar will attempt to scale to inf.
-        self.assertEqual(1e-6, img.norm.vmin)
+        self.assertEqual(0, img.norm.vmin)
         self.assertEqual(2, img.norm.vmax)
         self.assertTrue(isinstance(img.norm, Normalize))
 

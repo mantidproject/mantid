@@ -16,9 +16,10 @@ from matplotlib import axis, ticker  # noqa
 
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
+from mantid.plots.legend import LegendProperties
 # Constants set in workbench.plotting.functions but would cause backwards reliability
 from mantidqt.plotting.functions import pcolormesh
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
+
 
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
@@ -239,19 +240,19 @@ class PlotsLoader(object):
 
     def update_axis(self, axis_, properties):
         if isinstance(axis_, matplotlib.axis.XAxis):
-            if properties["position"] is "top":
+            if properties["position"] == "top":
                 axis_.tick_top()
             else:
                 axis_.tick_bottom()
 
         if isinstance(axis_, matplotlib.axis.YAxis):
-            if properties["position"] is "right":
+            if properties["position"] == "right":
                 axis_.tick_right()
             else:
                 axis_.tick_left()
 
         labels = axis_.get_ticklabels()
-        if properties["fontSize"] is not "":
+        if properties["fontSize"] != "":
             for label in labels:
                 label.set_fontsize(properties["fontSize"])
 
@@ -276,17 +277,17 @@ class PlotsLoader(object):
     @staticmethod
     def update_axis_ticks(axis_, properties):
         # Update Major and Minor Locator
-        if properties["majorTickLocator"] is "FixedLocator":
+        if properties["majorTickLocator"] == "FixedLocator":
             axis_.set_major_locator(ticker.FixedLocator(properties["majorTickLocatorValues"]))
 
-        if properties["minorTickLocator"] is "FixedLocator":
+        if properties["minorTickLocator"] == "FixedLocator":
             axis_.set_minor_locator(ticker.FixedLocator(properties["minorTickLocatorValues"]))
 
         # Update Major and Minor Formatter
-        if properties["majorTickFormatter"] is "FixedFormatter":
+        if properties["majorTickFormatter"] == "FixedFormatter":
             axis_.set_major_formatter(ticker.FixedFormatter(properties["majorTickFormat"]))
 
-        if properties["minorTickFormatter"] is "FixedFormatter":
+        if properties["minorTickFormatter"] == "FixedFormatter":
             axis_.set_major_formatter(ticker.FixedLocator(properties["minorTickFormat"]))
 
     @staticmethod

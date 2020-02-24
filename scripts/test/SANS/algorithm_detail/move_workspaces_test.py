@@ -11,8 +11,8 @@ import unittest
 import mantid.simpleapi
 from sans.algorithm_detail.move_workspaces import SANSMoveZOOM, SANSMoveSANS2D
 from sans.common.enums import SANSFacility, SANSInstrument, DetectorType
-from sans.state.data import get_data_builder
-from sans.state.move import get_move_builder
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -128,7 +128,8 @@ class MoveSans2DMonitor(unittest.TestCase):
 
         z_pos_mon_4_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=4, move_info=move_info)
 
-        self.assertAlmostEqual(z_pos_mon_4_before, z_pos_mon_4_after)
+        self.assertAlmostEqual(calculate_new_pos_rel_to_rear(ws=workspace, move_info=move_info, offset=mon_4_dist),
+                               z_pos_mon_4_after)
 
 
 class MoveZoomMonitors(unittest.TestCase):
@@ -223,7 +224,8 @@ class MoveZoomMonitors(unittest.TestCase):
         z_pos_mon_5_after = get_monitor_pos(ws=workspace, monitor_spectrum_no=5, move_info=move_info)
 
         self.assertAlmostEqual(z_pos_mon_4_before + mon_4_dist, z_pos_mon_4_after)
-        self.assertAlmostEqual(z_pos_mon_5_before, z_pos_mon_5_after)
+        self.assertAlmostEqual(calculate_new_pos_rel_to_rear(ws=workspace, move_info=move_info, offset=mon_5_dist),
+                               z_pos_mon_5_after)
 
     def test_moving_only_monitor_5(self):
         zoom_class = SANSMoveZOOM()

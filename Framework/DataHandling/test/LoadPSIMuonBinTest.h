@@ -93,8 +93,8 @@ public:
     TS_ASSERT_EQUALS(ws->y(0).size(), 10240);
     TS_ASSERT_EQUALS(ws->e(0).size(), 10240);
 
-    TS_ASSERT_EQUALS(ws->x(0)[0], 0);
-    TS_ASSERT_EQUALS(ws->x(0)[10240], 10);
+    TS_ASSERT_DELTA(ws->x(0)[0], -0.160, 0.001);
+    TS_ASSERT_DELTA(ws->x(0)[10240], 9.84, 0.001);
     TS_ASSERT_EQUALS(ws->y(0)[0], 24);
     TS_ASSERT_EQUALS(ws->y(0)[10239], 44);
     TS_ASSERT_EQUALS(ws->e(0)[0], std::sqrt(ws->y(0)[0]));

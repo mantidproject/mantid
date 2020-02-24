@@ -7,7 +7,6 @@
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
-#include "boost/bind.hpp"
 #include <algorithm>
 
 namespace Mantid {
@@ -74,9 +73,10 @@ PoldiDeadWireDecorator::getGoodElements(std::vector<int> rawElements) {
     size_t newElementCount = rawElements.size() - m_deadWireSet.size();
 
     std::vector<int> goodElements(newElementCount);
+    using namespace std::placeholders;
     std::remove_copy_if(
         rawElements.begin(), rawElements.end(), goodElements.begin(),
-        boost::bind(&PoldiDeadWireDecorator::isDeadElement, this, _1));
+        std::bind(&PoldiDeadWireDecorator::isDeadElement, this, _1));
 
     return goodElements;
   }

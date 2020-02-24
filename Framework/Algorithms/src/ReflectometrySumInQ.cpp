@@ -302,7 +302,7 @@ std::map<std::string, std::string> ReflectometrySumInQ::validateInputs() {
 
   const auto &spectrumInfo = inWS->spectrumInfo();
   const double beamCentre = getProperty(Prop::BEAM_CENTRE);
-  const auto beamCentreIndex = static_cast<size_t>(beamCentre);
+  const auto beamCentreIndex = static_cast<size_t>(std::round(beamCentre));
   bool beamCentreFound{false};
   for (const auto i : indices) {
     if (spectrumInfo.isMonitor(i)) {

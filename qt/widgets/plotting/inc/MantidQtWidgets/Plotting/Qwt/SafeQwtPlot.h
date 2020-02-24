@@ -13,7 +13,7 @@
 #include "qwt_text.h"
 MSVC_DIAG_OFF(4244)
 #include <QPainter>
-MSVC_DIAG_ON()
+MSVC_DIAG_ON(4244)
 #include <qwt_plot.h>
 
 namespace MantidQt {

@@ -51,8 +51,6 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
                 if tooltip_text is not None:
                     a.setToolTip(tooltip_text)
 
-        self.buttons = {}
-
         # Add the x,y location widget at the right side of the toolbar
         # The stretch factor is 1 which means any resizing of the toolbar
         # will resize this label instead of the buttons.

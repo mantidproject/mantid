@@ -461,6 +461,7 @@ void SofQWNormalisedPolygon::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  FractionalRebinning::finalizeFractionalRebin(*outputWS);
   outputWS->finalize();
   FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress.get());
 

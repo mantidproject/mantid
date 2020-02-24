@@ -73,6 +73,7 @@ add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
 find_package(Poco 1.4.6 REQUIRED)
 add_definitions(-DPOCO_ENABLE_CPP11)
 
+find_package(GSL REQUIRED)
 find_package(Nexus 4.3.1 REQUIRED)
 find_package(MuParser REQUIRED)
 find_package(JsonCPP 0.7.0 REQUIRED)
@@ -104,9 +105,6 @@ else()
     REQUIRED
   )
 endif()
-
-find_package(PythonInterp)
-set(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 
 find_package(OpenSSL REQUIRED)
 
@@ -267,19 +265,13 @@ endif()
 include(VersionNumber)
 
 # ##############################################################################
-# Look for OpenMP and set compiler flags if found
+# Look for OpenMP
 # ##############################################################################
-
-find_package(OpenMP)
-if(OPENMP_FOUND)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  if(NOT WIN32)
-    set(CMAKE_MODULE_LINKER_FLAGS
-        "${CMAKE_MODULE_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}"
-    )
-  endif()
+find_package(OpenMP COMPONENTS CXX)
+if(OpenMP_CXX_FOUND)
+  link_libraries(OpenMP::OpenMP_CXX)
 endif()
+
 
 # ##############################################################################
 # Add linux-specific things

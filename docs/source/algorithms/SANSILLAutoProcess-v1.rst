@@ -11,19 +11,11 @@ Description
 
 This algorithms performs complete treatment of SANS data recorded with the ILL instruments D11, D22 and D33.
 This high level algorithm steers the reduction and performs the full set of corrections for a given sample run; measured with one or more detector distances.
-It has two operation modes: *ReduceSample* (default) and *ReduceWater* as follows:
 
-ReduceSample
-------------
-
-This mode is used to correct the sample measurement and convert it to Q-space, producing by default the azimuthal average curve :math:`I(Q)`.
-
-ReduceWater
------------
-
-This mode should be used to process water reference measurement in order to derive the relative inter-pixel sensitivity map of the detector.
-This mode will produce two outputs; the regular output will contain fully corrected water run, and there will be an additional output containing the sensitivity map itself.
-The sensitivity map can be saved out to a file and used for sample reductions.
+The sample measurement will be corrected for all the effects and converted to Q-space, producing by default the azimuthal average curve :math:`I(Q)`.
+One can use water reference measurement in order to derive the relative inter-pixel sensitivity map of the detector or the reduced water data for absolute normalisation of the subsequent samples.
+The regular output will contain fully corrected water run, and there will be an additional output containing the sensitivity map itself.
+The sensitivity map, as well as reduced water can be saved out to a file and used for sample reductions.
 
 Caching with ADS
 ----------------
@@ -37,11 +29,11 @@ When multiple runs are summed, the run number of the first run is attributed to 
 
 .. include:: ../usagedata-note.txt
 
-**Example - full treatment of 3 samples at 3 different distances**
+**Example - full treatment of 3 samples at 3 different distances in D11**
 
 .. testsetup:: ExSANSILLAutoProcess
 
-    config['default.facility'] = 'ILL'
+    config.setFacility('ILL')
     config.appendDataSearchSubDir('ILL/D11/')
 
 .. testcode:: ExSANSILLAutoProcess
@@ -86,6 +78,67 @@ Output:
 .. testcleanup:: ExSANSILLAutoProcess
 
     mtd.clear()
+
+
+**Example 2 - full treatment of 5 samples in D33**
+
+.. plot::
+    :include-source:
+
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+
+    config.setFacility('ILL')
+    config['default.instrument'] = 'D33'
+    config.appendDataSearchSubDir('ILL/D33/')
+
+    absorber = '002227'
+
+    tr_beam = '002192'
+
+    can_tr = '002193'
+
+    empty_beam = '002219'
+
+    can = '002228'
+
+    mask = 'D33Mask2.nxs'
+
+    sample_names = ['H2O', 'D2O', 'AgBE', 'F127_D2O', 'F127_D2O_Anethol']
+    sample_legends = ['H$_2$O', 'D$_2$O', 'AgBE', 'F127 D$_2$O', 'F127 D$_2$O Anethol']
+
+    samples = ['002229', '001462', '001461', '001463', '001464']
+
+    transmissions = ['002194', '002195', '', '002196', '002197']
+
+    # Autoprocess every sample
+    for i in range(len(samples)):
+        SANSILLAutoProcess(
+            SampleRuns=samples[i],
+            SampleTransmissionRuns=transmissions[i],
+            MaskFiles=mask,
+            AbsorberRuns=absorber,
+            BeamRuns=empty_beam,
+            ContainerRuns=can,
+            ContainerTransmissionRuns=can_tr,
+            TransmissionBeamRuns=tr_beam,
+            CalculateResolution='None',
+            OutputWorkspace=sample_names[i]
+        )
+
+    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
+
+    plt.yscale('log')
+    plt.xscale('log')
+
+    # Plot the result of every autoprocess
+    for wName in sample_names:
+        ax.errorbar(mtd[wName][0])
+
+    plt.legend(sample_legends)
+    ax.set_ylabel('d$\sigma$/d$\Omega$ ($cm^{-1}$)')
+
+    #fig.show()
 
 .. categories::
 

@@ -11,9 +11,9 @@ from __future__ import (absolute_import, unicode_literals)
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QWidget
 
+from mantid.plots.legend import LegendProperties
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.plotconfigdialog.colorselector import ColorSelector
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 from mantidqt.widgets.plotconfigdialog.legendtabwidget.advancedlegendoptionsdialog.view import AdvancedLegendOptionsView
 
 

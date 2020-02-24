@@ -135,7 +135,7 @@ const std::string IMDWorkspace::toString() const {
 void IMDWorkspace::makeSinglePointWithNaN(std::vector<coord_t> &x,
                                           std::vector<signal_t> &y,
                                           std::vector<signal_t> &e) const {
-  x.emplace_back(0);
+  x.emplace_back(0.f);
   y.emplace_back(std::numeric_limits<signal_t>::quiet_NaN());
   e.emplace_back(std::numeric_limits<signal_t>::quiet_NaN());
 }

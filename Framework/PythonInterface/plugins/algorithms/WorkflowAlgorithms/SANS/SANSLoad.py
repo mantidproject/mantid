@@ -11,13 +11,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
-                        Progress,
-                        WorkspaceProperty)
-from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty)
+                        Progress, WorkspaceProperty)
+from mantid.kernel import (Direction, FloatArrayProperty)
 from sans.algorithm_detail.load_data import SANSLoadDataFactory
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 from sans.common.enums import SANSDataType
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+
+from sans.state.Serializer import Serializer
 
 
 class SANSLoad(ParallelDataProcessorAlgorithm):
@@ -31,8 +31,8 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         # ----------
         # INPUT
         # ----------
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
+        self.declareProperty('SANSState', "",
+                             doc='A JSON String which fulfills the SANSState contract.')
 
         self.declareProperty("PublishToCache", True, direction=Direction.Input,
                              doc="Publish the calibration workspace to a cache, in order to avoid reloading "
@@ -117,7 +117,7 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
     def PyExec(self):
         # Read the state
         state_property_manager = self.getProperty("SANSState").value
-        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
+        state = Serializer.from_json(state_property_manager)
 
         # Run the appropriate SANSLoader and get the workspaces and the workspace monitors
         # Note that cache optimization is only applied to the calibration workspace since it is not available as a
@@ -153,13 +153,13 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
     def validateInputs(self):
         errors = dict()
         # Check that the input can be converted into the right state object
-        state_property_manager = self.getProperty("SANSState").value
+        state_json = self.getProperty("SANSState").value
         try:
-            state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-            state.property_manager = state_property_manager
+            state = Serializer.from_json(state_json)
             state.validate()
         except ValueError as err:
             errors.update({"SANSState": str(err)})
+            return errors
 
         # We need to validate that the for each expected output workspace of the SANSState a output workspace name
         # was supplied in the PyInit
@@ -178,7 +178,6 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         # ------------------------------------
         # Check the optional output workspaces
         # If they are specified in the SANSState, then we require them to be set on the output as well.
-        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
         data_info = state.data
 
         # For sample transmission

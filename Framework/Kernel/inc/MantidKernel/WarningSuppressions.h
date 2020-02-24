@@ -82,7 +82,7 @@
 #define MSVC_DIAG_OFF(id)                                                        \
   __pragma(warning(push))                                                        \
   __pragma(warning(disable : id))
-#define MSVC_DIAG_ON() __pragma(warning(pop))
+#define MSVC_DIAG_ON(id) __pragma(warning(pop))
 // clang-format on
 #else
 #define MSVC_DIAG_OFF(x)

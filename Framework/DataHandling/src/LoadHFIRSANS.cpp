@@ -539,9 +539,19 @@ void LoadHFIRSANS::storeMetaDataIntoWS() {
       boost::lexical_cast<double>(m_metadata["Header/source_aperture_size"]),
       "mm");
   addRunProperty<double>(
+      "source_aperture_diameter",
+      boost::lexical_cast<double>(m_metadata["Header/source_aperture_size"]),
+      "mm");
+
+  addRunProperty<double>(
       "sample-aperture-diameter",
       boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]),
       "mm");
+  addRunProperty<double>(
+      "sample_aperture_diameter",
+      boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]),
+      "mm");
+
   addRunProperty<double>(
       "number-of-guides",
       boost::lexical_cast<double>(m_metadata["Motor_Positions/nguides"]));
@@ -629,6 +639,9 @@ void LoadHFIRSANS::setDetectorDistance() {
                 << " mm." << '\n';
   addRunProperty<double>("sample-detector-distance", m_sampleDetectorDistance,
                          "mm");
+  addRunProperty<double>("sample_detector_distance", m_sampleDetectorDistance,
+                         "mm");
+
   addRunTimeSeriesProperty<double>("sdd", m_sampleDetectorDistance);
 }
 
@@ -736,6 +749,9 @@ void LoadHFIRSANS::setBeamDiameter() {
   double sourceToSampleDistance = getSourceToSampleDistance();
   addRunProperty<double>("source-sample-distance", sourceToSampleDistance,
                          "mm");
+  addRunProperty<double>("source_sample_distance", sourceToSampleDistance,
+                         "mm");
+
   const auto sampleAperture =
       boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]);
   const auto sourceAperture =

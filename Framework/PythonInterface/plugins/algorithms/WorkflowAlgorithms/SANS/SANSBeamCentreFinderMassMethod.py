@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         IEventWorkspace)
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
+from mantid.kernel import (Direction, StringListValidator)
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
@@ -21,7 +21,7 @@ from sans.algorithm_detail.slice_sans_event import slice_sans_event
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DetectorType)
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
+from sans.state.Serializer import Serializer
 
 
 class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
@@ -36,8 +36,8 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         # INPUT
         # ----------
         # Workspace which is to be cropped
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
+        self.declareProperty('SANSState', '',
+                             doc='A JSON string which fulfills the SANSState contract.')
 
         self.declareProperty(MatrixWorkspaceProperty("SampleScatterWorkspace", '',
                                                      optional=PropertyMode.Mandatory, direction=Direction.Input),
@@ -266,9 +266,9 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
         return workspace
 
     def _get_state(self):
-        state_property_manager = self.getProperty("SANSState").value
-        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-        state.property_manager = state_property_manager
+        state_json = self.getProperty("SANSState").value
+        state = Serializer.from_json(state_json)
+
         return state
 
     def _get_monitor_workspace(self):

@@ -8,9 +8,12 @@ from __future__ import (absolute_import)
 
 from functools import (partial)
 
+from six import with_metaclass
+
 from mantid.py3compat import mock
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument)
+from sans.state.JsonSerializable import JsonSerializable
 from sans.test_helper.test_director import TestDirector
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
@@ -21,13 +24,13 @@ from ui.sans_isis.beam_centre import BeamCentre
 
 def create_mock_settings_diagnostic_tab():
     view = mock.create_autospec(SettingsDiagnosticTab, spec_set=False)
-    view.get_current_row = mock.MagicMock(return_value=3)
+    view.get_current_row = mock.MagicMock(return_value=0)
     return view
 
 
 def create_mock_masking_table():
     view = mock.create_autospec(MaskingTable, spec_set=False)
-    view.get_current_row = mock.MagicMock(return_value=3)
+    view.get_current_row = mock.MagicMock(return_value=0)
     return view
 
 
@@ -237,11 +240,10 @@ def create_mock_view2(user_file_path, batch_file_path=None):
     return view
 
 
-class FakeState(object):
-    dummy_state = "dummy_state"
-
+class FakeState(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(FakeState, self).__init__()
+        self.dummy_state = "dummy_state"
 
     @property
     def property_manager(self):
@@ -249,7 +251,7 @@ class FakeState(object):
 
 
 def get_state_for_row_mock(row_index, file_lookup=True, suppress_warnings=False):
-    return FakeState() if row_index == 3 else ""
+    return FakeState()
 
 
 def get_state_for_row_mock_with_real_state(row_index, file_lookup=True, suppress_warnings=False):

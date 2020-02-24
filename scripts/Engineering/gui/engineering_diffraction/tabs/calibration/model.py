@@ -13,18 +13,18 @@ import matplotlib.pyplot as plt
 
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
-from mantid.simpleapi import Load, EnggCalibrate, DeleteWorkspace, CloneWorkspace, \
-    CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace
+from mantid.simpleapi import EnggCalibrate, DeleteWorkspace, CloneWorkspace, \
+    CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, LoadAscii
+from mantidqt.plotting.functions import plot
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
+from Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 VANADIUM_INPUT_WORKSPACE_NAME = "engggui_vanadium_ws"
 CURVES_WORKSPACE_NAME = "engggui_vanadium_curves"
 INTEGRATED_WORKSPACE_NAME = "engggui_vanadium_integration"
 CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
-
-CALIBRATION_DIR = path.join(path_handling.OUT_FILES_ROOT_DIR, "Calibration", "")
 
 NORTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_North_bank.prm"
 SOUTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_236516_South_bank.prm"
@@ -36,7 +36,9 @@ class CalibrationModel(object):
                                sample_path,
                                plot_output,
                                instrument,
-                               rb_num=None):
+                               rb_num=None,
+                               bank=None,
+                               spectrum_numbers=None):
         """
         Create a new calibration from a vanadium run and sample run
         :param vanadium_path: Path to vanadium data file.
@@ -44,33 +46,62 @@ class CalibrationModel(object):
         :param plot_output: Whether the output should be plotted.
         :param instrument: The instrument the data relates to.
         :param rb_num: The RB number for file creation.
+        :param bank: Optional parameter to crop by bank
+        :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
         van_integration, van_curves = vanadium_corrections.fetch_correction_workspaces(
             vanadium_path, instrument, rb_num=rb_num)
-        sample_workspace = self.load_sample(sample_path)
-        output = self.run_calibration(sample_workspace, van_integration, van_curves)
+        sample_workspace = path_handling.load_workspace(sample_path)
+        full_calib_path = get_setting(path_handling.INTERFACES_SETTINGS_GROUP,
+                                      path_handling.ENGINEERING_PREFIX, "full_calibration")
+        if full_calib_path is not None and path.exists(full_calib_path):
+            full_calib = LoadAscii(full_calib_path, OutputWorkspace="det_pos", Separator="Tab")
+            output = self.run_calibration(sample_workspace,
+                                          van_integration,
+                                          van_curves,
+                                          bank,
+                                          spectrum_numbers,
+                                          full_calib_ws=full_calib)
+        else:
+            output = self.run_calibration(sample_workspace, van_integration, van_curves, bank,
+                                          spectrum_numbers)
         if plot_output:
             self._plot_vanadium_curves()
-            for i in range(2):
-                difc = [output[i].DIFC]
-                tzero = [output[i].TZERO]
-                self._generate_difc_tzero_workspace(difc, tzero, i + 1)
-            self._plot_difc_tzero()
-        difc = [output[0].DIFC, output[1].DIFC]
-        tzero = [output[0].TZERO, output[1].TZERO]
+            for i in range(len(output)):
+                if spectrum_numbers:
+                    bank_name = "cropped"
+                elif bank is None:
+                    bank_name = str(i + 1)
+                else:
+                    bank_name = bank
+                difa = output[i].DIFA
+                difc = output[i].DIFC
+                tzero = output[i].TZERO
+                self._generate_tof_fit_workspace(difa, difc, tzero, bank_name)
+            if bank is None and spectrum_numbers is None:
+                self._plot_tof_fit()
+            elif spectrum_numbers is None:
+                self._plot_tof_fit_single_bank_or_custom(bank)
+            else:
+                self._plot_tof_fit_single_bank_or_custom("cropped")
+        difa = [i.DIFC for i in output]
+        difc = [i.DIFC for i in output]
+        tzero = [i.TZERO for i in output]
 
         params_table = []
-        for i in range(2):
-            params_table.append([i, difc[i], 0.0, tzero[i]])
+
+        for i in range(len(difc)):
+            params_table.append([i, difc[i], difa[i], tzero[i]])
         self.update_calibration_params_table(params_table)
 
-        self.create_output_files(CALIBRATION_DIR, difc, tzero, sample_path, vanadium_path,
-                                 instrument)
+        calib_dir = path.join(path_handling.get_output_path(), "Calibration", "")
+        self.create_output_files(calib_dir, difa, difc, tzero, sample_path, vanadium_path, instrument,
+                                 bank, spectrum_numbers)
         if rb_num:
-            user_calib_dir = path.join(path_handling.OUT_FILES_ROOT_DIR, "User", rb_num,
+            user_calib_dir = path.join(path_handling.get_output_path(), "User", rb_num,
                                        "Calibration", "")
-            self.create_output_files(user_calib_dir, difc, tzero, sample_path, vanadium_path,
-                                     instrument)
+            self.create_output_files(user_calib_dir, difa, difc, tzero, sample_path, vanadium_path,
+                                     instrument, bank, spectrum_numbers)
 
     def load_existing_gsas_parameters(self, file_path):
         if not path.exists(file_path):
@@ -82,7 +113,7 @@ class CalibrationModel(object):
         except RuntimeError:
             logger.error("Invalid file selected: ", file_path)
             return
-        vanadium_corrections.fetch_correction_workspaces(van_no, instrument)
+        vanadium_corrections.fetch_correction_workspaces(instrument+van_no, instrument)
         return instrument, van_no, sample_no
 
     @staticmethod
@@ -133,20 +164,21 @@ class CalibrationModel(object):
         fig.show()
 
     @staticmethod
-    def _generate_difc_tzero_workspace(difc, tzero, bank):
-        bank_ws = Ads.retrieve(CalibrationModel._generate_table_workspace_name(bank - 1))
+    def _generate_tof_fit_workspace(difa, difc, tzero, bank):
+        bank_ws = Ads.retrieve(CalibrationModel._generate_table_workspace_name(bank))
 
         x_val = []
         y_val = []
         y2_val = []
 
-        difc_to_plot = difc[0]
-        tzero_to_plot = tzero[0]
+        difa_to_plot = difa
+        difc_to_plot = difc
+        tzero_to_plot = tzero
 
         for irow in range(0, bank_ws.rowCount()):
             x_val.append(bank_ws.cell(irow, 0))
             y_val.append(bank_ws.cell(irow, 5))
-            y2_val.append(x_val[irow] * difc_to_plot + tzero_to_plot)
+            y2_val.append(pow(x_val[irow], 2) * difa_to_plot + x_val[irow] * difc_to_plot + tzero_to_plot)
 
         ws1 = CreateWorkspace(DataX=x_val,
                               DataY=y_val,
@@ -154,7 +186,7 @@ class CalibrationModel(object):
                               YUnitLabel="Fitted Peaks Centre(TOF, us)")
         ws2 = CreateWorkspace(DataX=x_val, DataY=y2_val)
 
-        output_ws = "engggui_difc_zero_peaks_bank_" + str(bank)
+        output_ws = "engggui_tof_peaks_bank_" + str(bank)
         if Ads.doesExist(output_ws):
             DeleteWorkspace(output_ws)
 
@@ -163,9 +195,9 @@ class CalibrationModel(object):
         DeleteWorkspace(ws2)
 
     @staticmethod
-    def _plot_difc_tzero():
-        bank_1_ws = Ads.retrieve("engggui_difc_zero_peaks_bank_1")
-        bank_2_ws = Ads.retrieve("engggui_difc_zero_peaks_bank_2")
+    def _plot_tof_fit():
+        bank_1_ws = Ads.retrieve("engggui_tof_peaks_bank_1")
+        bank_2_ws = Ads.retrieve("engggui_tof_peaks_bank_2")
         # Create plot
         fig = plt.figure()
         gs = gridspec.GridSpec(1, 2)
@@ -173,82 +205,125 @@ class CalibrationModel(object):
         plot_bank_2 = fig.add_subplot(gs[1], projection="mantid")
 
         for ax, ws, bank in zip([plot_bank_1, plot_bank_2], [bank_1_ws, bank_2_ws], [1, 2]):
-            ax.plot(ws, wkspIndex=0, linestyle="--", marker="o", markersize="3")
+            ax.plot(ws, wkspIndex=0, linestyle="", marker="o", markersize="3")
             ax.plot(ws, wkspIndex=1, linestyle="--", marker="o", markersize="3")
-            ax.set_title("Engg Gui Difc Zero Peaks Bank " + str(bank))
-            ax.legend(("Peaks Fitted", "DifC/TZero Fitted Straight Line"))
+            ax.set_title("Engg Gui TOF Peaks Bank " + str(bank))
+            ax.legend(("Peaks Fitted", "TOF Quadratic Fit"))
             ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
+            ax.set_ylabel("Fitted Peaks Centre(TOF, us")
         fig.show()
 
     @staticmethod
-    def load_sample(sample_run_no):
-        try:
-            return Load(Filename=sample_run_no, OutputWorkspace="engggui_calibration_sample_ws")
-        except Exception as e:
-            logger.error("Error while loading calibration sample data. "
-                         "Could not run the algorithm Load successfully for the calibration sample "
-                         "(run number: " + str(sample_run_no) + "). Error description: " + str(e) +
-                         " Please check also the previous log messages for details.")
-            raise RuntimeError
+    def _plot_tof_fit_single_bank_or_custom(bank):
+        bank_ws = Ads.retrieve("engggui_difc_zero_peaks_bank_" + str(bank))
 
-    def run_calibration(self, sample_ws, van_integration, van_curves):
+        ax = plot([bank_ws], [0],
+                  plot_kwargs={
+                      "linestyle": "",
+                      "marker": "o",
+                      "markersize": "3"
+                  }).gca()
+        ax.plot(bank_ws, wkspIndex=1, linestyle="--", marker="o", markersize="3")
+        ax.set_title("Engg Gui Difc Zero Peaks Bank " + str(bank))
+        ax.legend(("Peaks Fitted", "DifC/TZero Fitted Straight Line"))
+        ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
+
+    def run_calibration(self,
+                        sample_ws,
+                        van_integration,
+                        van_curves,
+                        bank,
+                        spectrum_numbers,
+                        full_calib_ws=None):
         """
         Runs the main Engineering calibration algorithm.
         :param sample_ws: The workspace with the sample data.
         :param van_integration: The integration values from the vanadium corrections
         :param van_curves: The curves from the vanadium corrections.
+        :param full_calib_ws: Full pixel calibration of the detector (optional)
+        :param bank: The bank to crop to, both if none.
+        :param spectrum_numbers: The spectrum numbers to crop to, no crop if none.
         :return: The output of the algorithm.
         """
-        output = [None] * 2
-        for i in range(2):
-            table_name = self._generate_table_workspace_name(i)
-            output[i] = EnggCalibrate(InputWorkspace=sample_ws,
-                                      VanIntegrationWorkspace=van_integration,
-                                      VanCurvesWorkspace=van_curves,
-                                      Bank=str(i + 1),
-                                      FittedPeaks=table_name)
+        kwargs = {
+            "InputWorkspace": sample_ws,
+            "VanIntegrationWorkspace": van_integration,
+            "VanCurvesWorkspace": van_curves
+        }
+
+        def run_engg_calibrate(kwargs_to_pass):
+            return EnggCalibrate(**kwargs_to_pass)
+
+        if full_calib_ws is not None:
+            kwargs["DetectorPositions"] = full_calib_ws
+        if spectrum_numbers is None:
+            if bank is None:
+                output = [None] * 2
+                for i in range(len(output)):
+                    kwargs["Bank"] = str(i+1)
+                    kwargs["FittedPeaks"] = self._generate_table_workspace_name(str(i+1))
+                    output[i] = run_engg_calibrate(kwargs)
+            else:
+                output = [None]
+                kwargs["Bank"] = bank
+                kwargs["FittedPeaks"] = self._generate_table_workspace_name(bank)
+                output[0] = run_engg_calibrate(kwargs)
+
+        else:
+            output = [None]
+            kwargs["SpectrumNumbers"] = spectrum_numbers
+            kwargs["FittedPeaks"] = self._generate_table_workspace_name("cropped")
+            output[0] = run_engg_calibrate(kwargs)
         return output
 
-    def create_output_files(self, calibration_dir, difc, tzero, sample_path, vanadium_path,
-                            instrument):
+    def create_output_files(self, calibration_dir, difa, difc, tzero, sample_path, vanadium_path,
+                            instrument, bank, spectrum_numbers):
         """
         Create output files from the algorithms in the specified directory
         :param calibration_dir: The directory to save the files into.
+        :param difa: DIFA values from calibration algorithm
         :param difc: DIFC values from the calibration algorithm.
         :param tzero: TZERO values from the calibration algorithm.
         :param sample_path: The path to the sample data file.
         :param vanadium_path: The path to the vanadium data file.
         :param instrument: The instrument (ENGINX or IMAT)
+        :param bank: Optional parameter to crop by bank
+        :param spectrum_numbers: Optional parameter to crop using spectrum numbers.
         """
+        kwargs = {"ceria_run": path_handling.get_run_number_from_path(sample_path, instrument),
+                  "vanadium_run": path_handling.get_run_number_from_path(vanadium_path, instrument)}
+
+        def south_kwargs():
+            kwargs["template_file"] = SOUTH_BANK_TEMPLATE_FILE
+            kwargs["bank_names"] = ["South"]
+
+        def north_kwargs():
+            kwargs["template_file"] = NORTH_BANK_TEMPLATE_FILE
+            kwargs["bank_names"] = ["North"]
+
+        def generate_output_file(difa_list, difc_list, tzero_list, bank_name, kwargs_to_pass):
+            file_path = calibration_dir + self._generate_output_file_name(vanadium_path, sample_path, instrument,
+                                                                          bank=bank_name)
+            write_ENGINX_GSAS_iparam_file(file_path, difa_list, difc_list, tzero_list, **kwargs_to_pass)
+
         if not path.exists(calibration_dir):
             makedirs(calibration_dir)
-        filename = self._generate_output_file_name(vanadium_path,
-                                                   sample_path,
-                                                   instrument,
-                                                   bank="all")
-        # Both Banks
-        file_path = calibration_dir + filename
-        write_ENGINX_GSAS_iparam_file(file_path,
-                                      difc,
-                                      tzero,
-                                      ceria_run=sample_path,
-                                      vanadium_run=vanadium_path)
-        # North Bank
-        file_path = calibration_dir + self._generate_output_file_name(
-            vanadium_path, sample_path, instrument, bank="north")
-        write_ENGINX_GSAS_iparam_file(file_path, [difc[0]], [tzero[0]],
-                                      ceria_run=sample_path,
-                                      vanadium_run=vanadium_path,
-                                      template_file=NORTH_BANK_TEMPLATE_FILE,
-                                      bank_names=["North"])
-        # South Bank
-        file_path = calibration_dir + self._generate_output_file_name(
-            vanadium_path, sample_path, instrument, bank="south")
-        write_ENGINX_GSAS_iparam_file(file_path, [difc[1]], [tzero[1]],
-                                      ceria_run=sample_path,
-                                      vanadium_run=vanadium_path,
-                                      template_file=SOUTH_BANK_TEMPLATE_FILE,
-                                      bank_names=["South"])
+
+        if bank is None and spectrum_numbers is None:
+            generate_output_file(difa, difc, tzero, "all", kwargs)
+            north_kwargs()
+            generate_output_file([difa[0]], [difc[0]], [tzero[0]], "north", kwargs)
+            south_kwargs()
+            generate_output_file([difa[1]], [difc[1]], [tzero[1]], "south", kwargs)
+        elif bank == "1":
+            north_kwargs()
+            generate_output_file([difa[0]], [difc[0]], [tzero[0]], "north", kwargs)
+        elif bank == "2":
+            south_kwargs()
+            generate_output_file([difa[0]], [difc[0]], [tzero[0]], "south", kwargs)
+        elif bank is None:  # Custom cropped files use the north bank template.
+            north_kwargs()
+            generate_output_file([difa[0]], [difc[0]], [tzero[0]], "cropped", kwargs)
 
     @staticmethod
     def get_info_from_file(file_path):
@@ -281,7 +356,7 @@ class CalibrationModel(object):
 
     @staticmethod
     def _generate_table_workspace_name(bank_num):
-        return "engggui_calibration_bank_" + str(bank_num + 1)
+        return "engggui_calibration_bank_" + str(bank_num)
 
     @staticmethod
     def _generate_output_file_name(vanadium_path, sample_path, instrument, bank):
@@ -302,6 +377,8 @@ class CalibrationModel(object):
             filename = filename + "bank_North.prm"
         elif bank == "south":
             filename = filename + "bank_South.prm"
+        elif bank == "cropped":
+            filename = filename + "cropped.prm"
         else:
             raise ValueError("Invalid bank name entered")
         return filename

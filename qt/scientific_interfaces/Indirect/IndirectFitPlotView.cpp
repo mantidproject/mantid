@@ -207,7 +207,16 @@ void IndirectFitPlotView::setMaximumSpectrum(int maximum) {
 
 void IndirectFitPlotView::setPlotSpectrum(WorkspaceIndex spectrum) {
   MantidQt::API::SignalBlocker blocker(m_plotForm->spPlotSpectrum);
+  MantidQt::API::SignalBlocker comboBlocker(m_plotForm->cbPlotSpectrum);
   m_plotForm->spPlotSpectrum->setValue(spectrum.value);
+  auto index =
+      m_plotForm->cbPlotSpectrum->findText(QString::number(spectrum.value));
+  m_plotForm->cbPlotSpectrum->setCurrentIndex(index);
+}
+
+void IndirectFitPlotView::disableSpectrumPlotSelection() {
+  m_plotForm->spPlotSpectrum->setEnabled(false);
+  m_plotForm->cbPlotSpectrum->setEnabled(false);
 }
 
 void IndirectFitPlotView::setBackgroundLevel(double value) {
@@ -335,6 +344,7 @@ void IndirectFitPlotView::addBackgroundRangeSelector() {
   backRangeSelector->setVisible(false);
   backRangeSelector->setColour(Qt::darkGreen);
   backRangeSelector->setLowerBound(0.0);
+  backRangeSelector->setUpperBound(10.0);
 
   connect(backRangeSelector, SIGNAL(valueChanged(double)), this,
           SIGNAL(backgroundChanged(double)));
@@ -347,6 +357,7 @@ void IndirectFitPlotView::addBackgroundRangeSelector() {
 void IndirectFitPlotView::setBackgroundBounds() {
   auto backRangeSelector = m_topPlot->getSingleSelector("Background");
   backRangeSelector->setLowerBound(0.0);
+  backRangeSelector->setUpperBound(10.0);
 }
 
 void IndirectFitPlotView::addHWHMRangeSelector() {

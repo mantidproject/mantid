@@ -15,7 +15,7 @@ from SANSReductionCoreBase import SANSReductionCoreBase
 
 from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         Progress)
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
+from mantid.kernel import (Direction, StringListValidator)
 from sans.common.enums import (DetectorType, DataType)
 
 
@@ -31,8 +31,8 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         # ----------
         # INPUT
         # ----------
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
+        self.declareProperty('SANSState', '',
+                             doc='A JSON string which fulfills the SANSState contract.')
 
         # WORKSPACES
         # Scatter Workspaces

@@ -16,7 +16,7 @@ if(ENABLE_WORKBENCH AND NOT PYRCC5_CMD)
         ${PYTHON_EXECUTABLE}
         -m
         PyQt5.pyrcc_main
-        CACHE string "Command line to use to run the PyQt5 resource compiler")
+        CACHE STRING "Command line to use to run the PyQt5 resource compiler")
   else()
     find_file(PYRCC5_CMD "pyrcc5")
     if(NOT PYRCC5_CMD)

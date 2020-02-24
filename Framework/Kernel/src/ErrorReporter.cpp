@@ -50,10 +50,10 @@ ErrorReporter::ErrorReporter(const std::string application,
                              const std::string exitCode, const bool share,
                              const std::string name, const std::string email,
                              const std::string textBox,
-                             const std::string recoveryFile)
+                             const std::string traceback)
     : m_application(application), m_exitCode(exitCode), m_upTime(upTime),
       m_share(share), m_name(name), m_email(email), m_textbox(textBox),
-      m_recoveryFile(recoveryFile) {
+      m_stacktrace(traceback) {
   auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>(
       "errorreports.rooturl");
   if (!url.is_initialized()) {
@@ -123,12 +123,12 @@ std::string ErrorReporter::generateErrorMessage() {
     message["textBox"] = m_textbox;
     message["email"] = m_email;
     message["name"] = m_name;
-    message["fileHash"] = m_recoveryFile;
+    message["stacktrace"] = m_stacktrace;
   } else {
     message["email"] = "";
     message["name"] = "";
-    message["fileHash"] = "";
     message["textBox"] = "";
+    message["stacktrace"] = "";
   }
 
   ::Json::FastWriter writer;

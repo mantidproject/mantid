@@ -57,6 +57,7 @@ set(
   src/MessageDisplay.cpp
   src/MultifitSetupDialog.cpp
   src/MWRunFiles.cpp
+  src/NotificationService.cpp
   src/OptionsPropertyWidget.cpp
   src/ParseKeyValueString.cpp
   src/pixmaps.cpp
@@ -131,6 +132,7 @@ set(
   src/QtPropertyBrowser/StringDialogEditor.cpp
   src/QtPropertyBrowser/StringEditorFactory.cpp
   src/QtPropertyBrowser/WorkspaceEditorFactory.cpp
+  src/Python/CodeExecution.cpp
   src/Python/Sip.cpp
   src/Python/QHashToDict.cpp
 )
@@ -178,6 +180,7 @@ set(
   inc/MantidQtWidgets/Common/MessageDisplay.h
   inc/MantidQtWidgets/Common/MultifitSetupDialog.h
   inc/MantidQtWidgets/Common/MWRunFiles.h
+  inc/MantidQtWidgets/Common/NotificationService.h
   inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
   inc/MantidQtWidgets/Common/pqHelpWindow.h
   inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
@@ -282,6 +285,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProvider.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h
     inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h
+    inc/MantidQtWidgets/Common/Python/CodeExecution.h
     inc/MantidQtWidgets/Common/Python/Sip.h
     inc/MantidQtWidgets/Common/Python/Object.h
     inc/MantidQtWidgets/Common/Python/QHashToDict.h)
@@ -901,6 +905,7 @@ mtd_add_qt_library(
   SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TARGET_LIBRARIES}
+    PythonInterfaceCore
     ${Boost_LIBRARIES}
     ${PYTHON_LIBRARIES}
   QT5_LINK_LIBS

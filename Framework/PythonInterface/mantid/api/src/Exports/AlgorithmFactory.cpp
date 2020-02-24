@@ -10,6 +10,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/core/UninstallTrace.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -26,6 +27,7 @@
 using namespace Mantid::API;
 using namespace boost::python;
 using Mantid::PythonInterface::PythonObjectInstantiator;
+using Mantid::PythonInterface::UninstallTrace;
 
 GET_POINTER_SPECIALIZATION(AlgorithmFactoryImpl)
 
@@ -80,6 +82,27 @@ list getDescriptors(AlgorithmFactoryImpl &self, bool includeHidden) {
   return pyDescriptors;
 }
 
+/**
+ * A Python friendly version of getCategoriesWithState
+ * Return the categories of the algorithms. This includes those within the
+ * Factory itself and any cleanly constructed algorithms stored here.
+ * @param self :: Enables it to be called as a member function on the
+ * AlgorithmFactory class
+ * @returns The map of the categories, together with a true false value
+ * defining if they are hidden
+ */
+dict getCategoriesandState(AlgorithmFactoryImpl &self) {
+  std::map<std::string, bool> categories = self.getCategoriesWithState();
+  dict pythonCategories;
+  for (auto &it : categories) {
+    object categoryName(
+        handle<>(to_python_value<const std::string &>()(it.first)));
+    pythonCategories[categoryName] = it.second;
+  }
+
+  return pythonCategories;
+}
+
 //------------------------------------------------------------------------------
 // Python algorithm subscription
 //------------------------------------------------------------------------------
@@ -96,6 +119,7 @@ GNU_DIAG_OFF("cast-qual")
  *              or an instance of a class type derived from PythonAlgorithm
  */
 void subscribe(AlgorithmFactoryImpl &self, const boost::python::object &obj) {
+  UninstallTrace uninstallTrace;
   std::lock_guard<std::recursive_mutex> lock(PYALG_REGISTER_MUTEX);
 
   static auto *const pyAlgClass =
@@ -167,6 +191,11 @@ void export_AlgorithmFactory() {
            (arg("self"), arg("include_hidden")),
            "Return a list of descriptors of registered algorithms. Each "
            "descriptor is a list: [name, version, category, alias].")
+      .def(
+          "getCategoriesandState", &getCategoriesandState,
+          "Return the categories of the algorithms. This includes those within "
+          "the Factory itself and any cleanly constructed algorithms stored "
+          "here")
       .def("unsubscribe", &AlgorithmFactoryImpl::unsubscribe,
            (arg("self"), arg("name"), arg("version")),
            "Returns the highest version of the named algorithm. Throws "

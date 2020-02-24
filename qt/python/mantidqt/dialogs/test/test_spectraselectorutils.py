@@ -46,6 +46,7 @@ class SpectraSelectionUtilsTest(unittest.TestCase):
         mock_SpectraSelectionDialog.exec_.return_value = mock_SpectraSelectionDialog.Rejected
         mock_SpectraSelectionDialog.decision = QDialog.Rejected
         mock_SpectraSelectionDialog.selection = None
+        mock_SpectraSelectionDialog.get_compatible_workspaces.return_value = [self._multi_spec_ws]
 
         selection = get_spectra_selection([self._multi_spec_ws])
 
@@ -54,6 +55,7 @@ class SpectraSelectionUtilsTest(unittest.TestCase):
 
     @mock.patch('mantidqt.dialogs.spectraselectorutils.SpectraSelectionDialog')
     def test_get_spectra_selection_does_not_use_dialog_for_single_spectrum(self, dialog_mock):
+        dialog_mock.get_compatible_workspaces.return_value = [self._single_spec_ws]
         selection = get_spectra_selection([self._single_spec_ws])
 
         dialog_mock.assert_not_called()
@@ -64,6 +66,7 @@ class SpectraSelectionUtilsTest(unittest.TestCase):
     def test_get_spectra_selection_does_not_use_dialog_for_multiple__single_spectrum(self, dialog_mock):
         spectra_1 = ExtractSpectra(InputWorkspace=self._multi_spec_ws, StartWorkspaceIndex=0, EndWorkspaceIndex=0)
         spectra_2 = ExtractSpectra(InputWorkspace=self._multi_spec_ws, StartWorkspaceIndex=1, EndWorkspaceIndex=1)
+        dialog_mock.get_compatible_workspaces.return_value = [spectra_1, spectra_2]
         selection = get_spectra_selection([spectra_1, spectra_2])
 
         dialog_mock.assert_not_called()

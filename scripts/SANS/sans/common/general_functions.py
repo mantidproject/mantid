@@ -26,6 +26,8 @@ from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensional
 # -------------------------------------------
 # Constants
 # -------------------------------------------
+from sans.state.Serializer import Serializer
+
 ALTERNATIVE_SANS2D_NAME = "SAN"
 
 
@@ -236,31 +238,6 @@ def get_charge_and_time(workspace):
     time_passed = int((charges.times[-1] - charges.times[0]) / np.timedelta64(1, 'us'))  # microseconds
     time_passed = float(time_passed) / 1e6
     return total_charge, time_passed
-
-
-def add_to_sample_log(workspace, log_name, log_value, log_type):
-    """
-    Adds a sample log to the workspace
-
-    :param workspace: the workspace to which the sample log is added
-    :param log_name: the name of the log
-    :param log_value: the value of the log in string format
-    :param log_type: the log value type which can be String, Number, Number Series
-    """
-    if log_type not in ["String", "Number", "Number Series"]:
-        raise ValueError("Tryint go add {0} to the sample logs but it was passed "
-                         "as an unknown type of {1}".format(log_value, log_type))
-    if not isinstance(log_value, str):
-        raise TypeError("The value which is added to the sample logs needs to be passed as a string,"
-                        " but it is passed as {0}".format(type(log_value)))
-
-    add_log_name = "AddSampleLog"
-    add_log_options = {"Workspace": workspace,
-                       "LogName": log_name,
-                       "LogText": log_value,
-                       "LogType": log_type}
-    add_log_alg = create_unmanaged_algorithm(add_log_name, **add_log_options)
-    add_log_alg.execute()
 
 
 def append_to_sans_file_tag(workspace, to_append):
@@ -768,7 +745,7 @@ def get_transmission_output_name(state, data_type=DataType.SAMPLE, multi_reducti
     short_run_number_as_string = str(short_run_number)
 
     calculated_transmission_state = state.adjustment.calculate_transmission
-    fit = calculated_transmission_state.fit[DataType.SAMPLE]
+    fit = calculated_transmission_state.fit[DataType.SAMPLE.value]
     wavelength_range_string = "_" + str(fit.wavelength_low) + "_" + str(fit.wavelength_high)
 
     trans_suffix = "_trans_Sample" if data_type == DataType.SAMPLE else "_trans_Can"
@@ -932,7 +909,7 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
         return state_to_hash
 
     new_state = remove_sample_related_information(state)
-    new_state_serialized = new_state.property_manager
+    new_state_serialized = Serializer.to_json(new_state)
     new_state_serialized = json.dumps(new_state_serialized, sort_keys=True, indent=4)
 
     # Add a tag for the reduction mode

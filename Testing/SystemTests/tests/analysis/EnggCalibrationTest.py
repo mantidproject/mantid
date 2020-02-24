@@ -202,7 +202,7 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
                                                              VanadiumWorkspace=van_ws,
                                                              Bank='1',
                                                              ExpectedPeaks=
-                                                             '2.7057,1.9132,1.6316,1.5621,1.3528,1.1046',
+                                                             '2.7057,1.6316,1.5621,1.3528,1.1046',
                                                              DetectorPositions=self.pos_table)
         self.peaks = tbl.column('dSpacing')
         self.peaks_fitted = tbl.column('X0')
@@ -212,7 +212,7 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
                                                                          VanadiumWorkspace=van_ws,
                                                                          Bank='2',
                                                                          ExpectedPeaks=
-                                                                         '2.7057,1.9132,1.6316,1.5621,1.3528,1.1046',
+                                                                         '2.7057,1.6316,1.5621,1.3528,1.1046',
                                                                          DetectorPositions=self.pos_table)
         self.peaks_b2 = tbl_b2.column('dSpacing')
         self.peaks_fitted_b2 = tbl_b2.column('X0')
@@ -243,11 +243,8 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
                 self.assertEqual(cell_val[0:11], '{"1": {"A":')
             self.assertEqual(cell_val[-2:], '}}')
 
-        self.assertEqual(self.difa, 0)
-        self.assertEqual(self.difa_b2, 0)
-
         # this will be used as a comparison delta in relative terms (percentage)
-        exdelta_special = 5e-4
+        exdelta_special = 5e-3
         # Mac fitting tests produce large differences for some reason.
         # Windows results are different but within reasonable bounds
         import sys
@@ -258,34 +255,82 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
         # Note that the reference values are given with 12 digits more for reference than
         # for assert-comparison purposes (comparisons are not that picky, by far)
         single_spectrum_delta = 5e-3
-        self.assertTrue(rel_err_less_delta(self.pos_table.cell(100, 3), 1.53041625023, single_spectrum_delta))
         self.assertTrue(rel_err_less_delta(self.pos_table.cell(400, 4), 1.65264105797, single_spectrum_delta))
         self.assertTrue(rel_err_less_delta(self.pos_table.cell(200, 5), -0.296705961227, single_spectrum_delta))
-        # DIFA column
-        self.assertEqual(self.pos_table.cell(133, 7), 0)
-        # DIFC column
-        self.assertTrue(rel_err_less_delta(self.pos_table.cell(610, 8), 18603.7597656, single_spectrum_delta))
-        # TZERO column
-        self.assertTrue(abs(self.pos_table.cell(1199, 9)) < 10)
+        if systemtesting.using_gsl_v1():  # Different fitting for gsl_v1 (RHEL 7)
+            self.assertTrue(rel_err_less_delta(self.pos_table.cell(100, 3), 1.73157775402, single_spectrum_delta))
+            # DIFA column
+            self.assertTrue(rel_err_less_delta(self.pos_table.cell(133, 7), -27.229156494, single_spectrum_delta))
+            # DIFC column
+            self.assertTrue(rel_err_less_delta(self.pos_table.cell(610, 8), 18684.5429688, single_spectrum_delta))
+            # TZERO column
+            self.assertTrue(abs(self.pos_table.cell(1199, 9)) < 20)
 
-        # === check difc, zero parameters for GSAS produced by EnggCalibrate
+            # === check difc, zero parameters for GSAS produced by EnggCalibrate
+            # Bank 1
+            self.assertTrue(rel_err_less_delta(self.difa, 19.527099828, exdelta_special),
+                            "difa parameter for bank 1 is not what was expected, got: %f" % self.difa)
+            self.assertTrue(rel_err_less_delta(self.difc, 18383.536587, exdelta_special),
+                            "difc parameter for bank 1 is not what was expected, got: %f" % self.difc)
+            if "darwin" != sys.platform:
+                self.assertTrue(abs(self.zero) < 40,
+                                "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
 
-        # Bank 1
-        self.assertTrue(rel_err_less_delta(self.difc, 18401.881659, exdelta_special),
-                        "difc parameter for bank 1 is not what was expected, got: %f" % self.difc)
-        if "darwin" != sys.platform:
-            self.assertTrue(abs(self.zero) < 9,
-                            "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
+            # Bank 2
+            self.assertTrue(rel_err_less_delta(self.difa_b2, -2.9592743210, exdelta_special),
+                            "difa parameter for bank 2 is not what was expected, got: %f" % self.difa_b2)
+            self.assertTrue(rel_err_less_delta(self.difc_b2, 18401.514556, exdelta_special),
+                            "difc parameter for bank 2 is not what was expected, got: %f" % self.difc_b2)
+            if "darwin" != sys.platform:
+                self.assertTrue(abs(self.zero_b2) < 20,
+                                "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
+        else:
+            self.assertTrue(rel_err_less_delta(self.pos_table.cell(100, 3), 1.68769443035, single_spectrum_delta))
+            # DIFA column
+            self.assertTrue(rel_err_less_delta(self.pos_table.cell(133, 7), -18.6453819275, single_spectrum_delta))
+            # DIFC column
+            self.assertTrue(rel_err_less_delta(self.pos_table.cell(610, 8), 18684.5429688, single_spectrum_delta))
+            # TZERO column
+            self.assertTrue(abs(self.pos_table.cell(1199, 9)) < 15)
 
-        # Bank 2
-        self.assertTrue(rel_err_less_delta(self.difc_b2, 18389.841183, exdelta_special),
-                        "difc parameter for bank 2 is not what was expected, got: %f" % self.difc_b2)
-        if "darwin" != sys.platform:
-            self.assertTrue(abs(self.zero_b2) < 18,
-                            "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
+            # === check difc, zero parameters for GSAS produced by EnggCalibrate
+            if sys.platform == "win32":  # Windows performs the fit differently enough to cause problems.
+                # Bank 1
+                self.assertTrue(rel_err_less_delta(self.difa, 2.31176809660, exdelta_special),
+                                "difa parameter for bank 1 is not what was expected, got: %f" % self.difa)
+                self.assertTrue(rel_err_less_delta(self.difc, 18440.6101707, exdelta_special),
+                                "difc parameter for bank 1 is not what was expected, got: %f" % self.difc)
+                self.assertTrue(abs(self.zero) < 40,
+                                "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
+
+                # Bank 2
+                self.assertTrue(rel_err_less_delta(self.difa_b2, 3.92202365197, exdelta_special),
+                                "difa parameter for bank 2 is not what was expected, got: %f" % self.difa_b2)
+                self.assertTrue(rel_err_less_delta(self.difc_b2, 18382.7105214, exdelta_special),
+                                "difc parameter for bank 2 is not what was expected, got: %f" % self.difc_b2)
+                self.assertTrue(abs(self.zero_b2) < 10,
+                                "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
+            else:
+                # Bank 1
+                self.assertTrue(rel_err_less_delta(self.difa, 2.3265842459, exdelta_special),
+                                "difa parameter for bank 1 is not what was expected, got: %f" % self.difa)
+                self.assertTrue(rel_err_less_delta(self.difc, 18440.5718578, exdelta_special),
+                                "difc parameter for bank 1 is not what was expected, got: %f" % self.difc)
+                if "darwin" != sys.platform:
+                    self.assertTrue(abs(self.zero) < 40,
+                                    "zero parameter for bank 1 is not what was expected, got: %f" % self.zero)
+
+                # Bank 2
+                self.assertTrue(rel_err_less_delta(self.difa_b2, 3.9220236519, exdelta_special),
+                                "difa parameter for bank 2 is not what was expected, got: %f" % self.difa_b2)
+                self.assertTrue(rel_err_less_delta(self.difc_b2, 18382.7105215, exdelta_special),
+                                "difc parameter for bank 2 is not what was expected, got: %f" % self.difc_b2)
+                if "darwin" != sys.platform:
+                    self.assertTrue(abs(self.zero_b2) < 10,
+                                    "zero parameter for bank 2 is not what was expected, got: %f" % self.zero_b2)
 
         # === peaks used to fit the difc and zero parameters ===
-        expected_peaks = [1.1046, 1.3528, 1.5621, 1.6316, 1.9132, 2.7057]
+        expected_peaks = [1.1046, 1.3528, 1.5621, 1.6316, 2.7057]
         # Note that CalibrateFull is not applied on bank 2. These peaks are not too difficult and
         # fitted successfully though (but note the increased DIFC).
         self.assertEqual(len(self.peaks), len(expected_peaks))

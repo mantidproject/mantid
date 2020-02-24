@@ -8,29 +8,32 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import systemtesting
 import unittest
 
-import mantid  # noqa
+import systemtesting
+
 from mantid.api import AlgorithmManager
-from sans.user_file.state_director import StateDirectorISIS
-from sans.state.data import get_data_builder
-from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality, FitModeForMerge)
 from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_unmanaged_algorithm
+from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality, FitModeForMerge)
 from sans.common.file_information import SANSFileInformationFactory
+from sans.common.general_functions import create_unmanaged_algorithm
+from sans.state.Serializer import Serializer
+from sans.state.StateBuilder import StateBuilder
+from sans.state.StateObjects.StateData import get_data_builder
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Base class containing useful functions for the tests
 # ----------------------------------------------------------------------------------------------------------------------
+
+
 class SingleReductionTest(unittest.TestCase):
     def _load_workspace(self, state):
         load_alg = AlgorithmManager.createUnmanaged("SANSLoad")
         load_alg.setChild(True)
         load_alg.initialize()
 
-        state_dict = state.property_manager
+        state_dict = Serializer.to_json(state)
         load_alg.setProperty("SANSState", state_dict)
         load_alg.setProperty("PublishToCache", False)
         load_alg.setProperty("UseCached", False)
@@ -101,7 +104,7 @@ class SingleReductionTest(unittest.TestCase):
                               output_settings=None, event_slice_optimisation=False, save_can=False, use_optimizations=False):
         single_reduction_name = "SANSSingleReduction"
         ver = 1 if not event_slice_optimisation else 2
-        state_dict = state.property_manager
+        state_dict = Serializer.to_json(state)
 
         single_reduction_options = {"SANSState": state_dict,
                                     "SampleScatterWorkspace": sample_scatter,
@@ -159,21 +162,18 @@ class SANSSingleReductionTest(SingleReductionTest):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info, file_information)
-        user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
-        # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
+        user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
+        user_file_director = StateBuilder.new_instance(file_information=file_information,
+                                                       data_information=data_info,
+                                                       user_filename=user_file)
 
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY BEGIN -- Remove when appropriate
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        state = user_file_director.get_all_states()
+        # Set the reduction mode to LAB
+        state.reduction.reduction_mode = ReductionMode.LAB
+
         # Since we are dealing with event based data but we want to compare it with histogram data from the
         # old reduction system we need to enable the compatibility mode
-        user_file_director.set_compatibility_builder_use_compatibility_mode(True)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY END
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        state = user_file_director.construct()
+        state.compatibility.use_compatibility_mode = True
 
         # Load the sample workspaces
         sample, sample_monitor, transmission_workspace, direct_workspace, can, can_monitor, \
@@ -228,21 +228,13 @@ class SANSSingleReductionTest(SingleReductionTest):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info, file_information)
-        user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
-        # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.HAB)
-
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY BEGIN -- Remove when appropriate
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # Since we are dealing with event based data but we want to compare it with histogram data from the
-        # old reduction system we need to enable the compatibility mode
-        user_file_director.set_compatibility_builder_use_compatibility_mode(True)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY END
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        state = user_file_director.construct()
+        user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
+        user_file_director = StateBuilder.new_instance(file_information=file_information,
+                                                       data_information=data_info,
+                                                       user_filename=user_file)
+        state = user_file_director.get_all_states()
+        state.reduction.reduction_mode = ReductionMode.HAB
+        state.compatibility.use_compatibility_mode = True
 
         # Load the sample workspaces
         sample, sample_monitor, transmission_workspace, direct_workspace, can, can_monitor,\
@@ -282,23 +274,18 @@ class SANSSingleReductionTest(SingleReductionTest):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info, file_information)
-        user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
-        # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.MERGED)
-        user_file_director.set_reduction_builder_merge_fit_mode(FitModeForMerge.BOTH)
-        user_file_director.set_reduction_builder_merge_scale(1.0)
-        user_file_director.set_reduction_builder_merge_shift(0.0)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY BEGIN -- Remove when appropriate
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # Since we are dealing with event based data but we want to compare it with histogram data from the
-        # old reduction system we need to enable the compatibility mode
-        user_file_director.set_compatibility_builder_use_compatibility_mode(True)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY END
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        state = user_file_director.construct()
+        user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
+        user_file_director = StateBuilder.new_instance(file_information=file_information,
+                                                       data_information=data_info,
+                                                       user_filename=user_file)
+
+        state = user_file_director.get_all_states()
+        state.reduction.reduction_mode = ReductionMode.MERGED
+        state.reduction.merge_fit_mode = FitModeForMerge.BOTH
+        state.reduction.merge_scale = 1.0
+        state.reduction.merge_shift = 0.0
+
+        state.compatibility.use_compatibility_mode = True
 
         # Load the sample workspaces
         sample, sample_monitor, transmission_workspace, direct_workspace, \
@@ -347,22 +334,19 @@ class SANSSingleReductionTest(SingleReductionTest):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info, file_information)
-        user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
+        user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
+        user_file_director = StateBuilder.new_instance(file_information=file_information,
+                                                       data_information=data_info,
+                                                       user_filename=user_file)
+
+        state = user_file_director.get_all_states()
+
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
-        user_file_director.set_reduction_builder_reduction_dimensionality(ReductionDimensionality.TWO_DIM)
-        user_file_director.set_convert_to_q_builder_reduction_dimensionality(ReductionDimensionality.TWO_DIM)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY BEGIN -- Remove when appropriate
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # Since we are dealing with event based data but we want to compare it with histogram data from the
-        # old reduction system we need to enable the compatibility mode
-        user_file_director.set_compatibility_builder_use_compatibility_mode(True)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY END
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        state = user_file_director.construct()
+        state.reduction.reduction_mode = ReductionMode.LAB
+        state.reduction.reduction_dimensionality = ReductionDimensionality.TWO_DIM
+        state.convert_to_q.reduction_dimensionality = ReductionDimensionality.TWO_DIM
+
+        state.compatibility.use_compatibility_mode = True
 
         # Load the sample workspaces
         sample, sample_monitor, transmission_workspace, direct_workspace, can, can_monitor, \
@@ -414,18 +398,18 @@ class SANSSingleReduction2Test(SingleReductionTest):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info, file_information)
-        user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
+        user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
+        user_file_director = StateBuilder.new_instance(file_information=file_information,
+                                                       data_information=data_info,
+                                                       user_filename=user_file)
+        state = user_file_director.get_all_states()
         # Set the reduction mode to HAB
-        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.HAB)
-        user_file_director.set_compatibility_builder_use_compatibility_mode(False)
+        state.reduction.reduction_mode = ReductionMode.HAB
+        state.compatibility.use_compatibility_mode = False
 
         # Add some event slices
-        user_file_director.set_slice_event_builder_start_time([0.00, 300.00])
-        user_file_director.set_slice_event_builder_end_time([300.00, 600.00])
-
-        # Construct
-        state = user_file_director.construct()
+        state.slice.start_time = [0.00, 300.00]
+        state.slice.end_time = [300.00, 600.00]
 
         # Load the sample workspaces
         sample, sample_monitor, transmission_workspace, direct_workspace, can, can_monitor,\
@@ -465,9 +449,8 @@ class SANSSingleReduction2Test(SingleReductionTest):
         # ---------------------------------------------------
 
         # Run the first event slice
-        user_file_director.set_slice_event_builder_start_time([0.00])
-        user_file_director.set_slice_event_builder_end_time([300.00])
-        state = user_file_director.construct()
+        state.slice.start_time = [0.00]
+        state.slice.end_time = [300.00]
 
         single_reduction_alg_first_slice = self._run_single_reduction(state, sample_scatter=sample,
                                                                       sample_transmission=transmission_workspace,
@@ -482,9 +465,8 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                                       save_can=True)
 
         # Run the second event slice
-        user_file_director.set_slice_event_builder_start_time([300.00])
-        user_file_director.set_slice_event_builder_end_time([600.00])
-        state = user_file_director.construct()
+        state.slice.start_time = [300.00]
+        state.slice.end_time = [600.00]
 
         single_reduction_alg_second_slice = self._run_single_reduction(state, sample_scatter=sample,
                                                                        sample_transmission=transmission_workspace,
@@ -539,18 +521,18 @@ class SANSSingleReduction2Test(SingleReductionTest):
         data_info = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_info, file_information)
-        user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
+        user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
+        user_file_director = StateBuilder.new_instance(file_information=file_information,
+                                                       data_information=data_info,
+                                                       user_filename=user_file)
         # Set the reduction mode to LAB
-        user_file_director.set_reduction_builder_reduction_mode(ReductionMode.LAB)
-        user_file_director.set_compatibility_builder_use_compatibility_mode(False)
+        state = user_file_director.get_all_states()
+        state.reduction.reduction_mode = ReductionMode.LAB
+        state.compatibility.use_compatibility_mode = False
 
         # Add some event slices
-        user_file_director.set_slice_event_builder_start_time([0.00, 300.00])
-        user_file_director.set_slice_event_builder_end_time([300.00, 600.00])
-
-        # Construct
-        state = user_file_director.construct()
+        state.slice.start_time = [0.00, 300.00]
+        state.slice.end_time = [300.00, 600.00]
 
         # Load the sample workspaces
         sample, sample_monitor, transmission_workspace, direct_workspace, can, can_monitor,\
@@ -589,9 +571,8 @@ class SANSSingleReduction2Test(SingleReductionTest):
         # This can be removed once version 2 has been adopted
         # ---------------------------------------------------
         # Run the first event slice
-        user_file_director.set_slice_event_builder_start_time([0.00])
-        user_file_director.set_slice_event_builder_end_time([300.00])
-        state = user_file_director.construct()
+        state.slice.start_time = [0.00]
+        state.slice.end_time = [300.00]
 
         single_reduction_alg_first_slice = self._run_single_reduction(state, sample_scatter=sample,
                                                                       sample_transmission=transmission_workspace,
@@ -606,9 +587,8 @@ class SANSSingleReduction2Test(SingleReductionTest):
                                                                       save_can=True)
 
         # Run the second event slice
-        user_file_director.set_slice_event_builder_start_time([300.00])
-        user_file_director.set_slice_event_builder_end_time([600.00])
-        state = user_file_director.construct()
+        state.slice.start_time = [300.00]
+        state.slice.end_time = [600.00]
 
         single_reduction_alg_second_slice = self._run_single_reduction(state, sample_scatter=sample,
                                                                        sample_transmission=transmission_workspace,

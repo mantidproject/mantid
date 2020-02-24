@@ -58,6 +58,9 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_update_fields_connection(self, slot):
         self.sig_update_fields.connect(slot)
 
+    def set_on_check_cropping_state_changed(self, slot):
+        self.check_cropCalib.stateChanged.connect(slot)
+
     # =================
     # Component Setters
     # =================
@@ -90,6 +93,15 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def set_calibrate_button_text(self, text):
         self.button_calibrate.setText(text)
 
+    def set_cropping_widget_visibility(self, visible):
+        self.widget_cropping.setVisible(visible)
+
+    def set_check_cropping_enabled(self, enabled):
+        self.check_cropCalib.setEnabled(enabled)
+
+    def set_check_cropping_checked(self, checked):
+        self.check_cropCalib.setChecked(checked)
+
     # =================
     # Component Getters
     # =================
@@ -121,6 +133,12 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     def get_load_checked(self):
         return self.radio_loadCalib.isChecked()
 
+    def get_crop_checked(self):
+        return self.check_cropCalib.isChecked()
+
+    def get_cropping_widget(self):
+        return self.widget_cropping
+
     # =================
     # State Getters
     # =================
@@ -143,7 +161,14 @@ class CalibrationView(QtWidgets.QWidget, Ui_calib):
     # =================
 
     def setup_tabbing_order(self):
-        self.setTabOrder(self.radio_newCalib, self.finder_vanadium)
-        self.setTabOrder(self.finder_vanadium, self.finder_sample)
-        self.setTabOrder(self.finder_sample, self.check_plotOutput)
+        self.finder_vanadium.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.finder_sample.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
+        self.finder_path.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
+
+        self.setTabOrder(self.radio_newCalib, self.finder_vanadium.focusProxy())
+        self.setTabOrder(self.finder_vanadium.focusProxy(), self.finder_sample.focusProxy())
+        self.setTabOrder(self.finder_sample.focusProxy(), self.finder_path.focusProxy())
+        self.setTabOrder(self.finder_path.focusProxy(), self.check_cropCalib)
+        self.setTabOrder(self.check_cropCalib, self.widget_cropping)
+        self.setTabOrder(self.widget_cropping, self.check_plotOutput)
         self.setTabOrder(self.check_plotOutput, self.button_calibrate)

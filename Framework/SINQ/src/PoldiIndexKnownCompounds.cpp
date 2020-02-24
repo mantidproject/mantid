@@ -14,7 +14,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidSINQ/PoldiUtilities/MillerIndicesIO.h"
 
-#include <boost/bind.hpp>
 #include <numeric>
 
 #include <boost/math/distributions/normal.hpp>
@@ -726,10 +725,9 @@ PoldiPeakCollection_sptr
 PoldiIndexKnownCompounds::getIntensitySortedPeakCollection(
     const PoldiPeakCollection_sptr &peaks) const {
   std::vector<PoldiPeak_sptr> peakVector(peaks->peaks());
-
+  using namespace std::placeholders;
   std::sort(peakVector.begin(), peakVector.end(),
-            boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2,
-                              &PoldiPeak::intensity));
+            std::bind(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::intensity));
 
   PoldiPeakCollection_sptr sortedPeaks =
       boost::make_shared<PoldiPeakCollection>(peaks->intensityType());

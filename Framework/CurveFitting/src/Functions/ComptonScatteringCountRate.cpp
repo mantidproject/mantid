@@ -10,8 +10,6 @@
 #include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 
-#include <boost/bind.hpp>
-
 #include <sstream>
 
 namespace Mantid {
@@ -166,8 +164,9 @@ void ComptonScatteringCountRate::iterationStarting() {
 
   if (m_bkgdPolyN > 0) {
     BkgdNorm2 objf(m_cmatrix, m_dataErrorRatio);
+    using namespace std::placeholders;
     AugmentedLagrangianOptimizer::ObjFunction objfunc =
-        boost::bind(&BkgdNorm2::eval, objf, _1, _2);
+        std::bind(&BkgdNorm2::eval, objf, _1, _2);
     AugmentedLagrangianOptimizer lsqmin(nparams, objfunc, m_eqMatrix,
                                         m_cmatrix);
     lsqmin.minimize(x0);

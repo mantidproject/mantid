@@ -26,6 +26,9 @@ namespace ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL PerThetaDefaults {
 public:
+  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 9;
+  using ValueArray = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
+
   enum Column {
     // 0-based column indices for cells in a row. The Actual values are
     // important here so set them explicitly
@@ -40,8 +43,17 @@ public:
     RUN_SPECTRA = 8
   };
 
-  static auto constexpr OPTIONS_TABLE_COLUMN_COUNT = 9;
-  using ValueArray = std::array<std::string, OPTIONS_TABLE_COLUMN_COUNT>;
+  static auto constexpr ColumnPropertyName =
+      std::array<const char *, OPTIONS_TABLE_COLUMN_COUNT>{
+          "ThetaIn",
+          "FirstTransmissionRunList",
+          "SecondTransmissionRunList",
+          "TransmissionProcessingInstructions",
+          "MomentumTransferMin",
+          "MomentumTransferMax",
+          "MomentumTransferStep",
+          "ScaleFactor",
+          "ProcessingInstructions"};
 
   PerThetaDefaults(
       boost::optional<double> theta, TransmissionRunPair tranmissionRuns,

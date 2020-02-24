@@ -10,10 +10,11 @@ Controls the dynamic displaying of errors for line on the plot
 """
 from matplotlib.container import ErrorbarContainer
 from matplotlib.lines import Line2D
-from mantid.plots import MantidAxes
-from mantid.plots.helperfunctions import get_data_from_errorbar_container, set_errorbars_hidden
+
+from mantid.plots import datafunctions, MantidAxes
+from mantid.plots.datafunctions import get_data_from_errorbar_container, set_errorbars_hidden
+from mantid.plots.legend import LegendProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties, remove_curve_from_ax
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 
 class FigureErrorsManager(object):
@@ -38,11 +39,28 @@ class FigureErrorsManager(object):
         else:
             legend_props = None
 
+        if isinstance(curve, Line2D):
+            curve_index = ax.get_lines().index(curve)
+        else:
+            curve_index = ax.get_lines().index(curve[0])
+
         # get all curve properties
         curve_props = CurveProperties.from_curve(curve)
         # and remove the ones that matplotlib doesn't recognise
         plot_kwargs = curve_props.get_plot_kwargs()
         new_curve = cls.replot_curve(ax, curve, plot_kwargs)
+
+        if isinstance(ax, MantidAxes):
+            errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
+        else:
+            errorbar_cap_lines = []
+
+        ax.lines.insert(curve_index, ax.lines.pop())
+
+        if isinstance(ax, MantidAxes) and ax.is_waterfall():
+            datafunctions.convert_single_line_to_waterfall(ax, curve_index)
+
+        ax.lines += errorbar_cap_lines
 
         # Inverts either the current state of hide_errors
         # or the make_visible kwarg that forces a state:
@@ -93,6 +111,9 @@ class FigureErrorsManager(object):
     @classmethod
     def replot_curve(cls, ax, curve, plot_kwargs):
         if isinstance(ax, MantidAxes):
+            axis = ax.creation_args[0].get('axis', None)
+            if axis:
+                plot_kwargs['axis'] = axis
             try:
                 new_curve = ax.replot_artist(curve, errorbars=True, **plot_kwargs)
             except ValueError:  # ValueError raised if Artist not tracked by Axes

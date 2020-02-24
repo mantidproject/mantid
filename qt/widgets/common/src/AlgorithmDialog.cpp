@@ -15,6 +15,7 @@
 #include "MantidQtWidgets/Common/FilePropertyWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/PropertyWidget.h"
 
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -564,6 +565,15 @@ QWidget *AlgorithmDialog::tie(QWidget *widget, const QString &property,
 
   if (readHistory) {
     setPreviousValue(widget, property);
+  }
+
+  // If the widget is a line edit and has no value then set the placeholder text
+  // to the default value.
+  QLineEdit *textfield = qobject_cast<QLineEdit *>(widget);
+  if ((textfield)) {
+    if (prop) {
+      PropertyWidget::setFieldPlaceholderText(prop, textfield);
+    }
   }
 
   return validlbl;

@@ -59,17 +59,19 @@ class VanadiumCorrectionsTest(unittest.TestCase):
         self.assertEqual(0, van_correction.call_count)
         self.assertEqual(0, save.call_count)
 
+    @patch(dir_path + ".vanadium_corrections.path_handling.get_output_path")
     @patch(dir_path + ".vanadium_corrections.makedirs")
-    def test_file_path_generation(self, makedirs):
+    def test_file_path_generation(self, makedirs, out_path):
+        out_path.return_value = path.join(path.expanduser("~"), "Test_Directory")
         vanadium_run_number = "1234"
-        engineering_path = path.join(path.expanduser("~"), "Engineering_Mantid")
+        engineering_path = path.join(path.expanduser("~"), "Test_Directory")
         if path.exists(engineering_path):
             rmtree(engineering_path)
         output = vanadium_corrections._generate_saved_workspace_file_paths(vanadium_run_number)
         self.assertEqual(output,
-                         (path.join(path.expanduser("~"), "Engineering_Mantid", "Vanadium_Runs",
+                         (path.join(path.expanduser("~"), "Test_Directory", "Vanadium_Runs",
                                     "1234_precalculated_vanadium_run_integration.nxs"),
-                          path.join(path.expanduser("~"), "Engineering_Mantid", "Vanadium_Runs",
+                          path.join(path.expanduser("~"), "Test_Directory", "Vanadium_Runs",
                                     "1234_precalculated_vanadium_run_bank_curves.nxs")))
         self.assertEqual(1, makedirs.call_count)
 

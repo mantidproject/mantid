@@ -196,9 +196,9 @@ void insertDataSources(
   boost::split(data_split, data_sources, boost::is_any_of(","));
 
   // Trim any whitespace from ends of each data source string
-  std::for_each(
-      data_split.begin(), data_split.end(),
-      boost::bind(boost::algorithm::trim<std::string>, _1, std::locale()));
+  std::for_each(data_split.begin(), data_split.end(),
+                std::bind(boost::algorithm::trim<std::string>,
+                          std::placeholders::_1, std::locale()));
 
   // Insert each data source into our complete set of historical data sources
   historical_data_sources.insert(data_split.begin(), data_split.end());

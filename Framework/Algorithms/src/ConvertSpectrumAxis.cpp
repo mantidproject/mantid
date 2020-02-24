@@ -20,9 +20,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
-
 #include <cfloat>
 
 namespace Mantid {
@@ -129,13 +126,14 @@ void ConvertSpectrumAxis::exec() {
   } else {
     // Set up binding to memeber funtion. Avoids condition as part of loop over
     // nHistograms.
-    boost::function<double(const IDetector &)> thetaFunction;
+    using namespace std::placeholders;
+    std::function<double(const IDetector &)> thetaFunction;
     if (unitTarget == "signed_theta") {
       thetaFunction =
-          boost::bind(&MatrixWorkspace::detectorSignedTwoTheta, inputWS, _1);
+          std::bind(&MatrixWorkspace::detectorSignedTwoTheta, inputWS, _1);
     } else {
       thetaFunction =
-          boost::bind(&MatrixWorkspace::detectorTwoTheta, inputWS, _1);
+          std::bind(&MatrixWorkspace::detectorTwoTheta, inputWS, _1);
     }
 
     bool warningGiven = false;

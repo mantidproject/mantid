@@ -152,26 +152,22 @@ bool MDTransfQ3D::calcMatrixCoord3DElastic(const double &k0,
 
   // Dimension limits have to be converted to coord_t, otherwise floating point
   // error will cause valid events to be discarded.
-  std::vector<coord_t> dim_min;
-  dim_min.reserve(m_DimMin.size());
-  std::copy(m_DimMin.cbegin(), m_DimMin.cend(), std::back_inserter(dim_min));
-  std::vector<coord_t> dim_max;
-  dim_max.reserve(m_DimMax.size());
-  std::copy(m_DimMax.cbegin(), m_DimMax.cend(), std::back_inserter(dim_max));
-
   Coord[0] = static_cast<coord_t>(m_RotMat[0] * qx + m_RotMat[1] * qy +
                                   m_RotMat[2] * qz);
-  if (Coord[0] < dim_min[0] || Coord[0] >= dim_max[0])
+  if (Coord[0] < static_cast<coord_t>(m_DimMin[0]) ||
+      Coord[0] >= static_cast<coord_t>(m_DimMax[0]))
     return false;
 
   Coord[1] = static_cast<coord_t>(m_RotMat[3] * qx + m_RotMat[4] * qy +
                                   m_RotMat[5] * qz);
-  if (Coord[1] < dim_min[1] || Coord[1] >= dim_max[1])
+  if (Coord[1] < static_cast<coord_t>(m_DimMin[1]) ||
+      Coord[1] >= static_cast<coord_t>(m_DimMax[1]))
     return false;
 
   Coord[2] = static_cast<coord_t>(m_RotMat[6] * qx + m_RotMat[7] * qy +
                                   m_RotMat[8] * qz);
-  if (Coord[2] < dim_min[2] || Coord[2] >= dim_max[2])
+  if (Coord[2] < static_cast<coord_t>(m_DimMin[2]) ||
+      Coord[2] >= static_cast<coord_t>(m_DimMax[2]))
     return false;
 
   if (std::sqrt(Coord[0] * Coord[0] + Coord[1] * Coord[1] +

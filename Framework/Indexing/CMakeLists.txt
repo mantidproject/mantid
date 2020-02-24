@@ -82,6 +82,7 @@ target_link_libraries(Indexing
                       LINK_PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
+                      Kernel
                       Parallel)
 
 if("${UNIX_CODENAME}" STREQUAL "trusty")

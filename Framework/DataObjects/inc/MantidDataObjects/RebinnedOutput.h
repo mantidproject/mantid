@@ -25,8 +25,9 @@ namespace DataObjects {
 */
 class DLLExport RebinnedOutput : public Workspace2D {
 public:
-  RebinnedOutput() : m_finalized(false) {}
-  RebinnedOutput(bool finalized) : m_finalized(finalized) {}
+  RebinnedOutput() : m_finalized(false), m_hasSqrdErrs(true) {}
+  RebinnedOutput(bool finalized, bool hasSqrdErrs)
+      : m_finalized(finalized), m_hasSqrdErrs(hasSqrdErrs) {}
   /// Returns a clone of the workspace
   std::unique_ptr<RebinnedOutput> clone() const {
     return std::unique_ptr<RebinnedOutput>(doClone());
@@ -46,18 +47,30 @@ public:
   /// Returns the fractional area
   virtual const MantidVec &dataF(const std::size_t index) const;
 
-  /// Create final representation
-  void finalize(bool hasSqrdErrs = true, bool force = false);
-  void unfinalize(bool hasSqrdErrs = false, bool force = false);
+  /// Finalize to fractional area representation
+  void finalize(bool hasSqrdErrs = true);
+  /// Undo fractional area representation
+  void unfinalize();
 
   /// Returns if finalize has been called
   bool isFinalized() const { return m_finalized; }
+  /// Override the finalized flag
+  void setFinalized(bool value) { m_finalized = value; }
+
+  /// Returns if using squared errors
+  bool hasSqrdErrors() const { return m_hasSqrdErrs; }
+  /// Override the squared errors flag
+  void setSqrdErrors(bool value) { m_hasSqrdErrs = value; }
 
   /// Returns a read-only (i.e. const) reference to the specified F array
   const MantidVec &readF(std::size_t const index) const;
 
   /// Set the fractional area array for a given index.
   void setF(const std::size_t index, const MantidVecPtr &F);
+  /// Multiply the fractional area arrays by a scale factor
+  void scaleF(const double scale);
+  /// Returns if the fractional area is non zero
+  bool nonZeroF() const;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -74,10 +87,13 @@ protected:
   /// Flag to indicate if finalize has been called, and if errors/variance used
   bool m_finalized;
 
+  /// Flag to indiciate if the finalized data used squared errors
+  bool m_hasSqrdErrs;
+
 private:
   RebinnedOutput *doClone() const override { return new RebinnedOutput(*this); }
   RebinnedOutput *doCloneEmpty() const override {
-    return new RebinnedOutput(m_finalized);
+    return new RebinnedOutput(m_finalized, m_hasSqrdErrs);
   }
 };
 

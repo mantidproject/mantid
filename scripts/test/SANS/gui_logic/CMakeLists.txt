@@ -7,9 +7,7 @@ set(TEST_PY_FILES
     gui_state_director_test.py
     gui_common_test.py
     masking_table_presenter_test.py
-    property_manager_service_test.py
     run_tab_presenter_test.py
-    sans_data_processor_gui_algorithm_test.py
     state_gui_model_test.py
     settings_diagnostic_presenter_test.py
     table_model_test.py

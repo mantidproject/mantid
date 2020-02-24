@@ -15,8 +15,6 @@
 #include "MantidKernel/PropertyHistory.h"
 #include <nexus/NeXusFile.hpp>
 
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 #include <ctime>
 #include <set>
 #include <vector>

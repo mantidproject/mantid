@@ -5,10 +5,14 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=W0232,R0903
+import sys
 import systemtesting
 
 
 class PVPythonTest(systemtesting.MantidSystemTest):
+
+    def skipTests(self):
+        return sys.platform == 'win32'
 
     def runTest(self):
         # Make Vates/ParaView a soft requirement rather than failing on module import

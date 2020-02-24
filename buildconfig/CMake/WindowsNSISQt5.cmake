@@ -37,6 +37,7 @@ foreach( DLL ${QT5_PLUGINS_IMAGEFORMAT} )
 endforeach()
 
 install ( FILES ${QT5_PLUGIN_DIR}/platforms/qwindows.dll DESTINATION plugins/qt5/platforms )
+install ( FILES ${QT5_PLUGIN_DIR}/printsupport/windowsprintersupport.dll DESTINATION plugins/qt5/printsupport )
 install ( FILES ${QT5_PLUGIN_DIR}/sqldrivers/qsqlite.dll DESTINATION plugins/qt5/sqldrivers )
 install ( FILES ${QT5_PLUGIN_DIR}/styles/qwindowsvistastyle.dll DESTINATION plugins/qt5/styles )
 
@@ -45,7 +46,7 @@ install ( FILES ${QT5_INSTALL_PREFIX}/lib/qscintilla2_qt5.dll DESTINATION bin )
 ###########################################################################
 # Qt Resource Files for QtWebEngine
 ###########################################################################
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/qt/applications/workbench/qt.conf.webengine 
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/qt/applications/workbench/qt.conf.webengine
           DESTINATION lib/qt5/bin RENAME qt.conf)
 install ( FILES ${QT5_INSTALL_PREFIX}/bin/QtWebEngineProcess.exe DESTINATION lib/qt5/bin )
 install ( DIRECTORY ${QT5_INSTALL_PREFIX}/resources DESTINATION lib/qt5 )

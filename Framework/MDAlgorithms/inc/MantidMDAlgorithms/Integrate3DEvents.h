@@ -112,7 +112,9 @@ public:
                     double &sigi);
 
   double estimateSignalToNoiseRatio(const IntegrationParameters &params,
-                                    const Mantid::Kernel::V3D &center);
+                                    const Mantid::Kernel::V3D &center,
+                                    bool forceSpherical = false,
+                                    double sphericityTol = 0.02);
 
 private:
   /// Get a list of events for a given Q
@@ -150,13 +152,8 @@ private:
 
   /// Calculate the eigen vectors of a 3x3 real symmetric matrix
   static void getEigenVectors(Kernel::DblMatrix const &cov_matrix,
-                              std::vector<Mantid::Kernel::V3D> &eigen_vectors);
-
-  /// Calculate the standard deviation of 3D events in a specified direction
-  static double
-  stdDev(std::vector<std::pair<std::pair<double, double>,
-                               Mantid::Kernel::V3D>> const &events,
-         Mantid::Kernel::V3D const &direction, double radius);
+                              std::vector<Mantid::Kernel::V3D> &eigen_vectors,
+                              std::vector<double> &eigen_values);
 
   /// Form a map key as 10^12*h + 10^6*k + l from the integers h, k, l
   static int64_t getHklKey(int h, int k, int l);

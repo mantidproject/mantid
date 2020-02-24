@@ -217,7 +217,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted());
     std::string this_filename = alg.getProperty("Filename");
-    long unsigned int fileSize = Poco::File(this_filename).getSize();
+    const auto fileSize = Poco::File(this_filename).getSize();
     if (Poco::File(this_filename).exists())
       Poco::File(this_filename).remove();
 
@@ -235,7 +235,7 @@ public:
     alg2.execute();
     TS_ASSERT(alg2.isExecuted());
     std::string this_filename2 = alg2.getProperty("Filename");
-    long unsigned int fileSize2 = Poco::File(this_filename2).getSize();
+    const auto fileSize2 = Poco::File(this_filename2).getSize();
     if (Poco::File(this_filename2).exists())
       Poco::File(this_filename2).remove();
 

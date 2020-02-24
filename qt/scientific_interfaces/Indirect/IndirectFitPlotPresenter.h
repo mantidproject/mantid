@@ -56,6 +56,8 @@ public slots:
   void updateGuessAvailability();
   void enablePlotGuessInSeparateWindow();
   void disablePlotGuessInSeparateWindow();
+  void disableSpectrumPlotSelection();
+  void handlePlotSpectrumChanged(WorkspaceIndex spectrum);
 
 signals:
   void selectedFitDataChanged(TableDatasetIndex /*_t1*/);
@@ -74,7 +76,6 @@ private slots:
   void setModelHWHM(double minimum, double maximum);
   void setModelBackground(double background);
   void setActiveIndex(TableDatasetIndex index);
-  void setActiveSpectrum(WorkspaceIndex spectrum);
   void setHWHMMaximum(double minimum);
   void setHWHMMinimum(double maximum);
   void plotGuess(bool doPlotGuess);
@@ -82,6 +83,7 @@ private slots:
   void plotCurrentPreview();
   void emitFitSingleSpectrum();
   void emitFWHMChanged(double minimum, double maximum);
+  void setActiveSpectrum(WorkspaceIndex spectrum);
 
 private:
   void disableAllDataSelection();

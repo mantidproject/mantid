@@ -663,6 +663,27 @@ private:
 };
 
 //=================================================================================================
+/// Atomic Distance in Angstroms
+class MANTID_KERNEL_DLL AtomicDistance : public Empty {
+public:
+  AtomicDistance();
+  const std::string unitID() const override; ///< "AtomicDistance"
+  const std::string caption() const override { return "Atomic Distance"; }
+  const UnitLabel label() const override;
+
+  void init() override;
+  Unit *clone() const override;
+
+  double singleToTOF(const double x) const override;
+  double singleFromTOF(const double tof) const override;
+  double conversionTOFMin() const override;
+  double conversionTOFMax() const override;
+
+private:
+  UnitLabel m_label;
+};
+
+//=================================================================================================
 
 MANTID_KERNEL_DLL double timeConversionValue(std::string input_unit,
                                              std::string output_unit);

@@ -77,13 +77,13 @@ public:
 
   /// Return the top rule
   const Rule *topRule() const { return TopRule.get(); }
-  void setID(const std::string &id) { m_id = id; }
+  void setID(const std::string &id) override { m_id = id; }
   const std::string &id() const override { return m_id; }
 
   void setName(const int nx) { ObjNum = nx; }     ///< Set Name
   int getName() const override { return ObjNum; } ///< Get Name
 
-  void setMaterial(const Kernel::Material &material);
+  void setMaterial(const Kernel::Material &material) override;
   const Kernel::Material &material() const override;
 
   /// Return whether this object has a valid shape
@@ -165,11 +165,13 @@ public:
   int getPointInObject(Kernel::V3D &point) const override;
 
   /// Select a random point within the object
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const size_t) const override;
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const BoundingBox &activeRegion,
-                                    const size_t) const override;
+  boost::optional<Kernel::V3D>
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const size_t) const override;
+  boost::optional<Kernel::V3D>
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const BoundingBox &activeRegion,
+                        const size_t) const override;
 
   // Rendering member functions
   void draw() const override;

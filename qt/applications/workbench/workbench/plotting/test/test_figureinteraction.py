@@ -351,7 +351,7 @@ class FigureInteractionTest(unittest.TestCase):
         return fig_manager
 
     def _create_mock_right_click(self):
-        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = []))
+        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = [], creation_args = [{}]))
         type(mouse_event).button = PropertyMock(return_value=3)
         return mouse_event
 

@@ -18,7 +18,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-#include "boost/bind.hpp"
 #include <algorithm>
 #include <list>
 #include <numeric>
@@ -634,10 +633,11 @@ void PoldiPeakSearch::exec() {
   }
 
   std::vector<PoldiPeak_sptr> intensityFilteredPeaks(peakCoordinates.size());
+  using namespace std::placeholders;
   auto newEnd = std::remove_copy_if(
       peakCoordinates.begin(), peakCoordinates.end(),
       intensityFilteredPeaks.begin(),
-      boost::bind(&PoldiPeakSearch::isLessThanMinimum, this, _1));
+      std::bind(&PoldiPeakSearch::isLessThanMinimum, this, _1));
   intensityFilteredPeaks.resize(
       std::distance(intensityFilteredPeaks.begin(), newEnd));
 
@@ -646,8 +646,7 @@ void PoldiPeakSearch::exec() {
                       << "): " << intensityFilteredPeaks.size() << '\n';
 
   std::sort(intensityFilteredPeaks.begin(), intensityFilteredPeaks.end(),
-            boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2,
-                              &PoldiPeak::intensity));
+            std::bind(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::intensity));
 
   for (std::vector<PoldiPeak_sptr>::const_iterator peak =
            intensityFilteredPeaks.begin();

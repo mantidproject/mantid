@@ -16,8 +16,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -106,8 +104,8 @@ public:
 
     std::vector<coord_t> normal_vector;
     std::vector<coord_t> bound_vector;
-    normal_vector.emplace_back(1.);
-    bound_vector.emplace_back(3.);
+    normal_vector.emplace_back(1.f);
+    bound_vector.emplace_back(3.f);
 
     MDImplicitFunction *function = new MDImplicitFunction();
     function->addPlane(MDPlane(normal_vector, bound_vector));

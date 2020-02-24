@@ -263,6 +263,10 @@ public:
     TS_ASSERT_DELTA(peak0.getH(), -4.5, .0001)
     TS_ASSERT_DELTA(peak0.getK(), 7.0, .0001)
     TS_ASSERT_DELTA(peak0.getL(), -4.5, .0001)
+    const auto mainHKL0 = peak0.getIntHKL();
+    TS_ASSERT_DELTA(mainHKL0[0], -5, .0001)
+    TS_ASSERT_DELTA(mainHKL0[1], 7.0, .0001)
+    TS_ASSERT_DELTA(mainHKL0[2], -4, .0001)
     TS_ASSERT_EQUALS(peak0.getDetectorID(), 1129591)
     const auto mnp0 = peak0.getIntMNP();
     TS_ASSERT_DELTA(mnp0.X(), -1., 1e-08)
@@ -273,6 +277,10 @@ public:
     TS_ASSERT_DELTA(peak34.getH(), -7, .0001)
     TS_ASSERT_DELTA(peak34.getK(), 7.5, .0001)
     TS_ASSERT_DELTA(peak34.getL(), -2.5, .0001)
+    const auto mainHKL34 = peak34.getIntHKL();
+    TS_ASSERT_DELTA(mainHKL34[0], -7, .0001)
+    TS_ASSERT_DELTA(mainHKL34[1], 7.0, .0001)
+    TS_ASSERT_DELTA(mainHKL34[2], -3, .0001)
     TS_ASSERT_EQUALS(peak34.getDetectorID(), 1812163)
     const auto mnp34 = peak34.getIntMNP();
     TS_ASSERT_DELTA(mnp34.X(), 0., 1e-08)

@@ -16,7 +16,6 @@ from mantid.kernel import Logger
 import isis_reduction_steps
 import isis_reducer
 from centre_finder import *
-# import SANSReduction
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, ExperimentInfo
 import copy
@@ -24,6 +23,15 @@ from SANSadd2 import *
 import SANSUtility as su
 from SANSUtility import deprecated
 import SANSUserFileParser as UserFileParser
+
+import warnings
+warnings.simplefilter("default", category=DeprecationWarning)
+warnings.warn("This ISIS Command Interface is deprecated.\n"
+              "Please change 'import ISISCommandInterface' or 'from ISISCommandInterface'"
+              "to use 'sans.command_interface.ISISCommandInterface' instead.", DeprecationWarning,
+              stacklevel=2)
+warnings.simplefilter("ignore", category=DeprecationWarning)
+
 sanslog = Logger("SANS")
 
 # disable plotting if running outside Mantidplot
@@ -233,6 +241,22 @@ def SetMergeQRange(q_min=None, q_max=None):
     ReductionSingleton().instrument.getDetector('FRONT').mergeRange = ReductionSingleton().instrument. \
         getDetector('FRONT')._MergeRange(q_min, q_max)
     _printMessage('#Set merge range values')
+
+
+def SetDetectorMaskFiles(filenames):
+    assert isinstance(filenames, str),\
+        "Expected a command seperated list of filenames, got %r instead" % filenames
+    ReductionSingleton().settings["MaskFiles"] = filenames
+    _printMessage('#Set masking file names to {0}'.format(filenames))
+
+
+def SetMonDirect(correction_file):
+    if not ReductionSingleton().instrument:
+        raise RuntimeError("You must create an instrument object first")
+
+    ReductionSingleton().instrument.cur_detector().correction_file = correction_file
+    ReductionSingleton().instrument.other_detector().correction_file = correction_file
+    _printMessage('#Set MonDirect to {0}'.format(correction_file))
 
 
 def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):

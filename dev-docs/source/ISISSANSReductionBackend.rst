@@ -152,37 +152,18 @@ the state construction.
 *state_base.py*
 ^^^^^^^^^^^^^^^
 
-The *state_base.py* module contains the essential ingredients for defining a
-state object. These are the *StateBase* class which allows for serialization
-and a set of *TypedParameter*.
+The *JsonSerializable* metaclass contains the essential ingredients for
+serializing a state object. Additionally it provides a decorator for any
+Enum types which need to be JSON serializable.
 
-The *StateBase*'s *property_manager* property is responsible for serialization.
-Due to the nature of the *PropertyManagerProperty* of algorithms it serializes
-the state object to a Python dictionary and receives a Mantid *PropertyManager*
-object. This asymmetry is unfortunate, but mirrors the asymmetry of the
-algorithm inputs.
+Any classes which use the metaclass must place any attributes they intend
+to be serialized into JSON string in the instance. I.e. class level variables
+are not recommended since they may not end up in the instances internal
+dictionary.
 
-States which want to fulfill the *StateBase* contract must override the
-*validate* method. This method is used to ensure internal consistency
-of the *TypedParameters* on the state. It is important to have comprehensive
-and tight checks here.
+The *Serializer* is responsible for serialization using the JSON library and
+provides static methods to (de)serialize to a string or file.
 
-The entries on the state objects are all descriptors of type *TypedParameter* which allows
-for type checking, ensuring consistency early on. It is easy to
-build custom types. The current list of types are:
-
-- *StringParameter*
-- *BoolParameter*
-- *FloatParameter*
-- *PositiveFloatParameter*
-- *PositiveIntegerParameter*
-- *DictParameter*
-- *FloatWithNoneParameter*
-- *StringWithNoneParameter*
-- *PositiveFloatWithNoneParameter*
-- *FloatListParameter*
-- *StringListParameter*
-- *PositiveIntegerListParameter*
 
 Individual states
 ^^^^^^^^^^^^^^^^^
@@ -352,13 +333,13 @@ beam_stop_arm_pos1     The x position of the beam stop arm                      
 beam_stop_arm_pos2     The y position of the beam stop arm                        *FloatParameter*          Y         N
 clear                  currently not used                                         *BoolParameter*           Y         N
 clear_time             currently not used                                         *BoolParameter*           Y         N
-detector               A dict of detector type to *StateMaskDetector* sub-states  *DictParameter*           N         Y
+detector               A dict of detector type to *StateMaskDetectors* sub-states  *DictParameter*           N         Y
 idf_path               The path to the IDF                                        *StringParameter*         N         Y
 ====================== ========================================================== ========================= ========= ===============
 
 Validation is applied to some of the entries.
 
-The detector-specific settings are stored in the *StateMaskDetector* which contains the following parameters:
+The detector-specific settings are stored in the *StateMaskDetectors* which contains the following parameters:
 
 ============================ ============ =============================== ========= ===============
 Name                           Comment      Type                          Optional? Auto-generated?

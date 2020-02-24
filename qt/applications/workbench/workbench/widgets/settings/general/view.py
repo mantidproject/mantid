@@ -8,6 +8,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QFontDialog
 
 from mantidqt.utils.qt import load_ui
 
@@ -30,3 +31,8 @@ class GeneralSettingsView(general_base, general_form):
     def closeEvent(self, event):
         self.deleteLater()
         super(GeneralSettingsView, self).closeEvent(event)
+
+    def create_font_dialog(self, parent):
+        font_dialog = QFontDialog(parent.font(), parent)
+        font_dialog.open()
+        return font_dialog

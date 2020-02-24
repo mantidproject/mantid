@@ -12,7 +12,7 @@ from matplotlib import rcParams
 from matplotlib.container import ErrorbarContainer
 
 from mantid.kernel import config
-from mantid.plots.helperfunctions import errorbars_hidden
+from mantid.plots.datafunctions import errorbars_hidden
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties, get_ax_from_curve
 from workbench.plotting.plotscriptgenerator.utils import convert_args_to_string, clean_variable_name
 

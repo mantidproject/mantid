@@ -18,7 +18,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/bind.hpp>
 #include <boost/function.hpp>
 
 #include <algorithm>

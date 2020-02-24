@@ -62,9 +62,9 @@ void StartLiveData::init() {
       "You must specify the StartTime property if this is checked.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("UpdateEvery", 60.0,
+      std::make_unique<PropertyWithValue<double>>("UpdateEvery", 30.0,
                                                   Direction::Input),
-      "Frequency of updates, in seconds. Default 60.\n"
+      "Frequency of updates, in seconds. Default 30.\n"
       "If you specify 0, MonitorLiveData will not launch and you will get only "
       "one chunk.");
 

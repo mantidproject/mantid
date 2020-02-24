@@ -1442,6 +1442,34 @@ public:
   }
 
   //----------------------------------------------------------------------
+  // AtomicDistance tests
+  //----------------------------------------------------------------------
+
+  void
+  test_that_caption_returns_the_correct_label_for_the_AtomicDistance_unit() {
+    TS_ASSERT_EQUALS(atomicDistance.caption(), "Atomic Distance");
+  }
+
+  void test_that_unitID_returns_the_correct_ID_for_the_AtomicDistance_unit() {
+    TS_ASSERT_EQUALS(atomicDistance.unitID(), "AtomicDistance");
+  }
+
+  void test_that_label_returns_the_correct_unit_for_AtomicDistance() {
+    TS_ASSERT_EQUALS(atomicDistance.label().ascii(), "Angstrom")
+    TS_ASSERT_EQUALS(atomicDistance.label().utf8(), L"\u212b")
+  }
+
+  void test_that_singleToTOF_throws_for_the_AtomicDistance_unit() {
+    TS_ASSERT_THROWS(atomicDistance.singleToTOF(1.0),
+                     const std::runtime_error &);
+  }
+
+  void test_that_singleFromTOF_throws_for_the_AtomicDistance_unit() {
+    TS_ASSERT_THROWS(atomicDistance.singleFromTOF(1.0),
+                     const std::runtime_error &);
+  }
+
+  //----------------------------------------------------------------------
   // Time conversion tests
   //----------------------------------------------------------------------
 
@@ -1507,6 +1535,7 @@ private:
   Units::SpinEchoTime tau;
   Units::Degrees degrees;
   Units::Temperature temperature;
+  Units::AtomicDistance atomicDistance;
 };
 
 #endif /*UNITTEST_H_*/

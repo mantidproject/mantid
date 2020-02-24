@@ -194,7 +194,9 @@
         </xs:complexType>
       </xs:element>
       <xs:element name="description">      
-        <xs:attribute name="is"/>
+        <xs:complexType>
+          <xs:attribute name="is"/>
+        </xs:complexType>
       </xs:element>
       <xs:element name="fixed"/>
       <xs:element name="formula">

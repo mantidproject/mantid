@@ -71,7 +71,7 @@ private:
                         std::vector<std::string> const &spectra,
                         std::string const &outputBaseName,
                         std::string const &endOfSuffix,
-                        std::vector<API::MatrixWorkspace_sptr> const &names);
+                        std::vector<std::string> const &names);
   void renameGroupWorkspace(std::string const &currentName,
                             std::vector<std::string> const &spectra,
                             std::string const &outputBaseName,

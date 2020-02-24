@@ -73,6 +73,7 @@ class GeneralLoadAbInitioTester(object):
         self.assertEqual(correct_data["attributes"]["ab_initio_program"], data["attributes"]["ab_initio_program"])
         # advanced_parameters is stored as a str but we unpack/compare to dict
         # so comparison will tolerate unimportant formatting changes
+
         self.assertEqual(correct_data["attributes"]["advanced_parameters"],
                          json.loads(data["attributes"]["advanced_parameters"]))
 

@@ -404,6 +404,12 @@ int NexusFileIO::writeNexusProcessedData2D(
         NXputslab(fileID, rebin_workspace->readF(s).data(), start, asize);
         start[0]++;
       }
+
+      std::string finalized = (rebin_workspace->isFinalized()) ? "1" : "0";
+      NXputattr(fileID, "finalized", finalized.c_str(), 2, NX_CHAR);
+      std::string sqrdErrs = (rebin_workspace->hasSqrdErrors()) ? "1" : "0";
+      NXputattr(fileID, "sqrd_errors", sqrdErrs.c_str(), 2, NX_CHAR);
+
       if (m_progress != nullptr)
         m_progress->reportIncrement(1, "Writing data");
     }

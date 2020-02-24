@@ -17,7 +17,7 @@ import matplotlib.figure  # noqa
 import matplotlib.text  # noqa
 
 from mantidqt.project.plotsloader import PlotsLoader  # noqa
-import mantid.plots.plotfunctions  # noqa
+import mantid.plots.axesfunctions  # noqa
 from mantid.api import AnalysisDataService as ADS  # noqa
 from mantid.dataobjects import Workspace2D  # noqa
 from mantid.py3compat import mock  # noqa
@@ -31,7 +31,7 @@ class PlotsLoaderTest(unittest.TestCase):
     def setUp(self):
         self.plots_loader = PlotsLoader()
         plt.plot = mock.MagicMock()
-        mantid.plots.plotfunctions.plot = mock.MagicMock()
+        mantid.plots.axesfunctions.plot = mock.MagicMock()
         self.dictionary = {u'legend': {u'exists': False}, u'lines': [],
                            u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0), u'dynamic': True,
                                            u'frameOn': True, u'visible': True,

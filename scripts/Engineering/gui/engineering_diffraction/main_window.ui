@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
-    <height>197</height>
+    <width>638</width>
+    <height>848</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -92,6 +92,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="btn_settings">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QStatusBar" name="statusbar">
         <property name="sizeGripEnabled">
          <bool>false</bool>
@@ -121,6 +128,7 @@
   <tabstop>comboBox_instrument</tabstop>
   <tabstop>tab_main</tabstop>
   <tabstop>pushButton_help</tabstop>
+  <tabstop>btn_settings</tabstop>
   <tabstop>pushButton_close</tabstop>
  </tabstops>
  <resources/>

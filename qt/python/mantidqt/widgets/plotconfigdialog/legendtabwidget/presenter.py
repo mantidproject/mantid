@@ -8,8 +8,8 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+from mantid.plots.legend import LegendProperties
 from mantidqt.widgets.plotconfigdialog.legendtabwidget.view import LegendTabWidgetView
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
 
 import matplotlib
 import matplotlib.font_manager
@@ -56,7 +56,7 @@ class LegendTabWidgetPresenter:
 
         # Converts alpha value (opacity value between 0 and 1) to transparency percentage.
         if int(matplotlib.__version__[0]) >= 2:
-            transparency = 100-(legend_props.transparency*100)
+            transparency = int(100 - (legend_props.transparency*100))
             self.view.set_transparency_spin_box(transparency)
             self.view.set_transparency_slider(transparency)
         self.view.set_entries_font(legend_props.entries_font)

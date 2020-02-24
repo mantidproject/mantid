@@ -129,6 +129,7 @@ set(SRC_FILES
     src/MaskDetectors.cpp
     src/MaskDetectorsInShape.cpp
     src/MaskSpectra.cpp
+    src/MeshFileIO.cpp
     src/ModifyDetectorDotDatFile.cpp
     src/MoveInstrumentComponent.cpp
     src/NexusTester.cpp
@@ -143,6 +144,9 @@ set(SRC_FILES
     src/RenameLog.cpp
     src/RotateInstrumentComponent.cpp
     src/RotateSource.cpp
+    src/SampleEnvironmentFactory.cpp
+    src/SampleEnvironmentSpec.cpp
+    src/SampleEnvironmentSpecParser.cpp
     src/SaveANSTOAscii.cpp
     src/SaveAscii.cpp
     src/SaveAscii2.cpp
@@ -183,6 +187,7 @@ set(SRC_FILES
     src/SaveReflCustomAscii.cpp
     src/SaveReflThreeColumnAscii.cpp
     src/SaveReflectometryAscii.cpp
+    src/SaveRMCProfile.cpp
     src/SaveSESANS.cpp
     src/SaveSPE.cpp
     src/SaveSampleEnvironmentAndShape.cpp
@@ -315,18 +320,19 @@ set(INC_FILES
     inc/MantidDataHandling/LoadSampleEnvironment.h
     inc/MantidDataHandling/LoadSampleShape.h
     inc/MantidDataHandling/LoadSassena.h
-    inc/MantidDataHandling/LoadShape.h
     inc/MantidDataHandling/LoadSpec.h
     inc/MantidDataHandling/LoadSpice2D.h
     inc/MantidDataHandling/LoadSpiceAscii.h
     inc/MantidDataHandling/LoadSpiceXML2DDet.h
     inc/MantidDataHandling/LoadStl.h
+    inc/MantidDataHandling/LoadStlFactory.h
     inc/MantidDataHandling/LoadSwans.h
     inc/MantidDataHandling/LoadTBL.h
     inc/MantidDataHandling/LoadTOFRawNexus.h
     inc/MantidDataHandling/MaskDetectors.h
     inc/MantidDataHandling/MaskDetectorsInShape.h
     inc/MantidDataHandling/MaskSpectra.h
+    inc/MantidDataHandling/MeshFileIO.h
     inc/MantidDataHandling/ModifyDetectorDotDatFile.h
     inc/MantidDataHandling/MoveInstrumentComponent.h
     inc/MantidDataHandling/NXcanSASDefinitions.h
@@ -342,6 +348,9 @@ set(INC_FILES
     inc/MantidDataHandling/RenameLog.h
     inc/MantidDataHandling/RotateInstrumentComponent.h
     inc/MantidDataHandling/RotateSource.h
+    inc/MantidDataHandling/SampleEnvironmentFactory.h
+    inc/MantidDataHandling/SampleEnvironmentSpec.h
+    inc/MantidDataHandling/SampleEnvironmentSpecParser.h
     inc/MantidDataHandling/SaveANSTOAscii.h
     inc/MantidDataHandling/SaveAscii.h
     inc/MantidDataHandling/SaveAscii2.h
@@ -382,6 +391,7 @@ set(INC_FILES
     inc/MantidDataHandling/SaveReflCustomAscii.h
     inc/MantidDataHandling/SaveReflThreeColumnAscii.h
     inc/MantidDataHandling/SaveReflectometryAscii.h
+    inc/MantidDataHandling/SaveRMCProfile.h
     inc/MantidDataHandling/SaveSESANS.h
     inc/MantidDataHandling/SaveSPE.h
     inc/MantidDataHandling/SaveSampleEnvironmentAndShape.h
@@ -461,6 +471,7 @@ set(TEST_FILES
     LoadILLReflectometryTest.h
     LoadILLSANSTest.h
     LoadILLTOF2Test.h
+    LoadILLTest.h
     LoadISISNexusTest.h
     LoadISISPolarizationEfficienciesTest.h
     LoadInstrumentFromNexusTest.h
@@ -477,6 +488,7 @@ set(TEST_FILES
     LoadMuonLogTest.h
     LoadMuonNexus1Test.h
     LoadMuonNexus2Test.h
+    LoadNGEMTest.h
     LoadNXSPETest.h
     LoadNXcanSASTest.h
     LoadNexusLogsTest.h
@@ -484,7 +496,6 @@ set(TEST_FILES
     LoadNexusProcessed2Test.h
     LoadNexusProcessedTest.h
     LoadNexusTest.h
-    LoadNGEMTest.h
     LoadPDFgetNFileTest.h
     LoadPLNTest.h
     LoadPSIMuonBinTest.h
@@ -518,6 +529,7 @@ set(TEST_FILES
     MaskDetectorsInShapeTest.h
     MaskDetectorsTest.h
     MaskSpectraTest.h
+    MeshFileIOTest.h
     ModifyDetectorDotDatFileTest.h
     MoveInstrumentComponentTest.h
     NexusTesterTest.h
@@ -529,6 +541,10 @@ set(TEST_FILES
     RenameLogTest.h
     RotateInstrumentComponentTest.h
     RotateSourceTest.h
+    SampleEnvironmentFactoryTest.h
+    SampleEnvironmentSpecFileFinderTest.h
+    SampleEnvironmentSpecParserTest.h
+    SampleEnvironmentSpecTest.h
     SaveANSTOAsciiTest.h
     SaveAscii2Test.h
     SaveAsciiTest.h
@@ -567,6 +583,7 @@ set(TEST_FILES
     SaveReflCustomAsciiTest.h
     SaveReflThreeColumnAsciiTest.h
     SaveReflectometryAsciiTest.h
+    SaveRMCProfileTest.h
     SaveSESANSTest.h
     SaveSPETest.h
     SaveSampleEnvironmentAndShapeTest.h

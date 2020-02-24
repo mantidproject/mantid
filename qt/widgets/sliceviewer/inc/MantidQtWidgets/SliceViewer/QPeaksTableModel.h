@@ -5,7 +5,6 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DllOption.h"
-#include "boost/bind.hpp"
 #include "boost/function.hpp"
 #include "boost/tuple/tuple.hpp"
 #include <QAbstractTableModel>

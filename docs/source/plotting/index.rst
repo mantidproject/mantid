@@ -543,10 +543,10 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
     '''Checks all values b/w 0 and 1'''
     for j in range(4):
         if Cmap[i][j] > 1:
-            print Cmap[i]
+            print(Cmap[i])
             raise ValueError('Values must be between 0 and 1, one of the above is > 1')
         if Cmap[i][j] < 0:
-            print Cmap[i]
+            print(Cmap[i])
             raise ValueError('Values must be between 0 and 1, one of the above is negative')
         else:
             pass
@@ -590,10 +590,10 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
     '''Checks all values b/w 0 and 1'''
     for j in range(4):
         if Cmap[i][j] > 1:
-            print Cmap[i]
+            print(Cmap[i])
             raise ValueError('Values must be between 0 and 1, one of the above is > 1')
         if Cmap[i][j] < 0:
-            print Cmap[i]
+            print(Cmap[i])
             raise ValueError('Values must be between 0 and 1, one of the above is Negative')
         else:
             pass
@@ -656,10 +656,10 @@ Now the Custom Colormap has been registered, right-click on a workspace and prod
     '''Checks all values b/w 0 and 1'''
     for j in range(4):
         if Cmap[i][j] > 1:
-            print Cmap[i]
+            print(Cmap[i])
             raise ValueError('Values must be between 0 and 1, one of the above is > 1')
         if Cmap[i][j] < 0:
-            print Cmap[i]
+            print(Cmap[i])
             raise ValueError('Values must be between 0 and 1, one of the above is Negative')
         else:
             pass
@@ -722,19 +722,19 @@ beginning of the run), but one can also plot absolute time using `FullTime=True`
 
 
 Note that the parasite axes in matplotlib do not accept the projection keyword.
-So one needs to use :func:`mantid.plots.plotfunctions.plot<mantid.plots.plotfunctions.plot>` instead.
+So one needs to use :func:`mantid.plots.axesfunctions.plot<mantid.plots.axesfunctions.plot>` instead.
 
 .. plot::
    :include-source:
 
    import matplotlib.pyplot as plt
-   from mantid import plots
+   import mantid.plots.axesfunctions as axesfuncs
    from mantid.simpleapi import Load
    w=Load('CNCS_7860')
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    ax.plot(w,LogName='ChopperStatus5')
    axt=ax.twiny()
-   plots.plotfunctions.plot(axt,w,LogName='ChopperStatus5', FullTime=True)
+   axesfuncs.plot(axt,w,LogName='ChopperStatus5', FullTime=True)
    #fig.show()
 
 Complex plots

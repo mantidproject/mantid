@@ -13,7 +13,7 @@ from matplotlib import ticker
 from matplotlib.image import AxesImage
 
 from mantid import logger
-from mantidqt.widgets.plotconfigdialog.legendtabwidget import LegendProperties
+from mantid.plots.legend import LegendProperties
 
 try:
     from matplotlib.colors import to_hex

@@ -13,11 +13,11 @@ from os import listdir
 from os.path import isdir
 from shutil import rmtree
 import tempfile
-import mock
 
 from mantid.api import AnalysisDataService as ADS, IMDEventWorkspace  # noqa
 from mantid.dataobjects import MDHistoWorkspace, MaskWorkspace  # noqa
 from mantidqt.project import workspacesaver
+from mantid.py3compat import mock
 from mantid.simpleapi import (CreateSampleWorkspace, CreateMDHistoWorkspace, LoadMD, LoadMask, MaskDetectors,  # noqa
                               ExtractMask, GroupWorkspaces)  # noqa
 

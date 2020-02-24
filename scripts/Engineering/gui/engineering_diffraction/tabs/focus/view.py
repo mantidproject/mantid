@@ -19,9 +19,11 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
     def __init__(self, parent=None, instrument="ENGINX"):
         super(FocusView, self).__init__(parent)
         self.setupUi(self)
+        self.setup_tabbing_order()
 
         self.finder_focus.setLabelText("Sample Run #")
         self.finder_focus.setInstrumentOverride(instrument)
+        self.finder_focus.allowMultipleFiles(True)
 
     # =================
     # Slot Connectors
@@ -32,6 +34,9 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
 
     def set_enable_controls_connection(self, slot):
         self.sig_enable_controls.connect(slot)
+
+    def set_on_check_cropping_state_changed(self, slot):
+        self.check_cropFocus.stateChanged.connect(slot)
 
     # =================
     # Component Setters
@@ -46,24 +51,27 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
     def set_plot_output_enabled(self, enabled):
         self.check_plotOutput.setEnabled(enabled)
 
+    def set_cropping_widget_visibility(self, visible):
+        self.widget_cropping.setVisible(visible)
+
     # =================
     # Component Getters
     # =================
 
-    def get_focus_filename(self):
-        return self.finder_focus.getFirstFilename()
+    def get_focus_filenames(self):
+        return self.finder_focus.getFilenames()
 
     def get_focus_valid(self):
         return self.finder_focus.isValid()
 
-    def get_north_bank(self):
-        return self.check_northBank.isChecked()
-
-    def get_south_bank(self):
-        return self.check_southBank.isChecked()
-
     def get_plot_output(self):
         return self.check_plotOutput.isChecked()
+
+    def get_crop_checked(self):
+        return self.check_cropFocus.isChecked()
+
+    def get_cropping_widget(self):
+        return self.widget_cropping
 
     # =================
     # State Getters
@@ -71,3 +79,15 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
 
     def is_searching(self):
         return self.finder_focus.isSearching()
+
+    # =================
+    # Internal Setup
+    # =================
+
+    def setup_tabbing_order(self):
+        self.finder_focus.focusProxy().setFocusPolicy(QtCore.Qt.StrongFocus)
+
+        self.setTabOrder(self.finder_focus.focusProxy(), self.check_cropFocus)
+        self.setTabOrder(self.check_cropFocus, self.widget_cropping)
+        self.setTabOrder(self.widget_cropping, self.check_plotOutput)
+        self.setTabOrder(self.check_plotOutput, self.button_focus)

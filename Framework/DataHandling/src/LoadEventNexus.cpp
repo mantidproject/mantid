@@ -291,6 +291,11 @@ void LoadEventNexus::init() {
                       "LoadNexusInstrumentXML", true, Direction::Input),
                   "Reads the embedded Instrument XML from the NeXus file "
                   "(optional, default True). ");
+
+  declareProperty("NumberOfBins", 500, mustBePositive,
+                  "The number of bins intially defined. Use Rebin to change "
+                  "the binning later.  If there is no data loaded, or you "
+                  "select meta data only you will only get 1 bin.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1071,9 +1076,17 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  if (eventsLoaded > 0)
-    m_ws->setAllX(HistogramData::BinEdges{shortest_tof - 1, longest_tof + 1});
-  else
+  if (eventsLoaded > 0) {
+    int nBins = getProperty("NumberOfBins");
+    auto binEdgesVec = std::vector<double>(nBins + 1);
+    binEdgesVec[0] = shortest_tof - 1;
+    binEdgesVec[nBins] = longest_tof + 1;
+    double binStep = (binEdgesVec[nBins] - binEdgesVec[0]) / nBins;
+    for (int binIndex = 1; binIndex < nBins; binIndex++) {
+      binEdgesVec[binIndex] = binEdgesVec[0] + (binStep * binIndex);
+    }
+    m_ws->setAllX(HistogramData::BinEdges{binEdgesVec});
+  } else
     m_ws->setAllX(HistogramData::BinEdges{0.0, 1.0});
 
   // if there is time_of_flight load it
