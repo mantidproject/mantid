@@ -41,6 +41,7 @@ Improvements
 - :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` Sampling of scattering points during MC simulation now takes into account relative volume of sample and environment components. The calculation also now reuses the same set of simulated tracks to calculate the attenuation for different wavelengths. A new parameter ResimulateTracksForDifferentWavelengths has been added to control this behaviour with a default value of false. NOTE: This has been inserted in the middle of the parameter list so any usage of positional parameters with this algorithm will need to be adjusted
 - :ref:`AddSampleLogMultiple <algm-AddSampleLogMultiple>` Add parameter LogTypes to specify the type of each log value.
 - :ref:`ApplyCalibration <algm-ApplyCalibration>` can now independently change the pixel heights, widths, and Y-coordinate. Property "PositionTable" has been deprecated and property "CalibrationTable" should be used in its place.
+- :ref:`FilterEvents <algm-FilterEvents>` Now has an accurate agorithm to calculate duration of each split-out workspace and add the duration value to split-out workspace as a single value property named "duration". 
 
 
 

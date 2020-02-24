@@ -187,11 +187,6 @@ void FilterEvents::init() {
                   "If selected, the names of the output workspaces will "
                   "include information about each slice.");
 
-  //  declareProperty("KeepEvents", true,
-  //                  "If true, the output workspaces shall be EventWorkspaces;"
-  //                  "Otherwise, the output workspaces will be
-  //                  MatrixWorkspaces," "each spectrum of which contains 1
-  //                  value.");
 }
 
 std::map<std::string, std::string> FilterEvents::validateInputs() {
@@ -2016,7 +2011,7 @@ void FilterEvents::mapSplitterTSPtoWorkspaces(
 
 /** Calculate split-workspace's duration according to splitter time series
  * property
- * @brief FilterEvents::calculate_duration
+ * @brief calculate the duration from TSP "splitter"
  * @param splitter_tsp :: TimeSeriesProperty for splitter
  * @return
  */
