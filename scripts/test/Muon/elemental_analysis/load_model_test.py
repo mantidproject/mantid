@@ -9,6 +9,7 @@ from __future__ import print_function
 import unittest
 
 from mantid.py3compat import mock
+import mantid.simpleapi as mantid
 
 from Muon.GUI.ElementalAnalysis.LoadWidget import load_model
 
@@ -100,25 +101,33 @@ class CoLoadModel(unittest.TestCase):
     @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_model.lutils.replace_workspace_name_suffix')
     @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_model.mantid')
     def test_that_add_runs_renames_output_ws_and_adds_correctly(self, mock_mantid, mock_replace_ws):
-        left_ws = 'left_ws_1'
-        right_ws = 'right-ws'
-        suffix = 'my-suffix'
+        left_ws = '2695; detector 1'
+        right_ws = '2696; detector 1'
+        suffix = '2695-2696'
         mock_replace_ws.return_value = 'left_ws_my-suffix'
         added_runs = self.model.add_runs(left_ws, right_ws, suffix)
 
-        mock_replace_ws.assert_called_with(left_ws, suffix)
-        mock_mantid.Plus.assert_called_with(left_ws, right_ws, OutputWorkspace='left_ws_my-suffix')
-        self.assertEqual(added_runs, 'left_ws_my-suffix')
+        mock_mantid.Plus.assert_called_with(left_ws, right_ws, OutputWorkspace='2695-2696; detector 1')
+        self.assertEqual(added_runs, '2695-2696; detector 1')
 
     @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_model.lutils')
     def test_that_co_load_run_calls_right_functions(self, mock_lutils):
         mock_ws = mock.Mock()
-        mock_lutils.hyphenise.return_value = 1234
-        self.model.co_load_run(mock_ws)
+        self.model.workspace = mock.Mock()
+        mock_lutils.hyphenise.return_value = "2695-2696"
+        workspace1 = ["2695; detector 1", "2695; detector 2"]
+        workspace2 = ["2696; detector 1", "2696; detector 2"]
+        for ws in workspace1:
+            mantid.CreateSampleWorkspace(OutputWorkspace = ws)
+        for ws in workspace2:
+            mantid.CreateSampleWorkspace(OutputWorkspace = ws)
+        mock_lutils.flatten_run_data = mock.Mock(return_value=[workspace1,workspace2])
+        self.model.add_co_load_to_group = mock.Mock()
 
+        self.model.co_load_run(mock_ws)
+        self.assertEquals(self.model.add_co_load_to_group.call_count,1)
         self.assertEqual(mock_lutils.hyphenise.call_count, 1)
-        self.assertTrue(1234 in self.model.last_loaded_runs)
-        self.assertEqual(mock_lutils.group_by_detector.call_count, 1)
+        self.assertTrue("2695-2696" in self.model.loaded_runs.keys())
 
 
 if __name__ == '__main__':

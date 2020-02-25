@@ -60,6 +60,9 @@ class CoLoadModel(lutils.LModel):
             for run1, run2 in zip(*lutils.flatten_run_data(self.workspace, workspace))
         ]
         self.loaded_runs[run] = to_add
+        self.add_co_load_to_group(to_add,run)
+
+    def add_co_load_to_group(self, to_add,run):
         overall_ws = mantid.GroupWorkspaces(to_add[0], OutputWorkspace=str(run))
         for index in range(1, len(to_add)):
             overall_ws.add(to_add[index])
