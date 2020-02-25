@@ -82,7 +82,11 @@ class RowEntries(_UserEntries):
 
     @sample_shape.setter
     def sample_shape(self, val):
-        if val is SampleShape:
+        if not val:
+            self._sample_shape = None
+            return
+
+        if isinstance(val, SampleShape):
             self._sample_shape = val
             return
 

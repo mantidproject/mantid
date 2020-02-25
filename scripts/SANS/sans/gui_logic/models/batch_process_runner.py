@@ -59,7 +59,11 @@ class BatchProcessRunner(QObject):
         for row, index in row_index_pair:
 
             # TODO update the get_states_func to support one per call
-            states, errors = get_states_func(row_entries=[row])
+            try:
+                states, errors = get_states_func(row_entries=[row])
+            except Exception as e:
+                self.row_failed_signal.emit(index, str(e))
+                continue
 
             assert len(states) + len(errors) == 1, \
                 "Expected 1 error to return got {0}".format(len(states) + len(errors))
@@ -85,7 +89,11 @@ class BatchProcessRunner(QObject):
 
     def _load_workspaces_on_thread(self, row_index_pair, get_states_func):
         for row, index in row_index_pair:
-            states, errors = get_states_func(row_entries=[row])
+            try:
+                states, errors = get_states_func(row_entries=[row])
+            except Exception as e:
+                self.row_failed_signal.emit(index, str(e))
+                continue
 
             for error in itervalues(errors):
                 self.row_failed_signal.emit(index, error)
