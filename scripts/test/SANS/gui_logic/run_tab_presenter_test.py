@@ -467,6 +467,7 @@ class RunTabPresenterTest(unittest.TestCase):
 
         self.assertEqual(RowState.PROCESSED, mocked_row.state)
         self.assertIsNone(mocked_row.tool_tip)
+        self.presenter.update_view_from_table_model.assert_called_with()
 
         mocked_row.options.set_developer_option.assert_called_with('MergeShift', 0.0)
 

@@ -737,6 +737,7 @@ class RunTabPresenter(PresenterCommon):
 
         row_entry.state = RowState.PROCESSED
         row_entry.tool_tip = None
+        self.update_view_from_table_model()
 
     def increment_progress(self):
         self.progress += 1
