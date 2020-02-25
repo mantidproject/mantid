@@ -14,7 +14,7 @@ New Features
 
 Engineering Diffraction
 -----------------------
-- Introduction of Engineering Diffraction 2 interface. Currently supports calibration and focusing for ENGINX. 
+- Introduction of new Engineering Diffraction interface. Currently supports calibration and focusing for ENGINX.
 
 
 Improvements
