@@ -88,4 +88,3 @@ class LoadView(QtWidgets.QWidget):
 
     def warning(self,msg):
         message_box.warning(msg)
-
