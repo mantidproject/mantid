@@ -33,7 +33,6 @@ class LModel(object):
             workspace.getAxis(0).setUnit("Label").setLabel("Energy", "keV")
 
     def load_run(self):
-        print("pip")
         to_load = search_user_dirs(self.run)
         if not to_load:
             return None
@@ -54,7 +53,6 @@ class LModel(object):
         self._load(workspaces)
         self.loaded_runs.update({self.run: merge_workspaces(self.run, workspaces.values())})
         self.num_loaded_detectors[self.run] = num_loaded_detectors
-        print("baa", self.num_loaded_detectors.keys()) 
         self.last_loaded_runs.append(self.run)
         return self.loaded_runs[self.run]
 
@@ -216,12 +214,9 @@ def replace_workspace_name_suffix(name, suffix):
 
 
 def flatten_run_data(*workspaces):
-    print(workspaces, "hi")
     out = []
-    for workspace in workspaces:
-        detectors = [mantid.mtd[detector] for detector in workspace]
-        out.append(sorted([detector.getName() for detector in detectors]))
-    print("moo", out)
+    for workspace_list in workspaces:
+        out.append(sorted([ws_name for ws_name in workspace_list]))
     return out
 
 

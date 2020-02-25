@@ -91,7 +91,7 @@ class LoadPresenter(object):
     def get_run_num_loaded_detectors(self, run):
         num_detectors = 0
         try:
-             num_detectors = len(mantid.mtd[run])     
+            num_detectors = len(mantid.mtd[run])
         except:
             num_detectors = 0
         return num_detectors

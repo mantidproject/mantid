@@ -152,8 +152,9 @@ class LoadUtilsTest(unittest.TestCase):
 
 
     def test_flatten_run_data(self):
-        test_workspaces = [mantid.CreateSampleWorkspace(OutputWorkspace=name) for name in self.test_ws_names]
-        self.assertEquals(lutils.flatten_run_data(test_workspaces), [self.test_ws_names])
+        test_1 = ["1_det_1", "1_det_2"]
+        test_2 = ["2_det_1", "2_det_2"]
+        self.assertEquals(lutils.flatten_run_data(test_1,test_2), [test_1,test_2])
 
     def test_replace_workspace_name_suffix(self):
         tests = {self.test_ws_name: "suffix", "_".join([self.test_ws_name, "test"]): "suffix"}
