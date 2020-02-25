@@ -271,7 +271,6 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.gonfig.text(1,0,-2.5,'X',zdir=None,color='black')
         self.gonfig.plot([0,0],[-3,-3],[-2,-0.5],zdir='y',color='black',linewidth=3)
         self.gonfig.text(0,-1,-2.5,'Beam',zdir=None,color='black')
-        self.gonfig.set_aspect('equal', adjustable='datalim')
         self.gonfig.view_init(10,45)
 
         colors=['b','g','r']
