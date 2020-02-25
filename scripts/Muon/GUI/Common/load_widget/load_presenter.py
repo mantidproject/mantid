@@ -7,6 +7,7 @@
 from __future__ import absolute_import, print_function
 
 from Muon.GUI.Common import thread_model
+import mantid.simpleapi as mantid
 
 
 class LoadPresenter(object):
@@ -17,6 +18,7 @@ class LoadPresenter(object):
         self.load_thread = None
         self.co_thread = None
         self._current_run = None
+        self._current_num_detectors = None
 
         self.view.on_load_clicked(self.load_run)
         self.view.on_load_clicked(self.co_model.wipe_co_runs)
@@ -30,11 +32,11 @@ class LoadPresenter(object):
 
     def set_coadd_loaded_run(self):
         self.equalise_last_loaded_run(self.co_model.loaded_runs.keys())
+        self._current_num_detectors = self.co_model.num_loaded_detectors
 
     def set_loaded_run(self):
-        if self.co_model.loaded_runs == {} and self.load_model.loaded_runs == {}:
-            return
         self.equalise_last_loaded_run(self.load_model.loaded_runs.keys())
+        self._current_num_detectors = self.load_model.num_loaded_detectors
 
     def update_models(self, run):
         self.load_model.set_run(run)
@@ -86,4 +88,10 @@ class LoadPresenter(object):
         self.view.unreg_on_loading_finished(slot)
 
     def get_run_num_loaded_detectors(self, run):
-        return self.load_model.num_loaded_detectors[run]
+        print("this",self._current_num_detectors, run)
+        num_detectors = 0
+        try:
+             num_detectors = self._current_num_detectors[run]
+        except:
+             num_detectors = len(mantid.mtd[run])     
+        return num_detectors
