@@ -631,6 +631,7 @@ class RunTabPresenter(PresenterCommon):
         row = self._table_model.get_row(row_index)
         row.state = RowState.ERROR
         row.tool_tip = error_msg
+        self.sans_logger.error(error_msg)
         self.update_view_from_table_model()
 
     def on_processing_finished(self, result):
