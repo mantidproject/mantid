@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 """
     Main window for reduction UIs
 """
@@ -39,6 +39,7 @@ STARTUP_WARNING = ""
 if CAN_REDUCE:
     try:
         import reduction  # noqa
+
         if os.path.splitext(os.path.basename(reduction.__file__))[0] == "reduction":
             home_dir = os.path.expanduser('~')
             if os.path.abspath(reduction.__file__).startswith(home_dir):
@@ -253,10 +254,10 @@ class ReductionGUI(QMainWindow):
             if fname != self._filename and QFile.exists(fname) and fname not in recent_files:
                 recent_files.append(fname)
 
-        if len(recent_files)>0:
+        if len(recent_files) > 0:
             self.file_menu.addSeparator()
             for i, fname in enumerate(recent_files):
-                action = QAction("&%d %s" % (i+1, QFileInfo(fname).fileName()), self)
+                action = QAction("&%d %s" % (i + 1, QFileInfo(fname).fileName()), self)
                 action.setData(fname)
                 action.triggered.connect(self.open_file)
                 self.file_menu.addAction(action)
@@ -283,6 +284,7 @@ class ReductionGUI(QMainWindow):
         """
             Invoke an instrument selection dialog
         """
+
         class InstrDialog(QDialog):
             def __init__(self, instrument_list=None):
                 QDialog.__init__(self)
@@ -290,7 +292,8 @@ class ReductionGUI(QMainWindow):
                 self.instrument_list = instrument_list
                 self.instr_combo.clear()
                 self.facility_combo.clear()
-                instruments = sorted(INSTRUMENT_DICT.keys())
+                instruments = sorted([fac for fac in INSTRUMENT_DICT.keys() if
+                                      any([inst in INSTRUMENT_DICT[fac] for inst in instrument_list])])
                 instruments.reverse()
                 for facility in instruments:
                     self.facility_combo.addItem(facility)
@@ -311,7 +314,7 @@ class ReductionGUI(QMainWindow):
         else:
             dialog = InstrDialog(self._instrument_list)
         dialog.exec_()
-        if dialog.result()==1:
+        if dialog.result() == 1:
             self._instrument = dialog.instr_combo.currentText()
             self._facility = dialog.facility_combo.currentText()
             self.setup_layout()
@@ -338,8 +341,8 @@ class ReductionGUI(QMainWindow):
         """
         if False:
             reply = QMessageBox.question(self, 'Message',
-                                               "Are you sure you want to quit this application?",
-                                               QMessageBox.Yes, QMessageBox.No)
+                                         "Are you sure you want to quit this application?",
+                                         QMessageBox.Yes, QMessageBox.No)
 
             if reply == QMessageBox.Yes:
                 event.accept()
@@ -427,7 +430,7 @@ class ReductionGUI(QMainWindow):
             found_instrument = self._interface.scripter.verify_instrument(file_path)
         except:
             msg = "The file you attempted to load doesn't have a recognized format:\n" \
-                  + file_path+"\n\n" \
+                  + file_path + "\n\n" \
                   + "Please make sure it has been produced by this application."
             QMessageBox.warning(self, "Error loading reduction parameter file", msg)
             print(sys.exc_info()[1])
@@ -453,7 +456,7 @@ class ReductionGUI(QMainWindow):
 
         if file_path in self._recent_files:
             self._recent_files.remove(file_path)
-        self._recent_files.insert(0,file_path)
+        self._recent_files.insert(0, file_path)
         while len(self._recent_files) > 10:
             self._recent_files.pop()
 
@@ -497,7 +500,7 @@ class ReductionGUI(QMainWindow):
                 self.statusBar().showMessage("Saved as %s" % self._filename)
                 self._set_window_title()
             except:
-                #TODO: put this in a log window, and in a file
+                # TODO: put this in a log window, and in a file
                 print(sys.exc_info()[1])
                 self.statusBar().showMessage("Failed to save %s" % self._filename)
 
@@ -524,7 +527,7 @@ class ReductionGUI(QMainWindow):
             fname += ".xml"
         if fname in self._recent_files:
             self._recent_files.remove(fname)
-        self._recent_files.insert(0,fname)
+        self._recent_files.insert(0, fname)
         while len(self._recent_files) > 10:
             self._recent_files.pop()
         self._last_directory = QFileInfo(fname).path()
@@ -558,7 +561,8 @@ class ReductionGUI(QMainWindow):
         else:
             self.statusBar().showMessage("Could not save file")
 
-#--------------------------------------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------------------------------------
 
 
 def start():
@@ -570,6 +574,7 @@ def start():
     reducer.show()
     if not within_mantid:
         sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     start()
