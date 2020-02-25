@@ -37,7 +37,7 @@ void RunsTable::setSelectedRowLocations(std::vector<RowLocation> selected) {
 }
 
 void RunsTable::appendSelectedRowLocations(RowLocation selectedRowLocation) {
-  m_selectedRowLocations.emplace_back(selectedRowLocation);
+  m_selectedRowLocations.emplace_back(std::move(selectedRowLocation));
 }
 
 void RunsTable::resetState() { m_reductionJobs.resetState(); }

@@ -33,8 +33,6 @@ public:
   MOCK_METHOD0(isAnyBatchUnsaved, bool());
 
   MOCK_CONST_METHOD0(notifyOptionsChanged, void());
-  MOCK_METHOD1(setUnsavedFlag, void(bool));
-  MOCK_CONST_METHOD0(optionsChanged, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
   MOCK_METHOD0(notifyAnyBatchReductionResumed, void());

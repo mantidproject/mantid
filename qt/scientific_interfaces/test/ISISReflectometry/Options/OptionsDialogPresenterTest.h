@@ -228,7 +228,7 @@ private:
                      mainWindowSubscriber = std::make_unique<
                          NiceMock<MockOptionsDialogPresenterSubscriber>>()) {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mainWindowSubscriber));
   }
 };

@@ -57,8 +57,6 @@ public:
   // IMainWindowPresenter overrides
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
-  bool isBatchUnsaved(int batchIndex) const override;
-  bool isAnyBatchUnsaved() override;
   bool isCloseEventPrevented() override;
   bool isOverwriteBatchPrevented(int tabIndex) const override;
   bool isProcessAllPrevented() const override;
@@ -99,6 +97,8 @@ private:
   std::unique_ptr<IOptionsDialogPresenter> m_optionsDialogPresenter;
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
 
+  bool isBatchUnsaved(int batchIndex) const override;
+  bool isAnyBatchUnsaved() override;
   bool isWarnDiscardChangesChecked() const override;
   bool isRoundChecked() const override;
   int &getRoundPrecision() const override;

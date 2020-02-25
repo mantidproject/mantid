@@ -188,6 +188,19 @@ public:
     verifyAndClear();
   }
 
+  void testReductionResumedWithGroupAndChildRowSelected() {
+    auto jobRunner = makeJobRunner(twoGroupsWithTwoRowsModel());
+    selectGroup(jobRunner, 0);
+    selectRow(jobRunner, 0, 0);
+    jobRunner.notifyReductionResumed();
+    TS_ASSERT_EQUALS(jobRunner.isProcessing(), true);
+    TS_ASSERT_EQUALS(jobRunner.isAutoreducing(), false);
+    TS_ASSERT_EQUALS(jobRunner.m_reprocessFailed, true);
+    TS_ASSERT_EQUALS(jobRunner.m_processAll, false);
+    TS_ASSERT_EQUALS(jobRunner.m_processPartial, false);
+    verifyAndClear();
+  }
+
   void testGetAlgorithmsWithEmptyModel() {
     auto jobRunner = makeJobRunner();
     auto const algorithms = jobRunner.getAlgorithms();

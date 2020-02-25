@@ -97,13 +97,6 @@ Group makeGroupWithOneRow() {
                    makeRowWithOutputNames({"IvsLam", "IvsQ", "IvsQBin"})});
 }
 
-Group makeGroupWithOneRowAndOneEmptyRow() {
-  return Group("multi_row_group",
-               std::vector<boost::optional<Row>>{
-                   makeRowWithOutputNames({"IvsLam", "IvsQ", "IvsQBin"}),
-                   makeEmptyRow()});
-}
-
 Group makeGroupWithTwoRows() {
   return Group(
       "multi_row_group",
