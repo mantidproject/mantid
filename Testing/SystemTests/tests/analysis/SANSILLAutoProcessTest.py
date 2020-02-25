@@ -141,7 +141,7 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
         self.tolerance_is_rel_err = True
         self.disableChecking.append("Instrument")
 
-        return ['iq', 'ILL_D16_scan.nxs']
+        return ['iq', 'ILL_D16_Gamma_scan.nxs']
 
     def runTest(self):
         water = '3659, 3663, 3667'

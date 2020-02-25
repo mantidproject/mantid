@@ -168,7 +168,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.output = self.getPropertyValue('OutputWorkspace')
         self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
         self.normalise = self.getPropertyValue('NormaliseBy')
-        self.theta_dependent = self.getPropertyValue('ThetaDependent').value
+        self.theta_dependent = self.getProperty('ThetaDependent').value
         self.radius = self.getProperty('BeamRadius').value
         self.dimensionality = len(self.sample)
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10 * self.dimensionality)
