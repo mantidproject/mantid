@@ -193,5 +193,3 @@ class D16_AutoProcess_Test(systemtesting.MantidSystemTest):
                            SampleThickness=0.2,
                            BeamRadius=1,
                            ReferenceFiles=",".join(water_dir))
-
-
