@@ -138,8 +138,8 @@ class WorkspaceWidget(PluginWidget):
             except Exception as exception:
                 logger.warning("Could not open sample logs for workspace '{}'."
                                "".format(ws.name()))
-                logger.debug("{}: {}".format(type(exception).__name__,
-                                             exception))
+                logger.warning("{}: {}".format(type(exception).__name__,
+                                               exception))
 
     def _do_slice_viewer(self, names):
         """
