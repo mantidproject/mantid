@@ -184,9 +184,11 @@ void FunctionModel::setParameterTie(const QString &parName, QString tie) {
 
 QStringList FunctionModel::getParameterNames() const {
   QStringList names;
-  const auto paramNames = getCurrentFunction()->getParameterNames();
-  for (auto const name : paramNames) {
-    names << QString::fromStdString(name);
+  if (hasFunction()) {
+    const auto paramNames = getCurrentFunction()->getParameterNames();
+    for (auto const name : paramNames) {
+      names << QString::fromStdString(name);
+    }
   }
   return names;
 }
@@ -398,7 +400,7 @@ void FunctionModel::setGlobalParameters(const QStringList &globals) {
 
 QStringList FunctionModel::getLocalParameters() const {
   QStringList locals;
-  for (auto const name : getParameterNames()) {
+  for (auto const &name : getParameterNames()) {
     if (!m_globalParameterNames.contains(name))
       locals << name;
   }
