@@ -23,5 +23,6 @@ BugFixes
 ########
 
 - Fixed a bug in the :ref:`Crystal Field Python Interface` which prevented users from defining a cubic crystal field model.
+- Bug fixed affecting Direct > DGS Reduction interface - only facilities with applicable instruments can now be selected.
 
 :ref:`Release 4.3.0 <v4.3.0>`

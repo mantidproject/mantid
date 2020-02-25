@@ -66,6 +66,8 @@ Powder Diffraction
 - A bug has been fixed that prevented lists being given for `q_lims` in polaris create_total_scattering_pdf while merging banks.
 - A bug has been fixed that caused SavePDF to fail when asked to save histogram data
 - A bug has been fixed that prevented lists being given for `q_lims` in polaris create_total_scattering_pdf while merging banks.
+- Bug fixed affecting Diffraction > Powder Diffraction Reduction interface - only facilities with applicable instruments can now be selected.
+
 
 Engineering Diffraction
 -----------------------
