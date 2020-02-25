@@ -40,14 +40,14 @@ class SANSILLReduction(PythonAlgorithm):
 
     @staticmethod
     def _get_solid_angle_method(instrument):
-        if instrument in ['D11', 'D11lr']:
+        if instrument in ['D11', 'D11lr', 'D16']:
             return 'Rectangle'
         else:
             return 'GenericShape'
 
     @staticmethod
     def _make_solid_angle_name(ws):
-        return mtd[ws].getInstrument().getName()+'_'+str(int(mtd[ws].getRun().getLogData('L2').value))+'m_SolidAngle'
+        return mtd[ws].getInstrument().getName()+'_'+str(round(mtd[ws].getRun().getLogData('L2').value))+'m_SolidAngle'
 
     @staticmethod
     def _check_distances_match(ws1, ws2):
@@ -117,7 +117,7 @@ class SANSILLReduction(PythonAlgorithm):
                              doc='Choose the normalisation type.')
 
         self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.),
-                             doc='Beam raduis [m]; used for beam center finding, transmission and flux calculations.')
+                             doc='Beam radius [m]; used for beam center finding, transmission and flux calculations.')
 
         self.setPropertySettings('BeamRadius',
                                  EnabledWhenProperty(beam, transmission, LogicOperator.Or))
@@ -219,13 +219,16 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('DefaultMaskedInputWorkspace', sample)
 
+        self.declareProperty('ThetaDependent', True,
+                             doc='Whether or not to use 2theta dependent transmission correction')
+
     def _normalise(self, ws):
         """
             Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
             @param ws : the input workspace
         """
         normalise_by = self.getPropertyValue('NormaliseBy')
-        monID = 100000 if self._instrument != 'D33' else 500000
+        monID = 100000 if (self._instrument != 'D33' and self._instrument != 'D16') else 500000
         if normalise_by == 'Monitor':
             mon = ws + '_mon'
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
@@ -267,6 +270,7 @@ class SANSILLReduction(PythonAlgorithm):
         run = mtd[ws].getRun()
         if run.hasProperty('attenuator.attenuation_coefficient'):
             att_coeff = run.getLogData('attenuator.attenuation_coefficient').value
+            self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
         elif run.hasProperty('attenuator.attenuation_value'):
             att_value = run.getLogData('attenuator.attenuation_value').value
             if float(att_value) < 10. and self._instrument == 'D33':
@@ -278,9 +282,10 @@ class SANSILLReduction(PythonAlgorithm):
                     raise RuntimeError('Unable to find the attenuation coefficient for D33 attenuator #'+str(int(att_value)))
             else:
                 att_coeff = att_value
+            self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
         else:
-            raise RuntimeError('Unable to process as beam: could not find attenuation coefficient nor value.')
-        self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
+            att_coeff = 1
+            self.log().notice('Unable to process as beam: could not find attenuation coefficient nor value. Assuming 1.')
         flux_out = self.getPropertyValue('FluxOutputWorkspace')
         if flux_out:
             flux = ws + '_flux'
@@ -408,7 +413,7 @@ class SANSILLReduction(PythonAlgorithm):
         """
             Subtracts the dark current
             @param ws: input workspace
-            @parma absorber_ws: dark current workspace
+            @param absorber_ws: dark current workspace
         """
         if not self._check_processed_flag(absorber_ws, 'Absorber'):
             self.log().warning('Absorber input workspace is not processed as absorber.')
@@ -436,6 +441,7 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws: input workspace
             @param transmission_ws: transmission workspace
         """
+        theta_dependent = self.getProperty('ThetaDependent').value
         if not self._check_processed_flag(transmission_ws, 'Transmission'):
             self.log().warning('Transmission input workspace is not processed as transmission.')
         if transmission_ws.blocksize() == 1:
@@ -443,14 +449,15 @@ class SANSILLReduction(PythonAlgorithm):
             transmission = transmission_ws.readY(0)[0]
             transmission_err = transmission_ws.readE(0)[0]
             ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
-                                        TransmissionError=transmission_err, OutputWorkspace=ws)
+                                        TransmissionError=transmission_err, ThetaDependent=theta_dependent,
+                                        OutputWorkspace=ws)
         else:
             # wavelenght dependent transmission, need to rebin
             transmission_rebinned = ws + '_tr_rebinned'
             RebinToWorkspace(WorkspaceToRebin=transmission_ws, WorkspaceToMatch=ws,
                              OutputWorkspace=transmission_rebinned)
             ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionWorkspace=transmission_rebinned,
-                                        OutputWorkspace=ws)
+                                        ThetaDependent=theta_dependent, OutputWorkspace=ws)
             DeleteWorkspace(transmission_rebinned)
 
     def _apply_container(self, ws, container_ws):
@@ -561,12 +568,19 @@ class SANSILLReduction(PythonAlgorithm):
                         self._apply_transmission(ws, transmission_ws)
                     solid_angle = self._make_solid_angle_name(ws)
                     cache = self.getProperty('CacheSolidAngle').value
-                    if cache:
-                        if not mtd.doesExist(solid_angle):
-                            SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle,
-                                       Method=self._get_solid_angle_method(self._instrument))
-                    else:
-                        SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle,
+                    if (cache and not mtd.doesExist(solid_angle)) or not cache:
+                        if self._instrument == "D16":
+                            run = mtd[ws].getRun()
+                            distance = run.getLogData('L2').value
+                            CloneWorkspace(InputWorkspace=ws, OutputWorkspace=solid_angle)
+                            MoveInstrumentComponent(Workspace=solid_angle, X=0, Y=0, Z=distance,
+                                                    RelativePosition=False, ComponentName="detector")
+                            RotateInstrumentComponent(Workspace=solid_angle, X=0, Y=1, Z=0, angle=0,
+                                                      RelativeRotation=False, ComponentName="detector")
+                            input_solid = solid_angle
+                        else:
+                            input_solid = ws
+                        SolidAngle(InputWorkspace=input_solid, OutputWorkspace=solid_angle,
                                    Method=self._get_solid_angle_method(self._instrument))
                     Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws, WarnOnZeroDivide=False)
                     if not cache:
