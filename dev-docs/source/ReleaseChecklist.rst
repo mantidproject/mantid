@@ -166,6 +166,7 @@ Once the unscripted testing has passed:
 * Kick off the build for ``mantidXY`` on RHEL7 for SNS:
   http://builds.mantidproject.org/job/release_clean-rhel7/ with suffix
   ``XY``
+* **ISIS**: If in cycle add a calendar reminder for when the current cycle ends for mantid to be updated on IDAaaS and cabin PCs. If out of cycle do this immediately.
 
 Finalise
 ========
