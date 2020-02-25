@@ -218,7 +218,7 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
         iter_details = "Itr {:02d}: ({:7.3f}, {:7.3f})  SX={:<8.4f}\tSY={:<8.4f}\t Points: {:3d} (Unaligned: {:2d})" \
             .format(iteration, scaled_lr, scaled_tb,
                     avg_lr_residual, avg_tb_residual,
-                    lr_results.num_points_considered, lr_results.num_points_considered)
+                    lr_results.num_points_considered, lr_results.mismatched_points)
 
         self.logger.notice(iter_details)
 
