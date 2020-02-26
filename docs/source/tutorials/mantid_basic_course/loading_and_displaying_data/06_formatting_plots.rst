@@ -7,11 +7,7 @@ Formatting Plots
 Plot Toolbar
 ============
 
-.. figure:: /images/PlotToolbar.png
-   :align: left
-   :alt: Plot Toolbar
-
-The usual buttons on the Plot Toolbar:
+The usual buttons on the Plot Toolbar: |PlotToolbar.png|
 
 - Home: Rescales the Axes on the plot
 - Arrows: move back and forward between zoom levels (only activated after zooming or moving)
@@ -86,3 +82,5 @@ Please have a play with these options to see what you can do. For instance
 if you wish to change the label of a curve in the Legend, then edit the "Set 
 curve label" entry on the Curves tab. Then on the Legend tab you will see 
 Color and Font options.
+
+.. |PlotToolbar.png| image:: /images/PlotToolbar.png

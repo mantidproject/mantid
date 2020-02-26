@@ -42,14 +42,13 @@ Quick Intro to Workspaces and Bins
 
 A workspace is data stored within Mantid. It will appear in the Workspaces Toolbox.
 When you load a data file, it will create a Workspace. Likewise you can save a Workspace to a file. 
-Many of the features of Mantid change Workspaces into other Workspaces. 
+Many of the features of Mantid change Workspaces into other Workspaces. There are even differenet types of Workspaces in Mantid, which hold data in different formats. 
 
-The usual format of a Workspace is data cut into blocks called bins. Mantid sums the number of counts in each bin and the line we plot connects the top of these bins.
+A usual Workspace consists of a number of spectra, each cut into blocks called bins (more about spectra later). Mantid sums the number of counts in each bin and the line we plot connects the top of these bins.
 
 (Note that the bins can have different widths (defined by the instrument set-up)), such as below the bin-widths change from 10 to 20). 
 
 .. plot::
-   :include-source:
    :align: center
 
    import numpy as np

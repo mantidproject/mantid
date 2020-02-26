@@ -1,8 +1,8 @@
 .. _04_masking_and_grouping:
 
-====================
-Masking And Grouping 
-====================
+========================================
+Masking, Grouping and Region of Interest
+========================================
 
 The Draw tab is for grouping or masking detectors.
 
@@ -84,6 +84,8 @@ it **cannot be undone**!
 .. figure:: /images/Fullmaskview.png
    :align: center
    :alt: Fullmaskview.png
+
+Be aware that any data analysis on spectra from a region of interest (ROI) should not be performed on data in the Pick > mini-plot. You would need to run the :ref:`algm-DiffractionFocussing` algorithm.
 
 
 .. |MaskRedRing.png| image:: /images/MaskRedRing.png

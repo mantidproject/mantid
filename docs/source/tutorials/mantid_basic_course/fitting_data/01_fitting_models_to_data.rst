@@ -16,9 +16,9 @@ Fitting Models To Data
 .. role:: green
 .. role:: orange
 
-Fitting is the modelling of data where parameters of a model are allowed
-to vary during a fitting process until the agreement between model and
-data has seen an improvement according to some cost function.
+Fitting is itereatively searching for the parameter values that minimise some cost function to obtain
+the best fit of the model to the data.
+
 
 In summary the Mantid fitting provides
 

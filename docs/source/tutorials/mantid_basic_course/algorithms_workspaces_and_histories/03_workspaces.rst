@@ -68,6 +68,10 @@ To fix this **Rebin** the ragged workspace with regular binning:
    :alt: Rebinned
    :align: center
 
+As you can see **Rebin** is a very useful Algorithm for fixing ragged workspaces.
+Another important use of rebinning is prior to point-by-point normalisation (e.g. correcting for incident flux and detector efficiency) by normalising to a vanadium run). This is something that may be handled for you if executing an algorithm such as :ref:`algm-NormaliseToMonitor`.
+
+
 
 Event Workspaces
 ================
@@ -109,7 +113,7 @@ Note: If you Execute **Rebin** on an EventWorkspace *AND* the PreserveEvents box
 Performance
 -----------
 
-Operating on an EventWorkspace is slower than on a Workspace2D, or ut more techincally:
+Operating on an EventWorkspace is slower than on a Workspace2D, or put more techincally:
 
 - Each event list is separate
 - Sorting events is O(n) = n log(n)
@@ -135,7 +139,7 @@ Example of Workspace usage
 .. figure:: /images/peaksworkspace.png
    :alt: PeaksWorkspace
    :width: 600px
-   :align: center
+   :align: right
 
 TableWorkspaces
 ===============

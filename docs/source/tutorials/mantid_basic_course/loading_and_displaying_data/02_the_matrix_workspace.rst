@@ -31,7 +31,7 @@ The next dialog gives you options to limit the amount of data displayed; just cl
    :alt: WorkspaceMatrixAnnotated
 
 Normal Data is displayed with a light blue background. Spectra that correspond to monitor detectors appear as the first rows
-and are marked with a light yellow background. A monitor is a low efficiency detector of the particle beam, before and after the sample, that can be used to normalise runs. The rows corresponding to
+and are marked with a light yellow background. A monitor is a low efficiency detector of the particle beam, that can be placed before and after the sample, that can be used for normalisation. The rows corresponding to
 the masked detectors (if present) will be highlighted with a light grey
 background. If a monitor spectrum itself is masked, it will be marked
 with light grey just as other masked spectra. Masked bins will also be

@@ -61,6 +61,8 @@ In the 3D view:
 -  :green:`The Y axis is green.`
 -  :blue:`The Z axis is blue.`
 
+In most cases, the :blue:`Z axis` is the direction of the incident beam, but not for every instrument!
+
 Rotate the instrument by left-clicking and dragging.
 
 Pan the view by right-clicking and dragging.

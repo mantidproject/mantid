@@ -15,7 +15,7 @@ On the downloads page you will be able to get the latest stable release of Manti
 to download the latest nightly build, this is a more experimental version of the code. Whilst the nightly build may have more
 features, it is less tested and comes with much less guarantee.
 
-You will also find detailed instructions for installing Mantid on any of the above mentioned operating systems.
+You will also find detailed instructions for installing Mantid on different operating systems.
 
 .. figure:: /images/MantidDownload_42.png
    :width: 500px

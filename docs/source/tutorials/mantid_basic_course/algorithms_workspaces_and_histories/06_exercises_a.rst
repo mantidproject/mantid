@@ -50,8 +50,8 @@ Exercise 2
    :align: center
    :width: 700px
 
-Exercise 3 - now you choose the OutpuWorkspace names!
-=====================================================
+Exercise 3 - now you choose the OutputWorkspace names!
+======================================================
 
 #. **Load** *HYS_11388_event.nxs* as in Exercise 1, but this time perform 
    the filtering as part of the Loading, by setting **FilterByTimeStart**\ =\ *4000*
