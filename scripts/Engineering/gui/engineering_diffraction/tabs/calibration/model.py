@@ -215,7 +215,7 @@ class CalibrationModel(object):
 
     @staticmethod
     def _plot_tof_fit_single_bank_or_custom(bank):
-        bank_ws = Ads.retrieve("engggui_difc_zero_peaks_bank_" + str(bank))
+        bank_ws = Ads.retrieve("engggui_tof_peaks_bank_" + str(bank))
 
         ax = plot([bank_ws], [0],
                   plot_kwargs={
@@ -224,8 +224,8 @@ class CalibrationModel(object):
                       "markersize": "3"
                   }).gca()
         ax.plot(bank_ws, wkspIndex=1, linestyle="--", marker="o", markersize="3")
-        ax.set_title("Engg Gui Difc Zero Peaks Bank " + str(bank))
-        ax.legend(("Peaks Fitted", "DifC/TZero Fitted Straight Line"))
+        ax.set_title("Engg Gui TOF Peaks Bank " + str(bank))
+        ax.legend(("Peaks Fitted", "TOF Quadratic Fit"))
         ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
 
     def run_calibration(self,
