@@ -47,5 +47,7 @@ Fixed
   number of points considered. This allows for direct comparisons of different
   radius limits, which previously summed the difference across different
   numbers of points.
+- Bug fixed affecting SANS > ORNL_SANS interface - only facilities with applicable instruments can now be selected.
+
 
 :ref:`Release 4.3.0 <v4.3.0>`
