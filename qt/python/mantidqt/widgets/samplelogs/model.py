@@ -10,7 +10,7 @@
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import (BoolTimeSeriesProperty,
                            FloatTimeSeriesProperty, Int32TimeSeriesProperty,
-                           Int64TimeSeriesProperty, StringTimeSeriesProperty)
+                           Int64TimeSeriesProperty, StringTimeSeriesProperty, logger)
 from mantid.api import MultipleExperimentInfos
 from qtpy.QtGui import QStandardItemModel, QStandardItem
 
@@ -55,6 +55,7 @@ class SampleLogsModel(object):
     """This class stores the workspace object and return log values when
     requested
     """
+
     def __init__(self, ws):
         """Stores three thing:, the workspace, which experiment info number
         to use, and the run object.
@@ -126,23 +127,27 @@ class SampleLogsModel(object):
         """Return a QModel made from the current workspace. This should be set
         onto a QTableView
         """
+
+        def create_table_item(column, itemname, callable, *args):
+            item = QStandardItem()
+            item.setEditable(False)
+            try:
+                item.setText(callable(*args))
+            except Exception as exc:
+                logger.warning("Error setting column {} for log {}: {}".format(column, itemname, str(exc)))
+
+            return item
+
         model = QStandardItemModel()
         model.setHorizontalHeaderLabels(["Name", "Type", "Value", "Units"])
         model.setColumnCount(4)
         for key in self.get_log_names():
             log = self.run.getLogData(key)
-            name = QStandardItem()
-            name.setText(log.name)
-            name.setEditable(False)
-            log_type = QStandardItem()
-            log_type.setText(get_type(log))
-            log_type.setEditable(False)
-            value = QStandardItem()
-            value.setText(str(get_value(log)))
-            value.setEditable(False)
-            unit = QStandardItem()
-            unit.setText(log.units)
-            unit.setEditable(False)
+            name = create_table_item("Name", key, lambda: log.name)
+            log_type = create_table_item("Type", key, get_type, log)
+            value = create_table_item("Value", key, lambda log: str(get_value(log)), log)
+            unit = create_table_item("Units", key, lambda: log.units)
             model.appendRow((name, log_type, value, unit))
+
         model.sort(0)
         return model

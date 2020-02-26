@@ -608,7 +608,11 @@ def get_sample_log(workspace, **kwargs):
     if not run.hasProperty(LogName):
         raise ValueError('The workspace does not contain the {} sample log'.format(LogName))
     tsp = run[LogName]
-    units = tsp.units
+    try:
+        units = tsp.units
+    except UnicodeDecodeError as exc:
+        mantid.kernel.logger.warning("Error retrieving units for log {}: {}".format(LogName, str(exc)))
+        units = "unknown"
     if not isinstance(tsp, (mantid.kernel.FloatTimeSeriesProperty,
                             mantid.kernel.Int32TimeSeriesProperty,
                             mantid.kernel.Int64TimeSeriesProperty)):
