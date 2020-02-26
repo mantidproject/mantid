@@ -491,15 +491,58 @@ boost::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
   return m_handler;
 }
 
+/**
+ * Rotate the mesh according to the supplied rotation matrix
+ * @param rotationMatrix Rotation matrix to be applied
+ */
 void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
   for (Kernel::V3D &vertex : m_vertices) {
     vertex.rotate(rotationMatrix);
   }
 }
 
+/**
+ * Translate the mesh according to the supplied x, y, z vector
+ * @param translationVector Translation vector to be applied
+ */
 void MeshObject::translate(const Kernel::V3D &translationVector) {
   for (Kernel::V3D &vertex : m_vertices) {
     vertex += translationVector;
+  }
+}
+
+/**
+ * Scale the mesh according to the supplied scale factor
+ * @param scaleFactor Scale factor
+ */
+void MeshObject::scale(const double scaleFactor) {
+  for (Kernel::V3D &vertex : m_vertices) {
+    vertex *= scaleFactor;
+  }
+}
+
+/**
+ * Transform the mesh (scale, translate, rotate) according to the
+ * supplied transformation matrix
+ * @param matrix 4 x 4 transformation matrix
+ */
+void MeshObject::multiply(const Kernel::Matrix<double> &matrix) {
+  if ((matrix.numCols() != 4) || (matrix.numRows() != 4)) {
+    throw "Transformation matrix must be 4 x 4";
+  }
+
+  // create homogenous coordinates for the input vector with 4th element
+  // equal to 1 (position)
+  for (Kernel::V3D &vertex : m_vertices) {
+    std::vector<double> vertexin(4);
+    vertexin[0] = vertex.X();
+    vertexin[1] = vertex.Y();
+    vertexin[2] = vertex.Z();
+    vertexin[3] = 1;
+    std::vector<double> vertexout(4);
+    matrix.multiplyPoint(vertexin, vertexout);
+    Kernel::V3D newvertex(vertexout[0], vertexout[1], vertexout[2]);
+    vertex = newvertex;
   }
 }
 

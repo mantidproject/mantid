@@ -126,6 +126,7 @@ set(SRC_FILES
     src/LoadSwans.cpp
     src/LoadTBL.cpp
     src/LoadTOFRawNexus.cpp
+    src/Mantid3MFFileIO.cpp
     src/MaskDetectors.cpp
     src/MaskDetectorsInShape.cpp
     src/MaskSpectra.cpp
@@ -328,6 +329,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadSwans.h
     inc/MantidDataHandling/LoadTBL.h
     inc/MantidDataHandling/LoadTOFRawNexus.h
+    inc/MantidDataHandling/Mantid3MFFileIO.h
     inc/MantidDataHandling/MaskDetectors.h
     inc/MantidDataHandling/MaskDetectorsInShape.h
     inc/MantidDataHandling/MaskSpectra.h
@@ -636,6 +638,8 @@ set_property(TARGET DataHandling PROPERTY FOLDER "MantidFramework")
 target_include_directories(DataHandling PUBLIC inc ../Nexus/inc)
 target_include_directories(DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 
+find_package(Lib3mf REQUIRED)
+
 target_link_libraries(DataHandling
                       LINK_PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}
@@ -647,7 +651,8 @@ target_link_libraries(DataHandling
                       ${HDF5_LIBRARIES}
                       ${HDF5_HL_LIBRARIES}
                       ${JSONCPP_LIBRARIES}
-                      Catalog)
+                      Catalog
+                      ${LIB3MF_LIBRARIES})
 
 # Add the unit tests directory
 add_subdirectory(test)

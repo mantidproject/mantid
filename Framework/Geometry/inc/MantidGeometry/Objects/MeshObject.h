@@ -145,6 +145,8 @@ public:
 
   void rotate(const Kernel::Matrix<double> &);
   void translate(const Kernel::V3D &);
+  void multiply(const Kernel::Matrix<double> &);
+  void scale(const double scaleFactor);
   void updateGeometryHandler();
 
 private:

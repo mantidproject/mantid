@@ -47,6 +47,8 @@ private:
   void parseMaterials(Poco::XML::Element *element);
   void parseAndAddComponents(SampleEnvironmentSpec *spec,
                              Poco::XML::Element *element) const;
+  void loadFullSpecification(SampleEnvironmentSpec *spec,
+                             Poco::XML::Element *element);
   void parseAndAddContainers(SampleEnvironmentSpec *spec,
                              Poco::XML::Element *element) const;
   Geometry::Container_const_sptr

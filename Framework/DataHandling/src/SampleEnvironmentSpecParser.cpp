@@ -7,6 +7,7 @@
 #include "MantidDataHandling/SampleEnvironmentSpecParser.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/LoadStlFactory.h"
+#include "MantidDataHandling/Mantid3MFFileIO.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
@@ -37,6 +38,7 @@ using namespace Poco::XML;
 namespace {
 std::string MATERIALS_TAG = "materials";
 std::string COMPONENTS_TAG = "components";
+std::string FULL_SPEC_TAG = "fullspecification";
 std::string COMPONENT_TAG = "component";
 std::string CONTAINERS_TAG = "containers";
 std::string CONTAINER_TAG = "container";
@@ -124,6 +126,8 @@ SampleEnvironmentSpecParser::parse(const std::string &name,
       parseMaterials(childElement);
     } else if (node->nodeName() == COMPONENTS_TAG) {
       parseAndAddComponents(spec.get(), childElement);
+    } else if (node->nodeName() == FULL_SPEC_TAG) {
+      loadFullSpecification(spec.get(), childElement);
     }
     node = nodeIter.nextNode();
   }
@@ -197,6 +201,31 @@ void SampleEnvironmentSpecParser::parseAndAddComponents(
       spec->addComponent(parseComponent(childElement));
     }
     node = nodeIter.nextNode();
+  }
+}
+
+void SampleEnvironmentSpecParser::loadFullSpecification(
+    SampleEnvironmentSpec *spec, Poco::XML::Element *element) {
+  using Mantid::Geometry::Container;
+  auto filename = element->getAttribute("filename");
+  Mantid3MFFileIO MeshLoader;
+  MeshLoader.LoadFile(filename);
+
+  std::vector<boost::shared_ptr<Geometry::MeshObject>> environmentMeshes;
+
+  boost::shared_ptr<Geometry::MeshObject> sampleMesh;
+
+  MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
+
+  for (auto cpt : environmentMeshes) {
+    if (spec->ncans() == 0) {
+      auto can = boost::make_shared<Container>(cpt);
+      can->setSampleShape(sampleMesh);
+      spec->addContainer(can);
+    } else {
+
+      spec->addComponent(cpt);
+    }
   }
 }
 
@@ -300,7 +329,7 @@ std::vector<double> SampleEnvironmentSpecParser::parseTranslationVector(
 /**
  * Create a mesh shape from an STL input file. This can't be in the ShapeFactory
  * because that is in Geometry. This function needs acccess to the STL readers
- * @param stlfile A pointer to an XML \<stlfile\> element
+ * @param stlFileElement A pointer to an XML \<stlfile\> element
  * @return A new Object instance of the given type
  */
 boost::shared_ptr<Geometry::MeshObject>
@@ -312,7 +341,6 @@ SampleEnvironmentSpecParser::loadMeshFromSTL(Element *stlFileElement) const {
     Poco::Path stlFileName;
     if (suppliedStlFileName.isRelative()) {
       bool useSearchDirectories = true;
-
       if (!m_filepath.empty()) {
         // if environment spec xml came from a file, search in the same
         // directory as the file
@@ -335,7 +363,6 @@ SampleEnvironmentSpecParser::loadMeshFromSTL(Element *stlFileElement) const {
     } else {
       stlFileName = suppliedStlFileName;
     }
-
     if (Poco::File(stlFileName).exists()) {
 
       std::string scaleStr = stlFileElement->getAttribute("scale");
