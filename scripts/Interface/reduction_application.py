@@ -292,13 +292,13 @@ class ReductionGUI(QMainWindow):
                 self.instrument_list = instrument_list
                 self.instr_combo.clear()
                 self.facility_combo.clear()
-                instruments = sorted([fac for fac in INSTRUMENT_DICT.keys() if
-                                      any([inst in INSTRUMENT_DICT[fac] for inst in instrument_list])])
-                instruments.reverse()
-                for facility in instruments:
+                facilities = sorted([fac for fac in INSTRUMENT_DICT.keys() if
+                                     any([inst in INSTRUMENT_DICT[fac] for inst in instrument_list])])
+                facilities.reverse()
+                for facility in facilities:
                     self.facility_combo.addItem(facility)
 
-                self._facility_changed(instruments[0])
+                self._facility_changed(facilities[0])
                 self.facility_combo.activated.connect(self._facility_changed)
 
             def _facility_changed(self, facility):
