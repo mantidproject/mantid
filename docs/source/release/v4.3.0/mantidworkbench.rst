@@ -105,5 +105,6 @@ Bugfixes
 - Fixed an issue where fitting a distribution workspace was normalised twice.
 - Overplots will be normalized by bin width if they are overplotting a curve from a workspace which is a distribution.
 - Several bugs in the way Python scripts were parsed and executed, including blank lines after a colon and tabs in strings, have been fixed.
+- Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters. 
 
 :ref:`Release 4.3.0 <v4.3.0>`
