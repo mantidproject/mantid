@@ -62,7 +62,12 @@ const std::string NULL_STR("NULL");
  * @return true only if it exists
  */
 bool exists(::NeXus::File &file, const std::string &name) {
-  auto entries = file.getEntries();
+  const auto entries = file.getEntries();
+  return exists(entries, name);
+}
+
+bool exists(const std::map<std::string, std::string> &entries,
+            const std::string &name) {
   return entries.find(name) != entries.end();
 }
 
