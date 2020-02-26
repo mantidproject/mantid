@@ -119,12 +119,14 @@ class MainWindow(QMainWindow):
                 raise RuntimeError("Input value must be greater than 0 for conversion")
             inOption = self.ui.inputUnits.currentText()
             outOption = self.ui.outputUnits.currentText()
-            if self.ui.totalFlightPathInput.text() !='':
+            if self.ui.totalFlightPathInput.text():
                 self.flightpath = float(self.ui.totalFlightPathInput.text())
             else:
                 self.flightpath = -1.0
-            if self.ui.scatteringAngleInput.text() !='':
+            if self.ui.scatteringAngleInput.text():
                 self.Theta = float(self.ui.scatteringAngleInput.text()) * math.pi / 360.0
+            else:
+                self.Theta = -1.0
 
             self.output = TofConverter.convertUnits.doConversion(self.ui.InputVal.text(), inOption, outOption, self.Theta, self.flightpath)
 
@@ -135,6 +137,9 @@ class MainWindow(QMainWindow):
             return
         except ArithmeticError as ae:
             QMessageBox.warning(self, "TofConverter", str(ae))
+            return
+        except ValueError as ve:
+            QMessageBox.warning(self, "TofConverter", str(ve))
             return
         except RuntimeError as re:
             QMessageBox.warning(self, "TofConverter", str(re))
