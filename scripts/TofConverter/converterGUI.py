@@ -131,15 +131,9 @@ class MainWindow(QMainWindow):
 
             self.ui.convertedVal.clear()
             self.ui.convertedVal.insert(str(self.output))
-        except UnboundLocalError as ule:
-            QMessageBox.warning(self, "TofConverter", str(ule))
+        except (UnboundLocalError, ArithmeticError, ValueError, RuntimeError) as err:
+            QMessageBox.warning(self, "TofConverter", str(err))
             return
-        except ArithmeticError as ae:
-            QMessageBox.warning(self, "TofConverter", str(ae))
-            return
-        except ValueError as ve:
-            QMessageBox.warning(self, "TofConverter", str(ve))
-            return
-        except RuntimeError as re:
-            QMessageBox.warning(self, "TofConverter", str(re))
+        except Exception as exc:
+            Logger.error(exc)
             return
