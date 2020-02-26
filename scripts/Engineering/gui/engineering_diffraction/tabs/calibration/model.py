@@ -15,7 +15,6 @@ from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger
 from mantid.simpleapi import EnggCalibrate, DeleteWorkspace, CloneWorkspace, \
     CreateWorkspace, AppendSpectra, CreateEmptyTableWorkspace, LoadAscii
-from mantidqt.plotting.functions import plot
 from Engineering.EnggUtils import write_ENGINX_GSAS_iparam_file
 from Engineering.gui.engineering_diffraction.tabs.common import vanadium_corrections
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
@@ -194,8 +193,7 @@ class CalibrationModel(object):
         DeleteWorkspace(ws1)
         DeleteWorkspace(ws2)
 
-    @staticmethod
-    def _plot_tof_fit():
+    def _plot_tof_fit(self):
         bank_1_ws = Ads.retrieve("engggui_tof_peaks_bank_1")
         bank_2_ws = Ads.retrieve("engggui_tof_peaks_bank_2")
         # Create plot
@@ -205,28 +203,25 @@ class CalibrationModel(object):
         plot_bank_2 = fig.add_subplot(gs[1], projection="mantid")
 
         for ax, ws, bank in zip([plot_bank_1, plot_bank_2], [bank_1_ws, bank_2_ws], [1, 2]):
-            ax.plot(ws, wkspIndex=0, linestyle="", marker="o", markersize="3")
-            ax.plot(ws, wkspIndex=1, linestyle="--", marker="o", markersize="3")
-            ax.set_title("Engg Gui TOF Peaks Bank " + str(bank))
-            ax.legend(("Peaks Fitted", "TOF Quadratic Fit"))
-            ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
-            ax.set_ylabel("Fitted Peaks Centre(TOF, us")
+            self._add_plot_to_axes(ax, ws, bank)
+        fig.show()
+
+    def _plot_tof_fit_single_bank_or_custom(self, bank):
+        bank_ws = Ads.retrieve("engggui_tof_peaks_bank_" + str(bank))
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection="mantid")
+
+        self._add_plot_to_axes(ax, bank_ws, bank)
         fig.show()
 
     @staticmethod
-    def _plot_tof_fit_single_bank_or_custom(bank):
-        bank_ws = Ads.retrieve("engggui_tof_peaks_bank_" + str(bank))
-
-        ax = plot([bank_ws], [0],
-                  plot_kwargs={
-                      "linestyle": "",
-                      "marker": "o",
-                      "markersize": "3"
-                  }).gca()
-        ax.plot(bank_ws, wkspIndex=1, linestyle="--", marker="o", markersize="3")
+    def _add_plot_to_axes(ax, ws, bank):
+        ax.plot(ws, wkspIndex=0, linestyle="", marker="o", markersize="3")
+        ax.plot(ws, wkspIndex=1, linestyle="--", marker="o", markersize="3")
         ax.set_title("Engg Gui TOF Peaks Bank " + str(bank))
         ax.legend(("Peaks Fitted", "TOF Quadratic Fit"))
         ax.set_xlabel("Expected Peaks Centre(dSpacing, A)")
+        ax.set_ylabel("Fitted Peaks Centre(TOF, us)")
 
     def run_calibration(self,
                         sample_ws,
