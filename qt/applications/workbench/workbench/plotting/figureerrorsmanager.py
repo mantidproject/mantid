@@ -98,7 +98,6 @@ class FigureErrorsManager(object):
     @staticmethod
     def update_limits_and_legend(ax, legend_props=None):
         ax.relim()
-        ax.autoscale()
         if legend_props:
             LegendProperties.create_legend(legend_props, ax)
 
