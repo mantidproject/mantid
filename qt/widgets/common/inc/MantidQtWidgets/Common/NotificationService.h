@@ -16,9 +16,8 @@ namespace Mantid {
 namespace Kernel {
 // forward declaration
 class Timer;
-}
+} // namespace Kernel
 } // namespace Mantid
-
 
 /** The base class from which mantid custom widgets are derived contains
  *  some useful functions
@@ -49,7 +48,6 @@ public:
 
   static const std::string NOTIFICATIONS_ENABLED_KEY;
   static const float MIN_SECONDS_BETWEEN_IDENTICAL_NOTIFICATIONS;
-
 
   /// Are notifications supported by this OS?
   static bool isSupportedByOS();
