@@ -11,6 +11,15 @@
 #include <QObject>
 #include <QSystemTrayIcon>
 
+// namespace Mantid
+namespace Mantid {
+namespace Kernel {
+// forward declaration
+class Timer;
+}
+} // namespace Mantid
+
+
 /** The base class from which mantid custom widgets are derived contains
  *  some useful functions
  */
@@ -33,15 +42,22 @@ public:
   /// Display a notification
   static void showMessage(const QString &title, const QString &message,
                           MessageIcon icon = MessageIcon::Information,
-                          int millisecondsTimeoutHint = 10000);
+                          int millisecondsTimeoutHint = 5000);
 
   /// Is the notification service enabled through the config service?
   static bool isEnabled();
 
   static const std::string NOTIFICATIONS_ENABLED_KEY;
+  static const float MIN_SECONDS_BETWEEN_IDENTICAL_NOTIFICATIONS;
+
 
   /// Are notifications supported by this OS?
   static bool isSupportedByOS();
+
+private:
+  static QString g_lastMessage;
+  static QString g_lastTitle;
+  static Mantid::Kernel::Timer g_timer;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
