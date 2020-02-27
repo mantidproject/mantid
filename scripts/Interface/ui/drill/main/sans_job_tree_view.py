@@ -11,8 +11,8 @@ from mantidqt.widgets.jobtreeview import *
 class SansJobTreeView(JobTreeView):
 
     def __init__(self):
-        columns = ["Sample", "Transmission", "Absorber", "Beam", "Flux", "Container", "ContainerTransmission",
-                   "Mask", "TransmissionAbsorber", "TransmissionBeam", "Sensitivity", "CustomOptions"]
+        columns = ["Sample", "SampleTransmission", "Absorber", "Beam", "Flux", "Container", "ContainerTransmission",
+                   "TransmissionAbsorber", "TransmissionBeam", "Mask", "Water", "CustomOptions"]
 
         JobTreeView.__init__(self, columns,self.cell_style(''))
 
