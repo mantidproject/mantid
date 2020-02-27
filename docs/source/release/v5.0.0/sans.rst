@@ -31,7 +31,9 @@ Fixed
 - Tabbing between columns has been improved in the data GUI table. Users
   can now single tab between unmodified columns, or double tab for modified.
 - Saving a CSV with sample geometry enabled, then reloading works correctly.
-- Hitting Shift+Enter on the top row no longer causes an exception
+- Hitting Shift+Enter on the top row no longer causes an exception.
+- The beam centre finder correctly centres HAB and LAB banks, previously it
+  only worked for LAB.
 
 Changes
 #######
