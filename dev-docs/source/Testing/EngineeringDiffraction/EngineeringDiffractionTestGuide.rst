@@ -37,7 +37,7 @@ Calibration
 
 3. On opening the gui the Create New Calibration option should be selected.
 
-4. Open the setting dialog from the cog in the bottom left of the gui.
+4. Open the settings dialog from the cog in the bottom left of the gui.
 
 5. Set the Save location to a directory of your choice.
 
@@ -72,7 +72,7 @@ Focus
 .. image:: /images/EngineeringDiffractionTest/EnggDiffExampleFocusOutput.png
     :width: 900px
 
-5. Check that in your save location there is a Calibration folder containing six files
+5. Check that in your save location there is a Focus folder containing six files
    `ENGINX_305761_bank_1` and `ENGINX_305761_bank_2` for each of `.dat`, `.gss`, and `.nxs`.
 
 Test 2
@@ -96,19 +96,28 @@ This test covers the Force Vanadium Recalculation functionality.
 
 3. Calibrate again. It should take a longer time to perform as it does the entire calibration again.
 
+4. Check that the "Last Modified" timestamp on the files in the `Vanadium_Runs` folder and ensure that they have
+been updated.
+
 Test 4
 ^^^^^^
 
-This test covers the Cropping ability
+This test covers the Cropping functionality.
 
-1. Change the RB Number to North.
+1. Change the RB Number to "North", this is purely to separate the cropped output files into their own space.
 
 2. Tick the Crop Calibration option. In the select Bank/Spectra select `1 (North)`
 
-3. Click calibrate.
+3. Check the "Plot Calibrated Workspace" checkbox and click calibrate.
 
-4. Go to focus tab and do the same with the Crop Focus.
+4. The two generated figures should be one with two vanadium plots and one with a single TOF Peaks plot.
 
-5. Change the RB number to custom.
+5. Check that only a single output file was generated.
 
-6. Repeat steps 2-4 this time using Custom Spectra `1200-1400`
+6. Go to focus tab and do the same with the Crop Focus. In comparison to the previous focus test, this will only
+   generate a single axis on the figure, rather than two. 
+
+7. Change the RB number to "Custom".
+
+8. Repeat steps 2-5 this time using Custom Spectra `1200-1400`. Please note that some custom spectra values may
+   cause the algorithms to fail.
