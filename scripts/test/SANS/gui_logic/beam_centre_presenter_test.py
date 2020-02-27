@@ -74,48 +74,26 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.presenter.on_update_instrument(SANSInstrument.LARMOR)
         self.view.on_update_instrument.assert_called_once_with(SANSInstrument.LARMOR)
 
-    def test_that_on_processing_finished_updates_view_and_model(self):
+    def test_that_on_processing_finished_updates_view(self):
         self.presenter.set_view(self.view)
-        result = {'pos1': 0.1, 'pos2': -0.1}
-        self.presenter._beam_centre_model.scale_1 = 1000
-        self.presenter._beam_centre_model.scale_2 = 1000
-        self.presenter._beam_centre_model.update_lab = True
-        self.presenter._beam_centre_model.update_hab = True
 
-        self.presenter.on_processing_finished_centre_finder(result)
-        self.assertEqual(result['pos1'], self.presenter._beam_centre_model.lab_pos_1)
-        self.assertEqual(result['pos2'], self.presenter._beam_centre_model.lab_pos_2)
-        self.assertEqual(self.view.lab_pos_1, self.presenter._beam_centre_model.scale_1*result['pos1'])
-        self.assertEqual(self.view.lab_pos_2, self.presenter._beam_centre_model.scale_2*result['pos2'])
-        self.assertEqual(result['pos1'], self.presenter._beam_centre_model.hab_pos_1)
-        self.assertEqual(result['pos2'], self.presenter._beam_centre_model.hab_pos_2)
-        self.assertEqual(self.view.hab_pos_1, self.presenter._beam_centre_model.scale_1 * result['pos1'])
-        self.assertEqual(self.view.hab_pos_2, self.presenter._beam_centre_model.scale_2 * result['pos2'])
+        self.BeamCentreModel.lab_pos_1 = 1
+        self.BeamCentreModel.lab_pos_2 = 2
+        self.BeamCentreModel.hab_pos_1 = 3
+        self.BeamCentreModel.hab_pos_2 = 4
+
+        scale_1 = 1000
+        scale_2 = 2000
+        self.BeamCentreModel.scale_1 = scale_1
+        self.BeamCentreModel.scale_2 = scale_2
+
+        self.presenter.on_processing_finished_centre_finder()
+        self.assertEqual(self.BeamCentreModel.lab_pos_1 * scale_1, self.view.lab_pos_1)
+        self.assertEqual(self.BeamCentreModel.lab_pos_2 * scale_2, self.view.lab_pos_2)
+
+        self.assertEqual(self.BeamCentreModel.hab_pos_1 * scale_1, self.view.hab_pos_1)
+        self.assertEqual(self.BeamCentreModel.hab_pos_2 * scale_2, self.view.hab_pos_2)
         self.view.set_run_button_to_normal.assert_called_once_with()
-
-    def test_that_on_processing_finished_updates_does_not_update_view_and_model_when_update_disabled(self):
-        self.presenter.set_view(self.view)
-        result = {'pos1': 0.1, 'pos2': -0.1}
-        result_1 = {'pos1': 0.2, 'pos2': -0.2}
-        self.presenter._beam_centre_model.scale_1 = 1000
-        self.presenter._beam_centre_model.scale_2 = 1000
-        self.presenter._beam_centre_model.update_lab = True
-        self.presenter._beam_centre_model.update_hab = True
-        self.presenter.on_processing_finished_centre_finder(result)
-        self.presenter._beam_centre_model.update_lab = False
-        self.presenter._beam_centre_model.update_hab = False
-
-        self.presenter.on_processing_finished_centre_finder(result_1)
-
-        self.assertEqual(result['pos1'], self.presenter._beam_centre_model.lab_pos_1)
-        self.assertEqual(result['pos2'], self.presenter._beam_centre_model.lab_pos_2)
-        self.assertEqual(self.view.lab_pos_1, self.presenter._beam_centre_model.scale_1*result['pos1'])
-        self.assertEqual(self.view.lab_pos_2, self.presenter._beam_centre_model.scale_2*result['pos2'])
-        self.assertEqual(result['pos1'], self.presenter._beam_centre_model.hab_pos_1)
-        self.assertEqual(result['pos2'], self.presenter._beam_centre_model.hab_pos_2)
-        self.assertEqual(self.view.hab_pos_1, self.presenter._beam_centre_model.scale_1 * result['pos1'])
-        self.assertEqual(self.view.hab_pos_2, self.presenter._beam_centre_model.scale_2 * result['pos2'])
-        self.assertEqual(self.view.set_run_button_to_normal.call_count, 2)
 
     def test_that_update_hab_selected_enabled_hab_and_disabled_lab(self):
         self.presenter.set_view(self.view)

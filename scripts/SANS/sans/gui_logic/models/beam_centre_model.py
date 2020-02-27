@@ -69,21 +69,18 @@ class BeamCentreModel(object):
         :returns: The centre position found.
         """
         centre_finder = self.SANSCentreFinder()
-        find_direction = None
-        if self.up_down and self.left_right:
-            find_direction = FindDirectionEnum.ALL
-        elif self.up_down:
-            find_direction = FindDirectionEnum.UP_DOWN
-        elif self.left_right:
-            find_direction = FindDirectionEnum.LEFT_RIGHT
-        else:
-            self.logger.notice("Have chosen no find direction exiting early")
-            return {"pos1": self.lab_pos_1, "pos2": self.lab_pos_2}
+        find_direction = self.get_finder_direction()
+        if not find_direction:
+            self.logger.error("Have chosen no find direction exiting early")
+            return
+
+        pos_1 = self._lab_pos_1 if self.component is DetectorType.LAB else self._hab_pos_1
+        pos_2 = self._lab_pos_2 if self.component is DetectorType.LAB else self._hab_pos_2
 
         if self.COM:
             centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
                                    max_iter=self.max_iterations,
-                                   x_start=self.lab_pos_1, y_start=self.lab_pos_2,
+                                   x_start=pos_1, y_start=pos_2,
                                    tolerance=self.tolerance,
                                    find_direction=find_direction, reduction_method=False, component=self.component)
 
@@ -95,11 +92,33 @@ class BeamCentreModel(object):
                                    verbose=self.verbose, component=self.component)
         else:
             centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
-                                   max_iter=self.max_iterations, x_start=self.lab_pos_1,
-                                   y_start=self.lab_pos_2, tolerance=self.tolerance,
+                                   max_iter=self.max_iterations, x_start=pos_1,
+                                   y_start=pos_2, tolerance=self.tolerance,
                                    find_direction=find_direction, reduction_method=True,
                                    verbose=self.verbose, component=self.component)
-        return centre
+
+        self._update_centre_positions(results=centre)
+
+    def _update_centre_positions(self, results):
+        if self.component is DetectorType.LAB:
+            self.lab_pos_1 = results["pos1"]
+            self.lab_pos_2 = results["pos2"]
+        elif self.component is DetectorType.HAB:
+            self.hab_pos_1 = results['pos1']
+            self.hab_pos_2 = results['pos2']
+        else:
+            raise RuntimeError("Unexpected detector type, got %r" % results)
+
+    def get_finder_direction(self):
+        find_direction = None
+        if self.up_down and self.left_right:
+            find_direction = FindDirectionEnum.ALL
+        elif self.up_down:
+            find_direction = FindDirectionEnum.UP_DOWN
+        elif self.left_right:
+            find_direction = FindDirectionEnum.LEFT_RIGHT
+
+        return find_direction
 
     @property
     def max_iterations(self):
