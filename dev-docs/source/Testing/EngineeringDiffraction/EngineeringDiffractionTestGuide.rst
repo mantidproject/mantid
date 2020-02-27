@@ -1,6 +1,6 @@
-.. _Engineering_Diffraction_2_TestGuide-ref:
+.. _Engineering_Diffraction_TestGuide-ref:
 
-Engineering Diffraction 2 Testing
+Engineering Diffraction Testing
 =================================
 
 .. contents:: Table of Contents
@@ -9,14 +9,14 @@ Engineering Diffraction 2 Testing
 Preamble
 ^^^^^^^^^
 This document is tailored towards developers intending to test the Engineering Diffraction
-interface 2.
+interface.
 
 Runs can be loaded from the archive, however it is possible that different run numbers
 will be needed as older runs may be deleted.
 
 Overview
 ^^^^^^^^
-The Engineering Diffraction 2 interface allows scientists using the EnginX instrument to interactively
+The Engineering Diffraction interface allows scientists using the EnginX instrument to interactively
 process their data. There are 3 tabs which are ordered according to the main steps performed.
 These are:
 
