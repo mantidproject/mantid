@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1015</width>
-    <height>709</height>
+    <height>750</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -68,14 +68,14 @@
          <item row="4" column="1">
           <widget class="QCheckBox" name="update_lab_check_box">
            <property name="text">
-            <string>Update LAB</string>
+            <string>Use LAB Centre in Reduction</string>
            </property>
           </widget>
          </item>
          <item row="5" column="1">
           <widget class="QCheckBox" name="update_hab_check_box">
            <property name="text">
-            <string>Update HAB</string>
+            <string>Use HAB Centre in Reduction</string>
            </property>
           </widget>
          </item>
