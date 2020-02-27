@@ -109,6 +109,9 @@ void GaussianComptonProfile::massProfile(double *result, const size_t nData,
 
   const auto &modq = modQ();
   const auto &ei = e0();
+  if (modq.empty() || ei.empty()) {
+    throw std::runtime_error("The Q values or e0 values have not been set");
+  }
   // Include e_i^0.1*mass/q pre-factor
   for (size_t j = 0; j < nData; ++j) {
     const double q = modq[j];
