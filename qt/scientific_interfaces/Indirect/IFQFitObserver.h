@@ -10,6 +10,7 @@
 enum DataType {
   WIDTH,
   EISF,
+  ALL,
 };
 
 class IFQFitObserver {

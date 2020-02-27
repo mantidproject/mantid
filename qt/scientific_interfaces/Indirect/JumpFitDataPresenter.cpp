@@ -25,9 +25,9 @@ JumpFitDataPresenter::JumpFitDataPresenter(
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),
       m_jumpModel(model) {
   connect(view, SIGNAL(singleDataViewSelected()), this,
-          SLOT(showParameterComboBoxes()));
+          SLOT(handleSingleInputSelected()));
   connect(view, SIGNAL(multipleDataViewSelected()), this,
-          SLOT(hideParameterComboBoxes()));
+          SLOT(handleMultipleInputSelected()));
 
   connect(this, SIGNAL(requestedAddWorkspaceDialog()), this,
           SLOT(updateActiveDataIndex()));
@@ -54,6 +54,23 @@ void JumpFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
   emit updateAvailableFitTypes();
 }
 
+void JumpFitDataPresenter::handleMultipleInputSelected() {
+  hideParameterComboBoxes();
+  m_notifier.notify(
+      [](IFQFitObserver &obs) { obs.updateDataType(DataType::ALL); });
+}
+
+void JumpFitDataPresenter::handleSingleInputSelected() {
+  showParameterComboBoxes();
+  m_dataIndex = TableDatasetIndex{0};
+  std::string currentText = m_cbParameterType->currentText().toStdString();
+  auto dataType = m_cbParameterType->currentText() == QString("Width")
+                      ? DataType::WIDTH
+                      : DataType::EISF;
+  m_notifier.notify(
+      [&dataType](IFQFitObserver &obs) { obs.updateDataType(dataType); });
+}
+
 void JumpFitDataPresenter::hideParameterComboBoxes() {
   m_cbParameter->hide();
   m_cbParameterType->hide();
@@ -66,7 +83,6 @@ void JumpFitDataPresenter::showParameterComboBoxes() {
   m_cbParameterType->show();
   m_lbParameter->show();
   m_lbParameterType->show();
-  m_dataIndex = TableDatasetIndex{0};
 }
 
 void JumpFitDataPresenter::setActiveParameterType(const std::string &type) {

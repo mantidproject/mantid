@@ -47,6 +47,8 @@ private slots:
   void setSingleModelSpectrum(int index);
   void handleParameterTypeChanged(const QString &parameter);
   void handleSpectrumSelectionChanged(int parameterIndex);
+  void handleMultipleInputSelected();
+  void handleSingleInputSelected();
 
 signals:
   void spectrumChanged(WorkspaceIndex);
