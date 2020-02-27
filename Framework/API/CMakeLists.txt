@@ -370,7 +370,6 @@ if(PROFILE_ALGORITHM_LINUX)
 else()
   set(SRC_FILES "${SRC_FILES}" "src/AlgorithmExecute.cpp")
 endif()
-unset(PROFILE_ALGORITHM_LINUX CACHE)
 
 set(TEST_FILES
     ADSValidatorTest.h
