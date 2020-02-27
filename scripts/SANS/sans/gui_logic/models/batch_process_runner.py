@@ -4,9 +4,13 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+import traceback
+
+import six
 from qtpy.QtCore import Slot, QThreadPool, Signal, QObject
 from six import itervalues
 
+from mantid.kernel import Logger
 from sans.algorithm_detail.batch_execution import load_workspaces_from_states
 from sans.common.enums import ReductionMode
 from sans.sans_batch import SANSBatchReduction
@@ -23,6 +27,7 @@ class BatchProcessRunner(QObject):
         self.row_failed_signal.connect(notify_error)
         self.notify_done = notify_done
         self.batch_processor = SANSBatchReduction()
+        self._logger = Logger("SANS")
         self._worker = None
 
     @Slot()
@@ -62,7 +67,7 @@ class BatchProcessRunner(QObject):
             try:
                 states, errors = get_states_func(row_entries=[row])
             except Exception as e:
-                self.row_failed_signal.emit(index, str(e))
+                self._handle_err(index, e)
                 continue
 
             assert len(states) + len(errors) == 1, \
@@ -76,7 +81,7 @@ class BatchProcessRunner(QObject):
                     out_scale_factors, out_shift_factors = \
                         self.batch_processor([state], use_optimizations, output_mode, plot_results, output_graph, save_can)
                 except Exception as e:
-                    self.row_failed_signal.emit(index, str(e))
+                    self._handle_err(index, e)
                     continue
 
                 if state.reduction.reduction_mode == ReductionMode.MERGED:
@@ -92,7 +97,7 @@ class BatchProcessRunner(QObject):
             try:
                 states, errors = get_states_func(row_entries=[row])
             except Exception as e:
-                self.row_failed_signal.emit(index, str(e))
+                self._handle_err(index, e)
                 continue
 
             for error in itervalues(errors):
@@ -103,4 +108,12 @@ class BatchProcessRunner(QObject):
                     load_workspaces_from_states(state)
                     self.row_processed_signal.emit(index, [], [])
                 except Exception as e:
-                    self.row_failed_signal.emit(index, str(e))
+                    self._handle_err(index, e)
+                    continue
+
+    def _handle_err(self, index, e):
+        # We manually have to extract out the traceback, since going to a str for Qt signals will strip this
+        if six.PY3:
+            self._logger.error(''.join(traceback.format_tb(e.__traceback__)))
+        self._logger.error(str(e))
+        self.row_failed_signal.emit(index, str(e))
