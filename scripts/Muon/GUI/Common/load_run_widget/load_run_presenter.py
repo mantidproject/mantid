@@ -14,7 +14,6 @@ import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.utilities.run_string_utils import flatten_run_list
 from mantidqt.utils.observer_pattern import Observable
-from mantid.api import FileFinder
 
 
 class LoadRunWidgetPresenter(object):
@@ -158,7 +157,6 @@ class LoadRunWidgetPresenter(object):
 
         try:
             file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
-            FileFinder.findRuns(file_name)
             self.load_runs([file_name])
         except RuntimeError:
             self._view.warning_popup("Requested run exceeds the current run for this instrument ")

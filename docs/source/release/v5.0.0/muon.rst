@@ -17,6 +17,7 @@ Algorithms
 Bug Fixes
 #########
 - :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` can produce an empty dead time table, the time data is offset such that the start of thepulse is at time zero. The start and end date logs have been fixed and if no group name is present a default is generated.
+- The increment arrow no longer gives a spurious warning that the requested run exceeds the current run.
 
 
 Muon Analysis 2 and Frequency Domain Interfaces
