@@ -15,10 +15,8 @@ from mantidqt.widgets.jobtreeview import *
 from mantidqt import icons
 from mantid.simpleapi import config, logger
 from .helpers import *
-from ..sans.job_tree_view import SansJobTreeView
-from ..sans.tab_view import SansTabView
-from ..refl.job_tree_view import ReflJobTreeView
-from ..refl.tab_view import ReflTabView
+from .sans_job_tree_view import SansJobTreeView
+from .refl_job_tree_view import ReflJobTreeView
 import os
 
 
@@ -29,26 +27,24 @@ class DrillView(QMainWindow):
 
     def __init__(self):
         super(DrillView, self).__init__()
-        here = os.path.dirname(os.path.realpath(__file__))
-        uic.loadUi(os.path.join(here, 'main.ui'), self)
+        self.here = os.path.dirname(os.path.realpath(__file__))
+        uic.loadUi(os.path.join(self.here, 'main.ui'), self)
         self.instrument = config['default.instrument']
         self.technique = getTechnique(self.instrument)
         self.setup_header()
         self.setup_center()
-        self.setup_footer()
         self.show()
 
     def setup_header(self):
         self.instrumentselector = instrumentselector.InstrumentSelector(self)
         self.instrumentselector.instrumentSelectionChanged.connect(self.choose_instrument)
         self.headerLeft.addWidget(self.instrumentselector, 0, Qt.AlignLeft)
-        self.loadRundex.clicked.connect(self.load_rundex)
-        self.actionLoadRundex.setShortcut('Ctrl+O')
-        self.actionLoadRundex.setStatusTip('Load rundex')
-        self.actionLoadRundex.triggered.connect(self.load_rundex)
-        self.userDirs.clicked.connect(self.show_directory_manager)
+        self.datadirs.setIcon(icons.get_icon("mdi.folder"))
+        self.datadirs.clicked.connect(self.show_directory_manager)
         self.load.setIcon(icons.get_icon("mdi.file-import"))
         self.load.clicked.connect(self.load_rundex)
+        self.settings.setIcon(icons.get_icon("mdi.settings"))
+        self.settings.clicked.connect(self.show_settings)
         self.paste.setIcon(icons.get_icon("mdi.content-paste"))
         self.copy.setIcon(icons.get_icon("mdi.content-copy"))
         self.cut.setIcon(icons.get_icon("mdi.content-cut"))
@@ -56,7 +52,14 @@ class DrillView(QMainWindow):
         self.deleterow.setIcon(icons.get_icon("mdi.table-row-remove"))
         self.addrow.setIcon(icons.get_icon("mdi.table-row-plus-after"))
         self.save.setIcon(icons.get_icon("mdi.file-export"))
-        self.process.setIcon(icons.get_icon("mdi.launch"))
+        self.processRows.setIcon(icons.get_icon("mdi.play"))
+        self.processAll.setIcon(icons.get_icon("mdi.sigma"))
+        self.stop.setIcon(icons.get_icon("mdi.stop"))
+
+    def show_settings(self):
+        settings = QMainWindow(self)
+        uic.loadUi(os.path.join(self.here, self.technique + '_settings.ui'), settings)
+        settings.show()
 
     def setup_center(self):
         if hasattr(self, 'job_tree_view'):
@@ -64,38 +67,24 @@ class DrillView(QMainWindow):
                 self.job_tree_view.setParent(None)
                 self.job_tree_view = None
 
-        if self.technique == 'SANS':
+        if self.technique == 'sans':
             self.job_tree_view = SansJobTreeView()
-        elif self.technique == 'Reflectometry':
+        elif self.technique == 'refl':
             self.job_tree_view = ReflJobTreeView()
         else:
             pass
         self.center.addWidget(self.job_tree_view)
         self.table_signals = JobTreeViewSignalAdapter(self.job_tree_view, self)
 
-    def setup_footer(self):
-        if hasattr(self, 'tab_view'):
-            if self.tab_view:
-                self.tab_view.setParent(None)
-                self.tab_view = None
-        if self.technique == 'SANS':
-            self.tab_view = SansTabView()
-        elif self.technique == 'Reflectometry':
-            self.tab_view = ReflTabView()
-        else:
-            pass
-        self.footer.addWidget(self.tab_view)
-
     def load_rundex(self):
         fname = QFileDialog.getOpenFileName(self, 'Load rundex', '~')
 
     def choose_instrument(self, instrument):
-        if instrument in ['D11', 'D22', 'D33', 'D17', 'FIGARO']:
+        if instrument in ['D11', 'D16', 'D22', 'D33', 'D17', 'FIGARO']:
             config['default.instrument'] = instrument
             self.instrument = instrument
             self.technique = getTechnique(self.instrument)
             self.setup_center()
-            self.setup_footer()
         else:
             logger.error('Instrument {0} is not supported yet.'.format(instrument))
 

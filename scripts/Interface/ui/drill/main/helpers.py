@@ -6,12 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-TECHNIQUE_MAP = {'D11' : 'SANS', 'D16' : 'SANS', 'D22' : 'SANS', 'D33' : 'SANS',
-                 'D17' : 'Reflectometry', 'FIGARO' : 'Reflectometry'}
+TECHNIQUE_MAP = {'D11': 'sans', 'D16': 'sans', 'D22': 'sans', 'D33': 'sans',
+                 'D17': 'refl', 'FIGARO': 'refl'}
+
 
 def getTechnique(instrument):
 
     if instrument in TECHNIQUE_MAP.keys():
         return TECHNIQUE_MAP[instrument]
     else:
-        raise RuntimeError('Unsupported instrument {0}'.format(instrument))
+        raise RuntimeError('Instrument {0} is not yet supported.'.format(instrument))

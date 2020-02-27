@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>903</width>
-    <height>597</height>
+    <width>1200</width>
+    <height>960</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
-    <height>0</height>
+    <width>1024</width>
+    <height>768</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -30,57 +30,32 @@
     <item>
      <layout class="QVBoxLayout" name="mainLayout">
       <item>
-       <layout class="QHBoxLayout" name="header">
+       <layout class="QHBoxLayout" name="toolbar">
         <item>
          <layout class="QVBoxLayout" name="headerLeft"/>
         </item>
-        <item alignment="Qt::AlignHCenter">
-         <widget class="QPushButton" name="loadRundex">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>117</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>117</width>
-            <height>16777215</height>
-           </size>
-          </property>
+        <item>
+         <widget class="QToolButton" name="datadirs">
           <property name="toolTip">
-           <string>Load rundex</string>
+           <string>Manage Data Directories</string>
           </property>
           <property name="text">
-           <string>LoadRundex</string>
+           <string>...</string>
           </property>
          </widget>
         </item>
-        <item alignment="Qt::AlignRight">
-         <widget class="QPushButton" name="userDirs">
-          <property name="toolTip">
-           <string>Manage data and save directories</string>
-          </property>
-          <property name="text">
-           <string>ManageUserDirectories</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="toolbar">
         <item alignment="Qt::AlignLeft">
          <widget class="QToolButton" name="load">
           <property name="toolTip">
            <string>Load rundex</string>
           </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="settings">
           <property name="text">
            <string>...</string>
           </property>
@@ -156,16 +131,6 @@
           </property>
          </widget>
         </item>
-        <item alignment="Qt::AlignLeft">
-         <widget class="QToolButton" name="process">
-          <property name="toolTip">
-           <string>Process All</string>
-          </property>
-          <property name="text">
-           <string>...</string>
-          </property>
-         </widget>
-        </item>
         <item>
          <spacer name="horizontalSpacer">
           <property name="orientation">
@@ -182,7 +147,7 @@
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="center" stretch="">
+       <layout class="QVBoxLayout" name="center">
         <property name="sizeConstraint">
          <enum>QLayout::SetMaximumSize</enum>
         </property>
@@ -198,32 +163,35 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="processRows">
+         <widget class="QToolButton" name="processRows">
           <property name="toolTip">
            <string>Process selected rows</string>
           </property>
           <property name="text">
-           <string>ProcessRows</string>
+           <string>...</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="processAll">
+         <widget class="QToolButton" name="processAll">
           <property name="toolTip">
-           <string>Process the whole table</string>
+           <string>Process all</string>
           </property>
           <property name="text">
-           <string>ProcessAll</string>
+           <string>...</string>
           </property>
          </widget>
         </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="footer" stretch="">
-        <property name="sizeConstraint">
-         <enum>QLayout::SetMinimumSize</enum>
-        </property>
+        <item>
+         <widget class="QToolButton" name="stop">
+          <property name="toolTip">
+           <string>Stop processing</string>
+          </property>
+          <property name="text">
+           <string>...</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -235,7 +203,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>903</width>
+     <width>1200</width>
      <height>22</height>
     </rect>
    </property>
