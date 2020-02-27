@@ -61,7 +61,7 @@ class DirectBeam(BaseWidget):
         self._content.sample_plot.clicked.connect(self._sample_plot_clicked)
         self._content.direct_plot.clicked.connect(self._direct_plot_clicked)
 
-        if not self._has_instrumentview:
+        if not self._has_instrument_view:
             self._content.sample_plot.hide()
             self._content.direct_plot.hide()
 
