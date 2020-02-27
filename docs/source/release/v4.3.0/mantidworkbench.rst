@@ -107,5 +107,6 @@ Bugfixes
 - Several bugs in the way Python scripts were parsed and executed, including blank lines after a colon and tabs in strings, have been fixed.
 - Axes limits of a plot no longer automatically rescale when errorbars are on/off 
 - Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters. 
+- Fixed bug that caused an error if a MDHistoWorkspace was plotted and a user attempted to open a context menu.
 
 :ref:`Release 4.3.0 <v4.3.0>`

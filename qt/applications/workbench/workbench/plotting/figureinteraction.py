@@ -708,7 +708,11 @@ class FigureInteraction(object):
         plotted_normalized = []
         axis = ax.creation_args[0].get('axis', None)
         for workspace_name, artists in ax.tracked_workspaces.items():
-            if axis != MantidAxType.BIN and not ads.retrieve(workspace_name).isDistribution() and ax.data_replaced:
+            if hasattr(ads.retrieve(workspace_name), "isDistribution"):
+                is_dist = ads.retrieve(workspace_name).isDistribution()
+            else:
+                is_dist = True
+            if axis != MantidAxType.BIN and not is_dist and ax.data_replaced:
                 plotted_normalized += [a.is_normalized for a in artists]
             else:
                 return False
