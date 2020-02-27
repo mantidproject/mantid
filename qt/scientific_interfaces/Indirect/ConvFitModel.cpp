@@ -399,13 +399,13 @@ void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
                                 const Spectra &spectra) {
   IndirectFittingModel::addWorkspace(workspace, spectra);
 
-  const auto dataSize = numberOfWorkspaces();
-  if (m_resolution.size() < dataSize)
-    m_resolution.emplace_back(MatrixWorkspace_sptr());
-  else if (m_resolution.size() == dataSize &&
-           m_resolution[dataSize - TableDatasetIndex{1}].lock() &&
-           m_extendedResolution.size() < dataSize)
-    addExtendedResolution(dataSize - TableDatasetIndex{1});
+  // const auto dataSize = numberOfWorkspaces();
+  // if (m_resolution.size() < dataSize)
+  //   m_resolution.emplace_back(MatrixWorkspace_sptr());
+  // else if (m_resolution.size() == dataSize &&
+  //          m_resolution[dataSize - TableDatasetIndex{1}].lock() &&
+  //          m_extendedResolution.size() < dataSize)
+  //   addExtendedResolution(dataSize - TableDatasetIndex{1});
 }
 
 void ConvFitModel::removeWorkspace(TableDatasetIndex index) {

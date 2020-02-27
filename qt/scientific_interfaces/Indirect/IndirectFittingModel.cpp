@@ -965,6 +965,11 @@ std::vector<double> IndirectFittingModel::getQValuesForData() const {
   return qValues;
 }
 
+std::vector<std::pair<std::string, int>>
+IndirectFittingModel::getResolutionsForFit() const {
+  return std::vector<std::pair<std::string, int>>();
+}
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
