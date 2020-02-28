@@ -87,6 +87,7 @@ Improvements
 - You can now search for functions when doing fits.
 - A help button has been added to the fitting add function dialog.
 - The progress reporting for scripts has been vastly improved and now reports at the line level.
+- Warnings from the Python ``warnings`` module are now show as warnings and not errors in the log display.
 
 Bugfixes
 ########
@@ -105,8 +106,8 @@ Bugfixes
 - Fixed an issue where fitting a distribution workspace was normalised twice.
 - Overplots will be normalized by bin width if they are overplotting a curve from a workspace which is a distribution.
 - Several bugs in the way Python scripts were parsed and executed, including blank lines after a colon and tabs in strings, have been fixed.
-- Axes limits of a plot no longer automatically rescale when errorbars are on/off 
-- Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters. 
+- Axes limits of a plot no longer automatically rescale when errorbars are on/off
+- Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters.
 - Fixed bug that caused an error if a MDHistoWorkspace was plotted and a user attempted to open a context menu.
 
 :ref:`Release 5.0.0 <v5.0.0>`
