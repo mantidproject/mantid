@@ -709,7 +709,8 @@ QStringList IndirectFitAnalysisTab::getDatasetNames() const {
 void IndirectFitAnalysisTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(
       m_fittingModel->getNumberOfDomains(), getDatasetNames(),
-      m_fittingModel->getQValuesForData());
+      m_fittingModel->getQValuesForData(),
+      m_fittingModel->getResolutionsForFit());
   m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
 }
 
@@ -734,7 +735,8 @@ void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(
   m_dataPresenter->updateSpectraInTable(i);
   m_fitPropertyBrowser->updateFunctionBrowserData(
       m_fittingModel->getNumberOfDomains(), getDatasetNames(),
-      m_fittingModel->getQValuesForData());
+      m_fittingModel->getQValuesForData(),
+      m_fittingModel->getResolutionsForFit());
   setModelFitFunction();
   updateParameterEstimationData();
 }
