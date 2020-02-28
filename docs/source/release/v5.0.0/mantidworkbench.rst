@@ -110,5 +110,6 @@ Bugfixes
 - Axes editor menu now reads the grid visibility of the plot (i.e. the grid checkbox will always show the current grid visibility when an axis is double clicked)
 - Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters. 
 - Fixed bug that caused an error if a MDHistoWorkspace was plotted and a user attempted to open a context menu.
+- Fixed a bug which caused graphic scaling issues when the double-click menu was used to set an axis as log-scaled.
 
 :ref:`Release 5.0.0 <v5.0.0>`

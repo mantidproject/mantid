@@ -20,7 +20,7 @@ from matplotlib.colors import LogNorm, Normalize
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
-SYMLOG_LIN_THRESHOLD = 0.01
+TREAT_LOG_NEGATIVE_VALUES = 'clip'
 
 
 class PropertiesEditorBase(QDialog):
@@ -94,7 +94,6 @@ class LabelEditor(PropertiesEditorBase):
 
 
 class AxisEditorModel(object):
-
     min = None
     max = None
     log = None
@@ -122,9 +121,10 @@ class AxisEditor(PropertiesEditorBase):
 
         self.axes = axes
         self.axis_id = axis_id
+        self.lim_getter = getattr(axes, 'get_{}lim'.format(axis_id))
         self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
         self.scale_setter = getattr(axes, 'set_{}scale'.format(axis_id))
-        self.linthresholdkw = 'linthres' + axis_id
+        self.nonposkw = 'nonpos' + axis_id
         # Grid has no direct accessor from the axes
         self.axis = axes.xaxis if axis_id == 'x' else axes.yaxis
 
@@ -142,11 +142,15 @@ class AxisEditor(PropertiesEditorBase):
         axes = self.axes
 
         self.limit_min, self.limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
-        self.lim_setter(self.limit_min, self.limit_max)
+
         if self.ui.logBox.isChecked():
-            self.scale_setter('symlog', **{self.linthresholdkw: SYMLOG_LIN_THRESHOLD})
+            self.scale_setter('log', **{self.nonposkw: TREAT_LOG_NEGATIVE_VALUES})
+            self.limit_min, self.limit_max = self._check_log_limits(self.limit_min, self.limit_max)
         else:
             self.scale_setter('linear')
+
+        self.lim_setter(self.limit_min, self.limit_max)
+
         axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id)
 
     def error_occurred(self, exc):
@@ -161,6 +165,16 @@ class AxisEditor(PropertiesEditorBase):
         self.ui.editor_max.setText(str(model.max))
         self.ui.logBox.setChecked(model.log)
         self.ui.gridBox.setChecked(model.grid)
+
+    def _check_log_limits(self, editor_min, editor_max):
+        # Check that the limits from the editor are sensible for a log graph
+        # These limits are not necessarily in numeric order we have to check both
+        lim_min, lim_max = self.lim_getter()
+        if editor_min <= 0:
+            editor_min = lim_min
+        if editor_max <= 0:
+            editor_max = lim_max
+        return editor_min, editor_max
 
 
 class XAxisEditor(AxisEditor):
