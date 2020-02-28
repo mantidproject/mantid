@@ -102,7 +102,7 @@ class FittingTabModel(object):
         self._handle_single_fit_results(parameter_dict['InputWorkspace'], function_object, fitting_parameters_table,
                                         output_workspace, covariance_matrix, plot_fit)
 
-        return function_object.clone(), output_status, output_chi_squared
+        return function_object, output_status, output_chi_squared
 
     def do_single_tf_fit(self, parameter_dict, plot_fit=True):
         alg = mantid.AlgorithmManager.create("CalculateMuonAsymmetry")
@@ -114,7 +114,7 @@ class FittingTabModel(object):
                                         fitting_parameters_table, output_workspace, covariance_matrix,
                                         plot_fit)
 
-        return function_object.clone(), output_status, output_chi_squared
+        return function_object, output_status, output_chi_squared
 
     def do_single_fit_and_return_workspace_parameters_and_fit_function(
             self, parameters_dict):
@@ -210,7 +210,6 @@ class FittingTabModel(object):
         output_chi_squared_list = []
 
         for i, input_workspace in enumerate(workspace_list):
-
             params = self.get_parameters_for_single_fit(input_workspace)
 
             if not use_initial_values and i >= 1:
@@ -220,8 +219,8 @@ class FittingTabModel(object):
 
             function_object, output_status, output_chi_squared = self.do_single_fit(params,
                                                                                     plot_fit)
-            function_object_list.append(function_object)
 
+            function_object_list.append(function_object)
             output_status_list.append(output_status)
             output_chi_squared_list.append(output_chi_squared)
 
@@ -245,7 +244,6 @@ class FittingTabModel(object):
                                                                                           self.global_parameters,
                                                                                           plot_fit)
             function_object_list.append(function_object)
-
             output_status_list.append(output_status)
             output_chi_squared_list.append(output_chi_squared)
 
@@ -261,14 +259,13 @@ class FittingTabModel(object):
 
             if not use_initial_values and i >= 1:
                 previous_values = self.get_fit_function_parameter_values(function_object_list[i - 1])
-                self.set_fit_function_parameter_values(params['Function'],
+                self.set_fit_function_parameter_values(params['InputFunction'],
                                                        previous_values)
 
             function_object, output_status, output_chi_squared = self.do_single_tf_fit(params,
                                                                                        plot_fit)
 
             function_object_list.append(function_object)
-
             output_status_list.append(output_status)
             output_chi_squared_list.append(output_chi_squared)
 
@@ -284,7 +281,7 @@ class FittingTabModel(object):
 
             if not use_initial_values and i >= 1:
                 previous_values = self.get_fit_function_parameter_values(function_object_list[i - 1])
-                self.set_fit_function_parameter_values(params['Function'],
+                self.set_fit_function_parameter_values(params['InputFunction'],
                                                        previous_values)
 
             function_object, output_status, output_chi_squared = self.do_simultaneous_tf_fit(params,
@@ -292,7 +289,6 @@ class FittingTabModel(object):
                                                                                              plot_fit)
 
             function_object_list.append(function_object)
-
             output_status_list.append(output_status)
             output_chi_squared_list.append(output_chi_squared)
 
