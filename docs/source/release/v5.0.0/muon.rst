@@ -42,5 +42,6 @@ Bug Fixes
 - Fixed a bug with constraints in the Muon Analysis 2 GUI which would cause Mantid to crash.
 - Fixed a bug in Muon Analysis Old that prevented the muon fitting functions from appearing in the data analysis tab.
 - Data sets can now be reloaded while the Instrument View is open without crashing Mantid.
+- Fixed a bug where the incorrect path would be shown after loading a data file by run number.
 
 :ref:`Release 5.0.0 <v5.0.0>`
