@@ -106,6 +106,7 @@ Bugfixes
 - Overplots will be normalized by bin width if they are overplotting a curve from a workspace which is a distribution.
 - Several bugs in the way Python scripts were parsed and executed, including blank lines after a colon and tabs in strings, have been fixed.
 - Axes limits of a plot no longer automatically rescale when errorbars are on/off 
+- Axes editor menu now reads the grid visibility of the plot (i.e. the grid checkbox will always show the current grid visibility when an axis is double clicked)
 - Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters. 
 - Fixed bug that caused an error if a MDHistoWorkspace was plotted and a user attempted to open a context menu.
 
