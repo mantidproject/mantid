@@ -159,7 +159,6 @@ void IndirectFitAnalysisTab::setFitDataPresenter(
 void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
   m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(
       m_fittingModel.get(), view, this);
-  m_plotPresenter->disableSpectrumPlotSelection();
 }
 
 void IndirectFitAnalysisTab::setSpectrumSelectionView(

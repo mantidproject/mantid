@@ -214,9 +214,7 @@ void JumpFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
 
 void JumpFitDataPresenter::handleSpectrumSelectionChanged(int parameterIndex) {
   setSingleModelSpectrum(parameterIndex);
-  auto fitdata = m_jumpModel->getSpectra(m_dataIndex);
-  auto spectra = fitdata[TableRowIndex{0}];
-  emit spectrumChanged(spectra);
+  emit dataChanged();
 }
 
 void JumpFitDataPresenter::setModelSpectrum(int index) {
