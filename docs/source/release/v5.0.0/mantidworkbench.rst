@@ -108,5 +108,6 @@ Bugfixes
 - Axes limits of a plot no longer automatically rescale when errorbars are on/off 
 - Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters. 
 - Fixed bug that caused an error if a MDHistoWorkspace was plotted and a user attempted to open a context menu.
+- Fixed a bug which caused graphic scaling issues when the double-click menu was used to set an axis as log-scaled.
 
 :ref:`Release 5.0.0 <v5.0.0>`
