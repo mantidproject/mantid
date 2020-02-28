@@ -87,6 +87,7 @@ Improvements
 - You can now search for functions when doing fits.
 - A help button has been added to the fitting add function dialog.
 - The progress reporting for scripts has been vastly improved and now reports at the line level.
+- Warnings from the Python ``warnings`` module are now show as warnings and not errors in the log display.
 
 Bugfixes
 ########
