@@ -53,4 +53,4 @@ Bug fixes
 - The `TwoTheta` input option works now correctly for :ref:`ReflectometryILLPreProcess <algm-ReflectometryILLPreProcess>`
 
 
-:ref:`Release 4.3.0 <v4.3.0>`
+:ref:`Release 5.0.0 <v5.0.0>`

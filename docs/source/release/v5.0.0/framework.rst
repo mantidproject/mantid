@@ -73,4 +73,4 @@ Python
 
 - added :py:meth:`mantid.api.Run.getTimeAveragedStd` method to the :py:obj:`mantid.api.Run` object
 
-:ref:`Release 4.3.0 <v4.3.0>`
+:ref:`Release 5.0.0 <v5.0.0>`

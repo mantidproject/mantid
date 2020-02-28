@@ -53,4 +53,4 @@ BugFixes
 - Indirect ILL reductions for BATS and Doppler QENS modes will now flag the outputs as distributions if the data is normalised by the monitor.
 - :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` will now allow for manual setting of the inelastic peak channels.
 
-:ref:`Release 4.3.0 <v4.3.0>`
+:ref:`Release 5.0.0 <v5.0.0>`

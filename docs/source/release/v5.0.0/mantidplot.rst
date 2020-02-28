@@ -14,4 +14,4 @@ Bugfixes
 - Fixed an issue with Workspace History where unrolling consecutive workflow algorithms would result in only one of the algorithms being unrolled.
 - Fixed an issue where mantid crashed if you cleared the functions in the multi-dataset fitting interface
 
-:ref:`Release 4.3.0 <v4.3.0>`
+:ref:`Release 5.0.0 <v5.0.0>`

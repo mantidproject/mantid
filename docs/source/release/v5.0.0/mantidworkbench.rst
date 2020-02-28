@@ -109,4 +109,4 @@ Bugfixes
 - Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters. 
 - Fixed bug that caused an error if a MDHistoWorkspace was plotted and a user attempted to open a context menu.
 
-:ref:`Release 4.3.0 <v4.3.0>`
+:ref:`Release 5.0.0 <v5.0.0>`
