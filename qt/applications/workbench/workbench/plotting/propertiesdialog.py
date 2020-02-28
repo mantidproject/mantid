@@ -173,7 +173,7 @@ class AxisEditor(PropertiesEditorBase):
 
     def _check_log_limits(self, editor_min, editor_max):
         # Check that the limits from the editor are sensible for a log graph
-        # As these limits are not necessarily in numeric order we have to check both
+        # These limits are not necessarily in numeric order we have to check both
         lim_min, lim_max = self.lim_getter()
         if editor_min <= 0:
             editor_min = lim_min
