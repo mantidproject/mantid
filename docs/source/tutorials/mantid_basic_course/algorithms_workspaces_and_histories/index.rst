@@ -4,6 +4,8 @@
 Algorithms, Workspaces and Histories 
 ====================================
 
+The word Algorithm comes from the Latinised name of a Persian mathematician named al-Khwārizmī. He has been described as the father of algebra.
+
 .. toctree:: 
    :hidden: 
    :glob: 

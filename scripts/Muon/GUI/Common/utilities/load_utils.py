@@ -205,6 +205,9 @@ def load_workspace_from_filename(filename,
         alg, psi_data = create_load_algorithm(filename.split(os.sep)[-1], input_properties)
         alg.execute()
 
+    # The filename given to the loading algorithm can be different to the file that was actually loaded.
+    # Pulling the filename back out of the algorithm after loading ensures that the path is accurate.
+    filename = alg.getProperty("Filename").value
     workspace = AnalysisDataService.retrieve(alg.getProperty("OutputWorkspace").valueAsStr)
     if is_workspace_group(workspace):
         # handle multi-period data
