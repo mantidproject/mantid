@@ -28,7 +28,7 @@ class LoadPresenter(object):
         if self.co_model.loaded_runs == {} and self.load_model.loaded_runs == {}:
             return
         try:
-            self._current_run = list(runs)[-1]
+            self._current_run = str(list(runs)[-1])
         except IndexError:
             self.view.warning("The run was not found.")
             return
@@ -91,7 +91,8 @@ class LoadPresenter(object):
     def get_run_num_loaded_detectors(self, run):
         num_detectors = 0
         try:
-            num_detectors = len(mantid.mtd[run])
+            group = mantid.mtd[run]
+            num_detectors = len(group)
         except:
             num_detectors = 0
         return num_detectors
