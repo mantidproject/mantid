@@ -18,7 +18,7 @@ import matplotlib
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
 from mantidqt.utils.qt.testing import start_qapplication
-from workbench.plotting.propertiesdialog import *
+from workbench.plotting.propertiesdialog import XAxisEditor, YAxisEditor
 
 
 @start_qapplication
@@ -32,7 +32,7 @@ class PropertiesDialogTest(unittest.TestCase):
         # set properties that can be accessed via the axes menu
         ax.xaxis.grid(True)
         ax.set(xlim=[0, 4], ylim=[1e-3, 1e3], yscale='log')
-        # get an AxisEditor object for x/y axess
+        # get an AxisEditor object for x/y axes
         xEditor = XAxisEditor(fig.canvas, ax)
         yEditor = YAxisEditor(fig.canvas, ax)
         # test grid visibility
