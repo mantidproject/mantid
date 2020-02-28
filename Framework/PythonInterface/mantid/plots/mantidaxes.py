@@ -173,10 +173,11 @@ class MantidAxes(Axes):
             return None
         elif getattr(workspace, 'getNumberHistograms', lambda: -1)() == 1:
             # If the workspace has one histogram, just plot that
-            kwargs['wkspIndex'] = 0
             if MantidAxes.is_axis_of_type(MantidAxType.BIN, kwargs):
-                return kwargs['wkspIndex']
-            return MantidAxes.get_spec_num_from_wksp_index(workspace, kwargs['wkspIndex'])
+                kwargs['specNum'] = 0
+            else:
+                kwargs['specNum'] = MantidAxes.get_spec_num_from_wksp_index(workspace, 0)
+            return kwargs['specNum']
         else:
             return None
 
