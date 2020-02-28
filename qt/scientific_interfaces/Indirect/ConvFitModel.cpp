@@ -332,14 +332,18 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
 
 std::string ConvFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
-    return "MultiConvFit_" + m_fitType + m_backgroundString + "_Results";
-  return createOutputName("%1%_conv_" + m_fitType + m_backgroundString +
+    return "MultiConvFit_seq_" + m_fitType + m_backgroundString + "_Results";
+  return createOutputName("%1%_conv_seq_" + m_fitType + m_backgroundString +
                               "_s%2%",
                           "_to_", TableDatasetIndex{0});
 }
 
 std::string ConvFitModel::simultaneousFitOutputName() const {
-  return sequentialFitOutputName();
+  if (isMultiFit())
+    return "MultiConvFit_sim_" + m_fitType + m_backgroundString + "_Results";
+  return createOutputName("%1%_conv_sim_" + m_fitType + m_backgroundString +
+                              "_s%2%",
+                          "_to_", TableDatasetIndex{0});
 }
 
 std::string ConvFitModel::singleFitOutputName(TableDatasetIndex index,
@@ -398,14 +402,6 @@ void ConvFitModel::setTemperature(const boost::optional<double> &temperature) {
 void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
                                 const Spectra &spectra) {
   IndirectFittingModel::addWorkspace(workspace, spectra);
-
-  // const auto dataSize = numberOfWorkspaces();
-  // if (m_resolution.size() < dataSize)
-  //   m_resolution.emplace_back(MatrixWorkspace_sptr());
-  // else if (m_resolution.size() == dataSize &&
-  //          m_resolution[dataSize - TableDatasetIndex{1}].lock() &&
-  //          m_extendedResolution.size() < dataSize)
-  //   addExtendedResolution(dataSize - TableDatasetIndex{1});
 }
 
 void ConvFitModel::removeWorkspace(TableDatasetIndex index) {
