@@ -7,17 +7,21 @@
 from __future__ import (absolute_import, division, print_function)
 from mantidqt.widgets.jobtreeview import *
 
+COLUMNS = ["Sample", "SampleTransmission", "Absorber", "Beam", "Flux", "Container", "ContainerTransmission",
+           "TransmissionAbsorber", "TransmissionBeam", "Mask", "Water", "CustomOptions"]
+
+SETTING_KEYS = ["BeamRadius", "NormaliseTo", "SampleThickness", "WaterCrossSection", "DefaultMask", "SensitivityMap",
+                "ThetaDependent", "DefaultQBinning", "BinningFactor", "OutputBinning", "NPixelDivision", "SeparateOutputPanels"]
+
+SETTING_DEFAULT_VALS = [0.1, 'Timer', 0.1, 1., '', '', True, 'PixelSizeBased', 1, '', 1, False]
+
 
 class SansJobTreeView(JobTreeView):
 
     def __init__(self):
-        columns = ["Sample", "SampleTransmission", "Absorber", "Beam", "Flux", "Container", "ContainerTransmission",
-                   "TransmissionAbsorber", "TransmissionBeam", "Mask", "Water", "CustomOptions"]
-
-        JobTreeView.__init__(self, columns,self.cell_style(''))
-
+        JobTreeView.__init__(self, COLUMNS, self.cell_style(''))
         self.setRootIsDecorated(False)
-        self.add_row([''] * len(columns))
+        self.add_row([''] * len(COLUMNS))
 
     def add_row(self, value):
         value = [self.cell_style(x) for x in value]
@@ -34,3 +38,9 @@ class SansJobTreeView(JobTreeView):
         is_editable = True
         return Cell(text, background_color, border_thickness,
                     border_color, border_opacity, is_editable)
+
+
+class SansModel(object):
+
+    def __init__(self):
+        self.algorithm = 'SANSILLAutoProcess'

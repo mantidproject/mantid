@@ -9,8 +9,6 @@ from __future__ import (absolute_import, division, print_function)
 
 class DrillPresenter(object):
 
-    sheet_presenter = None
-    tab_presenter = None
 
     def __init__(self, model, view):
         self.model = model

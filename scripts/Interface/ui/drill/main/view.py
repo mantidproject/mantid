@@ -53,8 +53,33 @@ class DrillView(QMainWindow):
         self.addrow.setIcon(icons.get_icon("mdi.table-row-plus-after"))
         self.save.setIcon(icons.get_icon("mdi.file-export"))
         self.processRows.setIcon(icons.get_icon("mdi.play"))
+        self.processRows.clicked.connect(self.process_rows)
         self.processAll.setIcon(icons.get_icon("mdi.sigma"))
+        self.processAll.clicked.connect(self.process_all)
         self.stop.setIcon(icons.get_icon("mdi.stop"))
+
+    def process_all(self):
+        pass
+
+    def process_rows(self):
+        selected = self.get_selected_rows()
+        from mantid.simpleapi import SANSILLAutoProcess
+        for row in selected:
+            contents = self.get_row(RowLocation([row]))
+            args = {
+                'SampleRuns': contents[0],
+                'OutputWorkspace': 'test'
+            }
+            SANSILLAutoProcess(**args)
+
+    def get_selected_rows(self):
+        row_locations = self.job_tree_view.selectedRowLocations()
+        rows = [x.rowRelativeToParent() for x in row_locations]
+        return rows
+
+    def get_row(self, row_location):
+        cell_data = self.job_tree_view.cellsAt(row_location)
+        return [str(x.contentText()) for x in cell_data]
 
     def show_settings(self):
         settings = QMainWindow(self)
