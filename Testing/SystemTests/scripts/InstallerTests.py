@@ -135,11 +135,11 @@ try:
         out, err = p.communicate()  # waits for p to finish
         testsRunLog = open(testRunLogPath, 'w')
         if out:
-            testsRunLog.write(out)
+            testsRunLog.write(str(out))
         testsRunLog.close()
         testsRunErr = open(testRunErrPath, 'w')
         if err:
-            testsRunErr.write(err)
+            testsRunErr.write(str(err))
         testsRunErr.close()
     if p.returncode != 0:
         failure(installer)

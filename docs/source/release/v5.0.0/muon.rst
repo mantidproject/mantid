@@ -43,4 +43,4 @@ Bug Fixes
 - Fixed a bug in Muon Analysis Old that prevented the muon fitting functions from appearing in the data analysis tab.
 - Data sets can now be reloaded while the Instrument View is open without crashing Mantid.
 
-:ref:`Release 4.3.0 <v4.3.0>`
+:ref:`Release 5.0.0 <v5.0.0>`

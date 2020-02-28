@@ -28,7 +28,7 @@ See :doc:`mantidworkbench`.
 SliceViewer and Vates Simple Interface
 --------------------------------------
 
-:ref:`Release 4.3.0 <v4.3.0>`
+:ref:`Release 5.0.0 <v5.0.0>`
 
 Bugs
 ----
