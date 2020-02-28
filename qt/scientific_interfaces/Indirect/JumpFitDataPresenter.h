@@ -51,6 +51,9 @@ private slots:
 signals:
   void spectrumChanged(WorkspaceIndex);
 
+protected slots:
+  void handleSampleLoaded(const QString &) override;
+
 private:
   void setAvailableParameters(const std::vector<std::string> &parameters);
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
