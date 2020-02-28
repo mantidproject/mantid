@@ -48,6 +48,7 @@ Fixed
   radius limits, which previously summed the difference across different
   numbers of points.
 - Bug fixed affecting SANS > ORNL_SANS interface - only facilities with applicable instruments can now be selected.
+- Bug fixed causing ORNL_SANS interface to crash when selecting HFIR instruments
 
 
 :ref:`Release 4.3.0 <v4.3.0>`
