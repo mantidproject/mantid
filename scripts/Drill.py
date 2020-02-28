@@ -4,22 +4,24 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
+from mantid.kernel import (UsageService, FeatureType, config, logger)
 from qtpy import PYQT5
-from mantid.kernel import logger
+import sys
+
 if not PYQT5:
     logger.error('Drill interface is supported only in workbench.')
 else:
-    from mantid.simpleapi import config
     if config['default.facility'] != 'ILL':
         logger.error('Drill is enabled only if the facility is set to ILL.')
     else:
         from mantidqt.gui_helper import get_qapplication
         from Interface.ui.drill.main import (model, view, presenter)
         app, within_mantid = get_qapplication()
-        window = view.DrillView()
-        model = model.DrillModel()
-        presenter = presenter.DrillPresenter(model, view)
-        window.show()
+        instrument = config['default.instrument']
+        main_view = view.DrillView(instrument)
+        main_model = model.DrillModel(instrument)
+        main_presenter = presenter.DrillPresenter(main_model, main_view)
+        UsageService.registerFeatureUsage(FeatureType.Interface, "Drill", False)
+        main_view.show()
         if not within_mantid:
             sys.exit(app.exec_())
