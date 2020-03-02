@@ -112,7 +112,11 @@ void UserFunction::function1D(double *out, const double *xValues,
                               const size_t nData) const {
   for (size_t i = 0; i < nData; i++) {
     m_x = xValues[i];
-    out[i] = m_parser->Eval();
+    try {
+      out[i] = m_parser->Eval();
+    } catch (mu::Parser::exception_type &e) {
+      throw std::invalid_argument("Error evaluating function: " + e.GetMsg());
+    }
   }
 }
 
