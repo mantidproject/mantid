@@ -41,7 +41,7 @@ class LoadPresenterTest(unittest.TestCase):
         self.presenter.co_model.loaded_runs = runs
         self.presenter.load_model.loaded_runs = runs
         self.presenter.equalise_last_loaded_run(runs)
-        self.assertEqual(self.presenter._current_run, 3)
+        self.assertEqual(self.presenter._current_run, '3')
 
     def test_update_models(self):
         self.presenter.load_model = LoadModel()
