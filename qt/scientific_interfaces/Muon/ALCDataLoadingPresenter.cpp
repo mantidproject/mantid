@@ -159,6 +159,18 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
   }
 
   try {
+    if (lastRunPath.toString() == "") {
+      throw std::invalid_argument(
+          "The last run is not a valid run number. \n"
+          "This could be because the file is not in the search path or the "
+          "file does not exist yet. ");
+    }
+    if (firstRunPath.toString() == "") {
+      throw std::invalid_argument(
+          "The first run is not a valid run number. \n"
+          "This could be because the file is not in the search path or the "
+          "file does not exist yet. ");
+    }
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
     alg->setChild(true); // Don't want workspaces in the ADS
@@ -235,6 +247,8 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
 
     emit dataChanged();
 
+  } catch (const std::invalid_argument &e) {
+    m_view->displayError(e.what());
   } catch (std::exception &e) {
     m_view->displayError(e.what());
   }
