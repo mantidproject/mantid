@@ -15,6 +15,7 @@ Bugfixes
 - Fixed an issue where adding specific functions to the multi-dataset fitting interface caused it to crash
 - Fixed an issue where mantid crashed if you cleared the functions in the multi-dataset fitting interface
 - Fixed an issue where adding a UserFunction to the multi-dataset fitting interface caused a crash
+- Fixed an issue in the multi-dataset fitting interface where it crashed when doing a sequential fit with one spectra.
 
 
 :ref:`Release 5.0.0 <v5.0.0>`
