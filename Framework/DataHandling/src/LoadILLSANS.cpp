@@ -224,11 +224,24 @@ LoadILLSANS::getDetectorPositionD33(const NeXus::NXEntry &firstEntry,
 void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
                                 const std::string &instrumentPath) {
   g_log.debug("Fetching data...");
-  NXData dataGroup = firstEntry.openNXData("data");
+  std::string path;
+  if (firstEntry.containsGroup("data")) {
+    path = "data";
+  } else {
+    path = "data_scan/detector_data/data";
+  }
+  NXData dataGroup = firstEntry.openNXData(path);
   NXInt data = dataGroup.openIntData();
   data.load();
-  const size_t numberOfHistograms =
-      static_cast<size_t>(data.dim0() * data.dim1()) + N_MONITORS;
+  size_t numberOfHistograms;
+  if (data.dim0() == 1 && data.dim2() > 1 && m_instrumentName == "D16") {
+    // D16 omega scan
+    numberOfHistograms =
+        static_cast<size_t>(data.dim1() * data.dim2()) + N_MONITORS;
+  } else {
+    numberOfHistograms =
+        static_cast<size_t>(data.dim0() * data.dim1()) + N_MONITORS;
+  }
   createEmptyWorkspace(numberOfHistograms, 1);
   loadMetaData(firstEntry, instrumentPath);
   size_t nextIndex =
@@ -417,16 +430,33 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
     size_t firstIndex = 0) {
 
   // Workaround to get the number of tubes / pixels
-  const size_t numberOfTubes = data.dim0();
+  size_t numberOfTubes;
+  size_t histogramWidth;
+  const bool is_D16_omega =
+      (data.dim2() > 1 && data.dim0() == 1 && m_instrumentName == "D16");
+
+  if (is_D16_omega) {
+    // D16 with omega scan case
+    numberOfTubes = data.dim2();
+    histogramWidth = data.dim0();
+  } else {
+    numberOfTubes = data.dim0();
+    histogramWidth = data.dim2();
+  }
   const size_t numberOfPixelsPerTube = data.dim1();
   const HistogramData::BinEdges binEdges(timeBinning);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
   for (int i = 0; i < static_cast<int>(numberOfTubes); ++i) {
     for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
-      const int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      int *data_p;
+      if (is_D16_omega) {
+        data_p = &data(0, static_cast<int>(i), static_cast<int>(j));
+      } else {
+        data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      }
       const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
-      const HistogramData::Counts histoCounts(data_p, data_p + data.dim2());
+      const HistogramData::Counts histoCounts(data_p, data_p + histogramWidth);
       m_localWorkspace->setHistogram(index, binEdges, std::move(histoCounts));
     }
   }
