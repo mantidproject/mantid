@@ -62,6 +62,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
   createActions();
 
   m_selectorActive = false;
+  m_context_enabled = true;
 
   m_canvas->installEventFilterToMplCanvas(this);
   watchADS(observeADS);
@@ -442,7 +443,9 @@ bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
   bool stopEvent(false);
   if (evt->button() == Qt::RightButton) {
     stopEvent = true;
-    showContextMenu(evt);
+    if (m_context_enabled) {
+      showContextMenu(evt);
+    }
   } else if (evt->button() == Qt::LeftButton) {
     const auto position = evt->pos();
     if (!position.isNull())
@@ -702,7 +705,12 @@ void PreviewPlot::toggleLegend(const bool checked) {
 }
 
 void PreviewPlot::disableContextMenu() {
-  // Disable the context menu signal, this is currently in progress.
+  // Disable the context menu signal
+  // TODO Currently when changes are made to the plot through the context menu
+  // it is not communicated through to the perant gui which can cause issues,
+  // for now we are disabling the context menu but is should be made to
+  // communicate so it can be reactivated.
+  m_context_enabled = false;
 }
 
 } // namespace MantidWidgets

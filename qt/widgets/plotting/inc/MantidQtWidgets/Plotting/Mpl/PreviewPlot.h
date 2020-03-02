@@ -170,6 +170,7 @@ private:
   QAction *m_contextResetView;
   QActionGroup *m_contextXScale, *m_contextYScale;
   QAction *m_contextLegend;
+  bool m_context_enabled;
 };
 
 } // namespace MantidWidgets
