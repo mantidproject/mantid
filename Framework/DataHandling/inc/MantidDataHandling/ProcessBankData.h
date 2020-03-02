@@ -93,6 +93,8 @@ private:
   detid_t m_max_id;
   /// timer for performance
   Mantid::Kernel::Timer m_timer;
+  /// store event counts
+  std::vector<std::size_t> m_counts;
 }; // ENDDEF-CLASS ProcessBankData
 } // namespace DataHandling
 } // namespace Mantid
