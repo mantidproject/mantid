@@ -5,12 +5,14 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Colors.h"
+#include "MantidPythonInterface/core/Converters/ToPyList.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 
 #include <boost/optional.hpp>
 
 #include <algorithm>
+#include <numeric>
 #include <tuple>
 
 using boost::none;
@@ -20,6 +22,7 @@ using Mantid::PythonInterface::PythonException;
 
 using OptionalTupleDouble = optional<std::tuple<double, double>>;
 
+using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
@@ -176,8 +179,11 @@ Python::Object SymLogNorm::tickLocator() const {
   // Create log transform with base=10
   auto transform = scaleModule().attr("SymmetricalLogTransform")(
       10, Python::Object(pyobj().attr("linthresh")), m_linscale);
+  std::vector<float> subsVector(10);
+  std::iota(subsVector.begin(), subsVector.end(), 1);
+  auto subs = Converters::ToPyList<float>()(subsVector);
   return Python::Object(
-      tickerModule().attr("SymmetricalLogLocator")(transform));
+      tickerModule().attr("SymmetricalLogLocator")(transform, subs));
 }
 
 /**
