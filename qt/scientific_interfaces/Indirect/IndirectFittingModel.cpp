@@ -553,7 +553,11 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
   if (workspaceName.empty() || !doesExistInADS(workspaceName))
     throw std::runtime_error("A valid sample file needs to be selected.");
 
-  addWorkspace(workspaceName, Spectra(spectra));
+  try {
+    addWorkspace(workspaceName, Spectra(spectra));
+  } catch (std::logic_error &e) {
+    throw std::runtime_error(e.what());
+  }
 }
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
