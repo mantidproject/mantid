@@ -158,8 +158,9 @@ class LoadRunWidgetPresenter(object):
         try:
             file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
             self.load_runs([file_name])
-        except RuntimeError:
-            self._view.warning_popup("Requested run exceeds the current run for this instrument ")
+        except Exception:
+            # nothing is actually being caught here as it gets handled by thread_model.run
+            return
 
     def handle_decrement_run(self):
         decremented_run_list = self.get_decremented_run_list()
