@@ -701,5 +701,9 @@ void PreviewPlot::toggleLegend(const bool checked) {
   this->replot();
 }
 
+void PreviewPlot::disableContextMenu() {
+  // Disable the context menu signal, this is currently in progress.
+}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

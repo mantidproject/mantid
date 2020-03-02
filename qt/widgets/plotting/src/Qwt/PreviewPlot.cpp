@@ -63,7 +63,6 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
   m_uiForm.plot->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_uiForm.plot, SIGNAL(customContextMenuRequested(QPoint)), this,
           SLOT(showContextMenu(QPoint)));
-
   // Create the plot tool list for context menu
   m_plotToolGroup = new QActionGroup(m_contextMenu);
   m_plotToolGroup->setExclusive(true);
@@ -898,7 +897,6 @@ QStringList PreviewPlot::getCurvesForWorkspace(const MatrixWorkspace_sptr ws) {
  * @param position Position at which to show menu
  */
 void PreviewPlot::showContextMenu(QPoint position) {
-  // Show the context menu
   m_contextMenu->popup(m_uiForm.plot->mapToGlobal(position));
 }
 
@@ -1011,4 +1009,14 @@ void PreviewPlot::disableYAxisMenu() {
     throw std::runtime_error("Y Axis menu object could not be retrieved.");
   else
     menu->setVisible(false);
+}
+
+void PreviewPlot::disableContextMenu() {
+  // Disable the context menu signal
+  // TODO Currently when changes are made to the plot through the context menu
+  // it is not communicated through to the perant gui which can cause issues, 
+  // for now we are disabling the context menu but is should be made to communicate 
+  // so it can be reactivated.
+  disconnect(m_uiForm.plot, SIGNAL(customContextMenuRequested(QPoint)), this,
+             SLOT(showContextMenu(QPoint)));
 }
