@@ -93,6 +93,6 @@ class LoadPresenter(object):
         try:
             group = mantid.mtd[run]
             num_detectors = len(group)
-        except:
+        except KeyError:
             num_detectors = 0
         return num_detectors
