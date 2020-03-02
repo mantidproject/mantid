@@ -54,10 +54,6 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.load_utils_patcher = patcher.start()
         self.load_utils_patcher.exception_message_for_failed_files.return_value = ''
 
-        file_finder_patcher = mock.patch('Muon.GUI.Common.load_run_widget.load_run_presenter.FileFinder')
-        self.addCleanup(file_finder_patcher.stop)
-        file_finder_patcher.start()
-
     def tearDown(self):
         self.obj = None
 
@@ -77,6 +73,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
     def assert_view_empty(self):
         self.assertEqual(self.view.get_run_edit_text(), "")
 
+    @staticmethod
     def load_failure(self):
         raise ValueError("Error text")
 

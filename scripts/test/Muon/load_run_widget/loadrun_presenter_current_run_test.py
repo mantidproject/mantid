@@ -27,6 +27,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
 
         return run_twice
 
+    @staticmethod
     def load_failure(self):
         raise ValueError("Error text")
 
