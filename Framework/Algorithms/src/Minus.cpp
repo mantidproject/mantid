@@ -22,7 +22,7 @@ void Minus::performBinaryOperation(const HistogramData::Histogram &lhs,
                                    HistogramData::HistogramY &YOut,
                                    HistogramData::HistogramE &EOut) {
   std::transform(lhs.y().begin(), lhs.y().end(), rhs.y().begin(), YOut.begin(),
-                 std::minus<double>());
+                 std::minus<>());
   std::transform(lhs.e().begin(), lhs.e().end(), rhs.e().begin(), EOut.begin(),
                  VectorHelper::SumGaussError<double>());
 }
@@ -33,12 +33,14 @@ void Minus::performBinaryOperation(const HistogramData::Histogram &lhs,
                                    HistogramData::HistogramE &EOut) {
   using std::placeholders::_1;
   std::transform(lhs.y().begin(), lhs.y().end(), YOut.begin(),
-                 std::bind(std::minus<double>(), _1, rhsY));
+                 [rhsY](const double &l) { return l - rhsY; });
   // Only do E if non-zero, otherwise just copy
-  if (rhsE != 0)
-    std::transform(lhs.e().begin(), lhs.e().end(), EOut.begin(),
-                   std::bind(VectorHelper::SumGaussError<double>(), _1, rhsE));
-  else
+  if (rhsE != 0) {
+    double rhsE2 = rhsE * rhsE;
+    std::transform(
+        lhs.e().begin(), lhs.e().end(), EOut.begin(),
+        [rhsE2](const double &l) { return std::sqrt(l * l + rhsE2); });
+  } else
     EOut = lhs.e();
 }
 
