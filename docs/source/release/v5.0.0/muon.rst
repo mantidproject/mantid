@@ -15,7 +15,7 @@ Bug Fixes
 
 
 Muon Analysis 2 and Frequency Domain Interfaces
-############
+##################################################
 
 New Features
 ------------
