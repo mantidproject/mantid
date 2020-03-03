@@ -170,7 +170,7 @@ void WorkspaceTreeWidget::setupConnections() {
   connect(this, SIGNAL(signalClearView()), this, SLOT(handleClearView()),
           Qt::QueuedConnection);
   connect(m_tree, SIGNAL(itemSelectionChanged()), this,
-          SLOT(treeSelectionChanged()));
+          SLOT(onTreeSelectionChanged()));
   connect(m_tree, SIGNAL(itemExpanded(QTreeWidgetItem *)), this,
           SLOT(populateChildData(QTreeWidgetItem *)));
 }
@@ -900,7 +900,7 @@ bool WorkspaceTreeWidget::shouldBeSelected(QString name) const {
   return false;
 }
 
-void WorkspaceTreeWidget::treeSelectionChanged() {
+void WorkspaceTreeWidget::onTreeSelectionChanged() {
   // get selected workspaces
   auto items = m_tree->selectedItems();
 

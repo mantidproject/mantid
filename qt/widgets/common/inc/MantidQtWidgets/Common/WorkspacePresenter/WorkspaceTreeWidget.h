@@ -190,7 +190,7 @@ protected slots:
 
 private slots:
   void handleShowSaveAlgorithm();
-  void treeSelectionChanged();
+  void onTreeSelectionChanged();
   void onClickGroupButton();
   void onClickLoad();
   void onLoadAccept();
