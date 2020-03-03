@@ -52,6 +52,6 @@ BugFixes
 - Fixed a bug crashing the ``Indirect ILL Data Reduction GUI`` when Run is clicked.
 - Indirect ILL reductions for BATS and Doppler QENS modes will now flag the outputs as distributions if the data is normalised by the monitor.
 - :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` will now allow for manual setting of the inelastic peak channels.
-- The context menu on the fitting preview plots has been temporarily disabled for maintenance on the interface.
+- The context menu on the fitting preview plots for Data Analysis has been temporarily disabled due to lack of communication between it and the interface causing bugs.
 
 :ref:`Release 5.0.0 <v5.0.0>`
