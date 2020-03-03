@@ -159,7 +159,6 @@ void IndirectFitAnalysisTab::setFitDataPresenter(
 void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
   m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(
       m_fittingModel.get(), view, this);
-  m_plotPresenter->disableSpectrumPlotSelection();
 }
 
 void IndirectFitAnalysisTab::setSpectrumSelectionView(
@@ -369,11 +368,11 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
 
   if (error) {
     m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm,
-                                         TableDatasetIndex{0});
+                                         m_currentTableDatasetIndex);
     m_fittingAlgorithm.reset();
   } else
     m_fittingModel->addSingleFitOutput(m_fittingAlgorithm,
-                                       TableDatasetIndex{0});
+                                       m_currentTableDatasetIndex);
 }
 
 /**
@@ -531,6 +530,7 @@ void IndirectFitAnalysisTab::singleFit(TableDatasetIndex dataIndex,
     enableFitButtons(false);
     enableOutputOptions(false);
     m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
+    m_currentTableDatasetIndex = dataIndex;
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
   }
 }
