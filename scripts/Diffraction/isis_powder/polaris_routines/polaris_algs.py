@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
+import math
 
 import mantid.simpleapi as mantid
 from six import string_types
@@ -178,13 +179,13 @@ def _load_qlims(q_lims):
 
 def _determine_chopper_mode(ws):
     if ws.getRun().hasProperty('Frequency'):
-        frequency = ws.getRun()['Frequency'].lastValue()
-        print("No chopper mode provided")
-        if frequency == 50:
-            print("automatically chose Rietveld")
+        frequency = ws.getRun()['Frequency'].timeAverageValue()
+        print("Found chopper frequency of {} in log file.".format(frequency))
+        if math.isclose(frequency, 50, rel_tol=1):
+            print("Automatically chose Rietveld mode")
             return 'Rietveld', polaris_advanced_config.rietveld_focused_cropping_values
-        if frequency == 0:
-            print("automatically chose PDF")
+        if math.isclose(frequency, 0, rel_tol=1):
+            print("Automatically chose PDF mode")
             return 'PDF', polaris_advanced_config.pdf_focused_cropping_values
     else:
         raise ValueError("Chopper frequency not in log data. Please specify a chopper mode")
