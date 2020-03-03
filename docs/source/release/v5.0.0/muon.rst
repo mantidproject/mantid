@@ -32,8 +32,6 @@ New Features
 - Fixed a bug that prevented PSI data from being loaded.
 - Reworked the fitting tab to improve the user experience when doing single, and simultaneous fits.
 - Addition of a sequential fitting tab, enabling both sequential, and simultaneous sequential fits.
-- Fixed a bug where Elemental analysis gave an error when loading data.
-- Elemental analysis bug has been fixed that prevented co-adding data.
 
 Bug Fixes
 ---------
@@ -48,6 +46,8 @@ Elemental Analysis
 Bug Fixes
 ---------
 - The elemental analysis GUI can now handle legacy data which is missing a response dataset, e.g Delayed.
+- Fixed a bug where Elemental analysis gave an error when loading data.
+- Elemental analysis bug has been fixed that prevented co-adding data.
 
 Muon Analysis (old)
 ###################
