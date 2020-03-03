@@ -8,6 +8,8 @@ MantidWorkbench Changes
 Improvements
 ############
 
+- Tile plots are now reloaded correctly by project recovery.
+
 Bugfixes
 ########
 
