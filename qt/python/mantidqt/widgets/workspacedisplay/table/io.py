@@ -30,8 +30,7 @@ class TableWorkspaceDisplayEncoder(TableWorkspaceDisplayAttributes):
     def _encode_marked_columns(marked_columns):
         as_y_err = []
         for y_err in marked_columns.as_y_err:
-            as_y_err.append({"column": y_err.column, "relatedY": y_err.related_y_column,
-                             "labelIndex": y_err.label_index})
+            as_y_err.append({"column": y_err.column, "relatedY": y_err.related_y_column})
 
         return {"as_x": marked_columns.as_x, "as_y": marked_columns.as_y, "as_y_err": as_y_err}
 
@@ -54,7 +53,7 @@ class TableWorkspaceDisplayDecoder(TableWorkspaceDisplayAttributes):
 
         error_columns = []
         for y_err in obj_dic["markedColumns"]["as_y_err"]:
-            error_columns.append(ErrorColumn(column=y_err["column"], label_index=y_err["labelIndex"],
+            error_columns.append(ErrorColumn(column=y_err["column"],
                                              related_y_column=y_err["relatedY"]))
         pres.model.marked_columns.as_y_err = error_columns
 

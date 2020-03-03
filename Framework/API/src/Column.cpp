@@ -36,6 +36,8 @@ void Column::setPlotType(int t) {
   }
 }
 
+void Column::setLinkedYCol(const int yCol) { m_linkedYCol = yCol; }
+
 /**
  * No implementation by default.
  */

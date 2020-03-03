@@ -27,6 +27,7 @@
 #include <boost/python/dict.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>
+#include <boost/python/overloads.hpp>
 
 #include <cstring>
 #include <vector>
@@ -229,8 +230,11 @@ int getPlotType(ITableWorkspace &self, const object &column) {
  * @param self Reference to TableWorkspace this is called on
  * @param column Name or index of column
  * @param ptype PlotType: 0=None, 1=X, 2=Y, 3=Z, 4=xErr, 5=yErr, 6=Label
+ * @param linkedCol Index of the column that the column parameter is linked to
+ * (typically used for an error column)
  */
-void setPlotType(ITableWorkspace &self, const object &column, int ptype) {
+void setPlotType(ITableWorkspace &self, const object &column, int ptype,
+                 int linkedCol = -1) {
   // Find the column
   Mantid::API::Column_sptr colptr;
   if (STR_CHECK(column.ptr())) {
@@ -239,7 +243,30 @@ void setPlotType(ITableWorkspace &self, const object &column, int ptype) {
     colptr = self.getColumn(extract<int>(column)());
   }
   colptr->setPlotType(ptype);
+  if (linkedCol >= 0) {
+    colptr->setLinkedYCol(linkedCol);
+  }
   self.modified();
+}
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(setPlotType_overloads, setPlotType, 3, 4)
+
+/**
+ * Get the data column associated with a Y error column
+ * @param self Reference to TableWorkspace this is called on
+ * @param column Name or index of column
+ * @return index of the associated Y column
+ */
+int getLinkedYCol(ITableWorkspace &self, const object &column) {
+  // Find the column
+  Mantid::API::Column_const_sptr colptr;
+  if (STR_CHECK(column.ptr())) {
+    colptr = self.getColumn(extract<std::string>(column)());
+  } else {
+    colptr = self.getColumn(extract<int>(column)());
+  }
+
+  return colptr->getLinkedYCol();
 }
 
 /**
@@ -613,11 +640,18 @@ void export_ITableWorkspace() {
            "Accepts column name or index. \nPossible return values: "
            "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
 
-      .def("setPlotType", &setPlotType,
-           (arg("self"), arg("column"), arg("ptype")),
-           "Set the plot type of given column. "
-           "Accepts column name or index. \nPossible type values: "
-           "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
+      .def(
+          "setPlotType", setPlotType,
+          setPlotType_overloads(
+              (arg("self"), arg("column"), arg("ptype"), arg("linkedCol") = -1),
+              "Set the plot type of given column. "
+              "Accepts column name or index. \nPossible type values: "
+              "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = "
+              "Label)."))
+
+      .def("getLinkedYCol", &getLinkedYCol, (arg("self"), arg("column")),
+           "Get the plot type of given column as an integer. "
+           "Accepts column name or index. ")
 
       .def("removeColumn", &ITableWorkspace::removeColumn,
            (arg("self"), arg("name")), "Remove the named column.")
