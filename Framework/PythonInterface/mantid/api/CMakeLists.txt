@@ -133,10 +133,11 @@ target_link_libraries(PythonAPIModule
                               PythonGeometryModule
                               PythonKernelModule
                               API
-                              Types
-                              Kernel
-                              HistogramData
                               Geometry
+                              HistogramData
+                              Indexing
+                              Kernel
+                              Types
                               ${PYTHON_LIBRARIES}
                               ${POCO_LIBRARIES}
                               ${Boost_LIBRARIES})
