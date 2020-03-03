@@ -47,9 +47,14 @@ private slots:
   void setSingleModelSpectrum(int index);
   void handleParameterTypeChanged(const QString &parameter);
   void handleSpectrumSelectionChanged(int parameterIndex);
+  void handleMultipleInputSelected();
+  void handleSingleInputSelected();
 
 signals:
   void spectrumChanged(WorkspaceIndex);
+
+protected slots:
+  void handleSampleLoaded(const QString &) override;
 
 private:
   void setAvailableParameters(const std::vector<std::string> &parameters);

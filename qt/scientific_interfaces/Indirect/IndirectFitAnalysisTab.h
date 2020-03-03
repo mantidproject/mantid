@@ -161,6 +161,7 @@ private:
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
+  TableDatasetIndex m_currentTableDatasetIndex;
 };
 
 } // namespace IDA
