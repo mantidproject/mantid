@@ -7,6 +7,7 @@
 from __future__ import absolute_import, print_function
 
 from Muon.GUI.Common import thread_model
+import mantid.simpleapi as mantid
 
 
 class LoadPresenter(object):
@@ -16,29 +17,27 @@ class LoadPresenter(object):
         self.co_model = co_model
         self.load_thread = None
         self.co_thread = None
+        self._current_run = None
 
-        self.view.on_load_clicked(self.equalise_loaded_runs)
-        self.view.on_load_clicked(self.equalise_last_loaded_run)
         self.view.on_load_clicked(self.load_run)
         self.view.on_load_clicked(self.co_model.wipe_co_runs)
-        self.view.on_co_add_clicked(self.equalise_loaded_runs)
-        self.view.on_co_add_clicked(self.equalise_last_loaded_run)
         self.view.on_co_add_clicked(self.co_add_run)
         self.view.on_spinbox_changed(self.update_models)
 
-    def equalise_loaded_runs(self):
-        loaded_runs = max(
-            self.co_model.loaded_runs,
-            self.load_model.loaded_runs)
-        self.co_model.loaded_runs = loaded_runs
-        self.load_model.loaded_runs = loaded_runs
+    def equalise_last_loaded_run(self, runs):
+        if self.co_model.loaded_runs == {} and self.load_model.loaded_runs == {}:
+            return
+        try:
+            self._current_run = str(list(runs)[-1])
+        except IndexError:
+            self.view.warning("The run was not found.")
+            return
 
-    def equalise_last_loaded_run(self):
-        last_run = max(
-            self.co_model.last_loaded_runs,
-            self.load_model.last_loaded_runs)
-        self.co_model.last_loaded_runs = last_run
-        self.load_model.last_loaded_runs = last_run
+    def set_coadd_loaded_run(self):
+        self.equalise_last_loaded_run(self.co_model.loaded_runs.keys())
+
+    def set_loaded_run(self):
+        self.equalise_last_loaded_run(self.load_model.loaded_runs.keys())
 
     def update_models(self, run):
         self.load_model.set_run(run)
@@ -63,11 +62,13 @@ class LoadPresenter(object):
         self.view.enable_buttons()
 
     def end_load_thread(self):
+        self.set_loaded_run()
         self.enable_buttons()
         self.load_thread.deleteLater()
         self.load_thread = None
 
     def end_co_thread(self):
+        self.set_coadd_loaded_run()
         self.enable_buttons()
         self.co_thread.deleteLater()
         self.co_thread = None
@@ -77,7 +78,7 @@ class LoadPresenter(object):
 
     def last_loaded_run(self):
         try:
-            return self.load_model.last_loaded_runs[-1]
+            return self._current_run
         except IndexError:
             return None
 
@@ -88,4 +89,10 @@ class LoadPresenter(object):
         self.view.unreg_on_loading_finished(slot)
 
     def get_run_num_loaded_detectors(self, run):
-        return self.load_model.num_loaded_detectors[run]
+        num_detectors = 0
+        try:
+            group = mantid.mtd[run]
+            num_detectors = len(group)
+        except KeyError:
+            num_detectors = 0
+        return num_detectors
