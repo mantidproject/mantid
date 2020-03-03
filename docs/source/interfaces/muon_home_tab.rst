@@ -5,12 +5,12 @@ Home Tab
 
 .. image::  ../images/muon_interface_tab_home.png
    :align: right
-   :height: 500px
+   :height: 400px
 
 Pre-processing parameters
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Instrument** This selects the instrument used by the GUI
+**Instrument** This selects the instrument used by the GUI.
 
 **Time Zero** This is the time zero value used. By default the time zero is taken from the file but
 it can be specified here in which case the specified time zero is used for all calculations.
@@ -33,12 +33,6 @@ Rebin
 **Fixed** Fixed rebinning allows a scale factor to be entered which will then be used to scale the raw bins.
 
 **Variable** Variable binning allows a string to be entered which specifies the required binning. The string is of the format used by the :ref:`Rebin <algm-Rebin>` algorithm.
-
-Groups and Pairs
-^^^^^^^^^^^^^^^^
-
-**Periods** For multi period data the Summed and Subracted periods may be specified here. These periods will then be used for
-all groups and pairs.
 
 Used By
 ^^^^^^^

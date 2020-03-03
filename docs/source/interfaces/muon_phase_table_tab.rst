@@ -5,7 +5,7 @@ Phase Table Tab
 
 .. image::  ../images/muon_interface_tab_phase_table.png
    :align: right
-   :height: 500px
+   :height: 400px
 
 Phase Table Calculator
 ^^^^^^^^^^^^^^^^^^^^^^

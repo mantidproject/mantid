@@ -5,7 +5,7 @@ Results Table Tab
 
 .. image::  ../images/muon_interface_tab_results.png
    :align: right
-   :height: 500px
+   :height: 400px
 
 The results table tab outputs the results from the fitting tab as well as the log values from selected runs into a
 tableworkspace.
