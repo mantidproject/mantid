@@ -5,12 +5,14 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Colors.h"
+#include "MantidPythonInterface/core/Converters/ToPyList.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 
 #include <boost/optional.hpp>
 
 #include <algorithm>
+#include <numeric>
 #include <tuple>
 
 using boost::none;
@@ -20,6 +22,7 @@ using Mantid::PythonInterface::PythonException;
 
 using OptionalTupleDouble = optional<std::tuple<double, double>>;
 
+using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
@@ -176,8 +179,16 @@ Python::Object SymLogNorm::tickLocator() const {
   // Create log transform with base=10
   auto transform = scaleModule().attr("SymmetricalLogTransform")(
       10, Python::Object(pyobj().attr("linthresh")), m_linscale);
+
+  // Sets the subs parameter to be [1,2,...,10]. The parameter determines where
+  // the ticks on the colorbar are placed and setting it to this ensures that
+  // any range of values will have ticks.
+  std::vector<float> subsVector(10);
+  std::iota(subsVector.begin(), subsVector.end(), 1.f);
+  auto subs = Converters::ToPyList<float>()(subsVector);
+
   return Python::Object(
-      tickerModule().attr("SymmetricalLogLocator")(transform));
+      tickerModule().attr("SymmetricalLogLocator")(transform, subs));
 }
 
 /**
@@ -186,7 +197,7 @@ Python::Object SymLogNorm::tickLocator() const {
  */
 Python::Object SymLogNorm::labelFormatter() const {
   GlobalInterpreterLock lock;
-  return Python::Object(tickerModule().attr("LogFormatterMathtext")());
+  return Python::Object(tickerModule().attr("LogFormatterSciNotation")());
 }
 
 // ------------------------ PowerNorm ------------------------------------------
