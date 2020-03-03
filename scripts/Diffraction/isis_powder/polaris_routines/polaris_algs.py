@@ -181,10 +181,10 @@ def _determine_chopper_mode(ws):
     if ws.getRun().hasProperty('Frequency'):
         frequency = ws.getRun()['Frequency'].timeAverageValue()
         print("Found chopper frequency of {} in log file.".format(frequency))
-        if math.isclose(frequency, 50, rel_tol=1):
+        if math.isclose(frequency, 50, abs_tol=1):
             print("Automatically chose Rietveld mode")
             return 'Rietveld', polaris_advanced_config.rietveld_focused_cropping_values
-        if math.isclose(frequency, 0, rel_tol=1):
+        if math.isclose(frequency, 0, abs_tol=1):
             print("Automatically chose PDF mode")
             return 'PDF', polaris_advanced_config.pdf_focused_cropping_values
     else:
