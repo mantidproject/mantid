@@ -37,4 +37,5 @@ class DockablePlotToolbar(NavigationToolbar):
         for ax in self.canvas.figure.get_axes():
             if ax.get_legend() is not None:
                 ax.get_legend().set_visible(not ax.get_legend().get_visible())
+        self.canvas.figure.tight_layout()
         self.canvas.draw()
