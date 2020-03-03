@@ -17,10 +17,9 @@ from matplotlib import axis, ticker  # noqa
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
 from mantid.plots.legend import LegendProperties
-from mantid.plots.plotfunctions import plot, create_subplots
+from mantid.plots.plotfunctions import create_subplots
 # Constants set in workbench.plotting.functions but would cause backwards reliability
 from mantidqt.plotting.functions import pcolormesh
-
 
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
@@ -41,7 +40,8 @@ class PlotsLoader(object):
                 # Catch all errors in here so it can fail silently-ish
                 if isinstance(e, KeyboardInterrupt):
                     raise KeyboardInterrupt(str(e))
-                logger.warning("A plot was unable to be loaded from the save file. Error: " + str(e))
+                logger.warning("A plot was unable to be loaded from the save file. Error: " +
+                               str(e))
 
     def make_fig(self, plot_dict, create_plot=True):
         """
@@ -49,9 +49,7 @@ class PlotsLoader(object):
         :param plot_dict: dictionary; A dictionary of various items intended to recreate a figure
         :param create_plot: Bool; whether or not to make the plot, or to return the figure.
         :return: matplotlib.figure; Only returns if create_plot=False
-        """
-        import matplotlib.pyplot as plt
-        # Grab creation arguments
+        """        # Grab creation arguments
         creation_args = plot_dict["creationArguments"]
 
         if len(creation_args) == 0:
@@ -98,10 +96,20 @@ class PlotsLoader(object):
         if "cmap" in creation_arg:
             creation_arg["cmap"] = getattr(matplotlib.cm, creation_arg["cmap"])
 
-        function_dict = {"plot": axes.plot, "scatter": axes.scatter, "errorbar": axes.errorbar,
-                         "pcolor": axes.pcolor, "pcolorfast": axes.pcolorfast, "pcolormesh": pcolormesh,
-                         "imshow": pcolormesh, "contour": axes.contour, "contourf": axes.contourf,
-                         "tripcolor": axes.tripcolor, "tricontour": axes.tricontour, "tricontourf": axes.tricontourf}
+        function_dict = {
+            "plot": axes.plot,
+            "scatter": axes.scatter,
+            "errorbar": axes.errorbar,
+            "pcolor": axes.pcolor,
+            "pcolorfast": axes.pcolorfast,
+            "pcolormesh": pcolormesh,
+            "imshow": pcolormesh,
+            "contour": axes.contour,
+            "contourf": axes.contourf,
+            "tripcolor": axes.tripcolor,
+            "tricontour": axes.tricontour,
+            "tricontourf": axes.tricontourf
+        }
 
         func = function_dict[function_to_call]
         # Plotting is done via an Axes object unless a colorbar needs to be added
@@ -176,14 +184,16 @@ class PlotsLoader(object):
         ax.text(x=dic["position"][0],
                 y=dic["position"][1],
                 s=dic["text"],
-                fontdict={u'alpha': style_dic["alpha"],
-                          u'color': style_dic["color"],
-                          u'rotation': style_dic["rotation"],
-                          u'fontsize': style_dic["textSize"],
-                          u'zorder': style_dic["zOrder"],
-                          u'usetex': dic["useTeX"],
-                          u'horizontalalignment': style_dic["hAlign"],
-                          u'verticalalignment': style_dic["vAlign"]})
+                fontdict={
+                    u'alpha': style_dic["alpha"],
+                    u'color': style_dic["color"],
+                    u'rotation': style_dic["rotation"],
+                    u'fontsize': style_dic["textSize"],
+                    u'zorder': style_dic["zOrder"],
+                    u'usetex': dic["useTeX"],
+                    u'horizontalalignment': style_dic["hAlign"],
+                    u'verticalalignment': style_dic["vAlign"]
+                })
 
     @staticmethod
     def update_lines(ax, line):
@@ -299,8 +309,9 @@ class PlotsLoader(object):
         try:
             image.axes.set_cmap(cm.get_cmap(dic["cmap"]))
         except AttributeError as e:
-            logger.debug("PlotsLoader - The Image accessed did not have an axes with the ability to set the cmap: "
-                         + str(e))
+            logger.debug(
+                "PlotsLoader - The Image accessed did not have an axes with the ability to set the cmap: "
+                + str(e))
 
         # Redraw
         image.axes.figure.canvas.draw()
