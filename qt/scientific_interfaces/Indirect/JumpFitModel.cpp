@@ -8,6 +8,11 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidKernel/Logger.h"
+
+namespace {
+Mantid::Kernel::Logger logger("JumpFitModel");
+}
 
 using namespace Mantid::API;
 
@@ -278,7 +283,7 @@ void JumpFitModel::setActiveWidth(std::size_t widthIndex,
         createSpectra(std::vector<std::size_t>({widthSpectra[widthIndex]})),
         dataIndex);
   } else
-    throw std::runtime_error("Invalid width index specified.");
+    logger.warning("Invalid width index specified.");
 }
 
 void JumpFitModel::setActiveEISF(std::size_t eisfIndex,
@@ -291,7 +296,7 @@ void JumpFitModel::setActiveEISF(std::size_t eisfIndex,
         createSpectra(std::vector<std::size_t>({eisfSpectra[eisfIndex]})),
         dataIndex);
   } else
-    throw std::runtime_error("Invalid EISF index specified.");
+    logger.warning("Invalid EISF index specified.");
 }
 
 void JumpFitModel::setFitType(const std::string &fitType) {
