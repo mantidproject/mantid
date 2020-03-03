@@ -1014,9 +1014,9 @@ void PreviewPlot::disableYAxisMenu() {
 void PreviewPlot::disableContextMenu() {
   // Disable the context menu signal
   // TODO Currently when changes are made to the plot through the context menu
-  // it is not communicated through to the perant gui which can cause issues, 
-  // for now we are disabling the context menu but is should be made to communicate 
-  // so it can be reactivated.
+  // it is not communicated through to the perant gui which can cause issues,
+  // for now we are disabling the context menu but is should be made to
+  // communicate so it can be reactivated.
   disconnect(m_uiForm.plot, SIGNAL(customContextMenuRequested(QPoint)), this,
              SLOT(showContextMenu(QPoint)));
 }
