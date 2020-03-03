@@ -17,6 +17,7 @@ from matplotlib import axis, ticker  # noqa
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
 from mantid.plots.legend import LegendProperties
+from mantid.plots.plotfunctions import plot, create_subplots
 # Constants set in workbench.plotting.functions but would cause backwards reliability
 from mantidqt.plotting.functions import pcolormesh
 
@@ -59,21 +60,16 @@ class PlotsLoader(object):
                 "The original plot title was: {}".format(plot_dict["label"]))
             return
 
-        # Make a copy so it can be applied to the axes, of the plot once created.
-        creation_args_copy = copy.deepcopy(creation_args[0])
-
-        # Make initial plot
-        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
-
-        # If an overplot is necessary plot onto the same figure
-        for cargs in creation_args[0]:
-            if "workspaces" in cargs:
-                workspace_name = cargs.pop('workspaces')
-                workspace = ADS.retrieve(workspace_name)
-                self.plot_func(workspace, ax, ax.figure, cargs)
-
-        # Make sure that the axes gets it's creation_args as loading doesn't add them
-        ax.creation_args = creation_args_copy
+        fig, axes_matrix, _, _ = create_subplots(len(creation_args))
+        axes_list = axes_matrix.flatten().tolist()
+        for ax, cargs_list in zip(axes_list, creation_args):
+            creation_args_copy = copy.deepcopy(cargs_list)
+            for cargs in cargs_list:
+                if "workspaces" in cargs:
+                    workspace_name = cargs.pop("workspaces")
+                    workspace = ADS.retrieve(workspace_name)
+                    self.plot_func(workspace, ax, ax.figure, cargs)
+            ax.creation_args = creation_args_copy
 
         # Update the fig
         fig._label = plot_dict["label"]
@@ -124,6 +120,8 @@ class PlotsLoader(object):
             except IndexError as e:
                 if not self.color_bar_remade:
                     raise IndexError(e)
+            except KeyError:
+                logger.notice("Not adding data to blank axis.")
 
     @staticmethod
     def restore_fig_properties(fig, dic):
