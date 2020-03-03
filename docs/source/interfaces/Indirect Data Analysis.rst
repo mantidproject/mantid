@@ -201,8 +201,7 @@ Single Input/Multiple Input
   Choose between loading a single workspace or multiple workspaces. 
 
 Function Browser
-  This is used to decide the details of your fit including the fit type and minimizer used. It is 
-  possible to un-dock this browser.
+  This is used to decide the details of your fit including the fit type and minimizer used.
 
 Mini Plots
   The top plot displays the sample data, guess and fit. The bottom plot displays the difference between 
@@ -258,8 +257,9 @@ tab as seen in the :ref:`elwin-example-workflow`.
 
 4. Choose the **Fit Type** to be Gaussian. The parameters for this function can be seen if you
    expand the row labelled **f0-MsdGauss**. Choose appropriate starting values for these parameters.
-   It is possible to constrain one of the parameters by right clicking a parameter and selecting
-   **Constrain**.
+   When you begin to edit parameters in addition to being able to change the value of the parameter there are two additional options.
+   Clicking on the button with `...` will bring up more options to set constraints and ties on the parameters. The checkbox will toggle 
+   whether the parameter is local or global.
 
 5. Tick **Plot Guess** to get a prediction of what your fit will look like.
 
@@ -778,50 +778,54 @@ to select a file/workspace and the spectra to load). Once data has been loaded, 
 Highlighting data in the table and selecting 'Remove' will allow you to remove data from the fit. Above the preview
 plots will be a drop-down menu with which you can select the active data-set, which will be shown in the plots.
 
-Custom Function Groups
-~~~~~~~~~~~~~~~~~~~~~~
+Sequential and Simultaneous fits
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Under 'Custom Function Groups', you will find utility options for quick selection of common fit functions, specific
-to each fitting interface.
+There are options to fit your selected spectra either Sequentially or Simultaneously. 
 
-The 'Fit Type' drop-down menu will be available here in each of the QENS fitting interfaces -- which is useful for
-selecting common fit functions but not mandatory.
+A sequential fit will fit each spectra
+one after another. By defaut this will use the end values of one fit as the starting values of the next. This behaviour can be toggled 
+using the sequential/individual option. 
 
-Fitting Range
-~~~~~~~~~~~~~
+A Simultaneous fit will fit all the selected spectra against one cost function. The primary advantage of this method is that if there are
+parameters which are expected to be constant across the data range they can be tied across all the spectra.
 
-Under 'Fitting Range', you may select the start and end :math:`x`-values ('StartX' and 'EndX') to be used in the fit.
+Fit Function
+~~~~~~~~~~~~
 
-Functions
-~~~~~~~~~
+Under 'Fit Function', you can view the selected model and associated parameters as well as make modifications.
 
-Under 'Functions', you can view the selected model and associated parameters as well as make modifications.
-Right-clicking on 'Functions' and selecting 'Add Function' will allow you to add any function from Mantid's library
-of fitting functions. It is also possible to right-click on a composite function and select 'Add Function' to add a
-function to the composite.
-
+There are two modes which can be used to select functions. The default version allows easy selection of the most commonly used function models and options.
 Parameters may be tied by right-clicking on a parameter and selecting either 'Tie > To Function' when creating a tie
 to a parameter of the same name in a different function or by selecting 'Tie > Custom Tie' to tie to parameters of
 different names and for providing mathematical expressions. Parameters can be constrained by right-clicking and
 using the available options under 'Constrain'.
+
+If more fine grained control is needed selecting see full function will instead display the full function in the generic function browser.
+This generic browser functions in a very similar way to the one in :ref:`Multi-dataset Fitting Interface <Multi-dataset-Fitting-Interface>`.
 
 Upon performing a fit, the parameter values will be updated here to display the result of the fit for the selected
 spectrum.
 
 Settings
 ~~~~~~~~
+Fitting
+  Controls whether to do a sequential or simultaneous fit.
+
+Max Iterations
+  The maximum number of iterations used to perform the fit of each spectrum.
 
 Minimizer
   The minimizer which will be used in the fit (defaults to Levenberg-Marquadt).
 
-Ignore invalid data
-  Whether to ignore invalid (infinity/NaN) values when performing the fit.
-
 Cost function
   The cost function to be used in the fit (defaults to Least Squares).
 
-Max Iterations
-  The maximum number of iterations used to perform the fit of each spectrum.
+Evaluate Function As
+  The way the function is evaluated on histogram data sets. If value is “CentrePoint” then function is evaluated at centre of each bin. If it is “Histogram” then function is integrated within the bin and the integrals returned.
+
+Fit Type
+  Only available in sequential fits. Controls whether each fit is initialised from the end values of the previous fit.
 
 Preview Plots
 ~~~~~~~~~~~~~
@@ -992,6 +996,11 @@ and *Use Delta Function* options in the interface.
 The Temperature Correction is a :ref:`UserFunction <func-UserFunction>` with the
 formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
 :math:`T` is the temperature in Kelvin.
+
+Simultaneous Fitting
+~~~~~~~~~~~~~~~~~~~~
+
+
 
 **References**
 
