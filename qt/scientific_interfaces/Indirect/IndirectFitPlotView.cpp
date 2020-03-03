@@ -92,11 +92,13 @@ void IndirectFitPlotView::createSplitter() {
 
 PreviewPlot *IndirectFitPlotView::createTopPlot() {
   m_topPlot = std::make_unique<PreviewPlot>(m_splitter.get());
+  m_topPlot->disableContextMenu();
   return createPlot(m_topPlot.get(), QSize(0, 125), 0, 10);
 }
 
 PreviewPlot *IndirectFitPlotView::createBottomPlot() {
   m_bottomPlot = std::make_unique<PreviewPlot>(m_splitter.get());
+  m_bottomPlot->disableContextMenu();
   return createPlot(m_bottomPlot.get(), QSize(0, 75), 0, 6);
 }
 
