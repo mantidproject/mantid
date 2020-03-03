@@ -11,6 +11,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidNexus/MuonNexusReader.h"
 
 namespace Mantid {
 
@@ -65,7 +67,9 @@ private:
 
   /// Overwrites Algorithm method
   void exec() override;
-
+  /// Adds a log to the workspace
+  void addLogValueFromIndex(MuonNexusReader &nxload, const int &index,
+                            API::MatrixWorkspace_sptr &localWorkspace, std::set<std::string> &logNames);
   /// The name and path of an input file. This may be the filename of a raw
   /// datafile or the name of a specific log file.
   std::string m_filename;
