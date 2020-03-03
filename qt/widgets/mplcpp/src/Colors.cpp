@@ -197,7 +197,7 @@ Python::Object SymLogNorm::tickLocator() const {
  */
 Python::Object SymLogNorm::labelFormatter() const {
   GlobalInterpreterLock lock;
-  return Python::Object(tickerModule().attr("LogFormatterMathtext")());
+  return Python::Object(tickerModule().attr("LogFormatterSciNotation")());
 }
 
 // ------------------------ PowerNorm ------------------------------------------
