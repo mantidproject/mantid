@@ -5,10 +5,12 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
@@ -23,6 +25,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/implicit.hpp>
+#include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
@@ -118,6 +121,22 @@ boost::weak_ptr<Workspace> getMonitorWorkspace(MatrixWorkspace &self) {
 void clearMonitorWorkspace(MatrixWorkspace &self) {
   MatrixWorkspace_sptr monWS;
   self.setMonitorWorkspace(monWS);
+}
+
+/**
+ * @param self :: A reference to the calling object
+ *
+ * @return a list of associated spectrum numbers
+ */
+list getSpectrumNumbers(const MatrixWorkspace &self) {
+  const auto &spectrumNums = self.indexInfo().spectrumNumbers();
+  list spectra;
+
+  for (const auto index : spectrumNums) {
+    spectra.append(static_cast<int32_t>(index));
+  }
+
+  return spectra;
 }
 
 /**
@@ -283,6 +302,8 @@ void export_MatrixWorkspace() {
            "Returns size of the Y data array")
       .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms,
            arg("self"), "Returns the number of spectra in the workspace")
+      .def("getSpectrumNumbers", &getSpectrumNumbers, arg("self"),
+           "Returns a list of all spectrum numbers in the workspace")
       .def("yIndexOfX", &MatrixWorkspace::yIndexOfX,
            MatrixWorkspace_yIndexOfXOverloads(
                (arg("self"), arg("xvalue"), arg("workspaceIndex"),

@@ -90,6 +90,13 @@ class MatrixWorkspaceTest(unittest.TestCase):
         for i in range(len(ids)):
             self.assertEqual(expected[i], ids[i])
 
+    def test_spectrum_numbers_returned(self):
+        num_vec = 11
+        test_ws = WorkspaceFactory.create("Workspace2D", num_vec, 1, 1)
+
+        spec_nums = test_ws.getSpectrumNumbers()
+        self.assertEqual([x for x in range(1, num_vec + 1)], spec_nums)
+
     def test_detector_two_theta(self):
         det = self._test_ws.getDetector(1)
         two_theta = self._test_ws.detectorTwoTheta(det)
