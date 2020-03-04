@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TOFSANSRESOLUTIONBYPIXELTEST_H_
-#define TOFSANSRESOLUTIONBYPIXELTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -256,4 +255,3 @@ public:
 private:
   TOFSANSResolutionByPixel alg;
 };
-#endif /*TOFSANSRESOLUTIONBYPIXELTEST_H_*/

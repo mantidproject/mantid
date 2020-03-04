@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MULTIPLYRANGETEST_H_
-#define MULTIPLYRANGETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/MultiplyRange.h"
@@ -77,4 +76,3 @@ private:
   Mantid::Algorithms::MultiplyRange mr;
 };
 
-#endif /*MULTIPLYRANGETEST_H_*/

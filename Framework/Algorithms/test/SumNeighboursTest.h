@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SumNeighboursTEST_H_
-#define SumNeighboursTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -61,4 +60,3 @@ private:
   std::string inputSpace;
 };
 
-#endif /*SumNeighboursTEST_H_*/

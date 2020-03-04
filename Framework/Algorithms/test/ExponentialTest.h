@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef EXPONENTIALTEST_H_
-#define EXPONENTIALTEST_H_
+#pragma once
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -135,4 +134,3 @@ private:
   }
 };
 
-#endif /*EXPONENTIALTEST_H_*/

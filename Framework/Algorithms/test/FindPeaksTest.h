@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FINDPEAKSTEST_H_
-#define FINDPEAKSTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -383,4 +382,3 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_syntheticWS;
 }; // end of class FindPeaksTestPerformance
 
-#endif /*FINDPEAKSTEST_H_*/

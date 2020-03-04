@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTIONWILDESTEST_H_
-#define MANTID_ALGORITHMS_POLARIZATIONCORRECTIONWILDESTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -1994,4 +1993,3 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_ws11;
 };
 
-#endif /* MANTID_ALGORITHMS_POLARIZATIONCORRECTIONWILDESTEST_H_ */

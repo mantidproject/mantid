@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef Q1D2Test_H_
-#define Q1D2Test_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/ConvertUnits.h"
@@ -636,4 +635,3 @@ void createQResolutionWorkspace(Mantid::API::MatrixWorkspace_sptr &qResolution,
   }
 }
 
-#endif /*Q1D2Test_H_*/

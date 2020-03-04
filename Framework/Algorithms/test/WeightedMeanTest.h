@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WEIGHTEDMEANTEST_H_
-#define WEIGHTEDMEANTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/WeightedMean.h"
@@ -86,4 +85,3 @@ private:
   Mantid::Algorithms::WeightedMean wm;
 };
 
-#endif /*WEIGHTEDMEANTEST_H_*/

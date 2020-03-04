@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGY_H_
-#define MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGY_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 
@@ -38,4 +37,3 @@ public:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGY_H_ */

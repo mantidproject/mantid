@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MONTECARLOTESTING_H
-#define MANTID_ALGORITHMS_MONTECARLOTESTING_H
+#pragma once
 
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -172,4 +171,3 @@ inline boost::shared_ptr<Mantid::Geometry::SampleEnvironment> createTestKit() {
 
 } // namespace MonteCarloTesting
 
-#endif // MANTID_ALGORITHMS_MONTECARLOTESTING_H

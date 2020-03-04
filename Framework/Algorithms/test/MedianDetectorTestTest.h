@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WBVMEDIANTESTTEST_H_
-#define WBVMEDIANTESTTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -251,4 +250,3 @@ private:
   double m_YSum;
 };
 
-#endif /*WBVMEDIANTESTTEST_H_*/

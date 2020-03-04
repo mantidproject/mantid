@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef HE3TUBEEFFICIENCYTEST_H_
-#define HE3TUBEEFFICIENCYTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -214,4 +213,3 @@ private:
   const std::string inputWS;
   const std::string inputEvWS;
 };
-#endif // HE3TUBEEFFICIENCYTEST_H_

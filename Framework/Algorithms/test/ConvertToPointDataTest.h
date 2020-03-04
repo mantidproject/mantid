@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVERTTOPONTDATATEST_H_
-#define CONVERTTOPONTDATATEST_H_
+#pragma once
 
 #include "MantidAlgorithms/ConvertToPointData.h"
 #include <cxxtest/TestSuite.h>
@@ -224,4 +223,3 @@ private:
   Workspace2D_sptr inputWS;
 };
 
-#endif // CONVERTTOPONTDATATEST_H_

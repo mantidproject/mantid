@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NORMALISEBYCURRENTTEST_H_
-#define NORMALISEBYCURRENTTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -505,4 +504,3 @@ private:
 
   const bool performance = true;
 };
-#endif /*NORMALISEBYCURRENTTEST_H_*/

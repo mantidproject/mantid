@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef POWERLAWCORRECTIONTEST_H_
-#define POWERLAWCORRECTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -129,4 +128,3 @@ private:
   Mantid::Algorithms::PowerLawCorrection expon;
 };
 
-#endif /*POWERLAWCORRECTIONTEST_H_*/

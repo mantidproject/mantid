@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FFTSMOOTH2TEST_H_
-#define FFTSMOOTH2TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -293,4 +292,3 @@ private:
   Mantid::Algorithms::FFTSmooth2 fftsmooth2;
 };
 
-#endif /*FFTSMOOTH2TEST_H_*/

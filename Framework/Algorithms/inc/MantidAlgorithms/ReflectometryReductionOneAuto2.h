@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2_H_
-#define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2_H_
+#pragma once
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "ReflectometryWorkflowBase2.h"
@@ -121,4 +120,3 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2_H_ */

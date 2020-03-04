@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CHANGEBINOFFSETTEST_H_
-#define CHANGEBINOFFSETTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -213,4 +212,3 @@ private:
   EventWorkspace_sptr inputEvent;
 };
 
-#endif /*CHANGEBINOFFSETTEST_H_*/

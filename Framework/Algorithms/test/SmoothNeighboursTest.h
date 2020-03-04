@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SMOOTHNEIGHBOURSTEST_H_
-#define SMOOTHNEIGHBOURSTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/SmoothNeighbours.h"
@@ -468,4 +467,3 @@ private:
   MatrixWorkspace_sptr inWS;
 };
 
-#endif /*SMOOTHNEIGHBOURSTEST_H_*/

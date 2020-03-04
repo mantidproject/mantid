@@ -1,5 +1,4 @@
-#ifndef MANTID_ALGORITHMS_EQSANSCORRECTFRAMETEST_H_
-#define MANTID_ALGORITHMS_EQSANSCORRECTFRAMETEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/EQSANSCorrectFrame.h"
@@ -93,4 +92,3 @@ private:
   void cleanup() { return; }
 };
 
-#endif // MANTID_ALGORITHMS_EQSANSCORRECTFRAMETEST_H_

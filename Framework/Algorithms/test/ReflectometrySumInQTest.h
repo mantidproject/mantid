@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REFLECTOMETRYSUMINQTEST_H_
-#define MANTID_ALGORITHMS_REFLECTOMETRYSUMINQTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -401,4 +400,3 @@ private:
   std::vector<int64_t> m_fullIndexSet;
 };
 
-#endif /* MANTID_ALGORITHMS_REFLECTOMETRYSUMINQTEST_H_ */

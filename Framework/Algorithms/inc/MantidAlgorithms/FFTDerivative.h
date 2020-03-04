@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FFTDERIVATIVE_H_
-#define FFTDERIVATIVE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -63,4 +62,3 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*DERIVATIVE_H_*/

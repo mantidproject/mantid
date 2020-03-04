@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SOFQWCENTRETEST_H_
-#define SOFQWCENTRETEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/SofQWCentre.h"
@@ -81,4 +80,3 @@ public:
   }
 };
 
-#endif /*SOFQWTEST_H_*/

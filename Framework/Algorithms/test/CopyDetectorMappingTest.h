@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COPYDETECTORMAPPINGTEST_H_
-#define COPYDETECTORMAPPINGTEST_H_
+#pragma once
 
 #include "MantidAlgorithms/CopyDetectorMapping.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -94,4 +93,3 @@ public:
   }
 };
 
-#endif /*COPYDETECTORMAPPINGTEST_H_*/

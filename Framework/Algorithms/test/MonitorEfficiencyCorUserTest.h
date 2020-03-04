@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSERTEST_H_
-#define MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -173,4 +172,3 @@ public:
 private:
   DataObjects::Workspace2D_sptr input;
 };
-#endif /* MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSERTEST_H_ */

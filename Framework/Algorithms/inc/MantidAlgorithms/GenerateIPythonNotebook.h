@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOK_H
-#define MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOK_H
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
@@ -52,4 +51,3 @@ protected:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif // MANTID_ALGORITHMS_GENERATEIPYTHONNOTEBOOK_H

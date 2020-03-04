@@ -11,8 +11,7 @@
  *      Author: janik
  */
 
-#ifndef FILTERBYTIMETEST_H_
-#define FILTERBYTIMETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -234,4 +233,3 @@ private:
   FilterByTime alg;
 };
 
-#endif /* FILTERBYTIMETEST_H_ */

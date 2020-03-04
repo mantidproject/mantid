@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SPARSEINSTRUMENTTEST_H_
-#define SPARSEINSTRUMENTTEST_H_
+#pragma once
 
 #include "MantidAlgorithms/SampleCorrections/SparseInstrument.h"
 
@@ -306,4 +305,3 @@ private:
   const Mantid::Geometry::ReferenceFrame m_standardRefFrame;
 };
 
-#endif // SPARSEINSTRUMENTTEST_H_

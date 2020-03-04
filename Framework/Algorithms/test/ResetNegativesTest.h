@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_RESETNEGATIVESTEST_H_
-#define MANTID_ALGORITHMS_RESETNEGATIVESTEST_H_
+#pragma once
 
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -207,4 +206,3 @@ private:
   }
 };
 
-#endif /* MANTID_ALGORITHMS_RESETNEGATIVESTEST_H_ */

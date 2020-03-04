@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COMMUTATIVEBINARYOPERATIONTEST_H_
-#define COMMUTATIVEBINARYOPERATIONTEST_H_
+#pragma once
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -156,4 +155,3 @@ public:
   }
 };
 
-#endif /*COMMUTATIVEBINARYOPERATIONTEST_H_*/

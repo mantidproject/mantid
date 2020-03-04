@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SASSENAFFTTEST_H_
-#define MANTID_ALGORITHMS_SASSENAFFTTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -304,4 +303,3 @@ private:
   const size_t nbins;
 }; // class ApplyDetailedBalanceTest
 
-#endif // MANTID_ALGORITHMS_SASSENAFFTTEST_H_

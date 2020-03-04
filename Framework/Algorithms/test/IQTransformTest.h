@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IQTRANSFORMTEST_H_
-#define IQTRANSFORMTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -255,4 +254,3 @@ private:
   Mantid::API::MatrixWorkspace_sptr inWS_point;
 };
 
-#endif /*IQTRANSFORMTEST_H_*/

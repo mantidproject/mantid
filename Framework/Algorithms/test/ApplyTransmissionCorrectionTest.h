@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef APPLYTRANSMISSIONCORRECTIONTEST_H_
-#define APPLYTRANSMISSIONCORRECTIONTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/ApplyTransmissionCorrection.h"
@@ -127,4 +126,3 @@ public:
   }
 };
 
-#endif /*APPLYTRANSMISSIONCORRECTIONTEST_H_*/

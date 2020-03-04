@@ -11,8 +11,7 @@
  *      Author: spu92482
  */
 
-#ifndef ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACETEST_H_
-#define ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -181,4 +180,3 @@ public:
   }
 };
 
-#endif /* ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACETEST_H_ */

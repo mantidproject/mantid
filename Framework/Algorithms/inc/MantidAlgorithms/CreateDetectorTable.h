@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CREATE_DETECTOR_TABLE_H_
-#define CREATE_DETECTOR_TABLE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/EnabledWhenWorkspaceIsType.h"
@@ -76,4 +75,3 @@ createColumns(const bool isScanning, const bool includeData, const bool calcQ);
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*CREATE_DETECTOR_TABLE_H_*/

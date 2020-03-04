@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SOFQW_H_
-#define MANTID_ALGORITHMS_SOFQW_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -145,4 +144,3 @@ std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_SOFQW_H_*/

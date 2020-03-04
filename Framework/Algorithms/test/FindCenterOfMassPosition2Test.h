@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FINDCENTEROFMASSPOSITIONTEST2_H_
-#define FINDCENTEROFMASSPOSITIONTEST2_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
@@ -229,4 +228,3 @@ private:
   DataObjects::Workspace2D_sptr ws;
 };
 
-#endif /*FINDCENTEROFMASSPOSITIONTEST2_H_*/

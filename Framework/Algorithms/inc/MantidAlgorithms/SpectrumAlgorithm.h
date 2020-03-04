@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SPECTRUMALGORITHM_H_
-#define MANTID_ALGORITHMS_SPECTRUMALGORITHM_H_
+#pragma once
 
 #include <tuple>
 
@@ -159,4 +158,3 @@ using SpectrumAlgorithm_sptr = boost::shared_ptr<SpectrumAlgorithm>;
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_SPECTRUMALGORITHM_H_ */

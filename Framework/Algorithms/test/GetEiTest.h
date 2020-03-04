@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GETEITEST_H_
-#define GETEITEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -347,4 +346,3 @@ public:
   GetEiTest getEiTest;
 };
 
-#endif /*GETEITEST_H_*/

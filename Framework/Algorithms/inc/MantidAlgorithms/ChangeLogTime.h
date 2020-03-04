@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CHANGELOGTIME_H
-#define CHANGELOGTIME_H
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 
@@ -34,4 +33,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-#endif // CHANGELOGTIME_H

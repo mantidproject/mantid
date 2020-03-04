@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TOFSANSRESOLUTIONBYPIXELCALCULATORTEST_H_
-#define TOFSANSRESOLUTIONBYPIXELCALCULATORTEST_H_
+#pragma once
 
 #include "MantidAlgorithms/TOFSANSResolutionByPixelCalculator.h"
 #include <cxxtest/TestSuite.h>
@@ -52,4 +51,3 @@ public:
     TSM_ASSERT_EQUALS("Should be equate to 5", expectedResult, result);
   }
 };
-#endif

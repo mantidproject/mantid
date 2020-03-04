@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CALCULATEEFFICIENCYTEST_H_
-#define CALCULATEEFFICIENCYTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -249,4 +248,3 @@ private:
   std::string inputWS;
 };
 
-#endif /*Q1DTEST_H_*/

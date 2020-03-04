@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_APPENDSPECTRATEST_H_
-#define MANTID_ALGORITHMS_APPENDSPECTRATEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -479,4 +478,3 @@ private:
   const std::string ws2Name;
 };
 
-#endif /* MANTID_ALGORITHMS_APPENDSPECTRATEST_H_ */

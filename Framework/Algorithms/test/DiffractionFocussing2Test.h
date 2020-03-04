@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DIFFRACTIONFOCUSSING2TEST_H_
-#define DIFFRACTIONFOCUSSING2TEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectraAxis.h"
@@ -382,4 +381,3 @@ public:
   }
 };
 
-#endif /*DIFFRACTIONFOCUSSING2TEST_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CuboidGaugeVolumeAbsorptionTEST_H_
-#define CuboidGaugeVolumeAbsorptionTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -145,4 +144,3 @@ private:
   Mantid::Algorithms::CuboidGaugeVolumeAbsorption atten;
 };
 
-#endif /*CuboidGaugeVolumeAbsorptionTEST_H_*/

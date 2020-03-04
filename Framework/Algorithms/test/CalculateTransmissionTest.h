@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CALCULATETRANSMISSIONTEST_H_
-#define CALCULATETRANSMISSIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -479,4 +478,3 @@ private:
   std::string m_dirWS, m_transWS;
 };
 
-#endif /*CALCULATETRANSMISSIONTEST_H_*/

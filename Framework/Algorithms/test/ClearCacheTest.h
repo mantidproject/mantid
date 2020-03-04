@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CLEARCACHETEST_H_
-#define MANTID_ALGORITHMS_CLEARCACHETEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -174,4 +173,3 @@ public:
   std::vector<Poco::File> m_directoriesToRemove;
 };
 
-#endif /* MANTID_ALGORITHMS_CLEARCACHETEST_H_ */

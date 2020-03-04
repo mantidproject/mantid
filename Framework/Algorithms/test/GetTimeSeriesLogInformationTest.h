@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_GETTIMESERIESLOGINFORMATIONTEST_H_
-#define MANTID_ALGORITHMS_GETTIMESERIESLOGINFORMATIONTEST_H_
+#pragma once
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -158,4 +157,3 @@ public:
 private:
   Mantid::DataObjects::EventWorkspace_sptr inputWS;
 };
-#endif /* MANTID_ALGORITHMS_GETTIMESERIESLOGINFORMATIONTEST_H_ */

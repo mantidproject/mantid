@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef STRIPVANADIUMPEAKSTEST_H_
-#define STRIPVANADIUMPEAKSTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -78,4 +77,3 @@ public:
 private:
 };
 
-#endif /*STRIPVANADIUMPEAKSTEST_H_*/

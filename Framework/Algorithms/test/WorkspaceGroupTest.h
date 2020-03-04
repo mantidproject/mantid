@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WORKSPACEGROUP_H_
-#define WORKSPACEGROUP_H_
+#pragma once
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -756,4 +755,3 @@ private:
   }
 };
 
-#endif /*PLUSTEST_H_*/

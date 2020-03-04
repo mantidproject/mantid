@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SOLIDANGLETEST_H_
-#define SOLIDANGLETEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -249,4 +248,3 @@ private:
   CreateSampleWorkspace m_creator;
 };
 
-#endif /*SOLIDANGLETEST_H_*/

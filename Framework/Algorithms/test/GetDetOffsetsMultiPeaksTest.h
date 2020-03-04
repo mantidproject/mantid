@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GetDetOffsetsMultiPeaksTEST_H_
-#define GetDetOffsetsMultiPeaksTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -496,4 +495,3 @@ public:
   }
 };
 
-#endif /*GetDetOffsetsMultiPeaksTEST_H_*/

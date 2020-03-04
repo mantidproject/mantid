@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef RENAMEWORKSPACETEST_H_
-#define RENAMEWORKSPACETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -255,4 +254,3 @@ private:
   Mantid::Algorithms::RenameWorkspace alg;
 };
 
-#endif /*RENAMEWORKSPACETEST_H_*/

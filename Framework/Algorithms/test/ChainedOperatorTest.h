@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CHAINEDOPERATORTEST_H_
-#define CHAINEDOPERATORTEST_H_
+#pragma once
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -128,4 +127,3 @@ private:
   }
 };
 
-#endif /*CHAINEDOPERATORTEST_H_*/

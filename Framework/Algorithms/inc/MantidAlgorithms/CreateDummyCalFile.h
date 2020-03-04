@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CREATEDUMMYCALFILE_H_
-#define MANTID_ALGORITHMS_CREATEDUMMYCALFILE_H_
+#pragma once
 
 // To be compatible with MSVC++ Express Edition that does not have TR1 headers
 #include "MantidAPI/Algorithm.h"
@@ -96,4 +95,3 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_CREATEDUMMYCALFILE_H_*/

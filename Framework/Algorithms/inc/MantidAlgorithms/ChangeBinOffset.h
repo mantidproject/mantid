@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_CHANGEBINOFFSET_H_
-#define MANTID_ALGORITHM_CHANGEBINOFFSET_H_
+#pragma once
 
 #include "MantidAlgorithms/SpectrumAlgorithm.h"
 
@@ -52,4 +51,3 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_CHANGEBINOFFSET_H_*/

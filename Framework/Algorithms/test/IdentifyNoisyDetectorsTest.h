@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IDENTIFYNOISYDETECTORSTEST_H_
-#define IDENTIFYNOISYDETECTORSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -105,4 +104,3 @@ private:
   IdentifyNoisyDetectors *alg;
 };
 
-#endif /* IDENTIFYNOISYDETECTORSTEST_H_ */

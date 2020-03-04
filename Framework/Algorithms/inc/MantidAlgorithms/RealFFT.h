@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_REALFFT_H_
-#define MANTID_ALGORITHM_REALFFT_H_
+#pragma once
 
 #include "MantidAPI/ParallelAlgorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -45,4 +44,3 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHM_REALFFT_H_*/

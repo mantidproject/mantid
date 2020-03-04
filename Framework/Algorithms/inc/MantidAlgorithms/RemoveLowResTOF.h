@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REMOVELOWRESTOF_H_
-#define REMOVELOWRESTOF_H_
+#pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -55,4 +54,3 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* REMOVELOWRESTOF_H_ */

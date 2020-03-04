@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SPARSEINSTRUMENT_H_
-#define MANTID_ALGORITHMS_SPARSEINSTRUMENT_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
@@ -62,4 +61,3 @@ createDetectorGridDefinition(const API::MatrixWorkspace &modelWS,
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif // MANTID_ALGORITHMS_SPARSEWORKSPACECREATION_H_

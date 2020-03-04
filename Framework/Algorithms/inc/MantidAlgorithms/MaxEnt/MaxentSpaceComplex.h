@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MAXENTSPACECOMPLEX_H_
-#define MANTID_ALGORITHMS_MAXENTSPACECOMPLEX_H_
+#pragma once
 
 #include "MantidAlgorithms/MaxEnt/MaxentSpace.h"
 
@@ -28,4 +27,3 @@ using MaxentSpaceComplex_sptr =
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_MAXENTSPACECOMPLEX_H_ */

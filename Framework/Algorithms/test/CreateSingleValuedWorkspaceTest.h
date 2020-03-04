@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CREATESINGLEVALUEDWORKSPACETEST_H_
-#define CREATESINGLEVALUEDWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/CreateSingleValuedWorkspace.h"
@@ -100,4 +99,3 @@ private:
   Mantid::Algorithms::CreateSingleValuedWorkspace algNoErr, algWithErr;
 };
 
-#endif // CREATESINGLEVALUEDWORKSPACETEST_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SPHERICALABSORPTIONTEST_H_
-#define SPHERICALABSORPTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -87,4 +86,3 @@ public:
   }
 };
 
-#endif /*SPHERICALABSORPTIONTEST_H_*/
