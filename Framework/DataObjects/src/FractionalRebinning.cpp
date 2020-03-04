@@ -608,7 +608,7 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              RebinnedOutput &outputWS,
                              const std::vector<double> &verticalAxis,
                              const RebinnedOutput_const_sptr &inputRB) {
-  const auto &inX = inputWS->x(i);
+  const auto &inX = inputWS->binEdges(i);
   const auto &inY = inputWS->y(i);
   const auto &inE = inputWS->e(i);
   double signal = inY[j];
