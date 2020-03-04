@@ -47,6 +47,7 @@ public:
       Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinition);
 
   size_t size() const;
+  size_t detectorCount() const;
 
   const SpectrumDefinition &spectrumDefinition(const size_t index) const;
   void setSpectrumDefinition(const size_t index, SpectrumDefinition def);

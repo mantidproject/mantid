@@ -15,11 +15,11 @@
 #include <boost/python/list.hpp>
 #include <boost/python/return_value_policy.hpp>
 
-using Mantid::SpectrumDefinition;
 using Mantid::API::SpectrumInfo;
 using Mantid::API::SpectrumInfoItem;
 using Mantid::API::SpectrumInfoIterator;
 using Mantid::PythonInterface::SpectrumInfoPythonIterator;
+using Mantid::SpectrumDefinition;
 using namespace boost::python;
 
 // Helper method to make the python iterator
@@ -76,5 +76,7 @@ void export_SpectrumInfo() {
       .def("getSpectrumDefinition", &SpectrumInfo::spectrumDefinition,
            return_value_policy<return_by_value>(), (arg("self"), arg("index")),
            "Returns the SpectrumDefinition of the spectrum with the given "
-           "index.");
+           "index.")
+      .def("detectorCount", &SpectrumInfo::detectorCount, arg("self"),
+           "Returns the total number of detectors used across spectrum info.");
 }

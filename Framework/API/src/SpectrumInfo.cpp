@@ -33,6 +33,10 @@ SpectrumInfo::~SpectrumInfo() = default;
 /// Returns the size of the SpectrumInfo, i.e., the number of spectra.
 size_t SpectrumInfo::size() const { return m_spectrumInfo.size(); }
 
+size_t SpectrumInfo::detectorCount() const {
+  return m_spectrumInfo.detectorCount();
+}
+
 /// Returns a const reference to the SpectrumDefinition of the spectrum.
 const SpectrumDefinition &
 SpectrumInfo::spectrumDefinition(const size_t index) const {

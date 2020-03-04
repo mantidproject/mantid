@@ -57,6 +57,7 @@ public:
   ~SpectrumInfo();
 
   size_t size() const;
+  size_t detectorCount() const;
 
   const SpectrumDefinition &spectrumDefinition(const size_t index) const;
   const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
