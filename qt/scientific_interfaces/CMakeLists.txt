@@ -103,8 +103,7 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    DataObjects
                    PythonInterfaceCore
                    ${PYTHON_LIBRARIES}
-                   ${GMOCK_LIBRARIES}
-                   ${GTEST_LIBRARIES}
+                   gmock
                    ${POCO_LIBRARIES}
                    ${Boost_LIBRARIES}
                  QT4_LINK_LIBS
@@ -166,8 +165,7 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ${CORE_MANTIDLIBS}
                    DataObjects
                    PythonInterfaceCore
-                   ${GMOCK_LIBRARIES}
-                   ${GTEST_LIBRARIES}
+                   gmock
                    ${POCO_LIBRARIES}
                    ${Boost_LIBRARIES}
                    ${PYTHON_LIBRARIES}
