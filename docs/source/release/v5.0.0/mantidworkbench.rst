@@ -105,6 +105,7 @@ Bugfixes
 - The help button in fitting now finds the relevant page.
 - Fixed an issue with changing normalisation on single spectra plots done from a script
 - Fixed an issue where fitting a distribution workspace was normalised twice.
+- Fixed an issue where adding a Bk2BkExpConvPV function to the fit browser caused a crash
 - Overplots will be normalized by bin width if they are overplotting a curve from a workspace which is a distribution.
 - Several bugs in the way Python scripts were parsed and executed, including blank lines after a colon and tabs in strings, have been fixed.
 - Axes limits of a plot no longer automatically rescale when errorbars are on/off 

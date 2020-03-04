@@ -69,11 +69,13 @@ double Bk2BkExpConvPV::fwhm() const {
 }
 
 /** Set FWHM
- * It is an illegal operation of this type of peak
+ * This cannot be set directly so we assume Gamma is 0 and set Sigma by doing
+ * the reverse of calHandEta
  */
 void Bk2BkExpConvPV::setFwhm(const double w) {
-  UNUSED_ARG(w);
-  throw std::invalid_argument("Bk2BkExpConvPV is not allowed to set FWHM.");
+  this->setParameter("Gamma", 0);
+  auto sigma2 = std::pow(w, 2) / (8.0 * M_LN2);
+  this->setParameter("Sigma2", sigma2);
 }
 
 /** Set peak center
