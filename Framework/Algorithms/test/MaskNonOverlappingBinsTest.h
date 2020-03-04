@@ -203,4 +203,3 @@ private:
   API::MatrixWorkspace_sptr m_compWS;
   Algorithms::MaskNonOverlappingBins m_alg;
 };
-

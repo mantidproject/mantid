@@ -138,4 +138,3 @@ public:
     TS_ASSERT_EQUALS(pointDetectorStartStop.size(), 1);
   }
 };
-

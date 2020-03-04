@@ -36,4 +36,3 @@ public:
 
 } // namespace Algorithms
 } // namespace Mantid
-

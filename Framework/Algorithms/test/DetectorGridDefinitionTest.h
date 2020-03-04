@@ -108,4 +108,3 @@ private:
     return std::count(a.cbegin(), a.cend(), i) == 1;
   }
 };
-

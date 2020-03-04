@@ -258,4 +258,3 @@ public:
     TS_ASSERT_DELTA(output->mutableY(0)[0], -0.0196, 0.0001);
   }
 };
-

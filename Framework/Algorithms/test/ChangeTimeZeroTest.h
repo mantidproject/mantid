@@ -630,4 +630,3 @@ public:
     execute_change_time(m_workspaceEvent, 1000, "");
   }
 };
-

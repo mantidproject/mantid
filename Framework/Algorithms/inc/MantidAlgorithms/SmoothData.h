@@ -73,4 +73,3 @@ HistogramData::Histogram smooth(const HistogramData::Histogram &histogram,
 
 } // namespace Algorithms
 } // namespace Mantid
-

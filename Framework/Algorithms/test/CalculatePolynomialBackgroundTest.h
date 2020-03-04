@@ -313,4 +313,3 @@ public:
 private:
   Mantid::API::MatrixWorkspace_sptr m_ws;
 };
-

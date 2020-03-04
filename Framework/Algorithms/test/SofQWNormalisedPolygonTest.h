@@ -542,4 +542,3 @@ public:
 private:
   MatrixWorkspace_sptr m_largeWS;
 };
-

@@ -118,4 +118,3 @@ public:
 private:
   Mantid::Algorithms::HRPDSlabCanAbsorption atten;
 };
-

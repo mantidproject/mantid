@@ -1150,4 +1150,3 @@ private:
   Mantid::Algorithms::CheckWorkspacesMatch checker;
   const Mantid::API::MatrixWorkspace_sptr ws1;
 };
-

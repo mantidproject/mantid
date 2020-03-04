@@ -172,4 +172,3 @@ private:
   std::string inputWS;
   EventWorkspace_sptr WS;
 };
-

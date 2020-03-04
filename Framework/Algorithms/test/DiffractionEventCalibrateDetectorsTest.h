@@ -76,4 +76,3 @@ public:
     AnalysisDataService::Instance().remove("temp_event_ws");
   }
 };
-

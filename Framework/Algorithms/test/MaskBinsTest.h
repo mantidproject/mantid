@@ -373,4 +373,3 @@ public:
 private:
   Mantid::Algorithms::MaskBins masker;
 };
-

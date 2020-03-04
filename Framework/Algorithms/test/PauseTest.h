@@ -28,4 +28,3 @@ public:
     TS_ASSERT(alg.isExecuted());
   }
 };
-

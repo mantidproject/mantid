@@ -182,4 +182,3 @@ public:
 private:
   Mantid::Algorithms::CarpenterSampleCorrection algorithm;
 };
-

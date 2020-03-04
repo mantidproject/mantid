@@ -301,4 +301,3 @@ private:
   std::string inputProp2;
   std::string outputProp;
 };
-

@@ -458,4 +458,3 @@ public:
     cleanupWorkspaces(std::vector<std::string>{inputWs, resultWs});
   }
 };
-

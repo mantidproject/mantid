@@ -176,4 +176,3 @@ public:
     pAlg.reset(nullptr);
   }
 };
-

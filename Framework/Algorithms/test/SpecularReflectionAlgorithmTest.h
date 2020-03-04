@@ -116,5 +116,3 @@ public:
     linearDetectorWS = loadAlg->getProperty("OutputWorkspace");
   }
 };
-
-

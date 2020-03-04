@@ -80,4 +80,3 @@ public:
     TS_ASSERT_DELTA(det->xstep(), 0.008 * 1, 1e-6);
   }
 };
-

@@ -205,4 +205,3 @@ private:
     return inputWS;
   }
 };
-

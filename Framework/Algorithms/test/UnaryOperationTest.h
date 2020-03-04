@@ -89,4 +89,3 @@ public:
 private:
   UnaryOpHelper helper;
 };
-

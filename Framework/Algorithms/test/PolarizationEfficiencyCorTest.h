@@ -560,4 +560,3 @@ private:
     return retVal;
   }
 };
-

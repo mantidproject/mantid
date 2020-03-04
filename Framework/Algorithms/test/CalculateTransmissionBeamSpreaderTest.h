@@ -115,4 +115,3 @@ public:
 private:
   Mantid::Algorithms::CalculateTransmissionBeamSpreader trans;
 };
-

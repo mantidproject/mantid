@@ -114,4 +114,3 @@ private:
   Mantid::API::MatrixWorkspace_sptr inputMatrix;
   Mantid::DataObjects::EventWorkspace_sptr inputEvent;
 };
-

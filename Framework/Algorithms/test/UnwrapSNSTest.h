@@ -97,4 +97,3 @@ public:
     TS_ASSERT_EQUALS(ws->getSpectrum(0).x()[2], 4.0);
   }
 };
-

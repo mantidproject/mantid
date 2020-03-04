@@ -154,4 +154,3 @@ public:
     TS_ASSERT(helper.checkSizeCompatibility(work_in1, work_event2).empty());
   }
 };
-

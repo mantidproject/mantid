@@ -120,4 +120,3 @@ public:
                      currentTwoThetaInDeg, 1e-6);
   }
 };
-

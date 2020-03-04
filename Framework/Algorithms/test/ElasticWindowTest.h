@@ -217,4 +217,3 @@ private:
     TS_ASSERT_EQUALS(unitID, "QSquared");
   }
 };
-

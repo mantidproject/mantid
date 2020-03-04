@@ -399,4 +399,3 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_workspace;
   std::vector<int64_t> m_fullIndexSet;
 };
-

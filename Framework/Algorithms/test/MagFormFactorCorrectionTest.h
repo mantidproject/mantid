@@ -136,4 +136,3 @@ private:
     return sqrt(df2);
   }
 };
-

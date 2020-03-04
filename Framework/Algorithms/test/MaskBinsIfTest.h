@@ -131,4 +131,3 @@ public:
 private:
   MaskBinsIf m_alg;
 };
-

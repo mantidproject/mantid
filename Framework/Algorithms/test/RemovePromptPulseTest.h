@@ -147,4 +147,3 @@ public:
     AnalysisDataService::Instance().remove(inWSName);
   }
 };
-

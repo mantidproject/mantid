@@ -445,4 +445,3 @@ public:
       TS_ASSERT_DELTA(outputWS->readY(0)[i], exp_results[i], 0.1);
   }
 };
-

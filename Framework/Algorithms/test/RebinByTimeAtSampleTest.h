@@ -302,4 +302,3 @@ public:
     RebinByTimeBaseTestPerformance<RebinByTimeAtSample>::testExecution();
   }
 };
-

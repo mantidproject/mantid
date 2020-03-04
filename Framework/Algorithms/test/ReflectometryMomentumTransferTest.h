@@ -522,4 +522,3 @@ private:
   API::IAlgorithm_sptr m_algorithm;
   API::MatrixWorkspace_sptr m_reflectedWS;
 };
-

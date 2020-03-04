@@ -1884,4 +1884,3 @@ public:
 private:
   Mantid::Algorithms::MergeRuns m_mergeRuns;
 };
-

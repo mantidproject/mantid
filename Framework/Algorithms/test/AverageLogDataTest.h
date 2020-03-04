@@ -134,4 +134,3 @@ private:
     Mantid::API::AnalysisDataService::Instance().addOrReplace(inputWS, w);
   }
 };
-

@@ -489,4 +489,3 @@ private:
   Mantid::API::Workspace_sptr inputIndirect;
   Mantid::API::Workspace_sptr inputElasticMesh;
 };
-

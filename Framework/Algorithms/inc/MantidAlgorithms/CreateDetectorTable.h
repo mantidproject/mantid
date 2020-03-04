@@ -74,4 +74,3 @@ createColumns(const bool isScanning, const bool includeData, const bool calcQ);
 
 } // namespace Algorithms
 } // namespace Mantid
-

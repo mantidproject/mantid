@@ -103,4 +103,3 @@ private:
       AnalysisDataService::Instance().remove(out_name);
   }
 };
-

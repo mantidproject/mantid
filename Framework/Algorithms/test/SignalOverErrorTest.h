@@ -59,4 +59,3 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 };
-

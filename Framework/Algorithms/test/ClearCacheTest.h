@@ -172,4 +172,3 @@ public:
   std::vector<std::string> m_originalInstDir;
   std::vector<Poco::File> m_directoriesToRemove;
 };
-

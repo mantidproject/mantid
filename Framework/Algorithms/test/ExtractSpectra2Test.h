@@ -171,4 +171,3 @@ public:
                     "vertical axis has bin edges."))
   }
 };
-

@@ -127,4 +127,3 @@ private:
   DeadTimeCorrection m_alg;
   MatrixWorkspace_sptr in;
 };
-

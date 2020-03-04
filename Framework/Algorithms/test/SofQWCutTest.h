@@ -269,4 +269,3 @@ public:
     TS_ASSERT_DELTA(ws->readY(0)[0], 0.998910675, delta);
   }
 };
-

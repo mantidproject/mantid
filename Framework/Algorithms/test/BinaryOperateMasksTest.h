@@ -152,4 +152,3 @@ private:
   // Define the algorithm
   BinaryOperateMasks binoperator;
 };
-

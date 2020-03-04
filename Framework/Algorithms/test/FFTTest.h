@@ -987,4 +987,3 @@ private:
   const double a;
   const double tolerance;
 };
-

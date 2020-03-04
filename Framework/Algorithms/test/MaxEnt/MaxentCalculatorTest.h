@@ -339,4 +339,3 @@ public:
     Mock::VerifyAndClearExpectations(transform);
   }
 };
-

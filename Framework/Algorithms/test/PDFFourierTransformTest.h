@@ -243,4 +243,3 @@ private:
   Mantid::API::MatrixWorkspace_sptr ws;
   API::IAlgorithm *pdfft;
 };
-

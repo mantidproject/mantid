@@ -170,4 +170,3 @@ public:
     RebinByTimeBaseTestPerformance<RebinByPulseTimes>::testExecution();
   }
 };
-

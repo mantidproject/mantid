@@ -32,4 +32,3 @@ using MaxentTransform_sptr = boost::shared_ptr<MaxentTransform>;
 
 } // namespace Algorithms
 } // namespace Mantid
-

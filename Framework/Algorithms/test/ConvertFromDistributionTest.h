@@ -69,4 +69,3 @@ private:
   ConvertFromDistribution conv;
   std::string dist;
 };
-

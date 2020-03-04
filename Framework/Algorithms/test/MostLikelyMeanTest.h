@@ -59,4 +59,3 @@ public:
 private:
   MostLikelyMean m_alg;
 };
-

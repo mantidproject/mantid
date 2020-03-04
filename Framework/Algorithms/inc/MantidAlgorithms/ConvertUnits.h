@@ -135,4 +135,3 @@ protected:
 
 } // namespace Algorithms
 } // namespace Mantid
-

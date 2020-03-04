@@ -162,4 +162,3 @@ public:
     run.addLogData(new PropertyWithValue<double>(name, value));
   }
 };
-

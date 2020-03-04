@@ -209,4 +209,3 @@ public:
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
   }
 };
-

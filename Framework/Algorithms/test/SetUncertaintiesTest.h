@@ -239,4 +239,3 @@ private:
   boost::shared_ptr<Mantid::DataObjects::Workspace2D> inputWs;
   const std::string wsName = "outputWs";
 };
-

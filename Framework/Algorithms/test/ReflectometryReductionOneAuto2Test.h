@@ -1723,4 +1723,3 @@ private:
     alg.setProperty("MomentumTransferStep", 0.04);
   }
 };
-

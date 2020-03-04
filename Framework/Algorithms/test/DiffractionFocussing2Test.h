@@ -380,4 +380,3 @@ public:
     AnalysisDataService::Instance().remove("SNAP_focus");
   }
 };
-

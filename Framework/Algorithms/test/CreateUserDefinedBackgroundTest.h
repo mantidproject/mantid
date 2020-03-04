@@ -378,4 +378,3 @@ private:
   /// Key for option
   const std::string m_key;
 };
-

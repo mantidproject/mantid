@@ -204,4 +204,3 @@ private:
   double center_y;
   DataObjects::Workspace2D_sptr ws;
 };
-

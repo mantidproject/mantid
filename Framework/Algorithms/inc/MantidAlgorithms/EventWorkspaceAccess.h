@@ -18,4 +18,3 @@ struct EventWorkspaceAccess {
 };
 } // namespace Algorithms
 } // namespace Mantid
-

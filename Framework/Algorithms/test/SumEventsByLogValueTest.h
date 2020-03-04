@@ -235,4 +235,3 @@ public:
 private:
   EventWorkspace_sptr ws;
 };
-

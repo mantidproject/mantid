@@ -126,4 +126,3 @@ private:
     // Note err calculation not checked due to complexity.
   }
 };
-

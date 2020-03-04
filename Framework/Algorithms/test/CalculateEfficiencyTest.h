@@ -247,4 +247,3 @@ private:
   Mantid::Algorithms::CalculateEfficiency correction;
   std::string inputWS;
 };
-

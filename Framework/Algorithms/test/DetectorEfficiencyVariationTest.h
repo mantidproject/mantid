@@ -186,4 +186,3 @@ private:
     GoodVal = 0
   };
 };
-

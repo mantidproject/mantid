@@ -249,4 +249,3 @@ private:
   Workspace2D_sptr m_2DWS;
   double m_YSum;
 };
-

@@ -60,4 +60,3 @@ createDetectorGridDefinition(const API::MatrixWorkspace &modelWS,
 } // namespace SparseInstrument
 } // namespace Algorithms
 } // namespace Mantid
-

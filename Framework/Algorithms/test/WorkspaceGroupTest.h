@@ -754,4 +754,3 @@ private:
     return (std::find(vec.cbegin(), vec.cend(), val)) != vec.cend();
   }
 };
-

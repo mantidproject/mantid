@@ -253,4 +253,3 @@ public:
 private:
   Mantid::Algorithms::RenameWorkspace alg;
 };
-

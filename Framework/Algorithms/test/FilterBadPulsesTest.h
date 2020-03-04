@@ -88,4 +88,3 @@ private:
   FilterBadPulses alg;
   EventWorkspace_sptr WS;
 };
-

@@ -143,4 +143,3 @@ public:
 private:
   Mantid::Algorithms::CuboidGaugeVolumeAbsorption atten;
 };
-

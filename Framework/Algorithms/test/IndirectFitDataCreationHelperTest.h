@@ -269,4 +269,3 @@ public:
     TS_ASSERT(!boost::apply_visitor(AreSpectraEqual(), value1, value2));
   }
 };
-

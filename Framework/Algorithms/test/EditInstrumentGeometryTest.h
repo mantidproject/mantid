@@ -183,4 +183,3 @@ public:
     TS_ASSERT_EQUALS(spectrumInfo.detector(wsindex).getID(), detid);
   }
 };
-

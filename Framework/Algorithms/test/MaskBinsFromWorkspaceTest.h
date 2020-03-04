@@ -123,4 +123,3 @@ public:
 private:
   Mantid::Algorithms::MaskBinsFromWorkspace masker;
 };
-

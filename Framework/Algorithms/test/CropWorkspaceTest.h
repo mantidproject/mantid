@@ -464,4 +464,3 @@ public:
     TS_ASSERT(cropper.execute());
   }
 };
-

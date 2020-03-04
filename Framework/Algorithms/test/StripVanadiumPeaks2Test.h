@@ -712,4 +712,3 @@ private:
     return std::move(space2D);
   }
 };
-

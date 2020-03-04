@@ -79,4 +79,3 @@ public:
     auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQWCentre>();
   }
 };
-

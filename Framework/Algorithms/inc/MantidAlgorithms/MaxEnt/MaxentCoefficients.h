@@ -18,4 +18,3 @@ struct QuadraticCoefficients {
   Mantid::Kernel::DblMatrix s2; // Quadratic coefficient g_mu_nu
   Mantid::Kernel::DblMatrix c2; // Quadratic coefficient M_mu_nu
 };
-

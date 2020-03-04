@@ -170,4 +170,3 @@ public:
     TS_ASSERT(max_eventN > lowresws->getSpectrum(NUMPIXELS - 1).getTofMax());
   }
 };
-

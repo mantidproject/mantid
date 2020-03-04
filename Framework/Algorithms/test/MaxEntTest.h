@@ -1373,4 +1373,3 @@ private:
   MatrixWorkspace_sptr input;
   IAlgorithm_sptr alg;
 };
-

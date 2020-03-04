@@ -274,4 +274,3 @@ private:
     AnalysisDataService::Instance().addOrReplace(destName, destWorkspace);
   }
 };
-

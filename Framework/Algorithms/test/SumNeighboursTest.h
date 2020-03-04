@@ -59,4 +59,3 @@ private:
   std::string outputSpace2;
   std::string inputSpace;
 };
-

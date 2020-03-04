@@ -67,4 +67,3 @@ public:
     TS_ASSERT_THROWS(space.fromComplex(values), const std::invalid_argument &);
   }
 };
-

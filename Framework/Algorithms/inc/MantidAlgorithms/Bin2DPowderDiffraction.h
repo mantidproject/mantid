@@ -55,4 +55,3 @@ double calcDPerp(double wavelength, double logcostheta);
 
 } // namespace Algorithms
 } // namespace Mantid
-

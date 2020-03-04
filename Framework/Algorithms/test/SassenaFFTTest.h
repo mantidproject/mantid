@@ -302,4 +302,3 @@ private:
   const double ps2meV; // conversion factor from picosecond to micro-eV
   const size_t nbins;
 }; // class ApplyDetailedBalanceTest
-

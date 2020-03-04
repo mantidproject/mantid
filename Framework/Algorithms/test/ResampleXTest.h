@@ -412,4 +412,3 @@ public:
     do_testResampleXWorkspace2D(false, true);
   }
 };
-

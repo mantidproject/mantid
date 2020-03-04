@@ -224,4 +224,3 @@ private:
   Workspace2D_sptr inputWs;
   SmoothData smoothAlg;
 };
-

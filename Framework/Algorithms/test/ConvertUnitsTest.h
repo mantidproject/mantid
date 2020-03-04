@@ -893,4 +893,3 @@ private:
   MatrixWorkspace_sptr histWS;
   MatrixWorkspace_sptr eventWS;
 };
-

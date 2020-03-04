@@ -250,4 +250,3 @@ public:
 private:
   ParallaxCorrection m_alg;
 };
-

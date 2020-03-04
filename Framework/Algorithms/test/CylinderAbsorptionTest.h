@@ -339,4 +339,3 @@ private:
         alg.setPropertyValue("SampleNumberDensity", "0.07192"));
   }
 };
-

@@ -118,4 +118,3 @@ private:
     TS_ASSERT_EQUALS(id, detID);
   }
 };
-

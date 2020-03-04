@@ -373,4 +373,3 @@ private:
                      Mantid::Kernel::normalize(scatterToStart));
   }
 };
-

@@ -103,4 +103,3 @@ public:
 private:
   MatrixWorkspace_sptr m_ws;
 };
-

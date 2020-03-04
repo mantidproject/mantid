@@ -247,4 +247,3 @@ private:
   SolidAngle m_testee;
   CreateSampleWorkspace m_creator;
 };
-

@@ -127,4 +127,3 @@ public:
 private:
   Mantid::Algorithms::PowerLawCorrection expon;
 };
-

@@ -398,4 +398,3 @@ public:
     TS_ASSERT_DELTA(out4->y(0)[0], 0.6, 1e-14);
   }
 };
-

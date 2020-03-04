@@ -200,4 +200,3 @@ private:
   Mantid::Algorithms::CorrectToFile correctToFile;
   std::string inputFile;
 };
-

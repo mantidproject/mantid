@@ -178,4 +178,3 @@ private:
         boost::lexical_cast<std::string>(m_l2));
   }
 };
-

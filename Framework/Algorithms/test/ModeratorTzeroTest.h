@@ -407,4 +407,3 @@ private:
   MatrixWorkspace_sptr output;
   EventWorkspace_sptr outputEvent;
 };
-

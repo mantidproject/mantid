@@ -52,4 +52,3 @@ public:
     TS_ASSERT_EQUALS(0., correction.offset);
   }
 };
-

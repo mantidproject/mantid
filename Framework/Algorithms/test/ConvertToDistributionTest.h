@@ -93,4 +93,3 @@ private:
     return WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 0, 0.5);
   }
 };
-

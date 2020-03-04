@@ -380,4 +380,3 @@ public:
 private:
   PDCalibration pdc;
 };
-

@@ -381,4 +381,3 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_dataWS;
   Mantid::API::MatrixWorkspace_sptr m_syntheticWS;
 }; // end of class FindPeaksTestPerformance
-

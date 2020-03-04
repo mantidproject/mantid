@@ -286,4 +286,3 @@ private:
   API::MatrixWorkspace_sptr BgWS;
   API::MatrixWorkspace_sptr SourceWS;
 };
-

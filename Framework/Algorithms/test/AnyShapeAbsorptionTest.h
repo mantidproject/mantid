@@ -346,4 +346,3 @@ public:
 private:
   Mantid::Algorithms::AnyShapeAbsorption atten;
 };
-

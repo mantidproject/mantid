@@ -167,4 +167,3 @@ public:
 private:
   Mantid::Algorithms::PolynomialCorrection poly;
 };
-

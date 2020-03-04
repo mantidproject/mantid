@@ -258,4 +258,3 @@ public:
 private:
   FindEPP m_alg;
 };
-

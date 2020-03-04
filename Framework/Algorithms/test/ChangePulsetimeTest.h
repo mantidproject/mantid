@@ -150,4 +150,3 @@ public:
     execute_change_of_pulse_times(m_workspace, "1000", "");
   }
 };
-

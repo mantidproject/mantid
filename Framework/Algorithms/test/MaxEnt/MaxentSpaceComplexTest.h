@@ -35,4 +35,3 @@ public:
     TS_ASSERT_EQUALS(fromComplex, values);
   }
 };
-

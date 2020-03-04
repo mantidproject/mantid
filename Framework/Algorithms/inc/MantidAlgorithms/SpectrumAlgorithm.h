@@ -157,4 +157,3 @@ using SpectrumAlgorithm_sptr = boost::shared_ptr<SpectrumAlgorithm>;
 
 } // namespace Algorithms
 } // namespace Mantid
-

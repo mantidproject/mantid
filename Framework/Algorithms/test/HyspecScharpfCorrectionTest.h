@@ -73,4 +73,3 @@ public:
     TS_ASSERT_DELTA(y[16], 1. / std::cos(2. * alpha), 1e-6);
   }
 };
-

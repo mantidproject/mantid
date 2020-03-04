@@ -26,4 +26,3 @@ using MaxentSpaceComplex_sptr =
 
 } // namespace Algorithms
 } // namespace Mantid
-

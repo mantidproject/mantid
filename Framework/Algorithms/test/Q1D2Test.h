@@ -634,4 +634,3 @@ void createQResolutionWorkspace(Mantid::API::MatrixWorkspace_sptr &qResolution,
     alteredInput->mutableY(i) = value2;
   }
 }
-

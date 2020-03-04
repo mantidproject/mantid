@@ -539,4 +539,3 @@ public:
     TS_ASSERT(outWS != nullptr);
   }
 };
-

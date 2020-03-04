@@ -75,4 +75,3 @@ public:
 private:
   Mantid::Algorithms::MultiplyRange mr;
 };
-

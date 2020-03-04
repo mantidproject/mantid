@@ -35,4 +35,3 @@ using MaxentSpace_sptr = boost::shared_ptr<MaxentSpace>;
 
 } // namespace Algorithms
 } // namespace Mantid
-

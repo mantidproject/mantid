@@ -122,4 +122,3 @@ public:
     TS_ASSERT_THROWS(maskInstrumentInplace(in, {5}), const std::out_of_range &);
   }
 };
-

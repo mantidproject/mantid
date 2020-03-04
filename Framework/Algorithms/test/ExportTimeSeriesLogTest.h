@@ -294,4 +294,3 @@ public:
     return eventws;
   }
 };
-

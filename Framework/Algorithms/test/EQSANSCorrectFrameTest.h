@@ -91,4 +91,3 @@ private:
   int m_bankSize;
   void cleanup() { return; }
 };
-

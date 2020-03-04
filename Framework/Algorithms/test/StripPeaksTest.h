@@ -156,4 +156,3 @@ public:
 private:
   StripPeaks stripAlg;
 };
-

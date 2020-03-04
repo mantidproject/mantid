@@ -379,4 +379,3 @@ public:
     TS_ASSERT_DELTA(posOut.Z(), z, 1e-10)
   }
 };
-

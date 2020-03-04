@@ -466,4 +466,3 @@ public:
 private:
   MatrixWorkspace_sptr inWS;
 };
-

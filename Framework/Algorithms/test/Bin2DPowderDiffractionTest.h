@@ -296,4 +296,3 @@ private:
     binfile.close();
   }
 };
-

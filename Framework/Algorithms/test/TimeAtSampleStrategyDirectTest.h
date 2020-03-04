@@ -59,4 +59,3 @@ public:
     TSM_ASSERT_DELTA("L1 / (L1 + L2)", expectedShift, shift, 0.0000001);
   }
 };
-

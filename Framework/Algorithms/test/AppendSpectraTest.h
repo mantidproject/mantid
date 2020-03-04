@@ -477,4 +477,3 @@ private:
   const std::string ws1Name;
   const std::string ws2Name;
 };
-

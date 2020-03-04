@@ -305,4 +305,3 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[75], 0.0, Delta);
   }
 };
-

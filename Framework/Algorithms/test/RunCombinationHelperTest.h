@@ -202,4 +202,3 @@ private:
   RunCombinationHelper m_testee;
   MatrixWorkspace_sptr m_reference;
 };
-

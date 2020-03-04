@@ -63,4 +63,3 @@ public:
     TS_ASSERT_DELTA(result[2], 0.1, 1e-6);
   }
 };
-

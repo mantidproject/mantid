@@ -154,4 +154,3 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 };
-

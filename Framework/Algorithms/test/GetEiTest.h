@@ -345,4 +345,3 @@ public:
   // The test method object so that we can re-use the methods
   GetEiTest getEiTest;
 };
-

@@ -437,4 +437,3 @@ private:
            Mantid::PhysicalConstants::NeutronMass * 1e4;
   }
 };
-

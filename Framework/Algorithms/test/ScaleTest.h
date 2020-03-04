@@ -182,4 +182,3 @@ private:
   }
   Mantid::Algorithms::Scale scale;
 };
-

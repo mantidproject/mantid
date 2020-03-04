@@ -211,4 +211,3 @@ private:
   MatrixWorkspace_sptr input;
   EventWorkspace_sptr inputEvent;
 };
-

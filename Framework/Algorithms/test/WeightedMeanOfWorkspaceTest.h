@@ -128,4 +128,3 @@ private:
     return WorkspaceCreationHelper::createEventWorkspace();
   }
 };
-

@@ -228,4 +228,3 @@ public:
     AnalysisDataService::Instance().remove("test_ev_pow_out");
   }
 };
-

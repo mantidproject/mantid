@@ -609,4 +609,3 @@ private:
     return outputWS;
   }
 };
-

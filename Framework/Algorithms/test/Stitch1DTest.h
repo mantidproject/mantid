@@ -840,4 +840,3 @@ private:
   MatrixWorkspace_sptr ws1;
   MatrixWorkspace_sptr ws2;
 };
-

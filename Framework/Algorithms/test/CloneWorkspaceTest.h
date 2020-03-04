@@ -235,4 +235,3 @@ public:
 private:
   Mantid::Algorithms::CloneWorkspace cloner;
 };
-

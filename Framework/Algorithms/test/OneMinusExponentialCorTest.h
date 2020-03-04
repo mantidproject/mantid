@@ -248,4 +248,3 @@ public:
 private:
   Mantid::Algorithms::OneMinusExponentialCor expon;
 };
-

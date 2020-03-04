@@ -231,4 +231,3 @@ private:
   IAlgorithm_sptr m_converter;
   ITableWorkspace_sptr tws;
 };
-

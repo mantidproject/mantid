@@ -291,4 +291,3 @@ public:
 private:
   Mantid::Algorithms::FFTSmooth2 fftsmooth2;
 };
-

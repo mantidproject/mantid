@@ -148,4 +148,3 @@ private:
     API::AnalysisDataService::Instance().addOrReplace(m_inWSName, dataws);
   }
 };
-

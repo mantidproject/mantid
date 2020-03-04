@@ -373,4 +373,3 @@ public:
 private:
   Q1DWeighted m_alg;
 };
-

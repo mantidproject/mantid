@@ -179,4 +179,3 @@ public:
     TS_ASSERT_EQUALS("Wavelength", outWS->getAxis(0)->unit()->unitID());
   }
 };
-

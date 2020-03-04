@@ -187,4 +187,3 @@ private:
 
   MatrixWorkspace_sptr m_inpws;
 };
-

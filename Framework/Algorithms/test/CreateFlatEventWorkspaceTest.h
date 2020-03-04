@@ -64,4 +64,3 @@ public:
 
   void xtest_Something() { TSM_ASSERT("You forgot to write a test!", 0); }
 };
-

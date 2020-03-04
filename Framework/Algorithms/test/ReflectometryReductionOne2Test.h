@@ -1140,4 +1140,3 @@ private:
       TS_ASSERT_EQUALS(childHist->getPropertyValue(kvp.first), kvp.second);
   }
 };
-

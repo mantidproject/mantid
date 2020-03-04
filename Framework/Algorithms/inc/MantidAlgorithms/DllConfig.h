@@ -13,4 +13,3 @@
     @author Martyn Gigg, Tessella plc
 */
 #include "MantidKernel/System.h"
-

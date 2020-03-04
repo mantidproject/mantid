@@ -9,4 +9,3 @@
 namespace Mantid {
 double gsl_costFunction(const gsl_vector *x, void *params);
 } // namespace Mantid
-

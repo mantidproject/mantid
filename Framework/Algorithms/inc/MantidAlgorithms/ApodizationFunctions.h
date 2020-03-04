@@ -28,4 +28,3 @@ double none(const double, const double);
 } // namespace ApodizationFunctions
 } // namespace Algorithms
 } // namespace Mantid
-

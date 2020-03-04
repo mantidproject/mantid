@@ -248,4 +248,3 @@ public:
     TS_ASSERT_EQUALS(outWS->getNumberEvents(), 10);
   }
 };
-

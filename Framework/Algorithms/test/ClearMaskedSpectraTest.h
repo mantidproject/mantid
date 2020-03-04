@@ -135,4 +135,3 @@ public:
     TS_ASSERT_EQUALS(out->y(3)[0], 1.2);
   }
 };
-

@@ -180,4 +180,3 @@ private:
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 };
-

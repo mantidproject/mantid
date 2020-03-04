@@ -170,4 +170,3 @@ inline boost::shared_ptr<Mantid::Geometry::SampleEnvironment> createTestKit() {
 }
 
 } // namespace MonteCarloTesting
-

@@ -415,4 +415,3 @@ private:
   ConjoinXRuns m_alg;
   std::vector<std::string> m_ws;
 };
-

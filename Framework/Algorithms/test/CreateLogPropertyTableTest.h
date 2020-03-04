@@ -145,4 +145,3 @@ private:
     AnalysisDataService::Instance().addOrReplace(wsName, eventws);
   }
 };
-

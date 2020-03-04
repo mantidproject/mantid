@@ -182,4 +182,3 @@ private:
     TS_ASSERT_EQUALS(logValue, values[position]);
   }
 };
-

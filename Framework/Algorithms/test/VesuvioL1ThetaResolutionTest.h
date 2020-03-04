@@ -204,4 +204,3 @@ private:
     TS_ASSERT_DIFFERS(lastSpecDetIDs.find(3232), lastSpecDetIDs.end());
   }
 };
-

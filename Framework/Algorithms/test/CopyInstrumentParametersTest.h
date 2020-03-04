@@ -300,4 +300,3 @@ private:
   CopyInstrumentParameters copyInstParam;
   const std::string m_SourceWSName, m_TargetWSName;
 };
-

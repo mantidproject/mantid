@@ -167,4 +167,3 @@ public:
 private:
   Mantid::Algorithms::ExponentialCorrection expon;
 };
-

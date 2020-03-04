@@ -84,4 +84,3 @@ public:
 private:
   Mantid::Algorithms::WeightedMean wm;
 };
-

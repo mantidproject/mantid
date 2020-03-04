@@ -98,4 +98,3 @@ public:
     TS_ASSERT_DELTA(res, 0.0859414, 1e-6);
   }
 };
-

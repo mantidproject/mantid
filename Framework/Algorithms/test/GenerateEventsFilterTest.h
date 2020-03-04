@@ -1216,4 +1216,3 @@ public:
 private:
   Mantid::DataObjects::EventWorkspace_sptr inputEvent;
 };
-

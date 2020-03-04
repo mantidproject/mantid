@@ -477,4 +477,3 @@ private:
   /// these are the names of some sample data workspaces
   std::string m_dirWS, m_transWS;
 };
-

@@ -165,4 +165,3 @@ public:
     pAlg.reset(nullptr);
   }
 };
-

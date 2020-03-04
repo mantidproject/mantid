@@ -661,4 +661,3 @@ private:
 
   MatrixWorkspace_sptr ws;
 };
-

@@ -103,4 +103,3 @@ public:
     TS_ASSERT(filter.execute());
   }
 };
-

@@ -800,4 +800,3 @@ private:
   SumOverlappingTubes m_alg;
   size_t m_numberOfWorkspaces = 20;
 };
-

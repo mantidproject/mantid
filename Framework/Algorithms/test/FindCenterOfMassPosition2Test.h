@@ -227,4 +227,3 @@ private:
   double pixel_size;
   DataObjects::Workspace2D_sptr ws;
 };
-

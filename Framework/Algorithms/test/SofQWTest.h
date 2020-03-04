@@ -262,4 +262,3 @@ private:
     return (child->name() == name);
   }
 };
-

@@ -122,4 +122,3 @@ private:
 
   Mantid::Algorithms::CreatePSDBleedMask diagnostic;
 };
-

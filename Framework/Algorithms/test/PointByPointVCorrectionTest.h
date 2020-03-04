@@ -112,4 +112,3 @@ public:
 private:
   PointByPointVCorrection pbpv;
 };
-

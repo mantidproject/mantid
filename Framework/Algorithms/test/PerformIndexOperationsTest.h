@@ -150,4 +150,3 @@ public:
     TS_ASSERT_EQUALS(1.2 + 1.3, outWS->readY(2)[0])
   }
 };
-

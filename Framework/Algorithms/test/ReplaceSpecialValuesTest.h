@@ -341,4 +341,3 @@ private:
     TS_ASSERT(propToCheck->isDefault());
   }
 };
-

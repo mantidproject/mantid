@@ -96,4 +96,3 @@ protected: // for testing, actually private
 
 } // namespace Algorithms
 } // namespace Mantid
-

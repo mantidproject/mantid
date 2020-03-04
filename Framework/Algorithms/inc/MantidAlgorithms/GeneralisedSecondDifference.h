@@ -76,4 +76,3 @@ private:
 
 } // Namespace Algorithms
 } // Namespace Mantid
-

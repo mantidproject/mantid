@@ -580,4 +580,3 @@ private:
   DataObjects::TableWorkspace_sptr peakparmsws;
   API::MatrixWorkspace_sptr inputws;
 };
-

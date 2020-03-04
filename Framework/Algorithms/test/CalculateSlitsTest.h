@@ -116,4 +116,3 @@ public:
     TS_ASSERT(std::isnan(slit2));
   }
 };
-

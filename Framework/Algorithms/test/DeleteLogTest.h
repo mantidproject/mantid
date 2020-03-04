@@ -82,4 +82,3 @@ public:
                      const std::invalid_argument &);
   }
 };
-

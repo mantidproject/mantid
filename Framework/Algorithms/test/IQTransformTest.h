@@ -253,4 +253,3 @@ private:
   Mantid::API::MatrixWorkspace_sptr inWS_hist;
   Mantid::API::MatrixWorkspace_sptr inWS_point;
 };
-

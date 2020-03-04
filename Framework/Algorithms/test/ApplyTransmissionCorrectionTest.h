@@ -125,4 +125,3 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
   }
 };
-

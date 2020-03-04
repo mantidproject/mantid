@@ -101,4 +101,3 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ExpMethod", "Normal"));
   }
 };
-

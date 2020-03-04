@@ -294,4 +294,3 @@ private:
     AnalysisDataService::Instance().add(inputEvWSname, event);
   }
 };
-

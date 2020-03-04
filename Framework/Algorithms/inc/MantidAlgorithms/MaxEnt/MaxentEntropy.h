@@ -37,4 +37,3 @@ using MaxentEntropy_sptr = boost::shared_ptr<MaxentEntropy>;
 
 } // namespace Algorithms
 } // namespace Mantid
-

@@ -325,4 +325,3 @@ public:
                      std::invalid_argument &);
   }
 };
-

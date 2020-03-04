@@ -304,4 +304,3 @@ private:
   const Mantid::Geometry::ReferenceFrame m_goofyRefFrame;
   const Mantid::Geometry::ReferenceFrame m_standardRefFrame;
 };
-

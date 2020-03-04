@@ -64,4 +64,3 @@ public:
     TS_ASSERT_EQUALS(ws->hasMaskedBins(1), false);
   }
 };
-

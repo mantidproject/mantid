@@ -138,4 +138,3 @@ private:
     return inputWS;
   }
 };
-

@@ -110,4 +110,3 @@ private:
   Mantid::Algorithms::SumRowColumn summer;
   std::string inputWS;
 };
-

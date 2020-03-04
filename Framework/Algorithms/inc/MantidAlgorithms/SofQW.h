@@ -143,4 +143,3 @@ std::unique_ptr<Workspace> SofQW::setUpOutputWorkspace(
 
 } // namespace Algorithms
 } // namespace Mantid
-

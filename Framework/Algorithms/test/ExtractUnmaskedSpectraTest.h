@@ -168,4 +168,3 @@ private:
     return outputWS;
   }
 };
-

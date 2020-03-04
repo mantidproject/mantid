@@ -139,4 +139,3 @@ private:
     return maskedWS;
   }
 };
-

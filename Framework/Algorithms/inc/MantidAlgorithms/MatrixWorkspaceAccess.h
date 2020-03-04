@@ -18,4 +18,3 @@ struct MatrixWorkspaceAccess {
 };
 } // namespace Algorithms
 } // namespace Mantid
-

@@ -232,4 +232,3 @@ private:
   const int N;
   const double dX, XX;
 };
-

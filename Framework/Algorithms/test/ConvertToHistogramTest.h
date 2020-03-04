@@ -162,4 +162,3 @@ public:
 private:
   Workspace2D_sptr inputWS;
 };
-

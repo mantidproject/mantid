@@ -1655,4 +1655,3 @@ private:
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
   }
 };
-

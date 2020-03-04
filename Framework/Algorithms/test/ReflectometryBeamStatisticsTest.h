@@ -361,4 +361,3 @@ private:
     return om_fwhm;
   }
 };
-

@@ -215,4 +215,3 @@ public:
     TS_ASSERT_EQUALS(outws->getAxis(0)->unit()->caption(), "Radius");
   }
 };
-

@@ -103,4 +103,3 @@ public:
 private:
   IdentifyNoisyDetectors *alg;
 };
-

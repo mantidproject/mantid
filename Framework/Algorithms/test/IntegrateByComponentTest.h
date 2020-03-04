@@ -259,4 +259,3 @@ private:
     AnalysisDataService::Instance().add(inputWSname, ws2D);
   }
 };
-

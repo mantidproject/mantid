@@ -136,4 +136,3 @@ private:
   };
   Mantid::Kernel::Logger g_log{"MCAbsorptionStrategyTest"};
 };
-

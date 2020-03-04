@@ -242,4 +242,3 @@ private:
     return std::make_pair(monWs, detWs);
   }
 };
-

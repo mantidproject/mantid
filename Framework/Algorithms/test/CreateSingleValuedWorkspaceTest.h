@@ -98,4 +98,3 @@ public:
 private:
   Mantid::Algorithms::CreateSingleValuedWorkspace algNoErr, algWithErr;
 };
-

@@ -235,4 +235,3 @@ public:
 private:
   Algorithms::GroupToXResolution m_alg;
 };
-

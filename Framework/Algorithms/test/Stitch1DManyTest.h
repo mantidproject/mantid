@@ -1390,4 +1390,3 @@ public:
     Mantid::API::AnalysisDataService::Instance().clear();
   }
 };
-

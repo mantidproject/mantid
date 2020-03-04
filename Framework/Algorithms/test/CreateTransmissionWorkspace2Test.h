@@ -633,4 +633,3 @@ private:
     TS_ASSERT(!AnalysisDataService::Instance().doesExist(name));
   }
 };
-

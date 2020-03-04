@@ -551,4 +551,3 @@ private:
   MatrixWorkspace_sptr m_testWS;
   Mantid::Algorithms::CreateSampleWorkspace m_creator;
 };
-

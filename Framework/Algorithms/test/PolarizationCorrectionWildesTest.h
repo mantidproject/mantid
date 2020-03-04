@@ -1992,4 +1992,3 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_ws10;
   Mantid::API::MatrixWorkspace_sptr m_ws11;
 };
-
