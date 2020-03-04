@@ -27,6 +27,8 @@ void export_SpectrumInfoItem() {
       .add_property("signedTwoTheta",
                     &SpectrumInfoItem<SpectrumInfo>::signedTwoTheta)
       .add_property("l2", &SpectrumInfoItem<SpectrumInfo>::l2)
+      .add_property("hasDetectors",
+                    &SpectrumInfoItem<SpectrumInfo>::hasDetectors)
       .add_property("hasUniqueDetector",
                     &SpectrumInfoItem<SpectrumInfo>::hasUniqueDetector)
       .add_property(

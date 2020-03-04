@@ -28,7 +28,7 @@ size_t SpectrumInfo::size() const {
 
 /// Return count of all detectors used within spectrum
 size_t SpectrumInfo::detectorCount() const {
-    size_t count = 0;
+  size_t count = 0;
   for (const auto &spec : *m_spectrumDefinition) {
     count += spec.size();
   }

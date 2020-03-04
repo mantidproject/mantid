@@ -12,8 +12,8 @@
 #include "MantidTypes/SpectrumDefinition.h"
 #include <type_traits>
 
-using Mantid::SpectrumDefinition;
 using Mantid::Kernel::V3D;
+using Mantid::SpectrumDefinition;
 
 namespace Mantid {
 namespace API {
@@ -59,6 +59,8 @@ public:
   bool hasUniqueDetector() const {
     return m_spectrumInfo->hasUniqueDetector(m_index);
   }
+
+  bool hasDetectors() const { return m_spectrumInfo->hasDetectors(m_index); }
 
   const Mantid::SpectrumDefinition &spectrumDefinition() const {
     return m_spectrumInfo->spectrumDefinition(m_index);
