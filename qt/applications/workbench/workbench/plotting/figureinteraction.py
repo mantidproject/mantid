@@ -690,8 +690,8 @@ class FigureInteraction(object):
 
         ax.autoscale()
 
+        datafunctions.set_initial_dimensions(ax)
         if waterfall:
-            datafunctions.set_initial_dimensions(ax)
             ax.update_waterfall(x, y)
 
         self.canvas.draw()
