@@ -7,7 +7,7 @@ Fitting Tab
    :align: right
    :height: 400px
 
-This tab is used to evaluate a single fit object, which corresponds to a list of input workspaces and a fit function.
+This tab is used to evaluate a single fit object, which corresponds to a list of one or more input workspaces and a fit function.
 
 **Fit** Executes the specified fit.
 
@@ -30,7 +30,7 @@ The fitting browser here is similar to that used in the :ref:`Multi-dataset Fitt
 **Value** This lists the initial guesses for variables within fitting functions. Variables can be fixed for a given fit
 from the edit paramiter values dialog box (the ellipsis to the right of the value box).
 
-**Global** If we are performing a simultaneous fit variables can be made identical for each fit by checking this box.
+**Global** If we are performing a simultaneous fit, parameters for each workspace in the fit can be tied by checking this box.
 
 Fit properties browser
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -49,5 +49,5 @@ If it is unchecked it will use the rebinned data as specified on the home tab.
 Used By
 ^^^^^^^
 
-:ref:`Muon Analysis 2 <MuonAnalysis_2-ref>`
+:ref:`Muon Analysis <MuonAnalysis_2-ref>`
 :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`

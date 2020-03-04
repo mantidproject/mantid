@@ -40,4 +40,4 @@ parameters can be edited.
 Used By
 ^^^^^^^
 
-:ref:`Muon Analysis 2 <MuonAnalysis_2-ref>`
+:ref:`Muon Analysis <MuonAnalysis_2-ref>`
