@@ -234,13 +234,14 @@ class JanaFormat(object):
                 ]
                 lattice_params = "".join(["{: >10.4f}".format(value) for value in lattice_params])
                 headers.append("# Lattice parameters   {}\n".format(lattice_params))
-            headers.append("(3i5,2f12.2,i5,4f10.4)\n")
-            # column headers
+            # column headers and format
             column_names = ["h", "k", "l"]
             if self._modulation_col_num is not None:
                 modulated_cols = ["m1"]
+                headers.append("(3i5,1i5,2f12.2,i5,4f10.4)\n")
             else:
                 modulated_cols = ["m{}".format(i + 1) for i in range(self._num_mod_vec)]
+                headers.append("(3i5," + num_modulation_vectors(self._workspace) * "1i5," + "2f12.2,i5,4f10.4)\n")
             column_names.extend(modulated_cols)
             column_names.extend(
                 ["Fsqr", "s(Fsqr)", "Cod", "Lambda", "Twotheta", "Transm.", "Tbar", "TDS"])

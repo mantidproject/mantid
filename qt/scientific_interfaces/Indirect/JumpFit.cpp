@@ -58,10 +58,6 @@ void JumpFit::setupFitTab() {
   m_uiForm->cbParameter->setEnabled(false);
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm->cbParameterType, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updateAvailableFitTypes()));
-  connect(this, SIGNAL(updateAvailableFitTypes()), this,
-          SLOT(updateAvailableFitTypes()));
 }
 
 void JumpFit::updateModelFitTypeString() {

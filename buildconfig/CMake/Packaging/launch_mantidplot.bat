@@ -30,6 +30,8 @@ set PV_PLUGIN_PATH=%_INSTALL_DIR%\plugins\paraview\qt4
 if "%MPLBACKEND%"=="" (
   set MPLBACKEND=qt4agg
 )
+:: Ignore Python SyntaxWarning
+set PYTHONWARNINGS=default::DeprecationWarning:__main__,ignore::DeprecationWarning,ignore::PendingDeprecationWarning,ignore::ImportWarning,ignore::ResourceWarning,ignore::SyntaxWarning
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Start MantidPlot
