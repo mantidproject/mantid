@@ -706,6 +706,8 @@ class FigureInteraction(object):
         :return: bool
         """
         plotted_normalized = []
+        if not ax.creation_args:
+            return False
         axis = ax.creation_args[0].get('axis', None)
         for workspace_name, artists in ax.tracked_workspaces.items():
             if hasattr(ads.retrieve(workspace_name), "isDistribution"):
