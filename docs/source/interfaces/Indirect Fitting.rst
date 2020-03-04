@@ -32,10 +32,10 @@ of the interface to switch between selecting one or multiple data files respecti
 Data may either be provided as a file, or selected from workspaces which have already been loaded.
 
 When selecting 'Multiple Input', a table along with two buttons 'Add Workspace' and 'Remove' will be displayed.
-Clicking 'Add Workspace' will allow you to add a new data-set to be fit (this will bring up a menu allowing you
-to select a file/workspace and the spectra to load). Once data has been loaded, it will be displayed in the table.
+Clicking 'Add Workspace' will allow you to add a new data-set to the fit (this will bring up a menu allowing you
+to select a file/workspace and the spectra to load). Once the data has been loaded, it will be displayed in the table.
 Highlighting data in the table and selecting 'Remove' will allow you to remove data from the fit. Above the preview
-plots will be a drop-down menu with which you can select the active data-set, which will be shown in the plots.
+plots there is a drop-down menu with which can be used to select the active data-set, which will be shown in the plots.
 
 Sequential and Simultaneous fits
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,8 +45,8 @@ There are options to fit your selected spectra either Sequentially or Simultaneo
 A :ref:`sequential fit <algm-IqtFitSequential>` will fit each spectra one after another. By default this will use the end values of one fit as the starting values of the next. This behaviour can be toggled 
 using the sequential/individual option. 
 
-A :ref:`simultaneous fit <algm-IqtFitSimultaneous>` will fit all the selected spectra against one cost function. The primary advantage of this method is that if there are
-parameters which are expected to be constant across the data range they can be tied across all the spectra. This leads to these parameters being 
+A :ref:`simultaneous fit <algm-IqtFitSimultaneous>` will fit all the selected spectra against one cost function. The primary advantage of this method is that
+parameters which are expected to be constant across the data range can be tied across all the spectra. This leads to these parameters being 
 fitted with better statistics and hence reduced errors.
 
 Fit Function
@@ -63,8 +63,8 @@ in this mode differ for each of the four fitting tabs so more detailed informati
 bu ticking the `See full function` box, displays the generic function browser in which any function model can be specified. 
 This generic browser functions in a very similar way to the one in :ref:`Multi-dataset Fitting Interface <Multi-dataset-Fitting-Interface>`.
 
-Parameters may be tied by right-clicking on a parameter and selecting either 'Tie > To Function' when creating a tie
-to a parameter of the same name in a different function or by selecting 'Tie > Custom Tie' to tie to parameters of
+Parameters may be tied by right-clicking on a parameter and selecting either 'Tie > To Function' to tie the parameter
+to a parameter of the same name in a different function, or by selecting 'Tie > Custom Tie' to tie to parameters of
 different names and for providing mathematical expressions. Parameters can be constrained by right-clicking and
 using the available options under 'Constrain'.
 
@@ -82,13 +82,13 @@ Max Iterations
   The maximum number of iterations used to perform the fit of each spectrum.
 
 Minimizer
-  The minimizer which will be used in the fit (defaults to Levenberg-Marquadt).
+  The minimizer used for the fit (defaults to Levenberg-Marquadt).
 
 Cost function
-  The cost function to be used in the fit (defaults to Least Squares).
+  The cost function used for the fit (defaults to Least Squares).
 
 Evaluate Function As
-  The way the function is evaluated on histogram data sets. If value is “CentrePoint” then function is evaluated at centre of each bin. If it is “Histogram” then function is integrated within the bin and the integrals returned.
+  The way the function is evaluated on histogram data sets. If the value is “CentrePoint” then function is evaluated at centre of each bin. If it is “Histogram” then function is integrated within the bin and the integrals returned.
 
 Fit Type
   Only available in sequential fits. Controls whether each fit is initialised from the end values of the previous fit.
@@ -111,7 +111,7 @@ The 'Plot Spectrum' option can be used to select the active/displayed spectrum.
 A button labelled 'Fit Single Spectrum' is found under the preview plots and can be used to perform a fit of the
 selected specturm.
 
-'Plot Current Preview' can be used to plot the sample, fit and difference curves of the selected spectrum in
+'Plot Current Preview' can be used to plot the sample, fit, and difference curves of the selected spectrum in
 a separate plotting window.
 
 The 'Plot Guess' check-box can be used to enable/disable the guess curve in the top preview plot.
@@ -121,7 +121,7 @@ Spectrum Selection
 ~~~~~~~~~~~~~~~~~~
 
 In MsdFit, IqtFit and ConvFit below the fit model selection and preview plots, the spectra to be fit can be selected. 
-The 'Fit Spectra' drop-down menu allows for selecting either 'Range' or 'String'. If 'Range' is selected, you are able to select a range of spectra to fit by
+The 'Fit Spectra' drop-down menu provides two options ('Range' and 'String') to specificity the fit spectra. If 'Range' is selected, you are able to select a range of spectra to fit by
 providing the upper and lower bounds. If 'String' is selected you can provide the spectra to fit in a text form.
 When selecting spectra using text, you can use '-' to identify a range and ',' to separate each spectrum/range.
 
@@ -137,22 +137,22 @@ Next to the 'Plot' label, you can select a parameter to plot and then click 'Plo
 bars across the fit spectra (if multiple data-sets have been used, a separate plot will be produced for each data-set). 
 The 'Plot Output' options will be disabled after a fit if there is only one data point for the parameters.
 
-During a sequential fit, the parameters calculated for one spectrum become the start parameters for the next spectrum to be fitted. 
+During a sequential fit, the parameters calculated for one spectrum are used as the initial parameters for the next spectrum to be fitted. 
 Although this normally yields better parameter values for the later spectra, it can also lead to poorly fitted parameters if the
 next spectrum is not 'related' to the previous spectrum. It may be useful to replace this poorly fitted spectrum with the results 
 from a single fit using the 'Edit Result' option. 
-Clicking the 'Edit Result' button will allow you to modify the data within your *_Results* workspace using results 
-produced from a singly fit spectrum. See the algorithm :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>`.
+Clicking the 'Edit Result' button will allow you to modify the data within your *_Results* workspace using the results 
+produced from a fit to a single spectrum. See the algorithm :ref:`IndirectReplaceFitResult <algm-IndirectReplaceFitResult>`.
 
 Clicking the 'Save Result' button will save the result of the fit to your default save location.
 
 MSD Fit
 -------
 
-Given either a saved NeXus file or workspace generated using the Elwin tab, this
+Given either a saved NeXus file, or workspace generated using the Elwin tab, this
 tab fits :math:`intensity` vs. :math:`Q` with one of three functions for each
 run specified to give the Mean Square Displacement (MSD). It then plots the MSD
-as function of run number. This is done by means of the
+as function of run number. This is done using the
 :ref:`QENSFitSequential <algm-QENSFitSequential>` algorithm.
 
 MSDFit searches for the log files named <runnumber>_sample.txt in your chosen
@@ -163,12 +163,12 @@ not exist the MSD is plotted versus run number (last 3 digits).
 
 The fitted parameters for all runs are in _msd_Table and the <u2> in _msd. To
 run the Sequential fit a workspace named <inst><first-run>_to_<last-run>_eq is
-created of :math:`intensity` v. :math:`Q` for all runs. A contour or 3D plot of
+created, consisting of :math:`intensity` v. :math:`Q` for all runs. A contour or 3D plot of
 this may be of interest.
 
 A sequential fit is run by clicking the Run button at the bottom of the tab, a
-single fit can be done using the Fit Single Spectrum button underneath the
-preview plot. A simultaneous fit may be done in a very similar fashion by changeing the Fit Type to Simultaneous 
+single fit can be performed using the Fit Single Spectrum button underneath the
+preview plot. A simultaneous fit may be performed in a very similar fashion by changeing the Fit Type to Simultaneous 
 and the clicking run.
 
 The :ref:`Peters model <func-MsdPeters>` [1] reduces to a :ref:`Gaussian <func-MsdGauss>` at large 
@@ -195,11 +195,11 @@ tab as seen in the :ref:`elwin-example-workflow`.
 
 4. Choose the **Fit Type** to be Gaussian. The parameters for this function can be seen if you
    expand the row labelled **f0-MsdGauss**. Choose appropriate starting values for these parameters.
-   When you begin to edit parameters in addition to being able to change the value of the parameter there are two additional options.
+   As well as being able to change the value of the parameters, Two additional options are available.
    Clicking on the button with `...` will bring up more options to set constraints and ties on the parameters. The checkbox will toggle 
-   whether the parameter is local or global.
+   whether the parameter is local or global. You need to click on the parameter value to see these options.
 
-5. Tick **Plot Guess** to get a prediction of what your fit will look like.
+5. Tick **Plot Guess** to get a prediction of what the fit will look like.
 
 6. Click **Run** and wait for the interface to finish processing. This should generate a
    _Parameters table workspace and two group workspaces with end suffixes _Results and
@@ -207,9 +207,8 @@ tab as seen in the :ref:`elwin-example-workflow`.
    calculated fit and the lower mini-plot displaying the difference between the input data and the
    fit.
 
-7. Alternatively, you can click **Fit Single Spectrum** to perform a fit only for the spectrum
-   currently displayed in the upper mini-plot. Do not click this for the purposes of this
-   demonstration.
+7. Alternatively, you can click **Fit Single Spectrum** to perform a fit on just the currently displayed spectrum. 
+   Do not click this for the purposes of this demonstration.
 
 8. In the **Output** section, select the **Msd** parameter and then click **Plot**. This plots the
    Msd parameter which can be found within the _Results group workspace.
@@ -470,7 +469,7 @@ Output Chain
   minimizer.
 
 Chain Length
-  Number of further steps carried out by fitting algorithm once parameters have
+  Number of further steps carried out by fitting algorithm once the parameters have
   converged (see *ChainLength* is :ref:`FABADA` documentation)
 
 Convergence Criteria

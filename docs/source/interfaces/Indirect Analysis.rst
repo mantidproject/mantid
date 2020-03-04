@@ -13,7 +13,7 @@ Provides an interface for the :ref:`ElasticWindow <algm-ElasticWindow>`
 algorithm, with the option of selecting the range to integrate over as well as
 the background range. An on-screen plot is also provided.
 
-For workspaces that have a sample log or have a sample log file available in the
+For workspaces that have a sample log, or have a sample log file available in the
 Mantid data search paths that contains the sample environment information the
 ELF workspace can also be normalised to the lowest temperature run in the range
 of input files.
@@ -169,7 +169,7 @@ Plot Spectra
   If enabled, it will plot the selected workspace indices in the selected output workspace.
 
 Plot Tiled
-  It will plot a tiled plot containing the selected workspace indices. It accessed via the down
+  Generates a tiled plot containing the selected workspace indices. This option is accessed via the down
   arrow on the **Plot Spectra** button.
 
 Save Result
@@ -212,11 +212,11 @@ and the reflection is 002.
 A note on Binning
 ~~~~~~~~~~~~~~~~~
   
-The bin width is determined by the energy range and the sample binning factor. The number of bins is automatically 
-calculated based on the **SampleBinning** specified. The width is determined by the width of the range divided 
+The bin width is determined from the energy range and the sample binning factor. The number of bins is automatically 
+calculated based on the **SampleBinning** specified. The width is determined from the width of the range divided 
 by the number of bins.
 
-The following binning parameters are not enterable by the user and are instead automatically calculated through
+The following binning parameters cannot be modified by the user and are instead automatically calculated through
 the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm once a valid resolution file has been loaded. The calculated 
 binning parameters are displayed alongside the binning options:
 
