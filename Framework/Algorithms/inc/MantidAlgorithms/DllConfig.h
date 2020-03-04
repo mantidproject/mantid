@@ -13,3 +13,9 @@
     @author Martyn Gigg, Tessella plc
 */
 #include "MantidKernel/System.h"
+
+#ifdef IN_MANTID_ALGORITHMS
+#define MANTID_ALGORITHMS_DLL DLLExport
+#else
+#define MANTID_ALGORITHMS_DLL DLLImport
+#endif /* IN_MANTID_ALGORITHMS*/
