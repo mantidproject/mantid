@@ -10,8 +10,7 @@
 #include "MantidKernel/DllConfig.h"
 #include <string>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /** ChecksumHelper : A selection of helper methods for calculating checksums
  */
@@ -30,7 +29,6 @@ MANTID_KERNEL_DLL std::string sha1FromFile(const std::string &filepath,
 MANTID_KERNEL_DLL std::string gitSha1FromFile(const std::string &filepath);
 } // namespace ChecksumHelper
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 #endif /* MANTID_KERNEL_CHECKSUMHELPER_H_ */

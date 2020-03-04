@@ -14,12 +14,12 @@
 #include <fstream>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace {
 
-namespace ChecksumHelper {
-namespace // anonymous
-{
+// Unix line ending character
+constexpr auto EOL_LF = "\n";
+// Windows line ending sequence
+constexpr auto EOL_CRLF = "\r\n";
 
 /**
  * Create sha1 out of data and an optional header
@@ -57,20 +57,20 @@ std::string createMD5(const std::string &data, const std::string &header = "") {
 }
 } // namespace
 
+namespace Mantid::Kernel::ChecksumHelper {
+
 /** Creates a md5 checksum from a string
  * @param input The string to checksum
  * @returns a checksum string
  **/
-std::string md5FromString(const std::string &input) {
-  return ChecksumHelper::createMD5(input);
-}
+std::string md5FromString(const std::string &input) { return createMD5(input); }
 
 /** Creates a SHA-1 checksum from a string
  * @param input The string to checksum
  * @returns a checksum string
  **/
 std::string sha1FromString(const std::string &input) {
-  return ChecksumHelper::createSHA1(input);
+  return createSHA1(input);
 }
 
 /** Creates a SHA-1 checksum from a file
@@ -82,7 +82,7 @@ std::string sha1FromFile(const std::string &filepath,
                          const bool unixEOL = false) {
   if (filepath.empty())
     return "";
-  return ChecksumHelper::createSHA1(loadFile(filepath, unixEOL));
+  return createSHA1(loadFile(filepath, unixEOL));
 }
 
 /** Creates a git checksum from a file (these match the git hash-object
@@ -102,7 +102,7 @@ std::string gitSha1FromFile(const std::string &filepath) {
   std::string contents = ChecksumHelper::loadFile(filepath, unixEOL);
   std::stringstream header;
   header << "blob " << contents.size() << '\0';
-  return ChecksumHelper::createSHA1(contents, header.str());
+  return createSHA1(contents, header.str());
 }
 
 /**
@@ -124,13 +124,13 @@ std::string loadFile(const std::string &filepath, const bool unixEOL = false) {
   filein.close();
 
   if (unixEOL) {
-    static boost::regex eol(
-        "\\R"); // \R is Perl syntax for matching any EOL sequence
-    contents = boost::regex_replace(contents, eol, "\n"); // converts all to LF
+    // convert CRLF to LF
+    // Old-style mac line endings are left alone by git:
+    // https://github.com/git/git/blob/bfdd66e72fffd18235757bedbf355fd4176d6019/convert.c#L1425
+    static boost::regex eol(EOL_CRLF);
+    contents = boost::regex_replace(contents, eol, EOL_LF);
   }
   return contents;
 }
 
-} // namespace ChecksumHelper
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel::ChecksumHelper
