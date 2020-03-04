@@ -15,11 +15,11 @@
 #include <boost/python/list.hpp>
 #include <boost/python/return_value_policy.hpp>
 
+using Mantid::SpectrumDefinition;
 using Mantid::API::SpectrumInfo;
 using Mantid::API::SpectrumInfoItem;
 using Mantid::API::SpectrumInfoIterator;
 using Mantid::PythonInterface::SpectrumInfoPythonIterator;
-using Mantid::SpectrumDefinition;
 using namespace boost::python;
 
 // Helper method to make the python iterator
