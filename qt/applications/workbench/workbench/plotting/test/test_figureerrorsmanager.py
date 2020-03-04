@@ -138,6 +138,12 @@ class FigureErrorsManagerTest(unittest.TestCase):
 
         self.assertFalse(array_equal(self.ax.get_lines()[0].get_data(), self.ax.get_lines()[1].get_data()))
 
+    def test_creation_args_not_accessed_for_non_workspace_plots(self):
+        self.ax.plot([1, 2], [1, 2])
+
+        self.errors_manager.replot_curve(self.ax, self.ax.lines[0], {})
+        self.assertEqual(0, len(self.ax.creation_args))
+
 
 if __name__ == '__main__':
     unittest.main()
