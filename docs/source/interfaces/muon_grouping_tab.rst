@@ -38,7 +38,7 @@ Pairing Table
 **Guess Alpha** Estimates the alpha for the current pair and recalculates.
 
 Multi-Period Data
-^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 For multi period data, the summed and subratcted periods are specfied at the bottom of the tab. These periods will be used for all 
 the groups and pairs.

@@ -1,7 +1,7 @@
 .. _muon_sequential_fitting_tab-ref:
 
 Sequential Fitting Tab
------------
+------------------------
 
 .. image::  ../images/muon_interface_tab_sequential_fitting.png
    :align: right
