@@ -1054,10 +1054,10 @@ class MantidAxes(Axes):
         if enable:
             datafunctions.waterfall_create_fill(self)
 
-            if colour:
-                datafunctions.solid_colour_fill(self, colour)
-            else:
+            if colour is None:
                 datafunctions.line_colour_fill(self)
+            else:
+                datafunctions.solid_colour_fill(self, colour)
         else:
             if bool(colour):
                 raise RuntimeError("You have set fill to false but have given a colour.")
