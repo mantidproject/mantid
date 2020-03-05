@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CATALOG_ONCAT_H_
-#define MANTID_CATALOG_ONCAT_H_
+#pragma once
 
 #include "MantidCatalog/DllConfig.h"
 #include "MantidCatalog/OAuth.h"
@@ -149,5 +148,3 @@ private:
 } // namespace ONCat
 } // namespace Catalog
 } // namespace Mantid
-
-#endif /* MANTID_CATALOG_ONCAT_H_ */

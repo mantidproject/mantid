@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CATALOG_OAUTH_H_
-#define MANTID_CATALOG_OAUTH_H_
+#pragma once
 
 #include "MantidCatalog/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
@@ -86,5 +85,3 @@ using ConfigServiceTokenStore_uptr = std::unique_ptr<ConfigServiceTokenStore>;
 } // namespace OAuth
 } // namespace Catalog
 } // namespace Mantid
-
-#endif /* MANTID_CATALOG_OAUTH_H_ */
