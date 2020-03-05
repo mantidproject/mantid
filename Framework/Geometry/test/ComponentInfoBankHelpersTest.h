@@ -1,5 +1,4 @@
-#ifndef MANTID_GEOMETRY_COMPONENTINFOBANKHELPERSTEST_H_
-#define MANTID_GEOMETRY_COMPONENTINFOBANKHELPERSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -320,5 +319,3 @@ public:
       TS_ASSERT(!isAncestorOf(compInfo, source, i));
   }
 };
-
-#endif /* MANTID_GEOMETRY_COMPONENTINFOBANKHELPERSTEST_H_ */

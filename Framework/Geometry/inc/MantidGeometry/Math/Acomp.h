@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef Acomp_h
-#define Acomp_h
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Math/BnId.h"
@@ -130,5 +129,3 @@ std::ostream &operator<<(std::ostream &, const Acomp &);
 } // NAMESPACE Geometry
 
 } // NAMESPACE Mantid
-
-#endif

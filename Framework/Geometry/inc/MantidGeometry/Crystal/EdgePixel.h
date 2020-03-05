@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_EDGEPIXEL_H_
-#define MANTID_GEOMETRY_EDGEPIXEL_H_
+#pragma once
 
 #include "MantidGeometry/Instrument.h"
 
@@ -19,5 +18,3 @@ MANTID_GEOMETRY_DLL bool edgePixel(Geometry::Instrument_const_sptr inst,
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_EDGEPIXEL_H_ */

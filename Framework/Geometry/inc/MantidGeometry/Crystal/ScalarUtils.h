@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 /* File: Scalar_Utils.h */
 
-#ifndef MANTID_GEOMETRY_SCALAR_UTILS_H_
-#define MANTID_GEOMETRY_SCALAR_UTILS_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -83,5 +82,3 @@ private:
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_SCALAR_UTILS_H_ */

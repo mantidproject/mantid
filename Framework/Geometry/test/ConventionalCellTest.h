@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_CONVENTIONAL_CELL_TEST_H_
-#define MANTID_GEOMETRY_CONVENTIONAL_CELL_TEST_H_
+#pragma once
 
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
@@ -289,5 +288,3 @@ public:
     TS_ASSERT_DELTA(conv_cell.GetSumOfSides(), 21.6434, 1e-3);
   }
 };
-
-#endif /* MANTID_GEOMETRY_CONVENTIONAL_CELL_TEST_H_ */

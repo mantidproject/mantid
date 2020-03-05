@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDGEOMETRY_PEAKTRANSFORMHKL_TEST_H_
-#define MANTIDGEOMETRY_PEAKTRANSFORMHKL_TEST_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/PeakTransformHKL.h"
 #include "MockObjects.h"
@@ -278,4 +277,3 @@ public:
     TS_ASSERT_EQUALS(Mantid::Kernel::HKL, transform.getCoordinateSystem())
   }
 };
-#endif

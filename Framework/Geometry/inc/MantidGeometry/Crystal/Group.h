@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_GROUP_H_
-#define MANTID_GEOMETRY_GROUP_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/DllConfig.h"
@@ -212,5 +211,3 @@ MANTID_GEOMETRY_DLL bool operator!=(const Group_const_sptr &lhs,
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_GROUP_H_ */

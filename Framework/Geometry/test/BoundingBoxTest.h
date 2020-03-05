@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BOUNDINGBOXTEST_H_
-#define BOUNDINGBOXTEST_H_
+#pragma once
 
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -386,5 +385,3 @@ private:
                      insideTest);
   }
 };
-
-#endif // BOUNDINGBOXTEST_H_

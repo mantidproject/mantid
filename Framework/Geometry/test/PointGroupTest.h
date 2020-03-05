@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_POINTGROUPTEST_H_
-#define MANTID_GEOMETRY_POINTGROUPTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -477,5 +476,3 @@ private:
     std::cout << "Eq: " << h << ", Time: " << time / 1000.0 << '\n';
   }
 };
-
-#endif /* MANTID_GEOMETRY_POINTGROUPTEST_H_ */

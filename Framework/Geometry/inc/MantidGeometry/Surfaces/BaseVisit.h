@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GEOMETRY_BASEVISIT_H
-#define GEOMETRY_BASEVISIT_H
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 
@@ -45,5 +44,3 @@ public:
 
 } // NAMESPACE Geometry
 } // NAMESPACE Mantid
-
-#endif

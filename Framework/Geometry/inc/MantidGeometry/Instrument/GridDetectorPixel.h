@@ -1,5 +1,4 @@
-#ifndef MANTID_GEOMETRY_GRIDDETECTORPIXEL_H_
-#define MANTID_GEOMETRY_GRIDDETECTORPIXEL_H_
+#pragma once
 
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -79,5 +78,3 @@ protected:
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_GRIDDETECTORPIXEL_H_ */

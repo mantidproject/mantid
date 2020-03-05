@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_CENTERINGGROUP_H_
-#define MANTID_GEOMETRY_CENTERINGGROUP_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/DllConfig.h"
@@ -92,5 +91,3 @@ EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
     SingletonHolder<Mantid::Geometry::CenteringGroupCreatorImpl>;
 }
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_CENTERINGGROUP_H_ */

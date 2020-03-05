@@ -1,5 +1,4 @@
-#ifndef MANTID_GEOMETRY_MESHOBJECTCOMMONTEST_H_
-#define MANTID_GEOMETRY_MESHOBJECTCOMMONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <limits>
@@ -126,5 +125,3 @@ public:
                      std::invalid_argument &);
   }
 };
-
-#endif /* MANTID_GEOMETRY_MESHOBJECTCOMMONTEST_H_ */

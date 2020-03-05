@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SHAPEINFO_H_
-#define MANTID_GEOMETRY_SHAPEINFO_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
@@ -133,5 +132,3 @@ operator<<(std::ostream &os, const ShapeInfo::GeometryShape shape);
 } // namespace detail
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_SHAPEINFO_H_ */

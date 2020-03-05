@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef RECTANGULAR_DETECTOR_TEST_H
-#define RECTANGULAR_DETECTOR_TEST_H
+#pragma once
 
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -231,5 +230,3 @@ public:
     delete parDet;
   }
 };
-
-#endif

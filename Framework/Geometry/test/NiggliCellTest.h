@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_NiggliCellTEST_H_
-#define MANTID_GEOMETRY_NiggliCellTEST_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/NiggliCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -118,5 +117,3 @@ public:
     TS_ASSERT_DELTA(gamma, 60, 1e-1);
   }
 };
-
-#endif /* MANTID_GEOMETRY_NiggliCellTEST_H_ */

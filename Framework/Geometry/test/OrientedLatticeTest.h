@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_ORIENTEDLATTICETEST_H_
-#define MANTID_GEOMETRY_ORIENTEDLATTICETEST_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
@@ -302,5 +301,3 @@ public:
     TSM_ASSERT_EQUALS("y direction is", V3D(0, -1, 0), eyPrime);
   }
 };
-
-#endif /* MANTID_GEOMETRY_UNITCELLTEST_H_ */

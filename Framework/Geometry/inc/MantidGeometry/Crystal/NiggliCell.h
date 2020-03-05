@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_NiggliCell_H_
-#define MANTID_GEOMETRY_NiggliCell_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include <nexus/NeXusFile.hpp>
@@ -50,4 +49,3 @@ private:
 };
 } // namespace Geometry
 } // namespace Mantid
-#endif /* MANTID_GEOMETRY_UNITCELL_H_ */

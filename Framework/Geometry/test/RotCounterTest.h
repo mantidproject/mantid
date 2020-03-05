@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ROTCOUNTERTEST__
-#define MANTID_ROTCOUNTERTEST__
+#pragma once
 #include "MantidGeometry/Math/RotCounter.h"
 #include "MantidKernel/V3D.h"
 #include <cmath>
@@ -95,4 +94,3 @@ private:
     return output.str();
   }
 };
-#endif

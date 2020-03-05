@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_MOCKRNG_H_
-#define MANTID_GEOMETRY_MOCKRNG_H_
+#pragma once
 
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -29,5 +28,3 @@ public:
   MOCK_CONST_METHOD0(max, double());
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
-
-#endif /* MANTID_GEOMETRY_MOCKRNG_H_ */

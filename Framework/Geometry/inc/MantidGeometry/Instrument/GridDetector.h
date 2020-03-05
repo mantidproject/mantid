@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GRID_DETECTOR_H
-#define GRID_DETECTOR_H
+#pragma once
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
@@ -221,5 +220,3 @@ using GridDetector_const_sptr = boost::shared_ptr<const GridDetector>;
 
 } // Namespace Geometry
 } // Namespace Mantid
-
-#endif // GRID_DETECTOR_H

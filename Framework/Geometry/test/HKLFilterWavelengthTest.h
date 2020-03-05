@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_HKLFILTERWAVELENGTHTEST_H_
-#define MANTID_GEOMETRY_HKLFILTERWAVELENGTHTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -72,5 +71,3 @@ public:
     TS_ASSERT_EQUALS(wlFilter.isAllowed(V3D(1, 0, 2)), false);
   }
 };
-
-#endif /* MANTID_GEOMETRY_HKLFILTERWAVELENGTHTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef I_MD_DIMENSION_H
-#define I_MD_DIMENSION_H
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
@@ -112,4 +111,3 @@ using VecIMDDimension_const_sptr = std::vector<IMDDimension_const_sptr>;
 using VecIMDDimension_sptr = std::vector<IMDDimension_sptr>;
 } // namespace Geometry
 } // namespace Mantid
-#endif
