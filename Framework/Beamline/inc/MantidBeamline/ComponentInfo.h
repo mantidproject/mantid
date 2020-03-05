@@ -182,4 +182,3 @@ private:
 };
 } // namespace Beamline
 } // namespace Mantid
-

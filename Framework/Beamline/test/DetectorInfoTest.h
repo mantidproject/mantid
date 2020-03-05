@@ -289,4 +289,3 @@ public:
                      (std::vector<std::pair<int64_t, int64_t>>{{0, 1}}));
   }
 };
-

@@ -221,4 +221,3 @@ inline bool DetectorInfo::hasMaskedDetectors() const {
 
 } // namespace Beamline
 } // namespace Mantid
-
