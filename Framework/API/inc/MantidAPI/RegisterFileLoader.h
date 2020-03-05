@@ -38,4 +38,3 @@
            Mantid::API::FileLoaderRegistryImpl::Nexus),                        \
        0));                                                                    \
   }
-

@@ -293,4 +293,3 @@ std::condition_variable AsynchronousTest::g_condition2;
 std::mutex AsynchronousTest::g_mtx;
 bool AsynchronousTest::g_testStarted = false;
 bool AsynchronousTest::g_execStarted = false;
-

@@ -77,4 +77,3 @@ public:
     TS_ASSERT_DELTA(componentInfo.position(4)[2], distanceFromSample, 1e-14);
   }
 };
-

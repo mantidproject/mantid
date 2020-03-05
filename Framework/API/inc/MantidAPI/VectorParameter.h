@@ -238,4 +238,3 @@ ElemType &VectorParameter<Derived, ElemType>::at(size_t index) {
   };
 } // namespace API
 } // namespace Mantid
-

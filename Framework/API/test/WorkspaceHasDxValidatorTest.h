@@ -40,4 +40,3 @@ public:
                      "The workspace must have Dx values set")
   }
 };
-

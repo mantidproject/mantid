@@ -415,4 +415,3 @@ private:
   WorkspacePropertyWorkspaceTester2_uptr wsp5;
   WorkspacePropertyWorkspace_uptr wsp6;
 };
-

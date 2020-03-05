@@ -641,4 +641,3 @@ public:
   Run m_testRun;
   std::string m_propName;
 };
-

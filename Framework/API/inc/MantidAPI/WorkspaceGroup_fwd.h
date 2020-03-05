@@ -28,4 +28,3 @@ using WorkspaceGroup_const_uptr = std::unique_ptr<const WorkspaceGroup>;
 
 } // namespace API
 } // namespace Mantid
-

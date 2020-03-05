@@ -355,4 +355,3 @@ public:
   WorkspaceHistory m_wsHist;
   size_t m_execCount;
 };
-

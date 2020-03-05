@@ -109,4 +109,3 @@ using SpectrumInfoConstIt = SpectrumInfoIterator<const SpectrumInfo>;
 
 } // namespace API
 } // namespace Mantid
-

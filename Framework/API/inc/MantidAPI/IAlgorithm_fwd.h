@@ -28,4 +28,3 @@ using IAlgorithm_const_uptr = std::unique_ptr<const IAlgorithm>;
 
 } // namespace API
 } // namespace Mantid
-

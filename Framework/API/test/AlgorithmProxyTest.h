@@ -258,4 +258,3 @@ public:
     TS_ASSERT_EQUALS(val, val2);
   }
 };
-

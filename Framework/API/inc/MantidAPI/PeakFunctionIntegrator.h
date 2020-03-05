@@ -62,4 +62,3 @@ protected:
 double MANTID_API_DLL gsl_peak_wrapper(double x, void *parameters);
 } // namespace API
 } // namespace Mantid
-

@@ -520,4 +520,3 @@ using Algorithm_sptr = boost::shared_ptr<Algorithm>;
   Mantid::Kernel::RegistrationHelper register_alg_##classname((                \
       (Mantid::API::AlgorithmFactory::Instance().subscribe<classname>()), 0)); \
   }
-

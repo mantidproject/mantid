@@ -242,4 +242,3 @@ public:
     TS_ASSERT_THROWS_ANYTHING(outPair = algFactory.decodeName(mangledName));
   }
 };
-

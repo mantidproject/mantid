@@ -472,4 +472,3 @@ public:
     TS_ASSERT_EQUALS(1, histories.size());
   }
 };
-

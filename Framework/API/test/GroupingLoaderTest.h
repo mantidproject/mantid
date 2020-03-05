@@ -80,4 +80,3 @@ private:
   std::string m_testDataDir;
   std::string m_tmpDir;
 };
-

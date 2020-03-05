@@ -242,4 +242,3 @@ private:
     TS_ASSERT_EQUALS(msg, "");
   }
 };
-

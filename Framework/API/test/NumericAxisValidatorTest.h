@@ -49,4 +49,3 @@ public:
     TS_ASSERT_DIFFERS(s, "")
   }
 };
-

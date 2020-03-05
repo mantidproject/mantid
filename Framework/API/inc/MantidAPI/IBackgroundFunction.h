@@ -32,4 +32,3 @@ using IBackgroundFunction_sptr = boost::shared_ptr<IBackgroundFunction>;
 
 } // namespace API
 } // namespace Mantid
-

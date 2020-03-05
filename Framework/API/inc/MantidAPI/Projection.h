@@ -70,4 +70,3 @@ using Projection_sptr = boost::shared_ptr<Projection>;
 
 } // namespace API
 } // namespace Mantid
-

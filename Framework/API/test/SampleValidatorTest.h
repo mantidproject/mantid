@@ -47,4 +47,3 @@ public:
     TS_ASSERT_EQUALS(validator.checkValidity(ws), "");
   }
 };
-

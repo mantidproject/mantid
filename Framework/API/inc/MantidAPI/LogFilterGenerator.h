@@ -53,4 +53,3 @@ private:
 
 } // namespace API
 } // namespace Mantid
-

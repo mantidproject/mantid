@@ -196,4 +196,3 @@ private:
   WorkspaceProperty<MatrixWorkspace> m_wkspProp;
   IndexTypeProperty m_itypeProp;
 };
-

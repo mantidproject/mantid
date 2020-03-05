@@ -28,4 +28,3 @@ using MatrixWorkspace_const_uptr = std::unique_ptr<const MatrixWorkspace>;
 
 } // namespace API
 } // namespace Mantid
-

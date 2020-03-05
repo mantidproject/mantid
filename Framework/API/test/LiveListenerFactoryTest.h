@@ -168,4 +168,3 @@ public:
     factory.unsubscribe("MockLiveListener");
   }
 };
-

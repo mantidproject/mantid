@@ -227,4 +227,3 @@ private:
   std::vector<AlgorithmHistory_sptr> m_1000000Histories1;
   WorkspaceHistory m_1000000Histories2;
 };
-

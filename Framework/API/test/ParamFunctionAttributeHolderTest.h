@@ -88,4 +88,3 @@ public:
     TS_ASSERT_EQUALS(attrNames.at(2), "Att3");
   }
 };
-

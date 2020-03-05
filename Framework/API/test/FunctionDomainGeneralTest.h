@@ -112,4 +112,3 @@ public:
     TS_ASSERT_EQUALS(strCol->cell<std::string>(2), "Domain");
   }
 };
-

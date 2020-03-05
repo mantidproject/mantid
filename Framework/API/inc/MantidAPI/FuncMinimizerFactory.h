@@ -70,4 +70,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
            #username)),                                                        \
        0));                                                                    \
   }
-

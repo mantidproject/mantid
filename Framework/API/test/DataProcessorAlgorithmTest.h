@@ -250,4 +250,3 @@ public:
     AnalysisDataService::Instance().remove("test_input_workspace");
   }
 };
-

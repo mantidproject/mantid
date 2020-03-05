@@ -37,4 +37,3 @@ public:
                      "The workspace must contain histogram data");
   }
 };
-

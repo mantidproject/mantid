@@ -46,4 +46,3 @@ using GridDomain_sptr = boost::shared_ptr<GridDomain>;
 
 } // namespace API
 } // namespace Mantid
-

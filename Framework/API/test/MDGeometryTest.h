@@ -306,4 +306,3 @@ public:
                geometry.allBasisNormalized());
   }
 };
-

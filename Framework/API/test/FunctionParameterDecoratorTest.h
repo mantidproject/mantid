@@ -458,4 +458,3 @@ private:
     GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
-

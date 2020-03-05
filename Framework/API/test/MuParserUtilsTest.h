@@ -73,4 +73,3 @@ private:
     return parser.GetVar().size() == 0;
   }
 };
-

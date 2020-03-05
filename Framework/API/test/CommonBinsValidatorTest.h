@@ -61,4 +61,3 @@ public:
         "The workspace must have common bin boundaries for all histograms");
   }
 };
-

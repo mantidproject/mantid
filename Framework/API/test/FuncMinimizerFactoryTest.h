@@ -91,4 +91,3 @@ public:
     TS_ASSERT_EQUALS(b, 2.73);
   }
 };
-

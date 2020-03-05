@@ -99,4 +99,3 @@ DLLExport boost::optional<std::string> checkForOptionalInstrumentDefault(
     Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name);
 } // namespace API
 } // namespace Mantid
-

@@ -21,4 +21,3 @@ class MANTID_API_DLL MatrixWorkspaceValidator
 
 } // namespace API
 } // namespace Mantid
-

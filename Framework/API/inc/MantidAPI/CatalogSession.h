@@ -38,4 +38,3 @@ using CatalogSession_sptr = boost::shared_ptr<CatalogSession>;
 using CatalogSession_const_sptr = boost::shared_ptr<const CatalogSession>;
 } // namespace API
 } // namespace Mantid
-

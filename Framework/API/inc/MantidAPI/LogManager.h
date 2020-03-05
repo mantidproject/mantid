@@ -235,4 +235,3 @@ void LogManager::addProperty(const std::string &name, const TYPE &value,
 }
 } // namespace API
 } // namespace Mantid
-

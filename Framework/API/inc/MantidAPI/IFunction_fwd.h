@@ -40,4 +40,3 @@ using MultiDomainFunction_const_sptr =
 
 } // namespace API
 } // namespace Mantid
-

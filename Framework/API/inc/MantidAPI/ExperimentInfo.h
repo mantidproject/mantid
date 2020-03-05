@@ -234,4 +234,3 @@ using ExperimentInfo_const_sptr = boost::shared_ptr<const ExperimentInfo>;
 
 } // namespace API
 } // namespace Mantid
-

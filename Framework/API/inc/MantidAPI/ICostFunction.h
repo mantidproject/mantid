@@ -73,4 +73,3 @@ using ICostFunction_sptr = boost::shared_ptr<ICostFunction>;
 
 } // namespace API
 } // namespace Mantid
-

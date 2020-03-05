@@ -402,4 +402,3 @@ public:
 
   int m_notificationValue;
 };
-

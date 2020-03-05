@@ -51,4 +51,3 @@ public:
         "The instrument is missing the following components: sample holder");
   }
 };
-

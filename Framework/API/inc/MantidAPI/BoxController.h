@@ -545,4 +545,3 @@ using BoxController_const_sptr = boost::shared_ptr<const BoxController>;
 } // namespace API
 
 } // namespace Mantid
-

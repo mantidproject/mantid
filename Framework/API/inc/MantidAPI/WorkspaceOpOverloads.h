@@ -89,4 +89,3 @@ struct MANTID_API_DLL WorkspaceHelpers {
 
 } // namespace API
 } // namespace Mantid
-

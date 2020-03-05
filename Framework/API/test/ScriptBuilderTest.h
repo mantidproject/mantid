@@ -589,4 +589,3 @@ private:
   AnalysisDataServiceImpl &m_ads;
   MatrixWorkspace_sptr m_testWS;
 };
-

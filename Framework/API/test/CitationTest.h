@@ -118,4 +118,3 @@ public:
     TS_ASSERT_EQUALS(cite2.bibtex(), "bibtex")
   }
 };
-

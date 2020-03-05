@@ -137,4 +137,3 @@ using ILiveListener_sptr = boost::shared_ptr<ILiveListener>;
 
 } // namespace API
 } // namespace Mantid
-

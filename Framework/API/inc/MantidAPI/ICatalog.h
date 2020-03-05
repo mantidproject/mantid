@@ -59,4 +59,3 @@ using ICatalog_sptr = boost::shared_ptr<ICatalog>;
 using ICatalog_const_sptr = boost::shared_ptr<const ICatalog>;
 } // namespace API
 } // namespace Mantid
-

@@ -80,4 +80,3 @@ public:
     TS_ASSERT_THROWS(ax1.indexOfValue(10.1), const std::out_of_range &); // end
   }
 };
-

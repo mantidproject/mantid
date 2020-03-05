@@ -633,4 +633,3 @@ using MatrixWorkspace_const_sptr = boost::shared_ptr<const MatrixWorkspace>;
 
 } // namespace API
 } // namespace Mantid
-

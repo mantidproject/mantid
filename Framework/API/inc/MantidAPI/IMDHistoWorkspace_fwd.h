@@ -28,4 +28,3 @@ using IMDHistoWorkspace_const_uptr = std::unique_ptr<const IMDHistoWorkspace>;
 
 } // namespace API
 } // namespace Mantid
-

@@ -39,4 +39,3 @@ public:
         "A workspace containing numbers of counts is required here");
   }
 };
-

@@ -59,4 +59,3 @@ using IPawleyFunction_sptr = boost::shared_ptr<IPawleyFunction>;
 
 } // namespace API
 } // namespace Mantid
-

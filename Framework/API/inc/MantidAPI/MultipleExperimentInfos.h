@@ -53,4 +53,3 @@ using MultipleExperimentInfos_const_sptr =
 
 } // namespace API
 } // namespace Mantid
-

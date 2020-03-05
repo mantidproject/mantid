@@ -162,4 +162,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
                                           .subscribe<classname>(#classname)),  \
                                      0));                                      \
   }
-

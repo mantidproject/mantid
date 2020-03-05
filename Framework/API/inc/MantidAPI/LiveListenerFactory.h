@@ -78,4 +78,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
     Kernel::SingletonHolder<Mantid::API::LiveListenerFactoryImpl>;
 }
 } // namespace Mantid
-

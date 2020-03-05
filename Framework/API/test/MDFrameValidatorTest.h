@@ -77,4 +77,3 @@ public:
                      "MDWorkspace must be in the " + QLab::QLabName + " frame.")
   };
 };
-

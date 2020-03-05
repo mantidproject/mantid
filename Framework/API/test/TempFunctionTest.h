@@ -81,4 +81,3 @@ public:
     TS_ASSERT_THROWS_NOTHING(Mantid::API::FunctionDomain d(1));
   }
 };
-

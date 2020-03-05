@@ -71,4 +71,3 @@ using ISplittersWorkspace_const_sptr =
 
 } // namespace API
 } // namespace Mantid
-

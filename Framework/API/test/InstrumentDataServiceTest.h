@@ -119,4 +119,3 @@ public:
 private:
   boost::shared_ptr<Instrument> inst1, inst2;
 };
-

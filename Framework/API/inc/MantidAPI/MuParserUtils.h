@@ -35,4 +35,3 @@ void MANTID_API_DLL extraOneVarFunctions(mu::Parser &parser);
 } // namespace MuParserUtils
 } // namespace API
 } // namespace Mantid
-

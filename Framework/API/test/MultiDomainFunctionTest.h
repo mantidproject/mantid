@@ -503,4 +503,3 @@ private:
   MultiDomainFunction multi;
   JointDomain domain;
 };
-

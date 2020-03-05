@@ -20,4 +20,3 @@ public:
   using PropertyManager::declareProperty;
   using PropertyManager::setProperty;
 };
-

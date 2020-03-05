@@ -266,4 +266,3 @@ public:
         "name=IFT_Funct,BAttr=false,DAttr=0,IAttr=0,VAttr=(),VAttr1=(1,2,3)");
   }
 };
-

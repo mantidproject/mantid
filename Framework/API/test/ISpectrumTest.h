@@ -126,4 +126,3 @@ public:
     TS_ASSERT(!s3.hasDx());
   }
 };
-

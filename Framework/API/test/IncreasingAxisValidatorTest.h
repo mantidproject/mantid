@@ -60,4 +60,3 @@ private:
 
   Mantid::API::IncreasingAxisValidator validator;
 };
-

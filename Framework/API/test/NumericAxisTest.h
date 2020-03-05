@@ -223,4 +223,3 @@ public:
 private:
   Axis *numericAxis;
 };
-

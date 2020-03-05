@@ -21,4 +21,3 @@ MANTID_API_DLL void applyRectangularDetectorScaleToComponentInfo(
     const double scaleX, const double scaleY);
 } // namespace API
 } // namespace Mantid
-

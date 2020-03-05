@@ -109,4 +109,3 @@ using FunctionValues_sptr = boost::shared_ptr<FunctionValues>;
 
 } // namespace API
 } // namespace Mantid
-

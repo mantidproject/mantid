@@ -65,4 +65,3 @@ public:
         "X axis must be linear (all bins must have the same width)");
   }
 };
-

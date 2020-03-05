@@ -72,4 +72,3 @@ public:
     TS_ASSERT_EQUALS(mei.hasOrientedLattice(), false);
   }
 };
-

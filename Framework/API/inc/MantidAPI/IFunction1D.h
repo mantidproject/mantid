@@ -90,4 +90,3 @@ using IFunction1D_sptr = boost::shared_ptr<IFunction1D>;
 
 } // namespace API
 } // namespace Mantid
-

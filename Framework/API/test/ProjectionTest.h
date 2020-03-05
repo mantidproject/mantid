@@ -288,4 +288,3 @@ public:
     TS_ASSERT_EQUALS(p.getUnit(2), INV_ANG);
   }
 };
-

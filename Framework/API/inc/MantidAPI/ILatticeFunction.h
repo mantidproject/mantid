@@ -55,4 +55,3 @@ using ILatticeFunction_sptr = boost::shared_ptr<ILatticeFunction>;
 
 } // namespace API
 } // namespace Mantid
-

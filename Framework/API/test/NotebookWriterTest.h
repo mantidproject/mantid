@@ -59,4 +59,3 @@ public:
     TS_ASSERT_EQUALS(notebookLines[3], "   \"input\" : \"" + test_data + "\",")
   }
 };
-

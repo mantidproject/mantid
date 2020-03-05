@@ -64,4 +64,3 @@ public:
 private:
   WorkspaceTester workspace;
 };
-

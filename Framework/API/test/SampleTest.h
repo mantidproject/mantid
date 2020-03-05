@@ -360,4 +360,3 @@ public:
     TS_ASSERT(loaded.getName().empty());
   }
 };
-

@@ -48,4 +48,3 @@ public:
         "Workspace must have a sample with an orientation matrix defined.");
   };
 };
-

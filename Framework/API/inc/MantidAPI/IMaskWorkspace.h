@@ -55,4 +55,3 @@ using IMaskWorkspace_sptr = boost::shared_ptr<IMaskWorkspace>;
 using IMaskWorkspace_const_sptr = boost::shared_ptr<const IMaskWorkspace>;
 } // namespace API
 } // namespace Mantid
-

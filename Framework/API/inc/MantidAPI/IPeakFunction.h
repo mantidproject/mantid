@@ -92,4 +92,3 @@ using IPeakFunction_const_sptr = boost::shared_ptr<const IPeakFunction>;
 
 } // namespace API
 } // namespace Mantid
-

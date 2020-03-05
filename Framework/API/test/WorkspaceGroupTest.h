@@ -483,4 +483,3 @@ public:
     TS_ASSERT(group0->containsInChildren("wsInput"));
   }
 };
-

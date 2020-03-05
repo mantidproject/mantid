@@ -1245,4 +1245,3 @@ public:
     TS_ASSERT_EQUALS(fun->parameterLocalName(6, true), "a");
   }
 };
-

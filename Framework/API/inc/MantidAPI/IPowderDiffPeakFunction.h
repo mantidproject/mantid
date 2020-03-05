@@ -150,4 +150,3 @@ std::complex<double> MANTID_API_DLL E1(std::complex<double> z);
 
 } // namespace API
 } // namespace Mantid
-

@@ -332,4 +332,3 @@ public:
     TS_ASSERT(fun->getTie(3));
   }
 };
-

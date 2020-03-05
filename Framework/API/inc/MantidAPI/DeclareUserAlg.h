@@ -10,4 +10,3 @@
   Algorithm *x##_create() { return new x; }                                    \
                                                                                \
   void x##_destroy(Algorithm *p) { delete p; }
-

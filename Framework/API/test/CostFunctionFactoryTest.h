@@ -56,4 +56,3 @@ public:
     delete cfA;
   }
 };
-

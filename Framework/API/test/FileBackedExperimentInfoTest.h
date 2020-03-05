@@ -170,4 +170,3 @@ private:
   Mantid::API::ExperimentInfo_sptr m_inMemoryExptInfo;
   std::string m_filename;
 };
-

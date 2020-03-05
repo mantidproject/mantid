@@ -140,4 +140,3 @@ using FunctionParameterDecorator_sptr =
 
 } // namespace API
 } // namespace Mantid
-

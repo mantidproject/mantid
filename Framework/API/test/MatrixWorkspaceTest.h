@@ -2401,4 +2401,3 @@ private:
   Mantid::Geometry::IComponent_const_sptr m_sansBank;
   boost::shared_ptr<Mantid::Geometry::ParameterMap> m_paramMap;
 };
-

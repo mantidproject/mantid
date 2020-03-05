@@ -29,4 +29,3 @@ using IMDEventWorkspace_const_uptr = std::unique_ptr<const IMDEventWorkspace>;
 
 } // namespace API
 } // namespace Mantid
-

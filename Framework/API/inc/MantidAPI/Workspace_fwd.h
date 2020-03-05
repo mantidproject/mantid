@@ -28,4 +28,3 @@ using Workspace_const_uptr = std::unique_ptr<const Workspace>;
 
 } // namespace API
 } // namespace Mantid
-

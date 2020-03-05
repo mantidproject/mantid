@@ -89,4 +89,3 @@ public:
                prop2->getSettings()->isEnabled(&alg));
   }
 };
-

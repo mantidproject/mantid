@@ -150,4 +150,3 @@ using DistributedDataProcessorAlgorithm =
 
 } // namespace API
 } // namespace Mantid
-

@@ -561,4 +561,3 @@ public:
 private:
   WorkspaceTester m_workspace;
 };
-

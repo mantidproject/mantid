@@ -28,4 +28,3 @@ using IEventWorkspace_const_uptr = std::unique_ptr<const IEventWorkspace>;
 
 } // namespace API
 } // namespace Mantid
-

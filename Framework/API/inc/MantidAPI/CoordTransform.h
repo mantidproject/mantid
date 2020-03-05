@@ -71,4 +71,3 @@ using CoordTransform_const_sptr = boost::shared_ptr<const CoordTransform>;
 
 } // namespace API
 } // namespace Mantid
-

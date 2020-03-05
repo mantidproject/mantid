@@ -149,4 +149,3 @@ using IDomainCreator_sptr = boost::shared_ptr<IDomainCreator>;
                                      .subscribe<classname>(#classname)),       \
                                 0));                                           \
   }
-

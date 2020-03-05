@@ -37,4 +37,3 @@
 // Poco
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/XML/XML.h>
-

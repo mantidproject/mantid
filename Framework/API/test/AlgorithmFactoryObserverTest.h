@@ -79,4 +79,3 @@ public:
     TS_ASSERT(m_mockInheritingClass->m_updateHandleCalled)
   }
 };
-

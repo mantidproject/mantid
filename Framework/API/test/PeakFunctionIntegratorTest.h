@@ -193,4 +193,3 @@ public:
                     integrator.requiredRelativePrecision());
   }
 };
-

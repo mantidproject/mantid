@@ -224,4 +224,3 @@ private:
 const std::string RemoteJobManagerFactoryTest::SNSFac = "SNS";
 const std::string RemoteJobManagerFactoryTest::ISISFac = "ISIS";
 const std::string RemoteJobManagerFactoryTest::FermiName = "Fermi";
-

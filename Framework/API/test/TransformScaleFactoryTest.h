@@ -37,4 +37,3 @@ public:
 private:
   TransformScaleFactoryImpl &factory;
 };
-

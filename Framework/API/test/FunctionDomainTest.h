@@ -81,4 +81,3 @@ private:
 
   std::vector<double> data;
 };
-

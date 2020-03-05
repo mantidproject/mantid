@@ -277,4 +277,3 @@ using IRemoteJobManager_sptr = boost::shared_ptr<IRemoteJobManager>;
 
 } // namespace API
 } // namespace Mantid
-

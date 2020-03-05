@@ -45,4 +45,3 @@ public:
                      "Invalid or no shape defined for sample");
   }
 };
-

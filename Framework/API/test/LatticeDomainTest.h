@@ -53,4 +53,3 @@ public:
     TS_ASSERT_THROWS(domain[3], const IndexError &)
   }
 };
-

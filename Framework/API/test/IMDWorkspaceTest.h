@@ -147,4 +147,3 @@ public:
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
-

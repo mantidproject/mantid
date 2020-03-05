@@ -150,4 +150,3 @@ MANTID_API_DLL std::ostream &operator<<(std::ostream &,
 
 } // namespace API
 } // namespace Mantid
-

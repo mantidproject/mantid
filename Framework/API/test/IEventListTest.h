@@ -18,4 +18,3 @@ class IEventListTest : public CxxTest::TestSuite {
 public:
   void test_Something() {}
 };
-

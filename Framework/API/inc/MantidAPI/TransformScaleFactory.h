@@ -62,4 +62,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::TransformScaleFactoryImpl>;
 }
 } // namespace Mantid
-

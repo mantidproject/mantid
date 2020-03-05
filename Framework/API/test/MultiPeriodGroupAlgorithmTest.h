@@ -250,4 +250,3 @@ public:
     TS_ASSERT_EQUALS(a->size(), wsgroup->size());
   }
 };
-

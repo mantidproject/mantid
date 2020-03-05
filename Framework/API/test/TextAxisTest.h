@@ -135,4 +135,3 @@ public:
     TS_ASSERT_EQUALS(static_cast<size_t>(-1), ta.indexOfValue(-1.5));
   }
 };
-

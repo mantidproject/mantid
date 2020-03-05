@@ -57,4 +57,3 @@ private:
 
 } // namespace Instrumentation
 } // namespace Mantid
-

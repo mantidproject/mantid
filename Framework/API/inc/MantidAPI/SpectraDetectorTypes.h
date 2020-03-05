@@ -21,4 +21,3 @@ using detid2index_map = std::unordered_map<detid_t, size_t>;
 /// Map single det ID of group to its members
 using det2group_map = std::unordered_map<detid_t, std::set<detid_t>>;
 } // namespace Mantid
-

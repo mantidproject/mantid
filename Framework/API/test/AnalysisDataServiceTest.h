@@ -604,4 +604,3 @@ private:
     ads.addOrReplace(name, Workspace_sptr(new MockWorkspace));
   }
 };
-

@@ -32,4 +32,3 @@ public:
     TS_ASSERT_EQUALS(item.numberOfChildren(), 0)
   }
 };
-

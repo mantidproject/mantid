@@ -252,4 +252,3 @@ private:
   std::string m_correctOutput;
   size_t m_execCount;
 };
-

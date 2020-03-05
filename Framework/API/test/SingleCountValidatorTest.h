@@ -84,4 +84,3 @@ public:
                      "The workspace must not contain single counts");
   }
 };
-

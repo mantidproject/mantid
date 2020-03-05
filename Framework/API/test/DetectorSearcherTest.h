@@ -235,4 +235,3 @@ public:
     TS_ASSERT_EQUALS(hitCount, 16235)
   }
 };
-

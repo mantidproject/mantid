@@ -592,4 +592,3 @@ public:
 using ScriptRepository_sptr = boost::shared_ptr<ScriptRepository>;
 } // namespace API
 } // namespace Mantid
-

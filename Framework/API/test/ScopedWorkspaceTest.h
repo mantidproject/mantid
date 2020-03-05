@@ -218,4 +218,3 @@ public:
 private:
   AnalysisDataServiceImpl &m_ads;
 };
-

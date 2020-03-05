@@ -763,4 +763,3 @@ private:
     return m_dummyFilesDir + Poco::Path::separator() + filename;
   }
 };
-

@@ -150,4 +150,3 @@ Kernel::Logger WorkspaceProperty<TYPE>::g_log("WorkspaceProperty");
 
 } // namespace API
 } // namespace Mantid
-

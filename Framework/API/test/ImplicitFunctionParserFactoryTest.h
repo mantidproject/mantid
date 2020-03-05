@@ -102,4 +102,3 @@ public:
         const std::runtime_error &);
   }
 };
-

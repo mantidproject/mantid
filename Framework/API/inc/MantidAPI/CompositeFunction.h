@@ -293,4 +293,3 @@ public:
 
 } // namespace API
 } // namespace Mantid
-

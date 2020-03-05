@@ -202,4 +202,4 @@ protected:
 } // namespace API
 } // namespace Mantid
 
- /*MANTID_API_TEMPFUNCTION_H_*/
+/*MANTID_API_TEMPFUNCTION_H_*/

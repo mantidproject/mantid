@@ -19,4 +19,3 @@ public:
     /// Abstract class, nothing much to test.
   }
 };
-

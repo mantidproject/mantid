@@ -144,4 +144,3 @@ public:
     TS_ASSERT_EQUALS(fun.getParameter("D"), 0.0);
   }
 };
-

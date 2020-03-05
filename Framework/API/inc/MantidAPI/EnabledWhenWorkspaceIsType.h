@@ -104,4 +104,3 @@ protected:
 
 } // namespace API
 } // namespace Mantid
-

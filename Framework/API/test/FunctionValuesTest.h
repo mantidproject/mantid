@@ -126,4 +126,3 @@ public:
 private:
   std::vector<double> x;
 };
-

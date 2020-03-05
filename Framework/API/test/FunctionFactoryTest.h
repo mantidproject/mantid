@@ -511,4 +511,3 @@ public:
     TS_ASSERT(i == names.end());
   }
 };
-

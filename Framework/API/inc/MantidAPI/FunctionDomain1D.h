@@ -163,4 +163,3 @@ using FunctionDomain1D_const_sptr = boost::shared_ptr<const FunctionDomain1D>;
 
 } // namespace API
 } // namespace Mantid
-

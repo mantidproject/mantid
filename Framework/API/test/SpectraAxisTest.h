@@ -125,4 +125,3 @@ private:
   WorkspaceTester *ws;
   Axis *spectraAxis;
 };
-
