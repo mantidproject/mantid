@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_
-#define MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_
+#pragma once
 
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDBoxIterator.h"
@@ -773,6 +772,4 @@ public:
     do_test_getBoxes(true, 3, 125 * 125 * 125);
   }
 };
-
-#endif /* MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_ */
 #undef RUN_CXX_PERFORMANCE_TEST_EMBEDDED

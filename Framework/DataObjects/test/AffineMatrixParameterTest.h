@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef AFFINE_MATRIX_PARAMETER_TEST_H
-#define AFFINE_MATRIX_PARAMETER_TEST_H
+#pragma once
 
 #include "MantidDataObjects/AffineMatrixParameter.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -120,5 +119,3 @@ public:
         param.toXMLString());
   }
 };
-
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDEVENTTEST_H
-#define MDEVENTTEST_H
+#pragma once
 
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -371,5 +370,3 @@ public:
     TS_ASSERT_THROWS_NOTHING(MDEvent<4>::dataToEvents(data, transfEvents));
   }
 };
-
-#endif

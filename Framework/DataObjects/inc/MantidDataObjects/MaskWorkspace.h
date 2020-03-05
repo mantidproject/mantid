@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_MASKWORKSPACE_H
-#define MANTID_DATAOBJECTS_MASKWORKSPACE_H
+#pragma once
 
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -77,5 +76,3 @@ using MaskWorkspace_const_sptr = boost::shared_ptr<const MaskWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif // MANTID_DATAOBJECTS_MASKWORKSPACE_H

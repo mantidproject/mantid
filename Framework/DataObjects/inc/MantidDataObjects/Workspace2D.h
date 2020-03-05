@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_WORKSPACE2D_H_
-#define MANTID_DATAOBJECTS_WORKSPACE2D_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -113,4 +112,3 @@ using Workspace2D_const_sptr = boost::shared_ptr<const Workspace2D>;
 
 } // namespace DataObjects
 } // Namespace Mantid
-#endif /*MANTID_DATAOBJECTS_WORKSPACE2D_H_*/

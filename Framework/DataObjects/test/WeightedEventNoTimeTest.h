@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WEIGHTEDEVENTNOTIMETEST_H_
-#define WEIGHTEDEVENTNOTIMETEST_H_ 1
+#pragma once
 
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/Timer.h"
@@ -83,5 +82,3 @@ public:
     TS_ASSERT(wen == wen2);
   }
 };
-
-#endif /// EVENTLISTTEST_H_

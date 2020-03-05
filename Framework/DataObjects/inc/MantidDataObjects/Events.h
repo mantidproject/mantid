@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_EVENTS_H_
-#define MANTID_DATAOBJECTS_EVENTS_H_
+#pragma once
 
 #ifdef _WIN32 /* _WIN32 */
 #include <time.h>
@@ -219,4 +218,3 @@ inline double WeightedEventNoTime::errorSquared() const {
 
 } // namespace DataObjects
 } // namespace Mantid
-#endif /// MANTID_DATAOBJECTS_EVENTS_H_

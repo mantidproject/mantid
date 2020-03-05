@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_FRACTIONALREBINNING_
-#define MANTID_DATAOBJECTS_FRACTIONALREBINNING_
+#pragma once
 
 //------------------------------------------------------------------------------
 // Includes
@@ -70,5 +69,3 @@ finalizeFractionalRebin(DataObjects::RebinnedOutput &outputWS);
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif

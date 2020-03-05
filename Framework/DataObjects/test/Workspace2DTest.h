@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WORKSPACE2DTEST_H_
-#define WORKSPACE2DTEST_H_
+#pragma once
 
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -329,5 +328,3 @@ public:
               << " spectra, using the ISpectrum method (in parallel).\n";
   }
 };
-
-#endif

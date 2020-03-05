@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDGRIDBOXTEST_H
-#define MDGRIDBOXTEST_H
+#pragma once
 
 #include "MDBoxTest.h"
 #include "MantidAPI/BoxController.h"
@@ -1780,5 +1779,3 @@ public:
     }
   }
 };
-
-#endif

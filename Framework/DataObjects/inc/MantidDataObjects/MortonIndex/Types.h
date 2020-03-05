@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_
-#define MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_
+#pragma once
 
 // boost::multiprecision is not used here because the
 // with of the number is one WORD bigger, than actual
@@ -94,4 +93,3 @@ template <size_t ND, typename FP> struct IndexTypes {
 };
 
 } // namespace morton_index
-#endif // MANTID_DATAOBJECTS_MORTONINDEX_TYPES_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_SKIPPINGPOLICYTEST_H_
-#define MANTID_DATAOBJECTS_SKIPPINGPOLICYTEST_H_
+#pragma once
 
 #include "MantidDataObjects/SkippingPolicy.h"
 #include <cxxtest/TestSuite.h>
@@ -25,5 +24,3 @@ public:
     TSM_ASSERT_EQUALS("Should alway return False", false, p.keepGoing());
   }
 };
-
-#endif /* MANTID_DATAOBJECTS_SKIPPINGPOLICYTEST_H_ */
