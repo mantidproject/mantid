@@ -866,7 +866,7 @@ public:
 
     /*
      * Create a Cursor region.
-    */
+     */
     MantidQt::SliceViewer::Top top(0.5);
     MantidQt::SliceViewer::Bottom bottom(-0.5);
     MantidQt::SliceViewer::Left left(0);
