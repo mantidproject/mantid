@@ -17,6 +17,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
@@ -156,16 +157,10 @@ void ReflectometryReductionOne2::init() {
                       Direction::Input),
                   "Wavelength maximum in angstroms");
 
-  // Init properties for monitors
   initMonitorProperties();
-
-  // Init properties for transmission normalization
+  initBackgroundProperties();
   initTransmissionProperties();
-
-  // Init properties for algorithmic corrections
   initAlgorithmicProperties();
-
-  // Init properties for diagnostics
   initDebugProperties();
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
@@ -177,6 +172,11 @@ void ReflectometryReductionOne2::init() {
                       "OutputWorkspaceWavelength", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output Workspace IvsLam. Intermediate workspace.");
+  setPropertySettings(
+      "OutputWorkspaceWavelength",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+
+  initTransmissionOutputProperties();
 }
 
 /** Validate inputs
@@ -185,6 +185,9 @@ std::map<std::string, std::string>
 ReflectometryReductionOne2::validateInputs() {
 
   std::map<std::string, std::string> results;
+
+  const auto background = validateBackgroundProperties();
+  results.insert(background.begin(), background.end());
 
   const auto reduction = validateReductionProperties();
   results.insert(reduction.begin(), reduction.end());
@@ -260,6 +263,7 @@ void ReflectometryReductionOne2::exec() {
   // Convert to Q
   auto IvsQ = convertToQ(IvsLam);
 
+  // Set outputs
   if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
     setProperty("OutputWorkspaceWavelength", IvsLam);
   }
@@ -397,9 +401,16 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     result = cropWavelength(result, true, wavelengthMin(), wavelengthMax());
     outputDebugWorkspace(result, wsName, "_cropped", debug, step);
   } else {
+    g_log.debug("Extracting ROI\n");
+    result = makeDetectorWS(result, false, false);
+    outputDebugWorkspace(result, wsName, "_lambda", debug, step);
+    // Background subtraction
+    result = backgroundSubtraction(result);
+    outputDebugWorkspace(result, wsName, "_lambda_subtracted_bkg", debug, step);
+    // Sum in lambda
     if (m_sum) {
       g_log.debug("Summing in wavelength\n");
-      result = makeDetectorWS(result, m_convertUnits);
+      result = makeDetectorWS(result, m_convertUnits, true);
       outputDebugWorkspace(result, wsName, "_summed", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
@@ -458,6 +469,31 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
   return IvsLam;
 }
 
+MatrixWorkspace_sptr ReflectometryReductionOne2::backgroundSubtraction(
+    MatrixWorkspace_sptr detectorWS) {
+  bool subtractBackground = getProperty("SubtractBackground");
+  if (!subtractBackground)
+    return detectorWS;
+  auto alg = this->createChildAlgorithm("ReflectometryBackgroundSubtraction");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", detectorWS);
+  alg->setProperty("InputWorkspaceIndexType", "SpectrumNumber");
+  alg->setProperty("ProcessingInstructions",
+                   getPropertyValue("BackgroundProcessingInstructions"));
+  alg->setProperty("BackgroundCalculationMethod",
+                   getPropertyValue("BackgroundCalculationMethod"));
+  alg->setProperty("DegreeOfPolynomial",
+                   getPropertyValue("DegreeOfPolynomial"));
+  alg->setProperty("CostFunction", getPropertyValue("CostFunction"));
+  // For our case, the peak range is the same as the main processing
+  // instructions, and we do the summation separately so don't sum the peak
+  alg->setProperty("PeakRange", getPropertyValue("ProcessingInstructions"));
+  alg->setProperty("SumPeak", false);
+  alg->execute();
+  MatrixWorkspace_sptr corrected = alg->getProperty("OutputWorkspace");
+  return corrected;
+}
+
 /**
  * Perform either transmission or algorithmic correction according to the
  * settings.
@@ -493,6 +529,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     MatrixWorkspace_sptr detectorWS, const bool detectorWSReduced) {
 
   MatrixWorkspace_sptr transmissionWS = getProperty("FirstTransmissionRun");
+  auto transmissionWSName = transmissionWS->getName();
 
   // Reduce the transmission workspace, if not already done (assume that if
   // the workspace is in wavelength then it has already been reduced)
@@ -510,6 +547,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
           getPropertyValue("TransmissionProcessingInstructions");
     }
 
+    bool const isDebug = getProperty("Debug");
     MatrixWorkspace_sptr secondTransmissionWS =
         getProperty("SecondTransmissionRun");
     auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
@@ -535,9 +573,14 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     alg->setProperty("ProcessingInstructions", transmissionCommands);
     alg->setProperty("NormalizeByIntegratedMonitors",
                      getPropertyValue("NormalizeByIntegratedMonitors"));
-    alg->setPropertyValue("Debug", getPropertyValue("Debug"));
+    alg->setProperty("Debug", isDebug);
     alg->execute();
     transmissionWS = alg->getProperty("OutputWorkspace");
+    transmissionWSName = alg->getPropertyValue("OutputWorkspace");
+
+    // Set interim workspace outputs
+    setWorkspacePropertyFromChild(alg, "OutputWorkspaceFirstTransmission");
+    setWorkspacePropertyFromChild(alg, "OutputWorkspaceSecondTransmission");
   }
 
   // Rebin the transmission run to be the same as the input.
@@ -555,6 +598,13 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
   }
 
   MatrixWorkspace_sptr normalized = divide(detectorWS, transmissionWS);
+
+  // Set output transmission workspace
+  if (isDefault("OutputWorkspaceTransmission") && !transmissionWSName.empty()) {
+    setPropertyValue("OutputWorkspaceTransmission", transmissionWSName);
+  }
+  setProperty("OutputWorkspaceTransmission", transmissionWS);
+
   return normalized;
 }
 
@@ -911,7 +961,7 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
   // the same bin width as the input workspace
   const double binWidth = (detectorWS->x(0).back() - detectorWS->x(0).front()) /
                           static_cast<double>(detectorWS->blocksize());
-  const int numBins = static_cast<int>(
+  const auto numBins = static_cast<int>(
       std::ceil((wavelengthMax() - wavelengthMin()) / binWidth));
   // Construct the histogram with these X values. Y and E values are zero.
   const BinEdges xValues(numBins, LinearGenerator(wavelengthMin(), binWidth));
@@ -987,7 +1037,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
       std::vector<double> projectedE(outputE.size(), 0.0);
 
       // Process each value in the spectrum
-      const int ySize = static_cast<int>(inputY.size());
+      const auto ySize = static_cast<int>(inputY.size());
       for (int inputIdx = 0; inputIdx < ySize; ++inputIdx) {
         // Do the summation in Q
         sumInQProcessValue(inputIdx, twoTheta, bTwoTheta, inputX, inputY,
@@ -995,7 +1045,7 @@ ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
       }
 
       // Sum errors in quadrature
-      const int eSize = static_cast<int>(outputE.size());
+      const auto eSize = static_cast<int>(outputE.size());
       for (int outIdx = 0; outIdx < eSize; ++outIdx) {
         outputE[outIdx] += projectedE[outIdx] * projectedE[outIdx];
       }
@@ -1091,7 +1141,7 @@ void ReflectometryReductionOne2::sumInQShareCounts(
 
   // Loop through all overlapping output bins. Convert the iterator to an
   // index because we need to index both the X and Y arrays.
-  const int xSize = static_cast<int>(outputX.size());
+  const auto xSize = static_cast<int>(outputX.size());
   for (auto outIdx = startIter - outputX.begin(); outIdx < xSize - 1;
        ++outIdx) {
     const double binStart = outputX[outIdx];

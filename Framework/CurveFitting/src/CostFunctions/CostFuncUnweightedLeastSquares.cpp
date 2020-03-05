@@ -70,7 +70,7 @@ double CostFuncUnweightedLeastSquares::getResidualVariance() const {
     sum += difference * difference;
   }
 
-  double degreesOfFreedom = static_cast<double>(m_values->size() - nParams());
+  auto degreesOfFreedom = static_cast<double>(m_values->size() - nParams());
   double residualVariance = sum / degreesOfFreedom;
 
   if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {

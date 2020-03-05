@@ -10,13 +10,14 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidMuon/DllConfig.h"
 
 using namespace Mantid::API;
 
 namespace Mantid {
 namespace Muon {
 
-class DLLExport MuonGroupingAsymmetry : public API::Algorithm {
+class MANTID_MUON_DLL MuonGroupingAsymmetry : public API::Algorithm {
 public:
   MuonGroupingAsymmetry() : API::Algorithm() {}
   ~MuonGroupingAsymmetry() {}

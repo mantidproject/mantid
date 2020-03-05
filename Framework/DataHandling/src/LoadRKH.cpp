@@ -95,15 +95,15 @@ void LoadRKH::readLinesForRKH1D(std::istream &stream, int readStart,
     std::istringstream datastr(fileline);
     datastr >> xValue >> yValue >> yErrorValue;
 
-    xData.push_back(xValue);
-    yData.push_back(yValue);
-    yError.push_back(yErrorValue);
+    xData.emplace_back(xValue);
+    yData.emplace_back(yValue);
+    yError.emplace_back(yErrorValue);
 
     // check if we need to read in x error values
     if (readXError) {
       double xErrorValue(0.);
       datastr >> xErrorValue;
-      xError.push_back(xErrorValue);
+      xError.emplace_back(xErrorValue);
     }
 
     prog.report();
@@ -438,7 +438,7 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
 
   std::getline(m_fileIn, fileLine);
   boost::trim(fileLine);
-  const int nAxis0Boundaries = boost::lexical_cast<int>(fileLine);
+  const auto nAxis0Boundaries = boost::lexical_cast<int>(fileLine);
   axis0Data.resize(nAxis0Boundaries);
   readNumEntrys(nAxis0Boundaries, axis0Data);
 
@@ -469,8 +469,8 @@ Progress LoadRKH::read2DHeader(const std::string &initalLine,
   if (wsDimensions.count() < 2) {
     throw Exception::NotFoundError("Input file", "dimensions");
   }
-  const int nAxis0Values = boost::lexical_cast<int>(wsDimensions[0]);
-  const int nAxis1Values = boost::lexical_cast<int>(wsDimensions[1]);
+  const auto nAxis0Values = boost::lexical_cast<int>(wsDimensions[0]);
+  const auto nAxis1Values = boost::lexical_cast<int>(wsDimensions[1]);
 
   Progress prog(this, 0.05, 1.0, 2 * nAxis1Values);
 

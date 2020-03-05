@@ -65,12 +65,12 @@ PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field,
       dataAccesor = &MatrixWorkspace::readE;
   }
   npy_intp arrayDims[2] = {numHist, stride};
-  PyArrayObject *nparray = reinterpret_cast<PyArrayObject *>(
+  auto *nparray = reinterpret_cast<PyArrayObject *>(
       PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(NPY_DOUBLE),
                            2,         // rank 2
                            arrayDims, // Length in each dimension
                            nullptr, nullptr, 0, nullptr));
-  double *dest = reinterpret_cast<double *>(
+  auto *dest = reinterpret_cast<double *>(
       PyArray_DATA(nparray)); // HEAD of the contiguous numpy data array
 
   PARALLEL_FOR_IF(threadSafe(workspace))

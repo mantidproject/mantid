@@ -119,12 +119,13 @@ void writeBankHeader(std::stringstream &out, const std::string &bintype,
 //----------------------------------------------------------------------------------------------
 // Initialise the algorithm
 void SaveGSS::init() {
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
+  const std::vector<std::string> exts{".gsa", ".gss", ".gda", ".txt"};
+  declareProperty(std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "The input workspace");
 
-  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
-                                                      API::FileProperty::Save),
+  declareProperty(std::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save, exts),
                   "The filename to use for the saved data");
 
   declareProperty(
@@ -542,7 +543,7 @@ void SaveGSS::generateOutFileNames(size_t numberOfOutFiles) {
   if (numberOfOutFiles == 1) {
     // Only add one name and don't generate split filenames
     // when we are not in split mode
-    m_outFileNames.push_back(outputFileName);
+    m_outFileNames.emplace_back(outputFileName);
     return;
   }
 
@@ -715,7 +716,11 @@ std::map<std::string, std::string> SaveGSS::validateInputs() {
   std::map<std::string, std::string> result;
 
   API::MatrixWorkspace_const_sptr input_ws = getProperty("InputWorkspace");
-
+  if (!input_ws) {
+    result["InputWorkspace"] =
+        "The input workspace cannot be a GroupWorkspace.";
+    return result;
+  }
   // Check the number of histogram/spectra < 99
   const auto nHist = static_cast<int>(input_ws->getNumberHistograms());
   const bool split = getProperty("SplitFiles");

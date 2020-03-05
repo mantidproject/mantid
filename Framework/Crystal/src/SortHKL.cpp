@@ -59,11 +59,11 @@ void SortHKL::init() {
                  std::back_inserter(pgOptions),
                  [](const auto &group) { return group->getName(); });
   // Scripts may have Orthorhombic misspelled from past bug in PointGroupFactory
-  pgOptions.push_back("222 (Orthorombic)");
-  pgOptions.push_back("mm2 (Orthorombic)");
-  pgOptions.push_back("2mm (Orthorombic)");
-  pgOptions.push_back("m2m (Orthorombic)");
-  pgOptions.push_back("mmm (Orthorombic)");
+  pgOptions.emplace_back("222 (Orthorombic)");
+  pgOptions.emplace_back("mm2 (Orthorombic)");
+  pgOptions.emplace_back("2mm (Orthorombic)");
+  pgOptions.emplace_back("m2m (Orthorombic)");
+  pgOptions.emplace_back("mmm (Orthorombic)");
   declareProperty("PointGroup", pgOptions[0],
                   boost::make_shared<StringListValidator>(pgOptions),
                   "Which point group applies to this crystal?");

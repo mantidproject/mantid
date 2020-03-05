@@ -43,12 +43,12 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::SpecialCoordinateSystem;
-using Mantid::MantidVec;
 using Mantid::coord_t;
 using Mantid::detid_t;
+using Mantid::MantidVec;
 using Mantid::signal_t;
 using Mantid::specnum_t;
+using Mantid::Kernel::SpecialCoordinateSystem;
 
 //===================================================================================================================
 /** Helper class that implements ISpectrum */
@@ -484,15 +484,27 @@ public:
     throw std::runtime_error("Not Implemented");
   }
 
-  signal_t *getSignalArray() const override {
+  const signal_t *getSignalArray() const override {
     throw std::runtime_error("Not Implemented");
   }
 
-  signal_t *getErrorSquaredArray() const override {
+  const signal_t *getErrorSquaredArray() const override {
     throw std::runtime_error("Not Implemented");
   }
 
-  signal_t *getNumEventsArray() const override {
+  const signal_t *getNumEventsArray() const override {
+    throw std::runtime_error("Not Implemented");
+  }
+
+  signal_t *mutableSignalArray() override {
+    throw std::runtime_error("Not Implemented");
+  }
+
+  signal_t *mutableErrorSquaredArray() override {
+    throw std::runtime_error("Not Implemented");
+  }
+
+  signal_t *mutableNumEventsArray() override {
     throw std::runtime_error("Not Implemented");
   }
 

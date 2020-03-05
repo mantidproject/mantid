@@ -250,8 +250,8 @@ void CompareMDWorkspaces::compareMDWorkspaces(
                     "Number of points in box does not match");
 
     // Are both MDGridBoxes ?
-    MDGridBox<MDE, nd> *gridbox1 = dynamic_cast<MDGridBox<MDE, nd> *>(box1);
-    MDGridBox<MDE, nd> *gridbox2 = dynamic_cast<MDGridBox<MDE, nd> *>(box2);
+    auto *gridbox1 = dynamic_cast<MDGridBox<MDE, nd> *>(box1);
+    auto *gridbox2 = dynamic_cast<MDGridBox<MDE, nd> *>(box2);
     if (gridbox1 && gridbox2) {
       for (size_t d = 0; d < nd; d++)
         this->compareTol(gridbox1->getBoxSize(d), gridbox2->getBoxSize(d),
@@ -259,8 +259,8 @@ void CompareMDWorkspaces::compareMDWorkspaces(
     }
 
     // Are both MDBoxes (with events)
-    MDBox<MDE, nd> *mdbox1 = dynamic_cast<MDBox<MDE, nd> *>(box1);
-    MDBox<MDE, nd> *mdbox2 = dynamic_cast<MDBox<MDE, nd> *>(box2);
+    auto *mdbox1 = dynamic_cast<MDBox<MDE, nd> *>(box1);
+    auto *mdbox2 = dynamic_cast<MDBox<MDE, nd> *>(box2);
     if (mdbox1 && mdbox2) {
       if (m_CheckEvents) {
         const std::vector<MDE> &events1 = mdbox1->getConstEvents();

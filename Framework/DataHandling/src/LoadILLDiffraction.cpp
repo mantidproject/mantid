@@ -64,7 +64,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
 int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
-  if (descriptor.pathExists("/entry0/data_scan")) {
+  if (descriptor.pathExists("/entry0/instrument/2theta")) {
     return 80;
   } else {
     return 0;
@@ -211,8 +211,8 @@ void LoadILLDiffraction::loadDataScan() {
     m_scanVar[i].setScanned(scanned[static_cast<int>(i)]);
   }
 
-  resolveScanType();
   resolveInstrument();
+  resolveScanType();
   computeThetaOffset();
 
   std::string start_time = firstEntry.getString("start_time");
@@ -486,8 +486,9 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
   }
 
   // Then load the detector spectra
-  for (size_t i = NUMBER_MONITORS;
-       i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outWorkspace))
+  for (int i = NUMBER_MONITORS;
+       i < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS); ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
       auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
@@ -527,8 +528,9 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
                  [](double e) { return sqrt(e); });
 
   // Assign detector counts
-  for (size_t i = NUMBER_MONITORS;
-       i < m_numberDetectorsActual + NUMBER_MONITORS; ++i) {
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outWorkspace))
+  for (int i = NUMBER_MONITORS;
+       i < static_cast<int>(m_numberDetectorsActual + NUMBER_MONITORS); ++i) {
     auto &spectrum = m_outWorkspace->mutableY(i);
     auto &errors = m_outWorkspace->mutableE(i);
     const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
@@ -620,7 +622,7 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
     if (m_scanVar[i].property == propertyName) {
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
-        scannedVariable.push_back(
+        scannedVariable.emplace_back(
             scan(static_cast<int>(i), static_cast<int>(j)));
       }
       break;
@@ -708,7 +710,7 @@ LoadILLDiffraction::getAbsoluteTimes(const NXDouble &scan) const {
   size_t timeIndex = 1;
   while (timeIndex < m_numberScanPoints) {
     time += durations[timeIndex - 1];
-    times.push_back(time);
+    times.emplace_back(time);
     ++timeIndex;
   }
   return times;
@@ -719,13 +721,17 @@ LoadILLDiffraction::getAbsoluteTimes(const NXDouble &scan) const {
  */
 void LoadILLDiffraction::resolveScanType() {
   ScanType result = NoScan;
-  if (m_numberScanPoints != 1) {
-    for (const auto &scanVar : m_scanVar) {
-      if (scanVar.scanned == 1) {
-        result = OtherScan;
-        if (scanVar.name == "2theta") {
-          result = DetectorScan;
-          break;
+  if (m_instName == "D2B") {
+    result = DetectorScan;
+  } else {
+    if (m_numberScanPoints != 1) {
+      for (const auto &scanVar : m_scanVar) {
+        if (scanVar.scanned == 1) {
+          result = OtherScan;
+          if (scanVar.name == "2theta") {
+            result = DetectorScan;
+            break;
+          }
         }
       }
     }

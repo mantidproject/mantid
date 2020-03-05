@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/Policies/RemoveConst.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/implicit.hpp>
@@ -36,7 +36,7 @@ namespace {
       .def("unfiltered", &FilteredTimeSeriesProperty<TYPE>::unfiltered,        \
            (arg("self")), return_value_policy<RemoveConst>(),                  \
            "Returns a time series containing the unfiltered data");
-}
+} // namespace
 
 void export_FilteredTimeSeriesProperty() {
   EXPORT_FILTEREDTIMESERIES_PROP(double, Float);

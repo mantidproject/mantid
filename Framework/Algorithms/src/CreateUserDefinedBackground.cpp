@@ -107,7 +107,7 @@ void CreateUserDefinedBackground::cleanUpTable(
     if (!isZero(x)) {
       break;
     } else if (isZero(y)) {
-      blankRows.push_back(i);
+      blankRows.emplace_back(i);
     }
   }
   for (const auto &row : blankRows) {
@@ -168,7 +168,7 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
   const auto &lerp = getInterpolator(background, data);
   for (const auto &x : xPoints) {
     const double y = lerp.value(x);
-    yBackground.push_back(y);
+    yBackground.emplace_back(y);
   }
 
   auto histogram = outputWS->histogram(0);

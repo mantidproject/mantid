@@ -29,8 +29,8 @@ using namespace Mantid::DataObjects;
 
 using namespace std;
 
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Points;
 
 class FitPeaksTest : public CxxTest::TestSuite {
@@ -73,7 +73,7 @@ public:
 
     // create a 1-value peak index vector for peak (0) at X=5
     std::vector<int> peak_index_vec;
-    peak_index_vec.push_back(0);
+    peak_index_vec.emplace_back(0);
     const std::string ws_name("peakcenter1");
     const std::string peak_center_ws_name =
         genPeakCenterWorkspace(peak_index_vec, ws_name);
@@ -373,6 +373,61 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("StartWorkspaceIndex", 19990));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 20000));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("FitWindowRightBoundary", "1.15"));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakRanges", "0.02"));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakParameterValues", peakparvalues));
+
+    fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3");
+    fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3");
+    fitpeaks.setProperty("FittedPeaksWorkspace", "FittedPeaksWS3");
+
+    fitpeaks.execute();
+    TS_ASSERT(fitpeaks.isExecuted());
+
+    // check output workspaces
+    TS_ASSERT(
+        API::AnalysisDataService::Instance().doesExist("PeakPositionsWS3"));
+    TS_ASSERT(
+        API::AnalysisDataService::Instance().doesExist("PeakParametersWS3"));
+    TS_ASSERT(API::AnalysisDataService::Instance().doesExist("FittedPeaksWS3"));
+
+    // about the parameters
+    API::MatrixWorkspace_sptr peak_params_ws =
+        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+            AnalysisDataService::Instance().retrieve("PeakParametersWS3"));
+    TS_ASSERT(peak_params_ws);
+    TS_ASSERT_EQUALS(peak_params_ws->getNumberHistograms(), 5);
+    TS_ASSERT_EQUALS(peak_params_ws->histogram(0).x().size(), 10);
+
+    return;
+  }
+
+  void Ntest_singlePeakMultiSpectraPseudoVoigt() {
+    // Generate input workspace
+    // std::string input_ws_name = loadVulcanHighAngleData();
+
+    // Generate peak and background parameters
+    std::vector<string> peakparnames{"Mixing"};
+    std::vector<double> peakparvalues{0.5};
+
+    // Initialize FitPeak
+    FitPeaks fitpeaks;
+
+    fitpeaks.initialize();
+    TS_ASSERT(fitpeaks.isInitialized());
+
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("InputWorkspace", m_inputWorkspaceName));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("StartWorkspaceIndex", 19990));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("StopWorkspaceIndex", 20000));
+    TS_ASSERT_THROWS_NOTHING(
+        fitpeaks.setProperty("PeakFunction", "PseudoVoigt"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCenters", "1.0758"));
     TS_ASSERT_THROWS_NOTHING(
         fitpeaks.setProperty("FitWindowLeftBoundary", "1.05"));
@@ -846,19 +901,19 @@ public:
     parvalues.clear();
 
     parnames.emplace_back("I");
-    parvalues.push_back(2.5e+06);
+    parvalues.emplace_back(2.5e+06);
 
     parnames.emplace_back("A");
-    parvalues.push_back(5400);
+    parvalues.emplace_back(5400);
 
     parnames.emplace_back("B");
-    parvalues.push_back(1700);
+    parvalues.emplace_back(1700);
 
     parnames.emplace_back("X0");
-    parvalues.push_back(1.07);
+    parvalues.emplace_back(1.07);
 
     parnames.emplace_back("S");
-    parvalues.push_back(0.000355);
+    parvalues.emplace_back(0.000355);
 
     return;
   }
@@ -1009,13 +1064,13 @@ public:
     parvalues.clear();
 
     parnames.emplace_back("Height");
-    parvalues.push_back(2.5e+06);
+    parvalues.emplace_back(2.5e+06);
 
     parnames.emplace_back("Sigma");
-    parvalues.push_back(0.1);
+    parvalues.emplace_back(0.1);
 
     parnames.emplace_back("PeakCentre");
-    parvalues.push_back(10.0);
+    parvalues.emplace_back(10.0);
 
     return;
   }

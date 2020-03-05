@@ -30,7 +30,6 @@ public:
 private slots:
   virtual void algorithmComplete(bool error);
   void saveClicked();
-  void plotClicked();
   void runClicked();
   void getParameterDefaults(QString const &dataName);
   void setSampleDensityOptions(QString const &method);
@@ -90,11 +89,9 @@ private:
   double getCanDensityValue(QString const &type) const;
 
   void setRunEnabled(bool enabled);
-  void setPlotResultEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
-  void setPlotResultIsPlotting(bool plotting);
 
   Ui::AbsorptionCorrections m_uiForm;
 

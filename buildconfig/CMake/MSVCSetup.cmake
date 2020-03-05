@@ -4,6 +4,9 @@
 # dlls
 ###########################################################################
 set (SYSTEM_PACKAGE_TARGET RUNTIME)
+# Also include MSVC runtime libraries when running install commands
+set(CMAKE_INSTALL_OPENMP_LIBRARIES TRUE)
+include (InstallRequiredSystemLibraries)
 
 ###########################################################################
 # Compiler options.
@@ -11,7 +14,7 @@ set (SYSTEM_PACKAGE_TARGET RUNTIME)
 add_definitions ( -D_WINDOWS -DMS_VISUAL_STUDIO )
 add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
 add_definitions ( -DGSL_DLL -DJSON_DLL )
-add_definitions ( -DPOCO_DLL -DPOCO_NO_UNWINDOWS )
+add_definitions ( -DPOCO_DLL -DPOCO_NO_UNWINDOWS -DPOCO_NO_AUTOMATIC_LIBS)
 add_definitions ( -DBOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE )
 add_definitions ( -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS )
   # Prevent deprecation errors from std::tr1 in googletest until it is fixed upstream. In MSVC 2017 and later
@@ -20,15 +23,22 @@ add_definitions ( -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING )
 ##########################################################################
 # Additional compiler flags
 ##########################################################################
-# /MP     - Compile .cpp files in parallel
-# /W3     - Warning Level 3 (This is also the default)
-set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W3" )
+# Replace "/" with "\" for use in command prompt
+string ( REGEX REPLACE "/" "\\\\" THIRD_PARTY_INCLUDE_DIR "${THIRD_PARTY_DIR}/include/" )
+string ( REGEX REPLACE "/" "\\\\" THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/lib/" )
+# /MP            - Compile .cpp files in parallel
+# /W3            - Warning Level 3 (This is also the default)
+# /external:I    - Ignore third party library warnings (similar to "isystem" in GCC)
+set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+  /MP /W3 \
+  /experimental:external /external:W0 /external:I ${THIRD_PARTY_INCLUDE_DIR} /external:I ${THIRD_PARTY_LIB_DIR}\\python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}\\ "
+)
 
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason
-# Any other value lower or higher seems to work but not the default. It it is fine without this when compiling
+# Any other value lower or higher seems to work but not the default. It is fine without this when compiling
 # in the GUI though...
 set ( VISUALSTUDIO_COMPILERHEAPLIMIT 160 )
-# It make or may not already be set so override if it is (assumes if in CXX also in C)
+# It may or may not already be set, so override it if it is (assumes if in CXX also in C)
 if ( CMAKE_CXX_FLAGS MATCHES "(/Zm)([0-9]+)" )
  string ( REGEX REPLACE "(/Zm)([0-9]+)" "\\1${VISUALSTUDIO_COMPILERHEAPLIMIT}" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
  string ( REGEX REPLACE "(/Zm)([0-9]+)" "\\1${VISUALSTUDIO_COMPILERHEAPLIMIT}" CMAKE_C_FLAGS ${CMAKE_C_FLAGS} )
@@ -43,18 +53,9 @@ endif()
 set ( Qt5_DIR ${THIRD_PARTY_DIR}/lib/qt5/lib/cmake/Qt5 )
 
 ###########################################################################
-# On Windows we want to bundle Python.
+# Python development
 ###########################################################################
-set ( PYTHON_DIR ${THIRD_PARTY_DIR}/lib/python${PYTHON_MAJOR_VERSION}.${PYTHON_MINOR_VERSION} )
-## Set the variables that FindPythonLibs would set
-set ( PYTHON_INCLUDE_PATH "${PYTHON_DIR}/Include" )
-set ( PYTHON_LIBRARIES ${PYTHON_DIR}/libs/python${PYTHON_MAJOR_VERSION}${PYTHON_MINOR_VERSION}.lib )
-
-## The executable
-set ( PYTHON_EXECUTABLE "${PYTHON_DIR}/python.exe" CACHE FILEPATH "The location of the python executable" FORCE )
-# The "pythonw" executable that avoids raising another terminal when it runs. Used for IPython
-set ( PYTHONW_EXECUTABLE "${PYTHON_DIR}/pythonw.exe" CACHE FILEPATH
-      "The location of the pythonw executable. This suppresses the new terminal window on startup" FORCE )
+find_package ( PythonLibs REQUIRED )
 
 ###########################################################################
 # If required, find tcmalloc
@@ -115,7 +116,11 @@ configure_file ( ${WINDOWS_BUILDCONFIG}/pycharm.bat.in ${PROJECT_BINARY_DIR}/pyc
 ###########################################################################
 set ( PACKAGING_DIR ${PROJECT_SOURCE_DIR}/buildconfig/CMake/Packaging )
 # build version
-set ( MANTIDPYTHON_PREAMBLE "call %~dp0..\\..\\thirdpartypaths.bat\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%" )
+if(WITH_PYTHON3)
+  set ( MANTIDPYTHON_PREAMBLE "set PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%" )
+else()
+  set ( MANTIDPYTHON_PREAMBLE "call %~dp0..\\..\\thirdpartypaths.bat\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\PVPlugins\\PVPlugins;%PATH%" )
+endif()
 
 if ( MAKE_VATES )
   set ( PARAVIEW_PYTHON_PATHS ";${ParaView_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>;${ParaView_DIR}/lib/site-packages;${ParaView_DIR}/lib/site-packages/vtk" )

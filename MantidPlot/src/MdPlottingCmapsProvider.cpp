@@ -113,7 +113,7 @@ MdPlottingCmapsProvider::getSliceViewerIndicesForCommonColorMaps(
   for (QStringList::iterator it = colorMapNamesSliceViewer.begin();
        it != colorMapNamesSliceViewer.end(); ++it) {
     if (colorMapNamesVsi.indexOf(*it) != -1) {
-      indexVector.push_back(index);
+      indexVector.emplace_back(index);
     }
 
     index++;

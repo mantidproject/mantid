@@ -77,7 +77,7 @@ std::map<std::string, std::string> SumEventsByLogValue::validateInputs() {
   // Check that the log exists for the given input workspace
   m_logName = getPropertyValue("LogName");
   try {
-    ITimeSeriesProperty *log = dynamic_cast<ITimeSeriesProperty *>(
+    auto *log = dynamic_cast<ITimeSeriesProperty *>(
         m_inputWorkspace->run().getLogData(m_logName));
     if (log == nullptr) {
       errors["LogName"] = "'" + m_logName + "' is not a time-series log.";
@@ -102,10 +102,8 @@ void SumEventsByLogValue::exec() {
   const Property *const log = m_inputWorkspace->run().getLogData(m_logName);
 
   // Now we need to know what type of property it is
-  const TimeSeriesProperty<int> *intLog =
-      dynamic_cast<const TimeSeriesProperty<int> *>(log);
-  const TimeSeriesProperty<double> *dblLog =
-      dynamic_cast<const TimeSeriesProperty<double> *>(log);
+  const auto *intLog = dynamic_cast<const TimeSeriesProperty<int> *>(log);
+  const auto *dblLog = dynamic_cast<const TimeSeriesProperty<double> *>(log);
 
   m_binningParams = getProperty("OutputBinning");
   // Binning parameters must be provided for floating point logs
@@ -153,7 +151,8 @@ void SumEventsByLogValue::createTableOutput(
 
   // Accumulate things in a local vector before transferring to the table
   std::vector<int> Y(xLength);
-  const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
+  const auto numSpec =
+      static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numSpec + xLength);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {
@@ -386,11 +385,11 @@ double SumEventsByLogValue::sumProtonCharge(
     const Kernel::TimeSeriesProperty<double> *protonChargeLog,
     const Kernel::TimeSplitterType &filter) {
   // Clone the proton charge log and filter the clone on this log value
-  auto protonChargeLogClone(protonChargeLog->clone());
+  std::unique_ptr<Kernel::TimeSeriesProperty<double>> protonChargeLogClone(
+      protonChargeLog->clone());
   protonChargeLogClone->filterByTimes(filter);
   // Seems like the only way to sum this is to yank out the values
   const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
-
   return std::accumulate(pcValues.begin(), pcValues.end(), 0.0);
 }
 
@@ -404,7 +403,7 @@ void SumEventsByLogValue::createBinnedOutput(
   // If only the number of bins was given, add the min & max values of the log
   if (m_binningParams.size() == 1) {
     m_binningParams.insert(m_binningParams.begin(), log->minValue());
-    m_binningParams.push_back(
+    m_binningParams.emplace_back(
         log->maxValue() *
         1.000001); // Make it a tiny bit larger to cover full range
   }
@@ -424,7 +423,8 @@ void SumEventsByLogValue::createBinnedOutput(
   outputWorkspace->setYUnit("Counts");
 
   auto &Y = outputWorkspace->mutableY(0);
-  const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
+  const auto numSpec =
+      static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numSpec);
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWorkspace))
   for (int spec = 0; spec < numSpec; ++spec) {

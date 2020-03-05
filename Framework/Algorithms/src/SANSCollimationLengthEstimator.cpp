@@ -141,7 +141,7 @@ double SANSCollimationLengthEstimator::getCollimationLengthWithGuides(
     auto guideName = "Guide" + std::to_string(i);
     if (inOutWS->run().hasProperty(guideName)) {
       auto guideValue = getGuideValue(inOutWS->run().getProperty(guideName));
-      guideValues.push_back(guideValue);
+      guideValues.emplace_back(guideValue);
     } else {
       throw std::invalid_argument("TOFSANSResolutionByPixel: Mismatch between "
                                   "specified number of Guides and actual "

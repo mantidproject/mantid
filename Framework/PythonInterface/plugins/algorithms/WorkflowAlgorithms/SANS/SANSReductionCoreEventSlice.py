@@ -11,12 +11,12 @@ for which data must be event sliced. These steps are: slicing, adjustment, conve
 
 from __future__ import (absolute_import, division, print_function)
 
+from SANSReductionCoreBase import SANSReductionCoreBase
+
 from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         Progress)
-from mantid.kernel import (Direction, PropertyManagerProperty, StringListValidator)
+from mantid.kernel import (Direction, StringListValidator)
 from sans.common.enums import (DetectorType, DataType)
-
-from SANSReductionCoreBase import SANSReductionCoreBase
 
 
 class SANSReductionCoreEventSlice(SANSReductionCoreBase):
@@ -31,8 +31,8 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         # ----------
         # INPUT
         # ----------
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
+        self.declareProperty('SANSState', '',
+                             doc='A JSON string which fulfills the SANSState contract.')
 
         # WORKSPACES
         # Scatter Workspaces
@@ -62,16 +62,16 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         self.setPropertyGroup("TransmissionWorkspace", 'Data')
 
         # The component
-        allowed_detectors = StringListValidator([DetectorType.to_string(DetectorType.LAB),
-                                                 DetectorType.to_string(DetectorType.HAB)])
-        self.declareProperty("Component", DetectorType.to_string(DetectorType.LAB),
+        allowed_detectors = StringListValidator([DetectorType.LAB.value,
+                                                 DetectorType.HAB.value])
+        self.declareProperty("Component", DetectorType.LAB.value,
                              validator=allowed_detectors, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
         # The data type
-        allowed_data = StringListValidator([DataType.to_string(DataType.Sample),
-                                            DataType.to_string(DataType.Can)])
-        self.declareProperty("DataType", DataType.to_string(DataType.Sample),
+        allowed_data = StringListValidator([DataType.SAMPLE.value,
+                                            DataType.CAN.value])
+        self.declareProperty("DataType", DataType.SAMPLE.value,
                              validator=allowed_data, direction=Direction.Input,
                              doc="The component of the instrument which is to be reduced.")
 
@@ -84,7 +84,6 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
     def PyExec(self):
         # Get the input
         state = self._get_state()
-        state_serialized = state.property_manager
         progress = self._get_progress()
 
         workspace = self.getProperty("ScatterWorkspace").value
@@ -95,7 +94,7 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         progress.report("Event slicing ...")
         data_type_as_string = self.getProperty("DataType").value
         monitor_workspace = self._get_monitor_workspace()
-        workspace, monitor_workspace, slice_event_factor = self._slice(state_serialized, workspace, monitor_workspace,
+        workspace, monitor_workspace, slice_event_factor = self._slice(state, workspace, monitor_workspace,
                                                                        data_type_as_string)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -109,7 +108,7 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         progress.report("Creating adjustment workspaces ...")
         wavelength_adjustment_workspace, pixel_adjustment_workspace, wavelength_and_pixel_adjustment_workspace, \
             calculated_transmission_workspace, unfitted_transmission_workspace = \
-            self._adjustment(state_serialized, workspace, monitor_workspace, component_as_string, data_type_as_string)
+            self._adjustment(state, workspace, monitor_workspace, component_as_string, data_type_as_string)
 
         # ------------------------------------------------------------
         # 3. Convert event workspaces to histogram workspaces
@@ -129,11 +128,12 @@ class SANSReductionCoreEventSlice(SANSReductionCoreBase):
         # 5. Convert to Q
         # -----------------------------------------------------------
         progress.report("Converting to q ...")
-        workspace, sum_of_counts, sum_of_norms = self._convert_to_q(state_serialized,
-                                                                    workspace,
-                                                                    wavelength_adjustment_workspace,
-                                                                    pixel_adjustment_workspace,
-                                                                    wavelength_and_pixel_adjustment_workspace)
+        workspace, sum_of_counts, sum_of_norms = \
+            self._convert_to_q(state=state,
+                               workspace=workspace,
+                               wavelength_adjustment_workspace=wavelength_adjustment_workspace,
+                               pixel_adjustment_workspace=pixel_adjustment_workspace,
+                               wavelength_and_pixel_adjustment_workspace=wavelength_and_pixel_adjustment_workspace)
 
         progress.report("Completed SANSReductionCoreEventSlice...")
 

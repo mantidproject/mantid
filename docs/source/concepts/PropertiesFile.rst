@@ -30,20 +30,23 @@ The Properties
 General properties
 ******************
 
-+----------------------------------+--------------------------------------------------+-------------------+
-|Property                          |Description                                       | Example value     |
-+==================================+==================================================+===================+
-| ``algorithms.categories.hidden`` | A comma separated list of any categories of      | ``Muons,Testing`` |
-|                                  | algorithms that should be hidden in Mantid.      |                   |
-+----------------------------------+--------------------------------------------------+-------------------+
-| ``algorithms.retained``          | The Number of algorithms properties to retain in | ``50``            |
-|                                  | memory for reference in scripts.                   |                 |
-+----------------------------------+--------------------------------------------------+-------------------+
-| ``MultiThreaded.MaxCores``       | Sets the maximum number of cores available to be | ``0``             |
-|                                  | used for threads for                             |                   |
-|                                  | `OpenMP <http://www.openmp.org/>`_. If zero it   |                   |
-|                                  | will use one thread per logical core available.  |                   |
-+----------------------------------+--------------------------------------------------+-------------------+
++----------------------------------+--------------------------------------------------+------------------------+
+|Property                          |Description                                       | Example value          |
++==================================+==================================================+========================+
+| ``algorithms.categories.hidden`` | A comma separated list of any categories of      | ``Muons,Testing``      |
+|                                  | algorithms that should be hidden in Mantid.      |                        |
++----------------------------------+--------------------------------------------------+------------------------+
+| ``algorithms.retained``          | The Number of algorithms properties to retain in | ``50``                 |
+|                                  | memory for reference in scripts.                 |                        |
++----------------------------------+--------------------------------------------------+------------------------+
+| ``curvefitting.guiExclude``      | A semicolon separated list of function names     | ``ExpDecay;Gaussian;`` |
+|                                  | that should be hidden in Mantid.                 |                        |
++----------------------------------+--------------------------------------------------+------------------------+
+| ``MultiThreaded.MaxCores``       | Sets the maximum number of cores available to be | ``0``                  |
+|                                  | used for threads for                             |                        |
+|                                  | `OpenMP <http://www.openmp.org/>`_. If zero it   |                        |
+|                                  | will use one thread per logical core available.  |                        |
++----------------------------------+--------------------------------------------------+------------------------+
 
 Facility and instrument properties
 **********************************
@@ -52,7 +55,7 @@ Facility and instrument properties
 |Property                      |Description                                         |Example value        |
 +==============================+====================================================+=====================+
 | ``default.facility``         | The name of the default facility. The facility     | ``ISIS``            |
-|                              | must be defined within the facilities.xml file to   |                    |
+|                              | must be defined within the facilities.xml file to  |                     |
 |                              | be considered valid. The file is described         |                     |
 |                              | :ref:`here <Facilities file>`.                     |                     |
 +------------------------------+----------------------------------------------------+---------------------+
@@ -146,12 +149,15 @@ The logging priority levels for the file logging and console logging can also be
 
 
 
-MantidPlot Properties
-*********************
+Mantid Graphical User Interface Properties
+******************************************
 
 +--------------------------------------------+---------------------------------------------------+-----------------+
 |Property                                    |Description                                        |Example value    |
 +============================================+===================================================+=================+
+| ``Notifications.Enabled``                  |Should Mantid use System Notifications for         | ``On``, ``Off`` |
+|                                            |important messages?                                |                 |
++--------------------------------------------+---------------------------------------------------+-----------------+
 | ``cluster.submission``                     |Enable cluster submission elements in GUIs         | ``On``, ``Off`` |
 +--------------------------------------------+---------------------------------------------------+-----------------+
 | ``MantidOptions.InstrumentView.UseOpenGL`` |Controls the use of OpenGL in rendering the        | ``On``, ``Off`` |
@@ -181,7 +187,7 @@ Network Properties
 |                                           |operations (in seconds).                           |                                 |
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 | ``network.scriptrepo.timeout``            |The timeout for network operations in the script   | ``5``                           |
-|                                           |repository, this overrides the default timeout.   |                                  |
+|                                           |repository, this overrides the default timeout.    |                                 |
 +-------------------------------------------+---------------------------------------------------+---------------------------------+
 | ``proxy.host``                            | Allows the system proxy to be overridden, if not  | ``http://www.proxy.org``        |
 |                                           | set mantid will use the system proxy              |                                 |
@@ -210,12 +216,12 @@ ScriptRepository Properties
 +============================+===============================================+======================================================================+
 | ``ScriptLocalRepository``  |Directory where ScriptRepository is Installed. | ``C:\\MantidInstall\\MyScriptRepository``                            |
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
-| ``ScriptRepository``       |Base URL for the remote script repository.     | ``http://download.mantidproject.org/scriptrepository/``              |
+| ``ScriptRepository``       |Base URL for the remote script repository.     | ``https://download.mantidproject.org/scriptrepository/``             |
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
 | ``ScriptRepositoryIgnore`` |CSV patterns for paths that should not be      | ``*pyc;``                                                            |
 |                            |listed at ScriptRepository.                    |                                                                      |
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
-| ``UploaderWebServer``      |URL for uploading scripts.                     | ``http://upload.mantidproject.org/scriptrepository/payload/publish`` |
+| ``UploaderWebServer``      |URL for uploading scripts.                     | ``https://upload.mantidproject.org/scriptrepository/payload/publish``|
 +----------------------------+-----------------------------------------------+----------------------------------------------------------------------+
 
 
@@ -234,6 +240,44 @@ See :ref:`project recovery <Project Recovery>` for more details.
 | ``projectRecovery.secondsBetween``      |How often to save checkpoints in seconds       | ``60``           |
 +-----------------------------------------+-----------------------------------------------+------------------+
 
+Project Saving
+**************
+
++---------------------------------+------------------------------------------------------------------+------------------+
+|Property                         |Description                                                       |Example value     |
++=================================+==================================================================+==================+
+| ``projectSaving.warningSize``   |Size in bytes of a project before the user is warned when saving  |  ``10737418240`` |
++---------------------------------+------------------------------------------------------------------+------------------+
+
+Plotting Settings
+*****************
+
++---------------------------------+------------------------------------------------------------------+---------------------+
+|Property                         |Description                                                       |Example value        |
++=================================+==================================================================+=====================+
+|``plots.ShowTitle``              |Whether to show titles on plots                                   | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.xAxesScale``             |The default x scale on 1d plots                                   |``Linear``, ``Log``  |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.yAxesScale``             |The default y scale on 1d plots                                   |``Linear``, ``Log``  |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.line.Style``             |Default Line style on 1d plots                                    |``solid``, ``dashed``|
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.line.Width``             |Default Line width on 1d plots                                    |``1.5``              |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.marker.Style``           |Default marker style on 1d plots                                  |``point``            |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.marker.Size``            |Default maker size on 1d plots                                    |``6``                |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.errorbar.Capsize``       |Default cap size on error bars in 1d plots                        |``1.0``              |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.errorbar.CapThickness``  |Default cap thickness on error bars in 1d plots                   |``1.0``              |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.errorbar.errorEvery``    |Default number of error bars for every data point                 |``1``                |
+|                                 |in 1d plots. Must be an integer                                   |                     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.errorbar.Width``         |Default width of error bars in 1d plots                           |``1.0``              |
++---------------------------------+------------------------------------------------------------------+---------------------+
 
 Getting access to Mantid properties
 ***********************************

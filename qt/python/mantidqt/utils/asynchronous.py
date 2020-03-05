@@ -58,7 +58,9 @@ class AsyncTask(threading.Thread):
         return time.time() - start
 
     def run(self):
-
+        """
+        DO NOT CALL DIRECTLY. Use .start() to begin the thread execution.
+        """
         time_start = time.time()
 
         try:

@@ -111,8 +111,8 @@ void ThreadPool::start(double waitSec) {
     auto runnable = std::make_unique<ThreadPoolRunnable>(i, m_scheduler.get(),
                                                          m_prog.get(), waitSec);
     thread->start(*runnable);
-    m_threads.push_back(std::move(thread));
-    m_runnables.push_back(std::move(runnable));
+    m_threads.emplace_back(std::move(thread));
+    m_runnables.emplace_back(std::move(runnable));
   }
   // Yep, all the threads are running.
   m_started = true;

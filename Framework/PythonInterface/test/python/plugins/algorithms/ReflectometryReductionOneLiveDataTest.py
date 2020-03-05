@@ -10,8 +10,7 @@ import unittest
 
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import (CreateWorkspace, ReflectometryReductionOneAuto,
-                              ReflectometryReductionOneLiveData)
+from mantid.simpleapi import (CreateWorkspace, ReflectometryReductionOneLiveData)
 from testhelpers import (assertRaisesNothing, create_algorithm)
 
 
@@ -92,8 +91,9 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def test_all_child_properties_are_present(self):
         # Get the properties for the child algorithm, apart from a list of known
         # exclusions
-        child_alg = create_algorithm('ReflectometryReductionOneAuto')
-        excluded = ['ThetaIn', 'ThetaLogName', 'Diagnostics',
+        child_alg = create_algorithm('ReflectometryISISLoadAndProcess')
+        excluded = ['InputRunList', 'ThetaIn', 'ThetaLogName', 'OutputWorkspaceTransmission',
+                    'OutputWorkspaceFirstTransmission', 'OutputWorkspaceSecondTransmission',
                     'OutputWorkspaceBinned', 'OutputWorkspaceWavelength']
         child_props = set([prop.name for prop in child_alg.getProperties() if prop.name not in excluded])
         # Check the child properties exist in the parent algorithm
@@ -103,9 +103,9 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
             assert False, "The following child properties are not implemented in the parent algorithm:\n" \
             + str(child_props.difference(actual_props))
 
-    def test_instrument_was_set_on_output_workspace(self):
+    def test_instrument_was_set_on_input_and_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
-        self.assertEqual(self.__class__._input_ws.getInstrument().getName(), '')
+        self.assertEqual(self.__class__._input_ws.getInstrument().getName(), self._instrument_name)
         self.assertEqual(workspace.getInstrument().getName(), self._instrument_name)
 
     def test_sample_log_values_were_set_on_output_workspace(self):

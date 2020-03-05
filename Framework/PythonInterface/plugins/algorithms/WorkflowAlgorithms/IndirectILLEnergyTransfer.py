@@ -164,6 +164,15 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self.setPropertyGroup('SampleCoordinates', bats_options)
         self.setPropertyGroup('PulseChopper', bats_options)
 
+        self.declareProperty(name='GroupDetectors', defaultValue=True,
+                             doc='Group the pixels using the range, tube-by-tube (default) or in a custom way; \n'
+                                 'it is not recommended to group the detectors at this stage, \n'
+                                 'in order to get absorption corrections right, \n'
+                                 'however the default value is True for backwards compatibility.')
+
+        self.declareProperty(name='DiscardSingleDetectors', defaultValue=False,
+                             doc='Whether to discard the spectra of single detectors.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -204,6 +213,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self._fit_option = self.getPropertyValue('ElasticPeakFitting')
         self._group_by = self.getProperty('GroupPixelsBy').value
         self._pulse_chopper = self.getPropertyValue('PulseChopper')
+        self._group_detectors = self.getProperty('GroupDetectors').value
 
         if self._map_file or (self._psd_int_range[0] == 1 and self._psd_int_range[1] == N_PIXELS_PER_TUBE):
             self._use_map_file = True
@@ -227,11 +237,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         if self._use_map_file:
             if self._map_file == '':
                 # path name for default map file
-                if self._instrument.hasParameter('Workflow.GroupingFile'):
-                    grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
-                    self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
+                if self.getProperty('DiscardSingleDetectors').value:
+                    grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile.PSDOnly')[0]
                 else:
-                    raise RuntimeError("Failed to find default detector grouping file. Please specify manually.")
+                    grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
+                self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
 
             self.log().information('Set detector map file : {0}'.format(self._map_file))
 
@@ -277,7 +287,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=formula, AxisUnits = 'DeltaE')
 
-    def _monitor_max_range(self, ws):
+    @staticmethod
+    def _monitor_max_range(ws):
         """
         Gives the bin indices of the first and last peaks in the monitor
         @param ws :: input workspace name
@@ -291,7 +302,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         imax = np.nanargmax(y[mid:size]) + mid
         return imin, imax
 
-    def _monitor_zero_range(self, ws):
+    @staticmethod
+    def _monitor_zero_range(ws):
         """
         Gives the bin indices of the first and last non-zero bins in monitor
         @param ws :: input workspace name
@@ -379,14 +391,19 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 _extract_workspace(self._ws, left, 0, int(size/2))
                 _extract_workspace(self._ws, right, int(size/2), size)
                 DeleteWorkspace(self._ws)
-                self._reduce_one_wing(left)
-                self._reduce_one_wing(right)
+                self._reduce_one_wing_doppler(left)
+                self._reduce_one_wing_doppler(right)
                 GroupWorkspaces(InputWorkspaces=[left,right],OutputWorkspace=self._red_ws)
 
             elif self._mirror_sense == 16:    # one wing
 
-                self._reduce_one_wing(self._ws)
+                self._reduce_one_wing_doppler(self._ws)
                 GroupWorkspaces(InputWorkspaces=[self._ws],OutputWorkspace=self._red_ws)
+
+        if self._normalise_to == 'Monitor':
+            for ws in mtd[self._red_ws]:
+                AddSampleLog(Workspace=ws, LogName="NormalisedTo", LogType="String",
+                             LogText="Monitor", EnableLogging=False)
 
         self.setProperty('OutputWorkspace',self._red_ws)
 
@@ -419,7 +436,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             epp_ws.setCell('ChopperPhase', row, phase)
             epp_ws.setCell('PSD_TOF_Delay', row, delay)
 
-    def _t0_offset(self, center_chopper_speed, center_chopper_phase, shifted_chopper_phase, center_psd_delay, shifted_psd_delay):
+    @staticmethod
+    def _t0_offset(center_chopper_speed, center_chopper_phase, shifted_chopper_phase, center_psd_delay, shifted_psd_delay):
         """
         Calculates the t0 offset between measurements with and without inelastic offset.
         """
@@ -593,12 +611,18 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Indirect')
         ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=rebin_ws, WorkspaceIndex=int(N_PIXELS_PER_TUBE/2))
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=rebin_ws, OutputWorkspace=ws)
+        if self._group_detectors:
+            self._do_group_detectors(ws)
+        if self._normalise_to == 'Monitor':
+            mtd[ws].setDistribution(True)
         GroupWorkspaces(InputWorkspaces=[ws],OutputWorkspace=self._red_ws)
         DeleteWorkspaces([rebin_ws])
 
-    def _group_pixels(self, by=4):
+    @staticmethod
+    def _group_pixels(by=4):
         """
         Groups pixels in the tubes by the factor, which should be a power of 2.
+        @param by : the group pixels by
         """
         pattern = ''
         for i in range(N_TUBES):
@@ -608,9 +632,19 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 pattern += str(start)+'-'+str(end)+','
         return pattern[:-1]
 
-    def _reduce_one_wing(self, ws):
+    def _do_group_detectors(self, ws):
         """
-        Reduces given workspace assuming it is one wing already
+        Groups the pixels either tube by tube (default), or by user given range or by user given grouping file
+        @param ws : the workspace to group
+        """
+        if self._use_map_file:
+            GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws, MapFile=self._map_file)
+        else:
+            self._group_detectors_with_range(ws)
+
+    def _reduce_one_wing_doppler(self, ws):
+        """
+        Reduces given workspace in doppler mode assuming it is one wing already
         @param ws :: input workspace name
         """
 
@@ -618,10 +652,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         ExtractSingleSpectrum(InputWorkspace=ws, OutputWorkspace=mon, WorkspaceIndex=0)
 
-        if self._use_map_file:
-            GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws, MapFile=self._map_file)
-        else:
-            self._group_detectors_with_range(ws)
+        if self._group_detectors:
+            self._do_group_detectors(ws)
 
         xmin, xmax = self._monitor_zero_range(mon)
 
@@ -702,7 +734,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
             # remember the integral of the monitor
             AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number",
-                         LogText=str(mtd[int_ws].readY(0)[0]), EnableLogging = False)
+                         LogText=str(mtd[int_ws].readY(0)[0]), EnableLogging=False)
 
             DeleteWorkspace(int_ws)
 
@@ -724,11 +756,14 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             Plus(LHSWorkspace=i1,RHSWorkspace=i2,OutputWorkspace=int_ws)
 
             if mtd[int_ws].readY(0)[0] != 0: # this needs to be checked
-                Scale(InputWorkspace = ws, OutputWorkspace = ws, Factor = 1./mtd[int_ws].readY(0)[0])
+                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1./mtd[int_ws].readY(0)[0])
 
             # remember the integral of the monitor
             AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number",
-                         LogText=str(mtd[int_ws].readY(0)[0]), EnableLogging = False)
+                         LogText=str(mtd[int_ws].readY(0)[0]), EnableLogging=False)
+
+            # store the x_start and x_end derived from monitor, needed later for integration
+            AddSampleLogMultiple(Workspace=ws,LogNames=['MonitorLeftPeak', 'MonitorRightPeak'],LogValues=[x_start, x_end])
 
             DeleteWorkspace(i1)
             DeleteWorkspace(i2)
@@ -736,7 +771,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
                              NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
-
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLEnergyTransfer)

@@ -73,14 +73,16 @@ std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
   // same name as the group/output workspace
   for (const auto &ws : inputWorkspaces) {
     if (ws == outputWorkspace) {
-      results["OutputWorkspace"] = "The Output workspace has the same name as "
-                                   "one of the input workspaces";
+      if (!AnalysisDataService::Instance().retrieve(ws)->isGroup())
+        results["OutputWorkspace"] =
+            "The output workspace has the same name as "
+            "one of the input workspaces";
     }
   }
 
   for (auto it = globExpression.begin(); it < globExpression.end(); ++it) {
     if (*it == '\\') {
-      it = globExpression.erase(it, it + 2);
+      it = globExpression.erase(it, it + 1);
     }
   }
 

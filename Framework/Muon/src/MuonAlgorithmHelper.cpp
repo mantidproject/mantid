@@ -68,7 +68,7 @@ std::string getRunLabel(const std::vector<Workspace_sptr> &wsList) {
   runNumbers.reserve(wsList.size());
   for (auto &&workspace : wsList) {
     int runNumber = firstPeriod(workspace)->getRunNumber();
-    runNumbers.push_back(runNumber);
+    runNumbers.emplace_back(runNumber);
   }
 
   return getRunLabel(instrument, runNumbers);
@@ -448,14 +448,14 @@ void parseRunLabel(const std::string &label, std::string &instrument,
               pairTokenizer[0].length() - pairTokenizer[1].length();
           const std::string endRun =
               pairTokenizer[0].substr(0, diff) + pairTokenizer[1];
-          const int start = boost::lexical_cast<int>(pairTokenizer[0]);
-          const int end = boost::lexical_cast<int>(endRun);
+          const auto start = boost::lexical_cast<int>(pairTokenizer[0]);
+          const auto end = boost::lexical_cast<int>(endRun);
           for (int run = start; run < end + 1; run++) {
-            runNumbers.push_back(run);
+            runNumbers.emplace_back(run);
           }
         } else if (pairTokenizer.count() == 1) {
           // Single run
-          runNumbers.push_back(boost::lexical_cast<int>(pairTokenizer[0]));
+          runNumbers.emplace_back(boost::lexical_cast<int>(pairTokenizer[0]));
         } else {
           throw std::invalid_argument("Failed to parse run label: " + label +
                                       " too many tokens ");
@@ -539,7 +539,7 @@ MatrixWorkspace_sptr sumPeriods(const WorkspaceGroup_sptr &inputWS,
     auto LHSWorkspace = inputWS->getItem(periodsToSum[0] - 1);
     outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
     if (outWS != nullptr && periodsToSum.size() > 1) {
-      int numPeriods = static_cast<int>(periodsToSum.size());
+      auto numPeriods = static_cast<int>(periodsToSum.size());
       for (int i = 1; i < numPeriods; i++) {
         auto RHSWorkspace = inputWS->getItem(periodsToSum[i] - 1);
         IAlgorithm_sptr alg =

@@ -151,7 +151,7 @@ public:
     // Create elements from 0-9
     VecDisjointElement vecElements;
     for (int i = 0; i < 10; ++i) {
-      vecElements.push_back(boost::make_shared<DisjointElement>(i));
+      vecElements.emplace_back(boost::make_shared<DisjointElement>(i));
     }
 
     // Merge selected sets.

@@ -155,7 +155,7 @@ void InterfaceCategoryModel::loadHiddenCategories() {
  * @param parent :: the main MantidPlot ApplicationWindow object.
  */
 ManageInterfaceCategories::ManageInterfaceCategories(ApplicationWindow *parent)
-    : QDialog(parent), m_model(parent->allCategories()) {
+    : MantidDialog(parent), m_model(parent->allCategories()) {
   initLayout();
 }
 

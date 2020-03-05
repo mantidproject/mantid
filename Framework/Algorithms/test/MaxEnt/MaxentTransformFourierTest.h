@@ -15,9 +15,9 @@
 #include <boost/make_shared.hpp>
 #include <cmath>
 
+using Mantid::Algorithms::MaxentSpace_sptr;
 using Mantid::Algorithms::MaxentSpaceComplex;
 using Mantid::Algorithms::MaxentSpaceReal;
-using Mantid::Algorithms::MaxentSpace_sptr;
 using Mantid::Algorithms::MaxentTransformFourier;
 
 class MaxentTransformFourierTest : public CxxTest::TestSuite {

@@ -43,7 +43,6 @@ namespace Mantid {
 namespace API {
 class IFunction;
 class CompositeFunction;
-class MatrixWorkspace;
 } // namespace API
 } // namespace Mantid
 
@@ -196,8 +195,6 @@ private:
   QString m_wsName;
   /// Workspace index
   int m_spec;
-  /// Pointer to the workspace
-  boost::shared_ptr<Mantid::API::MatrixWorkspace> m_ws;
 
   bool m_init;         // Is the tool initialized?
   bool m_width_set;    // The width set flag

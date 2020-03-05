@@ -118,7 +118,6 @@ void IndirectCorrections::applySettings(
     std::map<std::string, QVariant> const &settings) {
   for (auto tab = m_tabs.begin(); tab != m_tabs.end(); ++tab) {
     tab->second->filterInputData(settings.at("RestrictInput").toBool());
-    tab->second->setPlotErrorBars(settings.at("ErrorBars").toBool());
   }
 }
 

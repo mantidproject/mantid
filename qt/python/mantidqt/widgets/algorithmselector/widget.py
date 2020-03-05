@@ -46,9 +46,10 @@ class AlgorithmTreeWidget(QTreeWidget):
 
     def mouseDoubleClickEvent(self, mouse_event):
         if mouse_event.button() == Qt.LeftButton:
-            if self.selectedItems() and not self.selectedItems()[0].child(0):
+            if self.selectedItems() and get_name_and_version_from_item_label(self.selectedItems()[0].text(0)):
                 self.parent.execute_algorithm()
-            super(AlgorithmTreeWidget, self).mouseDoubleClickEvent(mouse_event)
+            else:
+                super(AlgorithmTreeWidget, self).mouseDoubleClickEvent(mouse_event)
 
 
 class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
@@ -66,10 +67,14 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         self.search_box = None
         self.tree = None
         self.algorithm_progress_widget = None
+        self.get_selected_workspace_fn = None
         QWidget.__init__(self, parent)
         IAlgorithmSelectorView.__init__(self, include_hidden)
 
         self.afo = AlgorithmSelectorFactoryObserver(self)
+
+    def set_get_selected_workspace_fn(self, get_selected_workspace_fn):
+        self.get_selected_workspace_fn = get_selected_workspace_fn
 
     def observeUpdate(self, toggle):
         """
@@ -228,7 +233,10 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         Populate the GUI elements with the data that comes from Presenter.
         :param data: a list of algorithm descriptors.
         """
-        self.search_box.addItems(data[0])
+        self.tree.clear()
+        for alg in data[0]:
+            if self.search_box.findText(alg) == -1:
+                self.search_box.addItem(alg)
         self.search_box.setCurrentIndex(-1)
         item_list = []
         self._add_tree_items(item_list, data[1])
@@ -249,7 +257,19 @@ class AlgorithmSelectorWidget(IAlgorithmSelectorView, QWidget):
         Send a signal to a subscriber to execute the selected algorithm
         """
         algorithm = self.get_selected_algorithm()
+        presets = {}
+        enabled = []
         if algorithm is not None:
+            if self.get_selected_workspace_fn:
+                selected_ws_names = self.get_selected_workspace_fn()
+                if selected_ws_names:
+                    property_name = self.presenter.find_input_workspace_property(algorithm)
+                    if property_name:
+                        presets[property_name] = selected_ws_names[0]
+                        # Keep it enabled
+                        enabled.append(property_name)
+
             manager = InterfaceManager()
-            dialog = manager.createDialogFromName(algorithm.name, algorithm.version)
+            dialog = manager.createDialogFromName(algorithm.name, algorithm.version, None,
+                                                  False, presets, "", enabled)
             dialog.show()

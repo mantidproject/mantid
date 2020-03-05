@@ -20,7 +20,7 @@ fi
 PV_PLUGIN_PATH="${INSTALLDIR}/plugins/paraview/qt4"
 
 # Define where python libraries are
-LOCAL_PYTHONPATH=${INSTALLDIR}/bin:@LOCAL_PYPATH@@PARAVIEW_PYTHON_PATHS@
+LOCAL_PYTHONPATH=@LOCAL_PYPATH@@PARAVIEW_PYTHON_PATHS@
 if [ -n "${PYTHONPATH}" ]; then
     LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
 fi
@@ -30,6 +30,13 @@ if [ -n "${QT_API}" ]; then
     LOCAL_QT_API=${QT_API}
 else
     LOCAL_QT_API="pyqt" # force to use qt4
+fi
+
+# Find private sip module if it exists. Required by qtpy
+if [ -f "${INSTALLDIR}/lib/PyQt4/sip.so" ]; then
+  if [ "$LOCAL_QT_API" = "pyqt" ] || [ "$LOCAL_QT_API" = "pyqt4" ]; then
+    LOCAL_PYTHONPATH=$LOCAL_PYTHONPATH:${INSTALLDIR}/lib/PyQt4
+  fi
 fi
 
 if [ -n "$1" ] && [ "$1" = "--classic" ]; then

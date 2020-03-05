@@ -34,7 +34,7 @@ set(TEST_PY_FILES
     DSFinterpTest.py
     EnggCalibrateFullTest.py
     EnggCalibrateTest.py
-    EnggFitDIFCFromPeaksTest.py
+    EnggFitTOFFromPeaksTest.py
     EnggFitPeaksTest.py
     EnggFocusTest.py
     EnggSaveGSASIIFitResultsToHDF5Test.py
@@ -44,10 +44,11 @@ set(TEST_PY_FILES
     ExportSpectraMaskTest.py
     FilterLogByTimeTest.py
     FitGaussianTest.py
+    FitIncidentSpectrumTest.py
     FractionalIndexingTest.py
     GetEiT0atSNSTest.py
-    GetNegMuMuonicXRDTest.py
     HB2AReduceTest.py
+    HFIRSANS2WavelengthTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
     LoadAndMergeTest.py

@@ -9,8 +9,9 @@ from __future__ import (absolute_import, division, print_function)
 from mantid import mtd
 from mantid.simpleapi import (config, CropWorkspace, DeleteWorkspace, DirectILLApplySelfShielding, DirectILLCollectData,
                               DirectILLDiagnostics, DirectILLIntegrateVanadium, DirectILLReduction, DirectILLSelfShielding,
-                              DirectILLTubeBackground, SetSample, Subtract)
+                              DirectILLTubeBackground, SetSample, Subtract, Load)
 import systemtesting
+from testhelpers import (assertRaisesNothing, create_algorithm)
 
 
 class IN4(systemtesting.MantidSystemTest):
@@ -57,7 +58,7 @@ class IN4(systemtesting.MantidSystemTest):
         DirectILLSelfShielding(
             InputWorkspace='sample',
             OutputWorkspace='corrections',
-            NumberOfSimulatedWavelengths=10)
+            EventsPerPoint=20000)
         DirectILLApplySelfShielding(
             InputWorkspace='sample',
             OutputWorkspace='corrected',
@@ -87,6 +88,7 @@ class IN4(systemtesting.MantidSystemTest):
 
 
 class IN5(systemtesting.MantidSystemTest):
+
     def runTest(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'IN5'
@@ -203,3 +205,64 @@ class IN6(systemtesting.MantidSystemTest):
         self.tolerance = 1e-2
         self.tolerance_is_rel_err = True
         return ['cropped', 'ILL_IN6_SofQW.nxs']
+
+
+class IN5_Tube_Background(systemtesting.MantidSystemTest):
+
+    def runTest(self):
+        Load(Filename='ILL/IN5/Epp.nxs', OutputWorkspace='Epp')
+        Load(Filename='ILL/IN5/Sample.nxs', OutputWorkspace='Sample')
+        Load(Filename='ILL/IN5/Vmask.nxs', OutputWorkspace='Vmask')
+        args = {'InputWorkspace':'Sample',
+                'DiagnosticsWorkspace':'Vmask',
+                'EPPWorkspace':'Epp',
+                'OutputWorkspace':'Flat'}
+        alg = create_algorithm('DirectILLTubeBackground', **args)
+        assertRaisesNothing(self, alg.execute)
+
+
+class IN5_Mask_Non_Overlapping_Bins(systemtesting.MantidSystemTest):
+
+    def validate(self):
+        self.tolerance = 1e-7
+        self.tolerance_is_rel_err = True
+        return ['red', 'ILL_IN5_Tweak_sqw.nxs']
+
+    @staticmethod
+    def ecrase(ws):
+        import numpy as np
+        y = ws.extractY()
+        y_prime = np.full_like(y, 0.1)
+        for i in range(ws.getNumberHistograms()):
+            ws.setY(i, y_prime[i])
+
+    def runTest(self):
+
+        run = 'ILL/IN5/176053.nxs'
+
+        DirectILLCollectData(
+            Run=run,
+            Normalisation='Normalisation Time',
+            OutputIncidentEnergyWorkspace='Ei',
+            OutputElasticChannelWorkspace='Elc',
+            OutputWorkspace='raw',
+            OutputEPPWorkspace='Epp'
+        )
+
+        ws = Load(run)
+        self.ecrase(ws)
+
+        DirectILLCollectData(
+            InputWorkspace='ws',
+            Normalisation='Normalisation Time',
+            IncidentEnergyWorkspace='Ei',
+            ElasticChannelWorkspace='Elc',
+            OutputWorkspace='Eone'
+        )
+
+        DirectILLReduction(
+            InputWorkspace='Eone',
+            EnergyRebinning='a',
+            QBinningParams='',
+            OutputWorkspace='red'
+        )

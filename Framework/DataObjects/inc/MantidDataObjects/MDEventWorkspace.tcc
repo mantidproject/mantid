@@ -54,9 +54,8 @@ Kernel::Logger logger("MDEventWorkspace");
 TMDE(MDEventWorkspace)::MDEventWorkspace(
     Mantid::API::MDNormalization preferredNormalization,
     Mantid::API::MDNormalization preferredNormalizationHisto)
-    : API::IMDEventWorkspace(), data(nullptr),
-      m_BoxController(new API::BoxController(nd)),
-      m_displayNormalization(preferredNormalization),
+    : API::IMDEventWorkspace(), m_BoxController(new API::BoxController(nd)),
+      data(), m_displayNormalization(preferredNormalization),
       m_displayNormalizationHisto(preferredNormalizationHisto),
       m_coordSystem(Kernel::None) {
   // First box is at depth 0, and has this default boxController
@@ -67,9 +66,8 @@ TMDE(MDEventWorkspace)::MDEventWorkspace(
 /** Copy constructor
  */
 TMDE(MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other)
-    : IMDEventWorkspace(other), data(nullptr),
-      m_BoxController(other.m_BoxController->clone()),
-      m_displayNormalization(other.m_displayNormalization),
+    : IMDEventWorkspace(other), m_BoxController(other.m_BoxController->clone()),
+      data(), m_displayNormalization(other.m_displayNormalization),
       m_displayNormalizationHisto(other.m_displayNormalizationHisto),
       m_coordSystem(other.m_coordSystem) {
 
@@ -237,8 +235,8 @@ TMDE(std::vector<coord_t> MDEventWorkspace)::estimateResolution() const {
       finestSplit *= m_BoxController->getSplitInto(d);
     Geometry::IMDDimension_const_sptr dim = this->getDimension(d);
     // Calculate the bin size at the smallest split amount
-    out.push_back((dim->getMaximum() - dim->getMinimum()) /
-                  static_cast<coord_t>(finestSplit));
+    out.emplace_back((dim->getMaximum() - dim->getMinimum()) /
+                     static_cast<coord_t>(finestSplit));
   }
   return out;
 }
@@ -278,7 +276,8 @@ TMDE(std::vector<std::unique_ptr<Mantid::API::IMDIterator>>
     size_t end = ((i + 1) * numElements) / numCores;
     if (end > numElements)
       end = numElements;
-    out.push_back(std::make_unique<MDBoxIterator<MDE, nd>>(boxes, begin, end));
+    out.emplace_back(
+        std::make_unique<MDBoxIterator<MDE, nd>>(boxes, begin, end));
   }
   return out;
 }
@@ -423,7 +422,7 @@ TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
         1024;
   mess << m_BoxController->getTotalNumMDBoxes() << " MDBoxes (" << mem
        << " kB)";
-  out.push_back(mess.str());
+  out.emplace_back(mess.str());
   mess.str("");
 
   mem = (this->m_BoxController->getTotalNumMDGridBoxes() *
@@ -431,11 +430,11 @@ TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
         1024;
   mess << m_BoxController->getTotalNumMDGridBoxes() << " MDGridBoxes (" << mem
        << " kB)";
-  out.push_back(mess.str());
+  out.emplace_back(mess.str());
   mess.str("");
 
   //    mess << "Avg recursion depth: " << m_BoxController->getAverageDepth();
-  //    out.push_back(mess.str()); mess.str("");
+  //    out.emplace_back(mess.str()); mess.str("");
   //
   //    mess << "Recursion Coverage %: ";
   //    const std::vector<size_t> & num = m_BoxController->getNumMDBoxes();
@@ -448,7 +447,7 @@ TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
   //      std::fixed;
   //      mess << std::setprecision(2) << pct;
   //    }
-  //    out.push_back(mess.str()); mess.str("");
+  //    out.emplace_back(mess.str()); mess.str("");
 
   if (m_BoxController->isFileBacked()) {
     mess << "File backed: ";
@@ -459,7 +458,7 @@ TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
                          sizeof(MDE)) /
                   (1024 * 1024);
     mess << "Write buffer: " << used << " of " << avail << " MB. ";
-    out.push_back(mess.str());
+    out.emplace_back(mess.str());
     mess.str("");
 
     mess << "File";
@@ -467,11 +466,11 @@ TMDE(std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const {
       mess << " (needs updating)";
 
     mess << ": " << this->m_BoxController->getFileIO()->getFileName();
-    out.push_back(mess.str());
+    out.emplace_back(mess.str());
     mess.str("");
   } else {
     mess << "Not file backed.";
-    out.push_back(mess.str());
+    out.emplace_back(mess.str());
     mess.str("");
   }
 
@@ -500,7 +499,7 @@ TMDE(Mantid::API::ITableWorkspace_sptr MDEventWorkspace)::makeBoxTable(
   boxes_filtered.reserve(boxes.size());
 
   for (const auto box : boxes) {
-    boxes_filtered.push_back(dynamic_cast<MDBoxBase<MDE, nd> *>(box));
+    boxes_filtered.emplace_back(dynamic_cast<MDBoxBase<MDE, nd> *>(box));
   }
 
   // Now sort by ID
@@ -824,14 +823,14 @@ TMDE(API::IMDWorkspace::LinePlot MDEventWorkspace)
 
         // If the box is not masked then record the signal and error here
         if (!box->getIsMasked()) {
-          line.x.push_back(line_pos);
+          line.x.emplace_back(line_pos);
           signal_t signal = this->getNormalizedSignal(box, normalize);
           if (std::isinf(signal)) {
             // The plotting library (qwt) doesn't like infs.
             signal = std::numeric_limits<signal_t>::quiet_NaN();
           }
-          line.y.push_back(signal);
-          line.e.push_back(this->getNormalizedError(box, normalize));
+          line.y.emplace_back(signal);
+          line.e.emplace_back(this->getNormalizedError(box, normalize));
         }
       }
     }

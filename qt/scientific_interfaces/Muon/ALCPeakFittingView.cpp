@@ -102,7 +102,7 @@ void ALCPeakFittingView::setFunction(const IFunction_const_sptr &newFunction) {
       double error = newFunction->getError(i);
 
       m_ui.peaks->setParameter(name, value);
-      m_ui.peaks->setParamError(name, error);
+      m_ui.peaks->setParameterError(name, error);
     }
   } else {
     m_ui.peaks->clear();

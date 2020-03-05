@@ -7,7 +7,7 @@
 from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
-from Muon.GUI.Common.observer_pattern import Observer, GenericObserver
+from mantidqt.utils.observer_pattern import Observer, GenericObserver
 
 
 class HomeTabSubWidget:

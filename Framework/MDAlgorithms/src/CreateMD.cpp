@@ -211,7 +211,7 @@ void CreateMD::exec() {
   padParameterVector(gl, entries);
   padParameterVector(gs, entries);
   if (efix.empty()) {
-    efix.push_back(-1.0);
+    efix.emplace_back(-1.0);
   }
   padParameterVector(efix, entries);
 
@@ -253,7 +253,7 @@ void CreateMD::exec() {
                         gl[entry_number], gs[entry_number], do_in_place, alatt,
                         angdeg, u, v, out_filename, fileBackEnd, run_md);
 
-    to_merge_names.push_back(to_merge_name);
+    to_merge_names.emplace_back(to_merge_name);
 
     // We are stuck using ADS as we can't pass workspace pointers to MergeMD
     // There is currently no way to pass a list of workspace pointers

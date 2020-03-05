@@ -51,10 +51,10 @@ void SaveTBL::findGroups(ITableWorkspace_sptr ws) {
     TableRow row = ws->getRow(i);
     if (row.cell<int>(ws->columnCount() - 2) != 0) {
       // it was part of a group
-      m_stichgroups[row.cell<int>(ws->columnCount() - 2)].push_back(i);
+      m_stichgroups[row.cell<int>(ws->columnCount() - 2)].emplace_back(i);
     } else {
       // it wasn't part of a group
-      m_nogroup.push_back(i);
+      m_nogroup.emplace_back(i);
     }
   }
 }

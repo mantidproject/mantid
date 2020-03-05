@@ -8,13 +8,14 @@
 #define MANTID_MUON_MUONGROUPINGCOUNTS_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidMuon/DllConfig.h"
 
 using namespace Mantid::API;
 
 namespace Mantid {
 namespace Muon {
 
-class DLLExport MuonGroupingCounts : public API::Algorithm {
+class MANTID_MUON_DLL MuonGroupingCounts : public API::Algorithm {
 public:
   MuonGroupingCounts() : API::Algorithm() {}
   ~MuonGroupingCounts() {}

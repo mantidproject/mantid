@@ -109,7 +109,7 @@ boost::shared_ptr<Workspace> SINQHMListener::extractData() {
   std::vector<MDHistoDimension_sptr> dimensions;
   for (int i = 0; i < rank; i++) {
     Mantid::Geometry::GeneralFrame frame(dimNames[i], "");
-    dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
+    dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension(
         dimNames[i], dimNames[i], frame, .0, coord_t(dim[i]), dim[i])));
   }
   auto ws = boost::make_shared<MDHistoWorkspace>(dimensions);
@@ -151,13 +151,13 @@ void SINQHMListener::loadDimensions() {
    * TODO: There may be multiple banks but I only
    *       look at the first
    */
-  Element *bank = dynamic_cast<Element *>(bankList->item(0));
+  auto *bank = dynamic_cast<Element *>(bankList->item(0));
   std::string rankt = bank->getAttribute("rank");
   rank = std::stoi(rankt);
 
   Poco::AutoPtr<NodeList> axisList = bank->getElementsByTagName("axis");
   for (unsigned int i = 0; i < axisList->length(); i++) {
-    Element *axis = dynamic_cast<Element *>(axisList->item(i));
+    auto *axis = dynamic_cast<Element *>(axisList->item(i));
     std::string sdim = axis->getAttribute("length");
     dim[i] = std::stoi(sdim);
   }
@@ -196,7 +196,7 @@ void SINQHMListener::doSpecialDim() {
   }
 }
 int SINQHMListener::calculateCAddress(coord_t *pos) {
-  int result = static_cast<int>(pos[rank - 1]);
+  auto result = static_cast<int>(pos[rank - 1]);
   for (int i = 0; i < rank - 1; i++) {
     int mult = 1;
     for (int j = rank - 1; j > i; j--) {

@@ -8,38 +8,52 @@
 #
 #
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-# system imports
-
-# third-party library imports
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
-from mantidqt.icons import get_icon
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
-# local package imports
+from mantidqt.icons import get_icon
 
 
 class WorkbenchNavigationToolbar(NavigationToolbar2QT):
 
+    sig_home_clicked = QtCore.Signal()
     sig_grid_toggle_triggered = QtCore.Signal()
     sig_active_triggered = QtCore.Signal()
     sig_hold_triggered = QtCore.Signal()
     sig_toggle_fit_triggered = QtCore.Signal()
+    sig_plot_options_triggered = QtCore.Signal()
+    sig_generate_plot_script_file_triggered = QtCore.Signal()
+    sig_generate_plot_script_clipboard_triggered = QtCore.Signal()
+    sig_waterfall_reverse_order_triggered = QtCore.Signal()
+    sig_waterfall_offset_amount_triggered = QtCore.Signal()
+    sig_waterfall_fill_area_triggered = QtCore.Signal()
+    sig_waterfall_conversion = QtCore.Signal(bool)
 
     toolitems = (
-        ('Home', 'Reset original view', 'mdi.home', 'home', None),
+        ('Home', 'Center display on contents', 'mdi.home', 'on_home_clicked', None),
+        ('Back', 'Back to previous view', 'mdi.arrow-left', 'back', None),
+        ('Forward', 'Forward to next view', 'mdi.arrow-right', 'forward', None),
+        (None, None, None, None, None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
-        ('Zoom', 'Zoom to rectangle', 'mdi.magnify-plus-outline', 'zoom', False),
+        ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
         ('Grid', 'Toggle grid on/off', 'mdi.grid', 'toggle_grid', False),
         ('Save', 'Save the figure', 'mdi.content-save', 'save_figure', None),
-        ('Print','Print the figure', 'mdi.printer', 'print_figure', None),
+        ('Print', 'Print the figure', 'mdi.printer', 'print_figure', None),
         (None, None, None, None, None),
-        ('Customize', 'Configure plot options', 'mdi.settings', 'edit_parameters', None),
+        ('Customize', 'Configure plot options', 'mdi.settings', 'launch_plot_options', None),
+        (None, None, None, None, None),
+        ('Create Script', 'Generate a script that will recreate the current figure',
+         'mdi.script-text-outline', 'generate_plot_script', None),
         (None, None, None, None, None),
         ('Fit', 'Toggle fit browser on/off', None, 'toggle_fit', False),
+        (None, None, None, None, None),
+        ('Offset', 'Change the curve offset percentage', 'mdi.arrow-expand-horizontal',
+         'waterfall_offset_amount', None),
+        ('Reverse Order', 'Reverse curve order', 'mdi.swap-horizontal', 'waterfall_reverse_order', None),
+        ('Fill Area', 'Fill area under curves', 'mdi.format-color-fill', 'waterfall_fill_area', None)
     )
 
     def _init_toolbar(self):
@@ -47,9 +61,21 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
             if text is None:
                 self.addSeparator()
             else:
-                if mdi_icon:
-                    a = self.addAction(get_icon(mdi_icon),
-                                       text, getattr(self, callback))
+                if text == 'Create Script':
+                    # Add a QMenu under the QToolButton for "Create Script"
+                    a = self.addAction(get_icon(mdi_icon), text, lambda: None)
+                    # This is the only way I could find of getting hold of the QToolButton object
+                    button = [child for child in self.children()
+                              if isinstance(child, QtWidgets.QToolButton)][-1]
+                    menu = QtWidgets.QMenu("Menu", parent=button)
+                    menu.addAction("Script to file",
+                                   self.sig_generate_plot_script_file_triggered.emit)
+                    menu.addAction("Script to clipboard",
+                                   self.sig_generate_plot_script_clipboard_triggered.emit)
+                    button.setMenu(menu)
+                    button.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+                elif mdi_icon:
+                    a = self.addAction(get_icon(mdi_icon), text, getattr(self, callback))
                 else:
                     a = self.addAction(text, getattr(self, callback))
                 self._actions[callback] = a
@@ -59,25 +85,23 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
                 if tooltip_text is not None:
                     a.setToolTip(tooltip_text)
 
-        self.buttons = {}
         # Add the x,y location widget at the right side of the toolbar
         # The stretch factor is 1 which means any resizing of the toolbar
         # will resize this label instead of the buttons.
         if self.coordinates:
             self.locLabel = QtWidgets.QLabel("", self)
-            self.locLabel.setAlignment(
-                    QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
+            self.locLabel.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
             self.locLabel.setSizePolicy(
-                QtWidgets.QSizePolicy(QtWidgets.Expanding,
-                                      QtWidgets.QSizePolicy.Ignored))
+                QtWidgets.QSizePolicy(QtWidgets.Expanding, QtWidgets.QSizePolicy.Ignored))
             labelAction = self.addWidget(self.locLabel)
             labelAction.setVisible(True)
 
-        # reference holder for subplots_adjust window
-        self.adj_window = None
-
         # Adjust icon size or they are too small in PyQt5 by default
-        self.setIconSize(QtCore.QSize(24, 24))
+        dpi_ratio = QtWidgets.QApplication.instance().desktop().physicalDpiX() / 100
+        self.setIconSize(QtCore.QSize(24 * dpi_ratio, 24 * dpi_ratio))
+
+    def launch_plot_options(self):
+        self.sig_plot_options_triggered.emit()
 
     def toggle_grid(self):
         self.sig_grid_toggle_triggered.emit()
@@ -109,13 +133,43 @@ class WorkbenchNavigationToolbar(NavigationToolbar2QT):
     def contextMenuEvent(self, event):
         pass
 
+    def on_home_clicked(self):
+        self.sig_home_clicked.emit()
+        self.push_current()
+
+    def waterfall_conversion(self, is_waterfall):
+        self.sig_waterfall_conversion.emit(is_waterfall)
+
+    def set_waterfall_options_enabled(self, on):
+        for action in ['waterfall_offset_amount', 'waterfall_reverse_order', 'waterfall_fill_area']:
+            toolbar_action = self._actions[action]
+            toolbar_action.setEnabled(on)
+            toolbar_action.setVisible(on)
+
+    def set_generate_plot_script_enabled(self, enabled):
+        action = self._actions['generate_plot_script']
+        action.setEnabled(enabled)
+        action.setVisible(enabled)
+        # Show/hide the separator between this button and the "Fit" button
+        for i, toolbar_action in enumerate(self.actions()):
+            if toolbar_action == action:
+                self.actions()[i+1].setVisible(enabled)
+
+    def waterfall_offset_amount(self):
+        self.sig_waterfall_offset_amount_triggered.emit()
+
+    def waterfall_reverse_order(self):
+        self.sig_waterfall_reverse_order_triggered.emit()
+
+    def waterfall_fill_area(self):
+        self.sig_waterfall_fill_area_triggered.emit()
+
 
 class ToolbarStateManager(object):
     """
     An object that lets users check and manipulate the state of the toolbar
     whilst hiding any implementation details.
     """
-
     def __init__(self, toolbar):
         self._toolbar = toolbar
 
@@ -143,3 +197,9 @@ class ToolbarStateManager(object):
             fit_action.setChecked(False)
         else:
             fit_action.setChecked(True)
+
+    def home_button_connect(self, slot):
+        self._toolbar.sig_home_clicked.connect(slot)
+
+    def emit_sig_home_clicked(self):
+        self._toolbar.sig_home_clicked.emit()

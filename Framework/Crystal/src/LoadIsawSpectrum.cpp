@@ -79,8 +79,8 @@ void LoadIsawSpectrum::exec() {
     if (STRING.find("Bank") == std::string::npos) {
       double time0, spectra0;
       ss >> time0 >> spectra0;
-      time[a].push_back(time0);
-      spectra[a].push_back(spectra0);
+      time[a].emplace_back(time0);
+      spectra[a].emplace_back(spectra0);
 
     } else {
       a++;
@@ -96,7 +96,7 @@ void LoadIsawSpectrum::exec() {
 
     det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det) {
-      detList.push_back(det);
+      detList.emplace_back(det);
     } else {
       // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
       // We are not doing a full recursive search since that will be very long
@@ -106,7 +106,7 @@ void LoadIsawSpectrum::exec() {
         for (int j = 0; j < assem->nelements(); j++) {
           det = boost::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
-            detList.push_back(det);
+            detList.emplace_back(det);
           } else {
             // Also, look in the second sub-level for RectangularDetectors (e.g.
             // PG3).
@@ -118,7 +118,7 @@ void LoadIsawSpectrum::exec() {
                 det = boost::dynamic_pointer_cast<RectangularDetector>(
                     (*assem2)[k]);
                 if (det) {
-                  detList.push_back(det);
+                  detList.emplace_back(det);
                 }
               }
             }

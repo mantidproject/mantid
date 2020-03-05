@@ -40,7 +40,7 @@ Machine Setup
 
 Set up a local ``builder`` account that will be used by the slave.
 
-Install the :ref:`required prerequisites <GettingStarted>` for the relevant OS.
+Install the :ref:`required prerequisites <GettingStarted>` for the relevant OS. In addition, install a standalone `Python <https://www.python.org/downloads/windows/>`__ interpreter so the system tests are able to install the mantid package. Do not use the embeddable zip, use the full installer and ensure python.exe is on the `PATH`. 
 
 .. note::
    For Windows the `Command line Visual C++ build tools <https://visualstudio.microsoft.com/downloads/>`__
@@ -116,24 +116,24 @@ Configure `automatic security updates <https://help.ubuntu.com/community/Automat
 Install ``gdebi-core`` package to allow installing ``.deb`` files.
 
 The ``builder`` account must be setup to be able to run ``gdebi`` non-interactively. Use ``visudo`` to add the following
-exception got ``builder``::
+exception for ``builder``::
 
     # Allow no password for gdebi
     builder       ALL=(ALL)NOPASSWD:/usr/bin/gdebi, /usr/bin/dpkg
     ## Disable tty requirement for gdebi and dpkg command
-    Defaults!/usr/bin/gdebi !requiretty
-    Defaults!/usr/bin/dpkg  !requiretty
+    Defaults!/usr/bin/gdebi     !requiretty
+    Defaults!/usr/bin/dpkg      !requiretty
 
 Red Hat
 ^^^^^^^
 
 The ``builder`` account must be setup to be able to run ``yum`` non-interactively. Use ``visudo`` to add the following
-exception got ``builder``::
+exception for ``builder``::
 
     ## Allow no password for yum
     builder       ALL = NOPASSWD: /usr/bin/yum,/bin/rpm
     ## Disable tty requirement for yum command
-    Defaults!/bin/rpm       !requiretty
+    Defaults!/bin/rpm           !requiretty
     Defaults!/usr/bin/yum       !requiretty
 
 Mac OS
@@ -142,16 +142,14 @@ Mac OS
 Enable `SSH ("Remote Login") and VNC ("Remote Management") <https://apple.stackexchange.com/a/73919>`__.  If you have
 connection issues from a non-OS X client then try adjusting your color depth settings (True Color 32bpp works on Remmina).
 
-Install ``cppcheck`` from brew.
-
-The ``builder`` account must be setup to be able to run ``gdebi`` non-interactively. Use ``visudo`` to add the following
-exception got ``builder``::
+The ``builder`` account must be setup to be able to cp packages non-interactively. Use ``visudo`` to add the following
+exception for ``builder``::
 
 
-    # Allow builder to install packages without a password
-    builder  ALL=(ALL)NOPASSWD:/usr/sbin/installer, /bin/rm
+    # Allow builder to copy packages without a password
+    builder  ALL=(ALL)NOPASSWD:/bin/cp, /bin/rm
     # Disable tty requirement
-    Defaults!/usr/sbin/installer    !requiretty
+    Defaults!/bin/cp        !requiretty
     Defaults!/bin/rm        !requiretty
 
 In order to run the MantidPlot tests, which require a connection to the windowing system, the user that is running the jenkins slave must
@@ -389,7 +387,11 @@ List All SCM Urls
     import org.eclipse.jgit.transport.URIish;
 
     for(project in Hudson.instance.items) {
-      scm = project.scm;
+      try {
+        scm = project.scm;
+      } catch(Exception) {
+        continue
+      }
       if (scm instanceof hudson.plugins.git.GitSCM) {
         for (RemoteConfig cfg : scm.getRepositories()) {
           for (URIish uri : cfg.getURIs()) {
@@ -398,6 +400,43 @@ List All SCM Urls
         }
       }
     }
+
+Update Urls on All Jobs
+-----------------------
+
+.. code-block:: groovy
+
+   import jenkins.model.*;
+   import hudson.model.*;
+   import hudson.tasks.*;
+   import hudson.plugins.git.*;
+   import org.eclipse.jgit.transport.RemoteConfig;
+
+   def modifyGitUrl(url) {
+     if(url.startsWith('git://')) {
+       return "https://" + url.substring(6);
+     } else {
+       return url;
+     }
+   }
+
+   for(project in Hudson.instance.items) {
+     try{
+       oldScm = project.scm;
+     } catch(Exception) {
+       continue
+     }
+     if (oldScm instanceof hudson.plugins.git.GitSCM) {
+       def newUserRemoteConfigs = oldScm.userRemoteConfigs.collect {
+         new UserRemoteConfig(modifyGitUrl(it.url), it.name, it.refspec, it.credentialsId)
+       }
+       def newScm = new GitSCM(newUserRemoteConfigs, oldScm.branches, oldScm.doGenerateSubmoduleConfigurations,
+                               oldScm.submoduleCfg, oldScm.browser, oldScm.gitTool, oldScm.extensions)
+       project.scm = newScm;
+       project.save();
+     }
+   }
+
 
 Print All Loggers
 -----------------

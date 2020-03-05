@@ -155,8 +155,8 @@ private:
     constexpr double incrementSecs(10.0);
     for (size_t i = 0; i < logSize; ++i) {
       const double val = static_cast<double>(i);
-      times.push_back(initialTime + val * incrementSecs);
-      values.push_back(val);
+      times.emplace_back(initialTime + val * incrementSecs);
+      values.emplace_back(val);
     }
     log->addValues(times, values);
     ws->mutableRun().addLogData(std::move(log));

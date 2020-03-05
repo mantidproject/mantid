@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
-
 INSTALLDIR=$(cd "$(dirname "$0")"; pwd)
+# Python is embedded in the bundle
+PYTHONHOME=$INSTALLDIR/../Frameworks/Python.framework/Versions/@PYTHON_VERSION_MAJOR@.@PYTHON_VERSION_MINOR@
+
 cd $INSTALLDIR
-./MantidPlot || /usr/bin/python ../../scripts/ErrorReporter/error_dialog_app.py --exitcode=$? --directory=$INSTALLDIR --qtdir=$INSTALLDIR/../PlugIns --application=mantidplot
+env PYTHONHOME=${PYTHONHOME} ./MantidPlot
+if [ $? -ne 0 ]; then
+  env PYTHONHOME=${PYTHONHOME} $PYTHONHOME/bin/python ../scripts/ErrorReporter/error_dialog_app.py \
+    --exitcode=$? --directory=$INSTALLDIR --qtdir=$INSTALLDIR/../PlugIns --application=mantidplot
+fi

@@ -87,7 +87,7 @@ void MaskBinsData::loadFromProject(const std::string &lines) {
     for (size_t i = 0; i < numSpectra; ++i) {
       size_t spectrum;
       mask >> spectrum;
-      spectra.push_back(spectrum);
+      spectra.emplace_back(spectrum);
     }
 
     addXRange(start, end, spectra);

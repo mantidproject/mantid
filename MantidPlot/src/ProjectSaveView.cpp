@@ -247,13 +247,27 @@ void ProjectSaveView::save(bool checked) {
                          "Please choose a valid file path", QMessageBox::Ok);
     return;
   }
-
-  m_presenter->notify(ProjectSavePresenter::Notification::PrepareProjectFolder);
   auto wsNames = getCheckedWorkspaceNames();
+  if (m_presenter->needsSizeWarning(wsNames)) {
+    auto result = QMessageBox::question(
+        this, "Project Save",
+        "This project is very large, and so may take a long "
+        "time to save. Would you like to continue?",
+        QMessageBox::Yes | QMessageBox::No);
+    if (result == QMessageBox::No) {
+      close();
+      return;
+    }
+  }
+  m_presenter->notify(ProjectSavePresenter::Notification::PrepareProjectFolder);
   auto interfaces = getCheckedPythonInterfaces();
   auto windowNames = getIncludedWindowNames();
   auto filePath = m_ui.projectPath->text();
   auto compress = filePath.endsWith(".gz");
+
+  m_ui.btnSave->setEnabled(false);
+  m_ui.btnCancel->setEnabled(false);
+  m_ui.btnSave->setText("Saving");
 
   m_serialiser.save(filePath, wsNames, windowNames, interfaces, compress);
   emit projectSaved();
@@ -298,7 +312,7 @@ ProjectSaveView::getItemsWithCheckState(const QTreeWidget &tree,
     auto item = tree.topLevelItem(i);
     if (item->checkState(0) == state) {
       auto name = item->data(0, Qt::UserRole).toString().toStdString();
-      names.push_back(name);
+      names.emplace_back(name);
     }
 
     // now check the child items and append any that have the check state
@@ -306,7 +320,7 @@ ProjectSaveView::getItemsWithCheckState(const QTreeWidget &tree,
       auto child = item->child(i);
       if (child->checkState(0) == state) {
         auto childName = child->text(0).toStdString();
-        names.push_back(childName);
+        names.emplace_back(childName);
       }
     }
   }
@@ -325,7 +339,7 @@ std::vector<std::string> ProjectSaveView::getIncludedWindowNames() const {
   for (int i = 0; i < m_ui.includedWindows->topLevelItemCount(); ++i) {
     auto item = m_ui.includedWindows->topLevelItem(i);
     auto name = item->text(0).toStdString();
-    names.push_back(name);
+    names.emplace_back(name);
   }
   return names;
 }

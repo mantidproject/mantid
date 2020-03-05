@@ -4,17 +4,17 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
+from __future__ import (absolute_import, unicode_literals)
+
 import sys
 import unittest
 
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
-from Muon.GUI.Common.observer_pattern import Observer
+from mantid.py3compat import mock
+from mantidqt.utils.observer_pattern import Observer
+from mantidqt.utils.qt.testing import start_qapplication
 
-if sys.version_info.major < 2:
-    from unittest import mock
-else:
-    import mock
-
+@start_qapplication
 class MuonGUIContextTest(unittest.TestCase):
     def test_can_set_variables(self):
         context = MuonGuiContext()

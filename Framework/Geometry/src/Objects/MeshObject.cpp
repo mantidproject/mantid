@@ -50,6 +50,13 @@ void MeshObject::initialize() {
 const Kernel::Material &MeshObject::material() const { return m_material; }
 
 /**
+ * @param material :: material that is being set for the object
+ */
+void MeshObject::setMaterial(const Kernel::Material &material) {
+  m_material = material;
+}
+
+/**
  * Returns whether this object has a valid shape
  * @returns True if the entire MeshObject may enclose
  * one or more volumes.
@@ -143,7 +150,6 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
  * @return Number of segments added
  */
 int MeshObject::interceptSurface(Geometry::Track &UT) const {
-
   int originalCount = UT.count(); // Number of intersections original track
   BoundingBox bb = getBoundingBox();
   if (!bb.doesLineIntersect(UT)) {
@@ -168,6 +174,28 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
 }
 
 /**
+ * Compute the distance to the first point of intersection with the surface
+ * @param track Track defining start/direction
+ * @return The distance to the object
+ * @throws std::runtime_error if no intersection was found
+ */
+double MeshObject::distance(const Track &track) const {
+  Kernel::V3D vertex1, vertex2, vertex3, intersection;
+  TrackDirection unused;
+  for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); ++i) {
+    if (MeshObjectCommon::rayIntersectsTriangle(
+            track.startPoint(), track.direction(), vertex1, vertex2, vertex3,
+            intersection, unused)) {
+      return track.startPoint().distance(intersection);
+    }
+  }
+  std::ostringstream os;
+  os << "Unable to find intersection with object with track starting at "
+     << track.startPoint() << " in direction " << track.direction() << "\n";
+  throw std::runtime_error(os.str());
+}
+
+/**
  * Get intersection points and their in out directions on the given ray
  * @param start :: Start point of ray
  * @param direction :: Direction of ray
@@ -185,8 +213,8 @@ void MeshObject::getIntersections(
     if (MeshObjectCommon::rayIntersectsTriangle(start, direction, vertex1,
                                                 vertex2, vertex3, intersection,
                                                 entryExit)) {
-      intersectionPoints.push_back(intersection);
-      entryExitFlags.push_back(entryExit);
+      intersectionPoints.emplace_back(intersection);
+      entryExitFlags.emplace_back(entryExit);
     }
   }
   // still need to deal with edge cases
@@ -364,7 +392,7 @@ int MeshObject::getPointInObject(Kernel::V3D &point) const {
  * @param maxAttempts The maximum number of attempts at generating a point
  * @return The generated point
  */
-Kernel::V3D
+boost::optional<Kernel::V3D>
 MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                   const size_t maxAttempts) const {
   const auto &bbox = getBoundingBox();
@@ -383,21 +411,17 @@ MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
  * @param activeRegion Restrict point generation to this sub-region of the
  * object
  * @param maxAttempts The maximum number of attempts at generating a point
- * @return The newly generated point
+ * @return The generated point
  */
-Kernel::V3D
+boost::optional<Kernel::V3D>
 MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                   const BoundingBox &activeRegion,
                                   const size_t maxAttempts) const {
 
   const auto point =
       RandomPoint::bounded(*this, rng, activeRegion, maxAttempts);
-  if (!point) {
-    throw std::runtime_error("Object::generatePointInObject() - Unable to "
-                             "generate point in object after " +
-                             std::to_string(maxAttempts) + " attempts");
-  }
-  return *point;
+
+  return point;
 }
 
 /**

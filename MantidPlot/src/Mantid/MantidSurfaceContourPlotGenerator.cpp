@@ -189,9 +189,9 @@ MantidSurfaceContourPlotGenerator::createWorkspaceForGroupPlot(
       matrixWS->setSharedY(i, ws->sharedY(index));
       matrixWS->setSharedE(i, ws->sharedE(index));
       if (logName == MantidWSIndexWidget::CUSTOM) {
-        logValues.push_back(getSingleLogValue(i, customLogValues));
+        logValues.emplace_back(getSingleLogValue(i, customLogValues));
       } else {
-        logValues.push_back(getSingleLogValue(i, ws, logName));
+        logValues.emplace_back(getSingleLogValue(i, ws, logName));
       }
     }
   }

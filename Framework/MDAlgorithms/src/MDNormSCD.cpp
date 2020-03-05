@@ -292,13 +292,13 @@ MDNormSCD::getValuesFromOtherDimensions(bool &skipNormalization,
   std::vector<coord_t> otherDimValues;
   for (size_t i = 3; i < m_inputWS->getNumDims(); i++) {
     const auto dimension = m_inputWS->getDimension(i);
-    float dimMin = static_cast<float>(dimension->getMinimum());
-    float dimMax = static_cast<float>(dimension->getMaximum());
+    auto dimMin = static_cast<float>(dimension->getMinimum());
+    auto dimMax = static_cast<float>(dimension->getMaximum());
     auto *dimProp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
         currentRun.getProperty(dimension->getName()));
     if (dimProp) {
-      coord_t value = static_cast<coord_t>(dimProp->firstValue());
-      otherDimValues.push_back(value);
+      auto value = static_cast<coord_t>(dimProp->firstValue());
+      otherDimValues.emplace_back(value);
       // in the original MD data no time was spent measuring between dimMin and
       // dimMax
       if (value < dimMin || value > dimMax) {
@@ -435,7 +435,7 @@ void MDNormSCD::calculateNormalization(
   const auto &spectrumInfo = currentExptInfo.spectrumInfo();
 
   // Mappings
-  const int64_t ndets = static_cast<int64_t>(spectrumInfo.size());
+  const auto ndets = static_cast<int64_t>(spectrumInfo.size());
   const detid2index_map fluxDetToIdx =
       integrFlux->getDetectorIDToWorkspaceIndexMap();
   const detid2index_map solidAngDetToIdx =
@@ -495,7 +495,7 @@ for (int64_t i = 0; i < ndets; i++) {
   // pre-allocate for efficiency and copy non-hkl dim values into place
   pos.resize(vmdDims + otherValues.size());
   std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims - 1);
-  pos.push_back(1.);
+  pos.emplace_back(1.f);
 
   for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
     const auto &curIntSec = *it;
@@ -517,7 +517,7 @@ for (int64_t i = 0; i < ndets; i++) {
       continue;
 
     // index of the current intersection
-    size_t k = static_cast<size_t>(std::distance(intersectionsBegin, it));
+    auto k = static_cast<size_t>(std::distance(intersectionsBegin, it));
     // signal = integral between two consecutive intersections
     signal_t signal = (yValues[k] - yValues[k - 1]) * solid;
     Mantid::Kernel::AtomicOp(signalArray[linIndex], signal,
@@ -531,11 +531,11 @@ PARALLEL_CHECK_INTERUPT_REGION
 if (m_accumulate) {
   std::transform(
       signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
-      m_normWS->getSignalArray(),
+      m_normWS->mutableSignalArray(),
       [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
 } else {
   std::copy(signalArray.cbegin(), signalArray.cend(),
-            m_normWS->getSignalArray());
+            m_normWS->mutableSignalArray());
 }
 }
 

@@ -27,7 +27,7 @@ std::vector<std::string> getScatterers(const CrystalStructure &self) {
   scattererStrings.reserve(scatterers->nScatterers());
 
   for (size_t i = 0; i < scatterers->nScatterers(); ++i) {
-    scattererStrings.push_back(
+    scattererStrings.emplace_back(
         getIsotropicAtomBraggScattererString(scatterers->getScatterer(i)));
   }
 

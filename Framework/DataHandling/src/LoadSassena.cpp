@@ -124,7 +124,7 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
     throw Kernel::Exception::FileError(
         "Unable to read " + setName + " dataset info:", m_filename);
   }
-  int nq = static_cast<int>(dims[0]); // number of q-vectors
+  auto nq = static_cast<int>(dims[0]); // number of q-vectors
   std::vector<double> buf(nq * 3);
 
   herr_t errorcode = this->dataSetDouble(h5file, "qvectors", buf);
@@ -136,7 +136,7 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
 
   qvmod.reserve(nq);
   for (auto curr = buf.cbegin(); curr != buf.cend(); curr += 3) {
-    qvmod.push_back(
+    qvmod.emplace_back(
         sqrt(curr[0] * curr[0] + curr[1] * curr[1] + curr[2] * curr[2]));
   }
 
@@ -147,11 +147,11 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
       qvmodpair.emplace_back(qvmod[iq], iq);
     std::sort(qvmodpair.begin(), qvmodpair.end(), compare);
     for (int iq = 0; iq < nq; iq++)
-      sorting_indexes.push_back(qvmodpair[iq].second);
+      sorting_indexes.emplace_back(qvmodpair[iq].second);
     std::sort(qvmod.begin(), qvmod.end());
   } else
     for (int iq = 0; iq < nq; iq++)
-      sorting_indexes.push_back(iq);
+      sorting_indexes.emplace_back(iq);
 
   DataObjects::Workspace2D_sptr ws =
       boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
@@ -189,7 +189,7 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
                          const HistogramData::Points &qvmod,
                          const std::vector<int> &sorting_indexes) {
 
-  int nq = static_cast<int>(qvmod.size()); // number of q-vectors
+  auto nq = static_cast<int>(qvmod.size()); // number of q-vectors
   std::vector<double> buf(nq * 2);
   herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
   if (errorcode < 0) {
@@ -249,10 +249,10 @@ void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
     this->g_log.error("LoadSassena::loadFQT cannot proceed");
     return;
   }
-  int nnt = static_cast<int>(dims[1]); // number of non-negative time points
-  int nt = 2 * nnt - 1;                // number of time points
+  auto nnt = static_cast<int>(dims[1]); // number of non-negative time points
+  int nt = 2 * nnt - 1;                 // number of time points
 
-  int nq = static_cast<int>(qvmod.size()); // number of q-vectors
+  auto nq = static_cast<int>(qvmod.size()); // number of q-vectors
   std::vector<double> buf(nq * nnt * 2);
   herr_t errorcode = this->dataSetDouble(h5file, setName, buf);
   if (errorcode < 0) {
@@ -395,7 +395,7 @@ void LoadSassena::exec() {
   int nvalidSets = 4;
   const char *validSets[] = {"fq", "fq0", "fq2", "fqt"};
   for (int iSet = 0; iSet < nvalidSets; iSet++)
-    this->m_validSets.push_back(validSets[iSet]);
+    this->m_validSets.emplace_back(validSets[iSet]);
 
   // open the HDF5 file for reading
   m_filename = this->getPropertyValue("Filename");

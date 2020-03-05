@@ -209,7 +209,7 @@ def get_hkls(peaks_workspace):
     :param peaks_workspace: the peaks workspace to extract HKL values from
     :return: 2D numpy array of HKL values.
     """
-    return np.array([np.array([peak['h'], peak['k'], peak['l']])
+    return np.array([np.array([peak.getH(), peak.getK(), peak.getL()])
                      for peak in peaks_workspace])
 
 

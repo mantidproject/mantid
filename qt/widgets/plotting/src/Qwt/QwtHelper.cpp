@@ -47,7 +47,7 @@ curveDataFromWs(MatrixWorkspace_const_sptr ws) {
 
   for (size_t wsIndex = 0; wsIndex < histograms; wsIndex++) {
     auto wsIdxData = curveDataFromWs(ws, wsIndex);
-    dataVector.push_back(wsIdxData);
+    dataVector.emplace_back(wsIdxData);
   }
   return dataVector;
 }

@@ -63,3 +63,53 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
             return False
 
         return True
+
+
+class ConvertWANDSCDtoQ_HB3A_Test(systemtesting.MantidSystemTest):
+    def requiredMemoryMB(self):
+            return 8000
+
+    def runTest(self):
+        LoadMD('HB3A_data.nxs', OutputWorkspace='ConvertWANDSCDtoQ_HB3ATest_data')
+
+        SetGoniometer('ConvertWANDSCDtoQ_HB3ATest_data',
+                      Axis0='omega,0,1,0,-1',
+                      Axis1='chi,0,0,1,-1',
+                      Axis2='phi,0,1,0,-1')
+
+        ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQ_HB3ATest_data',
+                          Wavelength=1.008,
+                          BinningDim0='-5.0125,5.0125,401',
+                          BinningDim1='-2.0125,3.0125,201',
+                          BinningDim2='-0.0125,5.0125,201',
+                          KeepTemporaryWorkspaces=True,
+                          OutputWorkspace='ConvertWANDSCDtoQTest_Q')
+
+        ConvertWANDSCDtoQTest_peaks=FindPeaksMD(InputWorkspace='ConvertWANDSCDtoQTest_Q_data',
+                                                PeakDistanceThreshold=0.25,
+                                                DensityThresholdFactor=20000,
+                                                CalculateGoniometerForCW=True,
+                                                Wavelength=1.008,
+                                                FlipX=True,
+                                                InnerGoniometer=False)
+
+        IndexPeaks(ConvertWANDSCDtoQTest_peaks)
+
+        self.assertEqual(ConvertWANDSCDtoQTest_peaks.getNumberPeaks(), 1)
+
+        peak = ConvertWANDSCDtoQTest_peaks.getPeak(0)
+        self.assertDelta(peak.getWavelength(), 1.008, 1e-7)
+        np.testing.assert_allclose(peak.getQSampleFrame(), [-0.425693,1.6994,2.30206], rtol=1e-5)
+        np.testing.assert_array_equal(peak.getHKL(), [0, 0, 6])
+
+        ConvertWANDSCDtoQTest_HKL = ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQ_HB3ATest_data',
+                                                      Wavelength=1.008,
+                                                      Frame='HKL',
+                                                      BinningDim0='-1.01,1.01,101',
+                                                      BinningDim1='-1.01,1.01,101',
+                                                      BinningDim2='4.99,7.01,101',
+                                                      KeepTemporaryWorkspaces=True)
+
+        signal = ConvertWANDSCDtoQTest_HKL.getSignalArray()
+        # peak should be roughly the center of the volume
+        np.testing.assert_array_equal(np.unravel_index(np.nanargmax(signal), signal.shape), (50, 51, 53))

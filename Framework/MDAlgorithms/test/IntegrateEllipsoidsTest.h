@@ -33,25 +33,70 @@ void addFakeEllipsoid(const V3D &peakHKL, const int &totalNPixels,
                       EventWorkspace_sptr &eventWS,
                       PeaksWorkspace_sptr &peaksWS) {
   // Create the peak and add it to the peaks ws
-  Peak *peak = peaksWS->createPeakHKL(peakHKL);
+  auto peak = peaksWS->createPeakHKL(peakHKL);
   peaksWS->addPeak(*peak);
-  const int detectorId = peak->getDetectorID();
-  const double tofExact = peak->getTOF();
-  delete peak;
-
+  const auto detectorId = peak->getDetectorID();
+  const auto tofExact = peak->getTOF();
   EventList &el = eventWS->getSpectrum(detectorId - totalNPixels);
-
   // Add more events to the event list corresponding to the peak centre
-  double start = tofExact - (double(nEvents) / 2 * tofGap);
-  for (int i = 0; i < nEvents; ++i) {
+  auto nPkEvents = nEvents - 4;
+  double start = tofExact - (double(nPkEvents) / 2 * tofGap);
+  for (int i = 0; i < nPkEvents; ++i) {
     const double tof = start + (i * tofGap);
     el.addEventQuickly(TofEvent(tof));
+  }
+
+  /* Add single events at  +/- step in each direction perp QHKL
+  to ensure covariance matrix is not singular */
+
+  // vector to hold axes unit vectors perp Q
+  std::vector<V3D> eigvects;
+  auto const Q = peak->getQLabFrame();
+  auto const Qhat = Q / Q.norm(); // unit-vector (principal axis of ellipse)
+  V3D u;
+  double dotprod = 1;
+  // loop over 3 mutually-orthogonal vectors (100, 010, 001)
+  // until get one with component perp to Q (within tolerance)
+  size_t ii = 0;
+  do {
+    u = V3D(0, 0, 0); // reset u
+    u[ii] = 1;
+    dotprod = Qhat.scalar_prod(u);
+    ii++;
+  } while (abs(dotprod) > 1.0 - 1e-6);
+  auto v = Qhat.cross_prod(u);
+  eigvects.push_back(v / v.norm());
+  v = Qhat.cross_prod(v);
+  eigvects.push_back(v / v.norm());
+
+  // get appropriate step in directions perp Qhkl
+  // so events are in different detector ID
+  std::vector<double> step_perp{0.0, 0.0};
+  for (size_t ivect = 0; ivect < step_perp.size(); ivect++) {
+    auto detId = detectorId;
+    do {
+      step_perp[ivect] += 0.02;
+      auto pk = peaksWS->createPeak(Q + eigvects[ivect] * step_perp[ivect]);
+      detId = pk->getDetectorID();
+    } while (detId == detectorId);
+  }
+
+  // and single events
+  for (int istep = -1; istep < 2; istep += 2) {
+    for (size_t ivect = 0; ivect < step_perp.size(); ivect++) {
+      auto q = Q + eigvects[ivect] * step_perp[ivect] * istep;
+      auto pk = peaksWS->createPeak(q);
+      // add event
+      auto detId = pk->getDetectorID();
+      EventList &el = eventWS->getSpectrum(detId - totalNPixels);
+      el.addEventQuickly(TofEvent(pk->getTOF()));
+    }
   }
 }
 
 // Create diffraction data for test schenarios
 boost::tuple<EventWorkspace_sptr, PeaksWorkspace_sptr>
-createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
+createDiffractionData(const int nPixels = 200, const int nEventsPerPeak = 24,
                       const double tofGapBetweenEvents = 10) {
   Mantid::Geometry::Instrument_sptr inst =
       ComponentCreationHelper::createTestInstrumentRectangular(
@@ -63,9 +108,9 @@ createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
   // Set the instrument to be the fake rectangular bank above.
   peaksWS->setInstrument(inst);
   // Set the oriented lattice for a cubic crystal
-  OrientedLattice ol(6, 6, 6, 90, 90, 90);
-  ol.setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
-  peaksWS->mutableSample().setOrientedLattice(&ol);
+  auto lattice = std::make_unique<OrientedLattice>(6, 6, 6, 90, 90, 90);
+  lattice->setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
+  peaksWS->mutableSample().setOrientedLattice(std::move(lattice));
 
   // Make an event workspace and add fake peak data
   auto eventWS = boost::make_shared<EventWorkspace>();
@@ -90,9 +135,9 @@ createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
                    tofGapBetweenEvents, eventWS, peaksWS);
   addFakeEllipsoid(V3D(1, -4, -2), nPixelsTotal, nEventsPerPeak,
                    tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(V3D(1, -4, 0), nPixelsTotal, nEventsPerPeak,
+  addFakeEllipsoid(V3D(1, -5, -1), nPixelsTotal, nEventsPerPeak,
                    tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(V3D(2, -3, -4), nPixelsTotal, nEventsPerPeak,
+  addFakeEllipsoid(V3D(1, -3, -4), nPixelsTotal, nEventsPerPeak,
                    tofGapBetweenEvents, eventWS, peaksWS);
 
   // Return test data.
@@ -139,12 +184,20 @@ private:
           dynamic_cast<const PeakShapeEllipsoid *>(&peakShape);
       auto dirs = ellipsoid->directions();
 
-      /* We have set the fake ellipsoids up to be lines along a single detectors
-       * TOF (see setup).
-       * We therefore expect the principle axis of the ellipsoid to be the same
-       * as the q-dir!
+      /* We expect an axis of the ellipsoid to be mostly
+       * along Qhkl (probably the principal axis (i.e.
+       * direction of max varaince) but not necassarily)
        */
-      TS_ASSERT_EQUALS(qDir, dirs[0]);
+      double minangle = M_PI / 2;
+      for (size_t ii = 0; ii < dirs.size(); ii++) {
+        double angle = qDir.angle(dirs[ii]);
+        if (angle > M_PI / 2) {
+          // possible axis is flipepd
+          angle = M_PI - angle;
+        }
+        minangle = std::min(minangle, angle);
+      }
+      TS_ASSERT_LESS_THAN(minangle, 0.05); // aprox 3 deg
     }
   }
 
@@ -177,9 +230,9 @@ public:
     rebinAlg->initialize();
     rebinAlg->setProperty("InputWorkspace", m_eventWS);
     auto params = std::vector<double>();
-    params.push_back(950);
-    params.push_back(10);
-    params.push_back(2500);
+    params.emplace_back(950);
+    params.emplace_back(10);
+    params.emplace_back(2500);
     rebinAlg->setProperty("Params", params);
     rebinAlg->setProperty("PreserveEvents", false); // Make a histo workspace
     rebinAlg->setPropertyValue("OutputWorkspace", "dummy");
@@ -229,12 +282,12 @@ public:
     const auto &peak5 = integratedPeaksWS->getPeak(4);
     const auto &peak6 = integratedPeaksWS->getPeak(5);
 
-    TS_ASSERT_DELTA(peak1.getIntensity(), 1., 1e-6);
-    TS_ASSERT_DELTA(peak2.getIntensity(), 3., 1e-6);
-    TS_ASSERT_DELTA(peak3.getIntensity(), 1., 1e-6);
-    TS_ASSERT_DELTA(peak4.getIntensity(), 14., 1e-6);
-    TS_ASSERT_DELTA(peak5.getIntensity(), 0., 1e-6);
-    TS_ASSERT_DELTA(peak6.getIntensity(), 11., 1e-6);
+    TS_ASSERT_DELTA(peak1.getIntensity(), 8., 1e-6);
+    TS_ASSERT_DELTA(peak2.getIntensity(), 7., 1e-6);
+    TS_ASSERT_DELTA(peak3.getIntensity(), 8., 1e-6);
+    TS_ASSERT_DELTA(peak4.getIntensity(), 17., 1e-6);
+    TS_ASSERT_DELTA(peak5.getIntensity(), 11., 1e-6);
+    TS_ASSERT_DELTA(peak6.getIntensity(), 12., 1e-6);
   }
 
   void test_execution_histograms() {
@@ -258,9 +311,9 @@ public:
     const auto &peak2 = integratedPeaksWS->getPeak(1);
     const auto &peak3 = integratedPeaksWS->getPeak(2);
 
-    TS_ASSERT_DELTA(peak1.getIntensity(), 1., 1e-6);
-    TS_ASSERT_DELTA(peak2.getIntensity(), 1., 1e-6);
-    TS_ASSERT_DELTA(peak3.getIntensity(), 1., 1e-6);
+    TS_ASSERT_DELTA(peak1.getIntensity(), 4., 1e-6);
+    TS_ASSERT_DELTA(peak2.getIntensity(), 7., 1e-6);
+    TS_ASSERT_DELTA(peak3.getIntensity(), 4., 1e-6);
   }
 
   void test_execution_histograms_distribution_data() {
@@ -303,9 +356,9 @@ public:
     const auto &peak3 = integratedPeaksWS->getPeak(2);
 
     const double binWidth{10.};
-    TS_ASSERT_DELTA(peak1.getIntensity(), 1. / binWidth, 1e-6);
-    TS_ASSERT_DELTA(peak2.getIntensity(), 1. / binWidth, 1e-6);
-    TS_ASSERT_DELTA(peak3.getIntensity(), 1. / binWidth, 1e-6);
+    TS_ASSERT_DELTA(peak1.getIntensity(), 4. / binWidth, 1e-6);
+    TS_ASSERT_DELTA(peak2.getIntensity(), 7. / binWidth, 1e-6);
+    TS_ASSERT_DELTA(peak3.getIntensity(), 4. / binWidth, 1e-6);
   }
 
   void test_execution_events_adaptive() {
@@ -330,17 +383,17 @@ public:
                       m_peaksWS->getNumberPeaks());
 
     TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-                     integratedPeaksWS->getPeak(0).getIntensity(), 2, 0.01);
+                     integratedPeaksWS->getPeak(0).getIntensity(), 8., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-                     integratedPeaksWS->getPeak(1).getIntensity(), 0.8, 0.01);
+                     integratedPeaksWS->getPeak(1).getIntensity(), 9., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-                     integratedPeaksWS->getPeak(2).getIntensity(), 2, 0.01);
+                     integratedPeaksWS->getPeak(2).getIntensity(), 8., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-                     integratedPeaksWS->getPeak(3).getIntensity(), 7, 0.01);
+                     integratedPeaksWS->getPeak(3).getIntensity(), 16., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 4",
-                     integratedPeaksWS->getPeak(4).getIntensity(), 0, 0.01);
+                     integratedPeaksWS->getPeak(4).getIntensity(), 12., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-                     integratedPeaksWS->getPeak(5).getIntensity(), 5.83, 0.01);
+                     integratedPeaksWS->getPeak(5).getIntensity(), 9.97, 0.01);
   }
 
   void test_execution_histograms_adaptive() {
@@ -364,17 +417,17 @@ public:
                       integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
     TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-                     integratedPeaksWS->getPeak(0).getIntensity(), 3, 0.01);
+                     integratedPeaksWS->getPeak(0).getIntensity(), 5., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-                     integratedPeaksWS->getPeak(1).getIntensity(), 3, 0.01);
+                     integratedPeaksWS->getPeak(1).getIntensity(), 8., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-                     integratedPeaksWS->getPeak(2).getIntensity(), 3, 0.01);
+                     integratedPeaksWS->getPeak(2).getIntensity(), 4., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-                     integratedPeaksWS->getPeak(3).getIntensity(), 10, 0.01);
+                     integratedPeaksWS->getPeak(3).getIntensity(), 16., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 4",
-                     integratedPeaksWS->getPeak(4).getIntensity(), 0, 0.01);
+                     integratedPeaksWS->getPeak(4).getIntensity(), 12., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-                     integratedPeaksWS->getPeak(5).getIntensity(), 9.94, 0.01);
+                     integratedPeaksWS->getPeak(5).getIntensity(), 13., 0.01);
   }
 
   void test_execution_events_hkl() {
@@ -394,15 +447,15 @@ public:
                       m_peaksWS->getNumberPeaks());
 
     TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-                     integratedPeaksWS->getPeak(0).getIntensity(), -1, 0.01);
+                     integratedPeaksWS->getPeak(0).getIntensity(), 7., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-                     integratedPeaksWS->getPeak(1).getIntensity(), 3, 0.01);
+                     integratedPeaksWS->getPeak(1).getIntensity(), 7., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-                     integratedPeaksWS->getPeak(2).getIntensity(), -1, 0.01);
+                     integratedPeaksWS->getPeak(2).getIntensity(), 8., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-                     integratedPeaksWS->getPeak(3).getIntensity(), 15, 0.01);
+                     integratedPeaksWS->getPeak(3).getIntensity(), 19., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 4",
-                     integratedPeaksWS->getPeak(4).getIntensity(), 12, 0.01);
+                     integratedPeaksWS->getPeak(4).getIntensity(), 11., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5",
                      integratedPeaksWS->getPeak(5).getIntensity(), 11, 0.01);
   }
@@ -423,17 +476,17 @@ public:
                       integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
     TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-                     integratedPeaksWS->getPeak(0).getIntensity(), 2.0, 0.01);
+                     integratedPeaksWS->getPeak(0).getIntensity(), 6., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 1",
-                     integratedPeaksWS->getPeak(1).getIntensity(), 1.0, 0.01);
+                     integratedPeaksWS->getPeak(1).getIntensity(), 9., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-                     integratedPeaksWS->getPeak(2).getIntensity(), 2.0, 0.01);
+                     integratedPeaksWS->getPeak(2).getIntensity(), 3., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-                     integratedPeaksWS->getPeak(3).getIntensity(), 11, 0.01);
+                     integratedPeaksWS->getPeak(3).getIntensity(), 19., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 4",
-                     integratedPeaksWS->getPeak(4).getIntensity(), 14, 0.01);
+                     integratedPeaksWS->getPeak(4).getIntensity(), 11., 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-                     integratedPeaksWS->getPeak(5).getIntensity(), 13, 0.01);
+                     integratedPeaksWS->getPeak(5).getIntensity(), 11., 0.01);
   }
 };
 
@@ -475,9 +528,9 @@ public:
     rebinAlg->initialize();
     rebinAlg->setProperty("InputWorkspace", m_eventWS);
     auto params = std::vector<double>();
-    params.push_back(950);
-    params.push_back(5);
-    params.push_back(2500);
+    params.emplace_back(950);
+    params.emplace_back(5);
+    params.emplace_back(2500);
     rebinAlg->setProperty("Params", params);
     rebinAlg->setProperty("PreserveEvents", false); // Make a histo workspace
     rebinAlg->setPropertyValue("OutputWorkspace", "dummy");

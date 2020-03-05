@@ -103,7 +103,7 @@ void CrossCorrelate::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
   int reference = getProperty("ReferenceSpectra");
-  const size_t index_ref = static_cast<size_t>(reference);
+  const auto index_ref = static_cast<size_t>(reference);
 
   // check that the data range specified makes sense
   double xmin = getProperty("XMin");
@@ -113,12 +113,13 @@ void CrossCorrelate::exec() {
 
   // Now check if the range between x_min and x_max is valid
   auto &referenceX = inputWS->x(index_ref);
+  using std::placeholders::_1;
   auto minIt = std::find_if(referenceX.cbegin(), referenceX.cend(),
-                            std::bind2nd(std::greater<double>(), xmin));
+                            std::bind(std::greater<double>(), _1, xmin));
   if (minIt == referenceX.cend())
     throw std::runtime_error("No data above XMin");
   auto maxIt = std::find_if(minIt, referenceX.cend(),
-                            std::bind2nd(std::greater<double>(), xmax));
+                            std::bind(std::greater<double>(), _1, xmax));
   if (minIt == maxIt)
     throw std::runtime_error("Range is not valid");
 
@@ -168,7 +169,7 @@ void CrossCorrelate::exec() {
 
   // Now start the real stuff
   // Create a 2DWorkspace that will hold the result
-  const int nY = static_cast<int>(refY.size());
+  const auto nY = static_cast<int>(refY.size());
   const int npoints = 2 * nY - 3;
   if (npoints < 1)
     throw std::runtime_error("Range is not valid");

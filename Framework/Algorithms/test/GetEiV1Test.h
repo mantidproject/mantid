@@ -19,9 +19,9 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::MantidVecPtr;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
-using Mantid::MantidVecPtr;
 
 class GetEiV1Test : public CxxTest::TestSuite {
 public:

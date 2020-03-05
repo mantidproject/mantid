@@ -4,26 +4,24 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
 import unittest
+from mantidqt.utils.qt.testing import start_qapplication
 
-from mantid.api import AnalysisDataService
-from mantid.api import FileFinder
+from mantid.api import AnalysisDataService, FileFinder
+from mantid import ConfigService
 from mantid.dataobjects import Workspace2D
 from mantid.simpleapi import CreateWorkspace
-from Muon.GUI.Common.contexts.muon_context import MuonContext
-from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
-from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
-from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
-from Muon.GUI.Common.muon_load_data import MuonLoadData
+from collections import Counter
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
+@start_qapplication
 class MuonContextTest(unittest.TestCase):
     def setUp(self):
         AnalysisDataService.clear()
+        ConfigService['MantidOptions.InvisibleWorkspaces'] = 'True'
         self.filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
 
         self.load_result, self.run_number, self.filename, psi_data = load_workspace_from_filename(self.filepath)
@@ -41,38 +39,70 @@ class MuonContextTest(unittest.TestCase):
                                   instrument='EMU')
         self.data_context.current_runs = [[self.run_number]]
         self.data_context.update_current_data()
-        self.group_pair_context.reset_group_and_pairs_to_default(self.load_result['OutputWorkspace'][0]._workspace,
+        self.group_pair_context.reset_group_and_pairs_to_default(self.load_result['OutputWorkspace'][0].workspace,
                                                                  'EMU', '')
+
+    def tearDown(self):
+        ConfigService['MantidOptions.InvisibleWorkspaces'] = 'False'
 
     def populate_ADS(self):
         self.context.calculate_all_groups()
         self.context.show_all_groups()
         self.context.calculate_all_pairs()
         self.context.show_all_pairs()
-        workspace = CreateWorkspace([0], [0], StoreInADS=False)
-        self.context.phase_context.add_phase_quad(MuonWorkspaceWrapper(workspace, 'EMU19489; PhaseQuad; PhaseTable EMU19489'))
+        CreateWorkspace([0], [0], OutputWorkspace='EMU19489; PhaseQuad; PhaseTable EMU19489')
+        self.context.phase_context.add_phase_quad(
+            MuonWorkspaceWrapper('EMU19489; PhaseQuad; PhaseTable EMU19489'), '19489')
+
+    def _assert_list_in_ADS(self, workspace_name_list):
+        ads_list = AnalysisDataService.getObjectNames()
+        for item in workspace_name_list:
+            self.assertTrue(item in ads_list)
+
+    def test_window(self):
+        self.assertEquals("Muon Analysis", self.context.window_title)
+
+    def test_get_runs(self):
+        runs = self.context.get_runs(" 19489 ")
+        self.assertEquals(runs, [[19489]])
+
+    def test_get_group_or_pair(self):
+         group_and_pair = self.context.get_group_and_pair("All")
+         self.assertEquals(group_and_pair,(["fwd","bwd"],["long"]))
+
+    def test_get_group(self):
+         group_and_pair = self.context.get_group_and_pair(" fwd , bwd ")
+         self.assertEquals(group_and_pair,(["fwd","bwd"],[]))
+
+    def test_get_pair(self):
+         group_and_pair = self.context.get_group_and_pair(" long ")
+         self.assertEquals(group_and_pair,([],["long"]))
 
     def test_reset_groups_and_pairs_to_default(self):
         self.assertEqual(self.group_pair_context.group_names, ['fwd', 'bwd'])
         self.assertEqual(self.group_pair_context.pair_names, ['long'])
 
     def test_calculate_group_calculates_group_for_given_run(self):
-        counts_workspace, asymmetry_workspace = self.context.calculate_group('fwd', run=[19489])
+        counts_workspace, asymmetry_workspace, group_asymmetry_unormalised = self.context.calculate_group('fwd',
+                                                                                                          run=[19489])
 
-        self.assertEqual(type(counts_workspace), Workspace2D)
-        self.assertEqual(type(counts_workspace), Workspace2D)
+        self.assertEqual(counts_workspace, 'EMU19489; Group; fwd; Counts; MA')
+        self.assertEqual(asymmetry_workspace, 'EMU19489; Group; fwd; Asymmetry; MA')
+        self.assertEqual(group_asymmetry_unormalised, '__EMU19489; Group; fwd; Asymmetry; MA_unnorm')
 
     def test_calculate_pair_calculates_pair_for_given_run(self):
         pair_asymmetry = self.context.calculate_pair('long', run=[19489])
 
-        self.assertEqual(type(pair_asymmetry), Workspace2D)
+        self.assertEqual(pair_asymmetry, 'EMU19489; Pair Asym; long; MA')
 
     def test_show_all_groups_calculates_and_shows_all_groups(self):
         self.context.show_all_groups()
 
-        self.assertEquals(AnalysisDataService.getObjectNames(), ['EMU19489 Groups MA', 'EMU19489 MA','EMU19489; Group; bwd; Asymmetry; MA',
-                                                                 'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; fwd; Asymmetry; MA',
-                                                                 'EMU19489; Group; fwd; Counts; MA', 'Muon Data'])
+        self._assert_list_in_ADS(['__EMU19489; Group; bwd; Asymmetry; MA_unnorm',
+                                   '__EMU19489; Group; fwd; Asymmetry; MA_unnorm',
+                                   'EMU19489 MA', 'EMU19489; Group; bwd; Asymmetry; MA',
+                                   'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; fwd; Asymmetry; MA',
+                                   'EMU19489; Group; fwd; Counts; MA'])
 
     def test_that_show_all_calculates_and_shows_all_groups_with_rebin(self):
         self.gui_context['RebinType'] = 'Fixed'
@@ -80,16 +110,20 @@ class MuonContextTest(unittest.TestCase):
 
         self.context.show_all_groups()
 
-        self.assertEquals(AnalysisDataService.getObjectNames(),
-                          ['EMU19489 Groups MA','EMU19489 MA', 'EMU19489; Group; bwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; Rebin; MA',
-                           'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; bwd; Counts; Rebin; MA',
-                           'EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; fwd; Asymmetry; Rebin; MA',
-                           'EMU19489; Group; fwd; Counts; MA', 'EMU19489; Group; fwd; Counts; Rebin; MA', 'Muon Data'])
+        self._assert_list_in_ADS(['__EMU19489; Group; bwd; Asymmetry; MA_unnorm',
+                                   '__EMU19489; Group; bwd; Asymmetry; Rebin; MA_unnorm',
+                                   '__EMU19489; Group; fwd; Asymmetry; MA_unnorm',
+                                   '__EMU19489; Group; fwd; Asymmetry; Rebin; MA_unnorm',
+                                   'EMU19489 MA',
+                                   'EMU19489; Group; bwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; Rebin; MA',
+                                   'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; bwd; Counts; Rebin; MA',
+                                   'EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; fwd; Asymmetry; Rebin; MA',
+                                   'EMU19489; Group; fwd; Counts; MA', 'EMU19489; Group; fwd; Counts; Rebin; MA'])
 
     def test_show_all_pairs_calculates_and_shows_all_pairs(self):
         self.context.show_all_pairs()
 
-        self.assertEquals(AnalysisDataService.getObjectNames(), ['EMU19489 MA', 'EMU19489 Pairs MA', 'EMU19489; Pair Asym; long; MA', 'Muon Data'])
+        self._assert_list_in_ADS(['EMU19489 MA', 'EMU19489; Pair Asym; long; MA'])
 
     def test_that_show_all_calculates_and_shows_all_pairs_with_rebin(self):
         self.gui_context['RebinType'] = 'Fixed'
@@ -97,8 +131,8 @@ class MuonContextTest(unittest.TestCase):
 
         self.context.show_all_pairs()
 
-        self.assertEquals(AnalysisDataService.getObjectNames(),
-                          ['EMU19489 MA', 'EMU19489 Pairs MA', 'EMU19489; Pair Asym; long; MA', 'EMU19489; Pair Asym; long; Rebin; MA', 'Muon Data'])
+        self._assert_list_in_ADS(['EMU19489 MA', 'EMU19489; Pair Asym; long; MA',
+                                  'EMU19489; Pair Asym; long; Rebin; MA'])
 
     def test_update_current_data_sets_current_run_in_data_context(self):
         self.context.update_current_data()
@@ -114,7 +148,7 @@ class MuonContextTest(unittest.TestCase):
     def test_show_raw_data_puts_raw_data_into_the_ADS(self):
         self.context.show_raw_data()
 
-        self.assertEquals(AnalysisDataService.getObjectNames(), ['EMU19489 MA', 'EMU19489 Raw Data MA', 'EMU19489_raw_data MA', 'Muon Data'])
+        self._assert_list_in_ADS(['EMU19489 MA', 'EMU19489_raw_data MA'])
 
     def test_that_first_good_data_returns_correctly_when_from_file_chosen_option(self):
         self.gui_context.update({'FirstGoodDataFromFile': True})
@@ -155,8 +189,9 @@ class MuonContextTest(unittest.TestCase):
         self.populate_ADS()
         workspace_list = self.context.get_names_of_workspaces_to_fit('19489', 'fwd, bwd, long', True)
 
-        self.assertEqual(workspace_list, ['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
-                                          'EMU19489; Pair Asym; long; MA','EMU19489; PhaseQuad; PhaseTable EMU19489'])
+        self.assertEqual(Counter(workspace_list),
+                         Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
+                                  'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489']))
 
     def test_get_workspace_names_returns_nothing_if_no_parameters_passed(self):
         self.populate_ADS()
@@ -168,16 +203,18 @@ class MuonContextTest(unittest.TestCase):
         self.populate_ADS()
         workspace_list = self.context.get_names_of_workspaces_to_fit('19489', 'fwd, bwd, long, random, wrong', True)
 
-        self.assertEqual(workspace_list, ['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
-                                          'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489'])
+        self.assertEqual(Counter(workspace_list),
+                         Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
+                                  'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489']))
 
     def test_get_workspaces_names_copes_with_non_existent_runs(self):
         self.populate_ADS()
 
         workspace_list = self.context.get_names_of_workspaces_to_fit('19489, 22222', 'fwd, bwd, long', True)
 
-        self.assertEqual(workspace_list, ['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
-                                          'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489'])
+        self.assertEqual(Counter(workspace_list),
+                         Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
+                                  'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489']))
 
     def test_that_run_ranged_correctly_parsed(self):
         self.populate_ADS()
@@ -185,8 +222,10 @@ class MuonContextTest(unittest.TestCase):
         workspace_list = self.context.get_names_of_workspaces_to_fit('19489-95', 'fwd, bwd, long',
                                                                      True)
 
-        self.assertEqual(workspace_list, ['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
-                                          'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489'])
+        self.assertEqual(Counter(workspace_list),
+                         Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
+                                  'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489']))
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -61,6 +61,16 @@ public:
         plot(workspaces, index, boost::none, boost::none, hash))
   }
 
+  void testPlottingWorksWhenPlottingABin() {
+    const std::vector<std::string> workspaces = {m_testws_name};
+    const std::vector<int> index = {1};
+    QHash<QString, QVariant> hash;
+    hash["axis"] = static_cast<int>(MantidAxType::Bin);
+
+    TS_ASSERT_THROWS_NOTHING(
+        plot(workspaces, index, boost::none, boost::none, hash))
+  }
+
   void testPlottingWithIncorrectPlotKwargsThrows() {
     const std::vector<std::string> workspaces = {m_testws_name};
     const std::vector<int> index = {1};
@@ -127,6 +137,23 @@ public:
   void testPcolormesh() {
     const QStringList workspaces = {m_testws_name};
     TS_ASSERT_THROWS_NOTHING(pcolormesh(workspaces));
+  }
+
+  void testPlottingSubplotsWithWindowTitleWillNotThrow() {
+    const QStringList workspaces = {m_testws_name};
+    const std::vector<int> index = {1};
+    const std::string window_title = "window_title";
+
+    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none,
+                                  boost::none, boost::none, window_title))
+  }
+
+  void testPlottingSubplotsWithErrorsWillNotThrow() {
+    const QStringList workspaces = {m_testws_name};
+    const std::vector<int> index = {1};
+
+    TS_ASSERT_THROWS_NOTHING(plot(workspaces, boost::none, index, boost::none,
+                                  boost::none, boost::none, boost::none, true))
   }
 
 private:

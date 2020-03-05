@@ -17,9 +17,9 @@
 
 using Mantid::Kernel::ChebyshevPolyFit;
 using Mantid::Kernel::ChebyshevSeries;
+using Mantid::Kernel::getStatistics;
 using Mantid::Kernel::MersenneTwister;
 using Mantid::Kernel::StatOptions;
-using Mantid::Kernel::getStatistics;
 using std::pow;
 
 namespace {

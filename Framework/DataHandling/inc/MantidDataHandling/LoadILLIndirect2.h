@@ -49,6 +49,7 @@ private:
   void runLoadInstrument();
   void moveComponent(const std::string &, double);
   void moveSingleDetectors(NeXus::NXEntry &entry);
+  void rotateTubes();
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 

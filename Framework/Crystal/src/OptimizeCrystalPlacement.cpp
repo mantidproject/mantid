@@ -205,7 +205,7 @@ void OptimizeCrystalPlacement::exec() {
     if (it == RunNumList.end() &&
         use) // add to list of unique run numbers in workspace
     {
-      RunNumList.push_back(runNum);
+      RunNumList.emplace_back(runNum);
 
       Geometry::Goniometer Gon(peak.getGoniometerMatrix());
       std::vector<double> phichiOmega = Gon.getEulerAngles("YZY");
@@ -215,9 +215,9 @@ void OptimizeCrystalPlacement::exec() {
     if (use) // add to lists for workspace
     {
       nPeaksUsed++;
-      xRef.push_back(static_cast<double>(i));
-      xRef.push_back(static_cast<double>(i));
-      xRef.push_back(static_cast<double>(i));
+      xRef.emplace_back(static_cast<double>(i));
+      xRef.emplace_back(static_cast<double>(i));
+      xRef.emplace_back(static_cast<double>(i));
     }
   }
 
@@ -254,7 +254,7 @@ void OptimizeCrystalPlacement::exec() {
       std::string runNumStr = std::to_string(runNum);
       OptRunNums += predChar + runNumStr;
       predChar = "/";
-      ChRunNumList.push_back(runNumStr);
+      ChRunNumList.emplace_back(runNumStr);
     }
   }
 

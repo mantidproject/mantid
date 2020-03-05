@@ -77,8 +77,8 @@ using MantidQt::API::AlgorithmRunner;
 using MantidQt::API::MantidDesktopServices;
 using MantidQt::API::SignalBlocker;
 using MantidQt::API::SyncedCheckboxes;
-using Poco::XML::DOMParser;
 using Poco::XML::Document;
+using Poco::XML::DOMParser;
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
@@ -210,7 +210,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_rescaler = new QwtPlotRescaler(m_plot->canvas());
 
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Interface", "SliceViewer", false);
+      FeatureType::Interface, "SliceViewer", false);
 }
 
 void SliceViewer::updateAspectRatios() {
@@ -644,7 +644,7 @@ void SliceViewer::updateDimensionSliceWidgets() {
                        SLOT(rebinParamsChanged()));
 
       // Save in this list
-      m_dimWidgets.push_back(widget);
+      m_dimWidgets.emplace_back(widget);
     }
   }
   // Hide unnecessary ones
@@ -815,7 +815,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
     MDHistoDimension_sptr dim(
         new MDHistoDimension(m_ws->getDimension(d).get()));
     dim->setRange(numBins, min, max);
-    m_dimensions.push_back(dim);
+    m_dimensions.emplace_back(dim);
   }
 
   if (!mess.str().empty()) {
@@ -1640,7 +1640,7 @@ void SliceViewer::updateDisplay(bool resetAxes) {
     } else if (widget->getShownDim() == 1) {
       m_dimY = d;
     }
-    slicePoint.push_back(VMD_t(widget->getSlicePoint()));
+    slicePoint.emplace_back(VMD_t(widget->getSlicePoint()));
   }
   // Avoid going out of range
   if (m_dimX >= m_ws->getNumDims())
@@ -2320,9 +2320,9 @@ void SliceViewer::rebinParamsChanged() {
       numBins = widget->getNumBins();
     }
 
-    OutputExtents.push_back(min);
-    OutputExtents.push_back(max);
-    OutputBins.push_back(numBins);
+    OutputExtents.emplace_back(min);
+    OutputExtents.emplace_back(max);
+    OutputBins.emplace_back(numBins);
 
     // Set the BasisVector property...
     VMD basis(m_ws->getNumDims());

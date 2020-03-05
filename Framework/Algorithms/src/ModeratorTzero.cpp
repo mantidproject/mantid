@@ -111,7 +111,7 @@ void ModeratorTzero::exec() {
   // calculate tof shift once for all neutrons if emode==Direct
   double t0_direct(-1);
   if (emode == "Direct") {
-    double Ei = inputWS->run().getPropertyValueAsType<double>("Ei");
+    auto Ei = inputWS->run().getPropertyValueAsType<double>("Ei");
     mu::Parser parser;
     parser.DefineVar("incidentEnergy", &Ei); // associate E1 to this parser
     parser.SetExpr(m_formula);
@@ -121,7 +121,7 @@ void ModeratorTzero::exec() {
   const auto &spectrumInfo = inputWS->spectrumInfo();
   const double Lss = spectrumInfo.l1();
 
-  const size_t numHists = static_cast<size_t>(inputWS->getNumberHistograms());
+  const auto numHists = static_cast<size_t>(inputWS->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   // iterate over the spectra
@@ -238,7 +238,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
   // calculate tof shift once for all neutrons if emode==Direct
   double t0_direct(-1);
   if (emode == "Direct") {
-    double Ei = outputWS->run().getPropertyValueAsType<double>("Ei");
+    auto Ei = outputWS->run().getPropertyValueAsType<double>("Ei");
     mu::Parser parser;
     parser.DefineVar("incidentEnergy", &Ei); // associate E1 to this parser
     parser.SetExpr(m_formula);
@@ -249,12 +249,12 @@ void ModeratorTzero::execEvent(const std::string &emode) {
   const double Lss = spectrumInfo.l1();
 
   // Loop over the spectra
-  const size_t numHists = static_cast<size_t>(outputWS->getNumberHistograms());
+  const auto numHists = static_cast<size_t>(outputWS->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    size_t wsIndex = static_cast<size_t>(i);
+    auto wsIndex = static_cast<size_t>(i);
     EventList &evlist = outputWS->getSpectrum(wsIndex);
     if (evlist.getNumberEvents() > 0) // don't bother with empty lists
     {

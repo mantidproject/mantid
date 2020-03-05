@@ -46,14 +46,6 @@ def apply_vanadium_absorb_corrections(van_ws, run_details, absorb_ws=None):
     return van_ws
 
 
-def generate_out_name(run_number_string, long_mode_on, tt_mode):
-    output_name = "PRL" + str(run_number_string)
-    # Append each mode of operation
-    output_name += "_" + str(tt_mode)
-    output_name += "_long" if long_mode_on else ""
-    return output_name
-
-
 def generate_vanadium_absorb_corrections(van_ws, output_filename):
     shape_ws = mantid.CloneWorkspace(InputWorkspace=van_ws)
     shape_ws = mantid.ConvertUnits(InputWorkspace=shape_ws, OutputWorkspace=shape_ws, Target="Wavelength")

@@ -12,8 +12,8 @@
 #include "MantidTypes/SpectrumDefinition.h"
 #include <type_traits>
 
-using Mantid::Kernel::V3D;
 using Mantid::SpectrumDefinition;
+using Mantid::Kernel::V3D;
 
 namespace Mantid {
 namespace API {

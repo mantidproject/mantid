@@ -12,7 +12,9 @@ from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.run_string_utils as run_utils
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.load_utils as load_utils
-from Muon.GUI.Common.observer_pattern import Observable
+from Muon.GUI.Common.utilities.run_string_utils import flatten_run_list
+from mantidqt.utils.observer_pattern import Observable
+from mantid.api import FileFinder
 
 
 class LoadRunWidgetPresenter(object):
@@ -65,6 +67,7 @@ class LoadRunWidgetPresenter(object):
 
     def disable_loading(self):
         self._view.disable_load_buttons()
+        self.thread_success = True
 
     def enable_loading(self):
         if not self._instrument == "PSI":
@@ -113,7 +116,11 @@ class LoadRunWidgetPresenter(object):
         if not run_string:
             return
 
-        self.run_list = run_utils.run_string_to_list(run_string)
+        try:
+            self.run_list = run_utils.run_string_to_list(run_string)
+        except IndexError as err:
+            self._view.warning_popup(err.args[0])
+            return
         file_names = [file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
                       for new_run in self.run_list if not self._model.get_data(run=[new_run])]
         if file_names:
@@ -149,12 +156,12 @@ class LoadRunWidgetPresenter(object):
             return
         new_run = max(self.run_list)
 
-        if self._model.current_run and new_run > self._model.current_run[0]:
-            self._view.warning_popup("Requested run exceeds the current run for this instrument")
-            return
-
-        file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
-        self.load_runs([file_name])
+        try:
+            file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
+            FileFinder.findRuns(file_name)
+            self.load_runs([file_name])
+        except RuntimeError:
+            self._view.warning_popup("Requested run exceeds the current run for this instrument ")
 
     def handle_decrement_run(self):
         decremented_run_list = self.get_decremented_run_list()
@@ -209,6 +216,7 @@ class LoadRunWidgetPresenter(object):
             self._model.execute()
         except ValueError as error:
             self._view.warning_popup(error.args[0])
+            self.run_list = flatten_run_list(self._model.current_runs)
         finished_callback()
 
     def on_loading_start(self):
@@ -226,6 +234,7 @@ class LoadRunWidgetPresenter(object):
         self._load_thread.start()
 
     def error_callback(self, error_message):
+        self.thread_success = False
         self.enable_notifier.notify_subscribers()
         self._view.warning_popup(error_message)
 
@@ -233,6 +242,8 @@ class LoadRunWidgetPresenter(object):
         self._load_thread.deleteLater()
         self._load_thread = None
 
+        if not self.thread_success:
+            self.run_list = flatten_run_list(self._model.current_runs)
         self.on_loading_finished()
 
     def on_loading_finished(self):
@@ -250,7 +261,7 @@ class LoadRunWidgetPresenter(object):
             if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
                 run_list_to_add = [run for run in self.run_list if self._model.get_data(run=[run])]
                 run_list = [[run for run in self.run_list if self._model.get_data(run=[run])]]
-                load_utils.combine_loaded_runs(self._model, run_list_to_add)
+                load_utils.combine_loaded_runs(self._model, run_list_to_add, delete_added=True)
                 self._model.current_runs = run_list
 
             self.update_view_from_model(run_list)

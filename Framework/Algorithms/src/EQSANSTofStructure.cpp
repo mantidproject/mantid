@@ -181,7 +181,7 @@ void EQSANSTofStructure::execEvent(
     events.clear();
     events.reserve(clean_events.size());
     for (it = clean_events.begin(); it < clean_events.end(); ++it) {
-      events.push_back(*it);
+      events.emplace_back(*it);
     }
 
     progress.report("TOF structure");

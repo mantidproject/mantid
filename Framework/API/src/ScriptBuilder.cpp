@@ -161,7 +161,7 @@ ScriptBuilder::buildCommentString(const AlgorithmHistory &algHistory) {
   if (name == COMMENT_ALG) {
     auto props = algHistory.getProperties();
     for (auto &prop : props) {
-      if (prop->name() == "Note") {
+      if (prop->name() == "Text") {
         comment << "# " << prop->value();
       }
     }

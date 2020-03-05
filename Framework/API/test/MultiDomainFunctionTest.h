@@ -127,12 +127,12 @@ public:
     // multi.setDomainIndex(2,2);
 
     // std::vector<size_t> ii;
-    // ii.push_back(0);
-    // ii.push_back(1);
+    // ii.emplace_back(0);
+    // ii.emplace_back(1);
     // multi.setDomainIndices(1,ii);
     // ii.clear();
-    // ii.push_back(0);
-    // ii.push_back(2);
+    // ii.emplace_back(0);
+    // ii.emplace_back(2);
     // multi.setDomainIndices(2,ii);
 
     FunctionValues values(domain);
@@ -244,12 +244,12 @@ public:
   void test_calc() {
     multi.setDomainIndex(0, 0);
     std::vector<size_t> ii;
-    ii.push_back(0);
-    ii.push_back(1);
+    ii.emplace_back(0);
+    ii.emplace_back(1);
     multi.setDomainIndices(1, ii);
     ii.clear();
-    ii.push_back(0);
-    ii.push_back(2);
+    ii.emplace_back(0);
+    ii.emplace_back(2);
     multi.setDomainIndices(2, ii);
 
     FunctionValues values(domain);

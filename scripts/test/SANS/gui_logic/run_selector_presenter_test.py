@@ -6,15 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
-from sans.gui_logic.presenter.run_selector_presenter import RunSelectorPresenter
-from sans.gui_logic.models.run_selection import RunSelection
-from sans.gui_logic.models.run_finder import SummableRunFinder
-from sans.gui_logic.models.run_file import SummableRunFile
-from ui.sans_isis.run_selector_widget import RunSelectorWidget
-from fake_signal import FakeSignal
-
 from assert_called import assert_called
+from fake_signal import FakeSignal
+from mantid.py3compat import mock
+from sans.gui_logic.models.RunSelectionModel import RunSelectionModel
+from sans.gui_logic.models.run_file import SummableRunFile
+from sans.gui_logic.models.run_finder import SummableRunFinder
+from sans.gui_logic.presenter.RunSelectorPresenter import RunSelectorPresenter
+from ui.sans_isis.run_selector_widget import RunSelectorWidget
 
 
 class RunSelectorPresenterTest(unittest.TestCase):
@@ -34,7 +33,7 @@ class RunSelectorPresenterTest(unittest.TestCase):
         return mock_view
 
     def _make_mock_selection(self):
-        return mock.create_autospec(RunSelection)
+        return mock.create_autospec(RunSelectionModel)
 
     def _make_mock_finder(self):
         return mock.create_autospec(SummableRunFinder)

@@ -113,6 +113,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesMuon
                      ${PLUGINS_DIR}
                    OSX_INSTALL_RPATH
                      @loader_path/../../Contents/MacOS
+                     @loader_path/../../Contents/Frameworks
                      @loader_path/../../plugins/qt4
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/")
@@ -151,10 +152,21 @@ set(
 set(
   INC_FILES
   ALCBaselineModellingModel.h
+  ALCBaselineModellingPresenter.h
+  ALCBaselineModellingView.h
+  ALCDataLoadingPresenter.h
   ALCDataLoadingView.h
+  ALCInterface.h
   ALCLatestFileFinder.h
   ALCPeakFittingModel.h
+  ALCPeakFittingPresenter.h
   ALCPeakFittingView.h
+  DllConfig.h
+  IALCBaselineModellingModel.h
+  IALCBaselineModellingView.h
+  IALCDataLoadingView.h
+  IALCPeakFittingModel.h
+  IALCPeakFittingView.h
 )
 
 set(
@@ -177,15 +189,15 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesMuon
                      ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      ${POCO_LIBRARIES}
-					 ${PYTHON_LIBRARIES}
+                     ${PYTHON_LIBRARIES}
                      ${Boost_LIBRARIES}
                      ${JSONCPP_LIBRARIES}
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
-					 MantidQtWidgetsMplCpp
+     		     MantidQtWidgetsMplCpp
                      MantidQtWidgetsPlotting
                    INSTALL_DIR_BASE
-                     ${PLUGINS_DIR}
+                     ${WORKBENCH_PLUGINS_DIR}
                    OSX_INSTALL_RPATH
                      @loader_path/../../Contents/MacOS
                      @loader_path/../../plugins/qt5

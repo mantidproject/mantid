@@ -43,8 +43,8 @@
 #include <utility>
 #include <vector>
 
-using Poco::XML::DOMParser;
 using Poco::XML::Document;
+using Poco::XML::DOMParser;
 using Poco::XML::Element;
 
 namespace Mantid {
@@ -196,7 +196,7 @@ void LoadSpice2D::exec() {
   // it tests if there is metadata tagged with the wing detector
   // if so, puts the detector in the right angle
   if (metadata.find("Motor_Positions/det_west_wing_rot") != metadata.end()) {
-    double angle = boost::lexical_cast<double>(
+    auto angle = boost::lexical_cast<double>(
         metadata["Motor_Positions/det_west_wing_rot"]);
     rotateDetector(-angle);
   }
@@ -341,7 +341,7 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
     std::stringstream iss(data_str);
     double number;
     while (iss >> number) {
-      data.push_back(static_cast<int>(number));
+      data.emplace_back(static_cast<int>(number));
     }
     g_log.debug() << "Detector XPath: " << detectorXpath
                   << " parsed. Total size of data processed up to now = "
@@ -441,13 +441,13 @@ void LoadSpice2D::setBeamTrapRunProperty(
   double trapDiameterInUse = trapDiameters[1];
 
   std::vector<double> trapMotorPositions;
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_25mm"]));
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_50mm"]));
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_76mm"]));
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_101mm"]));
 
   // Check how many traps are in use (store indexes):
@@ -455,7 +455,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
   for (size_t i = 0; i < trapMotorPositions.size(); i++) {
     if (trapMotorPositions[i] > 26.0) {
       // Resting positions are below 25. Make sure we have one trap in use!
-      trapIndexInUse.push_back(i);
+      trapIndexInUse.emplace_back(i);
     }
   }
 
@@ -472,7 +472,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
                 << "\n";
 
   // The maximum value for the trapDiametersInUse is the trap in use
-  std::vector<double>::iterator trapDiameterInUseIt =
+  auto trapDiameterInUseIt =
       std::max_element(trapDiametersInUse.begin(), trapDiametersInUse.end());
   if (trapDiameterInUseIt != trapDiametersInUse.end())
     trapDiameterInUse = *trapDiameterInUseIt;

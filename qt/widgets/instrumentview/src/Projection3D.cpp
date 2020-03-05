@@ -227,7 +227,7 @@ void Projection3D::getSelectedDetectors(std::vector<size_t> &detIndices) {
     m_viewport.transform(pos);
     if (pos.X() >= xLeft && pos.X() <= xRight && pos.Y() >= yBottom &&
         pos.Y() <= yTop) {
-      detIndices.push_back(i);
+      detIndices.emplace_back(i);
     }
   }
 }
@@ -276,7 +276,7 @@ void Projection3D::getMaskedDetectors(std::vector<size_t> &detIndices) const {
     if (pos.Z() < zmin || pos.Z() > zmax)
       continue;
     if (m_maskShapes.isMasked(pos.X(), pos.Y())) {
-      detIndices.push_back(i);
+      detIndices.emplace_back(i);
     }
   }
 }

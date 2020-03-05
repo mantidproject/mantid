@@ -5,7 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateTransmissionWorkspace.h"
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
+#include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -45,7 +45,7 @@ void CreateTransmissionWorkspace::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
                       PropertyMode::Mandatory, inputValidator->clone()),
-                  "First transmission run, or the low wavelength transmision "
+                  "First transmission run, or the low wavelength transmission "
                   "run if SecondTransmissionRun is also provided.");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(

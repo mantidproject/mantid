@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -27,8 +28,8 @@
 
 #include <boost/math/special_functions/pow.hpp>
 
-using Mantid::Geometry::rad2deg;
 using boost::math::pow;
+using Mantid::Geometry::rad2deg;
 
 namespace {
 /**
@@ -311,12 +312,55 @@ void SofQWNormalisedPolygon::init() {
   SofQW::createCommonInputProperties(*this);
 }
 
+/** Checks that the input workspace and table have compatible dimensions
+ * @return a map with the corresponding error messages
+ * describing the problem with the property
+ */
+std::map<std::string, std::string> SofQWNormalisedPolygon::validateInputs() {
+  std::map<std::string, std::string> result;
+  API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  if (!inputWS) {
+    result["InputWorkspace"] = "InputWorkspace is of Incorrect type. Please "
+                               "provide a MatrixWorkspace as the "
+                               "InputWorkspace";
+  }
+  TableWorkspace_sptr tableWS = getProperty("DetectorTwoThetaRanges");
+  if (tableWS) {
+    // The table should have three columns
+    if (tableWS->columnCount() != 3) {
+      result["DetectorTwoThetaRanges"] =
+          "DetectorTwoThetaRanges requires 3 columns";
+    }
+    // The first column should be of type int
+    else if (!tableWS->getColumn(0)->isType<int>()) {
+      result["DetectorTwoThetaRanges"] =
+          "The first column of DetectorTwoThetaRanges should be of type int";
+    }
+    // The second column should be of type double
+    else if (!tableWS->getColumn(1)->isType<double>()) {
+      result["DetectorTwoThetaRanges"] =
+          "The second column of DetectorTwoThetaRanges should be of type "
+          "double";
+    }
+    // The third column should be of type double.
+    else if (!tableWS->getColumn(2)->isType<double>()) {
+      result["DetectorTwoThetaRanges"] =
+          "The third column of DetectorTwoThetaRanges should be of type double";
+    }
+    // Table and workspace should have the same number of detectors.
+    else if (tableWS->rowCount() != inputWS->getNumberHistograms()) {
+      result["DetectorTwoThetaRanges"] =
+          "The table and workspace do not have the same number of detectors";
+    }
+  }
+  return result;
+}
+
 /**
  * Execute the algorithm.
  */
 void SofQWNormalisedPolygon::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-
   // Compute input caches
   m_EmodeProperties.initCachedValues(*inputWS, this);
 
@@ -417,6 +461,7 @@ void SofQWNormalisedPolygon::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
+  FractionalRebinning::finalizeFractionalRebin(*outputWS);
   outputWS->finalize();
   FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress.get());
 

@@ -32,24 +32,24 @@ PeakShapeEllipsoidFactory::create(const std::string &source) const {
 
       const std::string algorithmName(root["algorithm_name"].asString());
       const int algorithmVersion(root["algorithm_version"].asInt());
-      const SpecialCoordinateSystem frame(
+      const auto frame(
           static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
       std::vector<double> abcRadii, abcRadiiBackgroundInner,
           abcRadiiBackgroundOuter;
-      abcRadii.push_back(root["radius0"].asDouble());
-      abcRadii.push_back(root["radius1"].asDouble());
-      abcRadii.push_back(root["radius2"].asDouble());
-      abcRadiiBackgroundInner.push_back(
+      abcRadii.emplace_back(root["radius0"].asDouble());
+      abcRadii.emplace_back(root["radius1"].asDouble());
+      abcRadii.emplace_back(root["radius2"].asDouble());
+      abcRadiiBackgroundInner.emplace_back(
           root["background_inner_radius0"].asDouble());
-      abcRadiiBackgroundInner.push_back(
+      abcRadiiBackgroundInner.emplace_back(
           root["background_inner_radius1"].asDouble());
-      abcRadiiBackgroundInner.push_back(
+      abcRadiiBackgroundInner.emplace_back(
           root["background_inner_radius2"].asDouble());
-      abcRadiiBackgroundOuter.push_back(
+      abcRadiiBackgroundOuter.emplace_back(
           root["background_outer_radius0"].asDouble());
-      abcRadiiBackgroundOuter.push_back(
+      abcRadiiBackgroundOuter.emplace_back(
           root["background_outer_radius1"].asDouble());
-      abcRadiiBackgroundOuter.push_back(
+      abcRadiiBackgroundOuter.emplace_back(
           root["background_outer_radius2"].asDouble());
 
       std::vector<V3D> directions(3);

@@ -113,7 +113,7 @@ void PoldiSourceSpectrum::setSpectrum(Parameter_sptr spectrumParameter) {
   }
 
   try {
-    const FitParameter &spectrum = spectrumParameter->value<FitParameter>();
+    const auto &spectrum = spectrumParameter->value<FitParameter>();
 
     m_spectrum = spectrum.getLookUpTable();
   } catch (...) {

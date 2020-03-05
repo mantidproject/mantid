@@ -10,6 +10,7 @@
 #include "ConvFitModel.h"
 #include "IndirectFitAnalysisTab.h"
 #include "IndirectSpectrumSelectionPresenter.h"
+#include "ParameterEstimation.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -29,7 +30,9 @@ public:
   bool hasResolution() const override { return true; }
 
 protected slots:
-  void setModelResolution(const QString &resolutionName);
+  void setModelResolution(const std::string &resolutionName);
+  void setModelResolution(const std::string &resolutionName,
+                          TableDatasetIndex index);
   void runClicked();
   void fitFunctionChanged();
 
@@ -40,12 +43,14 @@ protected:
 private:
   void setupFitTab() override;
   void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
+  EstimationDataSelector getEstimationDataSelector() const override;
+  void setStartAndEndHidden(bool hidden);
 
   std::string fitTypeString() const;
 
   std::unique_ptr<Ui::ConvFit> m_uiForm;
   // ShortHand Naming for fit functions
-  QHash<QString, std::string> m_fitStrings;
+  std::unordered_map<std::string, std::string> m_fitStrings;
   ConvFitModel *m_convFittingModel;
 };
 

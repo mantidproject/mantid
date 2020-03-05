@@ -100,7 +100,7 @@ public:
     const std::string name = "My testing application name";
     const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
     TestableErrorReporter errorService(name, upTime, "0", true, "name", "email",
-                                       "textBox", "fileHash");
+                                       "textBox", "stacktrace");
     const std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
@@ -111,7 +111,7 @@ public:
         "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
         "osArch",   "osName",      "osReadable", "osVersion",  "uid",
         "facility", "upTime",      "exitCode",   "textBox",    "name",
-        "email",    "fileHash"};
+        "email",    "stacktrace"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
                  std::find(members.begin(), members.end(), expectedMember) !=
@@ -124,14 +124,14 @@ public:
     TS_ASSERT_EQUALS(root["name"].asString(), "name");
     TS_ASSERT_EQUALS(root["email"].asString(), "email");
     TS_ASSERT_EQUALS(root["textBox"].asString(), "textBox");
-    TS_ASSERT_EQUALS(root["fileHash"].asString(), "fileHash");
+    TS_ASSERT_EQUALS(root["stacktrace"].asString(), "stacktrace");
   }
 
   void test_errorMessageWithNoShareAndRecoveryFileHash() {
     const std::string name = "My testing application name";
     const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
     TestableErrorReporter errorService(name, upTime, "0", false, "name",
-                                       "email", "textBox", "fileHash");
+                                       "email", "textBox", "stacktrace");
     const std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
@@ -142,7 +142,7 @@ public:
         "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
         "osArch",   "osName",      "osReadable", "osVersion",  "uid",
         "facility", "upTime",      "exitCode",   "textBox",    "name",
-        "email",    "fileHash"};
+        "email",    "stacktrace"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
                  std::find(members.begin(), members.end(), expectedMember) !=
@@ -155,7 +155,7 @@ public:
     TS_ASSERT_EQUALS(root["name"].asString(), "");
     TS_ASSERT_EQUALS(root["email"].asString(), "");
     TS_ASSERT_EQUALS(root["textBox"].asString(), "");
-    TS_ASSERT_EQUALS(root["fileHash"].asString(), "");
+    TS_ASSERT_EQUALS(root["stacktrace"].asString(), "");
   }
 };
 

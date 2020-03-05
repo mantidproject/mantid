@@ -34,13 +34,13 @@ public:
 
   void testVectorConstructor() {
     std::vector<Group_const_sptr> groups;
-    groups.push_back(GroupFactory::create<CyclicGroup>("-x,-y,-z"));
-    groups.push_back(GroupFactory::create<CyclicGroup>("x,-y,z"));
+    groups.emplace_back(GroupFactory::create<CyclicGroup>("-x,-y,-z"));
+    groups.emplace_back(GroupFactory::create<CyclicGroup>("x,-y,z"));
 
     TS_ASSERT_THROWS_NOTHING(ProductOfCyclicGroups group(groups));
 
     Group_const_sptr null;
-    groups.push_back(null);
+    groups.emplace_back(null);
 
     TS_ASSERT_THROWS_ANYTHING(ProductOfCyclicGroups group(groups));
   }
@@ -71,8 +71,8 @@ public:
     TestableProductOfCyclicGroups group;
 
     std::vector<Group_const_sptr> groups;
-    groups.push_back(GroupFactory::create<CyclicGroup>("-x,-y,-z"));
-    groups.push_back(GroupFactory::create<CyclicGroup>("x,-y,z"));
+    groups.emplace_back(GroupFactory::create<CyclicGroup>("-x,-y,-z"));
+    groups.emplace_back(GroupFactory::create<CyclicGroup>("x,-y,z"));
 
     Group_const_sptr productGroup = group.getProductOfCyclicGroups(groups);
 

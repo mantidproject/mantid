@@ -6,16 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
+import json
+import os
 import tempfile
 import unittest
-import os
-import json
-
-import mantid
 
 from mantid.py3compat import mock
 from sans.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
-from sans.test_helper.mock_objects import (create_run_tab_presenter_mock, FakeState, create_mock_settings_diagnostic_tab)
+from sans.state.Serializer import Serializer
+from sans.test_helper.mock_objects import (create_run_tab_presenter_mock, FakeState,
+                                           create_mock_settings_diagnostic_tab)
 
 
 class SettingsDiagnosticPresenterTest(unittest.TestCase):
@@ -59,9 +59,8 @@ class SettingsDiagnosticPresenterTest(unittest.TestCase):
         # Assert
         self.assertTrue(os.path.exists(dummy_file_path))
 
-        with open(dummy_file_path) as f:
-            data = json.load(f)
-        self.assertEqual(data,  "dummy_state")
+        obj = Serializer.load_file(dummy_file_path)
+        self.assertEqual("dummy_state", obj.dummy_state)
 
         if os.path.exists(dummy_file_path):
             os.remove(dummy_file_path)

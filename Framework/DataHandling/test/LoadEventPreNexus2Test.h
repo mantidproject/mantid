@@ -4,13 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-/*
- * LoadEventPreNexusTest.h
- *
- *  Created on: Jun 23, 2010
- *      Author: janik zikovsky
- */
-
 #ifndef LOADEVENTPRENEXUSTEST_H_
 #define LOADEVENTPRENEXUSTEST_H_
 
@@ -49,7 +42,7 @@ using std::vector;
 //==========================================================================================
 class LoadEventPreNexus2Test : public CxxTest::TestSuite {
 public:
-  LoadEventPreNexus2 *eventLoader;
+  std::unique_ptr<LoadEventPreNexus2> eventLoader;
 
   static LoadEventPreNexus2Test *createSuite() {
     return new LoadEventPreNexus2Test();
@@ -59,7 +52,7 @@ public:
   LoadEventPreNexus2Test() {}
 
   void setUp() override {
-    eventLoader = new LoadEventPreNexus2();
+    eventLoader = std::make_unique<LoadEventPreNexus2>();
     eventLoader->initialize();
   }
 
@@ -167,6 +160,12 @@ public:
 
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs"));
+    /*
+     * LoadEventPreNexusTest.h
+     *
+     *  Created on: Jun 23, 2010
+     *      Author: janik zikovsky
+     */
 
     // The # of events = size of the file / 8 bytes (per event)
     // This fails cause of errors in events

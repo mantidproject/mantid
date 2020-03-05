@@ -93,7 +93,7 @@ set(QTIPLOT_SRCS
     src/PluginFit.cpp
     src/PolynomFitDialog.cpp
     src/PolynomialFit.cpp
-    src/Process.cpp
+    src/Processes.cpp
     src/ProjectRecovery.cpp
     src/ProjectSaveView.cpp
     src/ProjectSerialiser.cpp
@@ -176,6 +176,7 @@ set(MANTID_SRCS
     src/Mantid/AlgorithmMonitor.cpp
     src/Mantid/ErrorBarSettings.cpp
     src/Mantid/FirstTimeSetup.cpp
+    src/Mantid/ReportUsageDisableDialog.cpp
     src/Mantid/FitParameterTie.cpp
     src/Mantid/IFunctionWrapper.cpp
     src/Mantid/ImportWorkspaceDlg.cpp
@@ -301,7 +302,7 @@ set(QTIPLOT_HDRS
     src/PluginFit.h
     src/PolynomFitDialog.h
     src/PolynomialFit.h
-    src/Process.h
+    src/Processes.h
     src/ProjectRecovery.h
     src/ProjectSerialiser.h
     src/ProjectSaveView.h
@@ -373,6 +374,7 @@ set(MANTID_HDRS
     src/Mantid/AlgorithmMonitor.h
     src/Mantid/ErrorBarSettings.h
     src/Mantid/FirstTimeSetup.h
+    src/Mantid/ReportUsageDisableDialog.h
     src/Mantid/FitParameterTie.h
     src/Mantid/IFunctionWrapper.h
     src/Mantid/ImportWorkspaceDlg.h
@@ -418,7 +420,6 @@ include(UseQt4)
 # Do the sip generation.
 #
 
-include_directories(${PYTHON_INCLUDE_PATH})
 
 # We need to manually add all the headers that are in qti.sip so that the
 # dependencies are known to CMake
@@ -457,21 +458,23 @@ set(MANTIDQTPYTHON_SIP_INCLUDES
     ${CMAKE_CURRENT_BINARY_DIR}/../qt/python/mantidqtpython
     -I
     ${CMAKE_CURRENT_SOURCE_DIR}/../qt/python/mantidqtpython)
+if ( USE_PRIVATE_SIPPYQT4 )
+  set ( _sip_include_dir ${PYQT4_SIP_INCLUDE_DIR} )
+  set ( _sip_executable ${PYQT4_SIP_EXECUTABLE} )
+else ()
+  set ( _sip_include_dir ${SIP_INCLUDE_DIR} )
+  set ( _sip_executable ${SIP_EXECUTABLE} )
+endif ()
+
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${SIP_SRC_AUTO}
-                   COMMAND ${SIP_EXECUTABLE} -I ${PYQT4_SIP_DIR}
+                   COMMAND ${_sip_executable} -I ${PYQT4_SIP_DIR}
                            ${MANTIDQTPYTHON_SIP_INCLUDES} ${PYQT4_SIP_FLAGS} -c
                            ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -o ${SIP_SPEC}
-                   DEPENDS ${SIP_INCLUDE_DIR}/sip.h
-                           src/qti.sip
+                   DEPENDS src/qti.sip
                            ${QTI_SIP_HDRS}
                            ../qt/python/mantidqtpython/mantidqtpython_def.sip
                    COMMENT "Generating python bindings using sip")
 
-# Needed for sip.h header that can end up in a different place to to the main
-# Python include directory
-include_directories(SYSTEM ${SIP_INCLUDE_DIR})
-# Needed for sip generated files to find includes in src
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 #
 # Specify the files that we need to pass to Qt macros
@@ -602,6 +605,7 @@ set(MANTID_MOC_FILES
     src/Mantid/AlgorithmMonitor.h
     src/Mantid/ErrorBarSettings.h
     src/Mantid/FirstTimeSetup.h
+    src/Mantid/ReportUsageDisableDialog.h
     src/Mantid/IFunctionWrapper.h
     src/Mantid/ImportWorkspaceDlg.h
     src/Mantid/LabelToolLogValuesDialog.h
@@ -668,9 +672,6 @@ enable_precompiled_headers(src/PrecompiledHeader.h ALL_SRC)
 
 qt4_wrap_ui(UI_HDRS ${UI_FILES})
 
-# The generated ui headers will go here:
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 #
 # Internal icon links
 #
@@ -684,19 +685,16 @@ qt4_add_resources(RES_FILES
 #
 # Add the dependencies
 #
-
+# This must come before ParaView so Python gets picked up from our third-party on Windows
+# and not the one Paraview is built with. Warnings from our external repo are all ignored
+# but the ones built by ParaView are not.
+include_directories(SYSTEM ${_sip_include_dir} ${PYTHON_INCLUDE_PATH})
 if(MAKE_VATES)
   include(${PARAVIEW_USE_FILE})
 endif()
 
-include_directories(SYSTEM ${MUPARSER_INCLUDE_DIR})
-include_directories(${ZLIB_INCLUDE_DIRS})
-
-include_directories(SYSTEM ${QWT5_INCLUDE_DIR})
 
 find_package(QwtPlot3d REQUIRED)
-include_directories(SYSTEM ${QWTPLOT3D_INCLUDE_DIR})
-
 find_package(QScintillaQt4 REQUIRED)
 
 #
@@ -798,16 +796,32 @@ add_executable(MantidPlot
                ${CONFIG_RESET_SCRIPT_FILE}
                ${IPYTHON_INSTALL_FILES})
 
-target_include_directories(MantidPlot
-                           PRIVATE src
-                                   src/lib/include
-                                   src/lib/3rdparty/qtcolorpicker/src
-                                   ../qt/widgets/common/inc
-                                   ../qt/widgets/instrumentview/inc
-                                   ../qt/widgets/sliceviewer/inc
-                                   ../qt/widgets/spectrumviewer/inc
-                                   ../qt/widgets/factory/inc
-                                   ../Framework/PythonInterface/inc)
+
+# Sip must be before Python for the case of our private sip module for RHEL
+# so that it gets picked up before the system one if it exists
+target_include_directories(MantidPlot SYSTEM PRIVATE
+  ${MUPARSER_INCLUDE_DIR}
+  ${ZLIB_INCLUDE_DIRS}
+  ${QWT5_INCLUDE_DIR}
+  ${QWTPLOT3D_INCLUDE_DIR}
+)
+target_include_directories(MantidPlot PRIVATE
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  src
+  src/lib/include
+  src/lib/3rdparty/qtcolorpicker/src
+  ../qt/widgets/common/inc
+  ../qt/widgets/instrumentview/inc
+  ../qt/widgets/sliceviewer/inc
+  ../qt/widgets/spectrumviewer/inc
+  ../qt/widgets/factory/inc
+  ../Framework/PythonInterface/inc
+)
+
+# GCC 8 onwards needs to disable functional casting at the Python interface
+target_compile_options( MantidPlot PRIVATE
+  $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,8.0>>:-Wno-cast-function-type> )
 
 # Library dependencies
 target_link_libraries(MantidPlot
@@ -856,10 +870,10 @@ endif()
 # Plugin dependencies
 add_dependencies(MantidPlot mantidqtpython CompilePyUI)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(
     MantidPlot
-    PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Libraries")
+    PROPERTIES INSTALL_RPATH "@executable_path;@executable_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   if(MAKE_VATES)
     set_target_properties(
@@ -879,22 +893,9 @@ set_target_properties(MantidPlot PROPERTIES FOLDER "Qt4")
 #
 # Custom Info.plist file for OS X
 #
-if(APPLE)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(MAC_BUNDLE_EXECUTABLE Mantid_osx_launcher)
-  # Setting the CFBundleIdentifer attribute on OS X 10.6 (SL) and before causes
-  # problems with trying to install the package on the same machine as it was
-  # built. It tries to relocate the package to the build directory because the
-  # bundle identifiers match. Mountain Lion requires the attribute to avoid
-  # crashes when accessing certain system dialogs from Qt. The ideal would be to
-  # pass the --no-relocate option to packagemaker but we can't control that so
-  # only set the identifier for 10.7 and above
-  #
-  # This can disappear when if/when we move to a drag-n-drop package.
-  if(OSX_VERSION VERSION_GREATER 10.7 OR OSX_VERSION VERSION_EQUAL 10.7)
-    set(MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidPlot")
-  else()
-    set(MAC_BUNDLE_IDENTIFIER "")
-  endif()
+  set(MAC_BUNDLE_IDENTIFIER "org.mantidproject.MantidPlot")
   set(MAC_BUNDLE_ICON MantidPlot.icns)
   set(MAC_BUNDLE_NAME MantidPlot)
   configure_file(
@@ -1003,24 +1004,22 @@ install(FILES ${CONFIG_RESET_SCRIPT} DESTINATION ${BIN_DIR})
 
 # file make_package.rb contains hard-coded path to the libraries this causes
 # fail of the installation with macports therefore MACPORTS option is introduced
-if(APPLE)
-  if(OSX_VERSION VERSION_LESS 10.9)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake @ONLY)
-
-    install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake)
-  elseif(MACPORTS)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  if(MACPORTS)
     install(FILES package_python_macports.py DESTINATION MantidPlot.app/)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/FixMacportsBundle.cmake.in
                    ${CMAKE_CURRENT_BINARY_DIR}/FixMacportsBundle.cmake @ONLY)
     install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMacportsBundle.cmake)
   else()
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/make_package.rb.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb @ONLY)
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb
-            DESTINATION MantidPlot.app/)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/FixMavericksBundle.cmake.in
-                   ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake @ONLY)
-    install(SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake)
+    install (CODE "
+      execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
+                              \${CMAKE_INSTALL_PREFIX}/MantidPlot.app ${PYTHON_EXECUTABLE} ${ParaView_DIR}
+                      RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
+      if(NOT install_name_tool_result EQUAL 0)
+        message(\"\${_out}\")
+        message(FATAL_ERROR \"Package script failed!!!\n\")
+      endif()
+  ")
+
   endif()
 endif()

@@ -54,7 +54,7 @@ class MaxEntPresenter(object):
         else:
             self.view.setRun("")
 
-        if run is not "None":
+        if run != "None":
             final_options.append(run)
         self.view.addItems(final_options)
         start = int(

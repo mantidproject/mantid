@@ -56,8 +56,8 @@ void CalculateUMatrix::exec() {
   double alpha = this->getProperty("alpha");
   double beta = this->getProperty("beta");
   double gamma = this->getProperty("gamma");
-  OrientedLattice o(a, b, c, alpha, beta, gamma);
-  Matrix<double> B = o.getB();
+  auto lattice = std::make_unique<OrientedLattice>(a, b, c, alpha, beta, gamma);
+  Matrix<double> B = lattice->getB();
 
   PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
   if (!ws)
@@ -135,9 +135,9 @@ void CalculateUMatrix::exec() {
       Eval[0][0], Eval[1][0], Eval[2][0],
       Eval[3][0]); // the first column corresponds to the highest eigenvalue
   DblMatrix U(qR.getRotation());
-  o.setU(U);
+  lattice->setU(U);
 
-  ws->mutableSample().setOrientedLattice(&o);
+  ws->mutableSample().setOrientedLattice(std::move(lattice));
 }
 
 } // namespace Crystal

@@ -29,19 +29,27 @@ class IndexSatellitePeaksTest(unittest.TestCase):
         indexed_peaks = IndexSatellitePeaks(self._nuclear_peaks, self._peaks,
                                             Tolerance=0.1,
                                             ClusterThreshold=1.5, NumOfQs=-1)
-        index_values = np.array(indexed_peaks.column("m1"))
 
+        index_values = []
+        for peak in indexed_peaks:
+            mnp = peak.getIntMNP()
+            self.assertAlmostEqual(0.0, mnp[1])
+            self.assertAlmostEqual(0.0, mnp[2])
+            index_values.append(mnp[0])
         npt.assert_array_equal(index_values, expected_values)
-        self.assertRaises(RuntimeError, indexed_peaks.column, "m2")
 
     def test_exec_with_number_of_qs(self):
         expected_values = np.array([-1, -1, 1, 1])
         indexed_peaks = IndexSatellitePeaks(self._nuclear_peaks, self._peaks,
                                             Tolerance=0.1, NumOfQs=2)
-        index_values = np.array(indexed_peaks.column("m1"))
 
+        index_values = []
+        for peak in indexed_peaks:
+            mnp = peak.getIntMNP()
+            self.assertAlmostEqual(0.0, mnp[1])
+            self.assertAlmostEqual(0.0, mnp[2])
+            index_values.append(mnp[0])
         npt.assert_array_equal(index_values, expected_values)
-        self.assertRaises(RuntimeError, indexed_peaks.column, "m2")
 
 
 if __name__ == "__main__":

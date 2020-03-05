@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/StructureFactorCalculator.h"
 
-#include <boost/bind.hpp>
-
 namespace Mantid {
 namespace Geometry {
 
@@ -47,9 +45,9 @@ double StructureFactorCalculator::getFSquared(const Kernel::V3D &hkl) const {
 std::vector<StructureFactor>
 StructureFactorCalculator::getFs(const std::vector<Kernel::V3D> &hkls) const {
   std::vector<StructureFactor> structureFactors(hkls.size());
-
+  using namespace std::placeholders;
   std::transform(hkls.begin(), hkls.end(), structureFactors.begin(),
-                 boost::bind(&StructureFactorCalculator::getF, this, _1));
+                 std::bind(&StructureFactorCalculator::getF, this, _1));
 
   return structureFactors;
 }
@@ -67,10 +65,9 @@ StructureFactorCalculator::getFs(const std::vector<Kernel::V3D> &hkls) const {
 std::vector<double> StructureFactorCalculator::getFsSquared(
     const std::vector<Kernel::V3D> &hkls) const {
   std::vector<double> fSquareds(hkls.size());
-
-  std::transform(
-      hkls.begin(), hkls.end(), fSquareds.begin(),
-      boost::bind(&StructureFactorCalculator::getFSquared, this, _1));
+  using namespace std::placeholders;
+  std::transform(hkls.begin(), hkls.end(), fSquareds.begin(),
+                 std::bind(&StructureFactorCalculator::getFSquared, this, _1));
 
   return fSquareds;
 }

@@ -965,7 +965,8 @@ void MWRunFiles::setReadOnly(bool readOnly) {
 
 /**
  * Turn on/off the display of the red validator star.
- * Validation is still performed, this just controls the display of the result.
+ * Validation is still performed, this just controls the display of the
+ * result.
  * @param display :: [input] whether to show validator result or not
  */
 void MWRunFiles::setValidatorDisplay(bool display) {

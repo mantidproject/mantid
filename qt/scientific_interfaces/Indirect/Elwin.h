@@ -24,15 +24,14 @@ private slots:
   void newInputFiles();
   void newPreviewFileSelected(int index);
   void plotInput();
+  void handlePreviewSpectrumChanged();
   void twoRanges(QtProperty *prop, bool /*val*/);
   void minChanged(double val);
   void maxChanged(double val);
   void updateRS(QtProperty *prop, double val);
   void unGroupInput(bool error);
-  void updateAvailablePlotSpectra();
   void runClicked();
   void saveClicked();
-  void plotClicked();
   void updateIntegrationRange();
 
 private:
@@ -51,18 +50,9 @@ private:
   std::vector<std::string> getOutputWorkspaceNames();
   QString getOutputBasename();
 
-  void updatePlotSpectrumOptions();
-  void updateAvailablePlotWorkspaces();
-  QString getPlotWorkspaceName() const;
-  void setPlotSpectrumValue(int value);
-  void setPlotSpectrumMinMax(int minimum, int maximum);
-  int getPlotSpectrumIndex() const;
-
   void setRunIsRunning(const bool &running);
-  void setPlotResultIsPlotting(const bool &plotting);
   void setButtonsEnabled(const bool &enabled);
   void setRunEnabled(const bool &enabled);
-  void setPlotResultEnabled(const bool &enabled);
   void setSaveResultEnabled(const bool &enabled);
 
   Ui::Elwin m_uiForm;

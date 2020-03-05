@@ -566,9 +566,9 @@ private:
     for (size_t i = 0; i < nDetectors; ++i) {
       std::vector<V3D> timePositions;
       for (size_t j = 0; j < nTimeIndexes; ++j) {
-        timePositions.push_back(V3D(double(i), double(j), 1.0));
+        timePositions.emplace_back(V3D(double(i), double(j), 1.0));
       }
-      positions.push_back(timePositions);
+      positions.emplace_back(timePositions);
     }
   }
 
@@ -576,15 +576,15 @@ private:
     for (size_t i = 0; i < nDetectors; ++i) {
       std::vector<Quat> timeRotations;
       for (size_t j = 0; j < nTimeIndexes; ++j) {
-        timeRotations.push_back(Quat(double(i), double(j), 1.0, 2.0));
+        timeRotations.emplace_back(Quat(double(i), double(j), 1.0, 2.0));
       }
-      rotations.push_back(timeRotations);
+      rotations.emplace_back(timeRotations);
     }
   }
 
   void initialiseRelativeRotations(size_t nTimeIndexes) {
     for (size_t i = 0; i < nTimeIndexes; ++i) {
-      relativeRotations.push_back(double(i) * 30.0);
+      relativeRotations.emplace_back(double(i) * 30.0);
     }
   }
 
@@ -621,7 +621,7 @@ public:
 
     std::vector<std::pair<DateAndTime, DateAndTime>> timeRanges;
     for (size_t i = 0; i < nTimeIndexes; ++i) {
-      timeRanges.push_back(std::pair<DateAndTime, DateAndTime>(
+      timeRanges.emplace_back(std::pair<DateAndTime, DateAndTime>(
           DateAndTime(i * 2), DateAndTime(i * 2 + 1)));
     }
 

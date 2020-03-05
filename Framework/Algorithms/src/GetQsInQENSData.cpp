@@ -113,8 +113,9 @@ MantidVec GetQsInQENSData::extractQValues(
       // Convert Q-values to point values.
       qValues.pop_back();
       qValues.erase(qValues.begin());
+      using std::placeholders::_1;
       std::transform(qValues.begin(), qValues.end(), qValues.begin(),
-                     std::bind2nd(std::divides<double>(), 2.0));
+                     std::bind(std::divides<double>(), _1, 2.0));
     }
   } else {
 

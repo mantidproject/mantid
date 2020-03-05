@@ -29,12 +29,12 @@ using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
 using Mantid::DataObjects::TableWorkspace;
 using Mantid::DataObjects::TableWorkspace_sptr;
+using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
 using MantidQt::CustomInterfaces::Muon::AnalysisOptions;
 using MantidQt::CustomInterfaces::Muon::DeadTimesType;
 using MantidQt::CustomInterfaces::Muon::ItemType;
 using MantidQt::CustomInterfaces::Muon::LoadResult;
 using MantidQt::CustomInterfaces::Muon::PlotType;
-using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
 
 /// Inherits from class under test so that protected methods can be tested
 class TestDataLoader : public MuonAnalysisDataLoader {

@@ -8,10 +8,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
+import numpy as np
 
 from mantid.kernel import DateAndTime
 from mantid.api import EventType
 from mantid.dataobjects import EventList
+
+gps_epoch_plus_42_nanoseconds = np.datetime64('1990-01-01T00:00:00.000000042Z', 'ns')
 
 class EventListTest(unittest.TestCase):
 
@@ -33,7 +36,17 @@ class EventListTest(unittest.TestCase):
         self.assertEqual(el.getEventType(), EventType.TOF)
         self.assertEqual(el.getTofs()[0], float(0.123))
         self.assertEqual(el.getPulseTimes()[0], DateAndTime(42))
+        self.assertEqual(el.getPulseTimesAsNumpy()[0], gps_epoch_plus_42_nanoseconds)
 
+    def test_event_list_addWeightedEventQuickly(self):
+        el = EventList()
+        el.switchTo(EventType.WEIGHTED)
+        el.addWeightedEventQuickly(float(0.123), 1.0, 0.1, DateAndTime(42))
+        self.assertEqual(el.getEventType(), EventType.WEIGHTED)
+        self.assertEqual(el.getTofs()[0], float(0.123))
+        self.assertEqual(el.getPulseTimes()[0], DateAndTime(42))
+        self.assertEqual(el.getPulseTimesAsNumpy()[0], gps_epoch_plus_42_nanoseconds)
+        self.assertEqual(el.getWeights()[0], 1.0)
 
     def test_event_list_iadd(self):
         left = self.createRandomEventList(10)

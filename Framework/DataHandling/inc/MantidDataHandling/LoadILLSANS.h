@@ -60,6 +60,7 @@ private:
 
   void initWorkSpace(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD33(NeXus::NXEntry &, const std::string &);
+  void initWorkSpaceD16(NeXus::NXEntry &, const std::string &);
   void createEmptyWorkspace(const size_t, const size_t);
 
   size_t loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
@@ -75,7 +76,8 @@ private:
   Kernel::V3D getComponentPosition(const std::string &componentName);
   void loadMetaData(const NeXus::NXEntry &, const std::string &);
   std::string getInstrumentFilePath(const std::string &) const;
-  void rotateD22(double, const std::string &);
+  void rotateInstrument(double, const std::string &);
+  void placeD16(double, double, const std::string &);
   void adjustTOF();
   void moveSource();
 

@@ -10,7 +10,7 @@ import collections
 from mantid.api import mtd
 import numpy
 import numpy.testing
-from testhelpers import illhelpers, run_algorithm
+from testhelpers import assert_almost_equal, illhelpers, run_algorithm
 import unittest
 
 
@@ -154,7 +154,7 @@ class DirectILLReductionTest(unittest.TestCase):
         ws = mtd[outWSName]
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'DeltaE')
         xs = ws.readX(0)
-        numpy.testing.assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
+        assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
 
     def testHybridERebinningSingleUserRange(self):
         outWSName = 'outWS'
@@ -173,7 +173,7 @@ class DirectILLReductionTest(unittest.TestCase):
         ws = mtd[outWSName]
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'DeltaE')
         xs = ws.readX(0)
-        numpy.testing.assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
+        assert_almost_equal(xs, numpy.arange(E0, E1 + 0.01, dE))
 
     def testHybridERebinningUserConstrainedAutoRange(self):
         outWSName = 'outWS'
@@ -211,7 +211,7 @@ class DirectILLReductionTest(unittest.TestCase):
         ws = mtd[outWSName]
         self.assertEqual(ws.getAxis(0).getUnit().unitID(), 'MomentumTransfer')
         xs = ws.readX(0)
-        numpy.testing.assert_almost_equal(xs, numpy.arange(Q0, Q1, dQ))
+        assert_almost_equal(xs, numpy.arange(Q0, Q1, dQ))
 
     def testQRebinningBinWidthOnly(self):
         _add_natural_angle_step_parameter(self._TEST_WS_NAME)
@@ -231,7 +231,7 @@ class DirectILLReductionTest(unittest.TestCase):
         self.assertGreater(len(xs), 3)
         dx = xs[1:] - xs[:-1]
         # Bin widths may differ at the edges.
-        numpy.testing.assert_almost_equal(dx[1:-1], 0.1)
+        assert_almost_equal(dx[1:-1], 0.1)
 
     def _checkAlgorithmsInHistory(self, ws, *args):
         """Return true if algorithm names listed in *args are found in the

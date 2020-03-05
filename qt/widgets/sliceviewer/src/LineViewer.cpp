@@ -151,7 +151,7 @@ LineViewer::LineViewer(QWidget *parent)
                    SLOT(onToggleLogYAxis()));
 
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "SliceViewer->LineViewer", false);
+      FeatureType::Feature, {"SliceViewer", "LineViewer"}, false);
 }
 
 LineViewer::~LineViewer() {}
@@ -160,7 +160,7 @@ LineViewer::~LineViewer() {}
 /** With the workspace set, create the dimension text boxes */
 void LineViewer::createDimensionWidgets() {
   // Create all necessary widgets
-  if (m_startText.size() < int(m_ws->getNumDims())) {
+  if (m_startText.size() < m_ws->getNumDims()) {
     for (size_t d = m_startText.size(); d < m_ws->getNumDims(); d++) {
       QLabel *dimLabel = new QLabel(this);
       dimLabel->setAlignment(Qt::AlignHCenter);
@@ -246,10 +246,14 @@ void LineViewer::updateFreeDimensions() {
 //-----------------------------------------------------------------------------------------------
 /** Show the start/end/width points in the GUI */
 void LineViewer::updateStartEnd() {
-  for (int d = 0; d < int(m_ws->getNumDims()); d++) {
-    m_startText[d]->setText(QString::number(m_start[d]));
-    m_endText[d]->setText(QString::number(m_end[d]));
-    m_thicknessText[d]->setText(QString::number(m_thickness[d]));
+  const size_t ndims{m_ws->getNumDims()};
+  for (size_t d = 0; d < ndims; d++) {
+    if (d < m_start.getNumDims())
+      m_startText[d]->setText(QString::number(m_start[d]));
+    if (d < m_end.getNumDims())
+      m_endText[d]->setText(QString::number(m_end[d]));
+    if (d < m_thickness.getNumDims())
+      m_thicknessText[d]->setText(QString::number(m_thickness[d]));
   }
   ui.textPlaneWidth->setText(QString::number(m_planeWidth * 2.));
 
@@ -495,15 +499,15 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
   // The X basis vector
   alg->setPropertyValue("BasisVector0", "X,units," + basisX.toString(","));
-  OutputExtents.push_back(0);
-  OutputExtents.push_back(length);
-  OutputBins.push_back(int(numBins));
+  OutputExtents.emplace_back(0);
+  OutputExtents.emplace_back(length);
+  OutputBins.emplace_back(int(numBins));
 
   // The Y basis vector, with one bin
   alg->setPropertyValue("BasisVector1", "Y,units," + basisY.toString(","));
-  OutputExtents.push_back(-planeWidth);
-  OutputExtents.push_back(+planeWidth);
-  OutputBins.push_back(1);
+  OutputExtents.emplace_back(-planeWidth);
+  OutputExtents.emplace_back(+planeWidth);
+  OutputBins.emplace_back(1);
 
   // Now each remaining dimension
   std::string dimChars = "012345"; // SlicingAlgorithm::getDimensionChars();
@@ -519,9 +523,9 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
       // Set the basis vector with the width *2 and 1 bin
       alg->setPropertyValue("BasisVector" + dim,
                             dim + ",units," + basis.toString(","));
-      OutputExtents.push_back(-0.5 * m_thickness[d]);
-      OutputExtents.push_back(+0.5 * m_thickness[d]);
-      OutputBins.push_back(1);
+      OutputExtents.emplace_back(-0.5 * m_thickness[d]);
+      OutputExtents.emplace_back(+0.5 * m_thickness[d]);
+      OutputBins.emplace_back(1);
 
       propNum++;
       if (propNum > dimChars.size())

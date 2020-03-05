@@ -412,12 +412,12 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
         Kernel::V3D v_det_sample = detpos - samplepos;
         Kernel::V3D v_sample_src = samplepos - sourcepos;
         double twotheta = v_det_sample.angle(v_sample_src) / M_PI * 180.;
-        vecX.push_back(twotheta);
+        vecX.emplace_back(twotheta);
       }
 
       // add new value to vecPair
       double signal = mditer->getInnerSignal(iev);
-      vecY.push_back(signal);
+      vecY.emplace_back(signal);
     } // ENDFOR (iev)
 
     // Advance to next cell
@@ -471,7 +471,7 @@ void GetSpiceDataRawCountsFromMD::getSampleLogValues(
     }
     // Get experiment value
     double logvalue = expinfo->run().getPropertyAsSingleValue(samplelogname);
-    vecSampleLog.push_back(logvalue);
+    vecSampleLog.emplace_back(logvalue);
     g_log.debug() << "Add sample log (" << samplelogname << ") " << logvalue
                   << " of " << iexp << "-th ExperimentInfo "
                   << "\n";

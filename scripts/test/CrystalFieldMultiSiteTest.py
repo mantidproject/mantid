@@ -5,9 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
+import re
 import unittest
 
+import testhelpers
 from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
+
 
 c_mbsr = 79.5774715459  # Conversion from barn to mb/sr
 
@@ -121,7 +124,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         y = y / c_mbsr
         expected_y = [12.474955, 1.190169, 0.122781, 0.042940, 10.837438]
         np.testing.assert_equal(x, r)
-        np.testing.assert_almost_equal(y, expected_y, 6)
+        testhelpers.assert_almost_equal(y, expected_y, 6)
 
     def test_get_spectrum_ws(self):
         from mantid.simpleapi import CreateWorkspace
@@ -159,13 +162,13 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         y = y / c_mbsr
         expected_y = [12.474946, 1.190160, 0.122785, 0.042940, 10.837170]
         np.testing.assert_equal(x, r)
-        np.testing.assert_almost_equal(y, expected_y, 6)
+        testhelpers.assert_almost_equal(y, expected_y, 6)
 
         x, y = cfms.getSpectrum(1, r)
         y = y / c_mbsr
         expected_y = [6.304662, 0.331218, 1.224681, 0.078540, 2.638049]
         np.testing.assert_equal(x, r)
-        np.testing.assert_almost_equal(y, expected_y, 6)
+        testhelpers.assert_almost_equal(y, expected_y, 6)
 
     def test_get_spectrum_ws_multi_spectra(self):
         from mantid.simpleapi import CreateWorkspace
@@ -213,13 +216,13 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         y = y / c_mbsr
         expected_y = [3.904037, 0.744519, 0.274897, 0.175713, 0.106540]
         np.testing.assert_equal(x, r)
-        np.testing.assert_almost_equal(y, expected_y, 6)
+        testhelpers.assert_almost_equal(y, expected_y, 6)
 
         x, y = cfms.getSpectrum(1, r)
         y = y / c_mbsr
         expected_y = [3.704726, 0.785600, 0.296255, 0.190176, 0.115650]
         np.testing.assert_equal(x, r)
-        np.testing.assert_almost_equal(y, expected_y, 6)
+        testhelpers.assert_almost_equal(y, expected_y, 6)
 
     def test_fit_multi_ion_single_spectrum(self):
 
@@ -364,16 +367,18 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         cf.background.background.constraints('A1 > 0')
 
         s = cf.makeSpectrumFunction()
-        self.assertTrue('0<IntensityScaling' in s)
-        self.assertTrue('B22<4' in s)
-        self.assertTrue('0<bg.f0.Sigma' in s)
-        self.assertTrue('0<bg.f1.A1' in s)
-        self.assertTrue('Height=10.1' in s)
-        self.assertTrue('A0=0.1' in s)
-        self.assertTrue('pk0.FWHM<2.2' in s)
-        self.assertTrue('0.1<pk1.FWHM' in s)
-        self.assertTrue('pk2.FWHM=2*pk1.FWHM' in s)
-        self.assertTrue('pk3.FWHM=2*pk2.FWHM' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', s))
+        constraints = ','.join(re.findall('constraints=\((.*?)\)', s))
+        self.assertTrue('0<IntensityScaling' in constraints)
+        self.assertTrue('B22<4' in constraints)
+        self.assertTrue('0<bg.f0.Sigma' in constraints)
+        self.assertTrue('0<bg.f1.A1' in constraints)
+        self.assertTrue('Height=10.1' in ties)
+        self.assertTrue('A0=0.1' in ties)
+        self.assertTrue('pk0.FWHM<2.2' in constraints)
+        self.assertTrue('0.1<pk1.FWHM' in constraints)
+        self.assertTrue('pk2.FWHM=2*pk1.FWHM' in ties)
+        self.assertTrue('pk3.FWHM=2*pk2.FWHM' in ties)
 
         # Test that ties and constraints are correctly defined
         fun = FunctionFactory.createInitialized(s)
@@ -398,17 +403,19 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         cf.constraints('sp1.pk1.FWHM > 1.1', '1 < sp1.pk4.FWHM < 2.2')
 
         s = str(cf.function)
-        self.assertTrue('0<sp0.IntensityScaling' in s)
-        self.assertTrue('sp1.IntensityScaling<2' in s)
-        self.assertTrue('sp0.bg.f0.Height=10.1' in s)
-        self.assertTrue('sp1.bg.f0.Height=20.2' in s)
-        self.assertTrue('0.1<sp0.bg.f0.Sigma' in s)
-        self.assertTrue('0.2<sp1.bg.f0.Sigma' in s)
-        self.assertTrue('sp0.pk1.FWHM<2.2' in s)
-        self.assertTrue('1.1<sp1.pk1.FWHM' in s)
-        self.assertTrue('1<sp1.pk4.FWHM<2.2' in s)
-        self.assertTrue('sp1.pk2.FWHM=2*sp1.pk1.FWHM' in s)
-        self.assertTrue('sp1.pk3.FWHM=2*sp1.pk2.FWHM' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', s))
+        constraints = ','.join(re.findall('constraints=\((.*?)\)', s))
+        self.assertTrue('0<sp0.IntensityScaling' in constraints)
+        self.assertTrue('sp1.IntensityScaling<2' in constraints)
+        self.assertTrue('sp0.bg.f0.Height=10.1' in ties)
+        self.assertTrue('sp1.bg.f0.Height=20.2' in ties)
+        self.assertTrue('0.1<sp0.bg.f0.Sigma' in constraints)
+        self.assertTrue('0.2<sp1.bg.f0.Sigma' in constraints)
+        self.assertTrue('sp0.pk1.FWHM<2.2' in constraints)
+        self.assertTrue('1.1<sp1.pk1.FWHM' in constraints)
+        self.assertTrue('1<sp1.pk4.FWHM<2.2' in constraints)
+        self.assertTrue('sp1.pk2.FWHM=2*sp1.pk1.FWHM' in ties)
+        self.assertTrue('sp1.pk3.FWHM=2*sp1.pk2.FWHM' in ties)
 
     def test_constraints_multi_spectrum_and_ion(self):
         from mantid.simpleapi import FlatBackground, Gaussian
@@ -430,17 +437,19 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         cf.constraints('ion0.sp1.pk1.FWHM > 1.1', '1 < ion0.sp1.pk4.FWHM < 2.2')
 
         s = str(cf.function)
-        self.assertTrue('0<sp0.IntensityScaling' in s)
-        self.assertTrue('sp1.IntensityScaling<2' in s)
-        self.assertTrue('sp0.bg.f0.Height=10.1' in s)
-        self.assertTrue('sp1.bg.f0.Height=20.2' in s)
-        self.assertTrue('0.1<sp0.bg.f0.Sigma' in s)
-        self.assertTrue('0.2<sp1.bg.f0.Sigma' in s)
-        self.assertTrue('ion0.sp0.pk1.FWHM<2.2' in s)
-        self.assertTrue('1.1<ion0.sp1.pk1.FWHM' in s)
-        self.assertTrue('1<ion0.sp1.pk4.FWHM<2.2' in s)
-        self.assertTrue('ion0.sp1.pk2.FWHM=2*ion0.sp1.pk1.FWHM' in s)
-        self.assertTrue('ion1.sp1.pk3.FWHM=2*ion1.sp1.pk2.FWHM' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', s))
+        constraints = ','.join(re.findall('constraints=\((.*?)\)', s))
+        self.assertTrue('0<sp0.IntensityScaling' in constraints)
+        self.assertTrue('sp1.IntensityScaling<2' in constraints)
+        self.assertTrue('sp0.bg.f0.Height=10.1' in ties)
+        self.assertTrue('sp1.bg.f0.Height=20.2' in ties)
+        self.assertTrue('0.1<sp0.bg.f0.Sigma' in constraints)
+        self.assertTrue('0.2<sp1.bg.f0.Sigma' in constraints)
+        self.assertTrue('ion0.sp0.pk1.FWHM<2.2' in constraints)
+        self.assertTrue('1.1<ion0.sp1.pk1.FWHM' in constraints)
+        self.assertTrue('1<ion0.sp1.pk4.FWHM<2.2' in constraints)
+        self.assertTrue('ion0.sp1.pk2.FWHM=2*ion0.sp1.pk1.FWHM' in ties)
+        self.assertTrue('ion1.sp1.pk3.FWHM=2*ion1.sp1.pk2.FWHM' in ties)
 
     def test_add_CrystalField(self):
         from CrystalField import CrystalField
@@ -461,9 +470,9 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertTrue('Pr' in cf2.Ions)
         self.assertEqual(len(cf2.Symmetries), 2)
         s = str(cf2.function)
-        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in s or
-                        'ion0.IntensityScaling=1.0*ion1.IntensityScaling' in s)  # either possible in python 3
-
+        ties = ','.join(re.findall('ties=\((.*?)\)', s))
+        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in ties or
+                        'ion0.IntensityScaling=1.0*ion1.IntensityScaling' in ties)  # either possible in python 3
 
     def test_add_CrystalFieldSite(self):
         from CrystalField import CrystalField
@@ -484,7 +493,8 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertTrue('Pr' in cf2.Ions)
         self.assertEqual(len(cf2.Symmetries), 2)
         s = str(cf2.function)
-        self.assertTrue('ion0.IntensityScaling=0.125*ion1.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', s))
+        self.assertTrue('ion0.IntensityScaling=0.125*ion1.IntensityScaling' in ties)
 
     def test_add_CrystalFieldMultiSite(self):
         cfms1 = CrystalFieldMultiSite(Ions=['Pm'], Symmetries=['D2'], Temperatures=[44, 50], FWHM=[1.1, 0.9],
@@ -500,10 +510,11 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertEqual(cfms3['ion1.B22'], 3.9770)
         self.assertEqual(cfms3['ion2.B40'], -0.03)
         s = str(cfms3.function)
-        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in s or
-                       'ion0.IntensityScaling=1.0*ion1.IntensityScaling' in s)
-        self.assertTrue('ion0.IntensityScaling=1.0*ion2.IntensityScaling' in s or
-                       'ion2.IntensityScaling=1.0*ion0.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', s))
+        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in ties or
+                       'ion0.IntensityScaling=1.0*ion1.IntensityScaling' in ties)
+        self.assertTrue('ion0.IntensityScaling=1.0*ion2.IntensityScaling' in ties or
+                       'ion2.IntensityScaling=1.0*ion0.IntensityScaling' in ties)
 
     def test_multi_ion_intensity_scaling(self):
         from CrystalField import CrystalField
@@ -512,45 +523,45 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
-        s = str(cf.function)
-        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in s or
-                        'ion0.IntensityScaling=1.0*ion1.IntensityScaling' in s) # either possible in python 3
-
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in ties or
+                        'ion0.IntensityScaling=1.0*ion1.IntensityScaling' in ties) # either possible in python 3
         cf = 2 * cf1 + cf2 * 8
-        s = str(cf.function)
-        self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in s)
+
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in ties)
 
         cf = 2 * cf1 + cf2
-        s = str(cf.function)
-        self.assertTrue('ion1.IntensityScaling=0.5*ion0.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion1.IntensityScaling=0.5*ion0.IntensityScaling' in ties)
 
         cf3 = CrystalField('Tb', 'C2v', **params)
         cf = 2 * cf1 + cf2 * 8 + cf3
-        s = str(cf.function)
-        self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in s)
-        self.assertTrue('ion2.IntensityScaling=0.125*ion1.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in ties)
+        self.assertTrue('ion2.IntensityScaling=0.125*ion1.IntensityScaling' in ties)
 
         cf = 2 * cf1 + cf2 * 8 + 10 * cf3
-        s = str(cf.function)
-        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
-        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in ties)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in ties)
 
         cf = 2 * cf1 + (cf2 * 8 + 10 * cf3)
-        s = str(cf.function)
-        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
-        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in ties)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in ties)
 
         cf = cf1 + (cf2 * 8 + 10 * cf3)
-        s = str(cf.function)
-        self.assertTrue('ion0.IntensityScaling=0.1*ion2.IntensityScaling' in s)
-        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion0.IntensityScaling=0.1*ion2.IntensityScaling' in ties)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in ties)
 
         cf4 = CrystalField('Yb', 'C2v', **params)
         cf = (2 * cf1 + cf2 * 8) + (10 * cf3 + cf4)
-        s = str(cf.function)
-        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
-        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
-        self.assertTrue('ion3.IntensityScaling=0.1*ion2.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in ties)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in ties)
+        self.assertTrue('ion3.IntensityScaling=0.1*ion2.IntensityScaling' in ties)
 
     def test_multi_ion_intensity_scaling_multi_spectrum(self):
         from CrystalField import CrystalField
@@ -559,42 +570,42 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2
-        s = str(cf.function)
-        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in s or
-                        'ion0.IntensityScaling=1.0*ion1.IntensityScaling' in s)  # either possible in python 3
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion1.IntensityScaling=1.0*ion0.IntensityScaling' in ties or
+                        'ion0.IntensityScaling=1.0*ion1.IntensityScaling' in ties)  # either possible in python 3
 
         cf = 2 * cf1 + cf2 * 8
-        s = str(cf.function)
-        self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in ties)
 
         cf = 2 * cf1 + cf2
-        s = str(cf.function)
-        self.assertTrue('ion1.IntensityScaling=0.5*ion0.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion1.IntensityScaling=0.5*ion0.IntensityScaling' in ties)
 
         cf3 = CrystalField('Tb', 'C2v', **params)
         cf = 2 * cf1 + cf2 * 8 + cf3
-        s = str(cf.function)
-        self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in s)
-        self.assertTrue('ion2.IntensityScaling=0.125*ion1.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion0.IntensityScaling=0.25*ion1.IntensityScaling' in ties)
+        self.assertTrue('ion2.IntensityScaling=0.125*ion1.IntensityScaling' in ties)
 
         cf = 2 * cf1 + cf2 * 8 + 10 * cf3
-        s = str(cf.function)
-        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
-        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in ties)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in ties)
 
         cf = 2 * cf1 + (cf2 * 8 + 10 * cf3)
-        s = str(cf.function)
-        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
-        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in ties)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in ties)
 
         cf = cf1 + (cf2 * 8 + 10 * cf3)
-        s = str(cf.function)
-        self.assertTrue('ion0.IntensityScaling=0.1*ion2.IntensityScaling' in s)
-        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion0.IntensityScaling=0.1*ion2.IntensityScaling' in ties)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in ties)
 
         cf4 = CrystalField('Yb', 'C2v', **params)
         cf = (2 * cf1 + cf2 * 8) + (10 * cf3 + cf4)
-        s = str(cf.function)
-        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in s)
-        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in s)
-        self.assertTrue('ion3.IntensityScaling=0.1*ion2.IntensityScaling' in s)
+        ties = ','.join(re.findall('ties=\((.*?)\)', str(cf.function)))
+        self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in ties)
+        self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in ties)
+        self.assertTrue('ion3.IntensityScaling=0.1*ion2.IntensityScaling' in ties)

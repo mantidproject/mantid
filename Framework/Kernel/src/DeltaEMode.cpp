@@ -41,7 +41,7 @@ const std::vector<std::string> DeltaEMode::availableTypes() {
   for (const auto &iter : lookup.index) {
     if (iter.first == DeltaEMode::Undefined)
       continue;
-    modes.push_back(iter.second);
+    modes.emplace_back(iter.second);
   }
   return modes;
 }

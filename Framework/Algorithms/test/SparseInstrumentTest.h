@@ -200,7 +200,7 @@ public:
     const size_t sparseCols = 6;
     auto grid = createDetectorGridDefinition(*ws, sparseRows, sparseCols);
     const size_t wavelengths = 3;
-    auto sparseWS = createSparseWS(*ws, *grid, wavelengths).release();
+    auto sparseWS = createSparseWS(*ws, *grid, wavelengths);
     for (size_t i = 0; i < sparseWS->getNumberHistograms(); ++i) {
       auto &ys = sparseWS->mutableY(i);
       auto &es = sparseWS->mutableE(i);

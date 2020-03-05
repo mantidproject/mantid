@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAbout.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "globals.h"
 
 /**
@@ -32,7 +33,8 @@ MantidAbout::MantidAbout(QWidget *parent)
   release.append("\">on github</a>)</p>");
   QLabel *releaselabel = m_uiForm.revision_value;
   releaselabel->setText(release);
-  releaselabel->setOpenExternalLinks(true);
+  connect(releaselabel, SIGNAL(linkActivated(const QString &)), this,
+          SLOT(openExternalLink(const QString &)));
 
   QLabel *builtusing_labelvalue = m_uiForm.builtusing_labelvalue;
   QString builtusing = "QtiPlot " + QString::number(maj_version) + "." +
@@ -47,17 +49,24 @@ MantidAbout::MantidAbout(QWidget *parent)
                       "www.mantidproject.org</a></p>";
   QLabel *url = m_uiForm.mantidurl;
   url->setText(mantidurl);
-  url->setOpenExternalLinks(true);
+  connect(url, SIGNAL(linkActivated(const QString &)), this,
+          SLOT(openExternalLink(const QString &)));
 
   QString mantidDOI = QString::fromStdString(
       "<p><a href = " + Mantid::Kernel::MantidVersion::doi() + ">" +
       Mantid::Kernel::MantidVersion::doi() + "</a></p>");
   m_uiForm.mantiddoi->setText(mantidDOI);
-  m_uiForm.mantiddoi->setOpenExternalLinks(true);
+  connect(m_uiForm.mantiddoi, SIGNAL(linkActivated(const QString &)), this,
+          SLOT(openExternalLink(const QString &)));
 
   QString mantidCitation = QString::fromStdString(
       "<p><a href = " + Mantid::Kernel::MantidVersion::paperCitation() + ">" +
       Mantid::Kernel::MantidVersion::paperCitation() + "</a></p>");
   m_uiForm.mantidcitation->setText(mantidCitation);
-  m_uiForm.mantidcitation->setOpenExternalLinks(true);
+  connect(m_uiForm.mantidcitation, SIGNAL(linkActivated(const QString &)), this,
+          SLOT(openExternalLink(const QString &)));
+}
+
+void MantidAbout::openExternalLink(const QString &link) {
+  MantidQt::API::MantidDesktopServices::openUrl(link);
 }

@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Policies/MatrixToNumpy.h"
+#include "MantidPythonInterface/core/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/Policies/MatrixToNumpy.h"
 #include <boost/optional.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>

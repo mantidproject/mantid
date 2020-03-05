@@ -29,7 +29,10 @@ AlgorithmProgressWidget::AlgorithmProgressWidget(QWidget *parent)
           &AlgorithmProgressWidget::showDetailsDialog);
 }
 
-void AlgorithmProgressWidget::algorithmStarted() {}
+void AlgorithmProgressWidget::algorithmStarted() {
+  // remove the word idle as we are doing something now
+  m_progressBar->setFormat("Running ...");
+}
 
 void AlgorithmProgressWidget::algorithmEnded() {
   m_progressBar->setValue(0);

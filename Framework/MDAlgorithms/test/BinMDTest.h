@@ -542,11 +542,10 @@ public:
       return;
 
     // Round-trip transform
-    coord_t originalPoint[3] = {1.0, 2.0, 3.0};
-    coord_t *transformedPoint = new coord_t[3];
-    coord_t *originalBack = new coord_t[3];
-    ctFrom->apply(originalPoint, transformedPoint);
-    ctTo->apply(transformedPoint, originalBack);
+    std::vector<coord_t> originalPoint = {1.0, 2.0, 3.0};
+    std::vector<coord_t> transformedPoint(3), originalBack(3);
+    ctFrom->apply(originalPoint.data(), transformedPoint.data());
+    ctTo->apply(transformedPoint.data(), originalBack.data());
     for (size_t d = 0; d < 3; d++) {
       TS_ASSERT_DELTA(originalPoint[d], originalBack[d], 1e-5);
     }
@@ -923,9 +922,8 @@ public:
         "BasisVector1", "tty,m, 0.0, 2.0", "NormalizeBasisVectors", "0",
         "ForceOrthogonal", "0", "Translation",
         "-1, -1", /* coords in B = (-4,-4) in A */
-        "OutputExtents",
-        "-1.5, 3.5, -1.5, 3.5", /* size of 5 in C = size of 10 in B = size
-                                   of 20 in A */
+        "OutputExtents", "-1.5, 3.5, -1.5, 3.5", /* size of 5 in C = size of 10
+                                                    in B = size of 20 in A */
         "OutputBins", "10,10");
 
     // Finally, C maps back onto A (mdew) binned as reference

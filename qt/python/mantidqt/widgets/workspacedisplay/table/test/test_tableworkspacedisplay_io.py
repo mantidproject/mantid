@@ -6,8 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
+from __future__ import (absolute_import, print_function)
 
-from mantidqt.utils.qt.testing import GuiTest
+import unittest
+
+from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import Load
 from mantidqt.widgets.workspacedisplay.table.io import TableWorkspaceDisplayDecoder, TableWorkspaceDisplayEncoder
 from mantidqt.widgets.workspacedisplay.table import StatusBarView
@@ -18,7 +21,8 @@ TABLEWORKSPACEDISPLAY_DICT = {"markedColumns": {"as_y": [2], "as_x": [1],
                               "workspace": "ws", "windowName": "ws"}
 
 
-class TableWorkspaceDisplayEncoderTest(GuiTest):
+@start_qapplication
+class TableWorkspaceDisplayEncoderTest(unittest.TestCase):
     def setUp(self):
         self.ws = Load("SavedTableWorkspace.nxs", OutputWorkspace="ws")
         self.encoder = TableWorkspaceDisplayEncoder()
@@ -28,7 +32,8 @@ class TableWorkspaceDisplayEncoderTest(GuiTest):
         self.assertEqual(TABLEWORKSPACEDISPLAY_DICT, self.encoder.encode(self.view))
 
 
-class TableWorkspaceDisplayDecoderTest(GuiTest):
+@start_qapplication
+class TableWorkspaceDisplayDecoderTest(unittest.TestCase):
     def setUp(self):
         self.ws = Load("SavedTableWorkspace.nxs", OutputWorkspace="ws")
         self.decoder = TableWorkspaceDisplayDecoder()
@@ -51,3 +56,7 @@ class TableWorkspaceDisplayDecoderTest(GuiTest):
             TABLEWORKSPACEDISPLAY_DICT["markedColumns"]["as_y_err"][0]["labelIndex"],
             view.presenter.model.marked_columns.as_y_err[0].label_index)
         self.assertEqual(1, len(view.presenter.model.marked_columns.as_y_err))
+
+
+if __name__ == '__main__':
+    unittest.main()

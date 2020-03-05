@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto2.h"
+#include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -92,10 +92,10 @@ void CreateTransmissionWorkspaceAuto2::exec() {
   auto instrument = firstWS->getInstrument();
 
   // Other mandatory properties
-  double wavMin = checkForMandatoryInstrumentDefault<double>(
+  auto wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
-  double wavMax = checkForMandatoryInstrumentDefault<double>(
+  auto wavMax = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMax", instrument, "LambdaMax");
   alg->setProperty("WavelengthMax", wavMax);
 

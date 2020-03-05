@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<detector-grouping instrument="IN16B">
+  <group name="psd1"> <detids val="1-128"/> </group>
+  <group name="psd2"> <detids val="129-256"/> </group>
+  <group name="psd3"> <detids val="257-384"/> </group>
+  <group name="psd4"> <detids val="385-512"/> </group>
+  <group name="psd5"> <detids val="513-640"/> </group>
+  <group name="psd6"> <detids val="641-768"/> </group>
+  <group name="psd7"> <detids val="769-896"/> </group>
+  <group name="psd8"> <detids val="897-1024"/> </group>
+  <group name="psd9"> <detids val="1025-1152"/> </group>
+  <group name="psd10"> <detids val="1153-1280"/> </group>
+  <group name="psd11"> <detids val="1281-1408"/> </group>
+  <group name="psd12"> <detids val="1409-1536"/> </group>
+  <group name="psd13"> <detids val="1537-1664"/> </group>
+  <group name="psd14"> <detids val="1665-1792"/> </group>
+  <group name="psd15"> <detids val="1793-1920"/> </group>
+  <group name="psd16"> <detids val="1921-2048"/> </group>
+</detector-grouping>

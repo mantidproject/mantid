@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifndef COMPONENTTYPE_H
 #define COMPONENTTYPE_H
-#include "MantidBeamline/DllConfig.h"
 
 namespace Mantid {
 namespace Beamline {

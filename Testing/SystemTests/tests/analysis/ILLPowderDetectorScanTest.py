@@ -32,7 +32,7 @@ class _DiffReductionTest(systemtesting.MantidSystemTest):
         config.appendDataSearchSubDir('ILL/D2B/')
         config.appendDataSearchSubDir('ILL/D20/')
 
-    def tearDown(self):
+    def cleanup(self):
         config['default.facility'] = self._facility
         config['default.instrument'] = self._instrument
         config['datasearch.directories'] = self._directories

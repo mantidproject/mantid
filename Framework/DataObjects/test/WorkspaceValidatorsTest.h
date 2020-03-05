@@ -236,8 +236,7 @@ public:
         validator.isValid(ws),
         "Workspace must have a sample with an orientation matrix defined.");
 
-    OrientedLattice lattice;
-    ws->mutableSample().setOrientedLattice(&lattice);
+    ws->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>());
 
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }

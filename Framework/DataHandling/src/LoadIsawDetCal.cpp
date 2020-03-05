@@ -145,7 +145,7 @@ void LoadIsawDetCal::exec() {
 
     det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det) {
-      detList.push_back(det);
+      detList.emplace_back(det);
     } else {
       // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
       // We are not doing a full recursive search since that will be very long
@@ -155,7 +155,7 @@ void LoadIsawDetCal::exec() {
         for (int j = 0; j < assem->nelements(); j++) {
           det = boost::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
-            detList.push_back(det);
+            detList.emplace_back(det);
 
           } else {
             // Also, look in the second sub-level for RectangularDetectors (e.g.
@@ -168,7 +168,7 @@ void LoadIsawDetCal::exec() {
                 det = boost::dynamic_pointer_cast<RectangularDetector>(
                     (*assem2)[k]);
                 if (det) {
-                  detList.push_back(det);
+                  detList.emplace_back(det);
                 }
               }
             }
@@ -222,7 +222,7 @@ void LoadIsawDetCal::exec() {
           alg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
           alg1->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", inputW);
           if (run.hasProperty("T0")) {
-            double T0IDF = run.getPropertyValueAsType<double>("T0");
+            auto T0IDF = run.getPropertyValueAsType<double>("T0");
             alg1->setProperty("Offset", mT0 - T0IDF);
           } else {
             alg1->setProperty("Offset", mT0);
@@ -303,7 +303,7 @@ void LoadIsawDetCal::exec() {
           detScaling.scaleY *= oldscaley[0];
       }
 
-      rectangularDetectorScalings.push_back(detScaling);
+      rectangularDetectorScalings.emplace_back(detScaling);
 
       doRotation(rX, rY, componentInfo, det);
     }
@@ -417,7 +417,7 @@ std::vector<std::string> LoadIsawDetCal::getFilenames() {
   // shouldn't be used except for legacy cases
   const std::string filename2 = this->getProperty("Filename2");
   if (!filename2.empty())
-    filenamesFromPropertyUnraveld.push_back(filename2);
+    filenamesFromPropertyUnraveld.emplace_back(filename2);
 
   return filenamesFromPropertyUnraveld;
 }

@@ -44,7 +44,6 @@
 #include "MantidAPI/Algorithm.tcc"
 
 using namespace Mantid::Kernel;
-using VectorStringProperty = PropertyWithValue<std::vector<std::string>>;
 
 namespace Mantid {
 namespace API {
@@ -57,7 +56,7 @@ public:
   explicit WorkspacePropertyValueIs(const std::string &value)
       : m_value(value) {}
   bool operator()(IWorkspaceProperty *property) {
-    Property *prop = dynamic_cast<Property *>(property);
+    auto *prop = dynamic_cast<Property *>(property);
     if (!prop)
       return false;
     return prop->value() == m_value;
@@ -221,8 +220,7 @@ const std::vector<std::string> Algorithm::categories() const {
 
   auto res = tokenizer.asVector();
 
-  const DeprecatedAlgorithm *depo =
-      dynamic_cast<const DeprecatedAlgorithm *>(this);
+  const auto *depo = dynamic_cast<const DeprecatedAlgorithm *>(this);
   if (depo != nullptr) {
     res.emplace_back("Deprecated");
   }
@@ -323,15 +321,15 @@ void Algorithm::cacheWorkspaceProperties() {
       continue;
     switch (prop->direction()) {
     case Kernel::Direction::Input:
-      m_inputWorkspaceProps.push_back(wsProp);
+      m_inputWorkspaceProps.emplace_back(wsProp);
       break;
     case Kernel::Direction::InOut:
-      m_inputWorkspaceProps.push_back(wsProp);
-      m_outputWorkspaceProps.push_back(wsProp);
+      m_inputWorkspaceProps.emplace_back(wsProp);
+      m_outputWorkspaceProps.emplace_back(wsProp);
       break;
     case Kernel::Direction::Output:
-      m_outputWorkspaceProps.push_back(wsProp);
-      m_pureOutputWorkspaceProps.push_back(wsProp);
+      m_outputWorkspaceProps.emplace_back(wsProp);
+      m_pureOutputWorkspaceProps.emplace_back(wsProp);
       break;
     default:
       throw std::logic_error(
@@ -435,7 +433,7 @@ void Algorithm::lockWorkspaces() {
         // Write-lock it if not already
         debugLog << "Write-locking " << ws->getName() << '\n';
         ws->getLock()->writeLock();
-        m_writeLockedWorkspaces.push_back(ws);
+        m_writeLockedWorkspaces.emplace_back(ws);
       }
     }
   }
@@ -453,7 +451,7 @@ void Algorithm::lockWorkspaces() {
         // Read-lock it if not already write-locked
         debugLog << "Read-locking " << ws->getName() << '\n';
         ws->getLock()->readLock();
-        m_readLockedWorkspaces.push_back(ws);
+        m_readLockedWorkspaces.emplace_back(ws);
       }
     }
   }
@@ -494,7 +492,7 @@ bool Algorithm::executeInternal() {
   Timer timer;
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
   {
-    DeprecatedAlgorithm *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
+    auto *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
     if (depo != nullptr)
       getLogger().error(depo->deprecationMsg(this));
   }
@@ -688,7 +686,7 @@ bool Algorithm::executeInternal() {
   } catch (CancelException &ex) {
     m_runningAsync = false;
     m_running = false;
-    getLogger().error() << this->name() << ": Execution terminated by user.\n";
+    getLogger().warning() << this->name() << ": Execution cancelled by user.\n";
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     this->unlockWorkspaces();
@@ -775,7 +773,7 @@ void Algorithm::store() {
           throw;
         }
       } else {
-        groupWsIndicies.push_back(i);
+        groupWsIndicies.emplace_back(i);
       }
     }
   }
@@ -872,7 +870,7 @@ void Algorithm::setupAsChildAlgorithm(Algorithm_sptr alg,
   // in parallel safely.
   boost::weak_ptr<IAlgorithm> weakPtr(alg);
   PARALLEL_CRITICAL(Algorithm_StoreWeakPtr) {
-    m_ChildAlgorithms.push_back(weakPtr);
+    m_ChildAlgorithms.emplace_back(weakPtr);
   }
 }
 
@@ -1389,10 +1387,10 @@ bool Algorithm::processGroups() {
 
   // ---------- Create all the output workspaces ----------------------------
   for (auto &pureOutputWorkspaceProp : m_pureOutputWorkspaceProps) {
-    Property *prop = dynamic_cast<Property *>(pureOutputWorkspaceProp);
+    auto *prop = dynamic_cast<Property *>(pureOutputWorkspaceProp);
     if (prop && !prop->value().empty()) {
       auto outWSGrp = boost::make_shared<WorkspaceGroup>();
-      outGroups.push_back(outWSGrp);
+      outGroups.emplace_back(outWSGrp);
       // Put the GROUP in the ADS
       AnalysisDataService::Instance().addOrReplace(prop->value(), outWSGrp);
       outWSGrp->observeADSNotifications(false);
@@ -1431,7 +1429,21 @@ bool Algorithm::processGroups() {
           // Either: this is the single group
           // OR: all inputs are groups
           // ... so get then entry^th workspace in this group
-          ws = thisGroup[entry];
+          if (entry < thisGroup.size()) {
+            ws = thisGroup[entry];
+          } else {
+            // This can happen when one has more than one input group
+            // workspaces, having different sizes. For example one workspace
+            // group is the corrections which has N parts (e.g. weights for
+            // polarized measurement) while the other one is the actual input
+            // workspace group, where each item needs to be corrected together
+            // with all N inputs of the second group. In this case processGroup
+            // needs to be overridden, which is currently not possible in
+            // python.
+            throw std::runtime_error(
+                "Unable to process over groups; consider passing workspaces "
+                "one-by-one or override processGroup method of the algorithm.");
+          }
         }
         // Append the names together
         if (!outputBaseName.empty())
@@ -1439,8 +1451,7 @@ bool Algorithm::processGroups() {
         outputBaseName += ws->getName();
 
         // Set the property using the name of that workspace
-        if (Property *prop =
-                dynamic_cast<Property *>(m_inputWorkspaceProps[iwp])) {
+        if (auto *prop = dynamic_cast<Property *>(m_inputWorkspaceProps[iwp])) {
           if (ws->getName().empty()) {
             alg->setProperty(prop->name(), ws);
           } else {
@@ -1456,7 +1467,7 @@ bool Algorithm::processGroups() {
     std::vector<std::string> outputWSNames(m_pureOutputWorkspaceProps.size());
     // ---------- Set all the output workspaces ----------------------------
     for (size_t owp = 0; owp < m_pureOutputWorkspaceProps.size(); owp++) {
-      if (Property *prop =
+      if (auto *prop =
               dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp])) {
         // Default name = "in1_in2_out"
         const std::string inName = prop->value();
@@ -1512,8 +1523,7 @@ bool Algorithm::processGroups() {
     // this has to be done after execute() because a workspace must exist
     // when it is added to a group
     for (size_t owp = 0; owp < m_pureOutputWorkspaceProps.size(); owp++) {
-      Property *prop =
-          dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
+      auto *prop = dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
       if (prop && prop->value().empty())
         continue;
       // And add it to the output group
@@ -1542,7 +1552,7 @@ void Algorithm::copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum) {
   const auto &props = this->getProperties();
   for (const auto &prop : props) {
     if (prop) {
-      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+      auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       // Copy the property using the string
       if (!wsProp)
         this->setOtherProperties(alg, prop->name(), prop->value(), periodNum);
@@ -1577,8 +1587,7 @@ bool Algorithm::isWorkspaceProperty(const Kernel::Property *const prop) const {
   if (!prop) {
     return false;
   }
-  const IWorkspaceProperty *const wsProp =
-      dynamic_cast<const IWorkspaceProperty *>(prop);
+  const auto *const wsProp = dynamic_cast<const IWorkspaceProperty *>(prop);
   return (wsProp != nullptr);
 }
 
@@ -1740,7 +1749,7 @@ void Algorithm::reportCompleted(const double &duration,
       msg << name() << " successful, Duration ";
       double seconds = duration;
       if (seconds > 60.) {
-        int minutes = static_cast<int>(seconds / 60.);
+        auto minutes = static_cast<int>(seconds / 60.);
         msg << minutes << " minutes ";
         seconds = seconds - static_cast<double>(minutes) * 60.;
       }
@@ -1763,8 +1772,8 @@ void Algorithm::registerFeatureUsage() const {
   if (UsageService::Instance().isEnabled()) {
     std::ostringstream oss;
     oss << this->name() << ".v" << this->version();
-    UsageService::Instance().registerFeatureUsage("Algorithm", oss.str(),
-                                                  isChild());
+    UsageService::Instance().registerFeatureUsage(FeatureType::Algorithm,
+                                                  oss.str(), isChild());
   }
 }
 
@@ -1979,9 +1988,8 @@ template <>
 MANTID_API_DLL API::IAlgorithm_sptr
 IPropertyManager::getValue<API::IAlgorithm_sptr>(
     const std::string &name) const {
-  PropertyWithValue<API::IAlgorithm_sptr> *prop =
-      dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
@@ -2001,9 +2009,8 @@ template <>
 MANTID_API_DLL API::IAlgorithm_const_sptr
 IPropertyManager::getValue<API::IAlgorithm_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<API::IAlgorithm_sptr> *prop =
-      dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

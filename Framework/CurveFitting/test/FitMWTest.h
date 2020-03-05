@@ -646,11 +646,13 @@ public:
     boost::shared_ptr<Mantid::Geometry::Instrument> instrument;
     instrument.reset(new Mantid::Geometry::Instrument);
     Mantid::Geometry::ObjComponent *source =
-        new Mantid::Geometry::ObjComponent("source");
+        new Mantid::Geometry::ObjComponent("source", instrument.get());
+    instrument->add(source);
     source->setPos(0.0, 0.0, -10.0);
     instrument->markAsSource(source);
     Mantid::Geometry::ObjComponent *sample =
-        new Mantid::Geometry::ObjComponent("sample");
+        new Mantid::Geometry::ObjComponent("sample", instrument.get());
+    instrument->add(sample);
     instrument->markAsSamplePos(sample);
     auto *det = new Mantid::Geometry::Detector("det", 1, nullptr);
     instrument->add(det);

@@ -47,9 +47,7 @@ public:
   /// Free up resources.
   ~MDFileObject() {
     m_file.close();
-    if (remove(m_filename.c_str()) != 0) {
-      std::cerr << "Cannot remove '" << m_filename << "'\n";
-    }
+    remove(m_filename.c_str());
   }
 
 private:
@@ -257,10 +255,10 @@ public:
     TS_ASSERT_EQUALS(2, dim2->getNBins());
 
     // Check the data
-    double *signals = outWs->getSignalArray();
+    auto signals = outWs->getSignalArray();
     TS_ASSERT_DELTA(1, signals[0], 0.0001); // Check the first signal value
     TS_ASSERT_DELTA(2, signals[1], 0.0001); // Check the second signal value
-    double *errorsSQ = outWs->getErrorSquaredArray();
+    const auto errorsSQ = outWs->getErrorSquaredArray();
     TS_ASSERT_DELTA(2 * 2, errorsSQ[0],
                     0.0001); // Check the first error sq value
     TS_ASSERT_DELTA(3 * 3, errorsSQ[1],

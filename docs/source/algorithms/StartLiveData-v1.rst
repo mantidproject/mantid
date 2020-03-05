@@ -46,6 +46,20 @@ PeriodList and SpectraList are properties of the ISISHistoDataListener. They
 are available as arguments in this call because Instrument is set to
 'ISIS_Histogram', which uses that listener.
 
+KafkaEventListener
+******************
+
+``BufferThreshold`` defines the number of events (default 1000000) to hold in the intermediate buffer before it is flushed to the streamed EventWorkspace.
+This parameter must be tuned to the data you are streaming.
+Setting this parameter too high for your event rate will cause behaviour that make live streaming appear to have stalled.
+Setting this too low may cause performance issues with high count rates.
+
+There is no general rule for deriving this parameter that will give the best performance.
+To ensure that live streaming remains responsive this parameter should be set to ``UpdateEvery`` times the approximate event rate.
+Due to the nature of the intermediate buffer it is not possible to avoid having to know the approximate event rate before streaming.
+
+25000000 has shown to work well for simulated LOKI data at 10e7 events per second.
+
 Live Plots
 ##########
 

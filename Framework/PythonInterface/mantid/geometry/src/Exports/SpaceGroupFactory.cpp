@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/PythonObjectInstantiator.h"
 
 #include <boost/python/class.hpp>
 

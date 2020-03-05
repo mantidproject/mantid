@@ -438,8 +438,20 @@ void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   g_log.debug() << "Channel width: " << m_channelWidth << " 1e-6 sec\n";
 }
 
+/**
+ * @brief LoadILLReflectometry::doubleFromRun
+ * Returns a sample log a single double
+ * @param entryName : the name of the log
+ * @return the value as double
+ * @throws runtime_error : if the log does not exist
+ */
 double LoadILLReflectometry::doubleFromRun(const std::string &entryName) const {
-  return m_localWorkspace->run().getPropertyValueAsType<double>(entryName);
+  if (m_localWorkspace->run().hasProperty(entryName)) {
+    return m_localWorkspace->run().getPropertyValueAsType<double>(entryName);
+  } else {
+    throw std::runtime_error("The log with the given name does not exist " +
+                             entryName);
+  }
 }
 
 /**
@@ -512,7 +524,17 @@ std::vector<double> LoadILLReflectometry::getXValues() {
         if (chop1Phase > 360.0)
           chop1Phase = 0.0;
       }
-      const double POFF = doubleFromRun(m_offsetFrom + ".poff");
+      double POFF;
+      try {
+        POFF = doubleFromRun(m_offsetFrom + ".poff");
+      } catch (std::runtime_error &) {
+        try {
+          POFF = doubleFromRun(m_offsetFrom + ".pickup_offset");
+        } catch (std::runtime_error &) {
+          throw std::runtime_error(
+              "Unable to find VirtualChopper pickup offset");
+        }
+      }
       double openOffset;
       if (m_localWorkspace->run().hasProperty(
               m_offsetFrom + ".open_offset")) // Valid from 2018.
@@ -584,26 +606,27 @@ void LoadILLReflectometry::loadData(
   const size_t nb_monitors = monitorsData.size();
   Progress progress(this, 0, 1, m_numberOfHistograms + nb_monitors);
 
-  // write monitors
+  // load data
   if (!xVals.empty()) {
     HistogramData::BinEdges binEdges(xVals);
-    // write data
-    specnum_t spectrumNumber = 0;
-    for (size_t j = 0; j < m_numberOfHistograms; ++j) {
+    PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+    for (int j = 0; j < static_cast<int>(m_numberOfHistograms); ++j) {
       const int *data_p = &data(0, static_cast<int>(j), 0);
       const HistogramData::Counts counts(data_p, data_p + m_numberOfChannels);
       m_localWorkspace->setHistogram(j, binEdges, std::move(counts));
-      m_localWorkspace->getSpectrum(j).setSpectrumNo(spectrumNumber);
+      m_localWorkspace->getSpectrum(j).setSpectrumNo(j);
       progress.report();
-      for (size_t im = 0; im < nb_monitors; ++im) {
-        const int *monitor_p = monitorsData[im].data();
-        const HistogramData::Counts monitorCounts(
-            monitor_p, monitor_p + m_numberOfChannels);
-        m_localWorkspace->setHistogram(im + m_numberOfHistograms, binEdges,
-                                       std::move(monitorCounts));
-        progress.report();
-      }
-      ++spectrumNumber;
+    }
+    for (size_t im = 0; im < nb_monitors; ++im) {
+      const int *monitor_p = monitorsData[im].data();
+      const HistogramData::Counts monitorCounts(monitor_p,
+                                                monitor_p + m_numberOfChannels);
+      const size_t spectrum = im + m_numberOfHistograms;
+      m_localWorkspace->setHistogram(spectrum, binEdges,
+                                     std::move(monitorCounts));
+      m_localWorkspace->getSpectrum(spectrum).setSpectrumNo(
+          static_cast<specnum_t>(spectrum));
+      progress.report();
     }
   } else
     g_log.debug("Vector of x values is empty");
@@ -660,7 +683,7 @@ double LoadILLReflectometry::reflectometryPeak() {
   const double height = *maxValueIt;
   // determine initial centre: index of the maximum value
   const size_t maxIndex = std::distance(integralWS->y(0).cbegin(), maxValueIt);
-  const double centreByMax = static_cast<double>(maxIndex);
+  const auto centreByMax = static_cast<double>(maxIndex);
   g_log.debug() << "Peak maximum position: " << centreByMax << '\n';
   // determine sigma
   const auto &ys = integralWS->y(0);
@@ -675,7 +698,7 @@ double LoadILLReflectometry::reflectometryPeak() {
                        "value as beam center.\n";
     return centreByMax;
   }
-  const double fwhm =
+  const auto fwhm =
       static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
   g_log.debug() << "Initial fwhm (full width at half maximum): " << fwhm
                 << '\n';
@@ -844,8 +867,24 @@ void LoadILLReflectometry::placeSlits() {
     slit2ToSample = 0.368 + offset;
     slit1ToSample = slit2ToSample + slitSeparation;
   } else {
-    slit1ToSample = mmToMeter(doubleFromRun("Distance.S2toSample"));
-    slit2ToSample = mmToMeter(doubleFromRun("Distance.S3toSample"));
+    try {
+      slit1ToSample = mmToMeter(doubleFromRun("Distance.S2toSample"));
+    } catch (std::runtime_error &) {
+      try {
+        slit1ToSample = mmToMeter(doubleFromRun("Distance.S2_Sample"));
+      } catch (std::runtime_error &) {
+        throw std::runtime_error("Unable to find slit 1 to sample distance");
+      }
+    }
+    try {
+      slit2ToSample = mmToMeter(doubleFromRun("Distance.S3toSample"));
+    } catch (std::runtime_error &) {
+      try {
+        slit2ToSample = mmToMeter(doubleFromRun("Distance.S3_Sample"));
+      } catch (std::runtime_error &) {
+        throw std::runtime_error("Unable to find slit 2 to sample distance");
+      }
+    }
   }
   V3D pos{0.0, 0.0, -slit1ToSample};
   m_loader.moveComponent(m_localWorkspace, "slit2", pos);
@@ -942,9 +981,21 @@ double LoadILLReflectometry::sampleHorizontalOffset() const {
  */
 double LoadILLReflectometry::sourceSampleDistance() const {
   if (m_instrument != Supported::FIGARO) {
-    const double pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp");
-    // Chopper pair separation is in cm in sample logs.
-    const double pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;
+    double pairCentre;
+    double pairSeparation;
+    try {
+      pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp");
+      pairSeparation = doubleFromRun("Distance.ChopperGap") / 100;
+    } catch (std::runtime_error &) {
+      try {
+        pairCentre = mmToMeter(
+            doubleFromRun("VirtualChopper.MidChopper_Sample_distance"));
+        pairSeparation = doubleFromRun("Distance.ChopperGap");
+      } catch (std::runtime_error &) {
+        throw std::runtime_error(
+            "Unable to extract chopper to sample distance");
+      }
+    }
     return pairCentre - 0.5 * pairSeparation;
   } else {
     const double chopperDist =

@@ -159,9 +159,9 @@ public:
     std::vector<MDLeanEvent<2>> vec;
     ev.setCenter(0, 2.0);
     ev.setCenter(1, 3.0);
-    vec.push_back(ev);
-    vec.push_back(ev);
-    vec.push_back(ev);
+    vec.emplace_back(ev);
+    vec.emplace_back(ev);
+    vec.emplace_back(ev);
     b.addEvents(vec);
 
     b.refreshCache();
@@ -231,7 +231,7 @@ public:
   //  ev.setCenter(0, 2.0);
   //  ev.setCenter(1, 3.0);
   //  for (size_t i=0; i<10; i++)
-  //    vec.push_back(ev);
+  //    vec.emplace_back(ev);
 
   //  b.addEvents(vec, 5, 8);
   //  b.refreshCache();
@@ -394,7 +394,7 @@ public:
     MDLeanEvent<3> ev(1.2, 3.4);
     std::vector<MDLeanEvent<3>> vec;
     for (size_t i = 0; i < 12; i++)
-      vec.push_back(ev);
+      vec.emplace_back(ev);
     b3.addEvents(vec);
 
     TS_ASSERT(b3.getBoxController() == sc.get());

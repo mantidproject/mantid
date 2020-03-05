@@ -8,6 +8,7 @@
 
 #include <QComboBox>
 #include <QHeaderView>
+#include <QtGlobal>
 
 namespace {
 QStringList convFitHeaders() {
@@ -31,7 +32,11 @@ ConvFitDataTablePresenter::ConvFitDataTablePresenter(ConvFitModel *model,
     : IndirectDataTablePresenter(model, dataTable, convFitHeaders()),
       m_convFitModel(model) {
   auto header = dataTable->horizontalHeader();
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(1, QHeaderView::Stretch);
+#else
+  header->setSectionResizeMode(1, QHeaderView::Stretch);
+#endif
 }
 
 int ConvFitDataTablePresenter::workspaceIndexColumn() const { return 2; }
@@ -42,12 +47,14 @@ int ConvFitDataTablePresenter::endXColumn() const { return 4; }
 
 int ConvFitDataTablePresenter::excludeColumn() const { return 5; }
 
-std::string ConvFitDataTablePresenter::getResolutionName(int row) const {
+std::string
+ConvFitDataTablePresenter::getResolutionName(TableRowIndex row) const {
   return getString(row, 1);
 }
 
-void ConvFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
-                                              std::size_t spectrum, int row) {
+void ConvFitDataTablePresenter::addTableEntry(TableDatasetIndex dataIndex,
+                                              WorkspaceIndex spectrum,
+                                              TableRowIndex row) {
   IndirectDataTablePresenter::addTableEntry(dataIndex, spectrum, row);
 
   const auto resolution = m_convFitModel->getResolution(dataIndex);
@@ -59,9 +66,9 @@ void ConvFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
   setCell(std::move(cell), row, 1);
 }
 
-void ConvFitDataTablePresenter::updateTableEntry(std::size_t dataIndex,
-                                                 std::size_t spectrum,
-                                                 int row) {
+void ConvFitDataTablePresenter::updateTableEntry(TableDatasetIndex dataIndex,
+                                                 WorkspaceIndex spectrum,
+                                                 TableRowIndex row) {
   IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
 
   const auto &name = m_convFitModel->getResolution(dataIndex)->getName();

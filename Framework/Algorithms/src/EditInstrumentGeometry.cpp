@@ -187,7 +187,7 @@ void EditInstrumentGeometry::exec() {
   {
     size_t numHist = workspace->getNumberHistograms();
     for (size_t i = 0; i < numHist; ++i) {
-      specids.push_back(workspace->getSpectrum(i).getSpectrumNo());
+      specids.emplace_back(workspace->getSpectrum(i).getSpectrumNo());
       g_log.information() << "Add spectrum "
                           << workspace->getSpectrum(i).getSpectrumNo() << ".\n";
     }

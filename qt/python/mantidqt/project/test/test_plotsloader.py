@@ -17,7 +17,7 @@ import matplotlib.figure  # noqa
 import matplotlib.text  # noqa
 
 from mantidqt.project.plotsloader import PlotsLoader  # noqa
-import mantid.plots.plotfunctions  # noqa
+import mantid.plots.axesfunctions  # noqa
 from mantid.api import AnalysisDataService as ADS  # noqa
 from mantid.dataobjects import Workspace2D  # noqa
 from mantid.py3compat import mock  # noqa
@@ -31,7 +31,7 @@ class PlotsLoaderTest(unittest.TestCase):
     def setUp(self):
         self.plots_loader = PlotsLoader()
         plt.plot = mock.MagicMock()
-        mantid.plots.plotfunctions.plot = mock.MagicMock()
+        mantid.plots.axesfunctions.plot = mock.MagicMock()
         self.dictionary = {u'legend': {u'exists': False}, u'lines': [],
                            u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0), u'dynamic': True,
                                            u'frameOn': True, u'visible': True,
@@ -74,14 +74,12 @@ class PlotsLoaderTest(unittest.TestCase):
         ws = Workspace2D()
         ADS.add("ws", ws)
         plot_dict = {"label": "plot", "creationArguments": [[{"workspaces": "ws", "wkspIndex": 0}, {}, {}]]}
-        self.plots_loader.plot_extra_lines = mock.MagicMock()
         self.plots_loader.plot_func = mock.MagicMock()
         self.plots_loader.restore_figure_data = mock.MagicMock()
 
         self.plots_loader.make_fig(plot_dict)
 
         self.assertEqual(self.plots_loader.plot_func.call_count, 1)
-        self.assertEqual(self.plots_loader.plot_extra_lines.call_count, 1)
         self.assertEqual(self.plots_loader.restore_figure_data.call_count, 1)
 
     def test_restore_fig_properties(self):

@@ -152,7 +152,7 @@ void MapNeXusToSeries(NeXus::NXEntry &entry, const std::string &path,
                       const std::string &time, const std::string &name,
                       const T &factor, int32_t index) {
 
-  T value = GetNeXusValue<T>(entry, path, defval, index);
+  auto value = GetNeXusValue<T>(entry, path, defval, index);
   AddSinglePointTimeSeriesProperty<T>(logManager, time, name, value * factor);
 }
 
@@ -496,7 +496,7 @@ protected:
       m_tofMax = tof;
 
     auto ev = Types::Event::TofEvent(tof, Types::Core::DateAndTime(offset));
-    m_eventVectors[id]->push_back(ev);
+    m_eventVectors[id]->emplace_back(ev);
   }
 
 public:
@@ -940,7 +940,7 @@ void LoadEMU<FD>::calibrateDopplerPhase(
     }
 
     // determine the points above the 25% threshold
-    int minLevel = static_cast<int>(maxHist / 4);
+    auto minLevel = static_cast<int>(maxHist / 4);
     for (size_t i = 0; i < numEvents; i++) {
       nCnd[i] = (histogram[nMap[i]] >= minLevel ? true : false);
     }

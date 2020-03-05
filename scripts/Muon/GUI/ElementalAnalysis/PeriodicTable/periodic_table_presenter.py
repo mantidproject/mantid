@@ -73,9 +73,12 @@ class PeriodicTablePresenter(object):
         except TypeError:
             return
 
-    def set_peak_datafile(self, filename):
+    def set_peak_datafile(self, filename=None):
         try:
-            self.model.peak_data_file = filename
+            if filename:
+                self.model.peak_data_file = filename
+            else:
+                self.model.peak_data_file = self.model.get_default_peak_data_file()
             self.set_buttons()
         except Exception as error:
             message_box.warning(error)

@@ -37,6 +37,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
     _back_calib_option = None
     _common_args = {}
     _all_runs = None
+    _discard_sds = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
@@ -134,6 +135,15 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                              validator=StringListValidator(['SpectrumNumber', '2Theta', 'Q', 'Q2']),
                              doc='The spectrum axis conversion target.')
 
+        self.declareProperty(name='DiscardSingleDetectors', defaultValue=False,
+                             doc='Whether to discard the spectra of single detectors.')
+
+        self.declareProperty(name='ManualInelasticPeakChannels', defaultValue=[-1,-1],
+                             doc='The channel indices for the inelastic peak positions in the beginning '
+                                 'and in the end of the spectra; by default the maxima of the monitor '
+                                 'spectrum will be used for this. The intensities will be integrated symmetrically '
+                                 'around each peak.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -141,6 +151,16 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         if self.getPropertyValue('CalibrationBackgroundRun') and not self.getPropertyValue('CalibrationRun'):
             issues['CalibrationRun'] = 'Calibration runs are required, ' \
                                        'if background for calibration is given.'
+
+        if not self.getProperty('ManualInelasticPeakChannels').isDefault:
+            peaks = self.getProperty('ManualInelasticPeakChannels').value
+            if len(peaks) != 2:
+                issues['ManualInelasticPeakChannels'] = 'Invalid value for peak channels, ' \
+                                                        'provide two comma separated positive integers.'
+            elif peaks[0] >= peaks[1]:
+                issues['ManualInelasticPeakChannels'] = 'First peak channel must be less than the second'
+            elif peaks[0] <= 0:
+                issues['ManualInelasticPeakChannels'] = 'Non negative integers are required'
 
         return issues
 
@@ -158,6 +178,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         self._calib_option = self.getPropertyValue('CalibrationOption')
         self._back_calib_option = self.getPropertyValue('CalibrationBackgroundOption')
         self._spectrum_axis = self.getPropertyValue('SpectrumAxis')
+        self._discard_sds = self.getProperty('DiscardSingleDetectors').value
 
         # arguments to pass to IndirectILLEnergyTransfer
         self._common_args['MapFile'] = self.getPropertyValue('MapFile')
@@ -165,6 +186,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         self._common_args['Reflection'] = self.getPropertyValue('Reflection')
         self._common_args['ManualPSDIntegrationRange'] = self.getProperty('ManualPSDIntegrationRange').value
         self._common_args['SpectrumAxis'] = self._spectrum_axis
+        self._common_args['DiscardSingleDetectors'] = self._discard_sds
 
         self._red_ws = self.getPropertyValue('OutputWorkspace')
 
@@ -183,9 +205,6 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         # Nexus metadata criteria for FWS type of data (both EFWS and IFWS)
         self._criteria = '($/entry0/instrument/Doppler/maximum_delta_energy$ == 0. or ' \
                          '$/entry0/instrument/Doppler/velocity_profile$ == 1)'
-
-        # make sure observable entry also exists (value is not important)
-        self._criteria += ' and ($/entry0/' + self._observable.replace('.', '/') + '$ or True)'
 
         # force sort x-axis, if interpolation is requested
         if ((self._back_option == 'Interpolate' and self._background_files) or
@@ -218,16 +237,27 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
     def _ifws_peak_bins(self, ws):
         '''
-        Gives the bin indices of the first and last peaks (of spectra 0) in the IFWS
+        Gives the bin indices of the first and last inelastic peaks
+        By default they are taken from the maxima of the monitor spectrum
+        Or they can be specified manually as input parameters
         @param ws :: input workspace
-        return    :: [xmin,xmax]
+        return    :: [imin,imax]
         '''
-
-        y = mtd[ws].readY(0)
-        size = len(y)
-        mid = int(size / 2)
-        imin = np.nanargmax(y[0:mid])
-        imax = np.nanargmax(y[mid:size]) + mid
+        if not self.getProperty('ManualInelasticPeakChannels').isDefault:
+            peak_channels = self.getProperty('ManualInelasticPeakChannels').value
+            blocksize = mtd[ws].blocksize()
+            if peak_channels[1] >= blocksize:
+                raise RuntimeError('Manual peak channel {0} is out of range {1}'.format(peak_channels[1], blocksize))
+            else:
+                AddSampleLogMultiple(Workspace=ws, LogNames=['ManualInelasticLeftPeak', 'ManualInelasticRightPeak'],
+                                     LogValues=str(peak_channels[0])+','+str(peak_channels[1]))
+                return peak_channels
+        run = mtd[ws].getRun()
+        if not run.hasProperty('MonitorLeftPeak') or not run.hasProperty('MonitorRightPeak'):
+            raise RuntimeError('Unable to retrieve the monitor peak information from the sample logs.')
+        else:
+            imin = run.getLogData('MonitorLeftPeak').value
+            imax = run.getLogData('MonitorRightPeak').value
         return imin, imax
 
     def _ifws_integrate(self, wsgroup):
@@ -259,7 +289,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         if mtd[groupws].getNumberOfEntries() == 2:  # two wings, sum
             left = mtd[groupws].getItem(0).name()
             right = mtd[groupws].getItem(1).name()
-            sum = '__sum_'+groupws
+            left_right_sum = '__sum_'+groupws
 
             left_monitor = mtd[left].getRun().getLogData('MonitorIntegral').value
             right_monitor = mtd[right].getRun().getLogData('MonitorIntegral').value
@@ -274,12 +304,12 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                 self.log().notice('Zero monitor integral has been found in one (or both) wings;'
                                   ' left: {0}, right: {1}'.format(left_monitor, right_monitor))
 
-            Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=sum)
+            Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=left_right_sum)
 
             DeleteWorkspace(left)
             DeleteWorkspace(right)
 
-            RenameWorkspace(InputWorkspace=sum, OutputWorkspace=groupws)
+            RenameWorkspace(InputWorkspace=left_right_sum, OutputWorkspace=groupws)
 
         else:
             RenameWorkspace(InputWorkspace=mtd[groupws].getItem(0), OutputWorkspace=groupws)
@@ -428,8 +458,8 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                     axis = mtd[ws].readX(0)
                     start = axis[0]
                     end = axis[-1]
-                    range = end-start
-                    params = [start, range, end]
+                    integration_range = end-start
+                    params = [start, integration_range, end]
                     Rebin(InputWorkspace=ws, OutputWorkspace=ws, Params=params)
 
     def _interpolate(self, label, reference):
@@ -453,8 +483,8 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                 if mtd[ws].blocksize() > 1:
                     SplineInterpolation(WorkspaceToInterpolate=ws,
                                         WorkspaceToMatch=ref,
+                                        Linear2Points=True,
                                         OutputWorkspace=ws)
-                    # TODO: add Linear2Point=True when ready
 
     def _subtract_background(self, background, reference):
         '''

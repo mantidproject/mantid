@@ -26,8 +26,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 class WorkspaceGroupTest : public CxxTest::TestSuite {
 private:

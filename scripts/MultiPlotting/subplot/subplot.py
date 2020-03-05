@@ -12,7 +12,7 @@ from qtpy import QtWidgets, QtCore
 from copy import deepcopy
 
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 
 from MultiPlotting.navigation_toolbar import myToolbar
 from MultiPlotting.edit_windows.remove_plot_window import RemovePlotWindow
@@ -25,8 +25,9 @@ from MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
 
 
 class subplot(QtWidgets.QWidget):
-    quickEditSignal = QtCore.Signal(object)
-    rmSubplotSignal = QtCore.Signal(object)
+    signal_quick_edit = QtCore.Signal(object)
+    signal_rm_subplot = QtCore.Signal(object)
+    signal_rm_line = QtCore.Signal(object)
 
     def __init__(self, context):
         super(subplot, self).__init__()
@@ -49,17 +50,16 @@ class subplot(QtWidgets.QWidget):
         self.toolbar.setRmConnection(self._rm)
         self.toolbar.setRmSubplotConnection(self._rm_subplot)
         # add plot
-        self.plotObjects = {}
+        self.plot_objects = {}
         grid.addWidget(self.canvas, 1, 0)
         self.setLayout(grid)
 
     """ this is called when the zoom
     or pan are used. We want to send a
     signal to update the axis ranges """
-
     def draw_event_callback(self, event):
         self.figure.tight_layout()
-        for subplot in self.plotObjects.keys():
+        for subplot in self.plot_objects.keys():
             self.emit_subplot_range(subplot)
 
     def add_annotate(self, subplotName, label):
@@ -68,193 +68,189 @@ class subplot(QtWidgets.QWidget):
         self._context.add_annotate(subplotName, label)
         self.canvas.draw()
 
-    def add_vline(self, subplotName, xvalue, name):
-        if subplotName not in self._context.subplots.keys():
+    def add_vline(self, subplot_name, xvalue, name, color):
+        if subplot_name not in self._context.subplots.keys():
             return
-        self._context.add_vline(subplotName, xvalue, name)
+        self._context.add_vline(subplot_name, xvalue, name, color)
         self.canvas.draw()
 
-    def rm_annotate(self, subplotName, name):
-        if subplotName not in self._context.subplots.keys():
+    def rm_annotate(self, subplot_name, name):
+        if subplot_name not in self._context.subplots.keys():
             return
-        self._context.removeLabel(subplotName, name)
+        self._context.removeLabel(subplot_name, name)
         self.canvas.draw()
 
-    def rm_vline(self, subplotName, name):
-        if subplotName not in self._context.subplots.keys():
+    def rm_vline(self, subplot_name, name):
+        if subplot_name not in self._context.subplots.keys():
             return
-        self._context.removeVLine(subplotName, name)
+        self._context.removeVLine(subplot_name, name)
         self.canvas.draw()
 
     # plot a workspace, if a new subplot create it.
-    def plot(self, subplotName, workspace, specNum=1):
+    def plot(self, subplot_name, workspace, color=None, spec_num=1):
         new = False
-        if subplotName not in self._context.subplots.keys():
-            self.add_subplot(subplotName, len(list(self.plotObjects.keys())))
+        if subplot_name not in self._context.subplots.keys():
+            self.add_subplot(subplot_name, len(list(self.plot_objects.keys())))
             new = True
-        self._add_plotted_line(subplotName, workspace, specNum=specNum)
+        self._add_plotted_line(subplot_name, workspace, spec_num=spec_num, color=color)
         if new:
-            self.emit_subplot_range(subplotName)
+            self.emit_subplot_range(subplot_name)
 
-    def change_errors(self, state, subplotNames):
-        for subplotName in subplotNames:
+    def change_errors(self, state, subplot_names):
+        for subplotName in subplot_names:
             self._context.subplots[subplotName].change_errors(state)
             self.canvas.draw()
 
     # adds plotted line to context and updates GUI
-    def _add_plotted_line(self, subplotName, workspace, specNum):
+    def _add_plotted_line(self, subplot_name, workspace, spec_num, color=None):
         """ Appends plotted lines to the related subplot list. """
-        self._context.addLine(subplotName, workspace, specNum)
+        self._context.addLine(subplot_name, workspace, spec_num, color=color)
         self.canvas.draw()
 
-    def add_subplot(self, subplotName, number):
+    def add_subplot(self, subplot_name, number):
         self._context.update_gridspec(number + 1)
         gridspec = self._context.gridspec
-        self.plotObjects[subplotName] = self.figure.add_subplot(
-            gridspec[number], label=subplotName)
-        self.plotObjects[subplotName].set_title(subplotName)
-        self._context.addSubplot(subplotName, self.plotObjects[subplotName])
+        self.plot_objects[subplot_name] = self.figure.add_subplot(gridspec[number],
+                                                                  label=subplot_name,
+                                                                  projection='mantid')
+        self.plot_objects[subplot_name].set_title(subplot_name)
+        self._context.addSubplot(subplot_name, self.plot_objects[subplot_name])
         self._update()
 
     def _update(self):
         self._context.update_layout(self.figure)
         self.canvas.draw()
 
-    def emit_subplot_range(self, subplotName):
-        self.quickEditSignal.emit(subplotName)
-        self._context.subplots[subplotName].redraw_annotations()
+    def emit_subplot_range(self, subplot_name):
+        self.signal_quick_edit.emit(subplot_name)
+        self._context.subplots[subplot_name].redraw_annotations()
 
-    def set_plot_x_range(self, subplotNames, range):
-        for subplotName in subplotNames:
+    def set_plot_x_range(self, subplot_names, range):
+        for subplotName in subplot_names:
             # make a set method in context and set it there
-            self.plotObjects[subplotName].set_xlim(range)
+            self.plot_objects[subplotName].set_xlim(range)
             self._context.subplots[subplotName].redraw_annotations()
             self.canvas.draw()
 
-    def set_plot_y_range(self, subplotNames, y_range):
-        for subplotName in subplotNames:
-            self.plotObjects[subplotName].set_ylim(y_range)
+    def set_plot_y_range(self, subplot_names, y_range):
+        for subplotName in subplot_names:
+            self.plot_objects[subplotName].set_ylim(y_range)
             self._context.subplots[subplotName].redraw_annotations()
             self.canvas.draw()
 
     def connect_quick_edit_signal(self, slot):
-        self.quickEditSignal.connect(slot)
+        self.signal_quick_edit.connect(slot)
 
     def disconnect_quick_edit_signal(self):
-        self.quickEditSignal.disconnect()
+        self.signal_quick_edit.disconnect()
 
     def connect_rm_subplot_signal(self, slot):
-        self.rmSubplotSignal.connect(slot)
+        self.signal_rm_subplot.connect(slot)
 
     def disconnect_rm_subplot_signal(self):
-        self.rmSubplotSignal.disconnect()
+        self.signal_rm_subplot.disconnect()
 
-    def set_y_autoscale(self, subplotNames, state):
-        for subplotName in subplotNames:
+    def connect_rm_line_signal(self, slot):
+        self.signal_rm_line.connect(slot)
+
+    def disconnect_rm_line_signal(self):
+        self.signal_rm_line.disconnect()
+
+    def set_y_autoscale(self, subplot_names, state):
+        for subplotName in subplot_names:
             self._context.subplots[subplotName].change_auto(state)
             self.canvas.draw()
 
     def _rm(self):
         names = list(self._context.subplots.keys())
-        # if the remove window is not visable
-        if self._rm_window is not None:
-            self._raise_rm_window()
-        # if the selector is not visable
-        elif self._selector_window is not None:
-            self._raise_selector_window()
-        # if only one subplot just skip selector
-        elif len(names) == 1:
-            self._get_rm_window(names[0])
-        # if no selector and no remove window -> let user pick which subplot to
-        # change
+        if len(names) == 1:
+            if self._rm_window is not None:
+                self._rm_window.show()
+            else:
+                self._get_rm_window(names[0])
         else:
-            self._selector_window = self._createSelectWindow(names)
-            self._selector_window.subplotSelectorSignal.connect(
-                self._get_rm_window)
-            self._selector_window.closeEventSignal.connect(
-                self._close_selector_window)
+            if self._rm_window is not None:
+                self._rm_window.close()
+                self._rm_window = None
+            self._close_selector_window()
+
+            self._selector_window = self._create_select_window(names)
+            self._selector_window.subplotSelectorSignal.connect(self._get_rm_window)
+            self._selector_window.closeEventSignal.connect(self._close_selector_window)
             self._selector_window.setMinimumSize(300, 100)
             self._selector_window.show()
 
     def _rm_subplot(self):
         names = list(self._context.subplots.keys())
-        # if the selector is not visable
-        if self._selector_window is not None:
-            self._raise_selector_window()
-        # if no selector and no remove window -> let user pick which subplot to
-        # change
-        else:
-            self._selector_window = self._createSelectWindow(names)
-            self._selector_window.subplotSelectorSignal.connect(
-                self._remove_subplot)
-            self._selector_window.subplotSelectorSignal.connect(
-                self._close_selector_window)
-            self._selector_window.closeEventSignal.connect(
-                self._close_selector_window)
-            self._selector_window.setMinimumSize(300, 100)
-            self._selector_window.show()
+        # If the selector is hidden then close it
+        self._close_selector_window()
 
-    def _createSelectWindow(self, names):
+        self._selector_window = self._create_select_window(names)
+        self._selector_window.subplotSelectorSignal.connect(self._remove_subplot)
+        self._selector_window.subplotSelectorSignal.connect(self._close_selector_window)
+        self._selector_window.closeEventSignal.connect(self._close_selector_window)
+        self._selector_window.setMinimumSize(300, 100)
+        self._selector_window.show()
+
+    def _create_select_window(self, names):
         return SelectSubplot(names)
-
-    def _raise_rm_window(self):
-        self._rm_window.raise_()
-
-    def _raise_selector_window(self):
-        self._selector_window.raise_()
 
     def _close_selector_window(self):
         if self._selector_window is not None:
-            self._selector_window.close
+            self._selector_window.close()
             self._selector_window = None
 
-    def _create_rm_window(self, subplotName):
-        line_names = list(self._context.subplots[subplotName].lines.keys())
-        vline_names = self._context.subplots[subplotName].vlines
-        return RemovePlotWindow(lines=line_names, vlines=vline_names, subplot=subplotName, parent=self)
+    def _create_rm_window(self, subplot_name):
+        line_names = list(self._context.subplots[subplot_name].lines.keys())
+        vline_names = self._context.subplots[subplot_name].vlines
+        return RemovePlotWindow(lines=line_names,
+                                vlines=vline_names,
+                                subplot=subplot_name,
+                                parent=self)
 
-    def _get_rm_window(self, subplotName):
+    def _get_rm_window(self, subplot_name):
         # always close selector after making a selection
         self._close_selector_window()
         # create the remove window
-        self._rm_window = self._create_rm_window(subplotName=subplotName)
-        self._rm_window.applyRemoveSignal.connect(self._applyRm)
+        self._rm_window = self._create_rm_window(subplot_name=subplot_name)
+        self._rm_window.applyRemoveSignal.connect(self._apply_rm)
         self._rm_window.closeEventSignal.connect(self._close_rm_window)
         self._rm_window.setMinimumSize(200, 200)
         self._rm_window.show()
 
-    def _applyRm(self, names):
-        remove_subplot = True
+    def remove_lines(self, subplot_name, line_names):
         # remove the lines from the subplot
-        for name in names:
-            if self._rm_window.getState(name):
-                self._context.subplots[
-                    self._rm_window.subplot].removeLine(name)
-            else:
-                remove_subplot = False
-        # if all of the lines have been removed -> delete subplot
-        if remove_subplot:
-            self._remove_subplot(self._rm_window.subplot)
+        for name in line_names:
+            self._context.subplots[subplot_name].removeLine(name)
 
-        self.canvas.draw()
-        # if no subplots then close plotting window
-        if len(self._context.subplots.keys()) == 0:
-            self._close_rm_window()
-            # close plot window once auto grid done
+        self.signal_rm_line.emit([str(name) for name in line_names])
+
+        # if all of the lines have been removed -> delete subplot
+        if not self._context.get_lines(subplot_name):
+            self._remove_subplot(subplot_name)
         else:
-            self._close_rm_window()
+            self.canvas.draw()
+
+    def _apply_rm(self, line_names):
+        to_close = []
+        for name in line_names:
+            if self._rm_window.getState(name):
+                to_close.append(name)
+
+        self.remove_lines(self._rm_window.subplot, to_close)
+        self._close_rm_window()
 
     def _close_rm_window(self):
         self._rm_window.close
         self._rm_window = None
 
-    def _remove_subplot(self, subplotName):
-        self.figure.delaxes(self.plotObjects[subplotName])
-        del self.plotObjects[subplotName]
-        self._context.delete(subplotName)
-        self._context.update_gridspec(len(list(self.plotObjects.keys())))
+    def _remove_subplot(self, subplot_name):
+        self.figure.delaxes(self.plot_objects[subplot_name])
+        del self.plot_objects[subplot_name]
+        self._context.delete(subplot_name)
+        self._context.update_gridspec(len(list(self.plot_objects.keys())))
         self._update()
-        self.rmSubplotSignal.emit(subplotName)
+        self.signal_rm_subplot.emit(subplot_name)
 
     def _rm_ws_from_plots(self, workspace_name):
         keys = deepcopy(self._context.subplots.keys())

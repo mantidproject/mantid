@@ -32,7 +32,7 @@ void FunctionDomainGeneral::addColumn(boost::shared_ptr<Column> column) {
                              "All columns must have the same size.");
   }
 
-  m_columns.push_back(column);
+  m_columns.emplace_back(column);
 }
 
 /// Get i-th column.

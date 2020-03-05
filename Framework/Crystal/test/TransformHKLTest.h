@@ -62,9 +62,9 @@ public:
     UB.setRow(1, row_1);
     UB.setRow(2, row_2);
 
-    OrientedLattice o_lattice;
-    o_lattice.setUB(UB);
-    ws->mutableSample().setOrientedLattice(&o_lattice);
+    auto lattice = std::make_unique<OrientedLattice>();
+    lattice->setUB(UB);
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
 
     Matrix<double> UB_inverse(UB);
     UB_inverse.Invert();

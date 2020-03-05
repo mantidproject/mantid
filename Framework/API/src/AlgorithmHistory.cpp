@@ -9,6 +9,14 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
+
+#if BOOST_VERSION == 106900
+#ifndef BOOST_PENDING_INTEGER_LOG2_HPP
+#define BOOST_PENDING_INTEGER_LOG2_HPP
+#include <boost/integer/integer_log2.hpp>
+#endif /* BOOST_PENDING_INTEGER_LOG2_HPP */
+#endif /* BOOST_VERSION */
+
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -91,7 +99,7 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
   // objects.
   const std::vector<Property *> &properties = alg->getProperties();
   for (const auto &property : properties) {
-    m_properties.push_back(
+    m_properties.emplace_back(
         boost::make_shared<PropertyHistory>(property->createHistory()));
   }
 }
@@ -147,7 +155,7 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime &start,
 void AlgorithmHistory::addProperty(const std::string &name,
                                    const std::string &value, bool isdefault,
                                    const unsigned int &direction) {
-  m_properties.push_back(boost::make_shared<PropertyHistory>(
+  m_properties.emplace_back(boost::make_shared<PropertyHistory>(
       name, value, "", isdefault, direction));
 }
 

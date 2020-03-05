@@ -435,7 +435,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
 
   // The optimum number of points in the smoothing, according to Mariscotti, is
   // 0.6*fwhm
-  int w = static_cast<int>(0.6 * m_inputPeakFWHM);
+  auto w = static_cast<int>(0.6 * m_inputPeakFWHM);
   // w must be odd
   if (!(w % 2))
     ++w;
@@ -588,7 +588,7 @@ void FindPeaks::findPeaksUsingMariscotti() {
 
         // Use i0, i2 and i4 to find out i_min and i_max, i0: right, i2: left,
         // i4: centre
-        int wssize = static_cast<int>(m_dataWS->x(k).size());
+        auto wssize = static_cast<int>(m_dataWS->x(k).size());
 
         int iwidth = i0 - i2;
         if (iwidth <= 0)
@@ -630,7 +630,7 @@ std::vector<Histogram> FindPeaks::calculateSecondDifference(
 
   // Loop over spectra
   for (const auto i : m_indexSet) {
-    diffed.push_back(input->histogram(i));
+    diffed.emplace_back(input->histogram(i));
     diffed.back().mutableY() = 0.0;
     diffed.back().mutableE() = 0.0;
 
@@ -678,7 +678,7 @@ void FindPeaks::calculateStandardDeviation(
   // phi values were needed (see Marriscotti p.312)
   static_assert(g_z == 5, "Value of z has changed!");
   // Have to adjust for fact that I normalise Si (unlike the paper)
-  const int factor = static_cast<int>(std::pow(static_cast<double>(w), g_z));
+  const auto factor = static_cast<int>(std::pow(static_cast<double>(w), g_z));
 
   const double constant =
       sqrt(static_cast<double>(this->computePhi(w))) / factor;
@@ -1040,8 +1040,8 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
   estimate->setProperty("WorkspaceIndex", spectrum);
   // estimate->setProperty("SigmaConstant", 1.0);
   std::vector<double> fwvec;
-  fwvec.push_back(vecX[i_min]);
-  fwvec.push_back(vecX[i_max]);
+  fwvec.emplace_back(vecX[i_min]);
+  fwvec.emplace_back(vecX[i_max]);
   estimate->setProperty("BackgroundType", m_backgroundType);
   estimate->setProperty("FitWindow", fwvec);
   estimate->executeAsChildAlg();
@@ -1344,7 +1344,7 @@ void FindPeaks::estimatePeakRange(const HistogramX &vecX, size_t i_centre,
   double peakrightbound = vecX[i_centre] + 6. * rightfwhm;
 
   // Deal with case the peak boundary is too close to fit window
-  size_t ipeakleft = static_cast<size_t>(getIndex(vecX, peakleftbound));
+  auto ipeakleft = static_cast<size_t>(getIndex(vecX, peakleftbound));
   if (ipeakleft <= i_min) {
     size_t numbkgdpts = (i_centre - i_min) / 6;
     // FIXME - 3 is a magic number
@@ -1357,7 +1357,7 @@ void FindPeaks::estimatePeakRange(const HistogramX &vecX, size_t i_centre,
     peakleftbound = vecX[ipeakleft];
   }
 
-  size_t ipeakright = static_cast<size_t>(getIndex(vecX, peakrightbound));
+  auto ipeakright = static_cast<size_t>(getIndex(vecX, peakrightbound));
   if (ipeakright >= i_max) {
     size_t numbkgdpts = (i_max - i_centre) / 6;
     // FIXME - 3 is a magic number

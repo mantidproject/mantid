@@ -72,7 +72,7 @@ void SaveDetectorsGrouping::createGroupDetectorIDMap(
   // 1. Create map
   for (size_t iws = 0; iws < mGroupWS->getNumberHistograms(); iws++) {
     // a) Group ID
-    int groupid = static_cast<int>(mGroupWS->y(iws)[0]);
+    auto groupid = static_cast<int>(mGroupWS->y(iws)[0]);
 
     // b) Exist? Yes --> get handler on vector.  No --> create vector and
     auto it = groupwkspmap.find(groupid);
@@ -125,16 +125,16 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
         ed = detid;
       } else {
         // broken:  (1) store (2) start new
-        detranges.push_back(st);
-        detranges.push_back(ed);
+        detranges.emplace_back(st);
+        detranges.emplace_back(ed);
 
         st = detid;
         ed = detid;
       }
     } // ENDFOR detectors
     // Complete the uncompleted
-    detranges.push_back(st);
-    detranges.push_back(ed);
+    detranges.emplace_back(st);
+    detranges.emplace_back(ed);
 
     // c) Save entry in output
     groupdetidrangemap[groupid] = detranges;

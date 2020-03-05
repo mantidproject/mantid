@@ -88,23 +88,23 @@ public:
   void testValidator() {
     ArrayLengthValidator<int> vi(3);
     std::vector<int> a;
-    a.push_back(3);
+    a.emplace_back(3);
     TS_ASSERT_DIFFERS(vi.isValid(a).length(), 0);
-    a.push_back(-1);
-    a.push_back(11);
+    a.emplace_back(-1);
+    a.emplace_back(11);
     TS_ASSERT_EQUALS(vi.isValid(a).length(), 0);
   }
 
   void testValidatorRange() {
     ArrayLengthValidator<int> vi(2, 3);
     std::vector<int> a;
-    a.push_back(3);
+    a.emplace_back(3);
     TS_ASSERT_DIFFERS(vi.isValid(a).length(), 0);
-    a.push_back(11);
+    a.emplace_back(11);
     TS_ASSERT_EQUALS(vi.isValid(a).length(), 0);
-    a.push_back(12);
+    a.emplace_back(12);
     TS_ASSERT_EQUALS(vi.isValid(a).length(), 0);
-    a.push_back(21);
+    a.emplace_back(21);
     TS_ASSERT_DIFFERS(vi.isValid(a).length(), 0);
   }
 };

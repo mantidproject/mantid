@@ -19,12 +19,12 @@ target_link_libraries(MantidParaViewPeaksFilterSMPlugin
                       ${Boost_LIBRARIES}
                       ${vtkjsoncpp_LIBRARIES})
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(
     MantidParaViewPeaksFilterSMPlugin
     PROPERTIES
       INSTALL_RPATH
-      "@loader_path/../../../Contents/Libraries;@loader_path/../../../Contents/MacOS"
+      "@loader_path/../../../Contents/Frameworks;@loader_path/../../../Contents/MacOS"
     )
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(MantidParaViewPeaksFilterSMPlugin

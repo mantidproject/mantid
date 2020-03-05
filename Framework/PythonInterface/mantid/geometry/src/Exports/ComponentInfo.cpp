@@ -8,9 +8,9 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
-#include "MantidPythonInterface/api/ComponentInfoPythonIterator.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/geometry/ComponentInfoPythonIterator.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>

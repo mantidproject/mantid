@@ -12,6 +12,7 @@ import os
 import json
 
 from mantid.kernel import Logger
+from sans.state.Serializer import Serializer
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 from sans.gui_logic.gui_common import JSON_SUFFIX
 
@@ -101,9 +102,13 @@ class SettingsDiagnosticPresenter(object):
 
     def display_state_diagnostic_tree(self, state):
         # Convert to dict before passing the state to the view
-        if state is not None:
-            state = state.property_manager
-        self._view.set_tree(state)
+        dict_vals = None
+
+        if state:
+            state = Serializer.to_json(state)
+            dict_vals = json.loads(state)  # We intentionally do not use serializer to get a dict type back
+
+        self._view.set_tree(dict_vals)
 
     def on_save_state(self):
         # Get the save location
@@ -120,9 +125,7 @@ class SettingsDiagnosticPresenter(object):
 
         row_index = self._view.get_current_row()
         state = self.get_state(row_index)
-        serialized_state = state.property_manager
-        with open(full_file_path, 'w') as f:
-            json.dump(serialized_state, f, sort_keys=True, indent=4)
+        Serializer.save_file(state, full_file_path)
         self.gui_logger.information("The state for row {} has been saved to: {} ".format(row_index, full_file_path))
 
         # Update the file name in the UI

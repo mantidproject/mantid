@@ -193,7 +193,7 @@ void SaveFITS::writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
       // this needs revisiting (similarly in LoadFITS)
       // See https://github.com/mantidproject/mantid/pull/15964
       std::array<uint8_t, g_maxBytesPP> bytesPixel;
-      uint8_t *iter = reinterpret_cast<uint8_t *>(&pixelVal);
+      auto *iter = reinterpret_cast<uint8_t *>(&pixelVal);
       std::reverse_copy(iter, iter + bytespp, bytesPixel.data());
 
       file.write(reinterpret_cast<const char *>(bytesPixel.data()), bytespp);

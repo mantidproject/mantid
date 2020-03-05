@@ -40,10 +40,10 @@ GraphDisplay::GraphDisplay(QwtPlot *graphPlot, QTableWidget *graphTable,
   if (isVertical)
     graphPlot->setAxisMaxMajor(QwtPlot::xBottom, 3);
 
-  g_curveColors.push_back(Qt::black);
-  g_curveColors.push_back(Qt::red);
-  g_curveColors.push_back(Qt::green);
-  g_curveColors.push_back(Qt::blue);
+  g_curveColors.emplace_back(Qt::black);
+  g_curveColors.emplace_back(Qt::red);
+  g_curveColors.emplace_back(Qt::green);
+  g_curveColors.emplace_back(Qt::blue);
 }
 
 GraphDisplay::~GraphDisplay() { clearCurves(); }

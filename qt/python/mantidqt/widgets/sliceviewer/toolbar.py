@@ -20,11 +20,12 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
 
     gridClicked = Signal()
     linePlotsClicked = Signal(bool)
+    plotOptionsChanged = Signal()
 
     toolitems = (
         ('Home', 'Reset original view', 'mdi.home', 'home', None),
         ('Pan', 'Pan axes with left mouse, zoom with right', 'mdi.arrow-all', 'pan', False),
-        ('Zoom', 'Zoom to rectangle', 'mdi.magnify-plus-outline', 'zoom', False),
+        ('Zoom', 'Zoom to rectangle', 'mdi.magnify', 'zoom', False),
         (None, None, None, None, None),
         ('Grid', 'Toggle grid on/off', 'mdi.grid', 'gridClicked', None),
         ('LinePlots', 'Toggle lineplots on/off', 'mdi.chart-bell-curve', 'linePlotsClicked', False),
@@ -50,8 +51,6 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
                 if tooltip_text is not None:
                     a.setToolTip(tooltip_text)
 
-        self.buttons = {}
-
         # Add the x,y location widget at the right side of the toolbar
         # The stretch factor is 1 which means any resizing of the toolbar
         # will resize this label instead of the buttons.
@@ -66,3 +65,7 @@ class SliceViewerNavigationToolbar(NavigationToolbar2QT):
 
         # Adjust icon size or they are too small in PyQt5 by default
         self.setIconSize(QSize(24, 24))
+
+    def edit_parameters(self):
+        NavigationToolbar2QT.edit_parameters(self)
+        self.plotOptionsChanged.emit()

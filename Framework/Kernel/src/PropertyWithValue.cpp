@@ -21,6 +21,9 @@ namespace Kernel {
   void PropertyWithValue<type>::saveProperty(::NeXus::File *file) {            \
     file->makeGroup(this->name(), "NXlog", true);                              \
     file->writeData("value", m_value);                                         \
+    file->openData("value");                                                   \
+    file->putAttr("units", this->units());                                     \
+    file->closeData();                                                         \
     file->closeGroup();                                                        \
   }
 

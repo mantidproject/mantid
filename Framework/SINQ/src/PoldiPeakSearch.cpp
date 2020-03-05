@@ -18,7 +18,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-#include "boost/bind.hpp"
 #include <algorithm>
 #include <list>
 #include <numeric>
@@ -82,9 +81,9 @@ PoldiPeakSearch::getNeighborSums(const HistogramY &correlationCounts) const {
 
   for (std::vector<size_t>::const_iterator index = validIndices.begin();
        index != validIndices.end(); ++index) {
-    summedNeighborCounts.push_back(correlationCounts[(*index) - 1] +
-                                   correlationCounts[*index] +
-                                   correlationCounts[(*index) + 1]);
+    summedNeighborCounts.emplace_back(correlationCounts[(*index) - 1] +
+                                      correlationCounts[*index] +
+                                      correlationCounts[(*index) + 1]);
   }
 
   return summedNeighborCounts;
@@ -157,7 +156,7 @@ PoldiPeakSearch::findPeaksRecursive(MantidVec::const_iterator begin,
   auto maxInRange = std::max_element(begin, end);
 
   std::list<MantidVec::const_iterator> peaks;
-  peaks.push_back(maxInRange);
+  peaks.emplace_back(maxInRange);
 
   // ...and perform same search on sub-list left of maximum...
   if (std::distance(begin, maxInRange) > m_minimumDistance) {
@@ -201,7 +200,7 @@ PoldiPeakSearch::mapPeakPositionsToCorrelationData(
   for (std::list<MantidVec::const_iterator>::const_iterator peakPosition =
            peakPositions.begin();
        peakPosition != peakPositions.end(); ++peakPosition) {
-    transformedIndices.push_back(
+    transformedIndices.emplace_back(
         originalDataStart + std::distance(baseDataStart, *peakPosition) + 1);
   }
 
@@ -262,7 +261,7 @@ PoldiPeakSearch::getPeaks(const MantidVec::const_iterator &baseListStart,
 
     PoldiPeak_sptr newPeak = PoldiPeak::create(
         MillerIndices(), UncertainValue(xDataD), UncertainValue(**peak), fwhm);
-    peakData.push_back(newPeak);
+    peakData.emplace_back(newPeak);
   }
 
   return peakData;
@@ -344,7 +343,7 @@ MantidVec PoldiPeakSearch::getBackground(
   for (auto point = correlationCounts.cbegin() + 1;
        point != correlationCounts.cend() - 1; ++point) {
     if (distanceToPeaksGreaterThanMinimum(peakPositions, point)) {
-      background.push_back(*point);
+      background.emplace_back(*point);
     }
   }
 
@@ -477,7 +476,7 @@ double PoldiPeakSearch::getSn(MantidVec::const_iterator begin,
     temp.reserve(numberOfPoints - 1);
     for (int j = 0; j < static_cast<int>(numberOfPoints); ++j) {
       if (j != i) {
-        temp.push_back(fabs(*(begin + j) - currentValue));
+        temp.emplace_back(fabs(*(begin + j) - currentValue));
       }
     }
     std::sort(temp.begin(), temp.end());
@@ -634,10 +633,11 @@ void PoldiPeakSearch::exec() {
   }
 
   std::vector<PoldiPeak_sptr> intensityFilteredPeaks(peakCoordinates.size());
+  using namespace std::placeholders;
   auto newEnd = std::remove_copy_if(
       peakCoordinates.begin(), peakCoordinates.end(),
       intensityFilteredPeaks.begin(),
-      boost::bind(&PoldiPeakSearch::isLessThanMinimum, this, _1));
+      std::bind(&PoldiPeakSearch::isLessThanMinimum, this, _1));
   intensityFilteredPeaks.resize(
       std::distance(intensityFilteredPeaks.begin(), newEnd));
 
@@ -646,8 +646,7 @@ void PoldiPeakSearch::exec() {
                       << "): " << intensityFilteredPeaks.size() << '\n';
 
   std::sort(intensityFilteredPeaks.begin(), intensityFilteredPeaks.end(),
-            boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2,
-                              &PoldiPeak::intensity));
+            std::bind(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::intensity));
 
   for (std::vector<PoldiPeak_sptr>::const_iterator peak =
            intensityFilteredPeaks.begin();

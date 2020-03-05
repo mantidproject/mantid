@@ -51,7 +51,7 @@ buildPartition(const int totalWorkers, const size_t totalSize,
       continue;
     if (std::get<0>(item) <= remainder) {
       std::get<2>(item) = true;
-      itemsInPartition.push_back(std::get<1>(item));
+      itemsInPartition.emplace_back(std::get<1>(item));
       remainder -= std::get<0>(item);
     }
   }
@@ -107,7 +107,7 @@ std::vector<std::vector<int>> Chunker::makeWorkerGroups() const {
   for (const auto &partition : m_partitioning) {
     workerGroups.emplace_back();
     for (int i = 0; i < partition.first; ++i)
-      workerGroups.back().push_back(worker++);
+      workerGroups.back().emplace_back(worker++);
   }
   return workerGroups;
 }
@@ -153,7 +153,7 @@ std::vector<Chunker::LoadRange> Chunker::makeLoadRanges() const {
           (m_worker - firstWorkerSharingOurPartition)) {
         size_t count =
             std::min(current + m_chunkSize, m_bankSizes[bank]) - current;
-        ranges.push_back(LoadRange{bank, current, count});
+        ranges.emplace_back(LoadRange{bank, current, count});
       }
       current += m_chunkSize;
       chunk++;

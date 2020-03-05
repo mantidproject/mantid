@@ -16,9 +16,9 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using Mantid::Algorithms::MayersSampleCorrection;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::Algorithms::MayersSampleCorrection;
 
 class MayersSampleCorrectionTest : public CxxTest::TestSuite {
 public:

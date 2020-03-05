@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -11,7 +11,7 @@ from __future__ import (absolute_import, division, print_function)
 from mantid.api import mtd
 from mantid.simpleapi import ReflectometryILLPreprocess
 import numpy.testing
-from testhelpers import (assertRaisesNothing, create_algorithm, illhelpers)
+from testhelpers import (assertRaisesNothing, assert_almost_equal, create_algorithm, illhelpers)
 import unittest
 import ReflectometryILL_common as common
 
@@ -34,14 +34,14 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
 
         det122 = outWS.getDetector(122)
         twoTheta122 = outWS.detectorTwoTheta(det122)
-        self.assertAlmostEquals(twoTheta122, 0.057659886309975004, delta=1.e-13)
+        self.assertAlmostEqual(twoTheta122, 0.057659886309975004, delta=1.e-13)
 
         twoTheta = outWS.run().getProperty(common.SampleLogs.TWO_THETA).value
-        self.assertAlmostEquals(twoTheta, 3.182191848754883, delta=1.e-13)
+        self.assertAlmostEqual(twoTheta, 3.182191848754883, delta=1.e-13)
 
         peakPosition = outWS.run().getProperty(common.SampleLogs.FOREGROUND_CENTRE).value
         twoTheta2 = numpy.rad2deg(outWS.spectrumInfo().twoTheta(peakPosition))
-        self.assertAlmostEquals(twoTheta2, 1.5371900428796088, delta=1.e-13)
+        self.assertAlmostEqual(twoTheta2, 1.5371900428796088, delta=1.e-13)
         self.assertEqual(mtd.getObjectNames(), [])
 
     def testDefaultRunFIGARO(self):
@@ -58,7 +58,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
 
         det122 = outWS.getDetector(122)
         twoTheta122 = outWS.detectorTwoTheta(det122)
-        self.assertAlmostEquals(twoTheta122, 0.03060663990053301, delta=1.e-13)
+        self.assertAlmostEqual(twoTheta122, 0.03060663990053301, delta=1.e-13)
         self.assertEqual(mtd.getObjectNames(), [])
 
     def testFlatBackgroundSubtraction(self):
@@ -84,9 +84,9 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
             if i != 49:
-                numpy.testing.assert_equal(ys, [0.0] * ysSize)
+                assert_almost_equal(ys, [0.0] * ysSize, decimal=12)
             else:
-                numpy.testing.assert_almost_equal(ys, [10.0] * ysSize)
+                assert_almost_equal(ys, [10.0] * ysSize, decimal=12)
         self.assertEqual(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def _backgroundSubtraction(self, subtractionType):
@@ -113,9 +113,9 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
             if i != 49:
-                numpy.testing.assert_almost_equal(ys, [0.0] * ysSize)
+                assert_almost_equal(ys, [0.0] * ysSize)
             else:
-                numpy.testing.assert_almost_equal(ys, [10.0] * ysSize)
+                assert_almost_equal(ys, [10.0] * ysSize)
         self.assertEqual(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def testLinearFlatBackgroundSubtraction(self):
@@ -199,17 +199,17 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         for i in range(outWS.getNumberHistograms()):
             ys = outWS.readY(i)
             if i in lowerBkgIndices:
-                numpy.testing.assert_equal(ys, [0.0] * ysSize)
+                assert_almost_equal(ys, [0.0] * ysSize)
             elif i in lowerExclusionIndices:
-                numpy.testing.assert_equal(ys, [-1005.0] * ysSize)
+                assert_almost_equal(ys, [-1005.0] * ysSize)
             elif i in foregroundIndices:
-                numpy.testing.assert_equal(ys, [995.0] * ysSize)
+                assert_almost_equal(ys, [995.0] * ysSize)
             elif i in upperExclusionIndices:
-                numpy.testing.assert_equal(ys, [-1005.0] * ysSize)
+                assert_almost_equal(ys, [-1005.0] * ysSize)
             elif i in upperBkgIndices:
-                numpy.testing.assert_equal(ys, [0.0] * ysSize)
+                assert_almost_equal(ys, [0.0] * ysSize)
             else:
-                numpy.testing.assert_equal(ys, [-5.0] * ysSize)
+                assert_almost_equal(ys, [-5.0] * ysSize)
         self.assertEqual(mtd.getObjectNames(), ['ReflectometryILLPreprocess_test_ws'])
 
     def testAsymmetricForegroundRanges(self):
@@ -414,7 +414,7 @@ class ReflectometryILLPreprocessTest(unittest.TestCase):
         alg = create_algorithm('ReflectometryILLPreprocess', **args)
         assertRaisesNothing(self, alg.execute)
         outWS = alg.getProperty('OutputWorkspace').value
-        self.assertAlmostEquals(outWS.getRun().getProperty(common.SampleLogs.LINE_POSITION).value,
+        self.assertAlmostEqual(outWS.getRun().getProperty(common.SampleLogs.LINE_POSITION).value,
                                 202.17752545515665,
                                 delta=1.e-13)
         self.assertEqual(outWS.getRun().getProperty(common.SampleLogs.FOREGROUND_CENTRE).value, 202)

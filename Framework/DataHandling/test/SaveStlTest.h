@@ -81,7 +81,7 @@ public:
                               V3D(-5, 5, -15),  V3D(5, -5, 15), V3D(5, 5, 15),
                               V3D(-5, 5, 15),   V3D(-5, -5, 15)};
     auto writer = SaveStl(path, triangle, vertices, ScaleUnits::metres);
-    TS_ASSERT_THROWS(writer.writeStl(), std::runtime_error);
+    TS_ASSERT_THROWS(writer.writeStl(), const std::runtime_error &);
     TS_ASSERT(!Poco::File(path).exists());
   }
 

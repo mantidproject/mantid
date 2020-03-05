@@ -68,7 +68,7 @@ public:
 
     for (const auto &element : elements) {
       try {
-        newValues.push_back(boost::lexical_cast<Type>(element));
+        newValues.emplace_back(boost::lexical_cast<Type>(element));
       } catch (boost::bad_lexical_cast &) {
         throw std::invalid_argument("Unable to convert one of the elements: " +
                                     element);

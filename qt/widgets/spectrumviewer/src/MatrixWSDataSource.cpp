@@ -257,7 +257,7 @@ std::vector<std::string> MatrixWSDataSource::getInfoList(double x, double y) {
   if (!ids.empty()) {
     list.emplace_back("Det ID");
     const int64_t id = static_cast<int64_t>(*(ids.begin()));
-    list.push_back(boost::lexical_cast<std::string>(id));
+    list.emplace_back(boost::lexical_cast<std::string>(id));
   }
 
   /* Now try to do various unit conversions to get equivalent info */

@@ -353,22 +353,22 @@ public:
         std::stringstream ss;
         ss.str(line);
         ss >> h >> k >> l;
-        hkl.push_back(h);
-        hkl.push_back(k);
-        hkl.push_back(l);
-        hkls.push_back(hkl);
+        hkl.emplace_back(h);
+        hkl.emplace_back(k);
+        hkl.emplace_back(l);
+        hkls.emplace_back(hkl);
 
         double d_h, tof_h, height, alpha, beta, sigma2, chi2;
         std::vector<double> params;
         ss >> d_h >> tof_h >> height >> alpha >> beta >> sigma2 >> chi2;
-        params.push_back(d_h);
-        params.push_back(tof_h);
-        params.push_back(height);
-        params.push_back(alpha);
-        params.push_back(beta);
-        params.push_back(sigma2);
-        params.push_back(chi2);
-        peakparameters.push_back(params);
+        params.emplace_back(d_h);
+        params.emplace_back(tof_h);
+        params.emplace_back(height);
+        params.emplace_back(alpha);
+        params.emplace_back(beta);
+        params.emplace_back(sigma2);
+        params.emplace_back(chi2);
+        peakparameters.emplace_back(params);
       }
     }
 
@@ -473,9 +473,9 @@ public:
         try {
           ss >> parmin >> parmax >> parstepsize;
           vector<double> mcpars;
-          mcpars.push_back(parmin);
-          mcpars.push_back(parmax);
-          mcpars.push_back(parstepsize);
+          mcpars.emplace_back(parmin);
+          mcpars.emplace_back(parmax);
+          mcpars.emplace_back(parstepsize);
           parametermcs.emplace(parname, mcpars);
         } catch (const std::runtime_error &) {
           ;

@@ -108,8 +108,8 @@ public:
     return componentIndex - m_assemblySortedDetectorIndices->size();
   }
 
-  Eigen::Vector3d position(const size_t componentIndex) const;
-  Eigen::Vector3d position(const std::pair<size_t, size_t> &index) const;
+  const Eigen::Vector3d &position(const size_t componentIndex) const;
+  const Eigen::Vector3d &position(const std::pair<size_t, size_t> &index) const;
   Eigen::Quaterniond rotation(const size_t componentIndex) const;
   Eigen::Quaterniond rotation(const std::pair<size_t, size_t> &index) const;
   Eigen::Vector3d relativePosition(const size_t componentIndex) const;
@@ -129,8 +129,8 @@ public:
   void setDetectorInfo(DetectorInfo *detectorInfo);
   bool hasSource() const;
   bool hasSample() const;
-  Eigen::Vector3d sourcePosition() const;
-  Eigen::Vector3d samplePosition() const;
+  const Eigen::Vector3d &sourcePosition() const;
+  const Eigen::Vector3d &samplePosition() const;
   size_t source() const;
   size_t sample() const;
   size_t root() const;

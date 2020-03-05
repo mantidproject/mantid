@@ -75,10 +75,10 @@ public:
   }
 
   void test_CreateOrOpenFile() {
+    using Mantid::coord_t;
     using Mantid::API::FileFinder;
     using Mantid::DataObjects::BoxControllerNeXusIO;
     using Mantid::Kernel::Exception::FileError;
-    using Mantid::coord_t;
 
     BoxControllerNeXusIO *pSaver(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
@@ -129,7 +129,7 @@ public:
 
     std::vector<uint64_t> freeSpaceVectorToSet;
     for (uint64_t i = 0; i < 20; i++) {
-      freeSpaceVectorToSet.push_back(i);
+      freeSpaceVectorToSet.emplace_back(i);
     }
     pSaver->setFreeSpaceVector(freeSpaceVectorToSet);
 

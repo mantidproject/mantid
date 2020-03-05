@@ -71,9 +71,8 @@ void AverageLogData::exec() {
                              " in the workspace.");
   }
 
-  Kernel::TimeSeriesProperty<double> *slog =
-      dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-          inputWS->run().getLogData(logname));
+  auto *slog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+      inputWS->run().getLogData(logname));
   if (!slog) {
     throw std::runtime_error("Problem reading property " + logname);
   }
@@ -97,10 +96,10 @@ void AverageLogData::exec() {
   std::vector<double> pctime = pclog->timesAsVectorSeconds();
   std::vector<double> pcvalue = pclog->valuesAsVector();
 
-  stime.push_back(EMPTY_DBL());
-  svalue.push_back(0.0);
-  pctime.push_back(EMPTY_DBL() * 1.1); // larger than stime
-  pcvalue.push_back(0.0);
+  stime.emplace_back(EMPTY_DBL());
+  svalue.emplace_back(0.0);
+  pctime.emplace_back(EMPTY_DBL() * 1.1); // larger than stime
+  pcvalue.emplace_back(0.0);
 
   auto isvalue = svalue.begin(), ipctime = pctime.begin(),
        ipcvalue = pcvalue.begin();

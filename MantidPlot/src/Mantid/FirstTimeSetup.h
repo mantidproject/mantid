@@ -25,6 +25,9 @@ public:
 private:
   void initLayout();
 
+public slots:
+  void openExternalLink(const QString &);
+
 private slots:
   void confirm();
   void cancel();

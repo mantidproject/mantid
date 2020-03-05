@@ -28,19 +28,22 @@ class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
 
         self.tolerance = 1e-2
         self.tolerance_rel_err = True
+        # this fails the test every time a new instrument parameter is added
+        # parameters file evolves quite often, so this is not checked
+        self.disableChecking = ['Instrument']
 
-    def tearDown(self):
+    def cleanup(self):
         config['default.facility'] = self.facility
         config['default.instrument'] = self.instrument
         config['datasearch.directories'] = self.datadirs
 
     def runTest(self):
 
-        center, epp = IndirectILLEnergyTransfer(Run='215962', PulseChopper='34')
+        center, epp = IndirectILLEnergyTransfer(Run='215962', PulseChopper='34', GroupDetectors=False)
 
-        offset_p100 = IndirectILLEnergyTransfer(Run='215967', InputElasticChannelWorkspace=epp, PulseChopper='34')
+        offset_p100 = IndirectILLEnergyTransfer(Run='215967', InputElasticChannelWorkspace=epp, PulseChopper='34', GroupDetectors=False)
 
-        offset_m275 = IndirectILLEnergyTransfer(Run='215968', InputElasticChannelWorkspace=epp, PulseChopper='34')
+        offset_m275 = IndirectILLEnergyTransfer(Run='215968', InputElasticChannelWorkspace=epp, PulseChopper='34', GroupDetectors=False)
 
         GroupWorkspaces(InputWorkspaces=[center, offset_p100, offset_m275], OutputWorkspace='group')
 

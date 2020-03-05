@@ -119,16 +119,16 @@ void SaveLauenorm::exec() {
   // We must sort the peaks
   std::vector<std::pair<std::string, bool>> criteria;
   if (type.compare(0, 2, "Ba") == 0)
-    criteria.push_back(std::pair<std::string, bool>("BankName", true));
+    criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
   else if (type.compare(0, 2, "Ru") == 0)
-    criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
+    criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
   else {
-    criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-    criteria.push_back(std::pair<std::string, bool>("BankName", true));
+    criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
+    criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
   }
-  criteria.push_back(std::pair<std::string, bool>("h", true));
-  criteria.push_back(std::pair<std::string, bool>("k", true));
-  criteria.push_back(std::pair<std::string, bool>("l", true));
+  criteria.emplace_back(std::pair<std::string, bool>("h", true));
+  criteria.emplace_back(std::pair<std::string, bool>("k", true));
+  criteria.emplace_back(std::pair<std::string, bool>("l", true));
   ws->sort(criteria);
 
   std::vector<Peak> peaks = ws->getPeaks();
@@ -194,9 +194,9 @@ void SaveLauenorm::exec() {
          p.getRow() > (nRows - widthBorder)))
       continue;
     // Take out the "bank" part of the bank name and convert to an int
-    bankName.erase(remove_if(bankName.begin(), bankName.end(),
-                             not1(std::ptr_fun(::isdigit))),
-                   bankName.end());
+    bankName.erase(
+        remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
+        bankName.end());
     if (type.compare(0, 2, "Ba") == 0) {
       Strings::convert(bankName, sequence);
     }
@@ -224,11 +224,11 @@ void SaveLauenorm::exec() {
 
     if (sequence != oldSequence) {
       oldSequence = sequence;
-      numPeaks.push_back(count);
-      maxLamVec.push_back(maxLam);
-      minLamVec.push_back(minLam);
-      sumLamVec.push_back(sumLam);
-      minDVec.push_back(minD);
+      numPeaks.emplace_back(count);
+      maxLamVec.emplace_back(maxLam);
+      minLamVec.emplace_back(minLam);
+      sumLamVec.emplace_back(sumLam);
+      minDVec.emplace_back(minD);
       count = 0;
       maxLam = 0;
       minLam = EMPTY_DBL();
@@ -244,11 +244,11 @@ void SaveLauenorm::exec() {
       minD = dsp;
     sumLam += lambda;
   }
-  numPeaks.push_back(count);
-  maxLamVec.push_back(maxLam);
-  minLamVec.push_back(minLam);
-  sumLamVec.push_back(sumLam);
-  minDVec.push_back(minD);
+  numPeaks.emplace_back(count);
+  maxLamVec.emplace_back(maxLam);
+  minLamVec.emplace_back(minLam);
+  sumLamVec.emplace_back(sumLam);
+  minDVec.emplace_back(minD);
   oldSequence = -1;
   // Go through each peak at this run / bank
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
@@ -270,9 +270,9 @@ void SaveLauenorm::exec() {
          p.getRow() > (nRows - widthBorder)))
       continue;
     // Take out the "bank" part of the bank name and convert to an int
-    bankName.erase(remove_if(bankName.begin(), bankName.end(),
-                             not1(std::ptr_fun(::isdigit))),
-                   bankName.end());
+    bankName.erase(
+        remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
+        bankName.end());
     if (type.compare(0, 2, "Ba") == 0) {
       Strings::convert(bankName, sequence);
     }

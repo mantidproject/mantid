@@ -22,7 +22,7 @@ namespace {
 void get_sizes(const Communicator &comm, std::mutex &mutex,
                std::vector<int> &sizes) {
   std::lock_guard<std::mutex> lock(mutex);
-  sizes.push_back(comm.size());
+  sizes.emplace_back(comm.size());
 }
 
 void get_ranks(const Communicator &comm, std::mutex &mutex,

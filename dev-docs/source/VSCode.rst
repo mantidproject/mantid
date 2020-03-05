@@ -66,7 +66,7 @@ Features
 Auto Formatting
 ---------------
 It is required in the mantid project to format code using clang-format, this can be done
-in multiple ways but VSCode makes it easier. With a formatter installed as an extension 
+in multiple ways but VSCode makes it easier. With a formatter installed as an extension
 it is possible to format any open file in VSCode. It is recommended to use this `Clang-Format <https://marketplace.visualstudio.com/items?itemName=xaver.clang-format>`_ extension.
 It is possible to format your code using on save, type, paste and save timeout. To set
 when you want to format:
@@ -158,6 +158,8 @@ If this fails
 For this section the guide will show you how to use GDB debugging. Inside the launch.json
 you will want to make your file look something a little like this:
 
+*MantidPlot*
+
 .. code-block:: javascript
 
     {
@@ -186,7 +188,37 @@ you will want to make your file look something a little like this:
         ]
     }
 
-**Window:**
+
+*Workbench*
+
+To debug C++ and start directly into the Workbench, add this to the configuration list in ``launch.json``.
+
+.. code-block:: javascript
+
+    {
+      "name": "(gdb) Workbench C++ Only",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/usr/bin/python2.7", // Path to your used Python interpreter, here and below
+      "args": ["Path/To/Build/Directory/bin/workbench", "&&","gdb","/usr/bin/python2.7","$!"], // $! gets the process ID
+      "stopAtEntry": false,
+      "cwd": "Path/To/Build/Directory/bin", // this should point to bin inside the build directory
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "preLaunchTask": "Build Mantid",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+
+
+
+**Windows:**
 
 For this section of the guide it will discuss use of the MSVC debugger. Please
 follow on with the `guide <https://code.visualstudio.com/docs/cpp/config-msvc>`_.
@@ -302,11 +334,75 @@ Then pass as an argument the specific test you want to be debugging. As an examp
         ]
     }
 
+Debugging Python
+-----------------
+Visual Studio Code can be remotely attached to any running Python targets 
+using `ptvsd`.
+Whilst this "just works" for the majority of cases, it will not allow you to
+debug both C++ and Python at the same time. It also will not work with
+PyQt listeners, as the debugger must be attached to the main thread.
+
+**Setting up ptvsd**
+
+*Linux/OSX*
+
+Install `ptvsd` using pip within the terminal
+
+.. code-block:: bash
+
+    pip install ptvsd
+    # Or if using Python 3
+    pip3 install ptvsd
+
+*Windows*
+
+`ptvsd` needs to be installed into each source folder:
+
+- Go to your source folder with Mantid (not the build folder)
+- Go to external/src/ThirdParty/lib/python2.7
+- Open a command prompt here (shift + right click in empty space)
+- Run the following: `python -m pip install ptvsd`
+
+**Setting up VS Code**
+- Ensure the Python extension is installed
+- Open `launch.json` through either the debug tab or the file finder
+- Add the following target
+
+.. code-block:: javascript
+
+    {
+        "name": "Python Attach",
+        "type": "python"
+        "request": "attach"
+        "port" : 5678,
+        "host": "localhost"
+    }
+
+**Attaching the debugger**
+- Go to the location where you would like Mantid to first trigger a breakpoint
+- Insert the following code:
+
+.. code-block:: python
+
+    import ptvsd
+    ptvsd.enable_attach(address=('127.0.0.1', 5678), redirect_output=True)
+    ptvsd.wait_for_attach()
+    ptvsd.break_into_debugger()
+
+- When Mantid appears to freeze. Open the debug tab and start the Python 
+  Attach Target
+- Any additional breakpoints using the IDE are added automatically 
+  (i.e. don't add `ptvsd.break_into_debugger()`
+- If you'd like the code to not break at that location, but would like the
+  debugger to attach only remove `wait_for_attach()`
+
+
+
 Keybindings
 -----------
 
 To get a list of all of possible keybindings the open your command line
-(Ctrl+Shift+P or ⌘+Shift+P) and search for "Help: Keyboard Shortcuts 
+(Ctrl+Shift+P or ⌘+Shift+P) and search for "Help: Keyboard Shortcuts
 Reference" and hit Enter.
 
 **Very commonly used keybindings:**
@@ -324,3 +420,53 @@ Reference" and hit Enter.
 +-------------------+---------------+---------------+---------------+
 | Launch            | F5            | F5            | F5            |
 +-------------------+---------------+---------------+---------------+
+
+(Advanced) Getting Live Warnings and Errors with Clangd
+=======================================================
+(Linux only)
+
+The C++ extension in VS Code provides limited inspection: it (currently) has
+warnings disabled and will only emit errors.
+
+Clang can be used to provide live warnings and will notify on common bugs, like
+implicit casts, which are normally only detected whilst building.
+
+Future versions of clangd (>=10) will also emit clang-tidy warnings as you
+work.
+
+**Setup**
+
+- Remove the C++ Intellisense extension
+- Remove the C++ extension and install Native Debug to keep C++ debugging OR
+-  Go to the C++ extension settings and disable the following:
+
+  Autocomplete, Enhanced Colorization, Error Squiggles,
+  Experimental Features, IntelliSense Engine, IntelliSense Engine Fallback
+
+- Install the official clangd extension: `vscode-clangd`
+- Install clangd >= 8 which is part of `clang-tools-n`
+  (where n is the latest version)
+- Create a folder for a clang build separate to your main Mantid build.
+  One recommended location is to create it in a folder called **build**
+  within the source folder since this will also be rebuilt by the
+  *CMakeTools* extension, if you have it.
+- Configure this separate folder to use the clang compiler:
+
+.. code-block:: sh
+
+    cd *path/to/clang_build*
+    CXX=clang++ CC=clang cmake *path/to/src* -DPYTHON_EXECTUABLE=/usr/bin/python2  # (or 3)
+    # Note this does not have to build unless you want to!
+
+- Go to the clangd setting in VS Code and add the following argument:
+  `--compile-commands-dir=/path/to/your/clang-build` ensuring that build
+  folder is related to the source folder. This allows clangd to understand
+  the structure of Mantid.
+- Restart VS Code - attempt to write: `int i = (size_t) 1;` and check a warning
+  appears.
+- Any errors about unknown types can usually be resolved by briefly opening
+  that header to force clangd to parse the type.
+
+
+
+

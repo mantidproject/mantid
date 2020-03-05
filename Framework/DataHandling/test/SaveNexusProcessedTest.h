@@ -40,6 +40,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <memory>
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
@@ -233,14 +234,14 @@ public:
                               bool clearfiles, bool PreserveEvents = true,
                               bool CompressNexus = false) {
     std::vector<std::vector<int>> groups(5);
-    groups[0].push_back(10);
-    groups[0].push_back(11);
-    groups[0].push_back(12);
-    groups[1].push_back(20);
-    groups[2].push_back(30);
-    groups[2].push_back(31);
-    groups[3].push_back(40);
-    groups[4].push_back(50);
+    groups[0].emplace_back(10);
+    groups[0].emplace_back(11);
+    groups[0].emplace_back(12);
+    groups[1].emplace_back(20);
+    groups[2].emplace_back(30);
+    groups[2].emplace_back(31);
+    groups[3].emplace_back(40);
+    groups[4].emplace_back(50);
 
     EventWorkspace_sptr WS =
         WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100, 1.0,
@@ -423,10 +424,10 @@ public:
     table->addColumn("vector_double", "DoubleVectorColumn");
 
     std::vector<double> d1, d2, d3;
-    d1.push_back(0.5);
-    d2.push_back(1.0);
-    d2.push_back(2.5);
-    d3.push_back(4.0);
+    d1.emplace_back(0.5);
+    d2.emplace_back(1.0);
+    d2.emplace_back(2.5);
+    d3.emplace_back(4.0);
 
     // Add some rows of different sizes
     TableRow row1 = table->appendRow();
@@ -904,6 +905,31 @@ public:
     for (size_t i{0}; i < data.size(); ++i) {
       TS_ASSERT_EQUALS(data[i], i * 11)
     }
+  }
+
+  void test_when_nested_workspaces_are_being_saved() {
+    Workspace2D_sptr ws1 = boost::dynamic_pointer_cast<Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+    Workspace2D_sptr ws2 = boost::dynamic_pointer_cast<Workspace2D>(
+        WorkspaceFactory::Instance().create("Workspace2D", 1, 10, 10));
+
+    Mantid::API::WorkspaceGroup_sptr gws1 =
+        boost::make_shared<WorkspaceGroup>();
+    gws1->addWorkspace(ws1);
+    gws1->addWorkspace(ws2);
+    Mantid::API::WorkspaceGroup_sptr gws2 =
+        boost::make_shared<WorkspaceGroup>();
+    gws2->addWorkspace(gws1);
+    AnalysisDataService::Instance().addOrReplace("gws2", gws2);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        saveAlg.setPropertyValue("InputWorkspace", "gws2"));
+    std::string file = "namesdoesntmatterasitshouldntsaveanyway.nxs";
+    TS_ASSERT_THROWS_NOTHING(saveAlg.setPropertyValue("Filename", file));
+    TS_ASSERT_THROWS(saveAlg.execute(), const std::runtime_error &);
+    TS_ASSERT(!saveAlg.isExecuted());
   }
 
 private:

@@ -197,11 +197,11 @@ void WorkspacePresenter::groupWorkspaces() {
     // execute the algorithm
     bool bStatus = alg->execute();
     if (!bStatus) {
-      m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
+      m_view->showCriticalUserMessage("Mantid - Algorithm error",
                                       " Error in GroupWorkspaces algorithm");
     }
   } catch (...) {
-    m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
+    m_view->showCriticalUserMessage("Mantid - Algorithm error",
                                     " Error in GroupWorkspaces algorithm");
   }
 }
@@ -228,11 +228,11 @@ void WorkspacePresenter::ungroupWorkspaces() {
     // execute the algorithm
     bool bStatus = alg->execute();
     if (!bStatus) {
-      m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
+      m_view->showCriticalUserMessage("Mantid - Algorithm error",
                                       " Error in UnGroupWorkspace algorithm");
     }
   } catch (...) {
-    m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
+    m_view->showCriticalUserMessage("Mantid - Algorithm error",
                                     " Error in UnGroupWorkspace algorithm");
   }
 }
@@ -252,7 +252,7 @@ void WorkspacePresenter::deleteWorkspaces() {
                    })) {
     m_view->showCriticalUserMessage(
         "Delete Workspaces",
-        "Unabel to delete workspaces. Invalid workspace names provided.");
+        "Unable to delete workspaces. Invalid workspace names provided.");
     return;
   }
 

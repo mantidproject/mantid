@@ -5,14 +5,17 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from six import with_metaclass
+
 from abc import (ABCMeta, abstractmethod)
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (SANSInstrument, DetectorType)
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.common.file_information import (find_full_file_path, get_instrument_paths_for_sans_file)
+
+from six import with_metaclass
+
+from sans.algorithm_detail.mask_functions import SpectraBlock
 from sans.algorithm_detail.xml_shapes import (add_cylinder, add_outside_cylinder, create_phi_mask, create_line_mask)
-from sans.algorithm_detail.mask_functions import (SpectraBlock)
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import SANSInstrument
+from sans.common.file_information import (find_full_file_path, get_instrument_paths_for_sans_file)
+from sans.common.general_functions import create_unmanaged_algorithm
 
 
 # ------------------------------------------------------------------
@@ -35,8 +38,8 @@ def mask_bins(mask_info, workspace, detector_type):
     bin_mask_general_start = mask_info.bin_mask_general_start
     bin_mask_general_stop = mask_info.bin_mask_general_stop
     # Mask the bins with the detector-specific setting
-    bin_mask_start = mask_info.detectors[DetectorType.to_string(detector_type)].bin_mask_start
-    bin_mask_stop = mask_info.detectors[DetectorType.to_string(detector_type)].bin_mask_stop
+    bin_mask_start = mask_info.detectors[detector_type.value].bin_mask_start
+    bin_mask_stop = mask_info.detectors[detector_type.value].bin_mask_stop
 
     # Combine the settings and run the binning
     start_mask = []
@@ -178,7 +181,7 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
     total_spectra = []
 
     # All masks are detector-specific, hence we pull out only the relevant part
-    detector = mask_info.detectors[DetectorType.to_string(detector_type)]
+    detector = mask_info.detectors[detector_type.value]
 
     # ----------------------
     # Single spectra
@@ -342,7 +345,7 @@ class Masker(with_metaclass(ABCMeta, object)):
         super(Masker, self).__init__()
 
     @abstractmethod
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
+    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
         pass
 
 
@@ -350,8 +353,7 @@ class NullMasker(Masker):
     def __init__(self):
         super(NullMasker, self).__init__()
 
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
-        _ = mask_info  # noqa
+    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
         return workspace_to_mask
 
 
@@ -362,7 +364,7 @@ class MaskerISIS(Masker):
         self._instrument = instrument
         self._detector_names = detector_names
 
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
+    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
         """
         Performs the different types of masks that are currently available for ISIS reductions.
 
@@ -373,27 +375,21 @@ class MaskerISIS(Masker):
         :return: a masked workspace.
         """
         # Perform bin masking
-        progress.report("Performing bin masking.")
         workspace_to_mask = mask_bins(mask_info, workspace_to_mask, detector_type)
 
         # Perform cylinder masking
-        progress.report("Performing cylinder masking.")
         workspace_to_mask = mask_cylinder(mask_info, workspace_to_mask)
 
         # Apply the xml mask files
-        progress.report("Applying mask files.")
         workspace_to_mask = mask_with_mask_files(mask_info, workspace_to_mask)
 
         # Mask spectrum list
-        progress.report("Applying spectrum masks.")
         workspace_to_mask = mask_spectra(mask_info, workspace_to_mask, self._spectra_block, detector_type)
 
         # Mask angle
-        progress.report("Applying angle mask.")
         workspace_to_mask = mask_angle(mask_info, workspace_to_mask)
 
         # Mask beam stop
-        progress.report("Masking beam stop.")
         return mask_beam_stop(mask_info, workspace_to_mask, self._instrument, self._detector_names)
 
 
@@ -407,6 +403,9 @@ def create_masker(state, detector_type):
     """
     data_info = state.data
     instrument = data_info.instrument
+
+    # TODO remove this shim
+
     detector_names = state.reduction.detector_names
     if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or\
                     instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM:  # noqa

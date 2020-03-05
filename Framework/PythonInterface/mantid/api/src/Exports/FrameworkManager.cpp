@@ -78,7 +78,6 @@ FrameworkManagerImpl &instance() {
     PyRun_SimpleString("import atexit\n"
                        "from mantid.api import FrameworkManager\n"
                        "atexit.register(lambda: FrameworkManager.shutdown())");
-
   });
   return frameworkMgr;
 }

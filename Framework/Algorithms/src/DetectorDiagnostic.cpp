@@ -587,9 +587,9 @@ DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
     // Iterate over all map elements with key == theKey
     std::vector<size_t> speclistsingle;
     for (s_it = keyRange.first; s_it != keyRange.second; ++s_it) {
-      speclistsingle.push_back(s_it->second);
+      speclistsingle.emplace_back(s_it->second);
     }
-    speclist.push_back(std::move(speclistsingle));
+    speclist.emplace_back(std::move(speclistsingle));
   }
 
   return speclist;
@@ -624,7 +624,7 @@ std::vector<double> DetectorDiagnostic::calculateMedian(
 
   for (const auto &hists : indexmap) {
     std::vector<double> medianInput;
-    const int nhists = static_cast<int>(hists.size());
+    const auto nhists = static_cast<int>(hists.size());
     // The maximum possible length is that of workspace length
     medianInput.reserve(nhists);
 
@@ -649,7 +649,7 @@ std::vector<double> DetectorDiagnostic::calculateMedian(
       }
       // Now we have a good value
       PARALLEL_CRITICAL(DetectorDiagnostic_median_d) {
-        medianInput.push_back(yValue);
+        medianInput.emplace_back(yValue);
       }
 
       PARALLEL_END_INTERUPT_REGION
@@ -659,7 +659,7 @@ std::vector<double> DetectorDiagnostic::calculateMedian(
     if (medianInput.empty()) {
       g_log.information(
           "some group has no valid histograms. Will use 0 for median.");
-      medianInput.push_back(0.);
+      medianInput.emplace_back(0.);
     }
 
     Kernel::Statistics stats =
@@ -670,7 +670,7 @@ std::vector<double> DetectorDiagnostic::calculateMedian(
       throw std::out_of_range("The calculated value for the median was either "
                               "negative or unreliably large");
     }
-    medianvec.push_back(median);
+    medianvec.emplace_back(median);
   }
   return medianvec;
 }

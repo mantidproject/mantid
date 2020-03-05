@@ -24,7 +24,7 @@ window.
 @author Samuel Jackson, STFC
 */
 
-class DLLExport IndirectBayes : public IndirectInterface {
+class MANTIDQT_INDIRECT_DLL IndirectBayes : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums

@@ -234,11 +234,12 @@ protected:
                                 const coord_t box_size,
                                 std::set<coord_t> &mid_points) const;
 
+  /// Box controller in use
+  API::BoxController_sptr m_BoxController;
+
   /** MDBox containing all of the events in the workspace. */
   std::unique_ptr<MDBoxBase<MDE, nd>> data;
 
-  /// Box controller in use
-  API::BoxController_sptr m_BoxController;
   // boost::shared_ptr<BoxCtrlChangesList > m_BoxController;
   /// Display normalization for the event workspace itself
   Mantid::API::MDNormalization m_displayNormalization;

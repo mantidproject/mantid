@@ -11,8 +11,8 @@ constraints on the spin box such as a maximum value.
 
 .. code-block:: python
 
-    self.spin = QtGui.QSpinBox()
+    self.spin = QtWidgets.QSpinBox()
     grid.addWidget(self.spin)
 
 To add a spin box to the GUI the above code needs to be added to the
-``__init__`` function of the View.
+``__init__`` function of the view.

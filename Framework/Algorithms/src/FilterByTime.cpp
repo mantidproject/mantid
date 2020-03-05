@@ -47,7 +47,7 @@ void FilterByTime::init() {
                   "sample log) is used as the zero. " +
                       commonHelp);
 
-  declareProperty("StopTime", 0.0,
+  declareProperty("StopTime", 0.0, min,
                   "The stop time, in seconds, since the start of the run. "
                   "Events at or after this time are filtered out. \nThe time "
                   "of the first pulse (i.e. the first entry in the "

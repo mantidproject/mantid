@@ -67,6 +67,8 @@ private Q_SLOTS:
   void updateTooltip(QtProperty *property) const;
 
 private:
+  void cleanUpErrors();
+
   /// Text appended to parameter descr. tooltip if error is set
   static const QString ERROR_TOOLTIP;
 

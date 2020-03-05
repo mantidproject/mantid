@@ -212,7 +212,7 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
 
         // try if numeric time series, then the size must match to the
         // blocksize
-        const int blocksize = static_cast<int>(ws->y(0).size());
+        const auto blocksize = static_cast<int>(ws->y(0).size());
 
         TimeSeriesProperty<double> *timeSeriesDouble(nullptr);
         TimeSeriesProperty<int> *timeSeriesInt(nullptr);
@@ -272,7 +272,7 @@ std::vector<double> ConjoinXRuns::getXAxis(MatrixWorkspace_sptr ws) const {
       axis = std::vector<double>(intAxis.begin(), intAxis.end());
     } else {
       // then scalar
-      axis.push_back(run.getPropertyAsSingleValue(m_logEntry));
+      axis.emplace_back(run.getPropertyAsSingleValue(m_logEntry));
     }
   }
 
@@ -308,7 +308,7 @@ void ConjoinXRuns::joinSpectrum(int64_t wsIndex) {
   std::vector<double> errors;
   std::vector<double> axis;
   std::vector<double> xerrors;
-  const size_t index = static_cast<size_t>(wsIndex);
+  const auto index = static_cast<size_t>(wsIndex);
   const auto ySize = m_outWS->y(index).size();
   spectrum.reserve(ySize);
   errors.reserve(ySize);
@@ -364,7 +364,7 @@ void ConjoinXRuns::exec() {
   for (const auto &input : RunCombinationHelper::unWrapGroups(inputs_given)) {
     MatrixWorkspace_sptr ws =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
-    m_inputWS.push_back(ws);
+    m_inputWS.emplace_back(ws);
   }
 
   auto first = m_inputWS.front();

@@ -9,7 +9,9 @@
 Description
 -----------
 
-The workspace data are stored in the file in columns: the first column contains
+The format used differs based on the type of workspace being saved.  For a table workspace the data will contain an optional row of column headers, followed by the row values, with each individual column value seperated by the defined seperator.
+
+For a  matrix workspace the data are stored in the file in columns: the first column contains
 the X-values, followed by pairs of Y and E values. Columns are separated by
 commas. The resulting file can normally be loaded into a workspace by the
 :ref:`algm-LoadAscii` algorithm.

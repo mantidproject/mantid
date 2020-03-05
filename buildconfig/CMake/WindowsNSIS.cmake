@@ -57,30 +57,19 @@ mark_as_advanced(WINDOWS_DEPLOYMENT_TYPE)
 ###########################################################################
 # External dependency DLLs
 ###########################################################################
-# MSVC runtime & openmp libs for Visual Studio
-# They are in the locations defined by the VS***COMNTOOLS environment variable
-set ( _RT 140 )
-file ( TO_CMAKE_PATH $ENV{VS${_RT}COMNTOOLS}../../VC/redist/x64 X64_REDIST_DIR )
-# CRT libraries
-set ( CRT_DLLS concrt${_RT}.dll msvcp${_RT}.dll vccorlib${_RT}.dll vcruntime${_RT}.dll )
-foreach( DLL ${CRT_DLLS} )
-  install ( FILES ${X64_REDIST_DIR}/Microsoft.VC${_RT}.CRT/${DLL} DESTINATION bin )
-endforeach()
-# OpenMP
-set ( OMP_DLLS vcomp${_RT}.dll )
-foreach( DLL ${OMP_DLLS} )
-    install ( FILES ${X64_REDIST_DIR}/Microsoft.VC${_RT}.OpenMP/${DLL} DESTINATION bin )
-endforeach()
-
-# Other third party dependencies
 set ( BOOST_DIST_DLLS
     boost_date_time-mt.dll
     boost_filesystem-mt.dll
-    boost_python27-mt.dll
     boost_regex-mt.dll
     boost_serialization-mt.dll
     boost_system-mt.dll
 )
+if ( WITH_PYTHON3 )
+  list( APPEND BOOST_DIST_DLLS boost_python38-mt.dll )
+else ()
+  list( APPEND BOOST_DIST_DLLS boost_python27-mt.dll )
+endif ()
+
 set ( POCO_DIST_DLLS
     PocoCrypto64.dll
     PocoFoundation64.dll
@@ -104,7 +93,7 @@ set ( OCC_DIST_DLLS
     TKTopAlgo.dll
 )
 set ( MISC_CORE_DIST_DLLS
-    cblas.dll
+    gslcblas.dll
     gsl.dll
     hdf5_cpp.dll
     hdf5_hl_cpp.dll
@@ -116,6 +105,7 @@ set ( MISC_CORE_DIST_DLLS
     libNeXusCPP-0.dll
     librdkafka.dll
     librdkafkacpp.dll
+    muparser.dll
     ssleay32.dll
     szip.dll
     tbb.dll
@@ -193,8 +183,8 @@ install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDNOTEBOOK
 ###########################################################################
 # On install. The blank lines seem to be required or it doesn't create the shortcut
 
-set ( MANTIDPLOT_LINK_NAME "MantidPlot${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
-set ( MANTIDNOTEBOOK_LINK_NAME "MantidNotebook${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
+set ( MANTIDPLOT_LINK_NAME "Mantid Plot ${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
+set ( MANTIDNOTEBOOK_LINK_NAME "Mantid Notebook ${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
 
 set (CPACK_NSIS_CREATE_ICONS_EXTRA "
   CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico'
@@ -228,7 +218,7 @@ set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
 # this is done via appending the relevant commands to the already declared variables
 if ( ENABLE_WORKBENCH )
   install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/images/${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico DESTINATION bin )
-  set ( MANTIDWORKBENCH_LINK_NAME "MantidWorkbench${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
+  set ( MANTIDWORKBENCH_LINK_NAME "Mantid Workbench ${WINDOWS_CAPITALIZED_PACKAGE_SUFFIX}.lnk" )
   message(STATUS "Adding icons for Workbench as it is being packaged in the installation.")
   set (CPACK_NSIS_CREATE_ICONS_EXTRA "
     CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDWORKBENCH_LINK_NAME}' '\\\"$INSTDIR\\\\bin\\\\launch_workbench.exe\\\"' '' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDWORKBENCH_ICON_NAME}.ico'

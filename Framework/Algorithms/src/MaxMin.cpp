@@ -73,7 +73,7 @@ void MaxMin::exec() {
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
-  const int numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int>(localworkspace->getNumberHistograms());
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
@@ -122,9 +122,11 @@ void MaxMin::exec() {
 
     if (MaxRange == EMPTY_DBL())
       highit = X.end();
-    else
+    else {
+      using std::placeholders::_1;
       highit = std::find_if(lowit, X.end(),
-                            std::bind2nd(std::greater<double>(), MaxRange));
+                            std::bind(std::greater<double>(), _1, MaxRange));
+    }
 
     // If range specified doesn't overlap with this spectrum then bail out
     if (lowit == X.end() || highit == X.begin() || lowit == highit)

@@ -35,9 +35,8 @@
 #include <QLabel>
 #include <QPushButton>
 
-OpenProjectDialog::OpenProjectDialog(QWidget *parent, bool extended,
-                                     Qt::WFlags flags)
-    : ExtensibleFileDialog(parent, extended, flags) {
+OpenProjectDialog::OpenProjectDialog(QWidget *parent, bool extended)
+    : ExtensibleFileDialog(parent, extended) {
   // setCaption(tr("QtiPlot - Open Project"));
   setWindowTitle(tr("MantidPlot - Open Project"));
   setFileMode(ExistingFile);

@@ -25,7 +25,7 @@ class ILLPowderEfficiencyTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ['967076.nxs']
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
 
     def runTest(self):

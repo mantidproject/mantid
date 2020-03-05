@@ -200,8 +200,7 @@ void HFIRLoad::exec() {
   } else {
     const std::string sddName = "total-sample-detector-distance";
     Mantid::Kernel::Property *prop = dataWS->run().getProperty(sddName);
-    Mantid::Kernel::PropertyWithValue<double> *dp =
-        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
     if (!dp) {
       throw std::runtime_error("Could not cast (interpret) the property " +
                                sddName + " as a floating point numeric value.");
@@ -246,8 +245,7 @@ void HFIRLoad::exec() {
   } catch (...) {
     Mantid::Kernel::Property *prop =
         dataWS->run().getProperty("source-sample-distance");
-    Mantid::Kernel::PropertyWithValue<double> *dp =
-        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
     src_to_sample = *dp;
     output_message +=
         "   Could not compute SSD from number of guides, taking: " +
@@ -256,8 +254,7 @@ void HFIRLoad::exec() {
 
   const std::string sampleADName = "sample-aperture-diameter";
   Mantid::Kernel::Property *prop = dataWS->run().getProperty(sampleADName);
-  Mantid::Kernel::PropertyWithValue<double> *dp =
-      dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+  auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
   if (!dp) {
     throw std::runtime_error("Could not cast (interpret) the property " +
                              sampleADName +

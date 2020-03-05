@@ -11,11 +11,13 @@ import unittest
 from mantid.py3compat import mock
 from sans.algorithm_detail.centre_finder_new import centre_finder_new, centre_finder_mass
 from sans.common.enums import (SANSDataType, FindDirectionEnum, DetectorType)
+from sans.test_helper.test_director import TestDirector
 
 
 class CentreFinderNewTest(unittest.TestCase):
     def setUp(self):
-        self.state = mock.MagicMock()
+        state_builder = TestDirector()
+        self.state = state_builder.construct()
 
     @mock.patch('sans.algorithm_detail.centre_finder_new.provide_loaded_data')
     @mock.patch('sans.algorithm_detail.centre_finder_new.create_managed_non_child_algorithm')
@@ -25,17 +27,17 @@ class CentreFinderNewTest(unittest.TestCase):
         position_1_start = 300
         position_2_start = -300
         tolerance = 0.001
-        find_direction = FindDirectionEnum.All
+        find_direction = FindDirectionEnum.ALL
         iterations = 10
         verbose = False
 
-        load_data_mock.return_value = {SANSDataType.SampleScatter: [mock.MagicMock()]}, {
-            SANSDataType.SampleScatter: [mock.MagicMock()]}
+        load_data_mock.return_value = {SANSDataType.SAMPLE_SCATTER: [mock.MagicMock()]}, {
+            SANSDataType.SAMPLE_SCATTER: [mock.MagicMock()]}
 
         beam_centre_finder = "SANSBeamCentreFinder"
         beam_centre_finder_options = {"Component":'LAB', "Iterations": iterations, "RMin": r_min / 1000, "RMax": r_max / 1000,
                                       "Position1Start": position_1_start, "Position2Start": position_2_start,
-                                      "Tolerance": tolerance, "Direction": FindDirectionEnum.to_string(find_direction),
+                                      "Tolerance": tolerance, "Direction": find_direction.value,
                                       "Verbose": verbose}
 
         centre_finder_new(self.state, r_min=r_min, r_max=r_max, iterations=iterations, position_1_start=position_1_start
@@ -53,8 +55,8 @@ class CentreFinderNewTest(unittest.TestCase):
         tolerance = 0.001
         iterations = 10
 
-        load_data_mock.return_value = {SANSDataType.SampleScatter: [mock.MagicMock()]}, {
-            SANSDataType.SampleScatter: [mock.MagicMock()]}
+        load_data_mock.return_value = {SANSDataType.SAMPLE_SCATTER: [mock.MagicMock()]}, {
+            SANSDataType.SAMPLE_SCATTER: [mock.MagicMock()]}
 
         beam_centre_finder = "SANSBeamCentreFinderMassMethod"
         beam_centre_finder_options = {"RMin": r_min / 1000,

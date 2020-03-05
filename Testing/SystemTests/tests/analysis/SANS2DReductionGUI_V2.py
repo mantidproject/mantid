@@ -40,7 +40,7 @@ class SANS2DMinimalBatchReductionTest_V2(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        return "trans_test_rear", "SANSReductionGUI.nxs"
+        return "trans_test_rear_1D_1.5_12.5", "SANSReductionGUI.nxs"
 
 
 class SANS2DMinimalSingleReductionTest_V2(systemtesting.MantidSystemTest):

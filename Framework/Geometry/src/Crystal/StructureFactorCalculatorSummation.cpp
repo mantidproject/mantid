@@ -65,7 +65,7 @@ void StructureFactorCalculatorSummation::updateUnitCellScatterers(
           BraggScatterer_sptr clone = current->clone();
           clone->setProperty("Position", getV3DasString(position));
 
-          braggScatterers.push_back(clone);
+          braggScatterers.emplace_back(clone);
         }
       }
     }

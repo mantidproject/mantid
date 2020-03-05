@@ -19,13 +19,13 @@
 
 #include <boost/cast.hpp>
 
+using Mantid::Algorithms::CalculateDynamicRange;
+using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::API::FrameworkManager;
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::Workspace;
 using Mantid::API::Workspace_sptr;
-using Mantid::Algorithms::CalculateDynamicRange;
-using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::DataHandling::MaskDetectorsInShape;
 using Mantid::DataHandling::MoveInstrumentComponent;
 

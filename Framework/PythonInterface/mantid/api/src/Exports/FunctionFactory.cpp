@@ -6,11 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/core/UninstallTrace.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -23,8 +26,11 @@
 
 using Mantid::API::FunctionFactory;
 using Mantid::API::FunctionFactoryImpl;
+using Mantid::API::IBackgroundFunction;
 using Mantid::API::IFunction;
+using Mantid::API::IPeakFunction;
 using Mantid::PythonInterface::PythonObjectInstantiator;
+using Mantid::PythonInterface::UninstallTrace;
 
 using namespace boost::python;
 
@@ -92,6 +98,52 @@ PyObject *getFunctionNames(FunctionFactoryImpl &self) {
 
 //------------------------------------------------------------------------------------------------------
 /**
+ * Something that returns the registered background functions as a list.
+ * @param self :: Enables it to be called as a member function on the
+ * FunctionFactory class
+ */
+PyObject *getBackgroundFunctionNames(FunctionFactoryImpl &self) {
+  const std::vector<std::string> &names =
+      self.getFunctionNames<Mantid::API::IFunction>();
+
+  PyObject *registered = PyList_New(0);
+  for (const auto &name : names) {
+    auto fun = self.createFunction(name);
+    if (dynamic_cast<IBackgroundFunction *>(fun.get())) {
+      PyObject *bkg_function = to_python_value<const std::string &>()(name);
+      if (PyList_Append(registered, bkg_function))
+        throw std::runtime_error("Failed to insert value into PyList");
+    }
+  }
+
+  return registered;
+}
+
+//------------------------------------------------------------------------------------------------------
+/**
+ * Something that returns the registered peak functions as a list.
+ * @param self :: Enables it to be called as a member function on the
+ * FunctionFactory class
+ */
+PyObject *getPeakFunctionNames(FunctionFactoryImpl &self) {
+  const std::vector<std::string> &names =
+      self.getFunctionNames<Mantid::API::IFunction>();
+
+  PyObject *registered = PyList_New(0);
+  for (const auto &name : names) {
+    auto fun = self.createFunction(name);
+    if (dynamic_cast<IPeakFunction *>(fun.get())) {
+      PyObject *peak_function = to_python_value<const std::string &>()(name);
+      if (PyList_Append(registered, peak_function))
+        throw std::runtime_error("Failed to insert value into PyList");
+    }
+  }
+
+  return registered;
+}
+
+//------------------------------------------------------------------------------------------------------
+/**
  * Something that makes Function Factory return to python a composite function
  * for Product function, Convolution or
  * any similar superclass of composite function.
@@ -122,11 +174,10 @@ std::recursive_mutex FUNCTION_REGISTER_MUTEX;
  * @param classObject A Python class derived from IFunction
  */
 void subscribe(FunctionFactoryImpl &self, PyObject *classObject) {
+  UninstallTrace uninstallTrace;
   std::lock_guard<std::recursive_mutex> lock(FUNCTION_REGISTER_MUTEX);
-  static PyTypeObject *baseClass = const_cast<PyTypeObject *>(
+  static auto *baseClass = const_cast<PyTypeObject *>(
       converter::registered<IFunction>::converters.to_python_target_type());
-  // object mantidapi(handle<>(PyImport_ImportModule("mantid.api")));
-  // object ifunction = mantidapi.attr("IFunction");
 
   // obj should be a class deriving from IFunction
   // PyObject_IsSubclass can set the error handler if classObject
@@ -180,5 +231,10 @@ void export_FunctionFactory() {
       .def("Instance", &FunctionFactory::Instance,
            return_value_policy<reference_existing_object>(),
            "Returns a reference to the FunctionFactory singleton")
+      .def("getBackgroundFunctionNames", &getBackgroundFunctionNames,
+           arg("self"),
+           "Returns a list of the currently available background functions")
+      .def("getPeakFunctionNames", &getPeakFunctionNames, arg("self"),
+           "Returns a list of the currently available peak functions")
       .staticmethod("Instance");
 }

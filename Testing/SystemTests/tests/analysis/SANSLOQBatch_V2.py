@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init
+# pylint: disable=no-init
 
 from __future__ import (absolute_import, division, print_function)
 import systemtesting
@@ -30,17 +30,17 @@ class SANSLOQBatchTest_V2(systemtesting.MantidSystemTest):
 
         BatchReduce(csv_file, 'raw', plotresults=False, saveAlgs={'SaveCanSAS1D': 'xml', 'SaveNexus': 'nxs'})
 
-        LoadNexus(Filename='54433sans.nxs', OutputWorkspace='result')
-        Plus(LHSWorkspace='result', RHSWorkspace='99630sanotrans', OutputWorkspace= 'result')
+        LoadNexus(Filename='54433sans_main_1D_2.2_10.0.nxs', OutputWorkspace='result')
+        Plus(LHSWorkspace='result', RHSWorkspace='99630sanotrans_main_1D_2.2_10.0', OutputWorkspace='result')
 
-        os.remove(os.path.join(config['defaultsave.directory'],'54433sans.nxs'))
-        os.remove(os.path.join(config['defaultsave.directory'],'99630sanotrans.nxs'))
-        os.remove(os.path.join(config['defaultsave.directory'],'54433sans.xml'))
-        os.remove(os.path.join(config['defaultsave.directory'],'99630sanotrans.xml'))
+        os.remove(os.path.join(config['defaultsave.directory'], '54433sans_main_1D_2.2_10.0.nxs'))
+        os.remove(os.path.join(config['defaultsave.directory'], '99630sanotrans_main_1D_2.2_10.0.nxs'))
+        os.remove(os.path.join(config['defaultsave.directory'], '54433sans_main_1D_2.2_10.0.xml'))
+        os.remove(os.path.join(config['defaultsave.directory'], '99630sanotrans_main_1D_2.2_10.0.xml'))
 
     def validate(self):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
 
-        return 'result','SANSLOQBatch.nxs'
+        return 'result', 'SANSLOQBatch.nxs'

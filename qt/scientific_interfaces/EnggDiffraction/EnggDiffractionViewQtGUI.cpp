@@ -28,7 +28,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // Add this class to the list of specialised dialogs in this namespace
-DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
+// Hidden for release of 5.0 to be removed as a maintainance issue.
+// DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 
@@ -724,7 +725,7 @@ void EnggDiffractionViewQtGUI::plotCalibOutput(const std::string &pyCode) {
   std::string status =
       runPythonCode(QString::fromStdString(pyCode), false).toStdString();
 
-  m_logMsgs.push_back(
+  m_logMsgs.emplace_back(
       "Plotted output calibration vanadium curves, with status string " +
       status);
   m_presenter->notify(IEnggDiffractionPresenter::LogMsg);
@@ -934,7 +935,7 @@ EnggDiffractionViewQtGUI::qListToVector(QStringList list,
                                         bool validator) const {
   std::vector<std::string> vec;
   if (validator) {
-    foreach (const QString &str, list) { vec.push_back(str.toStdString()); }
+    foreach (const QString &str, list) { vec.emplace_back(str.toStdString()); }
   }
 
   return vec;
@@ -942,8 +943,8 @@ EnggDiffractionViewQtGUI::qListToVector(QStringList list,
 
 std::vector<bool> EnggDiffractionViewQtGUI::focusingBanks() const {
   std::vector<bool> res;
-  res.push_back(m_uiTabFocus.checkBox_focus_bank1->isChecked());
-  res.push_back(m_uiTabFocus.checkBox_focus_bank2->isChecked());
+  res.emplace_back(m_uiTabFocus.checkBox_focus_bank1->isChecked());
+  res.emplace_back(m_uiTabFocus.checkBox_focus_bank2->isChecked());
   return res;
 }
 

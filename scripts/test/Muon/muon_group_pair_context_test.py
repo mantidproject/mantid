@@ -4,13 +4,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
 import unittest
 
 from Muon.GUI.Common.contexts.muon_group_pair_context import MuonGroupPairContext
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.observer_pattern import GenericObserverWithArgPassing
 from mantid.py3compat import mock
 from Muon.GUI.Common.test_helpers.general_test_helpers import create_group_populated_by_two_workspace
 

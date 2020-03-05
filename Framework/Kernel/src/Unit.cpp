@@ -104,12 +104,6 @@ void Unit::addConversion(std::string to, const double &factor,
 }
 
 //---------------------------------------------------------------------------------------
-/** Removes all registered 'quick conversions' from the unit class on which this
- * method is called.
- */
-void Unit::clearConversions() const { s_conversionFactors.clear(); }
-
-//---------------------------------------------------------------------------------------
 /** Initialize the unit to perform conversion using singleToTof() and
  *singleFromTof()
  *
@@ -1068,7 +1062,7 @@ DECLARE_UNIT(SpinEchoLength)
 
 const UnitLabel SpinEchoLength::label() const { return Symbol::Nanometre; }
 
-SpinEchoLength::SpinEchoLength() : Wavelength() { clearConversions(); }
+SpinEchoLength::SpinEchoLength() : Wavelength() {}
 
 void SpinEchoLength::init() {
   // Efixed must be set to something
@@ -1119,7 +1113,7 @@ DECLARE_UNIT(SpinEchoTime)
 
 const UnitLabel SpinEchoTime::label() const { return Symbol::Nanosecond; }
 
-SpinEchoTime::SpinEchoTime() : Wavelength() { clearConversions(); }
+SpinEchoTime::SpinEchoTime() : Wavelength() {}
 
 void SpinEchoTime::init() {
   // Efixed must be set to something
@@ -1258,6 +1252,42 @@ double Temperature::conversionTOFMax() const {
 }
 
 Unit *Temperature::clone() const { return new Temperature(*this); }
+
+// =====================================================================================================
+/* Atomic Distance in units of Angstroms
+ * =====================================================================================================
+ *
+ * The distance from the center of an atom in Angstroms
+ */
+DECLARE_UNIT(AtomicDistance)
+
+AtomicDistance::AtomicDistance() : Empty(), m_label("Atomic Distance") {}
+
+const UnitLabel AtomicDistance::label() const { return Symbol::Angstrom; }
+
+void AtomicDistance::init() {}
+
+Unit *AtomicDistance::clone() const { return new AtomicDistance(*this); }
+
+double AtomicDistance::singleToTOF(const double x) const {
+  UNUSED_ARG(x);
+  throw std::runtime_error(
+      "Atomic Distance is not allowed to be converted to TOF. ");
+}
+
+double AtomicDistance::singleFromTOF(const double tof) const {
+  UNUSED_ARG(tof);
+  throw std::runtime_error(
+      "Atomic Distance is not allowed to be converted from TOF. ");
+}
+
+double AtomicDistance::conversionTOFMin() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+double AtomicDistance::conversionTOFMax() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
 
 // ================================================================================
 

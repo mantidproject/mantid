@@ -95,7 +95,8 @@ private:
   void setWavelength();
 
   std::pair<int, int> parseDetectorDimensions(const std::string &dims_str);
-  std::vector<int> getData(const std::string &dataXpath = "//Data");
+  std::vector<int> readData(const std::string &dataXpath = "//Data");
+  void permuteTubes(std::vector<int> &data);
 
   void storeValue(int specID, double value, double error, double wavelength,
                   double dwavelength);

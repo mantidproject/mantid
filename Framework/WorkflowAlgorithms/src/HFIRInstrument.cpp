@@ -116,7 +116,7 @@ double getSourceToSampleDistance(API::MatrixWorkspace_sptr dataWS) {
     // First let's try to get source_distance first:
     sourceToSampleDistance = parsDouble[0] *= 1000; // convert to mm
   } else {
-    const int nGuides =
+    const auto nGuides =
         dataWS->run().getPropertyValueAsType<int>("Motor_Positions_nguides");
     // aperture-distances: array from the instrument parameters
     std::vector<std::string> parsString =
@@ -132,7 +132,7 @@ double getSourceToSampleDistance(API::MatrixWorkspace_sptr dataWS) {
     sourceToSampleDistance =
         boost::lexical_cast<double>(guidesDistancesSplit[nGuides]);
 
-    double sourceToSampleDistanceOffset =
+    auto sourceToSampleDistanceOffset =
         dataWS->run().getPropertyValueAsType<double>(
             "Header_sample_aperture_to_flange");
 

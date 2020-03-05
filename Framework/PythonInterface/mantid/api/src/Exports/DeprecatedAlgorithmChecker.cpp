@@ -42,8 +42,7 @@ public:
   /// deprecated, empty string otherwise
   const std::string isDeprecated() const {
     std::string deprecMessage;
-    DeprecatedAlgorithm *depr =
-        dynamic_cast<DeprecatedAlgorithm *>(m_alg.get());
+    auto *depr = dynamic_cast<DeprecatedAlgorithm *>(m_alg.get());
     if (depr)
       deprecMessage = depr->deprecationMsg(m_alg.get());
     return deprecMessage;

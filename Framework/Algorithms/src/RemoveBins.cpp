@@ -193,8 +193,8 @@ void RemoveBins::exec() {
 
   // Loop over the spectra
   int start = 0, end = 0;
-  const int blockSize = static_cast<int>(m_inputWorkspace->x(0).size());
-  const int numHists =
+  const auto blockSize = static_cast<int>(m_inputWorkspace->x(0).size());
+  const auto numHists =
       static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numHists);
   for (int i = 0; i < numHists; ++i) {
@@ -271,8 +271,8 @@ void RemoveBins::transformRangeUnit(const int index, double &startX,
     double l1, l2, theta;
     this->calculateDetectorPosition(index, l1, l2, theta);
     std::vector<double> endPoints;
-    endPoints.push_back(startX);
-    endPoints.push_back(endX);
+    endPoints.emplace_back(startX);
+    endPoints.emplace_back(endX);
     std::vector<double> emptyVec;
     m_rangeUnit->toTOF(endPoints, emptyVec, l1, l2, theta, 0, 0.0, 0.0);
     inputUnit->fromTOF(endPoints, emptyVec, l1, l2, theta, 0, 0.0, 0.0);
@@ -330,7 +330,7 @@ void RemoveBins::RemoveFromEnds(int start, int end, HistogramY &Y,
                                 HistogramE &E) {
   if (start)
     --start;
-  int size = static_cast<int>(Y.size());
+  auto size = static_cast<int>(Y.size());
   if (end > size)
     end = size;
   for (int j = start; j < end; ++j) {

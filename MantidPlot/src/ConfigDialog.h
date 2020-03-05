@@ -29,6 +29,7 @@ Description          : Preferences dialog
 #ifndef ConfigDialog_H
 #define ConfigDialog_H
 
+#include "MantidQtWidgets/Common/MantidDialog.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include <QCheckBox>
 #include <QDialog>
@@ -61,7 +62,7 @@ class InstrumentSelector;
 } // namespace MantidQt
 
 //! Preferences dialog
-class ConfigDialog : public QDialog {
+class ConfigDialog : public MantidQt::API::MantidDialog {
   Q_OBJECT
 
 public:
@@ -70,7 +71,7 @@ public:
    * @param parent :: parent widget (must be the application window!=
    * @param fl :: window flags
    */
-  ConfigDialog(QWidget *parent, Qt::WFlags fl = nullptr);
+  explicit ConfigDialog(QWidget *parent);
   void setColumnSeparator(const QString &sep);
   void gotoMantidDirectories();
 

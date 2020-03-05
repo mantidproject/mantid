@@ -81,33 +81,30 @@ ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
   // Everything gets created on the fly. Note that the order matters here
   // @todo Really could do with a better system than this. Virtual function
   // maybe?
-  const StructuredDetector *sd =
-      dynamic_cast<const StructuredDetector *>(base.get());
+  const auto *sd = dynamic_cast<const StructuredDetector *>(base.get());
   if (sd)
     return boost::make_shared<StructuredDetector>(sd, map);
 
-  const RectangularDetector *rd =
-      dynamic_cast<const RectangularDetector *>(base.get());
+  const auto *rd = dynamic_cast<const RectangularDetector *>(base.get());
   if (rd)
     return boost::make_shared<RectangularDetector>(rd, map);
 
-  const GridDetector *gd = dynamic_cast<const GridDetector *>(base.get());
+  const auto *gd = dynamic_cast<const GridDetector *>(base.get());
   if (gd)
     return boost::make_shared<GridDetector>(gd, map);
 
-  const CompAssembly *ac = dynamic_cast<const CompAssembly *>(base.get());
+  const auto *ac = dynamic_cast<const CompAssembly *>(base.get());
   if (ac)
     return boost::make_shared<CompAssembly>(ac, map);
-  const ObjCompAssembly *oac =
-      dynamic_cast<const ObjCompAssembly *>(base.get());
+  const auto *oac = dynamic_cast<const ObjCompAssembly *>(base.get());
   if (oac)
     return boost::make_shared<ObjCompAssembly>(oac, map);
 
-  const ObjComponent *oc = dynamic_cast<const ObjComponent *>(base.get());
+  const auto *oc = dynamic_cast<const ObjComponent *>(base.get());
   if (oc)
     return boost::make_shared<ObjComponent>(oc, map);
   // Must be a component
-  const IComponent *cc = dynamic_cast<const IComponent *>(base.get());
+  const auto *cc = dynamic_cast<const IComponent *>(base.get());
   if (cc)
     return boost::make_shared<Component>(cc, map);
 

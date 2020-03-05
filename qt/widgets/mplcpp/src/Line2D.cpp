@@ -11,9 +11,9 @@
 
 #include <QColor>
 
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::Converters::VectorToNDArray;
 using Mantid::PythonInterface::Converters::WrapReadOnly;
-using Mantid::PythonInterface::GlobalInterpreterLock;
 using MantidQt::Widgets::MplCpp::ColorConverter;
 using namespace MantidQt::Widgets::Common;
 

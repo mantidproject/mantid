@@ -51,7 +51,7 @@ const std::string IntegrateFlux::category() const {
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string IntegrateFlux::summary() const {
-  return "Interates spectra in a matrix workspace at a set of points.";
+  return "Integrates spectra in a matrix workspace at a set of points.";
 }
 
 //----------------------------------------------------------------------------------------------

@@ -38,7 +38,7 @@ public:
   MocMatrixWorkspace(size_t nspec, size_t nx, size_t ny) : m_blocksize(ny) {
     for (size_t i = 0; i < nspec; ++i) {
       MocSpectrum sp(nx, ny);
-      m_spectra.push_back(sp);
+      m_spectra.emplace_back(sp);
     }
   }
 

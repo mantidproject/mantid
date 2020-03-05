@@ -89,6 +89,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>editor_min</tabstop>
+  <tabstop>editor_max</tabstop>
+  <tabstop>logBox</tabstop>
+  <tabstop>gridBox</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

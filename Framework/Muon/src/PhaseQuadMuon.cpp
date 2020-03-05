@@ -258,7 +258,7 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     double syy = 0.;
     double sxy = 0.;
     for (size_t h = 0; h < nspec; h++) {
-      emptySpectrum.push_back(
+      emptySpectrum.emplace_back(
           std::all_of(ws->y(h).begin(), ws->y(h).end(),
                       [](double value) { return value == 0.; }) ||
           phase->Double(h, asymmetryIndex) == ASYMM_ERROR);
@@ -279,15 +279,15 @@ PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr &ws,
     const double mu2 = 2 * sxx / (sxx * syy - sxy * sxy);
     for (size_t h = 0; h < nspec; h++) {
       if (emptySpectrum[h]) {
-        aj.push_back(0.0);
-        bj.push_back(0.0);
+        aj.emplace_back(0.0);
+        bj.emplace_back(0.0);
       } else {
         const double asym = phase->Double(h, asymmetryIndex) / maxAsym;
         const double phi = phase->Double(h, phaseIndex);
         const double X = n0[h] * asym * cos(phi);
         const double Y = n0[h] * asym * sin(phi);
-        aj.push_back((lam1 * X + mu1 * Y) * 0.5);
-        bj.push_back((lam2 * X + mu2 * Y) * 0.5);
+        aj.emplace_back((lam1 * X + mu1 * Y) * 0.5);
+        bj.emplace_back((lam2 * X + mu2 * Y) * 0.5);
       }
     }
   }

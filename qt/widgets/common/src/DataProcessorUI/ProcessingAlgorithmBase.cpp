@@ -14,16 +14,17 @@ namespace DataProcessor {
 
 /** Constructor */
 ProcessingAlgorithmBase::ProcessingAlgorithmBase(
-    const QString &name, const std::set<QString> &blacklist)
-    : m_algName(name), m_blacklist(blacklist), m_inputWsProperties(),
-      m_inputStrListProperties(), m_OutputWsProperties() {
+    const QString &name, const std::set<QString> &blacklist, const int version)
+    : m_algName(name), m_version(version), m_blacklist(blacklist),
+      m_inputWsProperties(), m_inputStrListProperties(),
+      m_OutputWsProperties() {
 
   countWsProperties();
 }
 
 /** Default constructor (nothing to do) */
 ProcessingAlgorithmBase::ProcessingAlgorithmBase()
-    : m_algName(), m_blacklist(), m_inputWsProperties(),
+    : m_algName(), m_version(-1), m_blacklist(), m_inputWsProperties(),
       m_inputStrListProperties(), m_OutputWsProperties() {}
 
 /** Destructor */
@@ -33,7 +34,8 @@ ProcessingAlgorithmBase::~ProcessingAlgorithmBase() {}
 void ProcessingAlgorithmBase::countWsProperties() {
 
   Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create(m_algName.toStdString());
+      Mantid::API::AlgorithmManager::Instance().create(m_algName.toStdString(),
+                                                       m_version);
 
   auto properties = alg->getProperties();
   for (auto &prop : properties) {
@@ -42,17 +44,18 @@ void ProcessingAlgorithmBase::countWsProperties() {
         (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace" ||
          prop->type() == "Workspace2D")) {
 
-      m_inputWsProperties.push_back(QString::fromStdString(prop->name()));
+      m_inputWsProperties.emplace_back(QString::fromStdString(prop->name()));
     }
     if (prop->direction() == Mantid::Kernel::Direction::Input &&
         prop->type() == "str list") {
 
-      m_inputStrListProperties.push_back(QString::fromStdString(prop->name()));
+      m_inputStrListProperties.emplace_back(
+          QString::fromStdString(prop->name()));
     }
     if (prop->direction() == Mantid::Kernel::Direction::Output &&
         (prop->type() == "MatrixWorkspace" || prop->type() == "Workspace")) {
 
-      m_OutputWsProperties.push_back(QString::fromStdString(prop->name()));
+      m_OutputWsProperties.emplace_back(QString::fromStdString(prop->name()));
     }
   }
 }

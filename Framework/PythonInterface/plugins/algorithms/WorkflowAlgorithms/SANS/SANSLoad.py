@@ -9,14 +9,15 @@
 """ SANSLoad algorithm which handles loading SANS files"""
 
 from __future__ import (absolute_import, division, print_function)
-from mantid.kernel import (Direction, PropertyManagerProperty, FloatArrayProperty)
-from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
-                        WorkspaceProperty)
 
-from sans.state.state_base import create_deserialized_sans_state_from_property_manager
-from sans.common.enums import SANSDataType
-from sans.common.general_functions import create_child_algorithm
+from mantid.api import (ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
+                        Progress, WorkspaceProperty)
+from mantid.kernel import (Direction, FloatArrayProperty)
 from sans.algorithm_detail.load_data import SANSLoadDataFactory
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
+from sans.common.enums import SANSDataType
+
+from sans.state.Serializer import Serializer
 
 
 class SANSLoad(ParallelDataProcessorAlgorithm):
@@ -30,8 +31,8 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         # ----------
         # INPUT
         # ----------
-        self.declareProperty(PropertyManagerProperty('SANSState'),
-                             doc='A property manager which fulfills the SANSState contract.')
+        self.declareProperty('SANSState', "",
+                             doc='A JSON String which fulfills the SANSState contract.')
 
         self.declareProperty("PublishToCache", True, direction=Direction.Input,
                              doc="Publish the calibration workspace to a cache, in order to avoid reloading "
@@ -116,7 +117,7 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
     def PyExec(self):
         # Read the state
         state_property_manager = self.getProperty("SANSState").value
-        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
+        state = Serializer.from_json(state_property_manager)
 
         # Run the appropriate SANSLoader and get the workspaces and the workspace monitors
         # Note that cache optimization is only applied to the calibration workspace since it is not available as a
@@ -152,13 +153,13 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
     def validateInputs(self):
         errors = dict()
         # Check that the input can be converted into the right state object
-        state_property_manager = self.getProperty("SANSState").value
+        state_json = self.getProperty("SANSState").value
         try:
-            state = create_deserialized_sans_state_from_property_manager(state_property_manager)
-            state.property_manager = state_property_manager
+            state = Serializer.from_json(state_json)
             state.validate()
         except ValueError as err:
             errors.update({"SANSState": str(err)})
+            return errors
 
         # We need to validate that the for each expected output workspace of the SANSState a output workspace name
         # was supplied in the PyInit
@@ -177,7 +178,6 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         # ------------------------------------
         # Check the optional output workspaces
         # If they are specified in the SANSState, then we require them to be set on the output as well.
-        state = create_deserialized_sans_state_from_property_manager(state_property_manager)
         data_info = state.data
 
         # For sample transmission
@@ -262,25 +262,25 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         return errors
 
     def set_output_for_workspaces(self, workspace_type, workspaces):
-        if workspace_type is SANSDataType.SampleScatter:
+        if workspace_type is SANSDataType.SAMPLE_SCATTER:
             self.set_property_with_number_of_workspaces("SampleScatterWorkspace", workspaces)
-        elif workspace_type is SANSDataType.SampleTransmission:
+        elif workspace_type is SANSDataType.SAMPLE_TRANSMISSION:
             self.set_property_with_number_of_workspaces("SampleTransmissionWorkspace", workspaces)
-        elif workspace_type is SANSDataType.SampleDirect:
+        elif workspace_type is SANSDataType.SAMPLE_DIRECT:
             self.set_property_with_number_of_workspaces("SampleDirectWorkspace", workspaces)
-        elif workspace_type is SANSDataType.CanScatter:
+        elif workspace_type is SANSDataType.CAN_SCATTER:
             self.set_property_with_number_of_workspaces("CanScatterWorkspace", workspaces)
-        elif workspace_type is SANSDataType.CanTransmission:
+        elif workspace_type is SANSDataType.CAN_TRANSMISSION:
             self.set_property_with_number_of_workspaces("CanTransmissionWorkspace", workspaces)
-        elif workspace_type is SANSDataType.CanDirect:
+        elif workspace_type is SANSDataType.CAN_DIRECT:
             self.set_property_with_number_of_workspaces("CanDirectWorkspace", workspaces)
         else:
             raise RuntimeError("SANSLoad: Unknown data output workspace format: {0}".format(str(workspace_type)))
 
     def set_output_for_monitor_workspaces(self, workspace_type, workspaces):
-        if workspace_type is SANSDataType.SampleScatter:
+        if workspace_type is SANSDataType.SAMPLE_SCATTER:
             self.set_property("SampleScatterMonitorWorkspace", workspaces)
-        elif workspace_type is SANSDataType.CanScatter:
+        elif workspace_type is SANSDataType.CAN_SCATTER:
             self.set_property("CanScatterMonitorWorkspace", workspaces)
         else:
             raise RuntimeError("SANSLoad: Unknown data output workspace format: {0}".format(str(workspace_type)))
@@ -322,39 +322,21 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         self.setProperty(number_of_workspaces_name, counter)
 
     def _perform_initial_move(self, workspaces, state):
-        move_name = "SANSMove"
-        state_dict = state.property_manager
-
-        zero_options = {"SANSState": state_dict,
-                        "MoveType": "SetToZero",
-                        "Component": ""}
-        zero_alg = create_child_algorithm(self, move_name, **zero_options)
-
-        move_options = {"SANSState": state_dict,
-                        "MoveType": "InitialMove"}
-        move_alg = create_child_algorithm(self, move_name, **move_options)
+        # If beam centre was specified then use it
+        beam_coordinates = self.getProperty("BeamCoordinates").value
 
         # The workspaces are stored in a dict: workspace_names (sample_scatter, etc) : ListOfWorkspaces
         for key, workspace_list in workspaces.items():
-            if SANSDataType.to_string(key) in ("SampleTransmission", "CanTransmission", "CanDirect", "SampleDirect"):
-                is_trans = True
-            else:
-                is_trans = False
-            move_alg.setProperty("IsTransmissionWorkspace", is_trans)
+            is_trans = key in [SANSDataType.CAN_DIRECT, SANSDataType.CAN_TRANSMISSION,
+                               SANSDataType.SAMPLE_TRANSMISSION, SANSDataType.SAMPLE_DIRECT]
+
             for workspace in workspace_list:
-                zero_alg.setProperty("Workspace", workspace)
-                zero_alg.execute()
-                zeroed_workspace = zero_alg.getProperty("Workspace").value
+                move_component(component_name="", move_info=state.move,
+                               workspace=workspace, move_type=MoveTypes.RESET_POSITION)
 
-                # If beam centre was specified then use it
-                beam_coordinates = self.getProperty("BeamCoordinates").value
-                if beam_coordinates:
-                    move_alg.setProperty("BeamCoordinates", beam_coordinates)
-
-                # ZOOM and LARMOR only have LAB, SANS2D and LOQ move both at once.
-                move_alg.setProperty("Component", "LAB")
-                move_alg.setProperty("Workspace", zeroed_workspace)
-                move_alg.execute()
+                move_component(component_name="LAB", move_info=state.move,
+                               beam_coordinates=beam_coordinates, move_type=MoveTypes.INITIAL_MOVE,
+                               workspace=workspace, is_transmission_workspace=is_trans)
 
     def _get_progress_for_file_loading(self, data):
         # Get the number of workspaces which are to be loaded

@@ -14,6 +14,8 @@ from mantidqt.utils.qt import load_ui
 from Muon.GUI.Common.utilities import table_utils
 
 ui_list_selector, _ = load_ui(__file__, "list_selector.ui")
+CHECKBOX_COLUMN = 0
+WORKSPACE_NAME_COLUMN = 1
 
 
 class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
@@ -24,7 +26,7 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
         self.item_table_widget = TableWidgetDragRows()
 
         self.item_table_widget.setColumnCount(2)
-        self.item_table_widget.setColumnWidth(0, 350)
+        self.item_table_widget.setColumnWidth(CHECKBOX_COLUMN, 30)
         self.item_table_widget.verticalHeader().setVisible(False)
         self.item_table_widget.horizontalHeader().setStretchLastSection(True)
         self.item_table_widget.horizontalHeader().setVisible(False)
@@ -44,8 +46,8 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
         for index, row in enumerate(item_list):
             insertion_index = self.item_table_widget.rowCount()
             self.item_table_widget.setRowCount(insertion_index + 1)
-            table_utils.setRowName(self.item_table_widget, insertion_index, row[0])
-            table_utils.addCheckBoxToTable(self.item_table_widget, row[1], insertion_index, 1)
+            table_utils.setRowName(self.item_table_widget, insertion_index, row[0], col=WORKSPACE_NAME_COLUMN)
+            table_utils.addCheckBoxToTable(self.item_table_widget, row[1], insertion_index, CHECKBOX_COLUMN)
             self.set_row_enabled(insertion_index, row[2])
         self.item_table_widget.blockSignals(False)
 
@@ -56,14 +58,14 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
         self.item_table_widget.blockSignals(False)
 
     def set_row_enabled(self, row, enabled):
-        item = self.item_table_widget.item(row, 0)
+        item = self.item_table_widget.item(row, WORKSPACE_NAME_COLUMN)
         if enabled:
             item.setFlags(
                 Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
         else:
             item.setFlags(
                 Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
-        item = self.item_table_widget.item(row, 1)
+        item = self.item_table_widget.item(row, CHECKBOX_COLUMN)
         if enabled:
             item.setFlags(
                 Qt.ItemIsUserCheckable | Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled | Qt.ItemIsDropEnabled)
@@ -91,9 +93,9 @@ class ListSelectorView(QtWidgets.QWidget, ui_list_selector):
         self.item_table_widget.rowMoved.connect(action)
 
     def handle_cell_changed_signal(self, row, col):
-        if col == 1:
-            name = self.item_table_widget.item(row, 0).text()
-            state = self.item_table_widget.item(row, 1).checkState() == Qt.Checked
+        if col == CHECKBOX_COLUMN:
+            name = self.item_table_widget.item(row, WORKSPACE_NAME_COLUMN).text()
+            state = self.item_table_widget.item(row, CHECKBOX_COLUMN).checkState() == Qt.Checked
             self._item_selection_changed_action(name, state)
 
     def update_number_of_selected_label(self, number_selected, number_selected_displayed):

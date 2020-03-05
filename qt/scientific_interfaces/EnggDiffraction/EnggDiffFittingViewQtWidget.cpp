@@ -335,7 +335,7 @@ void EnggDiffFittingViewQtWidget::dataCurvesFactory(
     }
     dataCurve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
 
-    dataVector.push_back(dataCurve);
+    dataVector.emplace_back(dataCurve);
 
     dataVector[i]->setData(*peak);
     dataVector[i]->attach(m_ui.dataPlot);

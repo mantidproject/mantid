@@ -22,6 +22,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IWorkspaceFitControl.h"
+#include "MantidQtWidgets/Common/SelectFunctionDialog.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 /* Forward declarations */
@@ -38,19 +39,23 @@ class ParameterPropertyManager;
 class QtProperty;
 class QtBrowserItem;
 
-class QPushButton;
+class QAction;
+class QComboBox;
 class QLabel;
 class QLineEdit;
-class QComboBox;
-class QSignalMapper;
+class QListWidget;
+class QListWidgetItem;
 class QMenu;
-class QAction;
+class QPushButton;
+class QSignalMapper;
 class QTreeWidget;
+class QVBoxLayout;
 
 namespace MantidQt {
 namespace MantidWidgets {
 
 class PropertyHandler;
+class SelectFunctionDialog;
 /**
  * Class FitPropertyBrowser implements QtPropertyBrowser to display
  * and control fitting function parameters and settings.
@@ -129,7 +134,7 @@ public:
   /// Set the default function type
   void setDefaultFunctionType(const std::string &fnType);
   /// Get the default peak type
-  std::string defaultPeakType() const;
+  std::string defaultPeakType();
   /// Set the default peak type
   void setDefaultPeakType(const std::string &fnType);
   /// Get the default background type
@@ -169,6 +174,10 @@ public:
   int maxIterations() const;
   /// Get the peak radius for peak functions
   int getPeakRadius() const;
+  /// Get the excluded range for the fit
+  std::string getExcludeRange() const;
+  /// Get the X limits of the workspace
+  QVector<double> getXRange();
 
   /// Get the start X
   double startX() const;
@@ -180,6 +189,12 @@ public:
   void setEndX(double end) override;
   /// Set both start and end X
   void setXRange(double start, double end);
+  /// Get the name of the X column
+  QString getXColumnName() const;
+  /// Get the name of the Y column
+  QString getYColumnName() const;
+  /// Get the name of the Error column
+  QString getErrColumnName() const;
   /// Set LogValue for PlotPeakByLogValue
   void setLogValue(const QString &lv = "");
   /// Get LogValue
@@ -254,6 +269,8 @@ public:
   void setADSObserveEnabled(bool enabled);
 
   void postDeleteHandle(const std::string &wsName) override;
+  void renameHandle(const std::string &oldName,
+                    const std::string &newName) override;
   void addHandle(const std::string &wsName,
                  const boost::shared_ptr<Mantid::API::Workspace> ws) override;
 
@@ -263,12 +280,21 @@ public:
   /// Returns the list of workspaces that are currently been worked on by the
   /// fit property browser.
   QStringList getWorkspaceNames();
-  /// Create a MatrixWorkspace from a TableWorkspace
-  Mantid::API::Workspace_sptr createMatrixFromTableWorkspace() const;
 
   /// Allow or disallow sequential fits (depending on whether other conditions
   /// are met)
   void allowSequentialFits(bool allow) override;
+
+  /// Return the Fit menu. This gives Python access to events emitted by this
+  /// menu.
+  QMenu *getFitMenu() const { return m_fitMenu; }
+
+  /// Return the Fit menu. This gives Python access to events emitted by this
+  /// menu.
+  QListWidget *getWorkspaceList() const { return m_wsListWidget; }
+
+  /// Adds the fit result workspaces to the QListWidget in the browser
+  void addFitResultWorkspacesToTableWidget();
 
   // Methods intended for testing only
 
@@ -277,6 +303,7 @@ public:
   // Methods intended for interfacing with the workbench fitting tools
 
   void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+  void addAllowedTableWorkspace(const QString &wsName);
   QString addFunction(const QString &fnName);
   PropertyHandler *getPeakHandler(const QString &prefix);
   void setPeakCentreOf(const QString &prefix, double value);
@@ -286,6 +313,10 @@ public:
   void setPeakFwhmOf(const QString &prefix, double value);
   double getPeakFwhmOf(const QString &prefix);
   QStringList getPeakPrefixes() const;
+
+  // Emits a signal for when the sequential fit has finished
+
+  void sequentialFitFinished() { emit sequentialFitDone(); }
 
 public slots:
   virtual void fit();
@@ -299,6 +330,7 @@ public slots:
   void executeDisplayMenu(const QString & /*item*/);
   void executeSetupMenu(const QString & /*item*/);
   void executeSetupManageMenu(const QString & /*item*/);
+  void workspaceDoubleClicked(QListWidgetItem *item);
 
 signals:
   void currentChanged() const;
@@ -307,6 +339,7 @@ signals:
   void workspaceIndexChanged(int index);
   void updatePlotSpectrum(int index);
   void workspaceNameChanged(const QString & /*_t1*/);
+  void sequentialFitDone() const;
 
   void wsChangePPAssign(const QString & /*_t1*/);
   void functionChanged();
@@ -337,6 +370,8 @@ signals:
   void fitUndone();
   void functionLoaded(const QString & /*_t1*/);
   void fitResultsChanged(const QString &status);
+  void workspaceClicked(const QString &wsName);
+  void itemDoubleClicked(QListWidgetItem *item);
 
 protected slots:
   /// Get the registered function names
@@ -481,6 +516,7 @@ protected:
   QtProperty *m_peakRadius;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
+  QtProperty *m_excludeRange;
   QtProperty *m_plotCompositeMembers;
   QtProperty *m_convolveMembers;
   QtProperty *m_rawData;
@@ -598,9 +634,13 @@ private:
   QLabel *m_status;
 
   // The widget for choosing the fit function.
-  QDialog *m_fitSelector;
+  SelectFunctionDialog *m_fitSelector;
   // The tree widget containing the fit functions.
   QTreeWidget *m_fitTree;
+
+  //
+  QListWidget *m_wsListWidget;
+  QLabel *m_workspaceLabel;
 
   /// String property managers for special case attributes such as Filename or
   /// Formula
@@ -654,6 +694,8 @@ private:
   ///   keys are workspace names,
   ///   values are lists of workspace indices
   QMap<QString, QList<int>> m_allowedSpectra;
+  /// If set it contains the table workspace name to be fitted in this browser:
+  QString m_allowedTableWorkspace;
   /// Store workspace index to revert to in case validation fails
   int m_oldWorkspaceIndex;
 

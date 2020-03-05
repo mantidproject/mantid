@@ -186,7 +186,7 @@ UniqueReflectionCollection::getUnobservedUniqueReflections() const {
 
   for (const auto &reflection : m_reflections) {
     if (reflection.second.count() == 0) {
-      reflections.push_back(reflection.first);
+      reflections.emplace_back(reflection.first);
     }
   }
 

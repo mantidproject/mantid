@@ -90,10 +90,9 @@ void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
                                    uint32_t *detId, coord_t *Coord,
                                    size_t dataSize) const {
 
-  DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *const pWs =
-      dynamic_cast<
-          DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
-          m_Workspace.get());
+  auto *const pWs = dynamic_cast<
+      DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
+      m_Workspace.get());
   if (pWs) {
     for (size_t i = 0; i < dataSize; i++) {
       pWs->addEvent(DataObjects::MDEvent<nd>(
@@ -101,10 +100,9 @@ void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *runIndex,
           *(detId + i), (Coord + i * nd)));
     }
   } else {
-    DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<nd>, nd>
-        *const pLWs = dynamic_cast<
-            DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<nd>, nd> *>(
-            m_Workspace.get());
+    auto *const pLWs = dynamic_cast<
+        DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<nd>, nd> *>(
+        m_Workspace.get());
 
     if (!pLWs)
       throw std::runtime_error("Bad Cast: Target MD workspace to add events "
@@ -131,10 +129,9 @@ void MDEventWSWrapper::addMDDataND<0>(float * /*unused*/, uint16_t * /*unused*/,
 
 /***/
 template <size_t nd> void MDEventWSWrapper::splitBoxList() {
-  DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *const pWs =
-      dynamic_cast<
-          DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
-          m_Workspace.get());
+  auto *const pWs = dynamic_cast<
+      DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
+      m_Workspace.get());
   if (!pWs)
     throw(std::bad_cast());
 
@@ -149,10 +146,9 @@ template <> void MDEventWSWrapper::splitBoxList<0>() {
 /// helper function to refresh centroid on MDEventWorkspace with nd dimensions
 template <size_t nd> void MDEventWSWrapper::calcCentroidND() {
 
-  DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *const pWs =
-      dynamic_cast<
-          DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
-          this->m_Workspace.get());
+  auto *const pWs = dynamic_cast<
+      DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
+      this->m_Workspace.get());
   if (!pWs)
     throw(std::bad_cast());
 

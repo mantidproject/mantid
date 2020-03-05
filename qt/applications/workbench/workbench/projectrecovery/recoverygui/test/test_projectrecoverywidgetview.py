@@ -9,12 +9,15 @@
 
 from __future__ import (absolute_import, unicode_literals)
 
+import unittest
+
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from workbench.projectrecovery.recoverygui.projectrecoverywidgetview import ProjectRecoveryWidgetView
 
 
-class ProjectRecoveryWidgetViewTest(GuiTest):
+@start_qapplication
+class ProjectRecoveryWidgetViewTest(unittest.TestCase):
     def setUp(self):
         self.prw = ProjectRecoveryWidgetView(mock.MagicMock())
         self.prw.ui = mock.MagicMock()

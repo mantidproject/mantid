@@ -50,7 +50,7 @@ class SANS2DMultiPeriodAddFiles_V2(systemtesting.MantidSystemTest):
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Axes')
 
-        return '5512p7rear_1D_2.0_4.0Phi-45.0_45.0', 'SANS2DMultiPeriodAddFiles.nxs'
+        return '5512_p7rear_1D_2.0_4.0Phi-45.0_45.0', 'SANS2DMultiPeriodAddFiles.nxs'
 
 
 class LARMORMultiPeriodAddEventFilesTest_V2(systemtesting.MantidSystemTest):
@@ -72,7 +72,7 @@ class LARMORMultiPeriodAddEventFilesTest_V2(systemtesting.MantidSystemTest):
 
         # Clean up
         for element in AnalysisDataService.getObjectNames():
-            if AnalysisDataService.doesExist(element) and element != "13065p1rear_1D_2.0_4.0":
+            if AnalysisDataService.doesExist(element) and element != "13065_p1rear_1D_2.0_4.0":
                 AnalysisDataService.remove(element)
 
         paths = [os.path.join(config['defaultsave.directory'], 'LARMOR00013065-add.nxs'),
@@ -89,4 +89,4 @@ class LARMORMultiPeriodAddEventFilesTest_V2(systemtesting.MantidSystemTest):
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Axes')
 
-        return "13065p1rear_1D_2.0_4.0", "LARMORMultiPeriodAddEventFiles.nxs"
+        return "13065_p1rear_1D_2.0_4.0", "LARMORMultiPeriodAddEventFiles.nxs"

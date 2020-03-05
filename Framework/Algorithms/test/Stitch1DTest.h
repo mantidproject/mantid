@@ -513,7 +513,7 @@ public:
     std::vector<size_t> overlap_indexes = std::vector<size_t>();
     for (size_t itr = 0; itr < stitched_y.size(); ++itr) {
       if (stitched_y[itr] >= 1.0009 && stitched_y[itr] <= 3.0001) {
-        overlap_indexes.push_back(itr);
+        overlap_indexes.emplace_back(itr);
       }
     }
 
@@ -540,7 +540,7 @@ public:
     std::vector<size_t> overlap_indexes = std::vector<size_t>();
     for (size_t itr = 0; itr < stitched_y.size(); ++itr) {
       if (stitched_y[itr] >= 1.0009 && stitched_y[itr] <= 3.0001) {
-        overlap_indexes.push_back(itr);
+        overlap_indexes.emplace_back(itr);
       }
     }
 
@@ -567,7 +567,7 @@ public:
     std::vector<size_t> overlap_indexes = std::vector<size_t>();
     for (size_t itr = 0; itr < stitched_y.size(); ++itr) {
       if (stitched_y[itr] >= 1.0009 && stitched_y[itr] <= 3.0001) {
-        overlap_indexes.push_back(itr);
+        overlap_indexes.emplace_back(itr);
       }
     }
 

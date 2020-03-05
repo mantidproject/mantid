@@ -18,28 +18,18 @@ from qtpy.QtWidgets import QVBoxLayout
 # local package imports
 from mantid.kernel import logger
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
+from ..config import DEFAULT_SCRIPT_CONTENT
 from ..config.fonts import text_font
 from ..plugins.base import PluginWidget
 
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 
-# Initial content
-DEFAULT_CONTENT = """# The following line helps with future compatibility with Python 3
-# print must now be used as a function, e.g print('Hello','World')
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
-# import mantid algorithms, numpy and matplotlib
-from mantid.simpleapi import *
-
-import matplotlib.pyplot as plt
-
-import numpy as np
-"""
 # Accepted extensions for drag-and-drop to editor
 ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']
 # QSettings key for session tabs
 TAB_SETTINGS_KEY = "Editors/SessionTabs"
+ZOOM_LEVEL_KEY = "Editors/ZoomLevel"
 
 
 class MultiFileEditor(PluginWidget):
@@ -47,12 +37,14 @@ class MultiFileEditor(PluginWidget):
     Provides the container for the widget containing the CodeEditors in the Workbench
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent, font=None):
         super(MultiFileEditor, self).__init__(parent)
+        if not font:
+            font = text_font()
 
         # layout
-        self.editors = MultiPythonFileInterpreter(font=text_font(),
-                                                  default_content=DEFAULT_CONTENT,
+        self.editors = MultiPythonFileInterpreter(font=font,
+                                                  default_content=DEFAULT_SCRIPT_CONTENT,
                                                   parent=self)
         layout = QVBoxLayout()
         layout.addWidget(self.editors)
@@ -63,6 +55,7 @@ class MultiFileEditor(PluginWidget):
 
         # attributes
         self.tabs_open_on_closing = None
+        self.editors_zoom_level = None
 
     def load_settings_from_config(self, config):
         self.editors.load_settings_from_config(config)
@@ -94,6 +87,7 @@ class MultiFileEditor(PluginWidget):
         :return: True if editors can be closed, false if cancelled
         """
         self.tabs_open_on_closing = self.editors.tab_filepaths
+        self.editors_zoom_level = self.editors.current_editor().editor.getZoom()
         return self.editors.close_all()
 
     def dragEnterEvent(self, event):
@@ -121,12 +115,18 @@ class MultiFileEditor(PluginWidget):
     def readSettings(self, settings):
         try:
             prev_session_tabs = settings.get(TAB_SETTINGS_KEY)
+            zoom_level = settings.get(ZOOM_LEVEL_KEY)
         except KeyError:
             return
         self.restore_session_tabs(prev_session_tabs)
+        self.editors.current_editor().editor.zoomTo(int(zoom_level))
 
     def writeSettings(self, settings):
-        settings.set(TAB_SETTINGS_KEY, set(self.tabs_open_on_closing))
+        settings.set(ZOOM_LEVEL_KEY, self.editors_zoom_level)
+
+        no_duplicates = []
+        [no_duplicates.append(x) for x in self.tabs_open_on_closing if x not in no_duplicates]
+        settings.set(TAB_SETTINGS_KEY, no_duplicates)
 
     def register_plugin(self):
         self.main.add_dockwidget(self)
@@ -143,6 +143,10 @@ class MultiFileEditor(PluginWidget):
             except IOError as io_error:
                 logger.warning("Could not load file:\n  {}"
                                "".format(io_error))
+
+    def open_script_in_new_tab(self, content):
+        self.editors.append_new_editor(content=content)
+        self.editors.mark_current_tab_modified(True)
 
     def save_current_file(self):
         self.editors.save_current_file()

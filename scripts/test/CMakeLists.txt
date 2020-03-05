@@ -1,19 +1,5 @@
 set(TEST_PY_FILES
-    AbinsAtomsDataTest.py
-    AbinsCalculateDWSingleCrystalTest.py
-    AbinsCalculatePowderTest.py
-    AbinsCalculateQToscaTest.py
-    AbinsCalculateSingleCrystalTest.py
-    AbinsCalculateSPowderTest.py
-    AbinsDWSingleCrystalDataTest.py
-    AbinsFrequencyPowderGeneratorTest.py
-    AbinsIOmoduleTest.py
-    AbinsKpointsDataTest.py
-    AbinsLoadCASTEPTest.py
-    AbinsLoadCRYSTALTest.py
-    AbinsLoadDMOL3Test.py
-    AbinsLoadGAUSSIANTest.py
-    AbinsPowderDataTest.py
+    AbsorptionShapesTest.py 	
     ConvertToWavelengthTest.py
     CrystalFieldMultiSiteTest.py
     CrystalFieldTest.py
@@ -59,8 +45,8 @@ unset(PYUNITTEST_QT_API)
 
 
 # Additional tests
+add_subdirectory(Abins)
 add_subdirectory(directtools)
-add_subdirectory(isis_powder)
 add_subdirectory(MultiPlotting)
 add_subdirectory(Muon)
 add_subdirectory(SANS)

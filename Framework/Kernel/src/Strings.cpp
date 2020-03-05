@@ -222,7 +222,7 @@ int endsWithInt(const std::string &word) {
     return -1;
   int out = -1;
   // Find the index of the first number in the string (if any)
-  int firstNumber = int(word.size());
+  auto firstNumber = int(word.size());
   for (int i = int(word.size()) - 1; i >= 0; i--) {
     char c = word[i];
     if ((c > '9') || (c < '0'))
@@ -274,7 +274,7 @@ int getPartLine(std::istream &fh, std::string &Out, std::string &Excess,
   // std::string Line;
   if (fh.good()) {
     auto ss = new char[spc + 1];
-    const int clen = static_cast<int>(spc - Out.length());
+    const auto clen = static_cast<int>(spc - Out.length());
     fh.getline(ss, clen, '\n');
     ss[clen + 1] = 0; // incase line failed to read completely
     Out += static_cast<std::string>(ss);
@@ -597,7 +597,7 @@ template <typename T> int section(std::string &A, T &out) {
   if (cx.fail())
     return 0;
   const std::streamoff xpt = cx.tellg();
-  const char xc = static_cast<char>(cx.get());
+  const auto xc = static_cast<char>(cx.get());
   if (!cx.fail() && !isspace(xc))
     return 0;
   A.erase(0, static_cast<unsigned int>(xpt));
@@ -629,7 +629,7 @@ template <typename T> int sectionMCNPX(std::string &A, T &out) {
     if (xpt < 0) {
       return 0;
     }
-    const char xc = static_cast<char>(cx.get());
+    const auto xc = static_cast<char>(cx.get());
     if (!cx.fail() && !isspace(xc) && (xc != '-' || xpt < 5)) {
       return 0;
     }
@@ -688,7 +688,7 @@ template <typename T> int convert(const std::string &A, T &out) {
   cx >> retval;
   if (cx.fail())
     return 0;
-  const char clast = static_cast<char>(cx.get());
+  const auto clast = static_cast<char>(cx.get());
   if (!cx.fail() && !isspace(clast))
     return 0;
   out = retval;
@@ -783,7 +783,7 @@ int writeFile(const std::string &Fname, const T &step, const V<T, A> &Y) {
   V<T, A> Ex; // Empty vector
   V<T, A> X;  // Empty vector
   for (unsigned int i = 0; i < Y.size(); i++)
-    X.push_back(i * step);
+    X.emplace_back(i * step);
 
   return writeFile(Fname, X, Y, Ex);
 }
@@ -1023,14 +1023,14 @@ size_t split_path(const std::string &path,
   // code below implements perl split(/\\//,string) commamd. (\\ has been
   // converted to / above)
   std::list<int64_t> split_pos;
-  split_pos.push_back(-1);
+  split_pos.emplace_back(-1);
   size_t path_size = working_path.size();
   for (size_t i = 0; i < path_size; i++) {
     if (working_path[i] == '/') {
-      split_pos.push_back(i);
+      split_pos.emplace_back(i);
     }
   }
-  split_pos.push_back(path_size);
+  split_pos.emplace_back(path_size);
   // allocate target vector to keep folder structure and fill it in
   size_t n_folders = split_pos.size() - 1;
   path_components.resize(n_folders);
@@ -1135,7 +1135,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
       int element;
       if (convert(rangeElements[0], element) != 1)
         throw std::invalid_argument("Invalid element: " + elementString);
-      result.push_back(element);
+      result.emplace_back(element);
     }
     // A pair
     else if (noOfRangeElements == 2) {
@@ -1150,7 +1150,7 @@ std::vector<int> parseRange(const std::string &str, const std::string &elemSep,
                                     elementString);
 
       for (int i = start; i <= end; i++)
-        result.push_back(i);
+        result.emplace_back(i);
     }
     // Error - e.g. "--""
     else {

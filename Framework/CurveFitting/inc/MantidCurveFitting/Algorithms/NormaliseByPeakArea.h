@@ -80,7 +80,7 @@ private:
   API::MatrixWorkspace_sptr m_symmetrisedWS;
 
   /// Reporting
-  API::Progress *m_progress;
+  std::unique_ptr<API::Progress> m_progress;
 };
 
 } // namespace Algorithms

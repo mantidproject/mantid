@@ -13,7 +13,7 @@ if(CXXTEST_FOUND)
   include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR})
 
   set(CXXTEST_EXTRA_HEADER_INCLUDE
-      "${CMAKE_CURRENT_LIST_DIR}/GlobalInitialization.h")
+      "${CMAKE_CURRENT_LIST_DIR}/PythonInterfaceCppTestInitialization.h")
 
   set(_pythoninterface_test_target_name PythonInterfaceCppTest)
 

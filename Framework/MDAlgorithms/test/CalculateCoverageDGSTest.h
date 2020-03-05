@@ -56,8 +56,8 @@ public:
     V3D sampPos(0., 0., 0.), sourcePos(0, 0, -1.);
     WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(
         inputWorkspace, sampPos, sourcePos, detectorPositions);
-    OrientedLattice ol(2, 2, 2, 90, 90, 90);
-    inputWorkspace->mutableSample().setOrientedLattice(&ol);
+    inputWorkspace->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(2, 2, 2, 90, 90, 90));
     Goniometer gon(DblMatrix(3, 3, true));
     inputWorkspace->mutableRun().setGoniometer(gon, true);
     inputWorkspace->mutableRun().addLogData(

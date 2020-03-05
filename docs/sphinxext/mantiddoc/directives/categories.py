@@ -197,7 +197,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
         Returns:
           list: A list of strings containing the required categories
         """
-        category_list = ["Algorithm Index"]
+        category_list = ["AlgorithmIndex"]
         alg_cats = self.create_mantid_algorithm(self.algorithm_name(), self.algorithm_version()).categories()
         for cat in alg_cats:
             # double up the category separators so they are not treated as escape characters
@@ -292,7 +292,7 @@ class CategoriesDirective(AlgorithmBaseDirective):
     #end def
 
     def register_category(self, categ_name, env):
-        category = Category(categ_name, env.docname, env.doc2path(env.docname))
+        category = None
         if categ_name not in env.categories:
             category = Category(categ_name, env.docname, env.doc2path(env.docname))
             env.categories[categ_name] = category

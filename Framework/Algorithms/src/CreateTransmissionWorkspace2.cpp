@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 using namespace Mantid::API;
@@ -56,7 +57,7 @@ void CreateTransmissionWorkspace2::init() {
                       "FirstTransmissionRun", "", Direction::Input,
                       PropertyMode::Mandatory, inputValidator->clone()),
                   "First transmission run. Corresponds to the low wavelength "
-                  "transmision run if a SecondTransmissionRun is also "
+                  "transmission run if a SecondTransmissionRun is also "
                   "provided.");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -96,6 +97,24 @@ void CreateTransmissionWorkspace2::init() {
       std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
           "OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
       "Output workspace in wavelength.");
+
+  // Declare Debug output workspaces
+
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceFirstTransmission", "", Direction::Output,
+                      PropertyMode::Optional),
+                  "Output workspace in wavelength for first transmission run");
+  setPropertySettings(
+      "OutputWorkspaceFirstTransmission",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceSecondTransmission", "",
+                      Direction::Output, PropertyMode::Optional),
+                  "Output workspace in wavelength for second transmission run");
+  setPropertySettings(
+      "OutputWorkspaceSecondTransmission",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
 }
 
 /** Validate inputs
@@ -121,40 +140,41 @@ CreateTransmissionWorkspace2::validateInputs() {
 void CreateTransmissionWorkspace2::exec() {
   getRunNumbers();
 
-  MatrixWorkspace_sptr outWS;
-
+  // Process the first run
   MatrixWorkspace_sptr firstTransWS = getProperty("FirstTransmissionRun");
   convertProcessingInstructions(firstTransWS);
-
   firstTransWS = normalizeDetectorsByMonitors(firstTransWS);
   firstTransWS = cropWavelength(firstTransWS);
 
-  MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
-  if (secondTransWS) {
-    storeTransitionRun(1, firstTransWS);
-
-    convertProcessingInstructions(secondTransWS);
-
-    secondTransWS = normalizeDetectorsByMonitors(secondTransWS);
-    secondTransWS = cropWavelength(secondTransWS);
-    storeTransitionRun(2, secondTransWS);
-
-    // Stitch the results.
-    auto stitch = createChildAlgorithm("Stitch1D");
-    stitch->initialize();
-    stitch->setProperty("LHSWorkspace", firstTransWS);
-    stitch->setProperty("RHSWorkspace", secondTransWS);
-    stitch->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
-    stitch->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
-    stitch->setPropertyValue("Params", getPropertyValue("Params"));
-    stitch->setProperty("ScaleRHSWorkspace",
-                        getPropertyValue("ScaleRHSWorkspace"));
-    stitch->execute();
-    outWS = stitch->getProperty("OutputWorkspace");
-  } else {
-    outWS = firstTransWS;
+  // If we only have one run, set it as the output and finish
+  if (isDefault("SecondTransmissionRun")) {
+    setOutputWorkspace(firstTransWS);
+    return;
   }
-  storeOutputWorkspace(outWS);
+
+  // Process the second run
+  MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
+  convertProcessingInstructions(secondTransWS);
+  secondTransWS = normalizeDetectorsByMonitors(secondTransWS);
+  secondTransWS = cropWavelength(secondTransWS);
+
+  // Stitch the processed runs
+  auto stitch = createChildAlgorithm("Stitch1D");
+  stitch->initialize();
+  stitch->setProperty("LHSWorkspace", firstTransWS);
+  stitch->setProperty("RHSWorkspace", secondTransWS);
+  stitch->setPropertyValue("StartOverlap", getPropertyValue("StartOverlap"));
+  stitch->setPropertyValue("EndOverlap", getPropertyValue("EndOverlap"));
+  stitch->setPropertyValue("Params", getPropertyValue("Params"));
+  stitch->setProperty("ScaleRHSWorkspace",
+                      getPropertyValue("ScaleRHSWorkspace"));
+  stitch->execute();
+  MatrixWorkspace_sptr stitchedWS = stitch->getProperty("OutputWorkspace");
+
+  // Set the outputs
+  setOutputWorkspace(stitchedWS);
+  setOutputTransmissionRun(1, firstTransWS);
+  setOutputTransmissionRun(2, secondTransWS);
 }
 
 /** Normalize detectors by monitors
@@ -198,63 +218,110 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
  * in class variables.
  */
 void CreateTransmissionWorkspace2::getRunNumbers() {
-  MatrixWorkspace_sptr firstTransWS = getProperty("FirstTransmissionRun");
-  auto const &run = firstTransWS->run();
-  if (run.hasProperty("run_number")) {
-    m_firstTransmissionRunNumber =
-        run.getPropertyValueAsType<std::string>("run_number");
-  }
-
-  MatrixWorkspace_sptr secondTransWS = getProperty("SecondTransmissionRun");
-  if (secondTransWS && secondTransWS->run().hasProperty("run_number")) {
-    m_secondTransmissionRunNumber =
-        secondTransWS->run().getPropertyValueAsType<std::string>("run_number");
-  }
+  m_firstTransmissionRunNumber = getRunNumber("FirstTransmissionRun");
+  m_secondTransmissionRunNumber = getRunNumber("SecondTransmissionRun");
 }
 
-/** Store a transition run in ADS
+/** Get the run number for a given workspace. Also sets the m_missingRunNumber
+ * flag if a required run number could not be found.
+ * @returns : the run number as a string, or an empty string if it was not
+ * fouind
+ */
+std::string
+CreateTransmissionWorkspace2::getRunNumber(std::string const &propertyName) {
+  auto runNumber = std::string();
+  MatrixWorkspace_sptr transWS = getProperty(propertyName);
+  if (transWS) {
+    auto const &run = transWS->run();
+    if (run.hasProperty("run_number")) {
+      runNumber = run.getPropertyValueAsType<std::string>("run_number");
+    } else {
+      m_missingRunNumber = true;
+    }
+  }
+  return runNumber;
+}
+
+/** Output an interim transmission run if in debug mode or if running as a
+ * child algorithm. Note that the workspace will only be output if a sensible
+ * name can be constructed, which requires the workspace to have a run number.
  * @param which Which of the runs to store: 1 - first, 2 - second.
  * @param ws A workspace to store.
  */
-void CreateTransmissionWorkspace2::storeTransitionRun(int which,
-                                                      MatrixWorkspace_sptr ws) {
+void CreateTransmissionWorkspace2::setOutputTransmissionRun(
+    int which, MatrixWorkspace_sptr ws) {
+  bool const isDebug = getProperty("Debug");
+  if (!isDebug)
+    return;
+
   if (which < 1 || which > 2) {
     throw std::logic_error("There are only two runs: 1 and 2.");
   }
+
+  // Set the output property
+  auto const runDescription =
+      which == 1 ? "FirstTransmission" : "SecondTransmission";
+  auto const propertyName = std::string("OutputWorkspace") + runDescription;
+
+  // If the user provided an output name, just set the value
+  if (!isDefault(propertyName)) {
+    setProperty(propertyName, ws);
+    return;
+  }
+
+  // Otherwise try to set a default name based on the run number
   auto const &runNumber =
       which == 1 ? m_firstTransmissionRunNumber : m_secondTransmissionRunNumber;
-
-  if (!runNumber.empty()) {
-    auto const name = TRANS_LAM_PREFIX + runNumber;
-    AnalysisDataService::Instance().addOrReplace(name, ws);
+  if (runNumber.empty()) {
+    throw std::runtime_error(
+        std::string("Input workspace has no run number; cannot set default "
+                    "name for the "
+                    "output workspace. Please specify a name using the ") +
+        propertyName + std::string(" property."));
   }
+
+  auto const defaultName = TRANS_LAM_PREFIX + runNumber;
+  setPropertyValue(propertyName, defaultName);
+  setProperty(propertyName, ws);
 }
 
-/** Store the stitched transition workspace run in ADS
+/** Output the final transmission workspace
  * @param ws A workspace to store.
+ * @throws If the output workspace does not have a name and a default could not
+ * be found
  */
-void CreateTransmissionWorkspace2::storeOutputWorkspace(
+void CreateTransmissionWorkspace2::setOutputWorkspace(
     API::MatrixWorkspace_sptr ws) {
-  bool const isDebug = getProperty("Debug");
-  if (isDefault("OutputWorkspace") && (!isChild() || isDebug)) {
-    std::string name = TRANS_LAM_PREFIX;
-    if (!m_firstTransmissionRunNumber.empty()) {
-      name.append(m_firstTransmissionRunNumber);
-    } else {
+  // If the user provided an output name, just set the value
+  if (!isDefault("OutputWorkspace")) {
+    setProperty("OutputWorkspace", ws);
+    return;
+  }
+
+  // Otherwise, we want to set a default name based on the run number
+  if (m_missingRunNumber) {
+    if (isChild()) {
+      setProperty("OutputWorkspace", ws);
       return;
-    }
-    if (!m_secondTransmissionRunNumber.empty()) {
-      name.append("_");
-      name.append(m_secondTransmissionRunNumber);
-    }
-    if (!isChild()) {
-      setPropertyValue("OutputWorkspace", name);
     } else {
-      AnalysisDataService::Instance().addOrReplace(name, ws);
+      throw std::runtime_error(
+          "Input workspace has no run number; cannot set default name for the "
+          "output workspace. Please specify a name using the OutputWorkspace "
+          "property.");
     }
   }
+
+  std::string outputName = TRANS_LAM_PREFIX;
+  if (!m_firstTransmissionRunNumber.empty()) {
+    outputName.append(m_firstTransmissionRunNumber);
+  }
+  if (!m_secondTransmissionRunNumber.empty()) {
+    outputName.append("_");
+    outputName.append(m_secondTransmissionRunNumber);
+  }
+
+  setPropertyValue("OutputWorkspace", outputName);
   setProperty("OutputWorkspace", ws);
 }
-
 } // namespace Algorithms
 } // namespace Mantid

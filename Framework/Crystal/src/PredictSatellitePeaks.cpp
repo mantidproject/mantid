@@ -9,6 +9,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCrystal/PeakAlgorithmHelpers.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/HKLGenerator.h"
@@ -30,23 +31,11 @@ namespace Crystal {
 
 DECLARE_ALGORITHM(PredictSatellitePeaks)
 
-namespace {
-/// Small helper function that return -1 if convention
-/// is "Crystallography" and 1 otherwise.
-double get_factor_for_q_convention(const std::string &convention) {
-  if (convention == "Crystallography") {
-    return -1.0;
-  }
-  return 1.0;
-}
-} // namespace
-
 /** Constructor
  */
 
 PredictSatellitePeaks::PredictSatellitePeaks()
-    : m_qConventionFactor(get_factor_for_q_convention(
-          ConfigService::Instance().getString("Q.convention"))) {}
+    : m_qConventionFactor(qConventionFactor()) {}
 
 /// Initialise the properties
 void PredictSatellitePeaks::init() {
@@ -152,23 +141,22 @@ void PredictSatellitePeaks::exec() {
   }
 
   API::Sample sample = Peaks->mutableSample();
-
-  OrientedLattice lattice = sample.getOrientedLattice();
+  auto lattice = std::make_unique<OrientedLattice>(sample.getOrientedLattice());
 
   bool fromUB = getProperty("GetModVectorsFromUB");
   if (fromUB) {
-    offsets1 = lattice.getModVec(0);
-    offsets2 = lattice.getModVec(1);
-    offsets3 = lattice.getModVec(2);
+    offsets1 = lattice->getModVec(0);
+    offsets2 = lattice->getModVec(1);
+    offsets3 = lattice->getModVec(2);
     if (maxOrder == 0)
-      maxOrder = lattice.getMaxOrder();
-    crossTerms = lattice.getCrossTerm();
+      maxOrder = lattice->getMaxOrder();
+    crossTerms = lattice->getCrossTerm();
   } else {
-    lattice.setModVec1(offsets1);
-    lattice.setModVec2(offsets2);
-    lattice.setModVec3(offsets3);
-    lattice.setMaxOrder(maxOrder);
-    lattice.setCrossTerm(crossTerms);
+    lattice->setModVec1(offsets1);
+    lattice->setModVec2(offsets2);
+    lattice->setModVec3(offsets3);
+    lattice->setMaxOrder(maxOrder);
+    lattice->setCrossTerm(crossTerms);
   }
 
   const auto instrument = Peaks->getInstrument();
@@ -176,7 +164,7 @@ void PredictSatellitePeaks::exec() {
   outPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
       WorkspaceFactory::Instance().createPeaks());
   outPeaks->setInstrument(instrument);
-  outPeaks->mutableSample().setOrientedLattice(&lattice);
+  outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
 
   Kernel::Matrix<double> goniometer;
   goniometer.identityMatrix();
@@ -188,9 +176,9 @@ void PredictSatellitePeaks::exec() {
   std::vector<V3D> possibleHKLs;
   const double dMin = getProperty("MinDSpacing");
   const double dMax = getProperty("MaxDSpacing");
-  Geometry::HKLGenerator gen(lattice, dMin);
-  auto dSpacingFilter =
-      boost::make_shared<HKLFilterDRange>(lattice, dMin, dMax);
+  Geometry::HKLGenerator gen(outPeaks->sample().getOrientedLattice(), dMin);
+  auto dSpacingFilter = boost::make_shared<HKLFilterDRange>(
+      outPeaks->sample().getOrientedLattice(), dMin, dMax);
 
   V3D hkl = *(gen.begin());
   g_log.information() << "HKL range for d_min of " << dMin << " to d_max of "
@@ -207,7 +195,7 @@ void PredictSatellitePeaks::exec() {
 
   size_t N = possibleHKLs.size();
   N = max<size_t>(100, N);
-  auto &UB = lattice.getUB();
+  const auto &UB = outPeaks->sample().getOrientedLattice().getUB();
   goniometer = peak0.getGoniometerMatrix();
   Progress prog(this, 0.0, 1.0, N);
   vector<vector<int>> AlreadyDonePeaks;
@@ -237,11 +225,11 @@ void PredictSatellitePeaks::exec() {
   // Sort peaks by run number so that peaks with equal goniometer matrices are
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
-  criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.push_back(std::pair<std::string, bool>("BankName", true));
-  criteria.push_back(std::pair<std::string, bool>("h", true));
-  criteria.push_back(std::pair<std::string, bool>("k", true));
-  criteria.push_back(std::pair<std::string, bool>("l", true));
+  criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
+  criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
+  criteria.emplace_back(std::pair<std::string, bool>("h", true));
+  criteria.emplace_back(std::pair<std::string, bool>("k", true));
+  criteria.emplace_back(std::pair<std::string, bool>("l", true));
   outPeaks->sort(criteria);
 
   for (int i = 0; i < static_cast<int>(outPeaks->getNumberPeaks()); ++i) {
@@ -260,22 +248,22 @@ void PredictSatellitePeaks::exec_peaks() {
 
   API::Sample sample = Peaks->mutableSample();
 
-  OrientedLattice lattice = sample.getOrientedLattice();
+  auto lattice = std::make_unique<OrientedLattice>(sample.getOrientedLattice());
 
   bool fromUB = getProperty("GetModVectorsFromUB");
   if (fromUB) {
-    offsets1 = lattice.getModVec(0);
-    offsets2 = lattice.getModVec(1);
-    offsets3 = lattice.getModVec(2);
+    offsets1 = lattice->getModVec(0);
+    offsets2 = lattice->getModVec(1);
+    offsets3 = lattice->getModVec(2);
     if (maxOrder == 0)
-      maxOrder = lattice.getMaxOrder();
-    crossTerms = lattice.getCrossTerm();
+      maxOrder = lattice->getMaxOrder();
+    crossTerms = lattice->getCrossTerm();
   } else {
-    lattice.setModVec1(offsets1);
-    lattice.setModVec2(offsets2);
-    lattice.setModVec3(offsets3);
-    lattice.setMaxOrder(maxOrder);
-    lattice.setCrossTerm(crossTerms);
+    lattice->setModVec1(offsets1);
+    lattice->setModVec2(offsets2);
+    lattice->setModVec3(offsets3);
+    lattice->setMaxOrder(maxOrder);
+    lattice->setCrossTerm(crossTerms);
   }
 
   bool includePeaksInRange = false;
@@ -293,7 +281,7 @@ void PredictSatellitePeaks::exec_peaks() {
   outPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
       WorkspaceFactory::Instance().createPeaks());
   outPeaks->setInstrument(instrument);
-  outPeaks->mutableSample().setOrientedLattice(&lattice);
+  outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
 
   vector<vector<int>> AlreadyDonePeaks;
   HKLFilterWavelength lambdaFilter(DblMatrix(3, 3, true), 0.1, 100.);
@@ -323,11 +311,11 @@ void PredictSatellitePeaks::exec_peaks() {
   // Sort peaks by run number so that peaks with equal goniometer matrices are
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
-  criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.push_back(std::pair<std::string, bool>("BankName", true));
-  criteria.push_back(std::pair<std::string, bool>("h", true));
-  criteria.push_back(std::pair<std::string, bool>("k", true));
-  criteria.push_back(std::pair<std::string, bool>("l", true));
+  criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
+  criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
+  criteria.emplace_back(std::pair<std::string, bool>("h", true));
+  criteria.emplace_back(std::pair<std::string, bool>("k", true));
+  criteria.emplace_back(std::pair<std::string, bool>("l", true));
   outPeaks->sort(criteria);
 
   for (int i = 0; i < static_cast<int>(outPeaks->getNumberPeaks()); ++i) {
@@ -378,7 +366,7 @@ void PredictSatellitePeaks::predictOffsets(
         binary_search(AlreadyDonePeaks.begin(), AlreadyDonePeaks.end(), SavPk);
 
     if (!foundPeak) {
-      AlreadyDonePeaks.push_back(SavPk);
+      AlreadyDonePeaks.emplace_back(SavPk);
     } else {
       continue;
     }
@@ -433,7 +421,7 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
             goniometer * UB * satelliteHKL * 2.0 * M_PI * m_qConventionFactor;
 
         // Check if Q is non-physical
-        if (Qs.Z() <= 0)
+        if (Qs.Z() * m_qConventionFactor <= 0)
           continue;
 
         auto peak(Peaks->createPeak(Qs, 1));
@@ -451,7 +439,7 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
                                        AlreadyDonePeaks.end(), SavPk);
 
         if (!foundPeak) {
-          AlreadyDonePeaks.push_back(SavPk);
+          AlreadyDonePeaks.emplace_back(SavPk);
         } else {
           continue;
         }
@@ -467,9 +455,9 @@ void PredictSatellitePeaks::predictOffsetsWithCrossTerms(
 V3D PredictSatellitePeaks::getOffsetVector(const std::string &label) {
   vector<double> offsets = getProperty(label);
   if (offsets.empty()) {
-    offsets.push_back(0.0);
-    offsets.push_back(0.0);
-    offsets.push_back(0.0);
+    offsets.emplace_back(0.0);
+    offsets.emplace_back(0.0);
+    offsets.emplace_back(0.0);
   }
   V3D offsets1 = V3D(offsets[0], offsets[1], offsets[2]);
   return offsets1;

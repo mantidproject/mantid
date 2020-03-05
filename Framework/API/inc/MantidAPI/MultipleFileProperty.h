@@ -116,7 +116,8 @@ class DLLExport MultipleFileProperty
 public:
   MultipleFileProperty(
       const std::string &name, unsigned int action,
-      const std::vector<std::string> &exts = std::vector<std::string>());
+      const std::vector<std::string> &exts = std::vector<std::string>(),
+      bool allowEmptyTokens = false);
 
   MultipleFileProperty(
       const std::string &name,
@@ -167,6 +168,8 @@ private:
   /// MultipleFileProperty::setValueAsMultipleFiles
   /// and MultipleFileProperty::setValueAsSingleFile
   std::vector<std::vector<std::string>> m_oldFoundValue;
+  /// Whether to allow for empty tokens
+  bool m_allowEmptyTokens{false};
 };
 
 } // namespace API

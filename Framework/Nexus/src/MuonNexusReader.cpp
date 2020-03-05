@@ -82,7 +82,7 @@ void MuonNexusReader::readFromFile(const string &filename) {
   std::map<string, string> entries = handle.getEntries();
   for (auto &entry : entries) {
     if (entry.second == NXDATA) {
-      nxdataname.push_back(entry.first);
+      nxdataname.emplace_back(entry.first);
     }
   }
   handle.openGroup(nxdataname.front(), NXDATA);
@@ -254,7 +254,7 @@ bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
     for (int i = 0; i < info.dims[0]; ++i) {
       std::string str(&dataVals[i * info.dims[1]],
                       &dataVals[(i + 1) * info.dims[1]]);
-      stringValues.push_back(str);
+      stringValues.emplace_back(str);
     }
     values.resize(info.dims[0]); // Leave empty
   } else {
@@ -284,14 +284,14 @@ bool MuonNexusReader::readMuonLogData(NeXus::File &handle) {
 
   // Add loaded values to vectors
 
-  logNames.push_back(dataName);
+  logNames.emplace_back(dataName);
 
   std::vector<float> tmp(timeVals.get(), timeVals.get() + info.dims[0]);
-  logTimes.push_back(tmp);
+  logTimes.emplace_back(tmp);
 
-  logType.push_back(isNumeric);
-  logValues.push_back(values);
-  logStringValues.push_back(stringValues);
+  logType.emplace_back(isNumeric);
+  logValues.emplace_back(values);
+  logStringValues.emplace_back(stringValues);
 
   return true;
 }

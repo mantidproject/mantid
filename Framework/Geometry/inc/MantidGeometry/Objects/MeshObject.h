@@ -71,11 +71,13 @@ public:
     return new MeshObject(m_triangles, m_vertices, material);
   }
 
+  void setID(const std::string &id) override { m_id = id; }
   const std::string &id() const override { return m_id; }
 
   int getName() const override { return 0; }
 
   const Kernel::Material &material() const override;
+  void setMaterial(const Kernel::Material &material) override;
 
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;
@@ -87,6 +89,7 @@ public:
 
   // INTERSECTION
   int interceptSurface(Geometry::Track &) const override;
+  double distance(const Track &track) const override;
 
   // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
   double solidAngle(const Kernel::V3D &observer) const override;
@@ -109,11 +112,13 @@ public:
   int getPointInObject(Kernel::V3D &point) const override;
 
   /// Select a random point within the object
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const size_t) const override;
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const BoundingBox &activeRegion,
-                                    const size_t) const override;
+  boost::optional<Kernel::V3D>
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const size_t) const override;
+  boost::optional<Kernel::V3D>
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const BoundingBox &activeRegion,
+                        const size_t) const override;
 
   // Rendering member functions
   void draw() const override;

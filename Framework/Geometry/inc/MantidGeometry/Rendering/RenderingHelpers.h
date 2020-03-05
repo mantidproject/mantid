@@ -8,7 +8,6 @@
 #define MANTID_GEOMETRY_RENDERER_H_
 
 #include "MantidGeometry/DllConfig.h"
-#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include <vector>
 
 class TopoDS_Shape;

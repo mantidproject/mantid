@@ -329,13 +329,23 @@ template <typename T>
 Kernel::TimeSeriesProperty<T> *
 LogManager::getTimeSeriesProperty(const std::string &name) const {
   Kernel::Property *prop = getProperty(name);
-  if (Kernel::TimeSeriesProperty<T> *tsp =
-          dynamic_cast<Kernel::TimeSeriesProperty<T> *>(prop)) {
+  if (auto *tsp = dynamic_cast<Kernel::TimeSeriesProperty<T> *>(prop)) {
     return tsp;
   } else {
     throw std::invalid_argument("Run::getTimeSeriesProperty - '" + name +
                                 "' is not a TimeSeriesProperty");
   }
+}
+
+/**
+ * Returns the time dependent standard deviation
+ * @param name :: The name of the property
+ * @return A single double value
+ */
+double LogManager::getTimeAveragedStd(const std::string &name) const {
+  return getTimeSeriesProperty<double>(name)
+      ->getStatistics()
+      .time_standard_deviation;
 }
 
 /**
@@ -347,7 +357,7 @@ LogManager::getTimeSeriesProperty(const std::string &name) const {
 template <typename HeldType>
 HeldType LogManager::getPropertyValueAsType(const std::string &name) const {
   Kernel::Property *prop = getProperty(name);
-  if (Kernel::PropertyWithValue<HeldType> *valueProp =
+  if (auto *valueProp =
           dynamic_cast<Kernel::PropertyWithValue<HeldType> *>(prop)) {
     return (*valueProp)();
   } else {

@@ -62,12 +62,12 @@ public:
     UB.setRow(1, row_1);
     UB.setRow(2, row_2);
 
-    OrientedLattice o_lattice;
-    o_lattice.setUB(UB);
-    ws->mutableSample().setOrientedLattice(&o_lattice);
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
+    lattice->setUB(UB);
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
 
     // now get the UB back from the WS
-    UB = o_lattice.getUB();
+    UB = ws->sample().getOrientedLattice().getUB();
 
     ShowPossibleCells alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

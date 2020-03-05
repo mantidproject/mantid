@@ -52,8 +52,8 @@ const double BAD_OFFSET(1000.); // mark things that didn't work with this
 double gsl_costFunction(const gsl_vector *v, void *params) {
   // FIXME - there is no need to use vectors peakPosToFit, peakPosFitted and
   // chisq
-  double *p = reinterpret_cast<double *>(params);
-  size_t n = static_cast<size_t>(p[0]);
+  auto *p = reinterpret_cast<double *>(params);
+  auto n = static_cast<size_t>(p[0]);
   std::vector<double> peakPosToFit(n);
   std::vector<double> peakPosFitted(n);
   std::vector<double> height2(n);
@@ -478,7 +478,7 @@ void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(
 /** Calculate (all) detectors' offsets
  */
 void GetDetOffsetsMultiPeaks::calculateDetectorsOffsets() {
-  int nspec = static_cast<int>(m_inputWS->getNumberHistograms());
+  auto nspec = static_cast<int>(m_inputWS->getNumberHistograms());
 
   // To get the workspace index from the detector ID
   const detid2index_map pixel_to_wi =
@@ -592,7 +592,7 @@ FitPeakOffsetResult GetDetOffsetsMultiPeaks::calculatePeakOffset(
   } else {
     // dead detector will be masked
     const auto &Y = m_inputWS->y(wi);
-    const int YLength = static_cast<int>(Y.size());
+    const auto YLength = static_cast<int>(Y.size());
     double sumY = 0.0;
     size_t numNonEmptyBins = 0;
     for (int i = 0; i < YLength; i++) {
@@ -878,17 +878,17 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
   for (int i = 0; i < static_cast<int>(peakPositions.size()); ++i) {
     if ((peakPositions[i] > minD) && (peakPositions[i] < maxD)) {
       if (m_useFitWindowTable) {
-        fitWindowsToUse.push_back(std::max(m_vecFitWindow[wi][2 * i], minD));
-        fitWindowsToUse.push_back(
+        fitWindowsToUse.emplace_back(std::max(m_vecFitWindow[wi][2 * i], minD));
+        fitWindowsToUse.emplace_back(
             std::min(m_vecFitWindow[wi][2 * i + 1], maxD));
       } else if (useFitWindows) {
-        fitWindowsToUse.push_back(std::max(fitWindows[2 * i], minD));
-        fitWindowsToUse.push_back(std::min(fitWindows[2 * i + 1], maxD));
+        fitWindowsToUse.emplace_back(std::max(fitWindows[2 * i], minD));
+        fitWindowsToUse.emplace_back(std::min(fitWindows[2 * i + 1], maxD));
       }
-      peakPosToFit.push_back(peakPositions[i]);
+      peakPosToFit.emplace_back(peakPositions[i]);
     }
   }
-  int numPeaksInRange = static_cast<int>(peakPosToFit.size());
+  auto numPeaksInRange = static_cast<int>(peakPosToFit.size());
   if (numPeaksInRange == 0) {
     std::stringstream outss;
     outss << "Spectrum " << wi << " has no peak in range (" << minD << ", "
@@ -1078,12 +1078,12 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
       g_log.debug(dbss.str());
       continue;
     } else
-      vec_offsets.push_back(offset);
+      vec_offsets.emplace_back(offset);
 
     // (g) calculate width/pos as to determine the (z-value) for constant
     // "width" - (delta d)/d
     // double widthdevpos = width/centre;
-    vec_widthDivPos.push_back(widthdevpos);
+    vec_widthDivPos.emplace_back(widthdevpos);
 
     // g_log.debug() << " h:" << height << " c:" << centre << " w:" <<
     // (width/(2.*std::sqrt(2.*M_LN2)))
@@ -1091,10 +1091,10 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
 
     // Add peak to vectors
     double refcentre = peakPositionRef[i];
-    peakPosFitted.push_back(centre);
-    peakPosToFit.push_back(refcentre);
-    peakHeightFitted.push_back(height);
-    chisq.push_back(chi2);
+    peakPosFitted.emplace_back(centre);
+    peakPosToFit.emplace_back(refcentre);
+    peakHeightFitted.emplace_back(height);
+    chisq.emplace_back(chi2);
   }
 
   // Remove by Z-score on delta d/d
@@ -1106,7 +1106,7 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
       g_log.debug() << "Banning peak at " << peakPosFitted[i]
                     << " in wkspindex = (no show)" // << wi
                     << " sigma/d = " << vec_widthDivPos[i] << "\n";
-      banned.push_back(i);
+      banned.emplace_back(i);
       continue;
     }
   }
@@ -1233,7 +1233,7 @@ void GetDetOffsetsMultiPeaks::addInfoToReportWS(
                    (tofitpeakpositions[i] * tofitpeakpositions[i]);
     }
 
-    double numdelta = static_cast<double>(numpeaksfitted);
+    auto numdelta = static_cast<double>(numpeaksfitted);
     double stddev = 0.;
     if (numpeaksfitted > 1.)
       stddev = sqrt(sumdelta2 / numdelta -

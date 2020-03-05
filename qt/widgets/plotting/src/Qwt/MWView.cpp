@@ -272,7 +272,7 @@ void MWView::setVectorDimensions() {
     Mantid::Geometry::MDHistoDimension_sptr dimension(
         new Mantid::Geometry::MDHistoDimension(
             m_workspace->getDimension(d).get()));
-    m_dimensions.push_back(dimension);
+    m_dimensions.emplace_back(dimension);
   }
 }
 
@@ -292,9 +292,9 @@ void MWView::spawnWellcomeWorkspace() {
     auto dataY = std::vector<double>();
     for (int i = 0; i < numberSpectra; i++) {
       for (int j = 0; j < numberSpectra; j++) {
-        dataX.push_back(j * 1.);
-        dataY.push_back(intensity * (i * i + j * j) /
-                        (2 * numberSpectra * numberSpectra));
+        dataX.emplace_back(j * 1.);
+        dataY.emplace_back(intensity * (i * i + j * j) /
+                           (2 * numberSpectra * numberSpectra));
       }
     }
     auto createWsAlg =

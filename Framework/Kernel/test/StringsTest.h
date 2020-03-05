@@ -416,7 +416,7 @@ public:
     std::vector<int> expected;
     expected.reserve(12);
     for (int i = 1; i <= 12; i++)
-      expected.push_back(i);
+      expected.emplace_back(i);
 
     TS_ASSERT_EQUALS(result, expected);
   }
@@ -445,8 +445,8 @@ public:
     std::vector<int> expected;
     expected.reserve(8);
     for (int i = 52; i <= 58; i++)
-      expected.push_back(i);
-    expected.push_back(192);
+      expected.emplace_back(i);
+    expected.emplace_back(192);
 
     TS_ASSERT_EQUALS(result, expected);
   }
@@ -459,7 +459,7 @@ public:
     std::vector<int> expected;
     expected.reserve(10);
     for (int i = 1; i <= 10; i++)
-      expected.push_back(i);
+      expected.emplace_back(i);
 
     TS_ASSERT_EQUALS(result, expected);
   }
@@ -472,7 +472,7 @@ public:
     std::vector<int> expected;
     expected.reserve(10);
     for (int i = 1; i <= 10; i++)
-      expected.push_back(i);
+      expected.emplace_back(i);
 
     TS_ASSERT_EQUALS(result, expected);
   }

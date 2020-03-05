@@ -62,7 +62,9 @@ const std::string LoadPreNexus::category() const {
  */
 int LoadPreNexus::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &filename = descriptor.filename();
-  if (filename.compare(filename.size() - 12, 12, "_runinfo.xml") == 0)
+  if (filename.size() > 12
+          ? (filename.compare(filename.size() - 12, 12, "_runinfo.xml") == 0)
+          : false)
     return 80;
   else
     return 0;
@@ -234,9 +236,8 @@ void LoadPreNexus::parseRuninfo(const string &runinfo, string &dataDir,
               pNode = pNode->firstChild();
               while (pNode) {
                 if (pNode->nodeName() == "scattering") {
-                  Poco::XML::Element *element =
-                      static_cast<Poco::XML::Element *>(pNode);
-                  eventFilenames.push_back(element->getAttribute("name"));
+                  auto *element = static_cast<Poco::XML::Element *>(pNode);
+                  eventFilenames.emplace_back(element->getAttribute("name"));
                 }
                 pNode = pNode->nextSibling();
               }
@@ -281,14 +282,14 @@ void LoadPreNexus::runLoadNexusLogs(const string &runinfo,
 
   // put together a list of possible locations
   vector<string> possibilities;
-  possibilities.push_back(dataDir + shortName +
-                          "_event.nxs"); // next to runinfo
-  possibilities.push_back(dataDir + shortName + "_histo.nxs");
-  possibilities.push_back(dataDir + shortName + ".nxs");
-  possibilities.push_back(dataDir + "../NeXus/" + shortName +
-                          "_event.nxs"); // in NeXus directory
-  possibilities.push_back(dataDir + "../NeXus/" + shortName + "_histo.nxs");
-  possibilities.push_back(dataDir + "../NeXus/" + shortName + ".nxs");
+  possibilities.emplace_back(dataDir + shortName +
+                             "_event.nxs"); // next to runinfo
+  possibilities.emplace_back(dataDir + shortName + "_histo.nxs");
+  possibilities.emplace_back(dataDir + shortName + ".nxs");
+  possibilities.emplace_back(dataDir + "../NeXus/" + shortName +
+                             "_event.nxs"); // in NeXus directory
+  possibilities.emplace_back(dataDir + "../NeXus/" + shortName + "_histo.nxs");
+  possibilities.emplace_back(dataDir + "../NeXus/" + shortName + ".nxs");
 
   // run the algorithm
   bool loadedLogs = false;

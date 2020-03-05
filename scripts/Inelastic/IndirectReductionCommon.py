@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-from mantid.simpleapi import Load
+from mantid.simpleapi import DeleteWorkspace, Load
 from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
@@ -276,10 +276,14 @@ def crop_workspaces(workspace_names, spec_min, spec_max, extract_monitors=True, 
         # Crop to the detectors required
         workspace = mtd[workspace_name]
 
-        CropWorkspace(InputWorkspace=workspace_name,
-                      OutputWorkspace=workspace_name,
-                      StartWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_min)),
-                      EndWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_max)))
+        try:
+            CropWorkspace(InputWorkspace=workspace_name,
+                          OutputWorkspace=workspace_name,
+                          StartWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_min)),
+                          EndWorkspaceIndex=workspace.getIndexFromSpectrumNumber(int(spec_max)))
+        except RuntimeError:
+            raise RuntimeError('The spectra min {0} or spectra max {1} could not be found in workspace {2}.'
+                               .format(str(spec_min), str(spec_max), workspace_name))
 
 
 # -------------------------------------------------------------------------------
@@ -392,6 +396,30 @@ def sum_chopped_runs(workspace_names):
     return [workspace_names[0]]
 
 
+#--------------------------------------------------------------------------------
+
+
+def get_ipf_parameters_from_run(run_number, instrument, analyser, reflection, parameters):
+    from IndirectCommon import getInstrumentParameter
+
+    ipf_filename = os.path.join(config['instrumentDefinition.directory'], instrument + '_' + analyser + '_' + reflection
+                                + '_Parameters.xml')
+
+    results = dict()
+    try:
+        run_workspace = '__temp'
+        do_load(instrument+str(run_number), run_workspace, ipf_filename, False, {})
+
+        for parameter in parameters:
+            results[parameter] = getInstrumentParameter(run_workspace, parameter)
+
+        DeleteWorkspace(run_workspace)
+    except ValueError or RuntimeError:
+        pass
+
+    return results
+
+
 # -------------------------------------------------------------------------------
 
 
@@ -484,7 +512,6 @@ def unwrap_monitor(workspace_name):
         elif unwrap == 'BaseOnTimeRegime':
             mon_time = mtd[monitor_workspace_name].readX(0)[0]
             det_time = mtd[workspace_name].readX(0)[0]
-            logger.notice(str(mon_time) + " " + str(det_time))
             should_unwrap = mon_time == det_time
         else:
             should_unwrap = False

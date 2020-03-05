@@ -26,11 +26,6 @@ public:
 
   void tearDown() override { m_model.reset(); }
 
-  void
-  test_that_the_model_has_been_instantiated_with_the_correct_settings_group() {
-    TS_ASSERT_EQUALS(m_model->getSettingsGroup(), "Indirect Settings");
-  }
-
   void test_that_setFacility_will_set_the_saved_facility() {
     m_model->setFacility("ISIS");
     TS_ASSERT_EQUALS(m_model->getFacility(), "ISIS");

@@ -77,7 +77,7 @@ void RealFFT::exec() {
   int spec = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
 
   const auto &X = inWS->x(spec);
-  int ySize = static_cast<int>(inWS->blocksize());
+  auto ySize = static_cast<int>(inWS->blocksize());
 
   if (spec >= ySize)
     throw std::invalid_argument("Property WorkspaceIndex is out of range");

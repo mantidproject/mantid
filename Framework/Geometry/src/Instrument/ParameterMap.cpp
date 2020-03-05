@@ -1016,8 +1016,8 @@ std::string ParameterMap::asString() const {
   for (const auto &mappair : m_map) {
     const boost::shared_ptr<Parameter> &p = mappair.second;
     if (p && mappair.first) {
-      const IComponent *comp = dynamic_cast<const IComponent *>(mappair.first);
-      const IDetector *det = dynamic_cast<const IDetector *>(comp);
+      const auto *comp = dynamic_cast<const IComponent *>(mappair.first);
+      const auto *det = dynamic_cast<const IDetector *>(comp);
       if (det) {
         out << "detID:" << det->getID();
       } else if (comp) {
@@ -1132,7 +1132,7 @@ const std::vector<std::string> &ParameterMap::getParameterFilenames() const {
  * @param filename the filename to add
  */
 void ParameterMap::addParameterFilename(const std::string &filename) {
-  m_parameterFileNames.push_back(filename);
+  m_parameterFileNames.emplace_back(filename);
 }
 
 /// Wrapper for ParameterFactory::create to avoid include in header

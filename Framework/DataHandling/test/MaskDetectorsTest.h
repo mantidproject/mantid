@@ -31,14 +31,14 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountStandardDeviations;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::LinearGenerator;
-using Mantid::MantidVecPtr;
-using Mantid::Types::Event::TofEvent;
 using Mantid::detid_t;
+using Mantid::MantidVecPtr;
 using Mantid::specnum_t;
+using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
+using Mantid::HistogramData::LinearGenerator;
+using Mantid::Types::Event::TofEvent;
 
 class MaskDetectorsTest : public CxxTest::TestSuite {
 public:

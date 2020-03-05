@@ -29,7 +29,6 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <H5Cpp.h>
-#include <boost/function.hpp>
 #include <boost/shared_array.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -51,6 +50,11 @@ using namespace API;
 using namespace DataObjects;
 using Types::Core::DateAndTime;
 
+namespace {
+// detnotes the end of iteration for NeXus::getNextEntry
+const std::string NULL_STR("NULL");
+} // namespace
+
 /**
  * Based on the current group in the file, does the named sub-entry exist?
  * @param file : File handle. This is not modified, but cannot be const
@@ -58,7 +62,12 @@ using Types::Core::DateAndTime;
  * @return true only if it exists
  */
 bool exists(::NeXus::File &file, const std::string &name) {
-  auto entries = file.getEntries();
+  const auto entries = file.getEntries();
+  return exists(entries, name);
+}
+
+bool exists(const std::map<std::string, std::string> &entries,
+            const std::string &name) {
   return entries.find(name) != entries.end();
 }
 
@@ -270,7 +279,7 @@ void LoadEventNexus::init() {
   std::vector<std::string> loadType{"Default"};
 
 #ifndef _WIN32
-  loadType.push_back("Multiprocess (experimental)");
+  loadType.emplace_back("Multiprocess (experimental)");
 #endif // _WIN32
 
 #ifdef MPI_EXPERIMENTAL
@@ -287,6 +296,11 @@ void LoadEventNexus::init() {
                       "LoadNexusInstrumentXML", true, Direction::Input),
                   "Reads the embedded Instrument XML from the NeXus file "
                   "(optional, default True). ");
+
+  declareProperty("NumberOfBins", 500, mustBePositive,
+                  "The number of bins intially defined. Use Rebin to change "
+                  "the binning later.  If there is no data loaded, or you "
+                  "select meta data only you will only get 1 bin.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -298,19 +312,20 @@ void LoadEventNexus::setTopEntryName() {
     m_top_entry_name = nxentryProperty;
     return;
   }
-  using string_map_t = std::map<std::string, std::string>;
+
   try {
-    string_map_t::const_iterator it;
-    // assume we're at the top, otherwise: m_file->openPath("/");
-    string_map_t entries = m_file->getEntries();
-
-    // Choose the first entry as the default
-    m_top_entry_name = entries.begin()->first;
-
-    for (it = entries.begin(); it != entries.end(); ++it) {
-      if (((it->first == "entry") || (it->first == "raw_data_1")) &&
-          (it->second == "NXentry")) {
-        m_top_entry_name = it->first;
+    while (true) {
+      const auto entry = m_file->getNextEntry();
+      if (entry.second == "NXentry") {
+        if ((entry.first == "entry") || (entry.first == "raw_data_1")) {
+          m_top_entry_name = entry.first;
+          break;
+        }
+      } else if (entry.first == NULL_STR && entry.second == NULL_STR) {
+        g_log.error()
+            << "Unable to determine name of top level NXentry - assuming "
+               "\"entry\".\n";
+        m_top_entry_name = "entry";
         break;
       }
     }
@@ -349,9 +364,9 @@ template <>
 void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(
     EventWorkspaceCollection_sptr workspace) {
   // We provide a function pointer to the filter method of the object
-  boost::function<void(MatrixWorkspace_sptr)> func = std::bind1st(
-      std::mem_fun(&LoadEventNexus::filterDuringPause<MatrixWorkspace_sptr>),
-      this);
+  using std::placeholders::_1;
+  auto func = std::bind(
+      &LoadEventNexus::filterDuringPause<MatrixWorkspace_sptr>, this, _1);
   workspace->applyFilter(func);
 }
 
@@ -810,17 +825,18 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   // Now we want to go through all the bankN_event entries
   vector<string> bankNames;
   vector<std::size_t> bankNumEvents;
-  map<string, string> entries = m_file->getEntries();
-  map<string, string>::const_iterator it = entries.begin();
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
   ::NeXus::Info info;
   bool oldNeXusFileNames(false);
   bool hasTotalCounts(true);
   bool haveWeights = false;
   auto firstPulseT = DateAndTime::maximum();
-  for (; it != entries.end(); ++it) {
-    std::string entry_name(it->first);
-    std::string entry_class(it->second);
+  while (true) { // should be broken when entry name is set
+    const auto entry = m_file->getNextEntry();
+    const std::string entry_name(entry.first);
+    const std::string entry_class(entry.second);
+    if (entry_name == NULL_STR && entry_class == NULL_STR)
+      break;
 
     if (entry_class == classType) {
       // open the group
@@ -836,15 +852,11 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
       }
       // get the number of events
       std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames);
-      bankNames.push_back(entry_name);
-      bankNumEvents.push_back(num);
+      bankNames.emplace_back(entry_name);
+      bankNumEvents.emplace_back(num);
 
       // Look for weights in simulated file
-      if (exists(*m_file, "event_weight")) {
-        m_file->openData("event_weight");
-        haveWeights = true;
-        m_file->closeData();
-      }
+      haveWeights = exists(*m_file, "event_weight");
 
       m_file->closeGroup();
     }
@@ -952,7 +964,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     std::vector<double> instrumentUnused =
         m_ws->getInstrument()->getNumberParameter("remove-unused-banks", true);
     if (!instrumentUnused.empty()) {
-      const int unused = static_cast<int>(instrumentUnused.front());
+      const auto unused = static_cast<int>(instrumentUnused.front());
       if (unused == 1)
         deleteBanks(m_ws, bankNames);
     }
@@ -1053,8 +1065,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     if (!instrumentT0.empty()) {
       const double mT0 = instrumentT0.front();
       if (mT0 != 0.0) {
-        int64_t numHistograms =
-            static_cast<int64_t>(m_ws->getNumberHistograms());
+        auto numHistograms = static_cast<int64_t>(m_ws->getNumberHistograms());
         PARALLEL_FOR_IF(Kernel::threadSafe(*m_ws))
         for (int64_t i = 0; i < numHistograms; ++i) {
           PARALLEL_START_INTERUPT_REGION
@@ -1070,9 +1081,17 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
   // Now, create a default X-vector for histogramming, with just 2 bins.
-  if (eventsLoaded > 0)
-    m_ws->setAllX(HistogramData::BinEdges{shortest_tof - 1, longest_tof + 1});
-  else
+  if (eventsLoaded > 0) {
+    int nBins = getProperty("NumberOfBins");
+    auto binEdgesVec = std::vector<double>(nBins + 1);
+    binEdgesVec[0] = shortest_tof - 1;
+    binEdgesVec[nBins] = longest_tof + 1;
+    double binStep = (binEdgesVec[nBins] - binEdgesVec[0]) / nBins;
+    for (int binIndex = 1; binIndex < nBins; binIndex++) {
+      binEdgesVec[binIndex] = binEdgesVec[0] + (binStep * binIndex);
+    }
+    m_ws->setAllX(HistogramData::BinEdges{binEdgesVec});
+  } else
     m_ws->setAllX(HistogramData::BinEdges{0.0, 1.0});
 
   // if there is time_of_flight load it
@@ -1171,7 +1190,7 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
 
     det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det) {
-      detList.push_back(det);
+      detList.emplace_back(det);
     } else {
       // Also, look in the first sub-level for RectangularDetectors (e.g.
       // PG3). We are not doing a full recursive search since that will be
@@ -1181,7 +1200,7 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
         for (int j = 0; j < assem->nelements(); j++) {
           det = boost::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
-            detList.push_back(det);
+            detList.emplace_back(det);
 
           } else {
             // Also, look in the second sub-level for RectangularDetectors
@@ -1193,7 +1212,7 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
                 det = boost::dynamic_pointer_cast<RectangularDetector>(
                     (*assem2)[k]);
                 if (det) {
-                  detList.push_back(det);
+                  detList.emplace_back(det);
                 }
               }
             }
@@ -1228,13 +1247,13 @@ void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
         asmb2->getChildren(grandchildren, false);
 
         for (auto &row : grandchildren) {
-          Detector *d =
+          auto *d =
               dynamic_cast<Detector *>(const_cast<IComponent *>(row.get()));
           if (d)
             inst->removeDetector(d);
         }
       }
-      IComponent *comp = dynamic_cast<IComponent *>(det.get());
+      auto *comp = dynamic_cast<IComponent *>(det.get());
       inst->remove(comp);
     }
   }

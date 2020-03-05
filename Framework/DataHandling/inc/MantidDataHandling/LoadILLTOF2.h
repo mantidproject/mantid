@@ -84,6 +84,7 @@ private:
   double m_wavelength = 0;
   double m_channelWidth = 0;
   double m_timeOfFlightDelay = 0;
+  std::string m_monitorName;
 
   LoadHelper m_loader;
 };

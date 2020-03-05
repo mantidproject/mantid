@@ -105,7 +105,7 @@ public:
    * @param event :: TofEvent to add at the end of the list.
    * */
   inline void addEventQuickly(const Types::Event::TofEvent &event) {
-    this->events.push_back(event);
+    this->events.emplace_back(event);
     this->order = UNSORTED;
   }
 
@@ -115,7 +115,7 @@ public:
    * @param event :: WeightedEvent to add at the end of the list.
    * */
   inline void addEventQuickly(const WeightedEvent &event) {
-    this->weightedEvents.push_back(event);
+    this->weightedEvents.emplace_back(event);
     this->order = UNSORTED;
   }
 
@@ -125,7 +125,7 @@ public:
    * @param event :: WeightedEventNoTime to add at the end of the list.
    * */
   inline void addEventQuickly(const WeightedEventNoTime &event) {
-    this->weightedEventsNoTime.push_back(event);
+    this->weightedEventsNoTime.emplace_back(event);
     this->order = UNSORTED;
   }
 
@@ -242,6 +242,8 @@ public:
   void addTof(const double offset) override;
 
   void addPulsetime(const double seconds) override;
+
+  void addPulsetimes(const std::vector<double> &seconds) override;
 
   void maskTof(const double tofMin, const double tofMax) override;
   void maskCondition(const std::vector<bool> &mask) override;
@@ -453,6 +455,9 @@ private:
                         const double offset);
   template <class T>
   void addPulsetimeHelper(std::vector<T> &events, const double seconds);
+  template <class T>
+  void addPulsetimesHelper(std::vector<T> &events,
+                           const std::vector<double> &seconds);
   template <class T>
   static std::size_t maskTofHelper(std::vector<T> &events, const double tofMin,
                                    const double tofMax);

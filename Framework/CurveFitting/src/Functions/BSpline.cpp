@@ -100,7 +100,7 @@ void BSpline::derivative1D(double *out, const double *xValues, size_t nData,
                            const size_t order) const {
 
   int splineOrder = getAttribute("Order").asInt();
-  size_t k = static_cast<size_t>(splineOrder);
+  auto k = static_cast<size_t>(splineOrder);
 #if GSL_MAJOR_VERSION < 2
   if (!m_bsplineDerivWorkspace) {
     gsl_bspline_deriv_workspace *ws = gsl_bspline_deriv_alloc(k);

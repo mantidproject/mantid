@@ -18,11 +18,11 @@
 #include "ALCPeakFittingModel.h"
 
 #include "QInputDialog"
+#include <QCloseEvent>
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-
 namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(ALCInterface)
@@ -33,6 +33,22 @@ const QStringList ALCInterface::STEP_NAMES = {
 // %1 - current step no., %2 - total no. of steps, %3 - current step label
 const QString ALCInterface::LABEL_FORMAT = "Step %1/%2 - %3";
 
+// Custom close event - only allows the window to close if loading is not taking
+// place.
+void ALCInterface::closeEvent(QCloseEvent *event) {
+  // check if currently loading data
+  if (m_dataLoading) {
+    if (m_dataLoading->isLoading()) {
+      m_dataLoading->cancelLoading();
+      event->ignore();
+    } else {
+      event->accept();
+    }
+  } else {
+    event->accept();
+  }
+}
+// namespace CustomInterfaces
 ALCInterface::ALCInterface(QWidget *parent)
     : UserSubWindow(parent), m_ui(), m_baselineModellingView(nullptr),
       m_peakFittingView(nullptr), m_dataLoading(nullptr),
@@ -51,6 +67,7 @@ void ALCInterface::initLayout() {
   auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
   m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
   m_dataLoading->initialize();
+  m_dataLoading->setParent(this);
 
   m_baselineModellingView =
       new ALCBaselineModellingView(m_ui.baselineModellingView);

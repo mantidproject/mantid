@@ -279,7 +279,7 @@ void ConvertMDHistoToMatrixWorkspace::make2DWorkspace() {
   } else {
     normalization = NoNormalization;
   }
-  signal_t inverseVolume =
+  auto inverseVolume =
       static_cast<signal_t>(inputWorkspace->getInverseVolume());
 
   // create the output workspace

@@ -61,10 +61,10 @@ void removeFromRunMapAndADS(const RunLabel &runLabel, RunMap<S, T> &map,
                             Mantid::API::AnalysisDataServiceImpl &ADS) {
   if (map.contains(runLabel)) {
     const auto &name = map.get(runLabel)->getName();
-    map.remove(runLabel);
     if (ADS.doesExist(name)) {
       ADS.remove(name);
     }
+    map.remove(runLabel);
   }
 }
 
@@ -505,7 +505,7 @@ void EnggDiffFittingModel::loadWorkspaces(const std::string &filenamesString) {
     RunLabel runLabel(runNumber, bank);
 
     addFocusedWorkspace(runLabel, ws, filename);
-    collectedRunLabels.push_back(runLabel);
+    collectedRunLabels.emplace_back(runLabel);
   }
 
   if (collectedRunLabels.size() == 1) {

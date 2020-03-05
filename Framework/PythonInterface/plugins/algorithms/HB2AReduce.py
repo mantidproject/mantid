@@ -78,7 +78,7 @@ class HB2AReduce(PythonAlgorithm):
         if not self.getProperty("Filename").value:
             ipts = self.getProperty("IPTS").value
 
-            if ((ipts == Property.EMPTY_INT) or len(self.getProperty("ScanNumbers").value) is 0):
+            if ((ipts == Property.EMPTY_INT) or len(self.getProperty("ScanNumbers").value) == 0):
                 issues["Filename"] = 'Must specify either Filename or IPTS AND ScanNumbers'
 
             if self.getProperty("Exp").value == Property.EMPTY_INT:

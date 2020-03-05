@@ -22,11 +22,11 @@ class StatisticsTest : public CxxTest::TestSuite {
 public:
   void test_Doubles_And_Default_Flags_Calculates_All_Stats() {
     vector<double> data;
-    data.push_back(17.2);
-    data.push_back(18.1);
-    data.push_back(16.5);
-    data.push_back(18.3);
-    data.push_back(12.6);
+    data.emplace_back(17.2);
+    data.emplace_back(18.1);
+    data.emplace_back(16.5);
+    data.emplace_back(18.3);
+    data.emplace_back(12.6);
 
     Statistics stats = getStatistics(data);
 
@@ -39,11 +39,11 @@ public:
 
   void test_Doubles_With_Sorted_Data() {
     vector<double> data;
-    data.push_back(17.2);
-    data.push_back(18.1);
-    data.push_back(16.5);
-    data.push_back(18.3);
-    data.push_back(12.6);
+    data.emplace_back(17.2);
+    data.emplace_back(18.1);
+    data.emplace_back(16.5);
+    data.emplace_back(18.3);
+    data.emplace_back(12.6);
     sort(data.begin(), data.end());
 
     Statistics stats =
@@ -59,11 +59,11 @@ public:
   void
   test_Unsorted_Data_With_Sorted_Flag_Gives_Expected_Incorrect_Result_For_Median() {
     vector<double> data;
-    data.push_back(17.2);
-    data.push_back(18.1);
-    data.push_back(16.5);
-    data.push_back(18.3);
-    data.push_back(12.6);
+    data.emplace_back(17.2);
+    data.emplace_back(18.1);
+    data.emplace_back(16.5);
+    data.emplace_back(18.3);
+    data.emplace_back(12.6);
 
     Statistics stats =
         getStatistics(data, (StatOptions::Median | StatOptions::SortedData));
@@ -77,11 +77,11 @@ public:
 
   void test_Doubles_With_Corrected_StdDev_Calculates_Mean() {
     vector<double> data;
-    data.push_back(17.2);
-    data.push_back(18.1);
-    data.push_back(16.5);
-    data.push_back(18.3);
-    data.push_back(12.6);
+    data.emplace_back(17.2);
+    data.emplace_back(18.1);
+    data.emplace_back(16.5);
+    data.emplace_back(18.3);
+    data.emplace_back(12.6);
     sort(data.begin(), data.end());
 
     Statistics stats = getStatistics(data, StatOptions::CorrectedStdDev);
@@ -95,11 +95,11 @@ public:
 
   void test_Types_Can_Be_Disabled_With_Flags() {
     vector<double> data;
-    data.push_back(17.2);
-    data.push_back(18.1);
-    data.push_back(16.5);
-    data.push_back(18.3);
-    data.push_back(12.6);
+    data.emplace_back(17.2);
+    data.emplace_back(18.1);
+    data.emplace_back(16.5);
+    data.emplace_back(18.3);
+    data.emplace_back(12.6);
 
     Statistics justMean = getStatistics(data, StatOptions::Mean);
     TS_ASSERT_EQUALS(justMean.mean, 16.54);
@@ -111,26 +111,26 @@ public:
 
   void testZscores() {
     vector<double> data;
-    data.push_back(12);
-    data.push_back(13);
-    data.push_back(9);
-    data.push_back(18);
-    data.push_back(7);
-    data.push_back(9);
-    data.push_back(14);
-    data.push_back(16);
-    data.push_back(10);
-    data.push_back(12);
-    data.push_back(7);
-    data.push_back(13);
-    data.push_back(14);
-    data.push_back(19);
-    data.push_back(10);
-    data.push_back(16);
-    data.push_back(12);
-    data.push_back(16);
-    data.push_back(19);
-    data.push_back(11);
+    data.emplace_back(12);
+    data.emplace_back(13);
+    data.emplace_back(9);
+    data.emplace_back(18);
+    data.emplace_back(7);
+    data.emplace_back(9);
+    data.emplace_back(14);
+    data.emplace_back(16);
+    data.emplace_back(10);
+    data.emplace_back(12);
+    data.emplace_back(7);
+    data.emplace_back(13);
+    data.emplace_back(14);
+    data.emplace_back(19);
+    data.emplace_back(10);
+    data.emplace_back(16);
+    data.emplace_back(12);
+    data.emplace_back(16);
+    data.emplace_back(19);
+    data.emplace_back(11);
 
     std::vector<double> Zscore = getZscore(data);
     TS_ASSERT_DELTA(Zscore[4], 1.6397, 0.0001);
@@ -142,7 +142,7 @@ public:
 
   void testDoubleSingle() {
     vector<double> data;
-    data.push_back(42.);
+    data.emplace_back(42.);
 
     Statistics stats = getStatistics(data);
 
@@ -155,12 +155,12 @@ public:
 
   void testInt32Even() {
     vector<int32_t> data;
-    data.push_back(1);
-    data.push_back(2);
-    data.push_back(3);
-    data.push_back(4);
-    data.push_back(5);
-    data.push_back(6);
+    data.emplace_back(1);
+    data.emplace_back(2);
+    data.emplace_back(3);
+    data.emplace_back(4);
+    data.emplace_back(5);
+    data.emplace_back(6);
 
     Statistics stats = getStatistics(data);
 
@@ -249,7 +249,7 @@ public:
     // x-values to try out
     vector<double> x;
     for (size_t i = 0; i < numX; ++i)
-      x.push_back(static_cast<double>(i) * deltaX + offsetX);
+      x.emplace_back(static_cast<double>(i) * deltaX + offsetX);
 
     // just declare so we can have test of exception handling
     vector<double> y;
@@ -259,7 +259,7 @@ public:
     // now calculate the y-values
     for (size_t i = 0; i < numX; ++i) {
       double temp = (x[i] - mean) / sigma;
-      y.push_back(exp(-.5 * temp * temp) / (sigma * sqrt(2. * M_PI)));
+      y.emplace_back(exp(-.5 * temp * temp) / (sigma * sqrt(2. * M_PI)));
     }
 
     // Normal distribution values are taken from the wikipedia page
@@ -290,7 +290,7 @@ public:
       templeft = exp(-.5 * templeft * templeft) / (sigma * sqrt(2. * M_PI));
       double tempright = (x[i + 1] - mean) / sigma;
       tempright = exp(-.5 * tempright * tempright) / (sigma * sqrt(2. * M_PI));
-      y.push_back(.5 * deltaX * (templeft + tempright));
+      y.emplace_back(.5 * deltaX * (templeft + tempright));
       //      std::cout << i << ":\t" << x[i] << "\t" << y[i] << '\n';
     }
 

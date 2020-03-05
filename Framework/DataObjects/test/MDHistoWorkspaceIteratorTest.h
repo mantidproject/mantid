@@ -16,8 +16,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -29,7 +27,6 @@ using namespace Mantid::Kernel;
 using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDImplicitFunction;
-using Mantid::Geometry::MDPlane;
 using Mantid::Geometry::MDPlane;
 using Mantid::Kernel::VMD;
 
@@ -107,8 +104,8 @@ public:
 
     std::vector<coord_t> normal_vector;
     std::vector<coord_t> bound_vector;
-    normal_vector.push_back(1.);
-    bound_vector.push_back(3.);
+    normal_vector.emplace_back(1.f);
+    bound_vector.emplace_back(3.f);
 
     MDImplicitFunction *function = new MDImplicitFunction();
     function->addPlane(MDPlane(normal_vector, bound_vector));
@@ -930,8 +927,8 @@ public:
   void test_neighbours_2d_vertex_touching_by_width_vector() {
     const size_t nd = 2;
     std::vector<int> widthVector;
-    widthVector.push_back(5);
-    widthVector.push_back(3);
+    widthVector.emplace_back(5);
+    widthVector.emplace_back(3);
 
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);

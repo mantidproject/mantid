@@ -19,9 +19,9 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::MantidVecPtr;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
-using Mantid::MantidVecPtr;
 
 namespace GetEiTestHelper {
 IAlgorithm_sptr runGetEiUsingTestMonitors(const std::string &inputWS,

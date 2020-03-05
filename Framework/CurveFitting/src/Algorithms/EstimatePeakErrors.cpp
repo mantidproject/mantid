@@ -143,13 +143,13 @@ void EstimatePeakErrors::exec() {
     return;
   }
 
-  IPeakFunction *peak = dynamic_cast<IPeakFunction *>(function.get());
+  auto *peak = dynamic_cast<IPeakFunction *>(function.get());
 
   if (peak) {
     GSLMatrix covariance(*matrix);
     calculatePeakValues(*peak, *results, covariance, "");
   } else {
-    CompositeFunction *cf = dynamic_cast<CompositeFunction *>(function.get());
+    auto *cf = dynamic_cast<CompositeFunction *>(function.get());
     if (cf) {
       size_t ip = 0;
       for (size_t i = 0; i < cf->nFunctions(); ++i) {

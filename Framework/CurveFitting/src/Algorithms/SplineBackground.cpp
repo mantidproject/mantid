@@ -54,7 +54,7 @@ void SplineBackground::exec() {
     throw std::out_of_range("WorkspaceIndex is out of range.");
 
   /* this is the data to be fitted */
-  const int numBins = static_cast<int>(calculateNumBinsToProcess(inWS.get()));
+  const auto numBins = static_cast<int>(calculateNumBinsToProcess(inWS.get()));
 
   if (numBins < ncoeffs) {
     throw std::out_of_range("Too many basis functions (NCoeff)");

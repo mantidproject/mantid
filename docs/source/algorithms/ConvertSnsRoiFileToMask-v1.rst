@@ -34,7 +34,7 @@ Usage
     # To test, load data and mask
     ws = Load("CNCS_7860_event.nxs")
     mask_file = inst_name + "_Mask.xml"
-    mask = LoadMask(inst_name, mask_file)
+    mask = LoadMask(inst_name, mask_file, RefWorkspace = ws)
     MaskDetectors(ws, MaskedWorkspace=mask)
 
     # Check to see that only first 2 pixels are not masked

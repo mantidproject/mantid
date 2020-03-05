@@ -31,10 +31,15 @@ public:
   Container(const Container &container);
   Container(std::string xml);
 
-  bool hasSampleShape() const;
+  bool hasCustomizableSampleShape() const;
+  bool hasFixedSampleShape() const;
   IObject_sptr createSampleShape(const ShapeArgs &args) const;
+  IObject_sptr getSampleShape() const;
 
   void setSampleShape(const std::string &sampleShapeXML);
+  void setSampleShape(IObject_sptr sampleShape) {
+    m_sampleShape = std::move(sampleShape);
+  };
 
   const IObject &getShape() const { return *m_shape; }
 
@@ -57,6 +62,9 @@ public:
   int interceptSurface(Geometry::Track &t) const override {
     return m_shape->interceptSurface(t);
   }
+  double distance(const Geometry::Track &t) const override {
+    return m_shape->distance(t);
+  }
   double solidAngle(const Kernel::V3D &observer) const override {
     return m_shape->solidAngle(observer);
   }
@@ -76,13 +84,15 @@ public:
   int getPointInObject(Kernel::V3D &point) const override {
     return m_shape->getPointInObject(point);
   }
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const size_t i) const override {
+  boost::optional<Kernel::V3D>
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const size_t i) const override {
     return m_shape->generatePointInObject(rng, i);
   }
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const BoundingBox &activeRegion,
-                                    const size_t i) const override {
+  boost::optional<Kernel::V3D>
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const BoundingBox &activeRegion,
+                        const size_t i) const override {
     return m_shape->generatePointInObject(rng, activeRegion, i);
   }
 
@@ -109,12 +119,16 @@ public:
   const Kernel::Material &material() const override {
     return m_shape->material();
   }
-  void setID(const std::string &id);
+  virtual void setMaterial(const Kernel::Material &material) override {
+    m_shape->setMaterial(material);
+  };
+  void setID(const std::string &id) override;
   const std::string &id() const override { return m_shape->id(); }
 
 private:
   IObject_sptr m_shape;
   std::string m_sampleShapeXML;
+  IObject_sptr m_sampleShape = nullptr;
 };
 
 /// Typdef for a shared pointer

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidPythonInterface/api/AnalysisDataServiceObserverAdapter.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>

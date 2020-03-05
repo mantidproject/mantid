@@ -189,17 +189,13 @@ function (mtd_add_qt_target)
     target_include_directories (${_target} SYSTEM PUBLIC ${PARSED_SYSTEM_INCLUDE_DIRS})
   endif()
 
-  if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
-    prune_usr_local_include ( ${PARSED_LINK_LIBS} )
-  endif ()
-
   target_link_libraries (${_target} PRIVATE ${_qt_link_libraries}
                          ${PARSED_LINK_LIBS} ${_mtd_qt_libs})
   if(_all_defines)
     set_target_properties ( ${_target} PROPERTIES COMPILE_DEFINITIONS "${_all_defines}" )
   endif()
 
-  if (OSX_VERSION VERSION_GREATER 10.8)
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     if (PARSED_OSX_INSTALL_RPATH)
       set_target_properties ( ${_target} PROPERTIES INSTALL_RPATH  "${PARSED_OSX_INSTALL_RPATH}" )
     endif()
@@ -444,29 +440,4 @@ function (_disable_suggest_override _qt_version _target)
     set_target_properties ( ${_target} PROPERTIES
       COMPILE_OPTIONS "${_options}" )
   endif()
-endfunction ()
-
-# Homebrew on macOS symlinks Qt4 into /usr/local so that the
-# include directories are on the standard paths. When we add
-# /usr/local/include using target_include_directories clang sees
-# the duplicate but removes them from the end and keeps the paths
-# at the front causing cross-talk between Qt4/Qt5 headers.
-# This prunes /usr/local/include from an interface includes property
-# so they don't get transitively passed to future targets.
-function ( prune_usr_local_include )
-  foreach ( _it ${ARGN} )
-    if ( TARGET ${_it} )
-      get_property ( _tmp TARGET ${_it} PROPERTY INTERFACE_INCLUDE_DIRECTORIES )
-      if ( _tmp )
-        list ( REMOVE_ITEM _tmp /usr/local/include )
-        set_property ( TARGET ${_it} PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${_tmp}" )
-      endif ()
-
-      get_property ( _tmp TARGET ${_it} PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES )
-      if ( _tmp )
-        list ( REMOVE_ITEM _tmp /usr/local/include )
-        set_property ( TARGET ${_it} PROPERTY INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${_tmp}" )
-      endif ()
-    endif ()
-  endforeach ()
 endfunction ()

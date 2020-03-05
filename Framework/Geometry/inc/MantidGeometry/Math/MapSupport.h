@@ -36,8 +36,7 @@ namespace MapSupport {
 */
 
 // Note this needs to be non-constant unary_function return
-template <typename T, typename U>
-class PFirst : public std::unary_function<std::pair<T, U>, T> {
+template <typename T, typename U> class PFirst {
 public:
   /// Functional to the first object
   T operator()(const std::pair<T, U> &A) { return A.first; }
@@ -51,8 +50,7 @@ public:
   \brief Class to access the second object in index pair.
 */
 
-template <typename T, typename U>
-class PSecond : public std::unary_function<std::pair<T, U>, U> {
+template <typename T, typename U> class PSecond {
 public:
   /// Functional to the first object
   U operator()(const std::pair<T, U> &A) { return A.second; }
@@ -134,9 +132,7 @@ public:
   This functor swaps the components in a map.
 */
 
-template <typename KeyPart, typename BodyPart>
-class mapSwap : public std::unary_function<std::pair<BodyPart, KeyPart>,
-                                           std::pair<KeyPart, BodyPart>> {
+template <typename KeyPart, typename BodyPart> class mapSwap {
 public:
   /// Operator()
   std::pair<BodyPart, KeyPart>
@@ -180,9 +176,7 @@ public:
   key not found.
 */
 
-template <typename KeyPart, typename NumPart>
-class sndValue
-    : public std::unary_function<std::map<KeyPart, NumPart>, NumPart> {
+template <typename KeyPart, typename NumPart> class sndValue {
 private:
   const std::map<KeyPart, NumPart> &MRef; ///< Map begin accessd
 

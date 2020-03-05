@@ -88,6 +88,14 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
                     wtemp=mantid.simpleapi.ChangeBinOffset(wtemp,t2f*16667,sp2,sp2)
                 else:
                     wtemp = wm
+                maxtof = wtemp.readX(0)[-1]
+                period = 1.e6/60
+                Nmax = int(maxtof/period) + 1
+                for i in range(1,Nmax+1):
+                    tmin = min(i*period-30., maxtof)
+                    tmax = min(i*period+30., maxtof)
+                    if tmin<tmax:
+                        mantid.simpleapi.MaskBins(InputWorkspace=wtemp, OutputWorkspace=wtemp, XMin=tmin, XMax=tmax)
                 wtemp=mantid.simpleapi.Rebin(InputWorkspace=wtemp,Params="1",PreserveEvents=True)
                 #Run GetEi algorithm
                 alg=mantid.simpleapi.GetEi(InputWorkspace=wtemp,Monitor1Spec=sp1+1,Monitor2Spec=sp2+1,EnergyEstimate=EGuess)

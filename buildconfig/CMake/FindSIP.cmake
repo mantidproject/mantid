@@ -31,7 +31,15 @@ IF(SIP_VERSION)
   SET(SIP_FOUND TRUE)
 ELSE(SIP_VERSION)
 
-  FIND_FILE(_find_sip_py FindSIP.py PATHS ${CMAKE_MODULE_PATH})
+  if (EXISTS "${CMAKE_MODULE_PATH}/FindSIP.py")
+    set (_find_sip_py "${CMAKE_MODULE_PATH}/FindSIP.py")
+  else()
+    FIND_FILE(_find_sip_py FindSIP.py PATHS ${CMAKE_MODULE_PATH})
+  endif()
+
+  if (NOT EXISTS ${_find_sip_py})
+    message(FATAL_ERROR "Failed to find FindSIP.py in \"${CMAKE_MODULE_PATH}\"")
+  endif()
 
   EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} ${_find_sip_py} OUTPUT_VARIABLE sip_config)
   IF(sip_config)
@@ -46,8 +54,12 @@ ELSE(SIP_VERSION)
   ENDIF(sip_config)
 
   # Check that it really exists
-  FIND_PATH( SIP_INCLUDE_DIR sip.h PATHS ${SIP_INCLUDE_DIRECTORY} )
-
+  if(${CMAKE_SYSTEM} MATCHES "Darwin" AND IS_SYMLINK ${SIP_INCLUDE_DIRECTORY}/sip.h)
+    get_filename_component(_sip_h "${SIP_INCLUDE_DIRECTORY}/sip.h" REALPATH BASE_DIR)
+    get_filename_component(SIP_INCLUDE_DIRECTORY "${_sip_h}" DIRECTORY)
+  endif()
+  find_path(SIP_INCLUDE_DIR sip.h PATHS ${SIP_INCLUDE_DIRECTORY} NO_DEFAULT_PATH)
+  
   include ( FindPackageHandleStandardArgs )
   find_package_handle_standard_args( SIP DEFAULT_MSG SIP_VERSION_STR SIP_INCLUDE_DIR SIP_EXECUTABLE )
 

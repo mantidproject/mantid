@@ -8,7 +8,7 @@
 #define DATAHANDLING_LOAD_SHAPE_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataHandling/LoadShape.h"
+#include "MantidDataHandling/MeshFileIO.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
 namespace Mantid {
@@ -53,8 +53,6 @@ private:
 };
 void DLLExport rotate(Geometry::MeshObject &sampleMesh,
                       API::MatrixWorkspace_const_sptr inputWS);
-boost::shared_ptr<Geometry::MeshObject> DLLExport loadStl(std::string filename,
-                                                          ScaleUnits scaleType);
 
 } // namespace DataHandling
 } // namespace Mantid

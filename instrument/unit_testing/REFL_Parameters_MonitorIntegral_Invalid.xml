@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+<component-link name="REFL" >
+
+  <parameter name="MonitorIntegralMin">
+    <value val="7.0"/>
+  </parameter>
+
+  <parameter name="MonitorIntegralMax">
+    <value val="5.0"/>
+  </parameter>
+
+</component-link>
+
+</parameter-file>

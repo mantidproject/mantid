@@ -15,6 +15,8 @@ output Q sample space, then the UB can be found and used to then
 convert to HKL. The default binning ranges are good for converting to
 Q sample with the default wavelength.
 
+This algorithm will also work for data from DEMAND (HB3A).
+
 The normalization is calculated in the same way as
 :ref:`algm-MDNormSCD` but with the solid angle and flux coming from
 the NormalisationWorkspace, normally vanadium. A brief introduction to

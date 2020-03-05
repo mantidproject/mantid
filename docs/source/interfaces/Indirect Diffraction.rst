@@ -66,9 +66,11 @@ Spectra Min & Spectra Max
 Run
   Runs the processing configured on the current tab.
 
-Plot Type
-  Specify the type of plot to be created when the reduction is complete, either
-  a contour or spectra plot can be created.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
+
+Plot Contour
+  If enabled, it will plot the selected output workspace as a contour plot.
 
 Save Formats
   Select a range of save formats to save the reduced data as, in all cases the
@@ -89,7 +91,7 @@ files are remembered by the interface so they only have to be set once per cycle
 There is also the option to manually set the dRange used in all of the sample
 runs, note that in this case all sample files must correspond to the same dRange.
 The dRanges are numbered as per the `OSIRIS manual
-<http://www.isis.stfc.ac.uk/instruments/osiris/documents/osiris-user-guide6672.pdf>`_.
+<https://www.isis.stfc.ac.uk/Pages/osiris-user-guide.pdf>`_.
 Otherwise the dRange is determined based on the table provided in the manual.
 
 Note: There must be a corresponding vanadium file with the same dRanges for each

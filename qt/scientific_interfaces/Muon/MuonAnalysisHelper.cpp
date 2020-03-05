@@ -57,7 +57,7 @@ getKeysFromTable(const Mantid::API::ITableWorkspace_sptr &tab) {
     do {
       std::string key;
       row >> key;
-      keys.push_back(key);
+      keys.emplace_back(key);
     } while (row.next());
   }
   return keys;
@@ -421,7 +421,7 @@ std::string getRunLabel(const std::vector<Workspace_sptr> &wsList) {
   int numWorkspaces = static_cast<int>(wsList.size());
   for (int i = 0; i < numWorkspaces; i++) {
     int runNumber = firstPeriod(wsList[i])->getRunNumber();
-    runNumbers.push_back(runNumber);
+    runNumbers.emplace_back(runNumber);
   }
 
   return getRunLabel(instrument, runNumbers);
@@ -719,7 +719,7 @@ std::vector<std::string> findLogValues(const Workspace_sptr ws,
   matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
   if (matrixWS) {
     if (matrixWS->run().hasProperty(logName)) {
-      values.push_back(matrixWS->run().getProperty(logName)->value());
+      values.emplace_back(matrixWS->run().getProperty(logName)->value());
     }
   } else {
     // It could be a workspace group
@@ -730,7 +730,7 @@ std::vector<std::string> findLogValues(const Workspace_sptr ws,
             groupWS->getItem(index));
         if (matrixWS) {
           if (matrixWS->run().hasProperty(logName)) {
-            values.push_back(matrixWS->run().getProperty(logName)->value());
+            values.emplace_back(matrixWS->run().getProperty(logName)->value());
           }
         }
       }
@@ -807,7 +807,7 @@ void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
     MatrixWorkspace_sptr matrixWS =
         boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
     if (matrixWS) {
-      workspaces.push_back(matrixWS);
+      workspaces.emplace_back(matrixWS);
     } else { // it's a workspace group
       auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
       if (groupWS && groupWS->getNumberOfEntries() > 0) {
@@ -815,7 +815,7 @@ void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
           matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
               groupWS->getItem(index));
           if (matrixWS) {
-            workspaces.push_back(matrixWS);
+            workspaces.emplace_back(matrixWS);
           }
         }
       }
@@ -1035,11 +1035,11 @@ void parseRunLabel(const std::string &label, std::string &instrument,
           const int start = boost::lexical_cast<int>(pairTokenizer[0]);
           const int end = boost::lexical_cast<int>(endRun);
           for (int run = start; run < end + 1; run++) {
-            runNumbers.push_back(run);
+            runNumbers.emplace_back(run);
           }
         } else if (pairTokenizer.count() == 1) {
           // Single run
-          runNumbers.push_back(boost::lexical_cast<int>(pairTokenizer[0]));
+          runNumbers.emplace_back(boost::lexical_cast<int>(pairTokenizer[0]));
         } else {
           throw std::invalid_argument("Failed to parse run label: " + label +
                                       " too many tokens ");

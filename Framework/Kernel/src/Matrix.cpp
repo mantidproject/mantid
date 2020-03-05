@@ -129,7 +129,7 @@ vector.
 template <typename T>
 Matrix<T>::Matrix(const std::vector<T> &data) : m_numRows(0), m_numColumns(0) {
   size_t numElements = data.size();
-  size_t numRows = static_cast<size_t>(sqrt(double(numElements)));
+  auto numRows = static_cast<size_t>(sqrt(double(numElements)));
   size_t numRowsSquare = numRows * numRows;
   if (numElements != numRowsSquare) {
     throw(std::invalid_argument(
@@ -972,7 +972,7 @@ using LU decomposition
   Matrix<T> Lcomp(*this);
   Lcomp.lubcmp(indx.data(), determinant);
 
-  double det = static_cast<double>(determinant);
+  auto det = static_cast<double>(determinant);
   for (size_t j = 0; j < m_numRows; j++)
     det *= Lcomp.m_rawData[j][j];
 
@@ -1185,7 +1185,7 @@ into a triangular matrix
   }
 
   for (int i = static_cast<int>(m_numRows) - 1; i >= 0; i--) {
-    double sum = static_cast<T>(b[i]);
+    double sum = b[i];
     for (int j = i + 1; j < static_cast<int>(m_numRows); j++)
       sum -= m_rawData[i][j] * b[j];
     b[i] = sum / m_rawData[i][i];
@@ -1630,7 +1630,7 @@ void fillFromStream(std::istream &is, Kernel::Matrix<T> &in,
   size_t row(0), col(0);
   while (!is.eof() && std::getline(is, value_str, delimiter)) {
     try {
-      T value = boost::lexical_cast<T>(value_str);
+      auto value = boost::lexical_cast<T>(value_str);
       in.m_rawData[row][col] = value;
     } catch (boost::bad_lexical_cast &) {
       throw std::invalid_argument(

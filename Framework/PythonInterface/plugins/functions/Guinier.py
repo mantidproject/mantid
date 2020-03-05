@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 '''
 @author Mathieu Doucet, ORNL
 @date Oct 10, 2014
@@ -35,7 +35,7 @@ class Guinier(IFunction1D):
             Evaluate the model
             @param xvals: numpy array of q-values
         """
-        return self.getParameterValue("Scale") * np.exp(-(self.getParameterValue('Rg')*xvals)**2/3.0 )
+        return self.getParameterValue("Scale") * np.exp(-(self.getParameterValue('Rg')*xvals)**2/3.0)
 
     def functionDeriv1D(self, xvals, jacobian):
         """
@@ -46,8 +46,9 @@ class Guinier(IFunction1D):
         i = 0
         rg = self.getParameterValue('Rg')
         for x in xvals:
-            jacobian.set(i,0, math.exp(-(rg*x)**2/3.0 ) )
-            jacobian.set(i,1, -self.getParameterValue("Scale") * math.exp(-(rg*x)**2/3.0 )*2.0/3.0*rg*x*x )
+            jacobian.set(i, 0, math.exp(-(rg*x)**2/3.0))
+            jacobian.set(i, 1, -self.getParameterValue("Scale")
+                         * math.exp(-(rg*x)**2/3.0)*2.0/3.0*rg*x*x)
             i += 1
 
 

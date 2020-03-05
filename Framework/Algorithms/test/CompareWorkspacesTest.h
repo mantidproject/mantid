@@ -854,8 +854,8 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr ws2 =
         WorkspaceCreationHelper::create2DWorkspace123(2, 2);
-    ws2->instrumentParameters().addBool(new Mantid::Geometry::Component,
-                                        "myParam", true);
+    auto component = std::make_unique<Mantid::Geometry::Component>();
+    ws2->instrumentParameters().addBool(component.get(), "myParam", true);
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));

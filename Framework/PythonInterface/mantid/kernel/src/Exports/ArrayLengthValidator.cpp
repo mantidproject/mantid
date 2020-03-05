@@ -54,7 +54,7 @@ namespace {
            arg("self"), "Set the accepted minimum length of an array")         \
       .def("clearLengthMax", &ArrayLengthValidator<type>::clearLengthMax,      \
            arg("self"), "Set the accepted maximum length of an array");
-}
+} // namespace
 
 void export_ArrayLengthValidator() {
   EXPORT_LENGTHVALIDATOR(double, Float);

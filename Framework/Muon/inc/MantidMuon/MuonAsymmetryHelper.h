@@ -13,6 +13,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 /*

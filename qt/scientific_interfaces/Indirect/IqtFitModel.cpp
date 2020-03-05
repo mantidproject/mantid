@@ -41,39 +41,15 @@ IFunction_sptr getFirstInCategory(IFunction_sptr function,
   return nullptr;
 }
 
-boost::optional<std::size_t> getFirstParameter(IFunction_sptr function,
-                                               const std::string &shortName) {
-  for (auto i = 0u; i < function->nParams(); ++i) {
-    if (boost::algorithm::ends_with(function->parameterName(i), shortName))
-      return i;
-  }
-  return boost::none;
-}
-
 std::vector<std::string> getParameters(IFunction_sptr function,
                                        const std::string &shortParameterName) {
   std::vector<std::string> parameters;
 
   for (const auto &longName : function->getParameterNames()) {
     if (boost::algorithm::ends_with(longName, shortParameterName))
-      parameters.push_back(longName);
+      parameters.emplace_back(longName);
   }
   return parameters;
-}
-
-bool containsNOrMore(IFunction_sptr function,
-                     const std::vector<std::string> &values, std::size_t n) {
-  const auto names = function->getParameterNames();
-  if (names.empty())
-    return values.empty() || n == 0;
-
-  std::size_t count = 0;
-  std::size_t index = 0;
-  do {
-    for (const auto &value : values)
-      count += boost::algorithm::ends_with(names[index], value) ? 1 : 0;
-  } while (count < n && ++index < names.size());
-  return count >= n;
 }
 
 bool constrainIntensities(IFunction_sptr function) {
@@ -95,17 +71,6 @@ bool constrainIntensities(IFunction_sptr function) {
 
   function->tie(intensityParameters[0], tieString);
   return true;
-}
-
-bool unconstrainIntensities(IFunction_sptr function) {
-  const auto index = getFirstParameter(function, "Height");
-  if (index)
-    return function->removeTie(*index);
-  return false;
-}
-
-bool hasConstrainableIntensities(IFunction_sptr function) {
-  return containsNOrMore(function, {"Height", "A0"}, 2);
 }
 
 double computeTauApproximation(MatrixWorkspace_sptr workspace) {
@@ -188,7 +153,7 @@ IqtFitModel::IqtFitModel()
     : IndirectFittingModel(), m_makeBetaGlobal(false),
       m_constrainIntensities(false) {}
 
-CompositeFunction_sptr IqtFitModel::getMultiDomainFunction() const {
+MultiDomainFunction_sptr IqtFitModel::getMultiDomainFunction() const {
   if (m_makeBetaGlobal)
     return createFunctionWithGlobalBeta(getFittingFunction());
   return IndirectFittingModel::getMultiDomainFunction();
@@ -219,22 +184,22 @@ IAlgorithm_sptr IqtFitModel::simultaneousFitAlgorithm() const {
 std::string IqtFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
     return "MultiIqtFit_" + m_fitType + "_Results";
-  auto const fitString = getFitString(getWorkspace(0));
-  return createOutputName("%1%" + fitString + "_" + m_fitType + "_s%2%", "_to_",
-                          0);
+  auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
+  return createOutputName("%1%" + fitString + "_seq" + m_fitType + "_s%2%",
+                          "_to_", TableDatasetIndex{0});
 }
 
 std::string IqtFitModel::simultaneousFitOutputName() const {
   if (isMultiFit())
     return "MultiSimultaneousIqtFit_" + m_fitType + "_Results";
-  auto const fitString = getFitString(getWorkspace(0));
-  return createOutputName("%1%" + fitString + "_mult" + m_fitType + "_s%2%",
-                          "_to_", 0);
+  auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
+  return createOutputName("%1%" + fitString + "_sim" + m_fitType + "_s%2%",
+                          "_to_", TableDatasetIndex{0});
 }
 
-std::string IqtFitModel::singleFitOutputName(std::size_t index,
-                                             std::size_t spectrum) const {
-  auto const fitString = getFitString(getWorkspace(0));
+std::string IqtFitModel::singleFitOutputName(TableDatasetIndex index,
+                                             WorkspaceIndex spectrum) const {
+  auto const fitString = getFitString(getWorkspace(TableDatasetIndex{0}));
   return createSingleFitOutputName(
       "%1%" + fitString + "_" + m_fitType + "_s%2%_Results", index, spectrum);
 }
@@ -243,30 +208,15 @@ void IqtFitModel::setFitTypeString(const std::string &fitType) {
   m_fitType = fitType;
 }
 
-void IqtFitModel::setFitFunction(Mantid::API::IFunction_sptr function) {
+void IqtFitModel::setFitFunction(
+    Mantid::API::MultiDomainFunction_sptr function) {
   IndirectFittingModel::setFitFunction(function);
   if (m_constrainIntensities)
     constrainIntensities(function);
 }
 
-bool IqtFitModel::canConstrainIntensities() const {
-  return hasConstrainableIntensities(getFittingFunction());
-}
-
-bool IqtFitModel::setConstrainIntensities(bool constrain) {
-  if (constrain != m_constrainIntensities) {
-    m_constrainIntensities = constrain;
-    if (constrain)
-      return constrainIntensities(getFittingFunction());
-    return unconstrainIntensities(getFittingFunction());
-  }
-  return true;
-}
-
-void IqtFitModel::setBetaIsGlobal(bool global) { m_makeBetaGlobal = global; }
-
 std::unordered_map<std::string, ParameterValue>
-IqtFitModel::createDefaultParameters(std::size_t index) const {
+IqtFitModel::createDefaultParameters(TableDatasetIndex index) const {
   std::unordered_map<std::string, ParameterValue> parameters;
   parameters["Height"] =
       ParameterValue(computeHeightApproximation(getFittingFunction()));
@@ -280,13 +230,13 @@ IqtFitModel::createDefaultParameters(std::size_t index) const {
   return parameters;
 }
 
-CompositeFunction_sptr
+MultiDomainFunction_sptr
 IqtFitModel::createFunctionWithGlobalBeta(IFunction_sptr function) const {
   boost::shared_ptr<MultiDomainFunction> multiDomainFunction(
       new MultiDomainFunction);
   const auto functionString = function->asString();
-  for (auto i = 0u; i < numberOfWorkspaces(); ++i) {
-    auto addDomains = [&](std::size_t /*unused*/) {
+  for (auto i = TableDatasetIndex{0}; i < numberOfWorkspaces(); ++i) {
+    auto addDomains = [&](WorkspaceIndex /*unused*/) {
       const auto index = multiDomainFunction->nFunctions();
       multiDomainFunction->addFunction(createFunction(functionString));
       multiDomainFunction->setDomainIndex(index, index);

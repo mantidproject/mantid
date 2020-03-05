@@ -30,6 +30,9 @@ if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set ( CMAKE_INSTALL_PREFIX /opt/mantid${CPACK_PACKAGE_SUFFIX} CACHE PATH "Install path" FORCE )
 endif()
 
+# Tell rpm to use the appropriate python executable
+set(CPACK_RPM_SPEC_MORE_DEFINE "%define __python ${PYTHON_EXECUTABLE}")
+
 # Tell rpm that this package does not own /opt /usr/share/{applications,pixmaps}
 # Required for Fedora >= 18 and RHEL >= 7
 set ( CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /opt /usr/share/applications /usr/share/pixmaps )
@@ -69,6 +72,7 @@ print(sc.get_python_lib(plat_specific=True))"
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install
   "${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
+  "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}\n"
 )
 
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/mantid.pth.install
@@ -144,12 +148,16 @@ endif()
 # common definition of work for virtualgl - lots of escaping things from cmake
 set ( VIRTUAL_GL_WRAPPER
 "# whether or not to use vglrun
-if [ -n \"\${NXSESSIONID}\" ]; then
+if [ -n \"\${NXSESSIONID}\" ]; then  # running in nx
   command -v vglrun >/dev/null 2>&1 || { echo >&2 \"MantidPlot requires VirtualGL but it's not installed.  Aborting.\"; exit 1; }
   VGLRUN=\"vglrun\"
-elif [ -n \"\${TLSESSIONDATA}\" ]; then
+elif [ -n \"\${TLSESSIONDATA}\" ]; then  # running in thin-linc
   command -v vglrun >/dev/null 2>&1 || { echo >&2 \"MantidPlot requires VirtualGL but it's not installed.  Aborting.\"; exit 1; }
-  VGLRUN=\"vglrun\"
+  if [ command -v vgl-wrapper.sh ]; then
+    VGLRUN=\"vgl-wrapper.sh\"
+  else
+    VGLRUN=\"vglrun\"
+  fi
 fi" )
 
 # The scripts need tcmalloc to be resolved to the runtime library as the plain

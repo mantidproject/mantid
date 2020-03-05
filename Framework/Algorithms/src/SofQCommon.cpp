@@ -43,8 +43,7 @@ void SofQCommon::initCachedValues(const API::MatrixWorkspace &workspace,
     if (m_efixed == 0.0) {
       if (workspace.run().hasProperty("Ei")) {
         Kernel::Property *p = workspace.run().getProperty("Ei");
-        Kernel::PropertyWithValue<double> *eiProp =
-            dynamic_cast<Kernel::PropertyWithValue<double> *>(p);
+        auto *eiProp = dynamic_cast<Kernel::PropertyWithValue<double> *>(p);
         if (!eiProp)
           throw std::runtime_error("Input workspace contains Ei but its "
                                    "property type is not a double.");

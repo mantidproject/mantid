@@ -13,7 +13,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidPythonInterface/kernel/Policies/AsType.h"
+#include "MantidPythonInterface/core/Policies/AsType.h"
 
 #include <boost/python/def.hpp>
 #include <boost/python/return_value_policy.hpp>
@@ -55,9 +55,9 @@ void export_BinaryOperations() {
   using ReturnWorkspaceSptr = return_value_policy<AsType<Workspace_sptr>>;
 
   // Binary operations that return a workspace
+  using boost::python::def;
   using Mantid::PythonInterface::performBinaryOp;
   using Mantid::PythonInterface::performBinaryOpWithDouble;
-  using boost::python::def;
 
   def("performBinaryOp", (binary_fn_md_md)&performBinaryOp,
       ReturnWorkspaceSptr());

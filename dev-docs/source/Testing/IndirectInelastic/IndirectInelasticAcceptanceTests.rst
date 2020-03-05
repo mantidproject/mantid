@@ -67,7 +67,7 @@ Data reduction
 #. Check ``Rebin in energy``
 #. Set ``E-Low`` - ``E-width`` - ``E-High`` to -0.5, 0.01, 0.5
 #. Click ``Run``
-#. With ``Plot Output`` set as Contour click ``Plot``, this should result in a 2D contour plot
+#. Within the ``Plot Output`` section, click the down arrow on the ``Plot Spectra`` button and then select ``Plot Contour``, this should result in a 2D contour plot
 #. Click ``Manage User Directories`` and set the default save location
 #. Click ``Save Result``
 #. Check that the ``.nxs`` file was created in the correct location
@@ -167,8 +167,8 @@ Data analysis I(Q, T)
 #. Click ``Run``
 #. A new workspace with the suffix ``_iqt`` should appear in the main GUI, it should be a 87 x 6 table. **NB** keep this workspace for the next test
 #. Click ``Plot Current View`` this should plot the same data as the preview window
-#. Click ``Plot Spectrum`` this should give a plot with the title *irs26176_graphite002_iqt*   
-#. Click ``Plot Tiled`` this should give a tiled plot of spectra between the range specified.
+#. Choose some workspace indices (e.g. 0-2) in the ``Output`` section and click ``Plot Spectra`` this should give a plot with the title *irs26176_graphite002_iqt*   
+#. Click the down arrow on the ``Plot Spectra`` button and then select ``Plot Tiled``. This should give a tiled plot of the selected workspace indices.
 
 Data analysis I(Q, T) Fit
 -------------------------

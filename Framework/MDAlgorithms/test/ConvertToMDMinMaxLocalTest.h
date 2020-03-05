@@ -245,8 +245,9 @@ private:
           new Mantid::Kernel::PropertyWithValue<double>("Ei", Ei));
     }
 
-    Mantid::Geometry::OrientedLattice latt(2, 3, 4, 90, 90, 90);
-    ws->mutableSample().setOrientedLattice(&latt);
+    ws->mutableSample().setOrientedLattice(
+        std::make_unique<Mantid::Geometry::OrientedLattice>(2, 3, 4, 90, 90,
+                                                            90));
 
     // time average value of this is the simple average
     // of the first three values = 7.69667

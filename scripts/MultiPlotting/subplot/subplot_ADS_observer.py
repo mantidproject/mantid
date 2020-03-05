@@ -11,13 +11,17 @@ from mantid.api import AnalysisDataServiceObserver
 
 
 class SubplotADSObserver(AnalysisDataServiceObserver):
-
     def __init__(self, subplot):
         super(SubplotADSObserver, self).__init__()
         self._subplot = subplot
 
         self.observeDelete(True)
         self.observeReplace(True)
+
+    def unsubscribe(self):
+        self._subplot = None
+        self.observeDelete(False)
+        self.observeReplace(False)
 
     def deleteHandle(self, workspace_name, workspace):
         """

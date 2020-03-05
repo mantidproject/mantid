@@ -98,7 +98,7 @@ void PeakIntegration::exec() {
   }
 
   // Get some stuff from the input workspace
-  const int YLength = static_cast<int>(inputW->blocksize());
+  const auto YLength = static_cast<int>(inputW->blocksize());
   outputW = API::WorkspaceFactory::Instance().create(
       inputW, peaksW->getNumberPeaks(), YLength + 1, YLength);
   // Copy geometry over.
@@ -119,7 +119,7 @@ void PeakIntegration::exec() {
       size_t wi = wiEntry->second;
       if ((matchRun && peak.getRunNumber() != inputW->getRunNumber()) ||
           wi >= Numberwi)
-        badPeaks.push_back(i);
+        badPeaks.emplace_back(i);
     } else // This is for appending peak workspaces when running
            // SNSSingleCrystalReduction one bank at at time
         if (i + 1 > MinPeaks)
@@ -168,7 +168,7 @@ void PeakIntegration::exec() {
     const auto &X = outputW->x(i);
     const auto &Y = outputW->y(i);
     const auto &E = outputW->e(i);
-    int numbins = static_cast<int>(Y.size());
+    auto numbins = static_cast<int>(Y.size());
     if (TOFmin > numbins)
       TOFmin = numbins;
     if (TOFmax > numbins)

@@ -11,7 +11,7 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -26,8 +26,8 @@
 #include <numpy/arrayobject.h>
 
 using namespace Mantid::API;
-using Mantid::Kernel::Unit_sptr;
 using Mantid::specnum_t;
+using Mantid::Kernel::Unit_sptr;
 using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(Axis)
@@ -53,7 +53,7 @@ GNU_DIAG_ON("unused-local-typedef")
  * @return A PyObject representing the array
  */
 PyObject *extractAxisValues(Axis &self) {
-  const npy_intp nvalues = static_cast<npy_intp>(self.length());
+  const auto nvalues = static_cast<npy_intp>(self.length());
   npy_intp arrayDims[1] = {nvalues};
 
   // Pick the correct element type base on the Axis type

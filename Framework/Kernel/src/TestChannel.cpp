@@ -11,7 +11,7 @@
 
 namespace Mantid {
 
-void TestChannel::log(const Poco::Message &msg) { _msgList.push_back(msg); }
+void TestChannel::log(const Poco::Message &msg) { _msgList.emplace_back(msg); }
 
 TestChannel::MsgList &TestChannel::list() { return _msgList; }
 

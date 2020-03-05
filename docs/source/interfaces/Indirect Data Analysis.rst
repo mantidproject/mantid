@@ -111,10 +111,8 @@ Plot Current Preview
 Run
   Runs the processing configured on the current tab.
 
-Plot Spectrum
-  If enabled it will plot the spectrum represented by the workspace index in the 
-  neighbouring spin box. This workspace index is the index of the spectrum within the 
-  workspace selected in the combobox.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
 
 Save Result
   Saves the result in the default save directory.
@@ -153,8 +151,8 @@ and the reflection is 002.
 7. Click **Run** and wait for the interface to finish processing. This should generate four
    workspaces ending in _eq, _eq2, _elf and _elt.
 
-8. In the **Output** section, select the workspace ending with _eq and then choose a workspace
-   index. Click **Plot Spectrum** to plot the spectrum from the selected workspace.
+8. In the **Output** section, select the workspace ending with _eq and then choose some workspace
+   indices (e.g. 0-2,4). Click **Plot Spectra** to plot the spectrum from the selected workspace.
 
 9. Choose a default save directory and then click **Save Result** to save the output workspaces.
    The workspace ending in _eq will be used in the :ref:`msdfit-example-workflow`.
@@ -328,12 +326,12 @@ Number Of Iterations
 Run
   Runs the processing configured on the current tab.
 
-Plot Spectrum
-  If enabled will plot the spectrum selected by the neighbouring spinbox.
+Plot Spectra
+  If enabled, it will plot the selected workspace indices in the selected output workspace.
 
-Tiled Plot
-  Produces a tiled plot of spectra included within the range for the output workspaces 
-  generated. There is a maximum of 18 spectra allowed for a tiled plot. 
+Plot Tiled
+  It will plot a tiled plot containing the selected workspace indices. It accessed via the down
+  arrow on the **Plot Spectra** button.
 
 Save Result
   Saves the result workspace in the default save directory.
@@ -364,8 +362,8 @@ and the reflection is 002.
 4. Click **Run** and wait for the interface to finish processing. This should generate a workspace ending
    with a suffix _iqt.
 
-5. In the **Output** section, select a workspace index **Range** for a tiled plot and then click
-   **Tiled Plot**. Note that there is a maximum of 18 plots allowed for the tiled plot.
+5. In the **Output** section, select some workspace indices (e.g.0-2,4,6) for a tiled plot and then click
+   the down arrow on the **Plot Spectra** button before clicking **Plot Tiled**.
 
 6. Choose a default save directory and then click **Save Result** to save the _iqt workspace.
    This workspace will be used in the :ref:`iqtfit-example-workflow`.

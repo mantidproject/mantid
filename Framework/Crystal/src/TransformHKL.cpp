@@ -123,7 +123,8 @@ void TransformHKL::exec() {
   SelectCellWithForm::DetermineErrors(sigabc, UB, ws, tolerance);
   o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
                      sigabc[5]);
-  ws->mutableSample().setOrientedLattice(&o_lattice);
+  ws->mutableSample().setOrientedLattice(
+      std::make_unique<OrientedLattice>(o_lattice));
 
   std::vector<Peak> &peaks = ws->getPeaks();
   size_t n_peaks = ws->getNumberPeaks();
@@ -135,13 +136,12 @@ void TransformHKL::exec() {
   std::vector<V3D> q_vectors;
   for (size_t i = 0; i < n_peaks; i++) {
     V3D hkl(peaks[i].getHKL());
-    if (IndexingUtils::ValidIndex(hkl, tolerance)) {
-      num_indexed++;
-      miller_indices.push_back(hkl_tran * hkl);
-      q_vectors.push_back(peaks[i].getQSampleFrame());
-      peaks[i].setHKL(hkl_tran * hkl);
-    } else // mark as NOT indexed
-      peaks[i].setHKL(V3D(0.0, 0.0, 0.0));
+    V3D ihkl(peaks[i].getIntHKL());
+    peaks[i].setIntHKL(hkl_tran * ihkl);
+    miller_indices.emplace_back(hkl_tran * ihkl);
+    peaks[i].setHKL(hkl_tran * hkl);
+    q_vectors.emplace_back(peaks[i].getQSampleFrame());
+    num_indexed++;
   }
 
   double average_error =

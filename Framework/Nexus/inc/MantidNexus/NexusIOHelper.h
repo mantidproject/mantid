@@ -59,10 +59,19 @@ std::pair<::NeXus::Info, bool> checkIfOpenAndGetInfo(::NeXus::File &file,
   return info_and_close;
 }
 
-/// Use the getData function to read the buffer and close file if needed
+/// Use the getData function to read the buffer into vector and close file if
+/// needed
 template <typename T>
 void callGetData(::NeXus::File &file, std::vector<T> &buf, bool close_file) {
   file.getData(buf);
+  if (close_file)
+    file.closeData();
+}
+
+/// Use the getData function to read the buffer and close file if needed
+template <typename T>
+void callGetData(::NeXus::File &file, T &buf, bool close_file) {
+  file.getData(&buf);
   if (close_file)
     file.closeData();
 }
@@ -128,6 +137,24 @@ readNexusAnySlab(::NeXus::File &file, const std::vector<int64_t> &start,
   }
 }
 
+template <typename T, typename U>
+T readNexusAnyVariable(::NeXus::File &file, bool close_file) {
+  if (sizeof(T) < sizeof(U)) {
+    if (close_file)
+      file.closeData();
+    throw std::runtime_error(
+        "Downcasting is forbidden in NeXusIOHelper::readAnyVariable");
+  } else if (std::is_same<T, U>::value) {
+    T buf;
+    callGetData(file, buf, close_file);
+    return buf;
+  } else {
+    U buf;
+    callGetData(file, buf, close_file);
+    return static_cast<T>(buf);
+  }
+}
+
 } // end of anonymous namespace
 
 /** Opens the data group if needed, finds the data type, computes the data size,
@@ -153,6 +180,13 @@ std::vector<T> readNexusSlab(::NeXus::File &file, std::string entry,
   auto info_and_close = checkIfOpenAndGetInfo(file, entry);
   RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnySlab,
                              file, start, size, info_and_close.second);
+}
+
+template <typename T>
+T readNexusValue(::NeXus::File &file, std::string entry = "") {
+  auto info_and_close = checkIfOpenAndGetInfo(file, entry);
+  RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnyVariable,
+                             file, info_and_close.second);
 }
 
 } // namespace NeXusIOHelper

@@ -37,10 +37,10 @@ public:
   explicit AlgorithmRunner(QObject *parent = nullptr);
   ~AlgorithmRunner() override;
 
-  void cancelRunningAlgorithm();
+  virtual void cancelRunningAlgorithm();
 
-  void startAlgorithm(Mantid::API::IAlgorithm_sptr alg);
-  Mantid::API::IAlgorithm_sptr getAlgorithm() const;
+  virtual void startAlgorithm(Mantid::API::IAlgorithm_sptr alg);
+  virtual Mantid::API::IAlgorithm_sptr getAlgorithm() const;
 
 signals:
   /// Signal emitted when the algorithm has completed execution/encountered an

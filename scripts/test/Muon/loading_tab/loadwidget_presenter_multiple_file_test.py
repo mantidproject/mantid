@@ -5,11 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import time
 
 from mantid import ConfigService
 from mantid.api import FileFinder
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication, QWidget
 
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
@@ -25,11 +26,13 @@ from Muon.GUI.MuonAnalysis.load_widget.load_widget_presenter import LoadWidgetPr
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
 
 
-class LoadRunWidgetPresenterMultipleFileTest(GuiTest):
+@start_qapplication
+class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
-        if thread_model:
-            thread_model._thread.wait()
+        while(thread_model._thread.isRunning()):
             QApplication.instance().processEvents()
+            time.sleep(0.1)
+        QApplication.instance().processEvents()
 
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly

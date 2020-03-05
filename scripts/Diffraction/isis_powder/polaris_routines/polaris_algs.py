@@ -5,14 +5,15 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+import numpy as np
 
 import mantid.simpleapi as mantid
+from six import string_types
 
 from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
 from isis_powder.polaris_routines import polaris_advanced_config
-from six import PY3
 
 
 def calculate_van_absorb_corrections(ws_to_correct, multiple_scattering, is_vanadium):
@@ -62,18 +63,8 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
                                      vanadium_string=vanadium_runs, grouping_file_name=grouping_file_name)
 
 
-def process_vanadium_for_focusing(bank_spectra, mask_path, spline_number):
-    bragg_masking_list = _read_masking_file(mask_path)
-    masked_workspace_list = _apply_bragg_peaks_masking(bank_spectra, mask_list=bragg_masking_list)
-    output = common.spline_workspaces(focused_vanadium_spectra=masked_workspace_list,
-                                      num_splines=spline_number)
-    common.remove_intermediate_workspace(masked_workspace_list)
-    return output
-
-
 def save_unsplined_vanadium(vanadium_ws, output_path):
     converted_workspaces = []
-
     for ws_index in range(vanadium_ws.getNumberOfEntries()):
         ws = vanadium_ws.getItem(ws_index)
         previous_units = ws.getAxis(0).getUnit().unitID()
@@ -89,15 +80,50 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
     mantid.DeleteWorkspace(converted_group)
 
 
-def generate_ts_pdf(run_number, focus_file_path, merge_banks=False):
+def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
+                    sample_details=None, output_binning=None, pdf_type="G(r)", freq_params=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
-    pdf_output = mantid.ConvertUnits(InputWorkspace=focused_ws.name(), Target="MomentumTransfer")
+    focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
+
+    raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
+    sample_geometry = common.generate_sample_geometry(sample_details)
+    sample_material = common.generate_sample_material(sample_details)
+    self_scattering_correction = mantid.TotScatCalculateSelfScattering(InputWorkspace=raw_ws,
+                                                                       CalFileName=cal_file_name,
+                                                                       SampleGeometry=sample_geometry,
+                                                                       SampleMaterial=sample_material)
+
+    ws_group_list = []
+    for i in range(self_scattering_correction.getNumberHistograms()):
+        ws_name = 'correction_' + str(i)
+        mantid.ExtractSpectra(InputWorkspace=self_scattering_correction, OutputWorkspace=ws_name,
+                              WorkspaceIndexList=[i])
+        ws_group_list.append(ws_name)
+    self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
+    self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
+                                                         WorkspaceToMatch=focused_ws)
+    focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
+
     if merge_banks:
-        raise RuntimeError("Merging banks is currently not supported")
-    pdf_output = mantid.PDFFourierTransform(Inputworkspace=pdf_output, InputSofQType="S(Q)", PDFType="G(r)",
-                                            Filter=True)
-    pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
-                                         PreserveEvents=True)
+        q_min, q_max = _load_qlims(q_lims)
+        merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
+                                                   CalculateScale=False)
+        fast_fourier_filter(merged_ws, freq_params)
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", InputSofQType="S(Q)-1", PDFType=pdf_type,
+                                                Filter=True)
+    else:
+        for ws in focused_ws:
+            fast_fourier_filter(ws, freq_params)
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1",
+                                                PDFType=pdf_type, Filter=True)
+        pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
+                                             PreserveEvents=True)
+    common.remove_intermediate_workspace('self_scattering_correction')
+    if output_binning is not None:
+        try:
+            pdf_output = mantid.Rebin(InputWorkspace=pdf_output, Params=output_binning)
+        except RuntimeError:
+            return pdf_output
     return pdf_output
 
 
@@ -127,46 +153,27 @@ def _obtain_focused_run(run_number, focus_file_path):
     return focused_ws
 
 
-def _apply_bragg_peaks_masking(workspaces_to_mask, mask_list):
-    output_workspaces = list(workspaces_to_mask)
-
-    for ws_index, (bank_mask_list, workspace) in enumerate(zip(mask_list, output_workspaces)):
-        output_name = "masked_vanadium-" + str(ws_index + 1)
-        for mask_params in bank_mask_list:
-            output_workspaces[ws_index] = mantid.MaskBins(InputWorkspace=output_workspaces[ws_index],
-                                                          OutputWorkspace=output_name,
-                                                          XMin=mask_params[0], XMax=mask_params[1])
-    return output_workspaces
-
-
-def _read_masking_file(masking_file_path):
-    all_banks_masking_list = []
-    bank_masking_list = []
-    ignore_line_prefixes = (' ', '\n', '\t', '#')  # Matches whitespace or # symbol
-
-    # Python 3 requires the encoding to be included so an Angstrom
-    # symbol can be read, I'm assuming all file read here are
-    # `latin-1` which may not be true in the future. Python 2 `open`
-    # doesn't have an encoding option
-    if PY3:
-        encoding = {"encoding": "latin-1"}
+def _load_qlims(q_lims):
+    if isinstance(q_lims, string_types):
+        q_min = []
+        q_max = []
+        try:
+            with open(q_lims, 'r') as f:
+                line_list = [line.rstrip('\n') for line in f]
+                for line in line_list[1:]:
+                    value_list = line.split()
+                    q_min.append(float(value_list[2]))
+                    q_max.append(float(value_list[3]))
+            q_min = np.array(q_min)
+            q_max = np.array(q_max)
+        except IOError as exc:
+            raise RuntimeError("q_lims path is not valid: {}".format(exc))
+    elif isinstance(q_lims, (list, tuple)) or isinstance(q_lims, np.ndarray):
+        q_min = q_lims[0]
+        q_max = q_lims[1]
     else:
-        encoding = {}
-    with open(masking_file_path, **encoding) as mask_file:
-        for line in mask_file:
-            if line.startswith(ignore_line_prefixes):
-                # Push back onto new bank
-                if bank_masking_list:
-                    all_banks_masking_list.append(bank_masking_list)
-                bank_masking_list = []
-            else:
-                # Parse and store in current list
-                line.rstrip()
-                bank_masking_list.append(line.split())
-
-    if bank_masking_list:
-        all_banks_masking_list.append(bank_masking_list)
-    return all_banks_masking_list
+        raise RuntimeError("q_lims type is not valid. Expected a string filename or an array.")
+    return q_min, q_max
 
 
 def _determine_chopper_mode(ws):
@@ -181,3 +188,31 @@ def _determine_chopper_mode(ws):
             return 'PDF', polaris_advanced_config.pdf_focused_cropping_values
     else:
         raise ValueError("Chopper frequency not in log data. Please specify a chopper mode")
+
+
+def fast_fourier_filter(ws, freq_params=None):
+    if not freq_params:
+        return
+    # This is a simple fourier filter using the FFTSmooth to get a WS with only the low radius components, then
+    # subtracting that from the merged WS
+
+    x_range = ws.dataX(0)
+    # The param p in FFTSmooth defined such that if the input ws has Nx bins then in the fourier space ws it will cut of
+    # all frequencies in bins nk=Nk/p and above, calculated by p = pi/(k_c*dQ) when k_c is the cutoff frequency desired.
+    # The input ws of FFTSmooth has binning [x_min, dx, x_max], with Nx bins.
+    # FFTSmooth doubles the length of the input ws and preforms an FFT with output ws binning
+    # [0, dk, k_max]=[0, 1/2*(x_max-x_min), 1/(2*dx)], and Nk=Nx bins.
+    # k_max/k_c = Nk/nk
+    # 1/(k_c*2*dx) = p
+    # because FFT uses sin(2*pi*k*x) while PDFFourierTransform uses sin(Q*r) we need to include a factor of 2*pi
+    # p = pi/(k_c*dQ)
+    lower_freq_param = round(np.pi / (freq_params[0] * (x_range[1] - x_range[0])))
+    # This is giving the FFTSmooth the data in the form of S(Q)-1, later we use PDFFourierTransform with Q(S(Q)-1)
+    # it does not matter which we use in this case.
+    tmp = mantid.FFTSmooth(InputWorkspace=ws, Filter="Zeroing", Params=str(lower_freq_param), StoreInADS=False,
+                           IgnoreXBins=True)
+    mantid.Minus(LHSWorkspace=ws, RHSWorkspace=tmp, OutputWorkspace=ws)
+    if len(freq_params) > 1:
+        upper_freq_param = round(np.pi / (freq_params[1] * (x_range[1] - x_range[0])))
+        mantid.FFTSmooth(InputWorkspace=ws, OutputWorkspace=ws, Filter="Zeroing",
+                         Params=str(upper_freq_param), IgnoreXBins=True)

@@ -11,6 +11,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 namespace Indexing {
@@ -21,7 +22,7 @@ namespace Algorithms {
 /** CalMuonDetectorPhases : Calculates asymmetry and phase for each spectra in a
   workspace
 */
-class DLLExport CalMuonDetectorPhases : public API::Algorithm {
+class MANTID_MUON_DLL CalMuonDetectorPhases : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalMuonDetectorPhases"; }

@@ -164,7 +164,7 @@ void EstimateMuonAsymmetryFromCounts::exec() {
   }
 
   // Do the specified spectra only
-  int specLength = static_cast<int>(spectra.size());
+  auto specLength = static_cast<int>(spectra.size());
   std::vector<double> norm(specLength, 0.0);
 
   double normConst = getProperty("NormalizationIn");

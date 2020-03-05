@@ -27,7 +27,7 @@ class MANTID_KERNEL_DLL FileValidator : public TypedValidator<std::string> {
 public:
   explicit FileValidator(
       const std::vector<std::string> &extensions = std::vector<std::string>(),
-      bool testFileExists = true, bool testCanWrite = false);
+      bool testFileExists = true);
   std::vector<std::string> allowedValues() const override;
   IValidator_sptr clone() const override;
 
@@ -36,8 +36,6 @@ protected:
   std::vector<std::string> m_extensions;
   /// Flag indicating whether to test for existence of filename
   bool m_testExist;
-  /// Flag indicating whether to test for the file being writable
-  bool m_testCanWrite;
 
 private:
   std::string checkValidity(const std::string &value) const override;

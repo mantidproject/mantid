@@ -18,8 +18,8 @@
 #include <vector>
 
 using namespace Mantid::API;
-using Mantid::Algorithms::PaddingAndApodization;
 using Mantid::MantidVec;
+using Mantid::Algorithms::PaddingAndApodization;
 
 namespace {
 struct yData {
@@ -104,7 +104,7 @@ public:
   void test_SpectrumList() {
 
     std::vector<MatrixWorkspace_sptr> workspaces;
-    workspaces.push_back(createWorkspace(2, 50));
+    workspaces.emplace_back(createWorkspace(2, 50));
 
     // First, run the algorithm without specifying any spectrum
 
@@ -113,14 +113,14 @@ public:
     alg1->execute();
     TS_ASSERT(alg1->isExecuted());
 
-    workspaces.push_back(alg1->getProperty("OutputWorkspace"));
+    workspaces.emplace_back(alg1->getProperty("OutputWorkspace"));
 
     // Then run the algorithm on the second spectrum only
     IAlgorithm_sptr alg2 = setUpAlg();
     alg2->setProperty("InputWorkspace", workspaces[0]);
     alg2->execute();
     TS_ASSERT(alg2->isExecuted());
-    workspaces.push_back(alg2->getProperty("OutputWorkspace"));
+    workspaces.emplace_back(alg2->getProperty("OutputWorkspace"));
 
     for (int j = 0; j < 3; j++) {
       if (j != 0) { // check we have 2 spectra
@@ -278,8 +278,8 @@ public:
 
     std::vector<double> xData, yData;
     for (int j = 0; j < 50; j++) {
-      xData.push_back(double(j));
-      yData.push_back(double(j));
+      xData.emplace_back(double(j));
+      yData.emplace_back(double(j));
     }
 
     IAlgorithm_sptr makeWS =

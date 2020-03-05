@@ -739,7 +739,7 @@ public:
                                            std::string delimiter = ",") {
     std::vector<std::string> vec;
     for (size_t i = 0; i < ws->getNumberHistograms(); i++)
-      vec.push_back(boost::lexical_cast<std::string>(val));
+      vec.emplace_back(boost::lexical_cast<std::string>(val));
     std::string joined = boost::algorithm::join(vec, delimiter + " ");
     return joined;
   }

@@ -76,18 +76,18 @@ public:
     {
       double a = erfc(x);
       double da = -2*exp(-x*x)/sqrt(M_PI);
-      xvec.push_back(x);
-      erfcy.push_back(a);
-      derfc.push_back(da);
+      xvec.emplace_back(x);
+      erfcy.emplace_back(a);
+      derfc.emplace_back(da);
       outss << x <<"\t\t" << a << '\n';
     }
 
     // numerical derivative for erfc
-    nderfc.push_back(0.0);
+    nderfc.emplace_back(0.0);
     for (size_t i = 1; i < xvec.size(); ++i)
     {
       double nda = (erfcy[i]-erfcy[i-1])/0.01;
-      nderfc.push_back(nda);
+      nderfc.emplace_back(nda);
     }
 
     ofstream outfile;

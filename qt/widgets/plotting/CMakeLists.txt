@@ -1,11 +1,11 @@
-# Plotting support library for
-#  - Qt4 this is Qwt based and
-#  - Qt5 this is matplotlib based
+# Plotting support library for - Qt4 this is Qwt based and - Qt5 this is
+# matplotlib based
 
-###########################################################################
+# ##############################################################################
 # Qwt5-based implementation
-###########################################################################
-set ( QWT_SRC_FILES
+# ##############################################################################
+set(
+  QWT_SRC_FILES
   src/Qwt/ContourPreviewPlot.cpp
   src/Qwt/DraggableColorBarWidget.cpp
   src/Qwt/MantidColorMap.cpp
@@ -27,9 +27,11 @@ set ( QWT_SRC_FILES
   src/Qwt/RangeSelector.cpp
   src/Qwt/SafeQwtPlot.cpp
   src/Qwt/SignalRange.cpp
+  src/Qwt/SingleSelector.cpp
 )
 
-set ( QWT_MOC_FILES
+set(
+  QWT_MOC_FILES
   inc/MantidQtWidgets/Plotting/Qwt/ContourPreviewPlot.h
   inc/MantidQtWidgets/Plotting/Qwt/DraggableColorBarWidget.h
   inc/MantidQtWidgets/Plotting/Qwt/ColorBarWidget.h
@@ -39,10 +41,12 @@ set ( QWT_MOC_FILES
   inc/MantidQtWidgets/Plotting/Qwt/DisplayCurveFit.h
   inc/MantidQtWidgets/Plotting/Qwt/PreviewPlot.h
   inc/MantidQtWidgets/Plotting/Qwt/SafeQwtPlot.h
+  inc/MantidQtWidgets/Plotting/Qwt/SingleSelector.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
-set ( QWT_INC_FILES
+set(
+  QWT_INC_FILES
   inc/MantidQtWidgets/Plotting/AxisID.h
   inc/MantidQtWidgets/Plotting/DllOption.h
   inc/MantidQtWidgets/Plotting/Qwt/PreviewPlot.h
@@ -62,26 +66,25 @@ set ( QWT_INC_FILES
   inc/MantidQtWidgets/Plotting/Qwt/SignalRange.h
 )
 
-set ( QWT_UI_FILES
-  inc/MantidQtWidgets/Plotting/Qwt/ContourPreviewPlot.ui
+set(
+  QWT_UI_FILES
+  inc/MantidQtWidgets/Plotting/ContourPreviewPlot.ui
   inc/MantidQtWidgets/Plotting/Qwt/ColorBarWidget.ui
   inc/MantidQtWidgets/Plotting/Qwt/DisplayCurveFit.ui
   inc/MantidQtWidgets/Plotting/Qwt/MWView.ui
   inc/MantidQtWidgets/Plotting/PreviewPlot.ui
 )
 
-mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPlotting
+mtd_add_qt_library(
+  TARGET_NAME MantidQtWidgetsPlotting
   QT_VERSION 4
   SRC ${QWT_SRC_FILES}
   MOC ${QWT_MOC_FILES}
   NOMOC ${QWT_INC_FILES}
   UI ${QWT_UI_FILES}
-  DEFS
-    IN_MANTIDQT_PLOTTING
-  INCLUDE_DIRS
-    inc
-  SYSTEM_INCLUDE_DIRS
-    ${Boost_INCLUDE_DIRS}
+  DEFS IN_MANTIDQT_PLOTTING
+  INCLUDE_DIRS inc
+  SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
@@ -95,11 +98,13 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPlotting
     ${LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
+    @loader_path/../Frameworks
   LINUX_INSTALL_RPATH
     "\$ORIGIN/../${LIB_DIR}"
 )
 
-set( TEST_FILES
+set(
+  TEST_FILES
   test/ContourPreviewPlotTest.h
   test/MantidColorMapTest.h
   test/QwtWorkspaceBinDataTest.h
@@ -107,7 +112,13 @@ set( TEST_FILES
   test/SignalRangeTest.h
 )
 
-mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsPlottingTest
+set(
+  CXXTEST_EXTRA_HEADER_INCLUDE
+  "${CMAKE_CURRENT_LIST_DIR}/test/PlottingTestInitialization.h"
+)
+
+mtd_add_qt_tests(
+  TARGET_NAME MantidQtWidgetsPlottingTest
   QT_VERSION 4
   SRC ${TEST_FILES}
   INCLUDE_DIRS
@@ -125,53 +136,61 @@ mtd_add_qt_tests (TARGET_NAME MantidQtWidgetsPlottingTest
     ${Boost_LIBRARIES}
     ${GMOCK_LIBRARIES}
     ${GTEST_LIBRARIES}
-  QT4_LINK_LIBS
-    Qwt5
+  QT4_LINK_LIBS Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsPlotting
-  PARENT_DEPENDENCIES
-    GUITests
+  PARENT_DEPENDENCIES GUITests
 )
 
-###########################################################################
+# ##############################################################################
 # Matplotlib-based implementation
-###########################################################################
-set(MPL_SRC_FILES
-    src/Mpl/PeakPicker.cpp
-    src/Mpl/PreviewPlot.cpp
-    src/Mpl/RangeSelector.cpp
+# ##############################################################################
+set(
+  MPL_SRC_FILES
+  src/Mpl/ContourPreviewPlot.cpp
+  src/Mpl/PeakPicker.cpp
+  src/Mpl/PreviewPlot.cpp
+  src/Mpl/RangeSelector.cpp
+  src/Mpl/SingleSelector.cpp
 )
 
-set(MPL_MOC_FILES
-    inc/MantidQtWidgets/Plotting/Mpl/PeakPicker.h
-    inc/MantidQtWidgets/Plotting/Mpl/PreviewPlot.h
-    inc/MantidQtWidgets/Plotting/Mpl/RangeSelector.h
+set(
+  MPL_MOC_FILES
+  inc/MantidQtWidgets/Plotting/Mpl/ContourPreviewPlot.h
+  inc/MantidQtWidgets/Plotting/Mpl/PeakPicker.h
+  inc/MantidQtWidgets/Plotting/Mpl/PreviewPlot.h
+  inc/MantidQtWidgets/Plotting/Mpl/RangeSelector.h
+  inc/MantidQtWidgets/Plotting/Mpl/SingleSelector.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
-set(MPL_INC_FILES
-    ${MPL_MOC_FILES}
-    inc/MantidQtWidgets/Plotting/AxisID.h
-    inc/MantidQtWidgets/Plotting/PeakPicker.h
-    inc/MantidQtWidgets/Plotting/PreviewPlot.h
+set(
+  MPL_INC_FILES
+  ${MPL_MOC_FILES}
+  inc/MantidQtWidgets/Plotting/AxisID.h
+  inc/MantidQtWidgets/Plotting/ContourPreviewPlot.h
+  inc/MantidQtWidgets/Plotting/PeakPicker.h
+  inc/MantidQtWidgets/Plotting/PreviewPlot.h
 )
 
-set(MPL_UI_FILES
-    inc/MantidQtWidgets/Plotting/PreviewPlot.ui)
+set(
+  MPL_UI_FILES
+  inc/MantidQtWidgets/Plotting/ContourPreviewPlot.ui
+  inc/MantidQtWidgets/Plotting/PreviewPlot.ui
+)
 
 find_package(BoostPython)
 
-mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPlotting
+mtd_add_qt_library(
+  TARGET_NAME MantidQtWidgetsPlotting
   QT_VERSION 5
   SRC ${MPL_SRC_FILES}
   MOC ${MPL_MOC_FILES}
   NOMOC ${MPL_INC_FILES}
   UI ${MPL_UI_FILES}
-  DEFS
-    IN_MANTIDQT_PLOTTING
-  INCLUDE_DIRS
-    inc
+  DEFS IN_MANTIDQT_PLOTTING
+  INCLUDE_DIRS inc
   LINK_LIBS
     ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
@@ -183,9 +202,10 @@ mtd_add_qt_library (TARGET_NAME MantidQtWidgetsPlotting
     MantidQtWidgetsCommon
     MantidQtWidgetsMplCpp
   INSTALL_DIR
-    ${LIB_DIR}
+    ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
+    @loader_path/../Frameworks
   LINUX_INSTALL_RPATH
     "\$ORIGIN/../${LIB_DIR}"
 )

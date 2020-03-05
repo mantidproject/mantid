@@ -1041,9 +1041,9 @@ public:
     alg.initialize();
 
     std::vector<double> vectimeintervals;
-    vectimeintervals.push_back(static_cast<double>(timeinterval_ns));
-    vectimeintervals.push_back(static_cast<double>(timeinterval_ns) * 2.);
-    vectimeintervals.push_back(static_cast<double>(timeinterval_ns) * 3.);
+    vectimeintervals.emplace_back(static_cast<double>(timeinterval_ns));
+    vectimeintervals.emplace_back(static_cast<double>(timeinterval_ns) * 2.);
+    vectimeintervals.emplace_back(static_cast<double>(timeinterval_ns) * 3.);
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("InputWorkspace", "TestEventWorkspace08v"));
     TS_ASSERT_THROWS_NOTHING(
@@ -1162,7 +1162,7 @@ public:
         int wsindex = static_cast<int>(vecY[i]);
 
         Kernel::SplittingInterval ti(tstart, tstop, wsindex);
-        splitters.push_back(ti);
+        splitters.emplace_back(ti);
         ++numsplitters;
       }
     }

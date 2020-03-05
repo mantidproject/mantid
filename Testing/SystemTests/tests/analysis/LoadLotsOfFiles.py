@@ -291,6 +291,9 @@ class LoadLotsOfFiles(systemtesting.MantidSystemTest):
         del wksp
         return result
 
+    def requiredMemoryMB(self):
+        return 18000
+
     def runTest(self):
         """Main entry point for the test suite"""
         files = self.__getDataFileList__()

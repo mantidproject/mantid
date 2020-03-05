@@ -54,7 +54,7 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
   }();
   int ibound(2), istep(1), inew(1);
   // highest index in params array containing a bin boundary
-  int ibounds = static_cast<int>(fullParams.size());
+  auto ibounds = static_cast<int>(fullParams.size());
   int isteps = ibounds - 1; // highest index in params array containing a step
 
   // This coefficitent represents the maximum difference between the size of the
@@ -73,7 +73,7 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
 
   xnew.clear();
   if (resize_xnew)
-    xnew.push_back(xcurr);
+    xnew.emplace_back(xcurr);
 
   while ((ibound <= ibounds) && (istep <= isteps)) {
     // if step is negative then it is logarithmic step
@@ -111,7 +111,7 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
       istep += 2;
     }
     if (resize_xnew)
-      xnew.push_back(xcurr);
+      xnew.emplace_back(xcurr);
     inew++;
   }
 
@@ -553,7 +553,7 @@ std::vector<NumT> splitStringIntoVector(std::string listString) {
       std::stringstream oneNumber(str);
       NumT num;
       oneNumber >> num;
-      values.push_back(num);
+      values.emplace_back(num);
     }
   }
   return values;

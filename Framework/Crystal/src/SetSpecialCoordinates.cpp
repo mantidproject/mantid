@@ -42,9 +42,10 @@ const std::string SetSpecialCoordinates::HKLOption() {
 /** Constructor
  */
 SetSpecialCoordinates::SetSpecialCoordinates() {
-  m_specialCoordinatesNames.push_back(SetSpecialCoordinates::QLabOption());
-  m_specialCoordinatesNames.push_back(SetSpecialCoordinates::QSampleOption());
-  m_specialCoordinatesNames.push_back(SetSpecialCoordinates::HKLOption());
+  m_specialCoordinatesNames.emplace_back(SetSpecialCoordinates::QLabOption());
+  m_specialCoordinatesNames.emplace_back(
+      SetSpecialCoordinates::QSampleOption());
+  m_specialCoordinatesNames.emplace_back(SetSpecialCoordinates::HKLOption());
 
   m_specialCoordinatesMap.emplace(SetSpecialCoordinates::QLabOption(),
                                   Mantid::Kernel::QLab);

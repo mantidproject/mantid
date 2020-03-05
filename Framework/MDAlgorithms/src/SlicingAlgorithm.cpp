@@ -268,10 +268,10 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
       numBins);
 
   // Put both in the algo for future use
-  m_bases.push_back(basis);
-  m_binDimensions.push_back(std::move(out));
-  m_binningScaling.push_back(binningScaling);
-  m_transformScaling.push_back(transformScaling);
+  m_bases.emplace_back(basis);
+  m_binDimensions.emplace_back(std::move(out));
+  m_binningScaling.emplace_back(binningScaling);
+  m_transformScaling.emplace_back(transformScaling);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -302,8 +302,8 @@ void SlicingAlgorithm::processGeneralTransformProperties() {
   m_minExtents.clear();
   m_maxExtents.clear();
   for (size_t d = 0; d < m_outD; d++) {
-    m_minExtents.push_back(extents[d * 2]);
-    m_maxExtents.push_back(extents[d * 2 + 1]);
+    m_minExtents.emplace_back(extents[d * 2]);
+    m_maxExtents.emplace_back(extents[d * 2 + 1]);
   }
 
   m_numBins = this->getProperty("OutputBins");
@@ -396,27 +396,24 @@ void SlicingAlgorithm::createGeneralTransform() {
 
   // OK now find the min/max coordinates of the edges in the INPUT workspace
   m_inputMinPoint = m_translation;
-  for (size_t d = 0; d < m_outD; d++)
+  for (size_t d = 0; d < m_outD; d++) {
     // Translate from the outCoords=(0,0,0) to outCoords=(min,min,min)
     m_inputMinPoint += (m_bases[d] * m_binDimensions[d]->getMinimum());
-  // std::cout << m_inputMinPoint << " m_inputMinPoint \n";
+  }
 
   // Create the CoordTransformAffine for BINNING with these basis vectors
-  auto ct = new DataObjects::CoordTransformAffine(inD, m_outD);
+  auto ct = std::make_unique<DataObjects::CoordTransformAffine>(inD, m_outD);
   // Note: the scaling makes the coordinate correspond to a bin index
-  // ct->buildOrthogonal(m_inputMinPoint, this->m_bases,
-  //                    VMD(this->m_binningScaling));
   ct->buildNonOrthogonal(m_inputMinPoint, this->m_bases,
                          VMD(this->m_binningScaling) / VMD(m_transformScaling));
-  this->m_transform = ct;
+  this->m_transform = std::move(ct);
 
   // Transformation original->binned
-  auto ctFrom = new DataObjects::CoordTransformAffine(inD, m_outD);
-  // ctFrom->buildOrthogonal(m_translation, this->m_bases,
-  //                        VMD(m_transformScaling));
+  auto ctFrom =
+      std::make_unique<DataObjects::CoordTransformAffine>(inD, m_outD);
   ctFrom->buildNonOrthogonal(m_translation, this->m_bases,
                              VMD(m_transformScaling) / VMD(m_transformScaling));
-  m_transformFromOriginal = ctFrom;
+  m_transformFromOriginal = std::move(ctFrom);
 
   // Validate
   if (m_transform->getInD() != inD)
@@ -434,12 +431,15 @@ void SlicingAlgorithm::createGeneralTransform() {
   m_transformToOriginal = nullptr;
   if (m_outD == inD) {
     // Can't reverse transform if you lost dimensions.
-    auto ctTo = new DataObjects::CoordTransformAffine(inD, m_outD);
-    Matrix<coord_t> toMatrix = ctFrom->getMatrix();
+    auto ctTo =
+        std::make_unique<DataObjects::CoordTransformAffine>(inD, m_outD);
+    auto toMatrix = static_cast<DataObjects::CoordTransformAffine *>(
+                        m_transformFromOriginal.get())
+                        ->getMatrix();
     // Invert the affine matrix to get the reverse transformation
     toMatrix.Invert();
     ctTo->setMatrix(toMatrix);
-    m_transformToOriginal = ctTo;
+    m_transformToOriginal = std::move(ctTo);
   }
 }
 
@@ -519,12 +519,12 @@ void SlicingAlgorithm::makeAlignedDimensionFromString(const std::string &str) {
     // Copy the dimension name, ID and units
     IMDDimension_const_sptr inputDim = m_inWS->getDimension(dim_index);
     const auto &frame = inputDim->getMDFrame();
-    m_binDimensions.push_back(MDHistoDimension_sptr(
+    m_binDimensions.emplace_back(MDHistoDimension_sptr(
         new MDHistoDimension(inputDim->getName(), inputDim->getDimensionId(),
                              frame, min, max, numBins)));
 
     // Add the index from which we're binning to the vector
-    this->m_dimensionToBinFrom.push_back(dim_index);
+    this->m_dimensionToBinFrom.emplace_back(dim_index);
   }
 }
 //----------------------------------------------------------------------------------------------
@@ -582,18 +582,19 @@ void SlicingAlgorithm::createAlignedTransform() {
     // Create a unit basis vector that corresponds to this
     VMD basis(inD);
     basis[m_dimensionToBinFrom[d]] = 1.0;
-    m_bases.push_back(basis);
+    m_bases.emplace_back(basis);
   }
 
   // Transform for binning
-  m_transform = new DataObjects::CoordTransformAligned(
+  m_transform = std::make_unique<DataObjects::CoordTransformAligned>(
       m_inWS->getNumDims(), m_outD, m_dimensionToBinFrom, origin, scaling);
 
   // Transformation original->binned. There is no offset or scaling!
   std::vector<coord_t> unitScaling(m_outD, 1.0);
   std::vector<coord_t> zeroOrigin(m_outD, 0.0);
-  m_transformFromOriginal = new DataObjects::CoordTransformAligned(
-      inD, m_outD, m_dimensionToBinFrom, zeroOrigin, unitScaling);
+  m_transformFromOriginal =
+      std::make_unique<DataObjects::CoordTransformAligned>(
+          inD, m_outD, m_dimensionToBinFrom, zeroOrigin, unitScaling);
 
   // Now the reverse transformation.
   if (m_outD == inD) {
@@ -601,9 +602,9 @@ void SlicingAlgorithm::createAlignedTransform() {
     // dimension index is that?
     Matrix<coord_t> mat = m_transformFromOriginal->makeAffineMatrix();
     mat.Invert();
-    auto tmp = new DataObjects::CoordTransformAffine(inD, m_outD);
+    auto tmp = std::make_unique<DataObjects::CoordTransformAffine>(inD, m_outD);
     tmp->setMatrix(mat);
-    m_transformToOriginal = tmp;
+    m_transformToOriginal = std::move(tmp);
   } else {
     // Changed # of dimensions - can't reverse the transform
     m_transformToOriginal = nullptr;
@@ -718,13 +719,15 @@ void SlicingAlgorithm::createTransform() {
         Matrix<coord_t> matToIntermediate =
             matOriginalToIntermediate * matToOriginal;
 
-        m_transformToIntermediate = new DataObjects::CoordTransformAffine(
-            m_originalWS->getNumDims(), m_intermediateWS->getNumDims());
+        m_transformToIntermediate =
+            std::make_unique<DataObjects::CoordTransformAffine>(
+                m_originalWS->getNumDims(), m_intermediateWS->getNumDims());
         m_transformToIntermediate->setMatrix(matToIntermediate);
         // And now the reverse
         matToIntermediate.Invert();
-        m_transformFromIntermediate = new DataObjects::CoordTransformAffine(
-            m_intermediateWS->getNumDims(), m_originalWS->getNumDims());
+        m_transformFromIntermediate =
+            std::make_unique<DataObjects::CoordTransformAffine>(
+                m_intermediateWS->getNumDims(), m_originalWS->getNumDims());
         m_transformFromIntermediate->setMatrix(matToIntermediate);
       } catch (std::runtime_error &) {
         // Ignore error. Have no transform.
@@ -754,13 +757,13 @@ void SlicingAlgorithm::createTransform() {
  *        NULL to use the entire range.
  * @return MDImplicitFunction created
  */
-MDImplicitFunction *
+std::unique_ptr<MDImplicitFunction>
 SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
                                              const size_t *const chunkMax) {
   size_t nd = m_inWS->getNumDims();
 
   // General implicit function
-  auto func = new MDImplicitFunction;
+  auto func = std::make_unique<MDImplicitFunction>();
 
   // First origin = min of each basis vector
   VMD o1 = m_translation;
@@ -783,7 +786,7 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
     o2 += (m_bases[d] * xMax);
 
     VMD thisBase = m_bases[d] * (xMax - xMin);
-    bases.push_back(thisBase);
+    bases.emplace_back(thisBase);
     if (d == 0)
       x = thisBase;
   }
@@ -819,13 +822,13 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
       // Create a list of vectors that excludes the "current" basis
       for (size_t baseIndex = 0; baseIndex < boxDim; ++baseIndex) {
         if (baseIndex != ignoreIndex)
-          vectors.push_back(bases[baseIndex]);
+          vectors.emplace_back(bases[baseIndex]);
       }
 
       // if we have fewer basis vectors than dimensions
       // create a normal for the final dimension
       if (boxDim == nd - 1)
-        vectors.push_back(VMD::getNormalVector(bases));
+        vectors.emplace_back(VMD::getNormalVector(bases));
 
       // Add two planes for each set of vectors
       func->addPlane(MDPlane(vectors, o1, insidePoint));
@@ -862,7 +865,7 @@ SlicingAlgorithm::getGeneralImplicitFunction(const size_t *const chunkMin,
  *        NULL to use the entire range.
  * @return MDImplicitFunction created
  */
-MDImplicitFunction *
+std::unique_ptr<MDImplicitFunction>
 SlicingAlgorithm::getImplicitFunctionForChunk(const size_t *const chunkMin,
                                               const size_t *const chunkMax) {
   size_t nd = m_inWS->getNumDims();
@@ -884,8 +887,7 @@ SlicingAlgorithm::getImplicitFunctionForChunk(const size_t *const chunkMin,
         function_max[d] =
             m_binDimensions[bd]->getX(m_binDimensions[bd]->getNBins());
     }
-    auto function = new MDBoxImplicitFunction(function_min, function_max);
-    return function;
+    return std::make_unique<MDBoxImplicitFunction>(function_min, function_max);
   } else {
     // General implicit function
     return getGeneralImplicitFunction(chunkMin, chunkMax);
@@ -918,7 +920,7 @@ SlicingAlgorithm::getOldBasis(size_t dimension) const {
   for (size_t i = 0; i < dimension; ++i) {
     Mantid::Kernel::VMD basisVector(dimension);
     basisVector[i] = 1.0;
-    oldBasis.push_back(basisVector);
+    oldBasis.emplace_back(basisVector);
   }
   return oldBasis;
 }
@@ -947,7 +949,7 @@ std::vector<size_t> SlicingAlgorithm::getIndicesWithProjection(
   std::vector<size_t> indexWithProjection;
   for (size_t index = 0; index < oldBasis.size(); ++index) {
     if (isProjectingOnFrame(oldBasis[index], basisVector)) {
-      indexWithProjection.push_back(index);
+      indexWithProjection.emplace_back(index);
     }
   }
   return indexWithProjection;

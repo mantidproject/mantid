@@ -238,8 +238,8 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
         boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
-    int NROWS = static_cast<int>(grandchildren.size());
-    int NCOLS = static_cast<int>(children.size());
+    auto NROWS = static_cast<int>(grandchildren.size());
+    auto NCOLS = static_cast<int>(children.size());
     // Wish pixels and tubes start at 1 not 0
     if (x - 1 >= NCOLS || x - 1 < 0 || y - 1 >= NROWS || y - 1 < 0)
       return EMPTY_INT();

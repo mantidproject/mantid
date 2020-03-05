@@ -219,7 +219,7 @@ void EventParser<TimeOffsetType>::startAsync(
   // Wrapped in lambda because std::thread is unable to specialize doParsing on
   // its own
   m_thread =
-      std::thread([this, event_id_start, event_time_offset_start, &range] {
+      std::thread([this, event_id_start, event_time_offset_start, range] {
         doParsing(event_id_start, event_time_offset_start, range);
       });
 }

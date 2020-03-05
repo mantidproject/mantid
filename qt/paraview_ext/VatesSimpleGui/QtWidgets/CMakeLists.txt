@@ -45,7 +45,7 @@ mtd_add_qt_library(
   INSTALL_DIR_BASE
     ${PLUGINS_DIR}
   OSX_INSTALL_RPATH
-    @loader_path/../../Contents/Libraries
+    @loader_path/../../Contents/Frameworks
     @loader_path/../../Contents/MacOS
   LINUX_INSTALL_RPATH
     "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}"

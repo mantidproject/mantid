@@ -55,8 +55,7 @@ Mantid::API::CoordTransform *CoordTransformDistanceParser::createTransform(
 
   // Parse the in dimension parameter.
   InDimParameterParser inDimParamParser;
-  Poco::XML::Element *parameter =
-      dynamic_cast<Poco::XML::Element *>(parameters->item(0));
+  auto *parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(0));
   boost::shared_ptr<Mantid::API::InDimParameter> inDimParameter(
       inDimParamParser.createWithoutDelegation(parameter));
 

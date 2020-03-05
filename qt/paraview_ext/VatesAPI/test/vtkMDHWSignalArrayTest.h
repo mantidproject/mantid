@@ -40,8 +40,8 @@ public:
     const int nBinsY = static_cast<int>(ws_sptr->getYDimension()->getNBins());
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
-    signal->InitializeArray(ws_sptr->getSignalArray(),
-                            ws_sptr->getNumEventsArray(),
+    signal->InitializeArray(ws_sptr->mutableSignalArray(),
+                            ws_sptr->mutableNumEventsArray(),
                             ws_sptr->getInverseVolume(),
                             SignalArrayNormalization::None, imageSize, offset);
 
@@ -79,8 +79,8 @@ public:
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
 
-    signal->InitializeArray(ws_sptr->getSignalArray(),
-                            ws_sptr->getNumEventsArray(),
+    signal->InitializeArray(ws_sptr->mutableSignalArray(),
+                            ws_sptr->mutableNumEventsArray(),
                             ws_sptr->getInverseVolume(),
                             SignalArrayNormalization::None, imageSize, offset);
 
@@ -119,8 +119,8 @@ public:
     ws_sptr->setMDMaskAt(7, true);
     ws_sptr->setMDMaskAt(42, true);
 
-    signal->InitializeArray(ws_sptr->getSignalArray(),
-                            ws_sptr->getNumEventsArray(),
+    signal->InitializeArray(ws_sptr->mutableSignalArray(),
+                            ws_sptr->mutableNumEventsArray(),
                             ws_sptr->getInverseVolume(),
                             SignalArrayNormalization::None, imageSize, offset);
 
@@ -140,8 +140,8 @@ public:
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
     std::size_t offset = 0;
-    signal->InitializeArray(ws_sptr->getSignalArray(),
-                            ws_sptr->getNumEventsArray(),
+    signal->InitializeArray(ws_sptr->mutableSignalArray(),
+                            ws_sptr->mutableNumEventsArray(),
                             ws_sptr->getInverseVolume(),
                             SignalArrayNormalization::None, imageSize, offset);
 
@@ -167,8 +167,8 @@ public:
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
     std::size_t offset = 0;
-    signal->InitializeArray(ws_sptr->getSignalArray(),
-                            ws_sptr->getNumEventsArray(),
+    signal->InitializeArray(ws_sptr->mutableSignalArray(),
+                            ws_sptr->mutableNumEventsArray(),
                             ws_sptr->getInverseVolume(),
                             SignalArrayNormalization::None, imageSize, offset);
     TS_ASSERT_EQUALS(signal->LookupValue(1.0), -1);
@@ -184,8 +184,8 @@ public:
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     const int imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
     std::size_t offset = 0;
-    signal->InitializeArray(ws_sptr->getSignalArray(),
-                            ws_sptr->getNumEventsArray(),
+    signal->InitializeArray(ws_sptr->mutableSignalArray(),
+                            ws_sptr->mutableNumEventsArray(),
                             ws_sptr->getInverseVolume(),
                             SignalArrayNormalization::None, imageSize, offset);
 
@@ -217,7 +217,7 @@ public:
     const int nBinsZ = static_cast<int>(ws_sptr->getZDimension()->getNBins());
     imageSize = (nBinsX) * (nBinsY) * (nBinsZ);
     m_signal->InitializeArray(
-        ws_sptr->getSignalArray(), ws_sptr->getNumEventsArray(),
+        ws_sptr->mutableSignalArray(), ws_sptr->mutableNumEventsArray(),
         ws_sptr->getInverseVolume(), SignalArrayNormalization::Volume,
         imageSize, offset);
   }

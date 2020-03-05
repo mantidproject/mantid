@@ -113,6 +113,9 @@ private:
                            std::vector<std::string> &IvsLamGroup,
                            std::vector<std::string> &IvsQBinnedGroup,
                            std::vector<std::string> &IvsQGroup);
+  WorkspaceNames getOutputNamesForGroups(const std::string &inputName,
+                                         const std::string &runNumber,
+                                         const size_t wsGroupNumber);
 };
 
 } // namespace Algorithms

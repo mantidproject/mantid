@@ -119,12 +119,12 @@ public:
         sgn1 = -sgn1 + 1;
         sgn2 = sgn1;
       }
-      xvals.push_back(x);
-      yvals.push_back(y);
+      xvals.emplace_back(x);
+      yvals.emplace_back(y);
       const double val =
           NormVal(background, intensity, Mcol, Mrow, Vx, Vy, Vxy, y, x);
 
-      data.push_back(val);
+      data.emplace_back(val);
     }
 
     double xx[nCells];

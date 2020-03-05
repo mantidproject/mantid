@@ -153,7 +153,7 @@ class LoadCRYSTAL(AbinsModules.GeneralAbInitioProgram):
         """
         coord_lines = []
         self._parser.find_first(file_obj=file_obj,
-                                msg="ATOM          X(ANGSTROM)         Y(ANGSTROM)         Z(ANGSTROM)")
+                                regex=r".*\s+ATOM\s+X\(ANGSTROM\)\s+Y\(ANGSTROM\)\s+Z\(ANGSTROM\)\s*$")
 
         file_obj.readline()  # Line: *******************************************************************************
 

@@ -214,8 +214,8 @@ Complementary subtraction is by making A-B == A*B'
 
   // Have DNF parts and will return the same...
   // Sort the components of the list
-  std::for_each(Fparts.begin(), Fparts.end(), std::mem_fun_ref(&Acomp::Sort));
-  std::for_each(Gparts.begin(), Gparts.end(), std::mem_fun_ref(&Acomp::Sort));
+  std::for_each(Fparts.begin(), Fparts.end(), std::mem_fn(&Acomp::Sort));
+  std::for_each(Gparts.begin(), Gparts.end(), std::mem_fn(&Acomp::Sort));
 
   // Sort the list itself...
   std::sort(Gparts.begin(), Gparts.end());
@@ -226,18 +226,18 @@ Complementary subtraction is by making A-B == A*B'
   gc = Gparts.begin();
   for (fc = Fparts.begin(); gc != Gparts.end() && fc != Fparts.end(); ++fc) {
     while (gc != Gparts.end() && (*gc < *fc)) {
-      NegParts.push_back(*gc);
+      NegParts.emplace_back(*gc);
       ++gc;
     }
 
     if (gc != Gparts.end() && *gc == *fc) // match
       ++gc;
     else // ok that didn't work so add to us
-      Outparts.push_back(*fc);
+      Outparts.emplace_back(*fc);
   }
   // add extra bits from Gparts onto NegParts
   for (; gc != Gparts.end(); ++gc)
-    NegParts.push_back(*gc);
+    NegParts.emplace_back(*gc);
 
   // Clear This to put in Outparts.
   Units.clear();
@@ -524,7 +524,7 @@ adds it to the main Units object.
       split(flag, S, V);
       if (V >= static_cast<int>(Index.size()))
         throw std::runtime_error("Error with addUnit::Index");
-      Units.push_back(S * Index[i]);
+      Units.emplace_back(S * Index[i]);
     }
   }
   std::sort(Units.begin(), Units.end());
@@ -603,7 +603,7 @@ Decends down the Comp Tree.
 {
   std::sort(Units.begin(), Units.end());
   // Sort each decending object first
-  std::for_each(Comp.begin(), Comp.end(), std::mem_fun_ref(&Acomp::Sort));
+  std::for_each(Comp.begin(), Comp.end(), std::mem_fn(&Acomp::Sort));
   // use the sorted components to sort our component list
   std::sort(Comp.begin(), Comp.end());
 }
@@ -647,7 +647,7 @@ Test that the system that is logically the same:
   std::map<int, int>::const_iterator mc;
   for (mc = litMap.begin(); mc != litMap.end(); ++mc) {
     Base[mc->first] = 1; // Insert and Set to true
-    keyNumbers.push_back(mc->first);
+    keyNumbers.emplace_back(mc->first);
   }
 
   BnId State(Base.size(), 0); // zero base
@@ -756,9 +756,6 @@ literals
   for (cc = Comp.begin(); cc != Comp.end(); ++cc) {
     cc->getLiterals(literalMap);
   }
-  // Doesn't work because literal map is a reference
-  //  for_each(Comp.begin(),Comp.end(),
-  // std::bind2nd(std::mem_fun(&Acomp::getLiterals),literalMap));
 }
 
 int Acomp::isSimple() const
@@ -836,8 +833,9 @@ i.e. one pass.
     Work.erase(uend, Work.end());
     Tmod.clear(); // erase all at the start
     // set PI status to 1
+    using std::placeholders::_1;
     for_each(Work.begin(), Work.end(),
-             std::bind2nd(std::mem_fun_ref(&BnId::setPI), 1));
+             std::bind(std::mem_fn(&BnId::setPI), _1, 1));
 
     // Collect into pairs which have a difference of +/- one
     // object
@@ -853,7 +851,7 @@ i.e. one pass.
           std::pair<int, BnId> cVal = vc->makeCombination(*oc);
           if (cVal.first == 1) // was complementary
           {
-            Tmod.push_back(cVal.second);
+            Tmod.emplace_back(cVal.second);
             oc->setPI(0);
             vc->setPI(0);
             changeCount++; // 1 changed
@@ -864,7 +862,7 @@ i.e. one pass.
 
     for (vc = Work.begin(); vc != Work.end(); ++vc)
       if (vc->PIstatus() == 1)
-        PIComp.push_back(*vc);
+        PIComp.emplace_back(*vc);
     Work = Tmod;
 
   } while (!Tmod.empty());
@@ -941,7 +939,7 @@ It is set on exit (to the EPI)
       if (PIactive.end() == px)
         continue;
 
-      EPI.push_back(PIform[*px]);
+      EPI.emplace_back(PIform[*px]);
       // remove all minterm that the EPI covered
       for (ddx = DNFactive.begin(); ddx != DNFactive.end(); ++ddx)
         if (*ddx >= 0 && Grid[*px][*ddx])
@@ -951,8 +949,9 @@ It is set on exit (to the EPI)
     }
   }
   // Remove dead items from active list
+  using std::placeholders::_1;
   DNFactive.erase(remove_if(DNFactive.begin(), DNFactive.end(),
-                            std::bind2nd(std::less<int>(), 0)),
+                            std::bind(std::less<int>(), _1, 0)),
                   DNFactive.end());
 
   /// DEBUG PRINT
@@ -984,8 +983,8 @@ It is set on exit (to the EPI)
     cm++;
   }
 
-  const int Dsize(static_cast<int>(DNFactive.size()));
-  const int Psize(static_cast<int>(PIactive.size()));
+  const auto Dsize(static_cast<int>(DNFactive.size()));
+  const auto Psize(static_cast<int>(PIactive.size()));
   // icount == depth of search ie
   int vecI, di; // variable for later
   for (int Icount = 1; Icount < Psize; Icount++) {
@@ -1007,7 +1006,7 @@ It is set on exit (to the EPI)
       if (di == Dsize) // SUCCESS!!!!!
       {
         for (int iout = 0; iout < Icount; iout++) {
-          EPI.push_back(PIform[Index[iout]]);
+          EPI.emplace_back(PIform[Index[iout]]);
         }
         DNFobj = EPI;
         return 1;
@@ -1017,7 +1016,7 @@ It is set on exit (to the EPI)
 
   // OH well that means every PIactive is a EPI :-(
   for (px = PIactive.begin(); px != PIactive.end(); ++px)
-    EPI.push_back(PIform[*px]);
+    EPI.emplace_back(PIform[*px]);
   DNFobj = EPI;
   return 1;
 }
@@ -1033,7 +1032,7 @@ Get the key numbers in the system
   getAbsLiterals(litMap);
   std::map<int, int>::const_iterator mc;
   for (mc = litMap.begin(); mc != litMap.end(); ++mc)
-    keyNumbers.push_back(mc->first);
+    keyNumbers.emplace_back(mc->first);
 
   return keyNumbers;
 }
@@ -1064,7 +1063,7 @@ DNF objects are output into the function parameters.
 
   for (mc = litMap.begin(); mc != litMap.end(); ++mc) {
     Base[mc->first] = 1; // Set to true
-    keyNumbers.push_back(mc->first);
+    keyNumbers.emplace_back(mc->first);
   }
 
   DNFobj.clear();
@@ -1072,7 +1071,7 @@ DNF objects are output into the function parameters.
   do {
     State.mapState(keyNumbers, Base);
     if (isTrue(Base)) {
-      DNFobj.push_back(State);
+      DNFobj.emplace_back(State);
     }
   } while (++State);
 
@@ -1129,7 +1128,7 @@ component)
     for (const auto &item : Units) {
       Acomp Aitem(1); // Intersection (doesn't matter since 1 object)
       Aitem.addUnitItem(item);
-      Parts.push_back(Aitem);
+      Parts.emplace_back(Aitem);
     }
     std::copy(Comp.cbegin(), Comp.cend(), std::back_inserter(Parts));
     return static_cast<int>(Parts.size());
@@ -1142,7 +1141,7 @@ component)
       for (auto &obj : DNFobj) {
         Acomp Aitem(1); // make an intersection and add components
         Aitem.addUnit(keyNumbers, obj);
-        Parts.push_back(Aitem);
+        Parts.emplace_back(Aitem);
       }
     }
     return static_cast<int>(Parts.size());
@@ -1178,7 +1177,7 @@ DNF objects are output into the function parameters.
   for (mc = litMap.begin(); mc != litMap.end(); ++mc) {
     mc->second = cnt++;
     Base[mc->first] = 1; // Set to true
-    keyNumbers.push_back(mc->first);
+    keyNumbers.emplace_back(mc->first);
   }
 
   CNFobj.clear();
@@ -1186,7 +1185,7 @@ DNF objects are output into the function parameters.
   do {
     State.mapState(keyNumbers, Base);
     if (!isTrue(Base))
-      CNFobj.push_back(State);
+      CNFobj.emplace_back(State);
   } while (++State);
 
   return 0;
@@ -1205,7 +1204,7 @@ the Base state.
 
   // Deal with case of a single object (then join
   // doesn't matter
-  int retJoin = static_cast<int>(Units.size() + Comp.size());
+  auto retJoin = static_cast<int>(Units.size() + Comp.size());
   if (retJoin != 1) // single unit is alway ok
     retJoin = 1 - Intersect;
 
@@ -1264,8 +1263,8 @@ Carries out algebraic division
 
   for (cc = Flist.begin(); cc != Flist.end(); ++cc) {
     int itemCnt(0);
-    U.push_back(Acomp(0)); // intersection Unit
-    V.push_back(Acomp(0)); // intersection Unit
+    U.emplace_back(Acomp(0)); // intersection Unit
+    V.emplace_back(Acomp(0)); // intersection Unit
     Acomp &Uitem = U.back();
     Acomp &Vitem = V.back();
     int cell;
@@ -1375,9 +1374,9 @@ singles exist and up-promotes them.
     if (Stype.first + Stype.second == 1) // single unit component.
     {
       if (Stype.first == 1)
-        Units.push_back(AX.itemN(0));
+        Units.emplace_back(AX.itemN(0));
       else
-        Comp.push_back(*AX.itemC(0));
+        Comp.emplace_back(*AX.itemC(0));
       // delete memory and the component.
       Comp.erase(Comp.begin() + ix, Comp.begin() + ix + 1);
       ix--;
@@ -1515,11 +1514,12 @@ ab -> a'+b'
 */
 {
   Intersect = 1 - Intersect;
+  using std::placeholders::_1;
   transform(Units.begin(), Units.end(), Units.begin(),
-            std::bind2nd(std::multiplies<int>(), -1));
+            std::bind(std::multiplies<int>(), _1, -1));
   sort(Units.begin(), Units.end()); /// Resort the list. use reverse?
 
-  for_each(Comp.begin(), Comp.end(), std::mem_fun_ref(&Acomp::complement));
+  for_each(Comp.begin(), Comp.end(), std::mem_fn(&Acomp::complement));
   sort(Comp.begin(), Comp.end());
 }
 

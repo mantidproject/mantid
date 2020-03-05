@@ -72,7 +72,7 @@ void SCDCalibratePanels::exec() {
   }
   findU(peaksWs);
 
-  int nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
+  auto nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
   bool changeL1 = getProperty("ChangeL1");
   bool changeT0 = getProperty("ChangeT0");
   bool bankPanels = getProperty("CalibrateBanks");
@@ -156,13 +156,13 @@ void SCDCalibratePanels::exec() {
   // Try again to optimize L1
   if (changeL1) {
     findL1(nPeaks, peaksWs);
-    parameter_workspaces.push_back("params_L1");
-    fit_workspaces.push_back("fit_L1");
+    parameter_workspaces.emplace_back("params_L1");
+    fit_workspaces.emplace_back("fit_L1");
   }
   // Add T0 files to groups
   if (changeT0) {
-    parameter_workspaces.push_back("params_T0");
-    fit_workspaces.push_back("fit_T0");
+    parameter_workspaces.emplace_back("params_T0");
+    fit_workspaces.emplace_back("fit_T0");
   }
   std::sort(parameter_workspaces.begin(), parameter_workspaces.end());
   std::sort(fit_workspaces.begin(), fit_workspaces.end());

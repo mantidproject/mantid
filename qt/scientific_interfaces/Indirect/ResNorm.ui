@@ -255,17 +255,17 @@
              </property>
              <item>
               <property name="text">
+               <string>All</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
                <string>Intensity</string>
               </property>
              </item>
              <item>
               <property name="text">
                <string>Stretch</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>All</string>
               </property>
              </item>
             </widget>

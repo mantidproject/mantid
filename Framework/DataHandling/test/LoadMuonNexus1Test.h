@@ -437,11 +437,11 @@ public:
     // Check grouping
     std::vector<int> testVec;
     for (int i = 5; i < 11; i++)
-      testVec.push_back(i);
+      testVec.emplace_back(i);
     TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(0, 0), testVec);
     testVec.clear();
-    testVec.push_back(29);
-    testVec.push_back(31);
+    testVec.emplace_back(29);
+    testVec.emplace_back(31);
     TS_ASSERT_EQUALS(groupingTable->cell<std::vector<int>>(1, 0), testVec);
     AnalysisDataService::Instance().remove(groupingWSName);
   }

@@ -17,7 +17,8 @@ SANSInstrument_string_as_key = {LARMOR: SANSInstrument.LARMOR,
 
 # Include NoInstrument in a dict
 SANSInstrument_string_as_key_NoInstrument = SANSInstrument_string_as_key.copy()
-SANSInstrument_string_as_key_NoInstrument.update({"NoInstrument": SANSInstrument.NoInstrument})
+SANSInstrument_string_as_key_NoInstrument.update({"NoInstrument": SANSInstrument.NO_INSTRUMENT})
+SANSInstrument_string_as_key_NoInstrument.update({"No Instrument": SANSInstrument.NO_INSTRUMENT})
 
 SANSInstrument_enum_as_key = {SANSInstrument.LARMOR: LARMOR,
                               SANSInstrument.LOQ: LOQ,
@@ -25,7 +26,7 @@ SANSInstrument_enum_as_key = {SANSInstrument.LARMOR: LARMOR,
                               SANSInstrument.ZOOM: ZOOM}
 
 SANSInstrument_enum_as_key_NoInstrument = SANSInstrument_enum_as_key.copy()
-SANSInstrument_enum_as_key_NoInstrument.update({SANSInstrument.NoInstrument: "NoInstrument"})
+SANSInstrument_enum_as_key_NoInstrument.update({SANSInstrument.NO_INSTRUMENT: "NoInstrument"})
 
 SANSInstrument_string_list = [LARMOR, LOQ, SANS2D, ZOOM]
 SANSInstrument_enum_list = [SANSInstrument.LARMOR, SANSInstrument.LOQ, SANSInstrument.SANS2D, SANSInstrument.ZOOM]

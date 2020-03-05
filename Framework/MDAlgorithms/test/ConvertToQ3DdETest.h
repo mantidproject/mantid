@@ -291,144 +291,8 @@ public:
                pAlg->isExecuted());
   }
 
-  // COMPARISON WITH HORACE:  --->    DISABLED
-  void xtestTransfMat1() {
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(16, 10, true);
-    OrientedLattice *latt = new OrientedLattice(1, 2, 3, 90., 90., 90.);
-    ws2D->mutableSample().setOrientedLattice(latt);
-    delete latt;
-    MDWSDescription TWS(4);
-
-    std::vector<double> rot;
-    //    std::vector<double>
-    //    rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,0,0),Kernel::V3D(0,1,0));
-    Kernel::Matrix<double> unit = Kernel::Matrix<double>(3, 3, true);
-    Kernel::Matrix<double> rez(rot);
-    TS_ASSERT(unit.equals(rez, 1.e-4));
-  }
-  void xtestTransfMat2() {
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(16, 10, true);
-    OrientedLattice *latt = new OrientedLattice(1, 2, 3, 75., 45., 35.);
-    ws2D->mutableSample().setOrientedLattice(latt);
-    delete latt;
-    std::vector<double> rot;
-    // std::vector<double>
-    // rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,0,0),Kernel::V3D(0,1,0));
-    Kernel::Matrix<double> unit = Kernel::Matrix<double>(3, 3, true);
-    Kernel::Matrix<double> rez(rot);
-    TS_ASSERT(unit.equals(rez, 1.e-4));
-  }
-  void xtestTransfMat3() {
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(16, 10, true);
-    OrientedLattice *latt = new OrientedLattice(1, 2, 3, 75., 45., 35.);
-    ws2D->mutableSample().setOrientedLattice(latt);
-    delete latt;
-    std::vector<double> rot;
-    // std::vector<double>
-    // rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,0,0),Kernel::V3D(0,-1,0));
-    Kernel::Matrix<double> unit = Kernel::Matrix<double>(3, 3, true);
-    unit[1][1] = -1;
-    unit[2][2] = -1;
-    Kernel::Matrix<double> rez(rot);
-    TS_ASSERT(unit.equals(rez, 1.e-4));
-  }
-  void xtestTransfMat4() {
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(16, 10, true);
-    OrientedLattice *latt = new OrientedLattice(1, 1, 3, 90., 90., 90.);
-    ws2D->mutableSample().setOrientedLattice(latt);
-    delete latt;
-    ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 0);
-    ws2D->mutableRun().mutableGoniometer().setRotationAngle(1, 0);
-    ws2D->mutableRun().mutableGoniometer().setRotationAngle(2, 0);
-
-    std::vector<double> rot;
-    // std::vector<double>
-    // rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,1,0),Kernel::V3D(1,-1,0));
-    Kernel::Matrix<double> sample = Kernel::Matrix<double>(3, 3, true);
-    sample[0][0] = 0.5 * M_SQRT2;
-    sample[0][1] = 0.5 * M_SQRT2;
-    sample[1][0] = 0.5 * M_SQRT2;
-    sample[1][1] = -0.5 * M_SQRT2;
-    sample[2][2] = -1.0;
-    Kernel::Matrix<double> rez(rot);
-    TS_ASSERT(sample.equals(rez, 1.e-4));
-  }
-  void xtestTransfMat5() {
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(16, 10, true);
-    OrientedLattice *latt = new OrientedLattice(1, 2, 3, 75., 45., 90.);
-    ws2D->mutableSample().setOrientedLattice(latt);
-    delete latt;
-    ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 0);
-    ws2D->mutableRun().mutableGoniometer().setRotationAngle(1, 0);
-    ws2D->mutableRun().mutableGoniometer().setRotationAngle(2, 0);
-
-    std::vector<double> rot;
-    // std::vector<double>
-    // rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,1,0),Kernel::V3D(1,-1,0));
-    Kernel::Matrix<double> sample = Kernel::Matrix<double>(3, 3, true);
-    // aa=[0.9521 0.3058  0.0000;  0.3058   -0.9521    0.0000;   0         0
-    // -1.000];
-    sample[0][0] = 0.9521;
-    sample[0][1] = 0.3058;
-    sample[1][0] = 0.3058;
-    sample[1][1] = -0.9521;
-    sample[2][2] = -1;
-    Kernel::Matrix<double> rez(rot);
-    TS_ASSERT(sample.equals(rez, 1.e-4));
-  }
-  void xtestTransf_PSI_DPSI() {
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(16, 10, true);
-    OrientedLattice *latt = new OrientedLattice(1, 1, 1, 90., 90., 90.);
-    ws2D->mutableSample().setOrientedLattice(latt);
-    delete latt;
-    ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 0);
-    ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,
-                                                            -20); // Psi, dPsi
-    ws2D->mutableRun().mutableGoniometer().setRotationAngle(2, 0);
-
-    std::vector<double> rot;
-    // std::vector<double>
-    // rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,0,0),Kernel::V3D(0,1,0));
-    Kernel::Matrix<double> sample = Kernel::Matrix<double>(3, 3, true);
-    sample[0][0] = 0.9397;
-    sample[0][1] = 0.3420;
-    sample[1][0] = -0.3420;
-    sample[1][1] = 0.9397;
-    sample[2][2] = 1;
-    Kernel::Matrix<double> rez(rot);
-    TS_ASSERT(sample.equals(rez, 1.e-4));
-  }
-  void xtestTransf_GL() {
-    Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
-        createProcessedWorkspaceWithCylComplexInstrument(16, 10, true);
-    OrientedLattice *latt = new OrientedLattice(1, 1, 1, 90., 90., 90.);
-    ws2D->mutableSample().setOrientedLattice(latt);
-    delete latt;
-    ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 20); // gl
-    ws2D->mutableRun().mutableGoniometer().setRotationAngle(1, 0);
-    ws2D->mutableRun().mutableGoniometer().setRotationAngle(2, 0);
-
-    std::vector<double> rot;
-    // std::vector<double>
-    // rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,0,0),Kernel::V3D(0,1,0));
-    Kernel::Matrix<double> sample = Kernel::Matrix<double>(3, 3, true);
-
-    sample[0][0] = 0.9397;
-    sample[0][2] = 0.3420;
-    sample[2][0] = -0.3420;
-    sample[2][2] = 0.9397;
-    sample[1][1] = 1;
-    Kernel::Matrix<double> rez(rot);
-    TS_ASSERT(sample.equals(rez, 1.e-4));
-  }
   // check the results;
-  void t__tResult() {
+  void testAlgorithmExecution() {
     std::vector<double> L2(3, 10), polar(3, 0), azim(3, 0);
     polar[1] = 1;
     polar[2] = 2;
@@ -450,11 +314,12 @@ public:
         pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(
         pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
     TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("QdEValuesMin", "-10.,-10.,-10,-2"));
+        pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
     TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("QdEValuesMax", " 10., 10., 10, 8"))
+        pAlg->setPropertyValue("MinValues", "-10.,-10.,-10,-2"));
+    TS_ASSERT_THROWS_NOTHING(
+        pAlg->setPropertyValue("MaxValues", " 10., 10., 10, 8"))
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("PreprocDetectorsWS", ""));
 
     pAlg->execute();
@@ -467,9 +332,7 @@ public:
         wsOut);
   }
 
-  // COMPARISON WITH HORACE: END  <---
-  // TODO:  this check has to be implemented !!!!
-  void t__tWithExistingLatticeTrowsLowEnergy() {
+  void testWithExistingLatticeTrowsLowEnergy() {
     // create model processed workpsace with 10x10 cylindrical detectors, 10
     // energy levels and oriented lattice
     Mantid::API::MatrixWorkspace_sptr ws2D = WorkspaceCreationHelper::
@@ -479,22 +342,23 @@ public:
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
+    auto alg = std::make_unique<ConvertTo3DdETestHelper>();
+    alg->initialize();
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("QDimensions", "Q3D"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("dEAnalysisMode", "Direct"));
     TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("dEAnalysisMode", "Inelastic"));
+        alg->setPropertyValue("InputWorkspace", ws2D->getName()));
     TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("InputWorkspace", ws2D->getName()));
+        alg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
     TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("OutputWorkspace", "EnergyTransfer4DWS"));
+        alg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
     TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("MinValues", "-50.,-50.,-50,-2"));
-    TS_ASSERT_THROWS_NOTHING(
-        pAlg->setPropertyValue("MaxValues", " 50., 50.,-50,10"));
+        alg->setPropertyValue("MaxValues", " 50., 50.,-50,10"));
 
-    pAlg->execute();
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
     TSM_ASSERT(
         "Should be not-successful as input energy was lower then obtained",
-        !pAlg->isExecuted());
+        !alg->isExecuted());
   }
 
   ConvertToQ3DdETest() {

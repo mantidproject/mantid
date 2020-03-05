@@ -9,6 +9,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ScalarUtils.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid {
@@ -47,6 +48,9 @@ void SelectCellWithForm::init() {
 
   this->declareProperty("AllowPermutations", true,
                         "Allow permutations of conventional cells");
+  this->declareProperty(std::make_unique<ArrayProperty<double>>(
+                            "TransformationMatrix", Direction::Output),
+                        "The transformation matrix");
 }
 
 Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(
@@ -62,14 +66,14 @@ Kernel::Matrix<double> SelectCellWithForm::DetermineErrors(
   q_vectors.reserve(npeaks);
   q_vectors0.reserve(npeaks);
   for (int i = 0; i < npeaks; i++)
-    q_vectors0.push_back(ws->getPeak(i).getQSampleFrame());
+    q_vectors0.emplace_back(ws->getPeak(i).getQSampleFrame());
 
   Kernel::Matrix<double> newUB1(3, 3);
   IndexingUtils::GetIndexedPeaks(UB, q_vectors0, tolerance, miller_ind,
                                  q_vectors, fit_error);
   IndexingUtils::Optimize_UB(newUB1, miller_ind, q_vectors, sigabc);
 
-  int nindexed_old = static_cast<int>(q_vectors.size());
+  auto nindexed_old = static_cast<int>(q_vectors.size());
   int nindexed_new =
       IndexingUtils::NumberIndexed(newUB1, q_vectors0, tolerance);
   bool latErrorsValid = true;
@@ -108,8 +112,10 @@ void SelectCellWithForm::exec() {
     throw std::runtime_error("Could not read the peaks workspace");
   }
 
-  OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
-  Matrix<double> UB = o_lattice.getUB();
+  // copy current lattice
+  auto o_lattice = std::make_unique<OrientedLattice>(
+      ws->mutableSample().getOrientedLattice());
+  Matrix<double> UB = o_lattice->getUB();
 
   bool allowPermutations = this->getProperty("AllowPermutations");
 
@@ -132,10 +138,9 @@ void SelectCellWithForm::exec() {
 
   g_log.notice(std::string(message));
 
-  Kernel::Matrix<double> T(UB);
-  T.Invert();
-  T = newUB * T;
+  DblMatrix T = info.GetHKL_Tran();
   g_log.notice() << "Transformation Matrix =  " << T.str() << '\n';
+  this->setProperty("TransformationMatrix", T.getVector());
 
   if (apply) {
     //----------------------------------- Try to optimize(LSQ) to find lattice
@@ -144,32 +149,41 @@ void SelectCellWithForm::exec() {
     //                       least squares optimization
 
     //----------------------------------------------
-    o_lattice.setUB(newUB);
+    o_lattice->setUB(newUB);
     std::vector<double> sigabc(6);
     DetermineErrors(sigabc, newUB, ws, tolerance);
 
-    o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-                       sigabc[5]);
-
-    ws->mutableSample().setOrientedLattice(&o_lattice);
+    o_lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
+                        sigabc[5]);
 
     std::vector<Peak> &peaks = ws->getPeaks();
     size_t n_peaks = ws->getNumberPeaks();
 
     int num_indexed = 0;
     double average_error = 0.0;
-    std::vector<V3D> miller_indices;
-    std::vector<V3D> q_vectors;
-    for (size_t i = 0; i < n_peaks; i++) {
-      q_vectors.push_back(peaks[i].getQSampleFrame());
-    }
 
-    num_indexed = IndexingUtils::CalculateMillerIndices(
-        newUB, q_vectors, tolerance, miller_indices, average_error);
+    if (o_lattice->getMaxOrder() == 0) {
+      std::vector<V3D> miller_indices;
+      std::vector<V3D> q_vectors;
+      for (size_t i = 0; i < n_peaks; i++) {
+        q_vectors.emplace_back(peaks[i].getQSampleFrame());
+      }
+      num_indexed = IndexingUtils::CalculateMillerIndices(
+          newUB, q_vectors, tolerance, miller_indices, average_error);
 
-    for (size_t i = 0; i < n_peaks; i++) {
-      peaks[i].setHKL(miller_indices[i]);
+      for (size_t i = 0; i < n_peaks; i++) {
+        peaks[i].setIntHKL(miller_indices[i]);
+        peaks[i].setHKL(miller_indices[i]);
+      }
+    } else {
+      num_indexed = static_cast<int>(num_indexed);
+      for (size_t i = 0; i < n_peaks; i++) {
+        average_error += (peaks[i].getHKL()).hklError();
+        peaks[i].setIntHKL(T * peaks[i].getIntHKL());
+        peaks[i].setHKL(T * peaks[i].getHKL());
+      }
     }
+    ws->mutableSample().setOrientedLattice(std::move(o_lattice));
 
     // Tell the user what happened.
     g_log.notice() << "Re-indexed the peaks with the new UB. \n";

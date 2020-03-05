@@ -34,9 +34,9 @@ using Mantid::API::TableRow;
 using Mantid::API::Workspace;
 using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceGroup;
-using MantidQt::CustomInterfaces::Muon::DeadTimesType;
 using MantidQt::CustomInterfaces::MuonAnalysisDataLoader;
 using MantidQt::CustomInterfaces::MuonAnalysisFitDataPresenter;
+using MantidQt::CustomInterfaces::Muon::DeadTimesType;
 using MantidQt::MantidWidgets::IMuonFitDataModel;
 using MantidQt::MantidWidgets::IMuonFitDataSelector;
 using MantidQt::MantidWidgets::IWorkspaceFitControl;
@@ -958,7 +958,7 @@ private:
       std::vector<std::string> expectedNames{groupName +
                                              "_NormalisedCovarianceMatrix"};
       if (!extracted) {
-        expectedNames.push_back(baseName + "_Workspaces");
+        expectedNames.emplace_back(baseName + "_Workspaces");
       }
       for (const auto &name : inputNames) {
         std::ostringstream oss;
@@ -968,9 +968,9 @@ private:
         oss << baseName << "_" << wsParams.label << "_" << wsParams.itemName
             << "_" << wsParams.periods;
         if (extracted) {
-          expectedNames.push_back(oss.str() + "_Workspace");
+          expectedNames.emplace_back(oss.str() + "_Workspace");
         }
-        expectedNames.push_back(oss.str() + "_Parameters");
+        expectedNames.emplace_back(oss.str() + "_Parameters");
       }
       // Check expected workspaces in group
       auto groupNames(baseGroup->getNames());

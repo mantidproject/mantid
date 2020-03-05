@@ -374,7 +374,7 @@ SANSDiagnostics::rectangularDetectorDetails(
       rect->setDetectorName(QString::fromStdString(det->getName()));
       rect->setMinimumDetectorId(det->minDetectorID());
       rect->setMaximumDetectorId(det->maxDetectorID());
-      rectDetectors.push_back(rect);
+      rectDetectors.emplace_back(rect);
 
     } else {
 
@@ -390,7 +390,7 @@ SANSDiagnostics::rectangularDetectorDetails(
             rect->setDetectorName(QString::fromStdString(det->getName()));
             rect->setMinimumDetectorId(det->minDetectorID());
             rect->setMaximumDetectorId(det->maxDetectorID());
-            rectDetectors.push_back(rect);
+            rectDetectors.emplace_back(rect);
           }
         }
       }
@@ -460,8 +460,8 @@ void SANSDiagnostics::getSpectraList(
   specList.clear();
   // it is not really required, it could stay with the workspace id, just for
   // compatibility
-  specList.push_back(min_spec_index);
-  specList.push_back(max_spec_index);
+  specList.emplace_back(min_spec_index);
+  specList.emplace_back(max_spec_index);
 }
 /** This method returns the minimum and maximum spectrum Nos
  * @param specList - list of spectra.

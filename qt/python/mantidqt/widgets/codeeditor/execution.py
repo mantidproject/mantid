@@ -7,90 +7,73 @@
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
-import inspect
+import __future__
+import ast
+
+try:
+    import builtins
+except ImportError:
+    import __main__
+
+    builtins = __main__.__builtins__
+import copy
 import os
+from io import BytesIO
+from lib2to3.pgen2.tokenize import detect_encoding
 
 from qtpy.QtCore import QObject, Signal
 from qtpy.QtWidgets import QApplication
-from six import PY2, iteritems
 
 from mantidqt.utils import AddedToSysPath
 from mantidqt.utils.asynchronous import AsyncTask, BlockingAsyncTaskWithCallback
-from mantidqt.widgets.codeeditor.inputsplitter import InputSplitter
+from mantidqt.utils.qt import import_qt
 
-if PY2:
-    from inspect import getargspec as getfullargspec
-else:
-    from inspect import getfullargspec
+# Core object to execute the code with optinal progress tracking
+CodeExecution = import_qt('..._common', 'mantidqt.widgets.codeeditor', 'CodeExecution')
 
 EMPTY_FILENAME_ID = '<string>'
 FILE_ATTR = '__file__'
-COMPILE_MODE = 'exec'
 
 
-def get_function_spec(func):
-    """Get the python function signature for the given function object. First
-    the args are inspected followed by varargs, which are set by some modules,
-    e.g. mantid.simpleapi algorithm functions
-
-    :param func: A Python function object
-    :returns: A string containing the function specification
-    :
+def _get_imported_from_future(code_str):
     """
+    Parse the given code and return a list of names that are imported
+    from __future__.
+    :param code_str: The code to parse
+    :return list: List of names that are imported from __future__
+    """
+    future_imports = []
     try:
-        argspec = getfullargspec(func)
-    except TypeError:
-        return ''
-    # mantid algorithm functions have varargs set not args
-    args = argspec[0]
-    if args:
-        # For methods strip the self argument
-        if hasattr(func, 'im_func'):
-            args = args[1:]
-        defs = argspec[3]
-    elif argspec[1] is not None:
-        # Get from varargs/keywords
-        arg_str = argspec[1].strip().lstrip('\b')
-        defs = []
-        # Keyword args
-        kwargs = argspec[2]
-        if kwargs is not None:
-            kwargs = kwargs.strip().lstrip('\b\b')
-            if kwargs == 'kwargs':
-                kwargs = '**' + kwargs + '=None'
-            arg_str += ',%s' % kwargs
-        # Any default argument appears in the string
-        # on the rhs of an equal
-        for arg in arg_str.split(','):
-            arg = arg.strip()
-            if '=' in arg:
-                arg_token = arg.split('=')
-                args.append(arg_token[0])
-                defs.append(arg_token[1])
-            else:
-                args.append(arg)
-        if len(defs) == 0:
-            defs = None
-    else:
-        return ''
+        code_str = code_str.encode(detect_encoding(BytesIO(code_str.encode()).readline)[0])
+    except UnicodeEncodeError:  # Script contains unicode symbol. Cannot run detect_encoding as it requires ascii.
+        code_str = code_str.encode('utf-8')
+    for node in ast.walk(ast.parse(code_str)):
+        if isinstance(node, ast.ImportFrom):
+            if node.module == '__future__':
+                future_imports.extend([import_alias.name for import_alias in node.names])
+                break
+    return future_imports
 
-    if defs is None:
-        calltip = ','.join(args)
-        calltip = '(' + calltip + ')'
-    else:
-        # The defaults list contains the default values for the last n arguments
-        diff = len(args) - len(defs)
-        calltip = ''
-        for index in range(len(args) - 1, -1, -1):
-            def_index = index - diff
-            if def_index >= 0:
-                calltip = '[' + args[index] + '],' + calltip
-            else:
-                calltip = args[index] + "," + calltip
-        calltip = '(' + calltip.rstrip(',') + ')'
-    return calltip
+
+def get_future_import_compiler_flags(code_str):
+    """
+    Get the compiler flags that can be passed to `compile` that
+    correspond to the __future__ imports inside the given code.
+
+    :param code_str: The code being executed, containing __future__ imports
+    :return int: The 'bitwise or' union of compiler flags
+    """
+    flags = 0
+    for f_import_str in _get_imported_from_future(code_str):
+        try:
+            future_import = getattr(__future__, f_import_str)
+            flags |= future_import.compiler_flag
+        except AttributeError:
+            # Just pass and let the ImportError be raised on script execution
+            pass
+    return flags
 
 
 class PythonCodeExecution(QObject):
@@ -100,20 +83,14 @@ class PythonCodeExecution(QObject):
     """
     sig_exec_success = Signal(object)
     sig_exec_error = Signal(object)
-    sig_exec_progress = Signal(int)
 
-    def __init__(self, startup_code=None):
+    def __init__(self, editor=None):
         """Initialize the object"""
         super(PythonCodeExecution, self).__init__()
-
+        self._editor = editor
         self._globals_ns = None
-
         self._task = None
-
         self.reset_context()
-
-        # the code is not executed initially so code completion won't work
-        # on variables until part is executed
 
     @property
     def globals_ns(self):
@@ -156,38 +133,18 @@ class PythonCodeExecution(QObject):
         is used
         :raises: Any error that the code generates
         """
-        if filename:
-            self.globals_ns[FILE_ATTR] = filename
-        else:
+        if not filename:
             filename = EMPTY_FILENAME_ID
-        compile(code_str, filename, mode=COMPILE_MODE, dont_inherit=True)
 
+        self.globals_ns[FILE_ATTR] = filename
+        flags = get_future_import_compiler_flags(code_str)
         with AddedToSysPath([os.path.dirname(filename)]):
-            sig_progress = self.sig_exec_progress
-            for block in code_blocks(code_str):
-                sig_progress.emit(block.lineno)
-                # compile so we can set the filename
-                code_obj = compile(block.code_str, filename, mode=COMPILE_MODE,
-                                   dont_inherit=True)
-                exec (code_obj, self.globals_ns, self.globals_ns)
-
-    def generate_calltips(self):
-        """
-        Return a list of calltips for the current global scope. This is currently
-        very basic and only inspects the available functions and builtins at the current scope.
-
-        :return: A list of strings giving calltips for each global callable
-        """
-        calltips = []
-        for name, attr in iteritems(self._globals_ns):
-            if inspect.isfunction(attr) or inspect.isbuiltin(attr):
-                calltips.append(name + get_function_spec(attr))
-
-        return calltips
+            executor = CodeExecution(self._editor)
+            executor.execute(code_str, filename, flags, self.globals_ns)
 
     def reset_context(self):
         # create new context for execution
-        self._globals_ns, self._namespace = {}, {}
+        self._globals_ns = copy.copy(builtins.globals())
 
     # --------------------- Callbacks -------------------------------
     def _on_success(self, task_result):
@@ -198,51 +155,6 @@ class PythonCodeExecution(QObject):
         self._reset_task()
         self.sig_exec_error.emit(task_error)
 
-    def _on_progress_updated(self, lineno):
-        self.sig_exec_progress(lineno)
-
     # --------------------- Private -------------------------------
     def _reset_task(self):
         self._task = None
-
-
-class CodeBlock(object):
-    """Holds an executable code object. It also stores the line number
-    of the first line within a larger group of code blocks"""
-
-    def __init__(self, code_str, lineno):
-        self.code_str = code_str
-        self.lineno = lineno
-
-
-def code_blocks(code_str):
-    """Generator to produce blocks of executable code
-    from the given code string.
-    """
-    lineno_cur = 0
-    lines = code_str.splitlines()
-    line_count = len(lines)
-    isp = InputSplitter()
-    for line in lines:
-        lineno_cur += 1
-        # IPython InputSplitter assumes that indentation is 4 spaces, not tabs.
-        # Accounting for that here, rather than using script-level "tabs to spaces"
-        # allows the user to keep tabs in their script if they wish.
-        line = line.replace("\t", " "*4)
-        isp.push(line)
-        # If we need more input to form a complete statement
-        # or we are not at the end of the code then keep
-        # going
-        if isp.push_accepts_more() and lineno_cur != line_count:
-            continue
-        else:
-            # Now we have a complete set of executable statements
-            # throw them at the execution engine
-            code = isp.source
-            isp.reset()
-            yield CodeBlock(code, lineno_cur)
-            # In order to keep the line numbering in error stack traces
-            # consistent each executed block needs to have the statements
-            # on the same line as they are in the real code so we prepend
-            # blank lines to make this so
-            isp.push('\n' * lineno_cur)

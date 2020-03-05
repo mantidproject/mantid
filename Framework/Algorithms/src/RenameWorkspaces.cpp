@@ -126,7 +126,7 @@ void RenameWorkspaces::exec() {
   } else { // We are using prefix and/or suffix
     // Build new names.
     for (size_t i = 0; i < nWs; ++i) {
-      newWsName.push_back(prefix + inputWsName[i] + suffix);
+      newWsName.emplace_back(prefix + inputWsName[i] + suffix);
     }
   }
 

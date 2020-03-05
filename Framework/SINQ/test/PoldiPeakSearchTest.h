@@ -159,22 +159,22 @@ public:
     TestablePoldiPeakSearch poldiPeakSearch;
 
     std::vector<double> firstVector;
-    firstVector.push_back(2.0);
-    firstVector.push_back(3.0);
-    firstVector.push_back(4.0);
-    firstVector.push_back(5.0);
+    firstVector.emplace_back(2.0);
+    firstVector.emplace_back(3.0);
+    firstVector.emplace_back(4.0);
+    firstVector.emplace_back(5.0);
 
     std::vector<double> secondVector;
-    secondVector.push_back(1.5);
-    secondVector.push_back(2.5);
-    secondVector.push_back(3.5);
-    secondVector.push_back(4.5);
-    secondVector.push_back(5.5);
-    secondVector.push_back(6.5);
+    secondVector.emplace_back(1.5);
+    secondVector.emplace_back(2.5);
+    secondVector.emplace_back(3.5);
+    secondVector.emplace_back(4.5);
+    secondVector.emplace_back(5.5);
+    secondVector.emplace_back(6.5);
 
     std::list<std::vector<double>::const_iterator> firstIterators;
-    firstIterators.push_back(firstVector.begin() + 2);
-    firstIterators.push_back(firstVector.begin() + 3);
+    firstIterators.emplace_back(firstVector.begin() + 2);
+    firstIterators.emplace_back(firstVector.begin() + 3);
 
     std::list<std::vector<double>::const_iterator> secondIterators =
         poldiPeakSearch.mapPeakPositionsToCorrelationData(

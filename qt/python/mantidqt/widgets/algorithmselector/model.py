@@ -6,7 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
-from mantid.api import AlgorithmFactoryImpl
+from mantid.api import AlgorithmFactory, AlgorithmManager, IWorkspaceProperty
+from mantid.kernel import Direction
+
+CATEGORY_SEP = '\\'
 
 
 class AlgorithmSelectorModel(object):
@@ -28,6 +31,7 @@ class AlgorithmSelectorModel(object):
         """
         Prepare the algorithm description data for displaying in the view.
         :return: A tuple of two elements. The first is a list of all algorithm names.
+            This always contains all known algorithms regardless of their hidden state
             The second is a tree of nested dicts where keys either category names
             or self.algorithm_key. Values of the category names are sub-trees
             and those of self.algorithm_key have dicts mapping algorithm names
@@ -54,14 +58,11 @@ class AlgorithmSelectorModel(object):
             Here self.algorithm_key == '_'
 
         """
-        descriptors = AlgorithmFactoryImpl.Instance().getDescriptors(self.include_hidden)
-        algorithm_names = []
+        algm_factory = AlgorithmFactory.Instance()
+        descriptors = algm_factory.getDescriptors(self.include_hidden)
         data = {}
         for descriptor in descriptors:
-            # descriptor is a class with data fields: name, alias, category, version
-            if descriptor.name not in algorithm_names:
-                algorithm_names.append(descriptor.name)
-            categories = descriptor.category.split('\\')
+            categories = descriptor.category.split(CATEGORY_SEP)
             # Create nested dictionaries in which the key is a category and the value
             # is a similar dictionary with sub-categories as keys
             d = data
@@ -77,4 +78,16 @@ class AlgorithmSelectorModel(object):
             if descriptor.name not in d:
                 d[descriptor.name] = []
             d[descriptor.name].append(descriptor.version)
-        return algorithm_names, data
+
+        unique_alg_names = set(descr.name
+                               for descr in algm_factory.getDescriptors(True))
+        return sorted(unique_alg_names), data
+
+    def find_input_workspace_property(self, algorithm):
+        algm_manager = AlgorithmManager.Instance()
+        alg_instance = algm_manager.createUnmanaged(algorithm[0], algorithm[1])
+        alg_instance.initialize()
+        for prop in alg_instance.getProperties():
+            if isinstance(prop, IWorkspaceProperty) and prop.direction in [Direction.Input, Direction.InOut]:
+                return prop.name
+        return None

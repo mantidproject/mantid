@@ -377,10 +377,11 @@ void MDWSDescription::fillAddProperties(
 void MDWSDescription::checkMinMaxNdimConsistent(
     const std::vector<double> &minVal, const std::vector<double> &maxVal) {
   if (minVal.size() != maxVal.size()) {
-    std::string ERR = " number of specified min dimension values: " +
-                      std::to_string(minVal.size()) +
-                      " and number of max values: " +
-                      std::to_string(maxVal.size()) + " are not consistent\n";
+    std::string ERR =
+        " number of specified min dimension values: " +
+        std::to_string(minVal.size()) +
+        " and number of max values: " + std::to_string(maxVal.size()) +
+        " are not consistent\n";
     throw(std::invalid_argument(ERR));
   }
 

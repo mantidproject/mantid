@@ -294,10 +294,9 @@ template <>
 DLLExport Mantid::DataObjects::MaskWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
@@ -312,10 +311,9 @@ template <>
 DLLExport Mantid::DataObjects::MaskWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

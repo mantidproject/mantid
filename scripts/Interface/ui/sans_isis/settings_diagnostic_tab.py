@@ -12,13 +12,15 @@ and helps the developer to identify issues.
 """
 
 from __future__ import (absolute_import, division, print_function)
-
 from abc import ABCMeta, abstractmethod
 import os
 from qtpy import QtWidgets
 from six import with_metaclass, PY3
 
 from mantidqt.utils.qt import load_ui
+
+from mantid import UsageService
+from mantid.kernel import FeatureType
 from sans.gui_logic.gui_common import (GENERIC_SETTINGS, JSON_SUFFIX, load_file)
 
 if PY3:
@@ -62,11 +64,12 @@ class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
 
         # Excluded settings entries
         self.excluded = ["state_module", "state_name"]
-        self.class_type_id = "ClassTypeParameter"
 
         # Q Settings
         self.__generic_settings = GENERIC_SETTINGS
         self.__save_location_path_key = "save_state_location"
+
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Settings Diagnostics Tab"], False)
 
     def add_listener(self, listener):
         if not isinstance(listener, SettingsDiagnosticTab.SettingsDiagnosticTabListener):
@@ -145,17 +148,8 @@ class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
                 item.addChild(child)
         else:
             child = QtWidgets.QTreeWidgetItem()
-            value = self.clean_class_type(value)
             child.setText(1, unicode(value))
             item.addChild(child)
-
-    def clean_class_type(self, value):
-        if isinstance(value, str) and self.class_type_id in value:
-            # Only the last element is of interest
-            split_values = value.split("#")
-            return split_values[-1]
-        else:
-            return value
 
     def set_row(self, index):
         found_index = self.select_row_combo_box.findText(str(index))

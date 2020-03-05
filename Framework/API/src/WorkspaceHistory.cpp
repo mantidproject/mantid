@@ -16,6 +16,12 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/functional/hash.hpp>
+#if BOOST_VERSION == 106900
+#ifndef BOOST_PENDING_INTEGER_LOG2_HPP
+#define BOOST_PENDING_INTEGER_LOG2_HPP
+#include <boost/integer/integer_log2.hpp>
+#endif /* BOOST_PENDING_INTEGER_LOG2_HPP */
+#endif /* BOOST_VERSION */
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -23,8 +29,8 @@
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
-using Mantid::Kernel::EnvironmentHistory;
 using boost::algorithm::split;
+using Mantid::Kernel::EnvironmentHistory;
 
 namespace Mantid {
 namespace API {
@@ -400,7 +406,7 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
   // this doesn't abort if the version string doesn't contain a v
   numStart = numStart != 1 ? 1 : 0;
   temp = std::string(temp.begin() + numStart, temp.end());
-  const int version = boost::lexical_cast<int>(temp);
+  const auto version = boost::lexical_cast<int>(temp);
 
   // Get the execution date/time
   std::string date, time;
@@ -425,7 +431,7 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
 
   // Get the duration
   getWordsInString(info[EXEC_DUR], dummy, dummy, temp, dummy);
-  double dur = boost::lexical_cast<double>(temp);
+  auto dur = boost::lexical_cast<double>(temp);
   if (dur < -1.0) {
     g_log.warning() << "Error parsing duration in algorithm history entry."
                     << "\n";

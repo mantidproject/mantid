@@ -26,7 +26,7 @@ class ILLPowderD2BEfficiencyTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ['532008.nxs', '532009.nxs']
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
 
     def testAutoMasking(self):

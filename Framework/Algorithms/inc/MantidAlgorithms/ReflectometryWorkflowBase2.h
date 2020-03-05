@@ -29,8 +29,11 @@ protected:
   void initMonitorProperties();
   /// Initialize direct beam properties
   void initDirectBeamProperties();
+  /// Initialize background subtraction properties
+  void initBackgroundProperties();
   /// Initialize transmission properties
   void initTransmissionProperties();
+  void initTransmissionOutputProperties();
   /// Initialize properties for stitching transmission runs
   void initStitchProperties();
   /// Initialize corection algorithm properties
@@ -39,6 +42,8 @@ protected:
   void initMomentumTransferProperties();
   /// Initialize properties for diagnostics
   void initDebugProperties();
+  /// Validate background-type properties
+  std::map<std::string, std::string> validateBackgroundProperties() const;
   /// Validate reduction-type properties
   std::map<std::string, std::string> validateReductionProperties() const;
   /// Validate direct beam properties
@@ -58,7 +63,7 @@ protected:
   // Create a detector workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
   makeDetectorWS(Mantid::API::MatrixWorkspace_sptr inputWS,
-                 const bool convert = true);
+                 const bool convert = true, const bool sum = true);
   // Create a monitor workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
   makeMonitorWS(Mantid::API::MatrixWorkspace_sptr inputWS,
@@ -93,17 +98,12 @@ protected:
   std::string
   convertToSpectrumNumber(const std::string &workspaceIndex,
                           Mantid::API::MatrixWorkspace_const_sptr ws) const;
-
-  std::string convertProcessingInstructionsToWorkspaceIndices(
-      const std::string &instructions,
-      Mantid::API::MatrixWorkspace_const_sptr ws) const;
-
-  std::string convertToWorkspaceIndex(const std::string &spectrumNumber,
-                                      MatrixWorkspace_const_sptr ws) const;
-
   std::string convertProcessingInstructionsToSpectrumNumbers(
       const std::string &instructions,
       Mantid::API::MatrixWorkspace_const_sptr ws) const;
+
+  void setWorkspacePropertyFromChild(Algorithm_sptr alg,
+                                     std::string const &propertyName);
 };
 } // namespace Algorithms
 } // namespace Mantid

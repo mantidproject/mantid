@@ -894,7 +894,7 @@ std::vector<double> SANSPlotSpecial::Transform::functionConstants() {
     if (strcmp(item->metaObject()->className(), "QLineEdit") == 0) {
       item->setMaximumSize(25, 20);
       QString le = dynamic_cast<QLineEdit *>(item)->text();
-      result.push_back(le.toDouble());
+      result.emplace_back(le.toDouble());
     }
   }
 
@@ -902,7 +902,7 @@ std::vector<double> SANSPlotSpecial::Transform::functionConstants() {
     if (strcmp(item->metaObject()->className(), "QLineEdit") == 0) {
       item->setMaximumSize(25, 20);
       QString le = dynamic_cast<QLineEdit *>(item)->text();
-      result.push_back(le.toDouble());
+      result.emplace_back(le.toDouble());
     }
   }
   return result;

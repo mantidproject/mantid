@@ -23,9 +23,9 @@
 using Mantid::Geometry::IComponent;
 using Mantid::Geometry::IComponent_sptr;
 using Mantid::Geometry::Instrument_sptr;
+using Mantid::Geometry::Parameter_sptr;
 using Mantid::Geometry::ParameterMap;
 using Mantid::Geometry::ParameterMap_sptr;
-using Mantid::Geometry::Parameter_sptr;
 
 class ParameterMapTest : public CxxTest::TestSuite {
 public:

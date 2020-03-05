@@ -125,7 +125,7 @@ void Rebin2D::exec() {
   auto outputRB = boost::dynamic_pointer_cast<RebinnedOutput>(outputWS);
 
   // Progress reports & cancellation
-  const size_t nreports(static_cast<size_t>(numYBins));
+  const auto nreports(static_cast<size_t>(numYBins));
   m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, nreports);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
@@ -155,7 +155,8 @@ void Rebin2D::exec() {
   }
   PARALLEL_CHECK_INTERUPT_REGION
   if (useFractionalArea) {
-    outputRB->finalize(true, true);
+    FractionalRebinning::finalizeFractionalRebin(*outputRB);
+    outputRB->finalize(true);
   }
 
   FractionalRebinning::normaliseOutput(outputWS, inputWS, m_progress.get());

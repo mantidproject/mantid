@@ -7,6 +7,7 @@
 import unittest
 import numpy as np
 import numpy.testing as npt
+import testhelpers
 
 from mantid.geometry import UnitCell
 from mantid.simpleapi import CreatePeaksWorkspace, CreateSimulationWorkspace

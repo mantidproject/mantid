@@ -33,8 +33,8 @@
 
 using namespace Mantid;
 using namespace Geometry;
-using Mantid::Kernel::V3D;
 using detail::ShapeInfo;
+using Mantid::Kernel::V3D;
 
 class CSGObjectTest : public CxxTest::TestSuite {
 
@@ -335,9 +335,9 @@ public:
 
     // format = startPoint, endPoint, total distance so far
     // forward only intercepts means that start point should be track origin
-    expectedResults.push_back(Link(V3D(-1, 1.5, 1),
-                                   V3D(sqrt(16 - 0.25) + 1, 1.5, 1.0),
-                                   sqrt(15.75) + 2, *geom_obj));
+    expectedResults.emplace_back(Link(V3D(-1, 1.5, 1),
+                                      V3D(sqrt(16 - 0.25) + 1, 1.5, 1.0),
+                                      sqrt(15.75) + 2, *geom_obj));
 
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
@@ -348,7 +348,7 @@ public:
     Track track(V3D(0, -10, 0), V3D(0, 1, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(0, -4.1, 0), V3D(0, 4.1, 0), 14.1, *geom_obj));
 
     checkTrackIntercept(geom_obj, track, expectedResults);
@@ -360,7 +360,7 @@ public:
     Track track(V3D(-10, 0, 0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-4.1, 0, 0), V3D(4.1, 0, 0), 14.1, *geom_obj));
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
@@ -369,7 +369,8 @@ public:
     std::vector<Link> expectedResults;
     auto geom_obj = createCappedCylinder();
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(Link(V3D(0, -3, 0), V3D(0, 3, 0), 13, *geom_obj));
+    expectedResults.emplace_back(
+        Link(V3D(0, -3, 0), V3D(0, 3, 0), 13, *geom_obj));
 
     Track track(V3D(0, -10, 0), V3D(0, 1, 0));
     checkTrackIntercept(geom_obj, track, expectedResults);
@@ -381,7 +382,7 @@ public:
     Track track(V3D(-10, 0, 0), V3D(1, 0, 0));
 
     // format = startPoint, endPoint, total distance so far
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-3.2, 0, 0), V3D(1.2, 0, 0), 11.2, *geom_obj));
     checkTrackIntercept(geom_obj, track, expectedResults);
   }
@@ -423,6 +424,24 @@ public:
     checkTrackIntercept(track, expectedResults);
   }
 
+  void testDistanceWithIntersectionReturnsResult() {
+    auto geom_obj = createCappedCylinder();
+    V3D dir(0., 1., 0.);
+    dir.normalize();
+    Track track(V3D(0, 0, 0), dir);
+
+    TS_ASSERT_DELTA(3.0, geom_obj->distance(track), 1e-08)
+  }
+
+  void testDistanceWithoutIntersectionThrows() {
+    auto geom_obj = createCappedCylinder();
+    V3D dir(-1., 0., 0.);
+    dir.normalize();
+    Track track(V3D(-10, 0, 0), dir);
+
+    TS_ASSERT_THROWS(geom_obj->distance(track), const std::runtime_error &)
+  }
+
   void testTrackTwoIsolatedCubes()
   /**
   Test a track going through an object
@@ -448,8 +467,8 @@ public:
     TS_ASSERT(object2.interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, object1));
-    expectedResults.push_back(
+    expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, object1));
+    expectedResults.emplace_back(
         Link(V3D(4.5, 0, 0), V3D(6.5, 0, 0), 11.5, object2));
     checkTrackIntercept(TL, expectedResults);
   }
@@ -479,8 +498,8 @@ public:
     TS_ASSERT(object2.interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, object1));
-    expectedResults.push_back(
+    expectedResults.emplace_back(Link(V3D(-1, 0, 0), V3D(1, 0, 0), 6, object1));
+    expectedResults.emplace_back(
         Link(V3D(1, 0, 0), V3D(6.5, 0, 0), 11.5, object2));
 
     checkTrackIntercept(TL, expectedResults);
@@ -511,11 +530,12 @@ public:
     TS_ASSERT(object2.interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-1, 0, 0), V3D(-0.8, 0, 0), 4.2, object1));
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-0.8, 0, 0), V3D(0.8, 0, 0), 5.8, object1));
-    expectedResults.push_back(Link(V3D(0.8, 0, 0), V3D(1, 0, 0), 6, object2));
+    expectedResults.emplace_back(
+        Link(V3D(0.8, 0, 0), V3D(1, 0, 0), 6, object2));
     checkTrackIntercept(TL, expectedResults);
   }
 
@@ -544,11 +564,12 @@ public:
     TS_ASSERT(object2.interceptSurface(TL) != 0);
 
     std::vector<Link> expectedResults;
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-1, 0, 0), V3D(-0.4, 0, 0), 4.6, object1));
-    expectedResults.push_back(
+    expectedResults.emplace_back(
         Link(V3D(-0.4, 0, 0), V3D(0.2, 0, 0), 5.2, object1));
-    expectedResults.push_back(Link(V3D(0.2, 0, 0), V3D(1, 0, 0), 6, object2));
+    expectedResults.emplace_back(
+        Link(V3D(0.2, 0, 0), V3D(1, 0, 0), 6, object2));
     checkTrackIntercept(TL, expectedResults);
   }
 
@@ -709,14 +730,13 @@ public:
     // inside hole
     auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
     constexpr size_t maxAttempts{1};
-    V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = shell->generatePointInObject(rng, maxAttempts));
+    boost::optional<V3D> point = shell->generatePointInObject(rng, maxAttempts);
+    TS_ASSERT_EQUALS(!point, false);
 
     constexpr double tolerance{1e-10};
-    TS_ASSERT_DELTA(-1. + 2. * 0.55, point.X(), tolerance);
-    TS_ASSERT_DELTA(-1. + 2. * 0.65, point.Y(), tolerance);
-    TS_ASSERT_DELTA(-1. + 2. * 0.70, point.Z(), tolerance);
+    TS_ASSERT_DELTA(-1. + 2. * 0.55, point->X(), tolerance);
+    TS_ASSERT_DELTA(-1. + 2. * 0.65, point->Y(), tolerance);
+    TS_ASSERT_DELTA(-1. + 2. * 0.70, point->Z(), tolerance);
   }
 
   void testGeneratePointInsideCuboid() {
@@ -738,14 +758,14 @@ public:
     auto cuboid =
         ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
     constexpr size_t maxAttempts{0};
-    V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = cuboid->generatePointInObject(rng, maxAttempts));
+    boost::optional<V3D> point =
+        cuboid->generatePointInObject(rng, maxAttempts);
+    TS_ASSERT_EQUALS(!point, false);
 
     constexpr double tolerance{1e-10};
-    TS_ASSERT_DELTA(xLength - randX * 2. * xLength, point.X(), tolerance);
-    TS_ASSERT_DELTA(-yLength + randY * 2. * yLength, point.Y(), tolerance);
-    TS_ASSERT_DELTA(-zLength + randZ * 2. * zLength, point.Z(), tolerance);
+    TS_ASSERT_DELTA(xLength - randX * 2. * xLength, point->X(), tolerance);
+    TS_ASSERT_DELTA(-yLength + randY * 2. * yLength, point->Y(), tolerance);
+    TS_ASSERT_DELTA(-zLength + randZ * 2. * zLength, point->Z(), tolerance);
   }
 
   void testGeneratePointInsideCylinder() {
@@ -772,18 +792,18 @@ public:
     auto cylinder = ComponentCreationHelper::createCappedCylinder(
         radius, height, bottomCentre, axis, "cyl");
     constexpr size_t maxAttempts{0};
-    V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = cylinder->generatePointInObject(rng, maxAttempts));
+    boost::optional<V3D> point =
+        cylinder->generatePointInObject(rng, maxAttempts);
+    TS_ASSERT_EQUALS(!point, false);
     // Global->cylinder local coordinates
-    point -= bottomCentre;
+    *point -= bottomCentre;
     constexpr double tolerance{1e-10};
     const double polarAngle{2. * M_PI * randT};
     const double radialLength{radius * std::sqrt(randR)};
     const double axisLength{height * randZ};
-    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point.X(), tolerance);
-    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point.Y(), tolerance);
-    TS_ASSERT_DELTA(axisLength, point.Z(), tolerance);
+    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point->X(), tolerance);
+    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point->Y(), tolerance);
+    TS_ASSERT_DELTA(axisLength, point->Z(), tolerance);
   }
 
   void testGeneratePointInsideHollowCylinder() {
@@ -811,20 +831,20 @@ public:
     auto hollowCylinder = ComponentCreationHelper::createHollowCylinder(
         innerRadius, radius, height, bottomCentre, axis, "hol-cyl");
     constexpr size_t maxAttempts{0};
-    V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = hollowCylinder->generatePointInObject(rng, maxAttempts));
+    boost::optional<V3D> point;
+    point = hollowCylinder->generatePointInObject(rng, maxAttempts);
+    TS_ASSERT_EQUALS(!point, false);
     // Global->cylinder local coordinates
-    point -= bottomCentre;
+    *point -= bottomCentre;
     constexpr double tolerance{1e-10};
     const double polarAngle{2. * M_PI * randT};
     const double c1 = std::pow(innerRadius, 2);
     const double c2 = std::pow(radius, 2);
     const double radialLength{std::sqrt(c1 + (c2 - c1) * randR)};
     const double axisLength{height * randZ};
-    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point.X(), tolerance);
-    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point.Y(), tolerance);
-    TS_ASSERT_DELTA(axisLength, point.Z(), tolerance);
+    TS_ASSERT_DELTA(radialLength * std::cos(polarAngle), point->X(), tolerance);
+    TS_ASSERT_DELTA(radialLength * std::sin(polarAngle), point->Y(), tolerance);
+    TS_ASSERT_DELTA(axisLength, point->Z(), tolerance);
   }
 
   void testGeneratePointInsideSphere() {
@@ -843,19 +863,19 @@ public:
     constexpr double radius{0.23};
     auto sphere = ComponentCreationHelper::createSphere(radius);
     constexpr size_t maxAttempts{0};
-    V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = sphere->generatePointInObject(rng, maxAttempts));
+    boost::optional<V3D> point;
+    point = sphere->generatePointInObject(rng, maxAttempts);
+    TS_ASSERT_EQUALS(!point, false);
     // Global->cylinder local coordinates
     constexpr double tolerance{1e-10};
     const double azimuthalAngle{2. * M_PI * randT};
     const double polarAngle{std::acos(2. * randF - 1.)};
     const double r{radius * randR};
     TS_ASSERT_DELTA(r * std::cos(azimuthalAngle) * std::sin(polarAngle),
-                    point.X(), tolerance);
+                    point->X(), tolerance);
     TS_ASSERT_DELTA(r * std::sin(azimuthalAngle) * std::sin(polarAngle),
-                    point.Y(), tolerance);
-    TS_ASSERT_DELTA(r * std::cos(polarAngle), point.Z(), tolerance);
+                    point->Y(), tolerance);
+    TS_ASSERT_DELTA(r * std::cos(polarAngle), point->Z(), tolerance);
   }
 
   void testGeneratePointInsideRespectsMaxAttempts() {
@@ -872,8 +892,8 @@ public:
     // inside hole
     auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
     constexpr size_t maxAttempts{1};
-    TS_ASSERT_THROWS(shell->generatePointInObject(rng, maxAttempts),
-                     const std::runtime_error &);
+    boost::optional<V3D> point = shell->generatePointInObject(rng, maxAttempts);
+    TS_ASSERT_EQUALS(!point, true);
   }
 
   void testGeneratePointInsideRespectsActiveRegion() {
@@ -894,14 +914,14 @@ public:
     // Create a thin infinite rectangular region to restrict point generation
     BoundingBox activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
     constexpr size_t maxAttempts{1};
-    V3D point;
-    TS_ASSERT_THROWS_NOTHING(
-        point = ball->generatePointInObject(rng, activeRegion, maxAttempts));
+    boost::optional<V3D> point =
+        ball->generatePointInObject(rng, activeRegion, maxAttempts);
+    TS_ASSERT_EQUALS(!point, false);
     // We should get the point generated from the second 'random' triplet.
     constexpr double tolerance{1e-10};
-    TS_ASSERT_DELTA(-0.1 + randX * 0.2, point.X(), tolerance)
-    TS_ASSERT_DELTA(-0.1 + randY * 0.2, point.Y(), tolerance)
-    TS_ASSERT_DELTA(-0.1 + randZ * 0.2, point.Z(), tolerance)
+    TS_ASSERT_DELTA(-0.1 + randX * 0.2, point->X(), tolerance)
+    TS_ASSERT_DELTA(-0.1 + randY * 0.2, point->Y(), tolerance)
+    TS_ASSERT_DELTA(-0.1 + randZ * 0.2, point->Z(), tolerance)
   }
 
   void testSolidAngleSphere()
@@ -1386,29 +1406,29 @@ private:
     using SCompT = std::pair<int, std::string>;
     std::vector<SCompT> SurfLine;
     if (desired.find("60001") != std::string::npos)
-      SurfLine.push_back(SCompT(60001, "px -1"));
+      SurfLine.emplace_back(SCompT(60001, "px -1"));
     if (desired.find("60002") != std::string::npos)
-      SurfLine.push_back(SCompT(60002, "px 1"));
+      SurfLine.emplace_back(SCompT(60002, "px 1"));
     if (desired.find("60003") != std::string::npos)
-      SurfLine.push_back(SCompT(60003, "py -2"));
+      SurfLine.emplace_back(SCompT(60003, "py -2"));
     if (desired.find("60004") != std::string::npos)
-      SurfLine.push_back(SCompT(60004, "py 2"));
+      SurfLine.emplace_back(SCompT(60004, "py 2"));
     if (desired.find("60005") != std::string::npos)
-      SurfLine.push_back(SCompT(60005, "pz -3"));
+      SurfLine.emplace_back(SCompT(60005, "pz -3"));
     if (desired.find("60006") != std::string::npos)
-      SurfLine.push_back(SCompT(60006, "pz 3"));
+      SurfLine.emplace_back(SCompT(60006, "pz 3"));
 
     if (desired.find("80001") != std::string::npos)
-      SurfLine.push_back(SCompT(80001, "px 4.5"));
+      SurfLine.emplace_back(SCompT(80001, "px 4.5"));
     if (desired.find("80002") != std::string::npos)
-      SurfLine.push_back(SCompT(80002, "px 6.5"));
+      SurfLine.emplace_back(SCompT(80002, "px 6.5"));
 
     if (desired.find("71") != std::string::npos)
-      SurfLine.push_back(SCompT(71, "so 0.8"));
+      SurfLine.emplace_back(SCompT(71, "so 0.8"));
     if (desired.find("72") != std::string::npos)
-      SurfLine.push_back(SCompT(72, "s -0.7 0 0 0.3"));
+      SurfLine.emplace_back(SCompT(72, "s -0.7 0 0 0.3"));
     if (desired.find("73") != std::string::npos)
-      SurfLine.push_back(SCompT(73, "s 0.6 0 0 0.4"));
+      SurfLine.emplace_back(SCompT(73, "s 0.6 0 0 0.4"));
 
     // Note that the testObject now manages the "new Plane"
     for (const auto &vc : SurfLine) {

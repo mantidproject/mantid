@@ -52,7 +52,7 @@ void ChangePulsetime::exec() {
 
   // Either use the given list or use all spectra
   std::vector<int> workspaceIndices = getProperty("WorkspaceIndexList");
-  int64_t num_to_do = static_cast<int64_t>(workspaceIndices.size());
+  auto num_to_do = static_cast<int64_t>(workspaceIndices.size());
   bool doAll = false;
   if (workspaceIndices.empty()) {
     doAll = true;

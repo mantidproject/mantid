@@ -15,6 +15,7 @@
 #include "MantidQtWidgets/Common/FilePropertyWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/PropertyWidget.h"
 
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -566,6 +567,15 @@ QWidget *AlgorithmDialog::tie(QWidget *widget, const QString &property,
     setPreviousValue(widget, property);
   }
 
+  // If the widget is a line edit and has no value then set the placeholder text
+  // to the default value.
+  QLineEdit *textfield = qobject_cast<QLineEdit *>(widget);
+  if ((textfield)) {
+    if (prop) {
+      PropertyWidget::setFieldPlaceholderText(prop, textfield);
+    }
+  }
+
   return validlbl;
 }
 
@@ -723,6 +733,11 @@ void AlgorithmDialog::accept() {
         "One or more properties are invalid. The invalid properties are\n"
         "marked with a *, hold your mouse over the * for more information.");
   }
+}
+
+void AlgorithmDialog::reject() {
+  emit closeEventCalled();
+  QDialog::reject();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1059,7 +1074,7 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget,
  */
 void AlgorithmDialog::addAlgorithmObserver(
     Mantid::API::AlgorithmObserver *observer) {
-  m_observers.push_back(observer);
+  m_observers.emplace_back(observer);
   // turn off the keep open option - it would only confuse things if someone is
   // watching
   setShowKeepOpen(false);
@@ -1092,6 +1107,7 @@ void AlgorithmDialog::errorHandle(const IAlgorithm *alg,
  * Only allow close when close is enabled
  */
 void AlgorithmDialog::closeEvent(QCloseEvent *evt) {
+  emit closeEventCalled();
   if (m_exitButton) {
     if (m_exitButton->isEnabled()) {
       evt->accept();

@@ -134,7 +134,7 @@ LoadEventAndCompress::determineChunk(const std::string &filename) {
 MatrixWorkspace_sptr LoadEventAndCompress::loadChunk(const size_t rowIndex) {
   g_log.debug() << "loadChunk(" << rowIndex << ")\n";
 
-  double rowCount = static_cast<double>(m_chunkingTable->rowCount());
+  auto rowCount = static_cast<double>(m_chunkingTable->rowCount());
   double progStart = static_cast<double>(rowIndex) / rowCount;
   double progStop = static_cast<double>(rowIndex + 1) / rowCount;
 

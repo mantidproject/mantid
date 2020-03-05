@@ -361,7 +361,7 @@ bool SymmetryElementFactoryImpl::isSubscribed(
 void SymmetryElementFactoryImpl::subscribe(
     const AbstractSymmetryElementGenerator_sptr &generator,
     const std::string &generatorClassName) {
-  m_generators.push_back(generator);
+  m_generators.emplace_back(generator);
   m_generatorNames.insert(generatorClassName);
 }
 

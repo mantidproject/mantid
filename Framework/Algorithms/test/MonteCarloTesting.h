@@ -152,6 +152,24 @@ inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
   }
   return testSample;
 }
+
+inline boost::shared_ptr<Mantid::Geometry::SampleEnvironment> createTestKit() {
+  using namespace Mantid::Geometry;
+  using namespace Mantid::Kernel;
+
+  // at centre
+  ShapeFactory factory;
+  auto can = boost::make_shared<Container>(factory.createShape(
+      ComponentCreationHelper::sphereXML(0.01, V3D(0, 0, 0), "sp-1")));
+  can->setID("8mm");
+  auto kit = boost::make_shared<SampleEnvironment>("TestKit", can);
+  // before sample
+  kit->add(ComponentCreationHelper::createSphere(0.1, V3D(-0.25, 0.0, 0.0)));
+  // after sample
+  kit->add(ComponentCreationHelper::createSphere(0.1, V3D(0.25, 0.0, 0.0)));
+  return kit;
+}
+
 } // namespace MonteCarloTesting
 
 #endif // MANTID_ALGORITHMS_MONTECARLOTESTING_H

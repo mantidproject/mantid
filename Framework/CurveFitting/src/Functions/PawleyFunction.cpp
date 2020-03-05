@@ -459,8 +459,7 @@ void PawleyFunction::function(const FunctionDomain &domain,
                               FunctionValues &values) const {
   values.zeroCalculated();
   try {
-    const FunctionDomain1D &domain1D =
-        dynamic_cast<const FunctionDomain1D &>(domain);
+    const auto &domain1D = dynamic_cast<const FunctionDomain1D &>(domain);
 
     UnitCell cell = m_pawleyParameterFunction->getUnitCellFromParameters();
     double zeroShift = m_pawleyParameterFunction->getParameter("ZeroShift");
@@ -511,7 +510,7 @@ void PawleyFunction::setPeaks(const std::vector<Kernel::V3D> &hkls, double fwhm,
 /// Adds a peak with the supplied FWHM and height.
 void PawleyFunction::addPeak(const Kernel::V3D &hkl, double fwhm,
                              double height) {
-  m_hkls.push_back(hkl);
+  m_hkls.emplace_back(hkl);
 
   IPeakFunction_sptr peak = boost::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction(

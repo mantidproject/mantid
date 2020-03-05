@@ -105,15 +105,15 @@ private:
     t->addColumn("vector_int", "Detectors");
 
     std::vector<int> group1;
-    group1.push_back(1);
-    group1.push_back(2);
+    group1.emplace_back(1);
+    group1.emplace_back(2);
     TableRow row1 = t->appendRow();
     row1 << group1;
 
     std::vector<int> group2;
-    group2.push_back(3);
-    group2.push_back(4);
-    group2.push_back(5);
+    group2.emplace_back(3);
+    group2.emplace_back(4);
+    group2.emplace_back(5);
     TableRow row2 = t->appendRow();
     row2 << group2;
 

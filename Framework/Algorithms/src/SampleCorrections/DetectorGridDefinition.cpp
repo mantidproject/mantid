@@ -75,12 +75,12 @@ double DetectorGridDefinition::longitudeAt(const size_t column) const {
 std::array<size_t, 4>
 DetectorGridDefinition::nearestNeighbourIndices(const double latitude,
                                                 const double longitude) const {
-  size_t row = static_cast<size_t>((latitude - m_minLatitude) / m_latitudeStep);
+  auto row = static_cast<size_t>((latitude - m_minLatitude) / m_latitudeStep);
   // Check for points at the edges or outside the grid.
   if (row == m_latitudePoints - 1) {
     --row;
   }
-  size_t col =
+  auto col =
       static_cast<size_t>((longitude - m_minLongitude) / m_longitudeStep);
   if (col == m_longitudePoints - 1) {
     --col;

@@ -33,8 +33,8 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
 
 /* choose an instrument to test, we could test all instruments

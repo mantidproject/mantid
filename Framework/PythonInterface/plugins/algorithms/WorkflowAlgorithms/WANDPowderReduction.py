@@ -6,14 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, division, print_function
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory,
-                        MatrixWorkspaceProperty, PropertyMode)
+                        MatrixWorkspaceProperty, PropertyMode,
+                        IEventWorkspace)
 from mantid.dataobjects import MaskWorkspaceProperty
 from mantid.simpleapi import (ConvertSpectrumAxis, Transpose,
                               ResampleX, CopyInstrumentParameters,
                               Divide, DeleteWorkspace, Scale,
                               MaskAngle, ExtractMask, Minus,
                               ExtractUnmaskedSpectra, mtd,
-                              BinaryOperateMasks)
+                              BinaryOperateMasks, Integration)
 from mantid.kernel import StringListValidator, Direction, Property, FloatBoundedValidator
 
 
@@ -107,12 +108,16 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                                OperationType='OR', OutputWorkspace='__mask_tmp', EnableLogging=False)
 
         ExtractUnmaskedSpectra(InputWorkspace=data, MaskWorkspace='__mask_tmp', OutputWorkspace='__data_tmp', EnableLogging=False)
+        if isinstance(mtd['__data_tmp'], IEventWorkspace):
+            Integration(InputWorkspace='__data_tmp', OutputWorkspace='__data_tmp', EnableLogging=False)
         ConvertSpectrumAxis(InputWorkspace='__data_tmp', Target=target, EFixed=eFixed, OutputWorkspace=outWS, EnableLogging=False)
         Transpose(InputWorkspace=outWS, OutputWorkspace=outWS, EnableLogging=False)
         ResampleX(InputWorkspace=outWS, OutputWorkspace=outWS, XMin=xMin, XMax=xMax, NumberBins=numberBins, EnableLogging=False)
 
         if cal is not None:
             ExtractUnmaskedSpectra(InputWorkspace=cal, MaskWorkspace='__mask_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
+            if isinstance(mtd['__cal_tmp'], IEventWorkspace):
+                Integration(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
             CopyInstrumentParameters(data, '__cal_tmp', EnableLogging=False)
             ConvertSpectrumAxis(InputWorkspace='__cal_tmp', Target=target, EFixed=eFixed, OutputWorkspace='__cal_tmp', EnableLogging=False)
             Transpose(InputWorkspace='__cal_tmp', OutputWorkspace='__cal_tmp', EnableLogging=False)
@@ -128,6 +133,8 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
         if bkg is not None:
             ExtractUnmaskedSpectra(InputWorkspace=bkg, MaskWorkspace='__mask_tmp', OutputWorkspace='__bkg_tmp', EnableLogging=False)
+            if isinstance(mtd['__bkg_tmp'], IEventWorkspace):
+                Integration(InputWorkspace='__bkg_tmp', OutputWorkspace='__bkg_tmp', EnableLogging=False)
             CopyInstrumentParameters(data, '__bkg_tmp', EnableLogging=False)
             ConvertSpectrumAxis(InputWorkspace='__bkg_tmp', Target=target, EFixed=eFixed, OutputWorkspace='__bkg_tmp', EnableLogging=False)
             Transpose(InputWorkspace='__bkg_tmp', OutputWorkspace='__bkg_tmp', EnableLogging=False)

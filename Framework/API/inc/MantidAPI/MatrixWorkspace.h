@@ -99,7 +99,8 @@ public:
   virtual void updateSpectraUsing(const SpectrumDetectorMapping &map);
   /// Build the default spectra mapping, most likely wanted after an instrument
   /// update
-  void rebuildSpectraMapping(const bool includeMonitors = true);
+  void rebuildSpectraMapping(const bool includeMonitors = true,
+                             const specnum_t specNumOffset = 1);
 
   // More mapping
   spec2index_map getSpectrumToWorkspaceIndexMap() const;
@@ -444,6 +445,7 @@ public:
   void flagMasked(const size_t &index, const size_t &binIndex,
                   const double &weight = 1.0);
   bool hasMaskedBins(const size_t &workspaceIndex) const;
+  bool hasAnyMaskedBins() const;
   /// Masked bins for each spectrum are stored as a set of pairs containing <bin
   /// index, weight>
   using MaskList = std::map<size_t, double>;
@@ -456,7 +458,6 @@ public:
   setMonitorWorkspace(const boost::shared_ptr<MatrixWorkspace> &monitorWS);
   boost::shared_ptr<MatrixWorkspace> monitorWorkspace() const;
 
-  void saveInstrumentNexus(::NeXus::File *file) const;
   void loadInstrumentNexus(::NeXus::File *file);
 
   //=====================================================================================
@@ -546,8 +547,9 @@ public:
 
   void invalidateCachedSpectrumNumbers();
 
-  void cacheDetectorGroupings(const det2group_map &mapping) override;
-  size_t groupOfDetectorID(const detid_t detID) const override;
+  /// Invalidates the commons bins flag.  This is generally called when a method
+  /// could allow the X values to be changed.
+  void invalidateCommonBinsFlag() { m_isCommonBinsFlagValid.store(false); }
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -563,10 +565,6 @@ protected:
   virtual void init(const HistogramData::Histogram &histogram) = 0;
 
   virtual ISpectrum &getSpectrumWithoutInvalidation(const size_t index) = 0;
-
-  /// Invalidates the commons bins flag.  This is generally called when a method
-  /// could allow the X values to be changed.
-  void invalidateCommonBinsFlag() { m_isCommonBinsFlagValid.store(false); }
 
   void updateCachedDetectorGrouping(const size_t index) const override;
 

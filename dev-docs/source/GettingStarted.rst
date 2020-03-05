@@ -18,12 +18,12 @@ Windows
 
 Install the following:
 
-* `Visual Studio 2017 Community Edition <https://visualstudio.microsoft.com/downloads/>`_.
+* `Visual Studio 2019 Community Edition <https://visualstudio.microsoft.com/downloads/>`_.
 
   * When asked about installation workloads choose ``Desktop development with C++``
   * Under the "Installation details" section verify that the following are checked:
 
-    * ``Windows 8.1 SDK and UCRT SDK``
+    * ``Windows Universal CRT SDK``
     * The latest Windows 10 SDK
 
 
@@ -34,7 +34,7 @@ Install the following:
   * open up Git Bash and run ``git config --global lfs.storage C:/GitLFSStorage``
   * run ``git lfs install`` to initialize Git LFS. (Note that if you miss this step you may get errors due to the third party libraries not checking out properly. This can be fixed later by running ``git lfs fetch`` and ``git lfs checkout`` in the ``external\src\ThirdParty`` directory.)
 
-* `CMake <https://cmake.org/download/>`_ >= 3.14
+* `CMake <https://cmake.org/download/>`_ >= 3.15
 * `MiKTeX <https://miktex.org/download>`_. Installation instructions are  `available here <https://miktex.org/howto/install-miktex>`_. Once installed:
 
   * open the MikTeX console from the start menu
@@ -73,15 +73,18 @@ Red Hat/Cent OS/Fedora
 
 Ubuntu
 ~~~~~~
-Follow the `Ubuntu instructions <http://download.mantidproject.org/ubuntu.html>`_ to add the
-stable release repository and mantid ppa. Download the latest
-`mantid-developer <https://sourceforge.net/projects/mantid/files/developer>`_
-package and install it:
+- Setup the Kitware APT repository to get a recent version of CMake by
+  following `these instructions <https://apt.kitware.com/>`_
+- Follow the `Ubuntu instructions <http://download.mantidproject.org/ubuntu.html>`_
+  to add the stable release repository and mantid ppa.
+- Download the latest
+  `mantid-developer <https://sourceforge.net/projects/mantid/files/developer>`_
+  package and install it:
 
 .. code-block:: sh
 
    apt install gdebi-core
-   apt install ~/Downloads/mantid-developer.X.Y.Z.deb
+   gdebi ~/Downloads/mantid-developer.X.Y.Z.deb
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
 
@@ -95,7 +98,7 @@ Docker
 ------
 
 On Docker supported systems you may use the `mantid-development
-<https://github.com/mantidproject/dockerfiles/tree/master/mantid-development>`_
+<https://github.com/mantidproject/dockerfiles/tree/master/development>`_
 images to develop Mantid without having to configure your system as a suitable
 build environment. This will give you an out of the box working build
 environment, including ParaView/VATES, Python 3 (where available) and ccache.
@@ -115,6 +118,10 @@ There are a number of URLs via which the code can be checked out using various p
     git clone git@github.com:mantidproject/mantid.git
 
 
+Setting up GitHub
+#################
+Please install the ZenHub Browser extension from this `page <https://www.zenhub.com/extension>`_. 
+
 Building Mantid
 ###############
 See :ref:`BuildingWithCMake` for information about building Mantid.
@@ -127,8 +134,8 @@ Archive access
 ##############
 
 It is very convenient to be able to access the data archive directly.
-At ISIS, this is automatically done on the Windows machines, however OSX
-requires some extra setup.
+At ISIS, this is automatically done on the Windows machines, however OSX and Linux
+require some extra setup.
 
 OSX
 ---
@@ -140,3 +147,47 @@ OSX
 * It can be found at `/Volumes/inst$`
 
 **NB** the address in step 2 sometimes changes - if it does not work, replace `80` with `55` or `3`.
+
+Linux
+------
+1. Install packages:
+
+``sudo apt-get install -y autofs cifs-utils keyutils``
+
+2. Create an ``/archive.creds`` file in the root directory containing this, filling in the relevant details:
+
+This should only be done if full disk encryption is enabled or if the ``archive.creds`` file is stored in a secure (encrypted) location; to ensure passwords are kept safe.
+
+.. code-block:: text
+
+   username=FEDERAL_ID_HERE
+   password=FED_PASSWD_HERE
+   domain=CLRC
+
+3. Edit ``/etc/auto.master`` and add the line:
+
+.. code-block:: text
+
+   /archive      /etc/auto.archive
+
+4. Create ``/etc/auto.archive`` and add the single line:
+
+.. code-block:: text
+
+   *     -fstype=cifs,ro,credentials=/archive.creds,file_mode=0444,dir_mode=0555,vers=3.0,noserverino,nounix    ://isis.cclrc.ac.uk/inst\$/&
+
+5. Enter the following commands:
+
+.. code-block:: bash
+
+   sudo chmod 400 /archive.creds
+   sudo mkdir /archive
+   service autofs restart
+
+Done. You can now access directories in the archive. Test it by doing:
+
+.. code-block:: bash
+
+   ls /archive/ndxalf
+
+If it's working the command should return ``ls: cannot access '/archive/ndxalf/DfsrPrivate': Permission denied``

@@ -20,7 +20,7 @@ DECLARE_ALGORITHM(FakeISISHistoDAE)
 namespace {
 
 // Time we'll wait on a receive call (in seconds)
-const long RECV_TIMEOUT = 30;
+const long RECV_TIMEOUT = 60;
 
 typedef enum {
   ISISDSUnknown = 0,
@@ -276,7 +276,7 @@ public:
       } else {
         std::string command(comm.command);
         if (command == "GETDAT") {
-          int *spec_nos = reinterpret_cast<int *>(buffer);
+          auto *spec_nos = reinterpret_cast<int *>(buffer);
           int spec = spec_nos[0];
           int nos = spec_nos[1];
           sendData(spec, nos);

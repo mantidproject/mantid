@@ -194,9 +194,9 @@ private:
   /// Personal wrapper for sqrt to allow msvs to compile
   static double dblSqrt(double in);
 
-  // C++ interface to the NXS file
+  // Handle to the NeXus file
   // clang-format off
-  boost::scoped_ptr< ::NeXus::File> m_cppFile;
+  boost::scoped_ptr< ::NeXus::File> m_nexusFile;
   // clang-format on
 
   bool findSpectraDetRangeInFile(NeXus::NXEntry &entry,

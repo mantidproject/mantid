@@ -11,6 +11,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,7 +20,7 @@ namespace Algorithms {
 @author Anders Markvardsen, ISIS, RAL
 @date 1/12/2011
 */
-class DLLExport CalMuonDeadTime : public API::Algorithm {
+class MANTID_MUON_DLL CalMuonDeadTime : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalMuonDeadTime"; }

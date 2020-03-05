@@ -9,7 +9,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidKernel/System.h"
+#include "MantidLiveData/DllConfig.h"
 #include "MantidLiveData/LiveDataAlgorithm.h"
 
 namespace Mantid {
@@ -20,7 +20,7 @@ namespace LiveData {
 
   @date 2012-02-16
 */
-class DLLExport LoadLiveData : public LiveDataAlgorithm {
+class MANTID_LIVEDATA_DLL LoadLiveData : public LiveDataAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

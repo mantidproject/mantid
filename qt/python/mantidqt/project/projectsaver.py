@@ -8,13 +8,13 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from json import dump
 import os
+from json import dump
 
-from mantid.api import AnalysisDataService as ADS
-from mantidqt.project.workspacesaver import WorkspaceSaver
-from mantidqt.project.plotssaver import PlotsSaver
 from mantid import logger
+from mantid.api import AnalysisDataService as ADS
+from mantidqt.project.plotssaver import PlotsSaver
+from mantidqt.project.workspacesaver import WorkspaceSaver
 
 
 class ProjectSaver(object):
@@ -74,9 +74,9 @@ class ProjectSaver(object):
     def _return_interfaces_dicts(directory, interfaces_to_save):
         interfaces = []
         for interface, encoder in interfaces_to_save:
-            # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes
             try:
-                tag = encoder.tags[0]
+                # Add to the dictionary encoded data with the key as the first tag in the list on the encoder attributes
+                tag = encoder.tags()[0]
                 encoded_dict = encoder.encode(interface, directory)
                 encoded_dict["tag"] = tag
                 interfaces.append(encoded_dict)
@@ -85,7 +85,6 @@ class ProjectSaver(object):
                 if isinstance(e, KeyboardInterrupt):
                     raise
                 logger.warning("Project Saver: An interface could not be saver error: " + str(e))
-
         return interfaces
 
 
@@ -111,8 +110,11 @@ class ProjectWriter(object):
         try:
             with open(self.file_name, "w+") as f:
                 dump(obj=to_save_dict, fp=f)
-        except Exception as e:
+        except KeyboardInterrupt:
             # Catch any exception and log it
-            if isinstance(e, KeyboardInterrupt):
-                raise
-            logger.warning("JSON project file unable to be opened/written to")
+            raise
+        except (IOError, OSError, WindowsError) as e:
+            logger.warning("JSON project file unable to be opened/written to.")
+            logger.debug("Full error: {}".format(e))
+        except Exception as e:
+            logger.warning("Unknown error occurred. Full detail: {}".format(e))

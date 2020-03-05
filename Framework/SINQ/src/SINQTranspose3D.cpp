@@ -58,7 +58,6 @@ void SINQTranspose3D::exec() {
 }
 
 void SINQTranspose3D::doYXZ(IMDHistoWorkspace_sptr inWS) {
-  double *inVal, *inErr, *outVal, *outErr;
   size_t idxIn, idxOut;
 
   boost::shared_ptr<const IMDDimension> x, y, z;
@@ -67,16 +66,16 @@ void SINQTranspose3D::doYXZ(IMDHistoWorkspace_sptr inWS) {
   z = inWS->getZDimension();
 
   std::vector<IMDDimension_sptr> dimensions;
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(y));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(x));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(z));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(y));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(x));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(z));
 
   auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
 
-  inVal = inWS->getSignalArray();
-  inErr = inWS->getErrorSquaredArray();
-  outVal = outWS->getSignalArray();
-  outErr = outWS->getErrorSquaredArray();
+  const auto inVal = inWS->getSignalArray();
+  const auto inErr = inWS->getErrorSquaredArray();
+  auto outVal = outWS->mutableSignalArray();
+  auto outErr = outWS->mutableErrorSquaredArray();
   for (unsigned int xx = 0; xx < x->getNBins(); xx++) {
     for (unsigned int yy = 0; yy < y->getNBins(); yy++) {
       for (unsigned int zz = 0; zz < z->getNBins(); zz++) {
@@ -94,7 +93,6 @@ void SINQTranspose3D::doYXZ(IMDHistoWorkspace_sptr inWS) {
 }
 
 void SINQTranspose3D::doXZY(IMDHistoWorkspace_sptr inWS) {
-  double *inVal, *inErr, *outVal, *outErr;
   size_t idxIn, idxOut;
   unsigned int xdim, ydim, zdim;
 
@@ -104,16 +102,16 @@ void SINQTranspose3D::doXZY(IMDHistoWorkspace_sptr inWS) {
   z = inWS->getZDimension();
 
   std::vector<IMDDimension_sptr> dimensions;
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(x));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(z));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(y));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(x));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(z));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(y));
 
   auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
 
-  inVal = inWS->getSignalArray();
-  inErr = inWS->getErrorSquaredArray();
-  outVal = outWS->getSignalArray();
-  outErr = outWS->getErrorSquaredArray();
+  const auto inVal = inWS->getSignalArray();
+  const auto inErr = inWS->getErrorSquaredArray();
+  auto outVal = outWS->mutableSignalArray();
+  auto outErr = outWS->mutableErrorSquaredArray();
   xdim = static_cast<unsigned int>(x->getNBins());
   ydim = static_cast<unsigned int>(y->getNBins());
   zdim = static_cast<unsigned int>(z->getNBins());
@@ -133,7 +131,6 @@ void SINQTranspose3D::doXZY(IMDHistoWorkspace_sptr inWS) {
   setProperty("OutputWorkspace", outWS);
 }
 void SINQTranspose3D::doTRICS(IMDHistoWorkspace_sptr inWS) {
-  double *inVal, *inErr, *outVal, *outErr;
   size_t idxIn, idxOut;
   unsigned int xdim, ydim, zdim;
 
@@ -143,17 +140,17 @@ void SINQTranspose3D::doTRICS(IMDHistoWorkspace_sptr inWS) {
   z = inWS->getZDimension();
 
   std::vector<IMDDimension_sptr> dimensions;
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(x));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(z));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(y));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(x));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(z));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(y));
 
   auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
 
-  inVal = inWS->getSignalArray();
-  inErr = inWS->getErrorSquaredArray();
-  outVal = outWS->getSignalArray();
-  outErr = outWS->getErrorSquaredArray();
+  const auto inVal = inWS->getSignalArray();
+  const auto inErr = inWS->getErrorSquaredArray();
+  auto outVal = outWS->mutableSignalArray();
+  auto outErr = outWS->mutableErrorSquaredArray();
   xdim = static_cast<unsigned int>(x->getNBins());
   ydim = static_cast<unsigned int>(y->getNBins());
   zdim = static_cast<unsigned int>(z->getNBins());
@@ -173,7 +170,7 @@ void SINQTranspose3D::doTRICS(IMDHistoWorkspace_sptr inWS) {
   setProperty("OutputWorkspace", outWS);
 }
 void SINQTranspose3D::doAMOR(IMDHistoWorkspace_sptr inWS) {
-  double val, *inVal;
+  double val;
   unsigned int xdim, ydim, zdim, idx;
 
   boost::shared_ptr<const IMDDimension> x, y, z;
@@ -182,9 +179,9 @@ void SINQTranspose3D::doAMOR(IMDHistoWorkspace_sptr inWS) {
   z = inWS->getZDimension();
 
   std::vector<IMDDimension_sptr> dimensions;
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(y));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(x));
-  dimensions.push_back(boost::const_pointer_cast<IMDDimension>(z));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(y));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(x));
+  dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(z));
 
   auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
@@ -192,7 +189,7 @@ void SINQTranspose3D::doAMOR(IMDHistoWorkspace_sptr inWS) {
   xdim = static_cast<unsigned int>(x->getNBins());
   ydim = static_cast<unsigned int>(y->getNBins());
   zdim = static_cast<unsigned int>(z->getNBins());
-  inVal = inWS->getSignalArray();
+  const auto inVal = inWS->getSignalArray();
   for (unsigned int xx = 0; xx < xdim; xx++) {
     for (unsigned int yy = 0; yy < ydim; yy++) {
       for (unsigned zz = 0; zz < zdim; zz++) {

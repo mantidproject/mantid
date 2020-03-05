@@ -45,9 +45,13 @@ public:
   void setRange(const double start, const double end) override;
   /// Generate the next random number in the sequence within the given range
   /// default range
-  inline double nextValue() override { return nextValue(m_start, m_end); }
+  inline double nextValue() override {
+    return uniformRealDistribution(m_engine);
+  }
   /// Generate the next random number in the sequence within the given range.
-  double nextValue(double start, double end) override;
+  inline double nextValue(double start, double end) override {
+    return std::uniform_real_distribution<double>(start, end)(m_engine);
+  }
   /// Return the next integer in the sequence within the given range
   int nextInt(int start, int end) override;
   /// Resets the generator
@@ -65,6 +69,8 @@ public:
 private:
   /// The engine
   std::mt19937 m_engine;
+  /// Uniform Real distribution
+  std::uniform_real_distribution<double> uniformRealDistribution;
   /// Minimum in range
   double m_start;
   /// Maximum in range

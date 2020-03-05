@@ -34,8 +34,8 @@ SaveAscii::SaveAscii() : m_separatorIndex() {}
 /// Initialisation method.
 void SaveAscii::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
+                                                           Direction::Input),
       "The name of the workspace containing the data you want to save to a "
       "Ascii file.");
   const std::vector<std::string> asciiExts{".dat", ".txt", ".csv"};
@@ -69,7 +69,7 @@ void SaveAscii::init() {
     std::string option = spacer[0];
     m_separatorIndex.insert(
         std::pair<std::string, std::string>(option, spacer[1]));
-    sepOptions.push_back(option);
+    sepOptions.emplace_back(option);
   }
 
   declareProperty("Separator", "CSV",
@@ -99,8 +99,8 @@ void SaveAscii::init() {
 void SaveAscii::exec() {
   // Get the workspace
   MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
-  int nSpectra = static_cast<int>(ws->getNumberHistograms());
-  int nBins = static_cast<int>(ws->blocksize());
+  auto nSpectra = static_cast<int>(ws->getNumberHistograms());
+  auto nBins = static_cast<int>(ws->blocksize());
 
   // Get the properties
   std::vector<int> spec_list = getProperty("SpectrumList");

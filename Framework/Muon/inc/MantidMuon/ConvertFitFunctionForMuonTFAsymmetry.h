@@ -12,6 +12,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 namespace Muon {
@@ -33,7 +34,8 @@ normalization constants
 @author Anthony Lim
 @date 22/05/2018
 */
-class DLLExport ConvertFitFunctionForMuonTFAsymmetry : public API::Algorithm {
+class MANTID_MUON_DLL ConvertFitFunctionForMuonTFAsymmetry
+    : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {

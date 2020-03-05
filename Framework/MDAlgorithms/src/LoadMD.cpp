@@ -334,11 +334,12 @@ void LoadMD::loadHisto() {
   if (m_saveMDVersion == 2)
     m_file->openGroup("data", "NXdata");
   // Load each data slab
-  this->loadSlab("signal", ws->getSignalArray(), ws, ::NeXus::FLOAT64);
-  this->loadSlab("errors_squared", ws->getErrorSquaredArray(), ws,
+  this->loadSlab("signal", ws->mutableSignalArray(), ws, ::NeXus::FLOAT64);
+  this->loadSlab("errors_squared", ws->mutableErrorSquaredArray(), ws,
                  ::NeXus::FLOAT64);
-  this->loadSlab("num_events", ws->getNumEventsArray(), ws, ::NeXus::FLOAT64);
-  this->loadSlab("mask", ws->getMaskArray(), ws, ::NeXus::INT8);
+  this->loadSlab("num_events", ws->mutableNumEventsArray(), ws,
+                 ::NeXus::FLOAT64);
+  this->loadSlab("mask", ws->mutableMaskArray(), ws, ::NeXus::INT8);
 
   m_file->close();
 
@@ -386,7 +387,7 @@ void LoadMD::loadDimensions() {
     std::string dimXML;
     m_file->getAttr(mess.str(), dimXML);
     // Use the dimension factory to read the XML
-    m_dims.push_back(createDimension(dimXML));
+    m_dims.emplace_back(createDimension(dimXML));
   }
   // Since this is an old algorithm we will
   // have to provide an MDFrame correction
@@ -430,7 +431,7 @@ void LoadMD::loadDimensions2() {
             MDFrameArgument(frame, units));
     m_file->getData(axis);
     m_file->closeData();
-    m_dims.push_back(boost::make_shared<MDHistoDimension>(
+    m_dims.emplace_back(boost::make_shared<MDHistoDimension>(
         long_name, splitAxes[d - 1], *mdFrame,
         static_cast<coord_t>(axis.front()), static_cast<coord_t>(axis.back()),
         axis.size() - 1));
@@ -536,7 +537,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // ------------------------------
   prog->report("Reading box structure from HDD.");
   MDBoxFlatTree FlatBoxTree;
-  int nDims = static_cast<int>(nd); // should be safe
+  auto nDims = static_cast<int>(nd); // should be safe
   FlatBoxTree.loadBoxStructure(m_filename, nDims, MDE::getTypeName());
 
   BoxController_sptr bc = ws->getBoxController();
@@ -593,7 +594,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
     for (size_t i = 0; i < numBoxes; i++) {
       prog->report();
-      MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxTree[i]);
+      auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxTree[i]);
       if (!box)
         continue;
 

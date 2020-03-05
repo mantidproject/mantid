@@ -194,8 +194,10 @@ public:
     MockBackgroundStrategy mockStrategy;
     EXPECT_CALL(mockStrategy, configureIterator(_)).Times(1);
     /*
-     * We use the is background strategy to set up three disconected blocks for us.
-     * */ EXPECT_CALL(mockStrategy, isBackground(_))
+     * We use the is background strategy to set up three disconected blocks for
+     * us.
+     * */
+    EXPECT_CALL(mockStrategy, isBackground(_))
         .WillOnce(Return(false))
         .WillOnce(Return(true)) // is background
         .WillOnce(Return(false))
@@ -255,8 +257,10 @@ public:
     EXPECT_CALL(mockStrategy, configureIterator(_)).Times(1);
 
     /*
-     * We treat alternate cells as background, which actually should result in a single object. Think of a chequered flag.
-     * */ EXPECT_CALL(mockStrategy, isBackground(_))
+     * We treat alternate cells as background, which actually should result in a
+     * single object. Think of a chequered flag.
+     * */
+    EXPECT_CALL(mockStrategy, isBackground(_))
         .WillOnce(Return(true))
         .WillOnce(Return(false))
         .WillOnce(Return(true))
@@ -300,8 +304,10 @@ public:
     EXPECT_CALL(mockStrategy, configureIterator(_)).Times(1);
 
     /*
-     * We treat alternate cells as background, which actually should result in a single object. Think of a chequered flag.
-     * */ EXPECT_CALL(mockStrategy, isBackground(_))
+     * We treat alternate cells as background, which actually should result in a
+     * single object. Think of a chequered flag.
+     * */
+    EXPECT_CALL(mockStrategy, isBackground(_))
         .WillOnce(Return(true))
         .WillOnce(Return(false))
         .WillOnce(Return(true))

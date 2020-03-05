@@ -12,6 +12,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidMuon/DllConfig.h"
+
 namespace Mantid {
 namespace Algorithms {
 /**Algorithm for calculating Muon decay envelope.
@@ -19,7 +21,7 @@ namespace Algorithms {
 @author Raquel Alvarez, ISIS, RAL
 @date 5/12/2014
 */
-class DLLExport RRFMuon : public API::Algorithm {
+class MANTID_MUON_DLL RRFMuon : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RRFMuon"; }

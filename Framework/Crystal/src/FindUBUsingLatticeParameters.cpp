@@ -78,14 +78,14 @@ void FindUBUsingLatticeParameters::exec() {
   if (!ws)
     throw std::runtime_error("Could not read the peaks workspace");
 
-  std::vector<Peak> &peaks = ws->getPeaks();
-  size_t n_peaks = ws->getNumberPeaks();
+  const std::vector<Peak> &peaks = ws->getPeaks();
+  const int n_peaks = ws->getNumberPeaks();
 
   std::vector<V3D> q_vectors;
   q_vectors.reserve(n_peaks);
 
-  for (size_t i = 0; i < n_peaks; i++)
-    q_vectors.push_back(peaks[i].getQSampleFrame());
+  for (int i = 0; i < n_peaks; i++)
+    q_vectors.emplace_back(peaks[i].getQSampleFrame());
 
   Matrix<double> UB(3, 3, false);
   OrientedLattice lattice(a, b, c, alpha, beta, gamma);
@@ -104,11 +104,11 @@ void FindUBUsingLatticeParameters::exec() {
   } else // tell user how many would be indexed
   {      // and save the UB in the sample
     char logInfo[200];
-    int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
+    const int num_indexed =
+        IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
     sprintf(logInfo,
-            std::string(
-                "New UB will index %1d Peaks out of %1d with tolerance %5.3f")
-                .c_str(),
+            "New UB will index %1d Peaks out of %1d with tolerance "
+            "%5.3f",
             num_indexed, n_peaks, tolerance);
     g_log.notice(std::string(logInfo));
 
@@ -122,13 +122,13 @@ void FindUBUsingLatticeParameters::exec() {
     g_log.notice() << lattice << "\n";
 
     sprintf(logInfo,
-            std::string("Lattice Parameters (Refined - Input): %11.6f "
-                        "%11.6f %11.6f %11.6f %11.6f %11.6f")
-                .c_str(),
+            "Lattice Parameters (Refined - Input): %11.6f "
+            "%11.6f %11.6f %11.6f %11.6f %11.6f",
             calc_a - a, calc_b - b, calc_c - c, calc_alpha - alpha,
             calc_beta - beta, calc_gamma - gamma);
     g_log.notice(std::string(logInfo));
-    ws->mutableSample().setOrientedLattice(&lattice);
+    ws->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(lattice));
   }
 }
 

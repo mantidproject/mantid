@@ -14,6 +14,8 @@ set(TEST_PY_FILES
     DirectILLReductionTest.py
     DirectILLSelfShieldingTest.py
     EnergyWindowScanTest.py
+    FitGaussianPeaksTest.py
+    FindPeakAutomaticTest.py
     FlatPlatePaalmanPingsCorrectionTest.py
     IndirectAnnulusAbsorptionTest.py
     IndirectAnnulusAbsorption2Test.py
@@ -30,6 +32,7 @@ set(TEST_PY_FILES
     IndirectResolutionTest.py
     IndirectSampleChangerTest.py
     IndirectTransmissionMonitorTest.py
+    IndirectTwoPeakFitTest.py
     IqtFitMultipleTest.py
     IqtFitSequentialTest.py
     ISISIndirectDiffractionReductionTest.py
@@ -42,6 +45,8 @@ set(TEST_PY_FILES
     OSIRISDiffractionReductionTest.py
     PowderILLDetectorScanTest.py
     PowderILLParameterScanTest.py
+    ReflectometryILLAutoProcessTest.py
+    ReflectometryILL_commonTest.py
     ReflectometryILLConvertToQTest.py
     ReflectometryILLPolarizationCorTest.py
     ReflectometryILLPreprocessTest.py

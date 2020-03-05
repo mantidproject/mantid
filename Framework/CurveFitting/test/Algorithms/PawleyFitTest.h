@@ -232,7 +232,7 @@ private:
          << ",Sigma=" << fwhmAbs / (2.0 * sqrt(2.0 * M_LN2))
          << ",Height=" << row.String(3);
 
-      functionStrings.push_back(fn.str());
+      functionStrings.emplace_back(fn.str());
     }
 
     return boost::join(functionStrings, ";");

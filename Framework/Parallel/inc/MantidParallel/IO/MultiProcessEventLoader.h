@@ -312,7 +312,6 @@ void MultiProcessEventLoader::GroupLoader<
       finished = 1; // prevent the infinite loop;
       shmemLoaderException = std::current_exception();
     }
-
   });
 
   std::exception_ptr sorterException;

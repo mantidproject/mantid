@@ -15,11 +15,12 @@ namespace IDA {
 
 JumpFitDataPresenter::JumpFitDataPresenter(
     JumpFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType,
-    QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter)
+    QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter,
+    IFQFitObserver *fQTemplateBrowser)
     : IndirectFitDataPresenter(model, view,
                                std::make_unique<JumpFitDataTablePresenter>(
                                    model, view->getDataTable())),
-      m_activeParameterType("Width"), m_dataIndex(0),
+      m_activeParameterType("Width"), m_dataIndex(TableDatasetIndex{0}),
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),
       m_jumpModel(model) {
@@ -32,15 +33,9 @@ JumpFitDataPresenter::JumpFitDataPresenter(
           SLOT(updateActiveDataIndex()));
 
   connect(cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(setParameterLabel(const QString &)));
-  connect(cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(updateAvailableParameters(QString const &)));
-  connect(cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
-          SIGNAL(dataChanged()));
+          SLOT(handleParameterTypeChanged(const QString &)));
   connect(cbParameter, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(setSingleModelSpectrum(int)));
-  connect(cbParameter, SIGNAL(currentIndexChanged(int)), this,
-          SIGNAL(dataChanged()));
+          SLOT(handleSpectrumSelectionChanged(int)));
 
   connect(view, SIGNAL(sampleLoaded(const QString &)), this,
           SLOT(updateAvailableParameterTypes()));
@@ -52,6 +47,8 @@ JumpFitDataPresenter::JumpFitDataPresenter(
           SIGNAL(updateAvailableFitTypes()));
 
   updateParameterSelectionEnabled();
+  m_notifier = Notifier<IFQFitObserver>();
+  m_notifier.subscribe(fQTemplateBrowser);
 }
 
 void JumpFitDataPresenter::hideParameterComboBoxes() {
@@ -82,9 +79,9 @@ void JumpFitDataPresenter::updateAvailableParameters() {
 
 void JumpFitDataPresenter::updateAvailableParameters(const QString &type) {
   if (type == "Width")
-    setAvailableParameters(m_jumpModel->getWidths(0));
+    setAvailableParameters(m_jumpModel->getWidths(TableDatasetIndex{0}));
   else if (type == "EISF")
-    setAvailableParameters(m_jumpModel->getEISF(0));
+    setAvailableParameters(m_jumpModel->getEISF(TableDatasetIndex{0}));
   else
     setAvailableParameters({});
 
@@ -100,7 +97,7 @@ void JumpFitDataPresenter::updateAvailableParameterTypes() {
 }
 
 void JumpFitDataPresenter::updateParameterSelectionEnabled() {
-  const auto enabled = m_jumpModel->numberOfWorkspaces() > 0;
+  const auto enabled = m_jumpModel->numberOfWorkspaces() > TableDatasetIndex{0};
   m_cbParameter->setEnabled(enabled);
   m_cbParameterType->setEnabled(enabled);
   m_lbParameter->setEnabled(enabled);
@@ -116,6 +113,17 @@ void JumpFitDataPresenter::setAvailableParameters(
 
 void JumpFitDataPresenter::setParameterLabel(const QString &parameter) {
   m_lbParameter->setText(parameter + ":");
+}
+
+void JumpFitDataPresenter::handleParameterTypeChanged(
+    const QString &parameter) {
+  m_lbParameter->setText(parameter + ":");
+  updateAvailableParameters(parameter);
+  auto dataType =
+      parameter == QString("Width") ? DataType::WIDTH : DataType::EISF;
+  m_notifier.notify(
+      [&dataType](IFQFitObserver &obs) { obs.updateDataType(dataType); });
+  emit dataChanged();
 }
 
 void JumpFitDataPresenter::setDialogParameterNames(
@@ -152,7 +160,7 @@ void JumpFitDataPresenter::updateParameterTypes(
 }
 
 std::vector<std::string>
-JumpFitDataPresenter::getParameterTypes(std::size_t dataIndex) const {
+JumpFitDataPresenter::getParameterTypes(TableDatasetIndex dataIndex) const {
   std::vector<std::string> types;
   if (!m_jumpModel->zeroWidths(dataIndex))
     types.emplace_back("Width");
@@ -179,9 +187,19 @@ void JumpFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
 void JumpFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
   auto index = static_cast<std::size_t>(parameterIndex);
   if (m_cbParameterType->currentIndex() == 0)
-    m_jumpModel->setActiveWidth(index, 0);
+    m_jumpModel->setActiveWidth(index, TableDatasetIndex{0});
   else
-    m_jumpModel->setActiveEISF(index, 0);
+    m_jumpModel->setActiveEISF(index, TableDatasetIndex{0});
+}
+
+void JumpFitDataPresenter::handleSpectrumSelectionChanged(int parameterIndex) {
+  // setSingleModelSpectrum(parameterIndex);
+  auto spectra =
+      m_jumpModel->getSpectra(m_dataIndex)[TableRowIndex{parameterIndex}];
+  m_notifier.notify([&parameterIndex](IFQFitObserver &obs) {
+    obs.spectrumChanged(parameterIndex);
+  });
+  emit spectrumChanged(spectra);
 }
 
 void JumpFitDataPresenter::setModelSpectrum(int index) {

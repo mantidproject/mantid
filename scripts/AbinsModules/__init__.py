@@ -42,7 +42,7 @@ from .SPowderSemiEmpiricalCalculator import SPowderSemiEmpiricalCalculator
 # Data
 from .GeneralData import GeneralData
 from .KpointsData import KpointsData
-from .AtomsData import AtomsDaTa
+from .AtomsData import AtomsData
 from .AbinsData import AbinsData
 from .DWSingleCrystalData import DWSingleCrystalData
 from .SingleCrystalData import SingleCrystalData

@@ -9,8 +9,9 @@
 Description
 -----------
 
-Runs the :ref:`EnergyWindowScan <algm-EnergyWindowScan>` algorithm with slightly customised inputs and
-provides options for plotting and saving output.
+Runs the :ref:`EnergyWindowScan <algm-EnergyWindowScan>` algorithm with slightly customised inputs. It also
+provides the option to perform a Width Fit which utilizes the :ref:`IndirectTwoPeakFit <algm-IndirectTwoPeakFit>` 
+algorithm.
 
 Usage
 -----

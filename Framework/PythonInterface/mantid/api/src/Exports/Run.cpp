@@ -7,7 +7,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/Copyable.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include <boost/python/class.hpp>
@@ -152,7 +153,7 @@ void export_Run() {
   register_ptr_to_python<Run *>();
 
   // Run class
-  class_<Run, boost::noncopyable>("Run", no_init)
+  class_<Run, boost::noncopyable>("Run")
       .def("getProtonCharge", &Run::getProtonCharge, arg("self"),
            "Return the total good proton charge for the run")
 
@@ -176,6 +177,10 @@ void export_Run() {
            (arg("self"), arg("name")),
            "Return a log as a single float value. Time series values are "
            "averaged.")
+
+      .def("getTimeAveragedStd", &Run::getTimeAveragedStd,
+           (arg("self"), arg("name")),
+           "Returns the time averaged standard deviation")
 
       .def("getProperties", &Run::getProperties, arg("self"),
            return_internal_reference<>(),
@@ -236,6 +241,6 @@ void export_Run() {
            return_value_policy<return_by_value>())
       .def("__setitem__", &addOrReplaceProperty,
            (arg("self"), arg("name"), arg("value")))
-
-      ;
+      .def("__copy__", &Mantid::PythonInterface::generic__copy__<Run>)
+      .def("__deepcopy__", &Mantid::PythonInterface::generic__deepcopy__<Run>);
 }

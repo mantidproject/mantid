@@ -49,7 +49,7 @@ public:
   void handleAddNotification(
       const Poco::AutoPtr<FakeDataService::AddNotification> &) {
     std::lock_guard<std::mutex> _lock(m_vectorMutex);
-    vector.push_back(123);
+    vector.emplace_back(123);
     ++notificationFlag;
   }
 

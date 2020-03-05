@@ -123,31 +123,42 @@ std::string CrystalFieldSpectrum::writeToString(
     if (isActive(i)) {
       ostr << ',' << paramOut.str();
     } else if (isFixed(i)) {
-      ties.push_back(paramOut.str());
+      ties.emplace_back(paramOut.str());
     }
   }
 
-  // Print parameters of the important peaks only
-  const CompositeFunction &spectrum =
-      dynamic_cast<const CompositeFunction &>(*m_target);
-  for (size_t ip = 0; ip < m_nPeaks; ++ip) {
+  const auto &spectrum = dynamic_cast<const CompositeFunction &>(*m_target);
+  for (size_t ip = 0; ip < spectrum.nFunctions(); ++ip) {
     const auto &peak = dynamic_cast<IPeakFunction &>(*spectrum.getFunction(ip));
-    // Print peak's atributes
-    const auto attrNames = peak.getAttributeNames();
-    for (const auto &attName : attrNames) {
-      const std::string attValue = peak.getAttribute(attName).value();
-      if (!attValue.empty() && attValue != "\"\"") {
-        ostr << ",f" << ip << "." << attName << '=' << attValue;
+    // Print parameters of the important peaks only
+    if (ip < m_nPeaks) {
+      // Print peak's atributes
+      const auto attrNames = peak.getAttributeNames();
+      for (const auto &attName : attrNames) {
+        const std::string attValue = peak.getAttribute(attName).value();
+        if (!attValue.empty() && attValue != "\"\"") {
+          ostr << ",f" << ip << "." << attName << '=' << attValue;
+        }
       }
     }
-    // Print peak's parameters
+    // Print important peak's parameters
     for (size_t i = 0; i < peak.nParams(); i++) {
       const ParameterTie *tie = peak.getTie(i);
-      if (!tie || !tie->isDefault()) {
-        ostr << ",f" << ip << "." << peak.parameterName(i) << '='
-             << peak.getParameter(i);
+      std::ostringstream paramString;
+      paramString << "f" << ip << "." << peak.parameterName(i) << '='
+                  << peak.getParameter(i);
+      if (ip < m_nPeaks && (!tie || !tie->isDefault())) {
+        ostr << ',' << paramString.str();
+      }
+      // Add fixed ties for all peaks
+      if (peak.isFixed(i) && !peak.isFixedByDefault(i)) {
+        ties.emplace_back(paramString.str());
       }
     }
+    // collect non-default ties for peaks
+    const auto peakTies = peak.writeTies();
+    if (!peakTies.empty())
+      ties.emplace_back(peakTies);
   } // for peaks
 
   // collect non-default constraints
@@ -160,7 +171,7 @@ std::string CrystalFieldSpectrum::writeToString(
   // collect the non-default ties
   auto tiesString = writeTies();
   if (!tiesString.empty()) {
-    ties.push_back(tiesString);
+    ties.emplace_back(tiesString);
   }
   // print the ties
   if (!ties.empty()) {

@@ -14,6 +14,11 @@ from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments, show_
 from Muon.GUI.Common.utilities.run_string_utils import valid_float_regex
 from Muon.GUI.Common.message_box import warning
 
+DEADTIME_DATA_FILE = 0
+DEADTIME_WORKSPACE = 1
+DEADTIME_OTHER_FILE = 2
+DEADTIME_NONE = 3
+
 
 class InstrumentWidgetView(QtWidgets.QWidget):
     dataChanged = Signal()
@@ -107,7 +112,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.rebin_selector.setCurrentIndex(0)
         self.rebin_fixed_hidden(True)
         self.rebin_variable_hidden(True)
-        self.dead_time_selector.setCurrentIndex(0)
+        self.dead_time_selector.setCurrentIndex(DEADTIME_DATA_FILE)
         self.dead_time_data_info_hidden(True)
         self.dead_time_file_loader_hidden(True)
 
@@ -161,13 +166,11 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
     def on_instrument_changed(self, slot):
         self.instrument_selector.currentIndexChanged.connect(slot)
-        self.instrument_selector.currentIndexChanged.connect(
-            self.cache_instrument)
+        self.instrument_selector.currentIndexChanged.connect(self.cache_instrument)
 
     def cache_instrument(self):
         self._cached_instrument.pop(0)
-        self._cached_instrument.append(
-            str(self.instrument_selector.currentText()))
+        self._cached_instrument.append(str(self.instrument_selector.currentText()))
 
     @property
     def cached_instrument(self):
@@ -383,16 +386,16 @@ class InstrumentWidgetView(QtWidgets.QWidget):
 
         self.dead_time_selector = QtWidgets.QComboBox(self)
         self.dead_time_selector.addItems(
-            ["None",
-             "From data file",
+            ["From data file",
              "From table workspace",
-             "From other file"])
+             "From other file",
+             "None"])
 
         self.dead_time_label_2 = QtWidgets.QLabel(self)
         self.dead_time_label_2.setText("Dead Time Workspace : ")
 
         self.dead_time_label_3 = QtWidgets.QLabel(self)
-        self.dead_time_label_3.setText("")
+        self.dead_time_label_3.setText("No loaded dead time")
 
         self.dead_time_file_selector = QtWidgets.QComboBox(self)
         self.dead_time_file_selector.addItem("None")
@@ -493,26 +496,26 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.dead_time_label_3.setText(text)
 
     def on_dead_time_combo_changed(self, index):
-        if index == 0:
-            self._on_dead_time_unselected()
-            self.dead_time_file_loader_hidden(True)
-            self.dead_time_data_info_hidden(True)
-            self.dead_time_other_file_hidden(True)
-        if index == 1:
+        if index == DEADTIME_DATA_FILE:
             self._on_dead_time_from_data_selected()
             self.dead_time_file_loader_hidden(True)
             self.dead_time_data_info_hidden(False)
             self.dead_time_other_file_hidden(True)
-        if index == 2:
+        if index == DEADTIME_WORKSPACE:
             self._on_dead_time_from_file_selected()
             self.dead_time_file_loader_hidden(False)
             self.dead_time_data_info_hidden(False)
             self.dead_time_other_file_hidden(True)
-        if index == 3:
+        if index == DEADTIME_OTHER_FILE:
             self._on_dead_time_from_other_file_selected()
             self.dead_time_file_loader_hidden(True)
             self.dead_time_data_info_hidden(True)
             self.dead_time_other_file_hidden(False)
+        if index == DEADTIME_NONE:
+            self._on_dead_time_unselected()
+            self.dead_time_file_loader_hidden(True)
+            self.dead_time_data_info_hidden(True)
+            self.dead_time_other_file_hidden(True)
 
     def on_dead_time_from_other_file_selected(self, slot):
         self._on_dead_time_from_other_file_selected = slot

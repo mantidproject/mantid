@@ -73,7 +73,7 @@ void MantidTreeWidget::dropEvent(QDropEvent *de) {
   for (int i = 0; i < filenames.size(); ++i) {
     try {
       QFileInfo fi(filenames[i]);
-      QString basename = fi.baseName();
+      QString basename = fi.completeBaseName();
       auto alg = m_mantidUI->createAlgorithm("Load");
       alg->initialize();
       alg->setProperty("Filename", filenames[i].toStdString());
@@ -190,13 +190,13 @@ MantidTreeWidget::getSelectedMatrixWorkspaces() const {
         if (selectedWsNameSet.find(QString::fromStdString(childWsName)) ==
             selectedWsNameSet.end()) {
           selectedWsNameSet.insert(QString::fromStdString(childWsName));
-          selectedWsNameList.push_back(QString::fromStdString(childWsName));
+          selectedWsNameList.emplace_back(QString::fromStdString(childWsName));
         }
       }
     } else {
       if (selectedWsNameSet.find(wsName) == selectedWsNameSet.end()) {
         selectedWsNameSet.insert(wsName);
-        selectedWsNameList.push_back(wsName);
+        selectedWsNameList.emplace_back(wsName);
       }
     }
   }

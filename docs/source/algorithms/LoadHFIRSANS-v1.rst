@@ -24,11 +24,11 @@ Finds and sets the logs:
 * ``monitor``
 * ``timer``
 * ``sample-thicknes``
-* ``source-aperture-diameter``
-* ``sample-aperture-diameter``
+* ``source-aperture-diameter`` and ``source_aperture_diameter``
+* ``sample-aperture-diameter`` and ``sample-aperture-diameter``
 * ``number-of-guides``
-* ``sample-detector-distance`` and ``sdd``
-* ``source-sample-distance``
+* ``sample-detector-distance``, ``sample_detector_distance``, and ``sdd``
+* ``source-sample-distance`` and ``source-sample-distance``
 * ``beam-diameter``
 
 .. categories::

@@ -14,6 +14,13 @@
       <parameter name="grouping" type="string">
         <value val="0-16383"/>
       </parameter>
+      <!-- The pixel sizes used by SolidAngle -->
+      <parameter name="x-pixel-size" type="number">
+        <value val="7.5"/>
+      </parameter>
+      <parameter name="y-pixel-size" type="number">
+        <value val="7.5"/>
+      </parameter>
     </component-link>
 
 </parameter-file>

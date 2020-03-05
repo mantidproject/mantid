@@ -72,7 +72,7 @@ void MuonGroupDetectors::exec() {
   // First pass to determine how many non-empty groups we have
   for (size_t row = 0; row < table->rowCount(); ++row) {
     if (!table->cell<std::vector<int>>(row, 0).empty())
-      nonEmptyRows.push_back(row);
+      nonEmptyRows.emplace_back(row);
   }
 
   if (nonEmptyRows.empty())
@@ -93,7 +93,7 @@ void MuonGroupDetectors::exec() {
     size_t groupIndex =
         static_cast<size_t>(std::distance(nonEmptyRows.begin(), rowIt));
 
-    std::vector<int> &detectorIDs = table->cell<std::vector<int>>(*rowIt, 0);
+    auto &detectorIDs = table->cell<std::vector<int>>(*rowIt, 0);
 
     // Recieve detector IDs, but need workspace indices to group, so convert
     std::vector<size_t> wsIndices =

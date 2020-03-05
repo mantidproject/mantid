@@ -13,7 +13,10 @@
 
 	<!-- following parameters are saved to the run log,
 	     parameters are entered as log_[log_name] and the 
-	     and the value is: "hdf_tag,scale,def_value" -->
+	     and the value is: "hdf_tag,scale[,def_value]"
+       if the default value is not included and the
+       parameter is not in the hdf file no log value is
+       recorded-->
     <parameter name="log_sample_aperture" type="string">
       <value val="sample/sample_aperture, 1.0, 0.0"/>
     </parameter>		 
@@ -47,26 +50,27 @@
     </parameter>	
 
     <parameter name="log_L2_det_value" type="string">
-      <value val="instrument/L2_det, 0.001, 33.15616015625"/>
+      <value val="instrument/L2_det, 0.001, 33.1562"/>
     </parameter>	
+    <!-- no valid default value --> 
     <parameter name="log_Ltof_det_value" type="string">
-      <value val="instrument/Ltof_det, 0.001, 0.0"/>
+      <value val="instrument/Ltof_det, 0.001"/>
     </parameter>	
     <parameter name="log_L1" type="string">
       <value val="instrument/L1, 0.001, 16.671"/>
     </parameter>	
 	
 	<parameter name="log_L2_curtainl_value" type="string">
-      <value val="instrument/L2_curtainl, 0.001, 23.28446093750"/>
+      <value val="instrument/L2_curtainl, 0.001, 23.2845"/>
     </parameter>
 	<parameter name="log_L2_curtainr_value" type="string">
-      <value val="instrument/L2_curtainr, 0.001, 23.28201953125"/>
+      <value val="instrument/L2_curtainr, 0.001, 23.2820"/>
     </parameter>
 	<parameter name="log_L2_curtainu_value" type="string">
-      <value val="instrument/L2_curtainu, 0.001, 24.28616015625"/>
+      <value val="instrument/L2_curtainu, 0.001, 24.2862"/>
     </parameter>
 	<parameter name="log_L2_curtaind_value" type="string">
-      <value val="instrument/L2_curtaind, 0.001, 24.28235937500"/>
+      <value val="instrument/L2_curtaind, 0.001, 24.2824"/>
     </parameter>
  
 	<parameter name="log_D_curtainl_value" type="string">

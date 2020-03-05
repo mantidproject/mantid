@@ -45,7 +45,7 @@ void InstrumentWidgetDecoder::decode(const QMap<QString, QVariant> &map,
 
   m_workspaceName = map[QString("workspaceName")].toString();
 
-  const auto surfaceType = map[QString("surfaceType")].toString();
+  const auto surfaceType = map[QString("surfaceType")].toInt();
   obj.setSurfaceType(surfaceType);
 
   const auto currentTab = map[QString("currentTab")].toInt();
@@ -349,7 +349,7 @@ void InstrumentWidgetDecoder::decodeAlignmentInfo(
                                qLabMap[QString("y")].toDouble(),
                                qLabMap[QString("z")].toDouble());
 
-    alignmentPlane.push_back(std::make_pair(qValue, marker));
+    alignmentPlane.emplace_back(std::make_pair(qValue, marker));
   }
   obj->m_selectedAlignmentPlane = alignmentPlane;
 }

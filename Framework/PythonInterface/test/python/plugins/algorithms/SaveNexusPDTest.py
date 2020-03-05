@@ -26,7 +26,7 @@ class SaveNexusPDTest(unittest.TestCase):
         dataDir = mantid.config.getString('defaultsave.directory')
         return os.path.join(dataDir, wkspname+'.h5')
 
-    def cleanup(self, wkspname, filename):
+    def cleanup(self, filename, wkspname):
         if os.path.exists(filename):
             os.remove(filename)
         if mantid.mtd.doesExist(wkspname):

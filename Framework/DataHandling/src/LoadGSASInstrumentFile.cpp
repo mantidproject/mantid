@@ -232,7 +232,7 @@ void LoadGSASInstrumentFile::loadFile(string filename, vector<string> &lines) {
       // display the line we gathered:
       boost::algorithm::trim(line);
       if (!line.empty())
-        lines.push_back(line);
+        lines.emplace_back(line);
     }
 
     // close the stream:
@@ -304,7 +304,7 @@ void LoadGSASInstrumentFile::scanBanks(const std::vector<std::string> &lines,
         "INS") { // Ignore all lines that don't begin with INS
       if (line.find("BNKPAR") !=
           string::npos) { // We've found start of a new bank
-        bankStartIndex.push_back(i);
+        bankStartIndex.emplace_back(i);
       }
     } // INS
   }   // for(i)
@@ -412,13 +412,13 @@ TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
   for (parmapiter = bankmapiter->second.begin();
        parmapiter != bankmapiter->second.end(); ++parmapiter) {
     string parname = parmapiter->first;
-    vec_parname.push_back(parname);
+    vec_parname.emplace_back(parname);
   }
 
   for (bankmapiter = bankparammap.begin(); bankmapiter != bankparammap.end();
        ++bankmapiter) {
     size_t bankid = bankmapiter->first;
-    vec_bankids.push_back(bankid);
+    vec_bankids.emplace_back(bankid);
   }
 
   g_log.debug() << "[DBx240] Number of imported parameters is " << numparams

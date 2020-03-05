@@ -103,7 +103,7 @@ public:
       auto const &Ys = subtractedWS->y(i);
       for (size_t j = 0; j < Ys.size(); ++j) {
         if (j != numBins / 2) {
-          TS_ASSERT_DELTA(Ys[j], 0., 1e-12);
+          TS_ASSERT_DELTA(Ys[j], 0., 1e-11);
         }
       }
     }
@@ -143,7 +143,7 @@ public:
       auto const &Ys = subtractedWS->y(i);
       for (size_t j = 0; j < Ys.size(); ++j) {
         if (j != numBins / 2) {
-          TS_ASSERT_EQUALS(Ys[j], 0);
+          TS_ASSERT_DELTA(Ys[j], 0., 1e-12);
         }
       }
     }
@@ -227,7 +227,7 @@ public:
         auto const &Ys = outWS->y(i * numSpectraPerBank + j);
         auto const &Es = outWS->e(i * numSpectraPerBank + j);
         for (size_t k = 0; k < Ys.size(); ++k) {
-          TS_ASSERT_EQUALS(Ys[k], bankBkgs[i])
+          TS_ASSERT_DELTA(Ys[k], bankBkgs[i], 1e-11)
           TS_ASSERT_EQUALS(Es[k], 0.)
         }
       }
@@ -269,7 +269,7 @@ public:
         auto const &Ys = outWS->y(i * numSpectraPerBank + j);
         auto const &Es = outWS->e(i * numSpectraPerBank + j);
         for (size_t k = 0; k < Ys.size(); ++k) {
-          TS_ASSERT_EQUALS(Ys[k], bankBkgs[i])
+          TS_ASSERT_DELTA(Ys[k], bankBkgs[i], 1e-11)
           TS_ASSERT_EQUALS(Es[k], 0.)
         }
       }

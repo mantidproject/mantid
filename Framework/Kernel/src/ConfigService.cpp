@@ -94,7 +94,7 @@ std::vector<std::string> splitPath(const std::string &path) {
   std::vector<std::string> splitted;
 
   if (path.find(';') == std::string::npos) { // don't bother tokenizing
-    splitted.push_back(path);
+    splitted.emplace_back(path);
   } else {
     int options = Mantid::Kernel::StringTokenizer::TOK_TRIM +
                   Mantid::Kernel::StringTokenizer::TOK_IGNORE_EMPTY;
@@ -102,7 +102,7 @@ std::vector<std::string> splitPath(const std::string &path) {
     auto iend = tokenizer.end();
     for (auto itr = tokenizer.begin(); itr != iend; ++itr) {
       if (!itr->empty()) {
-        splitted.push_back(*itr);
+        splitted.emplace_back(*itr);
       }
     }
   }
@@ -618,9 +618,10 @@ bool ConfigServiceImpl::isInDataSearchList(const std::string &path) const {
   std::string correctedPath = path;
   replace(correctedPath.begin(), correctedPath.end(), '\\', '/');
 
+  using std::placeholders::_1;
   auto it =
       std::find_if(m_DataSearchDirs.cbegin(), m_DataSearchDirs.cend(),
-                   std::bind2nd(std::equal_to<std::string>(), correctedPath));
+                   std::bind(std::equal_to<std::string>(), _1, correctedPath));
   return (it != m_DataSearchDirs.end());
 }
 
@@ -934,7 +935,7 @@ void ConfigServiceImpl::getKeysRecursive(
   std::vector<std::string> rootKeys = getKeys(root);
 
   if (rootKeys.empty())
-    allKeys.push_back(root);
+    allKeys.emplace_back(root);
 
   for (auto &rootKey : rootKeys) {
     std::string searchString;
@@ -1594,7 +1595,7 @@ void ConfigServiceImpl::appendDataSearchSubDir(const std::string &subdir) {
       // only add new path if it isn't already there
       if (std::find(newDataDirs.begin(), newDataDirs.end(),
                     newDirPath.toString()) == newDataDirs.end())
-        newDataDirs.push_back(newDirPath.toString());
+        newDataDirs.emplace_back(newDirPath.toString());
     } catch (Poco::PathSyntaxException &) {
       continue;
     }
@@ -1621,9 +1622,8 @@ void ConfigServiceImpl::appendDataSearchDir(const std::string &path) {
   }
   if (!isInDataSearchList(dirPath.toString())) {
     std::string newSearchString;
-    std::vector<std::string>::const_iterator it = m_DataSearchDirs.begin();
-    for (; it != m_DataSearchDirs.end(); ++it) {
-      newSearchString.append(*it);
+    for (const std::string &it : m_DataSearchDirs) {
+      newSearchString.append(it);
       newSearchString.append(";");
     }
     newSearchString.append(path);
@@ -1727,7 +1727,7 @@ bool ConfigServiceImpl::addDirectoryifExists(
     const std::string &directoryName, std::vector<std::string> &directoryList) {
   try {
     if (Poco::File(directoryName).isDirectory()) {
-      directoryList.push_back(directoryName);
+      directoryList.emplace_back(directoryName);
       return true;
     } else {
       g_log.information("Unable to locate directory at: " + directoryName);
@@ -1742,12 +1742,16 @@ bool ConfigServiceImpl::addDirectoryifExists(
   }
 }
 
-std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
+const std::vector<std::string>
+ConfigServiceImpl::getFacilityFilenames(const std::string &fName) {
+  std::vector<std::string> returnPaths;
+
   // first try the supplied file
   if (!fName.empty()) {
     const Poco::File fileObj(fName);
     if (fileObj.exists()) {
-      return fName;
+      returnPaths.emplace_back(fName);
+      return returnPaths;
     }
   }
 
@@ -1775,9 +1779,13 @@ std::string ConfigServiceImpl::getFacilityFilename(const std::string &fName) {
     p.append("Facilities.xml");
     std::string filename = p.toString();
     Poco::File fileObj(filename);
-    // stop when you find the first one
+
     if (fileObj.exists())
-      return filename;
+      returnPaths.emplace_back(filename);
+  }
+
+  if (returnPaths.size() > 0) {
+    return returnPaths;
   }
 
   // getting this far means the file was not found
@@ -1801,38 +1809,65 @@ void ConfigServiceImpl::updateFacilities(const std::string &fName) {
 
   // Try to find the file. If it does not exist we will crash, and cannot read
   // the Facilities file
-  std::string fileName = getFacilityFilename(fName);
+  const auto fileNames = getFacilityFilenames(fName);
+  size_t attemptIndex = 0;
+  bool success = false;
+  while ((!success) && (attemptIndex < fileNames.size())) {
+    const auto &fileName = fileNames[attemptIndex];
+    try {
+      // Set up the DOM parser and parse xml file
+      Poco::AutoPtr<Poco::XML::Document> pDoc;
+      try {
+        Poco::XML::DOMParser pParser;
+        pDoc = pParser.parse(fileName);
+      } catch (...) {
+        throw Kernel::Exception::FileError("Unable to parse file:", fileName);
+      }
 
-  // Set up the DOM parser and parse xml file
-  Poco::AutoPtr<Poco::XML::Document> pDoc;
-  try {
-    Poco::XML::DOMParser pParser;
-    pDoc = pParser.parse(fileName);
-  } catch (...) {
-    throw Kernel::Exception::FileError("Unable to parse file:", fileName);
-  }
+      // Get pointer to root element
+      Poco::XML::Element *pRootElem = pDoc->documentElement();
+      if (!pRootElem->hasChildNodes()) {
+        throw std::runtime_error("No root element in Facilities.xml file");
+      }
 
-  // Get pointer to root element
-  Poco::XML::Element *pRootElem = pDoc->documentElement();
-  if (!pRootElem->hasChildNodes()) {
-    throw std::runtime_error("No root element in Facilities.xml file");
-  }
+      const Poco::AutoPtr<Poco::XML::NodeList> pNL_facility =
+          pRootElem->getElementsByTagName("facility");
+      const size_t n = pNL_facility->length();
 
-  Poco::AutoPtr<Poco::XML::NodeList> pNL_facility =
-      pRootElem->getElementsByTagName("facility");
-  size_t n = pNL_facility->length();
+      for (unsigned long i = 0; i < n; ++i) {
+        const auto *elem =
+            dynamic_cast<Poco::XML::Element *>(pNL_facility->item(i));
+        if (elem) {
+          m_facilities.emplace_back(new FacilityInfo(elem));
+        }
+      }
 
-  for (unsigned long i = 0; i < n; ++i) {
-    Poco::XML::Element *elem =
-        dynamic_cast<Poco::XML::Element *>(pNL_facility->item(i));
-    if (elem) {
-      m_facilities.push_back(new FacilityInfo(elem));
+      if (m_facilities.empty()) {
+        throw std::runtime_error("The facility definition file " + fileName +
+                                 " defines no facilities");
+      }
+
+      // if we got here we have suceeded and can exit the loop
+      success = true;
+    } catch (std::runtime_error &ex) {
+      // log this failure to load a file
+      g_log.error() << "Failed to load the facilities.xml file at " << fileName
+                    << "\nIt might be corrupt.  " << ex.what()
+                    << "\nWill try to load another version.\n";
+      attemptIndex++;
+      // move on to the next file index if available
+      if (attemptIndex == fileNames.size()) {
+        const std::string errorMessage =
+            "No more Facilities.xml files can be found, Mantid will not be "
+            "able to start, Sorry.  Try reinstalling Mantid.";
+        // This is one of the few times that both logging a messge and throwing
+        // might make sense
+        // as the error reporter tends to swallow the thrown message.
+        g_log.error() << errorMessage << "\n";
+        // Throw an exception as we have run out of files to try
+        throw std::runtime_error(errorMessage);
+      }
     }
-  }
-
-  if (m_facilities.empty()) {
-    throw std::runtime_error("The facility definition file " + fileName +
-                             " defines no facilities");
   }
 }
 
@@ -1899,11 +1934,9 @@ const std::vector<FacilityInfo *> ConfigServiceImpl::getFacilities() const {
  */
 const std::vector<std::string> ConfigServiceImpl::getFacilityNames() const {
   auto names = std::vector<std::string>(m_facilities.size());
-  auto itFacilities = m_facilities.begin();
-  auto itNames = names.begin();
-  for (; itFacilities != m_facilities.end(); ++itFacilities, ++itNames) {
-    *itNames = (**itFacilities).name();
-  }
+  std::transform(m_facilities.cbegin(), m_facilities.cend(), names.begin(),
+                 [](const FacilityInfo *facility) { return facility->name(); });
+
   return names;
 }
 
@@ -1946,22 +1979,28 @@ ConfigServiceImpl::getFacility(const std::string &facilityName) const {
  * @throw NotFoundException if the facility is not found
  */
 void ConfigServiceImpl::setFacility(const std::string &facilityName) {
-  bool found = false;
-  // Look through the facilities for a matching one.
-  std::vector<FacilityInfo *>::const_iterator it = m_facilities.begin();
-  for (; it != m_facilities.end(); ++it) {
-    if ((**it).name() == facilityName) {
-      // Found the facility
-      found = true;
-      // So it's safe to set it as our default
-      setString("default.facility", facilityName);
-    }
-  }
-  if (!found) {
+  const FacilityInfo *foundFacility = nullptr;
+
+  try {
+    // Get facility looks up by string - so re-use that to check if the facility
+    // is known
+    foundFacility = &getFacility(facilityName);
+  } catch (const Exception::NotFoundError &) {
     g_log.error("Failed to set default facility to be " + facilityName +
                 ". Facility not found");
-    throw Exception::NotFoundError("Facilities", facilityName);
+    throw;
   }
+  assert(foundFacility);
+  setString("default.facility", facilityName);
+
+  const auto &associatedInsts = foundFacility->instruments();
+  if (associatedInsts.empty()) {
+    throw std::invalid_argument(
+        "The selected facility has no instruments associated with it");
+  }
+
+  // Update the default instrument to be one from this facility
+  setString("default.instrument", associatedInsts[0].name());
 }
 
 /**  Add an observer to a notification

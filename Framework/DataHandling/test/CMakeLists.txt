@@ -1,5 +1,6 @@
 if(CXXTEST_FOUND)
-  include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR})
+  include_directories(SYSTEM 
+				      ${CXXTEST_INCLUDE_DIR})
 
   include_directories(../../TestHelpers/inc)
   # This variable is used within the cxxtest_add_test macro to build this helper
@@ -16,7 +17,8 @@ if(CXXTEST_FOUND)
       ../../TestHelpers/src/NexusTestHelper.cpp
       ../../TestHelpers/src/ONCatHelper.cpp
       ../../TestHelpers/src/ParallelRunner.cpp
-      NXcanSASTestHelper.cpp)
+      NXcanSASTestHelper.cpp
+	  ../../TestHelpers/src/FileResource.cpp)
 
   cxxtest_add_test(DataHandlingTest ${TEST_FILES})
   target_include_directories(DataHandlingTest SYSTEM
@@ -28,6 +30,7 @@ if(CXXTEST_FOUND)
                         Catalog
                         DataHandling
                         Nexus
+                        HistogramData
                         ${NEXUS_LIBRARIES}
                         ${HDF5_LIBRARIES}
                         ${HDF5_HL_LIBRARIES})

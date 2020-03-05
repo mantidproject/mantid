@@ -10,16 +10,16 @@
 from __future__ import absolute_import
 
 from collections import Counter, namedtuple
-
-import qtpy
-from mantid.py3compat.mock import Mock, patch, call
 import unittest
 
+import qtpy
 from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
 from mantid.api import AlgorithmFactoryImpl
-from mantidqt.utils.qt.testing import select_item_in_combo_box, select_item_in_tree, GuiTest
+from mantid.py3compat.mock import Mock, patch, call
+from mantidqt.utils.qt.testing import (select_item_in_combo_box,
+                                       select_item_in_tree, start_qapplication)
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 
@@ -54,14 +54,19 @@ class ModelTest(unittest.TestCase):
         names, descriptors = model.get_algorithm_data()
         self.assertTrue(isinstance(names, list))
         self.assertTrue(isinstance(descriptors, dict))
-        self.assertTrue('Load' in names)
-        self.assertTrue('Rebin' in names)
+        self.assertEqual(5, len(names))
+        self.assertEqual('ComesFirst', names[0])
+        self.assertEqual('DoStuff', names[1])
+        self.assertEqual('GoesSecond', names[2])
+        self.assertEqual('Load', names[3])
+        self.assertEqual('Rebin', names[4])
+
         self.assertTrue('Rebin' in descriptors['Transform'][AlgorithmSelectorModel.algorithm_key])
         self.assertTrue('Rebin' in descriptors['Transform']['Rebin'][AlgorithmSelectorModel.algorithm_key])
         counter = Counter(names)
         self.assertEqual(counter['Rebin'], 1)
         self.assertEqual(counter['DoStuff'], 1)
-        self.assertEqual(mock_get_algorithm_descriptors.mock_calls[-1], call(False))
+        self.assertEqual(mock_get_algorithm_descriptors.mock_calls, [call(False), call(True)])
 
     def test_include_hidden_algorithms(self):
         model = AlgorithmSelectorModel(None, include_hidden=True)
@@ -74,7 +79,8 @@ createDialogFromName_func_name = ('mantidqt.interfacemanager.InterfaceManager.'
 
 
 @patch.object(AlgorithmFactoryImpl, 'getDescriptors', mock_get_algorithm_descriptors)
-class WidgetTest(GuiTest):
+@start_qapplication
+class WidgetTest(unittest.TestCase):
 
     # def setUp(self):
     #     self.getDescriptors_orig = AlgorithmFactoryImpl.getDescriptors
@@ -156,14 +162,14 @@ class WidgetTest(GuiTest):
             widget = AlgorithmSelectorWidget()
             self._select_in_tree(widget, 'DoStuff v.2')
             widget.execute_button.click()
-            createDialog.assert_called_once_with('DoStuff', 2)
+            createDialog.assert_called_once_with('DoStuff', 2, None, False, {}, '', [])
 
     def test_run_dialog_opens_on_return_press(self):
         with patch(createDialogFromName_func_name) as createDialog:
             widget = AlgorithmSelectorWidget()
             self._select_in_tree(widget, 'DoStuff v.2')
             QTest.keyClick(widget.search_box, Qt.Key_Return)
-            createDialog.assert_called_once_with('DoStuff', 2)
+            createDialog.assert_called_once_with('DoStuff', 2, None, False, {}, '', [])
 
     def test_run_dialog_opens_on_double_click(self):
         with patch(createDialogFromName_func_name) as createDialog:
@@ -173,7 +179,7 @@ class WidgetTest(GuiTest):
             item_pos = widget.tree.visualItemRect(selected_item).center()
             QTest.mouseDClick(widget.tree.viewport(), Qt.LeftButton,
                               Qt.NoModifier, pos=item_pos)
-            createDialog.assert_called_once_with('Load', 1)
+            createDialog.assert_called_once_with('Load', 1, None, False, {}, '', [])
 
     def test_sorting_of_algorithms(self):
         widget = AlgorithmSelectorWidget()

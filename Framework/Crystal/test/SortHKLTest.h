@@ -46,11 +46,11 @@ public:
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
     ws->setInstrument(inst);
 
-    auto lattice = new Mantid::Geometry::OrientedLattice;
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
     Mantid::Kernel::DblMatrix UB(3, 3, true);
     UB.identityMatrix();
     lattice->setUB(UB);
-    ws->mutableSample().setOrientedLattice(lattice);
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
 
     double smu = 0.357;
     double amu = 0.011;
@@ -106,11 +106,9 @@ public:
     TS_ASSERT_EQUALS(p.getRunNumber(), 1000.);
     TS_ASSERT_DELTA(p.getDSpacing(), 3.5933, 1e-4);
     const auto sampleMaterial = wsout->sample().getMaterial();
-    if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
-        0.0) {
+    if (sampleMaterial.totalScatterXSection() != 0.0) {
       double rho = sampleMaterial.numberDensity();
-      smu = sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
-            rho;
+      smu = sampleMaterial.totalScatterXSection() * rho;
       amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
     } else {
       throw std::invalid_argument(

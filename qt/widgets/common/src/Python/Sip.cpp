@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidQtWidgets/Common/Python/Sip.h"
+#include <QtGlobal>
 #include <sip.h>
 
 namespace MantidQt {
@@ -21,30 +22,23 @@ const sipAPIDef *sipAPI() {
   static const sipAPIDef *sip_API = nullptr;
   if (sip_API)
     return sip_API;
-#if defined(SIP_USE_PYCAPSULE)
-  sip_API = (const sipAPIDef *)PyCapsule_Import("sip._C_API", 0);
+
+    // Some configs have a private sip module inside PyQt. Try this first
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  sip_API = (const sipAPIDef *)PyCapsule_Import("PyQt4.sip._C_API", 0);
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0) &&                               \
+    QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+  sip_API = (const sipAPIDef *)PyCapsule_Import("PyQt5.sip._C_API", 0);
 #else
-  /* Import the SIP module. */
-  PyObject *sip_module = PyImport_ImportModule("sip");
-  if (sip_module == NULL)
-    throw std::runtime_error("sip_api() - Error importing sip module");
-
-  /* Get the module's dictionary. */
-  PyObject *sip_module_dict = PyModule_GetDict(sip_module);
-
-  /* Get the "_C_API" attribute. */
-  PyObject *c_api = PyDict_GetItemString(sip_module_dict, "_C_API");
-  if (c_api == NULL)
-    throw std::runtime_error(
-        "sip_api() - Unable to find _C_API attribute in sip dictionary");
-
-  /* Sanity check that it is the right type. */
-  if (!PyCObject_Check(c_api))
-    throw std::runtime_error("sip_api() - _C_API type is not a CObject");
-
-  /* Get the actual pointer from the object. */
-  sip_API = (const sipAPIDef *)PyCObject_AsVoidPtr(c_api);
+#error "Unknown sip module for Qt >= 6"
 #endif
+  // Try plain sip module
+  if (!sip_API) {
+    PyErr_Clear();
+    sip_API = (const sipAPIDef *)PyCapsule_Import("sip._C_API", 0);
+  }
+
+  assert(sip_API);
   return sip_API;
 }
 } // namespace Detail

@@ -11,6 +11,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
@@ -20,9 +22,27 @@ namespace DataHandling {
 Saves a workspace or selected spectra in a coma-separated ascii file. Spectra
 are saved in columns.
 
-@author Keith Brown, ISIS, Placement student from the University of Derby
-@date 10/10/13
 */
+namespace AxisHelper {
+
+struct AxisProxy {
+  AxisProxy(Mantid::API::Axis *ax) : a(ax) {}
+  virtual double getCentre(const int index) { return a->getValue(index); }
+  virtual ~AxisProxy() = default;
+
+protected:
+  Mantid::API::Axis *a;
+};
+
+struct BinEdgeAxisProxy : AxisProxy {
+  using AxisProxy::AxisProxy;
+  double getCentre(const int index) override {
+    return (a->getValue(index) + a->getValue(index + 1)) / 2.;
+  }
+};
+
+} // namespace AxisHelper
+
 class DLLExport SaveAscii2 : public API::Algorithm {
 public:
   /// Default constructor
@@ -52,6 +72,10 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
+  void writeTableWorkspace(API::ITableWorkspace_const_sptr tws,
+                           const std::string &filename, bool appendToFile,
+                           bool writeHeader, int prec, bool scientific,
+                           const std::string &comment);
   /// Writes a spectrum to the file using a workspace index
   void writeSpectrum(const int &wsIndex, std::ofstream &file);
   std::vector<std::string> stringListToVector(std::string &inputString);
@@ -71,9 +95,11 @@ private:
   bool m_writeDX;
   bool m_writeID;
   bool m_isCommonBins;
+  bool m_writeSpectrumAxisValue;
   API::MatrixWorkspace_const_sptr m_ws;
   std::vector<std::string> m_metaData;
   std::map<std::string, std::vector<std::string>> m_metaDataMap;
+  std::unique_ptr<AxisHelper::AxisProxy> m_axisProxy;
 };
 } // namespace DataHandling
 } // namespace Mantid

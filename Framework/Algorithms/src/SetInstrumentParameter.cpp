@@ -135,7 +135,7 @@ void SetInstrumentParameter::exec() {
   std::vector<IDetector_const_sptr> dets;
   std::vector<IComponent_const_sptr> cmptList;
   // set default to whole instrument
-  cmptList.push_back(inst);
+  cmptList.emplace_back(inst);
 
   if (!detectorList.empty()) {
     dets = inst->getDetectors(detectorList);

@@ -56,7 +56,7 @@ void ALCBaselineModellingPresenter::fit() {
 
     IALCBaselineModellingModel::Section parsedSection(min, max);
 
-    parsedSections.push_back(parsedSection);
+    parsedSections.emplace_back(parsedSection);
   }
 
   std::string funcStr = m_view->function().toStdString();
@@ -113,7 +113,7 @@ void ALCBaselineModellingPresenter::removeSection(int row) {
   std::vector<IALCBaselineModellingView::SectionRow> allRows;
 
   for (int i = 0; i < m_view->noOfSectionRows(); ++i) {
-    allRows.push_back(m_view->sectionRow(i));
+    allRows.emplace_back(m_view->sectionRow(i));
   }
 
   allRows.erase(allRows.begin() + row);

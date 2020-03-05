@@ -92,7 +92,7 @@ std::map<std::string, std::string> CalMuonDetectorPhases::validateInputs() {
     }
 
     // Check spectra numbers are valid, if specified
-    int nspec = static_cast<int>(inputWS->getNumberHistograms());
+    auto nspec = static_cast<int>(inputWS->getNumberHistograms());
     std::vector<int> forward = getProperty("ForwardSpectra");
     std::vector<int> backward = getProperty("BackwardSpectra");
     for (int spec : forward) {
@@ -157,7 +157,7 @@ void CalMuonDetectorPhases::fitWorkspace(const API::MatrixWorkspace_sptr &ws,
                                          API::ITableWorkspace_sptr resTab,
                                          API::WorkspaceGroup_sptr &resGroup) {
 
-  int nhist = static_cast<int>(ws->getNumberHistograms());
+  auto nhist = static_cast<int>(ws->getNumberHistograms());
 
   // Create the fitting function f(x) = A * sin ( w * x + p )
   // The same function and initial parameters are used for each fit
@@ -245,7 +245,7 @@ void CalMuonDetectorPhases::extractDetectorInfo(
     phase = phase - M_PI;
   }
   // Now convert phases to interval [0, 2PI)
-  int factor = static_cast<int>(floor(phase / (2. * M_PI)));
+  auto factor = static_cast<int>(floor(phase / (2. * M_PI)));
   if (factor) {
     phase = phase - factor * 2. * M_PI;
   }

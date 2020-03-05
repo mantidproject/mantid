@@ -123,13 +123,13 @@ private:
   QwtPlotCurve *m_fullCurve;
 
   /// Vector of labels with the dimension names
-  QVector<QLabel *> m_dimensionLabel;
+  std::vector<QLabel *> m_dimensionLabel;
   /// Vector of text boxes with the start point
-  QVector<QLineEdit *> m_startText;
+  std::vector<QLineEdit *> m_startText;
   /// Vector of text boxes with the end point
-  QVector<QLineEdit *> m_endText;
+  std::vector<QLineEdit *> m_endText;
   /// Vector of text boxes with the thicknesses
-  QVector<QLineEdit *> m_thicknessText;
+  std::vector<QLineEdit *> m_thicknessText;
 
   /// Widget to choose X plot axis and normalization
   LinePlotOptions *m_lineOptions;

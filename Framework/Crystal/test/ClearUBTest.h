@@ -40,8 +40,8 @@ private:
   std::string createMatrixWorkspace(const bool withOrientedLattice = true) {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 2);
     if (withOrientedLattice) {
-      OrientedLattice latt(1.0, 2.0, 3.0, 90, 90, 90);
-      ws->mutableSample().setOrientedLattice(&latt);
+      ws->mutableSample().setOrientedLattice(
+          std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
     }
     const std::string wsName = "TestWorkspace";
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
@@ -54,13 +54,14 @@ private:
     const std::string wsName = "TestWorkspace";
     auto ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 10, 10, 1, wsName);
-    OrientedLattice latt(1.0, 2.0, 3.0, 90, 90, 90);
-    ws->getExperimentInfo(0)->mutableSample().setOrientedLattice(&latt);
+    ws->getExperimentInfo(0)->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
 
     for (uint16_t i = 1; i < nExperimentInfosToAdd; ++i) {
       ExperimentInfo_sptr experimentInfo = boost::make_shared<ExperimentInfo>();
       ws->addExperimentInfo(experimentInfo);
-      ws->getExperimentInfo(i)->mutableSample().setOrientedLattice(&latt);
+      ws->getExperimentInfo(i)->mutableSample().setOrientedLattice(
+          std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
     }
 
     AnalysisDataService::Instance().addOrReplace(wsName, ws);

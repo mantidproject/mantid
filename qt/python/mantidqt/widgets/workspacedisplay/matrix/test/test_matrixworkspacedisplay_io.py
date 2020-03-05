@@ -6,8 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
+from __future__ import absolute_import
 
-from mantidqt.utils.qt.testing import GuiTest
+import unittest
+
+from mantidqt.utils.qt.testing import start_qapplication
 from mantid.simpleapi import CreateSampleWorkspace
 from mantidqt.widgets.workspacedisplay.matrix.io import MatrixWorkspaceDisplayDecoder, MatrixWorkspaceDisplayEncoder
 from mantidqt.widgets.workspacedisplay.matrix import StatusBarView, MatrixWorkspaceDisplay
@@ -16,7 +19,8 @@ from mantidqt.widgets.workspacedisplay.matrix import StatusBarView, MatrixWorksp
 MATRIXWORKSPACEDISPLAY_DICT = {"workspace": "ws"}
 
 
-class MatrixWorkspaceDisplayEncoderTest(GuiTest):
+@start_qapplication
+class MatrixWorkspaceDisplayEncoderTest(unittest.TestCase):
     def setUp(self):
         self.ws = CreateSampleWorkspace(OutputWorkspace="ws")
         self.encoder = MatrixWorkspaceDisplayEncoder()
@@ -26,7 +30,8 @@ class MatrixWorkspaceDisplayEncoderTest(GuiTest):
         self.assertEqual(MATRIXWORKSPACEDISPLAY_DICT, self.encoder.encode(self.view))
 
 
-class MatrixWorkspaceDisplayDecoderTest(GuiTest):
+@start_qapplication
+class MatrixWorkspaceDisplayDecoderTest(unittest.TestCase):
     def setUp(self):
         self.ws = CreateSampleWorkspace(OutputWorkspace="ws")
         self.decoder = MatrixWorkspaceDisplayDecoder()

@@ -8,7 +8,6 @@ from __future__ import (absolute_import, division, unicode_literals)
 
 
 class DetectorsPresenter(object):
-
     def __init__(self, view):
         self.view = view
         self.detectors = []
@@ -17,6 +16,12 @@ class DetectorsPresenter(object):
 
     def setStateQuietly(self, name, state):
         self.view.setStateQuietly(name, state)
+
+    def enableDetector(self, name):
+        self.view.enableDetector(name)
+
+    def disableDetector(self, name):
+        self.view.disableDetector(name)
 
     def getNames(self):
         return self.view.widgets.keys()

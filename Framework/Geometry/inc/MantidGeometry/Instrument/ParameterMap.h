@@ -241,7 +241,7 @@ public:
       if (compName == it->first->getName()) {
         boost::shared_ptr<Parameter> param = get(it->first, name);
         if (param)
-          retval.push_back(param->value<T>());
+          retval.emplace_back(param->value<T>());
       }
     }
     return retval;

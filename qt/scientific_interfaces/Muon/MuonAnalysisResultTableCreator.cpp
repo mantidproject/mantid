@@ -172,7 +172,7 @@ MuonAnalysisResultTableCreator::getWorkspacesByLabel() const {
       for (const auto &name : group->getNames()) {
         const size_t pos = name.find("_Workspace");
         if (pos != std::string::npos) {
-          names.push_back(name.substr(0, pos));
+          names.emplace_back(name.substr(0, pos));
         }
       }
       if (names.empty()) {
@@ -496,24 +496,27 @@ void MuonAnalysisResultTableCreator::writeDataForSingleFit(
 
     // Write log values in each column
     for (int i = 0; i < m_logs.size(); ++i) {
-      Mantid::API::Column_sptr col = table->getColumn(i);
+      // need to add one to the column number
+      // as the first (0th) one is done elsewhere
+      Mantid::API::Column_sptr col = table->getColumn(i + 1);
+      auto col_type = col->type();
+
       const auto &log = m_logs[i];
       const QVariant &val = logValues[log];
+
       QString valueToWrite;
       // Special case: if log is time in sec, subtract the first start time
       if (log.endsWith(" (s)")) {
         auto seconds =
             val.toDouble() - static_cast<double>(m_firstStart_ns) * 1.e-9;
         valueToWrite = QString::number(seconds);
-      } else if (MuonAnalysisHelper::isNumber(val.toString()) &&
-                 !log.endsWith(" (text)")) {
+      } else if (col_type == "double") {
         valueToWrite = QString::number(val.toDouble());
       } else {
         valueToWrite = val.toString();
       }
 
-      if (MuonAnalysisHelper::isNumber(val.toString()) &&
-          !log.endsWith(" (text)")) {
+      if (col_type == "double") {
         row << valueToWrite.toDouble();
       } else {
         row << valueToWrite.toStdString();
@@ -726,7 +729,7 @@ bool MuonAnalysisResultTableCreator::haveSameParameters(
       do {
         std::string key;
         row >> key;
-        keys.push_back(key);
+        keys.emplace_back(key);
       } while (row.next());
     }
     return keys;
@@ -776,7 +779,7 @@ void MuonAnalysisResultTableCreator::removeFixedParameterErrors(
       }
     }
     if (allZeros) {
-      zeroErrorColumns.push_back(name);
+      zeroErrorColumns.emplace_back(name);
     }
   }
 

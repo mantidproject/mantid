@@ -443,6 +443,12 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertTrue(ws.hasMaskedBins(0))
         self.assertFalse(ws.hasMaskedBins(1))
 
+    def test_hasAnyMaskedBins(self):
+        numBins = 10
+        numHist=11
+        ws = WorkspaceCreationHelper.create2DWorkspace123WithMaskedBin(numHist, numBins, 0, 1)
+        self.assertTrue(ws.hasAnyMaskedBins())
+
     def test_maskedBinsIndices(self):
         numBins = 10
         numHist=11
@@ -451,6 +457,53 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual(1, len(maskedBinsIndices))
         for index in maskedBinsIndices:
             self.assertEqual(1, index)
+
+    def test_rebinnedOutput(self):
+        rebin = WorkspaceFactory.create("RebinnedOutput", 2, 3, 2)
+        self.assertFalse(rebin.nonZeroF())
+        fv = rebin.readF(1)
+        rebin.dataY(1)[:] = 10.0
+        rebin.dataE(1)[:] = 1.0
+        twos = np.ones(len(fv)) * 2.0
+        rebin.setF(1, twos)
+        self.assertTrue(rebin.nonZeroF())
+        rebin.setFinalized(False)
+        rebin.setSqrdErrors(False)
+        rebin.unfinalize()
+        self.assertFalse(rebin.isFinalized())
+        yv = rebin.readY(1)
+        ev = rebin.readE(1)
+        self.assertAlmostEqual(yv[0], 10.0)
+        self.assertAlmostEqual(ev[0], 1.0)
+
+        rebin.finalize(True)
+        self.assertTrue(rebin.isFinalized())
+        self.assertTrue(rebin.hasSqrdErrors())
+        yv = rebin.readY(1)
+        ev = rebin.readE(1)
+        self.assertAlmostEqual(yv[0], 5.0)
+        self.assertAlmostEqual(ev[0], 0.25)
+
+        rebin.finalize(False)
+        self.assertTrue(rebin.isFinalized())
+        self.assertFalse(rebin.hasSqrdErrors())
+        yv = rebin.readY(1)
+        ev = rebin.readE(1)
+        self.assertAlmostEqual(yv[0], 5.0)
+        self.assertAlmostEqual(ev[0], 0.5)
+
+        rebin.unfinalize()
+        self.assertFalse(rebin.isFinalized())
+        yv = rebin.readY(1)
+        ev = rebin.readE(1)
+        self.assertAlmostEqual(yv[0], 10.0)
+        self.assertAlmostEqual(ev[0], 1.0)
+
+        rebin.scaleF(2.0)
+        fv = rebin.readF(1)
+        self.assertAlmostEqual(fv[0], 4.0)
+
+
 
 
 if __name__ == '__main__':

@@ -6,17 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import sys
 
-PYQT5 = False
+IN_WORKBENCH = False
 IN_MANTIDPLOT = False
 
 try:
     import mantidplot
     IN_MANTIDPLOT = True
 except (Exception, Warning):
-    pass
-else:
     if "workbench.app.mainwindow" in sys.modules:
-        PYQT5 = True
+        IN_WORKBENCH = True
         try:
             from mantidqt.plotting.functions import plot
         except ImportError:
@@ -24,7 +22,7 @@ else:
 
 
 def can_plot_beamcentrefinder():
-    return PYQT5 or IN_MANTIDPLOT
+    return IN_WORKBENCH or IN_MANTIDPLOT
 
 
 def _plot_quartiles_matplotlib(output_workspaces, sample_scatter):
@@ -37,6 +35,8 @@ def _plot_quartiles_matplotlib(output_workspaces, sample_scatter):
 
     if not isinstance(output_workspaces, list):
         output_workspaces = [output_workspaces]
+
+    assert output_workspaces, "No workspaces were passed into plotting"
 
     plot(output_workspaces, wksp_indices=[0], ax_properties=ax_properties, overplot=True,
          plot_kwargs=plot_kwargs, window_title=title)
@@ -52,7 +52,7 @@ def _plot_quartiles(output_workspaces, sample_scatter):
 
 
 def plot_workspace_quartiles(output_workspaces, sample_scatter):
-    if PYQT5:
+    if IN_WORKBENCH:
         _plot_quartiles_matplotlib(output_workspaces, sample_scatter)
     elif IN_MANTIDPLOT:
         _plot_quartiles(output_workspaces, sample_scatter)

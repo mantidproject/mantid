@@ -39,8 +39,8 @@ public:
     // Arrange
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
     parameters.hasDx = true;
 
@@ -67,8 +67,8 @@ public:
     // Arrange
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
     parameters.hasDx = false;
 
@@ -95,8 +95,8 @@ public:
     // Arrange
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
     parameters.hasDx = false;
 
@@ -155,8 +155,8 @@ public:
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
 
     parameters.is2dData = true;
@@ -185,8 +185,8 @@ public:
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
 
     parameters.is2dData = true;
@@ -228,8 +228,8 @@ public:
     // Arrange
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
     parameters.hasDx = true;
 
@@ -556,8 +556,8 @@ private:
 
   void setup_1D() {
     removeFile(parameters1D.filename);
-    parameters1D.detectors.push_back("front-detector");
-    parameters1D.detectors.push_back("rear-detector");
+    parameters1D.detectors.emplace_back("front-detector");
+    parameters1D.detectors.emplace_back("rear-detector");
     parameters1D.invalidDetectors = false;
     parameters1D.hasDx = true;
 
@@ -581,8 +581,8 @@ private:
   void setup_2D() {
     removeFile(parameters2D.filename);
 
-    parameters2D.detectors.push_back("front-detector");
-    parameters2D.detectors.push_back("rear-detector");
+    parameters2D.detectors.emplace_back("front-detector");
+    parameters2D.detectors.emplace_back("rear-detector");
     parameters2D.invalidDetectors = false;
 
     parameters2D.is2dData = true;

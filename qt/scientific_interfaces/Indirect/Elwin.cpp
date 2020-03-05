@@ -13,8 +13,6 @@
 
 #include <QFileInfo>
 
-#include <qwt_plot.h>
-
 #include <algorithm>
 
 using namespace Mantid::API;
@@ -32,24 +30,8 @@ bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
-bool isWorkspacePlottable(MatrixWorkspace_sptr workspace) {
-  return workspace->y(0).size() > 1;
-}
-
-bool isWorkspacePlottable(std::string const &workspaceName) {
-  return isWorkspacePlottable(getADSMatrixWorkspace(workspaceName));
-}
-
-bool canPlotWorkspace(std::string const &workspaceName) {
-  return doesExistInADS(workspaceName) && isWorkspacePlottable(workspaceName);
-}
-
 std::vector<std::string> getOutputWorkspaceSuffices() {
   return {"_eq", "_eq2", "_elf", "_elt"};
-}
-
-int getNumberOfSpectra(std::string const &name) {
-  return static_cast<int>(getADSMatrixWorkspace(name)->getNumberHistograms());
 }
 
 std::string extractLastOf(const std::string &str,
@@ -119,6 +101,8 @@ namespace IDA {
 Elwin::Elwin(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_elwTree(nullptr) {
   m_uiForm.setupUi(parent);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
 }
 
 void Elwin::setup() {
@@ -176,13 +160,12 @@ void Elwin::setup() {
       m_uiForm.ppPlot->addRangeSelector("ElwinBackgroundRange");
   backgroundRangeSelector->setColour(
       Qt::darkGreen); // dark green for background
-  connect(integrationRangeSelector, SIGNAL(rangeChanged(double, double)),
+  connect(integrationRangeSelector, SIGNAL(selectionChanged(double, double)),
           backgroundRangeSelector, SLOT(setRange(double, double)));
   connect(backgroundRangeSelector, SIGNAL(minValueChanged(double)), this,
           SLOT(minChanged(double)));
   connect(backgroundRangeSelector, SIGNAL(maxValueChanged(double)), this,
           SLOT(maxChanged(double)));
-  backgroundRangeSelector->setRange(integrationRangeSelector->getRange());
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(updateRS(QtProperty *, double)));
@@ -200,17 +183,13 @@ void Elwin::setup() {
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
           SLOT(setSelectedSpectrum(int)));
   connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this,
-          SLOT(plotInput()));
+          SLOT(handlePreviewSpectrumChanged()));
 
   // Handle plot and save
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
-
-  connect(m_uiForm.cbPlotWorkspace, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(updateAvailablePlotSpectra()));
 
   // Set any default values
   m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
@@ -346,13 +325,12 @@ void Elwin::unGroupInput(bool error) {
       ungroupAlg->execute();
     }
 
-    updatePlotSpectrumOptions();
+    setOutputPlotOptionsWorkspaces(getOutputWorkspaceNames());
 
     if (m_blnManager->value(m_properties["Normalise"]))
       checkForELTWorkspace();
 
   } else {
-    setPlotResultEnabled(false);
     setSaveResultEnabled(false);
   }
 }
@@ -362,49 +340,6 @@ void Elwin::checkForELTWorkspace() {
   if (!doesExistInADS(workspaceName))
     showMessageBox("ElasticWindowMultiple successful. \nThe _elt workspace "
                    "was not produced - temperatures were not found.");
-}
-
-void Elwin::updatePlotSpectrumOptions() {
-  updateAvailablePlotWorkspaces();
-  if (m_uiForm.cbPlotWorkspace->size().isEmpty())
-    setPlotResultEnabled(false);
-  else
-    updateAvailablePlotSpectra();
-}
-
-void Elwin::updateAvailablePlotWorkspaces() {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.cbPlotWorkspace);
-  m_uiForm.cbPlotWorkspace->clear();
-  for (auto const &suffix : getOutputWorkspaceSuffices()) {
-    auto const workspaceName = getOutputBasename().toStdString() + suffix;
-    if (canPlotWorkspace(workspaceName))
-      m_uiForm.cbPlotWorkspace->addItem(QString::fromStdString(workspaceName));
-  }
-}
-
-QString Elwin::getPlotWorkspaceName() const {
-  return m_uiForm.cbPlotWorkspace->currentText();
-}
-
-void Elwin::setPlotSpectrumValue(int value) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.spPlotSpectrum);
-  m_uiForm.spPlotSpectrum->setValue(value);
-}
-
-void Elwin::updateAvailablePlotSpectra() {
-  auto const name = getPlotWorkspaceName().toStdString();
-  auto const maximumValue = getNumberOfSpectra(name) - 1;
-  setPlotSpectrumMinMax(0, maximumValue);
-  setPlotSpectrumValue(0);
-}
-
-void Elwin::setPlotSpectrumMinMax(int minimum, int maximum) {
-  m_uiForm.spPlotSpectrum->setMinimum(minimum);
-  m_uiForm.spPlotSpectrum->setMaximum(maximum);
-}
-
-int Elwin::getPlotSpectrumIndex() const {
-  return m_uiForm.spPlotSpectrum->text().toInt();
 }
 
 bool Elwin::validate() {
@@ -524,6 +459,15 @@ void Elwin::newInputFiles() {
   QString const wsname = m_uiForm.cbPreviewFile->currentText();
   auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
   setInputWorkspace(inputWs);
+
+  const auto range = getXRangeFromWorkspace(inputWs);
+
+  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"),
+                   m_properties["IntegrationStart"],
+                   m_properties["IntegrationEnd"], range);
+  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"),
+                   m_properties["BackgroundStart"],
+                   m_properties["BackgroundEnd"], range);
 }
 
 /**
@@ -566,14 +510,35 @@ void Elwin::plotInput() {
   setDefaultSampleLog(inputWorkspace());
 }
 
+void Elwin::handlePreviewSpectrumChanged() {
+  IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
+}
+
 void Elwin::updateIntegrationRange() {
   setDefaultResolution(inputWorkspace(),
-                       m_uiForm.ppPlot->getCurveRange("Sample"));
+                       getXRangeFromWorkspace(inputWorkspace()));
 }
 
 void Elwin::twoRanges(QtProperty *prop, bool val) {
-  if (prop == m_properties["BackgroundSubtraction"])
-    m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange")->setVisible(val);
+  if (prop == m_properties["BackgroundSubtraction"]) {
+    auto integrationRangeSelector =
+        m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange");
+    auto backgroundRangeSelector =
+        m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
+    backgroundRangeSelector->setVisible(val);
+    m_properties["BackgroundStart"]->setEnabled(val);
+    m_properties["BackgroundEnd"]->setEnabled(val);
+
+    disconnect(integrationRangeSelector,
+               SIGNAL(selectionChanged(double, double)),
+               backgroundRangeSelector, SLOT(setRange(double, double)));
+    if (!val) {
+      backgroundRangeSelector->setRange(integrationRangeSelector->getRange());
+      connect(integrationRangeSelector,
+              SIGNAL(selectionChanged(double, double)), backgroundRangeSelector,
+              SLOT(setRange(double, double)));
+    }
+  }
 }
 
 void Elwin::minChanged(double val) {
@@ -585,11 +550,17 @@ void Elwin::minChanged(double val) {
   MantidWidgets::RangeSelector *from =
       qobject_cast<MantidWidgets::RangeSelector *>(sender());
 
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateRS(QtProperty *, double)));
+
   if (from == integrationRangeSelector) {
     m_dblManager->setValue(m_properties["IntegrationStart"], val);
   } else if (from == backgroundRangeSelector) {
     m_dblManager->setValue(m_properties["BackgroundStart"], val);
   }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateRS(QtProperty *, double)));
 }
 
 void Elwin::maxChanged(double val) {
@@ -601,11 +572,17 @@ void Elwin::maxChanged(double val) {
   MantidWidgets::RangeSelector *from =
       qobject_cast<MantidWidgets::RangeSelector *>(sender());
 
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateRS(QtProperty *, double)));
+
   if (from == integrationRangeSelector) {
     m_dblManager->setValue(m_properties["IntegrationEnd"], val);
   } else if (from == backgroundRangeSelector) {
     m_dblManager->setValue(m_properties["BackgroundEnd"], val);
   }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateRS(QtProperty *, double)));
 }
 
 void Elwin::updateRS(QtProperty *prop, double val) {
@@ -614,25 +591,33 @@ void Elwin::updateRS(QtProperty *prop, double val) {
   auto backgroundRangeSelector =
       m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange");
 
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateRS(QtProperty *, double)));
+
   if (prop == m_properties["IntegrationStart"])
-    integrationRangeSelector->setMinimum(val);
+    setRangeSelectorMin(m_properties["IntegrationStart"],
+                        m_properties["IntegrationEnd"],
+                        integrationRangeSelector, val);
   else if (prop == m_properties["IntegrationEnd"])
-    integrationRangeSelector->setMaximum(val);
+    setRangeSelectorMax(m_properties["IntegrationStart"],
+                        m_properties["IntegrationEnd"],
+                        integrationRangeSelector, val);
   else if (prop == m_properties["BackgroundStart"])
-    backgroundRangeSelector->setMinimum(val);
+    setRangeSelectorMin(m_properties["BackgroundStart"],
+                        m_properties["BackgroundEnd"], backgroundRangeSelector,
+                        val);
   else if (prop == m_properties["BackgroundEnd"])
-    backgroundRangeSelector->setMaximum(val);
+    setRangeSelectorMax(m_properties["BackgroundStart"],
+                        m_properties["BackgroundEnd"], backgroundRangeSelector,
+                        val);
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateRS(QtProperty *, double)));
 }
 
-void Elwin::runClicked() { runTab(); }
-
-/**
- * Handles mantid plotting
- */
-void Elwin::plotClicked() {
-  setPlotResultIsPlotting(true);
-  plotSpectrum(getPlotWorkspaceName(), getPlotSpectrumIndex());
-  setPlotResultIsPlotting(false);
+void Elwin::runClicked() {
+  clearOutputPlotOptionsWorkspaces();
+  runTab();
 }
 
 /**
@@ -660,27 +645,16 @@ QString Elwin::getOutputBasename() {
 void Elwin::setRunIsRunning(const bool &running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
-}
-
-void Elwin::setPlotResultIsPlotting(const bool &plotting) {
-  m_uiForm.pbPlot->setText(plotting ? "Plotting..." : "Plot Spectrum");
-  setButtonsEnabled(!plotting);
+  m_uiForm.ppPlot->watchADS(!running);
 }
 
 void Elwin::setButtonsEnabled(const bool &enabled) {
   setRunEnabled(enabled);
-  setPlotResultEnabled(enabled);
   setSaveResultEnabled(enabled);
 }
 
 void Elwin::setRunEnabled(const bool &enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
-}
-
-void Elwin::setPlotResultEnabled(const bool &enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
-  m_uiForm.cbPlotWorkspace->setEnabled(enabled);
-  m_uiForm.spPlotSpectrum->setEnabled(enabled);
 }
 
 void Elwin::setSaveResultEnabled(const bool &enabled) {

@@ -18,7 +18,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/bind.hpp>
 #include <boost/function.hpp>
 
 #include <algorithm>
@@ -70,7 +69,7 @@ void ConvertUnitsUsingDetectorTable::init() {
                   "Name of the output workspace, can be the same as the input");
   declareProperty("Target", "",
                   boost::make_shared<StringListValidator>(
-                      UnitFactory::Instance().getKeys()),
+                      UnitFactory::Instance().getConvertibleUnits()),
                   "The name of the units to convert to (must be one of those "
                   "registered in\n"
                   "the Unit Factory)");
@@ -143,7 +142,7 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
   const auto &spectraColumn = paramWS->getColVector<int>("spectra");
 
   Progress prog(this, 0.2, 1.0, m_numberOfSpectra);
-  int64_t numberOfSpectra_i =
+  auto numberOfSpectra_i =
       static_cast<int64_t>(m_numberOfSpectra); // cast to make openmp happy
 
   // Get the unit object for each workspace

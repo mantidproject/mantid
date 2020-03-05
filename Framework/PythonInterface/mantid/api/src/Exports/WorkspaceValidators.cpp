@@ -12,7 +12,7 @@
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxisValidator.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidPythonInterface/kernel/TypedValidatorExporter.h"
+#include "MantidPythonInterface/core/TypedValidatorExporter.h"
 #include <boost/python/class.hpp>
 
 using Mantid::API::IMDWorkspace_sptr;
@@ -22,8 +22,8 @@ using namespace boost::python;
 
 /// This is the base TypedValidator for most of the WorkspaceValidators
 void export_MatrixWorkspaceValidator() {
-  using Mantid::API::MatrixWorkspaceValidator;
   using Mantid::API::MatrixWorkspace_sptr;
+  using Mantid::API::MatrixWorkspaceValidator;
   TypedValidatorExporter<MatrixWorkspace_sptr>::define(
       "MatrixWorkspaceValidator");
   TypedValidatorExporter<IMDWorkspace_sptr>::define("IMDWorkspaceValidator");

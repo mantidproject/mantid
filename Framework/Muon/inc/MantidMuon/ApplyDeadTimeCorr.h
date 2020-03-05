@@ -8,7 +8,7 @@
 #define MANTID_ALGORITHMS_APPLYDEADTIMECORR_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,7 +19,7 @@ namespace Algorithms {
   @author Robert Whitley, RAL
   @date 2011-11-30
 */
-class DLLExport ApplyDeadTimeCorr : public API::Algorithm {
+class MANTID_MUON_DLL ApplyDeadTimeCorr : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ApplyDeadTimeCorr"; };

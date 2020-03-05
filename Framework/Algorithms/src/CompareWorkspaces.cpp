@@ -266,7 +266,7 @@ void CompareWorkspaces::processGroups(
     boost::shared_ptr<const API::WorkspaceGroup> groupTwo) {
 
   // Check their sizes
-  const size_t totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());
+  const auto totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());
   if (groupOne->getNumberOfEntries() != groupTwo->getNumberOfEntries()) {
     recordMismatch("GroupWorkspaces size mismatch.");
     return;
@@ -281,7 +281,7 @@ void CompareWorkspaces::processGroups(
     // Skip those not set and the input workspaces
     if (p->isDefault() || propName == "Workspace1" || propName == "Workspace2")
       continue;
-    nonDefaultProps.push_back(p);
+    nonDefaultProps.emplace_back(p);
   }
   const size_t numNonDefault = nonDefaultProps.size();
 
@@ -558,7 +558,7 @@ bool CompareWorkspaces::compareEventWorkspaces(
             numUnequalWeights += tempNumWeight;
           }
 
-          vec_mismatchedwsindex.push_back(i);
+          vec_mismatchedwsindex.emplace_back(i);
         } // Parallel critical region
 
       } // If elist 1 is not equal to elist 2
@@ -753,7 +753,7 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
     // Don't check spectra axis as that just takes it values from the ISpectrum
     // (see checkSpectraMap)
     if (ax1->isNumeric() && ax2->isNumeric()) {
-      const NumericAxis *na1 = static_cast<const NumericAxis *>(ax1);
+      const auto *na1 = static_cast<const NumericAxis *>(ax1);
       const double tolerance = getProperty("Tolerance");
       if (!na1->equalWithinTolerance(*ax2, tolerance)) {
         recordMismatch(axis_name + " values mismatch");
@@ -873,7 +873,7 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
 /// @retval false The masking does not match
 bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
                                      API::MatrixWorkspace_const_sptr ws2) {
-  const int numHists = static_cast<int>(ws1->getNumberHistograms());
+  const auto numHists = static_cast<int>(ws1->getNumberHistograms());
 
   for (int i = 0; i < numHists; ++i) {
     const bool ws1_masks = ws1->hasMaskedBins(i);

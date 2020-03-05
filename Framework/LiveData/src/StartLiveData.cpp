@@ -12,7 +12,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/System.h"
 #include "MantidLiveData/LoadLiveData.h"
 #include "MantidLiveData/MonitorLiveData.h"
 #include "MantidTypes/Core/DateAndTime.h"
@@ -63,9 +62,9 @@ void StartLiveData::init() {
       "You must specify the StartTime property if this is checked.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("UpdateEvery", 60.0,
+      std::make_unique<PropertyWithValue<double>>("UpdateEvery", 30.0,
                                                   Direction::Input),
-      "Frequency of updates, in seconds. Default 60.\n"
+      "Frequency of updates, in seconds. Default 30.\n"
       "If you specify 0, MonitorLiveData will not launch and you will get only "
       "one chunk.");
 
@@ -126,7 +125,7 @@ void StartLiveData::removeListenerProperties() {
   // Find properties tagged with the listener property group
   for (const auto &prop : getProperties()) {
     if (prop->getGroup() == listenerPropertyGroup) {
-      propertiesToRemove.push_back(prop->name());
+      propertiesToRemove.emplace_back(prop->name());
     }
   }
 
@@ -225,8 +224,7 @@ void StartLiveData::exec() {
     // Create the MonitorLiveData but DO NOT make a AlgorithmProxy to it
     IAlgorithm_sptr algBase =
         AlgorithmManager::Instance().create("MonitorLiveData", -1, false);
-    MonitorLiveData *monitorAlg =
-        dynamic_cast<MonitorLiveData *>(algBase.get());
+    auto *monitorAlg = dynamic_cast<MonitorLiveData *>(algBase.get());
 
     if (!monitorAlg)
       throw std::runtime_error("Error creating the MonitorLiveData algorithm");

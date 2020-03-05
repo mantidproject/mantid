@@ -58,15 +58,19 @@ class PrimStretchedExpFT(IFunction1D):
         :return: P(bin_boundaries[i+1])- P(bin_boundaries[i]), the difference of the primitive
         """
         rf = 16
-        parms, de, energies, fourier = function1Dcommon(self, xvals, rf=rf, **optparms)
+        parms, de, energies, fourier = function1Dcommon(
+            self, xvals, rf=rf, **optparms)
         if parms is None:
-            return fourier # return zeros if parameters not valid
+            return fourier  # return zeros if parameters not valid
         denergies = (energies[-1] - energies[0]) / (len(energies)-1)
         # Find bin boundaries
         boundaries = (xvals[1:]+xvals[:-1])/2  # internal bin boundaries
-        boundaries = np.insert(boundaries, 0, 2*xvals[0]-boundaries[0])  # external lower boundary
-        boundaries = np.append(boundaries, 2*xvals[-1]-boundaries[-1])  # external upper boundary
-        primitive = np.cumsum(fourier) * (denergies/(rf*de))  # running Riemann sum
+        # external lower boundary
+        boundaries = np.insert(boundaries, 0, 2*xvals[0]-boundaries[0])
+        # external upper boundary
+        boundaries = np.append(boundaries, 2*xvals[-1]-boundaries[-1])
+        primitive = np.cumsum(fourier) * (denergies /
+                                          (rf*de))  # running Riemann sum
         transform = np.interp(boundaries[1:] - parms['Centre'], energies, primitive) - \
             np.interp(boundaries[:-1] - parms['Centre'], energies, primitive)
         return transform * parms['Height']

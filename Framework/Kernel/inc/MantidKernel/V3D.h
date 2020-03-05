@@ -314,6 +314,8 @@ public:
   double zenith(const V3D &) const noexcept;
   /// Angle between this and another vector
   double angle(const V3D &) const;
+  /// cos(Angle) between this and another vector
+  double cosAngle(const V3D &) const;
   /// Direction angles
   V3D directionAngles(bool inDegrees = true) const;
   /// Maximum absolute integer value

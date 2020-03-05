@@ -70,7 +70,7 @@ int traceLineNumber(PyObject *scriptObj, PyFrameObject *frame, int event,
 static const QString MSG_FINISHED = "Script execution finished.";
 /// Message to emit when starting
 static const QString MSG_STARTED = "Script execution started.";
-}
+} // namespace
 
 /**
  * Constructor

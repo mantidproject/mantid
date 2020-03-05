@@ -7,6 +7,12 @@
 # Note all changes in this file require a restart of Mantid
 # additionally any long term changes should be sent back to the development team so any changes can be merged
 # into future versions of Mantid.
+from __future__ import (absolute_import, unicode_literals)
+
+import copy
+
+from isis_powder.routines.common import ADVANCED_CONFIG as COMMON_ADVANCED_CONFIG
+
 
 absorption_correction_params = {
     # These are read directly by the generate absorb corrections functions instead of being parsed.
@@ -110,7 +116,7 @@ def get_mode_specific_dict(mode):
 
 
 def get_all_adv_variables(mode=None):
-    advanced_config_dict = {}
+    advanced_config_dict = copy.copy(COMMON_ADVANCED_CONFIG)
     advanced_config_dict.update(variables)
     advanced_config_dict.update(get_mode_specific_dict(mode))
     return advanced_config_dict

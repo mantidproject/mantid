@@ -79,19 +79,19 @@ std::vector<double> ReflectometryBackgroundSubtraction::findSpectrumRanges(
     const std::vector<specnum_t> &spectraList) {
 
   std::vector<double> spectrumRanges;
-  spectrumRanges.push_back(spectraList[0]);
+  spectrumRanges.emplace_back(spectraList[0]);
   auto prevSpec = spectrumRanges[0];
   for (size_t index = 0; index < spectraList.size() - 1; ++index) {
     auto spec = spectraList[index + 1];
     auto range = spec - prevSpec;
     // check if start of new range
     if (range > 1) {
-      spectrumRanges.push_back(prevSpec);
-      spectrumRanges.push_back(spec);
+      spectrumRanges.emplace_back(prevSpec);
+      spectrumRanges.emplace_back(spec);
     }
     prevSpec = spec;
   }
-  spectrumRanges.push_back(spectraList.back());
+  spectrumRanges.emplace_back(spectraList.back());
   return spectrumRanges;
 }
 
@@ -134,6 +134,7 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
   poly->setProperty("Degree", getPropertyValue("DegreeOfPolynomial"));
   poly->setProperty("XRanges", spectrumRanges);
   poly->setProperty("CostFunction", getPropertyValue("CostFunction"));
+  poly->setProperty("Minimizer", "Levenberg-Marquardt");
   poly->execute();
   MatrixWorkspace_sptr bgd = poly->getProperty("OutputWorkspace");
 
@@ -178,7 +179,6 @@ void ReflectometryBackgroundSubtraction::calculatePixelBackground(
   // will need to change if ISIS reflectometry get a 2D detector
   LRBgd->setProperty("LowResolutionRange", "0,0");
   LRBgd->setProperty("TypeOfDetector", "LinearDetector");
-  LRBgd->setProperty("OutputWorkspace", getPropertyValue("OutputWorkspace"));
   LRBgd->execute();
 
   Workspace_sptr outputWS = LRBgd->getProperty("OutputWorkspace");
@@ -288,8 +288,8 @@ void ReflectometryBackgroundSubtraction::exec() {
   std::vector<specnum_t> spectraList;
   for (auto index : indexSet) {
     auto &spec = inputWS->getSpectrum(index);
-    spectraList.push_back(spec.getSpectrumNo());
-    indexList.push_back(static_cast<double>(index));
+    spectraList.emplace_back(spec.getSpectrumNo());
+    indexList.emplace_back(static_cast<double>(index));
   }
 
   if (backgroundType == "PerDetectorAverage") {
@@ -297,6 +297,14 @@ void ReflectometryBackgroundSubtraction::exec() {
   }
 
   if (backgroundType == "Polynomial") {
+    auto range = static_cast<int>(spectraList.back() - spectraList.front());
+    int degree = getProperty("degreeOfPolynomial");
+    if (range < degree) {
+      throw std::invalid_argument(
+          "Cannot fit polynomial, number of data points in region < "
+          "the number of fitting parameters: " +
+          std::to_string(range + 1) + " < " + std::to_string(degree + 1));
+    }
     auto spectrumRanges = findSpectrumRanges(spectraList);
     calculatePolynomialBackground(inputWS, spectrumRanges);
   }

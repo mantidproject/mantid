@@ -57,7 +57,7 @@ MatrixWorkspaceMDIterator::MatrixWorkspaceMDIterator(
   m_max = 0;
   m_startIndices.reserve(m_endWI - m_beginWI);
   for (size_t i = m_beginWI; i < m_endWI; ++i) {
-    m_startIndices.push_back(m_max);
+    m_startIndices.emplace_back(m_max);
     m_max += m_ws->readY(i).size();
   }
 

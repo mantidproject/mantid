@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
@@ -24,7 +24,8 @@ def pair_name():
     return name
 
 
-class GroupSelectorTest(GuiTest):
+@start_qapplication
+class GroupSelectorTest(unittest.TestCase):
 
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
@@ -66,10 +67,10 @@ class GroupSelectorTest(GuiTest):
         self.presenter.add_pair(pair2)
 
     def get_group_1_selector_from_pair(self, row):
-        return self.view.pairing_table.cellWidget(row, 1)
+        return self.view.pairing_table.cellWidget(row, 2)
 
     def get_group_2_selector_from_pair(self, row):
-        return self.view.pairing_table.cellWidget(row, 2)
+        return self.view.pairing_table.cellWidget(row, 3)
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS : test the functionality around the combo boxes which allow the user to select the two groups that
@@ -122,7 +123,7 @@ class GroupSelectorTest(GuiTest):
         self.get_group_1_selector_from_pair(0).setCurrentIndex(1)
 
         self.assertEqual(self.view.on_cell_changed.call_count, 1)
-        self.assertEqual(self.view.on_cell_changed.call_args_list[0][0], (0, 1))
+        self.assertEqual(self.view.on_cell_changed.call_args_list[0][0], (0, 2))
 
     def test_that_removing_groups_and_then_calling_update_removes_groups_from_selections(self):
         self.presenter.handle_add_pair_button_clicked()

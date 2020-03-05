@@ -18,9 +18,9 @@
 #define DECLARE_UNIT(classname)                                                \
   namespace {                                                                  \
   Mantid::Kernel::RegistrationHelper                                           \
-      register_alg_##classname(((Mantid::Kernel::UnitFactory::Instance()       \
-                                     .subscribe<classname>(#classname)),       \
-                                0));                                           \
+      register_unit_##classname(((Mantid::Kernel::UnitFactory::Instance()      \
+                                      .subscribe<classname>(#classname)),      \
+                                 0));                                          \
   }                                                                            \
   const std::string Mantid::Kernel::Units::classname::unitID() const {         \
     return #classname;                                                         \
@@ -32,14 +32,10 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Kernel {
-
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-class Unit;
 
 /** Creates instances of concrete units.
     The factory is a singleton that hands out shared pointers to the base Unit
@@ -57,6 +53,21 @@ class MANTID_KERNEL_DLL UnitFactoryImpl final : public DynamicFactory<Unit> {
 public:
   UnitFactoryImpl(const UnitFactoryImpl &) = delete;
   UnitFactoryImpl &operator=(const UnitFactoryImpl &) = delete;
+
+  /// Returns the names of the convertible units in the factory
+  /// @return A string vector of keys
+  const std::vector<std::string> getConvertibleUnits() const {
+    std::vector<std::string> convertibleUnits;
+
+    for (const auto &unitKey : getKeys()) {
+      const auto unit_sptr = create(unitKey);
+      if (unit_sptr->isConvertible()) {
+        convertibleUnits.emplace_back(unitKey);
+      }
+    }
+
+    return convertibleUnits;
+  }
 
 private:
   friend struct CreateUsingNew<UnitFactoryImpl>;

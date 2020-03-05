@@ -13,9 +13,8 @@ if(ENABLE_MANTIDPLOT)
                      PYQT_VERSION 4
                      INCLUDE_DIRS
                       ${COMMON_SIP_DIR}
-                      ${PYTHON_INCLUDE_PATH}
-                      ${ICONS_INC_DIR}
                       ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
+                      ${ICONS_INC_DIR}
                      LINK_LIBS
                       MantidQtIconsQt4
                       Qt4::QtCore
@@ -40,7 +39,6 @@ if(ENABLE_WORKBENCH)
                      PYQT_VERSION 5
                      INCLUDE_DIRS
                       ${COMMON_SIP_DIR}
-                      ${PYTHON_INCLUDE_PATH}
                       ${ICONS_INC_DIR}
                       ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
                      LINK_LIBS

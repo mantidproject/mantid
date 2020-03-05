@@ -180,20 +180,20 @@ CreateFloodWorkspace::removeBackground(API::MatrixWorkspace_sptr ws) {
   if (isDefault(Prop::START_X)) {
     startX = x.front();
   } else {
-    excludeFromFit.push_back(x.front());
-    excludeFromFit.push_back(startX);
+    excludeFromFit.emplace_back(x.front());
+    excludeFromFit.emplace_back(startX);
   }
   if (isDefault(Prop::END_X)) {
     endX = x.back();
   } else {
-    excludeFromFit.push_back(endX);
-    excludeFromFit.push_back(x.back());
+    excludeFromFit.emplace_back(endX);
+    excludeFromFit.emplace_back(x.back());
   }
 
   // Exclude any bad detectors.
   for (auto i : m_excludedSpectra) {
-    excludeFromFit.push_back(i);
-    excludeFromFit.push_back(i);
+    excludeFromFit.emplace_back(i);
+    excludeFromFit.emplace_back(i);
   }
 
   std::string const function = getBackgroundFunction();

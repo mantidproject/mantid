@@ -41,8 +41,7 @@ public:
           WorkspaceFactory::Instance().create("Workspace2D", 5, 6, 5);
       Workspace2D_sptr space2D =
           boost::dynamic_pointer_cast<Workspace2D>(space);
-      double *a = new double[25];
-      double *e = new double[25];
+      std::vector<double> a(25), e(25);
       for (int i = 0; i < 25; ++i) {
         a[i] = i;
         e[i] = sqrt(double(i));
@@ -51,8 +50,10 @@ public:
         for (int k = 0; k < 6; ++k) {
           space2D->dataX(j)[k] = k;
         }
-        space2D->dataY(j) = std::vector<double>(a + (5 * j), a + (5 * j) + 5);
-        space2D->dataE(j) = std::vector<double>(e + (5 * j), e + (5 * j) + 5);
+        auto beginY = std::next(a.begin(), j * 5);
+        space2D->dataY(j) = std::vector<double>(beginY, std::next(beginY, 5));
+        auto beginE = std::next(e.begin(), j * 5);
+        space2D->dataE(j) = std::vector<double>(beginE, std::next(beginE, 5));
       }
       InstrumentCreationHelper::addFullInstrumentToWorkspace(*space2D, false,
                                                              false, "");

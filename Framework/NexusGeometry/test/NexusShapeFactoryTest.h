@@ -64,7 +64,7 @@ private:
 
   template <typename T>
   void appendTo(std::vector<T> &destination, unsigned int value) {
-    destination.push_back(static_cast<T>(value));
+    destination.emplace_back(static_cast<T>(value));
   }
 
 public:

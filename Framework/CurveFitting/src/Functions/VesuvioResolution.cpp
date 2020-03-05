@@ -247,8 +247,9 @@ void VesuvioResolution::voigtApprox(std::vector<double> &voigt,
 
   // Normalize so that integral of V=lorentzAmp
   const double norm = 1.0 / (0.5 * M_PI * lorentzWidth);
+  using std::placeholders::_1;
   std::transform(voigt.begin(), voigt.end(), voigt.begin(),
-                 std::bind2nd(std::multiplies<double>(), norm));
+                 std::bind(std::multiplies<double>(), _1, norm));
 }
 
 } // namespace Functions

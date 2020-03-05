@@ -30,7 +30,7 @@ class PreciseDoubleFactory(QItemEditorFactory):
         if user_type == QVariant.Double:
             widget.setFrame(True)
             widget.setDecimals(16)
-            widget.setRange(sys.float_info.min, sys.float_info.max)
+            widget.setRange(-sys.float_info.max, sys.float_info.max)
 
         return widget
 

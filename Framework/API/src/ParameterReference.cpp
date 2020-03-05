@@ -57,7 +57,7 @@ void ParameterReference::reset(IFunction *fun, std::size_t index,
   m_owner = fun;
   IFunction *fLocal = fun;
   size_t iLocal = index;
-  CompositeFunction *cf = dynamic_cast<CompositeFunction *>(fun);
+  auto *cf = dynamic_cast<CompositeFunction *>(fun);
   while (cf) {
     size_t iFun =
         cf->functionIndex(iLocal); // TODO squashing the warning breaks the code

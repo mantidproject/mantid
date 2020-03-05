@@ -5,8 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
+
 import unittest
-import mantid
 
 from mantid.kernel import DateAndTime
 from sans.common.file_information import (SANSFileInformationFactory, get_instrument_paths_for_sans_file)

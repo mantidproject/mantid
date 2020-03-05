@@ -143,9 +143,8 @@ void ExportTimeSeriesLog::exportLog(const std::string &logname,
 
   if (!logname.empty()) {
     // Log
-    Kernel::TimeSeriesProperty<double> *tlog =
-        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-            m_inputWS->run().getProperty(logname));
+    auto *tlog = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+        m_inputWS->run().getProperty(logname));
     if (!tlog) {
       std::stringstream errmsg;
       errmsg << "TimeSeriesProperty Log " << logname

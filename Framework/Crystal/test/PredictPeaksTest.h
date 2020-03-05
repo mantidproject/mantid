@@ -244,15 +244,21 @@ public:
   void test_manual_U_and_gonio() { do_test_manual(22.5, 22.5); }
 
   void test_crystallography() {
-    Kernel::ConfigService::Instance().setString("Q.convention",
-                                                "Crystallography");
+    using Kernel::ConfigService;
+    auto origQConv = ConfigService::Instance().getString("Q.convention");
+    ConfigService::Instance().setString("Q.convention", "Crystallography");
     do_test_exec("Primitive", 10, std::vector<V3D>(), -1);
+    ConfigService::Instance().setString("Q.convention", origQConv);
   }
   void test_edge() {
     do_test_exec("Primitive", 5, std::vector<V3D>(), 1, false, false, 10);
   }
 
   void test_exec_with_CalculateGoniometerForCW() {
+    using Kernel::ConfigService;
+    auto origQConv = ConfigService::Instance().getString("Q.convention");
+    ConfigService::Instance().setString("Q.convention", "Crystallography");
+
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 
@@ -277,7 +283,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalculateGoniometerForCW", true));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Wavelength", "1.5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MinAngle", "0"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaxAngle", "10.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaxAngle", "5.0"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -296,6 +302,8 @@ public:
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
+
+    ConfigService::Instance().setString("Q.convention", origQConv);
   }
 };
 

@@ -9,6 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidCrystal/PeakAlgorithmHelpers.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
@@ -38,24 +39,11 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace {
-/// Small helper function that return -1 if convention
-/// is "Crystallography" and 1 otherwise.
-double get_factor_for_q_convention(const std::string &convention) {
-  if (convention == "Crystallography") {
-    return -1.0;
-  }
-
-  return 1.0;
-}
-} // namespace
-
 /** Constructor
  */
 PredictPeaks::PredictPeaks()
     : m_runNumber(-1), m_inst(), m_pw(), m_sfCalculator(),
-      m_qConventionFactor(get_factor_for_q_convention(
-          ConfigService::Instance().getString("Q.convention"))) {
+      m_qConventionFactor(qConventionFactor()) {
   m_refConds = getAllReflectionConditions();
 }
 
@@ -196,7 +184,7 @@ void PredictPeaks::exec() {
     // Retrieve the goniometer rotation matrix
     try {
       DblMatrix goniometerMatrix = matrixWS->run().getGoniometerMatrix();
-      gonioVec.push_back(goniometerMatrix);
+      gonioVec.emplace_back(goniometerMatrix);
     } catch (std::runtime_error &e) {
       // If there is no goniometer matrix, use identity matrix instead.
       g_log.error() << "Error getting the goniometer rotation matrix from the "
@@ -208,7 +196,7 @@ void PredictPeaks::exec() {
     // Sort peaks by run number so that peaks with equal goniometer matrices are
     // adjacent
     std::vector<std::pair<std::string, bool>> criteria;
-    criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
+    criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
 
     peaksWS->sort(criteria);
 
@@ -218,7 +206,7 @@ void PredictPeaks::exec() {
       IPeak &p = peaksWS->getPeak(i);
       DblMatrix currentGoniometerMatrix = p.getGoniometerMatrix();
       if (!(currentGoniometerMatrix == lastGoniometerMatrix)) {
-        gonioVec.push_back(currentGoniometerMatrix);
+        gonioVec.emplace_back(currentGoniometerMatrix);
         lastGoniometerMatrix = currentGoniometerMatrix;
       }
     }
@@ -237,10 +225,10 @@ void PredictPeaks::exec() {
       try {
         DblMatrix goniometerMatrix =
             mdWS->getExperimentInfo(i)->mutableRun().getGoniometerMatrix();
-        gonioVec.push_back(goniometerMatrix);
+        gonioVec.emplace_back(goniometerMatrix);
       } catch (std::runtime_error &e) {
         // If there is no goniometer matrix, use identity matrix instead.
-        gonioVec.push_back(DblMatrix(3, 3, true));
+        gonioVec.emplace_back(DblMatrix(3, 3, true));
 
         g_log.error()
             << "Error getting the goniometer rotation matrix from the "
@@ -255,7 +243,7 @@ void PredictPeaks::exec() {
   // If there's no goniometer matrix at this point, push back an identity
   // matrix.
   if (gonioVec.empty()) {
-    gonioVec.push_back(DblMatrix(3, 3, true));
+    gonioVec.emplace_back(DblMatrix(3, 3, true));
   }
 
   setInstrumentFromInputWorkspace(inputExperimentInfo);
@@ -372,8 +360,8 @@ void PredictPeaks::exec() {
   // Sort peaks by run number so that peaks with equal goniometer matrices are
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
-  criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.push_back(std::pair<std::string, bool>("BankName", true));
+  criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
+  criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
   m_pw->sort(criteria);
 
   auto &peaks = m_pw->getPeaks();
@@ -510,7 +498,7 @@ void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(
    * for the convention stored in the workspace.
    */
   double peaks_q_convention_factor =
-      get_factor_for_q_convention(peaksWorkspace->getConvention());
+      qConventionFactor(peaksWorkspace->getConvention());
 
   for (int i = 0; i < static_cast<int>(peaksWorkspace->getNumberPeaks()); ++i) {
     IPeak &p = peaksWorkspace->getPeak(i);
@@ -520,7 +508,7 @@ void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(
     if (roundHKL)
       hkl.round();
 
-    possibleHKLs.push_back(hkl);
+    possibleHKLs.emplace_back(hkl);
   } // for each hkl in the workspace
 }
 

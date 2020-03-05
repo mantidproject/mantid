@@ -59,7 +59,7 @@ void MostLikelyMean::init() {
  */
 void MostLikelyMean::exec() {
   const std::vector<double> input = getProperty("InputArray");
-  const int size = static_cast<int>(input.size());
+  const auto size = static_cast<int>(input.size());
   boost::multi_array<double, 2> cov(boost::extents[size][size]);
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < size; ++i) {

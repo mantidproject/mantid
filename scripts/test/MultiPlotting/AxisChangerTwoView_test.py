@@ -7,12 +7,13 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
 
 
-class AxisChangerTwoViewTest(GuiTest):
+@start_qapplication
+class AxisChangerTwoViewTest(unittest.TestCase):
     def setUp(self):
         label = "test"
         self.view = AxisChangerView(label)

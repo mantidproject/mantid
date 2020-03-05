@@ -27,7 +27,6 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using Mantid::Geometry::MDBoxImplicitFunction;
 using Mantid::Geometry::MDImplicitFunction;
-using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDPlane;
 
 class MDBoxIteratorTest : public CxxTest::TestSuite {
@@ -608,6 +607,9 @@ public:
     it->getBox()->mask();
     // For masked boxes, getNormalizedSignal() should return NaN.
     TS_ASSERT(std::isnan(it->getNormalizedSignal()));
+
+    delete A->getBoxController();
+    delete A;
   }
 };
 
@@ -682,10 +684,10 @@ public:
     std::vector<MDBoxBase<MDLeanEvent<3>, 3> *> boxes;
 
     // Iterate and fill the vector as you go.
-    boxes.push_back(it.getBox());
+    boxes.emplace_back(it.getBox());
     while (it.next()) {
       box = it.getBox();
-      boxes.push_back(box);
+      boxes.emplace_back(box);
     }
     TS_ASSERT(box);
     size_t expected = 125 * 125 * 125 + 125 * 125 + 125 + 1;

@@ -16,7 +16,7 @@ from mantid.simpleapi import *
 
 class ResNorm(PythonAlgorithm):
 
-    _res_clone = None
+    _res_ws_clone = None
     _res_ws = None
     _van_ws = None
     _e_min = None
@@ -95,7 +95,7 @@ class ResNorm(PythonAlgorithm):
 
     def PyExec(self):
         res_clone_name = '__' + self._res_ws
-        res_clone_ws = CloneWorkspace(InputWorkspace=self._res_ws, OutputWorkspace=res_clone_name)
+        self._res_ws_clone = CloneWorkspace(InputWorkspace=self._res_ws, OutputWorkspace=res_clone_name)
 
         if self._create_output:
             self._out_ws_table = self.getPropertyValue('OutputWorkspaceTable')
@@ -114,6 +114,7 @@ class ResNorm(PythonAlgorithm):
 
         v_values = van_ws.getAxis(1).extractValues()
         v_unit = van_ws.getAxis(1).getUnit().unitID()
+        DeleteWorkspace(van_ws)
 
         # Process resolution workspace
         padded_res_ws = self._process_res_ws(num_hist)
@@ -150,7 +151,6 @@ class ResNorm(PythonAlgorithm):
                         OutputWorkspace=self._out_ws)
         self.setProperty('OutputWorkspace', self._out_ws)
 
-        DeleteWorkspace(van_ws)
         DeleteWorkspace(padded_res_ws)
         prog_process.report('Deleting workspaces')
 
@@ -158,9 +158,6 @@ class ResNorm(PythonAlgorithm):
             self.setProperty('OutputWorkspaceTable', fit_params)
 
         prog_process.report('Add or replace Resolution workspace')
-        res_name = res_clone_name[2:]
-        RenameWorkspace(InputWorkspace=res_clone_name,OutputWorkspace=res_name)
-        mtd.addOrReplace(res_name, res_clone_ws)
 
     def _process_res_ws(self, num_hist):
         """
@@ -172,10 +169,10 @@ class ResNorm(PythonAlgorithm):
         """
 
         norm_res_ws = '__ResNorm_unityres'
-        NormaliseToUnity(InputWorkspace=self._res_ws,
+        NormaliseToUnity(InputWorkspace=self._res_ws_clone,
                          OutputWorkspace=norm_res_ws)
 
-        ws_name = '%s' % (self._res_ws)
+        ws_name = '%s' % (self._res_ws_clone)
 
         for idx in range(num_hist):
             input_ws_1 = ws_name

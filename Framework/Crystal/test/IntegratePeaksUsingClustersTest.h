@@ -81,7 +81,7 @@ public:
   }
 
   void test_input_md_workspace_mandatory() {
-    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace();
+    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     IntegratePeaksUsingClusters alg;
     alg.setRethrows(true);
@@ -95,7 +95,7 @@ public:
   }
 
   void test_throw_if_special_coordinates_unknown() {
-    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace();
+    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace(2);
     IMDHistoWorkspace_sptr mdws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1);
 
@@ -239,8 +239,8 @@ public:
     const double peakRadius = 1;
     const double threshold = 100;
     std::vector<size_t> nEventsInPeakVec;
-    nEventsInPeakVec.push_back(10000);
-    nEventsInPeakVec.push_back(
+    nEventsInPeakVec.emplace_back(10000);
+    nEventsInPeakVec.emplace_back(
         20000); // Second peak has DOUBLE the intensity of the firse one.
 
     MDHistoPeaksWSTuple inputWorkspaces = make_peak_and_md_ws(

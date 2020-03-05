@@ -157,7 +157,7 @@ void FunctionCurve::loadData(int points) {
           continue;
         if (x > d_to)
           break;
-        X.push_back(x);
+        X.emplace_back(x);
       }
 
       // Create the function and initialize it using fnInput which was saved in
@@ -276,7 +276,7 @@ void FunctionCurve::loadMantidData(Mantid::API::MatrixWorkspace_const_sptr ws,
         continue;
       if (x > d_to)
         break;
-      X.push_back(x);
+      X.emplace_back(x);
     }
 
     // Create the function and initialize it using fnInput which was saved in

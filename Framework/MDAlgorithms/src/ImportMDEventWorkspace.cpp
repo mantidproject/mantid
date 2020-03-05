@@ -118,8 +118,8 @@ void ImportMDEventWorkspace::addEventsData(
   auto mdEventEntriesIterator = m_posMDEventStart;
   std::vector<Mantid::coord_t> centers(nd);
   for (size_t i = 0; i < m_nDataObjects; ++i) {
-    float signal = convert<float>(*(++mdEventEntriesIterator));
-    float error = convert<float>(*(++mdEventEntriesIterator));
+    auto signal = convert<float>(*(++mdEventEntriesIterator));
+    auto error = convert<float>(*(++mdEventEntriesIterator));
     uint16_t run_no = 0;
     int32_t detector_no = 0;
     if (m_IsFullDataObjects) {
@@ -162,7 +162,7 @@ void ImportMDEventWorkspace::quickFileCheck() {
       std::find(m_file_data.begin(), m_file_data.end(), DimensionBlockFlag());
   auto posMDEventStart =
       std::find(m_file_data.begin(), m_file_data.end(), MDEventBlockFlag());
-  int posDiffDims =
+  auto posDiffDims =
       static_cast<int>(std::distance(posDimStart, posMDEventStart));
   if (posDiffDims < 1) {
     std::string message = DimensionBlockFlag() +
@@ -249,7 +249,7 @@ void ImportMDEventWorkspace::exec() {
       std::find(m_file_data.begin(), m_file_data.end(), MDEventBlockFlag());
 
   // Calculate the dimensionality
-  int posDiffDims =
+  auto posDiffDims =
       static_cast<int>(std::distance(m_posDimStart, m_posMDEventStart));
   m_nDimensions = (posDiffDims - 1) / 4;
 
@@ -278,7 +278,7 @@ void ImportMDEventWorkspace::exec() {
       mdEventEntriesIterator += 2;
     }
     for (size_t j = 0; j < m_nDimensions; ++j) {
-      double coord = convert<double>(*(++mdEventEntriesIterator));
+      auto coord = convert<double>(*(++mdEventEntriesIterator));
       extentMins[j] = coord < extentMins[j] ? coord : extentMins[j];
       extentMaxs[j] = coord > extentMaxs[j] ? coord : extentMaxs[j];
     }
@@ -295,7 +295,7 @@ void ImportMDEventWorkspace::exec() {
     std::string id = convert<std::string>(*(++dimEntriesIterator));
     std::string name = convert<std::string>(*(++dimEntriesIterator));
     std::string units = convert<std::string>(*(++dimEntriesIterator));
-    int nbins = convert<int>(*(++dimEntriesIterator));
+    auto nbins = convert<int>(*(++dimEntriesIterator));
 
     auto mdUnit = unitFactory->create(units);
     Mantid::Geometry::GeneralFrame frame(

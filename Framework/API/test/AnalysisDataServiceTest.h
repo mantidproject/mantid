@@ -107,7 +107,7 @@ public:
                                          "test_all_items_present_2"};
     std::vector<Workspace_sptr> expected;
     for (const auto &name : names) {
-      expected.push_back(addToADS(name));
+      expected.emplace_back(addToADS(name));
     }
     std::vector<Workspace_sptr> items;
     TS_ASSERT_THROWS_NOTHING(items = ads.retrieveWorkspaces(names));
@@ -122,11 +122,11 @@ public:
     const std::vector<std::string> names{"test_all_items_present_unroll_1",
                                          "test_all_items_present_unroll_2"};
     std::vector<Workspace_sptr> expected;
-    expected.push_back(addToADS(names[0]));
+    expected.emplace_back(addToADS(names[0]));
     const size_t nitems{4u};
     WorkspaceGroup_sptr groupWS{addGroupToADS(names[1], nitems)};
     for (auto i = 0u; i < nitems; ++i) {
-      expected.push_back(groupWS->getItem(i));
+      expected.emplace_back(groupWS->getItem(i));
     }
     std::vector<Workspace_sptr> items;
     TS_ASSERT_THROWS_NOTHING(items = ads.retrieveWorkspaces(names, true));

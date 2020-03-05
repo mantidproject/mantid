@@ -172,7 +172,7 @@ void RecalculateTrajectoriesExtents::exec() {
         *(outWS->getExperimentInfo(static_cast<uint16_t>(iExpInfo)));
 
     const auto &spectrumInfo = currentExptInfo.spectrumInfo();
-    const int64_t nspectra = static_cast<int64_t>(spectrumInfo.size());
+    const auto nspectra = static_cast<int64_t>(spectrumInfo.size());
     std::vector<double> lowValues, highValues;
 
     auto *lowValuesLog = dynamic_cast<VectorDoubleProperty *>(

@@ -140,7 +140,7 @@ void GramCharlierComptonProfile::setHermiteCoefficients(
           "NCSCountRate - Error reading int from hermite coefficient string: " +
           coeffs);
     }
-    m_hermite.push_back(value);
+    m_hermite.emplace_back(value);
   }
   declareGramCharlierParameters();
 }
@@ -177,13 +177,13 @@ GramCharlierComptonProfile::intensityParameterIndices() const {
       std::ostringstream os;
       os << HERMITE_PREFIX
          << 2 * i; // refactor to have method that produces the name
-      indices.push_back(this->parameterIndex(os.str()));
+      indices.emplace_back(this->parameterIndex(os.str()));
     }
   }
   // Include Kfse if it is not fixed
   const size_t kIndex = this->parameterIndex(KFSE_NAME);
   if (isActive(kIndex)) {
-    indices.push_back(kIndex);
+    indices.emplace_back(kIndex);
   }
 
   return indices;
@@ -322,6 +322,10 @@ void GramCharlierComptonProfile::addFSETerm(std::vector<double> &lhs) const {
   if (m_userFixedFSE)
     kfse *= getParameter("C_0");
 
+  if (m_yfine.empty() || m_qfine.empty()) {
+    throw std::runtime_error("The Y values or Q values have not been set");
+  }
+
   for (int j = 0; j < NFINE_Y; ++j) {
     const double y = m_yfine[j] / M_SQRT2 / wg;
     const double he3 = boost::math::hermite(3, y);
@@ -428,8 +432,9 @@ void GramCharlierComptonProfile::cacheYSpaceValues(
 
   // Cache voigt function over yfine
   std::vector<double> minusYFine(NFINE_Y);
+  using std::placeholders::_1;
   std::transform(m_yfine.begin(), m_yfine.end(), minusYFine.begin(),
-                 std::bind2nd(std::multiplies<double>(), -1.0));
+                 std::bind(std::multiplies<double>(), _1, -1.0));
   std::vector<double> ym(
       NFINE_Y); // Holds result of (y[i] - yfine) for each original y
   m_voigt.resize(ncoarseY);
@@ -441,7 +446,7 @@ void GramCharlierComptonProfile::cacheYSpaceValues(
     const double yi = yspace[i];
     std::transform(
         minusYFine.begin(), minusYFine.end(), ym.begin(),
-        std::bind2nd(std::plus<double>(), yi)); // yfine is actually -yfine
+        std::bind(std::plus<double>(), _1, yi)); // yfine is actually -yfine
     m_resolutionFunction->voigtApprox(voigt, ym, 0, 1.0);
   }
 

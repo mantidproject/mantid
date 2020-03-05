@@ -1,0 +1,82 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//     NScD Oak Ridge National Laboratory, European Spallation Source
+//     & Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+#ifndef MANTIDWIDGETS_CONVOLUTIONFUNCTIONMODEL_H_
+#define MANTIDWIDGETS_CONVOLUTIONFUNCTIONMODEL_H_
+
+#include "DllOption.h"
+#include "FunctionModel.h"
+#include <boost/make_shared.hpp>
+#include <boost/optional.hpp>
+#include <vector>
+
+namespace MantidQt {
+namespace MantidWidgets {
+
+using namespace Mantid::API;
+
+class EXPORT_OPT_MANTIDQT_COMMON ConvolutionFunctionModel
+    : public FunctionModel {
+public:
+  void setFunction(IFunction_sptr) override;
+  void setModel(const std::string &background, const std::string &workspace,
+                int workspaceIndex, const std::string &peaks,
+                bool hasDeltaFunction);
+  void
+  setModel(const std::string &background,
+           const std::vector<std::pair<std::string, int>> &resolutionWorkspaces,
+           const std::string &peaks, bool hasDeltaFunction,
+           const std::vector<double> &qValues, const bool isQDependent,
+           bool hasTempCorrection, double tempValue);
+  boost::optional<QString> backgroundPrefix() const {
+    return m_backgroundPrefix;
+  }
+  boost::optional<QString> convolutionPrefix() const {
+    return m_convolutionPrefix;
+  }
+  boost::optional<QString> deltaFunctionPrefix() const {
+    return m_deltaFunctionPrefix;
+  }
+  boost::optional<QString> tempFunctionPrefix() const {
+    return m_tempFunctionPrefix;
+  }
+  boost::optional<QStringList> peakPrefixes() const { return m_peakPrefixes; }
+  std::string resolutionWorkspace() const { return m_resolutionWorkspace; }
+  int resolutionWorkspaceIndex() const { return m_resolutionWorkspaceIndex; }
+
+private:
+  void findComponentPrefixes();
+  //  void findConvolutionPrefixes(const IFunction_sptr &fun);
+  void iterateThroughFunction(IFunction *func, const QString &prefix);
+  void setPrefix(IFunction *func, const QString &prefix);
+  CompositeFunction_sptr createInnerFunction(std::string peaksFunction,
+                                             bool hasDeltaFunction,
+                                             bool isQDependent, double q,
+                                             bool hasTempCorrection,
+                                             double tempValue);
+  CompositeFunction_sptr addTempCorrection(CompositeFunction_sptr peaksFunction,
+                                           double tempValue);
+  IFunction_sptr createTemperatureCorrection(double correction);
+  CompositeFunction_sptr
+  createConvolutionFunction(IFunction_sptr resolutionFunction,
+                            IFunction_sptr innerFunction);
+  IFunction_sptr createResolutionFunction(std::string workspaceName,
+                                          int workspaceIndex);
+  CompositeFunction_sptr addBackground(CompositeFunction_sptr domainFunction,
+                                       std::string background);
+  boost::optional<QString> m_backgroundPrefix;
+  boost::optional<QString> m_convolutionPrefix;
+  boost::optional<QString> m_deltaFunctionPrefix;
+  boost::optional<QString> m_tempFunctionPrefix;
+  boost::optional<QStringList> m_peakPrefixes;
+  std::string m_resolutionWorkspace;
+  int m_resolutionWorkspaceIndex;
+};
+
+} // namespace MantidWidgets
+} // namespace MantidQt
+
+#endif // MANTIDWIDGETS_CONVOLUTIONFUNCTIONMODEL_H_

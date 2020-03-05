@@ -95,10 +95,14 @@ public:
   virtual void loadFromProject(const std::string &lines) override;
   /// Save settings for the pick tab to a project file
   virtual std::string saveToProject() const override;
-
+  void addToContextMenu(
+      QAction *action,
+      std::function<bool(std::map<std::string, bool>)> &actionCondition);
 public slots:
   void setTubeXUnits(int units);
   void changedIntegrationRange(double /*unused*/, double /*unused*/);
+  void savePlotToWorkspace();
+
 private slots:
   void plotContextMenu();
   void sumDetectors();
@@ -117,7 +121,6 @@ private slots:
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
-  void savePlotToWorkspace();
 
 private:
   void showEvent(QShowEvent * /*unused*/) override;
@@ -179,7 +182,10 @@ private:
   // Temporary caches for values from settings
   int m_tubeXUnitsCache;
   int m_plotTypeCache;
-
+  // store added actions and conditions
+  std::vector<
+      std::pair<QAction *, std::function<bool(std::map<std::string, bool>)>>>
+      m_addedActions;
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
 };
@@ -249,7 +255,7 @@ public:
 
   void setPlotType(PlotType type) { m_plotType = type; }
   PlotType getPlotType() const { return m_plotType; }
-  void setTubeXUnits(TubeXUnits units) { m_tubeXUnits = units; }
+  void setTubeXUnits(TubeXUnits units);
   TubeXUnits getTubeXUnits() const { return m_tubeXUnits; }
   QString getTubeXUnitsName() const;
   QString getTubeXUnitsUnits() const;

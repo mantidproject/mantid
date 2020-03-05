@@ -45,6 +45,11 @@ class WriteToSignal(QObject):
                 self.sig_write_received.emit("Error: Unable to write to the console of the process.\n"
                                              "This error is not related to your script's execution.\n"
                                              "Original error: {}\n\n".format(str(e)))
-
+            except UnicodeEncodeError:
+                """
+                Scripts containing unicode characters could fail to run if mantid is not started from the
+                terminal on unix systems. The script runs fine if this exception is caught and discarded.
+                """
+                pass
         # always write to the message log
         self.sig_write_received.emit(txt)

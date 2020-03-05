@@ -146,3 +146,6 @@ class TableWorkspaceDisplayModel:
         else:
             SortTableWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ws, Columns=column_name,
                                Ascending=sort_ascending)
+
+    def set_column_type(self, col, type):
+        self.ws.setPlotType(col, type)

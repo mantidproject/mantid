@@ -112,7 +112,7 @@ void EQSANSMonitorTOF::exec() {
   // the region beyond a single frame by considering only the first 1/60 sec of
   // the
   // TOF histogram. (Bins 1 to 1666, as opposed to 1 to 2000)
-  const int nTOF = static_cast<int>(XIn.size());
+  const auto nTOF = static_cast<int>(XIn.size());
 
   // Loop through each bin to find the cutoff where the TOF distribution wraps
   // around

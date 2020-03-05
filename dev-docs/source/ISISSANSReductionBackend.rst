@@ -152,45 +152,17 @@ the state construction.
 *state_base.py*
 ^^^^^^^^^^^^^^^
 
-The *state_base.py* module contains the essential ingredients for defining a
-state object. These are the *StateBase* class which allows for serialization
-and a set of *TypedParameter*.
+The *JsonSerializable* metaclass contains the essential ingredients for
+serializing a state object. Additionally it provides a decorator for any
+Enum types which need to be JSON serializable.
 
-The *StateBase*'s *property_manager* property is responsible for serialization.
-Due to the nature of the *PropertyManagerProperty* of algorithms it serializes
-the state object to a Python dictionary and receives a Mantid *PropertyManager*
-object. This asymmetry is unfortunate, but mirrors the asymmetry of the
-algorithm inputs.
+Any classes which use the metaclass must place any attributes they intend
+to be serialized into JSON string in the instance. I.e. class level variables
+are not recommended since they may not end up in the instances internal
+dictionary.
 
-States which want to fulfill the *StateBase* contract must override the
-*validate* method. This method is used to ensure internal consistency
-of the *TypedParameters* on the state. It is important to have comprehensive
-and tight checks here.
-
-The entries on the state objects are all descriptors of type *TypedParameter* which allows
-for type checking, ensuring consistency early on. It is easy to
-build custom types. The current list of types are:
-
-- *StringParameter*
-- *BoolParameter*
-- *FloatParameter*
-- *PositiveFloatParameter*
-- *PositiveIntegerParameter*
-- *DictParameter*
-- *ClassTypeParameter*
-- *FloatWithNoneParameter*
-- *StringWithNoneParameter*
-- *PositiveFloatWithNoneParameter*
-- *FloatListParameter*
-- *StringListParameter*
-- *PositiveIntegerListParameter*
-- *ClassTypeListParameter*
-
-Most of the  typed parameters are self-descriptive. The *ClassTypeParameter*
-refers to the enum-like class definitions in *enum.py*. Note that if a parameter
-is not set by the state builder, then it will return *None* when it is queried.
-If it is a mandatory parameter on a state object, then this needs to be enforced
-in the *validate* method of the state.
+The *Serializer* is responsible for serialization using the JSON library and
+provides static methods to (de)serialize to a string or file.
 
 
 Individual states
@@ -256,7 +228,7 @@ can_direct_period               The period to use for the can direct           *
 calibration                     The path to the calibration file               *StringParameter*                     Y         N
 sample_scatter_run_number       Run number of the sample scatter file          *PositiveIntegerParameter*            -         Y
 sample_scatter_is_multi_period  If the sample scatter is multi-period          *BoolParameter*                       -         Y
-instrument                      Enum for the SANS instrument                   *ClassTypeParameter(SANSInstrument)*  -         Y
+instrument                      Enum for the SANS instrument                   *Enum (SANSInstrument)*               -         Y
 idf_file_path                   Path to the IDF file                           *StringParameter*                     -         Y
 ipf_file_path                   Path to the IPF file                           *StringParameter*                     -         Y
 =============================== ============================================== ===================================== ========= ===============
@@ -309,9 +281,9 @@ reduction. It contains the following parameters:
 =============================== ===================================================== ============================================== ========= =============== ===========================================
 Name                            Comment                                               Type                                           Optional? Auto-generated? Default value
 =============================== ===================================================== ============================================== ========= =============== ===========================================
-reduction_mode                  The type of reduction, i.e. LAB, HAB, merged or both  *ClassTypeParameter(ReductionMode)*            N         N               *ISISReductionMode.LAB* enum value
-reduction_dimensionality        If 1D or 2D reduction                                 *ClassTypeParameter(ReductionDimensionality)*  N         N               *ReductionDimensionality.OneDim* enum value
-merge_fit_mode                  The fit mode for merging                              *ClassTypeParameter(FitModeForMerge)*          Y         N               *FitModeForMerge.NoFit* enum value
+reduction_mode                  The type of reduction, i.e. LAB, HAB, merged or both  *Enum(ReductionMode)*            N         N               *ReductionMode.LAB* enum value
+reduction_dimensionality        If 1D or 2D reduction                                 *Enum(ReductionDimensionality)*  N         N               *ReductionDimensionality.OneDim* enum value
+merge_fit_mode                  The fit mode for merging                              *Enum(FitModeForMerge)*          Y         N               *FitModeForMerge.NoFit* enum value
 merge_shift                     The shift value for merging                           *FloatParameter*                               Y         N               0.0
 merge_scale                     The scale value for merging                           *FloatParameter*                               Y         N               1.0
 merge_range_min                 The min q value for merging                           *FloatWithNoneParameter*                       Y         N               *None*
@@ -361,13 +333,13 @@ beam_stop_arm_pos1     The x position of the beam stop arm                      
 beam_stop_arm_pos2     The y position of the beam stop arm                        *FloatParameter*          Y         N
 clear                  currently not used                                         *BoolParameter*           Y         N
 clear_time             currently not used                                         *BoolParameter*           Y         N
-detector               A dict of detector type to *StateMaskDetector* sub-states  *DictParameter*           N         Y
+detector               A dict of detector type to *StateMaskDetectors* sub-states  *DictParameter*           N         Y
 idf_path               The path to the IDF                                        *StringParameter*         N         Y
 ====================== ========================================================== ========================= ========= ===============
 
 Validation is applied to some of the entries.
 
-The detector-specific settings are stored in the *StateMaskDetector* which contains the following parameters:
+The detector-specific settings are stored in the *StateMaskDetectors* which contains the following parameters:
 
 ============================ ============ =============================== ========= ===============
 Name                           Comment      Type                          Optional? Auto-generated?
@@ -405,11 +377,11 @@ from time-of-flight to wavelength units. The parameters are:
 ===================== ==================================== =================================== ========= ===============
 Name                  Comment                              Type                                Optional? Auto-generated?
 ===================== ==================================== =================================== ========= ===============
-rebin_type            The type of rebinning                *ClassTypeParameter(RebinType)*      N         N
+rebin_type            The type of rebinning                *Enum(RebinType)*      N         N
 wavelength_low        The lower wavelength boundary        *PositiveFloatParameter*            N         N
 wavelength_high       The upper wavelength boundary        *PositiveFloatParameter*            N         N
 wavelength_step       The wavelength step                  *PositiveFloatParameter*            N         N
-wavelength_step_type  This is either linear or logarithmic *ClassTypeParameter(RangeStepType)* N         N
+wavelength_step_type  This is either linear or logarithmic *Enum(RangeStepType)* N         N
 ===================== ==================================== =================================== ========= ===============
 
 The validation ensures that all entries are specified and that the lower wavelength boundary is smaller than the upper wavelength boundary.
@@ -424,7 +396,7 @@ the required information about saving the reduced data. The relevant parameters 
 Name                               Comment                                            Type                                Optional? Auto-generated? Default
 ================================== ================================================== =================================== ========= =============== =======
 zero_free_correction               If zero error correction (inflation) should happen *BoolParameter*                     Y         N               True
-file_format                        A list of file formats to save into                *ClassTypeListParameter(SaveType)*  Y         N               -
+file_format                        A list of file formats to save into                *EnumList(SaveType)*  Y         N               -
 user_specified_output_name         A custom user-specified name for the saved file    *StringWithNoneParameter*           Y         N               -
 user_specified_output_name_suffix  A custom user-specified suffix for the saved file  *StringParameter*                   Y         N               -
 use_reduction_mode_as_suffix       If the reduction mode should be used as a suffix   *BoolParameter*                     Y         N               -
@@ -441,12 +413,12 @@ and the volume information. The parameters are:
 ===================== ======================================== ================================== ========= ===============
 Name                  Comment                                  Type                               Optional? Auto-generated?
 ===================== ======================================== ================================== ========= ===============
-shape                 The user-specified shape of the sample   *ClassTypeParameter(SampleShape)*  N         Y
+shape                 The user-specified shape of the sample   *Enum(SampleShape)*  N         Y
 thickness             The user-specified sample thickness      *PositiveFloatParameter*           N         Y
 width                 The user-specified sample width          *PositiveFloatParameter*           N         Y
 height                The user-specified sample height         *PositiveFloatParameter*           N         Y
 scale                 The user-specified absolute scale        *PositiveFloatParameter*           N         Y
-shape_from_file       The file-extracted shape of the sample   *ClassTypeParameter(SampleShape)*  N         Y
+shape_from_file       The file-extracted shape of the sample   *Enum(SampleShape)*  N         Y
 thickness_from_file   The file-extracted sample thickness      *PositiveFloatParameter*           N         Y
 width_from_file       The file-extracted sample width          *PositiveFloatParameter*           N         Y
 height_from_file      The file-extracted sample height         *PositiveFloatParameter*           N         Y
@@ -501,11 +473,11 @@ incident_monitor                 The incident monitor                           
 prompt_peak_correction_min       The start time of a prompt peak correction                                                       *PositiveFloatParameter*        Y         N               -
 prompt_peak_correction_max       The stop time of a prompt peak correction                                                        *PositiveFloatParameter*        Y         N               -
 prompt_peak_correction_enabled   If the prompt peak correction should occur                                                       *BoolParameter*                 Y         N               True
-rebin_type                       The type of wavelength rebinning, i.e. standard or interpolating                                 *ClassTypeParameter(RebinType)* Y         N               -
+rebin_type                       The type of wavelength rebinning, i.e. standard or interpolating                                 *Enum(RebinType)* Y         N               -
 wavelength_low                   The lower wavelength boundary                                                                    *PositiveFloatParameter*        Y         N               -
 wavelength_high                  The upper wavelength boundary                                                                    *PositiveFloatParameter*        Y         N               -
 wavelength_step                  The wavelength step                                                                              *PositiveFloatParameter*        Y         N               -
-wavelength_step_type             The wavelength step type, i.e. lin or log                                                        *ClassTypeParameter(RebinType)* Y         N               -
+wavelength_step_type             The wavelength step type, i.e. lin or log                                                        *Enum(RebinType)* Y         N               -
 use_full_wavelength_range        If the full wavelength range of the instrument should be used                                    *BoolParameter*                 Y         N               -
 wavelength_full_range_low        The lower wavelength boundary of the full wavelength range                                       *PositiveFloatParameter*        Y         N               -
 wavelength_full_range_high       The upper wavelength boundary of the full wavelength range                                       *PositiveFloatParameter*        Y         N               -
@@ -532,7 +504,7 @@ fit information. The set of parameters describing this fit are:
 ================= ================================================================= ================================ ========= =============== ========================
 Name              Comment                                                           Type                             Optional? Auto-generated? Default
 ================= ================================================================= ================================ ========= =============== ========================
-fit_type          The type of fitting, i.e. lin, log or poly                        *ClassTypeParameter(FitType)*    Y         N               *FitType.Log* enum value
+fit_type          The type of fitting, i.e. lin, log or poly                        *Enum(FitType)*    Y         N               *FitType.Log* enum value
 polynomial_order  Polynomial order when poly fit type has been selected             *PositiveIntegerParameter*       Y         N               0
 wavelength_low    Lower wavelength bound for fitting (*None* means no lower bound)  *PositiveFloatWithNoneParameter* Y         N               -
 wavelength_high   Upper wavelength bound for fitting (*None* means no upper bound)  *PositiveFloatWithNoneParameter* Y         N               -
@@ -557,11 +529,11 @@ incident_monitor                The incident monitor                            
 prompt_peak_correction_min      The start time of a prompt peak correction                                          *PositiveFloatParameter*            Y         N               -
 prompt_peak_correction_max      The stop time of a prompt peak correction                                           *PositiveFloatParameter*            Y         N               -
 prompt_peak_correction_enabled  If the prompt peak correction should occur                                          *BoolParameter*                     Y         N               False
-rebin_type                      The type of wavelength rebinning, i.e. standard or interpolating                    *ClassTypeParameter(RebinType)*     Y         N               *RebinType.Rebin* enum value
+rebin_type                      The type of wavelength rebinning, i.e. standard or interpolating                    *Enum(RebinType)*     Y         N               *RebinType.Rebin* enum value
 wavelength_low                  The lower wavelength boundary                                                       *PositiveFloatParameter*            Y         N               -
 wavelength_high                 The upper wavelength boundary                                                       *PositiveFloatParameter*            Y         N               -
 wavelength_step                 The wavelength step                                                                 *PositiveFloatParameter*            Y         N               -
-wavelength_step_type            The wavelength step type, i.e. lin or log                                           *ClassTypeParameter(RangeStepType)* Y         N               -
+wavelength_step_type            The wavelength step type, i.e. lin or log                                           *Enum(RangeStepType)* Y         N               -
 background_TOF_general_start    General lower boundary for background correction                                    *FloatParameter*                    Y         N               -
 background_TOF_general_stop     General upper boundary for background correction                                    *FloatParameter*                    Y         N               -
 background_TOF_monitor_start    Monitor specific lower boundary for background correction (monitor vs. start value) *DictParameter*                     Y         N               -
@@ -582,7 +554,7 @@ Name                   Comment                                                  
 wavelength_low         The lower bound of the for the wavelength range                            *PositiveFloatParameter*            N         N
 wavelength_high        The upper bound of the for the wavelength range                            *PositiveFloatParameter*            N         N
 wavelength_step        The wavelength step                                                        *PositiveFloatParameter*            N         N
-wavelength_step_type   The wavelength step type, i.e. lin or log                                  *ClassTypeParameter(RangeStepType)* N         N
+wavelength_step_type   The wavelength step type, i.e. lin or log                                  *Enum(RangeStepType)* N         N
 adjustment_files       Dict to adjustment files; detector type vs *StateAdjustmentFiles* object   *DictParamter*                      N         Y
 idf_path               Path to the IDF file                                                       *StringParameter*                   N         Y
 ====================== ========================================================================== =================================== ========= ===============
@@ -611,7 +583,7 @@ The parameters are:
 ================================ ============================================= ============================================= =============================== =============== ===========================================
 Name                             Comment                                       Type                                          Optional?                       Auto-generated? Default
 ================================ ============================================= ============================================= =============================== =============== ===========================================
-reduction_dimensionality         1D or 2D                                      *ClassTypeParameter(ReductionDimensionality)* N                               N               *ReductionDimensionality.OneDim* enum value
+reduction_dimensionality         1D or 2D                                      *Enum(ReductionDimensionality)* N                               N               *ReductionDimensionality.OneDim* enum value
 use_gravity                      If gravity correction should be applied       *BoolParameter*                               Y                               N                False
 gravity_extra_length             Extra length for gravity correction           *PositiveFloatParameter*                      Y                               N                0
 radius_cuto-off                  Radius above which pixels are not considered  *PositiveFloatParameter*                      Y                               N                0
@@ -621,7 +593,7 @@ q_max                            Max momentum transfer value for 1D reduction  *
 q_1d_rebin_string                Rebin string for Q1D                          *StringParameter*                             N,                              if 1D  N         -
 q_xy_max                         Max momentum transfer value for 2D reduction  *PositiveFloatParameter*                      N,                              if 2D  N         -
 q_xy_step                        Momentum transfer step for 2D reduction       *PositiveFloatParameter*                      N,                              if 2D  N         -
-q_xy_step_type                   The step type, i.e. lin or log                *ClassTypeParameter(RangeStepType)*           N,                              if 2D  N         -
+q_xy_step_type                   The step type, i.e. lin or log                *Enum(RangeStepType)*           N,                              if 2D  N         -
 use_q_resolution                 If should perform a q resolution calculation  *BoolParameter*                               Y                               N                False
 q_resolution_collimation_length  Collimation length                            *PositiveFloatParameter*                      N, if performing q resolution   N                -
 q_resolution_delta_r             Virtual ring width on the detector            *PositiveFloatParameter*                      N, if performing q resolution   N                -
@@ -836,21 +808,22 @@ avoid large scripts sizes.
 
 The dedicated work-flow algorithms for the SANS reduction are:
 
-- :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>`
-- :ref:`SANSConvertToQ <algm-SANSConvertToQ>`
-- :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`
+- *Calculate SANS Transmission*
+- *Create SANS Wavelength Pixel Adjustment*
+- :ref:`CropToComponent <algm-CropToComponent>`
+- :ref:`Divide <algm-Divide>` (by Sample Volume)
+- :ref:`Multiply <algm-Multiply>` (by Absolute Scale)
+- :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`
+- *Normalize To SANS Monitor*
+- :ref:`Q1D <algm-Q1D>` or :ref:`Qxy <algm-Qxy>`
+- :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`
 - :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
-- :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
-- :ref:`SANSCrop <algm-SANSCrop>`
 - :ref:`SANSLoad <algm-SANSLoad>`
-- *SANSMaskWorkspace*
-- *SANSMove*
-- *SANSNormalizeToMonitor*
 - *SANSSave*
-- *SANSScale*
-- *SANSSliceEvent*
+- *Slice SANS Event*
+- *Workspace Masking*
 
-Note that the vast majority of the these algorithms takes a *SANSState* object as
+Note that algorithms prefixed with SANS take a *SANSState* object as
 an input.
 
 The individual algorithms are superficially discussed below.
@@ -859,14 +832,9 @@ There are two further algorithms which coordinate these algorithms, they are *SA
 *SANSSingleReduction* which are discussed further down.
 
 
-*SANSCalculateTransmission*
+*Calculate SANS Transmission*
 ------------------------------
-
-The :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>` algorithm is one of the more complex algorithms
-in the reduction chain with many sub-steps and a wide variety of parameters which
-can be set by the users.
-
-The algorithm performs the following steps:
+The following steps are performed:
 
 1. Select the incident monitor. If this is not explicitly set then the default value is taken.
 2. Select the transmission detector ids. The detector ids are chosen via the following preference:
@@ -904,12 +872,8 @@ The algorithm performs the following steps:
 6. Set the fitted and unfitted workspaces on the output of the algorithm.
 
 
-*SANSConvertToQ*
-------------------
-
-The :ref:`SANSConvertToQ <algm-SANSConvertToQ>` algorithm is the most essential algorithm in the reduction chain.
-It coordinates the final conversion from wavelength units to momentum transfer units.
-
+Conversion to Q
+----------------
 If a 1D reduction has been selected then the algorithm will perform the follow sub-steps:
 
 1. Calculate the momentum transfer resolution workspace using :ref:`TOFSANSResolutionByPixel <algm-TOFSANSResolutionByPixel>` (if applicable)
@@ -930,16 +894,6 @@ If a 2D reduction has been selected then the algorithm will perform the followin
    and set on the output of the algorithm
 
 
-*SANSConvertToWavelength*
-----------------------------
-
-The :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>` algorithm acts as a wrapper around
-:ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`.
-Unlike :ref:`SANSConvertToWavelengthAndRebin <algm-SANSConvertToWavelengthAndRebin>`
-it takes a *SANSState* object as its input. This algorithm is used for the
-wavelength conversion of the scatter workspace.
-
-
 *SANSConvertToWavelengthAndRebin*
 -----------------------------------
 
@@ -952,14 +906,13 @@ The algorithm performs the following steps:
 2. Performs a rebin operation using either :ref:`Rebin <algm-Rebin>` or :ref:`InterpolatingRebin <algm-InterpolatingRebin>`
 
 
-*SANSCreateWavelengthAndPixelAdjustment*
--------------------------------------------
+*Create SANS Wavelength and Pixel Adjustment*
+---------------------------------------------
 
-The :ref:`SANSCreateWavelengthAndPixelAdjustment <algm-SANSCreateWavelengthAndPixelAdjustment>`
-algorithm combines the output of the :ref:`SANSCalculateTransmission <algm-SANSCalculateTransmission>`
-algorithm, the output of the :ref:`SANSNormalizeToMonitor <algm-SANSNormalizeToMonitor>` algorithm
-and flood and direct files to produce the correction workspaces which are required
-for :ref:`SANSConvertToQ <algm-SANSConvertToQ>`.
+This step combines the output of the *Calculate SANS Transmission* step,
+the output of the *Normalize To SANS Monitor*,
+and flood and direct files to produce the correction workspaces which
+are required for converting to Q.
 
 The sub-steps of the algorithm are:
 
@@ -974,15 +927,10 @@ The sub-steps of the algorithm are:
 2. Create the pixel-adjustment workspace. The sub-states are:
 
    a. Load the pixel-adjustment file using :ref:`LoadRKH <algm-LoadRKH>`
-   b. Crop the pixel-adjustment workspace to the desired detector using :ref:`SANSCrop <algm-SANSCrop>`
+   b. Crop the pixel-adjustment workspace to the desired detector
+      using :ref:`CropToComponent <algm-CropToComponent>`
 
 3. Set the pixel-adjustment and wavelength-adjustment workspaces on the output of the algorithm
-
-*SANSCrop*
-------------
-
-The :ref:`SANSCrop <algm-SANSCrop>` algorithm crops the input workspace to a specified component using
-:ref:`CropToComponent <algm-CropToComponent>`.
 
 *SANSLoad*
 ------------
@@ -1023,12 +971,9 @@ The algorithm sub-steps are:
 5. For LOQ apply transmission corrections if applicable. This will apply a different
    instrument definition for transmission runs.
 
-*SANSMaskWorkspace*
+*Workspace Masking*
 ---------------------
-
-The :ref:`SANSMaskWorkspace <algm-SANSMaskWorkspace>` algorithm is responsible
-for masking detectors and time bins on the scatter workspaces. There are several
-types of masking which are currently supported:
+There are several types of masking which are currently supported:
 
 - Time/Bin masking.
 - Radius masking.
@@ -1077,34 +1022,27 @@ a particular masking instruction. The algorithm sub-steps are:
    :ref:`MaskDetectorsInShape <algm-MaskDetectorsInShape>`
 
 
-*SANSMove*
-------------
+*MoveInstrumentComponent* and *RotateInstrumentComponent*
+---------------------------------------------------------
 
-The :ref:`SANSMove <algm-SANSMove>` algorithm moves the instrument component
-of the SANS workspace according to the settings in
-the state object. Additionally the user can specify the beam centre.
+The :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`
+algorithm and :ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`
+are used in one of three ways, depending on how the state
+of the script. It can be used to move an individual component, reset positions,
+or specify the beam centre.
 Note that if the beam centre is also specified in the state object, then the
-manual selection takes precedence. The way we perform a move is highly-instrument
-and in fact data-dependent. Currently the move mechanism is implemented for
-**SANS2D**, **LOQ**, **LARMOR** and **ZOOM**.
-
-The main purpose is to shift a freshly loaded data set into its default position.
-Note that each instrument has its own way of displacing the instrument. In general
-this is achieved by a combination of translations and rotations using
-:ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>` and
-:ref:`RotateInstrumentComponent <algm-RotateInstrumentComponent>`.
+manual selection takes precedence.
 
 
-*SANSNormalizeToMonitor*
---------------------------
+*Normalize To SANS Monitor*
+---------------------------
 
-The :ref:`SANSNormalizeToMonitor <algm-SANSNormalizeToMonitor>` algorithm
-provides a monitor normalization workspace for subsequent wavelength correction
-in :ref:`algm-Q1D` or :ref:`algm-Qxy`. The settings of the algorithm are
-provided by the state object. The user can provide a *ScaleFactor* which is
+This step provides a monitor normalization workspace for subsequent 
+wavelength correction in :ref:`algm-Q1D` or :ref:`algm-Qxy`. 
+The user can provide a *ScaleFactor* which is
 normally obtained during event slicing.
 
-The sub-steps of this algorithm are:
+The sub-steps of this step are:
 
 1. Get the incident monitor spectrum number and the scale factor
 2. Extract the monitor spectrum using :ref:`ExtractSingleSpectrum <algm-ExtractSingleSpectrum>` into a monitor workspace
@@ -1127,31 +1065,11 @@ Zero-error inflation is useful for data points where the error is 0. When perfor
 any form of regression of this the zero-valued error will fix the model at this point.
 If we inflate the error at this point then it does not contribute to the regression.
 
-*SANSScale*
--------------
 
-The :ref:`SANSScale <algm-SANSScale>` algorithm scales a SANS workspace according to the settings
-in the state object. The scaling includes division by the volume of the sample and
-multiplication by an absolute scale.
-
-The sub-steps of this algorithm are:
-
-1. Multiply by the absolute scale. The sub-steps are:
-
-   a. If a scale is specified, multiply the scale by 100, else set the scale to 100
-   b. If the instrument is LOQ divide by :math:`\pi`
-   c. Multiply the scatter workspace by the scale using :ref:`Multiply <algm-Multiply>` (and :ref:`CreateSingleValuedWorkspace <algm-CreateSingleValuedWorkspace>`)
-
-2. Divide by the sample volume. The sub-steps are:
-
-   a. Calculate the sample volume based either on the user settings or the sample information from the file.
-   b. Divide by the scatter workspace by the sample volume using :ref:`Divide <algm-Divide>` (and :ref:`CreateSingleValuedWorkspace <algm-CreateSingleValuedWorkspace>`)
-
-
-*SANSSliceEvent*
+*Slice SANS Event*
 ------------------
 
-The :ref:`SANSSliceEvent <algm-SANSSliceEvent>` algorithm creates a sliced workspaces from an event-based
+This step creates a sliced workspace from an event-based
 SANS input workspace according to the settings in the state object. The algorithm
 will extract a slice based on a start and end time which are set in the state
 object. In addition, the data type, i.e. if the slice is to be taken from a sample
@@ -1248,8 +1166,8 @@ inner core of the orchestration mechanism. The inputs to this algorithm are
 The sub-steps of this algorithm are:
 
 1. Get the cropped input *ScatterWorkspace*. The cropping is defined by the selected detector type.
-   The underlying algorithm is :ref:`SANSCrop <algm-SANSCrop>`.
-2. Create an event slice of the input workspace using :ref:`SANSSliceEvent <algm-SANSSliceEvent>`.
+   The underlying algorithm is :ref:`CropToComponent <algm-CropToComponent>`.
+2. Create an event slice of the input workspace.
    Note that event slicing is only applied to event-mode workspaces and only when it has been
    specified by the user. During this step the scatter workspace is sliced and the associated
    monitor workspace is scaled. The scaling factor is the ratio of the charge of the sliced data set
@@ -1257,21 +1175,23 @@ The sub-steps of this algorithm are:
 3. If we are dealing with an even-mode workspace and the compatibility mode has been chosen then
    either a custom binning or the monitor binning is applied using :ref:`Rebin <algm-Rebin>` or
    :ref:`RebinToWorkspace <algm-RebinToWorkspace>`, respectively.
-4. Both the data and the monitor workspace perform an initial move operation
-   using :ref:`SANSMove <algm-SANSMove>`. The algorithm is applied twice. The first time using
-   the *SetToZero* mode in case the algorithm had been loaded and moved already previously. This
-   resets the instrument position of the workspace to the positions of the base instrument. The second
-   time the move algorithm is operated in *InitialMove* mode.
-5. The data workspace is masked using :ref:`SANSMaskWorkspace <algm-SANSMaskWorkspace>`. Note that
-   only the general masks and the masks for the selected component are applied.
+4. Both the data and the monitor workspace perform an initial move operation.
+   The first step sets the instrument positions back to the IDF,
+   in case the algorithm had been loaded and moved already previously.
+   The second time the move algorithm is operated in *InitialMove* mode to apply
+   and offset.
+5. The data workspace is masked using various modes. Note that
+   using :ref:`MoveInstrumentComponent <algm-MoveInstrumentComponent>`.
+   The algorithm is applied twice. The first time using the *SetToZero* mode
+   to reset the components to known positions from the IDF. The second
+   time the components are moved and rotated to the requested positions.
    Note that all steps up until now were performed in the time-of-flight domain.
-6. Convert the data from the time-of-flight to the wavelength domain using
-   :ref:`SANSConvertToWavelength <algm-SANSConvertToWavelength>`.
-7. Scale the data set using :ref:`SANSScale <algm-SANSScale>`. This will multiply the data set
-   with the absolute scale and divide by the sample volume.
-8. This step creates the adjustment workspaces using :ref:`SANSCreateAdjustmentWorkspaces <algm-SANSCreateAdjustmentWorkspaces>`.
+6. Convert the data from time-of-flight to wavelength.
+7. Scale the data set using :ref:`Multiply <algm-Multiply>`. This will multiply the data set
+   with the absolute scale and divide :ref:`Divide <algm-Divide>` by the sample volume.
+8. This step creates the adjustment workspaces by *Create SANS Adjustment Workspaces*.
    This uses the input *TransmissionWorkspace* and *DirectWorkspace* workspaces. Note that
-   the instruments referenced in the workspace are moved using :ref:`SANSMove <algm-SANSMove>` before they are used by the adjustment
+   the instrument's components are moved and rotated before they are used by the adjustment
    algorithm. The outputs are a wavelength-adjustment workspace, a pixel-adjustment workspace and a wavelength-and-pixel adjustment
    workspace. Note that their creation is optional.
 9. Convert the data workspace into histogram-mode using :ref:`RebinToWorkspace <algm-RebinToWorkspace>`.

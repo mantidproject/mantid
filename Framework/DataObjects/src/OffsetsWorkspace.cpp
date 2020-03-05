@@ -36,10 +36,9 @@ template <>
 DLLExport Mantid::DataObjects::OffsetsWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::OffsetsWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::OffsetsWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::OffsetsWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::OffsetsWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
@@ -54,10 +53,9 @@ template <>
 DLLExport Mantid::DataObjects::OffsetsWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::OffsetsWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::OffsetsWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::OffsetsWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::OffsetsWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

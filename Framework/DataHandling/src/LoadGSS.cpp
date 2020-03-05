@@ -245,9 +245,9 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
           g_log.warning(msg.str());
         }
 
-        totalflightpaths.push_back(totalpath);
-        twothetas.push_back(tth);
-        difcs.push_back(difc);
+        totalflightpaths.emplace_back(totalpath);
+        twothetas.emplace_back(tth);
+        difcs.emplace_back(difc);
 
         std::stringstream msg;
         msg << "Bank " << difcs.size() - 1
@@ -296,7 +296,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
       g_log.debug() << "Bank: " << specno
                     << "  filetypestring = " << filetypestring << '\n';
 
-      detectorIDs.push_back(specno);
+      detectorIDs.emplace_back(specno);
 
       if (filetypestring[0] == 'S') {
         // SLOG
@@ -316,7 +316,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
       if (filetype == 'r') {
         double x0 = bc1 / 32;
         g_log.debug() << "RALF: x0 = " << x0 << "  bc4 = " << bc4 << '\n';
-        vecX.push_back(x0);
+        vecX.emplace_back(x0);
       } else {
         // Cannot calculate x0, turn on the flag
         calslogx0 = true;
@@ -375,7 +375,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
           g_log.debug() << "x'_0 = " << xValue << "  bc3 = " << bc3 << '\n';
 
           double x0 = 2 * xValue / (bc3 + 2.0);
-          vecX.push_back(x0);
+          vecX.emplace_back(x0);
           xPrev = x0;
           g_log.debug() << "SLOG: x0 = " << x0 << '\n';
           calslogx0 = false;
@@ -393,9 +393,9 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
       }
 
       // store read in data (x, y, e) to vector
-      vecX.push_back(std::move(xValue));
-      vecY.push_back(std::move(yValue));
-      vecE.push_back(std::move(eValue));
+      vecX.emplace_back(std::move(xValue));
+      vecY.emplace_back(std::move(yValue));
+      vecE.emplace_back(std::move(eValue));
     } // Date Line
     else {
       g_log.warning() << "Line not defined: " << currentLine << '\n';
@@ -403,9 +403,9 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
   } // ENDWHILE of reading all lines
 
   // Get the sizes before using std::move
-  int nHist(static_cast<int>(gsasDataX.size()));
-  int xWidth(static_cast<int>(vecX.size()));
-  int yWidth(static_cast<int>(vecY.size()));
+  auto nHist(static_cast<int>(gsasDataX.size()));
+  auto xWidth(static_cast<int>(vecX.size()));
+  auto yWidth(static_cast<int>(vecY.size()));
 
   // Push the vectors (X, Y, E) of the last bank to gsasData
   if (!vecX.empty()) { // Put final spectra into data
@@ -451,7 +451,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
 
     // Reset spectrum number if
     if (useBankAsSpectrum) {
-      specnum_t specno = static_cast<specnum_t>(detectorIDs[i]);
+      auto specno = static_cast<specnum_t>(detectorIDs[i]);
       outputWorkspace->getSpectrum(i).setSpectrumNo(specno);
     }
   }
@@ -468,7 +468,7 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
  */
 double LoadGSS::convertToDouble(std::string inputstring) {
   std::string temps;
-  int isize = static_cast<int>(inputstring.size());
+  auto isize = static_cast<int>(inputstring.size());
   for (int i = 0; i < isize; i++) {
     char thechar = inputstring[i];
     if ((thechar <= 'Z' && thechar >= 'A') ||
@@ -531,7 +531,7 @@ void LoadGSS::createInstrumentGeometry(
   // Add detectors
   // The L2 and 2-theta values from Raw file assumed to be relative to sample
   // position
-  const int numDetector =
+  const auto numDetector =
       static_cast<int>(detectorids.size()); // number of detectors
   // std::vector<int> detID = detectorids;    // detector IDs
   // std::vector<double> angle = twothetas;  // angle between indicent beam and

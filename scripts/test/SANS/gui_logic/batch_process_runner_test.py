@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy.QtCore import QThreadPool
 import unittest
+from qtpy.QtCore import QThreadPool
 
 from mantid.py3compat import mock
 from sans.common.enums import (OutputMode)
@@ -32,15 +32,23 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.load_mock = load_patcher.start()
 
         self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.notify_done, self.notify_error)
-        self.states = {0: mock.MagicMock(), 1: mock.MagicMock(), 2: mock.MagicMock()}
+
+        self._mock_rows = [(mock.Mock(), i) for i in range(3)]
 
     def test_that_notify_done_method_set_correctly(self):
         self.batch_process_runner.notify_done()
-
         self.notify_done.assert_called_once_with()
 
-    def test_that_process_states_calls_batch_reduce_for_each_row(self):
-        self.batch_process_runner.process_states(self.states, False, OutputMode.Both, False, '')
+    def test_that_process_states_calls_batch_reduce_for_specified_row(self):
+        get_states_mock = mock.MagicMock()
+        states = {0: mock.MagicMock()}
+        errors = {}
+        get_states_mock.return_value = states, errors
+
+        self.batch_process_runner.process_states(row_index_pair=self._mock_rows,
+                                                 get_states_func=get_states_mock,
+                                                 use_optimizations=False, output_mode=OutputMode.BOTH,
+                                                 plot_results=False, output_graph='')
         QThreadPool.globalInstance().waitForDone()
 
         self.assertEqual(self.sans_batch_instance.call_count, 3)
@@ -48,7 +56,16 @@ class BatchProcessRunnerTest(unittest.TestCase):
     def test_that_process_states_emits_row_processed_signal_after_each_row(self):
         self.batch_process_runner.row_processed_signal = mock.MagicMock()
         self.batch_process_runner.row_failed_signal = mock.MagicMock()
-        self.batch_process_runner.process_states(self.states, False, OutputMode.Both, False, '')
+        get_states_mock = mock.MagicMock()
+
+        states = {0: mock.MagicMock()}
+        errors = {}
+        get_states_mock.return_value = states, errors
+
+        self.batch_process_runner.process_states(row_index_pair=self._mock_rows,
+                                                 get_states_func=get_states_mock,
+                                                 use_optimizations=False, output_mode=OutputMode.BOTH,
+                                                 plot_results=False, output_graph='')
         QThreadPool.globalInstance().waitForDone()
 
         self.assertEqual(self.batch_process_runner.row_processed_signal.emit.call_count, 3)
@@ -62,10 +79,18 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.batch_process_runner.row_failed_signal = mock.MagicMock()
         self.sans_batch_instance.side_effect = Exception('failure')
 
-        self.batch_process_runner.process_states(self.states, False, OutputMode.Both, False, '')
+        get_states_mock = mock.MagicMock()
+        states = {0: mock.MagicMock()}
+        errors = {}
+        get_states_mock.return_value = states, errors
+
+        self.batch_process_runner.process_states(row_index_pair=self._mock_rows,
+                                                 get_states_func=get_states_mock,
+                                                 use_optimizations=False, output_mode=OutputMode.BOTH,
+                                                 plot_results=False, output_graph='')
         QThreadPool.globalInstance().waitForDone()
 
-        self.assertEqual(self.batch_process_runner.row_failed_signal.emit.call_count, 3)
+        self.assertEqual(3, self.batch_process_runner.row_failed_signal.emit.call_count)
         self.batch_process_runner.row_failed_signal.emit.assert_any_call(0, 'failure')
         self.batch_process_runner.row_failed_signal.emit.assert_any_call(1, 'failure')
         self.batch_process_runner.row_failed_signal.emit.assert_any_call(2, 'failure')
@@ -75,10 +100,16 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.batch_process_runner.row_processed_signal = mock.MagicMock()
         self.batch_process_runner.row_failed_signal = mock.MagicMock()
 
-        self.batch_process_runner.load_workspaces(self.states)
+        states = {0: mock.MagicMock()}
+        errors = {}
+        get_states_mock = mock.MagicMock()
+        get_states_mock.return_value = states, errors
+
+        self.batch_process_runner.load_workspaces(row_index_pair=self._mock_rows, get_states_func=get_states_mock)
+
         QThreadPool.globalInstance().waitForDone()
 
-        self.assertEqual(self.batch_process_runner.row_processed_signal.emit.call_count, 3)
+        self.assertEqual(3, self.batch_process_runner.row_processed_signal.emit.call_count)
         self.batch_process_runner.row_processed_signal.emit.assert_any_call(0, [], [])
         self.batch_process_runner.row_processed_signal.emit.assert_any_call(1, [], [])
         self.batch_process_runner.row_processed_signal.emit.assert_any_call(2, [], [])
@@ -89,15 +120,18 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.batch_process_runner.row_failed_signal = mock.MagicMock()
         self.load_mock.side_effect = Exception('failure')
 
-        self.batch_process_runner.load_workspaces(self.states)
+        states = {}
+        errors = {0: "failure"}
+        get_states_mock = mock.MagicMock()
+        get_states_mock.return_value = states, errors
+
+        self.batch_process_runner.load_workspaces(row_index_pair=self._mock_rows, get_states_func=get_states_mock)
         QThreadPool.globalInstance().waitForDone()
 
-        self.assertEqual(self.batch_process_runner.row_failed_signal.emit.call_count, 3)
+        self.assertEqual(3, self.batch_process_runner.row_failed_signal.emit.call_count)
         self.batch_process_runner.row_failed_signal.emit.assert_any_call(0, 'failure')
         self.batch_process_runner.row_failed_signal.emit.assert_any_call(1, 'failure')
         self.batch_process_runner.row_failed_signal.emit.assert_any_call(2, 'failure')
-        self.assertEqual(self.batch_process_runner.row_processed_signal.emit.call_count, 0)
-
 
 
 if __name__ == '__main__':

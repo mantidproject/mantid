@@ -143,7 +143,7 @@ public:
     // Cache the total cost
     m_queueLock.lock();
     m_cost += newTask->cost();
-    m_queue.push_back(newTask);
+    m_queue.emplace_back(newTask);
     m_queueLock.unlock();
   }
 

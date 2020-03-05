@@ -56,8 +56,8 @@ public:
     std::string res;
 
     JSONArray ja;
-    TS_ASSERT_THROWS_NOTHING(ja.push_back(str));
-    TS_ASSERT_THROWS_NOTHING(ja.push_back(str));
+    TS_ASSERT_THROWS_NOTHING(ja.emplace_back(str));
+    TS_ASSERT_THROWS_NOTHING(ja.emplace_back(str));
     JSONValue jv(ja);
 
     JSONValue vBool(true);

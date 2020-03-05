@@ -241,13 +241,13 @@ int UnwrapSNS::unwrapX(const Mantid::HistogramData::HistogramX &datain,
     // iteration of the loop
     const double tof = datain[bin];
     if (tof < filterVal) {
-      tempX_L.push_back(tof + m_frameWidth);
+      tempX_L.emplace_back(tof + m_frameWidth);
       // Record the bins that fall in this range for copying over the data &
       // errors
       if (specialBin < bin)
         specialBin = bin;
     } else {
-      tempX_U.push_back(tof);
+      tempX_U.emplace_back(tof);
     }
   } // loop over X values
 

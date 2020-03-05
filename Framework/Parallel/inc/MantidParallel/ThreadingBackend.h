@@ -124,7 +124,7 @@ void ThreadingBackend::send(int source, int dest, int tag, T &&... args) {
     detail::saveToStream(oa, std::forward<T>(args)...);
   }
   std::lock_guard<std::mutex> lock(m_mutex);
-  m_buffer[std::make_tuple(source, dest, tag)].push_back(std::move(buf));
+  m_buffer[std::make_tuple(source, dest, tag)].emplace_back(std::move(buf));
 }
 
 template <typename... T>

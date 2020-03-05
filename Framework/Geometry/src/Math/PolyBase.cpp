@@ -279,8 +279,9 @@ PolyBase &PolyBase::operator*=(const double V)
   @return (*this*V);
  */
 {
+  using std::placeholders::_1;
   transform(afCoeff.begin(), afCoeff.end(), afCoeff.begin(),
-            std::bind2nd(std::multiplies<double>(), V));
+            std::bind(std::multiplies<double>(), _1, V));
   return *this;
 }
 
@@ -291,8 +292,9 @@ PolyBase &PolyBase::operator/=(const double V)
   @return (*this/V);
  */
 {
+  using std::placeholders::_1;
   transform(afCoeff.begin(), afCoeff.end(), afCoeff.begin(),
-            std::bind2nd(std::divides<double>(), V));
+            std::bind(std::divides<double>(), _1, V));
   return *this;
 }
 
@@ -426,7 +428,7 @@ std::vector<double> PolyBase::realRoots(const double epsilon)
   std::vector<std::complex<double>>::const_iterator vc;
   for (vc = Croots.begin(); vc != Croots.end(); ++vc) {
     if (fabs(vc->imag()) < eps)
-      Out.push_back(vc->real());
+      Out.emplace_back(vc->real());
   }
   return Out;
 }

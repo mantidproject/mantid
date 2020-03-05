@@ -10,7 +10,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/System.h"
+#include "MantidMuon/DllConfig.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
 namespace Mantid {
@@ -21,7 +21,7 @@ namespace Muon {
 @date 2018-05-31
 */
 
-class DLLExport LoadAndApplyMuonDetectorGrouping : public API::Algorithm {
+class MANTID_MUON_DLL LoadAndApplyMuonDetectorGrouping : public API::Algorithm {
 public:
   /// (Empty) Constructor
   LoadAndApplyMuonDetectorGrouping() : API::Algorithm() {}

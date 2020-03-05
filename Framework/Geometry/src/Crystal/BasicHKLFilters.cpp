@@ -24,7 +24,7 @@ HKLFilterDRange::HKLFilterDRange(const UnitCell &cell, double dMin, double dMax)
 }
 
 /// Returns a description containing the parameters of the filter.
-std::string HKLFilterDRange::getDescription() const {
+std::string HKLFilterDRange::getDescription() const noexcept {
   std::ostringstream strm;
   strm << "(" << m_dmin << " <= d <= " << m_dmax << ")";
 
@@ -32,7 +32,7 @@ std::string HKLFilterDRange::getDescription() const {
 }
 
 /// Returns true if the d-value of the HKL is within the specified range.
-bool HKLFilterDRange::isAllowed(const Kernel::V3D &hkl) const {
+bool HKLFilterDRange::isAllowed(const Kernel::V3D &hkl) const noexcept {
   double d = m_cell.d(hkl);
 
   return d >= m_dmin && d <= m_dmax;
@@ -64,16 +64,13 @@ HKLFilterSpaceGroup::HKLFilterSpaceGroup(
 }
 
 /// Returns a description of the filter that contains the space group symbol.
-std::string HKLFilterSpaceGroup::getDescription() const {
-  std::ostringstream strm;
-  strm << "(Space group: " << m_spaceGroup->hmSymbol() << ")";
-
-  return strm.str();
+std::string HKLFilterSpaceGroup::getDescription() const noexcept {
+  return "(Space group: " + m_spaceGroup->hmSymbol() + ")";
 }
 
 /// Returns true if the reflection is allowed by the space group reflection
 /// conditions.
-bool HKLFilterSpaceGroup::isAllowed(const Kernel::V3D &hkl) const {
+bool HKLFilterSpaceGroup::isAllowed(const Kernel::V3D &hkl) const noexcept {
   return m_spaceGroup->isAllowedReflection(hkl);
 }
 
@@ -88,7 +85,7 @@ HKLFilterStructureFactor::HKLFilterStructureFactor(
 }
 
 /// Returns a description for the filter that contains the minimum F^2.
-std::string HKLFilterStructureFactor::getDescription() const {
+std::string HKLFilterStructureFactor::getDescription() const noexcept {
   std::ostringstream strm;
   strm << "(F^2 > " << m_fSquaredMin << ")";
 
@@ -96,7 +93,8 @@ std::string HKLFilterStructureFactor::getDescription() const {
 }
 
 /// Returns true if F^2(hkl) is larger than the stored minimum.
-bool HKLFilterStructureFactor::isAllowed(const Kernel::V3D &hkl) const {
+bool HKLFilterStructureFactor::isAllowed(const Kernel::V3D &hkl) const
+    noexcept {
   return m_calculator->getFSquared(hkl) > m_fSquaredMin;
 }
 
@@ -111,12 +109,12 @@ HKLFilterCentering::HKLFilterCentering(
 }
 
 /// Returns a description with the centering symbol.
-std::string HKLFilterCentering::getDescription() const {
+std::string HKLFilterCentering::getDescription() const noexcept {
   return "(Centering: " + m_centering->getSymbol() + ")";
 }
 
 /// Returns true if the HKL is allowed according to the lattice centering.
-bool HKLFilterCentering::isAllowed(const Kernel::V3D &hkl) const {
+bool HKLFilterCentering::isAllowed(const Kernel::V3D &hkl) const noexcept {
   return m_centering->isAllowed(static_cast<int>(hkl.X()),
                                 static_cast<int>(hkl.Y()),
                                 static_cast<int>(hkl.Z()));

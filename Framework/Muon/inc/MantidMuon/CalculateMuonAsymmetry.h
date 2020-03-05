@@ -14,6 +14,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -45,7 +46,7 @@ f(t,{lambda}_j) ) </LI>
 @author
 @date 03/03/2017
 */
-class DLLExport CalculateMuonAsymmetry : public API::Algorithm {
+class MANTID_MUON_DLL CalculateMuonAsymmetry : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalculateMuonAsymmetry"; }
@@ -72,6 +73,11 @@ private:
   std::vector<double> getNormConstants(std::vector<std::string> wsNames);
   std::map<std::string, std::string> validateInputs() override;
   double getNormValue(API::CompositeFunction_sptr &func);
+  void addNormalizedFits(size_t numberOfFits, const std::vector<double>);
+  void normalizeWorkspace(
+      const API::MatrixWorkspace_sptr &normalizedWorkspace,
+      const API::MatrixWorkspace_const_sptr &unnormalizedWorkspace,
+      size_t workspaceIndex, double N0);
 };
 
 } // namespace Algorithms

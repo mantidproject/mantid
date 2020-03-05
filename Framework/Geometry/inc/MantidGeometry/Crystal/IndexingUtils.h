@@ -88,7 +88,7 @@ public:
   /// Scan rotations to find UB that indexes peaks given lattice parameters
   static double ScanFor_UB(Kernel::DblMatrix &UB,
                            const std::vector<Kernel::V3D> &q_vectors,
-                           const UnitCell &lattice, double degrees_per_step,
+                           const UnitCell &cell, double degrees_per_step,
                            double required_tolerance);
 
   /// Get list of possible directions and lengths for real space unit cell
@@ -147,6 +147,9 @@ public:
                                 double required_tolerance, double len_tol,
                                 double ang_tol);
 
+  /// Round all the components of a HKL objects to the nearest integer
+  static void RoundHKL(Kernel::V3D &hkl);
+
   /// Round all the components of a list of V3D objects, to the nearest integer
   static void RoundHKLs(std::vector<Kernel::V3D> &hkl_list);
 
@@ -184,12 +187,22 @@ public:
                               const std::vector<Kernel::V3D> &q_vectors,
                               double tolerance);
 
-  /// Given a UB, get list of Miller indices for specifed Qs
+  /// Given a UB, get list of Miller indices for specifed Qs and tolerance
   static int CalculateMillerIndices(const Kernel::DblMatrix &UB,
                                     const std::vector<Kernel::V3D> &q_vectors,
                                     double tolerance,
                                     std::vector<Kernel::V3D> &miller_indices,
                                     double &ave_error);
+
+  /// Given a UB, calculate the miller indices for given q vector
+  static bool CalculateMillerIndices(const Kernel::DblMatrix &inverseUB,
+                                     const Kernel::V3D &q_vector,
+                                     double tolerance,
+                                     Kernel::V3D &miller_indices);
+
+  /// Given a UB, calculate the miller indices for given q vector
+  static Kernel::V3D CalculateMillerIndices(const Kernel::DblMatrix &inverseUB,
+                                            const Kernel::V3D &q_vector);
 
   /// Get lists of indices and Qs for peaks indexed in the specified direction
   static int GetIndexedPeaks_1D(const Kernel::V3D &direction,

@@ -2882,11 +2882,11 @@ int SOAP_FMAC2 soap_match_array(struct soap *soap, const char *type) {
 }
 #endif
 
-  /******************************************************************************\
-   *
-   *  SSL/TLS
-   *
-  \******************************************************************************/
+/******************************************************************************\
+ *
+ *  SSL/TLS
+ *
+\******************************************************************************/
 
 #ifdef WITH_OPENSSL
 #ifndef PALM_2
@@ -3599,11 +3599,11 @@ int SOAP_FMAC2 soap_ssl_accept(struct soap *soap) {
 #endif
 #endif
 
-  /******************************************************************************\
-   *
-   *  TCP/UDP [SSL/TLS] IPv4 and IPv6
-   *
-  \******************************************************************************/
+/******************************************************************************\
+ *
+ *  TCP/UDP [SSL/TLS] IPv4 and IPv6
+ *
+\******************************************************************************/
 
 #ifndef WITH_NOIO
 #ifndef PALM_1
@@ -5385,11 +5385,11 @@ void SOAP_FMAC2 soap_done(struct soap *soap) {
 }
 #endif
 
-  /******************************************************************************\
-   *
-   *  HTTP
-   *
-  \******************************************************************************/
+/******************************************************************************\
+ *
+ *  HTTP
+ *
+\******************************************************************************/
 
 #ifndef WITH_NOHTTP
 #ifndef PALM_1
@@ -6177,11 +6177,11 @@ const char *SOAP_FMAC2 soap_encode_url_string(struct soap *soap,
 }
 #endif
 
-  /******************************************************************************\
-   *
-   *  HTTP Cookies
-   *
-  \******************************************************************************/
+/******************************************************************************\
+ *
+ *  HTTP Cookies
+ *
+\******************************************************************************/
 
 #ifdef WITH_COOKIES
 
@@ -16139,9 +16139,8 @@ int SOAP_FMAC2 soap_recv_fault(struct soap *soap, int check) {
              0) /* check == 1 but no SOAP: do not parse SOAP Fault */
     return SOAP_OK;
   soap->error = SOAP_OK;
-  if (soap_getfault(
-          soap)) { /* check flag set: check if SOAP Fault is present, if not
-                      just return */
+  if (soap_getfault(soap)) { /* check flag set: check if SOAP Fault is present,
+                                if not just return */
     if (check && soap->error == SOAP_TAG_MISMATCH && soap->level == 2)
       return soap->error = SOAP_OK;
     DBGLOG(TEST,

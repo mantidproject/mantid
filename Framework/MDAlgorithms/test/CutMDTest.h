@@ -90,8 +90,9 @@ private:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "__CutMDTest_tempMatWS");
 
-    Mantid::Geometry::OrientedLattice latt(2, 3, 4, 90, 90, 90);
-    tempMatWS->mutableSample().setOrientedLattice(&latt);
+    tempMatWS->mutableSample().setOrientedLattice(
+        std::make_unique<Mantid::Geometry::OrientedLattice>(2, 3, 4, 90, 90,
+                                                            90));
 
     ExperimentInfo_sptr ei(tempMatWS->cloneExperimentInfo());
     eventWS->addExperimentInfo(ei);

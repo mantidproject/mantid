@@ -13,6 +13,9 @@
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/ScalarMappable.h"
 
+#include <QHash>
+#include <QVariant>
+
 namespace MantidQt {
 namespace Widgets {
 namespace MplCpp {
@@ -42,6 +45,7 @@ public:
     return Axes{pyobj().attr("axes")[index]};
   }
 
+  void setTightLayout(QHash<QString, QVariant> const &args);
   QColor faceColor() const;
   void setFaceColor(const QColor color);
   void setFaceColor(const char *color);

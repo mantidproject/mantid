@@ -18,8 +18,8 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 
-using Poco::XML::DOMParser;
 using Poco::XML::Document;
+using Poco::XML::DOMParser;
 using Poco::XML::Element;
 
 using namespace Mantid::Kernel;

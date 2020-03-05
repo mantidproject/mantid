@@ -57,7 +57,7 @@ void PoldiSpectrumConstantBackground::poldiFunction1D(
     API::FunctionValues &values) const {
   if (m_flatBackground) {
     double backgroundDetector = m_flatBackground->getParameter(0);
-    double wireCount = static_cast<double>(indices.size());
+    auto wireCount = static_cast<double>(indices.size());
     double distributionFactor = wireCount *
                                 static_cast<double>(m_timeBinCount) /
                                 static_cast<double>(domain.size());

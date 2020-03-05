@@ -100,8 +100,7 @@ std::string CatalogInfo::getAttribute(const Poco::XML::Element *element,
 
   // If the tag exists in the XML file.
   if (elementTag->length() == 1) {
-    Poco::XML::Element *item =
-        dynamic_cast<Poco::XML::Element *>(elementTag->item(0));
+    auto *item = dynamic_cast<Poco::XML::Element *>(elementTag->item(0));
 
     // If the item does exist, then we want to return it.
     if (!item->getAttribute(attributeName).empty()) {

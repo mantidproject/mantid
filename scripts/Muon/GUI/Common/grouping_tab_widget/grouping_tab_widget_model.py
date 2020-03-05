@@ -57,6 +57,14 @@ class GroupingTabModel(object):
     def group_and_pair_names(self):
         return self._groups_and_pairs.group_names + self._groups_and_pairs.pair_names
 
+    @property
+    def selected_groups(self):
+        return self._groups_and_pairs.selected_groups
+
+    @property
+    def selected_pairs(self):
+        return self._groups_and_pairs.selected_pairs
+
     def show_all_groups_and_pairs(self):
         self._context.show_all_groups()
         self._context.show_all_pairs()
@@ -67,9 +75,32 @@ class GroupingTabModel(object):
     def clear_pairs(self):
         self._groups_and_pairs.clear_pairs()
 
+    def clear_selected_pairs(self):
+        self._groups_and_pairs.clear_selected_pairs()
+
+    def clear_selected_groups(self):
+        self._groups_and_pairs.clear_selected_groups()
+
     def clear(self):
         self.clear_groups()
         self.clear_pairs()
+        self.clear_selected_groups()
+        self.clear_selected_pairs()
+
+    def select_all_groups_to_analyse(self):
+        self._groups_and_pairs.set_selected_groups_to_all()
+
+    def remove_group_from_analysis(self, group):
+        self._groups_and_pairs.remove_group_from_selected_groups(group)
+
+    def add_group_to_analysis(self, group):
+        self._groups_and_pairs.add_group_to_selected_groups(group)
+
+    def remove_pair_from_analysis(self, pair):
+        self._groups_and_pairs.remove_pair_from_selected_pairs(pair)
+
+    def add_pair_to_analysis(self, pair):
+        self._groups_and_pairs.add_pair_to_selected_pairs(pair)
 
     def add_group(self, group):
         assert isinstance(group, MuonGroup)
@@ -113,6 +144,9 @@ class GroupingTabModel(object):
         self._groups_and_pairs.reset_group_and_pairs_to_default(self._data.current_workspace, self._data.instrument,
                                                                 self._data.main_field_direction)
 
+    def reset_selected_groups_and_pairs(self):
+        self._groups_and_pairs.reset_selected_groups_and_pairs()
+
     def update_pair_alpha(self, pair_name, new_alpha):
         self._groups_and_pairs[pair_name].alpha = new_alpha
 
@@ -133,7 +167,9 @@ class GroupingTabModel(object):
 
     def get_last_data_from_file(self):
         if self._data.current_runs:
-            return round(max(self._data.get_loaded_data_for_run(self._data.current_runs[-1])['OutputWorkspace'][0].workspace.dataX(0)), 3)
+            return round(max(
+                self._data.get_loaded_data_for_run(self._data.current_runs[-1])['OutputWorkspace'][0].workspace.dataX(
+                    0)), 3)
         else:
             return 0.0
 
@@ -142,3 +178,26 @@ class GroupingTabModel(object):
             return self._data.get_loaded_data_for_run(self._data.current_runs[-1])["FirstGoodData"]
         else:
             return 0.0
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Periods
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def is_data_multi_period(self):
+        return self._data.is_multi_period()
+
+    def number_of_periods(self):
+        if self.is_data_multi_period():
+            return len(self._data.current_data["OutputWorkspace"])
+        else:
+            return 1
+
+    def update_periods(self, summed_periods, subtracted_periods):
+        self._context.gui_context.update_and_send_signal(SubtractedPeriods=subtracted_periods,
+                                                         SummedPeriods=summed_periods)
+
+    def get_summed_periods(self):
+        return self._context.gui_context["SummedPeriods"]
+
+    def get_subtracted_periods(self):
+        return self._context.gui_context["SubtractedPeriods"]

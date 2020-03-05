@@ -31,7 +31,11 @@ JumpFitDataTablePresenter::JumpFitDataTablePresenter(JumpFitModel *model,
     : IndirectDataTablePresenter(model, dataTable, jumpFitHeaders()),
       m_jumpFitModel(model) {
   auto header = dataTable->horizontalHeader();
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(1, QHeaderView::Stretch);
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  header->setSectionResizeMode(1, QHeaderView::Stretch);
+#endif
 }
 
 int JumpFitDataTablePresenter::workspaceIndexColumn() const { return 2; }
@@ -42,8 +46,9 @@ int JumpFitDataTablePresenter::endXColumn() const { return 4; }
 
 int JumpFitDataTablePresenter::excludeColumn() const { return 5; }
 
-void JumpFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
-                                              std::size_t spectrum, int row) {
+void JumpFitDataTablePresenter::addTableEntry(TableDatasetIndex dataIndex,
+                                              WorkspaceIndex spectrum,
+                                              TableRowIndex row) {
   IndirectDataTablePresenter::addTableEntry(dataIndex, spectrum, row);
 
   const auto parameter =
@@ -56,9 +61,9 @@ void JumpFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
   setCell(std::move(cell), row, 1);
 }
 
-void JumpFitDataTablePresenter::updateTableEntry(std::size_t dataIndex,
-                                                 std::size_t spectrum,
-                                                 int row) {
+void JumpFitDataTablePresenter::updateTableEntry(TableDatasetIndex dataIndex,
+                                                 WorkspaceIndex spectrum,
+                                                 TableRowIndex row) {
   IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
 
   const auto parameter =

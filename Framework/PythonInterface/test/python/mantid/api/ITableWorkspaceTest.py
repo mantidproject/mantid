@@ -35,8 +35,8 @@ class ITableWorkspaceTest(unittest.TestCase):
         self.assertEqual(type(column_names), list)
 
     def test_cell_access_returns_variables_as_native_python_types(self):
-        self.assertAlmostEquals(self._test_ws.cell('r_gd_prtn_chrg',0), 10.040912628173828, 15)
-        self.assertAlmostEquals(self._test_ws.cell(0, 7), 10.040912628173828, 15)
+        self.assertAlmostEqual(self._test_ws.cell('r_gd_prtn_chrg',0), 10.040912628173828, 15)
+        self.assertAlmostEqual(self._test_ws.cell(0, 7), 10.040912628173828, 15)
 
         self.assertEqual(self._test_ws.cell('r_goodfrm', 0), 9229)
         self.assertEqual(self._test_ws.cell(0, 9), 9229)

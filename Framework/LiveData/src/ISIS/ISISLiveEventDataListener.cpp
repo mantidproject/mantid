@@ -258,7 +258,7 @@ void ISISLiveEventDataListener::run() {
       Mantid::Types::Core::DateAndTime pulseTime =
           m_startTime + static_cast<double>(events.head_n.frame_time_zero);
       // Save the pulse charge in the logs
-      double protons = static_cast<double>(events.head_n.protons);
+      auto protons = static_cast<double>(events.head_n.protons);
       m_eventBuffer[0]
           ->mutableRun()
           .getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)

@@ -789,20 +789,20 @@ On PEARL this is set to the following TOF windows:
 
   # Long mode ON:
         focused_cropping_values: [
-        (20300, 39990),  # Bank 1
-        (20300, 39990),  # Bank 2
-        (20300, 39990),  # Bank 3
-        (20300, 39990),  # Bank 4
-        (20300, 39990),  # Bank 5
-        (20300, 39990),  # Bank 6
-        (20300, 39990),  # Bank 7
-        (20300, 39990),  # Bank 8
-        (20300, 39990),  # Bank 9
-        (20300, 39990),  # Bank 10
-        (20300, 39990),  # Bank 11
-        (20300, 39990),  # Bank 12
-        (20300, 39990),  # Bank 13
-        (20300, 39990)   # Bank 14
+        (20300, 38830),  # Bank 1
+        (20300, 38830),  # Bank 2
+        (20300, 38830),  # Bank 3
+        (20300, 38830),  # Bank 4
+        (20300, 38830),  # Bank 5
+        (20300, 38830),  # Bank 6
+        (20300, 38830),  # Bank 7
+        (20300, 38830),  # Bank 8
+        (20300, 38830),  # Bank 9
+        (20300, 38830),  # Bank 10
+        (20300, 38830),  # Bank 11
+        (20300, 38830),  # Bank 12
+        (20300, 38830),  # Bank 13
+        (20300, 38830)   # Bank 14
       ]
 
 
@@ -987,7 +987,7 @@ On PEARL this is set to the following:
     raw_data_tof_cropping: (0, 19995)
 
   # Long mode ON:
-    raw_data_tof_cropping: (20280, 39995)
+    raw_data_tof_cropping: (20280, 39000)
 
 .. _spline_coefficient_pearl_isis-powder-diffraction-ref:
 
@@ -996,6 +996,7 @@ spline_coefficient
 Determines the spline coefficient to use after processing
 the vanadium in :ref:`create_vanadium_pearl_isis-powder-diffraction-ref`
 method. For more details see: :ref:`SplineBackground <algm-SplineBackground>`
+This value is lower on long-mode to deal with the increased noise.
 
 *Note that if this value is changed 'create_vanadium'
 will need to be called again.*
@@ -1004,7 +1005,11 @@ On PEARL this is set to the following:
 
 ..  code-block:: python
 
-  spline_coefficient: 60
+  # Long mode OFF:
+    spline_coefficient: 60
+    
+  # Long mode ON:
+    spline_coefficient: 5
 
 .. _subtract_empty_instrument_pearl_isis-powder-diffraction-ref:
 
@@ -1091,6 +1096,37 @@ On PEARL this is set to the following:
 
   vanadium_absorb_filename: "pearl_absorp_sphere_10mm_newinst2_long.nxs"
 
+.. _nxs_filename_pearl_isis-powder-diffraction-ref:
+
+nxs_filename
+^^^^^^^^^^^^
+A template for the filename of the generated NeXus file.
+
+.. _gss_filename_pearl_isis-powder-diffraction-ref:
+
+gss_filename
+^^^^^^^^^^^^
+A template for the filename of the generated GSAS file.
+
+.. _dat_files_directory_pearl_isis-powder-diffraction-ref:
+
+dat_files_directory
+^^^^^^^^^^^^^^^^^^^
+The subdirectory of the output directory where the .dat files are saved
+
+.. _tof_xye_filename_pearl_isis-powder-diffraction-ref:
+
+tof_xye_filename
+^^^^^^^^^^^^^^^^
+A template for the filename of the generated TOF XYE file.
+
+.. _dspacing_xye_filename_pearl_isis-powder-diffraction-ref:
+
+dspacing_xye_filename
+^^^^^^^^^^^^^^^^^^^^^
+A template for the filename of the generated dSpacing XYE file.
+
+
 .. _vanadium_tof_cropping_pearl_isis-powder-diffraction-ref:
 
 vanadium_tof_cropping
@@ -1118,6 +1154,6 @@ On PEARL this is set to the following:
   # Long mode OFF:
     vanadium_tof_cropping: (1400, 19990)
   # Long mode ON:
-    vanadium_tof_cropping: (20295, 39993)
+    vanadium_tof_cropping: (20295, 39000)
 
 .. categories:: Techniques

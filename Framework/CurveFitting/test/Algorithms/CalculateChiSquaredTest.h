@@ -293,8 +293,9 @@ private:
       }
       if (isHisto) {
         xValues.resize(nData);
+        using std::placeholders::_1;
         std::transform(xBins.begin(), xBins.end() - 1, xValues.begin(),
-                       std::bind2nd(std::plus<double>(), dx / 2));
+                       std::bind(std::plus<double>(), _1, dx / 2));
       } else {
         xValues = xBins;
       }

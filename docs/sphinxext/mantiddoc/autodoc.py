@@ -9,7 +9,7 @@ Mantid customizations for the behaviour of the Sphinx autodoc
 extension
 """
 
-def skip(app, what, name, obj, skip, options):
+def skip_member(app, what, name, obj, skip, options):
     """
     Arguments:
       app: Sphinx application object
@@ -20,11 +20,22 @@ def skip(app, what, name, obj, skip, options):
       options: the options given to the directive: an object with attributes inherited_members, undoc_members,
                show_inheritance and noindex that are true if the flag option of same name was given to the auto directive
     """
-    if name == "__init__":
-        return False
-    return skip
+    exclusions = (
+        'from_bytes',
+        'to_bytes',
+        'real',
+        'imag',
+        'real',
+        'conjugate',
+        'denominator',
+        'numerator',
+    )
+
+    exclude = name in exclusions
+    return skip or exclude
+
 
 def setup(app):
     # Define which methods are skipped when running autodoc
     # on a member
-    app.connect("autodoc-skip-member", skip)
+    app.connect("autodoc-skip-member", skip_member)

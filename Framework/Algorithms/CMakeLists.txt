@@ -23,8 +23,10 @@ set(SRC_FILES
     src/CalculateDIFC.cpp
     src/CalculateDynamicRange.cpp
     src/CalculateEfficiency.cpp
+    src/CalculateEfficiency2.cpp
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
+    src/CalculatePlaczekSelfScattering.cpp
     src/CalculatePolynomialBackground.cpp
     src/CalculateSlits.cpp
     src/CalculateTransmission.cpp
@@ -74,6 +76,7 @@ set(SRC_FILES
     src/CorrectTOFAxis.cpp
     src/CorrectToFile.cpp
     src/CreateCalFileByNames.cpp
+    src/CreateDetectorTable.cpp
     src/CreateDummyCalFile.cpp
     src/CreateEPP.cpp
     src/CreateFlatEventWorkspace.cpp
@@ -254,6 +257,7 @@ set(SRC_FILES
     src/ReflectometryMomentumTransfer.cpp
     src/ReflectometryReductionOne2.cpp
     src/ReflectometryReductionOneAuto2.cpp
+    src/ReflectometryReductionOneAuto3.cpp
     src/ReflectometrySumInQ.cpp
     src/ReflectometryWorkflowBase.cpp
     src/ReflectometryWorkflowBase2.cpp
@@ -360,14 +364,15 @@ set(INC_FILES
     inc/MantidAlgorithms/Bin2DPowderDiffraction.h
     inc/MantidAlgorithms/BinaryOperateMasks.h
     inc/MantidAlgorithms/BinaryOperation.h
-    inc/MantidAlgorithms/BoostOptionalToAlgorithmProperty.h
     inc/MantidAlgorithms/CalculateCarpenterSampleCorrection.h
     inc/MantidAlgorithms/CalculateCountRate.h
     inc/MantidAlgorithms/CalculateDIFC.h
     inc/MantidAlgorithms/CalculateDynamicRange.h
     inc/MantidAlgorithms/CalculateEfficiency.h
+    inc/MantidAlgorithms/CalculateEfficiency2.h
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
+    inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
     inc/MantidAlgorithms/CalculateSlits.h
     inc/MantidAlgorithms/CalculateTransmission.h
@@ -417,6 +422,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CorrectTOFAxis.h
     inc/MantidAlgorithms/CorrectToFile.h
     inc/MantidAlgorithms/CreateCalFileByNames.h
+    inc/MantidAlgorithms/CreateDetectorTable.h
     inc/MantidAlgorithms/CreateDummyCalFile.h
     inc/MantidAlgorithms/CreateEPP.h
     inc/MantidAlgorithms/CreateFlatEventWorkspace.h
@@ -601,6 +607,7 @@ set(INC_FILES
     inc/MantidAlgorithms/ReflectometryMomentumTransfer.h
     inc/MantidAlgorithms/ReflectometryReductionOne2.h
     inc/MantidAlgorithms/ReflectometryReductionOneAuto2.h
+    inc/MantidAlgorithms/ReflectometryReductionOneAuto3.h
     inc/MantidAlgorithms/ReflectometrySumInQ.h
     inc/MantidAlgorithms/ReflectometryWorkflowBase.h
     inc/MantidAlgorithms/ReflectometryWorkflowBase2.h
@@ -724,8 +731,10 @@ set(TEST_FILES
     CalculateDIFCTest.h
     CalculateDynamicRangeTest.h
     CalculateEfficiencyTest.h
+    CalculateEfficiency2Test.h
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
+    CalculatePlaczekSelfScatteringTest.h
     CalculatePolynomialBackgroundTest.h
     CalculateSlitsTest.h
     CalculateTransmissionBeamSpreaderTest.h
@@ -776,6 +785,7 @@ set(TEST_FILES
     CorrectTOFAxisTest.h
     CorrectToFileTest.h
     CreateCalFileByNamesTest.h
+    CreateDetectorTableTest.h
     CreateDummyCalFileTest.h
     CreateEPPTest.h
     CreateFlatEventWorkspaceTest.h
@@ -949,6 +959,7 @@ set(TEST_FILES
     ReflectometryMomentumTransferTest.h
     ReflectometryReductionOne2Test.h
     ReflectometryReductionOneAuto2Test.h
+    ReflectometryReductionOneAuto3Test.h
     ReflectometrySumInQTest.h
     RegroupTest.h
     RemoveBackgroundTest.h
@@ -1024,8 +1035,11 @@ set(TEST_FILES
     WorkspaceGroupTest.h)
 
 set(TEST_PY_FILES
-    NormaliseToUnityTest.py
-    ReflectometryBackgroundSubtractionTest.py)
+    test/NormaliseToUnityTest.py
+    test/ReflectometryBackgroundSubtractionTest.py
+    test/ReflectometryReductionOne2Test.py)
+
+  pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python ${TEST_PY_FILES})
 
 if(COVERALLS)
   foreach(loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
@@ -1046,7 +1060,7 @@ set_target_properties(Algorithms
                                  COMPILE_DEFINITIONS
                                  "IN_MANTID_ALGORITHMS")
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Algorithms
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")

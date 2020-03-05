@@ -182,7 +182,7 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm,
         maxfwhm = 4;
     }
   } else {
-    m_vecFWHM.push_back(usrwidth);
+    m_vecFWHM.emplace_back(usrwidth);
     m_sstream << "Add user defined FWHM = " << usrwidth << "\n";
   }
 
@@ -199,7 +199,7 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm,
 
   auto &vecX = m_dataWS->x(m_wsIndex);
 
-  int i_centre = static_cast<int>(getIndex(vecX, m_peakFunc->centre()));
+  auto i_centre = static_cast<int>(getIndex(vecX, m_peakFunc->centre()));
   int i_maxindex = static_cast<int>(vecX.size()) - 1;
 
   m_sstream << "FWHM to guess. Range = " << minfwhm << ", " << maxfwhm
@@ -232,7 +232,7 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm,
                 << ", i_centre = " << i_centre << ".\n";
     }
 
-    m_vecFWHM.push_back(in_fwhm);
+    m_vecFWHM.emplace_back(in_fwhm);
   }
 }
 
@@ -499,7 +499,7 @@ void FitOneSinglePeak::highBkgdFit() {
     g_log.warning(outss.str());
 
     size_t numpts = i_maxFitX - i_minFitX;
-    size_t shift = static_cast<size_t>(static_cast<double>(numpts) / 6.);
+    auto shift = static_cast<size_t>(static_cast<double>(numpts) / 6.);
     i_minPeakX += shift;
     const auto &Xdata = m_dataWS->x(m_wsIndex);
     if (i_minPeakX >= Xdata.size())
@@ -1239,7 +1239,7 @@ FitPeak::addFunctionParameterNames(std::vector<std::string> funcnames) {
 
   for (auto &funcname : funcnames) {
     // Add original name in
-    vec_funcparnames.push_back(funcname);
+    vec_funcparnames.emplace_back(funcname);
 
     // Add a full function name and parameter names in
     IFunction_sptr tempfunc =
@@ -1255,7 +1255,7 @@ FitPeak::addFunctionParameterNames(std::vector<std::string> funcnames) {
     }
     parnamess << ")";
 
-    vec_funcparnames.push_back(parnamess.str());
+    vec_funcparnames.emplace_back(parnamess.str());
   }
 
   return vec_funcparnames;

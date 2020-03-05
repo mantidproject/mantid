@@ -283,10 +283,10 @@ public:
     std::vector<double> bins;
     TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins),
                      const std::invalid_argument &);
-    bins.push_back(0.5);
+    bins.emplace_back(0.5);
     TS_ASSERT_THROWS(runInfo.storeHistogramBinBoundaries(bins),
                      const std::invalid_argument &);
-    bins.push_back(1.5);
+    bins.emplace_back(1.5);
     TS_ASSERT_THROWS_NOTHING(runInfo.storeHistogramBinBoundaries(bins));
   }
 

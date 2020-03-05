@@ -314,9 +314,9 @@ V3R V3R::getPositiveVector() const {
 /// Returns an std::vector<double> with approximations of the components.
 V3R::operator std::vector<double>() const {
   std::vector<double> vector;
-  vector.push_back(boost::rational_cast<double>(m_x));
-  vector.push_back(boost::rational_cast<double>(m_y));
-  vector.push_back(boost::rational_cast<double>(m_z));
+  vector.emplace_back(boost::rational_cast<double>(m_x));
+  vector.emplace_back(boost::rational_cast<double>(m_y));
+  vector.emplace_back(boost::rational_cast<double>(m_z));
 
   return vector;
 }

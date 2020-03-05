@@ -40,7 +40,7 @@ private:
 
 protected:
   Cone(const Cone &) = default;
-  Cone &operator=(const Cone &) = default;
+  Cone &operator=(const Cone &) = delete;
 
 public:
   /// Public identifer

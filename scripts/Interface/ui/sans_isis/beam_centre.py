@@ -12,6 +12,9 @@ from six import with_metaclass
 
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import messagedisplay
+
+from mantid import UsageService
+from mantid.kernel import FeatureType
 from sans.gui_logic.gui_common import get_detector_from_gui_selection, \
      get_detector_strings_for_gui, get_string_for_gui_from_reduction_mode
 
@@ -53,8 +56,12 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         self.q_max_line_edit.hide()
         self.Q_to.hide()
 
+        # At the moment we only track how many times this is opened, if it's popular
+        # we can track individual feature usage at a later date
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Beam Centre Tab"], False)
+
     def _setup_log_widget(self):
-        self.log_widget = messagedisplay.MessageDisplay(self.groupBox_2)
+        self.log_widget = messagedisplay.MessageDisplay(parent=self.groupBox_2)
         self.log_widget.setMinimumSize(QtCore.QSize(491, 371))
         self.log_widget.setObjectName(_fromUtf8("log_widget"))
         self.gridLayout.addWidget(self.log_widget, 0, 1, 4, 1)
@@ -105,20 +112,14 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         self.instrument = instrument
         component_list = get_detector_strings_for_gui(self.instrument)
         self.set_component_options(component_list)
-        self.lab_centre_label.setText('Centre Position {}'.format(component_list[0]))
-        self.update_lab_check_box.setText('Update {}'.format(component_list[0]))
         if len(component_list) < 2:
             self.hab_pos_1_line_edit.setEnabled(False)
             self.hab_pos_2_line_edit.setEnabled(False)
             self.update_hab_check_box.setEnabled(False)
-            self.hab_centre_label.setText('Centre Position HAB')
-            self.update_hab_check_box.setText('Update HAB')
         else:
             self.hab_pos_1_line_edit.setEnabled(True)
             self.hab_pos_2_line_edit.setEnabled(True)
             self.update_hab_check_box.setEnabled(True)
-            self.hab_centre_label.setText('Centre Position {}'.format(component_list[1]))
-            self.update_hab_check_box.setText('Update {}'.format(component_list[1]))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Actions
@@ -154,6 +155,12 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
     def set_run_button_to_normal(self):
         self.run_button.setText("Run")
         self.run_button.setEnabled(True)
+
+    def enable_update_hab(self, enabled):
+        self.update_hab_check_box.setChecked(enabled)
+
+    def enable_update_lab(self, enabled):
+        self.update_lab_check_box.setChecked(enabled)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Properties

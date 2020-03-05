@@ -10,18 +10,22 @@
 from __future__ import (absolute_import)
 
 # system imports
-# import readline before QApplication starts to avoid segfault with IPython 5 and Python 3
-import readline  # noqa
+# import readline (if available) before QApplication starts to avoid segfault with IPython 5 and Python 3
+try:
+    import readline  # noqa
+except ImportError:
+    pass
 import unittest
 
 # third-party library imports
 
 # local package imports
 from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 
-class InProcessJupyterConsoleTest(GuiTest):
+@start_qapplication
+class InProcessJupyterConsoleTest(unittest.TestCase):
 
     def test_construction_raises_no_errors(self):
         widget = InProcessJupyterConsole()

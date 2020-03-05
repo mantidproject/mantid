@@ -64,7 +64,7 @@ void CopyInstrumentParameters::exec() {
 
       const Geometry::IComponent *targComp = nullptr;
 
-      IDetector *pOldDet = dynamic_cast<IDetector *>(oldComponent);
+      auto *pOldDet = dynamic_cast<IDetector *>(oldComponent);
       if (pOldDet) {
         detid_t detID = pOldDet->getID();
         targComp = inst2->getBaseDetector(detID);

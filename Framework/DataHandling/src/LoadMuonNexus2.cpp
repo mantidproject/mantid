@@ -156,7 +156,7 @@ void LoadMuonNexus2::doExec() {
   int nBins = raw_time.dim0();
   std::vector<double> timeBins;
   timeBins.assign(raw_time(), raw_time() + nBins);
-  timeBins.push_back(raw_time[nBins - 1] + raw_time[1] - raw_time[0]);
+  timeBins.emplace_back(raw_time[nBins - 1] + raw_time[1] - raw_time[0]);
 
   // Calculate the size of a workspace, given its number of periods & spectra to
   // read
@@ -263,7 +263,7 @@ void LoadMuonNexus2::doExec() {
 
     int wsIndex = 0;
     localWorkspace->mutableX(0) = timeBins;
-    for (int spec = static_cast<int>(m_spec_min);
+    for (auto spec = static_cast<int>(m_spec_min);
          spec <= static_cast<int>(m_spec_max); ++spec) {
       int i = index_spectrum[spec]; // if spec not found i is 0
       localWorkspace->setHistogram(
@@ -378,7 +378,7 @@ void LoadMuonNexus2::loadRunDetails(
 
   runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
 
-  int numSpectra = static_cast<int>(localWorkspace->getNumberHistograms());
+  auto numSpectra = static_cast<int>(localWorkspace->getNumberHistograms());
   runDetails.addProperty("nspectra", numSpectra);
 
   m_filename = getPropertyValue("Filename");

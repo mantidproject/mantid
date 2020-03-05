@@ -11,12 +11,13 @@ from copy import copy
 
 from qtpy.QtGui import QFont
 
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.codeeditor.codecommenter import CodeCommenter
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 
 
-class CodeCommenterTest(GuiTest):
+@start_qapplication
+class CodeCommenterTest(unittest.TestCase):
 
     def setUp(self):
         self.lines = [

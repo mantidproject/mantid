@@ -77,10 +77,10 @@ void MonitorEfficiencyCorUser::exec() {
   const double eff0 = m_monitorCounts * calculateFormulaValue(effFormula, m_Ei);
 
   // Calculate the number of spectra in this workspace
-  const int numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int>(this->m_inputWS->getNumberHistograms());
   API::Progress prog(this, 0.0, 1.0, numberOfSpectra);
-  int64_t numberOfSpectra_i =
+  auto numberOfSpectra_i =
       static_cast<int64_t>(numberOfSpectra); // cast to make openmp happy
 
   // Loop over the histograms (detector spectra)

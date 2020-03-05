@@ -104,17 +104,19 @@ public:
   double getK() const override;
   double getL() const override;
   Mantid::Kernel::V3D getHKL() const override;
+  bool isIndexed() const override;
   Mantid::Kernel::V3D getIntHKL() const override;
+  Mantid::Kernel::V3D getIntMNP() const override;
   void setH(double m_H) override;
   void setK(double m_K) override;
   void setL(double m_L) override;
   void setBankName(std::string m_bankName);
   void setHKL(double H, double K, double L) override;
   void setHKL(const Mantid::Kernel::V3D &HKL) override;
-  void setIntHKL(const Mantid::Kernel::V3D HKL) override;
+  void setIntHKL(const Kernel::V3D &HKL) override;
+  void setIntMNP(const Mantid::Kernel::V3D &MNP) override;
   void setSamplePos(double samX, double samY, double samZ) override;
   void setSamplePos(const Mantid::Kernel::V3D &XYZ) override;
-  void resetHKL();
 
   Mantid::Kernel::V3D getQLabFrame() const override;
   Mantid::Kernel::V3D getQSampleFrame() const override;
@@ -125,7 +127,7 @@ public:
       const Mantid::Kernel::V3D &QSampleFrame,
       boost::optional<double> detectorDistance = boost::none) override;
   void
-  setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
+  setQLabFrame(const Mantid::Kernel::V3D &qLab,
                boost::optional<double> detectorDistance = boost::none) override;
 
   void setWavelength(double wavelength) override;
@@ -162,8 +164,6 @@ public:
   void setCol(int m_col);
   void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
-  void setIntMNP(const Mantid::Kernel::V3D MNP) override;
-  Mantid::Kernel::V3D getIntMNP() const override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
   virtual Mantid::Kernel::V3D getSamplePos() const override;
@@ -253,17 +253,9 @@ private:
   /// Cached detector position
   Mantid::Kernel::V3D detPos;
 
-  /// save values before setHKL is called for use in SortHKL
-  double m_orig_H;
-  double m_orig_K;
-  double m_orig_L;
-
-  // keep peak number
   int m_peakNumber;
-  Mantid::Kernel::V3D m_IntHKL;
-  Mantid::Kernel::V3D m_IntMNP;
-
-  /// integer HKL of the peak
+  Mantid::Kernel::V3D m_intHKL;
+  Mantid::Kernel::V3D m_intMNP;
 
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;

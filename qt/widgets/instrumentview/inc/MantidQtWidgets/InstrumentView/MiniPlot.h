@@ -22,7 +22,7 @@ using MiniPlot = MiniPlotQwt;
 #elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 using MiniPlot = MiniPlotMpl;
 #endif
-}
+} // namespace MantidWidgets
 } // namespace MantidQt
 
 #endif // MANTIDQT_WIDGETS_INSTRUMENTVIEW_MINIPLOT_H

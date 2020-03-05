@@ -148,6 +148,22 @@ public:
     TS_ASSERT_EQUALS(fac1.name(), "SNS");
   }
 
+  void testChangingDefaultFacilityChangesInst() {
+    // When changing default facility using the setFacility method, we should
+    // also change the instrument to the default so we don't get weird
+    // inst/facility combinations
+    auto &config = ConfigService::Instance();
+
+    config.setFacility("ISIS");
+    const auto isisFirstInst = config.getString("default.instrument");
+    TS_ASSERT(!isisFirstInst.empty());
+
+    config.setFacility("SNS");
+    const auto snsFirstInst = config.getString("default.instrument");
+    TS_ASSERT(!snsFirstInst.empty());
+    TS_ASSERT_DIFFERS(snsFirstInst, isisFirstInst);
+  }
+
   void testFacilityList() {
     std::vector<FacilityInfo *> facilities =
         ConfigService::Instance().getFacilities();
@@ -297,8 +313,8 @@ public:
     auto originalDirectories =
         ConfigService::Instance().getInstrumentDirectories();
     std::vector<std::string> testDirectories;
-    testDirectories.push_back("Test Directory 1");
-    testDirectories.push_back("Test Directory 2");
+    testDirectories.emplace_back("Test Directory 1");
+    testDirectories.emplace_back("Test Directory 2");
     ConfigService::Instance().setInstrumentDirectories(testDirectories);
     auto readDirectories = ConfigService::Instance().getInstrumentDirectories();
     TS_ASSERT_EQUALS(readDirectories.size(), testDirectories.size());

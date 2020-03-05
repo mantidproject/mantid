@@ -41,6 +41,8 @@ public:
     return m_figure.gca<AxesType>();
   }
 
+  void setTightLayout(QHash<QString, QVariant> const &args);
+
   /// Convert a point in screen coordinates to data coordinates
   QPointF toDataCoords(QPoint pos) const;
 

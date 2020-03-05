@@ -50,11 +50,11 @@ void SVUtils::Format(int width, int precision, double value, std::string &str) {
  */
 void SVUtils::PushNameValue(const std::string &name, int width, int precision,
                             double value, std::vector<std::string> &list) {
-  list.push_back(name);
+  list.emplace_back(name);
 
   std::string value_str;
   Format(width, precision, value, value_str);
-  list.push_back(value_str);
+  list.emplace_back(value_str);
 }
 
 /**

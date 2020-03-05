@@ -101,7 +101,7 @@ void LoadMuonNexus1::exec() {
         throw std::runtime_error("Unsupported data type for resolution");
       }
 
-      double bin = static_cast<double>(boost::lexical_cast<int>(firstGoodBin));
+      auto bin = static_cast<double>(boost::lexical_cast<int>(firstGoodBin));
       double bin_size = resolution / 1000000.0;
 
       setProperty("FirstGoodData", bin * bin_size);
@@ -241,9 +241,8 @@ void LoadMuonNexus1::exec() {
     size_t counter = 0;
     for (int64_t i = m_spec_min; i < m_spec_max; ++i) {
       // Shift the histogram to read if we're not in the first period
-      specnum_t histToRead =
-          static_cast<specnum_t>(i - 1 + period * nxload.t_nsp1);
-      specnum_t specNo = static_cast<specnum_t>(i);
+      auto histToRead = static_cast<specnum_t>(i - 1 + period * nxload.t_nsp1);
+      auto specNo = static_cast<specnum_t>(i);
       loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
                localWorkspace); // added -1 for NeXus
       counter++;
@@ -252,9 +251,9 @@ void LoadMuonNexus1::exec() {
     // Read in the spectra in the optional list parameter, if set
     if (m_list) {
       for (auto specid : m_spec_list) {
-        specnum_t histToRead =
+        auto histToRead =
             static_cast<specnum_t>(specid - 1 + period * nxload.t_nsp1);
-        specnum_t specNo = static_cast<specnum_t>(specid);
+        auto specNo = static_cast<specnum_t>(specid);
         loadData(counter, histToRead, specNo, nxload, lengthIn - 1,
                  localWorkspace);
         counter++;
@@ -299,8 +298,8 @@ void LoadMuonNexus1::exec() {
       }
       std::vector<int> specIDs, detecIDs;
       for (size_t i = 0; i < localWorkspace->getNumberHistograms(); i++) {
-        specIDs.push_back(localWorkspace->getSpectrum(i).getSpectrumNo());
-        detecIDs.push_back(localWorkspace->getSpectrum(i).getSpectrumNo());
+        specIDs.emplace_back(localWorkspace->getSpectrum(i).getSpectrumNo());
+        detecIDs.emplace_back(localWorkspace->getSpectrum(i).getSpectrumNo());
       }
       API::SpectrumDetectorMapping mapping(specIDs, detecIDs);
       localWorkspace->updateSpectraUsing(mapping);
@@ -422,7 +421,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
           // Populate deadTimes
           deadTimes.reserve(specToLoad.size());
           for (auto spec : specToLoad) {
-            int index = static_cast<int>(spec - 1 + i * m_numberOfSpectra);
+            auto index = static_cast<int>(spec - 1 + i * m_numberOfSpectra);
             deadTimes.emplace_back(deadTimesData[index]);
           }
 
@@ -478,7 +477,7 @@ LoadMuonNexus1::loadDetectorGrouping(NXRoot &root,
       // Start from 1 to N+1 to be consistent with
       // the case where spectra are specified
       for (int i = 1; i < m_numberOfSpectra + 1; i++)
-        specToLoad.push_back(i);
+        specToLoad.emplace_back(i);
     }
 
     if (numGroupingEntries < m_numberOfSpectra) {
@@ -526,7 +525,7 @@ LoadMuonNexus1::loadDetectorGrouping(NXRoot &root,
         // Multiple periods - same grouping for each
         specToLoad.clear();
         for (int i = 1; i < m_numberOfSpectra + 1; i++) {
-          specToLoad.push_back(i);
+          specToLoad.emplace_back(i);
         }
         for (const auto &spectrum : specToLoad) {
           grouping.emplace_back(groupingData[spectrum - 1]);
@@ -586,7 +585,7 @@ LoadMuonNexus1::loadDetectorGrouping(NXRoot &root,
       // Make sure it uses the right number of detectors
       std::ostringstream oss;
       oss << "1-" << m_numberOfSpectra;
-      dummyGrouping->groups.push_back(oss.str());
+      dummyGrouping->groups.emplace_back(oss.str());
       dummyGrouping->description = "Dummy grouping";
       dummyGrouping->groupNames.emplace_back("all");
     }
@@ -638,7 +637,7 @@ LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
   for (size_t i = 0; i < specToLoad.size(); i++) {
     // Add detector ID to the list of group detectors. Detector ID is always
     // spectra index + 1
-    groupingMap[grouping[i]].push_back(specToLoad[i]);
+    groupingMap[grouping[i]].emplace_back(specToLoad[i]);
   }
 
   for (auto &group : groupingMap) {
@@ -695,7 +694,7 @@ void LoadMuonNexus1::loadRunDetails(
 
   runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
 
-  int numSpectra = static_cast<int>(localWorkspace->getNumberHistograms());
+  auto numSpectra = static_cast<int>(localWorkspace->getNumberHistograms());
   runDetails.addProperty("nspectra", numSpectra);
 
   NXRoot root(m_filename);

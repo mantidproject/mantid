@@ -17,9 +17,9 @@
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
-using ::testing::_;
 
 class StructureFactorCalculatorTest : public CxxTest::TestSuite {
 public:

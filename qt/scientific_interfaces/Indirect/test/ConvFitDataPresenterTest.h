@@ -51,6 +51,7 @@ public:
   MOCK_CONST_METHOD0(isMultipleDataTabSelected, bool());
   MOCK_CONST_METHOD0(isResolutionHidden, bool());
   MOCK_METHOD1(setResolutionHidden, void(bool hide));
+  MOCK_METHOD1(setStartAndEndHidden, void(bool hidden));
   MOCK_METHOD0(disableMultipleDataTab, void());
 
   MOCK_CONST_METHOD0(getSelectedSample, std::string());
@@ -72,9 +73,12 @@ public:
 
   MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
+  MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
 
   /// Public slots
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
+  MOCK_METHOD1(setStartX, void(double));
+  MOCK_METHOD1(setEndX, void(double));
 };
 
 /// Mock object to mock the model
@@ -136,7 +140,7 @@ public:
 
   void
   test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), 1);
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
   }
 
   ///----------------------------------------------------------------------

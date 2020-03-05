@@ -110,7 +110,7 @@ void TransposeMD::exec() {
     // Clone the dimension corresponding to the axis requested.
     auto cloneDim = Geometry::IMDDimension_sptr(
         new Geometry::MDHistoDimension(inWS->getDimension(axes[i]).get()));
-    targetGeometry.push_back(cloneDim);
+    targetGeometry.emplace_back(cloneDim);
   }
 
   // Make the output workspace in the right shape.

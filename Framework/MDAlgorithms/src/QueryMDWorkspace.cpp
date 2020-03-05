@@ -88,9 +88,9 @@ void QueryMDWorkspace::init() {
                                          "LimitRows", IS_DEFAULT));
 
   std::vector<std::string> propOptions;
-  propOptions.push_back(noNormalisationOption());
-  propOptions.push_back(volumeNormalisationOption());
-  propOptions.push_back(numberOfEventsNormalisationOption());
+  propOptions.emplace_back(noNormalisationOption());
+  propOptions.emplace_back(volumeNormalisationOption());
+  propOptions.emplace_back(numberOfEventsNormalisationOption());
 
   declareProperty("Normalisation", "none",
                   boost::make_shared<StringListValidator>(propOptions),
@@ -145,7 +145,7 @@ void QueryMDWorkspace::getBoxData(
   std::vector<API::IMDNode *> boxes;
   ws->getBox()->getBoxes(boxes, depth, true);
   for (auto &boxe : boxes) {
-    MDBoxBase<MDE, nd> *box = dynamic_cast<MDBoxBase<MDE, nd> *>(boxe);
+    auto *box = dynamic_cast<MDBoxBase<MDE, nd> *>(boxe);
     if (!box)
       throw(std::runtime_error("Can not cast IMDNode to any type of boxes"));
     size_t d = box->getDepth();

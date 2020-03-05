@@ -8,37 +8,39 @@
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
-from __future__ import  (absolute_import, unicode_literals)
+from __future__ import (absolute_import, unicode_literals)
 
-from functools import wraps
 import sys
+from functools import wraps
 
-# 3rdparty imports
-from mantid.api import AnalysisDataServiceObserver
-from mantid.plots import MantidAxes
-from mantid.py3compat import text_type
-from mantidqt.plotting.figuretype import FigureType, figure_type
-from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 import matplotlib
 from matplotlib._pylab_helpers import Gcf
-from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg)  # noqa
 from matplotlib.axes import Axes
+from matplotlib.backend_bases import FigureManagerBase
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from qtpy.QtCore import QObject, Qt
-from qtpy.QtWidgets import QApplication, QLabel
+from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 
-# local imports
-from .figureinteraction import FigureInteraction
-from .figurewindow import FigureWindow
-from .qappthreadcall import QAppThreadCall
-from .toolbar import WorkbenchNavigationToolbar, ToolbarStateManager
+from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
+from mantid.kernel import logger
+from mantid.plots import datafunctions, MantidAxes
+from mantid.py3compat import text_type
+from mantidqt.io import open_a_file_dialog
+from mantidqt.plotting.figuretype import FigureType, figure_type
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
+from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
+from mantidqt.widgets.plotconfigdialog import curve_in_ax
+from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
+from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
+from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
+from workbench.plotting.figureinteraction import FigureInteraction
+from workbench.plotting.figurewindow import FigureWindow
+from workbench.plotting.plotscriptgenerator import generate_script
+from workbench.plotting.toolbar import WorkbenchNavigationToolbar, ToolbarStateManager
 
 
 def _catch_exceptions(func):
-    """
-    Catch all exceptions in method and print a traceback to stderr
-    """
-
+    """Catch all exceptions in method and print a traceback to stderr"""
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -52,7 +54,6 @@ def _catch_exceptions(func):
 
 
 class FigureManagerADSObserver(AnalysisDataServiceObserver):
-
     def __init__(self, manager):
         super(FigureManagerADSObserver, self).__init__()
         self.window = manager.window
@@ -61,12 +62,11 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         self.observeClear(True)
         self.observeDelete(True)
         self.observeReplace(True)
+        self.observeRename(True)
 
     @_catch_exceptions
     def clearHandle(self):
-        """
-        Called when the ADS is deleted all of its workspaces
-        """
+        """Called when the ADS is deleted all of its workspaces"""
         self.window.emit_close()
 
     @_catch_exceptions
@@ -106,7 +106,7 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         if all(empty_axes):
             self.window.emit_close()
         else:
-            self.canvas.draw_idle()
+            self.canvas.draw()
 
     @_catch_exceptions
     def replaceHandle(self, _, workspace):
@@ -124,7 +124,25 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
                 continue
             redraw = redraw | redraw_this
         if redraw:
-            self.canvas.draw_idle()
+            self.canvas.draw()
+
+    @_catch_exceptions
+    def renameHandle(self, oldName, newName):
+        """
+        Called when the ADS has renamed a workspace.
+        If this workspace is attached to this figure then the figure name is updated
+        :param oldName: The old name of the workspace.
+        :param newName: The new name of the workspace
+        """
+        for ax in self.canvas.figure.axes:
+            if isinstance(ax, MantidAxes):
+                ws = AnalysisDataService.retrieve(newName)
+                if isinstance(ws, MatrixWorkspace):
+                    for ws_name, artists in ax.tracked_workspaces.items():
+                        if ws_name == oldName:
+                            ax.tracked_workspaces[newName] = ax.tracked_workspaces.pop(oldName)
+                elif isinstance(ws, ITableWorkspace):
+                    ax.wsName = newName
 
 
 class FigureManagerWorkbench(FigureManagerBase, QObject):
@@ -181,12 +199,23 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.statusbar_label = QLabel()
         self.window.statusBar().addWidget(self.statusbar_label)
 
+        self.plot_options_dialog = None
         self.toolbar = self._get_toolbar(canvas, self.window)
         if self.toolbar is not None:
             self.window.addToolBar(self.toolbar)
             self.toolbar.message.connect(self.statusbar_label.setText)
             self.toolbar.sig_grid_toggle_triggered.connect(self.grid_toggle)
             self.toolbar.sig_toggle_fit_triggered.connect(self.fit_toggle)
+            self.toolbar.sig_plot_options_triggered.connect(self.launch_plot_options)
+            self.toolbar.sig_generate_plot_script_clipboard_triggered.connect(
+                self.generate_plot_script_clipboard)
+            self.toolbar.sig_generate_plot_script_file_triggered.connect(
+                self.generate_plot_script_file)
+            self.toolbar.sig_home_clicked.connect(self.set_figure_zoom_to_display_all)
+            self.toolbar.sig_waterfall_reverse_order_triggered.connect(self.waterfall_reverse_line_order)
+            self.toolbar.sig_waterfall_offset_amount_triggered.connect(self.launch_waterfall_offset_options)
+            self.toolbar.sig_waterfall_fill_area_triggered.connect(self.launch_waterfall_fill_area_options)
+            self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
         else:
@@ -200,8 +229,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         height = cs.height() + self._status_and_tool_height
         self.window.resize(cs.width(), height)
 
-        self.fit_browser = FitPropertyBrowser(canvas,
-                                              ToolbarStateManager(self.toolbar))
+        self.fit_browser = FitPropertyBrowser(canvas, ToolbarStateManager(self.toolbar))
         self.fit_browser.closing.connect(self.handle_fit_browser_close)
         self.window.setCentralWidget(canvas)
         self.window.addDockWidget(Qt.LeftDockWidgetArea, self.fit_browser)
@@ -215,6 +243,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # This will be called whenever the current axes is changed
             if self.toolbar is not None:
                 self.toolbar.update()
+
         canvas.figure.add_axobserver(notify_axes_change)
 
         # Register canvas observers
@@ -236,10 +265,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         return WorkbenchNavigationToolbar(canvas, parent, False)
 
     def resize(self, width, height):
-        'set the canvas size in pixels'
+        """Set the canvas size in pixels"""
         self.window.resize(width, height + self._status_and_tool_height)
 
-    def show(self):  # noqa
+    def show(self):
         self.window.show()
         self.window.activateWindow()
         self.window.raise_()
@@ -256,8 +285,19 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
         # Hack to ensure the canvas is up to date
         self.canvas.draw_idle()
-        if figure_type(self.canvas.figure) != FigureType.Line:
+        if figure_type(self.canvas.figure) not in [FigureType.Line, FigureType.Errorbar] \
+                or self.toolbar is not None and len(self.canvas.figure.get_axes()) > 1:
             self._set_fit_enabled(False)
+
+        # For plot-to-script button to show, we must have a MantidAxes with lines in it
+        # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
+        if not any((isinstance(ax, MantidAxes) and curve_in_ax(ax))
+                   for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes()[0].is_waterfall():
+            self.toolbar.set_generate_plot_script_enabled(False)
+
+        # Only show options specific to waterfall plots if the axes is a MantidAxes and is a waterfall plot.
+        if not isinstance(self.canvas.figure.get_axes()[0], MantidAxes) or not self.canvas.figure.get_axes()[0].is_waterfall():
+            self.toolbar.set_waterfall_options_enabled(False)
 
     def destroy(self, *args):
         # check for qApp first, as PySide deletes it in its atexit handler
@@ -283,10 +323,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             # Gcf can get destroyed before the Gcf.destroy
             # line is run, leading to a useless AttributeError.
 
+    def launch_plot_options(self):
+        self.plot_options_dialog = PlotConfigDialogPresenter(self.canvas.figure, parent=self.window)
+
     def grid_toggle(self):
-        """
-        Toggle grid lines on/off
-        """
+        """Toggle grid lines on/off"""
         canvas = self.canvas
         axes = canvas.figure.get_axes()
         for ax in axes:
@@ -294,9 +335,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         canvas.draw_idle()
 
     def fit_toggle(self):
-        """
-        Toggle fit browser and tool on/off
-        """
+        """Toggle fit browser and tool on/off"""
         if self.fit_browser.isVisible():
             self.fit_browser.hide()
         else:
@@ -304,14 +343,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def handle_fit_browser_close(self):
         """
-        Respond to a signal that user closed self.fit_browser by clicking the [x] button.
+        Respond to a signal that user closed self.fit_browser by
+        clicking the [x] button.
         """
         self.toolbar.trigger_fit_toggle_action()
 
     def hold(self):
-        """
-        Mark this figure as held
-        """
+        """ Mark this figure as held"""
         self.toolbar.hold()
 
     def get_window_title(self):
@@ -341,15 +379,76 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         action.setEnabled(on)
         action.setVisible(on)
 
+    def generate_plot_script_clipboard(self):
+        script = generate_script(self.canvas.figure, exclude_headers=True)
+        QApplication.clipboard().setText(script)
+        logger.notice("Plotting script copied to clipboard.")
+
+    def generate_plot_script_file(self):
+        script = generate_script(self.canvas.figure)
+        filepath = open_a_file_dialog(
+            parent=self.canvas,
+            default_suffix=".py",
+            file_filter="Python Files (*.py)",
+            accept_mode=QFileDialog.AcceptSave,
+            file_mode=QFileDialog.AnyFile
+        )
+        if filepath:
+            try:
+                with open(filepath, 'w') as f:
+                    f.write(script)
+            except IOError as io_error:
+                logger.error("Could not write file: {}\n{}"
+                             "".format(filepath, io_error))
+
+    def set_figure_zoom_to_display_all(self):
+        axes = self.canvas.figure.get_axes()
+        if axes:
+            for ax in axes:
+                # We check for axes type below as a pseudo check for an axes being
+                # a colorbar. this is based on the same check in
+                # FigureManagerADSObserver.deleteHandle.
+                if type(ax) is not Axes:
+                    if ax.lines:  # Relim causes issues with colour plots, which have no lines.
+                        ax.relim()
+                    ax.autoscale()
+
+            self.canvas.draw()
+
+    def waterfall_reverse_line_order(self):
+        ax = self.canvas.figure.get_axes()[0]
+        x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
+        fills = datafunctions.get_waterfall_fills(ax)
+        ax.update_waterfall(0, 0)
+
+        errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
+
+        ax.lines.reverse()
+        ax.lines += errorbar_cap_lines
+        ax.collections += fills
+        ax.collections.reverse()
+        ax.update_waterfall(x, y)
+
+        if ax.get_legend():
+            ax.make_legend()
+
+    def launch_waterfall_offset_options(self):
+        WaterfallPlotOffsetDialogPresenter(self.canvas.figure, parent=self.window)
+
+    def launch_waterfall_fill_area_options(self):
+        WaterfallPlotFillAreaDialogPresenter(self.canvas.figure, parent=self.window)
+
+    def update_toolbar_waterfall_plot(self, is_waterfall):
+        self.toolbar.set_waterfall_options_enabled(is_waterfall)
+        self.toolbar.set_generate_plot_script_enabled(not is_waterfall)
 
 # -----------------------------------------------------------------------------
 # Figure control
 # -----------------------------------------------------------------------------
 
+
 def new_figure_manager(num, *args, **kwargs):
-    """
-    Create a new figure manager instance
-    """
+    """Create a new figure manager instance"""
     from matplotlib.figure import Figure  # noqa
     figure_class = kwargs.pop('FigureClass', Figure)
     this_fig = figure_class(*args, **kwargs)
@@ -357,32 +456,7 @@ def new_figure_manager(num, *args, **kwargs):
 
 
 def new_figure_manager_given_figure(num, figure):
-    """
-    Create a new figure manager instance for the given figure.
-    """
+    """Create a new figure manager instance for the given figure."""
     canvas = FigureCanvasQTAgg(figure)
     manager = FigureManagerWorkbench(canvas, num)
     return manager
-
-
-if __name__ == '__main__':
-    # testing code
-    import numpy as np
-
-    qapp = QApplication([' '])
-    qapp.setAttribute(Qt.AA_UseHighDpiPixmaps)
-    if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-        qapp.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-
-    x = np.linspace(0, 10 * np.pi, 1000)
-    cx, sx = np.cos(x), np.sin(x)
-    fig_mgr_1 = new_figure_manager(1)
-    fig1 = fig_mgr_1.canvas.figure
-    ax = fig1.add_subplot(111)
-    ax.set_title("Test title")
-    ax.set_xlabel(r"$\mu s$")
-    ax.set_ylabel("Counts")
-
-    ax.plot(x, cx)
-    fig1.show()
-    qapp.exec_()

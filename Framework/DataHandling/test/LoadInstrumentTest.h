@@ -9,6 +9,7 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -23,6 +24,9 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
 #include <string>
@@ -44,6 +48,86 @@ public:
     TS_ASSERT(!loader.isInitialized());
     loader.initialize();
     TS_ASSERT(loader.isInitialized());
+  }
+
+  void testInstNameIsCaseInsensitive() {
+    LoadInstrument loader;
+    loader.initialize();
+    loader.setChild(true);
+
+    // create a workspace with some sample data
+    int histogramNumber = 2584;
+    int timechannels = 100;
+    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(
+        histogramNumber, HistogramData::Points(timechannels, timechannels));
+
+    Points timeChannelsVec(timechannels, LinearGenerator(0.0, 100.0));
+    // loop to create data
+    for (int i = 0; i < histogramNumber; i++) {
+      std::vector<double> v(timechannels);
+      std::vector<double> e(timechannels);
+      // timechannels
+      for (int j = 0; j < timechannels; j++) {
+        v[j] = (i + j) % 256;
+        e[j] = (i + j) % 78;
+      }
+      // Populate the workspace.
+      ws2D->setPoints(i, timeChannelsVec);
+      ws2D->dataY(i) = v;
+      ws2D->dataE(i) = e;
+    }
+
+    // We want to test if the spectra mapping changes
+    TS_ASSERT_EQUALS(ws2D->getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(ws2D->getSpectrum(256).getSpectrumNo(), 257);
+    TS_ASSERT_EQUALS(ws2D->getNumberHistograms(), 2584);
+
+    const auto &fileFinder = Mantid::API::FileFinder::Instance();
+    const std::string originalFilePath =
+        fileFinder.getFullPath("HET_Definition.xml");
+
+    const std::string tmpDir = Poco::Path::temp();
+    auto generateFiles = [&tmpDir, &originalFilePath](const std::string &name) {
+      Poco::Path tmpFilePath(tmpDir, name);
+
+      Poco::File originalFile(originalFilePath);
+      originalFile.copyTo(tmpFilePath.toString());
+
+      Poco::File tmpFile(tmpFilePath);
+      return tmpFile;
+    };
+
+    auto runAlg = [&generateFiles, &loader, &ws2D](
+                      const std::string &name, const std::string &expected) {
+      auto fileHandle = generateFiles(name);
+      const std::string path = fileHandle.path();
+
+      loader.setPropertyValue("Filename", path);
+      loader.setProperty("RewriteSpectraMap", OptionalBool(true));
+      loader.setProperty("Workspace", ws2D);
+
+      loader.execute();
+      TS_ASSERT(loader.isExecuted());
+
+      fileHandle.remove();
+
+      MatrixWorkspace_sptr output = loader.getProperty("Workspace");
+      const std::string loadedName = output->getInstrument()->getName();
+      TS_ASSERT_EQUALS(expected, loadedName);
+    };
+
+    const std::string allLowerInstrFilename = "het_definition.xml";
+    const std::string mixCaseInstrFilename = "Het_definition.xml";
+    const std::string uppercaseInstrFilename = "HET_DEFINITION.xml";
+    const std::string normalInstrFilename = "HET_Definition.xml";
+
+    // Something internal will always convert to lowercase
+    const std::string expectedName = "het";
+
+    runAlg(allLowerInstrFilename, expectedName);
+    runAlg(mixCaseInstrFilename, expectedName);
+    runAlg(uppercaseInstrFilename, expectedName);
+    runAlg(normalInstrFilename, expectedName);
   }
 
   void testExecHET() {

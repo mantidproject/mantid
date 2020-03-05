@@ -22,7 +22,7 @@ class SingleCrystalData(AbinsModules.GeneralData):
     def set(self, abins_data=None, dw_crystal_data=None):
 
         """
-        :param abins_data: object of type AbinsData with data from DFT phonon calculation.
+        :param abins_data: object of type AbinsData with data from ab initio phonon calculation.
         :param dw_crystal_data: object of type DwCrystalData with DW for the case of crystal.
         """
 
@@ -34,7 +34,7 @@ class SingleCrystalData(AbinsModules.GeneralData):
         if isinstance(dw_crystal_data, AbinsModules.DWSingleCrystalData):
             self._dw_crystal_data = dw_crystal_data
         else:
-            raise ValueError("Object of type DwCrystalData was expected.")
+            raise ValueError("Object of type DWCrystalData was expected.")
 
         self._data = {"abins_data": self._abins_data.extract(), "dw_crystal_data": self._dw_crystal_data.extract()}
 
@@ -45,7 +45,7 @@ class SingleCrystalData(AbinsModules.GeneralData):
 
             return self._data
         else:
-            raise ValueError("Object fo type CrystalData is inconsistent.")
+            raise ValueError("Object of type CrystalData is inconsistent.")
 
     def __str__(self):
         return "Crystal data"

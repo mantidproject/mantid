@@ -33,8 +33,9 @@ rm -fr $userconfig_dir
 mkdir -p $userconfig_dir
 touch $userconfig_dir/Mantid.user.properties
 
+# TODO: Remove -DENABLE_WORKBENCH=FALSE when the perfomance test machine has Qt5
 cd $BUILD_DIR
-cmake -G 'Ninja' -DCMAKE_BUILD_TYPE=Release -DTESTING_TIMEOUT=600 -DCXXTEST_ADD_PERFORMANCE=TRUE -DMAKE_VATES=TRUE -DParaView_DIR=$PARAVIEW_DIR $WORKSPACE
+cmake -G 'Ninja' -DCMAKE_BUILD_TYPE=Release -DTESTING_TIMEOUT=600 -DCXXTEST_ADD_PERFORMANCE=TRUE -DENABLE_WORKBENCH=FALSE -DMAKE_VATES=TRUE -DParaView_DIR=$PARAVIEW_DIR $WORKSPACE
 ninja -j$BUILD_THREADS
 ninja -j$BUILD_THREADS AllTests
 

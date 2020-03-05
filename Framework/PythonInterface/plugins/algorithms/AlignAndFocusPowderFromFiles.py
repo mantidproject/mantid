@@ -11,8 +11,8 @@ from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm,
 from mantid.kernel import Direction, PropertyManagerDataService
 from mantid.simpleapi import AlignAndFocusPowder, CompressEvents, ConvertDiffCal, ConvertUnits, CopyLogs, \
     CreateCacheFilename, DeleteWorkspace, DetermineChunking, Divide, EditInstrumentGeometry, FilterBadPulses, \
-    LoadDiffCal, Load, LoadNexusProcessed, PDDetermineCharacterizations, Plus, RebinToWorkspace, RemoveLogs, \
-    RenameWorkspace, SaveNexusProcessed
+    LoadDiffCal, Load, LoadIDFFromNexus, LoadNexusProcessed, PDDetermineCharacterizations, Plus, \
+    RebinToWorkspace, RemoveLogs, RenameWorkspace, SaveNexusProcessed
 import os
 import numpy as np
 
@@ -28,7 +28,7 @@ PROPS_FOR_ALIGN = [CAL_FILE, GROUP_FILE,
                    "Params", "ResampleX", "Dspacing",
                    "PreserveEvents",
                    "RemovePromptPulseWidth", "CompressTolerance", "CompressWallClockTolerance",
-                   "CompressStartTime", "UnwrapRef", "LowResRef",
+                   "CompressStartTime", "LorentzCorrection", "UnwrapRef", "LowResRef",
                    "LowResSpectrumOffset", "ReductionProperties"]
 PROPS_FOR_ALIGN.extend(PROPS_IN_PD_CHARACTER)
 PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
@@ -342,6 +342,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         canSkipLoadingLogs = False
 
         # inner loop is over chunks
+        haveAccumulationForFile = False
         for (j, chunk) in enumerate(chunks):
             prog_start = file_prog_start + float(j) * float(numSteps - 1) * prog_per_chunk_step
 
@@ -357,7 +358,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
             # load a chunk - this is a bit crazy long because we need to get an output property from `Load` when it
             # is run and the algorithm history doesn't exist until the parent algorithm (this) has finished
             loader = self.__createLoader(filename, chunkname,
-                                         skipLoadingLogs=(len(chunks) > 1 and canSkipLoadingLogs),
+                                         skipLoadingLogs=(len(chunks) > 1 and canSkipLoadingLogs and haveAccumulationForFile),
                                          progstart=prog_start, progstop=prog_start + prog_per_chunk_step,
                                          **chunk)
             loader.execute()
@@ -365,19 +366,28 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                 self.__setupCalibration(chunkname)
 
             # copy the necessary logs onto the workspace
-            if len(chunks) > 1 and canSkipLoadingLogs:
+            if len(chunks) > 1 and canSkipLoadingLogs and haveAccumulationForFile:
                 CopyLogs(InputWorkspace=wkspname, OutputWorkspace=chunkname, MergeStrategy='WipeExisting')
+                # re-load instrument so detector positions that depend on logs get initialized
+                try:
+                    LoadIDFFromNexus(Workspace=chunkname, Filename=filename, InstrumentParentPath='/entry')
+                except RuntimeError as e:
+                    self.log().warning('Reloading instrument using "LoadIDFFromNexus" failed: {}'.format(e))
 
             # get the underlying loader name if we used the generic one
             if self.__loaderName == 'Load':
                 self.__loaderName = loader.getPropertyValue('LoaderName')
             # only LoadEventNexus can turn off loading logs, but FilterBadPulses
             # requires them to be loaded from the file
-            canSkipLoadingLogs = self.__loaderName == 'LoadEventNexus' and self.filterBadPulses <= 0.
+            canSkipLoadingLogs = self.__loaderName == 'LoadEventNexus' and self.filterBadPulses <= 0. and haveAccumulationForFile
 
             if determineCharacterizations and j == 0:
                 self.__determineCharacterizations(filename, chunkname)  # updates instance variable
                 determineCharacterizations = False
+
+            if self.__loaderName == 'LoadEventNexus' and mtd[chunkname].getNumberEvents() == 0:
+                self.log().notice('Chunk {} of {} contained no events. Skipping to next chunk.'.format(j+1,len(chunks)))
+                continue
 
             prog_start += prog_per_chunk_step
             if self.filterBadPulses > 0.:
@@ -420,9 +430,13 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
                                 **self.kwargs)
             prog_start += 2. * prog_per_chunk_step  # AlignAndFocusPowder counts for two steps
 
-            self.__accumulate(chunkname, wkspname, unfocusname_chunk, unfocusname, j == 0,
+            self.__accumulate(chunkname, wkspname, unfocusname_chunk, unfocusname, not haveAccumulationForFile,
                               removelogs=canSkipLoadingLogs)
+
+            haveAccumulationForFile = True
         # end of inner loop
+        if not mtd.doesExist(wkspname):
+            raise RuntimeError('Failed to process any data from file "{}"'.format(filename))
 
         # write out the cachefile for the main reduced data independent of whether
         # the unfocussed workspace was requested
@@ -460,6 +474,8 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         else:
             if removelogs:
                 RemoveLogs(Workspace=chunkname)  # accumulation has them already
+            RebinToWorkspace(WorkspaceToRebin=chunkname, WorkspaceToMatch=sumname,
+                             OutputWorkspace=chunkname)
             Plus(LHSWorkspace=sumname, RHSWorkspace=chunkname, OutputWorkspace=sumname,
                  ClearRHSWorkspace=self.kwargs['PreserveEvents'])
             DeleteWorkspace(Workspace=chunkname)

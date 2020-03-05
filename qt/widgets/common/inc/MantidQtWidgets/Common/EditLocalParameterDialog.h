@@ -9,6 +9,7 @@
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/LogValueFinder.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 #include "ui_EditLocalParameterDialog.h"
 #include <QDialog>
 #include <memory>
@@ -23,20 +24,24 @@ class FunctionMultiDomainPresenter;
  * Parameters can be set individually or all to the same value.
  * They also can be fixed and unfixed.
  */
-class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog
+    : public MantidQt::API::MantidDialog {
   Q_OBJECT
 public:
-  EditLocalParameterDialog(QWidget *parent,
-                           FunctionMultiDomainPresenter *funcBrowser,
-                           const QString &parName, const QStringList &wsNames);
+  EditLocalParameterDialog(QWidget *parent, const QString &parName,
+                           const QStringList &wsNames, QList<double> values,
+                           QList<bool> fixes, QStringList ties,
+                           QStringList constraints);
   void doSetup(const QString &parName, const QStringList &wsNames);
   QString getParameterName() const { return m_parName; }
   QList<double> getValues() const;
   QList<bool> getFixes() const;
   QStringList getTies() const;
+  QStringList getConstraints() const;
   double getValue(int i) const { return m_values[i]; }
   bool isFixed(int i) const { return m_fixes[i]; }
   QString getTie(int i) const { return m_ties[i]; }
+  QString getConstraint(int i) const { return m_constraints[i]; }
   bool areOthersFixed(int i) const;
   bool areAllOthersFixed(int i) const;
   bool areOthersTied(int i) const;
@@ -52,6 +57,8 @@ private slots:
   void setAllFixed(bool /*fix*/);
   void setTie(int /*index*/, QString /*tie*/);
   void setTieAll(QString /*tie*/);
+  void setConstraint(int /*index*/, QString /*tie*/);
+  void setConstraintAll(QString /*tie*/);
   void copy();
   void paste();
   void setValueToLog(int /*i*/);
@@ -72,6 +79,8 @@ private:
   QList<bool> m_fixes;
   /// Cache for the ties
   QStringList m_ties;
+  /// Cache for the constraints
+  QStringList m_constraints;
   /// Log value finder
   std::unique_ptr<LogValueFinder> m_logFinder;
 };

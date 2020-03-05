@@ -73,7 +73,7 @@ Kernel::IndexSet SpectrumAlgorithm::getWorkspaceIndexSet(
   // Add range to index list if given.
   if (!isEmpty(max)) {
     for (int i = min; i <= max; i++)
-      indices_list.push_back(i);
+      indices_list.emplace_back(i);
   }
   return {indices_list, numberOfSpectra};
 }

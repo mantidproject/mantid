@@ -54,7 +54,7 @@ ObjCompAssembly::ObjCompAssembly(const IComponent *base,
 ObjCompAssembly::ObjCompAssembly(const std::string &n, IComponent *reference)
     : ObjComponent(n, reference) {
   if (reference) {
-    ICompAssembly *test = dynamic_cast<ICompAssembly *>(reference);
+    auto *test = dynamic_cast<ICompAssembly *>(reference);
     if (test)
       test->add(this);
   }
@@ -69,7 +69,7 @@ ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly &ass)
   // Need to do a deep copy
   comp_it it;
   for (it = group.begin(); it != group.end(); ++it) {
-    ObjComponent *c = dynamic_cast<ObjComponent *>((*it)->clone());
+    auto *c = dynamic_cast<ObjComponent *>((*it)->clone());
     if (!c) {
       throw Kernel::Exception::InstrumentDefinitionError(
           "ObjCompAssembly cannot contain components of non-ObjComponent type");
@@ -111,13 +111,13 @@ int ObjCompAssembly::add(IComponent *comp) {
         "ObjCompAssembly::add() called on a Parametrized object.");
 
   if (comp) {
-    ObjComponent *c = dynamic_cast<ObjComponent *>(comp);
+    auto *c = dynamic_cast<ObjComponent *>(comp);
     if (!c) {
       throw Kernel::Exception::InstrumentDefinitionError(
           "ObjCompAssembly cannot contain components of non-ObjComponent type");
     }
     comp->setParent(this);
-    group.push_back(c);
+    group.emplace_back(c);
   }
   return static_cast<int>(group.size());
 }
@@ -137,13 +137,13 @@ int ObjCompAssembly::addCopy(IComponent *comp) {
 
   if (comp) {
     IComponent *newcomp = comp->clone();
-    ObjComponent *c = dynamic_cast<ObjComponent *>(newcomp);
+    auto *c = dynamic_cast<ObjComponent *>(newcomp);
     if (!c) {
       throw Kernel::Exception::InstrumentDefinitionError(
           "ObjCompAssembly cannot contain components of non-ObjComponent type");
     }
     newcomp->setParent(this);
-    group.push_back(c);
+    group.emplace_back(c);
   }
   return static_cast<int>(group.size());
 }
@@ -164,14 +164,14 @@ int ObjCompAssembly::addCopy(IComponent *comp, const std::string &n) {
 
   if (comp) {
     IComponent *newcomp = comp->clone();
-    ObjComponent *c = dynamic_cast<ObjComponent *>(newcomp);
+    auto *c = dynamic_cast<ObjComponent *>(newcomp);
     if (!c) {
       throw Kernel::Exception::InstrumentDefinitionError(
           "ObjCompAssembly cannot contain components of non-ObjComponent type");
     }
     newcomp->setParent(this);
     newcomp->setName(n);
-    group.push_back(c);
+    group.emplace_back(c);
   }
   return static_cast<int>(group.size());
 }
@@ -230,7 +230,7 @@ void ObjCompAssembly::getChildren(std::vector<IComponent_const_sptr> &outVector,
   for (int i = 0; i < this->nelements(); i++) {
     boost::shared_ptr<IComponent> comp = this->getChild(i);
     if (comp) {
-      outVector.push_back(comp);
+      outVector.emplace_back(comp);
       // Look deeper, on option.
       if (recursive) {
         boost::shared_ptr<ICompAssembly> assemb =
@@ -349,11 +349,10 @@ void ObjCompAssembly::testIntersectionWithChildren(
     boost::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
     if (ICompAssembly_sptr childAssembly =
             boost::dynamic_pointer_cast<ICompAssembly>(comp)) {
-      searchQueue.push_back(comp);
+      searchQueue.emplace_back(comp);
     }
     // Check the physical object intersection
-    else if (IObjComponent *physicalObject =
-                 dynamic_cast<IObjComponent *>(comp.get())) {
+    else if (auto *physicalObject = dynamic_cast<IObjComponent *>(comp.get())) {
       physicalObject->interceptSurface(testRay);
     } else {
     }

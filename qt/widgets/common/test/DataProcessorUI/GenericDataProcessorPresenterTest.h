@@ -16,7 +16,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/MockObjects.h"
-#include "MantidQtWidgets/Common/DataProcessorUI/ProgressableViewMockObject.h"
+#include "MantidQtWidgets/Common/MockProgressableView.h"
 #include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include "MantidTestHelpers/DataProcessorTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -175,7 +175,8 @@ private:
         std::vector<QString>{"IvsQ_binned_", "IvsQ_", "IvsLam_"}, 1,
         std::set<QString>{"ThetaIn", "ThetaOut", "InputWorkspace",
                           "OutputWorkspace", "OutputWorkspaceWavelength",
-                          "FirstTransmissionRun", "SecondTransmissionRun"});
+                          "FirstTransmissionRun", "SecondTransmissionRun"},
+        2);
   }
 
   PostprocessingAlgorithm createReflectometryPostprocessor() {
@@ -482,23 +483,20 @@ private:
   void expectGetOptions(MockMainPresenter &mockMainPresenter,
                         Cardinality numTimes,
                         std::string postprocessingOptions = "") {
-    constexpr int GROUP = 0;
     if (numTimes.IsSatisfiedByCallCount(0)) {
       // If 0 calls, don't check return value
-      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(GROUP))
-          .Times(numTimes);
-      EXPECT_CALL(mockMainPresenter, getProcessingOptions(GROUP))
-          .Times(numTimes);
-      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(GROUP))
+      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions()).Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getProcessingOptions()).Times(numTimes);
+      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
           .Times(numTimes);
     } else {
-      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions(GROUP))
+      EXPECT_CALL(mockMainPresenter, getPreprocessingOptions())
           .Times(numTimes)
           .WillRepeatedly(Return(ColumnOptionsQMap()));
-      EXPECT_CALL(mockMainPresenter, getProcessingOptions(GROUP))
+      EXPECT_CALL(mockMainPresenter, getProcessingOptions())
           .Times(numTimes)
           .WillRepeatedly(Return(OptionsQMap()));
-      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString(GROUP))
+      EXPECT_CALL(mockMainPresenter, getPostprocessingOptionsAsString())
           .Times(numTimes)
           .WillRepeatedly(
               Return(QString::fromStdString(postprocessingOptions)));
@@ -1263,13 +1261,11 @@ public:
   }
 
   void expectNotifiedReductionPaused(MockMainPresenter &mockMainPresenter) {
-    EXPECT_CALL(mockMainPresenter,
-                confirmReductionPaused(DEFAULT_GROUP_NUMBER));
+    EXPECT_CALL(mockMainPresenter, confirmReductionPaused());
   }
 
   void expectNotifiedReductionResumed(MockMainPresenter &mockMainPresenter) {
-    EXPECT_CALL(mockMainPresenter,
-                confirmReductionPaused(DEFAULT_GROUP_NUMBER));
+    EXPECT_CALL(mockMainPresenter, confirmReductionPaused());
   }
 
   void testProcess() {
@@ -1685,8 +1681,8 @@ public:
         AnalysisDataService::Instance().doesExist("IvsQ_binned_TOF_dataB"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataA"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataB"));
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataA"));
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataB"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataA"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_TOF_dataB"));
     TS_ASSERT(
         AnalysisDataService::Instance().doesExist("IvsQ_TOF_dataA_TOF_dataB"));
 
@@ -3329,7 +3325,6 @@ public:
     NiceMock<MockMainPresenter> mockMainPresenter;
 
     auto presenter = makeDefaultPresenter();
-    constexpr int GROUP_NUMBER = 0;
 
     expectUpdateViewToPausedState(mockDataProcessorView, AtLeast(1));
     // Now accept the views
@@ -3340,7 +3335,7 @@ public:
     expectNoWarningsOrErrors(mockDataProcessorView);
     // The widget states are not updated immediately (only on confirm)
     expectUpdateViewToPausedState(mockDataProcessorView, Exactly(0));
-    EXPECT_CALL(mockMainPresenter, pause(GROUP_NUMBER)).Times(1);
+    EXPECT_CALL(mockMainPresenter, pause()).Times(1);
     presenter->notify(DataProcessorPresenter::PauseFlag);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockDataProcessorView));

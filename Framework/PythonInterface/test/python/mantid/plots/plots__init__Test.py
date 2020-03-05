@@ -8,25 +8,28 @@ from __future__ import (absolute_import, division, print_function)
 
 import matplotlib
 
-matplotlib.use('AGG')
+matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
+from matplotlib.collections import PolyCollection
 from matplotlib.container import ErrorbarContainer
 import numpy as np
 import unittest
 
-from mantid.api import WorkspaceFactory
 from mantid.kernel import config
-from mantid.plots.plotfunctions import get_colorplot_extents
+from mantid.plots import datafunctions
+from mantid.plots.legend import convert_color_to_hex
+from mantid.plots.utility import MantidAxType
+from mantid.plots.axesfunctions import get_colorplot_extents
 from mantid.py3compat.mock import Mock, patch
-from mantid.simpleapi import (AnalysisDataService, CreateWorkspace,
-                              CreateSampleWorkspace, DeleteWorkspace)
+from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace,
+                              RemoveSpectra, AnalysisDataService as ADS)
+from mantidqt.plotting.markers import SingleMarker
 
 
 class Plots__init__Test(unittest.TestCase):
     '''
     Just test if mantid projection works
     '''
-
     @classmethod
     def setUpClass(cls):
         cls.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
@@ -57,7 +60,7 @@ class Plots__init__Test(unittest.TestCase):
 
     def test_errorbar_plots(self):
         self.ax.errorbar(self.ws2d_histo, specNum=2, linewidth=6)
-        self.ax.errorbar(np.arange(10), np.arange(10), 0.1*np.ones((10,)), fmt='bo-')
+        self.ax.errorbar(np.arange(10), np.arange(10), 0.1 * np.ones((10, )), fmt='bo-')
 
     def test_imshow(self):
         self.ax.imshow(self.ws2d_histo)
@@ -95,12 +98,13 @@ class Plots__init__Test(unittest.TestCase):
         self.assertTrue(line_second_ws in self.ax.lines)
         DeleteWorkspace(second_ws)
 
-    def test_remove_workspace_artist_with_predicate_removes_only_lines_from_specified_workspace_which_return_true(self):
+    def test_remove_workspace_artist_with_predicate_removes_only_lines_from_specified_workspace_which_return_true(
+            self):
         line_ws2d_histo_spec_2 = self.ax.plot(self.ws2d_histo, specNum=2, linewidth=6)[0]
         line_ws2d_histo_spec_3 = self.ax.plot(self.ws2d_histo, specNum=3, linewidth=6)[0]
         self.assertEqual(2, len(self.ax.lines))
 
-        self.ax.remove_artists_if(lambda artist: artist.get_label() == 'ws2d_histo: spec 2')
+        self.ax.remove_artists_if(lambda artist: artist.get_label() == 'ws2d_histo: 6')
         self.assertEqual(1, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 in self.ax.lines)
@@ -110,7 +114,8 @@ class Plots__init__Test(unittest.TestCase):
         line_ws2d_histo_spec_3 = self.ax.plot(self.ws2d_histo, specNum=3, linewidth=6)[0]
         self.assertEqual(2, len(self.ax.lines))
 
-        is_empty = self.ax.remove_artists_if(lambda artist: artist.get_label() in ['ws2d_histo: spec 2', 'ws2d_histo: spec 3'])
+        is_empty = self.ax.remove_artists_if(
+            lambda artist: artist.get_label() in ['ws2d_histo: 6', 'ws2d_histo: 8'])
         self.assertEqual(0, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 not in self.ax.lines)
@@ -122,11 +127,23 @@ class Plots__init__Test(unittest.TestCase):
         line_ws2d_histo_spec_3 = self.ax.plot(self.ws2d_histo, specNum=3, linewidth=6)[0]
         self.assertEqual(2, len(self.ax.lines))
 
-        self.ax.remove_artists_if(lambda artist: artist.get_label() == 'ws2d_histo: spec 2')
+        self.ax.remove_artists_if(lambda artist: artist.get_label() == 'ws2d_histo: 6')
         self.assertEqual(1, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 in self.ax.lines)
-        self.assertEqual(self.ax.tracked_workspaces[self.ws2d_histo.name()][0]._artists, [line_ws2d_histo_spec_3])
+        self.assertEqual(self.ax.tracked_workspaces[self.ws2d_histo.name()][0]._artists,
+                         [line_ws2d_histo_spec_3])
+
+    def test_remove_if_removes_untracked_artists(self):
+        line = self.ax.plot([0], [0])[0]
+        err_cont = self.ax.errorbar([0], [0])
+        img = self.ax.imshow([[0, 1], [0, 1]])
+
+        self.ax.remove_artists_if(lambda art: art in [line, err_cont, img])
+        self.assertNotIn(line, self.ax.lines)
+        self.assertNotIn(err_cont[0], self.ax.lines)
+        self.assertNotIn(err_cont, self.ax.containers)
+        self.assertNotIn(img, self.ax.images)
 
     def test_remove_if_correctly_removes_lines_associated_with_multiple_workspaces(self):
         second_ws = CreateSampleWorkspace()
@@ -135,7 +152,8 @@ class Plots__init__Test(unittest.TestCase):
         line_second_ws = self.ax.plot(second_ws, specNum=5)[0]
         self.assertEqual(3, len(self.ax.lines))
 
-        is_empty = self.ax.remove_artists_if(lambda artist: artist.get_label() in ['ws2d_histo: spec 2', 'second_ws: spec 5'])
+        is_empty = self.ax.remove_artists_if(
+            lambda artist: artist.get_label() in ['ws2d_histo: 6', 'second_ws: spec 5'])
         self.assertEqual(1, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo_spec_2 not in self.ax.lines)
         self.assertTrue(line_ws2d_histo_spec_3 in self.ax.lines)
@@ -158,6 +176,26 @@ class Plots__init__Test(unittest.TestCase):
         self.assertAlmostEqual(25, line_ws2d_histo.get_xdata()[0])
         self.assertAlmostEqual(35, line_ws2d_histo.get_xdata()[-1])
         self.assertEqual('r', line_ws2d_histo.get_color())
+        # try deleting
+        self.ax.remove_workspace_artists(plot_data)
+
+    def test_replace_workspace_data_plot_with_fewer_spectra(self):
+        plot_data = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
+                                    DataY=[3, 4, 5, 3, 4, 5],
+                                    DataE=[1, 2, 3, 4, 1, 1],
+                                    NSpec=3)
+        line_ws2d_histo_spec_1 = self.ax.plot(plot_data, specNum=1, color='r')[0]
+        line_ws2d_histo_spec_2 = self.ax.plot(plot_data, specNum=2, color='r')[0]
+        line_ws2d_histo_spec_3 = self.ax.plot(plot_data, specNum=3, color='r')[0]
+
+        plot_data = CreateWorkspace(DataX=[20, 30, 40, 20, 30, 40],
+                                    DataY=[3, 4, 3, 4],
+                                    DataE=[1, 2, 1, 2],
+                                    NSpec=2)
+        self.ax.replace_workspace_artists(plot_data)
+        self.assertAlmostEqual(25, line_ws2d_histo_spec_2.get_xdata()[0])
+        self.assertAlmostEqual(35, line_ws2d_histo_spec_2.get_xdata()[-1])
+        self.assertEqual('r', line_ws2d_histo_spec_2.get_color())
         # try deleting
         self.ax.remove_workspace_artists(plot_data)
 
@@ -190,7 +228,8 @@ class Plots__init__Test(unittest.TestCase):
         im_data = CreateWorkspace(DataX=[20, 30, 40, 20, 30, 40, 20, 30, 40],
                                   DataY=[3, 4, 5, 3, 4, 5],
                                   DataE=[.1, .2, .3, .4, .1, .1],
-                                  NSpec=3, VerticalAxisValues=[2, 3, 4],
+                                  NSpec=3,
+                                  VerticalAxisValues=[2, 3, 4],
                                   VerticalAxisUnit='DeltaE')
         self.ax.replace_workspace_artists(im_data)
         self.assertEqual(1, len(artists))
@@ -232,6 +271,21 @@ class Plots__init__Test(unittest.TestCase):
         self.assertRaises(Exception, ax.plot_wireframe, self.ws2d_histo)
         self.assertRaises(Exception, ax.plot_surface, self.ws2d_histo)
 
+    def test_plot_is_not_normalized_for_bin_plots(self):
+        workspace = CreateWorkspace(DataX=[10, 20],
+                                    DataY=[2, 3, 4, 5, 6],
+                                    DataE=[1, 2, 1, 2, 1],
+                                    NSpec=5,
+                                    Distribution=False,
+                                    OutputWorkspace='workspace')
+        self.ax.plot(workspace, specNum=1, axis=MantidAxType.BIN, distribution=False)
+        self.ax.plot(workspace, specNum=1, axis=MantidAxType.BIN, distribution=True)
+        self.ax.plot(workspace, specNum=1, axis=MantidAxType.BIN)
+        ws_artists = self.ax.tracked_workspaces[workspace.name()]
+        self.assertFalse(ws_artists[0].is_normalized)
+        self.assertFalse(ws_artists[1].is_normalized)
+        self.assertFalse(ws_artists[2].is_normalized)
+
     def test_artists_normalization_state_labeled_correctly_for_dist_workspace(self):
         dist_ws = CreateWorkspace(DataX=[10, 20],
                                   DataY=[2, 3],
@@ -264,100 +318,345 @@ class Plots__init__Test(unittest.TestCase):
 
         self.ax.plot(non_dist_ws, specNum=1)
         auto_dist = (config['graph1d.autodistribution'] == 'On')
-        self.assertEqual(auto_dist, self.ax.tracked_workspaces[
-            non_dist_ws.name()][0].is_normalized)
+        self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
+    def test_artists_normalization_state_labeled_correctly_for_non_dist_workspace_with_uneven_spectra(self):
+        non_dist_ws = CreateWorkspace(DataX=[10, 20, 25, 30],
+                                      DataY=[2, 3, 4, 5],
+                                      DataE=[1, 2, 1, 2],
+                                      NSpec=1,
+                                      Distribution=False,
+                                      OutputWorkspace='non_dist_workpace')
+        self.ax.plot(non_dist_ws, specNum=1)
+        config['graph1d.autodistribution'] = 'Off'
+        self.assertTrue(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
+        del self.ax.tracked_workspaces[non_dist_ws.name()]
+
+    def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_dist_workspace(self):
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                      'contour', 'contourf', 'tricontour', 'tricontourf']
+        dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
+                                     DataY=[2, 3, 2, 3],
+                                     DataE=[1, 2, 1, 2],
+                                     NSpec=2,
+                                     Distribution=True,
+                                     OutputWorkspace='non_dist_workpace')
+        for plot_func in plot_funcs:
+            func = getattr(self.ax, plot_func)
+            func(dist_2d_ws, distribution=False)
+            func(dist_2d_ws, distribution=True)
+            func(dist_2d_ws)
+            ws_artists = self.ax.tracked_workspaces[dist_2d_ws.name()]
+            self.assertTrue(ws_artists[0].is_normalized)
+            self.assertTrue(ws_artists[1].is_normalized)
+            self.assertTrue(ws_artists[2].is_normalized)
+
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_false(self):
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                        'contour', 'contourf', 'tricontour', 'tricontourf']
+        non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
+                                         DataY=[2, 3, 2, 3],
+                                         DataE=[1, 2, 1, 2],
+                                         NSpec=2,
+                                         Distribution=False,
+                                         OutputWorkspace='non_dist_workpace')
+        for plot_func in plot_funcs:
+            func = getattr(self.ax, plot_func)
+            func(non_dist_2d_ws, distribution=False)
+            self.assertTrue(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
+
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_true(self):
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                      'contour', 'contourf', 'tricontour', 'tricontourf']
+        non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
+                                         DataY=[2, 3, 2, 3],
+                                         DataE=[1, 2, 1, 2],
+                                         NSpec=2,
+                                         Distribution=False,
+                                         OutputWorkspace='non_dist_workpace')
+        for plot_func in plot_funcs:
+            func = getattr(self.ax, plot_func)
+            func(non_dist_2d_ws, distribution=True)
+            self.assertFalse(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
+
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_on(self):
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                      'contour', 'contourf', 'tricontour', 'tricontourf']
+        non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
+                                         DataY=[2, 3, 2, 3],
+                                         DataE=[1, 2, 1, 2],
+                                         NSpec=2,
+                                         Distribution=False,
+                                         OutputWorkspace='non_dist_workpace')
+        for plot_func in plot_funcs:
+            func = getattr(self.ax, plot_func)
+            func(non_dist_2d_ws)
+            auto_dist = (config['graph1d.autodistribution'] == 'On')
+            self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
+
+    def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_non_dist_workspace_with_uneven_spectra(self):
+        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
+                      'contour', 'contourf', 'tricontour', 'tricontourf']
+        non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 25, 30, 10, 20, 25, 30],
+                                         DataY=[2, 3, 4, 5, 2, 3, 4, 5],
+                                         DataE=[1, 2, 1, 2, 1, 2, 1, 2],
+                                         NSpec=2,
+                                         Distribution=False,
+                                         OutputWorkspace='non_dist_workpace')
+        for plot_func in plot_funcs:
+            func = getattr(self.ax, plot_func)
+            func(non_dist_2d_ws)
+            config['graph1d.autodistribution'] = 'Off'
+            self.assertTrue(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
+
     def test_check_axes_distribution_consistency_mixed_normalization(self):
-        mock_logger = self._run_check_axes_distribution_consistency(
-            [True, False, True])
+        mock_logger = self._run_check_axes_distribution_consistency([True, False, True])
         mock_logger.assert_called_once_with("You are overlaying distribution and "
                                             "non-distribution data!")
 
     def test_check_axes_distribution_consistency_all_normalized(self):
-        mock_logger = self._run_check_axes_distribution_consistency(
-            [True, True, True])
+        mock_logger = self._run_check_axes_distribution_consistency([True, True, True])
         self.assertEqual(0, mock_logger.call_count)
 
     def test_check_axes_distribution_consistency_all_non_normalized(self):
-        mock_logger = self._run_check_axes_distribution_consistency(
-            [False, False, False])
+        mock_logger = self._run_check_axes_distribution_consistency([False, False, False])
         self.assertEqual(0, mock_logger.call_count)
 
     def test_that_autoscaling_can_be_turned_off_when_data_changes(self):
         """We should be able to plot a workspace without having it
         autoscale if the workspace changes
         """
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 20],
-                             OutputWorkspace="ws")
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20], OutputWorkspace="ws")
         self.ax.plot(ws, autoscale_on_update=False)
-        CreateWorkspace(DataX=[10, 20],
-                        DataY=[10, 5000],
-                        OutputWorkspace="ws")
+        CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], OutputWorkspace="ws")
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
     def test_that_autoscaling_can_be_turned_off_when_plotting_multiple_workspaces(self):
         """We should be able to plot a new workspace without having the plot scale to it"""
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 20])
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20])
         self.ax.plot(ws)
-        ws2 = CreateWorkspace(DataX=[10, 20],
-                              DataY=[10, 5000])
+        ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000])
         self.ax.plot(ws2, autoscale_on_update=False)
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
     def test_that_plot_autoscales_by_default(self):
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 20],
-                             OutputWorkspace="ws")
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20], OutputWorkspace="ws")
         self.ax.plot(ws)
-        ws2 = CreateWorkspace(DataX=[10, 20],
-                              DataY=[10, 5000],
-                              OutputWorkspace="ws2")
+        ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], OutputWorkspace="ws2")
         self.ax.plot(ws2)
         self.assertGreaterEqual(self.ax.get_ylim()[1], 5000)
 
     def test_that_errorbar_autoscales_by_default(self):
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 20],
-                             DataE=[1, 1],
-                             OutputWorkspace="ws")
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20], DataE=[1, 1], OutputWorkspace="ws")
         self.ax.errorbar(ws)
-        ws2 = CreateWorkspace(DataX=[10, 20],
-                              DataY=[10, 5000],
-                              DataE=[1, 1],
-                              OutputWorkspace="ws2")
+        ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], DataE=[1, 1], OutputWorkspace="ws2")
         self.ax.errorbar(ws2)
         self.assertGreaterEqual(self.ax.get_ylim()[1], 5000)
 
     def test_that_errorbar_autoscaling_can_be_turned_off_when_plotting_multiple_workspaces(self):
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 20])
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20])
         self.ax.errorbar(ws)
-        ws2 = CreateWorkspace(DataX=[10, 20],
-                              DataY=[10, 5000])
+        ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000])
         self.ax.errorbar(ws2, autoscale_on_update=False)
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
     def test_that_errorbar_autoscaling_can_be_turned_off(self):
-        ws = CreateWorkspace(DataX=[10, 20],
-                             DataY=[10, 20],
-                             DataE=[1, 2],
-                             OutputWorkspace="ws")
+        ws = CreateWorkspace(DataX=[10, 20], DataY=[10, 20], DataE=[1, 2], OutputWorkspace="ws")
         self.ax.errorbar(ws)
-        ws2 = CreateWorkspace(DataX=[10, 20],
-                              DataY=[10, 5000],
-                              DataE=[1, 1],
-                              OutputWorkspace="ws2")
+        ws2 = CreateWorkspace(DataX=[10, 20], DataY=[10, 5000], DataE=[1, 1], OutputWorkspace="ws2")
         self.ax.errorbar(ws2, autoscale_on_update=False)
         self.assertLess(self.ax.get_ylim()[1], 5000)
 
+    def test_that_plotting_ws_without_giving_spec_num_sets_spec_num_if_ws_has_1_histogram(self):
+        ws_name = "ws-with-one-spec"
+        ws = CreateWorkspace(DataX=[10, 20],
+                             DataY=[10, 5000],
+                             DataE=[1, 1],
+                             OutputWorkspace=ws_name)
+        self.ax.plot(ws)
+        ws_artist = self.ax.tracked_workspaces[ws_name][0]
+        self.assertEqual(1, ws_artist.spec_num)
+        self.assertTrue('specNum' in self.ax.creation_args[0])
+        self.assertFalse('wkspIndex' in self.ax.creation_args[0])
+
+    def test_that_plotting_ws_without_giving_spec_num_raises_if_ws_has_more_than_1_histogram(self):
+        self.assertRaises(RuntimeError, self.ax.plot, self.ws2d_histo)
+
+    def test_that_plotting_ws_without_giving_spec_num_sets_correct_spec_num_after_spectra_removed(
+            self):
+        CreateWorkspace(DataX=[10, 20, 30],
+                        DataY=[10, 20, 30],
+                        DataE=[1, 1, 1],
+                        NSpec=3,
+                        OutputWorkspace="ws-with-3-spec")
+        RemoveSpectra("ws-with-3-spec", [0, 1], OutputWorkspace='out_ws')
+        out_ws = ADS.retrieve('out_ws')
+        self.ax.plot(out_ws)
+        ws_artist = self.ax.tracked_workspaces['out_ws'][0]
+        self.assertEqual(3, ws_artist.spec_num)
+
+    def test_that_plotting_ws_without_spec_num_adds_default_spec_num_to_creation_args(self):
+        ws_name = "ws-with-one-spec"
+        ws = CreateWorkspace(DataX=[10, 20],
+                             DataY=[10, 5000],
+                             DataE=[1, 1],
+                             OutputWorkspace=ws_name)
+        self.ax.plot(ws)
+        self.assertEqual(1, self.ax.creation_args[0]['specNum'])
+
+    def test_that_relim_ignores_interactive_markers(self):
+        """
+        When calling .relim the content limits of the axes is calculated
+        and a margin added. When the axes is resized the interactive
+        markers re-calculate their limits to be the new axes limits,
+        i.e. the original limits plus the margin. This mean repeatedly
+        calling relim and autoscale will zoom out on the axes.
+
+        This test makes sure this isn't happening and that the markers
+        are ignored when calling .relim in this case.
+        """
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        y_min, y_max = ax.get_ylim()
+        SingleMarker(
+            fig.canvas,
+            'g',
+            0.5,
+            y_min,
+            y_max,
+            marker_type='XSingle',
+            axis=ax
+        )
+        ax.relim()
+        ax.autoscale()
+        np.testing.assert_almost_equal((y_min, y_max), ax.get_ylim())
+
+    def test_converting_from_1d_plot_to_waterfall_plot(self):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        # Plot the same line twice.
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.set_waterfall(True)
+
+        self.assertTrue(ax.is_waterfall())
+        # Check the lines' data are different now that it is a waterfall plot.
+        self.assertNotEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[1].get_xdata()[0])
+        self.assertNotEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[1].get_ydata()[0])
+
+    def test_converting_from_waterfall_plot_to_1d_plot(self):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        # Plot the same line twice.
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.set_waterfall(True)
+        # Make the plot non-waterfall again.
+        ax.set_waterfall(False)
+
+        self.assertFalse(ax.is_waterfall())
+        # Check that the lines have the same x and y data.
+        self.assertEqual(ax.get_lines()[0].get_xdata()[0], ax.get_lines()[1].get_xdata()[0])
+        self.assertEqual(ax.get_lines()[0].get_ydata()[0], ax.get_lines()[1].get_ydata()[0])
+
+    def test_create_fill_creates_fills_for_waterfall_plot(self):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.set_waterfall(True)
+        # Add filled areas.
+        ax.set_waterfall_fill(True)
+
+        fills = datafunctions.get_waterfall_fills(ax)
+        self.assertEqual(len(fills), 2)
+
+    def test_remove_fill_removes_fills_for_waterfall_plots(self):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.set_waterfall(True)
+        # Add filled areas.
+        ax.set_waterfall_fill(True)
+        # Remove filled areas.
+        ax.set_waterfall_fill(False)
+
+        self.assertFalse(ax.waterfall_has_fill())
+
+    def test_converting_from_waterfall_to_1d_plot_removes_filled_areas(self):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.set_waterfall(True)
+        # Add filled areas.
+        ax.set_waterfall_fill(True)
+        # Make the plot non-waterfall again.
+        ax.set_waterfall(False)
+
+        self.assertFalse(ax.waterfall_has_fill())
+
+    def test_overplotting_onto_waterfall_plot_with_line_colour_fills_adds_another_filled_area_with_new_line_colour(self):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1], color="#ff9900")
+        ax.plot([0, 1], [0, 1], color="#00d1ff")
+
+        # Make a waterfall plot.
+        ax.set_waterfall(True)
+        # Add filled areas.
+        ax.set_waterfall_fill(True)
+        # Set the fills to be the same colour as their lines.
+        ax.collections[0].set_facecolor(ax.lines[0].get_color())
+        ax.collections[1].set_facecolor(ax.lines[0].get_color())
+
+        # Plot another line and make it join the waterfall.
+        ax.plot([0, 1], [0,1], color='#00fff0')
+        datafunctions.convert_single_line_to_waterfall(ax, 2)
+        datafunctions.waterfall_update_fill(ax)
+
+        # Check that there are now three filled areas and the new line colour matches the new fill colour.
+        self.assertEqual(convert_color_to_hex(ax.collections[2].get_facecolor()[0]), ax.lines[2].get_color())
+
+    def test_overplotting_onto_waterfall_plot_with_solid_colour_fills_adds_a_filled_area_with_the_same_colour(self):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot.
+        ax.set_waterfall(True)
+        # Add filled areas.
+        ax.set_waterfall_fill(True)
+        # Set the fills to be the same colour.
+        ax.collections[0].set_facecolor([1, 0, 0, 1])
+        ax.collections[1].set_facecolor([1, 0, 0, 1])
+
+        # Plot another line and make it join the waterfall.
+        ax.plot([0, 1], [0, 1])
+        datafunctions.convert_single_line_to_waterfall(ax, 2)
+        datafunctions.waterfall_update_fill(ax)
+
+        # Check that there are now three filled areas and the new fill colour matches the others.
+        self.assertTrue((ax.collections[2].get_facecolor() == [1, 0, 0, 1]).all())
+
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {
-            'ws': [Mock(is_normalized=normalization_states[0]),
-                    Mock(is_normalized=normalization_states[1])],
-            'ws1': [Mock(is_normalized=normalization_states[2])]}
+            'ws': [
+                Mock(is_normalized=normalization_states[0]),
+                Mock(is_normalized=normalization_states[1])
+            ],
+            'ws1': [Mock(is_normalized=normalization_states[2])]
+        }
         with patch('mantid.kernel.logger.warning', Mock()) as mock_logger:
             with patch.object(self.ax, 'tracked_workspaces', mock_tracked_workspaces):
                 self.ax.check_axes_distribution_consistency()

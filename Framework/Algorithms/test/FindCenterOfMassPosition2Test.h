@@ -56,6 +56,10 @@ public:
         double dx = (center_x - (double)ix);
         double dy = (center_y - (double)iy);
         Y[0] = exp(-(dx * dx + dy * dy));
+        // Set tube extrema to special values
+        if (iy == 0 || iy == SANSInstrumentCreationHelper::nBins - 1)
+          Y[0] =
+              iy % 2 ? std::nan("") : std::numeric_limits<double>::infinity();
         E[0] = 1;
       }
     }

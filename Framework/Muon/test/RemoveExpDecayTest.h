@@ -16,8 +16,8 @@
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
-using Mantid::Algorithms::MuonRemoveExpDecay;
 using Mantid::MantidVec;
+using Mantid::Algorithms::MuonRemoveExpDecay;
 
 const std::string outputName = "MuonRemoveExpDecay_Output";
 
@@ -37,13 +37,13 @@ MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt) {
     for (size_t t = 0; t < maxt; t++) {
       double x = static_cast<double>(t) / static_cast<double>(maxt);
       double e = exp(-x / tau);
-      X.push_back(x);
-      Y.push_back(a *
-                      sin(w * x + static_cast<double>(s) * M_PI /
-                                      static_cast<double>(nspec)) *
-                      e +
-                  e);
-      E.push_back(0.005);
+      X.emplace_back(x);
+      Y.emplace_back(a *
+                         sin(w * x + static_cast<double>(s) * M_PI /
+                                         static_cast<double>(nspec)) *
+                         e +
+                     e);
+      E.emplace_back(0.005);
     }
   }
 

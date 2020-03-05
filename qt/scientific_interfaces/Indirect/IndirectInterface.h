@@ -9,6 +9,7 @@
 
 #include "IndirectSettings.h"
 
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 
 namespace MantidQt {

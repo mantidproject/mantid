@@ -10,6 +10,7 @@
 #include "MantidParallel/DllConfig.h"
 
 #include <map>
+#include <stdexcept>
 #include <string>
 
 namespace Mantid {
@@ -34,4 +35,4 @@ MANTID_PARALLEL_DLL StorageMode fromString(const std::string &mode);
 } // namespace Parallel
 } // namespace Mantid
 
-#endif /* MANTID_PARALLEL_STORAGEMODE_H_ */
+#endif // MANTID_PARALLEL_STORAGEMODE_H_

@@ -5,8 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/Group.h"
-#include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
+#include "MantidPythonInterface/core/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
@@ -50,7 +50,7 @@ Group_sptr constructGroupFromPythonList(const boost::python::list &symOpList) {
   std::vector<SymmetryOperation> operations;
 
   for (int i = 0; i < len(symOpList); ++i) {
-    operations.push_back(
+    operations.emplace_back(
         boost::python::extract<SymmetryOperation>(symOpList[i]));
   }
 

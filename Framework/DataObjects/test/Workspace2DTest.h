@@ -26,8 +26,8 @@ using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using HistogramData::CountStandardDeviations;
 using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
 using HistogramData::LinearGenerator;
 using WorkspaceCreationHelper::create2DWorkspaceBinned;
 
@@ -181,9 +181,9 @@ public:
   void test_generateHistogram() {
     Workspace2D_sptr ws = create2DWorkspaceBinned(2, 5);
     MantidVec X, Y, E;
-    X.push_back(0.0);
-    X.push_back(0.5);
-    X.push_back(1.0);
+    X.emplace_back(0.0);
+    X.emplace_back(0.5);
+    X.emplace_back(1.0);
     TS_ASSERT_THROWS_ANYTHING(ws->generateHistogram(2, X, Y, E););
     TS_ASSERT_THROWS_NOTHING(ws->generateHistogram(0, X, Y, E););
     TS_ASSERT_EQUALS(Y.size(), 2);

@@ -340,7 +340,7 @@ valgrind_do_client_request_expr(uintptr_t _zzq_default, uintptr_t _zzq_request,
 
 #endif /* PLAT_x86_win32 */
 
-  /* ------------------------ amd64-{linux,darwin} --------------- */
+/* ------------------------ amd64-{linux,darwin} --------------- */
 
 #if defined(PLAT_amd64_linux) || defined(PLAT_amd64_darwin)
 

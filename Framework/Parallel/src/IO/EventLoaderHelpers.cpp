@@ -17,7 +17,7 @@ std::vector<size_t> readBankSizes(const H5::Group &group,
   for (const auto &bankName : bankNames) {
     const H5::DataSet dataset = group.openDataSet(bankName + "/event_id");
     const H5::DataSpace dataSpace = dataset.getSpace();
-    bankSizes.push_back(dataSpace.getSelectNpoints());
+    bankSizes.emplace_back(dataSpace.getSelectNpoints());
   }
   return bankSizes;
 }

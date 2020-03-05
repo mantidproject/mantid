@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
+#include <string>
 #include <vector>
 
 namespace Mantid {
@@ -31,7 +32,8 @@ namespace TestHelpers {
 //     "REFL_Parameters_" to form the name for the file to load.
 MatrixWorkspace_sptr createREFL_WS(size_t nBins, double startX, double endX,
                                    std::vector<double> const &values,
-                                   std::string const &paramsType = "");
+                                   std::string const &paramsType = "",
+                                   std::string const &instrumentSuffix = "");
 
 // Create a group of workspaces created with createREFL_WS(...) function and
 // store it in the ADS.

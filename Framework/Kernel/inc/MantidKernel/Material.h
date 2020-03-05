@@ -13,6 +13,7 @@
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/shared_ptr.hpp>
+#include <string>
 #include <vector>
 
 // Forward Declares
@@ -88,21 +89,19 @@ public:
   /// Get the pressure
   double pressure() const;
   /// Get the coherent scattering cross section for a given wavelength in barns.
-  double
-  cohScatterXSection(const double lambda =
-                         PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  double cohScatterXSection() const;
   /// Get the incoherent cross section for a given wavelength in barns.
-  double incohScatterXSection(
-      const double lambda =
-          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  double incohScatterXSection() const;
   /// Return the total scattering cross section for a given wavelength in barns.
-  double totalScatterXSection(
-      const double lambda =
-          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  double totalScatterXSection() const;
   /// Get the absorption cross section at a given wavelength in barns.
   double
   absorbXSection(const double lambda =
                      PhysicalConstants::NeutronAtom::ReferenceLambda) const;
+  /// Compute the attenuation at a given wavelegnth over the given distance
+  double attenuation(const double distance,
+                     const double lambda =
+                         PhysicalConstants::NeutronAtom::ReferenceLambda) const;
 
   /**
    * Returns the linear coefficient of absorption for the material in units of
@@ -185,6 +184,10 @@ public:
 private:
   /// Update the total atom count
   void countAtoms();
+  /// Update the linear absorption x section (by wavelength)
+  void calculateLinearAbsorpXSectionByWL();
+  /// Update the total scatter x section
+  void calculateTotalScatterXSection();
 
   /// Material name
   std::string m_name;
@@ -198,6 +201,8 @@ private:
   double m_temperature;
   /// Pressure
   double m_pressure;
+  double m_linearAbsorpXSectionByWL;
+  double m_totalScatterXSection;
 };
 
 /// Typedef for a shared pointer

@@ -20,7 +20,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
-#include <Poco/File.h>
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::API;
@@ -37,6 +36,77 @@ using optional_size_t = NeXus::NexusFileIO::optional_size_t;
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveNexusProcessed)
+
+namespace {
+
+/**
+ * Create containers for spectra-detector map writing
+ *
+ * Note that in-out vectors passed by ref will be dynamically resized
+ * internally. They do not need to be sized correctly prior to calling method.
+ *
+ * @param ws : input workspace
+ * @param ws_indices : workspace indices to write
+ * @param out_detector_index : detector indices to write
+ * @param out_detector_count : detector count to write
+ * @param out_detector_list : detector list to write
+ * @param numberSpec
+ * @param numberDetectors
+ * @return
+ */
+bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
+                  std::vector<int32_t> &out_detector_index,
+                  std::vector<int32_t> &out_detector_count,
+                  std::vector<int32_t> &out_detector_list, int &numberSpec,
+                  size_t &numberDetectors) {
+
+  // Count the total number of detectors
+  numberDetectors = 0;
+  for (auto index : ws_indices) {
+    numberDetectors +=
+        ws.getSpectrum(static_cast<size_t>(index)).getDetectorIDs().size();
+  }
+  if (numberDetectors < 1) {
+    return false;
+  }
+  // Start the detector group
+
+  numberSpec = int(ws_indices.size());
+  // allocate space for the Nexus Muon format of spectra-detector mapping
+  // allow for writing one more than required
+  out_detector_index.resize(numberSpec + 1, 0);
+  out_detector_count.resize(numberSpec, 0);
+  out_detector_list.resize(numberDetectors, 0);
+  int id = 0;
+
+  int ndet = 0;
+  // get data from map into Nexus Muon format
+  for (int i = 0; i < numberSpec; i++) {
+    // Workspace index
+    const int si = ws_indices[i];
+    // Spectrum there
+    const auto &spectrum = ws.getSpectrum(si);
+
+    // The detectors in this spectrum
+    const auto &detectorgroup = spectrum.getDetectorIDs();
+    const auto ndet1 = static_cast<int>(detectorgroup.size());
+
+    // points to start of detector list for the next spectrum
+    out_detector_index[i + 1] = int32_t(out_detector_index[i] + ndet1);
+    out_detector_count[i] = int32_t(ndet1);
+    ndet += ndet1;
+
+    std::set<detid_t>::const_iterator it;
+    for (it = detectorgroup.begin(); it != detectorgroup.end(); ++it) {
+      out_detector_list[id++] = int32_t(*it);
+    }
+  }
+  // Cut the extra entry at the end of detector_index
+  out_detector_index.resize(numberSpec);
+  return true;
+}
+
+} // namespace
 
 /** Initialisation method.
  *
@@ -106,7 +176,7 @@ void SaveNexusProcessed::getWSIndexList(
   const bool interval = (spec_max != Mantid::EMPTY_INT());
   if (spec_max == Mantid::EMPTY_INT())
     spec_max = 0;
-  const int numberOfHist =
+  const auto numberOfHist =
       static_cast<int>(matrixWorkspace->getNumberHistograms());
 
   if (interval) {
@@ -116,13 +186,13 @@ void SaveNexusProcessed::getWSIndexList(
     }
     indices.reserve(1 + spec_max - spec_min);
     for (int i = spec_min; i <= spec_max; i++)
-      indices.push_back(i);
+      indices.emplace_back(i);
     if (list) {
       for (auto s : spec_list) {
         if (s < 0)
           continue;
         if (s < spec_min || s > spec_max)
-          indices.push_back(s);
+          indices.emplace_back(s);
       }
     }
   } else if (list) {
@@ -131,7 +201,7 @@ void SaveNexusProcessed::getWSIndexList(
     for (auto s : spec_list) {
       if (s < 0)
         continue;
-      indices.push_back(s);
+      indices.emplace_back(s);
       if (s > spec_max)
         spec_max = s;
       if (s < spec_min)
@@ -142,7 +212,7 @@ void SaveNexusProcessed::getWSIndexList(
     spec_max = numberOfHist - 1;
     indices.reserve(1 + spec_max - spec_min);
     for (int i = spec_min; i <= spec_max; i++)
-      indices.push_back(i);
+      indices.emplace_back(i);
   }
 }
 
@@ -217,16 +287,11 @@ void SaveNexusProcessed::doExec(
   // get the workspace name to write to file
   const std::string wsName = inputWorkspace->getName();
 
-  // If we don't want to append then remove the file if it already exists
+  // If not append, openNexusWrite will open with _CREATES perm and overwrite
   const bool append_to_file = getProperty("Append");
-  if (!append_to_file && !keepFile) {
-    Poco::File file(filename);
-    if (file.exists())
-      file.remove();
-  }
 
   nexusFile->resetProgress(&prog_init);
-  nexusFile->openNexusWrite(filename, entryNumber);
+  nexusFile->openNexusWrite(filename, entryNumber, append_to_file || keepFile);
 
   // Equivalent C++ API handle
   ::NeXus::File cppFile(nexusFile->fileID);
@@ -240,7 +305,7 @@ void SaveNexusProcessed::doExec(
   // write instrument data, if present and writer enabled
   if (matrixWorkspace) {
     // Save the instrument names, ParameterMap, sample, run
-    matrixWorkspace->saveExperimentInfoNexus(&cppFile);
+    matrixWorkspace->saveExperimentInfoNexus(&cppFile, saveLegacyInstrument());
     prog_init.reportIncrement(1, "Writing sample and instrument");
 
     // check if all X() are in fact the same array
@@ -268,14 +333,18 @@ void SaveNexusProcessed::doExec(
           workspaceTypeGroupName.c_str(), true);
     }
 
-    cppFile.openGroup("instrument", "NXinstrument");
-    cppFile.makeGroup("detector", "NXdetector", true);
-    cppFile.putAttr("version", 1);
-    saveSpectraDetectorMapNexus(*matrixWorkspace, &cppFile, indices,
-                                ::NeXus::LZW);
-    saveSpectrumNumbersNexus(*matrixWorkspace, &cppFile, indices, ::NeXus::LZW);
-    cppFile.closeGroup();
-    cppFile.closeGroup();
+    if (saveLegacyInstrument()) {
+      cppFile.openGroup("instrument", "NXinstrument");
+      cppFile.makeGroup("detector", "NXdetector", true);
+
+      cppFile.putAttr("version", 1);
+      saveSpectraDetectorMapNexus(*matrixWorkspace, &cppFile, indices,
+                                  ::NeXus::LZW);
+      saveSpectrumNumbersNexus(*matrixWorkspace, &cppFile, indices,
+                               ::NeXus::LZW);
+      cppFile.closeGroup();
+      cppFile.closeGroup();
+    }
 
   } // finish matrix workspace specifics
 
@@ -319,6 +388,8 @@ void SaveNexusProcessed::exec() {
 
   // Perform the execution.
   doExec(inputWorkspace, nexusFile);
+
+  // nexusFile->closeNexusFile();
 }
 
 //-------------------------------------------------------------------------------------
@@ -387,11 +458,11 @@ void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile,
   size_t index = 0;
   for (int wi = 0;
        wi < static_cast<int>(m_eventWorkspace->getNumberHistograms()); wi++) {
-    indices.push_back(index);
+    indices.emplace_back(index);
     // Track the total # of events
     index += m_eventWorkspace->getSpectrum(wi).getNumberEvents();
   }
-  indices.push_back(index);
+  indices.emplace_back(index);
 
   // Initialize all the arrays
   int64_t num = index;
@@ -505,18 +576,6 @@ bool SaveNexusProcessed::processGroups() {
   // Then immediately open the file
   auto nexusFile = boost::make_shared<Mantid::NeXus::NexusFileIO>();
 
-  /* Unless we have explicity been asked to append to the file. We should assume
-  that we can remove any existing
-  files of the same name prior to processing. */
-  bool append_to_file = this->getProperty("Append");
-  if (!append_to_file) {
-    const std::string filename = getPropertyValue("Filename");
-    Poco::File file(filename);
-    if (file.exists()) {
-      file.remove();
-    }
-  }
-
   // If we have arrived here then a WorkspaceGroup was passed to the
   // InputWorkspace property. Pull out the unrolled workspaces and append an
   // entry for each one. We only have a single input workspace property declared
@@ -525,7 +584,11 @@ bool SaveNexusProcessed::processGroups() {
   if (!workspaces.empty()) {
     for (size_t entry = 0; entry < workspaces.size(); entry++) {
       const Workspace_sptr ws = workspaces[entry];
-      this->doExec(ws, nexusFile, true /*keepFile*/, entry);
+      if (ws->isGroup()) {
+        throw std::runtime_error("SaveNexusProcessed: NeXus files do not "
+                                 "support nested groups of groups");
+      }
+      this->doExec(ws, nexusFile, entry > 0 /*keepFile*/, entry);
       g_log.information() << "Saving group index " << entry << "\n";
     }
   }
@@ -545,50 +608,18 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(
     const MatrixWorkspace &ws, ::NeXus::File *file,
     const std::vector<int> &wsIndices,
     const ::NeXus::NXcompression compression) const {
-  // Count the total number of detectors
-  std::size_t nDetectors = 0;
-  for (auto index : wsIndices) {
-    nDetectors +=
-        ws.getSpectrum(static_cast<size_t>(index)).getDetectorIDs().size();
-  }
-  if (nDetectors < 1) {
+
+  std::vector<int32_t> detector_index;
+  std::vector<int32_t> detector_count;
+  std::vector<int32_t> detector_list;
+  int numberSpec = 0;
+  size_t nDetectors = 0;
+  /*Make the mappings needed for writing to disk*/
+  const bool mappingsToWrite =
+      makeMappings(ws, wsIndices, detector_index, detector_count, detector_list,
+                   numberSpec, nDetectors);
+  if (!mappingsToWrite)
     return;
-  }
-  // Start the detector group
-
-  const int numberSpec = int(wsIndices.size());
-  // allocate space for the Nexus Muon format of spectra-detector mapping
-  // allow for writing one more than required
-  std::vector<int32_t> detector_index(numberSpec + 1, 0);
-  std::vector<int32_t> detector_count(numberSpec, 0);
-  std::vector<int32_t> detector_list(nDetectors, 0);
-  std::vector<double> detPos(nDetectors * 3);
-  int id = 0;
-
-  int ndet = 0;
-  // get data from map into Nexus Muon format
-  for (int i = 0; i < numberSpec; i++) {
-    // Workspace index
-    const int si = wsIndices[i];
-    // Spectrum there
-    const auto &spectrum = ws.getSpectrum(si);
-
-    // The detectors in this spectrum
-    const auto &detectorgroup = spectrum.getDetectorIDs();
-    const int ndet1 = static_cast<int>(detectorgroup.size());
-
-    // points to start of detector list for the next spectrum
-    detector_index[i + 1] = int32_t(detector_index[i] + ndet1);
-    detector_count[i] = int32_t(ndet1);
-    ndet += ndet1;
-
-    std::set<detid_t>::const_iterator it;
-    for (it = detectorgroup.begin(); it != detectorgroup.end(); ++it) {
-      detector_list[id++] = int32_t(*it);
-    }
-  }
-  // Cut the extra entry at the end of detector_index
-  detector_index.resize(numberSpec);
 
   // write data as Nexus sections detector{index,count,list}
   std::vector<int> dims(1, numberSpec);
@@ -600,6 +631,7 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(
   file->writeCompData("detector_list", detector_list, dims, compression, dims);
   // Get all the positions
   try {
+    std::vector<double> detPos(nDetectors * 3);
     Geometry::Instrument_const_sptr inst = ws.getInstrument();
     Geometry::IComponent_const_sptr sample = inst->getSample();
     if (sample) {
@@ -629,7 +661,7 @@ void SaveNexusProcessed::saveSpectraDetectorMapNexus(
         detPos[i] = 0.;
 
     dims.front() = static_cast<int>(nDetectors);
-    dims.push_back(3);
+    dims.emplace_back(3);
     file->writeCompData("detector_positions", detPos, dims, compression, dims);
   } catch (...) {
     g_log.error("Unknown error caught when saving detector positions.");
@@ -646,7 +678,7 @@ void SaveNexusProcessed::saveSpectrumNumbersNexus(
     const API::MatrixWorkspace &ws, ::NeXus::File *file,
     const std::vector<int> &wsIndices,
     const ::NeXus::NXcompression compression) const {
-  const int numberSpec = int(wsIndices.size());
+  const auto numberSpec = int(wsIndices.size());
   std::vector<int32_t> spectra;
   spectra.reserve(static_cast<size_t>(numberSpec));
   for (const auto index : wsIndices) {

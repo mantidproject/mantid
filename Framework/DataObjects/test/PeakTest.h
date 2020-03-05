@@ -236,6 +236,13 @@ public:
     TS_ASSERT_EQUALS(p.getHKL(), V3D(1.0, 2.0, 3.0));
   }
 
+  void test_isIndexed() {
+    Peak p(inst, 10000, 2.0);
+    TS_ASSERT_EQUALS(false, p.isIndexed());
+    p.setHKL(1, 2, 3);
+    TS_ASSERT_EQUALS(true, p.isIndexed());
+  }
+
   void test_samplePos() {
     Peak p(inst, 10000, 2.0);
     p.setSamplePos(1.0, 1.0, 1.0);

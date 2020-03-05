@@ -8,7 +8,7 @@
 #
 #
 from __future__ import (absolute_import, division, print_function)
-from mantid.plots.helperfunctions import get_indices
+from mantid.plots.datafunctions import get_indices
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.simpleapi import BinMD
 from mantid.py3compat.enum import Enum
@@ -109,3 +109,8 @@ class SliceViewerModel(object):
                 return WS_TYPE.MDE
         else:
             raise ValueError("Unsupported workspace type")
+
+    def can_normalize_workspace(self):
+        if self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
+            return True
+        return False

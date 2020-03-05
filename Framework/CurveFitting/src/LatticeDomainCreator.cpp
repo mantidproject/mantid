@@ -195,8 +195,8 @@ void LatticeDomainCreator::createDomainFromPeaksWorkspace(
     V3D hkl = currentPeak->getHKL();
 
     if (hkl != V3D(0, 0, 0)) {
-      hkls.push_back(hkl);
-      dSpacings.push_back(currentPeak->getDSpacing());
+      hkls.emplace_back(hkl);
+      dSpacings.emplace_back(currentPeak->getDSpacing());
     }
   }
 
@@ -258,10 +258,10 @@ void LatticeDomainCreator::createDomainFromPeakTable(
         V3D hkl = extractor(hklColumn, i);
 
         if (hkl != V3D(0, 0, 0)) {
-          hkls.push_back(hkl);
+          hkls.emplace_back(hkl);
 
           double d = (*dColumn)[i];
-          dSpacings.push_back(d);
+          dSpacings.emplace_back(d);
         }
       } catch (const std::bad_alloc &) {
         // do nothing.

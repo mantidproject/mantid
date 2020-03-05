@@ -7,6 +7,8 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import AbinsModules
+from AbinsModules import AbinsParameters
+
 try:
     # noinspection PyUnresolvedReferences
     from pathos.multiprocessing import ProcessPool
@@ -36,7 +38,7 @@ class CalculatePowder(object):
         self._atoms_data = abins_data.get_atoms_data().extract()
 
         self._clerk = AbinsModules.IOmodule(input_filename=filename,
-                                            group_name=AbinsModules.AbinsParameters.powder_data_group)
+                                            group_name=AbinsParameters.hdf_groups['powder_data'])
 
     def _calculate_powder(self):
         """
@@ -50,7 +52,7 @@ class CalculatePowder(object):
         a_tensors = {}
 
         if PATHOS_FOUND:
-            threads = AbinsModules.AbinsParameters.threads
+            threads = AbinsParameters.performance['threads']
             p_local = ProcessPool(nodes=threads)
             tensors = p_local.map(self._calculate_powder_k, k_indices)
         else:

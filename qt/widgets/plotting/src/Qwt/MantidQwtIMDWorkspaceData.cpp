@@ -19,11 +19,11 @@
 using MantidQt::API::toQStringInternal;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using Mantid::coord_t;
 using Mantid::API::CoordTransform;
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDWorkspace_const_sptr;
 using Mantid::API::NullCoordTransform;
-using Mantid::coord_t;
 
 /** Constructor
  *

@@ -15,12 +15,7 @@ using namespace Mantid::Kernel;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-IndirectSettingsModel::IndirectSettingsModel()
-    : m_settingsGroup("Indirect Settings") {}
-
-std::string IndirectSettingsModel::getSettingsGroup() const {
-  return m_settingsGroup;
-}
+IndirectSettingsModel::IndirectSettingsModel() {}
 
 void IndirectSettingsModel::setFacility(std::string const &facility) {
   auto const savedFacility = getFacility();

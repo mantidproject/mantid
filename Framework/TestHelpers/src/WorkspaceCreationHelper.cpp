@@ -262,7 +262,7 @@ create2DWorkspace154(int64_t nHist, int64_t nBins, bool isHist,
 
 Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace,
                              const std::set<int64_t> &maskedWorkspaceIndices) {
-  const int nhist = static_cast<int>(workspace->getNumberHistograms());
+  const auto nhist = static_cast<int>(workspace->getNumberHistograms());
   if (workspace->getInstrument()->nelements() == 0) {
     // We need detectors to be able to mask them.
     auto instrument = boost::make_shared<Instrument>();
@@ -419,7 +419,7 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(
 
   std::vector<double> timeRanges;
   for (size_t i = 0; i < nTimeIndexes; ++i) {
-    timeRanges.push_back(double(i + firstInterval));
+    timeRanges.emplace_back(double(i + firstInterval));
   }
 
   builder.setTimeRanges(DateAndTime(int(startTime), 0), timeRanges);
@@ -472,6 +472,47 @@ createEventWorkspaceWithFullInstrument(int numBanks, int numPixels,
   Instrument_sptr inst =
       ComponentCreationHelper::createTestInstrumentRectangular(numBanks,
                                                                numPixels);
+  EventWorkspace_sptr ws =
+      createEventWorkspace2(numBanks * numPixels * numPixels, 100);
+  ws->setInstrument(inst);
+
+  // Set the X axes
+  const auto &xVals = ws->x(0);
+  const size_t xSize = xVals.size();
+  auto ax0 = std::make_unique<NumericAxis>(xSize);
+  ax0->setUnit("dSpacing");
+  for (size_t i = 0; i < xSize; i++) {
+    ax0->setValue(i, xVals[i]);
+  }
+  ws->replaceAxis(0, std::move(ax0));
+
+  // re-assign detector IDs to the rectangular detector
+  const auto detIds = inst->getDetectorIDs();
+  for (int wi = 0; wi < static_cast<int>(ws->getNumberHistograms()); ++wi) {
+    ws->getSpectrum(wi).clearDetectorIDs();
+    if (clearEvents)
+      ws->getSpectrum(wi).clear(true);
+    ws->getSpectrum(wi).setDetectorID(detIds[wi]);
+  }
+  return ws;
+}
+
+/** Create an Eventworkspace with  instrument 2.0 that contains
+ *RectangularDetector's.
+ * X axis = 100 histogrammed bins from 0.0 in steps of 1.0.
+ * 200 events per pixel.
+ *
+ * @param numBanks :: number of rectangular banks
+ * @param numPixels :: each bank will be numPixels*numPixels
+ * @param clearEvents :: if true, erase the events from list
+ * @return The EventWorkspace
+ */
+Mantid::DataObjects::EventWorkspace_sptr
+createEventWorkspaceWithFullInstrument2(int numBanks, int numPixels,
+                                        bool clearEvents) {
+  Instrument_sptr inst =
+      ComponentCreationHelper::createTestInstrumentRectangular2(numBanks,
+                                                                numPixels);
   EventWorkspace_sptr ws =
       createEventWorkspace2(numBanks * numPixels * numPixels, 100);
   ws->setInstrument(inst);
@@ -958,8 +999,8 @@ void addTSPEntry(Run &runInfo, std::string name, double val) {
  */
 void setOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
                         double b, double c) {
-  auto latt = std::make_unique<OrientedLattice>(a, b, c, 90., 90., 90.);
-  ws->mutableSample().setOrientedLattice(latt.release());
+  ws->mutableSample().setOrientedLattice(
+      std::make_unique<OrientedLattice>(a, b, c, 90., 90., 90.));
 }
 
 // =====================================================================================
@@ -985,7 +1026,7 @@ Mantid::API::MatrixWorkspace_sptr
 createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
                                                  size_t numBins,
                                                  bool has_oriented_lattice) {
-  size_t rHist = static_cast<size_t>(std::sqrt(static_cast<double>(numPixels)));
+  auto rHist = static_cast<size_t>(std::sqrt(static_cast<double>(numPixels)));
   while (rHist * rHist < numPixels)
     rHist++;
 
@@ -999,8 +1040,8 @@ createProcessedWorkspaceWithCylComplexInstrument(size_t numPixels,
   pAxis0->setUnit("DeltaE");
   ws->replaceAxis(0, std::move(pAxis0));
   if (has_oriented_lattice) {
-    auto latt = std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
-    ws->mutableSample().setOrientedLattice(latt.release());
+    ws->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.));
 
     addTSPEntry(ws->mutableRun(), "phi", 0);
     addTSPEntry(ws->mutableRun(), "chi", 0);
@@ -1058,7 +1099,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
     std::vector<double> E_transfer;
     E_transfer.reserve(numBins);
     for (size_t i = 0; i <= numBins; i++) {
-      E_transfer.push_back(Emin + static_cast<double>(i) * dE);
+      E_transfer.emplace_back(Emin + static_cast<double>(i) * dE);
     }
     ws->mutableX(j) = std::move(E_transfer);
   }
@@ -1076,8 +1117,8 @@ createProcessedInelasticWS(const std::vector<double> &L2,
   ws->replaceAxis(0, std::move(pAxis0));
 
   // define oriented lattice which requested for processed ws
-  auto latt = std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.);
-  ws->mutableSample().setOrientedLattice(latt.release());
+  ws->mutableSample().setOrientedLattice(
+      std::make_unique<OrientedLattice>(1, 1, 1, 90., 90., 90.));
 
   ws->mutableRun().addProperty(
       new PropertyWithValue<std::string>("deltaE-mode", "Direct"), true);
@@ -1174,7 +1215,7 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   // Set Q ('y') axis binning
   std::vector<double> qbins{0.0, 1.0, 4.0};
   std::vector<double> qaxis;
-  const int numY =
+  const auto numY =
       static_cast<int>(VectorHelper::createAxisFromRebinParams(qbins, qaxis));
 
   // Initialize the workspace
@@ -1237,13 +1278,14 @@ RebinnedOutput_sptr createRebinnedOutputWorkspace() {
   // Set representation
   outputWS->finalize();
 
-  // Make errors squared rooted
+  // Make errors squared rooted and set sqrd err flag
   for (int i = 0; i < numHist; ++i) {
     auto &mutableE = outputWS->mutableE(i);
     for (int j = 0; j < numX - 1; ++j) {
       mutableE[j] = std::sqrt(mutableE[j]);
     }
   }
+  outputWS->setSqrdErrors(false);
 
   return outputWS;
 }
@@ -1283,9 +1325,21 @@ createPeaksWorkspace(const int numPeaks, const bool createOrientedLattice) {
   }
 
   if (createOrientedLattice) {
-    Mantid::Geometry::OrientedLattice lattice;
-    peaksWS->mutableSample().setOrientedLattice(&lattice);
+    peaksWS->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>());
   }
+  return peaksWS;
+}
+
+Mantid::DataObjects::PeaksWorkspace_sptr
+createPeaksWorkspace(const int numPeaks,
+                     const Mantid::Kernel::DblMatrix &ubMat) {
+  if (ubMat.numRows() != 3 || ubMat.numCols() != 3) {
+    throw std::invalid_argument("UB matrix is not 3x3");
+  }
+
+  auto peaksWS = createPeaksWorkspace(numPeaks, true);
+  peaksWS->mutableSample().getOrientedLattice().setUB(ubMat);
   return peaksWS;
 }
 
@@ -1350,10 +1404,8 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
   std::string InstrName = instrument->getName();
   targWS->logs()->addProperty<std::string>("InstrumentName", InstrName, true);
   targWS->logs()->addProperty<bool>("FakeDetectors", false, true);
-  targWS->logs()->addProperty<double>("Ei", Ei, true); //"Incident energy for
-  // Direct or Analysis
-  // energy for indirect
-  // instrument");
+  // Incident energy for Direct or Analysis energy for indirect instrument;
+  targWS->logs()->addProperty<double>("Ei", Ei, true);
 
   // get access to the workspace memory
   auto &sp2detMap = targWS->getColVector<size_t>("spec2detMap");
@@ -1413,7 +1465,7 @@ void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,
 boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
 buildPreprocessedDetectorsWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
   Mantid::DataObjects::TableWorkspace_sptr DetPos = createTableWorkspace(ws);
-  double Ei = ws->run().getPropertyValueAsType<double>("Ei");
+  auto Ei = ws->run().getPropertyValueAsType<double>("Ei");
   processDetectorsPositions(ws, DetPos, Ei);
 
   return DetPos;

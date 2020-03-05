@@ -83,7 +83,7 @@ API::Column_sptr TableWorkspace::addColumn(const std::string &type,
   }
   try {
     c = API::ColumnFactory::Instance().create(type);
-    m_columns.push_back(c);
+    m_columns.emplace_back(c);
     c->setName(name);
     resizeColumn(c.get(), rowCount());
   } catch (Kernel::Exception::NotFoundError &e) {
@@ -209,7 +209,7 @@ void TableWorkspace::addColumn(boost::shared_ptr<API::Column> column) {
     throw std::invalid_argument(ss.str());
   } else {
     modified();
-    m_columns.push_back(column);
+    m_columns.emplace_back(column);
   }
 }
 
@@ -326,7 +326,7 @@ template <>
 DLLExport DataObjects::TableWorkspace_sptr
 IPropertyManager::getValue<DataObjects::TableWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<DataObjects::TableWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
@@ -343,7 +343,7 @@ template <>
 DLLExport DataObjects::TableWorkspace_const_sptr
 IPropertyManager::getValue<DataObjects::TableWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<DataObjects::TableWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<DataObjects::TableWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {

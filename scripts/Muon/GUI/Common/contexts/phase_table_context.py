@@ -14,7 +14,7 @@ class PhaseTableContext(object):
     def __init__(self):
         self.options_dict = default_dict.copy()
         self.phase_tables = []
-        self.phase_quad = []
+        self.phase_quad = {}
 
     def add_phase_table(self, workspace):
         self.phase_tables = [phase_table for phase_table in self.phase_tables if phase_table.workspace_name != workspace.workspace_name]
@@ -23,18 +23,17 @@ class PhaseTableContext(object):
     def get_phase_table_list(self, instrument):
         return [phase_table.workspace_name for phase_table in self.phase_tables if instrument in phase_table.workspace_name]
 
-    def add_phase_quad(self, workspace):
-        self.phase_quad = [item for item in self.phase_quad if item.workspace_name != workspace.workspace_name]
-        self.phase_quad.append(workspace)
+    def add_phase_quad(self, workspace, run_list):
+        self.phase_quad.update({run_list: workspace})
 
     def get_phase_quad(self, instrument, run):
-        return [phase_quad.workspace_name for phase_quad in self.phase_quad if instrument in phase_quad.workspace_name
-                and run in phase_quad.workspace_name]
+        return [phase_quad.workspace_name for key, phase_quad in self.phase_quad.items() if instrument in phase_quad.workspace_name
+                and run == key]
 
     def remove_workspace_by_name(self, workspace_name):
         self.phase_tables = [item for item in self.phase_tables if item.workspace_name != workspace_name]
-        self.phase_quad = [item for item in self.phase_tables if item.workspace_name != workspace_name]
+        self.phase_quad = {key: item for key, item in self.phase_quad.items() if item.workspace_name != workspace_name}
 
     def clear(self):
         self.phase_tables = []
-        self.phase_quad = []
+        self.phase_quad = {}

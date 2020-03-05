@@ -9,10 +9,10 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Task.h"
+#include <functional>
 #include <stdexcept>
 
 #ifndef Q_MOC_RUN
-#include <boost/bind.hpp>
 #include <boost/function.hpp>
 #endif
 
@@ -35,12 +35,12 @@ public:
   //---------------------------------------------------------------------------------------------
   /** Constructor for a simple void function.
    *
-   * Pro-tip: use boost::bind(f, argument1, argument2) (for example) to turn a
+   * Pro-tip: use std::bind(f, argument1, argument2) (for example) to turn a
    *function that takes
    * an argument into a argument-less function pointer.
    *
-   * Use boost::bind(&ClassName::function, &*this, arg1, arg2) to bind to a
-   *class method of this.
+   * Use std::bind(&ClassName::function, &*this, arg1, arg2) to bind to a
+   * class method of this.
    *
    * @param func :: pointer to a void function()
    * @param cost :: computational cost
@@ -51,17 +51,17 @@ public:
   //---------------------------------------------------------------------------------------------
   /** Constructor for a simple boost bound function.
    *
-   * Pro-tip: use boost::bind(f, argument1, argument2) (for example) to turn a
+   * Pro-tip: use std::bind(f, argument1, argument2) (for example) to turn a
    *function that takes
    * an argument into a argument-less function pointer.
    *
-   * Use boost::bind(&ClassName::function, &*this, arg1, arg2) to bind to a
+   * Use std::bind(&ClassName::function, &*this, arg1, arg2) to bind to a
    *class method of this.
    *
-   * @param func :: boost::function<> returned by boost::bind()
+   * @param func :: std::function<> returned by std::bind()
    * @param cost :: computational cost
    */
-  FunctionTask(boost::function<void()> func, double cost = 1.0)
+  FunctionTask(std::function<void()> func, double cost = 1.0)
       : Task(cost), m_voidFunc(func) {}
 
   //---------------------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ public:
   }
 
 protected:
-  boost::function<void()> m_voidFunc;
+  std::function<void()> m_voidFunc;
 };
 
 } // namespace Kernel

@@ -13,7 +13,7 @@ from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisp
 class TableWorkspaceDisplayAttributes(object):
     # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so
     # just add an extra tag to the list e.g. ["InstrumentWidget", "IWidget"]
-    tags = ["TableWorkspaceDisplayView"]
+    _tags = ["TableWorkspaceDisplayView"]
 
 
 class TableWorkspaceDisplayEncoder(TableWorkspaceDisplayAttributes):
@@ -36,8 +36,8 @@ class TableWorkspaceDisplayEncoder(TableWorkspaceDisplayAttributes):
         return {"as_x": marked_columns.as_x, "as_y": marked_columns.as_y, "as_y_err": as_y_err}
 
     @classmethod
-    def has_tag(cls, tag):
-        return tag in cls.tags
+    def tags(cls):
+        return cls._tags
 
 
 class TableWorkspaceDisplayDecoder(TableWorkspaceDisplayAttributes):
@@ -63,5 +63,5 @@ class TableWorkspaceDisplayDecoder(TableWorkspaceDisplayAttributes):
         return pres.container
 
     @classmethod
-    def has_tag(cls, tag):
-        return tag in cls.tags
+    def tags(cls):
+        return cls._tags

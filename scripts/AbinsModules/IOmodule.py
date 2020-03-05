@@ -5,19 +5,20 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-import h5py
-import numpy as np
+import hashlib
+import io
+import json
+import os
 import six
 import subprocess
 import shutil
-import hashlib
-import io
+import h5py
+import numpy as np
 import AbinsModules
-import os
+
 from mantid.kernel import logger, ConfigService
 
 
-# noinspection PyMethodMayBeStatic
 class IOmodule(object):
     """
     Class for Abins I/O HDF file operations.
@@ -52,13 +53,6 @@ class IOmodule(object):
         save_dir_path = ConfigService.getString("defaultsave.directory")
         self._hdf_filename = os.path.join(save_dir_path, core_name + ".hdf5")  # name of hdf file
 
-        try:
-            self._advanced_parameters = self._get_advanced_parameters()
-        except IOError as err:
-            logger.error(str(err))
-        except ValueError as err:
-            logger.error(str(err))
-
         self._attributes = {}  # attributes for group
 
         # data  for group; they are expected to be numpy arrays or
@@ -78,12 +72,15 @@ class IOmodule(object):
 
     def _valid_advanced_parameters(self):
         """
-        In case of rerun checks if advanced parameters haven't changed.
-        Returns: True if they are the same, otherwise False
+        Check if advanced parameters haven't changed.
+
+        Compare JSON dict stored as data attribute with data in AbinsParams.
+        :returns: True if they are the same, otherwise False
 
         """
         previous_advanced_parameters = self.load(list_of_attributes=["advanced_parameters"])
-        return self._advanced_parameters == previous_advanced_parameters["attributes"]["advanced_parameters"]
+        return (AbinsModules.AbinsParameters.non_performance_parameters
+                == json.loads(previous_advanced_parameters["attributes"]["advanced_parameters"]))
 
     def get_previous_ab_initio_program(self):
         """
@@ -121,11 +118,12 @@ class IOmodule(object):
 
     def add_file_attributes(self):
         """
-        Adds file attributes: filename and hash of file to the collection of all attributes.
+        Add attributes for input data filename, hash of file, advanced parameters to data for HDF5 file
         """
         self.add_attribute("hash", self._hash_input_filename)
         self.add_attribute("filename", self._input_filename)
-        self.add_attribute("advanced_parameters", self._advanced_parameters)
+        self.add_attribute("advanced_parameters",
+                           json.dumps(AbinsModules.AbinsParameters.non_performance_parameters))
 
     def add_data(self, name=None, value=None):
         """
@@ -147,8 +145,9 @@ class IOmodule(object):
                 group.attrs[name] = self._attributes[name]
             else:
                 raise ValueError("Invalid value of attribute. String, "
-                                 "int or bytes was expected! " + name +
-                                 "= (invalid type : %s) " % type(self._attributes[name]))
+                                 "int or bytes was expected! "
+                                 + name
+                                 + "= (invalid type : %s) " % type(self._attributes[name]))
 
     def _recursively_save_structured_data_to_group(self, hdf_file=None, path=None, dic=None):
         """
@@ -223,8 +222,8 @@ class IOmodule(object):
             path = os.getcwd()
             temp_file = self._hdf_filename[self._hdf_filename.find(".")] + "temphgfrt.hdf5"
 
-            subprocess.check_call(["h5repack" + " -i " + os.path.join(path, self._hdf_filename) +
-                                   " -o " + os.path.join(path, temp_file)])
+            subprocess.check_call(["h5repack" + " -i " + os.path.join(path, self._hdf_filename)
+                                   + " -o " + os.path.join(path, temp_file)])
 
             shutil.move(os.path.join(path, temp_file), os.path.join(path, self._hdf_filename))
         except OSError:
@@ -234,8 +233,8 @@ class IOmodule(object):
         except RuntimeError:
             pass
 
-    # noinspection PyMethodMayBeStatic
-    def _list_of_str(self, list_str=None):
+    @staticmethod
+    def _list_of_str(list_str=None):
         """
         Checks if all elements of the list are strings.
         :param list_str: list to check
@@ -244,8 +243,8 @@ class IOmodule(object):
         if list_str is None:
             return False
 
-        if not (isinstance(list_str, list) and
-                all([isinstance(list_str[item], str) for item in range(len(list_str))])):
+        if not (isinstance(list_str, list)
+                and all([isinstance(list_str[item], str) for item in range(len(list_str))])):
             raise ValueError("Invalid list of items to load!")
 
         return True
@@ -291,8 +290,8 @@ class IOmodule(object):
 
         return results
 
-    # noinspection PyMethodMayBeStatic
-    def _get_subgrp_name(self, path=None):
+    @staticmethod
+    def _get_subgrp_name(path):
         """
         Extracts name of the particular subgroup from the absolute name.
         :param path: absolute  name of subgroup
@@ -302,18 +301,8 @@ class IOmodule(object):
         end = reversed_path.find("/")
         return reversed_path[:end]
 
-    # noinspection PyMethodMayBeStatic
-    def _convert_unicode_to_string_core(self, item=None):
-        """
-        Convert atom element from unicode to str
-        but only in Python 2 where unicode handling is a mess
-        :param item: converts unicode to item
-        :returns: converted element
-        """
-        assert isinstance(item, six.text_type)
-        return item.encode('utf-8')
-
-    def _convert_unicode_to_str(self, object_to_check=None):
+    @classmethod
+    def _convert_unicode_to_str(cls, object_to_check):
         """
         Converts unicode to Python str, works for nested dicts and lists (recursive algorithm). Only required
         for Python 2 where a mismatch with unicode/str objects is a problem for dictionary lookup
@@ -322,26 +311,31 @@ class IOmodule(object):
         """
         if six.PY2:
             if isinstance(object_to_check, list):
-                for i in range(len(object_to_check)):
-                    object_to_check[i] = self._convert_unicode_to_str(object_to_check[i])
+                object_to_check = list(map(cls._convert_unicode_to_str, object_to_check))
 
             elif isinstance(object_to_check, dict):
-                for item in object_to_check:
-                    if isinstance(item, six.text_type):
-
-                        decoded_item = self._convert_unicode_to_string_core(item)
-                        item_dict = object_to_check[item]
-                        del object_to_check[item]
-                        object_to_check[decoded_item] = item_dict
-                        item = decoded_item
-
-                    object_to_check[item] = self._convert_unicode_to_str(object_to_check[item])
+                return {cls._encode_utf8_if_text(key): cls._convert_unicode_to_str(value)
+                        for key, value in object_to_check.items()}
 
             # unicode element
             elif isinstance(object_to_check, six.text_type):
-                object_to_check = self._convert_unicode_to_string_core(object_to_check)
+                object_to_check = cls._encode_utf8_if_text(object_to_check)
 
         return object_to_check
+
+    @staticmethod
+    def _encode_utf8_if_text(item):
+        """
+        Convert atom element from unicode to str
+        but only in Python 2 where unicode handling is a mess
+
+        :param item: item to convert to unicode str if Python 2 str
+        :returns: laundered item
+        """
+        if isinstance(item, six.text_type):
+            return item.encode('utf-8')
+        else:
+            return item
 
     def _load_dataset(self, hdf_file=None, name=None, group=None):
         """
@@ -361,8 +355,8 @@ class IOmodule(object):
 
         # noinspection PyUnresolvedReferences,PyProtectedMember
         if isinstance(hdf_group, h5py._hl.dataset.Dataset):
-            return hdf_group.value
-        elif all([self._get_subgrp_name(path=hdf_group[el].name).isdigit() for el in hdf_group.keys()]):
+            return hdf_group[()]
+        elif all([self._get_subgrp_name(hdf_group[el].name).isdigit() for el in hdf_group.keys()]):
             structured_dataset_list = []
             # here we make an assumption about keys which have a numeric values; we assume that always : 1, 2, 3... Max
             num_keys = len(hdf_group.keys())
@@ -370,13 +364,14 @@ class IOmodule(object):
                 structured_dataset_list.append(
                     self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
                                                                     path=hdf_group.name + "/%s" % item))
-            return self._convert_unicode_to_str(object_to_check=structured_dataset_list)
+            return self._convert_unicode_to_str(structured_dataset_list)
         else:
             return self._convert_unicode_to_str(
-                object_to_check=self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
-                                                                                path=hdf_group.name + "/"))
+                self._recursively_load_dict_contents_from_group(hdf_file=hdf_file,
+                                                                path=hdf_group.name + "/"))
 
-    def _recursively_load_dict_contents_from_group(self, hdf_file=None, path=None):
+    @classmethod
+    def _recursively_load_dict_contents_from_group(cls, hdf_file=None, path=None):
         """
         Loads structure dataset which has form of Python dictionary.
         :param hdf_file:  hdf file object from which dataset is loaded
@@ -388,9 +383,9 @@ class IOmodule(object):
         for key, item in hdf_file[path].items():
             # noinspection PyUnresolvedReferences,PyProtectedMember,PyProtectedMember
             if isinstance(item, h5py._hl.dataset.Dataset):
-                ans[key] = item.value
+                ans[key] = item[()]
             elif isinstance(item, h5py._hl.group.Group):
-                ans[key] = self._recursively_load_dict_contents_from_group(hdf_file, path + key + '/')
+                ans[key] = cls._recursively_load_dict_contents_from_group(hdf_file, path + key + '/')
         return ans
 
     def load(self, list_of_attributes=None, list_of_datasets=None):
@@ -422,20 +417,18 @@ class IOmodule(object):
 
         return results
 
-    # noinspection PyMethodMayBeStatic
-    def _calculate_hash(self, filename=None):
+    @staticmethod
+    def _calculate_hash(filename=None, coding='utf-8'):
         """
         Calculates hash  of a file defined by filename according to sha512 algorithm.
-        :param filename: name of a file to calculate hash (full path to the file)
-        :returns: string representation of hash
-        """
-        return self._calculate_hash_core(filename=filename, coding='utf-8')
 
-    def _calculate_hash_core(self, filename=None, coding=None):
-        """
-        Helper function for calculating hash.
         :param filename: name of a file to calculate hash
+        :type filename: str
+        :param coding: Text encoding
+        :type encoding: str
+
         :returns: string representation of hash
+
         """
         hash_calculator = hashlib.sha512()
 
@@ -449,15 +442,6 @@ class IOmodule(object):
                 hash_calculator.update(data.encode(coding))
 
         return hash_calculator.hexdigest()
-
-    def _get_advanced_parameters(self):
-        """
-        Calculates hash of file with advanced parameters.
-        Returns: string representation of hash for  file  with advanced parameters
-                 which contains only hexadecimal digits
-        """
-        h = self._calculate_hash(filename=AbinsModules.AbinsParameters.__file__.replace(".pyc", ".py"))
-        return h
 
     def get_input_filename(self):
         return self._input_filename

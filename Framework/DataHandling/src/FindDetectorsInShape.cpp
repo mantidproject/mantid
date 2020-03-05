@@ -57,7 +57,7 @@ void FindDetectorsInShape::exec() {
 
   // progress
   detid2det_map::size_type objCmptCount = detectorInfo.size();
-  int iprogress_step = static_cast<int>(objCmptCount / 100);
+  auto iprogress_step = static_cast<int>(objCmptCount / 100);
   if (iprogress_step == 0)
     iprogress_step = 1;
   int iprogress = 0;
@@ -68,7 +68,7 @@ void FindDetectorsInShape::exec() {
       if (shape_sptr->isValid(detectorInfo.position(i))) {
         // shape encloses this objectComponent
         g_log.debug() << "Detector contained in shape " << detIDs[i] << '\n';
-        foundDets.push_back(detIDs[i]);
+        foundDets.emplace_back(detIDs[i]);
       }
     }
     iprogress++;

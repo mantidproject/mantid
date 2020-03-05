@@ -5,15 +5,19 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from qtpy.QtWidgets import QApplication
+from __future__ import absolute_import
+
+import unittest
 
 from mantid.simpleapi import CreateSampleWorkspace
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
+from qtpy.QtWidgets import QApplication
 
 
-class MatrixWorkspaceDisplayViewTest(GuiTest, QtWidgetFinder):
+@start_qapplication
+class MatrixWorkspaceDisplayViewTest(unittest.TestCase, QtWidgetFinder):
     def test_window_deleted_correctly(self):
         ws = CreateSampleWorkspace()
 

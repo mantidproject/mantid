@@ -172,7 +172,7 @@ std::vector<detid_t> DetectorGroup::getDetectorIDs() const {
   result.reserve(m_detectors.size());
   DetCollection::const_iterator it;
   for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    result.push_back((*it).first);
+    result.emplace_back((*it).first);
   }
   return result;
 }
@@ -186,7 +186,7 @@ std::vector<IDetector_const_sptr> DetectorGroup::getDetectors() const {
   result.reserve(m_detectors.size());
   DetCollection::const_iterator it;
   for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    result.push_back((*it).second);
+    result.emplace_back((*it).second);
   }
   return result;
 }

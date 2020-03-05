@@ -106,7 +106,7 @@ void TOFSANSResolution::exec() {
   const std::vector<double> binParams = getProperty("OutputBinning");
 
   // Count histogram for normalization
-  const int xLength = static_cast<int>(iqWS->x(0).size());
+  const auto xLength = static_cast<int>(iqWS->x(0).size());
   std::vector<double> XNorm(xLength - 1, 0.0);
 
   // Create workspaces with each component of the resolution for debugging
@@ -130,7 +130,7 @@ void TOFSANSResolution::exec() {
   // Initialize Dq
   HistogramData::HistogramDx DxOut(xLength - 1, 0.0);
 
-  const int numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int>(reducedWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
 
@@ -158,7 +158,7 @@ void TOFSANSResolution::exec() {
 
     const auto &XIn = reducedWS->x(i);
     const auto &YIn = reducedWS->y(i);
-    const int wlLength = static_cast<int>(XIn.size());
+    const auto wlLength = static_cast<int>(XIn.size());
 
     std::vector<double> _dx(xLength - 1, 0.0);
     std::vector<double> _norm(xLength - 1, 0.0);

@@ -58,7 +58,7 @@ void SaveFullprofResolution::init() {
                   "Bank number of the parameters belonged to. ");
 
   vector<string> supportedfunctions;
-  supportedfunctions.push_back(
+  supportedfunctions.emplace_back(
       "Back-to-back exponential convoluted with pseudo-voigt (profile 9)");
   supportedfunctions.emplace_back("Jason Hodge's function (profile 10)");
   auto funcvalidator =

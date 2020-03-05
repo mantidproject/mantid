@@ -28,7 +28,7 @@
        <item>
         <layout class="QHBoxLayout" name="loPlotArea" stretch="1,1">
          <item>
-          <widget class="MantidQt::MantidWidgets::IndirectFitPropertyBrowser" name="fitPropertyBrowser">
+          <widget class="MantidQt::CustomInterfaces::IDA::IndirectFitPropertyBrowser" name="fitPropertyBrowser">
            <widget class="QWidget" name="dockWidgetContents"/>
           </widget>
          </item>
@@ -142,16 +142,7 @@
           <property name="spacing">
            <number>0</number>
           </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>0</number>
           </property>
           <item>
@@ -222,12 +213,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::MantidWidgets::IndirectFitPropertyBrowser</class>
-   <extends>QDockWidget</extends>
-   <header>MantidQtWidgets/Common/IndirectFitPropertyBrowser.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>MantidQt::CustomInterfaces::IDA::IndirectFitPlotView</class>
    <extends>QWidget</extends>
    <header>IndirectFitPlotView.h</header>
@@ -243,6 +228,12 @@
    <class>MantidQt::CustomInterfaces::IDA::IndirectFitOutputOptionsView</class>
    <extends>QWidget</extends>
    <header>IndirectFitOutputOptionsView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::IDA::IndirectFitPropertyBrowser</class>
+   <extends>QDockWidget</extends>
+   <header>IndirectFitPropertyBrowser.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -25,6 +25,10 @@
 #include "MantidKernel/Property.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using MantidQt::API::MWRunFiles;
+
 namespace MantidQt {
 namespace CustomDialogs {
 namespace {
@@ -147,6 +151,9 @@ void LoadDialog::accept() {
   while (m_form.fileWidget->isSearching() || m_populating)
     QApplication::instance()->processEvents();
 
+  // Makes it so the dialog is still resizable if it is kept open
+  m_form.propertyLayout->setEnabled(true);
+
   // Check that the file still exists just incase it somehow got removed
   std::string errMess =
       getAlgorithm()->getPointerToProperty("Filename")->isValid();
@@ -256,9 +263,6 @@ void LoadDialog::createDynamicLayout() {
   // be being deleted
   m_form.propertyLayout->setEnabled(false);
 
-  using namespace Mantid::API;
-  using namespace Mantid::Kernel;
-
   if (!m_form.fileWidget->isValid())
     return;
   // First step is the get the specific loader that is responsible
@@ -329,10 +333,6 @@ void LoadDialog::createDynamicLayout() {
 int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
                                          QVBoxLayout *propertyLayout,
                                          QWidget *parent) {
-  using namespace Mantid::API;
-  using namespace Mantid::Kernel;
-  using MantidQt::API::MWRunFiles;
-
   QString propName = QString::fromStdString(prop->name());
   QWidget *inputWidget(nullptr);
   QHBoxLayout *widgetLayout(nullptr);

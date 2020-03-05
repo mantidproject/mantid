@@ -10,6 +10,7 @@
 #include "DllOption.h"
 
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidQtWidgets/Common/IFunctionView.h"
 
 #include <QMap>
@@ -97,7 +98,7 @@ public:
   /// Update the function parameter value
   void setParameter(const QString &paramName, double value) override;
   /// Update the function parameter error
-  void setParamError(const QString &paramName, double error) override;
+  void setParameterError(const QString &paramName, double error) override;
   /// Get a value of a parameter
   double getParameter(const QString &paramName) const override;
   /// Set error display on/off
@@ -108,6 +109,9 @@ public:
   boost::optional<QString> currentFunctionIndex() const override;
   /// Set a tie
   void setParameterTie(const QString &paramName, const QString &tie) override;
+  /// Set a constraint
+  void setParameterConstraint(const QString &paramName,
+                              const QString &constraint) override;
   /// Set new global parameters.
   void setGlobalParameters(const QStringList &) override;
   /// Get a list of global parameters
@@ -118,6 +122,11 @@ public:
                                           bool attributesOnly = false);
   /// Resize the browser's columns
   void setColumnSizes(int s0, int s1, int s2 = -1);
+
+  // Hide global boxes
+  void hideGlobals();
+  // Show global boxes
+  void showGlobals();
 
 protected:
   /// Create the Qt property browser
@@ -131,7 +140,7 @@ protected:
   /// Set a function
   void setFunction(QtProperty *prop, Mantid::API::IFunction_sptr fun);
   /// Add a function
-  void addFunction(QtProperty *prop, Mantid::API::IFunction_sptr fun);
+  bool addFunction(QtProperty *prop, Mantid::API::IFunction_sptr fun);
   /// Add a function property
   AProperty addFunctionProperty(QtProperty *parent, QString funName);
   /// Add a parameter property
@@ -206,8 +215,9 @@ protected:
   /// Check if a parameter property has a upper bound
   bool hasUpperBound(QtProperty *prop) const;
   /// Get a constraint string
-  QString getConstraint(const QString &paramName, const QString &lowerBound,
-                        const QString &upperBound) const;
+  QString getConstraint(const QString &paramName,
+                        const double &lowerBound = Mantid::EMPTY_DBL(),
+                        const double &upperBound = Mantid::EMPTY_DBL()) const;
   /// Get a pair of function index (eg f0.f2.) and constraint expression given a
   /// parameter property
   std::pair<QString, QString> getFunctionAndConstraint(QtProperty *prop) const;
@@ -265,6 +275,7 @@ protected slots:
   void setAttributeToFunction(Mantid::API::IFunction &fun, QtProperty *prop);
 
 protected:
+  void removeConstraintsQuiet(QtProperty *paramProp);
   /// Manager for function group properties
   QtGroupPropertyManager *m_functionManager;
   /// Manager for function parameter properties
@@ -282,7 +293,7 @@ protected:
   /// Manager for function tie properties
   QtStringPropertyManager *m_tieManager;
   /// Manager for parameter constraint properties
-  QtStringPropertyManager *m_constraintManager;
+  QtDoublePropertyManager *m_constraintManager;
   /// Manager for file name attributes
   QtStringPropertyManager *m_filenameManager;
   /// Manager for Formula attributes
@@ -340,6 +351,7 @@ protected:
   std::vector<std::string> m_allowedCategories;
   SelectFunctionDialog *m_selectFunctionDialog;
   QtProperty *m_selectedFunctionProperty;
+  bool m_emitParameterValueChange = true;
 
   friend class CreateAttributePropertyForFunctionTreeView;
   friend class SetAttributeFromProperty;

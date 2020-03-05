@@ -10,11 +10,14 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import json
 import os
+import re
 
+from qtpy.QtCore import Qt
 from mantidqt.project.workspaceloader import WorkspaceLoader
 from mantidqt.project.plotsloader import PlotsLoader
 from mantidqt.project.decoderfactory import DecoderFactory
 from mantid import AnalysisDataService as ADS, logger
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 
 def _confirm_all_workspaces_loaded(workspaces_to_confirm):
@@ -66,18 +69,16 @@ class ProjectLoader(object):
 
             # Load interfaces
             if self.project_reader.interface_list is not None:
-                self.load_interfaces(directory=directory)
+                QAppThreadCall(self.load_interfaces)(directory)
 
         return workspace_success
 
     def load_interfaces(self, directory):
         for interface in self.project_reader.interface_list:
-            # Find decoder
             decoder = self.decoder_factory.find_decoder(interface["tag"])
-
-            # Decode and Show the interface
             try:
                 decoded_interface = decoder.decode(interface, directory)
+                decoded_interface.setAttribute(Qt.WA_DeleteOnClose, True)
                 decoded_interface.show()
             except Exception as e:
                 # Catch any exception and log it for the encoder
@@ -108,4 +109,31 @@ class ProjectReader(object):
         except Exception as e:
             if isinstance(e, KeyboardInterrupt):
                 raise
-            logger.warning("JSON project file unable to be loaded/read")
+            if not self.read_mantidplot_project(file_name):
+                logger.warning("JSON project file unable to be loaded/read")
+
+    def read_mantidplot_project(self, file_name):
+        """
+        :param file_name: String or string castable object; the file_name of the project
+        :return: returns True if able to load the project, otherwise False
+        Will attempt to read the project file in from the file_name that is given as a mantidplot project file.
+        """
+        #Get the string inside the mantidworkspaces tags, allowing for whitespace at either end
+        workspaces_pattern = r"<mantidworkspaces>\s*(.*?)\s*<\/mantidworkspaces>"
+        try:
+            with open(file_name) as f:
+                full_text = f.read()
+                ws_match = re.search(workspaces_pattern,full_text,re.DOTALL)
+                if ws_match:
+                    #split by tab
+                    ws_list = ws_match.group(1).split('\t')
+                    if len(ws_list) > 1 and ws_list[0] == "WorkspaceNames":
+                        #the first entry is just an identification tag
+                        self.workspace_names = ws_list[1:]
+                        logger.notice("Loading workspaces from Mantidplot project file " + file_name)
+                        return True
+                logger.warning("Mantidplot project file unable to be read")
+                return False
+        except Exception:
+            logger.warning("Mantidplot project file unable to be loaded/read")
+            return False

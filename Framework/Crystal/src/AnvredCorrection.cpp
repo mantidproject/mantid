@@ -160,9 +160,8 @@ void AnvredCorrection::exec() {
       WorkspaceFactory::Instance().create(m_inputWS);
 
   // needs to be a signed because OpenMP gives an error otherwise
-  const int64_t numHists =
-      static_cast<int64_t>(m_inputWS->getNumberHistograms());
-  const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
+  const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const auto specSize = static_cast<int64_t>(m_inputWS->blocksize());
   if (specSize < 3)
     throw std::runtime_error("Problem in AnvredCorrection::events not binned");
 
@@ -253,8 +252,7 @@ void AnvredCorrection::cleanup() {
 
 void AnvredCorrection::execEvent() {
 
-  const int64_t numHists =
-      static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const auto numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   std::string unitStr = m_inputWS->getAxis(0)->unit()->unitID();
   auto correctionFactors = create<EventWorkspace>(*m_inputWS);
   correctionFactors->sortAll(TOF_SORT, nullptr);
@@ -350,8 +348,7 @@ void AnvredCorrection::retrieveBaseProperties() {
   m_power_th = getProperty("PowerLambda");     // in cm
   const Material &sampleMaterial = m_inputWS->sample().getMaterial();
 
-  const double scatterXSection =
-      sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda);
+  const double scatterXSection = sampleMaterial.totalScatterXSection();
 
   if (scatterXSection != 0.0) {
     double rho = sampleMaterial.numberDensity();
@@ -515,7 +512,7 @@ void AnvredCorrection::BuildLamdaWeights() {
     // value.
     m_lamda_weight.reserve(NUM_WAVELENGTHS);
     for (int i = 0; i < NUM_WAVELENGTHS; i++)
-      m_lamda_weight.push_back(1.);
+      m_lamda_weight.emplace_back(1.);
   }
 
   for (size_t i = 0; i < m_lamda_weight.size(); ++i) {
@@ -554,9 +551,9 @@ void AnvredCorrection::scale_exec(std::string &bankName, double &lambda,
   double eff_R = 1.0 - exp(-mu * pathlength); // efficiency at point R
   value *= eff_center / eff_R;                // slant path efficiency ratio
   // Take out the "bank" part of the bank name
-  bankName.erase(remove_if(bankName.begin(), bankName.end(),
-                           not1(std::ptr_fun(::isdigit))),
-                 bankName.end());
+  bankName.erase(
+      remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
+      bankName.end());
   if (inst->hasParameter("detScale" + bankName))
     value *=
         static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);

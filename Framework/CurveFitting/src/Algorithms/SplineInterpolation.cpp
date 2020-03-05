@@ -137,7 +137,7 @@ std::map<std::string, std::string> SplineInterpolation::validateInputs() {
 void SplineInterpolation::exec() {
   // read in algorithm parameters
   const int derivOrder = getProperty("DerivOrder");
-  const size_t order = static_cast<size_t>(derivOrder);
+  const auto order = static_cast<size_t>(derivOrder);
 
   // set input workspaces
   MatrixWorkspace_sptr mws = getProperty("WorkspaceToMatch");

@@ -14,6 +14,7 @@ from __future__ import (absolute_import)
 # 3rd-party imports
 import matplotlib as mpl
 import matplotlib._pylab_helpers as _pylab_helpers
+from qtpy.QtWidgets import QApplication
 
 # local imports
 from .globalfiguremanager import GlobalFigureManager
@@ -34,6 +35,8 @@ def initialize_matplotlib():
     setattr(_pylab_helpers, 'Gcf', GlobalFigureManager)
     # Set our defaults
     reset_rcparams_to_default()
+    # Set figure DPI scaling to monitor DPI
+    mpl.rcParams['figure.dpi'] = QApplication.instance().desktop().physicalDpiX()
 
 
 def reset_rcparams_to_default():

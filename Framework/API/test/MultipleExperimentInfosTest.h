@@ -51,13 +51,12 @@ public:
     MultipleExperimentInfos mei;
     TS_ASSERT_EQUALS(mei.hasOrientedLattice(), false);
 
-    OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
-
     // add some oriented lattices to the multiple experiment info
     for (uint16_t i = 0; i < nExperimentInfosToAdd; ++i) {
       ExperimentInfo_sptr experimentInfo = boost::make_shared<ExperimentInfo>();
       mei.addExperimentInfo(experimentInfo);
-      mei.getExperimentInfo(i)->mutableSample().setOrientedLattice(latt);
+      mei.getExperimentInfo(i)->mutableSample().setOrientedLattice(
+          std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
       TS_ASSERT_EQUALS(mei.hasOrientedLattice(), true);
     }
 
@@ -72,8 +71,6 @@ public:
         ->mutableSample()
         .clearOrientedLattice();
     TS_ASSERT_EQUALS(mei.hasOrientedLattice(), false);
-
-    delete latt;
   }
 };
 

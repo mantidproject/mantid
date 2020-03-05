@@ -193,7 +193,7 @@ ExtractMaskToTable::parseStringToVector(std::string liststr) {
   detidvec.reserve(numdetids);
   for (size_t i = 0; i < numdetids; ++i) {
     int tmpid = detlist.operator()()[i];
-    detidvec.push_back(tmpid);
+    detidvec.emplace_back(tmpid);
     g_log.debug() << "[DB] Add detector ID: " << tmpid << ".\n";
   }
 
@@ -219,7 +219,7 @@ std::vector<detid_t> ExtractMaskToTable::extractMaskFromMatrixWorkspace() {
   for (size_t i = 0; i < detectorInfo.size(); ++i) {
     bool masked = detectorInfo.isMasked(i);
     if (masked) {
-      maskeddetids.push_back(detids[i]);
+      maskeddetids.emplace_back(detids[i]);
     }
     g_log.debug() << "[DB] Detector No. " << i << ":  ID = " << detids[i]
                   << ", Masked = " << masked << ".\n";
@@ -405,7 +405,7 @@ ExtractMaskToTable::subtractVector(std::vector<detid_t> minuend,
     if (fiter != subtrahend.end())
       exist = *fiter == tmpid;
     if (!exist) {
-      diff.push_back(tmpid);
+      diff.emplace_back(tmpid);
     }
     firstsubiter = fiter;
   }

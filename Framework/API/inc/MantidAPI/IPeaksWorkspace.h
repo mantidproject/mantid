@@ -105,7 +105,7 @@ public:
    * detector. Calculated if not provided.
    * @return a pointer to a new Peak object.
    */
-  virtual Mantid::Geometry::IPeak *
+  virtual std::unique_ptr<Geometry::IPeak>
   createPeak(const Mantid::Kernel::V3D &QLabFrame,
              boost::optional<double> detectorDistance = boost::none) const = 0;
 
@@ -124,7 +124,7 @@ public:
    * @param HKL V3D
    * @return a pointer to a new Peak object.
    */
-  virtual Mantid::Geometry::IPeak *
+  virtual std::unique_ptr<Geometry::IPeak>
   createPeakHKL(const Mantid::Kernel::V3D &HKL) const = 0;
 
   //---------------------------------------------------------------------------------------------

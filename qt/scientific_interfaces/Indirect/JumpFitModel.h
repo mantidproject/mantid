@@ -26,31 +26,31 @@ public:
 
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
                     const Spectra & /*spectra*/) override;
-  void removeWorkspace(std::size_t index) override;
+  void removeWorkspace(TableDatasetIndex index) override;
   void setFitType(const std::string &fitType);
 
-  bool zeroWidths(std::size_t dataIndex) const;
-  bool zeroEISF(std::size_t dataIndex) const;
+  bool zeroWidths(TableDatasetIndex dataIndex) const;
+  bool zeroEISF(TableDatasetIndex dataIndex) const;
 
   bool isMultiFit() const override;
 
   std::vector<std::string> getSpectrumDependentAttributes() const override;
 
-  std::string getFitParameterName(std::size_t dataIndex,
-                                  std::size_t spectrum) const;
-  std::vector<std::string> getWidths(std::size_t dataIndex) const;
-  std::vector<std::string> getEISF(std::size_t dataIndex) const;
-  boost::optional<std::size_t> getWidthSpectrum(std::size_t widthIndex,
-                                                std::size_t dataIndex) const;
-  boost::optional<std::size_t> getEISFSpectrum(std::size_t eisfIndex,
-                                               std::size_t dataIndex) const;
-  void setActiveWidth(std::size_t widthIndex, std::size_t dataIndex);
-  void setActiveEISF(std::size_t eisfIndex, std::size_t dataIndex);
+  std::string getFitParameterName(TableDatasetIndex dataIndex,
+                                  WorkspaceIndex spectrum) const;
+  std::vector<std::string> getWidths(TableDatasetIndex dataIndex) const;
+  std::vector<std::string> getEISF(TableDatasetIndex dataIndex) const;
+  boost::optional<std::size_t>
+  getWidthSpectrum(std::size_t widthIndex, TableDatasetIndex dataIndex) const;
+  boost::optional<std::size_t>
+  getEISFSpectrum(std::size_t eisfIndex, TableDatasetIndex dataIndex) const;
+  void setActiveWidth(std::size_t widthIndex, TableDatasetIndex dataIndex);
+  void setActiveEISF(std::size_t eisfIndex, TableDatasetIndex dataIndex);
 
   std::string sequentialFitOutputName() const override;
   std::string simultaneousFitOutputName() const override;
-  std::string singleFitOutputName(std::size_t index,
-                                  std::size_t spectrum) const override;
+  std::string singleFitOutputName(TableDatasetIndex index,
+                                  WorkspaceIndex spectrum) const override;
 
 private:
   std::string constructOutputName() const;
@@ -59,8 +59,9 @@ private:
   addJumpFitParameters(Mantid::API::MatrixWorkspace *workspace,
                        const std::string &hwhmName);
   std::unordered_map<std::string, JumpFitParameters>::const_iterator
-  findJumpFitParameters(std::size_t dataIndex) const;
+  findJumpFitParameters(TableDatasetIndex dataIndex) const;
   std::string getResultXAxisUnit() const override;
+  std::string getResultLogName() const override;
 
   std::string m_fitType;
   std::unordered_map<std::string, JumpFitParameters> m_jumpParameters;

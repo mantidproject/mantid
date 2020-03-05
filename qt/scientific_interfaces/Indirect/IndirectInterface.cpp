@@ -8,7 +8,6 @@
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 
 using namespace MantidQt::API;
 
@@ -18,7 +17,7 @@ namespace CustomInterfaces {
 IndirectInterface::IndirectInterface(QWidget *parent)
     : UserSubWindow(parent),
       m_settings(dynamic_cast<IndirectSettings *>(
-          InterfaceManager().createSubWindow("Settings"))) {
+          InterfaceManager().createSubWindow("Settings", this))) {
 
   connect(m_settings.get(), SIGNAL(applySettings()), this,
           SLOT(applySettings()));
@@ -31,8 +30,8 @@ void IndirectInterface::help() {
 
 void IndirectInterface::settings() {
   m_settings->loadSettings();
+  m_settings->setWindowModality(Qt::WindowModal);
   m_settings->show();
-  m_settings->setFocus();
 }
 
 void IndirectInterface::applySettings() {
@@ -50,9 +49,7 @@ IndirectInterface::getInterfaceSettings() const {
 }
 
 void IndirectInterface::manageUserDirectories() {
-  ManageUserDirectories *ad = new ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
+  ManageUserDirectories::openManageUserDirectories();
 }
 
 void IndirectInterface::showMessageBox(QString const &message) {

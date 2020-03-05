@@ -53,7 +53,8 @@ public:
 
   /// open the nexus file for writing
   void openNexusWrite(const std::string &fileName,
-                      optional_size_t entryNumber = optional_size_t());
+                      optional_size_t entryNumber = optional_size_t(),
+                      const bool append_to_file = true);
   /// write the header ifon for the Mantid workspace format
   int writeNexusProcessedHeader(const std::string &title,
                                 const std::string &wsName = "") const;
@@ -382,12 +383,13 @@ void NexusFileIO::writeNumericTimeLog(
        dv != dV.end(); dv++) {
     T val = dv->second;
     Types::Core::DateAndTime time = dv->first;
-    values.push_back(val);
+    values.emplace_back(val);
     if (first) {
       t0 = time; // start time of log
       first = false;
     }
-    times.push_back(Types::Core::DateAndTime::secondsFromDuration(time - t0));
+    times.emplace_back(
+        Types::Core::DateAndTime::secondsFromDuration(time - t0));
   }
   // create log
   status = NXmakegroup(fileID, logName.c_str(), "NXlog");
@@ -398,13 +400,13 @@ void NexusFileIO::writeNumericTimeLog(
   // write log data
   std::vector<std::string> attributes, avalues;
   attributes.emplace_back("type");
-  avalues.push_back(logValueType<T>());
+  avalues.emplace_back(logValueType<T>());
   writeNxFloatArray("value", values, attributes, avalues);
   attributes.clear();
   avalues.clear();
   // get ISO time, and save it as an attribute
   attributes.emplace_back("start");
-  avalues.push_back(t0.toISO8601String());
+  avalues.emplace_back(t0.toISO8601String());
 
   writeNxFloatArray("time", times, attributes, avalues);
   status = NXclosegroup(fileID);

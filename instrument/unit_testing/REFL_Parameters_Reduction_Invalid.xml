@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+<component-link name="REFL" >
+
+  <parameter name="SummationType" type="string">
+      <value val="badSummationOption"/>
+  </parameter>
+
+  <parameter name="ReductionType" type="string">
+      <value val="badReductionOption"/>
+  </parameter>
+
+  <parameter name="IncludePartialBins">
+      <value val="badPartialBinsOption"/>
+  </parameter>
+
+</component-link>
+
+</parameter-file>

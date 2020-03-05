@@ -60,8 +60,8 @@ public:
 
   void testfunction_Uses_Numerical_Deriv_When_Deriv_NotSupplied() {
     using Mantid::API::IPeakFunction_sptr;
-    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     using Mantid::PythonInterface::createTestFunction;
+    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     IPeakFunction_sptr noDerivPeakFunction;
     TS_ASSERT_THROWS_NOTHING(
         noDerivPeakFunction =
@@ -81,8 +81,8 @@ public:
 
   void testfunction_Uses_Supplied_Deriv() {
     using Mantid::API::IPeakFunction_sptr;
-    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     using Mantid::PythonInterface::createTestFunction;
+    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     IPeakFunction_sptr peakFuncWithDeriv;
     TS_ASSERT_THROWS_NOTHING(
         peakFuncWithDeriv =

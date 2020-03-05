@@ -45,7 +45,7 @@ void SofQWPolygon::exec() {
 
   // Progress reports & cancellation
   const auto blocksize = inputWS->blocksize();
-  const size_t nreports(
+  const auto nreports(
       static_cast<size_t>(inputWS->getNumberHistograms() * blocksize));
   m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, nreports);
   // Compute input caches

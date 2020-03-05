@@ -26,7 +26,7 @@ bool CompositeImplicitFunction::addFunction(
     Mantid::Geometry::MDImplicitFunction_sptr constituentFunction) {
   bool bSuccess = false;
   if (constituentFunction.get() != nullptr) {
-    this->m_Functions.push_back(constituentFunction);
+    this->m_Functions.emplace_back(constituentFunction);
     bSuccess = true;
   }
   return bSuccess;

@@ -10,7 +10,7 @@ Description
 -----------
 
 SaveHKL outputs the peaks with corrections applied in a format
-that works successfully in GSAS and SHELX. Peaks that have not been 
+that works successfully in GSAS and SHELX. Peaks that have not been
 integrated and also peaks that were not indexed are removed.
 
 hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\\n'%
@@ -87,7 +87,7 @@ Output:
     #load a peaks workspace from file
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
     print("Number of peaks in table {}".format(peaks.rowCount()))
-    
+
     path = os.path.join(os.path.expanduser("~"), "MyPeaks.hkl")
     SaveHKL(peaks, path, MinWavelength=0.5, MaxWavelength=2,MinDSpacing=0.2, SortBy='Bank')
 
@@ -113,6 +113,43 @@ Output:
           pass
 
     removeFiles(["MyPeaks.hkl"])
+
+**Example - SaveHKL with shape from SetSample**
+
+.. testcode:: ExSaveHKLSetSample
+
+    import os
+    path = os.path.join(os.path.expanduser("~"), "MyPeaks.hkl")
+
+    # load a peaks workspace from file
+    peaks = LoadIsawPeaks(Filename=r'SXD23767.peaks')
+    SetSample(peaks,
+              Geometry={'Shape': 'Cylinder', 'Height': 4.0,
+                        'Radius': 0.8,
+                        'Center': [0.,0.,0.]},
+              Material={'ChemicalFormula': 'V', 'SampleNumberDensity': 0.1})
+    SaveHKL(peaks, path)
+    print(os.path.isfile(path))
+
+Output:
+
+.. testoutput:: ExSaveHKLSetSample
+
+    True
+
+.. testcleanup:: ExSaveHKLSimple
+
+    import os
+    def removeFiles(files):
+      for ws in files:
+        try:
+          path = os.path.join(os.path.expanduser("~"), ws)
+          os.remove(path)
+        except:
+          pass
+
+    removeFiles(["MyPeaks.hkl"])
+
 
 
 

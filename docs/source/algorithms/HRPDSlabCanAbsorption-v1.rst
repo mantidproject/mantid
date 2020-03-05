@@ -55,7 +55,7 @@ Usage
     ws = Rebin(ws,Params=[1])
     SetSampleMaterial(ws,ChemicalFormula="V")
 
-    wsOut = HRPDSlabCanAbsorption (ws,Thickness='0.2',ElementSize=3)
+    wsOut = HRPDSlabCanAbsorption (ws,Thickness=0.2,ElementSize=2)
 
     print('The created workspace has one entry for each spectra: {:d}'.format(wsOut.getNumberHistograms()))
 

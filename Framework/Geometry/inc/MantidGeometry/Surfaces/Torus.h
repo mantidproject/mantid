@@ -42,7 +42,7 @@ private:
 
 protected:
   Torus(const Torus &) = default;
-  Torus &operator=(const Torus &) = default;
+  Torus &operator=(const Torus &) = delete;
 
 public:
   /// Public identifier

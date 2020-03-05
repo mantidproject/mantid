@@ -6,13 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from Muon.GUI.Common.observer_pattern import Observer, Observable, GenericObservable, GenericObserver
+from mantidqt.utils.observer_pattern import Observer, Observable, GenericObservable, GenericObserver
 import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
+from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 
 
 class GroupingTabPresenter(object):
@@ -20,6 +21,10 @@ class GroupingTabPresenter(object):
     The grouping tab presenter is responsible for synchronizing the group and pair tables. It also maintains
     functionality which covers both groups/pairs ; e.g. loading/saving/updating data.
     """
+
+    @staticmethod
+    def string_to_list(text):
+        return run_string_to_list(text)
 
     def __init__(self, view, model,
                  grouping_table_widget=None,
@@ -40,6 +45,10 @@ class GroupingTabPresenter(object):
         self._view.on_load_grouping_button_clicked(self.handle_load_grouping_from_file)
         self._view.on_save_grouping_button_clicked(self.handle_save_grouping_file)
         self._view.on_default_grouping_button_clicked(self.handle_default_grouping_button_clicked)
+
+        # multi period
+        self._view.on_summed_periods_changed(self.handle_periods_changed)
+        self._view.on_subtracted_periods_changed(self.handle_periods_changed)
 
         # monitors for loaded data changing
         self.loadObserver = GroupingTabPresenter.LoadObserver(self)
@@ -65,6 +74,9 @@ class GroupingTabPresenter(object):
     def update_view_from_model(self):
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
+        self.hide_multiperiod_widget_if_data_single_period()
+        n_periods = self._model.number_of_periods()
+        self._view.set_period_number_in_period_label(n_periods)
 
     def show(self):
         self._view.show()
@@ -85,20 +97,20 @@ class GroupingTabPresenter(object):
             description_text = self.text_for_description()
         self._view.set_description_text(description_text)
 
-    def add_pair_from_grouping_table(self, group_name1, group_name2):
+    def add_pair_from_grouping_table(self, group_name1="", group_name2=""):
+
         """
         If user requests to add a pair from the grouping table.
         """
-        pair = self._model.construct_empty_pair_with_group_names(group_name1, group_name2)
-        self._model.add_pair(pair)
-        self.pairing_table_widget.update_view_from_model()
+        self.pairing_table_widget.handle_add_pair_button_clicked(group_name1, group_name2)
 
     def handle_guess_alpha(self, pair_name, group1_name, group2_name):
         """
         Calculate alpha for the pair for which "Guess Alpha" button was clicked.
         """
         if len(self._model._data.current_runs) > 1:
-            run, index, ok_clicked = RunSelectionDialog.get_run(self._model._data.current_runs, self._model._data.instrument, self._view)
+            run, index, ok_clicked = RunSelectionDialog.get_run(self._model._data.current_runs,
+                                                                self._model._data.instrument, self._view)
             if not ok_clicked:
                 return
             run_to_use = self._model._data.current_runs[index]
@@ -127,6 +139,9 @@ class GroupingTabPresenter(object):
         # Only XML format
         file_filter = file_utils.filter_for_extensions(["xml"])
         filename = self._view.show_file_browser_and_return_selection(file_filter, [""])
+
+        if filename == '':
+            return
 
         groups, pairs, description, default = xml_utils.load_grouping_from_XML(filename)
 
@@ -182,9 +197,13 @@ class GroupingTabPresenter(object):
 
     def handle_default_grouping_button_clicked(self):
         self._model.reset_groups_and_pairs_to_default()
+        self._model.reset_selected_groups_and_pairs()
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
         self.update_description_text()
+        self.groupingNotifier.notify_subscribers()
+        self.handle_update_all_clicked()
+        self.plot_default_groups_or_pairs()
 
     def on_clear_requested(self):
         self._model.clear()
@@ -195,21 +214,70 @@ class GroupingTabPresenter(object):
     def handle_new_data_loaded(self):
         if self._model.is_data_loaded():
             self._model._context.show_raw_data()
-            self.grouping_table_widget.update_view_from_model()
-            self.pairing_table_widget.update_view_from_model()
+            self.update_view_from_model()
             self.update_description_text()
             self.handle_update_all_clicked()
+            self.plot_default_groups_or_pairs()
         else:
             self.on_clear_requested()
+
+    def hide_multiperiod_widget_if_data_single_period(self):
+        if self._model.is_data_multi_period():
+            self._view.multi_period_widget_hidden(False)
+        else:
+            self._view.multi_period_widget_hidden(True)
+
+    def update_period_edits(self):
+        summed_periods = self._model.get_summed_periods()
+        subtracted_periods = self._model.get_subtracted_periods()
+
+        self._view.set_summed_periods(",".join([str(p) for p in summed_periods]))
+        self._view.set_subtracted_periods(",".join([str(p) for p in subtracted_periods]))
+
+    def handle_periods_changed(self):
+        self._view.summed_period_edit.blockSignals(True)
+        self._view.subtracted_period_edit.blockSignals(True)
+        summed = self.string_to_list(self._view.get_summed_periods())
+        subtracted = self.string_to_list(self._view.get_subtracted_periods())
+
+        subtracted = [i for i in subtracted if i not in summed]
+
+        n_periods = self._model.number_of_periods()
+        bad_periods = [period for period in summed if (period > n_periods) or period == 0] + \
+                      [period for period in subtracted if (period > n_periods) or period == 0]
+        if len(bad_periods) > 0:
+            self._view.display_warning_box(
+                "The following periods are invalid : " + ",".join([str(period) for period in bad_periods]))
+
+        summed = [p for p in summed if (p <= n_periods) and p > 0 and p not in bad_periods]
+        if not summed:
+            summed = [1]
+
+        subtracted = [p for p in subtracted if (p <= n_periods) and p > 0 and p not in bad_periods]
+
+        self._model.update_periods(summed, subtracted)
+
+        self.update_period_edits()
+        self._view.summed_period_edit.blockSignals(False)
+        self._view.subtracted_period_edit.blockSignals(False)
 
     def handle_save_grouping_file(self):
         filename = self._view.show_file_save_browser_and_return_selection()
         if filename != "":
-            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename, description=self._view.get_description_text())
+            xml_utils.save_grouping_to_XML(self._model.groups, self._model.pairs, filename,
+                                           description=self._view.get_description_text())
 
     def create_update_thread(self):
         self._update_model = ThreadModelWrapper(self.calculate_all_data)
         return thread_model.ThreadModel(self._update_model)
+
+    def plot_default_groups_or_pairs(self):
+        # if we have no pairs or groups selected, generate a default plot
+        if len(self._model.selected_pairs + self._model.selected_groups) == 0:
+            if len(self._model.pairs) > 0:  # if we have pairs - then plot all pairs
+                self.pairing_table_widget.plot_default_case()
+            else:  # else plot groups
+                self.grouping_table_widget.plot_default_case()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable

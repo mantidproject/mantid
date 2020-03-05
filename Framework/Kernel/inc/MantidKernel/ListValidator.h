@@ -75,7 +75,7 @@ public:
     allowedStrings.reserve(m_allowedValues.size());
     auto cend = m_allowedValues.end();
     for (auto cit = m_allowedValues.begin(); cit != cend; ++cit) {
-      allowedStrings.push_back(boost::lexical_cast<std::string>(*cit));
+      allowedStrings.emplace_back(boost::lexical_cast<std::string>(*cit));
     }
     return allowedStrings;
   }
@@ -88,7 +88,7 @@ public:
     // add only new values
     if (std::find(m_allowedValues.begin(), m_allowedValues.end(), value) ==
         m_allowedValues.end()) {
-      m_allowedValues.push_back(value);
+      m_allowedValues.emplace_back(value);
     }
   }
 

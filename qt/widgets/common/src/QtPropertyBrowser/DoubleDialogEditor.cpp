@@ -35,14 +35,15 @@ DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent,
   m_button->setMaximumSize(20, 1000000);
   connect(m_button, SIGNAL(clicked()), this, SLOT(runDialog()));
   layout->addWidget(m_button);
-  if (hasOption) {
-    m_checkBox = new QCheckBox;
-    m_checkBox->setChecked(isOptionSet);
-    connect(m_checkBox, SIGNAL(toggled(bool)), this, SLOT(optionToggled(bool)));
-    layout->addWidget(m_checkBox);
-    if (isOptionSet) {
-      m_button->hide();
-    }
+  m_checkBox = new QCheckBox;
+  m_checkBox->setChecked(isOptionSet);
+  connect(m_checkBox, SIGNAL(toggled(bool)), this, SLOT(optionToggled(bool)));
+  layout->addWidget(m_checkBox);
+  if (isOptionSet) {
+    m_button->hide();
+  }
+  if (!hasOption) {
+    m_checkBox->hide();
   }
 
   layout->setContentsMargins(0, 0, 0, 0);
@@ -52,17 +53,23 @@ DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent,
 
   m_editor->installEventFilter(this);
   m_button->installEventFilter(this);
+  m_checkBox->installEventFilter(this);
 }
 
 bool DoubleDialogEditor::eventFilter(QObject *obj, QEvent *evt) {
   if (evt->type() == QEvent::FocusOut) {
     if (obj == m_editor) {
-      if (!m_button->hasFocus()) {
+      if (!m_button->hasFocus() && !m_checkBox->hasFocus()) {
         updateProperty();
         emit closeEditor();
       }
     } else if (obj == m_button) {
-      if (!m_editor->hasFocus()) {
+      if (!m_editor->hasFocus() && !m_checkBox->hasFocus()) {
+        updateProperty();
+        emit closeEditor();
+      }
+    } else if (obj == m_checkBox) {
+      if (!m_editor->hasFocus() && !m_button->hasFocus()) {
         updateProperty();
         emit closeEditor();
       }

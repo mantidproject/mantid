@@ -5,6 +5,8 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MSDFit.h"
+#include "IndirectFunctionBrowser/MSDTemplateBrowser.h"
+
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -15,9 +17,6 @@
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include <QFileInfo>
-
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
 
 using namespace Mantid::API;
 
@@ -39,9 +38,12 @@ MSDFit::MSDFit(QWidget *parent)
   setPlotView(m_uiForm->pvFitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
+  auto templateBrowser = new MSDTemplateBrowser;
+  m_uiForm->fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
   setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
 
   setEditResultVisible(false);
+  m_uiForm->fitDataView->setStartAndEndHidden(false);
 }
 
 void MSDFit::setupFitTab() {
@@ -49,17 +51,8 @@ void MSDFit::setupFitTab() {
   auto gaussian = functionFactory.createFunction("MSDGauss");
   auto peters = functionFactory.createFunction("MSDPeters");
   auto yi = functionFactory.createFunction("MSDYi");
-  addComboBoxFunctionGroup("Gaussian", {gaussian});
-  addComboBoxFunctionGroup("Peters", {peters});
-  addComboBoxFunctionGroup("Yi", {yi});
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(this, SIGNAL(functionChanged()), this,
-          SLOT(updateModelFitTypeString()));
-}
-
-void MSDFit::updateModelFitTypeString() {
-  m_msdFittingModel->setFitType(selectedFitType().toStdString());
 }
 
 void MSDFit::runClicked() { runTab(); }
@@ -69,6 +62,13 @@ void MSDFit::setRunIsRunning(bool running) {
 }
 
 void MSDFit::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
+
+EstimationDataSelector MSDFit::getEstimationDataSelector() const {
+  return [](const std::vector<double> &,
+            const std::vector<double> &) -> DataForParameterEstimation {
+    return DataForParameterEstimation{};
+  };
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -50,7 +50,7 @@ public:
             outputSpace);
     long nBin = static_cast<long>(data->getNPoints());
     long sum = 0;
-    double *sdata = data->getSignalArray();
+    auto sdata = data->getSignalArray();
     for (long i = 0; i < nBin; i++) {
       sum += (long)sdata[i];
     }

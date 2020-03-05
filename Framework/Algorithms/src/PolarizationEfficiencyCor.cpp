@@ -251,7 +251,7 @@ PolarizationEfficiencyCor::getWorkspaceNameList() const {
             "Workspace from the input workspace group is not stored in the "
             "Analysis Data Service which is required by the Wildes method.");
       }
-      names.push_back(name);
+      names.emplace_back(name);
     }
   }
   return names;

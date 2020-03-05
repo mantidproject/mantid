@@ -112,7 +112,7 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
     }
 
     // Add to list of managed ones
-    m_managed_algs.push_back(alg);
+    m_managed_algs.emplace_back(alg);
     alg->initialize();
 
   } catch (std::runtime_error &ex) {
@@ -229,6 +229,18 @@ std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(
                  return algorithm->name() == algorithmName &&
                         algorithm->isRunning();
                });
+  return theRunningInstances;
+}
+
+/// Returns all running (& managed) occurances of any algorithm, oldest
+/// first
+std::vector<IAlgorithm_const_sptr>
+AlgorithmManagerImpl::runningInstances() const {
+  std::vector<IAlgorithm_const_sptr> theRunningInstances;
+  std::lock_guard<std::mutex> _lock(this->m_managedMutex);
+  std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(),
+               std::back_inserter(theRunningInstances),
+               [](const auto &algorithm) { return algorithm->isRunning(); });
   return theRunningInstances;
 }
 

@@ -109,7 +109,7 @@ void CatalogDownloadDataFiles::exec() {
     if (hasAccessToArchives) {
       g_log.information() << "File (" << *fileName << ") located in archives ("
                           << fileLocation << ").\n";
-      fileLocations.push_back(fileLocation);
+      fileLocations.emplace_back(fileLocation);
     } else {
       g_log.information()
           << "Unable to open file (" << *fileName
@@ -120,7 +120,7 @@ void CatalogDownloadDataFiles::exec() {
       progress(prog, "downloading over internet...");
       const std::string fullPathDownloadedFile =
           doDownloadandSavetoLocalDrive(url, *fileName);
-      fileLocations.push_back(fullPathDownloadedFile);
+      fileLocations.emplace_back(fullPathDownloadedFile);
     }
   }
 

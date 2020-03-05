@@ -29,12 +29,12 @@ public:
   }
 
   void test_empty() {
-    MultiDomainFunctionModel model;
+    FunctionModel model;
     TS_ASSERT(!model.getFitFunction());
   }
 
   void test_simple() {
-    MultiDomainFunctionModel model;
+    FunctionModel model;
     model.setFunctionString("name=LinearBackground,A0=1,A1=2");
     auto fun = model.getFitFunction();
     TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
@@ -43,7 +43,7 @@ public:
   }
 
   void test_simple_multidomain() {
-    MultiDomainFunctionModel model;
+    FunctionModel model;
     model.setFunctionString("name=LinearBackground,A0=1,A1=2");
     model.setNumberDomains(2);
     TS_ASSERT_EQUALS(model.getNumberDomains(), 2);
@@ -85,7 +85,7 @@ public:
   }
 
   void test_globals() {
-    MultiDomainFunctionModel model;
+    FunctionModel model;
     model.setFunctionString("name=LinearBackground,A0=1,A1=2");
     model.setNumberDomains(3);
     QStringList globals("A1");
@@ -111,14 +111,14 @@ public:
   }
 
   void test_set_number_domains_after_clear() {
-    MultiDomainFunctionModel model;
+    FunctionModel model;
     model.clear();
     model.setNumberDomains(1);
     TS_ASSERT_EQUALS(model.getNumberDomains(), 1);
   }
 
   void test_add_function_top_level() {
-    MultiDomainFunctionModel model;
+    FunctionModel model;
     {
       model.addFunction("", "name=LinearBackground,A0=1,A1=2");
       auto testFun = FunctionFactory::Instance().createInitialized(
@@ -159,7 +159,7 @@ public:
   }
 
   void test_add_function_nested() {
-    MultiDomainFunctionModel model;
+    FunctionModel model;
     model.addFunction(
         "", "name=LinearBackground,A0=1,A1=2;(composite=CompositeFunction)");
     {
@@ -210,7 +210,7 @@ public:
   }
 
   void test_remove_function() {
-    MultiDomainFunctionModel model;
+    FunctionModel model;
     model.addFunction("", "name=LinearBackground,A0=1,A1=2;name="
                           "LinearBackground,A0=1,A1=2;name=LinearBackground,A0="
                           "1,A1=2");

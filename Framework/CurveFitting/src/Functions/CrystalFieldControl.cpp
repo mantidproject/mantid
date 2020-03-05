@@ -116,15 +116,15 @@ void CrystalFieldControl::cacheAttributes() {
   if (nSpec == 1) {
     auto fwhmX = getAttribute("FWHMX").asVector();
     auto fwhmY = getAttribute("FWHMY").asVector();
-    m_fwhmX.push_back(fwhmX);
-    m_fwhmY.push_back(fwhmY);
+    m_fwhmX.emplace_back(fwhmX);
+    m_fwhmY.emplace_back(fwhmY);
   } else {
     for (size_t i = 0; i < nSpec; ++i) {
       auto &control = *getFunction(i);
       auto fwhmX = control.getAttribute("FWHMX").asVector();
       auto fwhmY = control.getAttribute("FWHMY").asVector();
-      m_fwhmX.push_back(fwhmX);
-      m_fwhmY.push_back(fwhmY);
+      m_fwhmX.emplace_back(fwhmX);
+      m_fwhmY.emplace_back(fwhmY);
     }
   }
 }

@@ -66,7 +66,7 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
           "Workspace " + *it +
           " is not a MDEventWorkspace. Cannot merge this workspace.");
     else
-      m_workspaces.push_back(ws);
+      m_workspaces.emplace_back(ws);
   }
   if (m_workspaces.empty())
     throw std::invalid_argument("No valid m_workspaces specified.");
@@ -151,7 +151,7 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
 
   for (uint16_t i = 0; i < nExperiments; i++) {
     uint16_t nWSexperiments = m_workspaces[i]->getNumExperimentInfo();
-    experimentInfoNo.push_back(nWSexperiments);
+    experimentInfoNo.emplace_back(nWSexperiments);
     for (uint16_t j = 0; j < nWSexperiments; j++) {
       API::ExperimentInfo_sptr ei = API::ExperimentInfo_sptr(
           m_workspaces[i]->getExperimentInfo(j)->cloneExperimentInfo());
@@ -226,7 +226,7 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws2) {
   // workspace
   std::vector<API::IMDNode *> boxes;
   box2->getBoxes(boxes, 1000, true);
-  int numBoxes = int(boxes.size());
+  auto numBoxes = int(boxes.size());
 
   bool fileBasedSource(false);
   if (ws2->isFileBacked())
@@ -238,7 +238,7 @@ void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws2) {
     PRAGMA_OMP( parallel for if (!ws2->isFileBacked()) )
     for (int i = 0; i < numBoxes; i++) {
       PARALLEL_START_INTERUPT_REGION
-      MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
+      auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
       if (box && !box->getIsMasked()) {
         // Copy the events from WS2 and add them into WS1
         const std::vector<MDE> &events = box->getConstEvents();
@@ -295,7 +295,7 @@ void MergeMD::exec() {
       inputs.insert(inputs.end(), group.begin(), group.end());
     } else {
       // Single workspace
-      inputs.push_back(input);
+      inputs.emplace_back(input);
     }
   }
 

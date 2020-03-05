@@ -12,7 +12,6 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 
@@ -179,12 +178,11 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // Function defining which events (in the input dimensions) to place in the
   // output
-  MDImplicitFunction *function =
-      this->getImplicitFunctionForChunk(nullptr, nullptr);
+  auto function = this->getImplicitFunctionForChunk(nullptr, nullptr);
 
   std::vector<API::IMDNode *> boxes;
   // Leaf-only; no depth limit; with the implicit function passed to it.
-  ws->getBox()->getBoxes(boxes, 1000, true, function);
+  ws->getBox()->getBoxes(boxes, 1000, true, function.get());
   // Sort boxes by file position IF file backed. This reduces seeking time,
   // hopefully.
   bool fileBackedWS = bc->isFileBacked();
@@ -203,7 +201,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Go through every box for this chunk.
   // PARALLEL_FOR_IF( !bc->isFileBacked() )
   for (int i = 0; i < int(boxes.size()); i++) {
-    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
+    auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
     // Perform the binning in this separate method.
     if (box && !box->getIsMasked()) {
       // An array to hold the rotated/transformed coordinates

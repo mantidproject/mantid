@@ -104,7 +104,7 @@ def validateParams(function):
 surrogates = {'fillJacobian': fillJacobian,
               'functionDeriv1D': functionDeriv1D,
               'init': init,
-              'validateParams': validateParams,}
+              'validateParams': validateParams, }
 
 
 def surrogate(method):
@@ -154,8 +154,10 @@ def function1Dcommon(function, xvals, refine_factor=16, **optparms):
     # Normalize the integral in energies to unity
     fourier *= 2*p['Tau']*gamma(1./p['Beta']) / (p['Beta']*planck_constant)
     # symmetrize to negative energies
-    fourier = np.concatenate([fourier[nt:], fourier[:nt]])  # increasing ordering
+    fourier = np.concatenate(
+        [fourier[nt:], fourier[:nt]])  # increasing ordering
     # Find energy values corresponding to the fourier values
     energies = planck_constant * fftfreq(2 * nt, d=dt)  # standard ordering
-    energies = np.concatenate([energies[nt:], energies[:nt]])  # increasing ordering
+    energies = np.concatenate(
+        [energies[nt:], energies[:nt]])  # increasing ordering
     return p, de, energies, fourier

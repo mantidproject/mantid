@@ -75,7 +75,7 @@ void SofQWCentre::exec() {
     // wave vectors and then use |q| = sqrt[(ki - kf)*(ki - kf)]
 
     const auto &detIDs = inputWorkspace->getSpectrum(i).getDetectorIDs();
-    double numDets_d = static_cast<double>(detIDs.size());
+    auto numDets_d = static_cast<double>(detIDs.size());
     const auto &Y = inputWorkspace->y(i);
     const auto &E = inputWorkspace->e(i);
     const auto &X = inputWorkspace->x(i);
@@ -143,9 +143,9 @@ void SofQWCentre::exec() {
               xAxis.begin() - 1;
 
           // Add this spectra-detector pair to the mapping
-          specNumberMapping.push_back(
+          specNumberMapping.emplace_back(
               outputWorkspace->getSpectrum(qIndex).getSpectrumNo());
-          detIDMapping.push_back(detID);
+          detIDMapping.emplace_back(detID);
 
           // And add the data and it's error to that bin, taking into account
           // the number of detectors contributing to this bin
@@ -199,10 +199,11 @@ void SofQWCentre::makeDistribution(API::MatrixWorkspace &outputWS,
   for (size_t i = 0; i < numQBins; ++i) {
     auto &Y = outputWS.mutableY(i);
     auto &E = outputWS.mutableE(i);
+    using std::placeholders::_1;
     std::transform(Y.begin(), Y.end(), Y.begin(),
-                   std::bind2nd(std::divides<double>(), widths[i + 1]));
+                   std::bind(std::divides<double>(), _1, widths[i + 1]));
     std::transform(E.begin(), E.end(), E.begin(),
-                   std::bind2nd(std::divides<double>(), widths[i + 1]));
+                   std::bind(std::divides<double>(), _1, widths[i + 1]));
   }
 }
 

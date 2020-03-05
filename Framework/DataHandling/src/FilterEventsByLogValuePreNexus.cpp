@@ -60,13 +60,13 @@ using namespace Geometry;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
-using Types::Core::DateAndTime;
-using Types::Event::TofEvent;
 using std::ifstream;
 using std::runtime_error;
 using std::string;
 using std::stringstream;
 using std::vector;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 //----------------------------------------------------------------------------------------------
 // constants for locating the parameters to use in execution
@@ -188,7 +188,7 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
                              .append("/calibrations/")
                              .append(mapping);
       if (Poco::File(path).exists()) {
-        files.push_back(path);
+        files.emplace_back(path);
       }
     }
   }
@@ -247,7 +247,7 @@ int FilterEventsByLogValuePreNexus::confidence(
   // get the size of the file in bytes and reset the handle back to the
   // beginning
   handle.seekg(0, std::ios::end);
-  const size_t filesize = static_cast<size_t>(handle.tellg());
+  const auto filesize = static_cast<size_t>(handle.tellg());
   handle.seekg(0, std::ios::beg);
 
   if (filesize % objSize == 0)
@@ -1026,7 +1026,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
       // Merge all workspaces, index by index.
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(workspace->getNumberHistograms()); iwi++) {
-        size_t wi = size_t(iwi);
+        auto wi = size_t(iwi);
 
         // The output event list.
         EventList &el = workspace->getSpectrum(wi);
@@ -1121,7 +1121,7 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
   //----------------------------------------------------------------------------------
   // Pulse ID and pulse time
   DateAndTime pulsetime;
-  int64_t numPulses = static_cast<int64_t>(m_numPulses);
+  auto numPulses = static_cast<int64_t>(m_numPulses);
   if (m_vecEventIndex.size() < m_numPulses) {
     g_log.warning()
         << "Event_indices vector is smaller than the pulsetimes array.\n";
@@ -1295,8 +1295,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
 
           std::vector<Types::Core::DateAndTime> tempvectime;
           std::vector<double> temptofs;
-          local_pulsetimes.push_back(tempvectime);
-          local_tofs.push_back(temptofs);
+          local_pulsetimes.emplace_back(tempvectime);
+          local_tofs.emplace_back(temptofs);
 
           theindex = newindex;
 
@@ -1307,8 +1307,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
         }
 
         // Store pulse time and tof of this event
-        local_pulsetimes[theindex].push_back(pulsetime);
-        local_tofs[theindex].push_back(tof);
+        local_pulsetimes[theindex].emplace_back(pulsetime);
+        local_tofs[theindex].emplace_back(tof);
       } // END-IF-ELSE: On Event's Pixel's Nature
 
     } // ENDIF (event is masked error)
@@ -1341,8 +1341,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
 
         std::vector<Types::Core::DateAndTime> vec_pulsetimes;
         std::vector<double> vec_tofs;
-        this->wrongdetid_pulsetimes.push_back(vec_pulsetimes);
-        this->wrongdetid_tofs.push_back(vec_tofs);
+        this->wrongdetid_pulsetimes.emplace_back(vec_pulsetimes);
+        this->wrongdetid_tofs.emplace_back(vec_tofs);
 
         mindex = newindex;
       } else {
@@ -1356,9 +1356,9 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
       // Append local (thread) loaded events (pulse + tof) to global wrong detid
       // data structure
       for (size_t iv = 0; iv < local_pulsetimes[localindex].size(); iv++) {
-        this->wrongdetid_pulsetimes[mindex].push_back(
+        this->wrongdetid_pulsetimes[mindex].emplace_back(
             local_pulsetimes[localindex][iv]);
-        this->wrongdetid_tofs[mindex].push_back(local_tofs[localindex][iv]);
+        this->wrongdetid_tofs[mindex].emplace_back(local_tofs[localindex][iv]);
       }
     }
 
@@ -1635,7 +1635,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int iwi = 0; iwi < int(m_localWorkspace->getNumberHistograms());
            iwi++) {
-        size_t wi = size_t(iwi);
+        auto wi = size_t(iwi);
 
         // The output event list.
         EventList &el = m_localWorkspace->getSpectrum(wi);
@@ -1725,7 +1725,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
   //----------------------------------------------------------------------------------
   // Pulse ID and pulse time
   DateAndTime pulsetime;
-  int64_t numPulses = static_cast<int64_t>(m_numPulses);
+  auto numPulses = static_cast<int64_t>(m_numPulses);
   if (m_vecEventIndex.size() < m_numPulses) {
     g_log.warning()
         << "Event_indices vector is smaller than the pulsetimes array.\n";
@@ -2070,8 +2070,8 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
 
           std::vector<Types::Core::DateAndTime> tempvectime;
           std::vector<double> temptofs;
-          local_pulsetimes.push_back(tempvectime);
-          local_tofs.push_back(temptofs);
+          local_pulsetimes.emplace_back(tempvectime);
+          local_tofs.emplace_back(temptofs);
 
           theindex = newindex;
 
@@ -2082,8 +2082,8 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
         }
 
         // Store pulse time and tof of this event
-        local_pulsetimes[theindex].push_back(pulsetime);
-        local_tofs[theindex].push_back(tof);
+        local_pulsetimes[theindex].emplace_back(pulsetime);
+        local_tofs[theindex].emplace_back(tof);
 #else
         // Ignore all operation
         ;
@@ -2272,13 +2272,14 @@ void FilterEventsByLogValuePreNexus::loadPixelMap(const std::string &filename) {
 
   // Open the file; will throw if there is any problem
   BinaryFile<PixelType> pixelmapFile(filename);
-  PixelType max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
+  auto max_pid = static_cast<PixelType>(pixelmapFile.getNumElements());
   // Load all the data
   this->m_pixelmap = pixelmapFile.loadAllIntoVector();
 
   // Check for funky file
+  using std::placeholders::_1;
   if (std::find_if(m_pixelmap.begin(), m_pixelmap.end(),
-                   std::bind2nd(std::greater<PixelType>(), max_pid)) !=
+                   std::bind(std::greater<PixelType>(), _1, max_pid)) !=
       m_pixelmap.end()) {
     this->g_log.warning("Pixel id in mapping file was out of bounds. Loading "
                         "without mapping file");
@@ -2375,8 +2376,8 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
     for (const auto &pulse : pulses) {
       DateAndTime pulseDateTime(static_cast<int64_t>(pulse.seconds),
                                 static_cast<int64_t>(pulse.nanoseconds));
-      this->pulsetimes.push_back(pulseDateTime);
-      this->m_vecEventIndex.push_back(pulse.event_index);
+      this->pulsetimes.emplace_back(pulseDateTime);
+      this->m_vecEventIndex.emplace_back(pulse.event_index);
 
       if (pulseDateTime < lastPulseDateTime)
         this->m_pulseTimesIncreasing = false;
@@ -2384,7 +2385,7 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
         lastPulseDateTime = pulseDateTime;
 
       temp = pulse.pCurrent;
-      this->m_protonCharge.push_back(temp);
+      this->m_protonCharge.emplace_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
       else

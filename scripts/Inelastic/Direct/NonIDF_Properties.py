@@ -5,7 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+from six import string_types
 from Direct.PropertiesDescriptors import *
 from Direct.RunDescriptor import RunDescriptor,RunDescriptorDependent
 from mantid.simpleapi import *
@@ -110,7 +111,7 @@ class NonIDF_Properties(object):
                          If not explicitly set, white beam for sample run is used.""")
     # TODO: do something about it.  Second white is explicitly used in
     # diagnostics but not accessed at all
-    second_white  = RunDescriptor("""Second white beam run resutlts currently unused in the workflow
+    second_white  = RunDescriptor("""Second white beam run results currently unused in the workflow
                     despite being referred to in Diagnostics.
                     In a future it should be enabled.""")
     #
@@ -202,7 +203,7 @@ class NonIDF_Properties(object):
                     facility_ = config.getFacility('TEST_LIVE')
                 #end
 
-            elif isinstance(Instrument,str): # instrument name defined
+            elif isinstance(Instrument, string_types): # instrument name defined
                 new_name,full_name,facility_ = prop_helpers.check_instrument_name(None,Instrument)
                 #idf_dir = config.getString('instrumentDefinitgeton.directory')
                 idf_file = api.ExperimentInfo.getInstrumentFilename(full_name)

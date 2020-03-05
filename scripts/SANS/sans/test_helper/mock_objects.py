@@ -8,9 +8,12 @@ from __future__ import (absolute_import)
 
 from functools import (partial)
 
+from six import with_metaclass
+
 from mantid.py3compat import mock
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument)
+from sans.state.JsonSerializable import JsonSerializable
 from sans.test_helper.test_director import TestDirector
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
@@ -21,13 +24,13 @@ from ui.sans_isis.beam_centre import BeamCentre
 
 def create_mock_settings_diagnostic_tab():
     view = mock.create_autospec(SettingsDiagnosticTab, spec_set=False)
-    view.get_current_row = mock.MagicMock(return_value=3)
+    view.get_current_row = mock.MagicMock(return_value=0)
     return view
 
 
 def create_mock_masking_table():
     view = mock.create_autospec(MaskingTable, spec_set=False)
-    view.get_current_row = mock.MagicMock(return_value=3)
+    view.get_current_row = mock.MagicMock(return_value=0)
     return view
 
 
@@ -96,6 +99,11 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path=""
     view.get_cell = mock.MagicMock(side_effect=get_cell_mock_with_path)
     view.get_batch_file_path = mock.MagicMock(return_value=batch_file_path)
     view.get_number_of_rows = mock.MagicMock(return_value=2)
+
+    # Older unit test files which do not specify this will cause Mock to substitute
+    # the MagicMock object instead. This cannot be deep copied causing
+    # the unit tests to fail over. This only affects testing for force to None type to avoid
+    view.transmission_mn_5_shift = None
 
     # Add the settings diagnostic mock
     settings_diagnostic_tab = create_mock_settings_diagnostic_tab()
@@ -199,10 +207,10 @@ def create_mock_view(user_file_path, batch_file_path=None, row_user_file_path=""
     _q_1d_step = mock.PropertyMock(return_value=.001)
     type(view).q_1d_step = _q_1d_step
 
-    _q_1d_step_type = mock.PropertyMock(return_value=RangeStepType.Lin)
+    _q_1d_step_type = mock.PropertyMock(return_value=RangeStepType.LIN)
     type(view)._q_1d_step_type = _q_1d_step_type
 
-    _output_mode = mock.PropertyMock(return_value=OutputMode.PublishToADS)
+    _output_mode = mock.PropertyMock(return_value=OutputMode.PUBLISH_TO_ADS)
     type(view).output_mode = _output_mode
 
     _wavelength_range = mock.PropertyMock(return_value='')
@@ -226,17 +234,16 @@ def create_mock_view2(user_file_path, batch_file_path=None):
     view._on_user_file_load = mock.MagicMock(side_effect=on_load_user_file_mock)
     view._on_batch_file_load = mock.MagicMock(side_effect=on_load_batch_file_mock)
 
-    _output_mode = mock.PropertyMock(return_value=OutputMode.PublishToADS)
+    _output_mode = mock.PropertyMock(return_value=OutputMode.PUBLISH_TO_ADS)
     type(view).output_mode = _output_mode
 
     return view
 
 
-class FakeState(object):
-    dummy_state = "dummy_state"
-
+class FakeState(with_metaclass(JsonSerializable)):
     def __init__(self):
         super(FakeState, self).__init__()
+        self.dummy_state = "dummy_state"
 
     @property
     def property_manager(self):
@@ -244,7 +251,7 @@ class FakeState(object):
 
 
 def get_state_for_row_mock(row_index, file_lookup=True, suppress_warnings=False):
-    return FakeState() if row_index == 3 else ""
+    return FakeState()
 
 
 def get_state_for_row_mock_with_real_state(row_index, file_lookup=True, suppress_warnings=False):

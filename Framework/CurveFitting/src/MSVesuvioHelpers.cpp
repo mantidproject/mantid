@@ -398,7 +398,7 @@ SimulationAggregator::SimulationAggregator(const size_t nruns) {
  */
 Simulation &SimulationAggregator::newSimulation(const size_t order,
                                                 const size_t ntimes) {
-  results.push_back(Simulation(order, ntimes));
+  results.emplace_back(Simulation(order, ntimes));
   return results.back();
 }
 
@@ -427,7 +427,7 @@ SimulationWithErrors SimulationAggregator::average() const {
         orderCounts[j] = 0.0;
         orderErrors[j] = 0.0;
       } else {
-        const double dblPts = static_cast<double>(npoints);
+        const auto dblPts = static_cast<double>(npoints);
         orderCounts[j] = mean / dblPts;
         // error is std dev
         double sumsq(0.0);

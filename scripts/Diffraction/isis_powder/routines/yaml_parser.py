@@ -42,7 +42,7 @@ def open_yaml_file_as_dictionary(file_path):
 
     with open(file_path, 'r') as input_stream:
         try:
-            read_config = yaml.load(input_stream)
+            read_config = yaml.safe_load(input_stream)
         except yaml.YAMLError as exception:
             print(exception)
             raise RuntimeError("Failed to parse YAML file: " + str(file_path))

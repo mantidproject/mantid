@@ -5,12 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
-
 import os
 
 from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
+from mantid.kernel import logger
 
 
 class Polaris(AbstractInst):
@@ -21,7 +21,8 @@ class Polaris(AbstractInst):
 
         super(Polaris, self).__init__(user_name=self._inst_settings.user_name,
                                       calibration_dir=self._inst_settings.calibration_dir,
-                                      output_dir=self._inst_settings.output_dir, inst_prefix="POL")
+                                      output_dir=self._inst_settings.output_dir,
+                                      inst_prefix="POLARIS")
 
         # Hold the last dictionary later to avoid us having to keep parsing the YAML
         self._run_details_cached_obj = {}
@@ -49,13 +50,23 @@ class Polaris(AbstractInst):
         return vanadium_d
 
     def create_total_scattering_pdf(self, **kwargs):
+        if 'pdf_type' not in kwargs or kwargs['pdf_type'] not in ['G(r)', 'g(r)', 'RDF(r)']:
+            kwargs['pdf_type'] = 'G(r)'
+            logger.warning('PDF type not specified or is invalid, defaulting to G(r)')
         self._inst_settings.update_attributes(kwargs=kwargs)
         # Generate pdf
         run_details = self._get_run_details(self._inst_settings.run_number)
         focus_file_path = self._generate_out_file_paths(run_details)["nxs_filename"]
+        cal_file_name = os.path.join(self._inst_settings.calibration_dir, self._inst_settings.grouping_file_name)
         pdf_output = polaris_algs.generate_ts_pdf(run_number=self._inst_settings.run_number,
                                                   focus_file_path=focus_file_path,
-                                                  merge_banks=self._inst_settings.merge_banks)
+                                                  merge_banks=self._inst_settings.merge_banks,
+                                                  q_lims=self._inst_settings.q_lims,
+                                                  cal_file_name=cal_file_name,
+                                                  sample_details=self._sample_details,
+                                                  output_binning=self._inst_settings.output_binning,
+                                                  pdf_type=self._inst_settings.pdf_type,
+                                                  freq_params=self._inst_settings.freq_params)
         return pdf_output
 
     def set_sample_details(self, **kwargs):
@@ -92,7 +103,7 @@ class Polaris(AbstractInst):
         return cropped_ws
 
     @staticmethod
-    def _generate_input_file_name(run_number):
+    def _generate_input_file_name(run_number, file_ext=""):
         polaris_old_name = "POL"
         polaris_new_name = "POLARIS"
         first_run_new_name = 96912
@@ -114,7 +125,7 @@ class Polaris(AbstractInst):
 
             prefix = polaris_new_name if use_new_name else polaris_old_name
 
-            return prefix + str(run_number)
+            return prefix + str(run_number) + file_ext
 
     def _get_input_batching_mode(self):
         return self._inst_settings.input_mode
@@ -133,15 +144,6 @@ class Polaris(AbstractInst):
             run_number_string=run_number_string, inst_settings=self._inst_settings, is_vanadium_run=self._is_vanadium)
 
         return self._run_details_cached_obj[run_number_string_key]
-
-    def _spline_vanadium_ws(self, focused_vanadium_spectra, instrument_version=''):
-        masking_file_name = self._inst_settings.masking_file_name
-        spline_coeff = self._inst_settings.spline_coeff
-        masking_file_path = os.path.join(self.calibration_dir, masking_file_name)
-        output = polaris_algs.process_vanadium_for_focusing(bank_spectra=focused_vanadium_spectra,
-                                                            spline_number=spline_coeff,
-                                                            mask_path=masking_file_path)
-        return output
 
     def _switch_mode_specific_inst_settings(self, mode):
         if mode is None and hasattr(self._inst_settings, "mode"):

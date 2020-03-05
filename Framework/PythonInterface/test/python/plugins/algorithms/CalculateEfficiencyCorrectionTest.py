@@ -19,15 +19,15 @@ class CalculateEfficiencyCorrectionTest(unittest.TestCase):
     _input_wksp = "input_wksp"
     _correction_wksp = "correction_wksp"
     _output_wksp = "output_wksp"
-    _wavelengths="0.2,0.01,4.0"
+    _wavelengths = "0.2,0.01,4.0"
     _alpha = 0.693
     _chemical_formula = "(He3)"
     _number_density = 0.0002336682167635477
     _mass_density = 0.0011702649036052439
     _efficiency1_forAbsXS = 0.712390781371
-    _efficiency2_forAbsXS = { "Efficiency": 0.74110947758, "Wavelength": 1.95}
+    _efficiency2_forAbsXS = {"Efficiency": 0.74110947758, "Wavelength": 1.95}
     _efficiency1_forTotalXS = 0.712793729636
-    _efficiency2_forTotalXS = { "Efficiency": 0.741472190178, "Wavelength": 1.95}
+    _efficiency2_forTotalXS = {"Efficiency": 0.741472190178, "Wavelength": 1.95}
     _thickness = 1.0
 
     def setUp(self):

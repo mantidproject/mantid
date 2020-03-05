@@ -325,7 +325,7 @@ void FABADAMinimizer::finalize() {
                        " (StepsBetweenValues = 10).\n";
     nSteps = 10;
   }
-  size_t convLength = size_t(double(chainLength) / double(nSteps));
+  auto convLength = size_t(double(chainLength) / double(nSteps));
 
   // Reduced chain
   std::vector<std::vector<double>> reducedConvergedChain;
@@ -400,8 +400,7 @@ void FABADAMinimizer::boundApplication(const size_t &parameterIndex,
   API::IConstraint *iConstraint = m_fitFunction->getConstraint(parameterIndex);
   if (!iConstraint)
     return;
-  Constraints::BoundaryConstraint *bcon =
-      dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
+  auto *bcon = dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
   if (!bcon)
     return;
 
@@ -494,9 +493,9 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
   // If new Chi square value is lower, jumping directly to new parameter
   if (chi2New < m_chi2) {
     for (size_t j = 0; j < m_nParams; j++) {
-      m_chain[j].push_back(newParameters.get(j));
+      m_chain[j].emplace_back(newParameters.get(j));
     }
-    m_chain[m_nParams].push_back(chi2New);
+    m_chain[m_nParams].emplace_back(chi2New);
     m_parameters = newParameters;
     m_chi2 = chi2New;
     m_changes[parameterIndex] += 1;
@@ -511,17 +510,17 @@ void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex,
     double p = std::uniform_real_distribution<double>(0.0, 1.0)(rng);
     if (p <= prob) {
       for (size_t j = 0; j < m_nParams; j++) {
-        m_chain[j].push_back(newParameters.get(j));
+        m_chain[j].emplace_back(newParameters.get(j));
       }
-      m_chain[m_nParams].push_back(chi2New);
+      m_chain[m_nParams].emplace_back(chi2New);
       m_parameters = newParameters;
       m_chi2 = chi2New;
       m_changes[parameterIndex] += 1;
     } else {
       for (size_t j = 0; j < m_nParams; j++) {
-        m_chain[j].push_back(m_parameters.get(j));
+        m_chain[j].emplace_back(m_parameters.get(j));
       }
-      m_chain[m_nParams].push_back(m_chi2);
+      m_chain[m_nParams].emplace_back(m_chi2);
       // Old parameters taken again
       for (size_t j = 0; j < m_nParams; ++j) {
         m_fitFunction->setParameter(j, m_parameters.get(j));
@@ -1010,7 +1009,7 @@ void FABADAMinimizer::calculateConvChainAndBestParameters(
     for (size_t j = 0; j < m_nParams; ++j) {
       // Obs: Starts at 1 (0 already added)
       for (size_t k = 1; k < convLength; ++k) {
-        reducedChain[j].push_back(m_chain[j][m_convPoint + nSteps * k]);
+        reducedChain[j].emplace_back(m_chain[j][m_convPoint + nSteps * k]);
       }
       // best fit parameters taken
       bestParameters[j] =
@@ -1072,8 +1071,7 @@ void FABADAMinimizer::initChainsAndParameters() {
 
     API::IConstraint *iConstraint = m_fitFunction->getConstraint(i);
     if (iConstraint) {
-      Constraints::BoundaryConstraint *bcon =
-          dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
+      auto *bcon = dynamic_cast<Constraints::BoundaryConstraint *>(iConstraint);
       if (bcon) {
         if (bcon->hasLower()) {
           if (param < bcon->lower())
@@ -1087,12 +1085,12 @@ void FABADAMinimizer::initChainsAndParameters() {
     }
 
     // Initialize chains
-    m_chain.push_back(std::vector<double>(1, param));
+    m_chain.emplace_back(std::vector<double>(1, param));
     // Initilize jump parameters
-    m_jump.push_back(param != 0.0 ? std::abs(param / 10) : 0.01);
+    m_jump.emplace_back(param != 0.0 ? std::abs(param / 10) : 0.01);
   }
   m_chi2 = m_leastSquares->val();
-  m_chain.push_back(std::vector<double>(1, m_chi2));
+  m_chain.emplace_back(std::vector<double>(1, m_chi2));
   m_parChanged = std::vector<bool>(m_nParams, false);
   m_changes = std::vector<int>(m_nParams, 0);
   m_changesOld = m_changes;

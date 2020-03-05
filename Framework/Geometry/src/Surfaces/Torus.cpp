@@ -120,7 +120,7 @@ int sectionV3D(std::string &A, Mantid::Kernel::V3D &out) {
   if (cx.fail())
     return 0;
   const std::streamoff xpt = cx.tellg();
-  const char xc = static_cast<char>(cx.get());
+  const auto xc = static_cast<char>(cx.get());
   if (!cx.fail() && !isspace(xc))
     return 0;
   A.erase(0, static_cast<unsigned int>(xpt));
@@ -148,7 +148,7 @@ int Torus::setSurface(const std::string &Pstr)
     return errDesc;
 
   // Torus on X/Y/Z axis
-  const std::size_t ptype = static_cast<std::size_t>(tolower(item[2]) - 'x');
+  const auto ptype = static_cast<std::size_t>(tolower(item[2]) - 'x');
   if (ptype >= 3)
     return errAxis;
 

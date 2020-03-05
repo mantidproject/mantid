@@ -167,7 +167,7 @@ ITableWorkspace_sptr PawleyFit::getPeakParametersFromFunction(
 
     IPeakFunction_sptr currentPeak = pawleyFn->getPeakFunction(i);
 
-    int peakNumber = static_cast<int>(i + 1);
+    auto peakNumber = static_cast<int>(i + 1);
     V3D peakHKL = pawleyFn->getPeakHKL(i);
 
     for (size_t j = 0; j < currentPeak->nParams(); ++j) {

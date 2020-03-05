@@ -61,10 +61,10 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
     if (!m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
       continue; // skip ND outside the range
 
-    sig_err.push_back(static_cast<float>(signal));
-    sig_err.push_back(static_cast<float>(errorSq));
-    run_index.push_back(runIndexLoc);
-    det_ids.push_back(detID);
+    sig_err.emplace_back(static_cast<float>(signal));
+    sig_err.emplace_back(static_cast<float>(errorSq));
+    run_index.emplace_back(runIndexLoc);
+    det_ids.emplace_back(detID);
     allCoord.insert(allCoord.end(), locCoord.begin(), locCoord.end());
   }
 

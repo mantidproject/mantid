@@ -231,7 +231,7 @@ createSparseWS(const API::MatrixWorkspace &modelWS,
     for (size_t row = 0; row < grid.numberRows(); ++row) {
       const auto lat = grid.latitudeAt(row);
       const size_t index = col * grid.numberRows() + row;
-      const int detID = static_cast<int>(index);
+      const auto detID = static_cast<int>(index);
       std::ostringstream detName;
       detName << "det-" << detID;
       auto det = std::make_unique<Geometry::Detector>(

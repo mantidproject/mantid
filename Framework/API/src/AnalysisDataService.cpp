@@ -202,7 +202,10 @@ std::vector<Workspace_sptr> AnalysisDataServiceImpl::retrieveWorkspaces(
   if (unrollGroups) {
     using IteratorDifference =
         std::iterator_traits<WorkspacesVector::iterator>::difference_type;
-    for (size_t i = 0; i < workspaces.size(); ++i) {
+
+    bool done{workspaces.size() == 0};
+    size_t i{0};
+    while (!done) {
       if (auto group =
               boost::dynamic_pointer_cast<WorkspaceGroup>(workspaces.at(i))) {
         const auto groupLength(group->size());
@@ -214,6 +217,12 @@ std::vector<Workspace_sptr> AnalysisDataServiceImpl::retrieveWorkspaces(
                             group->getItem(j));
         }
         i += groupLength;
+      } else {
+        ++i;
+      }
+
+      if (i == workspaces.size()) {
+        done = true;
       }
     }
   }

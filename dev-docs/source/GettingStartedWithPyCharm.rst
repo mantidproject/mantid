@@ -34,13 +34,14 @@ Setting up PyCharm on Windows
    .. code-block:: sh
 
        <Mantid Source Directory>/scripts
+       <Mantid Source Directory>/Framework/PythonInterface
        <Mantid Source Directory>/qt/applications/workbench
        <Mantid Source Directory>/qt/widgets
        <Mantid Source Directory>/qt/python
        <Mantid Source Directory>/external/src/ThirdParty/lib
 
 
-   The first folder can be replaced with the folder that contains your code, if you aren't writing code in ``scripts/``.
+   If you are writing scripts in any other directories, you can also mark them as sources. This helps PyCharm give better auto-complete and import suggestions during development.
 
    Additionally, in the Mantid build directory add the following as source folders:
 
@@ -164,7 +165,7 @@ This requires a PyCharm Professional license for the Remote Debugging feature.
 This approach can be used to debug unit tests. However, as the required package ``pydevd`` is not shipped with Mantid, we need to manually add it at runtime. This can be done by appending a directory that contains the installed ``pydevd`` package on the ``PYTHONPATH``. The following code does so at runtime::
 
     PYTHON_ROOT="<Change this to point to a Python installation that has pydevd installed>"
-    # PYTHON_ROOT="c:/users/qbr77747/apps/miniconda3"
+    # PYTHON_ROOT="c:/users/<username>/apps/miniconda3"
     import os
     import sys
     sys.path.append(os.path.join(PYTHON_ROOT, "lib/site-packages"))
@@ -180,11 +181,32 @@ The ``pydevd`` package does not have to be installed on Python 2. As of 12/11/20
 Setting up PyCharm on Linux
 ###########################
 
-On Linux the instructions are identical to Windows except that :
+1. Use the native python interpreter (``/usr/bin/python2.7``) rather than from ``<Mantid Source Directory>/external/src/ThirdParty/lib/python2.7/python.exe``
+2. In the ``Project Structure`` sub menu you should see your root directory with the source/build directories both visible (if not, add them). The folder structure should be present in the centre of the window allowing you to mark folders orange (excluded) or blue (source). Source directories will be searched for python code.
 
-- In step 2, use the native python interpreter (``/usr/bin/python2.7/python.exe``) rather than from ``<Mantid Source Directory>/external/src/ThirdParty/lib/python2.7/python.exe``
-- In step 3, add ``<Mantid Build Directory>/bin;`` to the ``PATH`` environment variable in the new configuration (rather than ``<Mantid Build Directory>/bin/Debug;``), and remove the other three file paths.
-- In step 4, if you are not using the EnvFile extension, then the file is ``pycharm.sh`` rather than ``pycharm.bat``
+   Within the source directory add the following to your sources:
+
+   .. code-block:: sh
+
+       <Mantid Source Directory>/scripts
+       <Mantid Source Directory>/Framework/PythonInterface
+       <Mantid Source Directory>/qt/applications/workbench
+       <Mantid Source Directory>/qt/widgets
+       <Mantid Source Directory>/qt/python
+
+
+   If you are writing scripts in any other directories, you can also mark them as sources. This helps PyCharm give better auto-complete and import suggestions during development.
+
+   Additionally, in the Mantid build directory add the following as source folders:
+
+   .. code-block:: sh
+
+       <Mantid Build Directory>/bin/
+
+   It is recommended that you add the whole build folder to ``excluded``. This will not interfere with the ``bin`` directory, inside the build, being used as a source folder. It will just limit the scope that PyCharm searches for files, classes, etc.
+
+3. Go to Run->Run... and select Edit Configurations. Go to Templates > Python. Make ``<Mantid Build Directory>/bin;`` the ``Working Directory``. This will then be used for all Python configurations you make.
+
 
 Useful Plugins
 ##############

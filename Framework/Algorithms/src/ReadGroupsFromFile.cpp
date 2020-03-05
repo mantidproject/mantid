@@ -113,7 +113,7 @@ void ReadGroupsFromFile::exec() {
 
   // Determine whether the user wants to see unselected detectors or not
   const std::string su = getProperty("ShowUnselected");
-  bool showunselected = bool(su == "True");
+  auto showunselected = bool(su == "True");
   bool success = false;
 
   for (int64_t i = 0; i < nHist; i++) {
@@ -211,11 +211,10 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
         "XML group file contains no group elements:", filename);
   }
 
-  unsigned int nGroups = static_cast<unsigned int>(groups->length());
+  auto nGroups = static_cast<unsigned int>(groups->length());
   for (unsigned int i = 0; i < nGroups; i++) {
     // Get the "detids" element from the grouping file
-    Poco::XML::Element *elem =
-        static_cast<Poco::XML::Element *>(groups->item(i));
+    auto *elem = static_cast<Poco::XML::Element *>(groups->item(i));
     Poco::XML::Element *group = elem->getChildElement("detids");
 
     if (!group) {

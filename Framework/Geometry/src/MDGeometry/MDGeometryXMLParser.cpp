@@ -19,24 +19,20 @@
 namespace Mantid {
 namespace Geometry {
 /// Helper unary comparison type for finding IMDDimensions by a specified id.
-struct findID
-    : public std::unary_function<Mantid::Geometry::IMDDimension_sptr, bool> {
+struct findID {
   const std::string m_id;
   explicit findID(const std::string &id) : m_id(id) {}
 
   bool operator()(const Mantid::Geometry::IMDDimension_sptr obj) const {
     return m_id == obj->getDimensionId();
   }
-  findID &operator=(const findID &);
 };
 
 /// Helper unary comparison type for finding non-integrated dimensions.
-struct findIntegrated
-    : public std::unary_function<Mantid::Geometry::IMDDimension_sptr, bool> {
+struct findIntegrated {
   bool operator()(const Mantid::Geometry::IMDDimension_sptr obj) const {
     return obj->getIsIntegrated();
   }
-  findIntegrated &operator=(const findIntegrated &);
 };
 
 /**
@@ -80,7 +76,7 @@ void MDGeometryXMLParser::execute() {
 
   ////Extract dimensions
   for (size_t i = 0; i < nDimensions; i++) {
-    Poco::XML::Element *dimensionXML = static_cast<Poco::XML::Element *>(
+    auto *dimensionXML = static_cast<Poco::XML::Element *>(
         dimensionsXML->item(static_cast<unsigned long>(i)));
     vecAllDims[i] = createDimension(*dimensionXML);
   }
@@ -254,7 +250,7 @@ MDGeometryXMLParser::getIntegratedDimensions() const {
   validate();
   Mantid::Geometry::VecIMDDimension_sptr temp = m_vecAllDims;
   temp.erase(
-      std::remove_if(temp.begin(), temp.end(), std::not1(findIntegrated())),
+      std::remove_if(temp.begin(), temp.end(), std::not_fn(findIntegrated())),
       temp.end());
   return temp;
 }

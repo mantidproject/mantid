@@ -6,10 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/MplCpp/ColorConverter.h"
 
-using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::callMethodNoCheck;
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
@@ -73,6 +74,15 @@ void Figure::setFaceColor(const char *color) {
 }
 
 /**
+ * Sets how tight_layout is called when drawing. ("pad", "w_pad", "h_pad",
+ * "rect", etc.)
+ * @param args A hash of parameters to pass to set_tight_layout
+ */
+void Figure::setTightLayout(QHash<QString, QVariant> const &args) {
+  pyobj().attr("set_tight_layout")(Python::qHashToDict(args));
+}
+
+/**
  * Add an Axes of the given dimensions to the current figure
  * All quantities are in fractions of figure width and height
  * @param left The X coordinate of the lower-left corner
@@ -122,7 +132,7 @@ Python::Object Figure::colorbar(const ScalarMappable &mappable, const Axes &cax,
       Py_BuildValue("(OO)", mappable.pyobj().ptr(), cax.pyobj().ptr()));
   const auto kwargs = Python::NewRef(
       Py_BuildValue("{sOsO}", "ticks", ticks.ptr(), "format", format.ptr()));
-  Python::Object attr{pyobj().attr("colorbar")};
+  Python::Object attr(pyobj().attr("colorbar"));
   return Python::NewRef(PyObject_Call(attr.ptr(), args.ptr(), kwargs.ptr()));
 }
 

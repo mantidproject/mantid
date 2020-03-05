@@ -61,6 +61,8 @@ void SlitCalculator::setInstrument(std::string instrumentName) {
   setupSlitCalculatorWithInstrumentValues(instrument);
 }
 
+void SlitCalculator::show() { QDialog::show(); }
+
 void SlitCalculator::setupSlitCalculatorWithInstrumentValues(
     Mantid::Geometry::Instrument_const_sptr instrument) {
   // fetch the components that we need for values from IDF

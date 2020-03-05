@@ -93,8 +93,8 @@ void ImportMDHistoWorkspace::exec() {
   }
 
   // Fetch out raw pointers to workspace arrays.
-  double *signals = ws->getSignalArray();
-  double *errors = ws->getErrorSquaredArray();
+  auto signals = ws->mutableSignalArray();
+  double *errors = ws->mutableErrorSquaredArray();
 
   // Write to the signal and error array from the deque.
   size_t currentBox = 0;

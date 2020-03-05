@@ -22,7 +22,7 @@ int ThreadPoolRunnableTest_value;
 class ThreadPoolRunnableTest : public CxxTest::TestSuite {
 public:
   void test_constructor() {
-    TS_ASSERT_THROWS(std::make_unique<ThreadPoolRunnable>(0, nullptr),
+    TS_ASSERT_THROWS(ThreadPoolRunnable(0, nullptr),
                      const std::invalid_argument &);
   }
 

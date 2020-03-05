@@ -163,20 +163,18 @@ FileFinderImpl::getInstrument(const string &hint) const {
     } else {
       // go forwards looking for the run number to start
       {
-        string::const_iterator it = std::find_if(
-            instrName.begin(), instrName.end(), std::ptr_fun(isdigit));
-        std::string::size_type nChars = std::distance(
-            static_cast<string::const_iterator>(instrName.begin()), it);
+        const auto it =
+            std::find_if(instrName.begin(), instrName.end(), isdigit);
+        const auto nChars = std::distance(instrName.begin(), it);
         instrName = instrName.substr(0, nChars);
       }
 
       // go backwards looking for the instrument name to end - gets around
       // delimiters
       if (!instrName.empty()) {
-        string::const_reverse_iterator it = std::find_if(
-            instrName.rbegin(), instrName.rend(), std::ptr_fun(isalpha));
-        string::size_type nChars = std::distance(
-            it, static_cast<string::const_reverse_iterator>(instrName.rend()));
+        const auto it =
+            std::find_if(instrName.rbegin(), instrName.rend(), isalpha);
+        const auto nChars = std::distance(it, instrName.rend());
         instrName = instrName.substr(0, nChars);
       }
     }
@@ -207,8 +205,8 @@ FileFinderImpl::toInstrumentAndNumber(const std::string &hint) const {
     runPart = hint;
   } else {
     /// Find the last non-digit as the instrument name can contain numbers
-    std::string::const_reverse_iterator it = std::find_if(
-        hint.rbegin(), hint.rend(), std::not1(std::ptr_fun(isdigit)));
+    std::string::const_reverse_iterator it =
+        std::find_if(hint.rbegin(), hint.rend(), std::not_fn(isdigit));
     // No non-digit or all non-digits
     if (it == hint.rend() || it == hint.rbegin()) {
       throw std::invalid_argument(
@@ -367,7 +365,7 @@ FileFinderImpl::getArchiveSearch(const Kernel::FacilityInfo &facility) const {
     return archs;
 
   // determine if the user wants archive search for this facility
-  bool createArchiveSearch = bool(archiveOpt == "all");
+  auto createArchiveSearch = bool(archiveOpt == "all");
 
   // then see if the facility name appears in the list or if we just want the
   // default facility
@@ -392,7 +390,7 @@ FileFinderImpl::getArchiveSearch(const Kernel::FacilityInfo &facility) const {
     for (const auto &facilityname : facility.archiveSearch()) {
       g_log.debug() << "get archive search for the facility..." << facilityname
                     << "\n";
-      archs.push_back(ArchiveSearchFactory::Instance().create(facilityname));
+      archs.emplace_back(ArchiveSearchFactory::Instance().create(facilityname));
     }
   }
   return archs;
@@ -485,7 +483,7 @@ std::string FileFinderImpl::findRun(const std::string &hintstr,
   std::vector<std::string> uniqueExts;
   uniqueExts.reserve(1 + exts.size() + extensions.size());
   if (!extension.empty())
-    uniqueExts.push_back(extension);
+    uniqueExts.emplace_back(extension);
 
   // If provided exts are empty, or useExtsOnly is false,
   // we want to include facility exts as well
@@ -530,7 +528,7 @@ void FileFinderImpl::getUniqueExtensions(
     const auto searchItr =
         std::find(uniqueExts.begin(), uniqueExts.end(), transformed);
     if (searchItr == uniqueExts.end()) {
-      uniqueExts.push_back(transformed);
+      uniqueExts.emplace_back(transformed);
     }
   }
 }
@@ -593,7 +591,7 @@ FileFinderImpl::findRuns(const std::string &hintstr,
                                     ". The end of string value is longer than "
                                     "the instrument's zero padding");
       }
-      int runNumber = boost::lexical_cast<int>(run);
+      auto runNumber = boost::lexical_cast<int>(run);
       std::string runEnd = run;
       // Adds zero padding to end of range.
       runEnd.replace(runEnd.end() - range[1].size(), runEnd.end(), range[1]);
@@ -603,7 +601,7 @@ FileFinderImpl::findRuns(const std::string &hintstr,
         throw std::invalid_argument("Malformed range of runs: Part of the run "
                                     "has a non-digit character in it.");
 
-      int runEndNumber = boost::lexical_cast<int>(runEnd);
+      auto runEndNumber = boost::lexical_cast<int>(runEnd);
       if (runEndNumber < runNumber) {
         throw std::invalid_argument("Malformed range of runs: " + *h);
       }
@@ -613,7 +611,7 @@ FileFinderImpl::findRuns(const std::string &hintstr,
           run.insert(0, "0");
         std::string path = findRun(p1.first + run, exts, useExtsOnly);
         if (!path.empty()) {
-          res.push_back(path);
+          res.emplace_back(path);
         } else {
           throw Kernel::Exception::NotFoundError("Unable to find file:", run);
         }
@@ -621,7 +619,7 @@ FileFinderImpl::findRuns(const std::string &hintstr,
     } else {
       std::string path = findRun(*h, exts, useExtsOnly);
       if (!path.empty()) {
-        res.push_back(path);
+        res.emplace_back(path);
       } else {
         throw Kernel::Exception::NotFoundError("Unable to find file:", *h);
       }

@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
-from mantid.py3compat import Enum
+from enum import Enum
 
 
 class DictionaryAction(Enum):

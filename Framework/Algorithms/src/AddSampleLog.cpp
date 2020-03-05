@@ -51,18 +51,18 @@ void AddSampleLog::init() {
   declareProperty("LogText", "", "The content of the log");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back(stringLogOption);
-  propOptions.push_back(numberLogOption);
-  propOptions.push_back(numberSeriesLogOption);
+  propOptions.emplace_back(stringLogOption);
+  propOptions.emplace_back(numberLogOption);
+  propOptions.emplace_back(numberSeriesLogOption);
   declareProperty("LogType", stringLogOption,
                   boost::make_shared<StringListValidator>(propOptions),
                   "The type that the log data will be.");
   declareProperty("LogUnit", "", "The units of the log");
 
   std::vector<std::string> typeOptions;
-  typeOptions.push_back(intTypeOption);
-  typeOptions.push_back(doubleTypeOption);
-  typeOptions.push_back(autoTypeOption);
+  typeOptions.emplace_back(intTypeOption);
+  typeOptions.emplace_back(doubleTypeOption);
+  typeOptions.emplace_back(autoTypeOption);
   declareProperty("NumberType", autoTypeOption,
                   boost::make_shared<StringListValidator>(typeOptions),
                   "Force LogText to be interpreted as a number of type 'int' "
@@ -285,7 +285,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
 
   // initialze the TimeSeriesProperty and add unit
   if (is_int_series) {
-    auto tsp = new TimeSeriesProperty<int>(prop_name);
+    auto tsp = std::make_unique<TimeSeriesProperty<int>>(prop_name);
     if (use_single_value) {
       int intVal;
       if (Strings::convert(prop_value, intVal)) {
@@ -295,9 +295,9 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
             "Input value cannot be converted to an integer value.");
       }
     }
-    run_obj.addLogData(tsp);
+    run_obj.addLogData(std::move(tsp));
   } else {
-    auto tsp = new TimeSeriesProperty<double>(prop_name);
+    auto tsp = std::make_unique<TimeSeriesProperty<double>>(prop_name);
     if (use_single_value) {
       double dblVal;
       if (Strings::convert(prop_value, dblVal)) {
@@ -307,7 +307,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
             "Input value cannot be converted to a double number.");
       }
     }
-    run_obj.addLogData(tsp);
+    run_obj.addLogData(std::move(tsp));
   }
   // add unit
   run_obj.getProperty(prop_name)->setUnits(prop_unit);
@@ -343,15 +343,14 @@ void AddSampleLog::setTimeSeriesData(Run &run_obj,
       getTimes(data_ws, ws_index, epochtime, is_second, run_obj);
   if (value_is_int) {
     // integer property
-    TimeSeriesProperty<int> *int_prop = dynamic_cast<TimeSeriesProperty<int> *>(
+    auto *int_prop = dynamic_cast<TimeSeriesProperty<int> *>(
         run_obj.getProperty(property_name));
     std::vector<int> value_vec = getIntValues(data_ws, ws_index);
     int_prop->addValues(time_vec, value_vec);
   } else {
     // double property
-    TimeSeriesProperty<double> *int_prop =
-        dynamic_cast<TimeSeriesProperty<double> *>(
-            run_obj.getProperty(property_name));
+    auto *int_prop = dynamic_cast<TimeSeriesProperty<double> *>(
+        run_obj.getProperty(property_name));
     std::vector<double> value_vec = getDblValues(data_ws, ws_index);
     int_prop->addValues(time_vec, value_vec);
   }
@@ -388,9 +387,9 @@ AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
     double timedbl = dataws->readX(workspace_index)[i];
     if (is_second)
       timedbl *= 1.E9;
-    int64_t entry_i64 = static_cast<int64_t>(timedbl);
+    auto entry_i64 = static_cast<int64_t>(timedbl);
     Types::Core::DateAndTime entry(timeshift + entry_i64);
-    timevec.push_back(entry);
+    timevec.emplace_back(entry);
   }
 
   return timevec;
@@ -427,7 +426,7 @@ AddSampleLog::getDblValues(API::MatrixWorkspace_const_sptr dataws,
   std::vector<double> valuevec;
   size_t vecsize = dataws->readY(workspace_index).size();
   for (size_t i = 0; i < vecsize; ++i)
-    valuevec.push_back(dataws->readY(workspace_index)[i]);
+    valuevec.emplace_back(dataws->readY(workspace_index)[i]);
 
   return valuevec;
 }
@@ -445,7 +444,7 @@ AddSampleLog::getIntValues(API::MatrixWorkspace_const_sptr dataws,
   std::vector<int> valuevec;
   size_t vecsize = dataws->readY(workspace_index).size();
   for (size_t i = 0; i < vecsize; ++i)
-    valuevec.push_back(static_cast<int>(dataws->readY(workspace_index)[i]));
+    valuevec.emplace_back(static_cast<int>(dataws->readY(workspace_index)[i]));
 
   return valuevec;
 }

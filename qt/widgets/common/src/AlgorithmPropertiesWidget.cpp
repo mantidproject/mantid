@@ -26,9 +26,9 @@
 #include <vector>
 
 using namespace Mantid::Kernel;
+using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::AlgorithmProxy;
-using Mantid::API::Algorithm_sptr;
 using Mantid::API::FrameworkManager;
 using Mantid::API::IWorkspaceProperty;
 
@@ -316,7 +316,7 @@ void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
             wsName = otherWidget->getValue();
             if (!wsName.isEmpty()) {
               // Add the candidate to the list of candidates.
-              candidateReplacementSources.push_back(otherWidget);
+              candidateReplacementSources.emplace_back(otherWidget);
             }
           }
         }

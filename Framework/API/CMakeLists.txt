@@ -14,10 +14,11 @@ set(SRC_FILES
     src/ArchiveSearchFactory.cpp
     src/Axis.cpp
     src/BinEdgeAxis.cpp
+    src/BoostOptionalToAlgorithmProperty.cpp
     src/BoxController.cpp
     src/CatalogManager.cpp
     src/CatalogSession.cpp
-    src/ChopperModel.cpp
+    src/Citation.cpp
     src/Column.cpp
     src/ColumnFactory.cpp
     src/CommonBinsValidator.cpp
@@ -36,7 +37,6 @@ set(SRC_FILES
     src/EqualBinSizesValidator.cpp
     src/ExperimentInfo.cpp
     src/Expression.cpp
-    src/FermiChopperModel.cpp
     src/FileBackedExperimentInfo.cpp
     src/FileFinder.cpp
     src/FileLoaderRegistry.cpp
@@ -79,7 +79,6 @@ set(SRC_FILES
     src/IPowderDiffPeakFunction.cpp
     src/ISpectrum.cpp
     src/ITableWorkspace.cpp
-    src/IkedaCarpenterModerator.cpp
     src/ImmutableCompositeFunction.cpp
     src/ImplicitFunctionFactory.cpp
     src/ImplicitFunctionParameterParserFactory.cpp
@@ -101,7 +100,6 @@ set(SRC_FILES
     src/MDGeometry.cpp
     src/MatrixWorkspace.cpp
     src/MatrixWorkspaceMDIterator.cpp
-    src/ModeratorModel.cpp
     src/MuParserUtils.cpp
     src/MultiDomainFunction.cpp
     src/MultiPeriodGroupAlgorithm.cpp
@@ -180,11 +178,12 @@ set(INC_FILES
     inc/MantidAPI/ArchiveSearchFactory.h
     inc/MantidAPI/Axis.h
     inc/MantidAPI/BinEdgeAxis.h
+    inc/MantidAPI/BoostOptionalToAlgorithmProperty.h
     inc/MantidAPI/BoxController.h
     inc/MantidAPI/CatalogFactory.h
     inc/MantidAPI/CatalogManager.h
     inc/MantidAPI/CatalogSession.h
-    inc/MantidAPI/ChopperModel.h
+    inc/MantidAPI/Citation.h
     inc/MantidAPI/Column.h
     inc/MantidAPI/ColumnFactory.h
     inc/MantidAPI/CommonBinsValidator.h
@@ -206,7 +205,6 @@ set(INC_FILES
     inc/MantidAPI/EqualBinSizesValidator.h
     inc/MantidAPI/ExperimentInfo.h
     inc/MantidAPI/Expression.h
-    inc/MantidAPI/FermiChopperModel.h
     inc/MantidAPI/FileBackedExperimentInfo.h
     inc/MantidAPI/FileFinder.h
     inc/MantidAPI/FileLoaderRegistry.h
@@ -274,7 +272,6 @@ set(INC_FILES
     inc/MantidAPI/ITableWorkspace_fwd.h
     inc/MantidAPI/ITransformScale.h
     inc/MantidAPI/IWorkspaceProperty.h
-    inc/MantidAPI/IkedaCarpenterModerator.h
     inc/MantidAPI/ImmutableCompositeFunction.h
     inc/MantidAPI/ImplicitFunctionBuilder.h
     inc/MantidAPI/ImplicitFunctionFactory.h
@@ -303,7 +300,6 @@ set(INC_FILES
     inc/MantidAPI/MatrixWorkspaceMDIterator.h
     inc/MantidAPI/MatrixWorkspaceValidator.h
     inc/MantidAPI/MatrixWorkspace_fwd.h
-    inc/MantidAPI/ModeratorModel.h
     inc/MantidAPI/MuParserUtils.h
     inc/MantidAPI/MultiDomainFunction.h
     inc/MantidAPI/MultiPeriodGroupAlgorithm.h
@@ -374,7 +370,6 @@ if(PROFILE_ALGORITHM_LINUX)
 else()
   set(SRC_FILES "${SRC_FILES}" "src/AlgorithmExecute.cpp")
 endif()
-unset(PROFILE_ALGORITHM_LINUX CACHE)
 
 set(TEST_FILES
     ADSValidatorTest.h
@@ -392,6 +387,7 @@ set(TEST_FILES
     AsynchronousTest.h
     BinEdgeAxisTest.h
     BoxControllerTest.h
+    CitationTest.h
     CommonBinsValidatorTest.h
     CompositeFunctionTest.h
     CoordTransformTest.h
@@ -403,7 +399,6 @@ set(TEST_FILES
     EqualBinSizesValidatorTest.h
     ExperimentInfoTest.h
     ExpressionTest.h
-    FermiChopperModelTest.h
     FileBackedExperimentInfoTest.h
     FileFinderTest.h
     FilePropertyTest.h
@@ -429,7 +424,6 @@ set(TEST_FILES
     ILatticeFunctionTest.h
     IMDWorkspaceTest.h
     ISpectrumTest.h
-    IkedaCarpenterModeratorTest.h
     ImmutableCompositeFunctionTest.h
     ImplicitFunctionParserFactoryTest.h
     IncreasingAxisValidatorTest.h
@@ -445,7 +439,6 @@ set(TEST_FILES
     MDFrameValidatorTest.h
     MDGeometryTest.h
     MatrixWorkspaceMDIteratorTest.h
-    ModeratorModelTest.h
     MuParserUtilsTest.h
     MultiDomainFunctionTest.h
     MultiPeriodGroupAlgorithmTest.h
@@ -526,8 +519,8 @@ set_target_properties(API
                                  COMPILE_DEFINITIONS
                                  IN_MANTID_API)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties(API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set_target_properties(API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(API PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()

@@ -132,7 +132,7 @@ void SaveDiffCal::writeIntFieldFromSVWS(
       auto &ids = ws->getSpectrum(i).getDetectorIDs();
       auto found = m_detidToIndex.find(*(ids.begin()));
       if (found != m_detidToIndex.end()) {
-        int32_t value = static_cast<int32_t>(ws->getValue(found->first));
+        auto value = static_cast<int32_t>(ws->getValue(found->first));
         // in maskworkspace 0=use, 1=dontuse - backwards from the file
         if (isMask) {
           if (value == 0)

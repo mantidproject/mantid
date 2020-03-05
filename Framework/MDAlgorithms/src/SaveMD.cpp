@@ -135,7 +135,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   //-----------------------------------------------------------------------------------------------------
   // create or open WS group and put there additional information about WS and
   // its dimensions
-  int nDims = static_cast<int>(nd);
+  auto nDims = static_cast<int>(nd);
   bool data_exist;
   auto file = file_holder_type(MDBoxFlatTree::createOrOpenMDWSgroup(
       filename, nDims, MDE::getTypeName(), false, data_exist));
@@ -245,8 +245,7 @@ void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     oldFile.remove();
 
   // Create a new file in HDF5 mode.
-  ::NeXus::File *file;
-  file = new ::NeXus::File(filename, NXACC_CREATE5);
+  auto file = std::make_unique<::NeXus::File>(filename, NXACC_CREATE5);
 
   // The base entry. Named so as to distinguish from other workspace types.
   file->makeGroup("MDHistoWorkspace", "NXentry", true);
@@ -260,7 +259,7 @@ void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
                   static_cast<uint32_t>(ws->displayNormalization()));
 
   // Save the algorithm history under "process"
-  ws->getHistory().saveNexus(file);
+  ws->getHistory().saveNexus(file.get());
 
   // Save all the ExperimentInfos
   for (uint16_t i = 0; i < ws->getNumExperimentInfo(); i++) {
@@ -270,7 +269,7 @@ void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
       // Can't overwrite entries. Just add the new ones
       file->makeGroup(groupName, "NXgroup", true);
       file->putAttr("version", 1);
-      ei->saveExperimentInfoNexus(file);
+      ei->saveExperimentInfoNexus(file.get());
       file->closeGroup();
     }
   }
@@ -287,7 +286,7 @@ void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
 
   // Write out the affine matrices
   MDBoxFlatTree::saveAffineTransformMatricies(
-      file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+      file.get(), boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
   // Check that the typedef has not been changed. The NeXus types would need
   // changing if it does!
@@ -295,7 +294,7 @@ void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
                 "signal_t typedef has been changed!");
 
   // Number of data points
-  int nPoints = static_cast<int>(ws->getNPoints());
+  auto nPoints = static_cast<int>(ws->getNPoints());
 
   file->makeData("signal", ::NeXus::FLOAT64, nPoints, true);
   file->putData(ws->getSignalArray());

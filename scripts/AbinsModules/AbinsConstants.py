@@ -68,6 +68,9 @@ ALL_KEYWORDS_ATOMS_S_DATA = ["s"]
 S_LABEL = "s"
 ATOM_LABEL = "atom"
 
+# user syntax for specifying atoms
+ATOM_PREFIX = "atom"
+
 FLOAT_ID = np.dtype(np.float64).num
 FLOAT_TYPE = np.dtype(np.float64)
 
@@ -171,7 +174,6 @@ MAX_WAVENUMBER = 5000.0  # in cm^-1
 MAX_POINTS_PER_PEAK = 1000
 MIN_POINTS_PER_PEAK = 1
 
-SMALL_S = 1e-6
 MAX_THRESHOLD = 0.3
 
 ONE_CHARACTER = 1

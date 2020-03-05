@@ -294,8 +294,8 @@ void IntegratePeakTimeSlices::exec() {
 
     neighborRadius =
         min<double>(MaxNeighborhoodRadius, NeighborhoodRadiusDivPeakRadius * R);
-    int Nneighbors = static_cast<int>(neighborRadius * neighborRadius /
-                                      m_cellWidth / m_cellHeight * 4);
+    auto Nneighbors = static_cast<int>(neighborRadius * neighborRadius /
+                                       m_cellWidth / m_cellHeight * 4);
 
     Nneighbors = min<int>(
         Nneighbors, static_cast<int>(inpWkSpace->getNumberHistograms()) - 2);
@@ -737,9 +737,9 @@ bool IntegratePeakTimeSlices::updateNeighbors(
   double DD = (CentPos - oldCenter).norm();
   bool changed = false;
   if (DD + NewRadius > neighborRadius) {
-    int NN = int(NStdDevPeakSpan * NeighborhoodRadiusDivPeakRadius * NewRadius /
-                 m_cellWidth * NStdDevPeakSpan *
-                 NeighborhoodRadiusDivPeakRadius * NewRadius / m_cellHeight);
+    auto NN = int(NStdDevPeakSpan * NeighborhoodRadiusDivPeakRadius *
+                  NewRadius / m_cellWidth * NStdDevPeakSpan *
+                  NeighborhoodRadiusDivPeakRadius * NewRadius / m_cellHeight);
     if (m_NeighborIDs[0] < NN) {
       delete[] m_NeighborIDs;
       m_NeighborIDs = new int[NN + 2];
@@ -980,7 +980,7 @@ std::vector<double> DataModeHandler::InitValues(double Varx, double Vary,
   Res[IVXX] = Varx;
   Res[IVYY] = Vary;
   Res[IVXY] = 0;
-  int nCells = static_cast<int>(StatBase[ISS1]);
+  auto nCells = static_cast<int>(StatBase[ISS1]);
   double Den = StatBase[IIntensities] - b * nCells;
   Res[IXMEAN] = (StatBase[ISSIx] - b * StatBase[ISSx]) / Den;
   Res[IYMEAN] = (StatBase[ISSIy] - b * StatBase[ISSy]) / Den;
@@ -1033,7 +1033,7 @@ std::vector<double> DataModeHandler::InitValues(double Varx, double Vary,
  */
 std::vector<double> DataModeHandler::GetParams(double b) {
 
-  int nCells = static_cast<int>(StatBase[ISS1]);
+  auto nCells = static_cast<int>(StatBase[ISS1]);
   double Den = StatBase[IIntensities] - b * nCells;
   double Varx, Vary;
 
@@ -1086,13 +1086,13 @@ bool DataModeHandler::setStatBase(std::vector<double> const &statBase)
 
 {
   double TotBoundaryIntensities = statBase[ITotBoundary];
-  int nBoundaryCells = static_cast<int>(statBase[INBoundary]);
+  auto nBoundaryCells = static_cast<int>(statBase[INBoundary]);
   this->StatBase = statBase;
   double b = 0;
   if (nBoundaryCells > 0)
     b = TotBoundaryIntensities / nBoundaryCells;
 
-  int nCells = static_cast<int>(statBase[ISS1]);
+  auto nCells = static_cast<int>(statBase[ISS1]);
   double Den = statBase[IIntensities] - b * nCells;
   int k = 0;
   while (Den <= 0 && b != 0) {
@@ -1238,7 +1238,7 @@ void DataModeHandler::setHeightHalfWidthInfo(
   const auto &C = counts;
   VarxHW = -1;
   VaryHW = -1;
-  int N = static_cast<int>(X.size());
+  auto N = static_cast<int>(X.size());
 
   HalfWidthAtHalfHeightRadius = -2;
 
@@ -1456,9 +1456,9 @@ void IntegratePeakTimeSlices::SetUpData(
   double DD = (CentPos - CentNghbr).norm();
 
   if (DD + NewRadius > neighborRadius) {
-    int NN = int(NStdDevPeakSpan * NeighborhoodRadiusDivPeakRadius * NewRadius /
-                 m_cellWidth * NStdDevPeakSpan *
-                 NeighborhoodRadiusDivPeakRadius * NewRadius / m_cellHeight);
+    auto NN = int(NStdDevPeakSpan * NeighborhoodRadiusDivPeakRadius *
+                  NewRadius / m_cellWidth * NStdDevPeakSpan *
+                  NeighborhoodRadiusDivPeakRadius * NewRadius / m_cellHeight);
     if (m_NeighborIDs[0] < NN) {
       delete[] m_NeighborIDs;
       m_NeighborIDs = new int[NN + 2];
@@ -1514,7 +1514,7 @@ void IntegratePeakTimeSlices::SetUpData1(
   spec_idList.clear();
 
   for (int i = 0; i < NAttributes + 2; i++)
-    StatBase.push_back(0);
+    StatBase.emplace_back(0);
 
   std::vector<double> yvalB;
   std::vector<double> errB;
@@ -1579,14 +1579,14 @@ void IntegratePeakTimeSlices::SetUpData1(
           variance += histoerrs[chan] * histoerrs[chan];
         }
 
-        yvalB.push_back(intensity);
+        yvalB.emplace_back(intensity);
         double sigma = 1;
 
-        errB.push_back(sigma);
-        xvalB.push_back(col);
-        YvalB.push_back(row);
+        errB.emplace_back(sigma);
+        xvalB.emplace_back(col);
+        YvalB.emplace_back(row);
 
-        xRef.push_back(static_cast<double>(jj));
+        xRef.emplace_back(static_cast<double>(jj));
         jj++;
 
         updateStats(intensity, variance, row, col, StatBase);
@@ -2011,25 +2011,25 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
     errs.clear();
     ITableWorkspace_sptr RRes = fit_alg->getProperty("OutputParameters");
     for (int prm = 0; prm < static_cast<int>(RRes->rowCount()) - 1; prm++) {
-      names.push_back(RRes->getRef<string>("Name", prm));
-      params.push_back(RRes->getRef<double>("Value", prm));
+      names.emplace_back(RRes->getRef<string>("Name", prm));
+      params.emplace_back(RRes->getRef<double>("Value", prm));
       double error = RRes->getRef<double>("Error", prm);
-      errs.push_back(error);
+      errs.emplace_back(error);
     }
     if (names.size() < 5) {
-      names.push_back(m_ParameterNames[IVXX]);
-      names.push_back(m_ParameterNames[IVYY]);
-      names.push_back(m_ParameterNames[IVXY]);
+      names.emplace_back(m_ParameterNames[IVXX]);
+      names.emplace_back(m_ParameterNames[IVYY]);
+      names.emplace_back(m_ParameterNames[IVXY]);
       double Varxx, Varxy, Varyy;
       m_AttributeValues->CalcVariancesFromData(
           params[IBACK], params[IXMEAN], params[IYMEAN], Varxx, Varxy, Varyy,
           m_AttributeValues->StatBase);
-      params.push_back(Varxx);
-      params.push_back(Varyy);
-      params.push_back(Varxy);
-      errs.push_back(0);
-      errs.push_back(0);
-      errs.push_back(0);
+      params.emplace_back(Varxx);
+      params.emplace_back(Varyy);
+      params.emplace_back(Varxy);
+      errs.emplace_back(0);
+      errs.emplace_back(0);
+      errs.emplace_back(0);
     }
 
   } catch (std::exception
@@ -2191,7 +2191,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
       params[IYMEAN] > m_NROWS - NBadEdgeCells)
     return false;
 
-  int ncells = static_cast<int>(m_AttributeValues->StatBaseVals(ISS1));
+  auto ncells = static_cast<int>(m_AttributeValues->StatBaseVals(ISS1));
 
   if (m_AttributeValues->StatBaseVals(IIntensities) <= 0 ||
       (m_AttributeValues->StatBaseVals(IIntensities) - params[Ibk] * ncells) <=
@@ -2223,7 +2223,7 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
 
   bool GoodNums = true;
   bool paramBad = false;
-  size_t BadParamNum = static_cast<size_t>(-1);
+  auto BadParamNum = static_cast<size_t>(-1);
   for (size_t i = 0; i < errs.size(); i++)
     if (errs[i] != errs[i]) {
       GoodNums = false;
@@ -2463,9 +2463,9 @@ int IntegratePeakTimeSlices::UpdateOutputWS(
   if (dir > 0)
     newRowIndex = static_cast<int>(TabWS->rowCount());
 
-  int TableRow = static_cast<int>(TabWS->insertRow(newRowIndex));
+  auto TableRow = static_cast<int>(TabWS->insertRow(newRowIndex));
 
-  int ncells = static_cast<int>(m_AttributeValues->StatBaseVals(ISS1));
+  auto ncells = static_cast<int>(m_AttributeValues->StatBaseVals(ISS1));
   double chisq =
       max<double>(Chisq, m_AttributeValues->StatBaseVals(IIntensities) /
                              max<int>(ncells, 1));
@@ -2623,7 +2623,7 @@ double DataModeHandler::CalcISAWIntensityVariance(const double *params,
                                                   const double *errs,
                                                   double chiSqOvDOF) {
 
-  int ncells = static_cast<int>(StatBase[ISS1]);
+  auto ncells = static_cast<int>(StatBase[ISS1]);
   double B = StatBase[IVariance] / ncells;
   if (B < chiSqOvDOF)
     B = chiSqOvDOF;
@@ -2652,9 +2652,9 @@ double DataModeHandler::CalcISAWIntensityVariance(const double *params,
  */
 double
 DataModeHandler::CalcSampleIntensityMultiplier(const double *params) const {
-  int MinRow = static_cast<int>(StatBase[IStartRow]);
+  auto MinRow = static_cast<int>(StatBase[IStartRow]);
   int MaxRow = MinRow + static_cast<int>(StatBase[INRows]) - 1;
-  int MinCol = static_cast<int>(StatBase[IStartCol]);
+  auto MinCol = static_cast<int>(StatBase[IStartCol]);
   int MaxCol = MinCol + static_cast<int>(StatBase[INCol]) - 1;
   double r = 1;
 
@@ -2678,7 +2678,7 @@ DataModeHandler::CalcSampleIntensityMultiplier(const double *params) const {
   }
   double P = 1;
   if (sgn * NstdX < 9) {
-    int xx = static_cast<int>(sgn * NstdX);
+    auto xx = static_cast<int>(sgn * NstdX);
     double a = probs[xx];
     double b = 1;
     if (xx + 1 <= 8)
@@ -2697,7 +2697,7 @@ DataModeHandler::CalcSampleIntensityMultiplier(const double *params) const {
   }
   P = 1;
   if (sgn * NstdY < 9) {
-    int xx = static_cast<int>(sgn * NstdY);
+    auto xx = static_cast<int>(sgn * NstdY);
     double a = probs[xx];
     double b = 1;
     if (xx + 1 <= 8)

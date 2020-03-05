@@ -10,8 +10,6 @@
 #include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 
-#include <boost/bind.hpp>
-
 #include <sstream>
 
 namespace Mantid {
@@ -166,8 +164,9 @@ void ComptonScatteringCountRate::iterationStarting() {
 
   if (m_bkgdPolyN > 0) {
     BkgdNorm2 objf(m_cmatrix, m_dataErrorRatio);
+    using namespace std::placeholders;
     AugmentedLagrangianOptimizer::ObjFunction objfunc =
-        boost::bind(&BkgdNorm2::eval, objf, _1, _2);
+        std::bind(&BkgdNorm2::eval, objf, _1, _2);
     AugmentedLagrangianOptimizer lsqmin(nparams, objfunc, m_eqMatrix,
                                         m_cmatrix);
     lsqmin.minimize(x0);
@@ -314,12 +313,12 @@ void ComptonScatteringCountRate::cacheFunctions() {
 void ComptonScatteringCountRate::cacheComptonProfile(
     const boost::shared_ptr<ComptonProfile> &profile,
     const size_t paramsOffset) {
-  m_profiles.push_back(profile.get());
+  m_profiles.emplace_back(profile.get());
   auto fixedParams = profile->intensityParameterIndices();
   for (auto fixedParam : fixedParams) {
     const size_t indexOfFixed = paramsOffset + fixedParam;
     this->setParameterStatus(indexOfFixed, Tied);
-    m_fixedParamIndices.push_back(indexOfFixed);
+    m_fixedParamIndices.emplace_back(indexOfFixed);
   }
 }
 
@@ -333,15 +332,14 @@ void ComptonScatteringCountRate::cacheBackground(
   // Check for the order attribute
   if (function1D->hasAttribute(m_bkgdOrderAttr)) {
     m_bkgdPolyN = function1D->getAttribute(m_bkgdOrderAttr).asInt();
-    const size_t npars =
-        static_cast<size_t>(m_bkgdPolyN + 1); // + constant term
+    const auto npars = static_cast<size_t>(m_bkgdPolyN + 1); // + constant term
     // we assume the parameters are at index 0->N on the background so we need
     // to reverse them
     for (size_t i = npars; i > 0; --i) // i = from npars->1
     {
       const size_t indexOfFixed = paramsOffset + (i - 1);
       this->setParameterStatus(indexOfFixed, Tied);
-      m_fixedParamIndices.push_back(indexOfFixed);
+      m_fixedParamIndices.emplace_back(indexOfFixed);
     }
   } else {
     std::ostringstream os;

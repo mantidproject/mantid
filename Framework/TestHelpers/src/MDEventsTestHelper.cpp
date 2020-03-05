@@ -255,7 +255,7 @@ makeFakeMDHistoWorkspaceGeneral(size_t numDims, double signal,
 
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
   for (size_t d = 0; d < numDims; d++)
-    dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
+    dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension(
         names[d], names[d], frame, min[d], max[d], numBins[d])));
 
   MDHistoWorkspace_sptr ws_sptr =
@@ -289,7 +289,7 @@ MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
   Mantid::Geometry::GeneralFrame frame(
       Mantid::Geometry::GeneralFrame::GeneralFrameDistance, "m");
   for (size_t d = 0; d < numDims; d++)
-    dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
+    dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension(
         names[d], names[d], frame, min[d], max[d], numBins[d])));
 
   MDHistoWorkspace_sptr ws_sptr =

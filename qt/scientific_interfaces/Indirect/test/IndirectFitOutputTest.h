@@ -9,7 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "IndirectFitOutput.h"
+#include "IndirectFitOutputLegacy.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -55,10 +55,11 @@ MatrixWorkspace_sptr createPopulatedworkspace(int const &numberOfSpectra) {
                                   verticalAxisNames);
 }
 
-IndirectFitData getIndirectFitData(int const &numberOfSpectra) {
+IndirectFitDataLegacy getIndirectFitData(int const &numberOfSpectra) {
   auto const workspace = createWorkspace(numberOfSpectra);
-  Spectra const spec = std::make_pair(0u, workspace->getNumberHistograms() - 1);
-  IndirectFitData data(workspace, spec);
+  SpectraLegacy const spec =
+      std::make_pair(0u, workspace->getNumberHistograms() - 1);
+  IndirectFitDataLegacy data(workspace, spec);
   return data;
 }
 
@@ -87,12 +88,12 @@ WorkspaceGroup_sptr getPopulatedGroup(std::size_t const &size) {
   return group;
 }
 
-std::unique_ptr<IndirectFitOutput>
+std::unique_ptr<IndirectFitOutputLegacy>
 createFitOutput(WorkspaceGroup_sptr resultGroup,
                 ITableWorkspace_sptr parameterTable,
-                WorkspaceGroup_sptr resultWorkspace, IndirectFitData *fitData,
-                std::size_t spectrum) {
-  return std::make_unique<IndirectFitOutput>(
+                WorkspaceGroup_sptr resultWorkspace,
+                IndirectFitDataLegacy *fitData, std::size_t spectrum) {
+  return std::make_unique<IndirectFitOutputLegacy>(
       resultGroup, parameterTable, resultWorkspace, fitData, spectrum);
 }
 
@@ -122,7 +123,7 @@ public:
     m_workspacesGroup = getPopulatedGroup(2);
     m_parameterTable = getPopulatedTable(2);
 
-    m_fitData = std::make_unique<IndirectFitData>(getIndirectFitData(5));
+    m_fitData = std::make_unique<IndirectFitDataLegacy>(getIndirectFitData(5));
 
     storeWorkspacesInADS(m_resultGroup, m_workspacesGroup, m_parameterTable);
   }
@@ -254,7 +255,8 @@ public:
   test_that_addOutput_will_add_new_fitData_without_overwriting_existing_data() {
     auto const output = createFitOutput(m_workspacesGroup, m_parameterTable,
                                         m_resultGroup, m_fitData.get(), 0);
-    auto const data2 = std::make_unique<IndirectFitData>(getIndirectFitData(2));
+    auto const data2 =
+        std::make_unique<IndirectFitDataLegacy>(getIndirectFitData(2));
 
     output->addOutput(m_workspacesGroup, m_parameterTable, m_resultGroup,
                       data2.get(), 0);
@@ -276,7 +278,8 @@ public:
   void test_that_removeOutput_will_not_delete_fitData_which_is_not_specified() {
     auto const output = createFitOutput(m_workspacesGroup, m_parameterTable,
                                         m_resultGroup, m_fitData.get(), 0);
-    auto const data2 = std::make_unique<IndirectFitData>(getIndirectFitData(2));
+    auto const data2 =
+        std::make_unique<IndirectFitDataLegacy>(getIndirectFitData(2));
 
     output->addOutput(m_workspacesGroup, m_parameterTable, m_resultGroup,
                       data2.get(), 0);
@@ -290,7 +293,8 @@ public:
   test_that_removeOutput_does_not_throw_when_provided_fitData_which_does_not_exist() {
     auto const output = createFitOutput(m_workspacesGroup, m_parameterTable,
                                         m_resultGroup, m_fitData.get(), 0);
-    auto const data2 = std::make_unique<IndirectFitData>(getIndirectFitData(2));
+    auto const data2 =
+        std::make_unique<IndirectFitDataLegacy>(getIndirectFitData(2));
 
     TS_ASSERT_THROWS_NOTHING(output->removeOutput(data2.get()));
   }
@@ -314,7 +318,7 @@ public:
 
 private:
   /// This will return fit output with workspaces still stored in the ADS
-  std::unique_ptr<IndirectFitOutput> getFitOutputData() {
+  std::unique_ptr<IndirectFitOutputLegacy> getFitOutputData() {
     storeWorkspacesInADS(m_workspacesGroup, m_resultGroup, m_parameterTable);
     return createFitOutput(m_workspacesGroup, m_parameterTable, m_resultGroup,
                            m_fitData.get(), 0);
@@ -334,7 +338,7 @@ private:
   WorkspaceGroup_sptr m_resultGroup;
   WorkspaceGroup_sptr m_workspacesGroup;
   ITableWorkspace_sptr m_parameterTable;
-  std::unique_ptr<IndirectFitData> m_fitData;
+  std::unique_ptr<IndirectFitDataLegacy> m_fitData;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
 };
 

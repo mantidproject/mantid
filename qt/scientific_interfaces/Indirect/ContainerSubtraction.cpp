@@ -24,6 +24,8 @@ namespace CustomInterfaces {
 ContainerSubtraction::ContainerSubtraction(QWidget *parent)
     : CorrectionsTab(parent), m_spectra(0) {
   m_uiForm.setupUi(parent);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraContour));
 
   connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this,
           SLOT(newSample(const QString &)));
@@ -36,13 +38,13 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent)
   connect(m_uiForm.spShift, SIGNAL(valueChanged(double)), this,
           SLOT(updateCan()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlotSpectrum, SIGNAL(clicked()), this,
-          SLOT(plotSpectrumClicked()));
-  connect(m_uiForm.pbPlotContour, SIGNAL(clicked()), this,
-          SLOT(plotContourClicked()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this,
           SLOT(plotCurrentPreview()));
+
+  // Allows empty workspace selector when initially selected
+  m_uiForm.dsSample->isOptional(true);
+  m_uiForm.dsContainer->isOptional(true);
 
   m_uiForm.spPreviewSpec->setMinimum(0);
   m_uiForm.spPreviewSpec->setMaximum(0);
@@ -88,8 +90,6 @@ void ContainerSubtraction::run() {
 
       if (!checkWorkspaceBinningMatches(m_csSampleWS, containerWs)) {
         setRunIsRunning(false);
-        setPlotSpectrumEnabled(false);
-        setPlotContourEnabled(false);
         setSaveResultEnabled(false);
         g_log.error("Cannot apply container corrections using a sample and "
                     "container with different binning.");
@@ -107,16 +107,7 @@ void ContainerSubtraction::run() {
     containerSubtractionComplete();
   }
   setRunIsRunning(false);
-  setPlotSpectrumIndexMax(static_cast<int>(getOutWsNumberOfSpectra()) - 1);
-}
-
-std::size_t ContainerSubtraction::getOutWsNumberOfSpectra() const {
-  return getADSWorkspace(m_pythonExportWsName)->getNumberHistograms();
-}
-
-MatrixWorkspace_const_sptr
-ContainerSubtraction::getADSWorkspace(std::string const &name) const {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+  setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
 }
 
 std::string ContainerSubtraction::createOutputName() {
@@ -378,47 +369,37 @@ void ContainerSubtraction::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void ContainerSubtraction::plotSpectrumClicked() {
-  setPlotSpectrumIsPlotting(true);
-
-  auto const spectrumIndex = getPlotSpectrumIndex();
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
-    plotSpectrum(QString::fromStdString(m_pythonExportWsName), spectrumIndex);
-
-  setPlotSpectrumIsPlotting(false);
+void ContainerSubtraction::runClicked() {
+  clearOutputPlotOptionsWorkspaces();
+  runTab();
 }
-
-void ContainerSubtraction::plotContourClicked() {
-  setPlotContourIsPlotting(true);
-
-  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, true))
-    plot2D(QString::fromStdString(m_pythonExportWsName));
-
-  setPlotContourIsPlotting(false);
-}
-
-void ContainerSubtraction::runClicked() { runTab(); }
 
 /**
  * Plots the current spectrum displayed in the preview plot
  */
 void ContainerSubtraction::plotCurrentPreview() {
-  QStringList workspaces = QStringList();
-
+  std::vector<std::string> workspaces;
+  auto const index = boost::numeric_cast<int>(m_spectra);
+  std::vector<int> indices;
   // Check whether a sample workspace has been specified
-  if (m_csSampleWS)
-    workspaces.append(QString::fromStdString(m_csSampleWS->getName()));
+  if (m_csSampleWS) {
+    workspaces.emplace_back(m_csSampleWS->getName());
+    indices.emplace_back(index);
+  }
 
   // Check whether a container workspace has been specified
-  if (m_transformedContainerWS)
-    workspaces.append(
-        QString::fromStdString(m_transformedContainerWS->getName()));
+  if (m_transformedContainerWS) {
+    workspaces.emplace_back(m_transformedContainerWS->getName());
+    indices.emplace_back(index);
+  }
 
   // Check whether a subtracted workspace has been generated
-  if (m_csSubtractedWS)
-    workspaces.append(QString::fromStdString(m_csSubtractedWS->getName()));
+  if (m_csSubtractedWS) {
+    workspaces.emplace_back(m_csSubtractedWS->getName());
+    indices.emplace_back(index);
+  }
 
-  IndirectTab::plotSpectrum(workspaces, boost::numeric_cast<int>(m_spectra));
+  m_plotter->plotCorrespondingSpectra(workspaces, indices);
 }
 
 /*
@@ -593,26 +574,8 @@ IAlgorithm_sptr ContainerSubtraction::addSampleLogAlgorithm(
   return shiftLog;
 }
 
-void ContainerSubtraction::setPlotSpectrumIndexMax(int maximum) {
-  MantidQt::API::SignalBlocker blocker(m_uiForm.spSpectrum);
-  m_uiForm.spSpectrum->setMaximum(maximum);
-}
-
-int ContainerSubtraction::getPlotSpectrumIndex() {
-  return m_uiForm.spSpectrum->text().toInt();
-}
-
 void ContainerSubtraction::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
-}
-
-void ContainerSubtraction::setPlotSpectrumEnabled(bool enabled) {
-  m_uiForm.pbPlotSpectrum->setEnabled(enabled);
-  m_uiForm.spSpectrum->setEnabled(enabled);
-}
-
-void ContainerSubtraction::setPlotContourEnabled(bool enabled) {
-  m_uiForm.pbPlotContour->setEnabled(enabled);
 }
 
 void ContainerSubtraction::setSaveResultEnabled(bool enabled) {
@@ -621,24 +584,12 @@ void ContainerSubtraction::setSaveResultEnabled(bool enabled) {
 
 void ContainerSubtraction::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
-  setPlotSpectrumEnabled(enabled);
-  setPlotContourEnabled(enabled);
   setSaveResultEnabled(enabled);
 }
 
 void ContainerSubtraction::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
-}
-
-void ContainerSubtraction::setPlotSpectrumIsPlotting(bool plotting) {
-  m_uiForm.pbPlotSpectrum->setText(plotting ? "Plotting..." : "Plot Spectrum");
-  setButtonsEnabled(!plotting);
-}
-
-void ContainerSubtraction::setPlotContourIsPlotting(bool plotting) {
-  m_uiForm.pbPlotContour->setText(plotting ? "Plotting..." : "Plot Contour");
-  setButtonsEnabled(!plotting);
 }
 
 } // namespace CustomInterfaces

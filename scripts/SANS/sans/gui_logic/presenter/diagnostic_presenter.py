@@ -72,7 +72,7 @@ class DiagnosticsPagePresenter(object):
         self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
-        state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
+        state_model_with_view_update = self._parent_presenter.update_model_from_view()
         state = self._create_state(state_model_with_view_update, input_file, period, self._facility)
         mask = self._view.horizontal_mask
         range = self._view.horizontal_range
@@ -85,7 +85,7 @@ class DiagnosticsPagePresenter(object):
         self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
-        state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
+        state_model_with_view_update = self._parent_presenter.update_model_from_view()
         state = self._create_state(state_model_with_view_update, input_file, period, self._facility)
         mask = self._view.vertical_mask
         range = self._view.vertical_range
@@ -98,7 +98,7 @@ class DiagnosticsPagePresenter(object):
         self._view.disable_integrals()
         input_file = self._view.run_input
         period = self._view.period
-        state_model_with_view_update = self._parent_presenter._get_state_model_with_view_update()
+        state_model_with_view_update = self._parent_presenter.update_model_from_view()
         state = self._create_state(state_model_with_view_update, input_file, period, self._facility)
         mask = self._view.time_mask
         range = self._view.time_range

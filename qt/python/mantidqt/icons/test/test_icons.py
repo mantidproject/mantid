@@ -6,15 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import unittest
 
 from mantidqt.icons import get_icon
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 
-class IconsTest(GuiTest):
+@start_qapplication
+class IconsTest(unittest.TestCase):
     def test_get_icon_name(self):
         icon = get_icon("mdi.run-fast")
         self.assertEqual(icon.isNull(), False)
@@ -31,3 +32,7 @@ class IconsTest(GuiTest):
         icon = get_icon(["mdi.run-fast", "mdi.run"], [{"color": "red", "scaleFactor": 1.5},
                                                       {"color": "green", "scaleFactor": 1.2}])
         self.assertEqual(icon.isNull(), False)
+
+
+if __name__ == '__main__':
+    unittest.main()

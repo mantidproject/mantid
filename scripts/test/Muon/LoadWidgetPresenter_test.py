@@ -7,14 +7,15 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.load_widget.load_presenter import LoadPresenter
 from Muon.GUI.Common.load_widget.load_view import LoadView
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
 
 
-class LoadPresenterTest(GuiTest):
+@start_qapplication
+class LoadPresenterTest(unittest.TestCase):
     def setUp(self):
         self._view = mock.create_autospec(LoadView)
         self._load_model = mock.create_autospec(LoadModel)

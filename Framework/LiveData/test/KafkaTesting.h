@@ -15,12 +15,12 @@
 #include <gmock/gmock.h>
 
 GNU_DIAG_OFF("conversion")
-#include "Kafka/private/Schema/ba57_run_info_generated.h"
 #include "Kafka/private/Schema/df12_det_spec_map_generated.h"
 #include "Kafka/private/Schema/ev42_events_generated.h"
 #include "Kafka/private/Schema/f142_logdata_generated.h"
 #include "Kafka/private/Schema/hs00_event_histogram_generated.h"
 #include "Kafka/private/Schema/is84_isis_events_generated.h"
+#include "Kafka/private/Schema/y2gw_run_info_generated.h"
 GNU_DIAG_ON("conversion")
 
 #include <ctime>
@@ -147,9 +147,9 @@ void fakeReceiveAnISISEventMessage(std::string *buffer, int32_t nextPeriod) {
   auto messageFlatbuf = CreateEventMessage(
       builder, builder.CreateString("KafkaTesting"), 0, frameTime,
       builder.CreateVector(tof), builder.CreateVector(spec),
-      FacilityData_ISISData,
+      FacilityData::ISISData,
       CreateISISData(builder, static_cast<uint32_t>(nextPeriod),
-                     RunState_RUNNING, protonCharge)
+                     RunState::RUNNING, protonCharge)
           .Union());
   FinishEventMessageBuffer(builder, messageFlatbuf);
 
@@ -182,7 +182,7 @@ void fakeReceiveHistoMessage(std::string *buffer) {
   auto xbins = HistoSchema::CreateArrayDouble(builder, bin_edges);
   auto bin_metadata = HistoSchema::CreateDimensionMetaData(
       builder, 3, builder.CreateString("TOF"), builder.CreateString("TOF"),
-      HistoSchema::Array_ArrayDouble, xbins.Union());
+      HistoSchema::Array::ArrayDouble, xbins.Union());
   auto unit_metadata = HistoSchema::CreateDimensionMetaData(
       builder, 1, builder.CreateString("Counts"));
 
@@ -197,7 +197,7 @@ void fakeReceiveHistoMessage(std::string *buffer) {
 
   auto messageFlatBuf = HistoSchema::CreateEventHistogram(
       builder, builder.CreateString("KafkaTesting"), 0, dim_metadata, 0,
-      builder.CreateVector(current_shape), 0, HistoSchema::Array_ArrayDouble,
+      builder.CreateVector(current_shape), 0, HistoSchema::Array::ArrayDouble,
       data.Union());
 
   FinishEventHistogramBuffer(builder, messageFlatBuf);
@@ -209,7 +209,7 @@ void fakeReceiveASampleEnvMessage(std::string *buffer) {
   flatbuffers::FlatBufferBuilder builder;
   // Sample environment log
   auto logDataMessage = LogSchema::CreateLogData(
-      builder, builder.CreateString("fake source"), LogSchema::Value_Int,
+      builder, builder.CreateString("fake source"), LogSchema::Value::Int,
       LogSchema::CreateInt(builder, 42).Union(), 1495618188000000000L);
   FinishLogDataBuffer(builder, logDataMessage);
 
@@ -220,19 +220,21 @@ void fakeReceiveASampleEnvMessage(std::string *buffer) {
 
 void fakeReceiveARunStartMessage(std::string *buffer, int32_t runNumber,
                                  const std::string &startTime,
-                                 const std::string &instName,
-                                 int32_t nPeriods) {
+                                 const std::string &instName, int32_t nPeriods,
+                                 std::string nexusStructure = "") {
   // Convert date to time_t
   auto mantidTime = Mantid::Types::Core::DateAndTime(startTime);
   auto startTimestamp =
       static_cast<uint64_t>(mantidTime.to_time_t() * 1000000000);
 
   flatbuffers::FlatBufferBuilder builder;
-  auto runInfo =
-      CreateRunInfo(builder, InfoTypes_RunStart,
-                    CreateRunStart(builder, startTimestamp, runNumber,
-                                   builder.CreateString(instName), nPeriods)
-                        .Union());
+  auto runInfo = CreateRunInfo(
+      builder, InfoTypes::RunStart,
+      CreateRunStart(builder, startTimestamp,
+                     builder.CreateString(std::to_string(runNumber)),
+                     builder.CreateString(instName), nPeriods,
+                     builder.CreateString(nexusStructure))
+          .Union());
   FinishRunInfoBuffer(builder, runInfo);
   // Copy to provided buffer
   buffer->assign(reinterpret_cast<const char *>(builder.GetBufferPointer()),
@@ -247,7 +249,7 @@ void fakeReceiveARunStopMessage(std::string *buffer,
       static_cast<uint64_t>(mantidTime.to_time_t() * 1000000000);
 
   flatbuffers::FlatBufferBuilder builder;
-  auto runInfo = CreateRunInfo(builder, InfoTypes_RunStop,
+  auto runInfo = CreateRunInfo(builder, InfoTypes::RunStop,
                                CreateRunStop(builder, stopTimestamp).Union());
   FinishRunInfoBuffer(builder, runInfo);
   // Copy to provided buffer

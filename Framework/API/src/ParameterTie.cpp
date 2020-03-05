@@ -156,7 +156,7 @@ std::string ParameterTie::asString(const IFunction *fun) const {
     while (boost::regex_search(start, end, res, rx)) {
       res_expression.append(start, res[0].first);
 
-      int iTemp = boost::lexical_cast<int>(res[1]);
+      auto iTemp = boost::lexical_cast<int>(res[1]);
       int i = 0;
       for (const auto &var : m_varMap) {
         if (i == iTemp) {

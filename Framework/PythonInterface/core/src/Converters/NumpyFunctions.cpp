@@ -35,7 +35,7 @@ PyArrayObject *func_PyArray_NewFromDescr(const char *datadescr, const int ndims,
   PyArray_Descr *descr = func_PyArray_Descr(datadescr);
 
   // create the array
-  PyArrayObject *nparray = reinterpret_cast<PyArrayObject *>(
+  auto *nparray = reinterpret_cast<PyArrayObject *>(
       PyArray_NewFromDescr(&PyArray_Type, descr, ndims, // rank
                            dims, // Length in each dimension
                            nullptr, nullptr, 0, nullptr));

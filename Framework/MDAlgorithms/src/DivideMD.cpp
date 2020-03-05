@@ -52,8 +52,8 @@ void DivideMD::checkInputs() {
 template <typename MDE, size_t nd>
 void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Get the scalar multiplying
-  float scalar = float(m_rhs_scalar->y(0)[0]);
-  float scalarError = float(m_rhs_scalar->e(0)[0]);
+  auto scalar = float(m_rhs_scalar->y(0)[0]);
+  auto scalarError = float(m_rhs_scalar->e(0)[0]);
   float scalarErrorSquared = scalarError * scalarError;
   float inverseScalarSquared = 1.f / (scalar * scalar);
 
@@ -70,7 +70,7 @@ void DivideMD::execEventScalar(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   }
 
   for (auto &boxe : boxes) {
-    MDBox<MDE, nd> *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
+    auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxe);
     if (box) {
       size_t ic(0);
       typename std::vector<MDE> &events = box->getEvents();

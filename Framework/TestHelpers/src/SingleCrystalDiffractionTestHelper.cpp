@@ -106,9 +106,9 @@ void WorkspaceBuilder::createPeaksWorkspace() {
   // Set the instrument to be the fake rectangular bank above.
   m_peaksWorkspace->setInstrument(m_instrument);
   // Set the oriented lattice for a cubic crystal
-  OrientedLattice ol(6, 6, 6, 90, 90, 90);
-  ol.setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
-  m_peaksWorkspace->mutableSample().setOrientedLattice(&ol);
+  auto lattice = std::make_unique<OrientedLattice>(6, 6, 6, 90, 90, 90);
+  lattice->setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
+  m_peaksWorkspace->mutableSample().setOrientedLattice(std::move(lattice));
 }
 
 /** Create an empty event workspace
@@ -162,7 +162,7 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
   const auto sigmas = std::get<2>(descriptor);
 
   // Create the peak and add it to the peaks ws
-  const auto peak = std::unique_ptr<Peak>(m_peaksWorkspace->createPeakHKL(hkl));
+  const auto peak = m_peaksWorkspace->createPeakHKL(hkl);
   m_peaksWorkspace->addPeak(*peak);
 
   // Get detector ID and TOF position of peak

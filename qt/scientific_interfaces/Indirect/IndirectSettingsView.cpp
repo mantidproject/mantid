@@ -8,30 +8,6 @@
 
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
-#include <QSettings>
-
-namespace {
-
-template <typename T>
-void setQSetting(QString const &settingGroup, QString const &settingName,
-                 T const &value) {
-  QSettings settings;
-  settings.beginGroup(settingGroup);
-  settings.setValue(settingName, value);
-  settings.endGroup();
-}
-
-QVariant getQSetting(QString const &settingGroup, QString const &settingName) {
-  QSettings settings;
-  settings.beginGroup(settingGroup);
-  auto const settingValue = settings.value(settingName);
-  settings.endGroup();
-
-  return settingValue;
-}
-
-} // namespace
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -82,17 +58,6 @@ void IndirectSettingsView::setPlotErrorBarsChecked(bool check) {
 
 bool IndirectSettingsView::isPlotErrorBarsChecked() const {
   return m_uiForm->ckPlotErrorBars->isChecked();
-}
-
-void IndirectSettingsView::setSetting(QString const &settingsGroup,
-                                      QString const &settingName,
-                                      bool const &value) {
-  setQSetting(settingsGroup, settingName, value);
-}
-
-QVariant IndirectSettingsView::getSetting(QString const &settingsGroup,
-                                          QString const &settingName) {
-  return getQSetting(settingsGroup, settingName);
 }
 
 void IndirectSettingsView::setApplyText(QString const &text) {

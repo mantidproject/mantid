@@ -155,17 +155,25 @@ std::string constructInputString(MatrixWorkspace_sptr workspace, int specMin,
   return input.str();
 }
 
-std::vector<MatrixWorkspace_sptr> extractWorkspaces(const std::string &input) {
-  std::vector<MatrixWorkspace_sptr> workspaces;
-
-  auto extractWorkspace = [&](const std::string &name) {
-    workspaces.emplace_back(getADSMatrixWorkspace(name));
-  };
-
+std::vector<std::string> extractWorkspaceNames(const std::string &input) {
+  std::vector<std::string> v;
   boost::regex reg("([^,;]+),");
   std::for_each(
       boost::sregex_token_iterator(input.begin(), input.end(), reg, 1),
-      boost::sregex_token_iterator(), extractWorkspace);
+      boost::sregex_token_iterator(),
+      [&v](const std::string &name) { v.emplace_back(name); });
+  return v;
+}
+
+std::vector<MatrixWorkspace_sptr> extractWorkspaces(const std::string &input) {
+  const auto workspaceNames = extractWorkspaceNames(input);
+
+  std::vector<MatrixWorkspace_sptr> workspaces;
+
+  for (const auto &wsName : workspaceNames) {
+    workspaces.emplace_back(getADSMatrixWorkspace(wsName));
+  }
+
   return workspaces;
 }
 
@@ -304,7 +312,7 @@ runParameterProcessingWithGrouping(IAlgorithm &processingAlgorithm,
                                     static_cast<int>(grouping[i + 1]) - 1);
     processingAlgorithm.setProperty("OutputWorkspace", "__Result");
     processingAlgorithm.execute();
-    results.push_back(processingAlgorithm.getProperty("OutputWorkspace"));
+    results.emplace_back(processingAlgorithm.getProperty("OutputWorkspace"));
   }
   return createGroup(results);
 }
@@ -398,7 +406,7 @@ void QENSFitSequential::init() {
   declareProperty(
       std::make_unique<FunctionProperty>("Function", Direction::InOut),
       "The fitting function, common for all workspaces in the input.");
-  declareProperty("LogValue", "",
+  declareProperty("LogName", "axis-1",
                   "Name of the log value to plot the "
                   "parameters against. Default: use spectra "
                   "numbers.");
@@ -465,6 +473,16 @@ void QENSFitSequential::init() {
       "The way the function is evaluated: CentrePoint or Histogram.",
       Kernel::Direction::Input);
 
+  const std::array<std::string, 2> fitTypes = {{"Sequential", "Individual"}};
+  declareProperty(
+      "FitType", "Sequential",
+      Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(fitTypes)),
+      "Defines the way of setting initial values. If set to Sequential every "
+      "next fit starts with parameters returned by the previous fit. If set to "
+      "Individual each fit starts with the same initial values defined in "
+      "the Function property. Allowed values: [Sequential, Individual]",
+      Kernel::Direction::Input);
+
   declareProperty(std::make_unique<ArrayProperty<double>>("Exclude", ""),
                   "A list of pairs of real numbers, defining the regions to "
                   "exclude from the fit.");
@@ -522,11 +540,13 @@ void QENSFitSequential::exec() {
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), resultWs);
 
-  if (containsMultipleData(workspaces))
+  if (containsMultipleData(workspaces)) {
+    const auto inputString = getPropertyValue("Input");
     renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace",
-                     inputWorkspaces);
-  else
+                     extractWorkspaceNames(inputString));
+  } else {
     renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace");
+  }
 
   copyLogs(resultWs, workspaces);
 
@@ -660,12 +680,13 @@ std::vector<std::size_t> QENSFitSequential::getDatasetGrouping(
 WorkspaceGroup_sptr QENSFitSequential::processIndirectFitParameters(
     ITableWorkspace_sptr parameterWorkspace,
     const std::vector<std::size_t> &grouping) {
+  std::string const columnX = getProperty("LogName");
   std::string const xAxisUnit = getProperty("ResultXAxisUnit");
   auto pifp =
       createChildAlgorithm("ProcessIndirectFitParameters", 0.91, 0.95, false);
   pifp->setAlwaysStoreInADS(false);
   pifp->setProperty("InputWorkspace", parameterWorkspace);
-  pifp->setProperty("ColumnX", "axis-1");
+  pifp->setProperty("ColumnX", columnX);
   pifp->setProperty("XAxisUnit", xAxisUnit);
   pifp->setProperty("ParameterNames", getFitParameterNames());
   pifp->setProperty("IncludeChiSquared", true);
@@ -680,10 +701,12 @@ QENSFitSequential::processParameterTable(ITableWorkspace_sptr parameterTable) {
 void QENSFitSequential::renameWorkspaces(
     WorkspaceGroup_sptr outputGroup, std::vector<std::string> const &spectra,
     std::string const &outputBaseName, std::string const &endOfSuffix,
-    std::vector<MatrixWorkspace_sptr> const &inputWorkspaces) {
+    std::vector<std::string> const &inputWorkspaceNames) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
   const auto getNameSuffix = [&](std::size_t i) {
-    return inputWorkspaces[i]->getName() + "_" + spectra[i] + endOfSuffix;
+    std::string workspaceName =
+        inputWorkspaceNames[i] + "_" + spectra[i] + endOfSuffix;
+    return workspaceName;
   };
   return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
                                    endOfSuffix + "s", getNameSuffix);
@@ -714,12 +737,13 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   const bool convolveMembers = getProperty("ConvolveMembers");
   const bool passWsIndex = getProperty("PassWSIndexToFunction");
   const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
+  IFunction_sptr inputFunction = getProperty("Function");
 
   // Run PlotPeaksByLogValue
   auto plotPeaks = createChildAlgorithm("PlotPeakByLogValue", 0.05, 0.90, true);
   plotPeaks->setProperty("Input", input);
   plotPeaks->setProperty("OutputWorkspace", output);
-  plotPeaks->setPropertyValue("Function", getPropertyValue("Function"));
+  plotPeaks->setProperty("Function", inputFunction);
   plotPeaks->setProperty("StartX", getPropertyValue("StartX"));
   plotPeaks->setProperty("EndX", getPropertyValue("EndX"));
   plotPeaks->setProperty("Exclude", exclude);
@@ -732,8 +756,9 @@ ITableWorkspace_sptr QENSFitSequential::performFit(const std::string &input,
   plotPeaks->setProperty("Minimizer", getPropertyValue("Minimizer"));
   plotPeaks->setProperty("PassWSIndexToFunction", passWsIndex);
   plotPeaks->setProperty("PeakRadius", getPropertyValue("PeakRadius"));
-  plotPeaks->setProperty("LogValue", getPropertyValue("LogValue"));
+  plotPeaks->setProperty("LogValue", getPropertyValue("LogName"));
   plotPeaks->setProperty("EvaluationType", getPropertyValue("EvaluationType"));
+  plotPeaks->setProperty("FitType", getPropertyValue("FitType"));
   plotPeaks->setProperty("CostFunction", getPropertyValue("CostFunction"));
   plotPeaks->executeAsChildAlg();
   return plotPeaks->getProperty("OutputWorkspace");
@@ -750,9 +775,15 @@ std::string QENSFitSequential::getInputString(
 
 std::vector<MatrixWorkspace_sptr> QENSFitSequential::getWorkspaces() const {
   const auto inputString = getPropertyValue("Input");
-  if (!inputString.empty())
-    return extractWorkspaces(inputString);
-  return {getProperty("InputWorkspace")};
+  if (!inputString.empty()) {
+    auto workspaceList = extractWorkspaces(inputString);
+    return workspaceList;
+  }
+  // The static_cast should not be necessary but it is required to avoid a
+  // "internal compiler error: segmentation fault" when compiling with gcc
+  // and std=c++1z
+  return std::vector<MatrixWorkspace_sptr>{
+      static_cast<MatrixWorkspace_sptr>(getProperty("InputWorkspace"))};
 }
 
 std::vector<MatrixWorkspace_sptr> QENSFitSequential::convertInputToElasticQ(

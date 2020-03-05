@@ -107,11 +107,11 @@ void SANSSolidAngleCorrection::exec() {
     setProperty("OutputWorkspace", outputWS);
   }
 
-  const int numHists = static_cast<int>(inputWS->getNumberHistograms());
+  const auto numHists = static_cast<int>(inputWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numHists);
 
   // Number of X bins
-  const int xLength = static_cast<int>(inputWS->y(0).size());
+  const auto xLength = static_cast<int>(inputWS->y(0).size());
 
   const auto &spectrumInfo = inputWS->spectrumInfo();
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS, *inputWS))
@@ -177,7 +177,7 @@ void SANSSolidAngleCorrection::execEvent() {
   }
   auto outputEventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
 
-  const int numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int>(outputEventWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, numberOfSpectra);
   progress.report("Solid Angle Correction");

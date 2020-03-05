@@ -70,6 +70,17 @@ void SaveMD2::init() {
   setPropertySettings("MakeFileBacked",
                       std::make_unique<EnabledWhenProperty>("UpdateFileBackEnd",
                                                             IS_EQUAL_TO, "0"));
+  declareProperty(
+      "SaveHistory", true,
+      "Option to not save the Mantid history in the file. Only for MDHisto");
+  declareProperty(
+      "SaveInstrument", true,
+      "Option to not save the instrument in the file. Only for MDHisto");
+  declareProperty(
+      "SaveSample", true,
+      "Option to not save the sample in the file. Only for MDHisto");
+  declareProperty("SaveLogs", true,
+                  "Option to not save the logs in the file. Only for MDHisto");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -86,16 +97,16 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     oldFile.remove();
 
   // Create a new file in HDF5 mode.
-  ::NeXus::File *file;
-  file = new ::NeXus::File(filename, NXACC_CREATE5);
+  auto file = std::make_unique<::NeXus::File>(filename, NXACC_CREATE5);
 
   // The base entry. Named so as to distinguish from other workspace types.
   file->makeGroup("MDHistoWorkspace", "NXentry", true);
   file->putAttr("SaveMDVersion", 2);
 
   // Write out the coordinate system
-  file->writeData("coordinate_system",
-                  static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
+  if (getProperty("SaveSample"))
+    file->writeData("coordinate_system",
+                    static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
 
   // Write out the Qconvention
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
@@ -104,28 +115,36 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   file->putAttr("QConvention", m_QConvention);
 
   // Write out the visual normalization
-  file->writeData("visual_normalization",
-                  static_cast<uint32_t>(ws->displayNormalization()));
+  if (getProperty("SaveSample"))
+    file->writeData("visual_normalization",
+                    static_cast<uint32_t>(ws->displayNormalization()));
 
   // Save the algorithm history under "process"
-  ws->getHistory().saveNexus(file);
+  if (getProperty("SaveHistory"))
+    ws->getHistory().saveNexus(file.get());
 
   // Save all the ExperimentInfos
-  for (uint16_t i = 0; i < ws->getNumExperimentInfo(); i++) {
-    ExperimentInfo_sptr ei = ws->getExperimentInfo(i);
-    std::string groupName = "experiment" + Strings::toString(i);
-    if (ei) {
-      // Can't overwrite entries. Just add the new ones
-      file->makeGroup(groupName, "NXgroup", true);
-      file->putAttr("version", 1);
-      ei->saveExperimentInfoNexus(file);
-      file->closeGroup();
+  if (getProperty("SaveInstrument") || (getProperty("SaveSample")) ||
+      getProperty("SaveLogs")) {
+    for (uint16_t i = 0; i < ws->getNumExperimentInfo(); i++) {
+      ExperimentInfo_sptr ei = ws->getExperimentInfo(i);
+      std::string groupName = "experiment" + Strings::toString(i);
+      if (ei) {
+        // Can't overwrite entries. Just add the new ones
+        file->makeGroup(groupName, "NXgroup", true);
+        file->putAttr("version", 1);
+        ei->saveExperimentInfoNexus(file.get(), getProperty("SaveInstrument"),
+                                    getProperty("SaveSample"),
+                                    getProperty("SaveLogs"));
+        file->closeGroup();
+      }
     }
   }
 
   // Write out the affine matrices
-  MDBoxFlatTree::saveAffineTransformMatricies(
-      file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+  if (getProperty("SaveSample"))
+    MDBoxFlatTree::saveAffineTransformMatricies(
+        file.get(), boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
   // Check that the typedef has not been changed. The NeXus types would need
   // changing if it does!
@@ -141,7 +160,7 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     IMDDimension_const_sptr dim = ws->getDimension(d);
     auto nbounds = dim->getNBoundaries();
     for (size_t n = 0; n < nbounds; n++)
-      axis.push_back(dim->getX(n));
+      axis.emplace_back(dim->getX(n));
     file->makeData(dim->getDimensionId(), ::NeXus::FLOAT64,
                    static_cast<int>(dim->getNBoundaries()), true);
     file->putData(&axis[0]);

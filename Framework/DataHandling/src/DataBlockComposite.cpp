@@ -40,7 +40,7 @@ getRemovalIntervalsRelevantForTheCurrentOriginalInterval(
   std::vector<std::pair<int64_t, int64_t>> overlaps;
   for (auto &removeInterval : removeIntervals) {
     if (hasOverlap(original, removeInterval)) {
-      overlaps.push_back(removeInterval);
+      overlaps.emplace_back(removeInterval);
     }
   }
   return overlaps;
@@ -167,12 +167,12 @@ std::vector<std::pair<int64_t, int64_t>> getSlicedIntervals(
       break;
     } else if (isRightHandSideOverlap(original, removeInterval)) {
       auto newInterval = handleRightHandSideOverlap(original, removeInterval);
-      newIntervals.push_back(newInterval);
+      newIntervals.emplace_back(newInterval);
     } else if (isLeftHandSideOverlap(original, removeInterval)) {
       handleLeftHandSideOverlap(original, removeInterval);
     } else if (isFullyContained(original, removeInterval)) {
       auto newInterval = handleFullyContained(original, removeInterval);
-      newIntervals.push_back(newInterval);
+      newIntervals.emplace_back(newInterval);
     } else {
       throw std::runtime_error(
           "DataBlockComposite: The intervals don't seem to overlap.");
@@ -185,7 +185,7 @@ std::vector<std::pair<int64_t, int64_t>> getSlicedIntervals(
   // or no righ-hand-side overlap of a removal interval
   if ((original.first != invalidIntervalValue) &&
       (original.second != invalidIntervalValue)) {
-    newIntervals.push_back(original);
+    newIntervals.emplace_back(original);
   }
 
   return newIntervals;
@@ -260,7 +260,7 @@ void DataBlockComposite::addDataBlock(DataBlock dataBlock) {
   m_numberOfSpectra = dataBlock.getNumberOfSpectra();
 
   // Insert the data block
-  m_dataBlocks.push_back(dataBlock);
+  m_dataBlocks.emplace_back(dataBlock);
 }
 
 size_t DataBlockComposite::getNumberOfSpectra() const {
@@ -447,7 +447,7 @@ void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove) {
                         numberOfChannels);
     dataBlock.setMinSpectrumID(newInterval.first);
     dataBlock.setMaxSpectrumID(newInterval.second);
-    m_dataBlocks.push_back(dataBlock);
+    m_dataBlocks.emplace_back(dataBlock);
   }
 }
 
@@ -460,7 +460,7 @@ std::vector<int64_t> DataBlockComposite::getAllSpectrumNumbers() {
   std::vector<int64_t> allSpectra;
 
   for (; !generator->isDone(); generator->next()) {
-    allSpectra.push_back(generator->getValue());
+    allSpectra.emplace_back(generator->getValue());
   }
 
   return allSpectra;

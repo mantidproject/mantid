@@ -1,22 +1,11 @@
 # testhelpers Python module
 
-set(PY_FILES
-    __init__.py
-    algorithm_decorator.py
-    illhelpers.py
-    tempfile_wrapper.py
-    testrunner.py
-    mlzhelpers.py)
-
-# Copy python files to output directory
-set(OUTPUT_DIR
-    ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/testhelpers)
-
-# Copy the files for the testhelpers to the build directory
-copy_files_to_dir("${PY_FILES}"
-                  ${CMAKE_CURRENT_SOURCE_DIR}
-                  ${OUTPUT_DIR}
-                  PYTHON_INSTALL_FILES)
+# Copying no longer happens but old builds have this
+# Remove the directory if it exists
+# TODO: Remove in 4.2 maintenance
+if(EXISTS "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/testhelpers")
+  file(REMOVE_RECURSE "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/testhelpers")
+endif()
 
 # Create the targets for this directory
 set(FRAMEWORK_DIR ../../..)
@@ -28,16 +17,15 @@ include_directories(${FRAMEWORK_DIR}/CurveFitting/inc
 
 # WorkspaceCreationHelper
 set(SRC_FILES
-    WorkspaceCreationHelperModule.cpp
+    WorkspaceCreationHelper/WorkspaceCreationHelperModule.cpp
     ${FRAMEWORK_DIR}/TestHelpers/src/ComponentCreationHelper.cpp
     ${FRAMEWORK_DIR}/TestHelpers/src/MDEventsTestHelper.cpp
     ${FRAMEWORK_DIR}/TestHelpers/src/InstrumentCreationHelper.cpp
     ${FRAMEWORK_DIR}/TestHelpers/src/WorkspaceCreationHelper.cpp)
 add_library(PythonWorkspaceCreationHelper
             ${SRC_FILES}
-            ${INC_FILES}
-            ${PYTHON_INSTALL_FILES})
-set_python_properties(PythonWorkspaceCreationHelper WorkspaceCreationHelper)
+            ${INC_FILES})
+set_python_properties(PythonWorkspaceCreationHelper _WorkspaceCreationHelper)
 
 # Override folder
 set_property(TARGET PythonWorkspaceCreationHelper
@@ -59,6 +47,18 @@ target_link_libraries(PythonWorkspaceCreationHelper
                       ${POCO_LIBRARIES})
 
 # Overall testhelpers target
-add_custom_target(testhelpers DEPENDS PythonWorkspaceCreationHelper)
+# .pth file for discovery (only needed for development)
+set(_testhelpers_pth_src "${CMAKE_CURRENT_BINARY_DIR}/testhelpers.pth")
+set(_testhelpers_pth_dest
+    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/testhelpers.pth")
+file(WRITE ${_testhelpers_pth_src} "${CMAKE_CURRENT_LIST_DIR}/..\n")
+add_custom_command(OUTPUT ${_testhelpers_pth_dest}
+                   COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                           ${_testhelpers_pth_src} ${_testhelpers_pth_dest}
+                   DEPENDS ${_testhelpers_pth_src}
+                   COMMENT "Generating testhelpers .pth file")
+add_custom_target(testhelpers DEPENDS PythonWorkspaceCreationHelper ${_testhelpers_pth_dest})
+add_dependencies(PythonInterface ScriptsDotPth)
+
 add_dependencies(FrameworkTests testhelpers)
 set_property(TARGET testhelpers PROPERTY FOLDER "UnitTests/Python")

@@ -316,9 +316,10 @@ void ChebfunBase::derivative(const std::vector<double> &a,
   } else {
     aout.front() = a[1];
   }
-  double d = (m_end - m_start) / 2;
-  std::transform(aout.begin(), aout.end(), aout.begin(),
-                 std::bind2nd(std::divides<double>(), d));
+  using std::placeholders::_1;
+  std::transform(
+      aout.begin(), aout.end(), aout.begin(),
+      std::bind(std::divides<double>(), _1, 0.5 * (m_end - m_start)));
 }
 
 /**
@@ -454,7 +455,7 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
   }
   p.clear();
   a.clear();
-  a.push_back(maxA);
+  a.emplace_back(maxA);
   return ChebfunBase_sptr();
 }
 
@@ -659,7 +660,7 @@ std::vector<double> ChebfunBase::fitOdd(const API::IFunction &f,
   xOdd.reserve(pOdd.size());
   // m_x is odd-sized so the loop is ok
   for (auto x = m_x.begin() + 1; x != m_x.end(); x += 2) {
-    xOdd.push_back(*x);
+    xOdd.emplace_back(*x);
   }
 
   API::FunctionDomain1DView x(xOdd.data(), xOdd.size());
@@ -736,7 +737,7 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
     } else {
       if (im + firstIm < 1e-10) {
         double x = startX() + (re + 1.0) / 2.0 * Dx;
-        r.push_back(x);
+        r.emplace_back(x);
       }
       isFirst = true;
     }
@@ -843,7 +844,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
     double cd1 = powerSpec[i] / noise;
     double cd2 = log(cd1);
     wf[i] = cd1 / (1.0 + cd1);
-    double j = static_cast<double>(i + 1);
+    auto j = static_cast<double>(i + 1);
     xx += j * j;
     xy += j * cd2;
     ym += cd2;
@@ -858,7 +859,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
     }
 
     // high frequency filter values: smooth decreasing function
-    double ri0f = static_cast<double>(i0 + 1);
+    auto ri0f = static_cast<double>(i0 + 1);
     double xm = (1.0 + ri0f) / 2;
     ym /= ri0f;
     double a1 = (xy - ri0f * xm * ym) / (xx - ri0f * xm * xm);
@@ -871,8 +872,8 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
     // second part of the filter
     double c0, c1, c2, c3;
     {
-      double x0 = double(i0 + 1);
-      double x1 = double(n + 1);
+      auto x0 = double(i0 + 1);
+      auto x1 = double(n + 1);
       double sigma = g_tolerance / noise / 10;
       double s = sigma / (1.0 - sigma);
       double m1 = log(s);
@@ -907,7 +908,7 @@ ChebfunBase::smooth(const std::vector<double> &xvalues,
 
     for (size_t i = i0; i < n; ++i) {
       // double s = exp(a1*static_cast<double>(i+1)+b1);
-      double s = double(i + 1);
+      auto s = double(i + 1);
       s = c0 + s * (c1 + s * (c2 + s * c3));
       if (s > 100.0) {
         wf[i] = 1.0;

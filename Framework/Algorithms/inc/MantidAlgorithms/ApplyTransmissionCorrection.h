@@ -72,6 +72,8 @@ public:
 private:
   /// Initialisation code
   void init() override;
+  /// Cross check inputs
+  std::map<std::string, std::string> validateInputs() override;
   /// Execution code
   void exec() override;
 };

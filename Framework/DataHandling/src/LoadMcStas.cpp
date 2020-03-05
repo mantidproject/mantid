@@ -392,7 +392,7 @@ std::vector<std::string> LoadMcStas::readEventData(
 
       progEntries.report("read event data into workspace");
       for (int64_t in = 0; in < nNeutronsForthisBlock; in++) {
-        const int detectorID =
+        const auto detectorID =
             static_cast<int>(data[4 + numberOfDataColumn * in]);
         const double detector_time = data[5 + numberOfDataColumn * in] *
                                      1.0e6; // convert to microseconds
@@ -507,7 +507,7 @@ std::vector<std::string> LoadMcStas::readHistogramData(
     nxFile.readData<double>(axis1Name, axis1Values);
     if (axis2Name.length() == 0) {
       axis2Name = nameAttrValueYLABEL;
-      axis2Values.push_back(0.0);
+      axis2Values.emplace_back(0.0);
     } else {
       nxFile.readData<double>(axis2Name, axis2Values);
     }

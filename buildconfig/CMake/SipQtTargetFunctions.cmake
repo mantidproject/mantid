@@ -3,7 +3,6 @@
 # of .sip definitions
 include ( QtTargetFunctions )
 
-
 # brief: Add a module target to generate Python bindings
 # for a set of sip sources. The sources list should be a list of filenames
 # without a path. The .sip module is generated in the CMAKE_CURRENT_BINARY_DIR
@@ -14,6 +13,8 @@ include ( QtTargetFunctions )
 #                      in the .sip files. These are set as dependencies on
 #                      the target.
 # keyword: INCLUDE_DIRS A list of additional target_include_directories
+# keyword: SYSTEM_INCLUDE_DIRS A list of additional target_include_directories
+#                              that should be marked as system headers
 # keyword: LINK_LIBS A list of additional target_link_libraries
 # keyword: PYQT_VERSION A single value indicating the version of PyQt
 #                       to compile against
@@ -30,7 +31,8 @@ function ( mtd_add_sip_module )
   set ( options )
   set ( oneValueArgs MODULE_NAME TARGET_NAME MODULE_OUTPUT_DIR
                      PYQT_VERSION FOLDER )
-  set ( multiValueArgs SIP_SRCS HEADER_DEPS INCLUDE_DIRS LINK_LIBS INSTALL_DIR OSX_INSTALL_RPATH LINUX_INSTALL_RPATH )
+  set ( multiValueArgs SIP_SRCS HEADER_DEPS SYSTEM_INCLUDE_DIRS INCLUDE_DIRS LINK_LIBS INSTALL_DIR
+                       OSX_INSTALL_RPATH LINUX_INSTALL_RPATH )
   cmake_parse_arguments ( PARSED "${options}" "${oneValueArgs}"
                          "${multiValueArgs}" ${ARGN} )
 
@@ -63,32 +65,43 @@ function ( mtd_add_sip_module )
   endforeach ()
 
   # Run sip code generator
+  if ( PARSED_PYQT_VERSION EQUAL 4 AND USE_PRIVATE_SIPPYQT4 )
+    set ( _sip_include_dir ${PYQT4_SIP_INCLUDE_DIR} )
+    set ( _sip_executable ${PYQT4_SIP_EXECUTABLE} )
+  else ()
+    set ( _sip_include_dir ${SIP_INCLUDE_DIR} )
+    set ( _sip_executable ${SIP_EXECUTABLE} )
+  endif ()
+
   set ( _module_spec ${CMAKE_CURRENT_BINARY_DIR}/${PARSED_MODULE_NAME}.sip )
   configure_file ( ${_sipmodule_template_path} ${_module_spec} )
   set ( _pyqt_sip_dir ${PYQT${PARSED_PYQT_VERSION}_SIP_DIR} )
+  set ( _sip_wrapper ${CMAKE_SOURCE_DIR}/tools/sip/sipwrapper.py)
   list ( APPEND _sip_include_flags "-I${_pyqt_sip_dir}" )
   set ( _pyqt_sip_flags ${PYQT${PARSED_PYQT_VERSION}_SIP_FLAGS} )
   set ( _sip_generated_cpp ${CMAKE_CURRENT_BINARY_DIR}/sip${PARSED_MODULE_NAME}part0.cpp )
   add_custom_command ( OUTPUT ${_sip_generated_cpp}
-    COMMAND ${SIP_EXECUTABLE}
+    COMMAND ${PYTHON_EXECUTABLE} ${_sip_wrapper} ${_sip_executable}
       ${_sip_include_flags} ${_pyqt_sip_flags}
       -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w -e ${_module_spec}
-    DEPENDS ${_module_spec} ${_sip_include_deps} ${SIP_INCLUDE_DIR}/sip.h
+    DEPENDS ${_module_spec} ${_sip_include_deps}
     COMMENT "Generating ${PARSED_MODULE_NAME} python bindings with sip"
   )
 
   add_library ( ${PARSED_TARGET_NAME} MODULE ${_sip_generated_cpp} ${_sip_include_deps} )
-  if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" )
-    prune_usr_local_include ( ${PARSED_LINK_LIBS} )
-    if ( NOT (SIP_INCLUDE_DIR STREQUAL /usr/local/include) )
-      target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${SIP_INCLUDE_DIR} )
-    endif ()
-  else()
-    target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${SIP_INCLUDE_DIR} )
-  endif ()
+  # Suppress Warnings about sip bindings have PyObject -> PyFunc casts which
+  # is a valid pattern GCC8 onwards detects
+  # GCC 8 onwards needs to disable functional casting at the Python interface
+  target_compile_options( ${PARSED_TARGET_NAME} PRIVATE
+    $<$<AND:$<CXX_COMPILER_ID:GNU>,$<VERSION_GREATER_EQUAL:$<CXX_COMPILER_VERSION>,8.0>>:-Wno-cast-function-type> )
+  target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${_sip_include_dir} ${PYTHON_INCLUDE_PATH})
   target_include_directories ( ${PARSED_TARGET_NAME} PRIVATE ${PARSED_INCLUDE_DIRS} )
+  target_include_directories ( ${PARSED_TARGET_NAME} SYSTEM PRIVATE ${PARSED_SYSTEM_INCLUDE_DIRS} )
   target_link_libraries ( ${PARSED_TARGET_NAME} PRIVATE ${PARSED_LINK_LIBS} )
 
+  if ( PARSED_PYQT_VERSION EQUAL 4 AND USE_PRIVATE_SIPPYQT4 )
+    add_dependencies( ${PARSED_TARGET_NAME} extern-pyqt4 )
+  endif ()
   # Set all required properties on the target
   set_target_properties ( ${PARSED_TARGET_NAME} PROPERTIES
     LIBRARY_OUTPUT_NAME ${PARSED_MODULE_NAME} )
@@ -99,7 +112,7 @@ function ( mtd_add_sip_module )
       LIBRARY_OUTPUT_DIRECTORY ${PARSED_MODULE_OUTPUT_DIR} )
   endif ()
 
-  if (OSX_VERSION VERSION_GREATER 10.8)
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     if (PARSED_OSX_INSTALL_RPATH)
       set_target_properties ( ${PARSED_TARGET_NAME} PROPERTIES INSTALL_RPATH  "${PARSED_OSX_INSTALL_RPATH}" )
     endif()

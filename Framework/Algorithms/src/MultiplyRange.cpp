@@ -58,7 +58,7 @@ void MultiplyRange::exec() {
   double factor = getProperty("Factor");
 
   // A few checks on the input properties
-  const int specSize = static_cast<int>(inputWS->blocksize());
+  const auto specSize = static_cast<int>(inputWS->blocksize());
   if (isEmpty(endBin))
     endBin = specSize - 1;
 
@@ -79,7 +79,7 @@ void MultiplyRange::exec() {
   }
 
   // Get the count of histograms in the input workspace
-  const int histogramCount = static_cast<int>(inputWS->getNumberHistograms());
+  const auto histogramCount = static_cast<int>(inputWS->getNumberHistograms());
   Progress progress(this, 0.0, 1.0, histogramCount);
   // Loop over spectra
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
@@ -90,12 +90,13 @@ void MultiplyRange::exec() {
     auto &newE = outputWS->mutableE(i);
 
     // Now multiply the requested range
+    using std::placeholders::_1;
     std::transform(newY.begin() + startBin, newY.begin() + endBin + 1,
                    newY.begin() + startBin,
-                   std::bind2nd(std::multiplies<double>(), factor));
+                   std::bind(std::multiplies<double>(), _1, factor));
     std::transform(newE.begin() + startBin, newE.begin() + endBin + 1,
                    newE.begin() + startBin,
-                   std::bind2nd(std::multiplies<double>(), factor));
+                   std::bind(std::multiplies<double>(), _1, factor));
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION

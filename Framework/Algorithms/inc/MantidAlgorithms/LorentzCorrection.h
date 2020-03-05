@@ -25,10 +25,15 @@ public:
   }
   const std::string category() const override;
   const std::string summary() const override;
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   void init() override;
   void exec() override;
+  void processTOF_SCD(Mantid::API::MatrixWorkspace_sptr &wksp,
+                      Mantid::API::Progress &prog);
+  void processTOF_PD(Mantid::API::MatrixWorkspace_sptr &wksp,
+                     Mantid::API::Progress &prog);
 };
 
 } // namespace Algorithms

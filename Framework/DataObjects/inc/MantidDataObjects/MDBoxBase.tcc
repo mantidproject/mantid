@@ -127,7 +127,7 @@ TMDE(std::vector<Mantid::Kernel::VMD> MDBoxBase)::getVertexes() const {
     } // (for each dimension)
 
     // Create the coordinate object and add it to the vector
-    out.push_back(Mantid::Kernel::VMD(nd, coords));
+    out.emplace_back(Mantid::Kernel::VMD(nd, coords));
   }
 
   return out;

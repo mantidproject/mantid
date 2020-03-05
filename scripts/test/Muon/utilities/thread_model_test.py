@@ -7,7 +7,7 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication
 
 from Muon.GUI.Common.thread_model import ThreadModel
@@ -58,7 +58,8 @@ class testModel:
         pass
 
 
-class LoadFileWidgetViewTest(GuiTest):
+@start_qapplication
+class LoadFileWidgetViewTest(unittest.TestCase):
     class Runner:
         """This runner class creates a main event loop for threaded code to run within (otherwise the threaded
         code will not connect signals/slots properly).

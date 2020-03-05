@@ -49,10 +49,25 @@ class ExperimentInfoTest(unittest.TestCase):
         # No instrument in test workspace, so size is 0.
         self.assertEqual(detInfo.size(), 0)
 
-#    def test_set_and_get_efixed(self):
-#      ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 5, False, False)
-#        ws.setEFixed(1, pi)
-#      self.assertEqual(ws.getEFixed(1), pi)
+    def test_setSample(self):
+        sample = Sample()
+        sample.setThickness(12.5)
+
+        self._expt_ws.setSample(sample)
+        held_sample = self._expt_ws.sample()
+
+        self.assertNotEqual(id(held_sample), id(sample))
+        self.assertEqual(held_sample.getThickness(), sample.getThickness())
+
+    def test_setRun(self):
+        run = Run()
+        run.addProperty("run_property", 1, True)
+
+        self._expt_ws.setRun(run)
+        held_run = self._expt_ws.run()
+
+        self.assertNotEqual(id(held_run), id(run))
+        self.assertTrue(held_run.hasProperty('run_property'))
 
 if __name__ == '__main__':
     unittest.main()

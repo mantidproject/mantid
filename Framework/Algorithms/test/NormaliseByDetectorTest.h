@@ -381,11 +381,10 @@ public:
       const auto &wavelength = outWS->points(wsIndex);
       for (size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex) {
         const double expectedValue =
-            yInputValues[binIndex] /
-            ((2 * wavelength[binIndex]) +
-             1); // According to the equation written into
-                 // the instrument parameter file for the
-                 // instrument component link.
+            yInputValues[binIndex] / ((2 * wavelength[binIndex]) +
+                                      1); // According to the equation written
+                                          // into the instrument parameter file
+                                          // for the instrument component link.
         TS_ASSERT_EQUALS(expectedValue, yValues[binIndex]);
         const double expectedError =
             (eInputValues[binIndex] * expectedValue) /
@@ -440,11 +439,10 @@ public:
       for (size_t binIndex = 0; binIndex < (xInputValues.size() - 1);
            ++binIndex) {
         const double expectedValue =
-            yInputValues[binIndex] /
-            ((2 * wavelength[binIndex]) +
-             1); // According to the equation written into
-                 // the instrument parameter file for the
-                 // instrument component link.
+            yInputValues[binIndex] / ((2 * wavelength[binIndex]) +
+                                      1); // According to the equation written
+                                          // into the instrument parameter file
+                                          // for the instrument component link.
         // Compare against the known/calculated value.
         TS_ASSERT_EQUALS(expectedValue, yValuesParallel[binIndex]);
         // Compare results from different execution types.

@@ -26,7 +26,6 @@ set(SRC_FILES
     src/HardThresholdBackground.cpp
     src/HasUB.cpp
     src/IndexPeaks.cpp
-    src/IndexPeaksWithSatellites.cpp
     src/IndexSXPeaks.cpp
     src/IntegratePeakTimeSlices.cpp
     src/IntegratePeaksHybrid.cpp
@@ -39,6 +38,7 @@ set(SRC_FILES
     src/NormaliseVanadium.cpp
     src/OptimizeCrystalPlacement.cpp
     src/OptimizeLatticeForCellType.cpp
+    src/PeakAlgorithmHelpers.cpp
     src/PeakBackground.cpp
     src/PeakClusterProjection.cpp
     src/PeakHKLErrors.cpp
@@ -102,7 +102,6 @@ set(INC_FILES
     inc/MantidCrystal/HasUB.h
     inc/MantidCrystal/ICluster.h
     inc/MantidCrystal/IndexPeaks.h
-    inc/MantidCrystal/IndexPeaksWithSatellites.h
     inc/MantidCrystal/IndexSXPeaks.h
     inc/MantidCrystal/IntegratePeakTimeSlices.h
     inc/MantidCrystal/IntegratePeaksHybrid.h
@@ -115,6 +114,7 @@ set(INC_FILES
     inc/MantidCrystal/NormaliseVanadium.h
     inc/MantidCrystal/OptimizeCrystalPlacement.h
     inc/MantidCrystal/OptimizeLatticeForCellType.h
+    inc/MantidCrystal/PeakAlgorithmHelpers.h
     inc/MantidCrystal/PeakBackground.h
     inc/MantidCrystal/PeakClusterProjection.h
     inc/MantidCrystal/PeakHKLErrors.h
@@ -173,7 +173,6 @@ set(TEST_FILES
     HardThresholdBackgroundTest.h
     HasUBTest.h
     IndexPeaksTest.h
-    IndexPeaksWithSatellitesTest.h
     IndexSXPeaksTest.h
     IntegratePeakTimeSlicesTest.h
     IntegratePeaksHybridTest.h
@@ -232,7 +231,7 @@ endif()
 add_library(Crystal ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties(Crystal PROPERTIES OUTPUT_NAME MantidCrystal)
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Crystal
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS/")

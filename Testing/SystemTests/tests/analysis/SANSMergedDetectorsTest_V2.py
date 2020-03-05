@@ -48,7 +48,7 @@ class SANSMergedDetectorsTest_V2(systemtesting.MantidSystemTest):
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
         self.tolerance = 1e-07
-        return '28797merged_1D_1.75_16.5', 'SANS2DTUBES_Merged_Reduction.nxs'
+        return '28797_merged_1D_1.75_16.5', 'SANS2DTUBES_Merged_Reduction.nxs'
 
     def cleanup(self):
         # Delete all workspaces

@@ -6,9 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from testhelpers import illhelpers, run_algorithm
+from testhelpers import assert_almost_equal, illhelpers, run_algorithm
 from mantid.api import mtd
-import numpy.testing
 import unittest
 
 
@@ -48,7 +47,6 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
             'SimulationInstrument': 'Sparse Instrument',
             'SparseInstrumentRows': 3,
             'SparseInstrumentColumns': 2,
-            'NumberOfSimulatedWavelengths': 3,
             'rethrow': True
         }
         run_algorithm('DirectILLSelfShielding', **kwargs)
@@ -58,7 +56,7 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
         self.assertEqual(outWS.getNumberHistograms(), inWS.getNumberHistograms())
         xs = outWS.extractX()
         originalXs = inWS.extractX()
-        numpy.testing.assert_almost_equal(xs, originalXs[:, :])
+        assert_almost_equal(xs, originalXs[:, :])
 
     def testOutputHasCommonBinningWithInput(self):
         self._setDefaultSample(self._TEST_WS_NAME)
@@ -75,7 +73,7 @@ class DirectILLSelfShieldingTest(unittest.TestCase):
         self.assertEqual(outWS.getNumberHistograms(), inWS.getNumberHistograms())
         xs = outWS.extractX()
         originalXs = inWS.extractX()
-        numpy.testing.assert_almost_equal(xs, originalXs[:, :])
+        assert_almost_equal(xs, originalXs[:, :])
 
     def _setDefaultSample(self, wsName):
         geometry = {

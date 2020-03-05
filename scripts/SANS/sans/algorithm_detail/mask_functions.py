@@ -6,13 +6,24 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from collections import (namedtuple, Sequence)
-from sans.common.enums import (SANSInstrument, DetectorOrientation, DetectorType)
+
+from mantid.py3compat import Enum
+from sans.common.enums import (DetectorType, SANSInstrument)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
 detector_shape_bundle = namedtuple("detector_shape_bundle", 'rectangular_shape, width, height, '
                                                             'number_of_pixels_override')
 geometry_bundle = namedtuple("geometry_bundle", 'shape, first_low_angle_spec_number')
+
+
+class DetectorOrientation(Enum):
+    """
+    Defines the detector orientation.
+    """
+    HORIZONTAL = "Horizontal"
+    ROTATED = "Rotated"
+    VERTICAL = "Vertical"
 
 
 def get_geometry_information(ipf_path, detector_type):
@@ -118,22 +129,22 @@ class SpectraBlock(object):
         if self._instrument is SANSInstrument.SANS2D:
             if self._run_number < 568:
                 self._first_spectrum_number = 1
-                self._detector_orientation = DetectorOrientation.Vertical
+                self._detector_orientation = DetectorOrientation.VERTICAL
             elif 568 <= self._run_number < 684:
                 self._first_spectrum_number = 9
-                self._detector_orientation = DetectorOrientation.Rotated
+                self._detector_orientation = DetectorOrientation.ROTATED
             else:
                 self._first_spectrum_number = 9
-                self._detector_orientation = DetectorOrientation.Horizontal
+                self._detector_orientation = DetectorOrientation.HORIZONTAL
         elif self._instrument is SANSInstrument.LARMOR:
             self._first_spectrum_number = 10
-            self._detector_orientation = DetectorOrientation.Horizontal
+            self._detector_orientation = DetectorOrientation.HORIZONTAL
         elif self._instrument is SANSInstrument.LOQ:
             self._first_spectrum_number = 3
-            self._detector_orientation = DetectorOrientation.Horizontal
+            self._detector_orientation = DetectorOrientation.HORIZONTAL
         elif self._instrument is SANSInstrument.ZOOM:
             self._first_spectrum_number = 9
-            self._detector_orientation = DetectorOrientation.Horizontal
+            self._detector_orientation = DetectorOrientation.HORIZONTAL
         else:
             raise RuntimeError("MaskParser: Cannot handle masking request for "
                                "instrument {0}".format(str(self._instrument)))
@@ -160,16 +171,16 @@ class SpectraBlock(object):
         base_spectrum_number = self._first_spectrum_number
 
         output = []
-        if self._detector_orientation == DetectorOrientation.Horizontal:
+        if self._detector_orientation == DetectorOrientation.HORIZONTAL:
             start_spectrum = base_spectrum_number + y_lower * detector_dimension + x_lower
             for y in range(0, y_dim):
                 output.extend((start_spectrum + (y * detector_dimension) + x for x in range(0, x_dim)))
-        elif self._detector_orientation == DetectorOrientation.Vertical:
+        elif self._detector_orientation == DetectorOrientation.VERTICAL:
             start_spectrum = base_spectrum_number + x_lower * detector_dimension + y_lower
             for x in range(detector_dimension - 1, detector_dimension - x_dim - 1, -1):
                 output.extend((start_spectrum + ((detector_dimension - x - 1) * detector_dimension) + y
                                for y in range(0, y_dim)))
-        elif self._detector_orientation == DetectorOrientation.Rotated:
+        elif self._detector_orientation == DetectorOrientation.ROTATED:
             # This is the horizontal one rotated so need to map the x_low and y_low to their rotated versions
             start_spectrum = base_spectrum_number + y_lower * detector_dimension + x_lower
             max_spectrum = detector_dimension * detector_dimension + base_spectrum_number - 1

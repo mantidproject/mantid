@@ -118,13 +118,13 @@ void StatisticsOfPeaksWorkspace::exec() {
   // We must sort the peaks
   std::vector<std::pair<std::string, bool>> criteria;
   if (sortType.compare(0, 2, "Re") == 0)
-    criteria.push_back(std::pair<std::string, bool>("DSpacing", false));
+    criteria.emplace_back(std::pair<std::string, bool>("DSpacing", false));
   else if (sortType.compare(0, 2, "Ru") == 0)
-    criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.push_back(std::pair<std::string, bool>("BankName", true));
-  criteria.push_back(std::pair<std::string, bool>("h", true));
-  criteria.push_back(std::pair<std::string, bool>("k", true));
-  criteria.push_back(std::pair<std::string, bool>("l", true));
+    criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
+  criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
+  criteria.emplace_back(std::pair<std::string, bool>("h", true));
+  criteria.emplace_back(std::pair<std::string, bool>("k", true));
+  criteria.emplace_back(std::pair<std::string, bool>("l", true));
   ws->sort(criteria);
 
   // =========================================

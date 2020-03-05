@@ -9,7 +9,7 @@
 
 #include "MantidAPI/IAlgorithm.h"
 
-#include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/core/PythonObjectInstantiator.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/python/object.hpp>

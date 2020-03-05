@@ -36,7 +36,6 @@ set(INC_FILES
     inc/MantidICat/CatalogMyDataSearch.h
     inc/MantidICat/CatalogSearch.h
     inc/MantidICat/CatalogSearchParam.h
-    inc/MantidICat/DllConfig.h
     inc/MantidICat/GSoap/soapserializersH.h
     inc/MantidICat/GSoap/soapserializersStub.h
     inc/MantidICat/GSoap/stdsoap2.h
@@ -90,7 +89,7 @@ set_target_properties(ICat
                                  COMPILE_DEFINITIONS
                                  IN_MANTID_ICAT)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(ICat
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")
@@ -113,6 +112,9 @@ target_link_libraries(ICat
 # Add the unit tests directory
 add_subdirectory(test)
 
-# Installation settings
+# Auto-generate exports header
+target_include_directories(ICat PUBLIC ${CMAKE_BINARY_DIR}/Framework/ICat)
+generate_mantid_export_header(ICat)
 
+# Installation settings
 install(TARGETS ICat ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR})

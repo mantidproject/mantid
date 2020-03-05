@@ -128,7 +128,7 @@ private:
     std::vector<std::string> histNames;
     auto histories = inputWS->history().getAlgorithmHistories();
     for (auto &hist : histories) {
-      histNames.push_back(hist->name());
+      histNames.emplace_back(hist->name());
     }
     return histNames;
   }

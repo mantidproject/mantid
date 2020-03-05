@@ -50,8 +50,8 @@ class WorkspaceSaver(object):
                 else:
                     # Save normally using SaveNexusProcessed
                     SaveNexusProcessed(InputWorkspace=workspace_name, Filename=place_to_save_workspace + ".nxs")
-            except Exception:
-                logger.warning("Couldn't save workspace in project: " + workspace)
+            except Exception as exc:
+                logger.warning("Couldn't save workspace in project: \"" + workspace_name + "\" because " + str(exc))
 
             self.output_list.append(workspace_name)
 

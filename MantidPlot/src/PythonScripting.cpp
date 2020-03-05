@@ -272,14 +272,22 @@ void PythonScripting::setupSip() {
   // Our use of the IPython console requires that we use the v2 api for these
   // PyQt types. This has to be set before the very first import of PyQt
   // which happens on importing _qti
-  PyObject *sipmod = PyImport_ImportModule("sip");
+  // Some environments now have a private sip module inside PyQt itself. Try
+  // this first.
+  PyObject *sipmod = PyImport_ImportModule("PyQt4.sip");
+  if (!sipmod) {
+    PyErr_Clear();
+    sipmod = PyImport_ImportModule("sip");
+  }
   if (sipmod) {
     constexpr std::array<const char *, 7> v2Types = {
         {"QString", "QVariant", "QDate", "QDateTime", "QTextStream", "QTime",
          "QUrl"}};
     for (const auto &className : v2Types) {
-      PyObject_CallMethod(sipmod, STR_LITERAL("setapi"), STR_LITERAL("(si)"),
-                          className, 2);
+      auto result = PyObject_CallMethod(sipmod, STR_LITERAL("setapi"),
+                                        STR_LITERAL("(si)"), className, 2);
+      if (!result)
+        PyErr_Print();
     }
     Py_DECREF(sipmod);
   }

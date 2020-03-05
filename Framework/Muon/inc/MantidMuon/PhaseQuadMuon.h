@@ -13,6 +13,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -21,7 +22,7 @@ namespace Algorithms {
 @author Raquel Alvarez, ISIS, RAL
 @date 1/12/2014
 */
-class DLLExport PhaseQuadMuon : public API::Algorithm {
+class MANTID_MUON_DLL PhaseQuadMuon : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PhaseQuad"; }

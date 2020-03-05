@@ -24,8 +24,8 @@
 
 using Mantid::Geometry::InstrumentDefinitionParser;
 using Poco::XML::AutoPtr;
-using Poco::XML::DOMParser;
 using Poco::XML::Document;
+using Poco::XML::DOMParser;
 using Poco::XML::Element;
 
 namespace Mantid {

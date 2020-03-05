@@ -105,7 +105,7 @@ public:
   }
 
   void test_input_md_workspace_mandatory() {
-    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace();
+    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     IntegratePeaksHybrid alg;
     alg.setRethrows(true);
@@ -119,7 +119,7 @@ public:
   }
 
   void test_outer_radius_mandatory() {
-    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace();
+    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     IMDEventWorkspace_sptr mdws = boost::static_pointer_cast<IMDEventWorkspace>(
         MDEventsTestHelper::makeMDEW<3>(10, 0, 10));
@@ -136,7 +136,7 @@ public:
   }
 
   void test_throw_if_special_coordinates_unknown() {
-    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace();
+    auto peaksws = WorkspaceCreationHelper::createPeaksWorkspace(2);
     IMDEventWorkspace_sptr mdws = boost::static_pointer_cast<IMDEventWorkspace>(
         MDEventsTestHelper::makeMDEW<3>(10, 0, 10));
 
@@ -320,8 +320,8 @@ public:
     const double backgroundOuterRadius = peakRadiusVec[0] * 3;
     const size_t nBins = 10;
     std::vector<size_t> nEventsInPeakVec;
-    nEventsInPeakVec.push_back(10000);
-    nEventsInPeakVec.push_back(
+    nEventsInPeakVec.emplace_back(10000);
+    nEventsInPeakVec.emplace_back(
         20000); // Second peak has DOUBLE the intensity of the firse one.
 
     MDEventPeaksWSTuple inputWorkspaces =

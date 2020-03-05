@@ -25,4 +25,4 @@ class SANS2DLimitEventsTimeTest_V2(systemtesting.MantidSystemTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         self.disableChecking.append('Instrument')
-        return '22048rear_1D_1.5_12.5', 'SANSReductionGUI_LimitEventsTime.nxs'
+        return '22048_rear_1D_1.5_12.5', 'SANSReductionGUI_LimitEventsTime.nxs'

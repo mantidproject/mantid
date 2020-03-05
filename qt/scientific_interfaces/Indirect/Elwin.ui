@@ -292,49 +292,24 @@
       </item>
       <item>
        <widget class="QGroupBox" name="gbOutput">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>56</height>
+         </size>
+        </property>
         <property name="title">
          <string>Output</string>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>7</number>
+         </property>
          <item>
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Workspace:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="cbPlotWorkspace">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>200</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="sizeAdjustPolicy">
-            <enum>QComboBox::AdjustToContents</enum>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="spPlotSpectrum">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pbPlot">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Plot Spectrum</string>
-           </property>
-          </widget>
+          <widget class="MantidQt::CustomInterfaces::IndirectPlotOptionsView" name="ipoPlotOptions" native="true"/>
          </item>
          <item>
           <spacer name="horizontalSpacer_1">
@@ -369,15 +344,21 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>MantidQt::API::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::IndirectPlotOptionsView</class>
+   <extends>QWidget</extends>
+   <header>IndirectPlotOptionsView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>MantidQt::MantidWidgets::PreviewPlot</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>MantidQt::API::MWRunFiles</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

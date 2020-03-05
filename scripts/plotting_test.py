@@ -32,9 +32,9 @@ class plotTestGui(QtGui.QMainWindow):
         self.test.add_subplot("baa")
         self.test.add_subplot("EXTRA")
 
-        self.test.plot("test", ws, specNum=26)
-        self.test.plot("test", ws, specNum=21)
-        self.test.plot("test", ws, specNum=22)
+        self.test.plot("test", ws, spec_num=26)
+        self.test.plot("test", ws, spec_num=21)
+        self.test.plot("test", ws, spec_num=22)
         # defines position of label
         dummy = Label("dummy", 10.1, False, 0.9, True, rotation=-90)
         dummy2 = Label(
@@ -57,10 +57,10 @@ class plotTestGui(QtGui.QMainWindow):
         self.test.add_annotate("bob", dummy3)
         self.test.add_vline("bob", 1.2, "just a line")
 
-        self.test.plot("bob", ws, specNum=1)
-        self.test.plot("EXTRA", ws, specNum=42)
-        self.test.plot("moo", ws, specNum=42)
-        self.test.plot("baa", ws, specNum=2)
+        self.test.plot("bob", ws, spec_num=1)
+        self.test.plot("EXTRA", ws, spec_num=42)
+        self.test.plot("moo", ws, spec_num=42)
+        self.test.plot("baa", ws, spec_num=2)
         self.test.set_all_values()
 
         self.test.connectCloseSignal(self.close)
@@ -82,7 +82,7 @@ class plotTestGui(QtGui.QMainWindow):
     def add(self):
         self.n += 1
         self.test.add_subplot(str(self.n))
-        self.test.plot(str(self.n), self.ws, specNum=self.n)
+        self.test.plot(str(self.n), self.ws, spec_num=self.n)
 
 
 def setUpSubplot():

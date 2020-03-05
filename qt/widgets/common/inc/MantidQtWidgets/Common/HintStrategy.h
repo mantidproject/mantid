@@ -9,8 +9,8 @@
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/Hint.h"
+#include <map>
 #include <string>
-#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {

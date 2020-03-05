@@ -20,11 +20,14 @@ from sans.common.constant_containers import (SANSInstrument_enum_list, SANSInstr
 from sans.common.constants import (SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME,
                                    REDUCED_CAN_TAG)
 from sans.common.log_tagger import (get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash)
-from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ISISReductionMode,
-                               SANSInstrument, SANSFacility, DataType, TransmissionType)
+from sans.common.enums import (DetectorType, RangeStepType, ReductionDimensionality, OutputParts, ReductionMode,
+                               SANSFacility, DataType, TransmissionType, SANSInstrument)
+
 # -------------------------------------------
 # Constants
 # -------------------------------------------
+from sans.state.Serializer import Serializer
+
 ALTERNATIVE_SANS2D_NAME = "SAN"
 
 
@@ -168,6 +171,7 @@ def get_input_workspace_as_copy_if_not_same_as_output_workspace(alg):
     :param alg: a handle to the algorithm which has a InputWorkspace property and a OutputWorkspace property
     :return: a workspace
     """
+
     def _clone_input(_ws):
         clone_name = "CloneWorkspace"
         clone_options = {"InputWorkspace": _ws,
@@ -205,8 +209,8 @@ def quaternion_to_angle_and_axis(quaternion):
     The conversion from a quaternion to an angle + axis is explained here:
     http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToAngle/
     """
-    angle = 2*acos(quaternion[0])
-    s_parameter = sqrt(1 - quaternion[0]*quaternion[0])
+    angle = 2 * acos(quaternion[0])
+    s_parameter = sqrt(1 - quaternion[0] * quaternion[0])
 
     axis = []
     # If the the angle is zero, then it does not make sense to have an axis
@@ -215,9 +219,9 @@ def quaternion_to_angle_and_axis(quaternion):
         axis.append(quaternion[2])
         axis.append(quaternion[3])
     else:
-        axis.append(quaternion[1]/s_parameter)
-        axis.append(quaternion[2]/s_parameter)
-        axis.append(quaternion[3]/s_parameter)
+        axis.append(quaternion[1] / s_parameter)
+        axis.append(quaternion[2] / s_parameter)
+        axis.append(quaternion[3] / s_parameter)
     return degrees(angle), axis
 
 
@@ -231,34 +235,9 @@ def get_charge_and_time(workspace):
     run = workspace.getRun()
     charges = run.getLogData('proton_charge')
     total_charge = sum(charges.value)
-    time_passed = int((charges.times[-1] - charges.times[0]) / np.timedelta64(1,'us')) # microseconds
+    time_passed = int((charges.times[-1] - charges.times[0]) / np.timedelta64(1, 'us'))  # microseconds
     time_passed = float(time_passed) / 1e6
     return total_charge, time_passed
-
-
-def add_to_sample_log(workspace, log_name, log_value, log_type):
-    """
-    Adds a sample log to the workspace
-
-    :param workspace: the workspace to which the sample log is added
-    :param log_name: the name of the log
-    :param log_value: the value of the log in string format
-    :param log_type: the log value type which can be String, Number, Number Series
-    """
-    if log_type not in ["String", "Number", "Number Series"]:
-        raise ValueError("Tryint go add {0} to the sample logs but it was passed "
-                         "as an unknown type of {1}".format(log_value, log_type))
-    if not isinstance(log_value, str):
-        raise TypeError("The value which is added to the sample logs needs to be passed as a string,"
-                        " but it is passed as {0}".format(type(log_value)))
-
-    add_log_name = "AddSampleLog"
-    add_log_options = {"Workspace": workspace,
-                       "LogName": log_name,
-                       "LogText": log_value,
-                       "LogType": log_type}
-    add_log_alg = create_unmanaged_algorithm(add_log_name, **add_log_options)
-    add_log_alg.execute()
 
 
 def append_to_sans_file_tag(workspace, to_append):
@@ -324,7 +303,7 @@ def convert_instrument_and_detector_type_to_bank_name(instrument, detector_type)
     elif instrument is SANSInstrument.ZOOM:
         bank_name = "rear-detector"
     else:
-        raise RuntimeError("SANSCrop: The instrument {0} is currently not supported.".format(instrument))
+        raise RuntimeError("Cropping Component: The instrument {0} is currently not supported.".format(instrument))
     return bank_name
 
 
@@ -391,7 +370,7 @@ def parse_diagnostic_settings(string_to_parse):
         if start > stop:
             raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
                              "value {1}. Make sure that this is not the case.").format(start, stop)
-        return range(start, stop+1, step)
+        return range(start, stop + 1, step)
 
     def _extract_multiple_entry(line):
         split_line = line.split(":")
@@ -418,7 +397,8 @@ def parse_diagnostic_settings(string_to_parse):
 
     multiple_entry_pattern = re.compile("\\s*" + number + "\\s*" + r':' + "\\s*" + number + "\\s*")
 
-    simple_range_with_step_pattern = re.compile("\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*" + r':' + "\\s*")
+    simple_range_with_step_pattern = re.compile(
+        "\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*" + r':' + "\\s*")
 
     slice_settings = string_to_parse.split(',')
 
@@ -449,7 +429,18 @@ def parse_diagnostic_settings(string_to_parse):
 # ----------------------------------------------------------------------------------------------------------------------
 #  Functions for bins, ranges and slices
 # ----------------------------------------------------------------------------------------------------------------------
-def parse_event_slice_setting(string_to_parse):
+class EventSliceParser(object):
+    number = r'(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)'  # float without sign
+    simple_slice_pattern = re.compile("\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*")
+    slice_range_pattern = re.compile("\\s*" + number + "\\s*" + r':' + "\\s*" + number + "\\s*"
+                                     + r':' + "\\s*" + number)
+    full_range_pattern = re.compile("\\s*" + "(<|>)" + "\\s*" + number + "\\s*")
+
+    range_marker = re.compile("[><]")
+
+    def __init__(self, input_line):
+        self.user_input = input_line
+
     """
     Create a list of boundaries from a string defining the slices.
     Valid syntax is:
@@ -465,9 +456,62 @@ def parse_event_slice_setting(string_to_parse):
 
     It does not accept negative values.
     """
-    def _does_match(compiled_regex, line):
-        return compiled_regex.match(line) is not None
 
+    @staticmethod
+    def float_range(start, stop, step):
+        while start < stop:
+            yield start
+            start += step
+
+    def parse_user_input_range(self):
+        if not self.user_input:
+            return None
+
+        # If it's a simple comma separated string of pairs skip regex
+        if self._is_comma_separated_range():
+            return self._parse_comma_separated_range()
+
+        slice_settings = self.user_input.split(',')
+        all_ranges = []
+        for slice_setting in slice_settings:
+            slice_setting = slice_setting.replace(' ', '')
+            # We can have three scenarios
+            # 1. Simple Slice:     X-Y
+            # 2. Slice range :     X:Y:Z
+            # 3. Slice full range: >X or <X
+            if self._does_match(self.simple_slice_pattern, slice_setting):
+                all_ranges.append(self._extract_simple_slice(slice_setting))
+            elif self._does_match(self.slice_range_pattern, slice_setting):
+                all_ranges.extend(self._extract_slice_range(slice_setting))
+            elif self._does_match(self.full_range_pattern, slice_setting):
+                all_ranges.append(self._extract_full_range(slice_setting, self.range_marker))
+            else:
+                raise ValueError("The provided event slice configuration {0} cannot be parsed because "
+                                 "of {1}".format(slice_settings, slice_setting))
+        return all_ranges
+
+    @staticmethod
+    def _does_match(compiled_regex, section_to_parse):
+        return compiled_regex.match(section_to_parse) is not None
+
+    def _is_comma_separated_range(self):
+        stripped_line = self.user_input.replace(' ', '')
+        if ',' not in stripped_line:
+            return False
+
+        split_line = stripped_line.split(',')
+        for character in split_line:
+            if len(character) > 1 or len(character) == 0:
+                # We likely have something like 1,2- or 1,
+                return False
+            elif not character.isdigit():
+                raise ValueError("The character {0} is not a digit.".format(character))
+
+        # Forward on result
+        self.user_input = split_line
+        return True
+
+    @staticmethod
     def _extract_simple_slice(line):
         start, stop = line.split("-")
         start = float(start)
@@ -477,11 +521,7 @@ def parse_event_slice_setting(string_to_parse):
                              "value {1}. Make sure that this is not the case.")
         return [start, stop]
 
-    def float_range(start, stop, step):
-        while start < stop:
-            yield start
-            start += step
-
+    @staticmethod
     def _extract_slice_range(line):
         split_line = line.split(":")
         start = float(split_line[0])
@@ -491,7 +531,7 @@ def parse_event_slice_setting(string_to_parse):
             raise ValueError("Parsing event slices. It appears that the start value {0} is larger than the stop "
                              "value {1}. Make sure that this is not the case.")
 
-        elements = list(float_range(start, stop, step))
+        elements = list(EventSliceParser.float_range(start, stop, step))
         # We are missing the last element
         elements.append(stop)
 
@@ -499,6 +539,7 @@ def parse_event_slice_setting(string_to_parse):
         ranges = list(zip(elements[:-1], elements[1:]))
         return [[e1, e2] for e1, e2 in ranges]
 
+    @staticmethod
     def _extract_full_range(line, range_marker_pattern):
         is_lower_bound = ">" in line
         line = re.sub(range_marker_pattern, "", line)
@@ -508,36 +549,20 @@ def parse_event_slice_setting(string_to_parse):
         else:
             return [-1., value]
 
-    # Check if the input actually exists.
-    if not string_to_parse:
-        return None
+    def _parse_comma_separated_range(self):
+        assert (isinstance(self.user_input, list))
+        output_list = []
+        for i, j in zip(self.user_input, self.user_input[1:]):
+            output_list.append([float(i), float(j)])
 
-    number = r'(\d+(?:\.\d+)?(?:[eE][+-]\d+)?)'  # float without sign
-    simple_slice_pattern = re.compile("\\s*" + number + "\\s*" r'-' + "\\s*" + number + "\\s*")
-    slice_range_pattern = re.compile("\\s*" + number + "\\s*" + r':' + "\\s*" + number + "\\s*"
-                                     + r':' + "\\s*" + number)
-    full_range_pattern = re.compile("\\s*" + "(<|>)" + "\\s*" + number + "\\s*")
+        return output_list
 
-    range_marker = re.compile("[><]")
 
-    slice_settings = string_to_parse.split(',')
-    all_ranges = []
-    for slice_setting in slice_settings:
-        slice_setting = slice_setting.replace(' ', '')
-        # We can have three scenarios
-        # 1. Simple Slice:     X-Y
-        # 2. Slice range :     X:Y:Z
-        # 3. Slice full range: >X or <X
-        if _does_match(simple_slice_pattern, slice_setting):
-            all_ranges.append(_extract_simple_slice(slice_setting))
-        elif _does_match(slice_range_pattern, slice_setting):
-            all_ranges.extend(_extract_slice_range(slice_setting))
-        elif _does_match(full_range_pattern, slice_setting):
-            all_ranges.append(_extract_full_range(slice_setting, range_marker))
-        else:
-            raise ValueError("The provided event slice configuration {0} cannot be parsed because "
-                             "of {1}".format(slice_settings, slice_setting))
-    return all_ranges
+def parse_event_slice_setting(string_to_parse):
+    # Shim to avoid having to adjust all the call sights, whilst
+    # encapsulating the extra complexity
+    parser = EventSliceParser(string_to_parse)
+    return parser.parse_user_input_range()
 
 
 def get_ranges_from_event_slice_setting(string_to_parse):
@@ -566,10 +591,10 @@ def get_bins_for_rebin_setting(min_value, max_value, step_value, step_type):
 
         bins.append(lower_bound)
         # We can either have linear or logarithmic steps. The logarithmic step depends on the lower bound.
-        if step_type is RangeStepType.Lin:
+        if step_type is RangeStepType.LIN:
             step = step_value
         else:
-            step = lower_bound*step_value
+            step = lower_bound * step_value
 
         # Check if the step will bring us out of bounds. If so, then set the new upper value to the max_value
         upper_bound = lower_bound + step
@@ -610,7 +635,7 @@ def get_ranges_for_rebin_array(rebin_array):
     min_value = rebin_array[0]
     step_value = rebin_array[1]
     max_value = rebin_array[2]
-    step_type = RangeStepType.Lin if step_value >= 0. else RangeStepType.Log
+    step_type = RangeStepType.LIN if step_value >= 0. else RangeStepType.LOG
     step_value = abs(step_value)
     return get_ranges_for_rebin_setting(min_value, max_value, step_value, step_type)
 
@@ -618,8 +643,8 @@ def get_ranges_for_rebin_array(rebin_array):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions related to workspace names
 # ----------------------------------------------------------------------------------------------------------------------
-def get_standard_output_workspace_name(state, reduction_data_type, data_type = DataType.to_string(DataType.Sample),
-                                       include_slice_limits=True):
+def get_standard_output_workspace_name(state, reduction_data_type,
+                                       include_slice_limits=True, custom_run_name=None):
     """
     Creates the name of the output workspace from a state object.
 
@@ -641,25 +666,29 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
     # 1. Short run number
     data = state.data
     short_run_number = data.sample_scatter_run_number
-    short_run_number_as_string = str(short_run_number)
+
+    # If the user has specified a custom run name we should prepend that instead
+    short_run_number_as_string = custom_run_name if custom_run_name else str(short_run_number)
+    if short_run_number_as_string[-1] != '_':
+        short_run_number_as_string = short_run_number_as_string + '_'
 
     # 2. Multiperiod
     if state.data.sample_scatter_period != ALL_PERIODS:
         period = data.sample_scatter_period
-        period_as_string = "p"+str(period)
+        period_as_string = "p" + str(period)
     else:
         period_as_string = ""
 
     # 3. Detector name
     move = state.move
     detectors = move.detectors
-    if reduction_data_type is ISISReductionMode.Merged:
+    if reduction_data_type is ReductionMode.MERGED:
         detector_name_short = "merged"
-    elif reduction_data_type is ISISReductionMode.HAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short
+    elif reduction_data_type is ReductionMode.HAB:
+        det_name = detectors[DetectorType.HAB.value].detector_name_short
         detector_name_short = det_name if det_name is not None else "hab"
-    elif reduction_data_type is ISISReductionMode.LAB:
-        det_name = detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short
+    elif reduction_data_type is ReductionMode.LAB:
+        det_name = detectors[DetectorType.LAB.value].detector_name_short
         detector_name_short = det_name if det_name is not None else "lab"
     else:
         raise RuntimeError("SANSStateFunctions: Unknown reduction data type {0} cannot be used to "
@@ -667,7 +696,7 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
 
     # 4. Dimensionality
     reduction = state.reduction
-    if reduction.reduction_dimensionality is ReductionDimensionality.OneDim:
+    if reduction.reduction_dimensionality is ReductionDimensionality.ONE_DIM:
         dimensionality_as_string = "_1D"
     else:
         dimensionality_as_string = "_2D"
@@ -678,7 +707,7 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
 
     # 6. Phi Limits
     mask = state.mask
-    if reduction.reduction_dimensionality is ReductionDimensionality.OneDim:
+    if reduction.reduction_dimensionality is ReductionDimensionality.ONE_DIM:
         if mask.phi_min and mask.phi_max and (abs(mask.phi_max - mask.phi_min) != 180.0):
             phi_limits_as_string = 'Phi' + str(mask.phi_min) + '_' + str(mask.phi_max)
         else:
@@ -698,16 +727,17 @@ def get_standard_output_workspace_name(state, reduction_data_type, data_type = D
         end_time_as_string = ""
 
     # Piece it all together
-    output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short +
-                             dimensionality_as_string + wavelength_range_string + phi_limits_as_string +
-                             start_time_as_string + end_time_as_string)
+    output_workspace_name = (short_run_number_as_string + period_as_string + detector_name_short
+                             + dimensionality_as_string + wavelength_range_string + phi_limits_as_string
+                             + start_time_as_string + end_time_as_string)
+
     output_workspace_base_name = (short_run_number_as_string + detector_name_short + dimensionality_as_string
                                   + phi_limits_as_string)
 
     return output_workspace_name, output_workspace_base_name
 
 
-def get_transmission_output_name(state, data_type=DataType.Sample, multi_reduction_type=None, fitted=True):
+def get_transmission_output_name(state, data_type=DataType.SAMPLE, multi_reduction_type=None, fitted=True):
     user_specified_output_name = state.save.user_specified_output_name
 
     data = state.data
@@ -715,10 +745,10 @@ def get_transmission_output_name(state, data_type=DataType.Sample, multi_reducti
     short_run_number_as_string = str(short_run_number)
 
     calculated_transmission_state = state.adjustment.calculate_transmission
-    fit = calculated_transmission_state.fit[DataType.to_string(DataType.Sample)]
+    fit = calculated_transmission_state.fit[DataType.SAMPLE.value]
     wavelength_range_string = "_" + str(fit.wavelength_low) + "_" + str(fit.wavelength_high)
 
-    trans_suffix = "_trans_Sample" if data_type == DataType.Sample else "_trans_Can"
+    trans_suffix = "_trans_Sample" if data_type == DataType.SAMPLE else "_trans_Can"
     trans_suffix = trans_suffix + '_unfitted' if not fitted else trans_suffix
 
     if user_specified_output_name:
@@ -743,47 +773,17 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
     # Get the external settings from the save state
     save_info = state.save
     user_specified_output_name = save_info.user_specified_output_name
-    user_specified_output_name_group = user_specified_output_name
     user_specified_output_name_suffix = save_info.user_specified_output_name_suffix
-    use_reduction_mode_as_suffix = save_info.use_reduction_mode_as_suffix
-    # This adds a reduction mode suffix in merged or all reductions so the workspaces do not overwrite each other.
-    if (
-            state.reduction.reduction_mode == ISISReductionMode.Merged or state.reduction.reduction_mode == ISISReductionMode.All) \
-            and user_specified_output_name:
-        use_reduction_mode_as_suffix = True
 
     # Get the standard workspace name
     workspace_name, \
         workspace_base_name = get_standard_output_workspace_name(state, reduction_mode,
-                                                                 include_slice_limits=(not event_slice_optimisation))
+                                                                 include_slice_limits=(not event_slice_optimisation),
+                                                                 custom_run_name=user_specified_output_name)
 
     # If user specified output name is not none then we use it for the base name
-    if user_specified_output_name and not is_group:
-        # Deal with single period data which has a user-specified name
-        output_name = user_specified_output_name
-        output_base_name = user_specified_output_name
-    elif user_specified_output_name and is_group:
-        # Deal with data which requires special attention and which has a user-specified name
-        output_name = user_specified_output_name
-        output_base_name = user_specified_output_name_group
-    elif not user_specified_output_name and is_group:
-        output_name = workspace_name
-        output_base_name = workspace_base_name
-    else:
-        output_name = workspace_name
-        output_base_name = workspace_name
-
-    # Add a reduction mode suffix if it is required
-    if use_reduction_mode_as_suffix:
-        if reduction_mode is ISISReductionMode.LAB:
-            output_name += "_rear"
-            output_base_name += "_rear"
-        elif reduction_mode is ISISReductionMode.HAB:
-            output_name += "_front"
-            output_base_name += "_front"
-        elif reduction_mode is ISISReductionMode.Merged:
-            output_name += "_merged"
-            output_base_name += "_merged"
+    output_name = workspace_name
+    output_base_name = workspace_base_name if is_group else workspace_name
 
     if multi_reduction_type and user_specified_output_name:
         if multi_reduction_type["period"]:
@@ -857,7 +857,7 @@ def get_facility(instrument):
     if instrument in SANSInstrument_enum_list:
         return SANSFacility.ISIS
     else:
-        return SANSFacility.NoFacility
+        return SANSFacility.NO_FACILITY
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -890,6 +890,7 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
     :param partial_type: if it is a partial type, then it needs to be specified here.
     :return: the hash of the state
     """
+
     def remove_sample_related_information(full_state):
         state_to_hash = deepcopy(full_state)
 
@@ -906,28 +907,29 @@ def get_state_hash_for_can_reduction(state, reduction_mode, partial_type=None):
         state_to_hash.save.user_specified_output_name = ""
 
         return state_to_hash
+
     new_state = remove_sample_related_information(state)
-    new_state_serialized = new_state.property_manager
+    new_state_serialized = Serializer.to_json(new_state)
     new_state_serialized = json.dumps(new_state_serialized, sort_keys=True, indent=4)
 
     # Add a tag for the reduction mode
     state_string = str(new_state_serialized)
-    if reduction_mode is ISISReductionMode.LAB:
+    if reduction_mode is ReductionMode.LAB:
         state_string += "LAB"
-    elif reduction_mode is ISISReductionMode.HAB:
+    elif reduction_mode is ReductionMode.HAB:
         state_string += "HAB"
     else:
         raise RuntimeError("Only LAB and HAB reduction modes are allowed at this point."
                            " {} was provided".format(reduction_mode))
 
     # If we are dealing with a partial output workspace, then mark it as such
-    if partial_type is OutputParts.Count:
+    if partial_type is OutputParts.COUNT:
         state_string += "counts"
-    elif partial_type is OutputParts.Norm:
+    elif partial_type is OutputParts.NORM:
         state_string += "norm"
-    elif partial_type is TransmissionType.Calculated:
+    elif partial_type is TransmissionType.CALCULATED:
         state_string += "calculated_transmission"
-    elif partial_type is TransmissionType.Unfitted:
+    elif partial_type is TransmissionType.UNFITTED:
         state_string += "unfitted_transmission"
     return str(get_hash_value(state_string))
 
@@ -953,9 +955,9 @@ def get_reduced_can_workspace_from_ads(state, output_parts, reduction_mode):
     reduced_can_count = None
     reduced_can_norm = None
     if output_parts:
-        hashed_state_count = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.Count)
+        hashed_state_count = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.COUNT)
         reduced_can_count = get_workspace_from_ads_based_on_hash(hashed_state_count)
-        hashed_state_norm = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.Norm)
+        hashed_state_norm = get_state_hash_for_can_reduction(state, reduction_mode, OutputParts.NORM)
         reduced_can_norm = get_workspace_from_ads_based_on_hash(hashed_state_norm)
     return reduced_can, reduced_can_count, reduced_can_norm
 
@@ -968,9 +970,9 @@ def get_transmission_workspaces_from_ads(state, reduction_mode):
         :param reduction_mode: the reduction mode which at this point is either HAB or LAB
         :return: a reduced transmission can object or None.
         """
-    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Calculated)
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.CALCULATED)
     calculated_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
-    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.Unfitted)
+    hashed_state = get_state_hash_for_can_reduction(state, reduction_mode, TransmissionType.UNFITTED)
     unfitted_transmission = get_workspace_from_ads_based_on_hash(hashed_state)
     return calculated_transmission, unfitted_transmission
 
@@ -1018,6 +1020,7 @@ def get_bank_for_spectrum_number(spectrum_number, instrument):
     :returns: either LAB or HAB
     """
     detector = DetectorType.LAB
+
     if instrument is SANSInstrument.LOQ:
         if 16387 <= spectrum_number <= 17784:
             detector = DetectorType.HAB

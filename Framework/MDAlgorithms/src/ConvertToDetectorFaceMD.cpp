@@ -100,7 +100,7 @@ void ConvertToDetectorFaceMD::convertEventList(
   auto it_end = events.end();
 
   for (; it != it_end; it++) {
-    coord_t tof = static_cast<coord_t>(it->tof());
+    auto tof = static_cast<coord_t>(it->tof());
     if (nd == 3) {
       coord_t center[3] = {x, y, tof};
       out_events.emplace_back(float(it->weight()), float(it->errorSquared()),
@@ -239,7 +239,7 @@ void ConvertToDetectorFaceMD::exec() {
     MDHistoDimension_sptr dimBanks(new MDHistoDimension(
         "bank", "bank", frameNumber, static_cast<coord_t>(min),
         static_cast<coord_t>(max), max - min));
-    dims.push_back(dimBanks);
+    dims.emplace_back(dimBanks);
   }
 
   // --------- Create the workspace with the right number of dimensions
@@ -274,9 +274,9 @@ void ConvertToDetectorFaceMD::exec() {
           throw std::runtime_error("Invalid workspace index found in bank " +
                                    det->getName() + "!");
 
-        coord_t xPos = static_cast<coord_t>(x);
-        coord_t yPos = static_cast<coord_t>(y);
-        coord_t bankPos = static_cast<coord_t>(bankNum);
+        auto xPos = static_cast<coord_t>(x);
+        auto yPos = static_cast<coord_t>(y);
+        auto bankPos = static_cast<coord_t>(bankNum);
 
         EventList &el = in_ws->getSpectrum(wi);
 

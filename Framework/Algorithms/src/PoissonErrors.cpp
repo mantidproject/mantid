@@ -41,7 +41,7 @@ void PoissonErrors::performBinaryOperation(const HistogramData::Histogram &lhs,
   // Just copy over the lhs data
   YOut = lhs.y();
   // Now make the fractional error the same as it was on the rhs
-  const int bins = static_cast<int>(lhs.e().size());
+  const auto bins = static_cast<int>(lhs.e().size());
   for (int j = 0; j < bins; ++j) {
     if (rhs.y()[j] != 0.0)
       EOut[j] = rhs.e()[j] / rhs.y()[j] * lhs.y()[j];

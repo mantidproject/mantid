@@ -22,9 +22,9 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
-using ::testing::_;
 
 class BasicHKLFiltersTest : public CxxTest::TestSuite {
 public:
@@ -34,6 +34,15 @@ public:
     return new BasicHKLFiltersTest();
   }
   static void destroySuite(BasicHKLFiltersTest *suite) { delete suite; }
+
+  void testHKLFilterNone() {
+    HKLFilterNone filter;
+
+    TS_ASSERT(filter.isAllowed(V3D(1, 2, 3)))
+    TS_ASSERT(filter.isAllowed(V3D(-1, -2, 3)))
+    TS_ASSERT(filter.isAllowed(V3D(-1, -2, -3)))
+    TS_ASSERT(filter.isAllowed(V3D(120380123, 4012983, -131233)))
+  }
 
   void testHKLFilterDRangeConstructors() {
     UnitCell cell(10., 10., 10.);

@@ -30,7 +30,7 @@ class GeneralAbInitioProgram(object):
         self._sample_form = None
         self._ab_initio_program = None
         self._clerk = AbinsModules.IOmodule(input_filename=input_ab_initio_filename,
-                                            group_name=AbinsModules.AbinsParameters.ab_initio_group)
+                                            group_name=AbinsModules.AbinsParameters.hdf_groups['ab_initio_data'])
 
     def read_vibrational_or_phonon_data(self):
         """
@@ -170,7 +170,7 @@ class GeneralAbInitioProgram(object):
                       "unit_cell": data["unit_cell"]
                       })
 
-        atoms = AbinsModules.AtomsDaTa(num_atoms=self._num_atoms)
+        atoms = AbinsModules.AtomsData(num_atoms=self._num_atoms)
         atoms.set(data["atoms"])
 
         result_data = AbinsModules.AbinsData()
@@ -192,10 +192,6 @@ class GeneralAbInitioProgram(object):
 
         # try to load ab initio data from *.hdf5 file
         try:
-            if self._ab_initio_program != self._clerk.get_previous_ab_initio_program():
-                raise ValueError("Different ab initio program was used in the previous calculation. Data in the hdf "
-                                 "file will be erased.")
-
             self._clerk.check_previous_data()
 
             ab_initio_data = self.load_formatted_data()

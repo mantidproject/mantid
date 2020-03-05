@@ -11,7 +11,7 @@
 using namespace ADARA;
 
 static bool validate_status(uint16_t val) {
-  VariableStatus::Enum e = static_cast<VariableStatus::Enum>(val);
+  auto e = static_cast<VariableStatus::Enum>(val);
 
   /* No default case so that we get warned when new status values
    * get added.
@@ -48,7 +48,7 @@ static bool validate_status(uint16_t val) {
 }
 
 static bool validate_severity(uint16_t val) {
-  VariableSeverity::Enum e = static_cast<VariableSeverity::Enum>(val);
+  auto e = static_cast<VariableSeverity::Enum>(val);
 
   /* No default case so that we get warned when new severities get added.
    */
@@ -439,7 +439,7 @@ ClientHelloPkt::ClientHelloPkt(const uint8_t *data, uint32_t len)
            m_payload_len < (2 * sizeof(uint32_t)))
     throw invalid_packet("Newer ClientHello packet is too short");
 
-  const uint32_t *fields = reinterpret_cast<const uint32_t *>(payload());
+  const auto *fields = reinterpret_cast<const uint32_t *>(payload());
   m_reqStart = fields[0];
   m_clientFlags = (m_version > 0) ? fields[1] : 0;
 }
@@ -758,7 +758,7 @@ DataDonePkt::DataDonePkt(const uint8_t *data, uint32_t len)
 
 DeviceDescriptorPkt::DeviceDescriptorPkt(const uint8_t *data, uint32_t len)
     : Packet(data, len) {
-  const uint32_t *fields = reinterpret_cast<const uint32_t *>(payload());
+  const auto *fields = reinterpret_cast<const uint32_t *>(payload());
   uint32_t size;
 
   if (m_version == 0x00 && m_payload_len < (2 * sizeof(uint32_t)))

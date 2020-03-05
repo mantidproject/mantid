@@ -8,24 +8,16 @@ from mantid import AnalysisDataService
 from mantid.api import AlgorithmPropertyWithValue
 from mantid.simpleapi import SumSpectra, ConvertAxesToRealSpace
 from sans.algorithm_detail.batch_execution import provide_loaded_data, create_unmanaged_algorithm, add_to_group
+from sans.algorithm_detail.crop_helper import get_component_name
+from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import IntegralEnum, DetectorType, SANSDataType
 from sans.common.file_information import get_instrument_paths_for_sans_file
-from sans.common.general_functions import create_child_algorithm, parse_diagnostic_settings
+from sans.common.general_functions import parse_diagnostic_settings
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
-from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.gui_logic.presenter.gui_state_director import (GuiStateDirector)
-
-from qtpy import PYQT4
-IN_MANTIDPLOT = False
-if PYQT4:
-    try:
-        import mantidplot
-        IN_MANTIDPLOT = True
-    except (Exception, Warning):
-        pass
-else:
-    from mantidqt.plotting.functions import plot
+from sans.gui_logic.models.RowEntries import RowEntries
+from sans.gui_logic.plotting import get_plotting_module
+from sans.gui_logic.presenter.gui_state_director import GuiStateDirector
 
 
 def run_integral(integral_ranges, mask, integral, detector, state):
@@ -39,10 +31,10 @@ def run_integral(integral_ranges, mask, integral, detector, state):
         input_workspace_name = input_workspace.name()
         if is_multi_range:
             AnalysisDataService.remove(input_workspace_name + '_ranges')
-        input_workspace = crop_workspace(DetectorType.to_string(detector), input_workspace)
+        input_workspace = crop_workspace(detector.value, input_workspace)
 
         if mask:
-            input_workspace = apply_mask(state, input_workspace, DetectorType.to_string(detector))
+            input_workspace = apply_mask(state, input_workspace, detector.value)
 
         x_dim, y_dim = get_detector_size_from_sans_file(state, detector)
 
@@ -77,29 +69,34 @@ def parse_range(range):
 
 
 def load_workspace(state):
-    workspace_to_name = {SANSDataType.SampleScatter: "SampleScatterWorkspace",
-                         SANSDataType.SampleTransmission: "SampleTransmissionWorkspace",
-                         SANSDataType.SampleDirect: "SampleDirectWorkspace",
-                         SANSDataType.CanScatter: "CanScatterWorkspace",
-                         SANSDataType.CanTransmission: "CanTransmissionWorkspace",
-                         SANSDataType.CanDirect: "CanDirectWorkspace"}
+    workspace_to_name = {SANSDataType.SAMPLE_SCATTER: "SampleScatterWorkspace",
+                         SANSDataType.SAMPLE_TRANSMISSION: "SampleTransmissionWorkspace",
+                         SANSDataType.SAMPLE_DIRECT: "SampleDirectWorkspace",
+                         SANSDataType.CAN_SCATTER: "CanScatterWorkspace",
+                         SANSDataType.CAN_TRANSMISSION: "CanTransmissionWorkspace",
+                         SANSDataType.CAN_DIRECT: "CanDirectWorkspace"}
 
-    workspace_to_monitor = {SANSDataType.SampleScatter: "SampleScatterMonitorWorkspace",
-                            SANSDataType.CanScatter: "CanScatterMonitorWorkspace"}
+    workspace_to_monitor = {SANSDataType.SAMPLE_SCATTER: "SampleScatterMonitorWorkspace",
+                            SANSDataType.CAN_SCATTER: "CanScatterMonitorWorkspace"}
 
     workspaces, monitors = provide_loaded_data(state, False, workspace_to_name, workspace_to_monitor)
 
-    return workspaces[SANSDataType.SampleScatter]
+    return workspaces[SANSDataType.SAMPLE_SCATTER]
 
 
 def crop_workspace(component, workspace):
-    crop_name = "SANSCrop"
+    crop_name = "CropToComponent"
+    component_to_crop = DetectorType(component)
+    component_to_crop = get_component_name(workspace, component_to_crop)
     crop_options = {"InputWorkspace": workspace,
                     "OutputWorkspace": EMPTY_NAME,
-                    "Component": component}
+                    "ComponentNames": component_to_crop}
+
     crop_alg = create_unmanaged_algorithm(crop_name, **crop_options)
     crop_alg.execute()
-    return crop_alg.getProperty("OutputWorkspace").value
+    output_workspace = crop_alg.getProperty("OutputWorkspace").value
+
+    return output_workspace
 
 
 def run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_dim):
@@ -124,8 +121,8 @@ def run_algorithm(input_workspace, range, integral, output_workspace, x_dim, y_d
 
 
 def generate_output_workspace_name(range, integral, mask, detector, input_workspace_name):
-    integral_string = IntegralEnum.to_string(integral)
-    detector_string = DetectorType.to_string(detector)
+    integral_string = integral.value
+    detector_string = detector.value
 
     return 'Run:{}, Range:{}, Direction:{}, Detector:{}, Mask:{}'.format(input_workspace_name, range,
                                                                          integral_string,
@@ -133,23 +130,18 @@ def generate_output_workspace_name(range, integral, mask, detector, input_worksp
 
 
 def plot_graph(workspace):
-    if IN_MANTIDPLOT:
-        return mantidplot.plotSpectrum(workspace, 0)
-    elif not PYQT4:
+    plotting_module = get_plotting_module()
+    if hasattr(plotting_module, 'plotSpectrum'):
+        return plotting_module.plotSpectrum(workspace, 0)
+    elif hasattr(plotting_module, 'plot'):
         if not isinstance(workspace, list):
             workspace = [workspace]
-        plot(workspace, wksp_indices=[0])
+        plotting_module.plot(workspace, wksp_indices=[0])
 
 
 def apply_mask(state, workspace, component):
-    state_serialized = state.property_manager
-    mask_name = "SANSMaskWorkspace"
-    mask_options = {"SANSState": state_serialized,
-                    "Workspace": workspace,
-                    "Component": component}
-    mask_alg = create_child_algorithm('', mask_name, **mask_options)
-    mask_alg.execute()
-    return mask_alg.getProperty("Workspace").value
+    output_ws = mask_workspace(component_as_string=component, workspace=workspace, state=state)
+    return output_ws
 
 
 def get_detector_size_from_sans_file(state, detector):
@@ -170,12 +162,9 @@ def get_detector_size_from_sans_file(state, detector):
 
 
 def create_state(state_model_with_view_update, file, period, facility):
-    table_row = TableIndexModel(file, period, '', '', '', '', '', '', '', '', '', '')
-    table = TableModel()
-    table.add_table_entry_no_thread_or_signal(0, table_row)
+    table_row = RowEntries(sample_scatter=file, sample_scatter_period=period)
+    gui_state_director = GuiStateDirector(state_model_with_view_update, facility)
 
-    gui_state_director = GuiStateDirector(table, state_model_with_view_update, facility)
-
-    state = gui_state_director.create_state(0)
+    state = gui_state_director.create_state(table_row)
 
     return state

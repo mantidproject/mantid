@@ -13,13 +13,13 @@
 #include <boost/python/return_arg.hpp>
 #include <boost/python/return_value_policy.hpp>
 
-using Mantid::Kernel::Quat;
-using Mantid::Kernel::V3D;
 using boost::python::arg;
 using boost::python::class_;
 using boost::python::copy_const_reference;
 using boost::python::init;
 using boost::python::return_value_policy;
+using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 /**
  * Python exports of the Mantid::Kernel::Quat class.

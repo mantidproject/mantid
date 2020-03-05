@@ -161,7 +161,7 @@ void CompositeCluster::setRootCluster(ICluster const *root) {
 void CompositeCluster::add(boost::shared_ptr<ICluster> &toOwn) {
   if (toOwn->size() > 0) // Do not add empty clusters.
   {
-    m_ownedClusters.push_back(toOwn);
+    m_ownedClusters.emplace_back(toOwn);
   }
 }
 

@@ -5,9 +5,11 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSettingsPresenter.h"
+#include "IndirectSettingsHelper.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
+using namespace IndirectSettingsHelper;
 
 IndirectSettingsPresenter::IndirectSettingsPresenter(QWidget *parent)
     : QObject(nullptr), m_model(std::make_unique<IndirectSettingsModel>()),
@@ -28,6 +30,15 @@ void IndirectSettingsPresenter::setUpPresenter() {
   connect(m_view.get(), SIGNAL(cancelClicked()), this, SLOT(closeDialog()));
 
   loadSettings();
+
+  // Temporary until better validation is used when loading data into interfaces
+  setDefaultRestrictData();
+}
+
+void IndirectSettingsPresenter::setDefaultRestrictData() const {
+  auto const isisFacility = m_model->getFacility() == "ISIS";
+  if (isisFacility)
+    setRestrictInputDataByName(isisFacility);
 }
 
 IIndirectSettingsView *IndirectSettingsPresenter::getView() {
@@ -50,28 +61,15 @@ void IndirectSettingsPresenter::closeDialog() { emit closeSettings(); }
 void IndirectSettingsPresenter::loadSettings() {
   m_view->setSelectedFacility(QString::fromStdString(m_model->getFacility()));
 
-  m_view->setRestrictInputByNameChecked(
-      getSetting("restrict-input-by-name").toBool());
-  m_view->setPlotErrorBarsChecked(getSetting("plot-error-bars").toBool());
-
-  // emit applySettings();
-}
-
-QVariant IndirectSettingsPresenter::getSetting(std::string const &settingName) {
-  return m_view->getSetting(QString::fromStdString(m_model->getSettingsGroup()),
-                            QString::fromStdString(settingName));
+  m_view->setRestrictInputByNameChecked(restrictInputDataByName());
+  m_view->setPlotErrorBarsChecked(externalPlotErrorBars());
 }
 
 void IndirectSettingsPresenter::saveSettings() {
-  auto const settingsGroup =
-      QString::fromStdString(m_model->getSettingsGroup());
-
   m_model->setFacility(m_view->getSelectedFacility().toStdString());
 
-  m_view->setSetting(settingsGroup, "restrict-input-by-name",
-                     m_view->isRestrictInputByNameChecked());
-  m_view->setSetting(settingsGroup, "plot-error-bars",
-                     m_view->isPlotErrorBarsChecked());
+  setRestrictInputDataByName(m_view->isRestrictInputByNameChecked());
+  setExternalPlotErrorBars(m_view->isPlotErrorBarsChecked());
 
   emit applySettings();
 }

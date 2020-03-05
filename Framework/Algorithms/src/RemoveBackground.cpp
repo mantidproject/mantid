@@ -113,7 +113,7 @@ void RemoveBackground::exec() {
   // Removing background in-place
   bool inPlace = (inputWS == outputWS);
   // workspace independent determination of length
-  const int histnumber = static_cast<int>(inputWS->getNumberHistograms());
+  const auto histnumber = static_cast<int>(inputWS->getNumberHistograms());
 
   if (!inPlace) {
     // make the copy of the output Workspace from the input. Also copies

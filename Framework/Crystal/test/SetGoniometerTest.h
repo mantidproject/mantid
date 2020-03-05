@@ -9,6 +9,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/SetGoniometer.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Matrix.h"
@@ -150,6 +151,42 @@ public:
     TS_ASSERT_EQUALS(G.getAxis(0).name, "omega");
 
     AnalysisDataService::Instance().remove("SetUnivGoniometerTest_ws");
+  }
+
+  void test_PeaksWorkspace() {
+    PeaksWorkspace_sptr ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
+    AnalysisDataService::Instance().addOrReplace(
+        "SetPeaksWorkspaceGoniometerTest_ws", ws);
+    FrameworkManager::Instance().exec(
+        "AddSampleLog", 8, "Workspace", "SetPeaksWorkspaceGoniometerTest_ws",
+        "LogName", "phi", "LogType", "Number Series", "LogText", "1.234");
+
+    FrameworkManager::Instance().exec(
+        "AddSampleLog", 8, "Workspace", "SetPeaksWorkspaceGoniometerTest_ws",
+        "LogName", "chi", "LogType", "Number Series", "LogText", "1.234");
+
+    FrameworkManager::Instance().exec(
+        "AddSampleLog", 8, "Workspace", "SetPeaksWorkspaceGoniometerTest_ws",
+        "LogName", "omega", "LogType", "Number Series", "LogText", "1.234");
+
+    SetGoniometer alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
+        "Workspace", "SetPeaksWorkspaceGoniometerTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Goniometers", "Universal"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted()); // no log values
+
+    // Check the results
+    const Goniometer &G = ws->mutableRun().getGoniometer();
+    TS_ASSERT_EQUALS(G.getNumberAxes(), 3);
+    TS_ASSERT_EQUALS(G.getAxis(2).name, "phi");
+    TS_ASSERT_EQUALS(G.getAxis(1).name, "chi");
+    TS_ASSERT_EQUALS(G.getAxis(0).name, "omega");
+
+    AnalysisDataService::Instance().remove(
+        "SetPeaksWorkspaceGoniometerTest_ws");
   }
 
   /** Do a test with a single param

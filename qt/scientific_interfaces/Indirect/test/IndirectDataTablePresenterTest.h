@@ -10,8 +10,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IndirectDataTablePresenter.h"
-#include "IndirectFittingModel.h"
+#include "IndirectDataTablePresenterLegacy.h"
+#include "IndirectFittingModelLegacy.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -55,7 +55,7 @@ private:
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the model
-class MockIndirectDataTableModel : public IndirectFittingModel {
+class MockIndirectDataTableModel : public IndirectFittingModelLegacy {
 public:
   /// Public methods
   MOCK_CONST_METHOD2(getFittingRange,
@@ -107,7 +107,7 @@ public:
   void setUp() override {
     m_model = std::make_unique<NiceMock<MockIndirectDataTableModel>>();
     m_table = createEmptyTableWidget(5, 5);
-    m_presenter = std::make_unique<IndirectDataTablePresenter>(
+    m_presenter = std::make_unique<IndirectDataTablePresenterLegacy>(
         std::move(m_model.get()), std::move(m_table.get()));
 
     SetUpADSWithWorkspace ads("WorkspaceName", createWorkspace(5));
@@ -368,7 +368,7 @@ private:
 
   std::unique_ptr<QTableWidget> m_table;
   std::unique_ptr<MockIndirectDataTableModel> m_model;
-  std::unique_ptr<IndirectDataTablePresenter> m_presenter;
+  std::unique_ptr<IndirectDataTablePresenterLegacy> m_presenter;
 };
 
 #endif

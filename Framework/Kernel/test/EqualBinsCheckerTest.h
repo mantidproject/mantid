@@ -96,7 +96,7 @@ private:
       if (i == length - 1) {
         val += error;
       }
-      data.push_back(val);
+      data.emplace_back(val);
     }
     return data;
   }

@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QString>
+#include <boost/optional.hpp>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -38,6 +39,22 @@ getFunctionWithPrefix(const QString &prefix, const IFunction_sptr &fun);
 /// index of the child function (1).
 EXPORT_OPT_MANTIDQT_COMMON std::pair<QString, int>
 splitFunctionPrefix(const QString &prefix);
+
+/// Split a constraint definition into a parameter name and a pair of bounds,
+/// for example -1 < f0.A1 < 2 ==> (f0.A1, (-1, 2))
+EXPORT_OPT_MANTIDQT_COMMON std::pair<QString, std::pair<QString, QString>>
+splitConstraintString(const QString &constraint);
+
+class ScopedFalse {
+  bool &m_ref;
+  bool m_oldValue;
+
+public:
+  ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) {
+    m_ref = false;
+  }
+  ~ScopedFalse() { m_ref = m_oldValue; }
+};
 
 } // namespace MantidWidgets
 } // namespace MantidQt

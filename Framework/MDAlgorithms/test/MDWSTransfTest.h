@@ -56,8 +56,6 @@ public:
     MDWSDescription TargWSDescription;
     Mantid::API::MatrixWorkspace_sptr spws =
         WorkspaceCreationHelper::create2DWorkspaceBinned(10, 10);
-    // Mantid::API::MatrixWorkspace_sptr spws
-    // =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
     std::vector<double> minVal(4, -3), maxVal(4, 3);
     TargWSDescription.setMinMax(minVal, maxVal);
 
@@ -68,12 +66,12 @@ public:
                      Transf.findTargetFrame(TargWSDescription));
 
     WorkspaceCreationHelper::setGoniometer(spws, 0, 0, 0);
-    // spws->mutableRun().mutableGoniometer().setRotationAngle(0,20);
 
     TS_ASSERT_EQUALS(CnvrtToMD::SampleFrame,
                      Transf.findTargetFrame(TargWSDescription));
 
-    spws->mutableSample().setOrientedLattice(pLattice.get());
+    spws->mutableSample().setOrientedLattice(
+        std::make_unique<Geometry::OrientedLattice>(*pLattice));
     TS_ASSERT_EQUALS(CnvrtToMD::HKLFrame,
                      Transf.findTargetFrame(TargWSDescription));
   }
@@ -100,8 +98,8 @@ public:
                                              CnvrtToMD::SampleFrame,
                                              CnvrtToMD::HKLScale),
                       const std::invalid_argument &);
-    spws->mutableSample().setOrientedLattice(pLattice.get());
-
+    spws->mutableSample().setOrientedLattice(
+        std::make_unique<Geometry::OrientedLattice>(*pLattice));
     WorkspaceCreationHelper::setGoniometer(spws, 20, 0, 0);
 
     // spws->mutableRun().mutableGoniometer().setRotationAngle(0,20);
@@ -150,7 +148,8 @@ public:
 
     pLattice = std::make_unique<Geometry::OrientedLattice>(
         5 * M_PI, M_PI, 2 * M_PI, 90., 90., 90.);
-    ws2D->mutableSample().setOrientedLattice(pLattice.get());
+    ws2D->mutableSample().setOrientedLattice(
+        std::make_unique<Geometry::OrientedLattice>(*pLattice));
     TWS.buildFromMatrixWS(ws2D, "Q3D", "Direct");
 
     std::vector<double> u(3, 0);
@@ -223,9 +222,9 @@ public:
     MDWSDescription TWS;
     std::vector<double> minVal(4, -3), maxVal(4, 3);
     TWS.setMinMax(minVal, maxVal);
-    Geometry::OrientedLattice latt(5 * M_PI, M_PI, 2 * M_PI, 90., 90., 90.);
-
-    ws2D->mutableSample().setOrientedLattice(&latt);
+    ws2D->mutableSample().setOrientedLattice(
+        std::make_unique<Geometry::OrientedLattice>(5 * M_PI, M_PI, 2 * M_PI,
+                                                    90., 90., 90.));
     TWS.buildFromMatrixWS(ws2D, "Q3D", "Direct");
 
     std::vector<double> u(3, 0);
@@ -345,9 +344,9 @@ public:
 
     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0, 0);
     // this is Wollastonite
-    Geometry::OrientedLattice latt(7.9250, 7.3200, 7.0650, 90.0550, 95.2170,
-                                   103.4200);
-    ws2D->mutableSample().setOrientedLattice(&latt);
+    ws2D->mutableSample().setOrientedLattice(
+        std::make_unique<Geometry::OrientedLattice>(
+            7.9250, 7.3200, 7.0650, 90.0550, 95.2170, 103.4200));
     //
     //[transf,u_to_rlu]=calc_proj_matrix([7.9250,7.3200,7.0650],
     // 90.0550,95.2170,103.4200, u, v, 0, omega, dpsi, gl, gs)
@@ -409,7 +408,8 @@ public:
     ws2D->mutableRun().addProperty("Ei", 13., "meV", true);
 
     pLattice = std::make_unique<Geometry::OrientedLattice>(3, 3, 2, 90, 90, 90);
-    ws2D->mutableSample().setOrientedLattice(pLattice.get());
+    ws2D->mutableSample().setOrientedLattice(
+        std::make_unique<Geometry::OrientedLattice>(*pLattice));
 
     // S_mantid*k_mantid = S_hor*k_hor; -- both Mantid and Horace produce the
     // same kind of crystal frame

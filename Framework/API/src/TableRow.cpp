@@ -16,7 +16,7 @@ namespace API {
 TableRow::TableRow(const TableRowHelper &trh)
     : m_row(trh.m_row), m_col(0), m_sep(",") {
   for (size_t i = 0; i < trh.m_workspace->columnCount(); i++)
-    m_columns.push_back(trh.m_workspace->getColumn(i));
+    m_columns.emplace_back(trh.m_workspace->getColumn(i));
   if (!m_columns.empty())
     m_nrows = int(m_columns[0]->size());
   else

@@ -22,11 +22,7 @@ class PeaksView(QtWidgets.QWidget):
         self.gamma = Checkbox("Gamma Peaks")
         self.electron = Checkbox("Electron Peaks")
 
-        self.peak_checkboxes = [
-            self.major,
-            self.minor,
-            self.gamma,
-            self.electron]
+        self.peak_checkboxes = [self.major, self.minor, self.gamma, self.electron]
         for peak_type in self.peak_checkboxes:
             self.list.addWidget(peak_type)
         self.setLayout(self.list)

@@ -61,7 +61,7 @@ void ProjectMD::exec() {
   std::vector<IMDDimension_sptr> dimensions;
   for (size_t i = 0; i < inWS->getNumDims(); i++) {
     if (i != dimNo) {
-      dimensions.push_back(
+      dimensions.emplace_back(
           boost::const_pointer_cast<IMDDimension>(inWS->getDimension(i)));
     } else {
       boost::shared_ptr<const IMDDimension> dimi = inWS->getDimension(i);

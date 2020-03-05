@@ -365,7 +365,7 @@ std::vector<int> QPeaksTableModel::defaultHideCols() {
     Mantid::Kernel::InstrumentInfo instrInfo =
         Mantid::Kernel::ConfigService::Instance().getInstrument(instrName);
     if (instrInfo.facility().name() != "SNS")
-      result.push_back(COL_BANKNAME);
+      result.emplace_back(COL_BANKNAME);
 
     // hide some columns based on the techniques
     { // shrink variable scope
@@ -376,15 +376,15 @@ std::vector<int> QPeaksTableModel::defaultHideCols() {
       const std::string DGS("TOF Direct Geometry Spectroscopy");
       bool showEnergy(false);
       if (techniques.find(DGS) == techniques.end())
-        result.push_back(COL_FINAL_ENERGY);
+        result.emplace_back(COL_FINAL_ENERGY);
       else
         showEnergy = true;
       if (techniques.find(IGS) == techniques.end())
-        result.push_back(COL_INITIAL_ENERGY);
+        result.emplace_back(COL_INITIAL_ENERGY);
       else
         showEnergy = true;
       if (!showEnergy)
-        result.push_back(COL_ENERGY_TRANSFER);
+        result.emplace_back(COL_ENERGY_TRANSFER);
     }
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     // Unable to fetch instrument info, so continue without it.

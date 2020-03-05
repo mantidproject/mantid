@@ -78,8 +78,8 @@ public:
 
   void testfunction_Uses_Numerical_Deriv_When_Deriv_NotSupplied() {
     using Mantid::API::IFunction1D_sptr;
-    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     using Mantid::PythonInterface::createTestFunction;
+    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     IFunction1D_sptr noDerivFunc1D;
     TS_ASSERT_THROWS_NOTHING(
         noDerivFunc1D = createTestFunction<IFunction1D_sptr::element_type>(
@@ -97,8 +97,8 @@ public:
 
   void testfunction_Uses_Supplied_Deriv() {
     using Mantid::API::IFunction1D_sptr;
-    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     using Mantid::PythonInterface::createTestFunction;
+    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     IFunction1D_sptr func1DWithDeriv;
     TS_ASSERT_THROWS_NOTHING(
         func1DWithDeriv = createTestFunction<IFunction1D_sptr::element_type>(

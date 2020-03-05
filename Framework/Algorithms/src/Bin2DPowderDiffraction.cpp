@@ -222,7 +222,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
   outputWS->replaceAxis(1, std::move(verticalAxis));
 
   Progress prog(this, 0.0, 1.0, m_numberOfSpectra);
-  int64_t numSpectra = static_cast<int64_t>(m_numberOfSpectra);
+  auto numSpectra = static_cast<int64_t>(m_numberOfSpectra);
   std::vector<std::vector<double>> newYValues(
       dPerpSize - 1, std::vector<double>(dSize - 1, 0.0));
   std::vector<std::vector<double>> newEValues(
@@ -316,27 +316,27 @@ void Bin2DPowderDiffraction::ReadBinsFromFile(
     n = line.find("dp =");
     if (n != std::string::npos) {
       if (!tmp.empty()) {
-        Xbins.push_back(tmp);
+        Xbins.emplace_back(tmp);
         tmp.clear();
       }
       double dp1 = std::stod(line.substr(4), &sz); // 4 is needed to crop 'dp='
       double dp2 = std::stod(line.substr(sz + 4));
       if (dpno < 1) {
-        Ybins.push_back(dp1);
-        Ybins.push_back(dp2);
+        Ybins.emplace_back(dp1);
+        Ybins.emplace_back(dp2);
       } else {
-        Ybins.push_back(dp2);
+        Ybins.emplace_back(dp2);
       }
       dpno++;
     } else if (line.find("#") == std::string::npos) {
       std::stringstream ss(line);
       double d;
       while (ss >> d) {
-        tmp.push_back(d);
+        tmp.emplace_back(d);
       }
     }
   }
-  Xbins.push_back(tmp);
+  Xbins.emplace_back(tmp);
   g_log.information() << "Number of Ybins: " << Ybins.size() << std::endl;
   g_log.information() << "Number of Xbins sets: " << Xbins.size() << std::endl;
 }
@@ -377,11 +377,12 @@ void Bin2DPowderDiffraction::normalizeToBinArea(MatrixWorkspace_sptr outWS) {
     // divide by the xBinWidth
     outWS->convertToFrequencies(idx);
     auto &freqs = outWS->mutableY(idx);
+    using std::placeholders::_1;
     std::transform(freqs.begin(), freqs.end(), freqs.begin(),
-                   std::bind1st(std::multiplies<double>(), factor));
+                   std::bind(std::multiplies<double>(), factor, _1));
     auto &errors = outWS->mutableE(idx);
     std::transform(errors.begin(), errors.end(), errors.begin(),
-                   std::bind1st(std::multiplies<double>(), factor));
+                   std::bind(std::multiplies<double>(), factor, _1));
   }
 }
 

@@ -171,9 +171,9 @@ void SaveIsawQvector::exec() {
             static_cast<float>(coord_signs[dim] * locCoord[coord_map[dim]]);
       }
       if (filename.empty()) {
-        Qx_save.push_back(static_cast<double>(buffer[0]));
-        Qy_save.push_back(static_cast<double>(buffer[1]));
-        Qz_save.push_back(static_cast<double>(buffer[2]));
+        Qx_save.emplace_back(static_cast<double>(buffer[0]));
+        Qy_save.emplace_back(static_cast<double>(buffer[1]));
+        Qz_save.emplace_back(static_cast<double>(buffer[2]));
       } else
         handle.write(reinterpret_cast<char *>(buffer), BUFF_SIZE);
     } // end of loop over events in list

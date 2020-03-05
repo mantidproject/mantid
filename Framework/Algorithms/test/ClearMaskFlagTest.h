@@ -21,12 +21,12 @@
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using Mantid::MantidVecPtr;
 using Mantid::Algorithms::ClearMaskFlag;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
-using Mantid::MantidVecPtr;
 
 class ClearMaskFlagTest : public CxxTest::TestSuite {
 public:

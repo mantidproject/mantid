@@ -101,8 +101,8 @@ void SaveMask::exec() {
       } else {
         // If skip: restart everything
         // i) record previous result
-        idx0sts.push_back(i0st);
-        idx0eds.push_back(i0ed);
+        idx0sts.emplace_back(i0st);
+        idx0eds.emplace_back(i0ed);
         // ii) reset the register
         i0st = detid0s[i];
         i0ed = detid0s[i];
@@ -111,8 +111,8 @@ void SaveMask::exec() {
     } // for
 
     // Complete the registration
-    idx0sts.push_back(i0st);
-    idx0eds.push_back(i0ed);
+    idx0sts.emplace_back(i0st);
+    idx0eds.emplace_back(i0ed);
 
     for (size_t i = 0; i < idx0sts.size(); i++) {
       g_log.information() << "Section " << i << " : " << idx0sts[i] << "  ,  "

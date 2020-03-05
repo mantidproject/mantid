@@ -99,11 +99,11 @@ private:
 
     std::vector<double> X, Y;
     for (int64_t i = 0; i < nbins; i++) {
-      X.push_back((double)i * 0.5);
-      Y.push_back(std::exp(-(double)i * invfourPiSqr));
+      X.emplace_back((double)i * 0.5);
+      Y.emplace_back(std::exp(-(double)i * invfourPiSqr));
     }
     if (isHistogram) {
-      X.push_back(nbins + 0.5);
+      X.emplace_back(nbins + 0.5);
     }
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(
         "Workspace2D", nspecs, isHistogram ? (nbins + 1) : nbins, nbins);

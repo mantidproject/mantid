@@ -2,6 +2,8 @@
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
+#include "frameobject.h"
+
 // Allows suppression of namespaces within the module
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::Batch;
@@ -80,6 +82,19 @@ public:
   MessageDisplay(QWidget *parent = 0);
   MessageDisplay(const QFont &font, QWidget *parent = 0);
   void attachLoggingChannel(int logLevel = -1);
+  QPlainTextEdit *getTextEdit();
+  void filterMessages();
+  QMenu *generateContextMenu();
+  void filePathModified(const QString &oldPath, const QString &newPath);
+
+  bool showFrameworkOutput();
+  void setShowFrameworkOutput(const bool &show);
+  bool showAllScriptOutput();
+  void setShowAllScriptOutput(const bool &show);
+  bool showActiveScriptOutput();
+  void setShowActiveScriptOutput(const bool &show);
+  QString activeScript();
+  void setActiveScript(const QString &scriptPath);
 
   void appendFatal(const QString &text);
   void appendError(const QString &text);
@@ -87,20 +102,9 @@ public:
   void appendNotice(const QString &text);
   void appendInformation(const QString &text);
   void appendDebug(const QString &text);
+  void appendPython(const QString &text, const int &priority, const QString &fileName);
   void setSource(const QString &source);
 };
-
-%If (Qt_5_0_0 -)
-class AlgorithmProgressWidget : QWidget {
-%TypeHeaderCode
-#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
-%End
-
-public:
-    AlgorithmProgressWidget(QWidget *parent /TransferThis/ = 0);
-    void blockUpdates(bool block = true);
-};
-%End
 
 class ScriptEditor : QWidget {
 %TypeHeaderCode
@@ -138,6 +142,7 @@ public:
   sipRes = sipBuildResult(nullptr, "(iiii)", lineFrom, indexFrom,
                           lineTo, indexTo);
 %End
+  int getZoom() const;
   bool hasSelectedText() const;
   bool isModified() const;
   bool isReadOnly() const;
@@ -160,6 +165,7 @@ public:
   void setSelection(int lineFrom, int indexFrom, int lineTo, int indexTo);
   void setTabWidth(int width);
   void setText(const QString &text);
+  void setEolVisibility(bool state);
   void setWhitespaceVisibility(WhitespaceVisibility mode);
   void updateCompletionAPI(const QStringList & completions);
 
@@ -169,18 +175,46 @@ public:
   void replaceAll(const QString &search, const QString &replace,
                               bool regex, bool caseSensitive, bool matchWords,
                               bool wrap, bool backward);
-
-
 public slots:
   void updateProgressMarker(int lineno, bool error);
+  void zoomTo(int level);
 
 signals:
   void fileNameChanged(const QString &fileName);
   void modificationChanged(bool m);
+  void textZoomedIn();
+  void textZoomedOut();
 
 private:
   ScriptEditor(const ScriptEditor&);
 };
+
+%If (Qt_5_0_0 -)
+
+class AlgorithmProgressWidget : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
+%End
+
+public:
+  AlgorithmProgressWidget(QWidget *parent /TransferThis/ = 0);
+  void blockUpdates(bool block = true);
+};
+
+class CodeExecution {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Python/CodeExecution.h"
+using MantidQt::Widgets::Common::Python::CodeExecution;
+%End
+
+public:
+  CodeExecution(ScriptEditor*);
+  SIP_PYOBJECT execute(const QString &, const QString &, int, SIP_PYOBJECT);
+private:
+  CodeExecution(const CodeExecution&);
+};
+
+%End // end >= Qt5
 
 
 class AlgorithmDialog: QDialog {
@@ -224,7 +258,6 @@ public:
   GenericDialog(QWidget *parent = nullptr);
 };
 
-
 class UserSubWindow : QMainWindow {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/UserSubWindow.h"
@@ -232,6 +265,32 @@ using namespace MantidQt::API;
 %End
 private:
   UserSubWindow(QWidget *parent = nullptr);
+};
+
+class BaseEncoder {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/BaseEncoder.h"
+%End
+public:
+  virtual QMap<QString, QVariant> encode(const QWidget *window,
+                                         const std::string &directory) = 0;
+  virtual QList<QString> tags() = 0;
+private:
+  BaseEncoder();
+  virtual ~BaseEncoder();
+};
+
+class BaseDecoder {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/BaseDecoder.h"
+%End
+public:
+  virtual QWidget * decode(const QMap<QString, QVariant> &map,
+                           const std::string &directory) = 0;
+  virtual QList<QString> tags() = 0;
+private:
+  BaseDecoder();
+  virtual ~BaseDecoder();
 };
 
 class UserSubWindowFactoryImpl /PyName=UserSubWindowFactory/ {
@@ -247,6 +306,9 @@ public:
     UserSubWindow *createUnwrapped(const std::string &name) const;
     QSet<QString> categories(const QString &interfaceName) const;
     QStringList keys() const;
+    BaseEncoder *findEncoder(QWidget *window);
+    BaseDecoder *findDecoder(const std::string &decodeString);
+
 
 private:
   UserSubWindowFactoryImpl();
@@ -325,6 +387,7 @@ class WorkspaceTreeWidgetSimple : WorkspaceTreeWidget {
 public:
   WorkspaceTreeWidgetSimple(bool viewOnly=false, QWidget *parent /TransferThis/ = nullptr);
   void refreshWorkspaces();
+  void enableDeletePrompt(bool enable);
 
 signals:
   void plotSpectrumClicked(const QStringList & workspaceNames);
@@ -356,7 +419,19 @@ class ManageUserDirectories : QDialog {
 %End
 public:
   ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
-  static void openUserDirsDialog(QWidget *parent);
+  static void openManageUserDirectories();
+};
+
+// ---------------------------------
+// Script Repository
+// ---------------------------------
+
+class ScriptRepositoryView : QDialog {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ScriptRepositoryView.h"
+%End
+public:
+    ScriptRepositoryView(QWidget *parent = nullptr);
 };
 
 // ---------------------------------
@@ -385,14 +460,24 @@ public:
     double endX() const;
     void setEndX(double end);
     void setXRange(double start, double end);
+    QVector<double> getXRange() throw(std::invalid_argument);
+    QString getXColumnName() const;
+    QString getYColumnName() const;
+    QString getErrColumnName() const;
     int workspaceIndex() const;
     void setWorkspaceIndex(int i);
     QStringList getWorkspaceNames();
     void fit();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+    void addAllowedTableWorkspace(const QString &wsName);
     void setTextPlotGuess(const QString);
+    bool plotDiff() const;
+    std::string outputName() const;
+    void addFitResultWorkspacesToTableWidget();
+    void setWorkspaceName(const QString &wsName);
+    void postDeleteHandle(const std::string &wsName);
 
-    SIP_PYOBJECT defaultPeakType() const;
+    SIP_PYOBJECT defaultPeakType();
 %MethodCode
     auto f = sipCpp->defaultPeakType();
     sipRes = FROM_CSTRING(f.c_str());
@@ -400,6 +485,11 @@ public:
     void setDefaultPeakType(SIP_PYOBJECT);
 %MethodCode
     sipCpp->setDefaultPeakType(TO_CSTRING(a0));
+%End
+SIP_PYOBJECT defaultBackgroundType();
+%MethodCode
+    auto f = sipCpp->defaultBackgroundType();
+    sipRes = FROM_CSTRING(f.c_str());
 %End
     QStringList registeredPeaks() const;
     QStringList registeredBackgrounds() const;
@@ -412,6 +502,9 @@ public:
     void setPeakHeightOf(QString, double);
     double getPeakFwhmOf(QString);
     void setPeakFwhmOf(QString, double);
+    void normaliseData(bool on);
+    QMenu *getFitMenu() const;
+    QListWidget* getWorkspaceList() const;
 
     SIP_PYOBJECT workspaceName() const;
 %MethodCode
@@ -440,6 +533,8 @@ signals:
     void algorithmFinished(const QString &);
     void removeFitCurves();
     void plotGuess();
+    void sequentialFitDone() const;
+    void workspaceClicked(const QString &);
 };
 
 // ---------------------------------
@@ -541,7 +636,11 @@ public:
                                      int column,
                                      const std::string& oldValue,
                                      const std::string& newValue) = 0;
+  virtual void notifySelectionChanged() = 0;
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation& itemIndex) = 0;
+  virtual void notifyAppendAndEditAtChildRowRequested() = 0;
+  virtual void notifyAppendAndEditAtRowBelowRequested() = 0;
+  virtual void notifyEditAtRowAboveRequested() = 0;
   virtual void notifyRemoveRowsRequested(
     const std::vector<MantidQt::MantidWidgets::Batch::RowLocation>& locationsOfRowsToRemove) = 0;
   virtual void notifyCopyRowsRequested() = 0;
@@ -560,7 +659,7 @@ public:
     JobTreeView(const QStringList &columnHeadings, const Cell& defaultCellStyle,
      QWidget *parent = nullptr);
 
-    void subscribe(JobTreeViewSubscriber& subscriber);
+    void subscribe(JobTreeViewSubscriber *subscriber);
     MantidQt::MantidWidgets::Batch::RowLocation insertChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
      &parent, int beforeRow,
                           const std::vector<Cell> &rowText);
@@ -571,6 +670,9 @@ public:
     MantidQt::MantidWidgets::Batch::RowLocation appendChildRowOf(const MantidQt::MantidWidgets::Batch::RowLocation
     &parentLocation,
                           const std::vector<Cell> &rowText);
+    void appendAndEditAtChildRow();
+    void appendAndEditAtRowBelow();
+    void editAtRowAbove();
     void removeRowAt(const MantidQt::MantidWidgets::Batch::RowLocation &location);
     void removeRows(std::vector<MantidQt::MantidWidgets::Batch::RowLocation> rowsToRemove);
     void removeAllRows();
@@ -663,7 +765,11 @@ public:
                                      int column,
                                      const std::string &oldValue,
                                      const std::string &newValue);
+  virtual void notifySelectionChanged();
   virtual void notifyRowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
+  virtual void notifyAppendAndEditAtChildRowRequested();
+  virtual void notifyAppendAndEditAtRowBelowRequested();
+  virtual void notifyEditAtRowAboveRequested();
   virtual void notifyRemoveRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   virtual void notifyCopyRowsRequested();
@@ -677,11 +783,13 @@ signals:
                        std::string newValue);
   void rowInserted(const MantidQt::MantidWidgets::Batch::RowLocation &itemIndex);
   void filterReset();
+  void appendAndEditAtChildRowRequested();
+  void appendAndEditAtRowBelowRequested();
+  void editAtRowAboveRequested();
   void removeRowsRequested(
       const std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &locationsOfRowsToRemove);
   void copyRowsRequested();
   void cutRowsRequested();
-
 };
 
 
@@ -712,6 +820,9 @@ public:
     void removeDatasets(QList<int> indices);
     QStringList getDatasetNames() const;
     void setErrorsEnabled(bool enabled);
+    void hideGlobalCheckbox();
+    void showGlobalCheckbox();
+
     QStringList getGlobalParameters() const;
     void setGlobalParameters(const QStringList &globals);
     void clear();
@@ -759,8 +870,13 @@ public:
     %MethodCode
       sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getGlobalFunction());
     %End
+    SIP_PYOBJECT getFunctionByIndex(const QString &index);
+    %MethodCode
+      sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->getFunctionByIndex(*a0));
+    %End
 signals:
     void functionStructureChanged();
+    void parameterChanged(const QString &funcIndex, const QString &paramName);
 };
 
 // ---------------------------------
@@ -780,4 +896,43 @@ public:
     QTreeWidget *treeWidget() const;
     QWidget *getParamWidget(const QString &paramName) const;
     double getParameter(const QString &paramName) const;
+};
+
+// ---------------------------------
+// MWRunFiles
+// ---------------------------------
+class MWRunFiles : QWidget
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/MWRunFiles.h"
+%End
+public:
+    MWRunFiles(QWidget *parent = nullptr);
+
+    QString getText();
+    QString getFirstFilename() const;
+    QStringList getFilenames() const;
+    void isForRunFiles(bool /*mode*/);
+    void isForDirectory(bool /*mode*/);
+    void allowMultipleFiles(bool /*allow*/);
+    bool isSearching() const;
+    bool isValid();
+    void liveButtonSetChecked(bool);
+    bool liveButtonIsChecked();
+    void setInstrumentOverride(const QString &instName);
+    void setLabelText(const QString &text);
+    void setLabelMinWidth(const int);
+    void setText(const QString&);
+    void setUserInput(const QVariant &);
+    void setReadOnly(bool readOnly);
+    void setFileExtensions(const QStringList &extensions);
+    void findFiles(bool isModified);
+
+signals:
+    void fileTextChanged(const QString & /*_t1*/);
+    void fileEditingFinished();
+    void fileFindingFinished();
+    void liveButtonPressed(bool);
+    void findingFiles();
+    void filesFound();
 };

@@ -190,7 +190,7 @@ inline void appendValue(const std::string &strvalue, std::vector<T> &value) {
 
   // just convert the whole thing into a value
   if (pos == std::string::npos) {
-    value.push_back(boost::lexical_cast<T>(strvalue));
+    value.emplace_back(boost::lexical_cast<T>(strvalue));
     return;
   }
 
@@ -204,7 +204,7 @@ inline void appendValue(const std::string &strvalue, std::vector<T> &value) {
     if (start + step < start)
       throw std::logic_error("Step size is negative with increasing limits");
     for (auto i = start; i <= stop;) {
-      value.push_back(i);
+      value.emplace_back(i);
       // done inside the loop because gcc7 doesn't like i+=step for short
       // unsigned int
       i = static_cast<T>(i + step);
@@ -213,7 +213,7 @@ inline void appendValue(const std::string &strvalue, std::vector<T> &value) {
     if (start + step >= start)
       throw std::logic_error("Step size is positive with decreasing limits");
     for (auto i = start; i >= stop;) {
-      value.push_back(i);
+      value.emplace_back(i);
       // done inside the loop because gcc7 doesn't like i+=step for short
       // unsigned int
       i = static_cast<T>(i + step);
@@ -303,7 +303,7 @@ void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
     std::transform(
         values.begin(), values.end(), std::back_inserter(vect),
         [](const std::string &str) { return boost::lexical_cast<T>(str); });
-    value.push_back(std::move(vect));
+    value.emplace_back(std::move(vect));
   }
 }
 

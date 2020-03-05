@@ -28,3 +28,4 @@ the right minimizer is provided :ref:`here <FittingMinimizers>`.
 
 * :ref:`Fit Functions List`
 * :ref:`fitminimizers`
+* :ref:`fitCostFunctions`

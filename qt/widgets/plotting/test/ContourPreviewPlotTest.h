@@ -26,27 +26,6 @@ MatrixWorkspace_sptr createMatrixWorkspace(int numberOfHistograms,
 
 } // namespace
 
-/// This QApplication object is required in order to construct the widget
-class QApplicationHolder : CxxTest::GlobalFixture {
-public:
-  bool setUpWorld() override {
-    int argc(0);
-    char **argv = {};
-    m_app = new QApplication(argc, argv);
-    return true;
-  }
-
-  bool tearDownWorld() override {
-    delete m_app;
-    return true;
-  }
-
-private:
-  QApplication *m_app;
-};
-
-static QApplicationHolder MAIN_QAPPLICATION;
-
 /// Unit tests for ContourPreviewPlot
 class ContourPreviewPlotTest : public CxxTest::TestSuite {
 public:
@@ -84,12 +63,6 @@ public:
   void test_that_setPlotVisible_will_hide_the_plot_when_it_is_passed_false() {
     m_contourPlot->setPlotVisible(false);
     TS_ASSERT(!m_contourPlot->isPlotVisible());
-  }
-
-  void
-  test_that_setColourBarVisible_will_hide_the_colour_bar_when_it_is_passed_false() {
-    m_contourPlot->setColourBarVisible(false);
-    TS_ASSERT(!m_contourPlot->isColourBarVisible());
   }
 
 private:

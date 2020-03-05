@@ -1,5 +1,6 @@
-# CMake version check. Require CMake 3.5, required by ParaView 5.1.0
-cmake_minimum_required(VERSION 3.5)
+# CMake version check. Require CMake 3.13 - Required for add_link_options
+# 3.15 is required on Windows, but is not available to RHEL yet
+cmake_minimum_required(VERSION 3.13)
 
 # Define the project name.
 project(Mantid)
@@ -82,8 +83,9 @@ if(ENABLE_MANTIDPLOT)
   include(ParaViewSetup)
 endif()
 
-# Set expected variables for OS X
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if( MSVC )
+  include ( MSVCSetup )
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   include(DarwinSetup)
 endif()
 
@@ -125,8 +127,14 @@ if(ENABLE_MANTIDPLOT)
     message(FATAL_ERROR "Qwt version 5 is required, found: ${QWT5_VERSION}")
   endif()
 
-  find_package(PyQt4 REQUIRED)
-  find_package(SIP REQUIRED)
+  if(PYTHON_VERSION_MAJOR EQUAL 3 AND
+     UNIX_DIST MATCHES "RedHatEnterprise" AND UNIX_RELEASE MATCHES "7\..*")
+    set(USE_PRIVATE_SIPPYQT4 ON)
+    include(ExternalSipPyQt4)
+  else()
+    find_package(PyQt4 REQUIRED)
+    find_package(SIP REQUIRED)
+  endif()
   separate_arguments(PYQT4_SIP_FLAGS)
 endif()
 
@@ -144,9 +152,6 @@ if(ENABLE_WORKBENCH)
   find_package(SIP REQUIRED)
   separate_arguments(PYQT5_SIP_FLAGS)
 endif()
-
-# gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
-find_package(GSL REQUIRED)
 
 # Now add in all the components
 
@@ -213,6 +218,7 @@ endif()
 
 add_custom_target(AllTests)
 add_dependencies(AllTests FrameworkTests)
+
 if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   add_custom_target(GUITests)
   add_dependencies(check GUITests)
@@ -228,28 +234,31 @@ endif()
 add_subdirectory(scripts)
 
 # Docs requirements
-find_package(Sphinx 1.2)
-if(SPHINX_FOUND)
-  # run python to see if the theme is installed
-  execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-                          "import sphinx_bootstrap_theme"
-                  OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
-                  ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
-                  OUTPUT_STRIP_TRAILING_WHITESPACE
-                  ERROR_STRIP_TRAILING_WHITESPACE)
-  if(SPHINX_BOOTSTRAP_THEME_ERR)
-    message(ERROR " Did not find sphinx_bootstrap_theme")
-    message(STATUS "${PYTHON_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
-    message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
-    message(
-      FATAL_ERROR
-        " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/"
-      )
-  endif()
+option(ENABLE_DOCS "Enable Building user and developer documentation" ON)
+if (ENABLE_DOCS)
+  find_package(Sphinx 1.2)
+  if(SPHINX_FOUND)
+    # run python to see if the theme is installed
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
+                            "import sphinx_bootstrap_theme"
+                    OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
+                    ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    ERROR_STRIP_TRAILING_WHITESPACE)
+    if(SPHINX_BOOTSTRAP_THEME_ERR)
+      message(ERROR " Did not find sphinx_bootstrap_theme")
+      message(STATUS "${PYTHON_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
+      message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
+      message(
+        FATAL_ERROR
+          " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/"
+        )
+    endif()
 
-  add_subdirectory(dev-docs)
-  if(ENABLE_MANTIDPLOT)
-    add_subdirectory(docs)
+    add_subdirectory(dev-docs)
+    if(ENABLE_MANTIDPLOT)
+      add_subdirectory(docs)
+    endif()
   endif()
 endif()
 
@@ -287,10 +296,10 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set(${output_var} ${_first}${_rest} PARENT_SCOPE)
   endfunction()
 
-  function(install_desktop_files filename app_name exec_cmd icon_file)
+  function(install_desktop_files filename app_name exec_cmd icon_file icon_install_file)
     set(DESKTOP_NAME ${app_name})
     set(DESKTOP_EXEC_CMD ${exec_cmd})
-    get_filename_component(DESKTOP_ICON ${icon_file} NAME_WE)
+    get_filename_component(DESKTOP_ICON ${icon_install_file} NAME_WE)
     set(_output_file ${CMAKE_CURRENT_BINARY_DIR}/${filename}.install)
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/installers/LinuxInstaller/launcher-template.desktop.in
@@ -300,8 +309,16 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
             RENAME ${filename})
     install(FILES ${icon_file}
             DESTINATION /usr/share/pixmaps
-            RENAME ${DESKTOP_ICON}.png)
+            RENAME ${icon_install_file})
   endfunction()
+
+  set(_icon_suffix)
+  if(CPACK_PACKAGE_SUFFIX)
+    if (${CPACK_PACKAGE_SUFFIX} STREQUAL "nightly" OR
+        ${CPACK_PACKAGE_SUFFIX} STREQUAL "unstable")
+      set(_icon_suffix ${CPACK_PACKAGE_SUFFIX})
+    endif()
+  endif()
 
   set( IMAGES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/images )
   set(_app_name_suffix)
@@ -310,24 +327,26 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   endif()
   if(ENABLE_MANTIDPLOT)
     set(_icon_filename ${IMAGES_DIR}/mantidplot)
-    if(CPACK_PACKAGE_SUFFIX)
-      set(_icon_filename ${_icon_filename}${CPACK_PACKAGE_SUFFIX})
+    if(_icon_suffix)
+      set(_icon_filename ${_icon_filename}${_icon_suffix})
     endif()
     install_desktop_files(mantidplot${CPACK_PACKAGE_SUFFIX}.desktop
-                          MantidPlot${_app_name_suffix}
+                          "Mantid Plot ${_app_name_suffix}"
                           ${CMAKE_INSTALL_PREFIX}/bin/MantidPlot
-                          ${_icon_filename}.png)
+                          ${_icon_filename}.png
+                          mantidplot${CPACK_PACKAGE_SUFFIX}.png )
   endif()
 
   if(ENABLE_WORKBENCH)
     set(_icon_filename ${IMAGES_DIR}/mantid_workbench)
-    if(CPACK_PACKAGE_SUFFIX)
-      set(_icon_filename ${_icon_filename}${CPACK_PACKAGE_SUFFIX})
+    if(_icon_suffix)
+      set(_icon_filename ${_icon_filename}${_icon_suffix})
     endif()
     install_desktop_files(mantidworkbench${CPACK_PACKAGE_SUFFIX}.desktop
-                          MantidWorkbench${_app_name_suffix}
+                          "Mantid Workbench ${_app_name_suffix}"
                           ${CMAKE_INSTALL_PREFIX}/bin/mantidworkbench
-                          ${_icon_filename}.png)
+                          ${_icon_filename}.png
+                          mantid_workbench${CPACK_PACKAGE_SUFFIX}.png)
   endif()
 endif()
 
@@ -360,50 +379,64 @@ if(ENABLE_CPACK)
     # rhel requirements - only used if package requested is rpm
     set(
       CPACK_RPM_PACKAGE_REQUIRES
-      "nexus >= 4.3.1,gsl,glibc,muParser,numpy,h5py >= 2.3.1,PyCifRW >= 4.2.1,tbb,librdkafka,"
-      "${CPACK_RPM_PACKAGE_REQUIRES},OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization,"
+      "boost169-date-time,"
+      "boost169-regex,"
+      "boost169-serialization,"
+      "boost169-filesystem,"
+      "boost169-system,"
+      "nexus >= 4.3.1,gsl,glibc,muParser,tbb,librdkafka,"
+      "OCE-draw,OCE-foundation,OCE-modeling,OCE-ocaf,OCE-visualization,"
       "poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,"
-      "sip >= 4.18,"
-      "python-six,python-ipython >= 1.1.0,python-ipython-notebook,PyYAML,"
-      "python-requests,"
-      "scipy,python2-scikit-image,"
       "hdf,hdf5,jsoncpp >= 0.7.0")
     if(ENABLE_MANTIDPLOT)
       set(CPACK_RPM_PACKAGE_REQUIRES
-          "${CPACK_RPM_PACKAGE_REQUIRES},qt4 >= 4.2,PyQt4,qwtplot3d-qt4")
+          "${CPACK_RPM_PACKAGE_REQUIRES},qt4 >= 4.2,qscintilla,qwt5-qt4,qwtplot3d-qt4")
     endif()
     if(ENABLE_WORKBENCH)
       set(CPACK_RPM_PACKAGE_REQUIRES
-          "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,python-qt5")
+          "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,qscintilla-qt5")
     endif()
 
-    if("${UNIX_CODENAME}" MATCHES "Santiago") # RHEL6
-      if(ENABLE_WORKBENCH)
-        message(FATAL_ERROR "mantidworkbench is not supported on RHEL6")
-      endif()
-      # On RHEL6 we have to use an updated qscintilla to fix an auto complete
-      # bug
+    if(PYTHON_VERSION_MAJOR EQUAL 3)
       set(
         CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},qscintilla >= 2.4.6,boost157,python-matplotlib,"
-        # On RHEL6 we are using SCL packages for Qt
-        "scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit,mantidlibs34-qwt5-qt4"
-        )
-    else() # assumes RHEL7 Require matplotlib >= 1.5 to fix bug in latex
-           # rendering - oddly matplotlib-qt4 contains qt5 backend as well
-      set(
-        CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},boost >= 1.53.0,python2-matplotlib-qt4 >= 1.5.2"
-        )
+        "${CPACK_RPM_PACKAGE_REQUIRES},"
+        "boost169-python3,"
+        "python36-numpy,python36-scipy,python36-h5py,python36-PyCifRW,"
+        "python36-six,python36-PyYAML,python36-requests,python36-toml,"
+        "python36-ipython,python36-ipython-notebook"
+      )
       if(ENABLE_MANTIDPLOT)
         set(CPACK_RPM_PACKAGE_REQUIRES
-            "${CPACK_RPM_PACKAGE_REQUIRES},qscintilla,qwt5-qt4")
+            "${CPACK_RPM_PACKAGE_REQUIRES},python36-QtPy,"
+            "python36-matplotlib-qt4,python36-ipython-gui")
       endif()
       if(ENABLE_WORKBENCH)
         set(CPACK_RPM_PACKAGE_REQUIRES
-            "${CPACK_RPM_PACKAGE_REQUIRES},qscintilla-qt5,python-psutil")
+            "${CPACK_RPM_PACKAGE_REQUIRES},python36-qt5,python36-QtPy,"
+            "python36-matplotlib-qt5,python36-psutil,python36-ipython-gui")
+      endif()
+    else()
+      set(
+        CPACK_RPM_PACKAGE_REQUIRES
+        "${CPACK_RPM_PACKAGE_REQUIRES},"
+        "boost169-python2,"
+        "numpy,scipy,h5py >= 2.3.1,PyCifRW >= 4.2.1,"
+        "python-enum34,python-six,PyYAML,python-requests,"
+        "python-ipython >= 1.1.0,python-ipython-notebook"
+      )
+      if(ENABLE_MANTIDPLOT)
+        set(CPACK_RPM_PACKAGE_REQUIRES
+            "${CPACK_RPM_PACKAGE_REQUIRES},sip >= 4.18,PyQt4,python2-QtPy,"
+            "python2-matplotlib-qt4 >= 1.5.2,python-ipython-gui")
+      endif()
+      if(ENABLE_WORKBENCH)
+        set(CPACK_RPM_PACKAGE_REQUIRES
+            "${CPACK_RPM_PACKAGE_REQUIRES},python2-qt5,python2-QtPy,"
+            "python2-matplotlib-qt4 >= 1.5.2,python-psutil,python-ipython-gui")
       endif()
     endif()
+
     string(REPLACE ";"
                    ","
                    CPACK_RPM_PACKAGE_REQUIRES
@@ -475,8 +508,9 @@ if(ENABLE_CPACK)
           "python3-sip,"
           "python3-six,"
           "python3-matplotlib,"
+          "python3-qtpy,"
           "python3-scipy,"
-          "python3-skimage,"
+          "python3-toml,"
           "python3-pycifrw (>= 4.2.1),"
           "python3-yaml,"
           "ipython3-qtconsole") # transitional package for bionic
@@ -497,8 +531,8 @@ if(ENABLE_CPACK)
           "python-sip,"
           "python-six,"
           "python-matplotlib,"
+          "python-qtpy,"
           "python-scipy,"
-          "python-skimage,"
           "python-pycifrw (>= 4.2.1),"
           "python-yaml,"
           "ipython-qtconsole")

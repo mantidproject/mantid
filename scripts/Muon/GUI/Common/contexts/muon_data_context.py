@@ -15,9 +15,9 @@ from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
 
-from mantid.api import WorkspaceGroup
+from mantid.simpleapi import GroupWorkspaces
 from mantid.kernel import ConfigService
-from Muon.GUI.Common.observer_pattern import Observable
+from mantidqt.utils.observer_pattern import Observable
 
 
 def construct_empty_group(group_names, group_index=0):
@@ -59,7 +59,7 @@ class MuonDataContext(object):
     The MuonContext is the core class for the MuonAnalysis 2 interface. It stores all the data and parameters used
     in the interface and serves as the model part of the MVP design pattern for every widget in the interface.
     By sharing a common instance of this class, the interface remains synchronized by use of the observer pattern to
-    notify subcribers of changes, whi will then respond by updating their view from this commonly shared model.
+    notify subcribers of changes, who will then respond by updating their view from this commonly shared model.
 
     The actual processing of data occurs via this class (as it should as the model).
     """
@@ -164,10 +164,9 @@ class MuonDataContext(object):
 
     def loaded_workspace_as_group(self, run):
         if self.is_multi_period():
-            workspace_group = WorkspaceGroup()
-            for workspace_wrapper in self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace']:
-                workspace_group.addWorkspace(workspace_wrapper.workspace)
-            return workspace_group
+            workspace_list = [wrapper._workspace_name for wrapper in self._loaded_data.get_data(
+                run=run, instrument=self.instrument)['workspace']['OutputWorkspace']]
+            return GroupWorkspaces(InputWorkspaces=workspace_list, OutputWorkspace='__temp_group')
         else:
             return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
 

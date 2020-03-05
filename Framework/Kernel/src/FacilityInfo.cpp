@@ -114,7 +114,7 @@ void FacilityInfo::fillExtensions(const Poco::XML::Element *elem) {
 void FacilityInfo::addExtension(const std::string &ext) {
   auto it = std::find(m_extensions.begin(), m_extensions.end(), ext);
   if (it == m_extensions.end())
-    m_extensions.push_back(ext);
+    m_extensions.emplace_back(ext);
 }
 
 /// Called from constructor to fill archive interface names
@@ -128,11 +128,10 @@ void FacilityInfo::fillArchiveNames(const Poco::XML::Element *elem) {
     Poco::AutoPtr<Poco::XML::NodeList> pNL_interfaces =
         elem->getElementsByTagName("archiveSearch");
     for (unsigned int i = 0; i < pNL_interfaces->length(); ++i) {
-      Poco::XML::Element *elem =
-          dynamic_cast<Poco::XML::Element *>(pNL_interfaces->item(i));
+      auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_interfaces->item(i));
       std::string plugin = elem->getAttribute("plugin");
       if (!plugin.empty()) {
-        m_archiveSearch.push_back(plugin);
+        m_archiveSearch.emplace_back(plugin);
       }
     }
   }
@@ -147,8 +146,7 @@ void FacilityInfo::fillTimezone(const Poco::XML::Element *elem) {
   } else if (pNL_timezones->length() == 1) {
     pNL_timezones = pNL_timezones->item(0)->childNodes();
     if (pNL_timezones->length() > 0) {
-      Poco::XML::Text *txt =
-          dynamic_cast<Poco::XML::Text *>(pNL_timezones->item(0));
+      auto *txt = dynamic_cast<Poco::XML::Text *>(pNL_timezones->item(0));
       m_timezone = txt->getData();
     }
   } else {
@@ -165,12 +163,11 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element *elem) {
   m_instruments.reserve(n);
 
   for (unsigned long i = 0; i < n; ++i) {
-    Poco::XML::Element *elem =
-        dynamic_cast<Poco::XML::Element *>(pNL_instrument->item(i));
+    auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_instrument->item(i));
     if (elem) {
       try {
         InstrumentInfo instr(this, elem);
-        m_instruments.push_back(instr);
+        m_instruments.emplace_back(instr);
       } catch (...) { /*skip this instrument*/
       }
     }
@@ -188,13 +185,12 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
       elem->getElementsByTagName("computeResource");
   unsigned long n = pNL_compute->length();
   for (unsigned long i = 0; i < n; i++) {
-    Poco::XML::Element *elem =
-        dynamic_cast<Poco::XML::Element *>(pNL_compute->item(i));
+    auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_compute->item(i));
 
     if (elem) {
       try {
         ComputeResourceInfo cr(this, elem);
-        m_computeResInfos.push_back(cr);
+        m_computeResInfos.emplace_back(cr);
 
         g_log.debug() << "Compute resource found: " << cr << '\n';
       } catch (...) { // next resource...
@@ -268,7 +264,7 @@ FacilityInfo::instruments(const std::string &tech) const {
   auto it = m_instruments.begin();
   for (; it != m_instruments.end(); ++it) {
     if (it->techniques().count(tech)) {
-      out.push_back(*it);
+      out.emplace_back(*it);
     }
   }
   return out;
@@ -282,7 +278,7 @@ std::vector<std::string> FacilityInfo::computeResources() const {
   std::vector<std::string> names;
   auto it = m_computeResources.begin();
   while (it != m_computeResources.end()) {
-    names.push_back((*it).first);
+    names.emplace_back((*it).first);
     ++it;
   }
 

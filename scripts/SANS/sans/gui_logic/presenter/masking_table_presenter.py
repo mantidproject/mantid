@@ -13,6 +13,9 @@ import copy
 
 from mantid.kernel import Logger
 from mantid.api import (AnalysisDataService)
+from sans.algorithm_detail.mask_sans_workspace import mask_workspace
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
+from sans.state.Serializer import Serializer
 from ui.sans_isis.masking_table import MaskingTable
 from sans.common.enums import DetectorType
 from sans.common.constants import EMPTY_NAME
@@ -34,14 +37,14 @@ masking_information = namedtuple("masking_information", "first, second, third")
 
 def load_and_mask_workspace(state, workspace_name):
     workspace_to_mask = load_workspace(state, workspace_name)
-    return mask_workspace(state, workspace_to_mask)
+    return run_mask_workspace(state, workspace_to_mask)
 
 
 def load_workspace(state, workspace_name):
     prepare_to_load_scatter_sample_only(state)
     handle_multi_period_data(state)
 
-    serialized_state = state.property_manager
+    serialized_state = Serializer.to_json(state)
 
     workspace = perform_load(serialized_state)
     perform_move(state, workspace)
@@ -49,20 +52,17 @@ def load_workspace(state, workspace_name):
     return workspace
 
 
-def mask_workspace(state, workspace_to_mask):
-    serialized_state = state.property_manager
-    masking_algorithm = create_masking_algorithm(serialized_state, workspace_to_mask)
+def run_mask_workspace(state, workspace_to_mask):
     mask_info = state.mask
 
-    detectors = [DetectorType.to_string(DetectorType.LAB), DetectorType.to_string(DetectorType.HAB)] \
-                if DetectorType.to_string(DetectorType.HAB) in mask_info.detectors else\
-                [DetectorType.to_string(DetectorType.LAB)]  # noqa
+    detectors = [DetectorType.LAB.value, DetectorType.HAB.value] \
+                if DetectorType.HAB.value in mask_info.detectors else\
+                [DetectorType.LAB.value]  # noqa
 
     for detector in detectors:
-        masking_algorithm.setProperty("Component", detector)
-        masking_algorithm.execute()
+        mask_workspace(component_as_string=detector, workspace=workspace_to_mask, state=state)
 
-    return masking_algorithm.getProperty("Workspace").value
+    return workspace_to_mask
 
 
 def prepare_to_load_scatter_sample_only(state):
@@ -88,33 +88,13 @@ def perform_load(serialized_state):
 
 
 def perform_move(state, workspace):
-    serialized_state = state.property_manager
-    move_name = "SANSMove"
-
-    zero_options = {"SANSState": serialized_state,
-                    "Workspace": workspace,
-                    "MoveType": "SetToZero",
-                    "Component": ""}
-    zero_alg = create_unmanaged_algorithm(move_name, **zero_options)
-    zero_alg.execute()
-    workspace = zero_alg.getProperty("Workspace").value
-
-    move_options = {"SANSState": serialized_state,
-                    "Workspace": workspace,
-                    "MoveType": "InitialMove"}
-    move_alg = create_unmanaged_algorithm(move_name, **move_options)
-    move_alg.execute()
+    move_info = state.move
+    move_component(move_info=move_info, component_name='', workspace=workspace, move_type=MoveTypes.RESET_POSITION)
+    move_component(component_name=None, move_info=move_info, workspace=workspace, move_type=MoveTypes.INITIAL_MOVE)
 
 
 def store_in_ads_as_hidden(workspace_name, workspace):
     AnalysisDataService.addOrReplace(workspace_name, workspace)
-
-
-def create_masking_algorithm(serialized_state, workspace_to_mask):
-    mask_name = "SANSMaskWorkspace"
-    mask_options = {"SANSState": serialized_state,
-                    "Workspace": workspace_to_mask}
-    return create_unmanaged_algorithm(mask_name, **mask_options)
 
 
 def create_load_algorithm(serialized_state):
@@ -142,7 +122,7 @@ class MaskingTablePresenter(object):
             self._presenter = presenter
 
         def on_row_changed(self):
-            self._presenter.on_row_changed()
+            pass
 
         def on_update_rows(self):
             self._presenter.on_update_rows()
@@ -167,12 +147,6 @@ class MaskingTablePresenter(object):
         self._work_handler = WorkHandler()
         self._logger = Logger("SANS")
 
-    def on_row_changed(self):
-        row_index = self._view.get_current_row()
-        state = self.get_state(row_index, file_lookup=False, suppress_warnings=True)
-        if state:
-            self.display_masking_information(state)
-
     def on_display(self):
         # Get the state information for the selected row.
         # Disable the button
@@ -183,17 +157,19 @@ class MaskingTablePresenter(object):
             state = self.get_state(row_index)
         except Exception as e:
             self.on_processing_error_masking_display(e)
-            raise Exception(str(e))  # propagate errors for run_tab_presenter to deal with
-        else:
-            if not state:
-                self._logger.information("You can only show a masked workspace if a user file has been loaded and there"
-                                         "valid sample scatter entry has been provided in the selected row.")
-                return
+            raise e  # propagate errors for run_tab_presenter to deal with
 
-            # Run the task
-            listener = MaskingTablePresenter.DisplayMaskListener(self)
-            state_copy = copy.copy(state)
-            self._work_handler.process(listener, load_and_mask_workspace, 0, state_copy, self.DISPLAY_WORKSPACE_NAME)
+        if not state:
+            self._logger.error("You can only show a masked workspace if a user file has been loaded and there"
+                               "valid sample scatter entry has been provided in the selected row.")
+            self._view.set_display_mask_button_to_normal()
+            return
+
+        # Run the task
+        self.display_masking_information(state)
+        listener = MaskingTablePresenter.DisplayMaskListener(self)
+        state_copy = copy.copy(state)
+        self._work_handler.process(listener, load_and_mask_workspace, 0, state_copy, self.DISPLAY_WORKSPACE_NAME)
 
     def on_processing_finished_masking_display(self, result):
         # Enable button
@@ -227,7 +203,6 @@ class MaskingTablePresenter(object):
 
         if new_row_index != -1:
             self.set_row(new_row_index)
-            self.on_row_changed()
 
     def set_row(self, index):
         self._view.set_row(index)
@@ -423,8 +398,8 @@ class MaskingTablePresenter(object):
         mask_info = state.mask
         masks = []
 
-        mask_info_lab = mask_info.detectors[DetectorType.to_string(DetectorType.LAB)]
-        mask_info_hab = mask_info.detectors[DetectorType.to_string(DetectorType.HAB)] if DetectorType.to_string(DetectorType.HAB) in mask_info.detectors else None  # noqa
+        mask_info_lab = mask_info.detectors[DetectorType.LAB.value]
+        mask_info_hab = mask_info.detectors[DetectorType.HAB.value] if DetectorType.HAB.value in mask_info.detectors else None  # noqa
 
         # Add the radius mask
         radius_mask = self._get_radius(mask_info)
@@ -483,4 +458,4 @@ class MaskingTablePresenter(object):
                 instrument_win.show()
             else:
                 instrument_win = InstrumentViewPresenter(masked_workspace)
-                instrument_win.view.show()
+                instrument_win.container.show()

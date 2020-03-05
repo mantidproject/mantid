@@ -137,14 +137,14 @@ public:
 
     // define user specified arbitrary header
     std::vector<std::string> user_header;
-    user_header.push_back("user line 1");
-    user_header.push_back("user line 2");
-    user_header.push_back("user line 3");
+    user_header.emplace_back("user line 1");
+    user_header.emplace_back("user line 2");
+    user_header.emplace_back("user line 3");
 
     // define user specified arbitrary bank header
     std::vector<std::string> user_bank_headers;
-    user_bank_headers.push_back("Bank 1 some information");
-    user_bank_headers.push_back("Bank 2 some information different");
+    user_bank_headers.emplace_back("Bank 1 some information");
+    user_bank_headers.emplace_back("Bank 2 some information different");
 
     // SLOG XYE precision
     std::vector<int> slog_xye_precision(3, 1);
@@ -284,6 +284,9 @@ public:
     // The alg will automatically append 0 and 1 when we split the files
     const std::string fileOnePath = outFilePath + "-0.gsas";
     const std::string fileTwoPath = outFilePath + "-1.gsas";
+
+    Poco::TemporaryFile::registerForDeletion(fileOnePath);
+    Poco::TemporaryFile::registerForDeletion(fileTwoPath);
 
     TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
         "SaveGSS-SplitRef-0.gsas", fileOnePath));

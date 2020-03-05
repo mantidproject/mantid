@@ -8,15 +8,18 @@
 #
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+import unittest
+
 from mantidqt.project.encoderfactory import EncoderFactory
 from mantidqt.widgets.instrumentview.io import InstrumentViewEncoder
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantid.simpleapi import CreateSampleWorkspace
 from mantid.api import AnalysisDataService as ADS
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 
-class EncoderFactoryTest(GuiTest):
+@start_qapplication
+class EncoderFactoryTest(unittest.TestCase):
     def setUp(self):
         EncoderFactory.register_encoder(InstrumentViewEncoder)
         CreateSampleWorkspace(OutputWorkspace="ws")

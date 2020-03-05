@@ -7,7 +7,7 @@
 #ifndef PYSEQUENCETOVECTORCONVERTERTEST_H_
 #define PYSEQUENCETOVECTORCONVERTERTEST_H_
 
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include <boost/python/dict.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/ssize_t.hpp>

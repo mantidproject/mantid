@@ -63,7 +63,7 @@ void GeneralisedSecondDifference::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   int spec_min = getProperty("WorkspaceIndexMin");
   int spec_max = getProperty("WorkspaceIndexMax");
-  int n_hists = static_cast<int>(inputWS->getNumberHistograms());
+  auto n_hists = static_cast<int>(inputWS->getNumberHistograms());
 
   if (spec_min == 0 && spec_max == 0) // Values per default, take all spectra
     spec_max = n_hists - 1;

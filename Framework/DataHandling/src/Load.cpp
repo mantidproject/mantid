@@ -291,6 +291,7 @@ void Load::init() {
   exts.emplace_back(".sqw");
   exts.emplace_back(".fits");
   exts.emplace_back(".bin");
+  exts.emplace_back(".edb");
 
   declareProperty(
       std::make_unique<MultipleFileProperty>("Filename", exts),
@@ -425,7 +426,7 @@ void Load::loadMultipleFiles() {
       }
     }
     // Add the sum to the list of loaded workspace names.
-    loadedWsList.push_back(sumWS);
+    loadedWsList.emplace_back(sumWS);
   }
 
   // If we only have one loaded ws, set it as the output.

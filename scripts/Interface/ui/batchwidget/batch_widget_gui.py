@@ -96,6 +96,15 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
     def on_filter_reset(self):
         self.filterBox.setText('')
 
+    def options_hint_strategy(self):
+        return MantidQt.MantidWidgets.AlgorithmHintStrategy("ReflectometryReductionOneAuto",
+                                                            ["ThetaIn", "ThetaOut", "InputWorkspace",
+                                                             "OutputWorkspace", "OutputWorkspaceBinned",
+                                                             "OutputWorkspaceWavelength", "FirstTransmissionRun",
+                                                             "SecondTransmissionRun", "MomentumTransferMin",
+                                                             "MomentumTransferMax", "MomentumTransferStep",
+                                                             "ScaleFactor"])
+
     def setup_layout(self):
         self.table = MantidQt.MantidWidgets.Batch.JobTreeView(["Run(s)",
                                                                "Angle",
@@ -105,6 +114,7 @@ class DataProcessorGui(QtGui.QMainWindow, Ui_BatchWidgetWindow):
                                                                "dQ/Q",
                                                                "Scale",
                                                                "Options"], cell(""), self)
+        self.table.setHintsForColumn(7, self.options_hint_strategy())
 
         self.table_signals = MantidQt.MantidWidgets.Batch.JobTreeViewSignalAdapter(self.table)
 

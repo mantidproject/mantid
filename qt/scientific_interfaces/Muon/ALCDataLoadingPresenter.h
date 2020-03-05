@@ -7,15 +7,13 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_ALCDATALOADINGPRESENTER_H_
 #define MANTIDQT_CUSTOMINTERFACES_ALCDATALOADINGPRESENTER_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/System.h"
-
 #include "DllConfig.h"
 #include "IALCDataLoadingView.h"
-
+#include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/System.h"
 #include <QFileSystemWatcher>
 #include <QObject>
-
 #include <atomic>
 
 namespace MantidQt {
@@ -39,6 +37,12 @@ public:
 
   /// Sets some data
   void setData(Mantid::API::MatrixWorkspace_sptr data);
+
+  // Returns a boolean stating whether data is currently being loading
+  bool isLoading() const;
+
+  // Cancels current loading algorithm
+  void cancelLoading() const;
 
 private slots:
   /// Check file range and call method to load new data
@@ -91,6 +95,12 @@ private:
 
   /// Number of detectors for current first run
   size_t m_numDetectors;
+
+  // bool to state whether loading data
+  std::atomic_bool m_loadingData;
+
+  // Loading algorithm
+  Mantid::API::IAlgorithm_sptr m_LoadingAlg;
 };
 
 } // namespace CustomInterfaces

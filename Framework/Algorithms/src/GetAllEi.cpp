@@ -160,7 +160,7 @@ void removeInvalidValues(const std::vector<bool> &guessValid,
 
   for (size_t i = 0; i < guessValid.size(); i++) {
     if (guessValid[i]) {
-      new_guess.push_back(guess[i]);
+      new_guess.emplace_back(guess[i]);
     }
   }
   new_guess.swap(guess);
@@ -292,7 +292,7 @@ void GetAllEi::exec() {
   for (double time : guess_opening) {
     double eGuess = destUnit->singleFromTOF(time);
     if (eGuess > eMin && eGuess < eMax) {
-      guess_ei.push_back(eGuess);
+      guess_ei.emplace_back(eGuess);
     }
   }
   g_log.debug() << "*From all chopper opening only: " +
@@ -738,12 +738,12 @@ size_t GetAllEi::calcDerivativeAndCountZeros(const std::vector<double> &bins,
 
     if (signChanged(deriv[i], prevSign)) {
       nZeros++;
-      zeros.push_back(0.5 * (bins[i - 1] + bins[i]));
+      zeros.emplace_back(0.5 * (bins[i - 1] + bins[i]));
     }
   }
   deriv[nPoints - 1] = 2 * (f1 - f0) / (bin1 + bin0);
   if (signChanged(deriv[nPoints - 1], prevSign)) {
-    zeros.push_back(bins[nPoints - 1]);
+    zeros.emplace_back(bins[nPoints - 1]);
     nZeros++;
   }
 
@@ -857,8 +857,8 @@ void GetAllEi::findBinRanges(const HistogramX &eBins, const HistogramY &signal,
           std::max(guess_peak[nGuess].right_rng,
                    eGuess * (1 + 3 * eResolution)),
           ind_min, ind_max);
-      irangeMin.push_back(ind_min);
-      irangeMax.push_back(ind_max);
+      irangeMin.emplace_back(ind_min);
+      irangeMax.emplace_back(ind_max);
       guessValid[nGuess] = true;
     } else {
       guessValid[nGuess] = false;
@@ -1106,7 +1106,7 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
         startTime = inputWS->run().startTime();
         endTime = inputWS->run().endTime();
         Kernel::SplittingInterval interval(startTime, endTime, 0);
-        splitter.push_back(interval);
+        splitter.emplace_back(interval);
       } else {
         throw std::runtime_error("filtered all data points. Nothing to do");
       }
@@ -1122,14 +1122,14 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
       if (SelectInterval(it->first, next->first, itder->second, inSelection,
                          startTime, endTime)) {
         Kernel::SplittingInterval interval(startTime, endTime, 0);
-        splitter.push_back(interval);
+        splitter.emplace_back(interval);
       }
       it = next;
     }
     // final interval
     if (inSelection && (endTime > startTime)) {
       Kernel::SplittingInterval interval(startTime, endTime, 0);
-      splitter.push_back(interval);
+      splitter.emplace_back(interval);
     }
   } // End of USE filter log.
 

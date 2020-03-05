@@ -42,17 +42,17 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
   std::vector<double> extents;
   for (size_t i = 0; i < shape.size(); ++i) {
     flatSize *= shape[i];
-    names.push_back(allNames[i]);
-    units.push_back(allUnits[i]);
-    extents.push_back(-10);
-    extents.push_back(10);
+    names.emplace_back(allNames[i]);
+    units.emplace_back(allUnits[i]);
+    extents.emplace_back(-10);
+    extents.emplace_back(10);
   }
 
   if (value == 0.0) {
     std::vector<double> signalArray;
     signalArray.reserve(flatSize);
     for (size_t i = 0; i < flatSize; ++i) {
-      signalArray.push_back(static_cast<double>(i + 1));
+      signalArray.emplace_back(static_cast<double>(i + 1));
     }
     create->setProperty("SignalInput", signalArray);
   } else {
@@ -122,19 +122,19 @@ public:
   void test_size_check_on_dimensionality() {
 
     std::vector<int> badDataShape;
-    badDataShape.push_back(3);
-    badDataShape.push_back(3);
-    badDataShape.push_back(3); // 3rd dimension given
+    badDataShape.emplace_back(3);
+    badDataShape.emplace_back(3);
+    badDataShape.emplace_back(3); // 3rd dimension given
 
     std::vector<int> goodDataShape;
-    goodDataShape.push_back(3);
-    goodDataShape.push_back(3);
-    goodDataShape.push_back(1); // Integrate so should be OK
+    goodDataShape.emplace_back(3);
+    goodDataShape.emplace_back(3);
+    goodDataShape.emplace_back(1); // Integrate so should be OK
 
     std::vector<int> shapeShape;
-    shapeShape.push_back(3);
-    shapeShape.push_back(3);
-    shapeShape.push_back(3);
+    shapeShape.emplace_back(3);
+    shapeShape.emplace_back(3);
+    shapeShape.emplace_back(3);
 
     auto dataWSGood = makeHistoWorkspace(goodDataShape);
     auto dataWSBad = makeHistoWorkspace(badDataShape);

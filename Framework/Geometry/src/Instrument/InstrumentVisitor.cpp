@@ -172,11 +172,11 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   }
   const size_t detectorStop = m_assemblySortedDetectorIndices->size();
   const size_t componentIndex = commonRegistration(assembly);
-  m_componentType->push_back(Beamline::ComponentType::Unstructured);
-  m_assemblySortedComponentIndices->push_back(componentIndex);
+  m_componentType->emplace_back(Beamline::ComponentType::Unstructured);
+  m_assemblySortedComponentIndices->emplace_back(componentIndex);
   // Unless this is the root component this parent is not correct and will be
   // updated later in the register call of the parent.
-  m_parentComponentIndices->push_back(componentIndex);
+  m_parentComponentIndices->emplace_back(componentIndex);
   const size_t componentStop = m_assemblySortedComponentIndices->size();
 
   m_detectorRanges->emplace_back(std::make_pair(detectorStart, detectorStop));
@@ -207,15 +207,15 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
       std::make_pair(0, 0)); // Represents an empty range
   // Record the ID -> index mapping
   const size_t componentIndex = commonRegistration(component);
-  m_componentType->push_back(Beamline::ComponentType::Generic);
+  m_componentType->emplace_back(Beamline::ComponentType::Generic);
 
   const size_t componentStart = m_assemblySortedComponentIndices->size();
   m_componentRanges->emplace_back(
       std::make_pair(componentStart, componentStart + 1));
-  m_assemblySortedComponentIndices->push_back(componentIndex);
+  m_assemblySortedComponentIndices->emplace_back(componentIndex);
   // Unless this is the root component this parent is not correct and will be
   // updated later in the register call of the parent.
-  m_parentComponentIndices->push_back(componentIndex);
+  m_parentComponentIndices->emplace_back(componentIndex);
   // Generic components are not assemblies and do not therefore have children.
   m_children->emplace_back(std::vector<size_t>());
   return componentIndex;
@@ -236,15 +236,15 @@ size_t InstrumentVisitor::registerInfiniteComponent(
       std::make_pair(0, 0)); // Represents an empty range
                              // Record the ID -> index mapping
   const size_t componentIndex = commonRegistration(component);
-  m_componentType->push_back(Beamline::ComponentType::Infinite);
+  m_componentType->emplace_back(Beamline::ComponentType::Infinite);
 
   const size_t componentStart = m_assemblySortedComponentIndices->size();
   m_componentRanges->emplace_back(
       std::make_pair(componentStart, componentStart + 1));
-  m_assemblySortedComponentIndices->push_back(componentIndex);
+  m_assemblySortedComponentIndices->emplace_back(componentIndex);
   // Unless this is the root component this parent is not correct and will be
   // updated later in the register call of the parent.
-  m_parentComponentIndices->push_back(componentIndex);
+  m_parentComponentIndices->emplace_back(componentIndex);
   // Generic components are not assemblies and do not therefore have children.
   m_children->emplace_back(std::vector<size_t>());
   return componentIndex;
@@ -349,7 +349,7 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
   // Record the ID -> component index mapping
   (*m_componentIdToIndexMap)[detector.getComponentID()] = detectorIndex;
   (*m_componentIds)[detectorIndex] = detector.getComponentID();
-  m_assemblySortedDetectorIndices->push_back(detectorIndex);
+  m_assemblySortedDetectorIndices->emplace_back(detectorIndex);
   (*m_detectorPositions)[detectorIndex] = Kernel::toVector3d(detector.getPos());
   (*m_detectorRotations)[detectorIndex] =
       Kernel::toQuaterniond(detector.getRotation());
@@ -357,14 +357,14 @@ size_t InstrumentVisitor::registerDetector(const IDetector &detector) {
   (*m_scaleFactors)[detectorIndex] =
       Kernel::toVector3d(detector.getScaleFactor());
   if (m_instrument->isMonitorViaIndex(detectorIndex)) {
-    m_monitorIndices->push_back(detectorIndex);
+    m_monitorIndices->emplace_back(detectorIndex);
   }
   (*m_names)[detectorIndex] = detector.getName();
   clearLegacyParameters(m_pmap, detector);
 
   /* Note that positions and rotations for detectors are currently
-  NOT stored! These go into DetectorInfo at present. push_back works for other
-  Component types because Detectors are always come first in the resultant
+  NOT stored! These go into DetectorInfo at present. emplace_back works for
+  other Component types because Detectors are always come first in the resultant
   component list
   forming a contiguous block.
   */

@@ -55,9 +55,9 @@ void createTrianglesFromPolygon(const std::vector<uint32_t> &windingOrder,
   triangularFaces.reserve(triangularFaces.size() + 3 * polygonOrder);
   for (int polygonVertex = 1; polygonVertex < polygonOrder - 1;
        ++polygonVertex) {
-    triangularFaces.push_back(*first);
-    triangularFaces.push_back(*(first + polygonVertex));
-    triangularFaces.push_back(*(first + polygonVertex + 1));
+    triangularFaces.emplace_back(*first);
+    triangularFaces.emplace_back(*(first + polygonVertex));
+    triangularFaces.emplace_back(*(first + polygonVertex + 1));
   }
   startOfFace = endOfFace; // start of the next face
 }
@@ -89,6 +89,17 @@ createTriangularFaces(const std::vector<uint32_t> &faceIndices,
   return triangularFaces;
 }
 } // namespace
+
+DLLExport std::unique_ptr<const Geometry::IObject>
+createCylinder(const std::vector<uint32_t> &cylinderPoints,
+               const std::vector<Eigen::Vector3d> &vertices) {
+  // Read points into matrix, sorted by cPoints ordering
+  Eigen::Matrix<double, 3, 3> vSorted;
+  for (int i = 0; i < 3; ++i) {
+    vSorted.col(cylinderPoints[i]) = vertices[i];
+  }
+  return createCylinder(vSorted);
+}
 
 /** Refer to NX_Cylinder definition here
  * http://download.nexusformat.org/doc/html/classes/base_classes/NXcylindrical_geometry.html?highlight=nxcylindrical_geometry
@@ -143,8 +154,8 @@ createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
     }
 
     // xmax, xmin, ymax, ymin, zmax, zmin
-    boundingBoxSimplified.push_back(max);
-    boundingBoxSimplified.push_back(min);
+    boundingBoxSimplified.emplace_back(max);
+    boundingBoxSimplified.emplace_back(min);
   }
 
   std::string algebra = "(-1 -2 3)";
@@ -157,7 +168,7 @@ createCylinder(const Eigen::Matrix<double, 3, 3> &pointsDef) {
 std::unique_ptr<const Geometry::IObject>
 createFromOFFMesh(const std::vector<uint32_t> &faceIndices,
                   const std::vector<uint32_t> &windingOrder,
-                  const std::vector<float> &nexusVertices) {
+                  const std::vector<double> &nexusVertices) {
   std::vector<uint32_t> triangularFaces =
       createTriangularFaces(faceIndices, windingOrder);
 

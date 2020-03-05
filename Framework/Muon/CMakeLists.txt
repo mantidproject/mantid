@@ -88,7 +88,7 @@ set_target_properties(Muon
                                  COMPILE_DEFINITIONS
                                  "IN_MANTID_MUON")
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Muon
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")
@@ -110,8 +110,11 @@ target_link_libraries(Muon
 # Add the unit tests directory
 add_subdirectory(test)
 
-# Installation settings
+# Auto-generate exports header
+target_include_directories(Muon PUBLIC ${CMAKE_BINARY_DIR}/Framework/Muon)
+generate_mantid_export_header(Muon)
 
+# Installation settings
 mtd_install_targets(TARGETS
                     Muon
                     INSTALL_DIRS

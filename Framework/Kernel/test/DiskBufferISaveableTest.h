@@ -87,12 +87,12 @@ public:
     num = 10;
     data.clear();
     for (size_t i = 0; i < num; i++)
-      data.push_back(std::make_unique<ISaveableTester>(i));
+      data.emplace_back(std::make_unique<ISaveableTester>(i));
     BIG_NUM = 1000;
     bigData.clear();
     bigData.reserve(BIG_NUM);
     for (long i = 0; i < BIG_NUM; i++)
-      bigData.push_back(std::make_unique<ISaveableTester>(i));
+      bigData.emplace_back(std::make_unique<ISaveableTester>(i));
   }
 
   void tearDown() override {
@@ -428,7 +428,7 @@ public:
     num = 100000;
     data.clear();
     for (size_t i = 0; i < num; i++) {
-      data.push_back(new ISaveableTester(i));
+      data.emplace_back(new ISaveableTester(i));
       data[i]->setBusy(true); // Items won't do any real saving
     }
   }

@@ -72,11 +72,9 @@ Output:
 
    LoadEmptyInstrument(InstrumentName='BIOSANS', OutputWorkspace='BIOSANS')
    mainDet = SolidAngle(InputWorkspace='BIOSANS', OutputWorkspace='main_detector',
-                        Method='VerticalTube',
-                        StartWorkspaceIndex=3-1, EndWorkspaceIndex=3+256*192-1)
+                        Method='VerticalTube', StartWorkspaceIndex=2, EndWorkspaceIndex=49153)
    wingDet = SolidAngle(InputWorkspace='BIOSANS', OutputWorkspace='wing_detector',
-                        Method='VerticalWing',
-                        StartWorkspaceIndex=49155-1, EndWorkspaceIndex=90114-1)
+                        Method='VerticalWing', StartWorkspaceIndex=49154, EndWorkspaceIndex=90113)
    # both are zero where nothing was calculated
    print('Solid angle where main was not calculated: %.2e' % mainDet.readY(1)[0])
    print('Solid angle where wing was not calculated: %.2e' % wingDet.readY(1)[0])
@@ -91,8 +89,8 @@ Output:
 
     Solid angle where main was not calculated: 0.00e+00
     Solid angle where wing was not calculated: 0.00e+00
-    Solid angle where main was calculated: 2.64e-05
-    Solid angle where wing was calculated: 1.26e-05
+    Solid angle where main was calculated: 2.82e-05
+    Solid angle where wing was calculated: 1.30e-05
 
 
 References

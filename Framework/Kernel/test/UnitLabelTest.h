@@ -74,7 +74,7 @@ private:
   void doImplicitConversionTest(UnitLabel lbl, std::string expected) {
     TS_ASSERT_EQUALS(expected, lbl.ascii());
     const auto &utf8 = lbl.utf8();
-    TS_ASSERT_EQUALS(expected, std::string(utf8.begin(), utf8.end()));
+    TS_ASSERT_EQUALS(std::wstring(expected.begin(), expected.end()), utf8);
   }
 };
 

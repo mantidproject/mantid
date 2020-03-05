@@ -168,11 +168,11 @@ void LoadSpec::readHistogram(const std::vector<double> &input,
   e.reserve(nElements);
 
   for (size_t index = 0; index < nElements; index++) {
-    x.push_back(input[index]);
+    x.emplace_back(input[index]);
     index++;
-    y.push_back(input[index]);
+    y.emplace_back(input[index]);
     index++;
-    e.push_back(input[index]);
+    e.emplace_back(input[index]);
   }
 
   histogram.resize(y.size());
@@ -180,7 +180,7 @@ void LoadSpec::readHistogram(const std::vector<double> &input,
   if (isHist) {
     // we're loading binned data
     // last value is final x bin
-    x.push_back(input.back());
+    x.emplace_back(input.back());
     histogram.setBinEdges(x);
   } else {
     histogram.setPoints(x);

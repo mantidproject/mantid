@@ -168,7 +168,7 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
 
     // Retrieve the output.
     Property *prop = alg->getProperty("OutputWorkspace");
-    IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+    auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
     if (!wsProp)
       throw std::runtime_error(
           "The " + alg->name() +
@@ -322,7 +322,7 @@ void LoadLiveData::addMDWSChunk(Workspace_sptr &accumWS,
   // Get the output as the generic Workspace type
   // This step is necessary for when we are operating on MD workspaces
   Property *prop = alg->getProperty("OutputWorkspace");
-  IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+  auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
   if (!wsProp)
     throw std::runtime_error(
         "The " + alg->name() +
@@ -375,7 +375,7 @@ void LoadLiveData::appendChunk(Mantid::API::Workspace_sptr chunkWS) {
     }
     // disassemble the accum group and put it back together again with updated
     // items
-    size_t nItems = static_cast<size_t>(chunk_gws->getNumberOfEntries());
+    auto nItems = static_cast<size_t>(chunk_gws->getNumberOfEntries());
     std::vector<Workspace_sptr> items(nItems);
     for (size_t i = 0; i < nItems; ++i) {
       items[i] = accum_gws->getItem(i);
@@ -606,7 +606,7 @@ void LoadLiveData::exec() {
   WorkspaceGroup_sptr out_gws =
       boost::dynamic_pointer_cast<WorkspaceGroup>(m_outputWS);
   if (out_gws) {
-    size_t n = static_cast<size_t>(out_gws->getNumberOfEntries());
+    auto n = static_cast<size_t>(out_gws->getNumberOfEntries());
     for (size_t i = 0; i < n; ++i) {
       auto ws = out_gws->getItem(i);
       const std::string &itemName = ws->getName();

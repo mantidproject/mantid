@@ -54,7 +54,7 @@ private:
   inline void addToOutputBuffer(const std::string &outName,
                                 const std::string &outType,
                                 const std::string &outVal) {
-    m_outputVector.push_back(OutputBufferEntry(outName, outType, outVal));
+    m_outputVector.emplace_back(OutputBufferEntry(outName, outType, outVal));
   }
 
   /// Adds ENGINX related data which is required for OpenGenie

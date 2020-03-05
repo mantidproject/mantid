@@ -81,8 +81,8 @@ Mantid::Kernel::TimeSeriesProperty<double> *AddLogDerivative::makeDerivative(
         // Avoid repeated time values giving infinite derivatives
         double dy = (y1 - y0) / (t1 - t0);
         double t = (t0 + t1) / 2.0;
-        dVal.push_back(dy);
-        dTime.push_back(t);
+        dVal.emplace_back(dy);
+        dTime.emplace_back(t);
         // For the next time interval
         t0 = t1;
         y0 = y1;
@@ -134,8 +134,7 @@ void AddLogDerivative::exec() {
   if (!prop)
     throw std::invalid_argument("Log " + LogName +
                                 " not found in the workspace sample logs.");
-  TimeSeriesProperty<double> *tsp =
-      dynamic_cast<TimeSeriesProperty<double> *>(prop);
+  auto *tsp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
   if (!tsp)
     throw std::invalid_argument("Log " + LogName +
                                 " is not a numerical series "

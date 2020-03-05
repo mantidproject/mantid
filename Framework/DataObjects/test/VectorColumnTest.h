@@ -43,23 +43,23 @@ public:
     // Simple case
     TS_ASSERT_THROWS_NOTHING(col.read(0, "1,2,3"));
     std::vector<int> v1;
-    v1.push_back(1);
-    v1.push_back(2);
-    v1.push_back(3);
+    v1.emplace_back(1);
+    v1.emplace_back(2);
+    v1.emplace_back(3);
     TS_ASSERT_EQUALS(col.cell<std::vector<int>>(0), v1);
 
     // Check if trimming works
     TS_ASSERT_THROWS_NOTHING(col.read(1, "  4, 5,  6"));
     std::vector<int> v2;
-    v2.push_back(4);
-    v2.push_back(5);
-    v2.push_back(6);
+    v2.emplace_back(4);
+    v2.emplace_back(5);
+    v2.emplace_back(6);
     TS_ASSERT_EQUALS(col.cell<std::vector<int>>(1), v2);
 
     // Single element
     TS_ASSERT_THROWS_NOTHING(col.read(2, "7"));
     std::vector<int> v3;
-    v3.push_back(7);
+    v3.emplace_back(7);
     TS_ASSERT_EQUALS(col.cell<std::vector<int>>(2), v3);
 
     // Empty string
@@ -79,11 +79,11 @@ public:
 
     // Simple case
     std::vector<int> v1;
-    v1.push_back(11);
-    v1.push_back(22);
-    v1.push_back(33);
-    v1.push_back(44);
-    v1.push_back(55);
+    v1.emplace_back(11);
+    v1.emplace_back(22);
+    v1.emplace_back(33);
+    v1.emplace_back(44);
+    v1.emplace_back(55);
     col.cell<std::vector<int>>(0) = v1;
     std::ostringstream s1;
     TS_ASSERT_THROWS_NOTHING(col.print(0, s1));
@@ -91,7 +91,7 @@ public:
 
     // Single element
     std::vector<int> v2;
-    v2.push_back(9876);
+    v2.emplace_back(9876);
     col.cell<std::vector<int>>(1) = v2;
     std::ostringstream s2;
     TS_ASSERT_THROWS_NOTHING(col.print(1, s2));

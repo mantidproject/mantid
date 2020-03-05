@@ -13,6 +13,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -33,7 +34,7 @@ Required Properties:
 @author
 @date 03/03/2017
 */
-class DLLExport EstimateMuonAsymmetryFromCounts : public API::Algorithm {
+class MANTID_MUON_DLL EstimateMuonAsymmetryFromCounts : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {

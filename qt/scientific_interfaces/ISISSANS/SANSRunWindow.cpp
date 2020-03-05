@@ -324,14 +324,14 @@ void SANSRunWindow::initLayout() {
 
   m_runFiles.reserve(6);
   // Text edit map
-  m_runFiles.push_back(m_uiForm.scatterSample);
-  m_runFiles.push_back(m_uiForm.scatCan);
+  m_runFiles.emplace_back(m_uiForm.scatterSample);
+  m_runFiles.emplace_back(m_uiForm.scatCan);
 
-  m_runFiles.push_back(m_uiForm.transmis);
-  m_runFiles.push_back(m_uiForm.transCan);
+  m_runFiles.emplace_back(m_uiForm.transmis);
+  m_runFiles.emplace_back(m_uiForm.transCan);
 
-  m_runFiles.push_back(m_uiForm.direct);
-  m_runFiles.push_back(m_uiForm.dirCan);
+  m_runFiles.emplace_back(m_uiForm.direct);
+  m_runFiles.emplace_back(m_uiForm.dirCan);
   std::vector<MWRunFiles *>::const_iterator it = m_runFiles.begin();
   for (; it != m_runFiles.end(); ++it) {
     (*it)->doButtonOpt(MWRunFiles::Icon);
@@ -1974,7 +1974,7 @@ void SANSRunWindow::markError(QLabel *label) {
  * Select the base directory for the data
  */
 void SANSRunWindow::selectDataDir() {
-  MantidQt::API::ManageUserDirectories::openUserDirsDialog(this);
+  MantidQt::API::ManageUserDirectories::openManageUserDirectories();
 }
 
 /**
@@ -2175,11 +2175,11 @@ bool SANSRunWindow::handleLoadButtonClick() {
           tuple<QLineEdit *, function<double(const Sample *)>, std::string>;
 
       std::vector<GeomSampleInfo> sampleInfoList;
-      sampleInfoList.push_back(make_tuple(m_uiForm.sample_thick,
-                                          &Sample::getThickness, "thickness"));
-      sampleInfoList.push_back(
+      sampleInfoList.emplace_back(make_tuple(
+          m_uiForm.sample_thick, &Sample::getThickness, "thickness"));
+      sampleInfoList.emplace_back(
           make_tuple(m_uiForm.sample_width, &Sample::getWidth, "width"));
-      sampleInfoList.push_back(
+      sampleInfoList.emplace_back(
           make_tuple(m_uiForm.sample_height, &Sample::getHeight, "height"));
 
       // Populate the sample geometry fields, but replace any zero values with
@@ -3480,9 +3480,8 @@ void SANSRunWindow::checkList() {
   // split up the comma separated list ignoring spaces
   Poco::StringTokenizer in(input, ",", Poco::StringTokenizer::TOK_TRIM);
   try {
-    for (const auto &i :
-         in) { // try a lexical cast, we don't need its result only
-               // if there was an error
+    for (const auto &i : in) { // try a lexical cast, we don't need its result
+                               // only if there was an error
       boost::lexical_cast<double>(i);
     }
     // there were no errors
@@ -4513,8 +4512,9 @@ void SANSRunWindow::writeTransmissionSettingsToPythonScript(
 
     auto transSpec = m_uiForm.trans_M3M4_line_edit->text();
     if (!transSpec.isEmpty()) {
-      pythonCode += "i.SetTransmissionMonitorSpectrumShift(trans_mon_shift=" +
-                    transSpec + ")\n";
+      pythonCode +=
+          "i.SetTransmissionMonitorSpectrumShift(trans_mon_shift=" + transSpec +
+          ")\n";
     }
   } else {
     // Handle Radius

@@ -28,10 +28,10 @@ std::vector<std::string> CatalogSelector::getSelectedCatalogSessions() {
   std::vector<std::string> selectedSessions;
   for (int row = 0; row < m_uiForm.selectedCatalogs->count(); ++row) {
     if (m_uiForm.selectedCatalogs->item(row)->isSelected()) {
-      selectedSessions.push_back(m_uiForm.selectedCatalogs->item(row)
-                                     ->data(Qt::UserRole)
-                                     .toString()
-                                     .toStdString());
+      selectedSessions.emplace_back(m_uiForm.selectedCatalogs->item(row)
+                                        ->data(Qt::UserRole)
+                                        .toString()
+                                        .toStdString());
     }
   }
   return selectedSessions;

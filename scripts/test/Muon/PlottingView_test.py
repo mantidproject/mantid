@@ -12,7 +12,7 @@ import unittest
 from matplotlib.figure import Figure
 from mantid import WorkspaceFactory, plots
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.ElementalAnalysis.Plotting.subPlot_object import subPlot
 from Muon.GUI.ElementalAnalysis.Plotting.plotting_view import PlotView
@@ -30,7 +30,7 @@ def get_subPlot(name):
     # create real lines
     fig = Figure()
     sub = fig.add_subplot(1, 1, 1)
-    line1 = plots.plotfunctions.plot(sub, ws1, specNum=1)
+    line1 = plots.axesfunctions.plot(sub, ws1, specNum=1)
     # add them both
     subplot = subPlot(name)
     subplot.addLine(label1, line1, ws1, 2)
@@ -38,7 +38,8 @@ def get_subPlot(name):
 
 @unittest.skipIf(lambda: sys.platform=='win32'(),
                  "Test segfaults on Windows and code will be removed soon")
-class PlottingViewHelperFunctionTests(GuiTest):
+@start_qapplication
+class PlottingViewHelperFunctionTests(unittest.TestCase):
 
     def setUp(self):
         self.view = PlotView()
@@ -292,7 +293,8 @@ class PlottingViewHelperFunctionTests(GuiTest):
 
 
 @unittest.skipIf(lambda: sys.platform=='win32'(), "Test segfaults on Windows and code will be removed soon")
-class PlottingViewPlotFunctionsTests(GuiTest):
+@start_qapplication
+class PlottingViewPlotFunctionsTests(unittest.TestCase):
 
     def setUp(self):
 

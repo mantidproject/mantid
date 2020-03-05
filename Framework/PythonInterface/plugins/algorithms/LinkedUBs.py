@@ -310,7 +310,7 @@ class LinkedUBs(DataProcessorAlgorithm):
 
             # get the indexing list that sorts dspacing from largest to
             # smallest
-            hkls = np.array([[p['h'], p['k'], p['l']] for p in predictor])
+            hkls = np.array([[p.getH(), p.getK(), p.getL()] for p in predictor])
             idx = dspacings_predicted.argsort()[::-1]
             HKL_predicted = hkls[idx, :]
 

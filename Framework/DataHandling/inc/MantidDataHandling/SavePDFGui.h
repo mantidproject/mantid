@@ -13,8 +13,15 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** SavePDFGui : TODO: DESCRIPTION
- */
+/** SavePDFGui : Saves a workspace containing a pair distrebution function in a
+format readable by the PDFgui package.
+
+Required Properties:
+<UL>
+<LI> InputWorkspace - An input workspace with units of Atomic Distance </LI>
+<LI> Filename - The filename to use for the saved data </LI>
+</UL>
+*/
 class DLLExport SavePDFGui : public API::Algorithm {
 public:
   const std::string name() const override;
@@ -29,6 +36,9 @@ public:
 private:
   void init() override;
   void exec() override;
+  void writeMetaData(std::ofstream &out,
+                     API::MatrixWorkspace_const_sptr inputWS);
+  void writeWSData(std::ofstream &out, API::MatrixWorkspace_const_sptr inputWS);
 };
 
 } // namespace DataHandling

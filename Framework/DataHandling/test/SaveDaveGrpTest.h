@@ -210,6 +210,7 @@ public:
     ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
     ld.setPropertyValue("OutputWorkspace", outws);
     ld.setPropertyValue("Precount", "0");
+    ld.setProperty("NumberOfBins", 1);
     ld.execute();
     TS_ASSERT(ld.isExecuted());
     AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();

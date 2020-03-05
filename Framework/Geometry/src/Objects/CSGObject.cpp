@@ -43,6 +43,10 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace {
+
+/// A shift to add/subtract to a point to test if it is an entry/exit point
+constexpr double VALID_INTERCEPT_POINT_SHIFT{2.5e-05};
+
 /**
  * Find the solid angle of a triangle defined by vectors a,b,c from point
  *"observer"
@@ -611,13 +615,13 @@ int CSGObject::hasComplement() const {
  */
 int CSGObject::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
   std::deque<Rule *> Rst;
-  Rst.push_back(TopRule.get());
+  Rst.emplace_back(TopRule.get());
   while (!Rst.empty()) {
     Rule *T1 = Rst.front();
     Rst.pop_front();
     if (T1) {
       // if an actual surface process :
-      SurfPoint *KV = dynamic_cast<SurfPoint *>(T1);
+      auto *KV = dynamic_cast<SurfPoint *>(T1);
       if (KV) {
         // Ensure that we have a it in the surface list:
         auto mf = Smap.find(KV->getKeyN());
@@ -633,9 +637,9 @@ int CSGObject::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
         Rule *TA = T1->leaf(0);
         Rule *TB = T1->leaf(1);
         if (TA)
-          Rst.push_back(TA);
+          Rst.emplace_back(TA);
         if (TB)
-          Rst.push_back(TB);
+          Rst.emplace_back(TB);
       }
     }
   }
@@ -846,9 +850,9 @@ int CSGObject::createSurfaceList(const int outFlag) {
       if (tmpC)
         TreeLine.push(tmpC);
     } else {
-      const SurfPoint *SurX = dynamic_cast<const SurfPoint *>(tmpA);
+      const auto *SurX = dynamic_cast<const SurfPoint *>(tmpA);
       if (SurX) {
-        m_SurList.push_back(SurX->getKey());
+        m_SurList.emplace_back(SurX->getKey());
       }
     }
   }
@@ -877,7 +881,7 @@ std::vector<int> CSGObject::getSurfaceIndex() const {
   std::vector<int> out;
   transform(m_SurList.begin(), m_SurList.end(),
             std::insert_iterator<std::vector<int>>(out, out.begin()),
-            std::mem_fun(&Surface::getName));
+            std::mem_fn(&Surface::getName));
   return out;
 }
 
@@ -921,7 +925,7 @@ void CSGObject::print() const {
   std::deque<Rule *> Rst;
   std::vector<int> Cells;
   int Rcount(0);
-  Rst.push_back(TopRule.get());
+  Rst.emplace_back(TopRule.get());
   Rule *TA, *TB; // Temp. for storage
 
   while (!Rst.empty()) {
@@ -929,16 +933,16 @@ void CSGObject::print() const {
     Rst.pop_front();
     if (T1) {
       Rcount++;
-      SurfPoint *KV = dynamic_cast<SurfPoint *>(T1);
+      auto *KV = dynamic_cast<SurfPoint *>(T1);
       if (KV)
-        Cells.push_back(KV->getKeyN());
+        Cells.emplace_back(KV->getKeyN());
       else {
         TA = T1->leaf(0);
         TB = T1->leaf(1);
         if (TA)
-          Rst.push_back(TA);
+          Rst.emplace_back(TA);
         if (TB)
-          Rst.push_back(TB);
+          Rst.emplace_back(TB);
       }
     }
   }
@@ -1094,16 +1098,15 @@ int CSGObject::procString(const std::string &Line) {
 
 /**
  * Given a track, fill the track with valid section
- * @param UT :: Initial track
+ * @param track :: Initial track
  * @return Number of segments added
  */
-int CSGObject::interceptSurface(Geometry::Track &UT) const {
-  int originalCount = UT.count(); // Number of intersections original track
+int CSGObject::interceptSurface(Geometry::Track &track) const {
+  int originalCount = track.count(); // Number of intersections original track
   // Loop over all the surfaces.
-  LineIntersectVisit LI(UT.startPoint(), UT.direction());
-  std::vector<const Surface *>::const_iterator vc;
-  for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
-    (*vc)->acceptVisitor(LI);
+  LineIntersectVisit LI(track.startPoint(), track.direction());
+  for (auto &surface : m_SurList) {
+    surface->acceptVisitor(LI);
   }
   const auto &IPoints(LI.getPoints());
   const auto &dPoints(LI.getDistance());
@@ -1114,14 +1117,37 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
     if (*ditr > 0.0) // only interested in forward going points
     {
       // Is the point and enterance/exit Point
-      const TrackDirection flag = calcValidType(*iitr, UT.direction());
+      const TrackDirection flag = calcValidType(*iitr, track.direction());
       if (flag != TrackDirection::INVALID)
-        UT.addPoint(flag, *iitr, *this);
+        track.addPoint(flag, *iitr, *this);
     }
   }
-  UT.buildLink();
+  track.buildLink();
   // Return number of track segments added
-  return (UT.count() - originalCount);
+  return (track.count() - originalCount);
+}
+
+/**
+ * Compute the distance to the first point of intersection with the surface
+ * @param track Track defining start/direction
+ * @return The distance to the object
+ * @throws std::runtime_error if no intersection was found
+ */
+double CSGObject::distance(const Geometry::Track &track) const {
+  LineIntersectVisit LI(track.startPoint(), track.direction());
+  for (auto &surface : m_SurList) {
+    surface->acceptVisitor(LI);
+  }
+  const auto &distances(LI.getDistance());
+  if (!distances.empty()) {
+    return std::abs(
+        *std::min_element(std::begin(distances), std::end(distances)));
+  } else {
+    std::ostringstream os;
+    os << "Unable to find intersection with object with track starting at "
+       << track.startPoint() << " in direction " << track.direction() << "\n";
+    throw std::runtime_error(os.str());
+  }
 }
 
 /**
@@ -1134,11 +1160,9 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
  */
 TrackDirection CSGObject::calcValidType(const Kernel::V3D &point,
                                         const Kernel::V3D &uVec) const {
-  const Kernel::V3D shift(uVec * Kernel::Tolerance * 25.0);
-  const Kernel::V3D testA(point - shift);
-  const Kernel::V3D testB(point + shift);
-  const int flagA = isValid(testA);
-  const int flagB = isValid(testB);
+  const Kernel::V3D shift(uVec * VALID_INTERCEPT_POINT_SHIFT);
+  const int flagA = isValid(point - shift);
+  const int flagB = isValid(point + shift);
   if (!(flagA ^ flagB))
     return Geometry::TrackDirection::INVALID;
   return (flagA) ? Geometry::TrackDirection::LEAVING
@@ -1756,10 +1780,10 @@ void CSGObject::calcBoundingBoxByGeometry() {
     auto rbb = lbb + (rfb - lfb); // Right-Back-Bottom
     auto rbt = rbb + (rft - rfb); // Right-Back-Top
 
-    vectors.push_back(lbt);
-    vectors.push_back(rft);
-    vectors.push_back(rbb);
-    vectors.push_back(rbt);
+    vectors.emplace_back(lbt);
+    vectors.emplace_back(rft);
+    vectors.emplace_back(rbb);
+    vectors.emplace_back(rbt);
 
     // Unreasonable extents to be replaced by first loop cycle
     constexpr double huge = 1e10;
@@ -1958,11 +1982,12 @@ int CSGObject::getPointInObject(Kernel::V3D &point) const {
  * @param rng  A reference to a PseudoRandomNumberGenerator where
  * nextValue should return a flat random number between 0.0 & 1.0
  * @param maxAttempts The maximum number of attempts at generating a point
- * @return The generated point
+ * @return whether a point was generated in the object or not
  */
-V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
-                                     const size_t maxAttempts) const {
-  V3D point;
+boost::optional<Kernel::V3D>
+CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
+                                 const size_t maxAttempts) const {
+  boost::optional<V3D> point{boost::none};
   // If the shape fills its bounding box well enough then the most efficient
   // way to get the point is just brute force. We'll try that first with
   // just a few attempts.
@@ -1975,7 +2000,7 @@ V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
   boost::optional<V3D> maybePoint{
       RandomPoint::inGenericShape(*this, rng, bruteForceAttempts)};
   if (maybePoint) {
-    point = *maybePoint;
+    point = maybePoint;
   } else {
     switch (shape()) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
@@ -1993,12 +2018,7 @@ V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
     default:
       maybePoint = RandomPoint::inGenericShape(
           *this, rng, maxAttempts - bruteForceAttempts);
-      if (!maybePoint) {
-        throw std::runtime_error("Unable to generate point in object after " +
-                                 std::to_string(maxAttempts) + " attempts");
-      }
-      point = *maybePoint;
-      break;
+      point = maybePoint;
     }
   }
   return point;
@@ -2012,11 +2032,12 @@ V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
  * @param activeRegion Restrict point generation to this sub-region of the
  * object
  * @param maxAttempts The maximum number of attempts at generating a point
- * @return The newly generated point
+ * @return whether a point was generated in the object or not
  */
-V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                     const BoundingBox &activeRegion,
-                                     const size_t maxAttempts) const {
+boost::optional<Kernel::V3D>
+CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                 const BoundingBox &activeRegion,
+                                 const size_t maxAttempts) const {
   boost::optional<V3D> point{boost::none};
   // We'll first try brute force. If the shape fills its bounding box
   // well enough, this should be the fastest method.
@@ -2037,19 +2058,23 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
     switch (shape) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
       point = RandomPoint::bounded<RandomPoint::inCuboid>(
-          m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
+          m_handler->shapeInfo(), rng, activeRegion,
+          maxAttempts - bruteForceAttempts);
       break;
     case detail::ShapeInfo::GeometryShape::CYLINDER:
       point = RandomPoint::bounded<RandomPoint::inCylinder>(
-          m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
+          m_handler->shapeInfo(), rng, activeRegion,
+          maxAttempts - bruteForceAttempts);
       break;
     case detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER:
       point = RandomPoint::bounded<RandomPoint::inHollowCylinder>(
-          m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
+          m_handler->shapeInfo(), rng, activeRegion,
+          maxAttempts - bruteForceAttempts);
       break;
     case detail::ShapeInfo::GeometryShape::SPHERE:
       point = RandomPoint::bounded<RandomPoint::inSphere>(
-          m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
+          m_handler->shapeInfo(), rng, activeRegion,
+          maxAttempts - bruteForceAttempts);
       break;
     default:
       point = RandomPoint::bounded(*this, rng, activeRegion,
@@ -2057,11 +2082,7 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
       break;
     }
   }
-  if (!point) {
-    throw std::runtime_error("Unable to generate point in object after " +
-                             std::to_string(maxAttempts) + " attempts");
-  }
-  return *point;
+  return point;
 }
 
 /**

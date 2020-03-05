@@ -83,7 +83,7 @@ ONCatEntity::vectorFromJSONStream(std::istream &streamContent) {
           "were not found.");
     }
 
-    entities.push_back(
+    entities.emplace_back(
         ONCatEntity(id, type, std::make_unique<Content>(subContent)));
   }
 

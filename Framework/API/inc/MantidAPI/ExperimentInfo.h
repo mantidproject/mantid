@@ -16,7 +16,6 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
-#include <list>
 #include <mutex>
 
 namespace Mantid {
@@ -38,8 +37,6 @@ class XMLInstrumentParameter;
 } // namespace Geometry
 
 namespace API {
-class ChopperModel;
-class ModeratorModel;
 class Run;
 class Sample;
 class SpectrumInfo;
@@ -83,23 +80,9 @@ public:
   // Add parameters to the instrument parameter map
   void populateInstrumentParameters();
 
-  /// Cache a lookup of grouped detIDs to member IDs
-  virtual void cacheDetectorGroupings(const det2group_map &mapping);
-
   void setNumberOfDetectorGroups(const size_t count) const;
   void setDetectorGrouping(const size_t index,
                            const std::set<detid_t> &detIDs) const;
-
-  /// Set an object describing the source properties and take ownership
-  void setModeratorModel(ModeratorModel *source);
-  /// Returns a reference to the source properties object
-  ModeratorModel &moderatorModel() const;
-
-  /// Set a chopper description specified by index where 0 is closest to the
-  /// source
-  void setChopperModel(ChopperModel *chopper, const size_t index = 0);
-  /// Returns a reference to a chopper description
-  ChopperModel &chopperModel(const size_t index = 0) const;
 
   /// Sample accessors
   const Sample &sample() const;
@@ -132,7 +115,11 @@ public:
   void setEFixed(const detid_t detID, const double value);
 
   /// Saves this experiment description to the open NeXus file
-  void saveExperimentInfoNexus(::NeXus::File *file) const;
+  void saveExperimentInfoNexus(::NeXus::File *file,
+                               bool saveLegacyInstrument = true) const;
+  /// Saves this experiment description to the open NeXus file
+  void saveExperimentInfoNexus(::NeXus::File *file, bool saveInstrument,
+                               bool saveSample, bool saveLogs) const;
   /// Loads an experiment description from the open NeXus file
   void loadExperimentInfoNexus(const std::string &nxFilename,
                                ::NeXus::File *file, std::string &parameterStr);
@@ -184,8 +171,6 @@ public:
   void invalidateSpectrumDefinition(const size_t index);
   void updateSpectrumDefinitionIfNecessary(const size_t index) const;
 
-  virtual size_t groupOfDetectorID(const detid_t detID) const;
-
 protected:
   size_t numberOfDetectorGroups() const;
   /// Called as the first operation of most public methods.
@@ -195,10 +180,6 @@ protected:
       Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions);
 
   virtual void updateCachedDetectorGrouping(const size_t index) const;
-  /// Description of the source object
-  boost::shared_ptr<ModeratorModel> m_moderatorModel;
-  /// Description of the choppers for this experiment.
-  std::list<boost::shared_ptr<ChopperModel>> m_choppers;
   /// Parameters modifying the base instrument
   boost::shared_ptr<Geometry::ParameterMap> m_parmap;
   /// The base (unparametrized) instrument

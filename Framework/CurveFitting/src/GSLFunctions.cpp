@@ -22,7 +22,7 @@ namespace CurveFitting {
  */
 int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
   assert(x->data);
-  struct GSL_FitData *p = reinterpret_cast<struct GSL_FitData *>(params);
+  auto *p = reinterpret_cast<struct GSL_FitData *>(params);
 
   // update function parameters
   size_t ia = 0;
@@ -85,7 +85,7 @@ int gsl_f(const gsl_vector *x, void *params, gsl_vector *f) {
  */
 int gsl_df(const gsl_vector *x, void *params, gsl_matrix *J) {
 
-  struct GSL_FitData *p = reinterpret_cast<struct GSL_FitData *>(params);
+  auto *p = reinterpret_cast<struct GSL_FitData *>(params);
 
   p->J.setJ(J);
 
@@ -201,10 +201,10 @@ GSL_FitData::GSL_FitData(
   int j = 0;
   for (size_t i = 0; i < function->nParams(); ++i) {
     if (function->isActive(i)) {
-      J.m_index.push_back(j);
+      J.m_index.emplace_back(j);
       j++;
     } else
-      J.m_index.push_back(-1);
+      J.m_index.emplace_back(-1);
   }
 }
 

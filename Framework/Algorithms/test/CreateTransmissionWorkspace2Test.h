@@ -399,157 +399,239 @@ public:
     }
   }
 
-  void test_one_run_store_in_ADS() {
-    AnalysisDataService::Instance().clear();
-    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    inputWS->mutableRun().addProperty<std::string>("run_number", "1234");
-
+  void test_one_run_stores_output_workspace() {
     CreateTransmissionWorkspace2 alg;
-    alg.initialize();
-    alg.setProperty("FirstTransmissionRun", inputWS);
-    alg.setProperty("WavelengthMin", 3.0);
-    alg.setProperty("WavelengthMax", 12.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
+    setup_test_to_check_output_workspaces(alg);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     alg.execute();
-
-    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("outWS"));
-
-    MatrixWorkspace_sptr firstLam =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
-
-    TS_ASSERT(firstLam);
-    TS_ASSERT_EQUALS(firstLam->getAxis(0)->unit()->unitID(), "Wavelength");
-    TS_ASSERT(firstLam->x(0).front() >= 3.0);
-    TS_ASSERT(firstLam->x(0).back() <= 12.0);
+    check_stored_lambda_workspace("outWS");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
+                         "TRANS_LAM_1234");
   }
 
-  void test_one_run_store_in_ADS_default() {
-    AnalysisDataService::Instance().clear();
-    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    inputWS->mutableRun().addProperty<std::string>("run_number", "1234");
-
+  void test_one_run_sets_output_workspace_when_child() {
     CreateTransmissionWorkspace2 alg;
-    alg.initialize();
-    alg.setProperty("FirstTransmissionRun", inputWS);
-    alg.setProperty("WavelengthMin", 3.0);
-    alg.setProperty("WavelengthMax", 12.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
-    alg.execute();
-
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
-
-    MatrixWorkspace_sptr firstLam =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "TRANS_LAM_1234");
-
-    TS_ASSERT(firstLam);
-    TS_ASSERT_EQUALS(firstLam->getAxis(0)->unit()->unitID(), "Wavelength");
-    TS_ASSERT(firstLam->x(0).front() >= 3.0);
-    TS_ASSERT(firstLam->x(0).back() <= 12.0);
-  }
-
-  void test_two_runs_store_in_ADS() {
-    AnalysisDataService::Instance().clear();
-    auto inputWS1 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    inputWS1->mutableRun().addProperty<std::string>("run_number", "1234");
-    auto inputWS2 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    inputWS2->mutableRun().addProperty<std::string>("run_number", "4321");
-
-    CreateTransmissionWorkspace2 alg;
-    alg.initialize();
-    alg.setProperty("FirstTransmissionRun", inputWS1);
-    alg.setProperty("SecondTransmissionRun", inputWS2);
-    alg.setProperty("WavelengthMin", 3.0);
-    alg.setProperty("WavelengthMax", 12.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
+    setup_test_to_check_output_workspaces(alg);
     alg.setPropertyValue("OutputWorkspace", "outWS");
-    alg.execute();
-    MatrixWorkspace_sptr firstLam =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "TRANS_LAM_1234");
-    MatrixWorkspace_sptr secondLam =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "TRANS_LAM_4321");
-
-    TS_ASSERT(firstLam);
-    TS_ASSERT_EQUALS(firstLam->getAxis(0)->unit()->unitID(), "Wavelength");
-    TS_ASSERT(firstLam->x(0).front() >= 3.0);
-    TS_ASSERT(firstLam->x(0).back() <= 12.0);
-
-    TS_ASSERT(secondLam);
-    TS_ASSERT_EQUALS(secondLam->getAxis(0)->unit()->unitID(), "Wavelength");
-    TS_ASSERT(secondLam->x(0).front() >= 3.0);
-    TS_ASSERT(secondLam->x(0).back() <= 12.0);
-
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
-    TS_ASSERT(
-        !AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("outWS"));
-  }
-
-  void test_two_runs_store_in_ADS_default() {
-    AnalysisDataService::Instance().clear();
-    auto inputWS1 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    inputWS1->mutableRun().addProperty<std::string>("run_number", "1234");
-    auto inputWS2 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    inputWS2->mutableRun().addProperty<std::string>("run_number", "4321");
-
-    CreateTransmissionWorkspace2 alg;
-    alg.initialize();
-    alg.setProperty("FirstTransmissionRun", inputWS1);
-    alg.setProperty("SecondTransmissionRun", inputWS2);
-    alg.setProperty("WavelengthMin", 3.0);
-    alg.setProperty("WavelengthMax", 12.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
-    alg.execute();
-    MatrixWorkspace_sptr firstLam =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "TRANS_LAM_1234");
-    MatrixWorkspace_sptr secondLam =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "TRANS_LAM_4321");
-
-    TS_ASSERT(firstLam);
-    TS_ASSERT_EQUALS(firstLam->getAxis(0)->unit()->unitID(), "Wavelength");
-    TS_ASSERT(firstLam->x(0).front() >= 3.0);
-    TS_ASSERT(firstLam->x(0).back() <= 12.0);
-
-    TS_ASSERT(secondLam);
-    TS_ASSERT_EQUALS(secondLam->getAxis(0)->unit()->unitID(), "Wavelength");
-    TS_ASSERT(secondLam->x(0).front() >= 3.0);
-    TS_ASSERT(secondLam->x(0).back() <= 12.0);
-
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
-  }
-
-  void test_two_runs_store_in_ADS_default_child() {
-    AnalysisDataService::Instance().clear();
-    auto inputWS1 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    inputWS1->mutableRun().addProperty<std::string>("run_number", "1234");
-    auto inputWS2 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
-    inputWS2->mutableRun().addProperty<std::string>("run_number", "4321");
-
-    CreateTransmissionWorkspace2 alg;
     alg.setChild(true);
-    alg.initialize();
-    alg.setProperty("FirstTransmissionRun", inputWS1);
-    alg.setProperty("SecondTransmissionRun", inputWS2);
-    alg.setProperty("WavelengthMin", 3.0);
-    alg.setProperty("WavelengthMax", 12.0);
-    alg.setPropertyValue("ProcessingInstructions", "2");
+    alg.execute();
+    check_output_lambda_workspace(alg, "OutputWorkspace", "outWS");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
+                         "TRANS_LAM_1234");
+  }
+
+  void test_one_run_stores_output_workspace_with_default_name() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces(alg);
+    alg.execute();
+    check_stored_lambda_workspace("TRANS_LAM_1234");
+  }
+
+  void test_one_run_sets_output_workspace_with_default_name_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces(alg);
+    alg.setChild(true);
+    alg.execute();
+    check_output_lambda_workspace(alg, "OutputWorkspace", "TRANS_LAM_1234");
+  }
+
+  void test_two_runs_stores_stitched_output_workspace_only() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.execute();
+    check_stored_lambda_workspace("outWS");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
+                         "TRANS_LAM_1234");
+    check_output_not_set(alg, "OutputWorkspaceSecondTransmission",
+                         "TRANS_LAM_4321");
+  }
+
+  void test_two_runs_does_not_set_interim_output_workspaces_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.setChild(true);
+    alg.execute();
+    check_output_lambda_workspace(alg, "OutputWorkspace", "outWS");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
+                         "TRANS_LAM_1234");
+    check_output_not_set(alg, "OutputWorkspaceSecondTransmission",
+                         "TRANS_LAM_4321");
+  }
+
+  void test_two_runs_sets_all_output_workspaces_when_child_with_debug() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.setChild(true);
+    alg.setProperty("Debug", true);
+    alg.execute();
+    check_output_lambda_workspace(alg, "OutputWorkspace", "outWS");
+    check_output_lambda_workspace(alg, "OutputWorkspaceFirstTransmission",
+                                  "TRANS_LAM_1234");
+    check_output_lambda_workspace(alg, "OutputWorkspaceSecondTransmission",
+                                  "TRANS_LAM_4321");
+  }
+
+  void test_two_runs_stores_stitched_output_workspace_with_default_name() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.execute();
+    check_stored_lambda_workspace("TRANS_LAM_1234_4321");
+    check_output_not_set(alg, "OutputWorkspaceFirstTransmission",
+                         "TRANS_LAM_1234");
+    check_output_not_set(alg, "OutputWorkspaceSecondTransmission",
+                         "TRANS_LAM_4321");
+  }
+
+  void
+  test_two_runs_sets_stitched_output_workspace_with_default_name_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.setChild(true);
+    alg.execute();
+    check_output_lambda_workspace(alg, "OutputWorkspace",
+                                  "TRANS_LAM_1234_4321");
+  }
+
+  void test_two_runs_sets_all_output_workspaces_when_debug_enabled() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.setProperty("Debug", true);
+    alg.execute();
+    check_stored_lambda_workspace("TRANS_LAM_1234_4321");
+    check_stored_lambda_workspace("TRANS_LAM_1234");
+    check_stored_lambda_workspace("TRANS_LAM_4321");
+  }
+
+  void test_two_runs_stores_no_lambda_workspaces_in_ADS_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.setChild(true);
     alg.execute();
     MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT(outWS);
-
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
+    check_lambda_workspace(outWS);
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
     TS_ASSERT(
         !AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
+  }
+
+  void
+  test_two_runs_stores_no_lambda_workspaces_in_ADS_when_child_with_debug() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.setChild(true);
+    alg.setProperty("Debug", true);
+    alg.execute();
+    MatrixWorkspace_sptr outWS = alg.getProperty("OutputWorkspace");
+    check_lambda_workspace(outWS);
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_1234"));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist("TRANS_LAM_4321"));
+    TS_ASSERT(
+        !AnalysisDataService::Instance().doesExist("TRANS_LAM_1234_4321"));
+  }
+
+  void test_two_runs_sets_interim_lambda_output_workspaces_when_debug() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg);
+    alg.setProperty("Debug", true);
+    alg.execute();
+    check_stored_lambda_workspace("TRANS_LAM_1234_4321");
+    check_stored_lambda_workspace("TRANS_LAM_1234");
+    check_stored_lambda_workspace("TRANS_LAM_4321");
+  }
+
+  void test_throws_if_first_trans_name_not_found() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg, false, true);
+    alg.setProperty("Debug", true);
+    alg.execute();
+    TS_ASSERT_EQUALS(alg.isExecuted(), false);
+  }
+
+  void test_throws_if_first_trans_name_not_found_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg, false, true);
+    alg.setProperty("Debug", true);
+    alg.setChild(true);
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+  }
+
+  void test_throws_if_second_trans_name_not_found() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg, true, false);
+    alg.setProperty("Debug", true);
+    alg.execute();
+    TS_ASSERT_EQUALS(alg.isExecuted(), false);
+  }
+
+  void test_throws_if_second_trans_name_not_found_when_child() {
+    CreateTransmissionWorkspace2 alg;
+    setup_test_to_check_output_workspaces_with_2_inputs(alg, true, false);
+    alg.setProperty("Debug", true);
+    alg.setChild(true);
+    TS_ASSERT_THROWS_ANYTHING(alg.execute());
+  }
+
+private:
+  void setup_test_to_check_output_workspaces(CreateTransmissionWorkspace2 &alg,
+                                             bool hasRunNumber = true) {
+    AnalysisDataService::Instance().clear();
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    if (hasRunNumber)
+      inputWS->mutableRun().addProperty<std::string>("run_number", "1234");
+
+    alg.initialize();
+    alg.setProperty("FirstTransmissionRun", inputWS);
+    alg.setProperty("WavelengthMin", 3.0);
+    alg.setProperty("WavelengthMax", 12.0);
+    alg.setPropertyValue("ProcessingInstructions", "2");
+  }
+
+  void setup_test_to_check_output_workspaces_with_2_inputs(
+      CreateTransmissionWorkspace2 &alg, bool firstHasRunNumber = true,
+      bool secondHasRunNumber = true) {
+    setup_test_to_check_output_workspaces(alg, firstHasRunNumber);
+    auto inputWS2 = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    if (secondHasRunNumber)
+      inputWS2->mutableRun().addProperty<std::string>("run_number", "4321");
+    alg.setProperty("SecondTransmissionRun", inputWS2);
+  }
+
+  void check_output_lambda_workspace(CreateTransmissionWorkspace2 const &alg,
+                                     std::string const &propertyName,
+                                     std::string const &name) {
+    TS_ASSERT_EQUALS(alg.getPropertyValue(propertyName), name);
+    MatrixWorkspace_sptr outWS = alg.getProperty(propertyName);
+    check_lambda_workspace(outWS);
+  }
+
+  void check_stored_lambda_workspace(std::string const &name) {
+    auto exists = AnalysisDataService::Instance().doesExist(name);
+    TS_ASSERT(exists);
+    if (exists) {
+      auto ws =
+          AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
+      check_lambda_workspace(ws);
+    }
+  }
+
+  void check_lambda_workspace(MatrixWorkspace_sptr ws) {
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+    TS_ASSERT_EQUALS(ws->getAxis(0)->unit()->unitID(), "Wavelength");
+    TS_ASSERT(ws->x(0).front() >= 3.0);
+    TS_ASSERT(ws->x(0).back() <= 12.0);
+  }
+
+  void check_output_not_set(CreateTransmissionWorkspace2 const &alg,
+                            std::string const &propertyName,
+                            std::string const &name) {
+    TS_ASSERT(alg.isDefault(propertyName));
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist(name));
   }
 };
 

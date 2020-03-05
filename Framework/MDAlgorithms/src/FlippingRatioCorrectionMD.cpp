@@ -120,7 +120,7 @@ void FlippingRatioCorrectionMD::exec() {
     muParser.DefineConst("pi", M_PI);
     muParser.SetExpr(inputFormula);
     try {
-      flippingRatio.push_back(muParser.Eval());
+      flippingRatio.emplace_back(muParser.Eval());
     } catch (mu::Parser::exception_type &e) {
       g_log.error() << "Parsing error in experiment info " << i << "\n"
                     << e.GetMsg() << std::endl
@@ -129,8 +129,8 @@ void FlippingRatioCorrectionMD::exec() {
     }
   }
   for (const auto &fr : flippingRatio) {
-    C1.push_back(fr / (fr - 1.));
-    C2.push_back(1. / (fr - 1.));
+    C1.emplace_back(fr / (fr - 1.));
+    C2.emplace_back(1. / (fr - 1.));
   }
   // Create workspaces by cloning
   API::IMDWorkspace_sptr outputWS1, outputWS2;
@@ -184,15 +184,14 @@ void FlippingRatioCorrectionMD::executeTemplatedMDE(
     dbuff = ws->getBoxController()->getFileIO();
   }
   for (const auto &boxe : boxes) {
-    DataObjects::MDBox<MDE, nd> *box =
-        dynamic_cast<DataObjects::MDBox<MDE, nd> *>(boxe);
+    auto *box = dynamic_cast<DataObjects::MDBox<MDE, nd> *>(boxe);
     if (box) {
       auto &events = box->getEvents();
       const bool hasEvents = !events.empty();
       for (auto &event : events) {
-        const size_t ind = static_cast<size_t>(event.getRunIndex());
-        const float scalar = static_cast<float>(m_factor[ind]);
-        const float scalarSquared =
+        const auto ind = static_cast<size_t>(event.getRunIndex());
+        const auto scalar = static_cast<float>(m_factor[ind]);
+        const auto scalarSquared =
             static_cast<float>(m_factor[ind] * m_factor[ind]);
         // Multiply weight by a scalar, propagating error
         const float oldSignal = event.getSignal();

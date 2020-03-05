@@ -159,7 +159,7 @@ int RotaryCounter::operator--()
   @retval 0 :: no loop occored
 */
 {
-  const int Size(static_cast<int>(RC.size()));
+  const auto Size(static_cast<int>(RC.size()));
   int I;
   for (I = Size - 1; I > 0 && RC[I] == RC[I - 1] + 1; I--)
     ;

@@ -225,6 +225,35 @@ public:
       Poco::File(m_filename).remove();
   }
 
+  void testCanSetAdditionalRunNumbersAsProperties() {
+    // Initialize alg
+    SaveCanSAS1D2 savealg;
+
+    TS_ASSERT_THROWS_NOTHING(savealg.initialize());
+    TS_ASSERT(savealg.isInitialized());
+    savealg.setPropertyValue("InputWorkspace", m_workspace1);
+    savealg.setPropertyValue("Filename", m_filename);
+    savealg.setPropertyValue("DetectorNames", "HAB");
+
+    // Set the additional run number properties
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be able to set SampleTransmissionRunNumber property",
+        savealg.setProperty("SampleTransmissionRunNumber", "5"));
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be able to set SampleDirectRunNumber property",
+        savealg.setProperty("SampleDirectRunNumber", "6"));
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be able to set CanScatterRunNumber property",
+        savealg.setProperty("CanScatterRunNumber", "7"));
+    TSM_ASSERT_THROWS_NOTHING(
+        "Should be able to set CanDirectRunNumber property",
+        savealg.setProperty("CanDirectRunNumber", "8"));
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(savealg.execute());
+    TS_ASSERT(savealg.isExecuted());
+  }
+
   void testGroup() {
     // do the save, the results of which we'll test
     SaveCanSAS1D2 savealg;

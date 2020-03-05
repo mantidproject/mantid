@@ -374,7 +374,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           adaptiveQBackgroundMultiplier * lenQpeak + BackgroundOuterRadius;
       CoordTransformDistance sphere(nd, center, dimensionsUsed);
 
-      if (Peak *shapeablePeak = dynamic_cast<Peak *>(&p)) {
+      if (auto *shapeablePeak = dynamic_cast<Peak *>(&p)) {
 
         PeakShape *sphereShape = new PeakShapeSpherical(
             PeakRadiusVector[i], BackgroundInnerRadiusVector[i],
@@ -693,7 +693,7 @@ void IntegratePeaksMD2::calculateE1(
     V3D E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
                  1. - std::cos(tt1)); // end of trajectory
     E1 = E1 * (1. / E1.norm());       // normalize
-    E1Vec.push_back(E1);
+    E1Vec.emplace_back(E1);
   }
 }
 

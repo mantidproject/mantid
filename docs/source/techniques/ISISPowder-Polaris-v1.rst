@@ -70,19 +70,16 @@ the user enables and will spline the resulting workspace(s) for later focusing.
 On POLARIS the following parameters are required when executing *create_vanadium*:
 
 - :ref:`calibration_mapping_file_polaris_isis-powder-diffraction-ref`
-- :ref:`mode_polaris_isis-powder-diffraction-ref`
 - :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref`
 - :ref:`first_cycle_run_no_polaris_isis-powder-diffraction-ref`
 
-If :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref` is 
-set to **True** the following parameter is required in addition to the 
-above:
+The following may optionally be set.
 
+- :ref:`mode_polaris_isis-powder-diffraction-ref`
 - :ref:`multiple_scattering_polaris_isis-powder-diffraction-ref`
 
 Example
 =======
-
 ..  code-block:: python
 
   # Notice how the filename ends with .yaml
@@ -102,20 +99,17 @@ focuses and optionally applies corrections if the user has requested them.
 On POLARIS the following parameters are required when executing *focus*:
 
 - :ref:`calibration_mapping_file_polaris_isis-powder-diffraction-ref`
-- :ref:`mode_polaris_isis-powder-diffraction-ref`
 - :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref`
 - :ref:`do_van_normalisation_polaris_isis-powder-diffraction-ref`
 - :ref:`input_mode_polaris_isis-powder-diffraction-ref`
 - :ref:`run_number_polaris_isis_powder-diffraction-ref`
 
-If :ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref` is 
-set to **True** the following parameter is required in addition to the 
-above:
 
-- :ref:`multiple_scattering_polaris_isis-powder-diffraction-ref`
 
 The following parameters may also be optionally set:
 
+- :ref:`mode_polaris_isis-powder-diffraction-ref`
+- :ref:`multiple_scattering_polaris_isis-powder-diffraction-ref`
 - :ref:`file_ext_polaris_isis-powder-diffraction-ref`
 - :ref:`sample_empty_polaris_isis_powder-diffraction-ref`
 - :ref:`suffix_polaris_isis-powder-diffraction-ref`
@@ -173,8 +167,8 @@ create_total_scattering_pdf
 The *create_total_scattering_pdf* method allows a user to create a Pair Distribution Function (PDF)
 from focused POLARIS data, with a view performing further total scattering analysis.
 
-With no merging criteria specified, *merge_banks=False* a PDF will be generated for each bank within
-the focused_workspace.
+This function applies the placzek self scattering correction from
+:ref:CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering> before calculating the PDF
 
 This function requires the run_number you wish to analyse. The focused file for this run number must
 either be loaded in Mantid with the naming format given by the *focus* method:
@@ -187,6 +181,19 @@ for example:
 
 Or the focused file must be in the output directory of the POLARIS instrument.
 
+The output PDF can be customized with the following parameters:
+
+- By calling with `pdf_type` the type of PDF output can be specified, with the option of `G(r)`,
+  `g(r)`, `RDF(r)` (defaults to `G(r)`).
+- By calling with `merge_banks=True` a PDF will be generated based on the weighted sum of the detector
+  banks performed using supplied Q limits `q_lims=q_limits`, q_limits can be in the form of an array or
+  with shape (2, x) where x is the number of detectors, or a string containing the directory
+  of an appropriately formatted `.lim` file. By default or specifically called with `merge_banks=False`
+  a PDF will be generated for each bank within the focused_workspace.
+- By calling with `output_binning` which will rebin the output PDF as with the rebin algorithm.
+- By calling with `freq_params` a fourier filter will be performed on the focused signal removing any
+  components from atomic distances outside of the parameters. The parameters must be given as list:
+  [lower], or [lower, upper].
 
 Example
 =======
@@ -194,7 +201,11 @@ Example
 ..  code-block:: python
 
   polaris_example.create_total_scattering_pdf(run_number='12345',
-                                              merge_banks=False)
+                                              merge_banks=True,
+                                              q_lims=[[2.5, 3, 4, 6, 7], [3.5, 5, 7, 11, 40]],
+                                              output_binning=[0,0.1,20],
+                                              pdf_type='G(r)',
+                                              freq_params=[1])
 
 .. _calibration_mapping_polaris-isis-powder-ref:
 
@@ -300,6 +311,8 @@ Example Input:
 
 mode
 ^^^^^^^^^^
+*optional*
+
 The current chopper mode to use in the 
 :ref:`create_vanadium_polaris_isis-powder-diffraction-ref`
 and :ref:`focus_polaris_isis-powder-diffraction-ref` method.
@@ -309,6 +322,9 @@ to use whilst processing.
 Accepted values are: **PDF** or **Rietveld**
 
 *Note: This parameter is not case sensitive*
+
+If this value is not set, mantid will attempt to deduce it from
+the frequency logs.
 
 Example Input:
 
@@ -349,10 +365,6 @@ set first with the :ref:`set_sample_polaris_isis-powder-diffraction-ref`
 method. 
 
 Accepted values are: **True** or **False**
-
-*Note: If this is set to 'True'*
-:ref:`multiple_scattering_polaris_isis-powder-diffraction-ref`
-*must be set*
 
 Example Input:
 
@@ -453,10 +465,10 @@ Example Input:
 
 multiple_scattering
 ^^^^^^^^^^^^^^^^^^^
+*optional*
+
 Indicates whether to account for the effects of multiple scattering
-when calculating absorption corrections. If 
-:ref:`do_absorb_corrections_polaris_isis-powder-diffraction-ref` is
-set to **True** this parameter must be set.
+when calculating absorption corrections. 
 
 Accepted values are: **True** or **False**
 
@@ -654,6 +666,36 @@ On POLARIS this is set to the following:
 ..  code-block:: python
 
   vanadium_peaks_masking_file: "VanaPeaks.dat"
+
+.. _nxs_filename_polaris_isis-powder-diffraction-ref:
+
+nxs_filename
+^^^^^^^^^^^^
+A template for the filename of the generated NeXus file.
+
+.. _gss_filename_polaris_isis-powder-diffraction-ref:
+
+gss_filename
+^^^^^^^^^^^^
+A template for the filename of the generated GSAS file.
+
+.. _dat_files_directory_polaris_isis-powder-diffraction-ref:
+
+dat_files_directory
+^^^^^^^^^^^^^^^^^^^
+The subdirectory of the output directory where the .dat files are saved
+
+.. _tof_xye_filename_polaris_isis-powder-diffraction-ref:
+
+tof_xye_filename
+^^^^^^^^^^^^^^^^
+A template for the filename of the generated TOF XYE file.
+
+.. _dspacing_xye_filename_polaris_isis-powder-diffraction-ref:
+
+dspacing_xye_filename
+^^^^^^^^^^^^^^^^^^^^^
+A template for the filename of the generated dSpacing XYE file.
 
 .. _sample_empty_scale_polaris_isis-powder-diffraction-ref:
 

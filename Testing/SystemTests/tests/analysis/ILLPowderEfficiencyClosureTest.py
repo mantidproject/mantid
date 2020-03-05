@@ -30,7 +30,7 @@ class ILLPowderEfficiencyClosureTest(systemtesting.MantidSystemTest):
     def requiredFiles(self):
         return ['967076.nxs']
 
-    def tearDown(self):
+    def cleanup(self):
         mtd.clear()
         remove(self._m_tmp_file)
 

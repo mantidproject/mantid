@@ -7,7 +7,7 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
@@ -19,7 +19,8 @@ from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_widget
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_view
 
 
-class TransformTest(GuiTest):
+@start_qapplication
+class TransformTest(unittest.TestCase):
     def setUp(self):
         self.load = mock.MagicMock()
         self.fft = mock.create_autospec(fft_presenter.FFTPresenter, spec_Set=True)

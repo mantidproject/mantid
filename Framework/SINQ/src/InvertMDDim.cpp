@@ -42,13 +42,13 @@ void InvertMDDim::exec() {
   std::vector<IMDDimension_sptr> dimensions;
   for (int i = static_cast<int>(inWS->getNumDims()) - 1; i >= 0; i--) {
     boost::shared_ptr<const IMDDimension> dimi = inWS->getDimension(i);
-    dimensions.push_back(boost::const_pointer_cast<IMDDimension>(dimi));
+    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dimi));
   }
 
   auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
 
-  int rank = static_cast<int>(inWS->getNumDims());
+  auto rank = static_cast<int>(inWS->getNumDims());
   auto idx = new int[rank];
   if (idx == nullptr || outWS == nullptr) {
     throw std::runtime_error("Out of memory in InvertMDDim");

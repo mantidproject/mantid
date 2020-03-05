@@ -80,7 +80,7 @@ std::vector<std::string> PointGroupFactoryImpl::getPointGroupSymbols(
     PointGroup_sptr pointGroup = getPrototype(generator.first);
 
     if (pointGroup->crystalSystem() == crystalSystem) {
-      pointGroups.push_back(generator.first);
+      pointGroups.emplace_back(generator.first);
     }
   }
 

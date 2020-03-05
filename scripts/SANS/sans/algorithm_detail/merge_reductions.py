@@ -7,12 +7,15 @@
 """ Merges two reduction types to single reduction"""
 
 from __future__ import (absolute_import, division, print_function)
+
 from abc import (ABCMeta, abstractmethod)
+
 from six import with_metaclass
-from sans.common.general_functions import create_child_algorithm
-from sans.common.enums import (SANSFacility, DataType, FitModeForMerge)
-from sans.algorithm_detail.bundles import MergeBundle
+
 import mantid.simpleapi as mantid_api
+from sans.algorithm_detail.bundles import MergeBundle
+from sans.common.enums import (SANSFacility, DataType)
+from sans.common.general_functions import create_child_algorithm
 
 
 class Merger(with_metaclass(ABCMeta, object)):
@@ -27,6 +30,7 @@ class ISIS1DMerger(Merger):
     """
     Class which handles ISIS-style merges.
     """
+
     def __init__(self):
         super(ISIS1DMerger, self).__init__()
 
@@ -74,7 +78,7 @@ class ISIS1DMerger(Merger):
         shift_factor, scale_factor, fit_mode, fit_min, fit_max, merge_mask, merge_min, merge_max = \
             get_shift_and_scale_parameter(reduction_mode_vs_output_bundles)
 
-        fit_mode_as_string = FitModeForMerge.to_string(fit_mode)
+        fit_mode_as_string = fit_mode.value
 
         # We need to convert NoFit to None.
         if fit_mode_as_string == "NoFit":
@@ -177,8 +181,8 @@ def get_partial_workspaces(primary_detector, secondary_detector, reduction_mode_
     """
     Get the partial workspaces for the primary and secondary detectors.
 
-    :param primary_detector: the primary detector (now normally ISISReductionMode.LAB)
-    :param secondary_detector: the secondary detector (now normally ISISReductionMode.HAB)
+    :param primary_detector: the primary detector (now normally ReductionMode.LAB)
+    :param secondary_detector: the secondary detector (now normally ReductionMode.HAB)
     :param reduction_mode_vs_output_bundles: a ReductionMode vs OutputBundles map
     :param is_data_type: the data type, i.e. if can or sample
     :return: the primary count workspace, the primary normalization workspace, the secondary count workspace and the
@@ -223,8 +227,8 @@ def get_shift_and_scale_parameter(reduction_mode_vs_output_bundles):
 
 
 def is_sample(x):
-    return x.data_type is DataType.Sample
+    return x.data_type is DataType.SAMPLE
 
 
 def is_can(x):
-    return x.data_type is DataType.Can
+    return x.data_type is DataType.CAN

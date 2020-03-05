@@ -9,18 +9,18 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import copy
-
-from matplotlib import ticker, text, axis  # noqa
-import matplotlib.colors
 import matplotlib.axes
 import matplotlib.cm as cm
+import matplotlib.colors
+from matplotlib import axis, ticker  # noqa
 
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
-from mantid import plots  # noqa
+from mantid.plots.legend import LegendProperties
+# Constants set in workbench.plotting.functions but would cause backwards reliability
 from mantidqt.plotting.functions import pcolormesh
 
-# Constants set in workbench.plotting.functions but would cause backwards reliability
+
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
 
@@ -53,23 +53,27 @@ class PlotsLoader(object):
         # Grab creation arguments
         creation_args = plot_dict["creationArguments"]
 
+        if len(creation_args) == 0:
+            logger.information(
+                "A plot could not be loaded from the save file, as it did not have creation_args. "
+                "The original plot title was: {}".format(plot_dict["label"]))
+            return
+
         # Make a copy so it can be applied to the axes, of the plot once created.
         creation_args_copy = copy.deepcopy(creation_args[0])
-
-        # Populate workspace names
-        workspace_name = creation_args[0][0].pop('workspaces')
-        workspace = ADS.retrieve(workspace_name)
 
         # Make initial plot
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
 
+        # If an overplot is necessary plot onto the same figure
+        for cargs in creation_args[0]:
+            if "workspaces" in cargs:
+                workspace_name = cargs.pop('workspaces')
+                workspace = ADS.retrieve(workspace_name)
+                self.plot_func(workspace, ax, ax.figure, cargs)
+
         # Make sure that the axes gets it's creation_args as loading doesn't add them
         ax.creation_args = creation_args_copy
-
-        self.plot_func(workspace, ax, fig, creation_args[0][0])
-
-        # If an overplot is necessary plot onto the same figure
-        self.plot_extra_lines(creation_args=creation_args, ax=ax)
 
         # Update the fig
         fig._label = plot_dict["label"]
@@ -82,7 +86,7 @@ class PlotsLoader(object):
         else:
             return fig
 
-    def plot_func(self, workspace, axes, fig,creation_arg):
+    def plot_func(self, workspace, axes, fig, creation_arg):
         """
         Plot's the graph from the given workspace, axes and creation_args. then returns the function used to create it.
         :param workspace: mantid.Workspace; Workspace to create the graph from
@@ -99,7 +103,7 @@ class PlotsLoader(object):
             creation_arg["cmap"] = getattr(matplotlib.cm, creation_arg["cmap"])
 
         function_dict = {"plot": axes.plot, "scatter": axes.scatter, "errorbar": axes.errorbar,
-                         "pcolor": axes.pcolor, "pcolorfast": axes.pcolorfast,"pcolormesh": pcolormesh,
+                         "pcolor": axes.pcolor, "pcolorfast": axes.pcolorfast, "pcolormesh": pcolormesh,
                          "imshow": pcolormesh, "contour": axes.contour, "contourf": axes.contourf,
                          "tripcolor": axes.tripcolor, "tricontour": axes.tricontour, "tricontourf": axes.tricontourf}
 
@@ -110,21 +114,6 @@ class PlotsLoader(object):
             self.color_bar_remade = True
         else:
             func(workspace, **creation_arg)
-
-    def plot_extra_lines(self, creation_args, ax):
-        """
-        This method currently only considers single matplotlib.axes.Axes based figures as that is the most common case,
-        to make it more than that the lines creation_args[0] needs to be rewrote to handle multiple axes args.
-        :param creation_args:
-        :param ax:
-        :return:
-        """
-        # If an overplot is necessary plot onto the same figure
-        if len(creation_args[0]) > 1:
-            for ii in range(1, len(creation_args[0])):
-                workspace_name = creation_args[0][ii].pop('workspaces')
-                workspace = ADS.retrieve(workspace_name)
-                self.plot_func(workspace, ax, ax.figure, creation_args[0][ii])
 
     def restore_figure_data(self, fig, dic):
         self.restore_fig_properties(fig, dic["properties"])
@@ -170,12 +159,7 @@ class PlotsLoader(object):
             self.create_text_from_dict(ax, artist)
 
         # Update Legend
-        legend = ax.get_legend()
-        if legend is not None:
-            self.update_legend(ax, dic["legend"])
-        else:
-            ax.legend()
-            self.update_legend(ax, dic["legend"])
+        self.update_legend(ax, dic["legend"])
 
         # Update colorbar if present
         if self.color_bar_remade and dic["colorbar"]["exists"]:
@@ -231,13 +215,10 @@ class PlotsLoader(object):
 
     @staticmethod
     def update_legend(ax, legend):
-        if not legend["exists"]:
+        if not legend["exists"] and ax.get_legend():
             ax.get_legend().remove()
             return
-        ax.legend().set_visible(legend["visible"])
-
-        # Ensure that legend is draggable
-        ax.get_legend().draggable()
+        LegendProperties.create_legend(legend, ax)
 
     def update_properties(self, ax, properties):
         ax.set_position(properties["bounds"])
@@ -259,19 +240,19 @@ class PlotsLoader(object):
 
     def update_axis(self, axis_, properties):
         if isinstance(axis_, matplotlib.axis.XAxis):
-            if properties["position"] is "top":
+            if properties["position"] == "top":
                 axis_.tick_top()
             else:
                 axis_.tick_bottom()
 
         if isinstance(axis_, matplotlib.axis.YAxis):
-            if properties["position"] is "right":
+            if properties["position"] == "right":
                 axis_.tick_right()
             else:
                 axis_.tick_left()
 
         labels = axis_.get_ticklabels()
-        if properties["fontSize"] is not "":
+        if properties["fontSize"] != "":
             for label in labels:
                 label.set_fontsize(properties["fontSize"])
 
@@ -296,17 +277,17 @@ class PlotsLoader(object):
     @staticmethod
     def update_axis_ticks(axis_, properties):
         # Update Major and Minor Locator
-        if properties["majorTickLocator"] is "FixedLocator":
+        if properties["majorTickLocator"] == "FixedLocator":
             axis_.set_major_locator(ticker.FixedLocator(properties["majorTickLocatorValues"]))
 
-        if properties["minorTickLocator"] is "FixedLocator":
+        if properties["minorTickLocator"] == "FixedLocator":
             axis_.set_minor_locator(ticker.FixedLocator(properties["minorTickLocatorValues"]))
 
         # Update Major and Minor Formatter
-        if properties["majorTickFormatter"] is "FixedFormatter":
+        if properties["majorTickFormatter"] == "FixedFormatter":
             axis_.set_major_formatter(ticker.FixedFormatter(properties["majorTickFormat"]))
 
-        if properties["minorTickFormatter"] is "FixedFormatter":
+        if properties["minorTickFormatter"] == "FixedFormatter":
             axis_.set_major_formatter(ticker.FixedLocator(properties["minorTickFormat"]))
 
     @staticmethod
@@ -316,7 +297,7 @@ class PlotsLoader(object):
         image.set_label(dic["label"])
         image.set_cmap(cm.get_cmap(dic["cmap"]))
         image.set_interpolation(dic["interpolation"])
-        #Try and make the cmap line up but sometimes it wont
+        # Try and make the cmap line up but sometimes it wont
         try:
             image.axes.set_cmap(cm.get_cmap(dic["cmap"]))
         except AttributeError as e:

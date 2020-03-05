@@ -91,14 +91,14 @@ std::unique_ptr<Beamline::ComponentInfo> makeSingleBeamlineComponentInfo(
       boost::make_shared<std::vector<size_t>>(); // No detectors in this example
   auto detectorRanges =
       boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
-  detectorRanges->push_back(
+  detectorRanges->emplace_back(
       std::make_pair(0, 0)); // One component with no detectors
 
   auto componentIndices = boost::make_shared<std::vector<size_t>>(
       std::vector<size_t>{0}); // No detectors in this example
   auto componentRanges =
       boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
-  componentRanges->push_back(
+  componentRanges->emplace_back(
       std::make_pair(0, 1)); // One component with no sub-components
 
   auto parentIndices = boost::make_shared<const std::vector<size_t>>(
@@ -138,18 +138,18 @@ public:
                                                    // example
     auto detectorRanges =
         boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
-    detectorRanges->push_back(
+    detectorRanges->emplace_back(
         std::make_pair(0, 0)); // One component with no detectors
-    detectorRanges->push_back(
+    detectorRanges->emplace_back(
         std::make_pair(0, 0)); // Another component with no detectors
 
     auto componentIndices = boost::make_shared<std::vector<size_t>>(
         std::vector<size_t>{0, 1}); // No detectors in this example
     auto componentRanges =
         boost::make_shared<std::vector<std::pair<size_t, size_t>>>();
-    componentRanges->push_back(
+    componentRanges->emplace_back(
         std::make_pair(0, 0)); // One component with no sub-components
-    componentRanges->push_back(
+    componentRanges->emplace_back(
         std::make_pair(0, 0)); // Another component with no subcomponents
 
     auto parentIndices = boost::make_shared<const std::vector<size_t>>(
@@ -179,8 +179,8 @@ public:
 
     auto shapes = boost::make_shared<
         std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(boost::make_shared<const Geometry::CSGObject>());
-    shapes->push_back(boost::make_shared<const Geometry::CSGObject>());
+    shapes->emplace_back(boost::make_shared<const Geometry::CSGObject>());
+    shapes->emplace_back(boost::make_shared<const Geometry::CSGObject>());
 
     ComponentInfo info(std::move(internalInfo), componentIds,
                        makeComponentIDMap(componentIds), shapes);
@@ -198,7 +198,7 @@ public:
 
     auto shapes = boost::make_shared<
         std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(createCappedCylinder());
+    shapes->emplace_back(createCappedCylinder());
 
     ComponentInfo a(std::move(internalInfo), componentIds,
                     makeComponentIDMap(componentIds), shapes);
@@ -225,7 +225,7 @@ public:
 
     auto shapes = boost::make_shared<
         std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(createCappedCylinder());
+    shapes->emplace_back(createCappedCylinder());
 
     ComponentInfo compInfo(std::move(internalInfo), componentIds,
                            makeComponentIDMap(componentIds), shapes);
@@ -253,7 +253,7 @@ public:
 
     auto shapes = boost::make_shared<
         std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(ComponentCreationHelper::createSphere(radius));
+    shapes->emplace_back(ComponentCreationHelper::createSphere(radius));
 
     ComponentInfo info(std::move(internalInfo), componentIds,
                        makeComponentIDMap(componentIds), shapes);
@@ -288,7 +288,7 @@ public:
 
     auto shapes = boost::make_shared<
         std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(createCappedCylinder());
+    shapes->emplace_back(createCappedCylinder());
 
     ComponentInfo info(std::move(internalInfo), componentIds,
                        makeComponentIDMap(componentIds), shapes);
@@ -311,7 +311,7 @@ public:
 
     auto shapes = boost::make_shared<
         std::vector<boost::shared_ptr<const Geometry::IObject>>>();
-    shapes->push_back(ComponentCreationHelper::createSphere(radius));
+    shapes->emplace_back(ComponentCreationHelper::createSphere(radius));
 
     ComponentInfo componentInfo(std::move(internalInfo), componentIds,
                                 makeComponentIDMap(componentIds), shapes);
@@ -324,6 +324,53 @@ public:
                   .norm() < 1e-9);
     TS_ASSERT((boundingBox.maxPoint() -
                (Kernel::V3D{position[0] + radius, position[1] + radius,
+                            position[2] + radius}))
+                  .norm() < 1e-9);
+    // Nullify shape and retest BoundingBox
+    shapes->at(0) = boost::shared_ptr<const Geometry::IObject>(nullptr);
+    boundingBox = componentInfo.boundingBox(0);
+    TS_ASSERT(boundingBox.isNull());
+  }
+
+  // Test calculation of the bounding box for a milimiter-sized
+  // capped-cylinder detector pixel
+  void test_boundingBox_single_component_capped_cylinder() {
+
+    const double radius = 0.00275;
+    const double height = 0.0042;
+    const Mantid::Kernel::V3D baseCentre(0., 0., 0.);
+    const Mantid::Kernel::V3D axis(0, 1, 0);
+    const std::string id("cy-1");
+
+    Eigen::Vector3d position{1., 1., 1.};
+    auto internalInfo = makeSingleBeamlineComponentInfo(position);
+    Mantid::Geometry::ObjComponent comp1(
+        "component1", ComponentCreationHelper::createCappedCylinder(
+                          radius, height, baseCentre, axis, id));
+
+    auto componentIds =
+        boost::make_shared<std::vector<Mantid::Geometry::ComponentID>>(
+            std::vector<Mantid::Geometry::ComponentID>{&comp1});
+
+    auto shapes = boost::make_shared<
+        std::vector<boost::shared_ptr<const Geometry::IObject>>>();
+    shapes->push_back(ComponentCreationHelper::createCappedCylinder(
+        radius, height, baseCentre, axis, id));
+
+    ComponentInfo componentInfo(std::move(internalInfo), componentIds,
+                                makeComponentIDMap(componentIds), shapes);
+
+    BoundingBox boundingBox = componentInfo.boundingBox(0 /*componentIndex*/);
+
+    TS_ASSERT(
+        (boundingBox.width() - (Kernel::V3D{2 * radius, height, 2 * radius}))
+            .norm() < 1e-9);
+    TS_ASSERT(
+        (boundingBox.minPoint() -
+         (Kernel::V3D{position[0] - radius, position[1], position[2] - radius}))
+            .norm() < 1e-9);
+    TS_ASSERT((boundingBox.maxPoint() -
+               (Kernel::V3D{position[0] + radius, position[1] + height,
                             position[2] + radius}))
                   .norm() < 1e-9);
     // Nullify shape and retest BoundingBox
@@ -703,6 +750,19 @@ public:
     TS_ASSERT_EQUALS(panel.bottomRight, 12);
     TS_ASSERT_EQUALS(panel.topLeft, 3);
     TS_ASSERT_EQUALS(panel.topRight, 15);
+  }
+
+  void test_has_detectors() {
+    auto instrument = ComponentCreationHelper::createTestInstrumentRectangular(
+        1 /*1 bank*/, 4 /*4 by 4 pixels*/);
+    auto wrappers = InstrumentVisitor::makeWrappers(*instrument);
+    const auto &componentInfo = std::get<0>(wrappers);
+
+    TS_ASSERT(componentInfo->hasDetectors(componentInfo->root()));
+    TS_ASSERT(!componentInfo->hasDetectors(0));
+    TS_ASSERT(!componentInfo->hasDetectors(componentInfo->sample()));
+    TS_ASSERT(!componentInfo->hasDetectors(componentInfo->source()));
+    TS_ASSERT(componentInfo->hasDetectors(componentInfo->indexOfAny("bank1")));
   }
 };
 

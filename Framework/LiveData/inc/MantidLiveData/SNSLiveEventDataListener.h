@@ -153,10 +153,9 @@ private:
 
   // These 2 determine whether or not we filter out events that arrive when
   // the run is paused.
-  bool m_runPaused{
-      false}; // Set to true or false when we receive a pause/resume
-              // marker in an annotation packet. (See
-              // rxPacket( const ADARA::AnnotationPkt &pkt))
+  bool m_runPaused{false}; // Set to true or false when we receive a
+                           // pause/resume marker in an annotation packet. (See
+                           // rxPacket( const ADARA::AnnotationPkt &pkt))
   bool m_keepPausedEvents{false}; // Set from a configuration property
 
   // Holds on to any exceptions that were thrown in the background thread so

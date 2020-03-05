@@ -76,7 +76,7 @@ PoldiPeakCollection_sptr PoldiPeakCollection::clone() {
 size_t PoldiPeakCollection::peakCount() const { return m_peaks.size(); }
 
 void PoldiPeakCollection::addPeak(const PoldiPeak_sptr &newPeak) {
-  m_peaks.push_back(newPeak);
+  m_peaks.emplace_back(newPeak);
 }
 
 PoldiPeak_sptr PoldiPeakCollection::peak(size_t index) const {

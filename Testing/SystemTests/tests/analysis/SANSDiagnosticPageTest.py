@@ -12,10 +12,11 @@ import os
 import systemtesting
 
 import mantid
+from sans.state.StateBuilder import StateBuilder
 
-from sans.state.data import get_data_builder
+from sans.state.StateObjects.StateData import get_data_builder
 from sans.common.enums import (DetectorType, SANSFacility, IntegralEnum)
-from sans.user_file.state_director import StateDirectorISIS
+
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.gui_logic.models.diagnostics_page_model import run_integral
@@ -88,21 +89,12 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         data_state = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_state, file_information)
-        user_file_director.set_user_file("USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt")
-
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY BEGIN -- Remove when appropriate
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # Since we are dealing with event based data but we want to compare it with histogram data from the
-        # old reduction system we need to enable the compatibility mode
-        user_file_director.set_compatibility_builder_use_compatibility_mode(True)
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        # COMPATIBILITY END
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-        # Construct the final state
-        state = user_file_director.construct()
+        user_file = "USER_SANS2D_154E_2p4_4m_M3_Xpress_8mm_SampleChanger.txt"
+        user_file_director = StateBuilder.new_instance(file_information=file_information,
+                                                       data_information=data_state,
+                                                       user_filename=user_file)
+        state = user_file_director.get_all_states()
+        state.compatibility.use_compatibility_mode = True
 
         # Act
         output_workspaces = run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)
@@ -122,11 +114,13 @@ class SANSDiagnosticPageTest(unittest.TestCase):
         data_state = data_builder.build()
 
         # Get the rest of the state from the user file
-        user_file_director = StateDirectorISIS(data_state, file_information)
-        user_file_director.set_user_file("USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt")
+        user_file = "USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt"
+        user_file_director = StateBuilder.new_instance(data_information=data_state,
+                                                       file_information=file_information,
+                                                       user_filename=user_file)
 
         # Construct the final state
-        state = user_file_director.construct()
+        state = user_file_director.get_all_states()
 
         # Act
         output_workspaces = run_integral('', True, IntegralEnum.Horizontal, DetectorType.LAB, state)

@@ -616,7 +616,7 @@ ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box) {
     for (size_t i = 0; i < outTable->rowCount(); ++i) {
       const bool insideRegion = outTable->cell<Boolean>(i, 1);
       if (insideRegion) {
-        indexes.push_back(i);
+        indexes.emplace_back(i);
       }
     }
   }

@@ -9,8 +9,8 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
-#include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
+#include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
+#include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 
 // See
 // http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
@@ -89,9 +89,9 @@ std::unique_ptr<Kernel::Property> SequenceTypeHandler<ContainerType>::create(
     const boost::python::object &validator,
     const unsigned int direction) const {
   using DestElementType = typename ContainerType::value_type;
+  using boost::python::extract;
   using Kernel::IValidator;
   using Kernel::PropertyWithValue;
-  using boost::python::extract;
 
   ContainerType valueInC;
   // Current workaround for things that still pass back wrapped vectors...

@@ -26,12 +26,22 @@ using Mantid::Kernel::V3D;
 class SphereTest : public CxxTest::TestSuite {
 
 public:
-  void testConstructor() {
+  void testDefaultConstructor() {
     Sphere A;
     // both centre and radius = 0
     TS_ASSERT_EQUALS(extractString(A), "-1 so 0\n");
     TS_ASSERT_EQUALS(A.getCentre(), V3D(0, 0, 0));
     TS_ASSERT_EQUALS(A.getRadius(), 0);
+  }
+
+  void testConstructor() {
+    const V3D centre{0, 0, 1};
+    const double radius{0.5};
+    Sphere A{centre, radius};
+
+    TS_ASSERT_EQUALS(extractString(A), "-1 s [0,0,1] 0.5\n");
+    TS_ASSERT_EQUALS(A.getCentre(), centre);
+    TS_ASSERT_EQUALS(A.getRadius(), radius);
   }
 
   void testsetSurface() {

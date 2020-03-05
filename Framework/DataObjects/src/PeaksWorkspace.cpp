@@ -81,7 +81,7 @@ PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace &other)
 //=====================================================================================
 /** Comparator class for sorting peaks by one or more criteria
  */
-class PeakComparator : public std::binary_function<Peak, Peak, bool> {
+class PeakComparator {
 public:
   std::vector<std::pair<std::string, bool>> &criteria;
 
@@ -185,9 +185,9 @@ void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
  */
 void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
   if (dynamic_cast<const Peak *>(&ipeak)) {
-    peaks.push_back((const Peak &)ipeak);
+    peaks.emplace_back((const Peak &)ipeak);
   } else {
-    peaks.push_back(Peak(ipeak));
+    peaks.emplace_back(Peak(ipeak));
   }
 }
 
@@ -206,7 +206,7 @@ void PeaksWorkspace::addPeak(const V3D &position,
 /** Add a peak to the list
  * @param peak :: Peak object to add (move) into this.
  */
-void PeaksWorkspace::addPeak(Peak &&peak) { peaks.push_back(peak); }
+void PeaksWorkspace::addPeak(Peak &&peak) { peaks.emplace_back(peak); }
 
 //---------------------------------------------------------------------------------------------
 /** Return a reference to the Peak
@@ -241,17 +241,14 @@ const Peak &PeaksWorkspace::getPeak(const int peakNum) const {
  * detector. You do NOT need to explicitly provide this distance.
  * @return a pointer to a new Peak object.
  */
-Geometry::IPeak *
+std::unique_ptr<Geometry::IPeak>
 PeaksWorkspace::createPeak(const Kernel::V3D &QLabFrame,
                            boost::optional<double> detectorDistance) const {
-  Geometry::Goniometer goniometer = this->run().getGoniometer();
-
   // create a peak using the qLab frame
-  auto peak = new Peak(this->getInstrument(), QLabFrame, detectorDistance);
-
+  std::unique_ptr<IPeak> peak = std::make_unique<Peak>(
+      this->getInstrument(), QLabFrame, detectorDistance);
   // Set the goniometer
-  peak->setGoniometerMatrix(goniometer.getR());
-
+  peak->setGoniometerMatrix(this->run().getGoniometer().getR());
   // Take the run number from this
   peak->setRunNumber(this->getRunNumber());
 
@@ -269,11 +266,11 @@ std::unique_ptr<Geometry::IPeak>
 PeaksWorkspace::createPeak(const Kernel::V3D &position,
                            const Kernel::SpecialCoordinateSystem &frame) const {
   if (frame == Mantid::Kernel::HKL) {
-    return std::unique_ptr<Geometry::IPeak>(createPeakHKL(position));
+    return createPeakHKL(position);
   } else if (frame == Mantid::Kernel::QLab) {
-    return std::unique_ptr<Geometry::IPeak>(createPeak(position));
+    return createPeak(position);
   } else {
-    return std::unique_ptr<Geometry::IPeak>(createPeakQSample(position));
+    return createPeakQSample(position);
   }
 }
 
@@ -284,7 +281,8 @@ PeaksWorkspace::createPeak(const Kernel::V3D &position,
  * detector. You do NOT need to explicitly provide this distance.
  * @return a pointer to a new Peak object.
  */
-Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const {
+std::unique_ptr<IPeak>
+PeaksWorkspace::createPeakQSample(const V3D &position) const {
   // Create a peak from QSampleFrame
 
   Geometry::Goniometer goniometer;
@@ -312,7 +310,8 @@ Peak *PeaksWorkspace::createPeakQSample(const V3D &position) const {
     goniometer = run().getGoniometer();
   }
   // create a peak using the qLab frame
-  auto peak = new Peak(getInstrument(), position, goniometer.getR());
+  std::unique_ptr<IPeak> peak =
+      std::make_unique<Peak>(getInstrument(), position, goniometer.getR());
   // Take the run number from this
   peak->setRunNumber(getRunNumber());
   return peak;
@@ -339,7 +338,7 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
   std::ostringstream oss;
   oss << std::setw(12) << std::fixed << std::setprecision(3) << (qFrame.norm());
   std::pair<std::string, std::string> QMag("|Q|", oss.str());
-  Result.push_back(QMag);
+  Result.emplace_back(QMag);
 
   oss.str("");
   oss.clear();
@@ -349,7 +348,7 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
   std::pair<std::string, std::string> dspc("d-spacing", oss.str());
   oss.str("");
   oss.clear();
-  Result.push_back(dspc);
+  Result.emplace_back(dspc);
 
   int seqNum = -1;
   bool hasOneRunNumber = true;
@@ -399,20 +398,18 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
   {
     std::pair<std::string, std::string> QlabStr(
         "Qlab", boost::lexical_cast<std::string>(Qlab));
-    Result.push_back(QlabStr);
+    Result.emplace_back(QlabStr);
   }
 
   if (!labCoords || seqNum >= 0) {
 
     std::pair<std::string, std::string> QsampStr(
         "QSample", boost::lexical_cast<std::string>(Qsamp));
-    Result.push_back(QsampStr);
+    Result.emplace_back(QsampStr);
   }
 
   try {
-
-    Geometry::IPeak *peak = createPeak(Qlab);
-
+    auto peak = createPeak(Qlab);
     if (sample().hasOrientedLattice()) {
 
       peak->setGoniometerMatrix(Gon);
@@ -425,13 +422,13 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
 
       std::pair<std::string, std::string> HKL(
           "HKL", boost::lexical_cast<std::string>(hkl));
-      Result.push_back(HKL);
+      Result.emplace_back(HKL);
     }
 
     if (hasOneRunNumber) {
       std::pair<std::string, std::string> runn("RunNumber",
                                                "   " + std::to_string(runNum));
-      Result.push_back(runn);
+      Result.emplace_back(runn);
     }
 
     //------- Now get phi, chi and omega ----------------
@@ -441,16 +438,16 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
 
     std::pair<std::string, std::string> GRead(
         "Goniometer Angles", boost::lexical_cast<std::string>(PhiChiOmega));
-    Result.push_back(GRead);
+    Result.emplace_back(GRead);
 
     std::pair<std::string, std::string> SeqNum(
         "Seq Num,1st=1", "    " + std::to_string(seqNum + 1));
-    Result.push_back(SeqNum);
+    Result.emplace_back(SeqNum);
 
     oss << std::setw(12) << std::fixed << std::setprecision(3)
         << (peak->getWavelength());
     std::pair<std::string, std::string> wl("Wavelength", oss.str());
-    Result.push_back(wl);
+    Result.emplace_back(wl);
     oss.str("");
     oss.clear();
 
@@ -458,38 +455,38 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
       std::pair<std::string, std::string> detpos(
           "Position(x,y,z)",
           boost::lexical_cast<std::string>(peak->getDetPos()));
-      Result.push_back(detpos);
+      Result.emplace_back(detpos);
 
       oss << std::setw(15) << std::fixed << std::setprecision(3)
           << (peak->getTOF());
       std::pair<std::string, std::string> tof("TOF", oss.str());
-      Result.push_back(tof);
+      Result.emplace_back(tof);
       oss.str("");
       oss.clear();
 
       oss << std::setw(12) << std::fixed << std::setprecision(3)
           << (peak->getFinalEnergy());
       std::pair<std::string, std::string> Energy("Energy", oss.str());
-      Result.push_back(Energy);
+      Result.emplace_back(Energy);
       oss.str("");
       oss.clear();
 
       std::pair<std::string, std::string> row(
           "Row", "    " + std::to_string(peak->getRow()));
-      Result.push_back(row);
+      Result.emplace_back(row);
 
       std::pair<std::string, std::string> col(
           "Col", "    " + std::to_string(peak->getCol()));
-      Result.push_back(col);
+      Result.emplace_back(col);
 
       std::pair<std::string, std::string> bank("Bank",
                                                "    " + peak->getBankName());
-      Result.push_back(bank);
+      Result.emplace_back(bank);
 
       oss << std::setw(12) << std::fixed << std::setprecision(3)
           << (peak->getScattering());
       std::pair<std::string, std::string> scat("Scattering Angle", oss.str());
-      Result.push_back(scat);
+      Result.emplace_back(scat);
     }
 
   } catch (...) // Impossible position
@@ -505,30 +502,26 @@ PeaksWorkspace::peakInfo(const Kernel::V3D &qFrame, bool labCoords) const {
  * @param HKL : reciprocal lattice vector coefficients
  * @return Fully formed peak.
  */
-Peak *PeaksWorkspace::createPeakHKL(const V3D &HKL) const {
+std::unique_ptr<IPeak> PeaksWorkspace::createPeakHKL(const V3D &HKL) const {
   /*
    The following allows us to add peaks where we have a single UB to work from.
    */
-
-  Geometry::OrientedLattice lattice = this->sample().getOrientedLattice();
-  Geometry::Goniometer goniometer = this->run().getGoniometer();
+  const auto &lattice = this->sample().getOrientedLattice();
+  const auto &goniometer = this->run().getGoniometer();
 
   // Calculate qLab from q HKL. As per Busing and Levy 1967, q_lab_frame = 2pi *
   // Goniometer * UB * HKL
-  V3D qLabFrame = goniometer.getR() * lattice.getUB() * HKL * 2 * M_PI;
+  const V3D qLabFrame = goniometer.getR() * lattice.getUB() * HKL * 2 * M_PI;
 
   // create a peak using the qLab frame
-  auto peak =
-      new Peak(this->getInstrument(),
-               qLabFrame); // This should calculate the detector positions too.
-
+  // This should calculate the detector positions too
+  std::unique_ptr<IPeak> peak =
+      std::make_unique<Peak>(this->getInstrument(), qLabFrame);
   // We need to set HKL separately to keep things consistent.
   peak->setHKL(HKL[0], HKL[1], HKL[2]);
   peak->setIntHKL(peak->getHKL());
-
   // Set the goniometer
   peak->setGoniometerMatrix(goniometer.getR());
-
   // Take the run number from this
   peak->setRunNumber(this->getRunNumber());
 
@@ -556,7 +549,7 @@ int PeaksWorkspace::peakInfoNumber(const Kernel::V3D &qFrame,
   std::ostringstream oss;
   oss << std::setw(12) << std::fixed << std::setprecision(3) << (qFrame.norm());
   std::pair<std::string, std::string> QMag("|Q|", oss.str());
-  Result.push_back(QMag);
+  Result.emplace_back(QMag);
 
   oss.str("");
   oss.clear();
@@ -566,7 +559,7 @@ int PeaksWorkspace::peakInfoNumber(const Kernel::V3D &qFrame,
   std::pair<std::string, std::string> dspc("d-spacing", oss.str());
   oss.str("");
   oss.clear();
-  Result.push_back(dspc);
+  Result.emplace_back(dspc);
 
   int seqNum = -1;
   double minDist = 10000000;
@@ -599,7 +592,7 @@ bool PeaksWorkspace::hasIntegratedPeaks() const {
   bool ret = false;
   const std::string peaksIntegrated = "PeaksIntegrated";
   if (this->run().hasProperty(peaksIntegrated)) {
-    const int value = boost::lexical_cast<int>(
+    const auto value = boost::lexical_cast<int>(
         this->run().getProperty(peaksIntegrated)->value());
     ret = (value != 0);
   }
@@ -625,7 +618,7 @@ API::ITableWorkspace_sptr PeaksWorkspace::createDetectorTable() const {
   table->addColumn("int", "Index");
   table->addColumn("int", "DetectorID");
 
-  const int npeaks(static_cast<int>(this->rowCount()));
+  const auto npeaks(static_cast<int>(this->rowCount()));
   int nrows(0);
   for (int i = 0; i < npeaks; ++i) {
     const Peak &peak = this->peaks[i];
@@ -673,10 +666,10 @@ void PeaksWorkspace::initColumns() {
  **/
 void PeaksWorkspace::addPeakColumn(const std::string &name) {
   // Create the PeakColumn.
-  columns.push_back(boost::shared_ptr<DataObjects::PeakColumn>(
+  columns.emplace_back(boost::shared_ptr<DataObjects::PeakColumn>(
       new DataObjects::PeakColumn(this->peaks, name)));
   // Cache the names
-  columnNames.push_back(name);
+  columnNames.emplace_back(name);
 }
 
 //---------------------------------------------------------------------------------------------
@@ -907,8 +900,8 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
 
   // Goniometer Matrix Column
   std::vector<int> array_dims;
-  array_dims.push_back(static_cast<int>(peaks.size()));
-  array_dims.push_back(9);
+  array_dims.emplace_back(static_cast<int>(peaks.size()));
+  array_dims.emplace_back(9);
   file->writeData("column_15", goniometerMatrix, array_dims);
   file->openData("column_15");
   file->putAttr("name", "Goniometer Matrix");
@@ -918,8 +911,8 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
 
   // Shape
   std::vector<int64_t> dims;
-  dims.push_back(np);
-  dims.push_back(static_cast<int>(maxShapeJSONLength));
+  dims.emplace_back(np);
+  dims.emplace_back(static_cast<int>(maxShapeJSONLength));
   const std::string name = "column_16";
   file->makeData(name, NeXus::CHAR, dims, false);
   file->openData(name);
@@ -997,10 +990,9 @@ template <>
 DLLExport Mantid::DataObjects::PeaksWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
@@ -1015,10 +1007,9 @@ template <>
 DLLExport Mantid::DataObjects::PeaksWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

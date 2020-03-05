@@ -205,7 +205,7 @@ void Expression::parse(const std::string &str) {
   setFunct(*tkz.begin());
 
   for (size_t i = 0; i <= m_tokens.size(); i++) {
-    m_terms.push_back(Expression(this));
+    m_terms.emplace_back(Expression(this));
     Expression &t = m_terms.back();
     if (i)
       t.m_op = GetOp(i - 1);
@@ -330,7 +330,7 @@ void Expression::tokenize() {
           if (prec < min_prec)
             min_prec = prec;
           Token tok(is, i - 1, is1, prec);
-          tokens.push_back(tok);
+          tokens.emplace_back(tok);
           is = is1;
         }
 
@@ -429,7 +429,7 @@ void Expression::setFunct(const std::string &name) {
       m_funct = op;
       Expression tmp(this);
       tmp.parse(name.substr(op.size()));
-      m_terms.push_back(tmp);
+      m_terms.emplace_back(tmp);
       return;
     }
   }
@@ -473,7 +473,7 @@ void Expression::setFunct(const std::string &name) {
       tmp.parse(args);
       if (tmp.name() != EMPTY_EXPRESSION_NAME &&
           (!tmp.isFunct() || tmp.name() != ",")) {
-        m_terms.push_back(tmp);
+        m_terms.emplace_back(tmp);
       } else {
         if (f.empty() && tmp.name() == ",") {
           f = ",";

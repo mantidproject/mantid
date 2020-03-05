@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/WindowIcons.h"
 #include "MantidQtWidgets/Common/WorkspaceIcons.h"
 
+#include <sstream>
 #include <unordered_set>
 
 using namespace Mantid::API;
@@ -39,14 +40,14 @@ ProjectSaveModel::ProjectSaveModel(
     // then track it so we can always add it to the included
     // window list
     if (wsNames.size() == 0) {
-      m_unattachedWindows.push_back(window);
+      m_unattachedWindows.emplace_back(window);
       continue;
     }
 
     // otherwise add a reference mapping the window to the
     // it's various connected workspaces
     for (auto &name : wsNames) {
-      m_workspaceWindows[name].push_back(window);
+      m_workspaceWindows[name].emplace_back(window);
     }
   }
 }
@@ -145,13 +146,13 @@ ProjectSaveModel::getWindowInformation(const std::vector<std::string> &wsNames,
 
   for (auto window : getUniqueWindows(wsNames)) {
     auto info = makeWindowInfoObject(window);
-    winInfo.push_back(info);
+    winInfo.emplace_back(info);
   }
 
   if (includeUnattached) {
     for (const auto window : m_unattachedWindows) {
       auto info = makeWindowInfoObject(window);
-      winInfo.push_back(info);
+      winInfo.emplace_back(info);
     }
   }
 
@@ -184,11 +185,11 @@ std::vector<WorkspaceInfo> ProjectSaveModel::getWorkspaceInformation() const {
       auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
       for (int i = 0; i < group->getNumberOfEntries(); ++i) {
         auto subInfo = makeWorkspaceInfoObject(group->getItem(i));
-        info.subWorkspaces.push_back(subInfo);
+        info.subWorkspaces.emplace_back(subInfo);
       }
     }
 
-    wsInfo.push_back(info);
+    wsInfo.emplace_back(info);
   }
 
   return wsInfo;
@@ -227,4 +228,39 @@ bool ProjectSaveModel::hasWindows(const std::string &wsName) const {
   }
 
   return false;
+}
+
+/**
+ * @brief Check if the project size will be larger than the warning size defined
+ * in mantid.properties.
+ *
+ * @param wsNames A vector of workspace names as strings.
+ * @return true If larger warning.
+ * @return false If equal or less than warning.
+ */
+bool ProjectSaveModel::needsSizeWarning(
+    const std::vector<std::string> &wsNames) {
+  std::istringstream iss(Mantid::Kernel::ConfigService::Instance().getString(
+      "projectSaving.warningSize"));
+  size_t warningSize;
+  iss >> warningSize;
+  const size_t totalSize = getProjectSize(wsNames);
+  return totalSize > warningSize;
+}
+
+/**
+ * @brief Get the project size from a list of workspace names.
+ *
+ * @param wsNames List of workspace names to look up.
+ * @return size_t The size of the project in bytes.
+ */
+size_t
+ProjectSaveModel::getProjectSize(const std::vector<std::string> &wsNames) {
+  size_t totalSize = 0;
+  for (const auto &ws : wsNames) {
+    totalSize += Mantid::API::AnalysisDataService::Instance()
+                     .retrieve(ws)
+                     ->getMemorySize();
+  }
+  return totalSize;
 }

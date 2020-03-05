@@ -94,7 +94,7 @@ void BoundaryConstraint::initialize(API::IFunction *fun,
   for (size_t i = 0; i < terms.size(); i++) {
     std::string name = terms[i].str();
     try {
-      double d = boost::lexical_cast<double>(name);
+      auto d = boost::lexical_cast<double>(name);
       values[i] = d;
       std::string op = terms[i].operator_name();
       if (op.empty()) {

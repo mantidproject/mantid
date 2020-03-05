@@ -183,8 +183,8 @@ void SampleLogsBehaviour::setSampleMap(SampleLogsMap &map,
   std::vector<double> tolerancesVector = createTolerancesVector(
       tokenizer.asVector().size(), tolerancesStringVector);
 
-  StringTokenizer::Iterator i = tokenizer.begin();
-  std::vector<double>::iterator j = tolerancesVector.begin();
+  auto i = tokenizer.begin();
+  auto j = tolerancesVector.begin();
 
   for (; i != tokenizer.end() && j != tolerancesVector.end(); ++i, ++j) {
     auto item = *i;
@@ -506,7 +506,7 @@ void SampleLogsBehaviour::updateTimeSeriesProperty(MatrixWorkspace &addeeWS,
     // Remove this to supress a warning, we will put it back after adding the
     // workspaces in MergeRuns
     const Property *addeeWSProperty = addeeWS.run().getProperty(name);
-    m_addeeLogMap.push_back(
+    m_addeeLogMap.emplace_back(
         std::shared_ptr<Property>(addeeWSProperty->clone()));
   }
 }

@@ -15,8 +15,8 @@
  *WIKI*/
 
 #include "MantidAlgorithms/CreateTransmissionWorkspaceAuto.h"
+#include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidAlgorithms/BoostOptionalToAlgorithmProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -43,8 +43,8 @@ const std::string CreateTransmissionWorkspaceAuto::summary() const {
 void CreateTransmissionWorkspaceAuto::init() {
 
   std::vector<std::string> analysis_modes;
-  analysis_modes.push_back("PointDetectorAnalysis");
-  analysis_modes.push_back("MultiDetectorAnalysis");
+  analysis_modes.emplace_back("PointDetectorAnalysis");
+  analysis_modes.emplace_back("MultiDetectorAnalysis");
   declareProperty("AnalysisMode", analysis_modes.at(0),
                   boost::make_shared<StringListValidator>(analysis_modes),
                   "Analysis Mode to Choose", Direction::Input);
@@ -154,9 +154,9 @@ void CreateTransmissionWorkspaceAuto::exec() {
     processing_commands = processing_commands_temp;
   }
 
-  double wavelength_min = checkForMandatoryInstrumentDefault<double>(
+  auto wavelength_min = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
-  double wavelength_max = checkForMandatoryInstrumentDefault<double>(
+  auto wavelength_max = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMax", instrument, "LambdaMax");
   auto wavelength_back_min = checkForOptionalInstrumentDefault<double>(
       this, "MonitorBackgroundWavelengthMin", instrument,

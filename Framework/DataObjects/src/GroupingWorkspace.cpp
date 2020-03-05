@@ -50,7 +50,7 @@ void GroupingWorkspace::makeDetectorIDToGroupMap(
   ngroups = 0;
   for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
-    int group = static_cast<int>(this->readY(wi)[0]);
+    auto group = static_cast<int>(this->readY(wi)[0]);
     if (group == 0)
       group = -1;
     auto detIDs = this->getDetectorIDs(wi);
@@ -76,7 +76,7 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(
   ngroups = 0;
   for (size_t wi = 0; wi < getNumberHistograms(); ++wi) {
     // Convert the Y value to a group number
-    int group = static_cast<int>(this->y(wi).front());
+    auto group = static_cast<int>(this->y(wi).front());
     if (group == 0)
       group = -1;
     auto detIDs = this->getDetectorIDs(wi);
@@ -105,10 +105,9 @@ template <>
 DLLExport Mantid::DataObjects::GroupingWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
@@ -123,10 +122,9 @@ template <>
 DLLExport Mantid::DataObjects::GroupingWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *prop =
-      dynamic_cast<
-          PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *>(
-          getPointerToProperty(name));
+  auto *prop = dynamic_cast<
+      PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr> *>(
+      getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

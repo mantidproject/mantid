@@ -40,8 +40,8 @@ const std::string efficienciesLabel("Efficiencies");
 
 std::vector<std::string> modes() {
   std::vector<std::string> modes;
-  modes.push_back(pALabel);
-  modes.push_back(pNRLabel);
+  modes.emplace_back(pALabel);
+  modes.emplace_back(pNRLabel);
   return modes;
 }
 

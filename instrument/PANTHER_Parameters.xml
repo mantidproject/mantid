@@ -78,6 +78,11 @@
 		<parameter name="temperature_sample_log" type="string">
 			<value val="sample.temperature" />
 		</parameter>
+
+		<!-- The detector name for the height axis used in SumOverlappingTubes -->
+		<parameter name="detector_for_height_axis" type="string">
+			<value val="tube_1" />
+		</parameter>
 	</component-link>
 
 </parameter-file>

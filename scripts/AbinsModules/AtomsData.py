@@ -10,10 +10,10 @@ import six
 import AbinsModules
 
 
-class AtomsDaTa(AbinsModules.GeneralData):
+class AtomsData(AbinsModules.GeneralData):
 
     def __init__(self, num_atoms=None):
-        super(AtomsDaTa, self).__init__()
+        super(AtomsData, self).__init__()
         if not isinstance(num_atoms, int):
             raise ValueError("Invalid number of atoms.")
         if num_atoms < 0:

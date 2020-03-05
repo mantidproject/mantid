@@ -62,6 +62,10 @@ MANTID_DATAOBJECTS_DLL void rebinToFractionalOutput(
     const std::vector<double> &verticalAxis,
     const DataObjects::RebinnedOutput_const_sptr &inputRB = nullptr);
 
+/// Set finalize flag after fractional rebinning loop
+MANTID_DATAOBJECTS_DLL void
+finalizeFractionalRebin(DataObjects::RebinnedOutput &outputWS);
+
 } // namespace FractionalRebinning
 
 } // namespace DataObjects

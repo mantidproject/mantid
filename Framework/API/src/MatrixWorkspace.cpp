@@ -143,7 +143,7 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
   if (m_indexInfoNeedsUpdate) {
     std::vector<Indexing::SpectrumNumber> spectrumNumbers;
     for (size_t i = 0; i < getNumberHistograms(); ++i)
-      spectrumNumbers.push_back(getSpectrum(i).getSpectrumNo());
+      spectrumNumbers.emplace_back(getSpectrum(i).getSpectrumNo());
     m_indexInfo->setSpectrumNumbers(std::move(spectrumNumbers));
     m_indexInfoNeedsUpdate = false;
   }
@@ -364,8 +364,11 @@ void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
  * the same ID. If an empty instrument is set then a 1:1 map from 1->NHistograms
  * is created.
  * @param includeMonitors :: If false the monitors are not included
+ * @param specNumOffset :: Constant offset from detector ID used to derive
+ *                         spectrum number
  */
-void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
+void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors,
+                                            const specnum_t specNumOffset) {
   if (sptr_instrument->nelements() == 0) {
     return;
   }
@@ -380,8 +383,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
          ++it) {
       // The detector ID
       const detid_t detId = *it;
-      // By default: Spectrum number = index +  1
-      const specnum_t specNo = specnum_t(index + 1);
+      const auto specNo = specnum_t(index + specNumOffset);
 
       if (index < this->getNumberHistograms()) {
         auto &spec = getSpectrum(index);
@@ -402,7 +404,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
  *    VALUE is the Workspace Index
  */
 spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
-  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
+  auto *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -426,7 +428,7 @@ spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
  */
 std::vector<size_t>
 MatrixWorkspace::getSpectrumToWorkspaceIndexVector(specnum_t &offset) const {
-  SpectraAxis *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
+  auto *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -592,7 +594,7 @@ std::vector<size_t> MatrixWorkspace::getIndicesFromSpectra(
   while (iter != spectraList.cend()) {
     for (size_t i = 0; i < this->getNumberHistograms(); ++i) {
       if (this->getSpectrum(i).getSpectrumNo() == *iter) {
-        indexList.push_back(i);
+        indexList.emplace_back(i);
         break;
       }
     }
@@ -680,7 +682,7 @@ std::vector<specnum_t> MatrixWorkspace::getSpectraFromDetectorIDs(
     }
 
     if (foundDet)
-      spectraList.push_back(foundSpecNum);
+      spectraList.emplace_back(foundSpecNum);
   } // for each detector ID in the list
   return spectraList;
 }
@@ -1198,6 +1200,11 @@ bool MatrixWorkspace::hasMaskedBins(const size_t &workspaceIndex) const {
   return m_masks.find(workspaceIndex) != m_masks.end();
 }
 
+/** Does this workspace contain any masked bins
+ *  @return True if there are masked bins somewhere in this workspace
+ */
+bool MatrixWorkspace::hasAnyMaskedBins() const { return !m_masks.empty(); }
+
 /** Returns the list of masked bins for a spectrum.
  *  @param  workspaceIndex
  *  @return A const reference to the list of masked bins
@@ -1673,8 +1680,8 @@ std::vector<std::unique_ptr<IMDIterator>> MatrixWorkspace::createIterators(
     size_t end = ((i + 1) * numElements) / numCores;
     if (end > numElements)
       end = numElements;
-    out.push_back(std::make_unique<MatrixWorkspaceMDIterator>(this, function,
-                                                              begin, end));
+    out.emplace_back(std::make_unique<MatrixWorkspaceMDIterator>(this, function,
+                                                                 begin, end));
   }
   return out;
 }
@@ -2119,22 +2126,6 @@ void MatrixWorkspace::invalidateCachedSpectrumNumbers() {
   m_indexInfoNeedsUpdate = true;
 }
 
-/// Cache a lookup of grouped detIDs to member IDs. Always throws
-/// std::runtime_error since MatrixWorkspace supports detector grouping via
-/// spectra instead of the caching mechanism.
-void MatrixWorkspace::cacheDetectorGroupings(
-    const det2group_map & /*mapping*/) {
-  throw std::runtime_error("Cannot cache detector groupings in a "
-                           "MatrixWorkspace -- grouping must be defined via "
-                           "spectra");
-}
-
-/// Throws an exception. This method is only for MDWorkspaces.
-size_t MatrixWorkspace::groupOfDetectorID(const detid_t /*detID*/) const {
-  throw std::runtime_error("ExperimentInfo::groupOfDetectorID can not be used "
-                           "for MatrixWorkspace, only for MDWorkspaces");
-}
-
 /** Update detector grouping for spectrum with given index.
  *
  * This method is called when the detector grouping stored in SpectrumDefinition
@@ -2232,7 +2223,7 @@ template <>
 MANTID_API_DLL Mantid::API::MatrixWorkspace_sptr
 IPropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {
@@ -2249,7 +2240,7 @@ template <>
 MANTID_API_DLL Mantid::API::MatrixWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(
     const std::string &name) const {
-  PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *prop =
+  auto *prop =
       dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(
           getPointerToProperty(name));
   if (prop) {

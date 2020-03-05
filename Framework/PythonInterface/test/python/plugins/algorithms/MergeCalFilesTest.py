@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
 import tempfile
+import shutil
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -53,10 +54,11 @@ A helper resource managing wrapper over a new calfile object. Creates cal file a
 class DisposableCalFileObject:
 
     _fullpath = None
+    _dirpath = None
 
     def __init__(self, name):
-         dirpath = tempfile.mkdtemp()
-         self._fullpath = os.path.join(dirpath, name)
+         self._dirpath = tempfile.mkdtemp()
+         self._fullpath = os.path.join(self._dirpath, name)
          file = open(self._fullpath, 'w')
          file.close()
 
@@ -67,6 +69,8 @@ class DisposableCalFileObject:
 
     def __del__(self):
         os.remove(self._fullpath)
+        if os.path.exists(self._dirpath):
+            shutil.rmtree(self._dirpath)
 
     def getPath(self):
         return self._fullpath
@@ -76,19 +80,20 @@ A helper resource managing wrapper over an existing cal file for reading. Dispos
 class ReadableCalFileObject:
 
     _fullpath = None
+    _dirpath = None
 
-    def __init__(self, fullpath):
+    def __init__(self, dirpath, filename):
+        fullpath = os.path.join(dirpath, filename)
         if not os.path.exists(fullpath):
             raise RuntimeError("No readable cal file at location: " + fullpath)
         else:
             self._fullpath = fullpath
+            self._dirpath = dirpath
 
     def __del__(self):
         pass
         os.remove(self._fullpath)
-
-    def getPath(self):
-        return _fullpath
+        shutil.rmtree(self._dirpath)
 
     def readline(self):
         result = None
@@ -127,8 +132,9 @@ class MergeCalFilesTest(unittest.TestCase):
                       OutputFile=outputfilestring, MergeOffsets=mergeOffsets, MergeSelections=mergeSelect, MergeGroups=mergeGroups)
 
         # Read the results file and return the first line as a CalFileEntry
-        outputfile = ReadableCalFileObject(outputfilestring)
+        outputfile = ReadableCalFileObject(dirpath,"product.cal")
         firstLineOutput = outputfile.readline()
+
         return firstLineOutput
 
     def test_replace_nothing(self):

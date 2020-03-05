@@ -14,7 +14,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidSINQ/PoldiUtilities/MillerIndicesIO.h"
 
-#include <boost/bind.hpp>
 #include <numeric>
 
 #include <boost/math/distributions/normal.hpp>
@@ -171,7 +170,7 @@ void PoldiIndexKnownCompounds::initializeIndexedPeaks(
     newCollection->setProfileFunctionName(
         m_measuredPeaks->getProfileFunctionName());
 
-    m_indexedPeaks.push_back(newCollection);
+    m_indexedPeaks.emplace_back(newCollection);
   }
 }
 
@@ -240,7 +239,8 @@ PoldiIndexKnownCompounds::getPeakCollections(
           "Can only construct PoldiPeakCollection from a TableWorkspace.");
     }
 
-    peakCollections.push_back(boost::make_shared<PoldiPeakCollection>(tableWs));
+    peakCollections.emplace_back(
+        boost::make_shared<PoldiPeakCollection>(tableWs));
   }
 
   return peakCollections;
@@ -337,7 +337,7 @@ std::vector<double> PoldiIndexKnownCompounds::getNormalizedContributions(
       throw std::invalid_argument("Contributions less than 0 are not allowed.");
     }
 
-    normalizedContributions.push_back(contribution / sum);
+    normalizedContributions.emplace_back(contribution / sum);
   }
 
   return normalizedContributions;
@@ -558,7 +558,7 @@ PoldiIndexKnownCompounds::getIndexCandidatePairs(
       PoldiPeak_sptr currentCandidate = currentCandidateCollection->peak(p);
 
       if (isCandidate(peak, currentCandidate)) {
-        indexCandidates.push_back(
+        indexCandidates.emplace_back(
             IndexCandidatePair(peak, currentCandidate, i));
       }
     }
@@ -725,10 +725,9 @@ PoldiPeakCollection_sptr
 PoldiIndexKnownCompounds::getIntensitySortedPeakCollection(
     const PoldiPeakCollection_sptr &peaks) const {
   std::vector<PoldiPeak_sptr> peakVector(peaks->peaks());
-
+  using namespace std::placeholders;
   std::sort(peakVector.begin(), peakVector.end(),
-            boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2,
-                              &PoldiPeak::intensity));
+            std::bind(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::intensity));
 
   PoldiPeakCollection_sptr sortedPeaks =
       boost::make_shared<PoldiPeakCollection>(peaks->intensityType());

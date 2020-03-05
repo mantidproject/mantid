@@ -126,8 +126,8 @@ void process_mem_usage(size_t &vm_usage, size_t &resident_set) {
 #endif
 }
 
-  // ----------------------- functions associated with getting the memory of the
-  // system
+// ----------------------- functions associated with getting the memory of the
+// system
 
 #ifdef __linux__
 /**

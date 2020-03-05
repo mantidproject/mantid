@@ -142,8 +142,8 @@ struct IntersectionPoint {
  */
 class MANTID_GEOMETRY_DLL Track {
 public:
-  using LType = std::list<Link>;
-  using PType = std::list<IntersectionPoint>;
+  using LType = std::vector<Link>;
+  using PType = std::vector<IntersectionPoint>;
 
 public:
   /// Default constructor

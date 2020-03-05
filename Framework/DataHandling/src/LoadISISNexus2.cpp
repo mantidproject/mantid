@@ -86,7 +86,7 @@ LoadISISNexus2::LoadISISNexus2()
       m_load_selected_spectra(false), m_wsInd2specNum_map(), m_spec2det_map(),
       m_entrynumber(0), m_tof_data(), m_proton_charge(0.), m_spec(),
       m_spec_end(nullptr), m_monitors(), m_logCreator(), m_progress(),
-      m_cppFile() {}
+      m_nexusFile() {}
 
 /**
  * Return the confidence criteria for this algorithm can load the file
@@ -169,7 +169,7 @@ void LoadISISNexus2::exec() {
   NXRoot root(m_filename);
 
   // "Open" the same file but with the C++ interface
-  m_cppFile.reset(new ::NeXus::File(root.m_fileID));
+  m_nexusFile.reset(new ::NeXus::File(root.m_fileID));
 
   // Open the raw data group 'raw_data_1'
   NXEntry entry = root.openEntry("raw_data_1");
@@ -282,8 +282,8 @@ void LoadISISNexus2::exec() {
   }
 
   // Load logs and sample information
-  m_cppFile->openPath(entry.path());
-  local_workspace->loadSampleAndLogInfoNexus(m_cppFile.get());
+  m_nexusFile->openPath(entry.path());
+  local_workspace->loadSampleAndLogInfoNexus(m_nexusFile.get());
 
   // Load logs and sample information further information... See maintenance
   // ticket #8697
@@ -604,8 +604,8 @@ bool LoadISISNexus2::checkOptionalProperties(bool bseparateMonitors,
 
       // The spec_min - spec_max range needs to be added to the spec list
       for (int64_t i = spec_min; i < spec_max + 1; ++i) {
-        specnum_t spec_num = static_cast<specnum_t>(i);
-        spec_list.push_back(spec_num);
+        auto spec_num = static_cast<specnum_t>(i);
+        spec_list.emplace_back(spec_num);
         std::sort(spec_list.begin(), spec_list.end());
         // supplied range converted into the list, so no more supplied range
       }
@@ -695,7 +695,7 @@ void LoadISISNexus2::buildSpectraInd2SpectraNumMap(
     auto generator = dataBlockComposite.getGenerator();
     int64_t hist = 0;
     for (; !generator->isDone(); generator->next()) {
-      specnum_t spec_num = static_cast<specnum_t>(generator->getValue());
+      auto spec_num = static_cast<specnum_t>(generator->getValue());
       m_wsInd2specNum_map.emplace(hist, spec_num);
       ++hist;
     }
@@ -720,12 +720,12 @@ LoadISISNexus2::prepareSpectraBlocks(std::map<int64_t, std::string> &monitors,
   for (const auto &dataBlock : dataBlocks) {
     auto min = dataBlock.getMinSpectrumID();
     if (isMonitor(min)) {
-      m_spectraBlocks.push_back(
+      m_spectraBlocks.emplace_back(
           SpectraBlock(min, min, true, monitors.find(min)->second));
-      includedMonitors.push_back(min);
+      includedMonitors.emplace_back(min);
     } else {
       auto max = dataBlock.getMaxSpectrumID();
-      m_spectraBlocks.push_back(SpectraBlock(min, max, false, ""));
+      m_spectraBlocks.emplace_back(SpectraBlock(min, max, false, ""));
     }
   }
 
@@ -1194,7 +1194,7 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
 
     // Iterate over each monitor and create a data block for each monitor
     for (const auto &monitor : monitors) {
-      int64_t monID = static_cast<int64_t>(monitor.first);
+      auto monID = static_cast<int64_t>(monitor.first);
       auto monTemp = DataBlock(chans);
       monTemp.setMinSpectrumID(monID);
       monTemp.setMaxSpectrumID(monID);

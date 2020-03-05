@@ -35,9 +35,9 @@ public:
     TransposeMD transposeMD;
     transposeMD.initialize();
     std::vector<int> axes;
-    axes.push_back(1); // should be fine.
+    axes.emplace_back(1); // should be fine.
     TS_ASSERT_THROWS_NOTHING(transposeMD.setProperty("Axes", axes));
-    axes.push_back(-1); // Not a valid axis
+    axes.emplace_back(-1); // Not a valid axis
     TS_ASSERT_THROWS(transposeMD.setProperty("Axes", axes),
                      std::invalid_argument &);
   }
@@ -117,8 +117,8 @@ public:
     transposeMD.setPropertyValue("OutputWorkspace", "dummy");
     transposeMD.setProperty("InputWorkspace", inputWS);
     std::vector<int> axes;
-    axes.push_back(1);
-    axes.push_back(0);
+    axes.emplace_back(1);
+    axes.emplace_back(0);
     transposeMD.setProperty("Axes", axes);
     transposeMD.execute();
     IMDHistoWorkspace_sptr outputWS =
@@ -155,8 +155,8 @@ public:
     transposeMD.setPropertyValue("OutputWorkspace", "dummy");
     transposeMD.setProperty("InputWorkspace", inputWS);
     std::vector<int> axes;
-    axes.push_back(0);
-    axes.push_back(1);
+    axes.emplace_back(0);
+    axes.emplace_back(1);
     transposeMD.setProperty("Axes", axes); // 0 and 1, but 2 not specified!
     transposeMD.execute();
     IMDHistoWorkspace_sptr outputWS =

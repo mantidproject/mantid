@@ -179,8 +179,7 @@ public:
     // WHEN + THEN
     TSM_ASSERT_THROWS("Should throw a invalid argument error when background "
                       "strategy is not AbsoluteBackgroundStrategy",
-                      std::make_unique<AllPeaksStrategy>(
-                          backgroundStrategy.get(), spectrumInfo);
+                      AllPeaksStrategy(backgroundStrategy.get(), spectrumInfo);
                       , const std::invalid_argument &);
   }
 

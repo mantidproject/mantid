@@ -45,7 +45,7 @@ void HFIRSANSNormalise::exec() {
 
   // Get the monitor or timer
   boost::algorithm::to_lower(normalisation);
-  double norm_count =
+  auto norm_count =
       inputWS->run().getPropertyValueAsType<double>(normalisation);
 
   double factor;

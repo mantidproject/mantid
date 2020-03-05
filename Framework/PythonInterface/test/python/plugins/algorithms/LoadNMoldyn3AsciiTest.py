@@ -21,6 +21,7 @@ class LoadNMoldyn3AsciiTest(unittest.TestCase):
         """
         Load an F(Q, t) function from an nMOLDYN 3 .cdl file
         """
+
         moldyn_group = LoadNMoldyn3Ascii(Filename=self._cdl_filename,
                                          Functions=['Fqt-total'],
                                          OutputWorkspace='__LoadNMoldyn3Ascii_test')
@@ -81,6 +82,12 @@ class LoadNMoldyn3AsciiTest(unittest.TestCase):
 
         self.assertTrue(isinstance(moldyn_ws, MatrixWorkspace))
         self.assertTrue(moldyn_ws.getNumberHistograms(), 12)
+
+        workdir = config['defaultsave.directory']
+        filename = 'MolDyn_angles.txt'
+        path = os.path.join(workdir, filename)
+        if os.path.exists(path):
+            os.remove(path)
 
 
     def test_function_validation_cdl(self):

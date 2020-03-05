@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 
-#include "boost/bind.hpp"
 #include <cmath>
 #include <stdexcept>
 
@@ -132,15 +131,15 @@ PoldiPeak_sptr PoldiPeak::create(MillerIndices hkl, UncertainValue dValue,
 bool PoldiPeak::greaterThan(const PoldiPeak_sptr &first,
                             const PoldiPeak_sptr &second,
                             UncertainValue (PoldiPeak::*function)() const) {
-  return static_cast<double>(boost::bind(function, first.get())()) >
-         static_cast<double>(boost::bind(function, second.get())());
+  return static_cast<double>(std::bind(function, first.get())()) >
+         static_cast<double>(std::bind(function, second.get())());
 }
 
 bool PoldiPeak::lessThan(const PoldiPeak_sptr &first,
                          const PoldiPeak_sptr &second,
                          UncertainValue (PoldiPeak::*function)() const) {
-  return static_cast<double>(boost::bind(function, first.get())()) <
-         static_cast<double>(boost::bind(function, second.get())());
+  return static_cast<double>(std::bind(function, first.get())()) <
+         static_cast<double>(std::bind(function, second.get())());
 }
 
 PoldiPeak::PoldiPeak(UncertainValue d, UncertainValue intensity,

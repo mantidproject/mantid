@@ -105,7 +105,7 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr,
   if (!(targetWSDescr.m_PreprDetTable))
     throw std::runtime_error("MDWSDescription does not have a detector table");
 
-  int Emode = static_cast<int>(targetWSDescr.getEMode());
+  auto Emode = static_cast<int>(targetWSDescr.getEMode());
 
   this->initialize(unitsFrom, unitsTo, targetWSDescr.m_PreprDetTable, Emode,
                    forceViaTOF);

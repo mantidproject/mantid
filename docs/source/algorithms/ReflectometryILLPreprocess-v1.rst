@@ -31,6 +31,9 @@ The algorithm adds the following sample log entries to the *OutputWorkspace*:
 * reduction.foreground.last_workspace_index
 * reduction.foreground.first_workspace_index
 * reduction.line_position : the peak position (workspace index) used to define the :math:`2\theta` angles (detector positions)
+* reduction.two_theta
+
+The option *Slit Normalisation AUTO* will select the slit normalisation depending on the instrument: for D17 and FIGARO, the slit normalisation will be turned on and off, respectively.
 
 The workflow diagram below gives an overview of the algorithm:
 
@@ -84,7 +87,6 @@ The following figure exemplifies the foreground and background for the D17 instr
    theta0 = numpy.rad2deg(ws.detectorSignedTwoTheta(det0))
    theta1 = numpy.rad2deg(ws.detectorSignedTwoTheta(det1))
    fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
-   ax.pcolor(ws, cmap='Oranges')
    ax.set_xlim(xmin=3, xmax=27)
    ax.set_ylim(ymin=0, ymax=ws.getNumberHistograms())
    ax.set_ylabel('Pixel (workspace index)')

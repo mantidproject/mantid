@@ -79,7 +79,8 @@ public:
   // Calculate goniometer for rotation around y-axis for constant wavelength
   // from Q Sample
   void calcFromQSampleAndWavelength(const Mantid::Kernel::V3D &Q,
-                                    double wavelength);
+                                    double wavelength, bool flip_x = false,
+                                    bool inner = false);
   // Get axis object
   const GoniometerAxis &getAxis(size_t axisnumber) const;
   // Get axis object

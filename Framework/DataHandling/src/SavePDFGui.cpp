@@ -43,7 +43,7 @@ const std::string SavePDFGui::summary() const {
 void SavePDFGui::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
                                                         Direction::Input),
-                  "An input workspace.");
+                  "An input workspace with units of Atomic Distance.");
   declareProperty(std::make_unique<API::FileProperty>(
                       "Filename", "", API::FileProperty::Save, ".gr"),
                   "The filename to use for the saved data");
@@ -59,7 +59,7 @@ std::map<std::string, std::string> SavePDFGui::validateInputs() {
     return result;
   }
 
-  const int nHist = static_cast<int>(inputWS->getNumberHistograms());
+  const auto nHist = static_cast<int>(inputWS->getNumberHistograms());
   if (nHist != 1) {
     result["InputWorkspace"] = "Workspace must contain only one spectrum";
   } else if (std::string(inputWS->getAxis(0)->unit()->label()) != "Angstrom") {
@@ -82,6 +82,17 @@ void SavePDFGui::exec() {
   // --------- write the header in the style of
   //#Comment: neutron, Qmin=0.5, Qmax=31.42, Qdamp=0.017659, Qbroad= 0.0191822,
   // Temperature = 300
+  writeMetaData(out, inputWS);
+
+  // --------- write the data
+  writeWSData(out, inputWS);
+
+  // --------- close the file
+  out.close();
+}
+
+void SavePDFGui::writeMetaData(std::ofstream &out,
+                               API::MatrixWorkspace_const_sptr inputWS) {
   out << "#Comment: neutron";
   auto run = inputWS->run();
   if (run.hasProperty("Qmin")) {
@@ -106,22 +117,20 @@ void SavePDFGui::exec() {
   // out << "#P0  -22.03808    1.10131 2556.26392    0.03422    1.50  0.5985\n";
   // // TODO
   out << "#L r G(r) dr dG(r)\n";
+}
 
-  // --------- write the data
-  const auto &x = inputWS->x(0);
+void SavePDFGui::writeWSData(std::ofstream &out,
+                             API::MatrixWorkspace_const_sptr inputWS) {
+  const auto &x = inputWS->points(0);
   const auto &y = inputWS->y(0);
   const auto &dy = inputWS->e(0);
   HistogramData::HistogramDx dx(y.size(), 0.0);
   if (inputWS->sharedDx(0))
     dx = inputWS->dx(0);
-  const size_t length = x.size();
-  for (size_t i = 0; i < length; ++i) {
+  for (size_t i = 0; i < x.size(); ++i) {
     out << "  " << x[i] << "  " << y[i] << "  " << dx[i] << "  " << dy[i]
         << "\n";
   }
-
-  // --------- close the file
-  out.close();
 }
 
 } // namespace DataHandling

@@ -73,7 +73,7 @@ void UnwrapMonitor::exec() {
   // Get the input workspace
   m_inputWS = getProperty("InputWorkspace");
   // Get the number of spectra in this workspace
-  const int numberOfSpectra =
+  const auto numberOfSpectra =
       static_cast<int>(m_inputWS->getNumberHistograms());
   g_log.debug() << "Number of spectra in input workspace: " << numberOfSpectra
                 << '\n';
@@ -209,7 +209,7 @@ const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
     // First deal with bins where m_Tmin < tof < T2
     if (tof < T2) {
       const double wavelength = (m_conversionConstant * tof) / Ld;
-      tempX_L.push_back(wavelength);
+      tempX_L.emplace_back(wavelength);
       // Record the bins that fall in this range for copying over the data &
       // errors
       if (binRange[0] == -1)
@@ -220,7 +220,7 @@ const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
     else if (tof > T1) {
       const double velocity = Ld / (tof - m_Tmax + m_Tmin);
       const double wavelength = m_conversionConstant / velocity;
-      newX.push_back(wavelength);
+      newX.emplace_back(wavelength);
       // Remove the duplicate boundary bin
       if (tof == m_Tmax && std::abs(wavelength - tempX_L.front()) < 1.0e-5)
         newX.pop_back();
@@ -342,7 +342,7 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr &tempWS,
       const MatrixWorkspace::MaskList &inputMasks =
           m_inputWS->maskedBins(spectrum);
       for (const auto &inputMask : inputMasks) {
-        const int maskIndex = static_cast<int>(inputMask.first);
+        const auto maskIndex = static_cast<int>(inputMask.first);
         if (maskIndex >= rangeBounds[0] && maskIndex < rangeBounds[1])
           tempWS->flagMasked(spectrum, maskIndex - rangeBounds[0],
                              inputMask.second);

@@ -68,12 +68,15 @@ public:
   bool isMonitor(const std::pair<size_t, size_t> &index) const;
   bool isMasked(const size_t index) const;
   bool isMasked(const std::pair<size_t, size_t> &index) const;
+  bool hasMaskedDetectors() const;
   double l2(const size_t index) const;
   double l2(const std::pair<size_t, size_t> &index) const;
   double twoTheta(const size_t index) const;
   double twoTheta(const std::pair<size_t, size_t> &index) const;
   double signedTwoTheta(const size_t index) const;
   double signedTwoTheta(const std::pair<size_t, size_t> &index) const;
+  double azimuthal(const size_t index) const;
+  double azimuthal(const std::pair<size_t, size_t> &index) const;
   Kernel::V3D position(const size_t index) const;
   Kernel::V3D position(const std::pair<size_t, size_t> &index) const;
   Kernel::Quat rotation(const size_t index) const;

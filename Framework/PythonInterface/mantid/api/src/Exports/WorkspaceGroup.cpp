@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidPythonInterface/kernel/DataServiceExporter.h"
-#include "MantidPythonInterface/kernel/GetPointer.h"
-#include "MantidPythonInterface/kernel/Policies/ToWeakPtr.h"
+#include "MantidPythonInterface/core/DataServiceExporter.h"
+#include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/Policies/ToWeakPtr.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>

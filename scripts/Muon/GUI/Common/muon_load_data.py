@@ -141,7 +141,8 @@ class MuonLoadData:
     def remove_workspace_by_name(self, workspace_name, instrument=''):
         list_of_workspace_names_to_remove = []
         for entry in self.params:
-            if any([workspace.workspace_name == workspace_name for workspace in entry['workspace']['OutputWorkspace']]):
+            if any([workspace.workspace_name == workspace_name for workspace in entry['workspace']['OutputWorkspace']])\
+                    or entry['workspace']['DataDeadTimeTable'] == workspace_name:
                 list_of_workspace_names_to_remove.append(entry)
 
         runs_removed = []

@@ -161,7 +161,7 @@ void QDataProcessorWidget::addActions(
 
   // Put the commands in the toolbar
   for (auto &command : commands) {
-    m_commands.push_back(
+    m_commands.emplace_back(
         std::make_unique<QtCommandAdapter>(ui.rowToolBar, std::move(command)));
   }
 

@@ -64,26 +64,30 @@ public:
     SaveIsawPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", outfile));
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
-    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", outfile))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
 
     // Test appending same file to check peak numbers
     SaveIsawPeaks alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize())
     TS_ASSERT(alg2.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("Filename", outfile));
-    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("AppendFile", true));
-    TS_ASSERT_THROWS_NOTHING(alg2.execute(););
+    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("Filename", outfile))
+    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("AppendFile", true))
+    TS_ASSERT_THROWS_NOTHING(alg2.execute();)
 
     // Get the file
     if (numPeaksPerBank > 0) {
       outfile = alg2.getPropertyValue("Filename");
-      TS_ASSERT(Poco::File(outfile).exists());
+      TS_ASSERT(Poco::File(outfile).exists())
       std::ifstream in(outfile.c_str());
-      std::string line, line0;
+      std::string line0;
+      getline(in, line0);
+      TS_ASSERT_EQUALS(line0, "Version: 2.0  Facility: Unknown  Instrument: "
+                              "basic_rect  Date: 1990-01-01T00:00:01")
+      std::string line;
       while (!in.eof()) // To get you all the lines.
       {
         getline(in, line0); // Saves the line in STRING.
@@ -93,7 +97,7 @@ public:
       }
       TS_ASSERT_EQUALS(line, "3     71   -3   -3   -3    3.00     4.00    "
                              "27086  2061.553   0.24498   0.92730   3.500000   "
-                             "14.3227        3       3.10    1.73   310");
+                             "14.3227        3       3.10    1.73   310")
     }
 
     if (Poco::File(outfile).exists())
@@ -113,61 +117,61 @@ public:
     alg1.setPropertyValue("Filename", "Modulated.peaks");
     alg1.setPropertyValue("OutputWorkspace", "peaks");
 
-    TS_ASSERT(alg1.execute());
-    TS_ASSERT(alg1.isExecuted());
+    TS_ASSERT(alg1.execute())
+    TS_ASSERT(alg1.isExecuted())
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
         ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve("peaks")));
-    TS_ASSERT(ws);
+    TS_ASSERT(ws)
     if (!ws)
       return;
     std::string outfile = "./SaveIsawPeaksTest.peaks";
     SaveIsawPeaks alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize())
     TS_ASSERT(alg2.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("InputWorkspace", ws));
-    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("Filename", outfile));
-    TS_ASSERT_THROWS_NOTHING(alg2.execute(););
+    TS_ASSERT_THROWS_NOTHING(alg2.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg2.setPropertyValue("Filename", outfile))
+    TS_ASSERT_THROWS_NOTHING(alg2.execute();)
     LoadIsawPeaks alg3;
     TS_ASSERT_THROWS_NOTHING(alg3.initialize())
     TS_ASSERT(alg3.isInitialized())
     alg3.setPropertyValue("Filename", outfile);
     alg3.setPropertyValue("OutputWorkspace", "peaks2");
 
-    TS_ASSERT(alg3.execute());
-    TS_ASSERT(alg3.isExecuted());
+    TS_ASSERT(alg3.execute())
+    TS_ASSERT(alg3.isExecuted())
 
     PeaksWorkspace_sptr ws2;
     TS_ASSERT_THROWS_NOTHING(
         ws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(
-            AnalysisDataService::Instance().retrieve("peaks2")));
-    TS_ASSERT(ws2);
+            AnalysisDataService::Instance().retrieve("peaks2")))
+    TS_ASSERT(ws2)
     if (!ws2)
       return;
-    TS_ASSERT_EQUALS(ws2->getNumberPeaks(), 18);
+    TS_ASSERT_EQUALS(ws2->getNumberPeaks(), 18)
 
     Peak p = ws->getPeaks()[0];
     Peak p2 = ws2->getPeaks()[0];
-    TS_ASSERT_EQUALS(p.getRunNumber(), p2.getRunNumber());
-    TS_ASSERT_DELTA(p.getH(), p2.getH(), 1e-4);
-    TS_ASSERT_DELTA(p.getK(), p2.getK(), 1e-4);
-    TS_ASSERT_DELTA(p.getL(), p2.getL(), 1e-4);
-    TS_ASSERT_EQUALS(p.getIntMNP(), p2.getIntMNP());
-    TS_ASSERT_EQUALS(p.getBankName(), p2.getBankName());
-    TS_ASSERT_DELTA(p.getCol(), p2.getCol(), 1e-4);
-    TS_ASSERT_DELTA(p.getRow(), p2.getRow(), 1e-4);
-    TS_ASSERT_DELTA(p.getIntensity(), p2.getIntensity(), 0.01);
-    TS_ASSERT_DELTA(p.getSigmaIntensity(), p2.getSigmaIntensity(), 0.01);
-    TS_ASSERT_DELTA(p.getBinCount(), p2.getBinCount(), 1);
-    TS_ASSERT_DELTA(p.getWavelength(), p2.getWavelength(), 0.001);
-    TS_ASSERT_DELTA(p.getL1(), p2.getL1(), 1e-3);
-    TS_ASSERT_DELTA(p.getL2(), p2.getL2(), 1e-3);
-    TS_ASSERT_DELTA(p.getTOF(), p2.getTOF(),
-                    0.1); // channel number is about TOF
+    TS_ASSERT_EQUALS(p.getRunNumber(), p2.getRunNumber())
+    TS_ASSERT_DELTA(p.getH(), p2.getH(), 1e-4)
+    TS_ASSERT_DELTA(p.getK(), p2.getK(), 1e-4)
+    TS_ASSERT_DELTA(p.getL(), p2.getL(), 1e-4)
+    TS_ASSERT_EQUALS(p.getIntMNP(), p2.getIntMNP())
+    TS_ASSERT_EQUALS(p.getBankName(), p2.getBankName())
+    TS_ASSERT_DELTA(p.getCol(), p2.getCol(), 1e-4)
+    TS_ASSERT_DELTA(p.getRow(), p2.getRow(), 1e-4)
+    TS_ASSERT_DELTA(p.getIntensity(), p2.getIntensity(), 0.01)
+    TS_ASSERT_DELTA(p.getSigmaIntensity(), p2.getSigmaIntensity(), 0.01)
+    TS_ASSERT_DELTA(p.getBinCount(), p2.getBinCount(), 1)
+    TS_ASSERT_DELTA(p.getWavelength(), p2.getWavelength(), 0.001)
+    TS_ASSERT_DELTA(p.getL1(), p2.getL1(), 1e-3)
+    TS_ASSERT_DELTA(p.getL2(), p2.getL2(), 1e-3)
 
-    TS_ASSERT_DELTA(p.getDSpacing(), p2.getDSpacing(), 0.001);
+    // channel number is about TOF
+    TS_ASSERT_DELTA(p.getTOF(), p2.getTOF(), 0.1)
+    TS_ASSERT_DELTA(p.getDSpacing(), p2.getDSpacing(), 0.001)
   }
 };
 

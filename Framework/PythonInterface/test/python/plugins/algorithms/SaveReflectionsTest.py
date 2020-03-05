@@ -11,17 +11,24 @@ import shutil
 import numpy as np
 
 from mantid.api import FileFinder
-from mantid.simpleapi import SaveReflections, DeleteWorkspace, LoadEmptyInstrument, CreatePeaksWorkspace, SetUB, CreateEmptyTableWorkspace
+from mantid.kernel import V3D
+from mantid.simpleapi import (CloneWorkspace, CreatePeaksWorkspace, DeleteWorkspace,
+                              LoadEmptyInstrument, SetUB, SaveReflections)
 
 
 class SaveReflectionsTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls._test_dir = tempfile.mkdtemp()
+
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree(cls._test_dir)
 
     def setUp(self):
         self._workspace = self._create_peaks_workspace()
-        self._test_dir = tempfile.mkdtemp()
 
     def tearDown(self):
-        shutil.rmtree(self._test_dir)
         DeleteWorkspace(self._workspace)
 
     def _create_peaks_workspace(self):
@@ -34,7 +41,7 @@ class SaveReflectionsTest(unittest.TestCase):
 
         # Add a bunch of random peaks that happen to fall on the
         # detetor bank defined in the IDF
-        center_q = np.array([-5.1302,2.5651,3.71809])
+        center_q = np.array([-5.1302, 2.5651, 3.71809])
         qs = []
         for i in np.arange(0, 1, 0.1):
             for j in np.arange(-0.5, 0, 0.1):
@@ -55,44 +62,25 @@ class SaveReflectionsTest(unittest.TestCase):
         return ws
 
     def _create_modulated_peak_table(self):
-        hklm = np.ones((self._workspace.rowCount(), 2))
-        return self._create_indexed_workspace(self._workspace, 5, hklm)
+        # alternating pattern of (1,0),(0,-1) and a (0,0)
+        nrows = self._workspace.rowCount()
+        m1m2 = np.zeros((nrows, 2))
+        m1m2[::2, 0] = 1
+        m1m2[1::2, 1] = -1
+        m1m2[int(nrows / 2)] = [0, 0]
+        return self._create_indexed_workspace(self._workspace, m1m2)
 
-    def _create_indexed_workspace(self, fractional_peaks, ndim, hklm):
+    def _create_indexed_workspace(self, fractional_peaks, m1m2):
         # Create table with the number of columns we need
-        indexed = CreateEmptyTableWorkspace()
-        names = fractional_peaks.getColumnNames()
-        types = fractional_peaks.columnTypes()
+        modulated = CloneWorkspace(fractional_peaks)
+        lattice = modulated.sample().getOrientedLattice()
+        lattice.setModVec1(V3D(0.5, 0.0, 0.5))
+        lattice.setModVec2(V3D(0.333, 0.333, 0.))
+        for row, peak in enumerate(modulated):
+            row_indices = m1m2[row]
+            peak.setIntMNP(V3D(row_indices[0], row_indices[1], 0))
 
-        # Insert the extra columns for the addtional indicies
-        for i in range(ndim - 3):
-            names.insert(5 + i, 'm{}'.format(i + 1))
-            types.insert(5 + i, 'double')
-
-        names = np.array(names)
-        types = np.array(types)
-
-        # Create columns in the table workspace
-        for name, column_type in zip(names, types):
-            indexed.addColumn(column_type, name)
-
-        # Copy all columns from original workspace, ignoring HKLs
-        column_data = []
-        idx = np.arange(0, names.size)
-        hkl_mask = (idx < 5) | (idx > 4 + (ndim - 3))
-        for name in names[hkl_mask]:
-            column_data.append(fractional_peaks.column(name))
-
-        # Insert the addtional HKL columns into the data
-        for i, col in enumerate(hklm.T.tolist()):
-            column_data.insert(i + 2, col)
-
-        # Insert the columns into the table workspace
-        for i in range(fractional_peaks.rowCount()):
-            row = [column_data[j][i] for j in range(indexed.columnCount())]
-            indexed.addRow(row)
-
-        return indexed
+        return modulated
 
     def _get_reference_result(self, name):
         path = FileFinder.getFullPath(name)
@@ -110,7 +98,7 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(compare_file(reference_result, file_name))
+        self._assert_file_content_equal(reference_result, file_name)
 
     def test_save_fullprof_format_modulated(self):
         # Arrange
@@ -123,7 +111,7 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(compare_file(reference_result, file_name))
+        self._assert_file_content_equal(reference_result, file_name)
 
     def test_save_jana_format(self):
         # Arrange
@@ -135,9 +123,9 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(compare_file(reference_result, file_name))
+        self._assert_file_content_equal(reference_result, file_name)
 
-    def test_save_jana_format_modulated(self):
+    def test_save_jana_format_modulated_single_file(self):
         # Arrange
         workspace = self._create_modulated_peak_table()
         reference_result = self._get_reference_result("jana_format_modulated.hkl")
@@ -148,7 +136,39 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(compare_file(reference_result, file_name))
+        self._assert_file_content_equal(reference_result, file_name)
+
+    def test_save_jana_format_modulated_separate_files(self):
+        # Arrange
+        workspace = self._create_modulated_peak_table()
+        reference_results = [
+            self._get_reference_result("jana_format_modulated-m{}.hkl".format(i))
+            for i in range(1, 3)
+        ]
+        file_name = os.path.join(self._test_dir, "test_jana_modulated.hkl")
+        output_format = "Jana"
+        split_files = True
+
+        # Act
+        SaveReflections(InputWorkspace=workspace,
+                        Filename=file_name,
+                        Format=output_format,
+                        SplitFiles=split_files)
+
+        # Assert
+        self._assert_file_content_equal(reference_results[0],
+                                        os.path.join(self._test_dir, "test_jana_modulated-m1.hkl"))
+        self._assert_file_content_equal(reference_results[1],
+                                        os.path.join(self._test_dir, "test_jana_modulated-m2.hkl"))
+
+    def test_save_jana_with_no_lattice_information(self):
+        peaks = CloneWorkspace(self._workspace)
+        peaks.sample().clearOrientedLattice()
+        file_name = os.path.join(self._test_dir, "test_jana_no_lattice.hkl")
+
+        # Act
+        SaveReflections(InputWorkspace=peaks, Filename=file_name,
+                        Format="Jana", SplitFiles=False)
 
     def test_save_GSAS_format(self):
         # Arrange
@@ -160,7 +180,7 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(compare_file(reference_result, file_name))
+        self._assert_file_content_equal(reference_result, file_name)
 
     def test_save_GSAS_format_modulated(self):
         # Arrange
@@ -169,7 +189,11 @@ class SaveReflectionsTest(unittest.TestCase):
         output_format = "GSAS"
 
         # Act
-        self.assertRaises(RuntimeError, SaveReflections, InputWorkspace=workspace, Filename=file_name, Format=output_format)
+        self.assertRaises(RuntimeError,
+                          SaveReflections,
+                          InputWorkspace=workspace,
+                          Filename=file_name,
+                          Format=output_format)
 
     def test_save_SHELX_format(self):
         # Arrange
@@ -181,7 +205,7 @@ class SaveReflectionsTest(unittest.TestCase):
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
 
         # Assert
-        self.assertTrue(compare_file(reference_result, file_name))
+        self._assert_file_content_equal(reference_result, file_name)
 
     def test_save_SHELX_format_modulated(self):
         # Arrange
@@ -190,7 +214,11 @@ class SaveReflectionsTest(unittest.TestCase):
         output_format = "SHELX"
 
         # Act
-        self.assertRaises(RuntimeError, SaveReflections, InputWorkspace=workspace, Filename=file_name, Format=output_format)
+        self.assertRaises(RuntimeError,
+                          SaveReflections,
+                          InputWorkspace=workspace,
+                          Filename=file_name,
+                          Format=output_format)
 
     def test_save_invalid_format(self):
         # Arrange
@@ -198,21 +226,20 @@ class SaveReflectionsTest(unittest.TestCase):
         output_format = "InvalidFormatName"
 
         # Act
-        self.assertRaises(ValueError, SaveReflections, InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
+        self.assertRaises(ValueError,
+                          SaveReflections,
+                          InputWorkspace=self._workspace,
+                          Filename=file_name,
+                          Format=output_format)
 
-
-def compare_file(reference_result, file_name):
-    with open(reference_result, 'r') as ref_file:
+    # Private api
+    def _assert_file_content_equal(self, reference_result, file_name):
+        with open(reference_result, 'r') as ref_file:
+            reference = ref_file.read()
         with open(file_name, 'r') as actual_file:
-            ref_lines = ref_file.readlines()
-            actual_lines = actual_file.readlines()
-            ref_lines = map(lambda x: x.strip(), ref_lines)
-            actual_lines = map(lambda x: x.strip(), actual_lines)
-            for ref_line, actual_line in zip(ref_lines, actual_lines):
-                if ref_line != actual_line:
-                    return False
-
-    return True
+            actual = actual_file.read()
+            self.maxDiff = 10000
+        self.assertMultiLineEqual(reference, actual)
 
 
 if __name__ == '__main__':

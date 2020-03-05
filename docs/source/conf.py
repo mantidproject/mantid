@@ -22,7 +22,10 @@ if LooseVersion(sphinx_version) > LooseVersion("1.6"):
     def setup(app):
         """Called automatically by Sphinx when starting the build process
         """
-        app.add_stylesheet("custom.css")
+        if hasattr(app, 'add_css_file'):  # >=v1.8
+            app.add_css_file("custom.css")
+        else:
+            app.add_stylesheet("custom.css")  # v1.6-1.8
 
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -131,6 +134,7 @@ pngmath_use_preview = True
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
+qthelp_theme = 'bootstrap'
 html_theme = 'bootstrap'
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -208,11 +212,12 @@ exec(compile(open(html_theme_cfg).read(), html_theme_cfg, 'exec'))
 # -- Link to other projects ----------------------------------------------------
 
 intersphinx_mapping = {
-    'h5py': ('http://docs.h5py.org/en/latest/', None),
-    'matplotlib': ('http://matplotlib.org', None),
+    'h5py': ('https://h5py.readthedocs.io/en/stable/', None),
+    'matplotlib': ('https://matplotlib.org', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
     'python': ('https://docs.python.org/3/', None),
-    'SciPy': ('http://docs.scipy.org/doc/scipy/reference', None),
-    'pandas': ('http://pandas.pydata.org/pandas-docs/stable', None),
-    'pystog': ('https://pystog.readthedocs.io/en/latest/', None)
+    'SciPy': ('https://docs.scipy.org/doc/scipy/reference', None),
+    'pandas': ('https://pandas.pydata.org/pandas-docs/stable', None),
+    'pystog': ('https://pystog.readthedocs.io/en/latest/', None),
+    'mantid-dev':('https://developer.mantidproject.org/', None)
 }

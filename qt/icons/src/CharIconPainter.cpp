@@ -12,6 +12,11 @@
 namespace MantidQt {
 namespace Icons {
 
+namespace {
+const QString DEFAULT_COLOR("black");
+const QString DEFAULT_DEACTIVATED_COLOR("#c7c7c7");
+} // namespace
+
 void CharIconPainter::paint(IconicFont *iconic, QPainter *painter, QRect rect,
                             QIcon::Mode mode, QIcon::State state,
                             QList<QHash<QString, QVariant>> &options) {
@@ -28,8 +33,8 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter,
   // down this far. This is because they can be used for defining variable
   // changes based on state of the buttons/QObject that the Icon is present in.
   // Since we currently don't use this feature availible with QIcon they have
-  // not yet been implemented.
-  UNUSED_ARG(mode);
+  // not yet been implemented. Mode has now been implemented however it will
+  // only ever be gray in it's current mode when disabled.
   UNUSED_ARG(state);
 
   painter->save();
@@ -41,9 +46,11 @@ void CharIconPainter::paintIcon(IconicFont *iconic, QPainter *painter,
       iconic->findCharacterFromCharMap(prefix, charecterOption);
 
   // Set some defaults so it doesn't fail later if nothing was set
-  QString color("black");
+  QString color(DEFAULT_COLOR);
   double scaleFactor(1.0);
-  if (colorVariant.canConvert<QString>()) {
+  if (mode == QIcon::Mode::Disabled) {
+    color = DEFAULT_DEACTIVATED_COLOR; // gray
+  } else if (colorVariant.canConvert<QString>()) {
     color = colorVariant.toString();
   }
   if (scaleVariant.canConvert<double>()) {

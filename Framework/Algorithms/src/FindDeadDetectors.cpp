@@ -88,7 +88,7 @@ void FindDeadDetectors::exec() {
   // iterate over the data values setting the live and dead values
   g_log.information() << "Marking dead detectors\n";
   const int64_t numSpec = integratedWorkspace->getNumberHistograms();
-  const double numSpec_d = static_cast<double>(numSpec);
+  const auto numSpec_d = static_cast<double>(numSpec);
   int64_t iprogress_step = numSpec / 100;
   if (iprogress_step == 0)
     iprogress_step = 1;
@@ -108,7 +108,7 @@ void FindDeadDetectors::exec() {
         file << " " << id;
         // we could write dead detectors to the log but if they are viewing the
         // log in the MantidPlot viewer it will crash MantidPlot
-        deadDets.push_back(id);
+        deadDets.emplace_back(id);
         ++countDets;
       }
       file << '\n';

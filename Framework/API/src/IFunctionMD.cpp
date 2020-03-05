@@ -78,7 +78,7 @@ void IFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws) {
  */
 void IFunctionMD::function(const FunctionDomain &domain,
                            FunctionValues &values) const {
-  const FunctionDomainMD *dmd = dynamic_cast<const FunctionDomainMD *>(&domain);
+  const auto *dmd = dynamic_cast<const FunctionDomainMD *>(&domain);
   if (!dmd) {
     throw std::invalid_argument("Unexpected domain in IFunctionMD");
   }

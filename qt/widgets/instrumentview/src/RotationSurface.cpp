@@ -260,7 +260,7 @@ void RotationSurface::findAndCorrectUGap() {
   if (bin_width == 0.0) {
     QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
     QMessageBox::warning(
-        nullptr, tr("MantidPlot - Instrument view warning"),
+        nullptr, tr("Mantid - Instrument view warning"),
         tr("Rotation surface: failed to build unwrapped surface"));
     QApplication::restoreOverrideCursor();
     m_u_min = 0.0;

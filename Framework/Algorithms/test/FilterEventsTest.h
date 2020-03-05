@@ -254,6 +254,26 @@ public:
                      Types::Core::DateAndTime(20465000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(6), 0);
 
+    // verify the log: duration
+    std::string duration0str =
+        filteredws0->run().getProperty("duration")->value();
+    double duration0 = std::stod(duration0str);
+    TS_ASSERT_DELTA(duration0, 35000000 * 1.E-9, 1.E-9);
+
+    std::string duration1str =
+        filteredws1->run().getProperty("duration")->value();
+    double duration1 = std::stod(duration1str);
+    TS_ASSERT_DELTA(duration1, (20195000000 - 20035000000) * 1.E-9, 1.E-9);
+
+    std::string duration2str =
+        filteredws2->run().getProperty("duration")->value();
+    double duration2 = std::stod(duration2str);
+    TS_ASSERT_DELTA(duration2,
+                    (20265000000 - 20200000000 + 20365000000 - 20300000000 +
+                     20465000000 - 20400000000) *
+                        1.E-9,
+                    1.E-9);
+
     // Clean up
     AnalysisDataService::Instance().remove("Test02");
     AnalysisDataService::Instance().remove("Splitter02");
@@ -1017,8 +1037,8 @@ public:
     filter.setProperty("OutputWorkspaceIndexedFrom1", true);
 
     std::vector<std::string> prop_vec;
-    prop_vec.push_back("LogB");
-    prop_vec.push_back("slow_int_log");
+    prop_vec.emplace_back("LogB");
+    prop_vec.emplace_back("slow_int_log");
     filter.setProperty("TimeSeriesPropertyLogs", prop_vec);
     filter.setProperty("ExcludeSpecifiedLogs", true);
 
@@ -1046,6 +1066,7 @@ public:
       // a new TSP splitter is added by FilterEvents. So there will be exactly
       // same number, but some different, sample logs in the input and output
       // workspaces
+
       TS_ASSERT_EQUALS(num_original_logs,
                        childworkspace->run().getProperties().size());
     }
@@ -1324,6 +1345,8 @@ public:
     eventWS->mutableRun().addProperty(
         new Kernel::PropertyWithValue<std::string>("Title",
                                                    "Testing EventWorkspace"));
+    eventWS->mutableRun().addProperty(
+        new Kernel::PropertyWithValue<double>("duration", 1000.));
 
     // add an integer slow log
     auto int_tsp =
@@ -1543,23 +1566,23 @@ public:
     std::vector<int64_t> time_vec;
     std::vector<int> index_vec;
 
-    time_vec.push_back(runstart_i64);
+    time_vec.emplace_back(runstart_i64);
 
     // Splitter 0: 0 ~ 3+ (first pulse)
     int64_t t1 = runstart_i64 + tofdt * 3 + tofdt / 2;
-    time_vec.push_back(t1);
-    index_vec.push_back(0);
+    time_vec.emplace_back(t1);
+    index_vec.emplace_back(0);
 
     // Splitter 1: 3+ ~ 9+ (second pulse)
     int64_t t2 = runstart_i64 + pulsedt + tofdt * 9 + tofdt / 2;
-    time_vec.push_back(t2);
-    index_vec.push_back(1);
+    time_vec.emplace_back(t2);
+    index_vec.emplace_back(1);
 
     // Splitter 2 and so on: from 3rd pulse, 0 ~ 6+
     for (size_t i = 2; i < 5; i++) {
       int64_t newT = runstart_i64 + i * pulsedt + 6 * tofdt + tofdt / 2;
-      time_vec.push_back(newT);
-      index_vec.push_back(2);
+      time_vec.emplace_back(newT);
+      index_vec.emplace_back(2);
     }
 
     // Create the workspace and set it

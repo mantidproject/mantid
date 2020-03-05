@@ -9,6 +9,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
+#include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <vector>
@@ -53,6 +54,7 @@ public:
   virtual int getName() const = 0;
 
   virtual int interceptSurface(Geometry::Track &) const = 0;
+  virtual double distance(const Geometry::Track &) const = 0;
   // Solid angle
   virtual double solidAngle(const Kernel::V3D &observer) const = 0;
   // Solid angle with a scaling of the object
@@ -68,10 +70,11 @@ public:
   virtual double volume() const = 0;
 
   virtual int getPointInObject(Kernel::V3D &point) const = 0;
-  virtual Kernel::V3D
+
+  virtual boost::optional<Kernel::V3D>
   generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                         const size_t) const = 0;
-  virtual Kernel::V3D
+  virtual boost::optional<Kernel::V3D>
   generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                         const BoundingBox &activeRegion,
                         const size_t) const = 0;
@@ -87,7 +90,9 @@ public:
   virtual void initDraw() const = 0;
 
   virtual const Kernel::Material &material() const = 0;
+  virtual void setMaterial(const Kernel::Material &material) = 0;
   virtual const std::string &id() const = 0;
+  virtual void setID(const std::string &id) = 0;
 
   virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() const = 0;
 };

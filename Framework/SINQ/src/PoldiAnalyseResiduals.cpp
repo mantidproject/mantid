@@ -123,7 +123,7 @@ void PoldiAnalyseResiduals::normalizeResiduals(
     DataObjects::Workspace2D_sptr &residuals,
     const std::vector<int> &validWorkspaceIndices) {
   double sumOfResiduals = sumCounts(residuals, validWorkspaceIndices);
-  double dataPointCount =
+  auto dataPointCount =
       static_cast<double>(numberOfPoints(residuals, validWorkspaceIndices));
 
   addValue(residuals, -sumOfResiduals / dataPointCount, validWorkspaceIndices);

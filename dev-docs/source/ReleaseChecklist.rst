@@ -67,11 +67,14 @@ Unscripted and Final Testing (technical tasks)
 *  Run
    `open-release-testing <http://builds.mantidproject.org/view/All/job/open-release-testing/>`__
    to create the release branch and prepare build jobs
-*  Enable and update the release branch name for
-   `merge\_release\_into\_master <http://builds.mantidproject.org/view/All/job/merge_release_into_master/>`__
-*  Check state of all open pull requests for this milestone and update
-   the base branch to the new release branch accordingly.
-*  Create a skeleton set of release notes for the next version using the `python helper tool <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_
+*  Check state of all open pull requests for this milestone and decide which should be kept for the release, liase with PM on this. Move any pull requests not targeted for release out of the milestone and run `update-pr-base-branch.py <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__ to update the base branches of those pull requests.
+*  Inform other developers that release-next has been created by adapting/posting the following announcement:
+
+  .. code
+  
+  The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/master-branch workflow before then please take a moment to familiarise yourself with the process: http://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as master.
+
+*  Create a skeleton set of release notes for the next version using the `python helper tool <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_ and open a pull request to put them on ``master``.
 *  Perform unscripted testing following the instructions described
    `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
 
@@ -142,29 +145,34 @@ Once the unscripted testing has passed:
   uncomment ``VERSION_PATCH`` and set it to ``0``.
 * Merge ``release-next`` branch back to ``master``
 * Comment out patch number on ``master`` branch
+* Hit build on `release kit
+  builds <http://builds.mantidproject.org/view/Release%20Pipeline/>`__
+  and set the ``PACKAGE_SUFFIX`` parameter to an empty string
 * Draft a `new
   release <https://github.com/mantidproject/mantid/releases>`__ on
   GitHub. The new tag should be created based of the release branch in
   the form ``vX.Y.Z``
-* Hit build on `release kit
-  builds <http://builds.mantidproject.org/view/Release%20Pipeline/>`__
-  and set the ``PACKAGE_SUFFIX`` parameter to an empty string
-* After all of the packages have been smoke tested build the
-  ``release_deploy`` job to put the packages (not windows) on
-  Sourceforge.
+* After all of the packages have been smoke tested run the
+  `release_deploy <https://builds.mantidproject.org/view/Release%20Pipeline/job/release_deploy/>`__
+  job to put the packages, with the exception of Windows, on Sourceforge.
+  
+  * Have someone at ISIS signs the Windows binary and upload this
+    manually to Sourceforge
+  
+  * Set the default package for each OS to the new version using the information icon
+    next to the file list on Sourceforge
+
+* Upload packages to the GitHub release (essentially for a backup). 
+* Publish the GitHub release. This will create the tag required to generate the DOI.
+* Update the `download <http://download.mantidproject.org>`__ page,
+  following the instructions
+  `here <https://github.com/mantidproject/download.mantidproject.org>`__. Once the new
+  file in the `releases` directory is pushed Jenkins will publish the new page.
+* Publish the draft release on GitHub (this will create the tag too).
 * Kick off the build for ``mantidXY`` on RHEL7 for SNS:
   http://builds.mantidproject.org/job/release_clean-rhel7/ with suffix
   ``XY``
-* Make sure someone at ISIS signs the Windows binary and uploads this
-  manually to Sourceforge
-* Set the default package for each OS to the new version
-* Upload packages to GitHub once they are ready and have been checked
-* Publish the page
-* Update the `download <http://download.mantidproject.org>`__ page,
-  following the instructions
-  `here <https://github.com/mantidproject/download.mantidproject.org>`__
-* Publish the draft release on GitHub (this will create the tag too).
-* Clear any error reports from https://errorreports.mantidproject.org for the new version.
+* **ISIS**: If in cycle add a calendar reminder for when the current cycle ends for mantid to be updated on IDAaaS and cabin PCs. If out of cycle do this immediately.
 
 Finalise
 ========
@@ -172,7 +180,6 @@ Finalise
 * Send an email, including the text of the release notes, to the
   following lists
 * ``mantid-announce@mantidproject.org``
-* ``mantid-developers@mantidproject.org``
 * ``nobugs@nobugsconference.org``
 * ``news@neutronsources.org``
 * ``neutron@neutronsources.org``
@@ -198,7 +205,7 @@ created on GitHub.
 
 * Major/minor/patch version numbers must be supplied, as well as a
   username which can be found in the `Protected
-  Information <http://www.mantidproject.org/Protected_Information>`__
+  Information <https://www.mantidproject.org/Protected_Information>`__
   section. The script will prompt for the password. Note that only
   MediaWiki admins have access rights to the page.
 * A corresponding version tag must be present in the Mantid repo.

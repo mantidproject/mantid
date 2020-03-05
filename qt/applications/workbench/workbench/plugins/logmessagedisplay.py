@@ -9,16 +9,13 @@
 #
 from __future__ import (absolute_import, unicode_literals)
 
-# std imports
 import sys
 
-# 3rdparty imports
-from mantidqt.utils.writetosignal import WriteToSignal
-from mantidqt.utils.qt import toQSettings
-from mantidqt.widgets.messagedisplay import MessageDisplay
 from qtpy.QtWidgets import QHBoxLayout
 
-# local imports
+from mantidqt.utils.qt import toQSettings
+from mantidqt.utils.writetosignal import WriteToSignal
+from mantidqt.widgets.messagedisplay import MessageDisplay
 from ..config.fonts import text_font
 from ..plugins.base import PluginWidget
 
@@ -42,12 +39,21 @@ class LogMessageDisplay(PluginWidget):
 
         # output capture
         self.stdout = WriteToSignal(ORIGINAL_STDOUT)
-        self.stdout.sig_write_received.connect(self.display.appendNotice)
+        self.stdout.sig_write_received.connect(self.display.append_script_notice)
         self.stderr = WriteToSignal(ORIGINAL_STDERR)
-        self.stderr.sig_write_received.connect(self.display.appendError)
+        self.stderr.sig_write_received.connect(self.display.append_script_error)
 
     def get_plugin_title(self):
         return "Messages"
+
+    def current_tab_changed(self, script_path):
+        self.display.current_tab_changed(script_path)
+
+    def script_executing(self, script_path):
+        self.display.script_executing(script_path)
+
+    def file_name_modified(self, old_file_name, new_file_name):
+        self.display.file_name_modified(old_file_name, new_file_name)
 
     def readSettings(self, settings):
         self.display.readSettings(toQSettings(settings))

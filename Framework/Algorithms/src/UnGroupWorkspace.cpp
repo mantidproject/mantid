@@ -59,7 +59,6 @@ void UnGroupWorkspace::exec() {
   if (!wsGrpSptr) {
     throw std::runtime_error("Selected Workspace is not a WorkspaceGroup");
   }
-
   // Notify observers that a WorkspaceGroup is about to be unrolled
   data_store.notificationCenter.postNotification(
       new Mantid::API::WorkspaceUnGroupingNotification(inputws, wsSptr));

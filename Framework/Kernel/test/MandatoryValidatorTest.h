@@ -65,7 +65,7 @@ public:
     TS_ASSERT(ivec.empty())
     TS_ASSERT_EQUALS(i.isValid(ivec),
                      "A value must be entered for this parameter")
-    ivec.push_back(1);
+    ivec.emplace_back(1);
     TS_ASSERT_EQUALS(i.isValid(ivec), "")
 
     MandatoryValidator<std::vector<double>> d;
@@ -73,7 +73,7 @@ public:
     TS_ASSERT(dvec.empty())
     TS_ASSERT_EQUALS(d.isValid(dvec),
                      "A value must be entered for this parameter")
-    dvec.push_back(1.1);
+    dvec.emplace_back(1.1);
     TS_ASSERT_EQUALS(d.isValid(dvec), "")
 
     MandatoryValidator<std::vector<std::string>> s;

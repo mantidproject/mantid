@@ -7,12 +7,13 @@
 import unittest
 
 from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import GuiTest
+from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.list_selector.list_selector_presenter import ListSelectorPresenter
 
 
-class TestListSelectorPresenter(GuiTest):
+@start_qapplication
+class TestListSelectorPresenter(unittest.TestCase):
     def setUp(self):
         self.view = mock.MagicMock()
         self.model = {

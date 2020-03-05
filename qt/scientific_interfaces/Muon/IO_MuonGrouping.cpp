@@ -20,7 +20,6 @@
 #include <Poco/DOM/Text.h>
 #include <Poco/XML/XMLWriter.h>
 
-#include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <fstream>
 
@@ -254,7 +253,7 @@ std::vector<int> MuonGroupingHelper::whichGroupToWhichRow() const {
       continue;
     }
 
-    groupToRow.push_back(i);
+    groupToRow.emplace_back(i);
   }
   return groupToRow;
 }
@@ -293,7 +292,7 @@ std::vector<int> MuonGroupingHelper::whichPairToWhichRow() const {
     if (qwF->count() < 2 || qwB->count() < 2)
       continue;
 
-    pairToRow.push_back(i);
+    pairToRow.emplace_back(i);
   }
   return pairToRow;
 }

@@ -94,8 +94,8 @@ public:
     UncertainValue pair1(3.0, 2.0);
 
     std::vector<UncertainValue> goodList;
-    goodList.push_back(pair0);
-    goodList.push_back(pair1);
+    goodList.emplace_back(pair0);
+    goodList.emplace_back(pair1);
 
     TS_ASSERT_EQUALS(core.reduceChopperSlitList(goodList, 1.0), 3.0625);
   }

@@ -82,11 +82,11 @@ API::CatalogSession_sptr ICat4Catalog::login(const std::string &username,
   // Setting the username and pass credentials to the login class.
   entry.key = &usernameKey;
   entry.value = &userName;
-  entries.push_back(entry);
+  entries.emplace_back(entry);
 
   entry.key = &passwordKey;
   entry.value = &passWord;
-  entries.push_back(entry);
+  entries.emplace_back(entry);
 
   int result = icat.login(&login, &loginResponse);
 
@@ -361,8 +361,7 @@ void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType *> response,
   std::vector<xsd__anyType *>::const_iterator iter;
   for (iter = response.begin(); iter != response.end(); ++iter) {
     // Cast from xsd__anyType to subclass (xsd__string).
-    ns1__investigation *investigation =
-        dynamic_cast<ns1__investigation *>(*iter);
+    auto *investigation = dynamic_cast<ns1__investigation *>(*iter);
     if (investigation) {
       API::TableRow table = outputws->appendRow();
       // Used to insert an empty string into the cell if value does not exist.
@@ -450,7 +449,7 @@ void ICat4Catalog::saveDataSets(std::vector<xsd__anyType *> response,
 
   std::string emptyCell;
   for (auto &iter : response) {
-    ns1__dataset *dataset = dynamic_cast<ns1__dataset *>(iter);
+    auto *dataset = dynamic_cast<ns1__dataset *>(iter);
     if (dataset) {
       API::TableRow table = outputws->appendRow();
 
@@ -517,7 +516,7 @@ void ICat4Catalog::saveDataFiles(std::vector<xsd__anyType *> response,
 
   std::vector<xsd__anyType *>::const_iterator iter;
   for (iter = response.begin(); iter != response.end(); ++iter) {
-    ns1__datafile *datafile = dynamic_cast<ns1__datafile *>(*iter);
+    auto *datafile = dynamic_cast<ns1__datafile *>(*iter);
     if (datafile) {
       API::TableRow table = outputws->appendRow();
       // Now add the relevant investigation data to the table.
@@ -558,7 +557,7 @@ void ICat4Catalog::listInstruments(std::vector<std::string> &instruments) {
   for (auto &searchResult : searchResults) {
     auto instrument = dynamic_cast<xsd__string *>(searchResult);
     if (instrument)
-      instruments.push_back(instrument->__item);
+      instruments.emplace_back(instrument->__item);
   }
 }
 
@@ -577,7 +576,7 @@ void ICat4Catalog::listInvestigationTypes(
   for (auto &searchResult : searchResults) {
     auto investigationType = dynamic_cast<xsd__string *>(searchResult);
     if (investigationType)
-      invstTypes.push_back(investigationType->__item);
+      invstTypes.emplace_back(investigationType->__item);
   }
 }
 

@@ -10,12 +10,10 @@ from qtpy import QtWidgets
 
 from collections import OrderedDict
 
-
 from Muon.GUI.Common.checkbox import Checkbox
 
 
 class DetectorsView(QtWidgets.QWidget):
-
     def __init__(self, parent=None):
         super(DetectorsView, self).__init__(parent)
 
@@ -35,3 +33,9 @@ class DetectorsView(QtWidgets.QWidget):
         self.widgets[name].blockSignals(True)
         self.widgets[name].setChecked(state)
         self.widgets[name].blockSignals(False)
+
+    def enableDetector(self, name):
+        self.widgets[name].setEnabled(True)
+
+    def disableDetector(self, name):
+        self.widgets[name].setEnabled(False)

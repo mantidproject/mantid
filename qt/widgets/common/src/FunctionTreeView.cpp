@@ -103,7 +103,7 @@ void FunctionTreeView::createBrowser() {
   m_attributeBoolManager = new QtBoolPropertyManager(this);
   m_indexManager = new QtStringPropertyManager(this);
   m_tieManager = new QtStringPropertyManager(this);
-  m_constraintManager = new QtStringPropertyManager(this);
+  m_constraintManager = new QtDoublePropertyManager(this);
   m_filenameManager = new QtStringPropertyManager(this);
   m_formulaManager = new QtStringPropertyManager(this);
   m_workspaceManager = new QtStringPropertyManager(this);
@@ -151,7 +151,7 @@ void FunctionTreeView::createBrowser() {
   m_browser->setFactoryForManager(m_attributeBoolManager, checkBoxFactory);
   m_browser->setFactoryForManager(m_indexManager, lineEditFactory);
   m_browser->setFactoryForManager(m_tieManager, lineEditFactory);
-  m_browser->setFactoryForManager(m_constraintManager, lineEditFactory);
+  m_browser->setFactoryForManager(m_constraintManager, doubleEditorFactory);
   m_browser->setFactoryForManager(m_filenameManager,
                                   filenameDialogEditorFactory);
   m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
@@ -251,7 +251,7 @@ void FunctionTreeView::createActions() {
   connect(m_actionRemoveConstraint, SIGNAL(triggered()), this,
           SLOT(removeConstraint()));
 
-  setErrorsEnabled(true);
+  setErrorsEnabled(false);
 }
 
 /**
@@ -268,7 +268,9 @@ void FunctionTreeView::clear() {
  */
 void FunctionTreeView::setFunction(Mantid::API::IFunction_sptr fun) {
   clear();
-  addFunction(nullptr, fun);
+  if (fun) {
+    addFunction(nullptr, fun);
+  }
 }
 
 /**
@@ -414,10 +416,12 @@ void FunctionTreeView::setFunction(QtProperty *prop,
 /**
  * Add a function.
  * @param prop :: Property of the parent composite function or NULL
- * @param fun :: FunctionFactory function creation string
+ * @param fun :: A function to add
  */
-void FunctionTreeView::addFunction(QtProperty *prop,
+bool FunctionTreeView::addFunction(QtProperty *prop,
                                    Mantid::API::IFunction_sptr fun) {
+  if (!fun)
+    return false;
   if (!prop) {
     AProperty ap =
         addFunctionProperty(nullptr, QString::fromStdString(fun->name()));
@@ -425,17 +429,24 @@ void FunctionTreeView::addFunction(QtProperty *prop,
   } else {
     Mantid::API::IFunction_sptr parentFun = getFunction(prop);
     if (!parentFun)
-      return;
+      return false;
     auto cf =
         boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(parentFun);
     if (!cf) {
-      throw std::runtime_error(
+      throw std::logic_error(
           "FunctionTreeView: CompositeFunction is expected for addFunction");
     }
-    cf->addFunction(fun);
+    try {
+      cf->addFunction(fun);
+    } catch (const std::exception &e) {
+      QMessageBox::warning(this, "Mantid - Warning",
+                           QString("Cannot Add function:\n\n%1").arg(e.what()));
+      return false;
+    }
     setFunction(prop, cf);
   }
   updateFunctionIndices();
+  return true;
 }
 
 /**
@@ -969,72 +980,34 @@ FunctionTreeView::addConstraintProperties(QtProperty *prop,
                                           QString constraint) {
   if (!isParameter(prop))
     return QList<FunctionTreeView::AProperty>();
-  QString lowerBoundStr = "";
-  QString upperBoundStr = "";
-  Mantid::API::Expression expr;
-  expr.parse(constraint.toStdString());
-  if (expr.name() != "==")
+  auto const parts = splitConstraintString(constraint);
+  if (parts.first.isEmpty())
     return QList<FunctionTreeView::AProperty>();
-  if (expr.size() == 3) { // lower < param < upper
-    try {
-      // check that the first and third terms are numbers
-      double d1 = boost::lexical_cast<double>(expr[0].name());
-      (void)d1;
-      double d2 = boost::lexical_cast<double>(expr[2].name());
-      (void)d2;
-      if (expr[1].operator_name() == "<" && expr[2].operator_name() == "<") {
-        lowerBoundStr = QString::fromStdString(expr[0].name());
-        upperBoundStr = QString::fromStdString(expr[2].name());
-      } else // assume that the operators are ">"
-      {
-        lowerBoundStr = QString::fromStdString(expr[2].name());
-        upperBoundStr = QString::fromStdString(expr[0].name());
-      }
-    } catch (...) { // error in constraint
-      return QList<FunctionTreeView::AProperty>();
-    }
-  } else if (expr.size() == 2) { // lower < param or param > lower etc
-    size_t paramPos = 0;
-    try // find position of the parameter name in expression
-    {
-      double d = boost::lexical_cast<double>(expr[1].name());
-      (void)d;
-    } catch (...) {
-      paramPos = 1;
-    }
-    std::string op = expr[1].operator_name();
-    if (paramPos == 0) { // parameter goes first
-      if (op == "<") {   // param < number
-        upperBoundStr = QString::fromStdString(expr[1].name());
-      } else { // param > number
-        lowerBoundStr = QString::fromStdString(expr[1].name());
-      }
-    } else {           // parameter is second
-      if (op == "<") { // number < param
-        lowerBoundStr = QString::fromStdString(expr[0].name());
-      } else { // number > param
-        upperBoundStr = QString::fromStdString(expr[0].name());
-      }
-    }
-  }
+  auto lowerBound = parts.second.first;
+  auto upperBound = parts.second.second;
 
   // add properties
   QList<FunctionTreeView::AProperty> plist;
   AConstraint ac;
   ac.paramProp = prop;
   ac.lower = ac.upper = nullptr;
-  if (!lowerBoundStr.isEmpty()) {
-    auto ap = addProperty(prop, m_constraintManager->addProperty("LowerBound"));
-    plist << ap;
-    ac.lower = ap.prop;
-    m_constraintManager->setValue(ac.lower, lowerBoundStr);
+
+  if (!lowerBound.isEmpty()) {
+    auto apLower =
+        addProperty(prop, m_constraintManager->addProperty("LowerBound"));
+    plist << apLower;
+    ac.lower = apLower.prop;
+    m_constraintManager->setValue(ac.lower, lowerBound.toDouble());
   }
-  if (!upperBoundStr.isEmpty()) {
-    auto ap = addProperty(prop, m_constraintManager->addProperty("UpperBound"));
-    plist << ap;
-    ac.upper = ap.prop;
-    m_constraintManager->setValue(ac.upper, upperBoundStr);
+
+  if (!upperBound.isEmpty()) {
+    auto apUpper =
+        addProperty(prop, m_constraintManager->addProperty("UpperBound"));
+    plist << apUpper;
+    ac.upper = apUpper.prop;
+    m_constraintManager->setValue(ac.upper, upperBound.toDouble());
   }
+
   if (ac.lower || ac.upper) {
     m_constraints.insert(m_properties[prop].parent, ac);
   }
@@ -1098,16 +1071,17 @@ bool FunctionTreeView::hasUpperBound(QtProperty *prop) const {
 
 /// Get a constraint string
 QString FunctionTreeView::getConstraint(const QString &paramName,
-                                        const QString &lowerBound,
-                                        const QString &upperBound) const {
+                                        const double &lowerBound,
+                                        const double &upperBound) const {
+
   QString constraint;
-  if (!lowerBound.isEmpty()) {
-    constraint += lowerBound + "<";
-  }
+  if (lowerBound != Mantid::EMPTY_DBL())
+    constraint += QString::number(lowerBound) + "<";
+
   constraint += paramName;
-  if (!upperBound.isEmpty()) {
-    constraint += "<" + upperBound;
-  }
+  if (upperBound != Mantid::EMPTY_DBL())
+    constraint += "<" + QString::number(upperBound);
+
   return constraint;
 }
 
@@ -1203,6 +1177,7 @@ void FunctionTreeView::addFunctionBegin() {
     connect(m_selectFunctionDialog, SIGNAL(finished(int)), this,
             SLOT(addFunctionEnd(int)));
   }
+  m_selectFunctionDialog->clearSearchBoxText();
   m_selectedFunctionProperty = prop;
   m_selectFunctionDialog->open();
 }
@@ -1227,7 +1202,9 @@ void FunctionTreeView::addFunctionEnd(int result) {
             prop->propertyName().toStdString());
     auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
     if (cf) {
-      addFunction(prop, f);
+      auto const isAdded = addFunction(prop, f);
+      if (!isAdded)
+        return;
     } else {
       cf.reset(new Mantid::API::CompositeFunction);
       auto f0 = getFunction(prop);
@@ -1238,7 +1215,9 @@ void FunctionTreeView::addFunctionEnd(int result) {
       setFunction(cf);
     }
   } else { // the browser is empty - add first function
-    addFunction(nullptr, f);
+    auto const isAdded = addFunction(nullptr, f);
+    if (!isAdded)
+      return;
   }
   emit functionAdded(QString::fromStdString(f->asString()));
 }
@@ -1364,6 +1343,7 @@ Mantid::API::IFunction_sptr FunctionTreeView::getFunction(QtProperty *prop,
  */
 void FunctionTreeView::setParameter(const QString &paramName, double value) {
   auto prop = getParameterProperty(paramName);
+  ScopedFalse _false(m_emitParameterValueChange);
   m_parameterManager->setValue(prop, value);
 }
 
@@ -1372,7 +1352,8 @@ void FunctionTreeView::setParameter(const QString &paramName, double value) {
  * @param paramName :: Parameter name
  * @param error :: New error
  */
-void FunctionTreeView::setParamError(const QString &paramName, double error) {
+void FunctionTreeView::setParameterError(const QString &paramName,
+                                         double error) {
   QString index, name;
   std::tie(index, name) = splitParameterName(paramName);
   if (auto prop = getFunctionProperty(index)) {
@@ -1470,7 +1451,7 @@ void FunctionTreeView::removeFunction() {
       // which means more than two subproperties
       size_t nFunctions = props[0]->subProperties().size() - 1;
 
-      if (nFunctions == 1) {
+      if (nFunctions == 1 && cf->name() == "CompositeFunction") {
         // If only one function remains, remove the composite function:
         // Temporary copy the remaining function
         auto func = getFunction(m_browser->properties()[0]->subProperties()[1]);
@@ -1638,6 +1619,15 @@ void FunctionTreeView::addConstraints50() {
   emit parameterConstraintAdded(functionIndex, constraint);
 }
 
+void FunctionTreeView::removeConstraintsQuiet(QtProperty *prop) {
+  auto props = prop->subProperties();
+  foreach (QtProperty *p, props) {
+    if (isConstraint(p)) {
+      removeProperty(p);
+    }
+  }
+}
+
 /**
  * Remove both constraints from current parameter
  */
@@ -1648,13 +1638,7 @@ void FunctionTreeView::removeConstraints() {
   QtProperty *prop = item->property();
   if (!isParameter(prop))
     return;
-  // const bool isLocal = isLocalParameterProperty(prop);
-  auto props = prop->subProperties();
-  foreach (QtProperty *p, props) {
-    if (isConstraint(p)) {
-      removeProperty(p);
-    }
-  }
+  removeConstraintsQuiet(prop);
   emit parameterConstraintRemoved(getParameterName(prop));
 }
 
@@ -1682,20 +1666,21 @@ void FunctionTreeView::removeConstraint() {
 std::pair<QString, QString>
 FunctionTreeView::getFunctionAndConstraint(QtProperty *prop) const {
   auto const parName = getParameterName(prop);
-  QString lower, upper;
+  double lower = Mantid::EMPTY_DBL();
+  double upper = Mantid::EMPTY_DBL();
   for (auto p : prop->subProperties()) {
     if (p->propertyName() == "LowerBound")
       lower = m_constraintManager->value(p);
     if (p->propertyName() == "UpperBound")
       upper = m_constraintManager->value(p);
   }
-  if (!lower.isEmpty() || !upper.isEmpty()) {
+  if (lower != Mantid::EMPTY_DBL() || upper != Mantid::EMPTY_DBL()) {
     QString functionIndex, name;
     std::tie(functionIndex, name) = splitParameterName(parName);
     return std::make_pair(functionIndex, getConstraint(name, lower, upper));
   }
   return std::make_pair("", "");
-}
+} // namespace MantidWidgets
 
 /**
  * Slot connected to all function attribute managers. Update the corresponding
@@ -1712,7 +1697,7 @@ void FunctionTreeView::attributeChanged(QtProperty *prop) {
   // delete and recreate all function's properties (attributes, parameters, etc)
   setFunction(funProp, fun);
   updateFunctionIndices();
-  emit functionReplaced(QString::fromStdString(fun->asString()));
+  emit functionReplaced(QString::fromStdString(getFunction()->asString()));
 }
 
 /** Called when the size of a vector attribute is changed
@@ -1772,7 +1757,10 @@ void FunctionTreeView::parameterPropertyChanged(QtProperty *prop) {
       m_tieManager->setValue(tieProp, newTie);
     }
   }
-  emit parameterChanged(getParameterName(prop));
+  if (m_emitParameterValueChange) {
+    setErrorsEnabled(false);
+    emit parameterChanged(getParameterName(prop));
+  }
 }
 
 /// Called when a tie property changes
@@ -1815,6 +1803,11 @@ bool FunctionTreeView::hasFunction() const {
 void FunctionTreeView::setColumnSizes(int s0, int s1, int s2) {
   m_browser->setColumnSizes(s0, s1, s2);
 }
+
+/// Show global column
+void FunctionTreeView::hideGlobals() { m_browser->hideColumn(2); }
+// Hide global column
+void FunctionTreeView::showGlobals() { m_browser->showColumn(2); }
 
 /**
  * Emit a signal when any of the Global options change.
@@ -1867,6 +1860,15 @@ void FunctionTreeView::setParameterTie(const QString &paramName,
   } else if (tieProp) {
     removeProperty(tieProp);
   }
+}
+
+void FunctionTreeView::setParameterConstraint(const QString &paramName,
+                                              const QString &constraint) {
+  auto paramProp = getParameterProperty(paramName);
+  if (hasConstraint(paramProp)) {
+    removeConstraintsQuiet(paramProp);
+  }
+  addConstraintProperties(paramProp, constraint);
 }
 
 QStringList FunctionTreeView::getGlobalParameters() const {

@@ -8,6 +8,13 @@ from contextlib import contextmanager
 from importlib import import_module
 
 
+def is_required_version(required_version, version):
+    for version_part, required_version_part in zip(version.split('.'), required_version.split('.')):
+        if int(version_part) < int(required_version_part):
+            return False
+    return True
+
+
 def import_mantid_cext(modulename, package="", caller_globals=None):
     """
     Import a Mantid module built from the PythonInterface.

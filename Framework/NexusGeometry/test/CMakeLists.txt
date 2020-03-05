@@ -6,7 +6,10 @@ if(CXXTEST_FOUND)
                       ${Boost_INCLUDE_DIRS}
                       ../../TestHelpers/inc)
 
-  set(TESTHELPER_SRCS ../../TestHelpers/src/NexusGeometryTestHelpers.cpp)
+  set(TESTHELPER_SRCS ../../TestHelpers/src/NexusGeometryTestHelpers.cpp
+                      ../../TestHelpers/src/JSONGeometryParserTestHelper.cpp
+                      ../../TestHelpers/src/ComponentCreationHelper.cpp
+					  ../../TestHelpers/src/FileResource.cpp)
 
   cxxtest_add_test(NexusGeometryTest ${TEST_FILES})
 
@@ -20,9 +23,12 @@ if(CXXTEST_FOUND)
                         Geometry
                         Nexus
                         API
+						Types
+						Kernel
                         ${NEXUS_LIBRARIES}
                         ${HDF5_LIBRARIES}
-                        ${HDF5_HL_LIBRARIES})
+                        ${HDF5_HL_LIBRARIES}
+                        ${GMOCK_LIBRARIES})
   add_dependencies(NexusGeometryTest Geometry)
   add_dependencies(FrameworkTests NexusGeometryTest)
   add_dependencies(NexusGeometryTest StandardTestData)

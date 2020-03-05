@@ -130,8 +130,8 @@ class ReductionWrapperTest(unittest.TestCase):
 
         import reduce_vars as rv
 
-        self.assertEqual(rv.standard_vars,main_prop)
-        self.assertEqual(rv.advanced_vars,adv_prop)
+        self.assertDictEqual(rv.standard_vars,main_prop)
+        self.assertDictEqual(rv.advanced_vars,adv_prop)
         self.assertTrue(hasattr(rv,'variable_help'))
 
         imp.reload(mr)

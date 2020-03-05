@@ -24,10 +24,6 @@ check_include_files(stdint.h stdint)
 if(stdint)
   add_definitions(-DHAVE_STDINT_H)
 endif()
-check_include_files(cstdint.hpp boost_stdint)
-if(boost_stdint)
-  add_definitions(-DBOOST_CSTDINT_HPP)
-endif()
 
 # Globally-linked libraries variable
 
@@ -57,6 +53,7 @@ include(TargetFunctions)
 
 add_custom_target(FrameworkTests) # target for all framework tests
 add_dependencies(check FrameworkTests)
+add_dependencies(FrameworkTests Framework)
 
 include_directories(Types/inc)
 add_subdirectory(Types)
@@ -93,13 +90,13 @@ include_directories(Geometry/inc)
 add_subdirectory(Geometry)
 set(MANTIDLIBS ${MANTIDLIBS} Geometry)
 
-include_directories(NexusGeometry/inc)
-add_subdirectory(NexusGeometry)
-set(MANTIDLIBS ${MANTIDLIBS} NexusGeometry)
-
 include_directories(API/inc)
 add_subdirectory(API)
 set(MANTIDLIBS ${MANTIDLIBS} API)
+
+include_directories(NexusGeometry/inc)
+add_subdirectory(NexusGeometry)
+set(MANTIDLIBS ${MANTIDLIBS} NexusGeometry)
 
 add_subdirectory(PythonInterface)
 
@@ -168,7 +165,7 @@ add_custom_target(Framework DEPENDS ${FRAMEWORK_LIBS})
 # Create instrument directory
 foreach(_bundle ${BUNDLES})
   install(DIRECTORY ../instrument/
-          DESTINATION ${_bundle}instrument
+          DESTINATION ${_bundle}/instrument
           PATTERN "*UNIT_TESTING*"
           EXCLUDE
           PATTERN ".gitignore"
@@ -178,7 +175,7 @@ foreach(_bundle ${BUNDLES})
     if(CMAKE_SIZEOF_VOID_P EQUAL 8) # Recommended way of detecting 64- vs 32-bit
                                     # build Excludes .so files & _win32 binaries
       install(DIRECTORY ../scripts/
-              DESTINATION ${_bundle}scripts
+              DESTINATION ${_bundle}/scripts
               PATTERN "*.pyc"
               EXCLUDE
               PATTERN ".svn"
@@ -216,7 +213,11 @@ foreach(_bundle ${BUNDLES})
     # Also ship mingw libraries for Inelastic fortran code. We need to do a
     # better job here and build things
     file(GLOB MINGW_DLLS "${THIRD_PARTY_DIR}/bin/mingw/*.dll")
-    install(FILES ${MINGW_DLLS} DESTINATION ${_bundle}scripts/Inelastic)
+    if(WITH_PYTHON3)
+      install(FILES ${MINGW_DLLS} DESTINATION ${_bundle}scripts/Inelastic)
+    else()
+      install(FILES ${MINGW_DLLS} DESTINATION ${_bundle}scripts/Inelastic/cp27)
+    endif()
   else()
     install(DIRECTORY ../scripts/
             DESTINATION ${_bundle}scripts

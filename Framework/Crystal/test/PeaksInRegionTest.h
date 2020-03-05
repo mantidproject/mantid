@@ -80,7 +80,7 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
     alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace());
+                    WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Extents", "-1,1,-1,1,-1,1");
     alg.setPropertyValue("OutputWorkspace", "OutWS");
@@ -93,7 +93,7 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
     alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace());
+                    WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Extents", extents);
     alg.setPropertyValue("OutputWorkspace", "OutWS");

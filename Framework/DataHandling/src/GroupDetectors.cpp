@@ -80,7 +80,7 @@ void GroupDetectors::exec() {
     return;
   }
 
-  const specnum_t firstIndex = static_cast<specnum_t>(indexList[0]);
+  const auto firstIndex = static_cast<specnum_t>(indexList[0]);
   auto &firstSpectrum = WS->getSpectrum(firstIndex);
   setProperty("ResultIndex", firstIndex);
 

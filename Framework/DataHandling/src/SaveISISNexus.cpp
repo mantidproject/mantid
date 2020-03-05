@@ -492,7 +492,7 @@ void SaveISISNexus::detector_1() {
   NXopengroup(handle, "detector_1", "NXdata");
 
   for (int i = 0; i < nmon; ++i) {
-    int si = int(std::distance(
+    auto si = int(std::distance(
         m_isisRaw.spec,
         std::find(m_isisRaw.spec, m_isisRaw.spec + nsp, m_isisRaw.mdet[i])));
     monitor_index[si] = i;
@@ -800,30 +800,31 @@ void SaveISISNexus::runlog() {
     boost::posix_time::ptime time(
         boost::posix_time::time_from_string(date_time_str));
     boost::posix_time::time_duration dt = time - start_time;
-    time_vec.push_back(float(dt.total_seconds()));
-    period_vec.push_back(period);
-    is_running_vec.push_back(is_running);
-    is_waiting_vec.push_back(is_waiting);
-    good_frames_vec.push_back(good_frames);
-    raw_frames_vec.push_back(raw_frames);
-    monitor_sum_1_vec.push_back(monitor_sum_1);
-    total_counts_vec.push_back(total_counts);
-    proton_charge_vec.push_back(proton_charge);
-    proton_charge_raw_vec.push_back(proton_charge_raw);
-    dae_beam_current_vec.push_back(dae_beam_current);
-    count_rate_vec.push_back(count_rate);
-    np_ratio_vec.push_back(np_ratio);
+    time_vec.emplace_back(float(dt.total_seconds()));
+    period_vec.emplace_back(period);
+    is_running_vec.emplace_back(is_running);
+    is_waiting_vec.emplace_back(is_waiting);
+    good_frames_vec.emplace_back(good_frames);
+    raw_frames_vec.emplace_back(raw_frames);
+    monitor_sum_1_vec.emplace_back(monitor_sum_1);
+    total_counts_vec.emplace_back(total_counts);
+    proton_charge_vec.emplace_back(proton_charge);
+    proton_charge_raw_vec.emplace_back(proton_charge_raw);
+    dae_beam_current_vec.emplace_back(dae_beam_current);
+    count_rate_vec.emplace_back(count_rate);
+    np_ratio_vec.emplace_back(np_ratio);
   }
   fil.close();
 
   run_status_vec.resize(time_vec.size());
+  using std::placeholders::_1;
   std::transform(is_running_vec.begin(), is_running_vec.end(),
-                 run_status_vec.begin(), std::bind2nd(std::plus<int>(), 1));
+                 run_status_vec.begin(), std::bind(std::plus<int>(), _1, 1));
 
   NXmakegroup(handle, "runlog", "IXrunlog");
   NXopengroup(handle, "runlog", "IXrunlog");
 
-  int time_vec_size = static_cast<int>(time_vec.size());
+  auto time_vec_size = static_cast<int>(time_vec.size());
 
   write_runlog("period", &time_vec[0], &period_vec[0], NX_INT32, time_vec_size,
                "none");
@@ -871,8 +872,8 @@ void SaveISISNexus::runlog() {
     boost::posix_time::ptime time(
         boost::posix_time::time_from_string(date_time_str));
     boost::posix_time::time_duration dt = time - start_time;
-    time_vec.push_back(float(dt.total_seconds()));
-    event_vec.push_back(line.substr(20));
+    time_vec.emplace_back(float(dt.total_seconds()));
+    event_vec.emplace_back(line.substr(20));
   }
   icpevent_fil.close();
 
@@ -960,7 +961,7 @@ void SaveISISNexus::selog() {
     l_filenamePart = Poco::Path(dir_itr->path()).getFileName();
 
     if (boost::regex_match(l_filenamePart, regex)) {
-      potentialLogFiles.push_back(dir_itr->path());
+      potentialLogFiles.emplace_back(dir_itr->path());
     }
   }
 
@@ -1006,7 +1007,7 @@ void SaveISISNexus::selog() {
       boost::posix_time::ptime time(
           boost::posix_time::time_from_string(date_time_str));
       boost::posix_time::time_duration dt = time - start_time;
-      time_vec.push_back(float(dt.total_seconds()));
+      time_vec.emplace_back(float(dt.total_seconds()));
       std::istringstream istr(line.substr(20));
       // check if the data are numeric then save them in flt_vec
       if (!isNotNumeric) {
@@ -1015,10 +1016,10 @@ void SaveISISNexus::selog() {
         if (istr.bad() || istr.fail()) {
           isNotNumeric = true;
         } else {
-          flt_vec.push_back(flt);
+          flt_vec.emplace_back(flt);
         }
       }
-      str_vec.push_back(istr.str());
+      str_vec.emplace_back(istr.str());
     }
     fil.close();
     NXmakegroup(handle, &logName[0], "IXseblock");

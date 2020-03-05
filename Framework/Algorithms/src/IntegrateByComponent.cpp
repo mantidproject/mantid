@@ -103,8 +103,8 @@ void IntegrateByComponent::exec() {
 
         // Now we have a good value
         PARALLEL_CRITICAL(IntegrateByComponent_good) {
-          averageYInput.push_back(yValue);
-          averageEInput.push_back(eValue * eValue);
+          averageYInput.emplace_back(yValue);
+          averageEInput.emplace_back(eValue * eValue);
         }
 
         PARALLEL_END_INTERUPT_REGION
@@ -164,9 +164,9 @@ IntegrateByComponent::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
   std::vector<size_t> single;
 
   for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    single.push_back(i);
+    single.emplace_back(i);
   }
-  mymap.push_back(single);
+  mymap.emplace_back(single);
   return mymap;
 }
 
@@ -219,9 +219,9 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
     // Iterate over all map elements with key == theKey
     speclistsingle.clear();
     for (s_it = keyRange.first; s_it != keyRange.second; ++s_it) {
-      speclistsingle.push_back((*s_it).second);
+      speclistsingle.emplace_back((*s_it).second);
     }
-    speclist.push_back(speclistsingle);
+    speclist.emplace_back(speclistsingle);
   }
 
   return speclist;

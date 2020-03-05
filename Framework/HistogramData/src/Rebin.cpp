@@ -12,13 +12,13 @@
 #include <numeric>
 
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::CountVariances;
-using Mantid::HistogramData::Counts;
-using Mantid::HistogramData::Exception::InvalidBinEdgesError;
 using Mantid::HistogramData::Frequencies;
 using Mantid::HistogramData::FrequencyStandardDeviations;
 using Mantid::HistogramData::Histogram;
+using Mantid::HistogramData::Exception::InvalidBinEdgesError;
 
 namespace {
 Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {

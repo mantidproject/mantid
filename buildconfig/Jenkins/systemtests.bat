@@ -84,10 +84,18 @@ echo CheckMantidVersion.OnStartup = 0 >> %USERPROPS_NIGHTLY%
 
 :: Run
 set PKGDIR=%WORKSPACE%\build
-:: A completely clean build will not have Mantid installed but will need Python to
-:: run the testing setup scripts. Assume it is in the PATH
-set NTHREADS=%BUILD_THREADS%
-set MAXTHREADS=12
-if %NTHREADS% gtr %MAXTHREADS% set NTHREADS=%MAXTHREADS%
+if "%SYSTEST_NPROCS%"=="" (
+  if "%BUILD_THREADS%"=="" (
+    set NTHREADS=1
+  ) else (
+    set NTHREADS=%BUILD_THREADS%
+  )
+) else (
+  set NTHREADS=%SYSTEST_NPROCS%
+)
+@echo "Runing system tests with %NTHREADS% cores."
+
+:: A completely clean builder will not have Mantid installed but will need Python to
+:: run the testing setup scripts. Assume it is in the PATH.
 set PYTHON_EXE=python.exe
 %PYTHON_EXE% %WORKSPACE%\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR% -j %NTHREADS% %EXTRA_ARGS%

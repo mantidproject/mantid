@@ -51,7 +51,7 @@ void ComponentParser::startElement(const Poco::XML::XMLString & /*uri*/,
 
   // A new component was created
   if (newComp) {
-    m_current.push_back(newComp);
+    m_current.emplace_back(newComp);
     // Read the attributes into the new component
     newComp->readXMLAttributes(attr);
   }

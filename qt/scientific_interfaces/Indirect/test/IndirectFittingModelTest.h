@@ -9,7 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "IndirectFittingModel.h"
+#include "IndirectFittingModelLegacy.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -35,7 +35,7 @@ IFunction_sptr getFunction(std::string const &functionString) {
 
 /// A dummy model used to inherit the methods which need testing
 class DummyModel
-    : public MantidQt::CustomInterfaces::IDA::IndirectFittingModel {
+    : public MantidQt::CustomInterfaces::IDA::IndirectFittingModelLegacy {
 public:
   ~DummyModel(){};
 
@@ -255,9 +255,9 @@ public:
   test_that_getSpectra_returns_a_correct_spectra_when_the_index_provided_is_valid() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 3);
 
-    Spectra const inputSpectra = DiscontinuousSpectra<std::size_t>("0-1");
+    SpectraLegacy const inputSpectra = DiscontinuousSpectra<std::size_t>("0-1");
     model->setSpectra(inputSpectra, 0);
-    Spectra const spectra = model->getSpectra(0);
+    SpectraLegacy const spectra = model->getSpectra(0);
 
     TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), spectra, inputSpectra));
   }
@@ -266,8 +266,8 @@ public:
   test_that_getSpectra_returns_an_empty_DiscontinuousSpectra_when_provided_an_out_of_range_index() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 3);
 
-    Spectra const emptySpectra(DiscontinuousSpectra<std::size_t>(""));
-    Spectra const spectra = model->getSpectra(3);
+    SpectraLegacy const emptySpectra(DiscontinuousSpectra<std::size_t>(""));
+    SpectraLegacy const spectra = model->getSpectra(3);
 
     TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), spectra, emptySpectra));
   }
@@ -556,9 +556,10 @@ public:
   test_that_setSpectra_will_set_the_spectra_to_the_provided_inputSpectra() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 10);
 
-    Spectra const inputSpectra = DiscontinuousSpectra<std::size_t>("2,4,6-8");
+    SpectraLegacy const inputSpectra =
+        DiscontinuousSpectra<std::size_t>("2,4,6-8");
     model->setSpectra(inputSpectra, 0);
-    Spectra const spectra = model->getSpectra(0);
+    SpectraLegacy const spectra = model->getSpectra(0);
 
     TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), spectra, inputSpectra));
   }
@@ -567,9 +568,9 @@ public:
   test_that_setSpectra_will_set_the_spectra_when_provided_a_spectra_pair() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 10);
 
-    Spectra const inputSpectra = std::make_pair(0u, 5u);
+    SpectraLegacy const inputSpectra = std::make_pair(0u, 5u);
     model->setSpectra(inputSpectra, 0);
-    Spectra const spectra = model->getSpectra(0);
+    SpectraLegacy const spectra = model->getSpectra(0);
 
     TS_ASSERT(boost::apply_visitor(AreSpectraEqual(), spectra, inputSpectra));
   }

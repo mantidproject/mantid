@@ -69,10 +69,10 @@ void MultiDomainFunction::countNumberOfDomains() {
 void MultiDomainFunction::countValueOffsets(
     const CompositeDomain &domain) const {
   m_valueOffsets.clear();
-  m_valueOffsets.push_back(0);
+  m_valueOffsets.emplace_back(0);
   for (size_t i = 0; i < domain.getNParts(); ++i) {
     const FunctionDomain &d = domain.getDomain(i);
-    m_valueOffsets.push_back(m_valueOffsets.back() + d.size());
+    m_valueOffsets.emplace_back(m_valueOffsets.back() + d.size());
   }
 }
 
@@ -121,7 +121,7 @@ void MultiDomainFunction::function(const FunctionDomain &domain,
     throw std::invalid_argument(
         "Non-CompositeDomain passed to MultiDomainFunction.");
   }
-  const CompositeDomain &cd = dynamic_cast<const CompositeDomain &>(domain);
+  const auto &cd = dynamic_cast<const CompositeDomain &>(domain);
   // domain must not have less parts than m_maxIndex
   if (cd.getNParts() <= m_maxIndex) {
     throw std::invalid_argument("CompositeDomain has too few parts (" +
@@ -169,7 +169,7 @@ void MultiDomainFunction::functionDeriv(const FunctionDomain &domain,
   if (getAttribute("NumDeriv").asBool()) {
     calNumericalDeriv(domain, jacobian);
   } else {
-    const CompositeDomain &cd = dynamic_cast<const CompositeDomain &>(domain);
+    const auto &cd = dynamic_cast<const CompositeDomain &>(domain);
     // domain must not have less parts than m_maxIndex
     if (cd.getNParts() < m_maxIndex) {
       throw std::invalid_argument("CompositeDomain has too few parts (" +
@@ -308,7 +308,7 @@ void MultiDomainFunction::setLocalAttribute(size_t i,
     }
     // value looks like "a - b". a and b must be ints and define a range of
     // domain indices
-    size_t start = boost::lexical_cast<size_t>(list.terms()[0].str());
+    auto start = boost::lexical_cast<size_t>(list.terms()[0].str());
     size_t end = boost::lexical_cast<size_t>(list.terms()[1].str()) + 1;
     if (start >= end) {
       throw std::runtime_error(

@@ -41,8 +41,8 @@ void UpdateScriptRepository::init() {}
 void UpdateScriptRepository::exec() {
   // TODO Auto-generated execute stub
   using Mantid::API::ScriptRepository;
-  using Mantid::API::ScriptRepositoryFactory;
   using Mantid::API::ScriptRepository_sptr;
+  using Mantid::API::ScriptRepositoryFactory;
   auto repo_ptr =
       ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
 

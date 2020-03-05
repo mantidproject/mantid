@@ -46,14 +46,12 @@ void raiseDuplicateDetectorError(const size_t detectorId) {
 /// Default constructor
 Instrument::Instrument()
     : CompAssembly(), m_detectorCache(), m_sourceCache(nullptr),
-      m_chopperPoints(new std::vector<const ObjComponent *>),
       m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
       m_referenceFrame(new ReferenceFrame) {}
 
 /// Constructor with name
 Instrument::Instrument(const std::string &name)
     : CompAssembly(name), m_detectorCache(), m_sourceCache(nullptr),
-      m_chopperPoints(new std::vector<const ObjComponent *>),
       m_sampleCache(nullptr), m_defaultView("3D"), m_defaultViewAxis("Z+"),
       m_referenceFrame(new ReferenceFrame) {}
 
@@ -64,7 +62,6 @@ Instrument::Instrument(const std::string &name)
 Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
                        boost::shared_ptr<ParameterMap> map)
     : CompAssembly(instr.get(), map.get()), m_sourceCache(instr->m_sourceCache),
-      m_chopperPoints(instr->m_chopperPoints),
       m_sampleCache(instr->m_sampleCache), m_defaultView(instr->m_defaultView),
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
       m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
@@ -81,7 +78,6 @@ Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
  */
 Instrument::Instrument(const Instrument &instr)
     : CompAssembly(instr), m_sourceCache(nullptr),
-      m_chopperPoints(new std::vector<const ObjComponent *>),
       m_sampleCache(nullptr), /* Should only be temporarily null */
       m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
       m_defaultView(instr.m_defaultView),
@@ -111,8 +107,7 @@ Instrument::Instrument(const Instrument &instr)
     // Now check whether the current component is the source or sample.
     // As the majority of components will be detectors, we will rarely get to
     // here
-    if (const ObjComponent *obj =
-            dynamic_cast<const ObjComponent *>(it->get())) {
+    if (const auto *obj = dynamic_cast<const ObjComponent *>(it->get())) {
       const std::string objName = obj->getName();
       // This relies on the source and sample having a unique name.
       // I think the way our instrument definition files work ensures this is
@@ -125,23 +120,7 @@ Instrument::Instrument(const Instrument &instr)
         markAsSamplePos(obj);
         continue;
       }
-      for (size_t i = 0; i < instr.m_chopperPoints->size(); ++i) {
-        if (objName == (*m_chopperPoints)[i]->getName()) {
-          markAsChopperPoint(obj);
-          break;
-        }
-      }
     }
-  }
-}
-
-/**
- * Destructor
- */
-Instrument::~Instrument() {
-  if (!m_map) {
-    m_chopperPoints->clear(); // CompAssembly will delete them
-    delete m_chopperPoints;
   }
 }
 
@@ -237,12 +216,12 @@ std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
     const auto &in_dets = m_instr->m_detectorCache;
     for (const auto &in_det : in_dets)
       if (!skipMonitors || !std::get<2>(in_det))
-        out.push_back(std::get<0>(in_det));
+        out.emplace_back(std::get<0>(in_det));
   } else {
     const auto &in_dets = m_detectorCache;
     for (const auto &in_det : in_dets)
       if (!skipMonitors || !std::get<2>(in_det))
-        out.push_back(std::get<0>(in_det));
+        out.emplace_back(std::get<0>(in_det));
   }
   return out;
 }
@@ -314,7 +293,7 @@ void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
       IDetector_const_sptr det =
           boost::dynamic_pointer_cast<const IDetector>(*it);
       if (det) {
-        dets.push_back(det);
+        dets.emplace_back(det);
       }
     }
   }
@@ -367,34 +346,6 @@ IComponent_const_sptr Instrument::getSource() const {
   }
 }
 
-/**
- * Returns the chopper at the given index. Index 0 is defined as closest to the
- * source
- * If there are no choppers defined or the index is out of range then an
- * invalid_argument
- * exception is thrown.
- * @param index :: Defines which chopper to pick, 0 being closest to the source
- * [Default = 0]
- * @return A pointer to the chopper
- */
-IObjComponent_const_sptr Instrument::getChopperPoint(const size_t index) const {
-  if (index >= getNumberOfChopperPoints()) {
-    std::ostringstream os;
-    os << "Instrument::getChopperPoint - No chopper point at index '" << index
-       << "' defined. Instrument has only " << getNumberOfChopperPoints()
-       << " chopper points defined.";
-    throw std::invalid_argument(os.str());
-  }
-  return IObjComponent_const_sptr(m_chopperPoints->at(index), NoDeleting());
-}
-/**
- * @return The number of chopper points defined by this instrument
- */
-size_t Instrument::getNumberOfChopperPoints() const {
-  return m_chopperPoints->size();
-}
-
-//------------------------------------------------------------------------------------------
 /** Gets a pointer to the Sample Position
  *  @returns a pointer to the Sample Position
  */
@@ -436,7 +387,7 @@ Kernel::V3D Instrument::getBeamDirection() const {
  */
 boost::shared_ptr<const IComponent>
 Instrument::getComponentByID(const IComponent *id) const {
-  const IComponent *base = static_cast<const IComponent *>(id);
+  const auto *base = static_cast<const IComponent *>(id);
   if (m_map)
     return ParComponentFactory::create(
         boost::shared_ptr<const IComponent>(base, NoDeleting()), m_map);
@@ -460,12 +411,12 @@ Instrument::getAllComponentsWithName(const std::string &cname) const {
   std::vector<boost::shared_ptr<const IComponent>> retVec;
   // Check the instrument name first
   if (this->getName() == cname) {
-    retVec.push_back(node);
+    retVec.emplace_back(node);
   }
   // Same algorithm as used in getComponentByName() but searching the full tree
   std::deque<boost::shared_ptr<const IComponent>> nodeQueue;
   // Need to be able to enter the while loop
-  nodeQueue.push_back(node);
+  nodeQueue.emplace_back(node);
   while (!nodeQueue.empty()) {
     node = nodeQueue.front();
     nodeQueue.pop_front();
@@ -478,9 +429,9 @@ Instrument::getAllComponentsWithName(const std::string &cname) const {
     for (int i = 0; i < nchildren; ++i) {
       boost::shared_ptr<const IComponent> comp = (*asmb)[i];
       if (comp->getName() == cname) {
-        retVec.push_back(comp);
+        retVec.emplace_back(comp);
       } else {
-        nodeQueue.push_back(comp);
+        nodeQueue.emplace_back(comp);
       }
     }
   } // while-end
@@ -602,7 +553,7 @@ Instrument::getDetectors(const std::vector<detid_t> &det_ids) const {
   dets_ptr.reserve(det_ids.size());
   std::vector<detid_t>::const_iterator it;
   for (it = det_ids.begin(); it != det_ids.end(); ++it) {
-    dets_ptr.push_back(this->getDetector(*it));
+    dets_ptr.emplace_back(this->getDetector(*it));
   }
   return dets_ptr;
 }
@@ -617,39 +568,9 @@ Instrument::getDetectors(const std::set<detid_t> &det_ids) const {
   dets_ptr.reserve(det_ids.size());
   std::set<detid_t>::const_iterator it;
   for (it = det_ids.begin(); it != det_ids.end(); ++it) {
-    dets_ptr.push_back(this->getDetector(*it));
+    dets_ptr.emplace_back(this->getDetector(*it));
   }
   return dets_ptr;
-}
-
-/**
- * Adds a Component which already exists in the instrument to the chopper cache.
- * If
- * the component is not a chopper or it has no name then an invalid_argument
- * expection is thrown
- * @param comp :: A pointer to the component
- */
-void Instrument::markAsChopperPoint(const ObjComponent *comp) {
-  const std::string name = comp->getName();
-  if (name.empty()) {
-    throw std::invalid_argument(
-        "Instrument::markAsChopper - Chopper component must have a name");
-  }
-  IComponent_const_sptr source = getSource();
-  if (!source) {
-    throw Exception::InstrumentDefinitionError("Instrument::markAsChopper - No "
-                                               "source is set, cannot defined "
-                                               "chopper positions.");
-  }
-  auto insertPos = m_chopperPoints->begin();
-  const double newChopperSourceDist = m_sourceCache->getDistance(*comp);
-  for (; insertPos != m_chopperPoints->end(); ++insertPos) {
-    const double sourceToChopDist = m_sourceCache->getDistance(**insertPos);
-    if (newChopperSourceDist < sourceToChopDist) {
-      break; // Found the insertion point
-    }
-  }
-  m_chopperPoints->insert(insertPos, comp);
 }
 
 /** Mark a component which has already been added to the Instrument (as a child
@@ -802,7 +723,7 @@ void Instrument::removeDetector(IDetector *det) {
 
   // Remove it from the parent assembly (and thus the instrument). Evilness
   // required here unfortunately.
-  CompAssembly *parentAssembly = dynamic_cast<CompAssembly *>(
+  auto *parentAssembly = dynamic_cast<CompAssembly *>(
       const_cast<IComponent *>(det->getBareParent()));
   if (parentAssembly) // Should always be true, but check just in case
   {
@@ -821,7 +742,7 @@ std::vector<detid_t> Instrument::getMonitors() const {
   std::vector<detid_t> mons;
   for (const auto &item : m_detectorCache)
     if (std::get<2>(item))
-      mons.push_back(std::get<0>(item));
+      mons.emplace_back(std::get<0>(item));
   return mons;
 }
 
@@ -880,8 +801,7 @@ Instrument::getPlottable() const {
     // Get a reference to the underlying vector, casting away the constness so
     // that we
     // can modify it to get our result rather than creating another long vector
-    std::vector<IObjComponent_const_sptr> &res =
-        const_cast<std::vector<IObjComponent_const_sptr> &>(*objs);
+    auto &res = const_cast<std::vector<IObjComponent_const_sptr> &>(*objs);
     const std::vector<IObjComponent_const_sptr>::size_type total = res.size();
     for (std::vector<IObjComponent_const_sptr>::size_type i = 0; i < total;
          ++i) {
@@ -903,16 +823,16 @@ void Instrument::appendPlottable(
     const CompAssembly &ca, std::vector<IObjComponent_const_sptr> &lst) const {
   for (int i = 0; i < ca.nelements(); i++) {
     IComponent *c = ca[i].get();
-    CompAssembly *a = dynamic_cast<CompAssembly *>(c);
+    auto *a = dynamic_cast<CompAssembly *>(c);
     if (a)
       appendPlottable(*a, lst);
     else {
-      Detector *d = dynamic_cast<Detector *>(c);
-      ObjComponent *o = dynamic_cast<ObjComponent *>(c);
+      auto *d = dynamic_cast<Detector *>(c);
+      auto *o = dynamic_cast<ObjComponent *>(c);
       if (d)
-        lst.push_back(IObjComponent_const_sptr(d, NoDeleting()));
+        lst.emplace_back(IObjComponent_const_sptr(d, NoDeleting()));
       else if (o)
-        lst.push_back(IObjComponent_const_sptr(o, NoDeleting()));
+        lst.emplace_back(IObjComponent_const_sptr(o, NoDeleting()));
       else
         g_log.error() << "Unknown comp type\n";
     }
@@ -1040,7 +960,7 @@ void Instrument::saveNexus(::NeXus::File *file,
     std::vector<detid_t> monitorIDs;
     for (size_t i = 0; i < detmonIDs.size(); i++) {
       if (isMonitorViaIndex(i))
-        monitorIDs.push_back(detmonIDs[i]);
+        monitorIDs.emplace_back(detmonIDs[i]);
     }
 
     // Add Monitors group

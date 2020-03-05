@@ -131,7 +131,7 @@ bool NumericAxis::equalWithinTolerance(const Axis &axis2,
   if (length() != axis2.length()) {
     return false;
   }
-  const NumericAxis *spec2 = dynamic_cast<const NumericAxis *>(&axis2);
+  const auto *spec2 = dynamic_cast<const NumericAxis *>(&axis2);
   if (!spec2) {
     return false;
   }

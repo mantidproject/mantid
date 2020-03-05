@@ -16,13 +16,16 @@ namespace PythonInterface {
 namespace Converters {
 /// Enum defining wrapping type for conversion to numpy
 enum NumpyWrapMode { ReadOnly, ReadWrite };
+/// Enum defining transfer of ownership when converting to numpy array
+enum OwnershipMode { Cpp, Python };
 
 namespace Impl {
 // Forward declare a conversion function. This should be specialized for each
 // container type that is to be wrapped
 template <typename ElementType>
 PyObject *wrapWithNDArray(const ElementType *, const int ndims,
-                          Py_intptr_t *dims, const NumpyWrapMode);
+                          Py_intptr_t *dims, const NumpyWrapMode mode,
+                          const OwnershipMode oMode = OwnershipMode::Cpp);
 } // namespace Impl
 
 /**

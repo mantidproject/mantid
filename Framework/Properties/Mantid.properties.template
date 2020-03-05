@@ -21,7 +21,7 @@ Q.convention = Inelastic
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
 
-mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py Direct/MSlice.py SANS/ORNL_SANS.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry_Old.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS.py Muon/Frequency_Domain_Analysis.py Muon/Elemental_Analysis.py Muon/Frequency_Domain_Analysis_Old.py Muon/Muon_Analysis_2.py
+mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py Direct/PyChop.py Direct/MSlice.py SANS/ORNL_SANS.py Utility/TofConverter.py Diffraction/Engineering_Diffraction.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py Diffraction/HFIR_4Circle_Reduction.py Utility/QECoverage.py SANS/ISIS_SANS.py Muon/Frequency_Domain_Analysis.py Muon/Elemental_Analysis.py Muon/Frequency_Domain_Analysis_Old.py Muon/Muon_Analysis.py
 
 # Directory containing the above startup scripts
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
@@ -43,6 +43,8 @@ python.plugins.directories = @PYTHONPLUGIN_DIRS@
 
 # Where to load instrument definition files from
 instrumentDefinition.directory = @MANTID_ROOT@/instrument
+# Controls whether Mantid Workbench will use system notifications for important messages (On/Off)
+Notifications.Enabled = On
 
 # Whether to check for updated instrument definitions on startup of Mantid
 UpdateInstrumentDefinitions.OnStartup = @UPDATE_INSTRUMENT_DEFINTITIONS@
@@ -122,7 +124,7 @@ curvefitting.defaultPeak=Gaussian
 curvefitting.findPeaksFWHM=7
 curvefitting.findPeaksTolerance=4
 # Functions excluded from use by the guis
-curvefitting.guiExclude=CrystalFieldFunction;CrystalFieldHeatCapacity;CrystalFieldMagnetisation;CrystalFieldMoment;CrystalFieldMultiSpectrum;CrystalFieldPeaks;CrystalFieldSpectrum;CrystalFieldSusceptibility
+curvefitting.guiExclude=CrystalFieldFunction;CrystalFieldHeatCapacity;CrystalFieldMagnetisation;CrystalFieldMoment;CrystalFieldMultiSpectrum;CrystalFieldPeaks;CrystalFieldSpectrum;CrystalFieldSusceptibility;PeakParameterFunction;
 
 #Defines whether or not the sliceViewer will show NonOrthogonal view as a default
 sliceviewer.nonorthogonal=false
@@ -151,14 +153,9 @@ MantidOptions.InstrumentView.UseOpenGL = On
 
 # Controls the default normalization mode for graph plotting
 # Allowed values are:
-#   On: Normalize to the bin width for plots
+#   On: Normalize to the bin width for 1d and 2d plots
 #   Off: Do not normalize
 graph1d.autodistribution = On
-
-#Uncommenting the line below will enable algorithm chain re-running whenever a
-#workspace is replaced. Uncommenting and setting it to 0 will also turn it off
-#enabling this is currently discouraged as it could cause race conditions with python scripts
-#AlgorithmChaining.SwitchedOn = 1
 
 # logging configuration
 # root level message filter (This sets a minimal level possible for any channel)
@@ -216,7 +213,7 @@ UploaderWebServer = @MANTIDPUBLISHER@
 # Local system path for the script repository.
 ScriptLocalRepository =
 # Base Url for the remote script repository. Not necessarily accessible, it is used to construct longer URLs
-ScriptRepository = http://download.mantidproject.org/scriptrepository/
+ScriptRepository = https://download.mantidproject.org/scriptrepository/
 # Pattern given to ScriptRepository that is used to hide entries from repository to the users. It is a csv string separated with ';'
 ScriptRepositoryIgnore = *pyc;
 
@@ -234,3 +231,38 @@ projectRecovery.secondsBetween = 60
 
 # The number of checkpoints to retain in the recovery folder
 projectRecovery.numberOfCheckpoints = 5
+
+# The size of the project before a warning is given in bytes.
+# 10 GB = 10737418240 bytes
+projectSaving.warningSize = 10737418240
+
+# Whether to show titles on plots
+plots.ShowTitle = On
+
+# The default scale on 1d plots. Options are Linear or Log
+plots.xAxesScale = Linear
+plots.yAxesScale = Linear
+
+# Default Line style on 1d plots. Options are solid, dashed, dotted, dashdot
+plots.line.Style = solid
+
+# Default Line width on 1d plots
+plots.line.Width = 1.5
+
+# Default marker style on 1d plots
+plots.marker.Style = None
+
+# Default maker size on 1d plots
+plots.marker.Size = 6
+
+# Default cap size on error bars in 1d plots
+plots.errorbar.Capsize = 0.0
+
+# Default cap thickness on error bars in 1d plots
+plots.errorbar.CapThickness = 1.0
+
+# Default number of error bars for every data point in 1d plots
+plots.errorbar.errorEvery = 1
+
+# Default width of error bars in 1d plots
+plots.errorbar.Width = 1.0

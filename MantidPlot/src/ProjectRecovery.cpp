@@ -8,7 +8,7 @@
 
 #include "ApplicationWindow.h"
 #include "Folder.h"
-#include "Process.h"
+#include "Processes.h"
 #include "ProjectRecoveryGUIs/ProjectRecoveryPresenter.h"
 #include "ProjectRecoveryGUIs/ProjectRecoveryView.h"
 #include "ProjectRecoveryGUIs/RecoveryFailureView.h"
@@ -66,7 +66,7 @@ std::string getRecoveryFolderOutput() {
   static std::string appData =
       Mantid::Kernel::ConfigService::Instance().getAppDataDir();
   static std::string hostname = Poco::Environment::nodeName();
-  static std::string pid = std::to_string(Process::getProcessID());
+  static std::string pid = std::to_string(Processes::getProcessID());
 
   static std::string recoverFolder =
       appData + "recovery/" + hostname + '/' + pid + '/';
@@ -309,7 +309,8 @@ ProjectRecovery::~ProjectRecovery() {
 
 void ProjectRecovery::attemptRecovery() {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "ProjectRecovery->AttemptRecovery", true);
+      Mantid::Kernel::FeatureType::Feature,
+      {"ProjectRecovery", "AttemptRecovery"}, true);
 
   m_recoveryGui = new ProjectRecoveryPresenter(this, m_windowPtr);
   bool failed = m_recoveryGui->startRecoveryView();
@@ -330,7 +331,7 @@ bool ProjectRecovery::checkForRecovery() const noexcept {
     // them.
     removeEmptyFolders(checkpointPaths);
     return checkpointPaths.size() != 0 &&
-           (checkpointPaths.size() > Process::numberOfMantids());
+           (checkpointPaths.size() > Processes::numberOfMantids());
   } catch (...) {
     g_log.warning("Project Recovery: Caught exception whilst attempting to "
                   "check for existing recovery");

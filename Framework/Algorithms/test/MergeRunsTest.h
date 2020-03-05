@@ -373,7 +373,7 @@ public:
     va_list vl;
     va_start(vl, num);
     for (int i = 0; i < num; i++)
-      retVal.push_back(va_arg(vl, int));
+      retVal.emplace_back(va_arg(vl, int));
     return retVal;
   }
 
@@ -418,8 +418,8 @@ public:
     std::vector<std::vector<int>> groups;
 
     groups.clear();
-    groups.push_back(makeVector(3, 0, 1, 2));
-    groups.push_back(makeVector(3, 3, 4, 5));
+    groups.emplace_back(makeVector(3, 0, 1, 2));
+    groups.emplace_back(makeVector(3, 3, 4, 5));
     evg1 = WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100);
     AnalysisDataService::Instance().addOrReplace(
         "evg1", boost::dynamic_pointer_cast<MatrixWorkspace>(evg1));
@@ -433,9 +433,9 @@ public:
     TS_ASSERT(evg1->getSpectrum(1).hasDetectorID(3));
 
     groups.clear();
-    groups.push_back(makeVector(2, 3, 4));
-    groups.push_back(makeVector(3, 0, 1, 2));
-    groups.push_back(makeVector(1, 15));
+    groups.emplace_back(makeVector(2, 3, 4));
+    groups.emplace_back(makeVector(3, 0, 1, 2));
+    groups.emplace_back(makeVector(1, 15));
     evg2 = WorkspaceCreationHelper::createGroupedEventWorkspace(groups, 100);
     AnalysisDataService::Instance().addOrReplace(
         "evg2", boost::dynamic_pointer_cast<MatrixWorkspace>(evg2));

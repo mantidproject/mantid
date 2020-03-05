@@ -11,19 +11,19 @@ from __future__ import (print_function, absolute_import, unicode_literals)
 
 from qtpy.QtCore import Qt, Signal, Slot
 
+import matplotlib.pyplot
+
 from mantid import logger
-from mantid.api import AlgorithmManager
-from mantid.simpleapi import mtd
+from mantid.api import AlgorithmManager, AnalysisDataService, ITableWorkspace, MatrixWorkspace
+from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt import import_qt
 
 from .interactive_tool import FitInteractiveTool
-
 
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
 
 
 class FitPropertyBrowserBase(BaseBrowser):
-
     def __init__(self, parent=None):
         super(FitPropertyBrowserBase, self).__init__(parent)
         self.init()
@@ -45,22 +45,28 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         self.toolbar_manager = toolbar_manager
         # The peak editing tool
         self.tool = None
-        # Pyplot lines for the fit result curves
-        self.fit_result_lines = []
+        # The name of the fit result workspace
+        self.fit_result_ws_name = ""
         # Pyplot line for the guess curve
         self.guess_line = None
-        # Map the indices of the markers in the peak editing tool to the peak function prefixes (in the form f0.f1...)
+        # Pyplot line for the sequential fit curve
+        self.sequential_fit_line = None
+        # Map the indices of the markers in the peak editing tool to the peak function prefixes
+        # (in the form f0.f1...)
         self.peak_ids = {}
         self._connect_signals()
 
     def _connect_signals(self):
-        self.startXChanged.connect(self.move_start_x)
-        self.endXChanged.connect(self.move_end_x)
+        self.xRangeChanged.connect(self.move_x_range)
         self.algorithmFinished.connect(self.fitting_done_slot)
         self.changedParameterOf.connect(self.peak_changed_slot)
         self.removeFitCurves.connect(self.clear_fit_result_lines_slot, Qt.QueuedConnection)
         self.plotGuess.connect(self.plot_guess_slot, Qt.QueuedConnection)
         self.functionChanged.connect(self.function_changed_slot, Qt.QueuedConnection)
+        # Update whether data needs to be normalised when a button on the Fit menu is clicked
+        self.getFitMenu().aboutToShow.connect(self._set_normalise_data)
+        self.sequentialFitDone.connect(self._sequential_fit_done_slot)
+        self.workspaceClicked.connect(self.display_workspace)
 
     def _add_spectra(self, spectra):
         """
@@ -86,81 +92,165 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                 pass
         return allowed_spectra
 
+    def _get_table_workspace(self):
+        """
+        Get the name of the table workspace if it exists
+        """
+        for ax in self.canvas.figure.get_axes():
+            try:
+                return ax.wsName
+            except AttributeError:  # only table workspaces have wsName
+                pass
+        return None
+
+    def _get_selected_workspace_artist(self):
+        ws_artists_list = self.get_axes().tracked_workspaces[self.workspaceName()]
+        for ws_artists in ws_artists_list:
+            if ws_artists.workspace_index == self.workspaceIndex():
+                return ws_artists
+
+    def _set_normalise_data(self):
+        """
+        Set if the data should be normalised before fitting using the
+        normalisation state of the active workspace artist.
+        If the workspace is a distribution normalisation is set to False so it is not normalised twice.
+        """
+        ws_is_distribution = False
+        if AnalysisDataService.doesExist(self.workspaceName()):
+            workspace = AnalysisDataService.retrieve(self.workspaceName())
+            if isinstance(workspace, ITableWorkspace):
+                return
+            if hasattr(workspace, 'isDistribution') and workspace.isDistribution():
+                ws_is_distribution = True
+        ws_artist = self._get_selected_workspace_artist()
+        should_normalise_before_fit = ws_artist.is_normalized and not ws_is_distribution
+        self.normaliseData(should_normalise_before_fit)
+
     def closeEvent(self, event):
         """
-        Emit self.closing signal used by figure manager to put the menu buttons in correct states
+        Emit self.closing signal used by figure manager to put the menu buttons
+        in correct states
         """
         self.closing.emit()
         BaseBrowser.closeEvent(self, event)
 
     def show(self):
+        import matplotlib.pyplot as plt
         """
         Override the base class method. Initialise the peak editing tool.
         """
         allowed_spectra = self._get_allowed_spectra()
+        table = self._get_table_workspace()
+
         if allowed_spectra:
             self._add_spectra(allowed_spectra)
+        elif table:
+            self.addAllowedTableWorkspace(table)
         else:
             self.toolbar_manager.toggle_fit_button_checked()
-            logger.warning("Cannot open fitting tool: No valid workspaces to "
-                           "fit to.")
+            logger.warning("Cannot open fitting tool: No valid workspaces to fit to.")
             return
 
-        self.tool = FitInteractiveTool(self.canvas, self.toolbar_manager,
-                                       current_peak_type=self.defaultPeakType())
-        self.tool.fit_start_x_moved.connect(self.setStartX)
-        self.tool.fit_end_x_moved.connect(self.setEndX)
+        super(FitPropertyBrowser, self).show()
+        self.tool = FitInteractiveTool(self.canvas,
+                                       self.toolbar_manager,
+                                       current_peak_type=self.defaultPeakType(),
+                                       default_background=self.defaultBackgroundType())
+        self.tool.fit_range_changed.connect(self.set_fit_range)
         self.tool.peak_added.connect(self.peak_added_slot)
         self.tool.peak_moved.connect(self.peak_moved_slot)
         self.tool.peak_fwhm_changed.connect(self.peak_fwhm_changed_slot)
         self.tool.peak_type_changed.connect(self.setDefaultPeakType)
         self.tool.add_background_requested.connect(self.add_function_slot)
         self.tool.add_other_requested.connect(self.add_function_slot)
-        self.setXRange(self.tool.fit_start_x.x, self.tool.fit_end_x.x)
-        super(FitPropertyBrowser, self).show()
+
+        self.set_fit_bounds(self.get_fit_bounds())
+        self.set_fit_range(self.tool.fit_range.get_range())
+
         self.setPeakToolOn(True)
         self.canvas.draw()
+
+        # change the output name if more than one plot of the same workspace
+        window_title = self.canvas.get_window_title()
+        workspace_name = window_title.rsplit('-', 1)[0]
+        for open_figures in plt.get_figlabels():
+            if open_figures != window_title and open_figures.rsplit('-', 1)[0] == workspace_name:
+                self.setOutputName(window_title)
+
+    def get_fit_bounds(self):
+        """
+        Gets the lower and upper bounds to use for the range marker tool
+        """
+        workspace_name = self.workspaceName()
+        if AnalysisDataService.doesExist(workspace_name):
+            return self.get_workspace_x_range(AnalysisDataService.retrieve(workspace_name))
+        return None
+
+    def get_workspace_x_range(self, workspace):
+        """
+        Gets the x limits of a workspace
+        :param workspace: The workspace to get the limits from
+        """
+        try:
+            x_data = self.getXRange()
+            return x_data
+        except (RuntimeError, IndexError, ValueError):
+            return None
+
+    def set_fit_bounds(self, fit_bounds):
+        """
+        Sets the bounds within which the range marker can be moved
+        :param fit_bounds: The bounds of the fit range
+        """
+        if fit_bounds is not None:
+            self.tool.fit_range.set_bounds(fit_bounds[0], fit_bounds[1])
+
+    def set_fit_range(self, fit_range):
+        """
+        Sets the range to fit in the FitPropertyBrowser
+        :param fit_range: The new fit range
+        """
+        if fit_range is not None:
+            self.setXRange(fit_range[0], fit_range[1])
 
     def hide(self):
         """
         Override the base class method. Hide the peak editing tool.
         """
         if self.tool is not None:
-            self.tool.fit_start_x_moved.disconnect()
-            self.tool.fit_end_x_moved.disconnect()
+            self.tool.fit_range_changed.disconnect()
             self.tool.disconnect()
             self.tool = None
             self.canvas.draw()
         super(FitPropertyBrowser, self).hide()
         self.setPeakToolOn(False)
 
-    def move_start_x(self, xd):
+    def move_x_range(self, start_x, end_x):
         """
-        Let the tool know that StartX has changed.
-        :param xd: New value of StartX
-        """
-        if self.tool is not None:
-            self.tool.move_start_x(xd)
-
-    def move_end_x(self, xd):
-        """
-        Let the tool know that EndX has changed.
-        :param xd: New value of EndX
+        Let the tool know that the Fit range has been changed in the FitPropertyBrowser.
+        :param start_x: New value of StartX
+        :param end_x: New value of EndX
         """
         if self.tool is not None:
-            self.tool.move_end_x(xd)
+            new_range = sorted([start_x, end_x])
+            bounds = self.tool.fit_range.get_bounds()
+            if bounds[0] <= new_range[0] and bounds[1] >= new_range[1]:
+                self.tool.set_fit_range(new_range[0], new_range[1])
+            else:
+                self.set_fit_range(self.tool.fit_range.get_range())
 
     def clear_fit_result_lines(self):
         """
         Delete the fit curves.
         """
-        for lin in self.fit_result_lines:
-            try:
-                lin.remove()
-            except ValueError:
-                # workspace replacement could invalidate these references
-                pass
-        self.fit_result_lines = []
+        for line in self.get_lines():
+            if line.get_label() == self.sequential_fit_line:
+                line.remove()
+
+        if self.fit_result_ws_name:
+            ws = AnalysisDataService.retrieve(self.fit_result_ws_name)
+            self.get_axes().remove_workspace_artists(ws)
+            self.fit_result_ws_name = ""
         self.update_legend()
 
     def get_lines(self):
@@ -172,6 +262,8 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     def get_axes(self):
         """
         Get the pyplot's Axes object.
+
+        :rtype: matplotlib.axes.Axes
         """
         return self.canvas.figure.get_axes()[0]
 
@@ -179,38 +271,68 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         """
         This needs to be called to update plot's legend after removing lines.
         """
-        axes = self.get_axes()
-        if axes.legend_ is not None:
-            axes.legend()
+        ax = self.get_axes()
+        # only create a legend if the plot already had one
+        if ax.get_legend():
+            ax.make_legend()
 
     def plot_guess(self):
         """
         Plot the guess curve.
         """
-        from mantidqt.plotting.functions import plot
         fun = self.getFittingFunction()
         ws_name = self.workspaceName()
         if fun == '' or ws_name == '':
             return
-        ws_index = self.workspaceIndex()
         out_ws_name = '{}_guess'.format(ws_name)
 
+        try:
+            out_ws = self.evaluate_function(ws_name, fun, out_ws_name)
+        except RuntimeError:
+            return
+
+        ax = self.get_axes()
+        legend = ax.get_legend()
+
+        # Setting distribution=True prevents the guess being normalised
+        self.guess_line = ax.plot(out_ws,
+                                  wkspIndex=1,
+                                  label=out_ws_name,
+                                  distribution=True,
+                                  update_axes_labels=False,
+                                  autoscale_on_update=False)[0]
+
+        if legend:
+            ax.make_legend()
+
+        if self.guess_line:
+            self.setTextPlotGuess('Remove Guess')
+
+        self.canvas.draw()
+
+    def evaluate_function(self, ws_name, fun, out_ws_name):
+        ws_index = self.workspaceIndex()
+        startX = self.startX()
+        endX = self.endX()
+        workspace = AnalysisDataService.retrieve(ws_name)
         alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
         alg.setChild(True)
         alg.initialize()
         alg.setProperty('Function', fun)
         alg.setProperty('InputWorkspace', ws_name)
-        alg.setProperty('WorkspaceIndex', ws_index)
+        if isinstance(workspace, ITableWorkspace):
+            alg.setProperty('XColumn', self.getXColumnName())
+            alg.setProperty('YColumn', self.getYColumnName())
+            if self.getErrColumnName():
+                alg.setProperty('ErrColumn', self.getErrColumnName())
+        else:
+            alg.setProperty('WorkspaceIndex', ws_index)
+        alg.setProperty('StartX', startX)
+        alg.setProperty('EndX', endX)
         alg.setProperty('OutputWorkspace', out_ws_name)
         alg.execute()
-        out_ws = alg.getProperty('OutputWorkspace').value
 
-        plot([out_ws], wksp_indices=[1], fig=self.canvas.figure, overplot=True, plot_kwargs={'label': out_ws_name})
-        for lin in self.get_lines():
-            if lin.get_label().startswith(out_ws_name):
-                self.guess_line = lin
-                self.setTextPlotGuess('Remove Guess')
-        self.canvas.draw()
+        return alg.getProperty('OutputWorkspace').value
 
     def remove_guess(self):
         """
@@ -240,11 +362,36 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         :return: The menu passed to us
         """
         if self.tool is not None:
-            self.tool.add_to_menu(menu, peak_names=self.registeredPeaks(),
+            self.tool.add_to_menu(menu,
+                                  peak_names=self.registeredPeaks(),
                                   current_peak_type=self.defaultPeakType(),
                                   background_names=self.registeredBackgrounds(),
                                   other_names=self.registeredOthers())
         return menu
+
+    def do_plot(self, ws, plot_diff = False, **plot_kwargs):
+        ax = self.get_axes()
+
+        self.clear_fit_result_lines()
+
+        # Keep local copy of the original lines
+        original_lines = self.get_lines()
+
+        ax.plot(ws, wkspIndex=1, autoscale_on_update=False, **plot_kwargs)
+        if plot_diff:
+            ax.plot(ws, wkspIndex=2, autoscale_on_update=False, **plot_kwargs)
+
+        self.addFitResultWorkspacesToTableWidget()
+        # Add properties back to the lines
+        new_lines = self.get_lines()
+        for new_line, old_line in zip(new_lines, original_lines):
+            new_line.update_from(old_line)
+
+        if ax.get_legend():
+            # Update the legend to make sure it changes to the old properties
+            ax.make_legend()
+
+        ax.figure.canvas.draw()
 
     @Slot()
     def clear_fit_result_lines_slot(self):
@@ -261,26 +408,25 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         This is called after Fit finishes to update the fit curves.
         :param name: The name of Fit's output workspace.
         """
-        from mantidqt.plotting.functions import plot
-        ws = mtd[name]
 
-        # Keep local copy of the original lines
-        original_lines = self.get_lines()
+        ws = AnalysisDataService.retrieve(name)
+        self.do_plot(ws, plot_diff=self.plotDiff())
+        self.fit_result_ws_name = name
 
-        self.clear_fit_result_lines()
-        plot([ws], wksp_indices=[1, 2], fig=self.canvas.figure, overplot=True)
-        name += ':'
-        for lin in self.get_lines():
-            if lin.get_label().startswith(name):
-                self.fit_result_lines.append(lin)
+    @Slot()
+    def _sequential_fit_done_slot(self):
+        fun = self.getFittingFunction()
+        ws_name = self.workspaceName()
+        out_ws_name = self.outputName() + "_res"
 
-        # Add properties back to the lines
-        new_lines = self.get_lines()
-        for new_line, old_line in zip(new_lines, original_lines):
-            new_line.update_from(old_line)
+        try:
+            out_ws = self.evaluate_function(ws_name, fun, out_ws_name)
+        except RuntimeError:
+            return
 
-        # Now update the legend to make sure it changes to the old properties
-        self.get_axes().legend().draggable()
+        plot_kwargs = {'label': out_ws_name}
+        self.do_plot(out_ws, plot_diff=False, **plot_kwargs)
+        self.sequential_fit_line = out_ws_name
 
     @Slot(int, float, float, float)
     def peak_added_slot(self, peak_id, centre, height, fwhm):
@@ -325,14 +471,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     @Slot(str)
     def peak_changed_slot(self, fun):
         """
-        Update the peak marker in the peak editing tool after peak's parameters change in the browser.
+        Update the peak marker in the peak editing tool after peak's parameters
+        change in the browser.
         :param fun: A prefix of the function that changed.
         """
         for peak_id, prefix in self.peak_ids.items():
             if prefix == fun:
                 self.tool.update_peak(peak_id, self.getPeakCentreOf(prefix),
-                                      self.getPeakHeightOf(prefix),
-                                      self.getPeakFwhmOf(prefix))
+                                      self.getPeakHeightOf(prefix), self.getPeakFwhmOf(prefix))
         self.update_guess()
 
     @Slot(str)
@@ -356,13 +502,14 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
     @Slot()
     def function_changed_slot(self):
         """
-        Update the peak editing tool after function structure has changed in the browser: functions added
-        and/or removed.
+        Update the peak editing tool after function structure has changed in
+        the browser: functions added and/or removed.
         """
         peaks_to_add = []
         peaks = {v: k for k, v in self.peak_ids.items()}
         for prefix in self.getPeakPrefixes():
-            c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(prefix), self.getPeakFwhmOf(prefix)
+            c, h, w = self.getPeakCentreOf(prefix), self.getPeakHeightOf(
+                prefix), self.getPeakFwhmOf(prefix)
             if prefix in peaks:
                 self.tool.update_peak(peaks[prefix], c, h, w)
                 del peaks[prefix]
@@ -383,10 +530,24 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                     need_update_markers = True
                     break
         if need_update_markers:
-            peak_ids, peak_updates = self.tool.update_peak_markers(self.peak_ids.keys(), peaks_to_add)
+            peak_ids, peak_updates = self.tool.update_peak_markers(self.peak_ids.keys(),
+                                                                   peaks_to_add)
             self.peak_ids.update(peak_ids)
             for prefix, c, h, w in peak_updates:
                 self.setPeakCentreOf(prefix, c)
                 self.setPeakHeightOf(prefix, h)
                 self.setPeakFwhmOf(prefix, w)
         self.update_guess()
+
+    @Slot(str)
+    def display_workspace(self, name):
+        from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDisplay
+        from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
+        if AnalysisDataService.doesExist(name):
+            ws = AnalysisDataService.retrieve(name)
+            if isinstance(ws, MatrixWorkspace):
+                presenter = MatrixWorkspaceDisplay(ws, plot=plot)
+                presenter.show_view()
+            elif isinstance(ws, ITableWorkspace):
+                presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot)
+                presenter.show_view()

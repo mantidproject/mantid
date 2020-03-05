@@ -149,7 +149,7 @@ void ProgressBase::reportIncrement(size_t inc, const std::string &msg) {
 void ProgressBase::setNumSteps(int64_t nsteps) {
   m_numSteps = std::max(nsteps, int64_t{1}); // Minimum of 1
 
-  double numSteps = static_cast<double>(m_numSteps);
+  auto numSteps = static_cast<double>(m_numSteps);
   m_step = (m_end - m_start) / numSteps;
 
   m_notifyStep = static_cast<int64_t>(numSteps * m_notifyStepPct * 0.01 /
@@ -204,7 +204,7 @@ void ProgressBase::setNotifyStep(double notifyStepPct) {
  *
  * @return seconds estimated to remain. 0 if it cannot calculate it */
 double ProgressBase::getEstimatedTime() const {
-  double elapsed = double(m_timeElapsed->elapsed_no_reset());
+  auto elapsed = double(m_timeElapsed->elapsed_no_reset());
   double prog = double(m_i) * m_step;
   if (prog <= 1e-4)
     return 0.0; // unknown

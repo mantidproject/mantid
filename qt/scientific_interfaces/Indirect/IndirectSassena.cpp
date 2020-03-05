@@ -16,11 +16,13 @@ namespace CustomInterfaces {
 IndirectSassena::IndirectSassena(QWidget *parent)
     : IndirectSimulationTab(parent) {
   m_uiForm.setupUi(parent);
+  setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
+      m_uiForm.ipoPlotOptions, this, PlotWidget::Spectra));
+
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(handleAlgorithmFinish(bool)));
 
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 }
 
@@ -77,10 +79,10 @@ void IndirectSassena::run() {
  */
 void IndirectSassena::handleAlgorithmFinish(bool error) {
   setRunIsRunning(false);
-  if (error) {
-    setPlotEnabled(false);
+  if (error)
     setSaveEnabled(false);
-  }
+  else
+    setOutputPlotOptionsWorkspaces({m_outWsName.toStdString()});
 }
 
 /**
@@ -93,16 +95,9 @@ void IndirectSassena::loadSettings(const QSettings &settings) {
   m_uiForm.mwInputFile->readSettings(settings.group());
 }
 
-void IndirectSassena::runClicked() { runTab(); }
-
-/**
- * Handle mantid plotting of workspace
- */
-void IndirectSassena::plotClicked() {
-  setPlotIsPlotting(true);
-  if (checkADSForPlotSaveWorkspace(m_outWsName.toStdString(), true))
-    plotSpectrum(m_outWsName);
-  setPlotIsPlotting(false);
+void IndirectSassena::runClicked() {
+  clearOutputPlotOptionsWorkspaces();
+  runTab();
 }
 
 /**
@@ -119,23 +114,13 @@ void IndirectSassena::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-void IndirectSassena::setPlotIsPlotting(bool running) {
-  m_uiForm.pbPlot->setText(running ? "Plotting..." : "Plot Result");
-  setButtonsEnabled(!running);
-}
-
 void IndirectSassena::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
-  setPlotEnabled(enabled);
   setSaveEnabled(enabled);
 }
 
 void IndirectSassena::setRunEnabled(bool enabled) {
   m_uiForm.pbRun->setEnabled(enabled);
-}
-
-void IndirectSassena::setPlotEnabled(bool enabled) {
-  m_uiForm.pbPlot->setEnabled(enabled);
 }
 
 void IndirectSassena::setSaveEnabled(bool enabled) {

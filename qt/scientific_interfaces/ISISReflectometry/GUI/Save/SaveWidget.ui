@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SaveWidget</class>
+ <widget class="QWidget" name="SaveWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>988</width>
+    <height>672</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Save ASCII</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+   <item>
+    <widget class="QGroupBox" name="fileLocationGroup">
+     <property name="title">
+      <string>File Names and Location</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="savePathLabel">
+        <property name="text">
+         <string>Save Path:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="savePathEdit"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="savePathBrowseButton">
+        <property name="text">
+         <string>Browse To Directory</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="fileNameLabel">
+        <property name="text">
+         <string>File Name Prefix:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="prefixEdit"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="detailedOptionsLayout" stretch="2,1">
+     <item>
+      <layout class="QVBoxLayout" name="saveTypesLayout" stretch="0,1">
+       <item>
+        <widget class="QGroupBox" name="customSaveGroupBox">
+         <property name="title">
+          <string>Custom Save</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="leftMargin">
+           <number>6</number>
+          </property>
+          <item>
+           <layout class="QVBoxLayout" name="workspaceListLayout">
+            <item>
+             <widget class="QLabel" name="listOfWorkspacesLabel">
+              <property name="text">
+               <string>&lt;b&gt;List Of Workspaces&lt;/b&gt;</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::RichText</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="workspaceFilterLayout">
+              <item>
+               <widget class="QLineEdit" name="filterEdit">
+                <property name="placeholderText">
+                 <string>Filter Workspaces</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="regexCheckBox">
+                <property name="text">
+                 <string>Regex</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QListWidget" name="listOfWorkspaces">
+              <property name="selectionMode">
+               <enum>QAbstractItemView::ExtendedSelection</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="refreshButton">
+              <property name="text">
+               <string>Refresh</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="loggedParametersLayout">
+            <item>
+             <widget class="QLabel" name="listOfLoggedParametersLabel">
+              <property name="text">
+               <string>&lt;b&gt;List Of Logged Parameters&lt;/b&gt;</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::RichText</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="listOfLoggedParameters">
+              <property name="selectionMode">
+               <enum>QAbstractItemView::ExtendedSelection</enum>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="autosaveGroup">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="title">
+          <string>Automatic Save</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QCheckBox" name="saveReductionResultsCheckBox">
+            <property name="toolTip">
+             <string>Saves stitched workspaces for multi-row group reductions and IvsQ_binned workspaces for reductions single row reductions.</string>
+            </property>
+            <property name="text">
+             <string>Save as ASCII on completion</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="fileFormatGroup">
+       <property name="styleSheet">
+        <string notr="true">.QGroupBox {
+    border-bottom: transparent;
+	border-left: transparent;
+    border-right: transparent;
+}</string>
+       </property>
+       <property name="title">
+        <string>File Format</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,0,0,0,0">
+        <property name="leftMargin">
+         <number>6</number>
+        </property>
+        <property name="topMargin">
+         <number>6</number>
+        </property>
+        <property name="rightMargin">
+         <number>6</number>
+        </property>
+        <property name="bottomMargin">
+         <number>6</number>
+        </property>
+        <item>
+         <widget class="QCheckBox" name="titleCheckBox">
+          <property name="text">
+           <string>Title</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="qResolutionCheckBox">
+          <property name="text">
+           <string>Q resolution</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="separatorButtons">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetMinimumSize</enum>
+          </property>
+          <item>
+           <widget class="QLabel" name="separatorLabel">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Separator:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="commaRadioButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Comma</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">separatorButtonGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="spaceRadioButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Space</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">separatorButtonGroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="tabRadioButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Tab</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">separatorButtonGroup</string>
+            </attribute>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QComboBox" name="fileFormatComboBox">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <item>
+           <property name="text">
+            <string>Custom format (*.dat)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>3 column (*.dat)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ANSTO, MotoFit, 4 column (*.txt)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>ILL Cosmos (*.mft)</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="saveButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>3</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>131</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>Save</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+ <buttongroups>
+  <buttongroup name="separatorButtonGroup"/>
+ </buttongroups>
+</ui>

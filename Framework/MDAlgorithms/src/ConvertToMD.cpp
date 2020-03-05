@@ -414,15 +414,6 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
     }
   }
 
-  // Replacement for SpectraDetectorMap::createIDGroupsMap using the ISpectrum
-  // objects instead
-  auto mapping = boost::make_shared<det2group_map>();
-  for (size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i) {
-    const auto &dets = m_InWS2D->getSpectrum(i).getDetectorIDs();
-    if (!dets.empty())
-      mapping->emplace(*dets.begin(), dets);
-  }
-
   // The last experiment info should always be the one that refers
   // to latest converting workspace. All others should have had this
   // information set already
@@ -431,7 +422,6 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
     ExperimentInfo_sptr expt =
         mdEventWS->getExperimentInfo(static_cast<uint16_t>(nexpts - 1));
     expt->mutableRun().storeHistogramBinBoundaries(binBoundaries.rawData());
-    expt->cacheDetectorGroupings(*mapping);
   }
 }
 

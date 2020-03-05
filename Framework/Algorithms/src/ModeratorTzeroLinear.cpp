@@ -166,7 +166,7 @@ void ModeratorTzeroLinear::exec() {
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
     PARALLEL_START_INTERUPT_REGION
     double t_f, L_i;
-    size_t wsIndex = static_cast<size_t>(i);
+    auto wsIndex = static_cast<size_t>(i);
     calculateTfLi(spectrumInfo, wsIndex, t_f, L_i);
 
     outputWS->setHistogram(i, inputWS->histogram(i));
@@ -220,7 +220,7 @@ void ModeratorTzeroLinear::execEvent() {
   Progress prog(this, 0.0, 1.0, numHists); // report progress of algorithm
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int i = 0; i < static_cast<int>(numHists); ++i) {
-    size_t wsIndex = static_cast<size_t>(i);
+    auto wsIndex = static_cast<size_t>(i);
     PARALLEL_START_INTERUPT_REGION
     EventList &evlist = outputWS->getSpectrum(wsIndex);
     if (evlist.getNumberEvents() > 0) // don't bother with empty lists

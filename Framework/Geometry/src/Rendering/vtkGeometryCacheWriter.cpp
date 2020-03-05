@@ -24,8 +24,8 @@
 #include <sstream>
 
 using Poco::XML::AutoPtr;
-using Poco::XML::DOMWriter;
 using Poco::XML::Document;
+using Poco::XML::DOMWriter;
 using Poco::XML::Element;
 using Poco::XML::Text;
 using Poco::XML::XMLWriter;

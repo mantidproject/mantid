@@ -30,9 +30,9 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::HistogramData::BinEdges;
+using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::CountVariances;
-using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::Points;
 
 namespace {

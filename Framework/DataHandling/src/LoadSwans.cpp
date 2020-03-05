@@ -183,7 +183,7 @@ std::map<uint32_t, std::vector<uint32_t>> LoadSwans::loadData() {
       continue;
     }
     pos -= 400000;
-    eventMap[pos].push_back(tof);
+    eventMap[pos].emplace_back(tof);
   }
   return eventMap;
 }

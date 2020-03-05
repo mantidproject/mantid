@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='ASCII'?>
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+            name="GPSANS"
+            valid-from="1900-01-31 23:59:59"
+            valid-to="2019-09-30 23:59:59"
+		    last-modified="2018-12-10 17:31:39.813535">
+
+
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+  </defaults>
+
+  <!--SOURCE AND SAMPLE POSITION-->
+  <component type="source">
+    <location z="-1"/>
+  </component>
+  <type is="Source" name="source"/>
+
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0"/>
+  </component>
+  <type is="SamplePos" name="sample-position"/>
+
+
+  <!-- detector components (including monitors) -->
+
+  <!-- ***************************************************************** -->
+  <!--MONITOR 1 -->
+  <component type="monitor1" idlist="monitor1">
+    <location z="-0.5" />
+  </component>
+  <type name="monitor1" is="monitor" />
+  <idlist idname="monitor1">
+    <id val="1" />
+  </idlist>
+
+ <!--MONITOR 2 -->
+  <component type="timer1" idlist="timer1">
+    <location z="-0.5" />
+  </component>
+  <type name="timer1" is="monitor" />
+   <idlist idname="timer1">
+    <id val="2" />
+  </idlist>
+
+  <component type="sample_aperture">
+    <location z="0.0"/>
+    <parameter name="Size"> <value val="14.0" /> </parameter>
+  </component>
+  <type name="sample_aperture" />
+
+
+<!-- ***************************************************************** -->
+<!-- Main Detector -->
+<component type="detector1" idstart="3" idfillbyfirst="x" idstep="192" idstepbyrow="1">
+		<location name="detector1">
+			<parameter name="z">
+				<logfile eq="0.001*value" id="sdd"/>
+			</parameter>
+			<parameter name="x">
+				<logfile eq="0.001*value" id="detector-translation"/>
+			</parameter>
+      <parameter name="y">
+        <value val="0.0"/>
+      </parameter>
+		</location>
+</component>
+
+<!-- Detector: -->
+<type name="detector1" is="rectangular_detector" type="pixel"
+    xpixels="192" xstart="-0.491825" xstep="0.00515"
+    ypixels="192" ystart="-0.491825" ystep="0.00515">
+    <properties />
+</type>
+
+<!-- Pixel for Detector-->
+<type name="pixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="-0.002575" y="-0.002575" z="0.0"  />
+      <left-front-top-point  x="-0.002575" y="0.002575" z="0.0"  />
+      <left-back-bottom-point  x="-0.002575" y="-0.002575" z="-0.000005"  />
+      <right-front-bottom-point  x="0.002575" y="-0.002575" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+
+</instrument>
+

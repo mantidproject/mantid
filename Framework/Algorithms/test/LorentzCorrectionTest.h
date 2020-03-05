@@ -34,13 +34,17 @@ private:
   /*
    * Calculate what the weight should be.
    */
-  double calculate_weight_at(double xMin, double xMax, double twotheta) {
+  double calculate_scd_weight_at(double xMin, double xMax, double twotheta) {
 
     double lam = 0.5 * (xMin + xMax);
     double weight = std::sin(0.5 * twotheta);
     weight = weight * weight;
     weight = weight / (lam * lam * lam * lam);
     return weight;
+  }
+
+  double calculate_pd_weight_at(double twotheta) {
+    return std::sin(0.5 * twotheta);
   }
 
   /**
@@ -104,9 +108,10 @@ public:
     LorentzCorrection alg;
     alg.setChild(true);
     alg.initialize();
-    TSM_ASSERT_THROWS("Workspace must be in units of wavelength",
-                      alg.setProperty("InputWorkspace", ws_tof),
-                      std::invalid_argument &);
+    alg.setProperty("InputWorkspace", ws_tof);
+
+    TSM_ASSERT_THROWS("Workspace must be in units of wavelength", alg.execute(),
+                      std::runtime_error &);
   }
 
   void test_throws_if_wavelength_zero() {
@@ -122,7 +127,7 @@ public:
                       alg.execute(), std::runtime_error &);
   }
 
-  void test_execute() {
+  void test_execute_scd() {
     auto ws_lam = this->create_workspace(2 /*nBins*/);
 
     LorentzCorrection alg;
@@ -142,17 +147,39 @@ public:
     const auto &eData = out_ws->e(0);
     const auto &spectrumInfo = out_ws->spectrumInfo();
 
-    int index = 0;
-    double weight = calculate_weight_at(xData[index], xData[index + 1],
-                                        spectrumInfo.twoTheta(0));
-    TS_ASSERT_EQUALS(yData[index], weight);
-    TS_ASSERT_EQUALS(eData[index], weight);
+    for (int index = 0; index < 2; ++index) {
+      const double weight = calculate_scd_weight_at(
+          xData[index], xData[index + 1], spectrumInfo.twoTheta(0));
+      TS_ASSERT_EQUALS(yData[index], weight);
+      TS_ASSERT_EQUALS(eData[index], weight);
+    }
+  }
 
-    index++; // go to 1
-    weight = calculate_weight_at(xData[index], xData[index + 1],
-                                 spectrumInfo.twoTheta(0));
-    TS_ASSERT_EQUALS(yData[index], weight);
-    TS_ASSERT_EQUALS(eData[index], weight);
+  void test_execute_pd() {
+    auto ws_lam = this->create_workspace(2 /*nBins*/);
+
+    LorentzCorrection alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", ws_lam);
+    alg.setPropertyValue("OutputWorkspace", "temp");
+    alg.setPropertyValue("Type", "PowderTOF");
+    alg.execute();
+    MatrixWorkspace_sptr out_ws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(out_ws != nullptr);
+
+    const std::string unitID = out_ws->getAxis(0)->unit()->unitID();
+    TS_ASSERT_EQUALS(unitID, "Wavelength");
+
+    const auto &yData = out_ws->y(0);
+    const auto &eData = out_ws->e(0);
+    const auto &spectrumInfo = out_ws->spectrumInfo();
+
+    for (int index = 0; index < 2; ++index) {
+      const double weight = calculate_pd_weight_at(spectrumInfo.twoTheta(0));
+      TS_ASSERT_EQUALS(yData[index], weight);
+      TS_ASSERT_EQUALS(eData[index], weight);
+    }
   }
 };
 

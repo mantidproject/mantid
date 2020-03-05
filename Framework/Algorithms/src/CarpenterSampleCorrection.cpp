@@ -83,8 +83,7 @@ void CarpenterSampleCorrection::exec() {
       boost::dynamic_pointer_cast<EventWorkspace>(inputWksp);
 
   // Inverse the absorption correction ( 1/A)
-  const int64_t NUM_HIST =
-      static_cast<int64_t>(inputWksp->getNumberHistograms());
+  const auto NUM_HIST = static_cast<int64_t>(inputWksp->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*absWksp))
   for (int64_t i = 0; i < NUM_HIST; ++i) {
     PARALLEL_START_INTERUPT_REGION

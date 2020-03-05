@@ -65,7 +65,7 @@ void SortTableWorkspace::exec() {
 
   // by default sort all columns in ascending order
   if (ascending.empty()) {
-    ascending.push_back(1);
+    ascending.emplace_back(1);
   }
 
   // if "Ascending" contains a single value - it's common for all columns.

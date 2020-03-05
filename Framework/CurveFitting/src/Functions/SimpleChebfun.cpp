@@ -155,9 +155,9 @@ std::vector<double> SimpleChebfun::roughRoots(double level) const {
   for (size_t i = 1; i < m_P.size(); ++i) {
     auto y = m_P[i] - level;
     if (y == 0.0) {
-      rs.push_back(x[i]);
+      rs.emplace_back(x[i]);
     } else if (y1 * y < 0.0) {
-      rs.push_back((-x[i - 1] * y + x[i] * y1) / (y1 - y));
+      rs.emplace_back((-x[i - 1] * y + x[i] * y1) / (y1 - y));
     }
     y1 = y;
   }

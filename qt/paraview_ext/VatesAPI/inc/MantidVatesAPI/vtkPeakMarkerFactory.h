@@ -44,14 +44,12 @@ public:
                        ePeakDimensions dimensions = Peak_in_Q_lab);
 
   /// Initialize the object with a workspace.
-  virtual void initialize(Mantid::API::Workspace_sptr workspace);
+  void initialize(Mantid::API::Workspace_sptr workspace);
 
   /// Factory method
   vtkSmartPointer<vtkPolyData> create(ProgressAction &progressUpdating) const;
 
-  virtual std::string getFactoryTypeName() const {
-    return "vtkPeakMarkerFactory";
-  }
+  std::string getFactoryTypeName() const { return "vtkPeakMarkerFactory"; }
 
   /// Getter for the peak workspace integration radius
   double getIntegrationRadius() const;
@@ -60,7 +58,7 @@ public:
   bool isPeaksWorkspaceIntegrated() const;
 
 protected:
-  virtual void validate() const;
+  void validate() const;
 
 private:
   void validateWsNotNull() const;

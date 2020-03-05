@@ -74,7 +74,7 @@ plot(const std::vector<std::string> &workspaces,
      boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
      boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
      boost::optional<std::string> windowTitle = boost::none,
-     bool errors = false, bool overplot = false);
+     bool errors = false, bool overplot = false, bool tiled = false);
 
 /**
  * \overload plot(const std::vector<std::string> &workspaces,
@@ -94,7 +94,46 @@ plot(const QStringList &workspaces,
      boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
      boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
      boost::optional<std::string> windowTitle = boost::none,
-     bool errors = false, bool overplot = false);
+     bool errors = false, bool overplot = false, bool tiled = false);
+
+/**
+ * Makes a call to mantidqt.plotting.plotsubplots.
+ *
+ * @param workspaces A vector of workspace names that are present in the ADS
+ *
+ * @param spectrumNums A vector of spectrum numbers correlating to the
+ * respective workspace in the vector of workspace names
+ *
+ * @param wkspIndices A vector of workspace indices correlating to the
+ * respective workspace in the vector of workspace names
+ *
+ * @param fig The python object that represents the matplotlib figure.
+ *
+ * @param plotKwargs A QHash<QString, QVariant> that consists of the individual
+ * plot options you can use, for examples look at the **kwargs section on this
+ * page https://matplotlib.org/api/_as_gen/matplotlib.pyplot.plot.html
+ *
+ * @param axProperties A QHash<QString, QVariant> that consists of the
+ * individual arguments you can give to the Matplotlib Axes object, for
+ * examples look at the **kwargs section on this page
+ * https://matplotlib.org/api/axes_api.html
+ *
+ * @param windowTitle The title of the plot window will be set here
+ *
+ * @param errors Whether or not the plot should contain errorbars
+ *
+ * @return Returns the figure that was created by the
+ * function in Python
+ */
+MANTID_MPLCPP_DLL Common::Python::Object plotsubplots(
+    const QStringList &workspaces,
+    boost::optional<std::vector<int>> spectrumNums,
+    boost::optional<std::vector<int>> wkspIndices,
+    boost::optional<Common::Python::Object> fig = boost::none,
+    boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
+    boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
+    boost::optional<std::string> windowTitle = boost::none,
+    bool errors = false);
 
 /**
  * Makes a call to mantidqt.plotting.pcolormesh.
