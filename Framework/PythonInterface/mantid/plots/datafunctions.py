@@ -1013,8 +1013,12 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     :param vmin: the minimum value on the colorbar
     :param vmax: the maximum value on the colorbar
     """
-    if vmin == 0 and scale == LogNorm:
-        vmin += 1e-6  # Avoid 0 log scale error
+    if vmin <= 0 and scale == LogNorm:
+        vmin = 1e-6  # Avoid 0 log scale error
+
+    if vmax <= 0 and scale == LogNorm:
+        vmax = 1  # Avoid 0 log scale error
+
     image.set_norm(scale(vmin=vmin, vmax=vmax))
     if image.colorbar:
         image.colorbar.remove()

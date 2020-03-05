@@ -42,12 +42,18 @@ class ImagesTabWidgetView(QWidget):
         self._populate_interpolation_combo_box()
         self._populate_scale_combo_box()
 
+        self.set_min_max_ranges(self.get_scale())
+
+        self.max_min_value_warning.setVisible(False)
+
+    def set_min_max_ranges(self, scale):
         # Set maximum and minimum for the min/max spin boxes
         for bound in ['min', 'max']:
             spin_box = getattr(self, '%s_value_spin_box' % bound)
-            spin_box.setRange(0, np.finfo(np.float32).max)
-
-        self.max_min_value_warning.setVisible(False)
+            if scale == "Linear":
+                spin_box.setRange(np.finfo(np.float32).min, np.finfo(np.float32).max)
+            else:
+                spin_box.setRange(0, np.finfo(np.float32).max)
 
     def _populate_colormap_combo_box(self):
         for cmap_name in get_colormap_names():

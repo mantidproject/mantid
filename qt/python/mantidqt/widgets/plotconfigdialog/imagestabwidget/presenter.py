@@ -30,6 +30,7 @@ class ImagesTabWidgetPresenter:
         # Signals
         self.view.select_image_combo_box.currentIndexChanged.connect(
             self.update_view)
+        self.view.scale_combo_box.currentTextChanged.connect(self.scale_changed)
 
     def apply_properties(self):
         props = self.view.get_properties()
@@ -112,3 +113,6 @@ class ImagesTabWidgetPresenter:
                 self.generate_image_name(img), img, self.image_names_dict)
         self.view.populate_select_image_combo_box(
             sorted(self.image_names_dict.keys()))
+
+    def scale_changed(self, scale):
+        self.view.set_min_max_ranges(scale)
