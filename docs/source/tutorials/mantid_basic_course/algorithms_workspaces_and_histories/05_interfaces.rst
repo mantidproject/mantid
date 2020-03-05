@@ -31,7 +31,7 @@ A simple walkthrough
 #. Some preset values will have populated the Run table and the **Settings** tab
 #. Back on the **Run** tab, notice that the Run table is editable and in the lower-right corner, there are several 
    options for Reducing and Saving data. Leave these as default for now.
-#. In the top-right, click *Process All*, in the main Mantid window, Workspaces will appear in the Workspaces Toolbox.
+#. In the top-right, click *Process All*, and notice in the main Mantid window, Workspaces will appear in the Workspaces Toolbox.
 #. Plot the *second_time_main_1D_2.2_10.0* Workspace to produce the plot seen below.
 
 .. figure:: /images/ISISSANSInterfaceplot.PNG

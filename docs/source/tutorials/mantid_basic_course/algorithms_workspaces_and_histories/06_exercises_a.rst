@@ -30,8 +30,7 @@ Exercise 1
    :align: center
    :width: 700px
 
-#. Replay by the steps used to create the *FilteredByTime* workspace
-   from the history of this workspace
+Show the History of the *FilteredByTime* workspace, which should match the steps above.
 
 Exercise 2
 ==========

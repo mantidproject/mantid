@@ -35,7 +35,6 @@ function".
 
 .. figure:: /images/AddOtherFunctionOptionEMU.png
    :alt: AddOtherFunctionOption.png
-   :width: 700px
    :align: center
 
 

@@ -72,9 +72,8 @@ Exercise 2
 
 where the orange line is the guess
 
-#. Remove plot guess
-#. Fit the data with the model, where the output should be something
-   similar to:
+9. Remove plot guess
+10. Fit the data with the model, where the output should be something similar to:
 
 .. figure:: /images/ExerciseFittingMBCfit.png
    :alt: ExerciseFittingMBCfit.png
@@ -82,20 +81,7 @@ where the orange line is the guess
 
 where the green line here is the Calculated fit
 
-#. Now clear the model (Setup > Clear Model) and remove the fit curves (Display > Clear Fit Curves)
-#. Plot the spectrum in the *GEM63437_focussed_3* workspace
-#. Using the same background and peak fitting function as above, try to fit the
-   region between about 2000 and 9400 microseconds. I advise displaying Plot Guess after adding the background and before adding any peaks, then use this to help alter the height, position and width of the peaks as you add them. Also, remember you can zoom in on the smaller peaks!.
-
-.. figure:: /images/ExerciseFittingMBCfit_2.png
-   :alt: ExerciseFittingMBCfit_2.png
-   :align: center
-
-**Note** this will take a little longer to fit as it has almost 40
-independent parameters to optimise.
-
-#. Optionally using a similar approach try to fit the spectrum in for
-   example GEM63437_focussed_5
+Optionally using a similar approach try to fit the spectrum in for example *GEM63437_focussed_3*
 
 Exercise 3
 ==========

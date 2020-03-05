@@ -26,7 +26,7 @@ Another way to plot
 
 .. figure:: /images/200px-MAR11060PartialLoad.png
    :alt: 200px-MAR11060PartialLoad.png
-   :width: 250px
+   :width: 350px
 
 1. Load MAR11060.raw, but this time set SpectrumMin to be "100" and
    SpectrumMax to be "200". Because the values are inclusive, we are
@@ -47,7 +47,7 @@ Another way to plot
 
 .. figure:: /images/300px-MatrixDisplayRightClickOptions.png
    :align: center
-   :width: 700px
+
 
 5. You will be presented with options for plotting the selected spectra,
    with and without errors. Select "Plot Spectra" (showing the values
