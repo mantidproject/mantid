@@ -51,6 +51,7 @@ Fixed
   numbers of points.
 - Bug fixed affecting SANS > ORNL_SANS interface - only facilities with applicable instruments can now be selected.
 - Bug fixed causing ORNL_SANS interface to crash when selecting HFIR instruments
+- The help documentation now loads correctly
 
 
 :ref:`Release 5.0.0 <v5.0.0>`
