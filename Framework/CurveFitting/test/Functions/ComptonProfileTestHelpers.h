@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COMPTONPROFILETESTHELPERS_H_
-#define COMPTONPROFILETESTHELPERS_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -207,5 +206,3 @@ static void addFoilResolution(const Mantid::API::MatrixWorkspace_sptr &ws,
   pmap.addDouble(compID, "sigma_gauss", 20);
 }
 } // namespace ComptonProfileTestHelpers
-
-#endif /* COMPTONPROFILETESTHELPERS_H_ */

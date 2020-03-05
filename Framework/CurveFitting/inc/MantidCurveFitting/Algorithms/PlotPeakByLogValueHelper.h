@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_PLOTPEAKBULOGVALUEHELPER_H_
-#define MANTID_CURVEFITTING_PLOTPEAKBULOGVALUEHELPER_H_
+#pragma once
 #include "MantidAPI/DllConfig.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -52,5 +51,3 @@ enum SpecialIndex {
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_PLOTPEAKBYLOGVALUEHELPER_H_*/

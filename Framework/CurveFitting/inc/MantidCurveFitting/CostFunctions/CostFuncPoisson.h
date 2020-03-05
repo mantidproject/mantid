@@ -1,5 +1,4 @@
-#ifndef MANTID_CURVEFITTING_COSTFUNCPOISSON_H_
-#define MANTID_CURVEFITTING_COSTFUNCPOISSON_H_
+#pragma once
 
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
@@ -62,5 +61,3 @@ private:
 } // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_COSTFUNCPOISSON_H_ */

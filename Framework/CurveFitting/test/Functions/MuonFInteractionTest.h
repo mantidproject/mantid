@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MUONFINTERACTIONTEST_H_
-#define MUONFINTERACTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -114,5 +113,3 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 };
-
-#endif /*MUONFINTERACTONTEST_H_*/

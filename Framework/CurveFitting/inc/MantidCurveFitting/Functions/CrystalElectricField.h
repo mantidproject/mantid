@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_CRYSTALELECTRICFIELD_H_
-#define MANTID_CURVEFITTING_CRYSTALELECTRICFIELD_H_
+#pragma once
 
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/FortranDefs.h"
@@ -59,5 +58,3 @@ void MANTID_CURVEFITTING_DLL calculateMagneticMomentMatrix(
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_CRYSTALELECTRICFIELD_H_*/

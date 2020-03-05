@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_COMPLEXVECTOR_H_
-#define MANTID_CURVEFITTING_COMPLEXVECTOR_H_
+#pragma once
 
 #include "MantidCurveFitting/DllConfig.h"
 #include <gsl/gsl_vector.h>
@@ -138,5 +137,3 @@ inline ComplexType operator*(const ComplexType &c,
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_COMPLEXVECTOR_H_*/

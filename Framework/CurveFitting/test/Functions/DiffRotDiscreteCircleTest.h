@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DIFFROTDISCRETECIRCLETEST_H_
-#define DIFFROTDISCRETECIRCLETEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -610,5 +609,3 @@ private:
     return ws;
   }
 };
-
-#endif /* DIFFROTDISCRETECIRCLETEST_H_ */

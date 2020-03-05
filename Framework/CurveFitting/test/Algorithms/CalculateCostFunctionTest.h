@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_CALCULATECOSTFUNCTIONTEST_H_
-#define MANTID_CURVEFITTING_CALCULATECOSTFUNCTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -96,5 +95,3 @@ public:
     TS_ASSERT_DELTA(value, sum / 2, 1e-15);
   }
 };
-
-#endif /* MANTID_CURVEFITTING_CALCULATECOSTFUNCTIONTEST_H_ */

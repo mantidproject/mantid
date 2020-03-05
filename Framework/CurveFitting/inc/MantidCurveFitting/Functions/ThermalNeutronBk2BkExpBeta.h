@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPBETA_H_
-#define MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPBETA_H_
+#pragma once
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
@@ -56,5 +55,3 @@ using ThermalNeutronBk2BkExpBeta_sptr =
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPBETA_H_ */

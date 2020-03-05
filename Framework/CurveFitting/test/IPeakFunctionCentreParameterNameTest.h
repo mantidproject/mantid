@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IPEAKFUNCTIONCENTREPARAMETERNAMETEST_H
-#define IPEAKFUNCTIONCENTREPARAMETERNAMETEST_H
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -61,5 +60,3 @@ public:
 private:
   std::map<std::string, std::string> m_expectedResults;
 };
-
-#endif // IPEAKFUNCTIONCENTREPARAMETERNAMETEST_H

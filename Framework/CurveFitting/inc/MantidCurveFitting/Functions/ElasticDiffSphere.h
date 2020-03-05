@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ELASTICDIFFSPHERE_H_
-#define MANTID_ELASTICDIFFSPHERE_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -47,5 +46,3 @@ public:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif // MANTID_ELASTICDIFFSPHERE_H_

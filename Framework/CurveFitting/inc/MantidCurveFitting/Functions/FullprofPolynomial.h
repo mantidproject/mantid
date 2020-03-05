@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_FULLPROFPOLYNOMIAL_H_
-#define MANTID_CURVEFITTING_FULLPROFPOLYNOMIAL_H_
+#pragma once
 
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidKernel/System.h"
@@ -63,5 +62,3 @@ using FullprofPolynomial_sptr = boost::shared_ptr<FullprofPolynomial>;
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_FULLPROFPOLYNOMIAL_H_ */

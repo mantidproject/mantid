@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_REFINEPOWDERINSTRUMENTPARAMETERS_H_
-#define MANTID_CURVEFITTING_REFINEPOWDERINSTRUMENTPARAMETERS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -200,5 +199,3 @@ inline double linearInterpolateY(double x0, double xf, double y0, double yf,
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_REFINEPOWDERINSTRUMENTPARAMETERS_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BACKTOBACKEXPONENTIALTEST_H_
-#define BACKTOBACKEXPONENTIALTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -192,5 +191,3 @@ public:
     TS_ASSERT_EQUALS(b2bExp.getParameter("I"), 3.0);
   }
 };
-
-#endif /*BACKTOBACKEXPONENTIALTEST_H_*/

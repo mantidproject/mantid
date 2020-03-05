@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_REFINEPOWDERINSTRUMENTPARAMETERSTEST_H_
-#define MANTID_CURVEFITTING_REFINEPOWDERINSTRUMENTPARAMETERSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -505,5 +504,3 @@ public:
     return;
   }
 };
-
-#endif /* MANTID_CURVEFITTING_REFINEPOWDERINSTRUMENTPARAMETERSTEST_H_ */

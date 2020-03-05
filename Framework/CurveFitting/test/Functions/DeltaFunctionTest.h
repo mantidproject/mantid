@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DELTAFUNCTIONTEST_H
-#define DELTAFUNCTIONTEST_H
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -224,5 +223,3 @@ public:
   }
 
 }; // end of DeltaFunctionTest
-
-#endif /* DELTAFUNCTIONTEST_H */

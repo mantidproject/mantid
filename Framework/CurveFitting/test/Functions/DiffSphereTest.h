@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DIFFSPHERETEST_H_
-#define DIFFSPHERETEST_H_
+#pragma once
 
 #include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
@@ -549,5 +548,3 @@ private:
   }
 
 }; // class DiffSphereTest
-
-#endif /*DIFFSPHERETEST_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DYNAMICKUBOTOYABETEST_H_
-#define DYNAMICKUBOTOYABETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -134,5 +133,3 @@ public:
     TS_ASSERT_DELTA(y[4], 0.177036, 0.000001);
   }
 };
-
-#endif /*DYNAMICKUBOTOYABETEST_H_*/

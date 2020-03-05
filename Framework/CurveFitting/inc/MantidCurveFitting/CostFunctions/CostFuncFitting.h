@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_COSTFUNCFITTING_H_
-#define MANTID_CURVEFITTING_COSTFUNCFITTING_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -142,5 +141,3 @@ protected:
 } // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_COSTFUNCFITTING_H_*/

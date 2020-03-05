@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_PRODUCTQUADRATICEXPTEST_H_
-#define MANTID_CURVEFITTING_PRODUCTQUADRATICEXPTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -234,5 +233,3 @@ public:
     do_test_function_calculation(A0, A1, A2, Height, Lifetime);
   }
 };
-
-#endif /* MANTID_CURVEFITTING_PRODUCTQUADRATICEXPTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef RESOLUTIONTEST_H_
-#define RESOLUTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -162,5 +161,3 @@ private:
   double yErr;
   const std::string resFileName;
 };
-
-#endif /*RESOLUTIONTEST_H_*/

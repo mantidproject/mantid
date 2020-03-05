@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TEIXEIRAWATERSQETEST_H_
-#define TEIXEIRAWATERSQETEST_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
@@ -103,5 +102,3 @@ private:
     return func;
   }
 };
-
-#endif /*TEIXEIRAWATERSQETEST_H_*/
