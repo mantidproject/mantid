@@ -11,8 +11,7 @@
  *      Author: ruth
  */
 
-#ifndef PANELHKLERRORSTEST_H_
-#define PANELHKLERRORSTEST_H_
+#pragma once
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
@@ -127,5 +126,3 @@ public:
     TS_ASSERT_DELTA(Jac->get(80, 4), -.0943, .1);
   }
 };
-
-#endif /* PANELHKLERRORSTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_LOADISAWSpectrumTEST_H_
-#define MANTID_CRYSTAL_LOADISAWSpectrumTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/LoadIsawSpectrum.h"
@@ -61,5 +60,3 @@ public:
     AnalysisDataService::Instance().remove("LoadIsawSpectrumTest_ws");
   }
 };
-
-#endif /* MANTID_CRYSTAL_LOADISAWSpectrumTEST_H_ */

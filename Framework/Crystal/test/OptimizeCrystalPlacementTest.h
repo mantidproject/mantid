@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef OPTIMIZECRYSTALPLACEMENTTEST_H_
-#define OPTIMIZECRYSTALPLACEMENTTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
@@ -247,5 +246,3 @@ private:
 
   PeaksWorkspace_sptr m_inputPeaksWS;
 };
-
-#endif /* OPTIMIZECRYSTALPLACEMENTTEST_H_ */

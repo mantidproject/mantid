@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FIND_SX_PEAKSTEST_H_
-#define FIND_SX_PEAKSTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidCrystal/FindSXPeaks.h"
@@ -415,5 +414,3 @@ public:
     TSM_ASSERT("Should have found many peaks!", 0 < result->rowCount());
   }
 };
-
-#endif

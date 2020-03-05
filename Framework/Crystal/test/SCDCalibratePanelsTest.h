@@ -11,8 +11,7 @@
  *      Author: ruth
  */
 
-#ifndef SCDCALIBRATEPANELSTEST_H_
-#define SCDCALIBRATEPANELSTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
@@ -89,5 +88,3 @@ public:
     remove(detCalTempPath.string().c_str());
   }
 };
-
-#endif /* SCDCALIBRATEPANELSTEST_H_ */

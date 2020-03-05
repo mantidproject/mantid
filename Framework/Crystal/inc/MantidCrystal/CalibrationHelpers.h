@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_CALIBRATIONHELPERS_H_
-#define MANTID_CRYSTAL_CALIBRATIONHELPERS_H_
+#pragma once
 
 #include "MantidGeometry/Instrument.h"
 
@@ -35,5 +34,3 @@ adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames,
 } // namespace CalibrationHelpers
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_CALIBRATIONHELPERS_H_ */

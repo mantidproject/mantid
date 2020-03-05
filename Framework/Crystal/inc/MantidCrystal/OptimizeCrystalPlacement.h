@@ -11,8 +11,7 @@
  *      Author: ruth
  */
 
-#ifndef OPTIMIZECRYSTALPLACEMENT_H_
-#define OPTIMIZECRYSTALPLACEMENT_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
@@ -55,5 +54,3 @@ private:
 };
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* OPTIMIZECRYSTALPLACEMENT_H_ */

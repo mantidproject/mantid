@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_PEAKBACKGROUND_H_
-#define MANTID_CRYSTAL_PEAKBACKGROUND_H_
+#pragma once
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -59,5 +58,3 @@ public:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_PEAKBACKGROUND_H_ */

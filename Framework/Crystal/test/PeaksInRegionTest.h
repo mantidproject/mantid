@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_PEAKSINREGIONTEST_H_
-#define MANTID_CRYSTAL_PEAKSINREGIONTEST_H_
+#pragma once
 
 #include "MantidCrystal/PeaksInRegion.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -508,5 +507,3 @@ public:
     TS_ASSERT_EQUALS(inputWS->rowCount(), outWS->rowCount());
   }
 };
-
-#endif /* MANTID_CRYSTAL_PEAKSINREGIONTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BACKGROUNDSTRATEGY_H_
-#define BACKGROUNDSTRATEGY_H_
+#pragma once
 
 namespace Mantid {
 namespace API {
@@ -25,4 +24,3 @@ public:
 };
 } // namespace Crystal
 } // namespace Mantid
-#endif /* BACKGROUNDSTRATEGY_H_ */

@@ -11,8 +11,7 @@
  *      Author: ruth
  */
 
-#ifndef PEAKHKLERRORS_H_
-#define PEAKHKLERRORS_H_
+#pragma once
 #include "MantidKernel/System.h"
 
 #include "MantidAPI/IFunction.h"
@@ -161,5 +160,3 @@ private:
 };
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* PEAKHKLERRORS_H_ */

@@ -5,8 +5,7 @@
  *      Author: Vickie Lynch
  */
 
-#ifndef PREDICTSATELLITEPEAKSTEST_H_
-#define PREDICTSATELLITEPEAKSTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -112,5 +111,3 @@ public:
     AnalysisDataService::Instance().remove("Modulated");
   }
 };
-
-#endif /* PREDICTSATELLITEPEAKSTEST__H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_CALIBRATIONHELPERSTEST_H_
-#define MANTID_CRYSTAL_CALIBRATIONHELPERSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -278,5 +277,3 @@ private:
     oldRotFirstBank3 = detectorInfoOldWs.rotation(FIRST_DET_INDEX_BANK_3);
   }
 };
-
-#endif /* MANTID_CRYSTAL_CALIBRATIONHELPERSTEST_H_ */

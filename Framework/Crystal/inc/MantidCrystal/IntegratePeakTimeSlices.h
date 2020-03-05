@@ -10,8 +10,7 @@
  *  Created on: May 5, 2011
  *      Author: ruth
  */
-#ifndef INTEGRATEPEAKTIMESLICES_H_
-#define INTEGRATEPEAKTIMESLICES_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -360,5 +359,3 @@ private:
 };
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* INTEGRATEPEAKTIMESLICES_H_ */

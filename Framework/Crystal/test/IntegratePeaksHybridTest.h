@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_INTEGRATEPEAKSHYBRIDTEST_H_
-#define MANTID_CRYSTAL_INTEGRATEPEAKSHYBRIDTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -424,5 +423,3 @@ public:
     execute_integration(m_inputWorkspaces, m_backgroundOuterRadius, m_nBins);
   }
 };
-
-#endif /* MANTID_CRYSTAL_INTEGRATEPEAKSHYBRIDTEST_H_ */
