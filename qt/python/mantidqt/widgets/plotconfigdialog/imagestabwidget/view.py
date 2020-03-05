@@ -53,7 +53,7 @@ class ImagesTabWidgetView(QWidget):
             if scale == "Linear":
                 spin_box.setRange(np.finfo(np.float32).min, np.finfo(np.float32).max)
             else:
-                spin_box.setRange(0, np.finfo(np.float32).max)
+                spin_box.setRange(0.0001, np.finfo(np.float32).max)
 
     def _populate_colormap_combo_box(self):
         for cmap_name in get_colormap_names():

@@ -141,15 +141,15 @@ class AxisEditor(PropertiesEditorBase):
         # apply properties
         axes = self.axes
 
-        self.limit_min, self.limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
+        self.min, self.limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
 
         if self.ui.logBox.isChecked():
             self.scale_setter('log', **{self.nonposkw: TREAT_LOG_NEGATIVE_VALUES})
-            self.limit_min, self.limit_max = self._check_log_limits(self.limit_min, self.limit_max)
+            self.min, self.limit_max = self._check_log_limits(self.min, self.limit_max)
         else:
             self.scale_setter('linear')
 
-        self.lim_setter(self.limit_min, self.limit_max)
+        self.lim_setter(self.min, self.limit_max)
 
         axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id)
 
@@ -203,11 +203,19 @@ class ColorbarAxisEditor(AxisEditor):
         self.create_model()
 
     def changes_accepted(self):
-        super(ColorbarAxisEditor, self).changes_accepted()
+        self.ui.errors.hide()
+
+        limit_min, limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
+
         scale = Normalize
         if isinstance(self.images[0].norm, LogNorm):
             scale = LogNorm
-        update_colorbar_scale(self.canvas.figure, self.images[0], scale, self.limit_min, self.limit_max)
+
+        if scale == LogNorm and (limit_min <= 0 or limit_max <= 0):
+            raise ValueError("Limits must be positive\nwhen scale is logarithmic.")
+
+        self.lim_setter(limit_min, limit_max)
+        update_colorbar_scale(self.canvas.figure, self.images[0], scale, limit_min, limit_max)
 
     def create_model(self):
         memento = AxisEditorModel()

@@ -1014,10 +1014,12 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     :param vmax: the maximum value on the colorbar
     """
     if vmin <= 0 and scale == LogNorm:
-        vmin = 1e-6  # Avoid 0 log scale error
+        vmin = 0.0001  # Avoid 0 log scale error
+        mantid.kernel.logger.error("Scale is set to logarithmic so non-positive min value has been changed to 0.0001.")
 
     if vmax <= 0 and scale == LogNorm:
         vmax = 1  # Avoid 0 log scale error
+        mantid.kernel.logger.error("Scale is set to logarithmic so non-positive max value has been changed to 1.")
 
     image.set_norm(scale(vmin=vmin, vmax=vmax))
     if image.colorbar:

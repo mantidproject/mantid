@@ -24,13 +24,15 @@ class ImagesTabWidgetPresenter:
         else:
             self.view = view
 
+        # This connection is here so that when the view is updated below the min/max spin boxes have the correct range
+        # for the scale.
+        self.view.scale_combo_box.currentTextChanged.connect(self.scale_changed)
+
         self.image_names_dict = dict()
         self.populate_select_image_combo_box_and_update_view()
 
-        # Signals
         self.view.select_image_combo_box.currentIndexChanged.connect(
             self.update_view)
-        self.view.scale_combo_box.currentTextChanged.connect(self.scale_changed)
 
     def apply_properties(self):
         props = self.view.get_properties()
