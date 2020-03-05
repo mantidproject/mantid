@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTOR_H_
-#define MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTOR_H_
+#pragma once
 
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/Validation.h"
@@ -167,5 +166,3 @@ public:
 } // namespace detail
 } // namespace HistogramData
 } // namespace Mantid
-
-#endif /* MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTOR_H_ */
