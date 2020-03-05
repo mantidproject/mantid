@@ -14,7 +14,7 @@ If Algorithms are the verbs of Mantid, then Workspaces are the nouns.
 Workspaces are used to store data within Mantid, and when you manipulate data, 
 you output to a new Workspace.
 
-Workspaces come in several forms, but the most common two are the :ref:`Workspace2D` and the :ref:`EventWorkspace`. Their data are in an XYE format (the genereal Mantid term is :ref:`MatrixWorkspace`)
+Workspaces come in several forms, but the most common two are the :ref:`Workspace2D` and the :ref:`EventWorkspace`. Their data are in an XYE format (the general Mantid term is :ref:`MatrixWorkspace`)
 containing 1 or more spectra.
 
 
@@ -115,7 +115,7 @@ Note: If you Execute **Rebin** on an EventWorkspace *AND* the PreserveEvents box
 Performance
 -----------
 
-Operating on an EventWorkspace is slower than on a Workspace2D, or put more techincally:
+Operating on an EventWorkspace is slower than on a Workspace2D, or put more technically:
 
 - Each event list is separate
 - Sorting events is O(n) = n log(n)
@@ -154,8 +154,8 @@ A :ref:`PeaksWorkspace` is a special type of TableWorkspace with additional supp
 See right for an example of a PeaksWorkspace.
 
 
-OtherWorkspace Types
-====================
+Other Workspace Types
+=====================
 
 -  A :ref:`WorkspaceGroup` allows you to organise Workspaces into groups.
    To create a group simply select more than one workspace in the Workspace Toolbox and click the "**Group**" button.

@@ -84,7 +84,7 @@ Let's build a model consisting of a peak and a background function.
 Note that two fit functions have appeared in the Fit
 Property Browser called ``f0-Gaussian`` and ``f1-FlatBackground``.
 Click on the triangles beside these functions to reveal their fit parameters.
-Just as with the StartX/EndX values, dragging on the plot and changing these values update eachother.
+Just as with the StartX/EndX values, dragging on the plot and changing these values update each other.
 
 .. figure:: /images/PeakAndBackgroundSetup.png
    :alt: PeakAndBackgroundSetup.png
@@ -138,7 +138,7 @@ The Mantid fitting framework allows you to tie or constrain parameters.
 **Tying** sets a parameter equal to an expression
 of other parameters (from any of the selected functions). 
 
-**Fixing** is bascially tying a parameter to a number (constant).
+**Fixing** is basically tying a parameter to a number (constant).
 
 **Constraining** a parameter keeps its value above a lower bound,
 below an upper bound, or both!

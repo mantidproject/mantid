@@ -15,7 +15,7 @@ Exercise 1
    **PreserveEvents** ticked
 #. Right-click the workspace called *binned* and choose the **Plot
    Spectrum** option. Once the graph is plotted, leave do not delete it
-#. Events in a EventWorkspace may get filtered according to other
+#. Events in an EventWorkspace may get filtered according to other
    recorded events during the experiments. At perhaps the simplest level
    you can filter out events between specific times. Use
    :ref:`algm-FilterByTime` for this. It has a parameter called

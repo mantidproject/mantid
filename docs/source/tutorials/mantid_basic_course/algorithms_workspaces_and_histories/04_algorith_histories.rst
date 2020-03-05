@@ -1,7 +1,7 @@
 .. _04_algorith_histories:
 
 ====================
-Algorithim Histories 
+Algorithm Histories 
 ====================
 
 Algorithm History

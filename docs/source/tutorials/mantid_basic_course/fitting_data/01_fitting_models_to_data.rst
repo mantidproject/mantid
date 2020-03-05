@@ -16,7 +16,7 @@ Fitting Models To Data
 .. role:: green
 .. role:: orange
 
-Fitting is itereatively searching for the parameter values that minimise some cost function to obtain
+Fitting is iteratively searching for the parameter values that minimise some cost function to obtain
 the best fit of the model to the data.
 
 
@@ -48,7 +48,7 @@ Simple fitting
 4. Choose ExpDecay and click OK
 |ChooseExpDecay.png|
 
-5. Notice how the ExpDecay function has appeared in the Functions list on the Fit Property Browser, and there are preset Settings below.
+5. Notice how the ExpDecay function has appeared in the Functions list on the Fit Property Browser, and there are pre-set Settings below.
 For now, just click on the drop-down menu "Fit" and run a normal Fit.
 
 .. figure:: /images/RunFitOption.png
