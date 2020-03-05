@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADSPICE2DTEST_H
-#define LOADSPICE2DTEST_H
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -247,4 +246,3 @@ private:
   std::string inputFile;
   Mantid::DataHandling::LoadSpice2D spice2d;
 };
-#endif

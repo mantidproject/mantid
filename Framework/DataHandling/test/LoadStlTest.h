@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOAD_STL_TEST_H_
-#define LOAD_STL_TEST_H_
+#pragma once
 #include "MantidDataHandling/LoadStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/V3D.h"
@@ -72,4 +71,3 @@ public:
     TS_ASSERT_DIFFERS(HashV3DPair{}(pair1), HashV3DPair{}(pair3));
   }
 };
-#endif /* LOAD_STL_TEST_H_ */

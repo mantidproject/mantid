@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SETSCALINGPSDTEST_H_
-#define SETSCALINGPSDTEST_H_
+#pragma once
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
@@ -180,5 +179,3 @@ private:
   /// Constant shift
   const double m_y_offset;
 };
-
-#endif /*SETSCALINGPSDTEST_H_*/

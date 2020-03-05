@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATAHANDING_SAVEFOCUSEDXYE_H_
-#define DATAHANDING_SAVEFOCUSEDXYE_H_
+#pragma once
 
 #include "MantidAPI/SerialAlgorithm.h"
 
@@ -105,4 +104,3 @@ private:
 };
 } // namespace DataHandling
 } // namespace Mantid
-#endif // DATAHANDING_SAVEFOCUSEDXYE_H_

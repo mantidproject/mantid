@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ENDIAN_CONVERT
-#define ENDIAN_CONVERT
+#pragma once
 
 // We aren't going to EVER change this code - so let's ignore the warnings.
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
@@ -42,5 +41,3 @@ void local_to_ieee_float(float *val, const int *n, int *errcode);
 void local_to_ieee_double(double *val, const int *n, int *errcode);
 void ieee_float_to_local(float *val, const int *n, int *errcode);
 void ieee_double_to_local(double *val, const int *n, int *errcode);
-
-#endif /* ENDIAN_CONVERT */

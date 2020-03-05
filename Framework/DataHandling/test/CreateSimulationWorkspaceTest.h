@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACETEST_H_
-#define MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -262,4 +261,3 @@ private:
 
   const std::string outWsName = "outTestWs";
 };
-#endif /* MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACETEST_H_ */

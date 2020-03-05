@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ITEM_STRUCT_H
-#define ITEM_STRUCT_H
+#pragma once
 
 #include <map>
 #include <string>
@@ -80,5 +79,3 @@ public:
   int getArrayItem(const std::string &item_name, int nspec, T *larray);
   int getArrayItem(const std::string &item_name, T *larray);
 };
-
-#endif /* ITEM_STRUCT_H */

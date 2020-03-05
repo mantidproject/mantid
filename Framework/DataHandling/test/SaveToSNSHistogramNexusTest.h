@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVESNSNEXUSTEST_H_
-#define SAVESNSNEXUSTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -59,4 +58,3 @@ private:
   std::string outputFile;
   std::string title;
 };
-#endif /*SaveToSNSHistogramNexusTEST_H_*/

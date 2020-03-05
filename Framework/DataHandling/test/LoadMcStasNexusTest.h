@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADMCSTASNEXUSTEST_H_
-#define LOADMCSTASNEXUSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -112,4 +111,3 @@ private:
   std::string inputFile;
   std::string outputSpace;
 };
-#endif /*LOADMCSTASNEXUSTEST_H_*/

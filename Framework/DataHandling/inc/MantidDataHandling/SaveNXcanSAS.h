@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVENXCANSAS_H_
-#define MANTID_DATAHANDLING_SAVENXCANSAS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
@@ -50,5 +49,3 @@ makeCanSASRelaxedName(const std::string &input);
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_SAVENXCANSAS_H_ */

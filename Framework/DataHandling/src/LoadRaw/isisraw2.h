@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ISISRAW2_H
-#define ISISRAW2_H
+#pragma once
 
 #include "isisraw.h"
 
@@ -27,5 +26,3 @@ private:
   char *outbuff; ///< output buffer
   int m_bufferSize;
 };
-
-#endif /* ISISRAW2_H */

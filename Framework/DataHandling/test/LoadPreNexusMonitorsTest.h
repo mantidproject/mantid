@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADPRENEXUSMONITORSTEST_H_
-#define LOADPRENEXUSMONITORSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -76,5 +75,3 @@ private:
   Mantid::DataHandling::LoadPreNexusMonitors loader;
   std::string runinfoFile;
 };
-
-#endif /* LOADPRENEXUSMONITORSTEST_H_ */

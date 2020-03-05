@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MOVEINSTRUMENTCOMPONENTTEST_H_
-#define MOVEINSTRUMENTCOMPONENTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -146,5 +145,3 @@ private:
   boost::shared_ptr<Instrument> instrument;
   MatrixWorkspace_sptr WS;
 };
-
-#endif /*MOVEINSTRUMENTCOMPONENTTEST_H_*/

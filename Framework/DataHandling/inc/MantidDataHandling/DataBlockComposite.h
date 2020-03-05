@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_DATABLOCK_COMPOSITE_H_
-#define MANTID_DATAHANDLING_DATABLOCK_COMPOSITE_H_
+#pragma once
 
 #include "MantidDataHandling/DataBlock.h"
 #include "MantidDataHandling/DllConfig.h"
@@ -150,4 +149,3 @@ void DLLExport populateDataBlockCompositeWithContainer(
 }
 } // namespace DataHandling
 } // namespace Mantid
-#endif
