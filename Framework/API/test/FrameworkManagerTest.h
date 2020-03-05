@@ -52,6 +52,7 @@ public:
   // Make sure FrameworkManager is always instantiated. This is needed to
   // initialize the MPI environment.
   FrameworkManagerTest() { FrameworkManager::Instance(); }
+#endif
 
   void testConstructor() {
     // Not really much to test
@@ -61,6 +62,7 @@ public:
     // If this is 'MPI Mantid' then test that the mpi environment has been
     // initialized
     TS_ASSERT(boost::mpi::environment::initialized());
+#endif
   }
 
   void testcreateAlgorithm() {
@@ -97,5 +99,3 @@ public:
                      const std::runtime_error &)
   }
 };
-
-/*FRAMEWORKMANAGERTEST_H_*/

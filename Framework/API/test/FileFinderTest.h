@@ -470,6 +470,7 @@ public:
     TS_ASSERT(path.find("CSp78173.Raw") != std::string::npos);
 #else
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
+#endif
     Poco::File file(path);
     TS_ASSERT(file.exists());
     std::string path2 =
@@ -507,6 +508,7 @@ public:
     TS_ASSERT_THROWS_ANYTHING(fileOn2.exists());
     TS_ASSERT_THROWS_ANYTHING(fileOn3.exists());
     TS_ASSERT_THROWS_ANYTHING(fileOn4.exists());
+#endif
 
     fileFinder.setCaseSensitive(startingCaseOption);
   }
@@ -672,5 +674,3 @@ private:
   // Number of files to find.
   size_t m_filesToFind;
 };
-
- /*FILEFINDERTEST_H_*/
