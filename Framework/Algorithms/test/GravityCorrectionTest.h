@@ -339,20 +339,22 @@ public:
         "OutputWorkspace", "ws", "XUnit", "TimeOfFlight");)
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("ws"));
     auto ws = Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>("ws");
+                  .retrieveWS<Mantid::API::MatrixWorkspace>("ws");
     GravityCorrection gc00;
-    Mantid::API::MatrixWorkspace_const_sptr corrected = this->runGravityCorrection(gc00, ws, "OutputWorkspace");
-    Mantid::API::MatrixWorkspace_const_sptr cws = Mantid::API::AnalysisDataService::Instance()
+    Mantid::API::MatrixWorkspace_const_sptr corrected =
+        this->runGravityCorrection(gc00, ws, "OutputWorkspace");
+    Mantid::API::MatrixWorkspace_const_sptr cws =
+        Mantid::API::AnalysisDataService::Instance()
             .retrieveWS<Mantid::API::MatrixWorkspace>("ws");
     this->noLossOfCounts(cws, corrected);
-    //this->notCommonBinCheck(cws, corrected);
+    // this->notCommonBinCheck(cws, corrected);
     // TOF values, first spectrum
     const auto x1 = ws->x(0);
     const auto x2 = corrected->x(0);
-    //TS_ASSERT_EQUALS(x1[0], 0.)tbc
-    //TS_ASSERT_EQUALS(x2[0], 0.)tbc
-    //TS_ASSERT_EQUALS(x1[1], 0.)tbc
-    //TS_ASSERT_EQUALS(x2[1], 0.)tbc
+    // TS_ASSERT_EQUALS(x1[0], 0.)tbc
+    // TS_ASSERT_EQUALS(x2[0], 0.)tbc
+    // TS_ASSERT_EQUALS(x1[1], 0.)tbc
+    // TS_ASSERT_EQUALS(x2[1], 0.)tbc
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().clear())
   }
@@ -363,20 +365,22 @@ public:
         "OutputWorkspace", "ws", "XUnit", "TimeOfFlight");)
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("ws"));
     auto ws = Mantid::API::AnalysisDataService::Instance()
-            .retrieveWS<Mantid::API::MatrixWorkspace>("ws");
+                  .retrieveWS<Mantid::API::MatrixWorkspace>("ws");
     GravityCorrection gc00;
-    Mantid::API::MatrixWorkspace_const_sptr corrected = this->runGravityCorrection(gc00, ws, "OutputWorkspace");
-    Mantid::API::MatrixWorkspace_const_sptr cws = Mantid::API::AnalysisDataService::Instance()
+    Mantid::API::MatrixWorkspace_const_sptr corrected =
+        this->runGravityCorrection(gc00, ws, "OutputWorkspace");
+    Mantid::API::MatrixWorkspace_const_sptr cws =
+        Mantid::API::AnalysisDataService::Instance()
             .retrieveWS<Mantid::API::MatrixWorkspace>("ws");
     this->noLossOfCounts(cws, corrected);
-    //this->notCommonBinCheck(cws, corrected);
+    // this->notCommonBinCheck(cws, corrected);
     // TOF values, first spectrum
     const auto x1 = cws->x(0);
     const auto x2 = corrected->x(0);
-    //TS_ASSERT_EQUALS(x1[0], 0.)tbc
-    //TS_ASSERT_EQUALS(x2[0], 0.)tbc
-    //TS_ASSERT_EQUALS(x1[1], 0.)tbc
-    //TS_ASSERT_EQUALS(x2[1], 0.)tbc
+    // TS_ASSERT_EQUALS(x1[0], 0.)tbc
+    // TS_ASSERT_EQUALS(x2[0], 0.)tbc
+    // TS_ASSERT_EQUALS(x1[1], 0.)tbc
+    // TS_ASSERT_EQUALS(x2[1], 0.)tbc
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().clear())
   }
@@ -401,10 +405,9 @@ public:
           gravityCorrection.setProperty("SecondSlitName", secondSlitName))
     TS_ASSERT_THROWS_NOTHING(gravityCorrection.execute())
     TS_ASSERT(gravityCorrection.isExecuted())
-    TS_ASSERT(Mantid::API::AnalysisDataService::Instance()
-              .doesExist(outName))
+    TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist(outName))
     return Mantid::API::AnalysisDataService::Instance()
-                          .retrieveWS<Mantid::API::MatrixWorkspace>(outName);
+        .retrieveWS<Mantid::API::MatrixWorkspace>(outName);
   }
 
   void notCommonBinCheck(Mantid::API::MatrixWorkspace_const_sptr &ws1,
@@ -418,14 +421,14 @@ public:
   }
 
   void noLossOfCounts(Mantid::API::MatrixWorkspace_const_sptr &ws1,
-                         Mantid::API::MatrixWorkspace_const_sptr &ws2) {
-      double totalCounts{0.}, totalCountsCorrected{0.};
-      for (size_t i = 0; i < ws1->getNumberHistograms(); i++) {
-        for (size_t k = 0; k < ws1->blocksize(); k++) {
-          totalCounts += ws1->y(i)[k];
-          totalCountsCorrected += ws2->y(i)[k];
-        }
+                      Mantid::API::MatrixWorkspace_const_sptr &ws2) {
+    double totalCounts{0.}, totalCountsCorrected{0.};
+    for (size_t i = 0; i < ws1->getNumberHistograms(); i++) {
+      for (size_t k = 0; k < ws1->blocksize(); k++) {
+        totalCounts += ws1->y(i)[k];
+        totalCountsCorrected += ws2->y(i)[k];
       }
+    }
   }
 
   void comparer(CompareWorkspaces &compare, const std::string &in1,

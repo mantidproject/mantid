@@ -428,7 +428,8 @@ create2DWorkspaceWithReflectometryInstrumentMultiDetector(
     const Mantid::Kernel::V3D &sourcePos = Mantid::Kernel::V3D(0, 0, 0),
     const Mantid::Kernel::V3D &monitorPos = Mantid::Kernel::V3D(14, 0, 0),
     const Mantid::Kernel::V3D &samplePos = Mantid::Kernel::V3D(15, 0, 0),
-    const Mantid::Kernel::V3D &detectorCenterPos = Mantid::Kernel::V3D(20, 5, 0),
+    const Mantid::Kernel::V3D &detectorCenterPos = Mantid::Kernel::V3D(20, 5,
+                                                                       0),
     const int nSpectra = 4, const int nBins = 20, const double deltaX = 5000.0);
 
 void createInstrumentForWorkspaceWithDistances(
