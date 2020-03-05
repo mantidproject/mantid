@@ -18,6 +18,8 @@ from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.thread_model import ThreadModel, ThreadModelWorker
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
+# this class is required to keep track of error signal emissions since the output is garbage collected by the time
+# we reach the equal assertion
 class MockSignalHandler(object):
     def __init__(self, parent=None):
         self.call_count = 0
@@ -121,6 +123,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.assertEqual(self.signal_handler.call_count, 1)
 
     @run_test_with_and_without_threading
+    # the following patch is required because the warning popup originates from thread_model in this case
     @patch("Muon.GUI.Common.load_run_widget.load_run_presenter.thread_model.warning")
     def test_load_current_run_reverts_to_previous_data_if_fails_to_load(self, warning_mock):
         # set up previous data
@@ -159,6 +162,7 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         self.assertEqual(self.presenter.workspaces, [workspace])
 
     @run_test_with_and_without_threading
+    # the following patch is required because the warning popup also originates from thread_model in this case
     @patch("Muon.GUI.Common.load_run_widget.load_run_presenter.thread_model.warning")
     def test_load_current_run_emits_error_signal_if_incrementing_past_current_run(self, warning_mock):
         self.create_mock_signal_handler()
