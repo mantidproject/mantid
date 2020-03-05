@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_MULTIPLEFILEPROPERTYTEST_H_
-#define MANTID_API_MULTIPLEFILEPROPERTYTEST_H_
+#pragma once
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
@@ -765,4 +764,3 @@ private:
   }
 };
 
-#endif /* MANTID_API_MULTIPLEFILEPROPERTYTEST_H_ */

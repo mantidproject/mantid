@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ITABLEWORKSPACE_FWD_H_
-#define MANTID_API_ITABLEWORKSPACE_FWD_H_
+#pragma once
 
 #include <boost/shared_ptr.hpp>
 #include <memory>
@@ -29,4 +28,3 @@ using ITableWorkspace_const_uptr = std::unique_ptr<const ITableWorkspace>;
 
 } // namespace API
 } // Namespace Mantid
-#endif // MANTID_API_ITABLEWORKSPACE_FWD_H_

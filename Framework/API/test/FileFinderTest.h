@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FILEFINDERTEST_H_
-#define FILEFINDERTEST_H_
+#pragma once
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/ConfigService.h"
@@ -471,7 +470,6 @@ public:
     TS_ASSERT(path.find("CSp78173.Raw") != std::string::npos);
 #else
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
-#endif
     Poco::File file(path);
     TS_ASSERT(file.exists());
     std::string path2 =
@@ -509,7 +507,6 @@ public:
     TS_ASSERT_THROWS_ANYTHING(fileOn2.exists());
     TS_ASSERT_THROWS_ANYTHING(fileOn3.exists());
     TS_ASSERT_THROWS_ANYTHING(fileOn4.exists());
-#endif
 
     fileFinder.setCaseSensitive(startingCaseOption);
   }
@@ -676,4 +673,4 @@ private:
   size_t m_filesToFind;
 };
 
-#endif /*FILEFINDERTEST_H_*/
+ /*FILEFINDERTEST_H_*/

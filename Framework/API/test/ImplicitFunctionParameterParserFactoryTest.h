@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IMPLICIT_FUNCTION_PARAMETER_PARSER_FACTORY_TEST_H_
-#define IMPLICIT_FUNCTION_PARAMETER_PARSER_FACTORY_TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
@@ -102,4 +101,3 @@ public:
   }
 };
 
-#endif

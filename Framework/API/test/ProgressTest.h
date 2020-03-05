@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROGRESSTEST_H_
-#define PROGRESSTEST_H_
+#pragma once
 
 #include "MantidAPI/Progress.h"
 #include <cxxtest/TestSuite.h>
@@ -27,4 +26,3 @@ public:
   }
 };
 
-#endif

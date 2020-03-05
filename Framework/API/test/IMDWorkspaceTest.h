@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IMD_MATRIX_WORKSPACETEST_H_
-#define IMD_MATRIX_WORKSPACETEST_H_
+#pragma once
 
 // Tests the MatrixWorkspace as an IMDWorkspace.
 
@@ -149,4 +148,3 @@ public:
   }
 };
 
-#endif /*IMD_MATRIX_WORKSPACETEST_H_*/

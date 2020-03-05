@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_TABLEROW_H_
-#define MANTID_API_TABLEROW_H_
+#pragma once
 
 #include "MantidAPI/Column.h"
 
@@ -170,5 +169,3 @@ MANTID_API_DLL std::ostream &operator<<(std::ostream &s, const TableRow &row);
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*  MANTID_API_TABLEROW_H_ */

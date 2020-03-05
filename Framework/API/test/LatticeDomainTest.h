@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_LATTICEDOMAINTEST_H_
-#define MANTID_API_LATTICEDOMAINTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -55,4 +54,3 @@ public:
   }
 };
 
-#endif /* MANTID_API_LATTICEDOMAINTEST_H_ */

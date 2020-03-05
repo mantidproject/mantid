@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_CATALOGFACTORYIMPL_H_
-#define MANTID_API_CATALOGFACTORYIMPL_H_
+#pragma once
 
 /* Used to register Catalog classes into the factory. creates a global object in
  *an
@@ -76,4 +75,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
 }
 } // namespace Mantid
 
-#endif /*MANTID_API_CATALOGFACTORYIMPL_H_*/

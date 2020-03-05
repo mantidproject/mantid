@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BOXCONTROLLER_H_
-#define BOXCONTROLLER_H_
+#pragma once
 
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidKernel/DiskBuffer.h"
@@ -547,4 +546,3 @@ using BoxController_const_sptr = boost::shared_ptr<const BoxController>;
 
 } // namespace Mantid
 
-#endif /* SPLITCONTROLLER_H_ */

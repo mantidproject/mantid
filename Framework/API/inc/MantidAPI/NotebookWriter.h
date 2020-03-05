@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_NOTEBOOKWRITER_H
-#define MANTID_NOTEBOOKWRITER_H
+#pragma once
 
 /** @class NotebookWriter
 
@@ -43,4 +42,3 @@ private:
 } // namespace API
 } // namespace Mantid
 
-#endif // MANTID_NOTEBOOKWRITER_H

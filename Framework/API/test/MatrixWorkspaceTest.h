@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WORKSPACETEST_H_
-#define WORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ISpectrum.h"
@@ -2403,4 +2402,3 @@ private:
   boost::shared_ptr<Mantid::Geometry::ParameterMap> m_paramMap;
 };
 
-#endif /*WORKSPACETEST_H_*/

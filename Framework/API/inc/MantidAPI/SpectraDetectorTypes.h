@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SPECTRADETECTORMAP_TYPES
-#define MANTID_API_SPECTRADETECTORMAP_TYPES
+#pragma once
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
@@ -23,4 +22,3 @@ using detid2index_map = std::unordered_map<detid_t, size_t>;
 using det2group_map = std::unordered_map<detid_t, std::set<detid_t>>;
 } // namespace Mantid
 
-#endif // MANTID_API_SPECTRADETECTORMAP_TYPES

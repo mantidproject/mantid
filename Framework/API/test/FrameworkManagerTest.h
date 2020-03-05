@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FRAMEWORKMANAGERTEST_H_
-#define FRAMEWORKMANAGERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -53,7 +52,6 @@ public:
   // Make sure FrameworkManager is always instantiated. This is needed to
   // initialize the MPI environment.
   FrameworkManagerTest() { FrameworkManager::Instance(); }
-#endif
 
   void testConstructor() {
     // Not really much to test
@@ -63,7 +61,6 @@ public:
     // If this is 'MPI Mantid' then test that the mpi environment has been
     // initialized
     TS_ASSERT(boost::mpi::environment::initialized());
-#endif
   }
 
   void testcreateAlgorithm() {
@@ -101,4 +98,4 @@ public:
   }
 };
 
-#endif /*FRAMEWORKMANAGERTEST_H_*/
+ /*FRAMEWORKMANAGERTEST_H_*/

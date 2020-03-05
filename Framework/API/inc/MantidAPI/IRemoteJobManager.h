@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_IREMOTEJOBMANAGER_H
-#define MANTID_KERNEL_IREMOTEJOBMANAGER_H
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
@@ -279,4 +278,3 @@ using IRemoteJobManager_sptr = boost::shared_ptr<IRemoteJobManager>;
 } // namespace API
 } // namespace Mantid
 
-#endif // MANTID_API_IREMOTEJOBMANAGER_H

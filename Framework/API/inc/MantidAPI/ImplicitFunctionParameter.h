@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IPARAMETER_H_
-#define IPARAMETER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -138,5 +137,3 @@ template <> struct ElementTraits<float> {
 //------------------------------------------------------------------------------------
 } // namespace API
 } // namespace Mantid
-
-#endif

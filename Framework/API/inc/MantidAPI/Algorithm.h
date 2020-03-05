@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ALGORITHM_H_
-#define MANTID_API_ALGORITHM_H_
+#pragma once
 
 #include <atomic>
 
@@ -522,4 +521,3 @@ using Algorithm_sptr = boost::shared_ptr<Algorithm>;
       (Mantid::API::AlgorithmFactory::Instance().subscribe<classname>()), 0)); \
   }
 
-#endif /*MANTID_API_ALGORITHM_H_*/

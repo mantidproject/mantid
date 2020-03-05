@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IMPLICIT_FUNCTION_PARAMETER_PARSER_FACTORY_H
-#define IMPLICIT_FUNCTION_PARAMETER_PARSER_FACTORY_H
+#pragma once
 
 /** @class ImplicitFunctionFactory ImplicitFunctionFactory.h
 Kernel/ImplicitFunctionFactory.h
@@ -59,4 +58,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<
 }
 } // namespace Mantid
 
-#endif

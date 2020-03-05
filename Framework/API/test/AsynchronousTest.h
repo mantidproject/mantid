@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ASYNCHRONOUSTEST_H_
-#define ASYNCHRONOUSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -295,4 +294,3 @@ std::mutex AsynchronousTest::g_mtx;
 bool AsynchronousTest::g_testStarted = false;
 bool AsynchronousTest::g_execStarted = false;
 
-#endif /*ASYNCHRONOUSTEST_H_*/

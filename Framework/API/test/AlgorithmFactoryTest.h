@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALGORITHMFACTORYTEST_H_
-#define ALGORITHMFACTORYTEST_H_
+#pragma once
 
 #include "FakeAlgorithms.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -244,4 +243,3 @@ public:
   }
 };
 
-#endif

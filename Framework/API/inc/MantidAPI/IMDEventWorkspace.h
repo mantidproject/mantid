@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IMDEVENTWORKSPACE_H_
-#define IMDEVENTWORKSPACE_H_
+#pragma once
 
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/DllConfig.h"
@@ -135,4 +134,3 @@ private:
 
 } // namespace Mantid
 
-#endif /* IMDEVENTWORKSPACE_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDAPI_NULLCOORDTRANSFORM_H
-#define MANTIDAPI_NULLCOORDTRANSFORM_H
+#pragma once
 
 #include "MantidAPI/CoordTransform.h"
 
@@ -34,4 +33,3 @@ private:
 } // namespace API
 } // namespace Mantid
 
-#endif

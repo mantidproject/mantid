@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_BOOSTOPTIONALTOALGORITHMPROPERTY_H_
-#define MANTID_API_BOOSTOPTIONALTOALGORITHMPROPERTY_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DllConfig.h"
@@ -101,4 +100,3 @@ DLLExport boost::optional<std::string> checkForOptionalInstrumentDefault(
 } // namespace API
 } // namespace Mantid
 
-#endif // MANTID_API_BOOSTOPTIONALTOALGORITHMPROPERTY_H_
