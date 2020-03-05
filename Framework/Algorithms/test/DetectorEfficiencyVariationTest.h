@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DETECTOREFFICIENCYVARIATION_H_
-#define DETECTOREFFICIENCYVARIATION_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -187,5 +186,3 @@ private:
     GoodVal = 0
   };
 };
-
-#endif /*DETECTOREFFICIENCYVARIATION_H_*/

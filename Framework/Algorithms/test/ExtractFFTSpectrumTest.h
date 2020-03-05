@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef EXTRACTFFTSPECTRUM_H_
-#define EXTRACTFFTSPECTRUM_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -92,4 +91,3 @@ public:
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->label(), "ns");
   }
 };
-#endif // EXTRACTFFTSPECTRUM_H

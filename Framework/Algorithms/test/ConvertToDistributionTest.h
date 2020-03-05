@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVERTTODISTRIBUTIONTEST_H_
-#define CONVERTTODISTRIBUTIONTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -94,5 +93,3 @@ private:
     return WorkspaceCreationHelper::create2DWorkspaceBinned(1, 10, 0, 0.5);
   }
 };
-
-#endif /*CONVERTTODISTRIBUTIONTEST_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CORRECTTOFAXISTEST_H_
-#define MANTID_ALGORITHMS_CORRECTTOFAXISTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -438,5 +437,3 @@ private:
            Mantid::PhysicalConstants::NeutronMass * 1e4;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_CORRECTTOFAXISTEST_H_ */

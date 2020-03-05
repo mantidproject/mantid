@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REBIN2DTEST_H_
-#define MANTID_ALGORITHMS_REBIN2DTEST_H_
+#pragma once
 
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAlgorithms/Rebin2D.h"
@@ -328,5 +327,3 @@ public:
 private:
   MatrixWorkspace_sptr m_inputWS;
 };
-
-#endif /* MANTID_ALGORITHMS_REBIN2DTEST_H_ */

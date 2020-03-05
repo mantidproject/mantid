@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MASKINSTRUMENTTEST_H_
-#define MANTID_ALGORITHMS_MASKINSTRUMENTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -123,5 +122,3 @@ public:
     TS_ASSERT_THROWS(maskInstrumentInplace(in, {5}), const std::out_of_range &);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_MASKINSTRUMENTTEST_H_ */

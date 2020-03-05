@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BINARYOPERATIONTEST_H_
-#define BINARYOPERATIONTEST_H_
+#pragma once
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -449,5 +448,3 @@ public:
                 Parallel::StorageMode::MasterOnly);
   }
 };
-
-#endif /*BINARYOPERATIONTEST_H_*/

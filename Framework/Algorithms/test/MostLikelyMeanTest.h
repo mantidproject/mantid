@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MOSTLIKELYMEANTEST_H_
-#define MANTID_ALGORITHMS_MOSTLIKELYMEANTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -60,5 +59,3 @@ public:
 private:
   MostLikelyMean m_alg;
 };
-
-#endif /* MANTID_ALGORITHMS_MOSTLIKELYMEANTEST_H_ */

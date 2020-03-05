@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FLATPLATEABSORPTIONTEST_H_
-#define FLATPLATEABSORPTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -102,5 +101,3 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ExpMethod", "Normal"));
   }
 };
-
-#endif /*FLATPLATEABSORPTIONTEST_H_*/

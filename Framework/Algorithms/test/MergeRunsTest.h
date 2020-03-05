@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MERGERUNSTEST_H_
-#define MANTID_ALGORITHMS_MERGERUNSTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -1885,5 +1884,3 @@ public:
 private:
   Mantid::Algorithms::MergeRuns m_mergeRuns;
 };
-
-#endif /*MANTID_ALGORITHMS_MERGERUNSTEST_H_*/

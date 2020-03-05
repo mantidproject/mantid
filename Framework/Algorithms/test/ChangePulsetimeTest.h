@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CHANGEPULSETIMETEST_H_
-#define MANTID_ALGORITHMS_CHANGEPULSETIMETEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -151,5 +150,3 @@ public:
     execute_change_of_pulse_times(m_workspace, "1000", "");
   }
 };
-
-#endif /* MANTID_ALGORITHMS_CHANGEPULSETIMETEST_H_ */

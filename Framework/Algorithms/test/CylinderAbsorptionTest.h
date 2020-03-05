@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CYLINDERABSORPTIONTEST_H_
-#define CYLINDERABSORPTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -340,5 +339,3 @@ private:
         alg.setPropertyValue("SampleNumberDensity", "0.07192"));
   }
 };
-
-#endif /*CYLINDERABSORPTIONTEST_H_*/

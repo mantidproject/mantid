@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SANSCOLLIMATIONLENGTHESTIMATORTEST_H
-#define MANTID_ALGORITHMS_SANSCOLLIMATIONLENGTHESTIMATORTEST_H
+#pragma once
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidAlgorithms/SANSCollimationLengthEstimator.h"
 #include <cxxtest/TestSuite.h>
@@ -446,4 +445,3 @@ public:
                       expectedCollimationLength);
   }
 };
-#endif

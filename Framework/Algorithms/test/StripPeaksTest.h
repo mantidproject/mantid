@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef STRIPPEAKSTEST_H_
-#define STRIPPEAKSTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -157,5 +156,3 @@ public:
 private:
   StripPeaks stripAlg;
 };
-
-#endif /*STRIPPEAKSTEST_H_*/

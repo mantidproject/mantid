@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVERTTOHISTOGRAMTEST_H_
-#define CONVERTTOHISTOGRAMTEST_H_
+#pragma once
 
 #include "MantidAlgorithms/ConvertToHistogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -163,5 +162,3 @@ public:
 private:
   Workspace2D_sptr inputWS;
 };
-
-#endif // CONVERTTOHISTOGRAMTEST_H_

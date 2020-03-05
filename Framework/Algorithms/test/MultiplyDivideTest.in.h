@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 // clang-format off
-#ifndef @MULTIPLYDIVIDETEST_CLASS@_H_
-#define @MULTIPLYDIVIDETEST_CLASS@_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
@@ -1027,4 +1026,3 @@ public:
     }
   }
 };
-#endif /*MULTIPLYTEST_H_ or DIVIDETEST_H_*/

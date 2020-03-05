@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COPYINSTRUMENTPARAMETERSTEST_H_
-#define COPYINSTRUMENTPARAMETERSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -301,5 +300,3 @@ private:
   CopyInstrumentParameters copyInstParam;
   const std::string m_SourceWSName, m_TargetWSName;
 };
-
-#endif /*COPYINSTRUMENTPARAMETERSTEST_H_*/

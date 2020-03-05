@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FFT_TEST_H_
-#define FFT_TEST_H_
+#pragma once
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -988,5 +987,3 @@ private:
   const double a;
   const double tolerance;
 };
-
-#endif /*FFT_TEST_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVERTTABLETOMATRIXWORKSPACETEST_H_
-#define CONVERTTABLETOMATRIXWORKSPACETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -232,5 +231,3 @@ private:
   IAlgorithm_sptr m_converter;
   ITableWorkspace_sptr tws;
 };
-
-#endif /*CONVERTTABLETOMATRIXWORKSPACETEST_H_*/

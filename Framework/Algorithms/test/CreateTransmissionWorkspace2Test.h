@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACE2TEST_H_
-#define ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACE2TEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -634,5 +633,3 @@ private:
     TS_ASSERT(!AnalysisDataService::Instance().doesExist(name));
   }
 };
-
-#endif /* ALGORITHMS_TEST_CREATETRANSMISSIONWORKSPACE2TEST_H_ */

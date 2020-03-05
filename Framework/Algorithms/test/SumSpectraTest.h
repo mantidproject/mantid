@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SUMSPECTRATEST_H_
-#define SUMSPECTRATEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -739,5 +738,3 @@ private:
   MatrixWorkspace_sptr input;
   EventWorkspace_sptr inputEvent;
 };
-
-#endif /*SUMSPECTRATEST_H_*/

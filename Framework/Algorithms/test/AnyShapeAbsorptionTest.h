@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ANYSHAPEABSORPTIONTEST_H_
-#define ANYSHAPEABSORPTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -347,5 +346,3 @@ public:
 private:
   Mantid::Algorithms::AnyShapeAbsorption atten;
 };
-
-#endif /*ANYSHAPEABSORPTIONTEST_H_*/

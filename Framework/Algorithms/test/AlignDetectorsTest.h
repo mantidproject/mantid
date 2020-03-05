@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALIGNDETECTORSTEST_H_
-#define ALIGNDETECTORSTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -176,5 +175,3 @@ private:
   std::string inputWS;
   EventWorkspace_sptr WS;
 };
-
-#endif /*ALIGNDETECTORSTEST_H_*/

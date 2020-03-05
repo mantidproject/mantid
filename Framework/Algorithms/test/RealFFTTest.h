@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REALFFT_TEST_H_
-#define REALFFT_TEST_H_
+#pragma once
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -233,5 +232,3 @@ private:
   const int N;
   const double dX, XX;
 };
-
-#endif /*REALFFT_TEST_H_*/

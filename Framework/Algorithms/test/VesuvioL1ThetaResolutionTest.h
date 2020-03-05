@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_VESUVIOL1THETARESOLUTIONTEST_H_
-#define MANTID_ALGORITHMS_VESUVIOL1THETARESOLUTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -205,5 +204,3 @@ private:
     TS_ASSERT_DIFFERS(lastSpecDetIDs.find(3232), lastSpecDetIDs.end());
   }
 };
-
-#endif /* MANTID_ALGORITHMS_VESUVIOL1THETARESOLUTIONTEST_H_ */

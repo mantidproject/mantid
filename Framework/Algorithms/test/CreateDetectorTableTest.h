@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CREATEDETECTORTABLETEST_H_
-#define CREATEDETECTORTABLETEST_H_
+#pragma once
 
 #include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidAlgorithms/CreateDetectorTable.h"
@@ -188,5 +187,3 @@ public:
     alg.execute();
   }
 };
-
-#endif // CREATEDETECTORTABLETEST_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SIGNALOVERERRORTEST_H_
-#define MANTID_ALGORITHMS_SIGNALOVERERRORTEST_H_
+#pragma once
 
 #include "MantidAlgorithms/SignalOverError.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -60,5 +59,3 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_SIGNALOVERERRORTEST_H_ */

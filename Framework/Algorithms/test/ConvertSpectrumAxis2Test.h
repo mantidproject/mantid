@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVERTSPECTRUMAXIS2TEST_H_
-#define CONVERTSPECTRUMAXIS2TEST_H_
+#pragma once
 
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
 #include <cxxtest/TestSuite.h>
@@ -552,5 +551,3 @@ private:
   MatrixWorkspace_sptr m_testWS;
   Mantid::Algorithms::CreateSampleWorkspace m_creator;
 };
-
-#endif /*CONVERTSPECTRUMAXIS2TEST_H_*/

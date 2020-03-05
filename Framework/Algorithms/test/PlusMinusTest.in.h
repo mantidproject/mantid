@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 // clang-format off
-#ifndef @PLUSMINUSTEST_CLASS@_H_
-#define @PLUSMINUSTEST_CLASS@_H_
+#pragma once
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 
@@ -1117,5 +1116,4 @@ public:
 
 }; // end of class @PLUSMINUSTEST_CLASS@Performance
 
-#endif
 

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_RESIZERECTANGULARDETECTORTEST_H_
-#define MANTID_ALGORITHMS_RESIZERECTANGULARDETECTORTEST_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -81,5 +80,3 @@ public:
     TS_ASSERT_DELTA(det->xstep(), 0.008 * 1, 1e-6);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_RESIZERECTANGULARDETECTORTEST_H_ */

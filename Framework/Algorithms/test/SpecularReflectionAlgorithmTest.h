@@ -13,7 +13,7 @@
  *      Author: Owen Arnold
  */
 
-#ifndef MANTID_ALGORITHMS_TEST_SPECULARREFLECTIONALGORITHMTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -116,7 +116,3 @@ public:
     linearDetectorWS = loadAlg->getProperty("OutputWorkspace");
   }
 };
-
-#define MANTID_ALGORITHMS_TEST_SPECULARREFLECTIONALGORITHMTEST_H_
-
-#endif /* SPECULARREFLECTIONALGORITHMTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MAXENTENTROPY_H_
-#define MANTID_ALGORITHMS_MAXENTENTROPY_H_
+#pragma once
 
 #include "MantidAlgorithms/DllConfig.h"
 #include <boost/shared_ptr.hpp>
@@ -38,5 +37,3 @@ using MaxentEntropy_sptr = boost::shared_ptr<MaxentEntropy>;
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_MAXENTENTROPY_H_ */

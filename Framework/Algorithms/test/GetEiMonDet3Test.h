@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GETEIMONDET3TEST_H_
-#define GETEIMONDET3TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -243,5 +242,3 @@ private:
     return std::make_pair(monWs, detWs);
   }
 };
-
-#endif // GETEIMONDET3TEST_H_

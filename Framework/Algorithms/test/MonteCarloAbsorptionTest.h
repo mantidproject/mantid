@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MONTECARLOABSORPTIONTEST_H_
-#define MONTECARLOABSORPTIONTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
@@ -490,5 +489,3 @@ private:
   Mantid::API::Workspace_sptr inputIndirect;
   Mantid::API::Workspace_sptr inputElasticMesh;
 };
-
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CROPWORKSPACETEST_H_
-#define CROPWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -465,5 +464,3 @@ public:
     TS_ASSERT(cropper.execute());
   }
 };
-
-#endif /*CROPWORKSPACETEST_H_*/

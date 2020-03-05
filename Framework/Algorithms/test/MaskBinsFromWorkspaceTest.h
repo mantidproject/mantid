@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MASKBINSFROMWORKSPACETEST_H_
-#define MASKBINSFROMWORKSPACETEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -124,5 +123,3 @@ public:
 private:
   Mantid::Algorithms::MaskBinsFromWorkspace masker;
 };
-
-#endif /*MASKBINSFROMWORKSPACETEST_H_*/

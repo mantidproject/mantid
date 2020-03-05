@@ -11,8 +11,7 @@
  *      Author: janik
  */
 
-#ifndef MANTID_ALGORITHMS_STRIPVANADIUMPEAKS_H_
-#define MANTID_ALGORITHMS_STRIPVANADIUMPEAKS_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -71,5 +70,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* STRIPVANADIUMPEAKS_H_ */

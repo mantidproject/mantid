@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MAGFORMFACTORCORRECTION_H_
-#define MAGFORMFACTORCORRECTION_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -137,5 +136,3 @@ private:
     return sqrt(df2);
   }
 };
-
-#endif /*MAGFORMFACTORCORRECTION_H_*/

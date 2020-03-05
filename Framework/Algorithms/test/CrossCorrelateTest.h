@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CROSSCORRELATETEST_H_
-#define CROSSCORRELATETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -181,5 +180,3 @@ private:
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 };
-
-#endif /*CROSSCORRELATETEST_H_*/

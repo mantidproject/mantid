@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef RemoveBinsTest_H_
-#define RemoveBinsTest_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -311,4 +310,3 @@ private:
   const size_t numHists = 10000;
   RemoveBins alg;
 };
-#endif /*RemoveBinsTest_H_*/

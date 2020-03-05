@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVERTFROMDISTRIBUTIONTEST_H_
-#define CONVERTFROMDISTRIBUTIONTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -70,5 +69,3 @@ private:
   ConvertFromDistribution conv;
   std::string dist;
 };
-
-#endif /*CONVERTFROMDISTRIBUTIONTEST_H_*/

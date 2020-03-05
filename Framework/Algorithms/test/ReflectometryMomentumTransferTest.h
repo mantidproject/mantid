@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_
-#define MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -523,5 +522,3 @@ private:
   API::IAlgorithm_sptr m_algorithm;
   API::MatrixWorkspace_sptr m_reflectedWS;
 };
-
-#endif /* MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_ */

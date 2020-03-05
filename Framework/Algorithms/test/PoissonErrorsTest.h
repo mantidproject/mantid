@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef POISSONERRORSTEST_H_
-#define POISSONERRORSTEST_H_
+#pragma once
 
 #include <cmath>
 #include <cxxtest/TestSuite.h>
@@ -302,5 +301,3 @@ private:
   std::string inputProp2;
   std::string outputProp;
 };
-
-#endif /*POISSONERRORSTEST_H_*/

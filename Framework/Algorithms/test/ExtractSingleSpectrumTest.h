@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef EXTRACTSINGLESPECTRUMTEST_H_
-#define EXTRACTSINGLESPECTRUMTEST_H_
+#pragma once
 
 #include "CropWorkspaceTest.h" // Use the test label functionality as it should do the same thing
 #include "MantidAlgorithms/ExtractSingleSpectrum.h"
@@ -119,5 +118,3 @@ private:
     TS_ASSERT_EQUALS(id, detID);
   }
 };
-
-#endif /*EXTRACTSINGLESPECTRUMTEST_H_*/

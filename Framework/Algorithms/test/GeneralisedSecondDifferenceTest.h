@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GENERALISEDSECONDDIFFERENCETEST_H_
-#define GENERALISEDSECONDDIFFERENCETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -115,5 +114,3 @@ private:
   Mantid::API::MatrixWorkspace_sptr inputMatrix;
   Mantid::DataObjects::EventWorkspace_sptr inputEvent;
 };
-
-#endif /* GENERALISEDSECONDDIFERENCETEST_H_ */

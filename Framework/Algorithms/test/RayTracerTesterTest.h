@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_RAYTRACERTESTERTEST_H_
-#define MANTID_ALGORITHMS_RAYTRACERTESTERTEST_H_
+#pragma once
 
 #include "MantidAlgorithms/RayTracerTester.h"
 #include "MantidKernel/System.h"
@@ -61,4 +60,3 @@ public:
 private:
   RayTracerTester alg;
 };
-#endif /* MANTID_ALGORITHMS_RAYTRACERTESTERTEST_H_ */

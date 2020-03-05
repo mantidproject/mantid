@@ -9,8 +9,7 @@
  RebinByPulseTime and RebinByTimeAtSample
  */
 
-#ifndef MANTID_ALGORITHMS_REBINBYTIMEBASETEST_H_
-#define MANTID_ALGORITHMS_REBINBYTIMEBASETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -540,5 +539,3 @@ public:
     TS_ASSERT(outWS != nullptr);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_REBINBYTIMEBASETEST_H_ */

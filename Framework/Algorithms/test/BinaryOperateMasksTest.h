@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_BINARYOPERATEMASKSTEST_H_
-#define MANTID_ALGORITHMS_BINARYOPERATEMASKSTEST_H_
+#pragma once
 
 #include "MantidAlgorithms/BinaryOperateMasks.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -153,5 +152,3 @@ private:
   // Define the algorithm
   BinaryOperateMasks binoperator;
 };
-
-#endif /* MANTID_ALGORITHMS_BINARYOPERATEMASKSTEST_H_ */

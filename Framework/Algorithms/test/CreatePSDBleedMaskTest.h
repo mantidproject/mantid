@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CREATEPSDBLEEDMASKSTEST_H_
-#define CREATEPSDBLEEDMASKSTEST_H_
+#pragma once
 
 #include "MantidAlgorithms/CreatePSDBleedMask.h"
 #include <cxxtest/TestSuite.h>
@@ -123,5 +122,3 @@ private:
 
   Mantid::Algorithms::CreatePSDBleedMask diagnostic;
 };
-
-#endif // CREATEPSDBLEEDMASKSTEST_H_

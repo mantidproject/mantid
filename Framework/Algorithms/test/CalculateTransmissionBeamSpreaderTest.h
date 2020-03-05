@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CALCULATETRANSMISSIONBEAMSPREADERTEST_H_
-#define CALCULATETRANSMISSIONBEAMSPREADERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -116,5 +115,3 @@ public:
 private:
   Mantid::Algorithms::CalculateTransmissionBeamSpreader trans;
 };
-
-#endif /*CALCULATETRANSMISSIONBEAMSPREADERTEST_H_*/

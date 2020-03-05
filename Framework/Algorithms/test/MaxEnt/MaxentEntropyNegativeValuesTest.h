@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUESTEST_H_
-#define MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUESTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -69,5 +68,3 @@ public:
     TS_ASSERT_DELTA(result[2], 10, 1E-6);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUESTEST_H_ */

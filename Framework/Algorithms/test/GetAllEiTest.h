@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GETALLEI_TEST_H_
-#define GETALLEI_TEST_H_
+#pragma once
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/GetAllEi.h"
@@ -627,4 +626,3 @@ public:
 private:
   Mantid::API::MatrixWorkspace_sptr inputMatrix;
 };
-#endif

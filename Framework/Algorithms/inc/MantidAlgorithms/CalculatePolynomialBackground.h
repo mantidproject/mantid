@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CALCULATEPOLYNOMIALBACKGROUND_H_
-#define MANTID_ALGORITHMS_CALCULATEPOLYNOMIALBACKGROUND_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
@@ -35,5 +34,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CALCULATEPOLYNOMIALBACKGROUND_H_ */

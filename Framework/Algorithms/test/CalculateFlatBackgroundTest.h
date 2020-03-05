@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FLATBACKGROUNDTEST_H_
-#define FLATBACKGROUNDTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -870,5 +869,3 @@ private:
     AnalysisDataService::Instance().remove(minusWSName);
   }
 };
-
-#endif /*FlatBackgroundTest_H_*/

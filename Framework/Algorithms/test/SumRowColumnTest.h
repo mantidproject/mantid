@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SUMROWCOLUMNTEST_H_
-#define SUMROWCOLUMNTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/SumRowColumn.h"
@@ -111,5 +110,3 @@ private:
   Mantid::Algorithms::SumRowColumn summer;
   std::string inputWS;
 };
-
-#endif /*SUMROWCOLUMNTEST_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_DIFFRACTIONEVENTCALIBRATEDETECTORSTEST_H_
-#define MANTID_ALGORITHMS_DIFFRACTIONEVENTCALIBRATEDETECTORSTEST_H_
+#pragma once
 
 #include "MantidAlgorithms/DiffractionEventCalibrateDetectors.h"
 #include "MantidKernel/System.h"
@@ -77,5 +76,3 @@ public:
     AnalysisDataService::Instance().remove("temp_event_ws");
   }
 };
-
-#endif /* MANTID_ALGORITHMS_DIFFRACTIONEVENTCALIBRATEDETECTORSTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2TEST_H_
-#define MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -1724,5 +1723,3 @@ private:
     alg.setProperty("MomentumTransferStep", 0.04);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_REFLECTOMETRYREDUCTIONONEAUTO2TEST_H_ */

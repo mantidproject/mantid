@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef EXTRACTMASKINGTEST_H_
-#define EXTRACTMASKINGTEST_H_
+#pragma once
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ExtractMask.h"
@@ -198,5 +197,3 @@ private:
     }
   }
 };
-
-#endif // EXTRACTMASKINGTEST_H_

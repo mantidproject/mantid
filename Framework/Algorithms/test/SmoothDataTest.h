@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SMOOTHDATATEST_H_
-#define SMOOTHDATATEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -225,5 +224,3 @@ private:
   Workspace2D_sptr inputWs;
   SmoothData smoothAlg;
 };
-
-#endif /*SMOOTHDATATEST_H_*/

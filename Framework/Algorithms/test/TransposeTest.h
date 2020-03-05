@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TRANSPOSETEST_H_
-#define TRANSPOSETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -206,4 +205,3 @@ public:
   const std::string rebinned_inputWS = "rebinned_inputWS";
   const std::string rebinned_outputWS = "rebinned_outputWS";
 };
-#endif
