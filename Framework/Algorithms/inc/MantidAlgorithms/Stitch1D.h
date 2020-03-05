@@ -45,9 +45,12 @@ private:
   void init() override;
   /// Overwrites Algorithm method.
   void exec() override;
-  /// Get pair of start and end overlap
-  std::pair<double, double> getOverlap(const double intersectionMin,
-                                       const double intersectionMax) const;
+  /// Get the start overlap
+  double getStartOverlap(const double intesectionMin,
+                         const double intesectionMax) const;
+  /// Get the end overlap
+  double getEndOverlap(const double intesectionMin,
+                       const double intesectionMax) const;
 
   /// Get the rebin parameters
   std::vector<double>
@@ -82,6 +85,8 @@ private:
   void maskInPlace(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
   /// Add back in any special values
   void reinsertSpecialValues(Mantid::API::MatrixWorkspace_sptr ws);
+  /// Range tolerance
+  static const double range_tolerance;
   /// Scaling factors
   double m_scaleFactor;
   double m_errorScaleFactor;
