@@ -5,7 +5,7 @@ Results Table Tab
 
 .. image::  ../images/muon_interface_tab_results.png
    :align: right
-   :height: 500px
+   :height: 400px
 
 The results table tab outputs the results from the fitting tab as well as the log values from selected runs into a
 tableworkspace.
@@ -55,5 +55,5 @@ Output
 Used By
 ^^^^^^^
 
-:ref:`Muon Analysis 2 <MuonAnalysis_2-ref>`
+:ref:`Muon Analysis <MuonAnalysis_2-ref>`
 :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`
