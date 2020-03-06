@@ -50,7 +50,7 @@ private:
 
   std::unique_ptr<Ui::ConvFit> m_uiForm;
   // ShortHand Naming for fit functions
-  QHash<QString, std::string> m_fitStrings;
+  std::unordered_map<std::string, std::string> m_fitStrings;
   ConvFitModel *m_convFittingModel;
 };
 

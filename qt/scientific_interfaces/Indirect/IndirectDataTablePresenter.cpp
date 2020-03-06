@@ -627,9 +627,10 @@ void IndirectDataTablePresenter::updateDataPositionsInCells(
     TableDatasetIndex from, TableDatasetIndex to) {
   for (auto i = from; i < to; ++i) {
     const auto nextPosition = getNextPosition(i);
-    for (auto row = m_dataPositions[i]; row < nextPosition; ++row)
+    for (auto row = m_dataPositions[i]; row < nextPosition; ++row) {
       m_dataTable->item(row.value, 0)
           ->setData(Qt::UserRole, getVariant(i.value));
+    }
   }
 }
 

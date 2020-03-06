@@ -143,6 +143,7 @@ public:
   getDataForParameterEstimation(EstimationDataSelector selector) const;
 
   std::vector<double> getQValuesForData() const;
+  virtual std::vector<std::pair<std::string, int>> getResolutionsForFit() const;
 
 protected:
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;

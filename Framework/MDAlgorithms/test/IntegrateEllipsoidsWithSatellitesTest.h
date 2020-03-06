@@ -543,9 +543,9 @@ public:
     const auto &peak2 = integratedPeaksWS->getPeak(1);
     const auto &peak3 = integratedPeaksWS->getPeak(2);
 
-    TS_ASSERT_DELTA(peak1.getIntensity(), 15., 2e-6);
-    TS_ASSERT_DELTA(peak2.getIntensity(), 26., 2e-6);
-    TS_ASSERT_DELTA(peak3.getIntensity(), 25., 2e-6);
+    TS_ASSERT_DELTA(peak1.getIntensity(), 45., 2e-6);
+    TS_ASSERT_DELTA(peak2.getIntensity(), 58., 2e-6);
+    TS_ASSERT_DELTA(peak3.getIntensity(), 56., 2e-6);
   }
 
   void test_execution_histograms() {

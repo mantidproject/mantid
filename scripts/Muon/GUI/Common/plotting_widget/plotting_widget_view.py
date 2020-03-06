@@ -8,17 +8,16 @@ from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtWidgets
 import Muon.GUI.Common.message_box as message_box
+from Muon.GUI.Common.plotting_widget.dockable_plot_toolbar import DockablePlotToolbar
 from matplotlib.figure import Figure
 from mantid.plots.plotfunctions import get_plot_fig
 from matplotlib.backends.qt_compat import is_pyqt5
 from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 
 if is_pyqt5():
-    from matplotlib.backends.backend_qt5agg import (
-        FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+    from matplotlib.backends.backend_qt5agg import FigureCanvas
 else:
-    from matplotlib.backends.backend_qt4agg import (
-        FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+    from matplotlib.backends.backend_qt4agg import FigureCanvas
 
 
 class PlotWidgetView(QtWidgets.QWidget):
@@ -116,7 +115,7 @@ class PlotWidgetView(QtWidgets.QWidget):
         # create the figure
         self.fig = Figure()
         self.fig.canvas = FigureCanvas(self.fig)
-        self.toolBar = NavigationToolbar(self.fig.canvas, self)
+        self.toolBar = DockablePlotToolbar(self.fig.canvas, self)
         # set size policy
         self.toolBar.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
 

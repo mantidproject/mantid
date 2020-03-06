@@ -322,6 +322,10 @@ void GramCharlierComptonProfile::addFSETerm(std::vector<double> &lhs) const {
   if (m_userFixedFSE)
     kfse *= getParameter("C_0");
 
+  if (m_yfine.empty() || m_qfine.empty()) {
+    throw std::runtime_error("The Y values or Q values have not been set");
+  }
+
   for (int j = 0; j < NFINE_Y; ++j) {
     const double y = m_yfine[j] / M_SQRT2 / wg;
     const double he3 = boost::math::hermite(3, y);

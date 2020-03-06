@@ -41,7 +41,6 @@ class SeqFittingTabPresenter(object):
             self.view.set_fit_quality_to_default()
             return
 
-        self.model.clear_fit_information()
         parameter_values = []
         number_of_parameters = self.model.fit_function.nParams()
         parameters = [self.model.fit_function.parameterName(i) for i in range(number_of_parameters)]

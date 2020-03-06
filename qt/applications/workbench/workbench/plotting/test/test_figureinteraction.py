@@ -314,6 +314,13 @@ class FigureInteractionTest(unittest.TestCase):
         self.interactor.errors_manager.toggle_all_errors(self.ax, make_visible=True)
         self.assertTrue(self.ax.containers[0][2][0].get_visible())
 
+    def test_no_normalisation_options_on_non_workspace_plot(self):
+        fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.ax.plot([1, 2], [1, 2], label="myLabel")
+
+        anonymous_menu = QMenu()
+        self.assertEqual(None, self.interactor._add_normalization_option_menu(anonymous_menu, self.ax))
+
     # Failure tests
     def test_construction_with_non_qt_canvas_raises_exception(self):
         class NotQtCanvas(object):

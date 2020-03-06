@@ -130,29 +130,29 @@ Bugfixes
 - The Show Instrument right click menu option is now disabled for workspaces that have had their spectrum axis converted to another axis using :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`. Once this axis has been converted the workspace loses its link between the data values and the detectors they were recorded on so we cannot display it in the instrument view.
 - Fixed a bug on the instrument viewer where changing projection and back to Full 3D would display the wrong point of view.
 - Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters. 
+- Warnings from the Python ``warnings`` module are now show as warnings and not errors in the log display.
+- Colorbar scale on Instrument view shows labelled ticks when the range is within an order of magnitude.
 
 **Plotting**
 - Overplots will be normalized by bin width if they are overplotting a curve from a distribution workspace.
 - Colorbar scale shows helpful minor ticks and no longer vanishes on colorfill plots with a logarithmic scale.
-- Colorbar scale on Instrument view shows labelled ticks when the range is within an order of magnitude.
 - Axes limits of a plot no longer automatically rescale when errorbars are on/off. 
 - Figure options no longer causes a crash for 2d plots created from a script.
 - Running an algorithm that reduces the number of spectra on an active plot (eg SumSpectra) no longer causes an error.
 - Figure options on bin plots open without throwing an error.
 - Right-click menu on the plot of an MDHistoWorkspace can be opened without an error.
 - Fixed an uncaught exception when plotting logs on single spectrum workspaces.
+- Fixed an issue with changing normalisation on single spectra plots done from a script.
+- Axes editor menu now reads the state of the grids on the plot. 
+- Fixed a bug which caused graphic scaling issues when the double-click menu was used to set an axis as log-scaled.
 
 **Fitting**
 - Fitting a distribution workspace is normalised correctly.
 - The help button in fitting now finds the page for the relevant function.
+- Fixed an issue where adding a Bk2BkExpConvPV function to the fit browser caused a crash
 
 **Algorithms**
 - In the Algorithm Toolbox, double-clicking on an algorithm always executes the algorithm. In the case, where previous versions of an algorithm are still available, this would show the other versions. You can still click on the triangle to see and execute previous versions.
 - Unrolling consecutive workflow algorithms in Workspace History correctly includes every algorithm.
-
-
-
-
-
 
 :ref:`Release 5.0.0 <v5.0.0>`

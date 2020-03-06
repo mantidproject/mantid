@@ -159,7 +159,6 @@ void IndirectFitAnalysisTab::setFitDataPresenter(
 void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
   m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(
       m_fittingModel.get(), view, this);
-  m_plotPresenter->disableSpectrumPlotSelection();
 }
 
 void IndirectFitAnalysisTab::setSpectrumSelectionView(
@@ -369,11 +368,11 @@ void IndirectFitAnalysisTab::updateSingleFitOutput(bool error) {
 
   if (error) {
     m_fittingModel->cleanFailedSingleRun(m_fittingAlgorithm,
-                                         TableDatasetIndex{0});
+                                         m_currentTableDatasetIndex);
     m_fittingAlgorithm.reset();
   } else
     m_fittingModel->addSingleFitOutput(m_fittingAlgorithm,
-                                       TableDatasetIndex{0});
+                                       m_currentTableDatasetIndex);
 }
 
 /**
@@ -424,10 +423,13 @@ void IndirectFitAnalysisTab::updateParameterValues(
 
 void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
   IFunction_sptr fun = m_fittingModel->getFittingFunction();
-  if (fun->getNumberDomains() > 1)
-    m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
-  else
-    m_fitPropertyBrowser->updateParameters(*fun);
+  if (fun) {
+    if (fun->getNumberDomains() > 1) {
+      m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
+    } else {
+      m_fitPropertyBrowser->updateParameters(*fun);
+    }
+  }
 }
 
 void IndirectFitAnalysisTab::updateFitBrowserParameterValuesFromAlg() {
@@ -528,6 +530,7 @@ void IndirectFitAnalysisTab::singleFit(TableDatasetIndex dataIndex,
     enableFitButtons(false);
     enableOutputOptions(false);
     m_fittingModel->setFittingMode(FittingMode::SIMULTANEOUS);
+    m_currentTableDatasetIndex = dataIndex;
     runSingleFit(m_fittingModel->getSingleFit(dataIndex, spectrum));
   }
 }
@@ -709,7 +712,8 @@ QStringList IndirectFitAnalysisTab::getDatasetNames() const {
 void IndirectFitAnalysisTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(
       m_fittingModel->getNumberOfDomains(), getDatasetNames(),
-      m_fittingModel->getQValuesForData());
+      m_fittingModel->getQValuesForData(),
+      m_fittingModel->getResolutionsForFit());
   m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
 }
 
@@ -734,7 +738,8 @@ void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(
   m_dataPresenter->updateSpectraInTable(i);
   m_fitPropertyBrowser->updateFunctionBrowserData(
       m_fittingModel->getNumberOfDomains(), getDatasetNames(),
-      m_fittingModel->getQValuesForData());
+      m_fittingModel->getQValuesForData(),
+      m_fittingModel->getResolutionsForFit());
   setModelFitFunction();
   updateParameterEstimationData();
 }

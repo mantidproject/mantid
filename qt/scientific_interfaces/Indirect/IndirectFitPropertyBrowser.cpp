@@ -354,12 +354,14 @@ TableRowIndex IndirectFitPropertyBrowser::currentDataset() const {
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(
     TableRowIndex nData, const QStringList &datasetNames,
-    const std::vector<double> &qValues) {
+    const std::vector<double> &qValues,
+    const std::vector<std::pair<std::string, int>> &fitResolutions) {
   m_functionBrowser->setNumberOfDatasets(nData.value);
   m_functionBrowser->setDatasetNames(datasetNames);
   m_templateBrowser->setNumberOfDatasets(nData.value);
   m_templateBrowser->setDatasetNames(datasetNames);
   m_templateBrowser->setQValues(qValues);
+  m_templateBrowser->setResolution(fitResolutions);
 }
 
 void IndirectFitPropertyBrowser::setFitEnabled(bool) {}
