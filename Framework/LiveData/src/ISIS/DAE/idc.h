@@ -1,5 +1,4 @@
-#ifndef IDC_H
-#define IDC_H
+#pragma once
 /**
 
     @file idc.h
@@ -118,5 +117,3 @@ int IDCreport(int status, int code, const char *format, ...);
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* IDC_H */
