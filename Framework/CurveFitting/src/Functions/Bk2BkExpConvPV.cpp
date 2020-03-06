@@ -38,11 +38,11 @@ Bk2BkExpConvPV::Bk2BkExpConvPV() : mFWHM(0.0), mLowTOF(0.0), mUpperTOF(0.0) {}
 /** Initialize:  declare paraemters
  */
 void Bk2BkExpConvPV::init() {
-  declareParameter("TOF_h", -0.0);
-  declareParameter("Height", 1.0);
-  declareParameter("Alpha", 1.0);
-  declareParameter("Beta", 1.0);
-  declareParameter("Sigma2", 1.0);
+  declareParameter("TOF_h", -0.0, "Location of the peak");
+  declareParameter("Height", 1.0, "Integrated intensity");
+  declareParameter("Alpha", 1.0, "Exponential rise");
+  declareParameter("Beta", 1.0, "Exponential decay");
+  declareParameter("Sigma2", 1.0, "Sigma squared");
   declareParameter("Gamma", 0.0);
 }
 
