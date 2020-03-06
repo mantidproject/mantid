@@ -189,7 +189,6 @@ private:
 
   ExecutionState m_executionState; ///< the current execution state
   ResultState m_resultState;       ///< the current result State
-  bool m_isExecuted;               ///< Executed flag
   bool m_isLoggingEnabled; ///< is the logging of the underlying algorithm
                            /// enabled
   int m_loggingOffset;     ///< the logging priority offset

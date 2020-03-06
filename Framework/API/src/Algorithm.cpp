@@ -98,10 +98,10 @@ Algorithm::Algorithm()
     : PropertyManagerOwner(), m_cancel(false), m_parallelException(false),
       m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(nullptr),
       m_notificationCenter(nullptr), m_progressObserver(nullptr),
-      m_executionState(ExecutionState::UNINITIALIZED),
-      m_resultState(ResultState::INCOMPLETE), m_isExecuted(false),
+      m_executionState(ExecutionState::Uninitialized),
+      m_resultState(ResultState::NotFinished), m_isExecuted(false),
       m_isChildAlgorithm(false), m_recordHistoryForChild(false),
-      m_alwaysStoreInADS(true), m_runningAsync(false), m_running(false),
+      m_alwaysStoreInADS(true), m_runningAsync(false),
       m_rethrow(false), m_isAlgStartupLoggingEnabled(true),
       m_startChildProgress(0.), m_endChildProgress(0.), m_algorithmID(this),
       m_singleGroup(-1), m_groupsHaveSimilarNames(false),
@@ -128,20 +128,24 @@ void Algorithm::setExecutionState(const ExecutionState state) {
 ResultState Algorithm::resultState() const { return m_resultState; }
 
 /// Sets the result execution state
+/// if set to Success or Failed will also set the execution state to finished
 void Algorithm::setResultState(const ResultState state) {
+  if (state != ResultState::NotFinished) {
+    setExecutionState(ExecutionState::Finished);
+  }
   m_resultState = state;
 }
 
 //---------------------------------------------------------------------------------------------
 /// Has the Algorithm already been initialized
 bool Algorithm::isInitialized() const {
-  return (m_executionState != ExecutionState::UNINITIALIZED);
+  return (m_executionState != ExecutionState::Uninitialized);
 }
 
 /// Has the Algorithm already been executed
 bool Algorithm::isExecuted() const {
-  return ((executionState() == ExecutionState::FINISHED) &&
-          (resultState() == ResultState::SUCCESS));
+  return ((executionState() == ExecutionState::Finished) &&
+          (resultState() == ResultState::Success));
 }
 
 //---------------------------------------------------------------------------------------------
@@ -189,7 +193,7 @@ bool Algorithm::getAlwaysStoreInADS() const { return m_alwaysStoreInADS; }
 void Algorithm::setRethrows(const bool rethrow) { this->m_rethrow = rethrow; }
 
 /// True if the algorithm is running.
-bool Algorithm::isRunning() const { return m_running; }
+bool Algorithm::isRunning() const { return (executionState() == ExecutionState::Running); }
 
 //---------------------------------------------------------------------------------------------
 /**  Add an observer to a notification
@@ -288,7 +292,7 @@ void Algorithm::initialize() {
 
     // Indicate that this Algorithm has been initialized to prevent duplicate
     // attempts.
-    setExecutionState(ExecutionState::INITIALIZED);
+    setExecutionState(ExecutionState::Initialized);
   } catch (std::runtime_error &) {
     throw;
   }
@@ -560,7 +564,7 @@ bool Algorithm::executeInternal() {
                         << ex.what() << "\n";
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
-    m_running = false;
+    setResultState(ResultState::Failed);
     if (m_isChildAlgorithm || m_runningAsync || m_rethrow) {
       m_runningAsync = false;
       throw;
@@ -630,10 +634,7 @@ bool Algorithm::executeInternal() {
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
     try {
-      setExecutionState(ExecutionState::RUNNING);
-      if (!isChild()) {
-        m_running = true;
-      }
+      setExecutionState(ExecutionState::Running);
 
       startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
       // Call the concrete algorithm's exec method
@@ -673,8 +674,7 @@ bool Algorithm::executeInternal() {
           " seconds\n");
       reportCompleted(duration);
     } catch (std::runtime_error &ex) {
-      setExecutionState(ExecutionState::FINISHED);
-      setResultState(ResultState::FAILED);
+      setResultState(ResultState::Failed);
       this->unlockWorkspaces();
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
@@ -685,10 +685,8 @@ bool Algorithm::executeInternal() {
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
-      m_running = false;
     } catch (std::logic_error &ex) {
-      setExecutionState(ExecutionState::FINISHED);
-      setResultState(ResultState::FAILED);
+      setResultState(ResultState::Failed);
       this->unlockWorkspaces();
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
@@ -699,13 +697,10 @@ bool Algorithm::executeInternal() {
       }
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
-      m_running = false;
     }
   } catch (CancelException &ex) {
-    setExecutionState(ExecutionState::FINISHED);
-    setResultState(ResultState::FAILED);
+    setResultState(ResultState::Failed);
     m_runningAsync = false;
-    m_running = false;
     getLogger().warning() << this->name() << ": Execution cancelled by user.\n";
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
@@ -714,10 +709,8 @@ bool Algorithm::executeInternal() {
   }
   // Gaudi also specifically catches GaudiException & std:exception.
   catch (std::exception &ex) {
-    setExecutionState(ExecutionState::FINISHED);
-    setResultState(ResultState::FAILED);
+    setResultState(ResultState::Failed);
     m_runningAsync = false;
-    m_running = false;
 
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
@@ -729,11 +722,9 @@ bool Algorithm::executeInternal() {
   }
 
   catch (...) {
-    // Execution failed
-    setExecutionState(ExecutionState::FINISHED);
-    setResultState(ResultState::FAILED);
+    // Execution
+    setResultState(ResultState::Failed);
     m_runningAsync = false;
-    m_running = false;
 
     notificationCenter().postNotification(
         new ErrorNotification(this, "UNKNOWN Exception is caught in exec()"));
@@ -748,8 +739,7 @@ bool Algorithm::executeInternal() {
 
   // Only gets to here if algorithm ended normally
   if (algIsExecuted) {
-    setExecutionState(ExecutionState::FINISHED);
-    setResultState(ResultState::SUCCESS);
+    setResultState(ResultState::Success);
   }
   notificationCenter().postNotification(
       new FinishedNotification(this, algIsExecuted));
@@ -1301,18 +1291,14 @@ bool Algorithm::doCallProcessGroups(
     // but we also need to update flags in the parent algorithm and
     // send an ErrorNotification (because the child isn't registered with the
     // AlgorithmMonitor).
-    setExecutionState(ExecutionState::FINISHED);
-    setResultState(ResultState::FAILED);
+    setResultState(ResultState::Failed);
     m_runningAsync = false;
-    m_running = false;
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     throw;
   } catch (...) {
-    setExecutionState(ExecutionState::FINISHED);
-    setResultState(ResultState::FAILED);
+    setResultState(ResultState::Failed);
     m_runningAsync = false;
-    m_running = false;
     notificationCenter().postNotification(new ErrorNotification(
         this, "UNKNOWN Exception caught from processGroups"));
     throw;
@@ -1341,11 +1327,10 @@ bool Algorithm::doCallProcessGroups(
 
     // Log that execution has completed.
     reportCompleted(duration, true /* this is for group processing*/);
-    setResultState(ResultState::SUCCESS);
+    setResultState(ResultState::Success);
   } else {
-    setResultState(ResultState::FAILED);
+    setResultState(ResultState::Failed);
   }
-  setExecutionState(ExecutionState::FINISHED);
 
   notificationCenter().postNotification(
       new FinishedNotification(this, isExecuted()));
@@ -1794,7 +1779,7 @@ void Algorithm::reportCompleted(const double &duration,
     getLogger().debug() << name() << " finished with isChild = " << isChild()
                         << '\n';
   }
-  m_running = false;
+  setExecutionState(ExecutionState::Finished);
 }
 
 /** Registers the usage of the algorithm with the UsageService

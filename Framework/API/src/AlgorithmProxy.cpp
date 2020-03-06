@@ -29,8 +29,8 @@ AlgorithmProxy::AlgorithmProxy(Algorithm_sptr alg)
       m_categorySeparator(alg->categorySeparator()), m_seeAlso(alg->seeAlso()),
       m_alias(alg->alias()), m_summary(alg->summary()),
       m_version(alg->version()), m_alg(alg),
-      m_executionState(ExecutionState::INITIALIZED),
-      m_resultState(ResultState::INCOMPLETE), m_isExecuted(),
+      m_executionState(ExecutionState::Initialized),
+      m_resultState(ResultState::NotFinished), 
       m_isLoggingEnabled(true), m_loggingOffset(0),
       m_isAlgStartupLoggingEnabled(true), m_rethrow(false), m_isChild(false),
       m_setAlwaysStoreInADS(true) {
@@ -80,7 +80,7 @@ bool AlgorithmProxy::execute() {
     throw;
   }
   stopped();
-  return m_isExecuted;
+  return isExecuted();
 }
 
 /** Asynchronous execution of the algorithm.
@@ -110,7 +110,7 @@ bool AlgorithmProxy::executeAsyncImpl(const Poco::Void &dummy) {
     throw;
   }
   stopped();
-  return m_isExecuted;
+  return (resultState()==ResultState::Success);
 }
 
 /// Gets the current execution state
@@ -123,7 +123,7 @@ ResultState AlgorithmProxy::resultState() const { return m_resultState; }
 
 /// True if the algorithm is running.
 bool AlgorithmProxy::isRunning() const {
-  return m_alg ? m_alg->isRunning() : false;
+  return m_alg ? (m_alg->executionState() == ExecutionState::Running) : false;
 }
 
 /// Has the AlgorithmProxy already been initialized
@@ -131,8 +131,8 @@ bool AlgorithmProxy::isInitialized() const {
   return true; // Algorithm Proxies will always initialize the algorithm
 }
 
-/// Has the AlgorithmProxy already been executed
-bool AlgorithmProxy::isExecuted() const { return m_isExecuted; }
+/// Has the AlgorithmProxy already been executed successfully
+bool AlgorithmProxy::isExecuted() const { return resultState() == ResultState::Success; }
 
 /// Cancel the execution of the algorithm
 void AlgorithmProxy::cancel() {
@@ -273,7 +273,6 @@ void AlgorithmProxy::createConcreteAlg(bool initOnly) {
 void AlgorithmProxy::stopped() {
   if (m_setAlwaysStoreInADS)
     dropWorkspaceReferences();
-  m_isExecuted = m_alg->isExecuted();
   m_executionState = m_alg->executionState();
   m_resultState = m_alg->resultState();
   m_alg.reset();

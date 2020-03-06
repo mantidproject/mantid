@@ -29,9 +29,9 @@ namespace API {
 using AlgorithmID = void *;
 
 /// The current state of the algorithm object
-enum class ExecutionState { UNINITIALIZED, INITIALIZED, RUNNING, FINISHED };
+enum class ExecutionState { Uninitialized, Initialized, Running, Finished };
 /// The validity of the results of the algorithm object
-enum class ResultState { INCOMPLETE, FAILED, SUCCESS };
+enum class ResultState { NotFinished, Failed, Success };
 
 /**
  IAlgorithm is the interface implemented by the Algorithm base class.
