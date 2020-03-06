@@ -7,7 +7,6 @@
 #include "MantidAlgorithms/SetUncertainties.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
@@ -115,6 +114,7 @@ void SetUncertainties::exec() {
   auto inputEventWorkspace =
       boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(
           inputWorkspace);
+  MatrixWorkspace_sptr outputWorkspace = getProperty("OutputWorkspace");
   std::string errorType = getProperty("SetError");
   bool zeroError = (errorType == ZERO);
   bool takeSqrt = ((errorType == SQRT) || (errorType == SQRT_OR_ONE));
@@ -125,20 +125,36 @@ void SetUncertainties::exec() {
   double valueToCompare = resetOne ? 0.0 : getProperty("IfEqualTo");
   int precision = getProperty("Precision");
   double tolerance = resetOne ? 1E-10 : std::pow(10.0, precision * (-1));
+  
+  if (inputEventWorkspace && inputEventWorkspace->getEventType() == Mantid::API::TOF) {
+    bool NonzeroUncertainty = true;
+    const int64_t numHists = static_cast<int64_t>(inputWorkspace->getNumberHistograms());
+    for (int64_t i = 0; i < numHists; ++i) {
+      const auto &Y = inputEventWorkspace->y(i);
+      auto it = std::find(Y.begin(), Y.end(), 0.);
+      if (it != Y.end()) {
+        NonzeroUncertainty = false;
+        break;
+      }
+    }
+    if(NonzeroUncertainty) {
+      if (inputWorkspace != outputWorkspace) {
+        outputWorkspace = inputWorkspace->clone();
+      }
+      this->setProperty("OutputWorkspace", outputWorkspace);
+      return;
+    }
+  }    
 
-  // Create the output workspace. This will copy many aspects from the input
-  // one.
-  MatrixWorkspace_sptr outputWorkspace = getProperty("OutputWorkspace");
-  if (inputWorkspace != outputWorkspace || bool(inputEventWorkspace)) {
+  // Create the output workspace. This will copy many aspects from the input one.
+  if (inputWorkspace != outputWorkspace || inputEventWorkspace) {
     outputWorkspace = inputWorkspace->clone();
   }
-  // ...but not the data, so do that here.
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
-  const size_t numHists = inputWorkspace->getNumberHistograms();
+  const int64_t numHists = static_cast<int64_t>(inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numHists);
-
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
-  for (int64_t i = 0; i < int64_t(numHists); ++i) {
+  for (int64_t i = 0; i < numHists; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // copy the E or set to zero depending on the mode
     if (errorType == ONE_IF_ZERO || customError) {
