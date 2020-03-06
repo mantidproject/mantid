@@ -14,8 +14,7 @@
  * @date 07/08/2019
  */
 
-#ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
-#define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidNexusGeometry/AbstractLogger.h"
@@ -67,5 +66,3 @@ MANTID_NEXUSGEOMETRY_DLL void saveInstrument(
 } // namespace NexusGeometrySave
 } // namespace NexusGeometry
 } // namespace Mantid
-
-#endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_ */

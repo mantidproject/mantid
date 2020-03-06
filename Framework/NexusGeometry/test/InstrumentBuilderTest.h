@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENT_GEOMETRY_ABSTRACTION_TEST_H_
-#define INSTRUMENT_GEOMETRY_ABSTRACTION_TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -87,5 +86,3 @@ private:
   boost::shared_ptr<const Geometry::IObject> shape =
       boost::make_shared<const Geometry::CSGObject>();
 };
-
-#endif // INSTRUMENT_GEOMETRY_ABSTRACTION_TEST_H_

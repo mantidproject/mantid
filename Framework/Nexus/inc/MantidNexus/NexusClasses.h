@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_NEXUS_NEXUSCLASSES_H_
-#define MANTID_NEXUS_NEXUSCLASSES_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -983,5 +982,3 @@ private:
 
 } // namespace NeXus
 } // namespace Mantid
-
-#endif /*MANTID_NEXUS_NEXUSCLASSES_H_*/

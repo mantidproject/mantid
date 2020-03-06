@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_NEXUSGEOMETRY_ABSTRACTLOGGER_H_
-#define MANTID_NEXUSGEOMETRY_ABSTRACTLOGGER_H_
+#pragma once
 
 #include "MantidNexusGeometry/DllConfig.h"
 #include <memory>
@@ -63,5 +62,3 @@ template <typename T> std::unique_ptr<AbstractLogger> makeLogger(T *adaptee) {
 
 } // namespace NexusGeometry
 } // namespace Mantid
-
-#endif /* MANTID_NEXUSGEOMETRY_ABSTRACTLOGGER_H_ */

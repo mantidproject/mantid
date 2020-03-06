@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_NEXUSGEOMETRY_JSONGEOMETRYPARSERTEST_H_
-#define MANTID_NEXUSGEOMETRY_JSONGEOMETRYPARSERTEST_H_
+#pragma once
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
@@ -477,5 +476,3 @@ public:
 private:
   std::string instrument;
 };
-
-#endif /* MANTID_GEOMETRY_JSONGEOMETRYPARSERTEST_H_ */

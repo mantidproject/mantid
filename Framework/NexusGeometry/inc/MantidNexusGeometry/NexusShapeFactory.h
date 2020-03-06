@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDNEXUSGEOMETRY_SHAPEFACTORY_H
-#define MANTIDNEXUSGEOMETRY_SHAPEFACTORY_H
+#pragma once
 
 #include "MantidNexusGeometry/DllConfig.h"
 
@@ -56,4 +55,3 @@ createFromOFFMesh(const std::vector<uint32_t> &faceIndices,
 } // namespace NexusShapeFactory
 } // namespace NexusGeometry
 } // namespace Mantid
-#endif // MANTIDNEXUSGEOMETRY_SHAPEFACTORY_H

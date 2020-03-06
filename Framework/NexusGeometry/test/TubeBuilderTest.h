@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TUBE_TEST_H_
-#define TUBE_TEST_H_
+#pragma once
 
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
@@ -68,5 +67,3 @@ public:
     TS_ASSERT_EQUALS(tube.size(), 1);
   }
 };
-
-#endif // TUBE_TEST_H_

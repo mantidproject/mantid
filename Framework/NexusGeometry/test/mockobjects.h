@@ -1,5 +1,4 @@
-#ifndef NEXUSGEOMETRY_MOCKOBJECTS_H
-#define NEXUSGEOMETRY_MOCKOBJECTS_H
+#pragma once
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexusGeometry/AbstractLogger.h"
@@ -19,5 +18,3 @@ public:
   MOCK_METHOD1(error, void(const std::string &));
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
-
-#endif // NEXUSGEOMETRY_MOCKOBJECTS_H

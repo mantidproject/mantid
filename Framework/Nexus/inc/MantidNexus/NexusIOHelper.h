@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NEXUSIOHELPER_H
-#define NEXUSIOHELPER_H
+#pragma once
 
 #include "MantidIndexing/DllConfig.h"
 #include <algorithm>
@@ -192,5 +191,3 @@ T readNexusValue(::NeXus::File &file, std::string entry = "") {
 } // namespace NeXusIOHelper
 } // namespace NeXus
 } // namespace Mantid
-
-#endif /* NEXUSIOHELPER_H */
