@@ -4,21 +4,25 @@
 Mantid 5.0.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/Py3Python.png
    :class: screenshot
-   :width: 385px
+   :width: 500px
    :align: right
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 5.0.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+**MANTID NOW RUNS IN Python 3**
 
-This is just one of many improvements in this release, so please take a
+Make sure you update any of your Mantid scripts that are currently written in Python 2.
+As a reminder this migration is because Python 2 support ended on 1st Jan 2020.
+
+For this release we have fully  migrated all scripts in the Mantid Script Repository to be Python 3 compatible. Other highlights include the addition of *Waterfall Plots* to Workbench,
+a *brand new Engineering Diffraction interface* and a redesign of the Muon Analysis and Frequency Domain Interfaces.
+
+These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
 has put a great effort into making all of these improvements within
