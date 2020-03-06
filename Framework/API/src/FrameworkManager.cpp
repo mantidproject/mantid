@@ -26,6 +26,8 @@
 
 #include <clocale>
 #include <cstdarg>
+#include <memory>
+#include <thread>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -39,6 +41,13 @@
 #ifdef MPI_BUILD
 #include <boost/mpi.hpp>
 #endif
+
+namespace {
+// This must be thread local, as TBB will try to destroy a process wide handle
+// despite individual threads (such as Python multi-processing) having already
+// cleaned up
+thread_local std::unique_ptr<tbb::task_scheduler_init> tbb_handle;
+} // namespace
 
 namespace Mantid {
 using Kernel::ConfigService;
@@ -170,7 +179,12 @@ void FrameworkManagerImpl::setNumOMPThreadsToConfigValue() {
 void FrameworkManagerImpl::setNumOMPThreads(const int nthreads) {
   g_log.debug() << "Setting maximum number of threads to " << nthreads << "\n";
   PARALLEL_SET_NUM_THREADS(nthreads);
-  static tbb::task_scheduler_init m_init{nthreads};
+  if (tbb_handle) {
+    tbb_handle
+        .reset(); // Have to reset to change the number of threads at runtime
+  }
+
+  tbb_handle = std::make_unique<tbb::task_scheduler_init>(nthreads);
 }
 
 /**
@@ -195,6 +209,8 @@ void FrameworkManagerImpl::clear() {
 
 void FrameworkManagerImpl::shutdown() {
   Kernel::UsageService::Instance().shutdown();
+  // Ensure we don't run into static init ordering issues with TBB
+  tbb_handle.reset();
   clear();
 }
 
