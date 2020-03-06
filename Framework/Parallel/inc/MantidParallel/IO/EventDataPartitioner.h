@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_EVENTDATAPARTITIONER_H_
-#define MANTID_PARALLEL_EVENTDATAPARTITIONER_H_
+#pragma once
 
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/IO/Chunker.h"
@@ -107,5 +106,3 @@ void EventDataPartitioner<IndexType, TimeZeroType, TimeOffsetType>::partition(
 } // namespace IO
 } // namespace Parallel
 } // namespace Mantid
-
-#endif /* MANTID_PARALLEL_EVENTDATAPARTITIONER_H_ */
