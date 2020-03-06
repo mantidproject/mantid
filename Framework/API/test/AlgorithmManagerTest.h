@@ -86,6 +86,13 @@ public:
   bool isRunning() const override { return isRunningFlag; }
   void setIsRunningTo(bool runningFlag) { isRunningFlag = runningFlag; }
   void cancel() override { isRunningFlag = false; }
+  ExecutionState executionState() const override {
+    return isRunningFlag ? ExecutionState::Running : ExecutionState::Finished;
+  }
+  /// Gets the current result State
+  ResultState resultState() const override {
+    return isRunningFlag ? ResultState::NotFinished : ResultState::Failed;
+  }
 };
 
 DECLARE_ALGORITHM(AlgTest)

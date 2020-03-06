@@ -78,6 +78,9 @@ private:
   /// Unimplemented assignment operator
   AlgorithmManagerImpl &operator=(const AlgorithmManagerImpl &);
 
+  /// Removes any finished algorithms from the list of managed algorithms
+  size_t removeFinishedAlgorithms();
+
   /// The maximum size of the algorithm store
   int m_max_no_algs;
   /// The list of managed algorithms

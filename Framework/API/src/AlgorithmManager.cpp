@@ -82,6 +82,11 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
     else
       alg = unmanagedAlg;
 
+    auto count = removeFinishedAlgorithms();
+    g_log.debug()
+        << count
+        << " Finished algorithms removed from the managed algorithms list. "
+        << m_managed_algs.size() << " remaining.\n";
     // If this takes us beyond the maximum size, then remove the oldest one(s)
     while (m_managed_algs.size() >=
            static_cast<std::deque<IAlgorithm_sptr>::size_type>(m_max_no_algs)) {
@@ -239,6 +244,25 @@ void AlgorithmManagerImpl::cancelAll() {
     if (managed_alg->isRunning())
       managed_alg->cancel();
   }
+}
+
+/// Removes all of the finished algorithms
+/// this does not lock the mutex as the locking is already assumed to be in place
+size_t AlgorithmManagerImpl::removeFinishedAlgorithms() {
+  std::vector<IAlgorithm_const_sptr> theCompletedInstances;
+  std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(),
+               std::back_inserter(theCompletedInstances),
+               [](const auto &algorithm) { return (algorithm->executionState() == ExecutionState::Finished); });
+  for (auto completedAlg : theCompletedInstances) {
+    auto itend = m_managed_algs.end();
+    for (auto it = m_managed_algs.begin(); it != itend; ++it) {
+      if ((**it).getAlgorithmID() == completedAlg->getAlgorithmID()) {
+        m_managed_algs.erase(it);
+        break;
+      }
+    }
+  }
+  return theCompletedInstances.size();
 }
 
 void AlgorithmManagerImpl::shutdown() { clear(); }
