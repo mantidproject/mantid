@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ICAT_COMPOSITECATALOGTEST_H_
-#define MANTID_ICAT_COMPOSITECATALOGTEST_H_
+#pragma once
 
 #include "ICatTestHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -192,5 +191,3 @@ private:
     return compositeCatalog;
   }
 };
-
-#endif /* MANTID_ICAT_COMPOSITECATALOGTEST_H_ */
