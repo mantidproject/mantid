@@ -107,6 +107,7 @@ void LoadILLSANS::init() {
  */
 void LoadILLSANS::exec() {
   const std::string filename = getPropertyValue("Filename");
+  m_isD16Omega = false;
   NXRoot root(filename);
   NXEntry firstEntry = root.openFirstEntry();
   const std::string instrumentPath =
@@ -234,8 +235,11 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
   NXInt data = dataGroup.openIntData();
   data.load();
   size_t numberOfHistograms;
-  if (data.dim0() == 1 && data.dim2() > 1 && m_instrumentName == "D16") {
-    // D16 omega scan
+
+  m_isD16Omega =
+      (data.dim0() == 1 && data.dim2() > 1 && m_instrumentName == "D16");
+
+  if (m_isD16Omega) {
     numberOfHistograms =
         static_cast<size_t>(data.dim1() * data.dim2()) + N_MONITORS;
   } else {
@@ -244,8 +248,14 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry,
   }
   createEmptyWorkspace(numberOfHistograms, 1);
   loadMetaData(firstEntry, instrumentPath);
-  size_t nextIndex =
-      loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
+  size_t nextIndex;
+  if (m_isD16Omega) {
+    nextIndex =
+        loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
+  } else {
+    nextIndex =
+        loadDataIntoWorkspaceFromVerticalTubes(data, m_defaultBinning, 0);
+  }
   nextIndex = loadDataIntoWorkspaceFromMonitors(firstEntry, nextIndex);
   if (data.dim1() == 128) {
     m_resMode = "low";
@@ -410,6 +420,10 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
       const HistogramData::Counts histoCounts(data(), data() + data.dim2());
       m_localWorkspace->setHistogram(firstIndex, std::move(histoBinEdges),
                                      std::move(histoCounts));
+      if (m_isD16Omega) {
+        m_localWorkspace->setPoints(firstIndex,
+                                    HistogramData::Points(histoBinEdges));
+      }
       // Add average monitor counts to a property:
       double averageMonitorCounts =
           std::accumulate(data(), data() + data.dim2(), 0) /
@@ -430,12 +444,10 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
     size_t firstIndex = 0) {
 
   // Workaround to get the number of tubes / pixels
-  size_t numberOfTubes;
-  size_t histogramWidth;
-  const bool is_D16_omega =
-      (data.dim2() > 1 && data.dim0() == 1 && m_instrumentName == "D16");
+  int numberOfTubes;
+  int histogramWidth;
 
-  if (is_D16_omega) {
+  if (m_isD16Omega) {
     // D16 with omega scan case
     numberOfTubes = data.dim2();
     histogramWidth = data.dim0();
@@ -443,21 +455,25 @@ size_t LoadILLSANS::loadDataIntoWorkspaceFromVerticalTubes(
     numberOfTubes = data.dim0();
     histogramWidth = data.dim2();
   }
-  const size_t numberOfPixelsPerTube = data.dim1();
+  const int numberOfPixelsPerTube = data.dim1();
   const HistogramData::BinEdges binEdges(timeBinning);
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-  for (int i = 0; i < static_cast<int>(numberOfTubes); ++i) {
-    for (size_t j = 0; j < numberOfPixelsPerTube; ++j) {
+  for (int i = 0; i < numberOfTubes; ++i) {
+    for (int j = 0; j < numberOfPixelsPerTube; ++j) {
       int *data_p;
-      if (is_D16_omega) {
-        data_p = &data(0, static_cast<int>(i), static_cast<int>(j));
+      if (m_isD16Omega) {
+        data_p = &data(0, i, j);
       } else {
-        data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+        data_p = &data(i, j, 0);
       }
       const size_t index = firstIndex + i * numberOfPixelsPerTube + j;
       const HistogramData::Counts histoCounts(data_p, data_p + histogramWidth);
       m_localWorkspace->setHistogram(index, binEdges, std::move(histoCounts));
+      if (m_isD16Omega) {
+        const HistogramData::Points histoPoints(binEdges);
+        m_localWorkspace->setPoints(index, std::move(histoPoints));
+      }
     }
   }
 
