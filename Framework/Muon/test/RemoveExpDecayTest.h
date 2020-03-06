@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MUONREMOVEEXPDECAYTEST_H_
-#define MUONREMOVEEXPDECAYTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -222,5 +221,3 @@ public:
 private:
   MatrixWorkspace_sptr input;
 };
-
-#endif /*MUONREMOVEEXPDECAYTEST_H_*/

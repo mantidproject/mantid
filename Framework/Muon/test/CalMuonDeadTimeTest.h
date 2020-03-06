@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CALMUONDEADTIMETEST_H_
-#define CALMUONDEADTIMETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -107,5 +106,3 @@ private:
     return boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
   }
 };
-
-#endif /*CALMUONDEADTIMETEST_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MUON_MUONGROUPINGCOUNTSTEST_H_
-#define MANTID_MUON_MUONGROUPINGCOUNTSTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -318,5 +317,3 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.0100, 0.0001);
   }
 };
-
-#endif /* MANTID_MUON_MUONGROUPINGCOUNTSTEST_H_ */

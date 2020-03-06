@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CALMUONDETECTORPHASESTEST_H_
-#define CALMUONDETECTORPHASESTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -223,5 +222,3 @@ private:
     TS_ASSERT_DELTA(tab->Double(3, 2), 5.504, 0.001);
   }
 };
-
-#endif /*CALMUONDETECTORPHASESTEST_H_*/
