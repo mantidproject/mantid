@@ -28,7 +28,9 @@ AlgorithmProxy::AlgorithmProxy(Algorithm_sptr alg)
       m_name(alg->name()), m_category(alg->category()),
       m_categorySeparator(alg->categorySeparator()), m_seeAlso(alg->seeAlso()),
       m_alias(alg->alias()), m_summary(alg->summary()),
-      m_version(alg->version()), m_alg(alg), m_isExecuted(),
+      m_version(alg->version()), m_alg(alg),
+      m_executionState(ExecutionState::INITIALIZED),
+      m_resultState(ResultState::INCOMPLETE), m_isExecuted(),
       m_isLoggingEnabled(true), m_loggingOffset(0),
       m_isAlgStartupLoggingEnabled(true), m_rethrow(false), m_isChild(false),
       m_setAlwaysStoreInADS(true) {
@@ -111,6 +113,15 @@ bool AlgorithmProxy::executeAsyncImpl(const Poco::Void &dummy) {
   return m_isExecuted;
 }
 
+/// Gets the current execution state
+ExecutionState AlgorithmProxy::executionState() const {
+  return m_executionState;
+}
+
+/// Gets the current result State
+ResultState AlgorithmProxy::resultState() const { 
+  return m_resultState; }
+
 /// True if the algorithm is running.
 bool AlgorithmProxy::isRunning() const {
   return m_alg ? m_alg->isRunning() : false;
@@ -118,7 +129,7 @@ bool AlgorithmProxy::isRunning() const {
 
 /// Has the AlgorithmProxy already been initialized
 bool AlgorithmProxy::isInitialized() const {
-  return true; //!!!!!!!!!
+  return true; //Algorithm Proxies will always initialize the algorithm
 }
 
 /// Has the AlgorithmProxy already been executed
@@ -264,6 +275,8 @@ void AlgorithmProxy::stopped() {
   if (m_setAlwaysStoreInADS)
     dropWorkspaceReferences();
   m_isExecuted = m_alg->isExecuted();
+  m_executionState = m_alg->executionState();
+  m_resultState = m_alg->resultState();
   m_alg.reset();
 }
 

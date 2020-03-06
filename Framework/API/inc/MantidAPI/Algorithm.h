@@ -220,6 +220,11 @@ public:
   bool execute() override final;
   void executeAsChildAlg() override;
   std::map<std::string, std::string> validateInputs() override;
+
+  /// Gets the current execution state
+  ExecutionState executionState() const override;
+  /// Gets the current result State
+  ResultState resultState() const override;
   bool isInitialized() const override;
   bool isExecuted() const override;
   bool isRunning() const override;
@@ -331,7 +336,8 @@ protected:
   friend class AlgorithmProxy;
   void initializeFromProxy(const AlgorithmProxy &);
 
-  void setInitialized();
+  void setExecutionState(const ExecutionState state); ///< Sets the current execution state
+  void setResultState(const ResultState state); ///< Sets the result execution state
   void setExecuted(bool state);
 
   void store();
@@ -455,7 +461,8 @@ private:
   mutable std::unique_ptr<Poco::NObserver<Algorithm, ProgressNotification>>
       m_progressObserver;
 
-  bool m_isInitialized;         ///< Algorithm has been initialized flag
+  ExecutionState m_executionState; ///< the current execution state
+  ResultState m_resultState;       ///< the current result State
   bool m_isExecuted;            ///< Algorithm is executed flag
   bool m_isChildAlgorithm;      ///< Algorithm is a child algorithm
   bool m_recordHistoryForChild; ///< Flag to indicate whether history should be

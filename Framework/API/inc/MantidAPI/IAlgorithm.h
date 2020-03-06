@@ -29,6 +29,11 @@ namespace API {
  */
 using AlgorithmID = void *;
 
+///The current state of the algorithm object
+enum class ExecutionState { UNINITIALIZED, INITIALIZED, RUNNING, FINISHED };
+///The validity of the results of the algorithm object
+enum class ResultState { INCOMPLETE, FAILED, SUCCESS };
+
 /**
  IAlgorithm is the interface implemented by the Algorithm base class.
  Concrete algorithms, derived from the Algorithm base class are controlled
@@ -109,6 +114,12 @@ public:
 
   /// Execute as a Child Algorithm, with try/catch
   virtual void executeAsChildAlg() = 0;
+
+  /// Gets the current execution state
+  virtual ExecutionState executionState() const = 0;
+
+  /// Gets the currnet result State
+  virtual ResultState resultState() const = 0;
 
   /// Check whether the algorithm is initialized properly
   virtual bool isInitialized() const = 0;

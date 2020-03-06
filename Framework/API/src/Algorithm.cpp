@@ -98,12 +98,14 @@ Algorithm::Algorithm()
     : PropertyManagerOwner(), m_cancel(false), m_parallelException(false),
       m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(nullptr),
       m_notificationCenter(nullptr), m_progressObserver(nullptr),
-      m_isInitialized(false), m_isExecuted(false), m_isChildAlgorithm(false),
-      m_recordHistoryForChild(false), m_alwaysStoreInADS(true),
-      m_runningAsync(false), m_running(false), m_rethrow(false),
-      m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
-      m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
-      m_groupsHaveSimilarNames(false), m_inputWorkspaceHistories(),
+      m_executionState(ExecutionState::UNINITIALIZED),
+      m_resultState(ResultState::INCOMPLETE), m_isExecuted(false),
+      m_isChildAlgorithm(false), m_recordHistoryForChild(false),
+      m_alwaysStoreInADS(true), m_runningAsync(false), m_running(false),
+      m_rethrow(false), m_isAlgStartupLoggingEnabled(true),
+      m_startChildProgress(0.), m_endChildProgress(0.), m_algorithmID(this),
+      m_singleGroup(-1), m_groupsHaveSimilarNames(false),
+      m_inputWorkspaceHistories(),
       m_communicator(std::make_unique<Parallel::Communicator>()) {}
 
 /// Virtual destructor
@@ -114,24 +116,49 @@ Algorithm::~Algorithm() {}
 //===================================
 //=============================================================================================
 
+/// Gets the current execution state
+ExecutionState Algorithm::executionState() const { return m_executionState; }
+
+/// Sets the current execution state
+void Algorithm::setExecutionState(const ExecutionState state) {
+  m_executionState = state;
+}
+
+/// Gets the current result State
+ResultState Algorithm::resultState() const { return m_resultState; }
+
+/// Sets the result execution state
+void Algorithm::setResultState(const ResultState state) {
+  m_resultState = state;
+}
+
 //---------------------------------------------------------------------------------------------
 /// Has the Algorithm already been initialized
-bool Algorithm::isInitialized() const { return m_isInitialized; }
+bool Algorithm::isInitialized() const {
+  return (m_executionState != ExecutionState::UNINITIALIZED);
+}
 
 /// Has the Algorithm already been executed
-bool Algorithm::isExecuted() const { return m_isExecuted; }
+bool Algorithm::isExecuted() const {
+  return ((executionState() == ExecutionState::FINISHED) && (resultState() == ResultState::SUCCESS)) ;
+}
 
 //---------------------------------------------------------------------------------------------
-/// Set the Algorithm initialized state
-void Algorithm::setInitialized() { m_isInitialized = true; }
-
 /** Set the executed flag to the specified state
 // Public in Gaudi - don't know why and will leave here unless we find a reason
 otherwise
 //     Also don't know reason for different return type and argument.
 @param state :: New executed state
 */
-void Algorithm::setExecuted(bool state) { m_isExecuted = state; }
+void Algorithm::setExecuted(bool state) {
+  if (state) {
+    setExecutionState(ExecutionState::FINISHED);
+    setResultState(ResultState::SUCCESS);
+  } else {
+    setExecutionState(ExecutionState::FINISHED);
+    setResultState(ResultState::FAILED);
+  }
+}
 
 //---------------------------------------------------------------------------------------------
 /** To query whether algorithm is a child.
@@ -262,7 +289,7 @@ const std::string Algorithm::workspaceMethodInputProperty() const { return ""; }
  */
 void Algorithm::initialize() {
   // Bypass the initialization if the algorithm has already been initialized.
-  if (m_isInitialized)
+  if (isInitialized())
     return;
 
   g_log.setName(this->name());
@@ -277,7 +304,7 @@ void Algorithm::initialize() {
 
     // Indicate that this Algorithm has been initialized to prevent duplicate
     // attempts.
-    setInitialized();
+    setExecutionState(ExecutionState::INITIALIZED);
   } catch (std::runtime_error &) {
     throw;
   }
@@ -490,6 +517,7 @@ void Algorithm::unlockWorkspaces() {
 
 bool Algorithm::executeInternal() {
   Timer timer;
+  bool algIsExecuted = false;
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
   {
     auto *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
@@ -618,7 +646,7 @@ bool Algorithm::executeInternal() {
   // Invoke exec() method of derived class and catch all uncaught exceptions
   try {
     try {
-      setExecuted(false);
+      setExecutionState(ExecutionState::RUNNING);
       if (!isChild()) {
         m_running = true;
       }
@@ -646,7 +674,9 @@ bool Algorithm::executeInternal() {
       if (m_alwaysStoreInADS)
         this->store();
 
-      setExecuted(true);
+      // just cache the value internally, it is set at the very end of this
+      // method
+      algIsExecuted = true;
 
       // Log that execution has completed.
       getLogger().debug(
@@ -659,6 +689,8 @@ bool Algorithm::executeInternal() {
           " seconds\n");
       reportCompleted(duration);
     } catch (std::runtime_error &ex) {
+      setExecutionState(ExecutionState::FINISHED);
+      setResultState(ResultState::FAILED);
       this->unlockWorkspaces();
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
@@ -671,6 +703,8 @@ bool Algorithm::executeInternal() {
           new ErrorNotification(this, ex.what()));
       m_running = false;
     } catch (std::logic_error &ex) {
+      setExecutionState(ExecutionState::FINISHED);
+      setResultState(ResultState::FAILED);
       this->unlockWorkspaces();
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
@@ -684,6 +718,8 @@ bool Algorithm::executeInternal() {
       m_running = false;
     }
   } catch (CancelException &ex) {
+    setExecutionState(ExecutionState::FINISHED);
+    setResultState(ResultState::FAILED);
     m_runningAsync = false;
     m_running = false;
     getLogger().warning() << this->name() << ": Execution cancelled by user.\n";
@@ -694,7 +730,8 @@ bool Algorithm::executeInternal() {
   }
   // Gaudi also specifically catches GaudiException & std:exception.
   catch (std::exception &ex) {
-    setExecuted(false);
+    setExecutionState(ExecutionState::FINISHED);
+    setResultState(ResultState::FAILED);
     m_runningAsync = false;
     m_running = false;
 
@@ -709,7 +746,8 @@ bool Algorithm::executeInternal() {
 
   catch (...) {
     // Execution failed
-    setExecuted(false);
+    setExecutionState(ExecutionState::FINISHED);
+    setResultState(ResultState::FAILED);
     m_runningAsync = false;
     m_running = false;
 
@@ -724,10 +762,14 @@ bool Algorithm::executeInternal() {
   // Unlock the locked workspaces
   this->unlockWorkspaces();
 
-  notificationCenter().postNotification(
-      new FinishedNotification(this, isExecuted()));
   // Only gets to here if algorithm ended normally
-  return isExecuted();
+  if (algIsExecuted) {
+    setExecutionState(ExecutionState::FINISHED);
+    setResultState(ResultState::FAILED);
+  }
+  notificationCenter().postNotification(
+      new FinishedNotification(this, algIsExecuted));
+  return algIsExecuted;
 }
 
 //---------------------------------------------------------------------------------------------
@@ -1275,14 +1317,16 @@ bool Algorithm::doCallProcessGroups(
     // but we also need to update flags in the parent algorithm and
     // send an ErrorNotification (because the child isn't registered with the
     // AlgorithmMonitor).
-    setExecuted(false);
+    setExecutionState(ExecutionState::FINISHED);
+    setResultState(ResultState::FAILED);
     m_runningAsync = false;
     m_running = false;
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     throw;
   } catch (...) {
-    setExecuted(false);
+    setExecutionState(ExecutionState::FINISHED);
+    setResultState(ResultState::FAILED);
     m_runningAsync = false;
     m_running = false;
     notificationCenter().postNotification(new ErrorNotification(
@@ -1313,9 +1357,12 @@ bool Algorithm::doCallProcessGroups(
 
     // Log that execution has completed.
     reportCompleted(duration, true /* this is for group processing*/);
+    setResultState(ResultState::SUCCESS);
+  } else {
+    setResultState(ResultState::FAILED);
   }
+  setExecutionState(ExecutionState::FINISHED);
 
-  setExecuted(completed);
   notificationCenter().postNotification(
       new FinishedNotification(this, isExecuted()));
 
