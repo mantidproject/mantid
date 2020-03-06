@@ -141,15 +141,15 @@ class AxisEditor(PropertiesEditorBase):
         # apply properties
         axes = self.axes
 
-        self.min, self.limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
+        self.limit_min, self.limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
 
         if self.ui.logBox.isChecked():
             self.scale_setter('log', **{self.nonposkw: TREAT_LOG_NEGATIVE_VALUES})
-            self.min, self.limit_max = self._check_log_limits(self.min, self.limit_max)
+            self.limit_min, self.limit_max = self._check_log_limits(self.limit_min, self.limit_max)
         else:
             self.scale_setter('linear')
 
-        self.lim_setter(self.min, self.limit_max)
+        self.lim_setter(self.limit_min, self.limit_max)
 
         axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id)
 
