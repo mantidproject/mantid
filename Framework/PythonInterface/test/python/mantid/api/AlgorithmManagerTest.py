@@ -62,14 +62,6 @@ class AlgorithmManagerTest(unittest.TestCase):
         self.assertEqual(None, AlgorithmManager.getAlgorithm(alg.getAlgorithmID()))
         self.assertNotEqual(None, AlgorithmManager.getAlgorithm(alg2.getAlgorithmID()))
 
-    def test_newestInstanceOf_returns_correct_instance(self):
-        alg = AlgorithmManager.create("ConvertUnits")
-        alg2 = AlgorithmManager.create("ConvertUnits")
-        alg3 = AlgorithmManager.newestInstanceOf("ConvertUnits")
-
-        self.assertEqual(alg2.getAlgorithmID(), alg3.getAlgorithmID())
-        self.assertNotEqual(alg.getAlgorithmID(), alg3.getAlgorithmID())
-
     def test_runningInstancesOf_returns_python_list(self):
         algs = AlgorithmManager.runningInstancesOf("ConvertUnits")
         self.assertTrue(isinstance(algs, list))
