@@ -5,6 +5,9 @@ Framework Changes
 .. contents:: Table of Contents
    :local:
 
+.. figure:: ../../images/PoohPy3.png
+   :width: 500px
+   :align: right
 
 New Features
 ############
