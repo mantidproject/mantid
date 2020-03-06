@@ -119,8 +119,7 @@ ExecutionState AlgorithmProxy::executionState() const {
 }
 
 /// Gets the current result State
-ResultState AlgorithmProxy::resultState() const { 
-  return m_resultState; }
+ResultState AlgorithmProxy::resultState() const { return m_resultState; }
 
 /// True if the algorithm is running.
 bool AlgorithmProxy::isRunning() const {
@@ -129,7 +128,7 @@ bool AlgorithmProxy::isRunning() const {
 
 /// Has the AlgorithmProxy already been initialized
 bool AlgorithmProxy::isInitialized() const {
-  return true; //Algorithm Proxies will always initialize the algorithm
+  return true; // Algorithm Proxies will always initialize the algorithm
 }
 
 /// Has the AlgorithmProxy already been executed

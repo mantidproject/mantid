@@ -28,9 +28,9 @@ namespace API {
  */
 using AlgorithmID = void *;
 
-///The current state of the algorithm object
+/// The current state of the algorithm object
 enum class ExecutionState { UNINITIALIZED, INITIALIZED, RUNNING, FINISHED };
-///The validity of the results of the algorithm object
+/// The validity of the results of the algorithm object
 enum class ResultState { INCOMPLETE, FAILED, SUCCESS };
 
 /**

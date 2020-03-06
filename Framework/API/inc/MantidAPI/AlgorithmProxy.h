@@ -185,14 +185,14 @@ private:
   const int m_version;         ///< version of the real algorithm
 
   mutable boost::shared_ptr<Algorithm>
-      m_alg;         ///< Shared pointer to a real algorithm. Created on demand
+      m_alg; ///< Shared pointer to a real algorithm. Created on demand
 
-  ExecutionState m_executionState;   ///< the current execution state
-  ResultState m_resultState;         ///< the current result State
-  bool m_isExecuted;                 ///< Executed flag
-  bool m_isLoggingEnabled;           ///< is the logging of the underlying algorithm
-                                     /// enabled
-  int m_loggingOffset;               ///< the logging priority offset
+  ExecutionState m_executionState; ///< the current execution state
+  ResultState m_resultState;       ///< the current result State
+  bool m_isExecuted;               ///< Executed flag
+  bool m_isLoggingEnabled; ///< is the logging of the underlying algorithm
+                           /// enabled
+  int m_loggingOffset;     ///< the logging priority offset
   bool m_isAlgStartupLoggingEnabled; /// Whether to log alg startup and
                                      /// closedown messages from the base class
                                      /// (default = true)

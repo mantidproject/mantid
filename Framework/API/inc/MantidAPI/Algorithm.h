@@ -335,8 +335,10 @@ protected:
   friend class AlgorithmProxy;
   void initializeFromProxy(const AlgorithmProxy &);
 
-  void setExecutionState(const ExecutionState state); ///< Sets the current execution state
-  void setResultState(const ResultState state); ///< Sets the result execution state
+  void setExecutionState(
+      const ExecutionState state); ///< Sets the current execution state
+  void
+  setResultState(const ResultState state); ///< Sets the result execution state
 
   void store();
 
@@ -461,8 +463,8 @@ private:
 
   ExecutionState m_executionState; ///< the current execution state
   ResultState m_resultState;       ///< the current result State
-  bool m_isExecuted;            ///< Algorithm is executed flag
-  bool m_isChildAlgorithm;      ///< Algorithm is a child algorithm
+  bool m_isExecuted;               ///< Algorithm is executed flag
+  bool m_isChildAlgorithm;         ///< Algorithm is a child algorithm
   bool m_recordHistoryForChild; ///< Flag to indicate whether history should be
                                 /// recorded. Applicable to child algs only
   bool m_alwaysStoreInADS; ///< Always store in the ADS, even for child algos
