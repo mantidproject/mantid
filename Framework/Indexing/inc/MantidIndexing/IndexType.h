@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDEXING_INDEXTYPE_H_
-#define MANTID_INDEXING_INDEXTYPE_H_
+#pragma once
 
 #include <string>
 #include <type_traits>
@@ -58,5 +57,3 @@ private:
 } // namespace detail
 } // namespace Indexing
 } // namespace Mantid
-
-#endif /* MANTID_INDEXING_INDEXTYPE_H_ */

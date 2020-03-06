@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDEXING_ROUNDROBINPARTITIONERTEST_H_
-#define MANTID_INDEXING_ROUNDROBINPARTITIONERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -45,5 +44,3 @@ public:
     TS_ASSERT_EQUALS(partitioner.indexOf(GlobalSpectrumIndex(3)), 0);
   }
 };
-
-#endif /* MANTID_INDEXING_ROUNDROBINPARTITIONERTEST_H_ */

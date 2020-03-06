@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDEXING_GLOBALSPECTRUMINDEXTEST_H_
-#define MANTID_INDEXING_GLOBALSPECTRUMINDEXTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -29,5 +28,3 @@ public:
         dynamic_cast<detail::IndexType<GlobalSpectrumIndex, size_t> &>(data))));
   }
 };
-
-#endif /* MANTID_INDEXING_GLOBALSPECTRUMINDEXTEST_H_ */

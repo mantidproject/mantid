@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDEXING_SCATTERTEST_H_
-#define MANTID_INDEXING_SCATTERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -91,5 +90,3 @@ public:
 
   void test_StorageMode_Cloned() { runParallel(run_StorageMode_Cloned); }
 };
-
-#endif /* MANTID_INDEXING_SCATTERTEST_H_ */
