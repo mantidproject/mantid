@@ -247,12 +247,15 @@ void AlgorithmManagerImpl::cancelAll() {
 }
 
 /// Removes all of the finished algorithms
-/// this does not lock the mutex as the locking is already assumed to be in place
+/// this does not lock the mutex as the locking is already assumed to be in
+/// place
 size_t AlgorithmManagerImpl::removeFinishedAlgorithms() {
   std::vector<IAlgorithm_const_sptr> theCompletedInstances;
-  std::copy_if(m_managed_algs.cbegin(), m_managed_algs.cend(),
-               std::back_inserter(theCompletedInstances),
-               [](const auto &algorithm) { return (algorithm->executionState() == ExecutionState::Finished); });
+  std::copy_if(
+      m_managed_algs.cbegin(), m_managed_algs.cend(),
+      std::back_inserter(theCompletedInstances), [](const auto &algorithm) {
+        return (algorithm->executionState() == ExecutionState::Finished);
+      });
   for (auto completedAlg : theCompletedInstances) {
     auto itend = m_managed_algs.end();
     for (auto it = m_managed_algs.begin(); it != itend; ++it) {
