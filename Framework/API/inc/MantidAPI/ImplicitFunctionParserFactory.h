@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef IMPLICIT_FUNCTION_PARSER_FACTORY
-#define IMPLICIT_FUNCTION_PARSER_FACTORY
+#pragma once
 
 /** @class ImplicitFunctionParserFactory ImplicitFunctionParserFactory.h
    Kernel/ImplicitFunctionParserFactory.h
@@ -62,5 +61,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<
     Mantid::API::ImplicitFunctionParserFactoryImpl>;
 }
 } // namespace Mantid
-
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_SingleValueParameter_H_
-#define MANTID_MDALGORITHMS_SingleValueParameter_H_
+#pragma once
 
 #include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MantidKernel/System.h"
@@ -153,5 +152,3 @@ std::string SingleValueParameter<Derived, ValType>::toXMLString() const {
   };
 } // namespace API
 } // namespace Mantid
-
-#endif

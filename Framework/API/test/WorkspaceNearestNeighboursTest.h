@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS
-#define MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS
+#pragma once
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceNearestNeighbours.h"
@@ -240,5 +239,3 @@ public:
     }
   }
 };
-
-#endif /* MANTID_TEST_GEOMETRY_NEARESTNEIGHBOURS */

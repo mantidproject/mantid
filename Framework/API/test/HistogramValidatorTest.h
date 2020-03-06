@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_HISTOGRAMVALIDATORTEST_H_
-#define MANTID_API_HISTOGRAMVALIDATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -38,5 +37,3 @@ public:
                      "The workspace must contain histogram data");
   }
 };
-
-#endif /* MANTID_API_HISTOGRAMVALIDATORTEST_H_ */

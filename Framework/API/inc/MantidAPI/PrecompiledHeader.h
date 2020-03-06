@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_PRECOMPILED_HEADER_H_
-#define MANTID_API_PRECOMPILED_HEADER_H_
+#pragma once
 
 // Mantid
 #include "MantidGeometry/IComponent.h"
@@ -38,5 +37,3 @@
 // Poco
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/XML/XML.h>
-
-#endif // MANTID_API_PRECOMPILED_HEADER_H_

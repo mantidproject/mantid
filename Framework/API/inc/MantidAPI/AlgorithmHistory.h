@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ALGORITHMHISTORY_H_
-#define MANTID_API_ALGORITHMHISTORY_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -151,5 +150,3 @@ MANTID_API_DLL std::ostream &operator<<(std::ostream &,
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_ALGORITHMHISTORY_H_*/

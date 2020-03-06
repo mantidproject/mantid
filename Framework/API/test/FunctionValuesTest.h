@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FUNCTIONVALUESTEST_H_
-#define FUNCTIONVALUESTEST_H_
+#pragma once
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
@@ -127,5 +126,3 @@ public:
 private:
   std::vector<double> x;
 };
-
-#endif /*FUNCTIONVALUESTEST_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IPEAKFUNCTION_H_
-#define MANTID_API_IPEAKFUNCTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -93,5 +92,3 @@ using IPeakFunction_const_sptr = boost::shared_ptr<const IPeakFunction>;
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_IPEAKFUNCTION_H_*/

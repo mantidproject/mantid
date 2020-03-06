@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_MDFRAMEVALIDATOR_H
-#define MANTID_API_MDFRAMEVALIDATOR_H
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -36,5 +35,3 @@ private:
 
 } // namespace API
 } // namespace Mantid
-
-#endif // MANTID_API_MDFRAMEVALIDATOR_H

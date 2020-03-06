@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ITRANSFORMSCALE_H_
-#define MANTID_API_ITRANSFORMSCALE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -51,5 +50,3 @@ using ITransformScale_sptr = boost::shared_ptr<ITransformScale>;
            #classname)),                                                       \
        0));                                                                    \
   }
-
-#endif /*MANTID_API_ITRANSFORMSCALE_H_*/

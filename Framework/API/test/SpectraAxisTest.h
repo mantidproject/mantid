@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SPECTRAAXISTEST_H_
-#define SPECTRAAXISTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -126,5 +125,3 @@ private:
   WorkspaceTester *ws;
   Axis *spectraAxis;
 };
-
-#endif /*SPECTRAAXISTEST_H_*/

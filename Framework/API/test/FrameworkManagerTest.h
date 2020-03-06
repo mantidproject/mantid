@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FRAMEWORKMANAGERTEST_H_
-#define FRAMEWORKMANAGERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -100,5 +99,3 @@ public:
                      const std::runtime_error &)
   }
 };
-
-#endif /*FRAMEWORKMANAGERTEST_H_*/

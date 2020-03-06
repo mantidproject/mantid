@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TRANSFORMSCALEFACTORYTEST_H_
-#define TRANSFORMSCALEFACTORYTEST_H_
+#pragma once
 
 #include "ITransformScale.h"
 #include "MantidAPI/TransformScaleFactory.h"
@@ -38,5 +37,3 @@ public:
 private:
   TransformScaleFactoryImpl &factory;
 };
-
-#endif /* TRANSFORMSCALEFACTORYTEST_H_ */

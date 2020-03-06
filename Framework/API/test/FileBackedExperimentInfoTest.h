@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_FILEBACKEDEXPERIMENTINFOTEST_H_
-#define MANTID_API_FILEBACKEDEXPERIMENTINFOTEST_H_
+#pragma once
 
 #include "ExperimentInfoTest.h"
 #include "MantidAPI/FileBackedExperimentInfo.h"
@@ -171,5 +170,3 @@ private:
   Mantid::API::ExperimentInfo_sptr m_inMemoryExptInfo;
   std::string m_filename;
 };
-
-#endif /* MANTID_API_FILEBACKEDEXPERIMENTINFOTEST_H_ */
