@@ -16,12 +16,9 @@ the GUI.
    open up the Algorithm History window. In the list of Algorithms, 
    click on Rebin v.1 and you should see the following:
 
-.. The image file name is lying!
-
-.. figure:: /images/HistoryRebinOfCNCS_7860_event.png
+.. figure:: /images/HistoryRebinOfHYS_11388_event.png
    :alt: AlgHistory
    :align: center
-
 
 This reveals the history done to this workspace, i.e. Load to load
 the workspace, SumSpectra, and Rebin
