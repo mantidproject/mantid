@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef THREADPOOL_H_
-#define THREADPOOL_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ThreadScheduler.h"
@@ -86,5 +85,3 @@ private:
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* THREADPOOL_H_ */

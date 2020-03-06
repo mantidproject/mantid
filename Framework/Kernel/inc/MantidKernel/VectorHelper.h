@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_VECTORHELPER_H_
-#define MANTID_KERNEL_VECTORHELPER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -248,5 +247,3 @@ template <class T> struct SimpleAverage {
 } // namespace VectorHelper
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /*MANTID_KERNEL_VECTORHELPER_H_*/

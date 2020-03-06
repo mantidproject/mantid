@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_NEUTRONATOM_H_
-#define MANTID_KERNEL_NEUTRONATOM_H_
+#pragma once
 
 //------------------------------------------------------------------------------
 // Include
@@ -113,5 +112,3 @@ MANTID_KERNEL_DLL void calculateScatteringLengths(NeutronAtom &atom);
 
 } // Namespace PhysicalConstants
 } // Namespace Mantid
-
-#endif /* NEUTRONATOM_H_ */

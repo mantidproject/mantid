@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef STATISTICSTEST_H_
-#define STATISTICSTEST_H_
+#pragma once
 
 #include "MantidKernel/Statistics.h"
 #include <algorithm>
@@ -314,5 +313,3 @@ public:
     }
   }
 };
-
-#endif // STATISTICSTEST_H_

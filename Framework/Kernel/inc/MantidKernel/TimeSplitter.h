@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TIMESPLITTER_H
-#define TIMESPLITTER_H
+#pragma once
 
 #include "MantidKernel/DateAndTime.h"
 
@@ -72,5 +71,3 @@ MANTID_KERNEL_DLL TimeSplitterType operator~(const TimeSplitterType &a);
 
 } // Namespace Kernel
 } // Namespace Mantid
-
-#endif // TIMESPLITTER_H

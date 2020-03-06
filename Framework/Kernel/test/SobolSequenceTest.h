@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SOBOLSEQUENCETEST_H_
-#define SOBOLSEQUENCETEST_H_
+#pragma once
 
 #include "MantidKernel/SobolSequence.h"
 #include <cxxtest/TestSuite.h>
@@ -116,5 +115,3 @@ public:
     TS_ASSERT(sumSizes > 0);
   }
 };
-
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_UNITLABELTEST_H_
-#define MANTID_KERNEL_UNITLABELTEST_H_
+#pragma once
 
 #include "MantidKernel/UnitLabel.h"
 
@@ -77,5 +76,3 @@ private:
     TS_ASSERT_EQUALS(std::wstring(expected.begin(), expected.end()), utf8);
   }
 };
-
-#endif /* MANTID_KERNEL_UNITLABELTEST_H_ */

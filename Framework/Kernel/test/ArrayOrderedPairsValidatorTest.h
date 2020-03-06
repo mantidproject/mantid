@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ARRAYBOUNDEDVALIDATORTEST_H_
-#define ARRAYBOUNDEDVALIDATORTEST_H_
+#pragma once
 
 #include "MantidKernel/ArrayOrderedPairsValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -51,5 +50,3 @@ public:
                      "Array has an odd number of entries (5).");
   }
 };
-
-#endif // ARRAYBOUNDEDVALIDATORTEST_H_

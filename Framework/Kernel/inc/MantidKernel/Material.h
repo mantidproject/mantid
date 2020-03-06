@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_MATERIAL_H_
-#define MANTID_GEOMETRY_MATERIAL_H_
+#pragma once
 
 //------------------------------------------------------------------------------
 // Includes
@@ -211,5 +210,3 @@ using Material_sptr = boost::shared_ptr<Material>;
 using Material_const_sptr = boost::shared_ptr<const Material>;
 } // namespace Kernel
 } // namespace Mantid
-
-#endif // MANTID_GEOMETRY_MATERIAL_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_DATEANDTIMEHELPERS_H_
-#define MANTID_KERNEL_DATEANDTIMEHELPERS_H_
+#pragma once
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DllConfig.h"
@@ -31,5 +30,3 @@ averageSorted(const std::vector<Types::Core::DateAndTime> &times,
 } // namespace DateAndTimeHelpers
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_DATEANDTIMEHELPERS_H_ */

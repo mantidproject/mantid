@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_STATISTICS_H_
-#define MANTID_KERNEL_STATISTICS_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include <vector>
@@ -102,4 +101,3 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
                                         const int maxMoment = 3);
 } // namespace Kernel
 } // namespace Mantid
-#endif /* STATISTICS_H_ */

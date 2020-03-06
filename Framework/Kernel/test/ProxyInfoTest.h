@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SCRIPTREPOSITORY_PROXYINFOTEST_H_
-#define MANTID_SCRIPTREPOSITORY_PROXYINFOTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -99,5 +98,3 @@ public:
     TS_ASSERT(b.emptyProxy())
   }
 };
-
-#endif /* MANTID_SCRIPTREPOSITORY_PROXYINFOTEST_H_ */

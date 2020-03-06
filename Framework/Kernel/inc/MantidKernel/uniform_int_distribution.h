@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_UNIFORM_INT_DISRIBUTION_H_
-#define MANTID_KERNEL_UNIFORM_INT_DISRIBUTION_H_
+#pragma once
 
 #include <limits>
 #include <random>
@@ -324,5 +323,3 @@ uniform_int_distribution<_IntType>::operator()(_URNG &__g,
 #undef __CHAR_BIT__
 #undef _MANTID_CHAR_BIT_DEFINED_HERE
 #endif
-
-#endif // MANTID_KERNEL_UNIFORM_INT_DISRIBUTION_H_

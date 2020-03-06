@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_PRECOMPILEDHEADER_H_
-#define MANTID_KERNEL_PRECOMPILEDHEADER_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 
@@ -39,5 +38,3 @@
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 // clang-format on
-
-#endif

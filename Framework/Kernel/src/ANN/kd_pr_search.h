@@ -22,8 +22,7 @@
 //		Initial release
 //----------------------------------------------------------------------
 
-#ifndef ANN_kd_pr_search_H
-#define ANN_kd_pr_search_H
+#pragma once
 
 #include "kd_tree.h"    // kd-tree declarations
 #include "kd_util.h"    // kd-tree utilities
@@ -45,5 +44,3 @@ extern double ANNprMaxErr;      // max tolerable squared error
 extern ANNpointArray ANNprPts;  // the points
 extern ANNpr_queue *ANNprBoxPQ; // priority queue for boxes
 extern ANNmin_k *ANNprPointMK;  // set of k closest points
-
-#endif

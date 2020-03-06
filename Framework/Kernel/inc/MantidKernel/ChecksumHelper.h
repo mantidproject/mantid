@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_CHECKSUMHELPER_H_
-#define MANTID_KERNEL_CHECKSUMHELPER_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include <string>
@@ -30,5 +29,3 @@ MANTID_KERNEL_DLL std::string gitSha1FromFile(const std::string &filepath);
 } // namespace ChecksumHelper
 
 } // namespace Mantid::Kernel
-
-#endif /* MANTID_KERNEL_CHECKSUMHELPER_H_ */

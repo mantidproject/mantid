@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_NDPSEUDORANDOMNUMBERGENERATOR_H_
-#define MANTID_KERNEL_NDPSEUDORANDOMNUMBERGENERATOR_H_
+#pragma once
 
 //------------------------------------------------------------------------------
 // Includes
@@ -140,5 +139,3 @@ void NDPseudoRandomNumberGenerator<SingleValueGenerator>::restore() {
 }
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_NDPSEUDORANDOMNUMBERGENERATOR_H_ */

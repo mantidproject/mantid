@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_NEXUSDESCRIPTOR_H_
-#define MANTID_KERNEL_NEXUSDESCRIPTOR_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 
@@ -116,5 +115,3 @@ private:
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_HIERARCHICALFILEDESCRIPTOR_H_ */

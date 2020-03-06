@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOGPARSERTEST_H_
-#define LOGPARSERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -855,5 +854,3 @@ private:
   TmpFile log_num_repeat;        // num log with repeating lines
   TmpFile log_str_continuations; // string log with continuation lines
 };
-
-#endif /*LOGPARSERTEST_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_SYSTEM_H_
-#define MANTID_KERNEL_SYSTEM_H_
+#pragma once
 
 /*******************************************************************************
  *                      READ THIS!! (AND THEN READ IT AGAIN)
@@ -82,5 +81,3 @@
  */
 #include <cstddef>
 #include <cstdint>
-
-#endif /*MANTID_KERNEL_SYSTEM_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NEUTRONATOMTEST_H_
-#define NEUTRONATOMTEST_H_
+#pragma once
 
 #include "MantidKernel/NeutronAtom.h"
 #include <cxxtest/TestSuite.h>
@@ -62,5 +61,3 @@ public:
     TS_ASSERT_THROWS(getNeutronAtom(97), const std::runtime_error &);
   }
 };
-
-#endif // NEUTRONATOMTEST_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MAKE_COW_TEST_H_
-#define MAKE_COW_TEST_H_
+#pragma once
 
 #include "MantidKernel/make_cow.h"
 #include <cxxtest/TestSuite.h>
@@ -44,5 +43,3 @@ public:
                       product->args, 2);
   }
 };
-
-#endif

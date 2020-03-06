@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MAGNETICION_H_
-#define MAGNETICION_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include <string>
@@ -74,5 +73,3 @@ MANTID_KERNEL_DLL std::vector<std::string> getMagneticIonList();
 
 } // namespace PhysicalConstants
 } // namespace Mantid
-
-#endif /* MAGNETICION_H_ */

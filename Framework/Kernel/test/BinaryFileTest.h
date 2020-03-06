@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BINARYFILETEST_H_
-#define BINARYFILETEST_H_
+#pragma once
 
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/ConfigService.h"
@@ -191,5 +190,3 @@ public:
     TS_ASSERT_THROWS(file2.loadBlock(buffer, 10), const std::runtime_error &);
   }
 };
-
-#endif /*BINARYFILETEST_H_*/

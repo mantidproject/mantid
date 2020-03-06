@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SUPPORTTEST_H_
-#define MANTID_SUPPORTTEST_H_
+#pragma once
 
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
@@ -649,5 +648,3 @@ private:
   std::vector<double> input;
   std::string separator{","};
 };
-
-#endif // MANTID_SUPPORTTEST_H_

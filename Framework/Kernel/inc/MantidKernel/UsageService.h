@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_USAGESERVICE_H_
-#define MANTID_KERNEL_USAGESERVICE_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -161,5 +160,3 @@ using UsageService = Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_USAGESERVICE_H_ */

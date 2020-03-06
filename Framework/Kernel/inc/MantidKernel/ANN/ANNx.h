@@ -33,8 +33,7 @@
 //		Fixed minor compilation bugs for new versions of gcc
 //----------------------------------------------------------------------
 
-#ifndef ANNx_H
-#define ANNx_H
+#pragma once
 
 #include "MantidKernel/ANN/ANN.h" // ANN includes
 #include <iomanip>                // I/O manipulators
@@ -204,5 +203,3 @@ public:
 
 // array of halfspaces
 using ANNorthHSArray = ANNorthHalfSpace *;
-
-#endif

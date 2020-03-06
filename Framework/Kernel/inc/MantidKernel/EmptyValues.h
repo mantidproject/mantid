@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_EMPTYVALUES_H_
-#define MANTID_KERNEL_EMPTYVALUES_H_
+#pragma once
 
 /**
     This file contains functions to define empty values, i.e EMPTY_INT();
@@ -50,5 +49,3 @@ constexpr double EMPTY_DBL() noexcept {
 }
 
 } // namespace Mantid
-
-#endif // MANTID_KERNEL_EMPTYVALUES_H_

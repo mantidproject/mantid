@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef THREADPOOLTEST_H_
-#define THREADPOOLTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -437,5 +436,3 @@ public:
     TS_ASSERT_EQUALS(ThreadPoolTest_TaskThatThrows_counter, 1);
   }
 };
-
-#endif

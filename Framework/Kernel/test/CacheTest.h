@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CACHETEST_H_
-#define CACHETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -130,5 +129,3 @@ public:
   Cache<int, double> m_cacheGet;
   Cache<int, double> m_cacheSet;
 };
-
-#endif /*CACHETEST_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_FILEDESCRIPTORTEST_H_
-#define MANTID_KERNEL_FILEDESCRIPTORTEST_H_
+#pragma once
 
 #include <cstdio>
 #include <cxxtest/TestSuite.h>
@@ -175,5 +174,3 @@ private:
   std::string m_testNonNexusPath;
   std::string m_testAsciiPath;
 };
-
-#endif /* MANTID_KERNEL_FILEDESCRIPTORTEST_H_ */

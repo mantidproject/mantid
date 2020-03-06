@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_FILTEREDTIMESERIESPROPERTYTEST_H_
-#define MANTID_KERNEL_FILTEREDTIMESERIESPROPERTYTEST_H_
+#pragma once
 
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include <cxxtest/TestSuite.h>
@@ -117,5 +116,3 @@ private:
     return filter;
   }
 };
-
-#endif /* MANTID_KERNEL_FILTEREDTIMESERIESPROPERTYTEST_H_ */
