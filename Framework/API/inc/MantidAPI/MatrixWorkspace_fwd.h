@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_MATRIXWORKSPACE_FWD_H_
-#define MANTID_API_MATRIXWORKSPACE_FWD_H_
+#pragma once
 
 #include <boost/shared_ptr.hpp>
 #include <memory>
@@ -29,5 +28,3 @@ using MatrixWorkspace_const_uptr = std::unique_ptr<const MatrixWorkspace>;
 
 } // namespace API
 } // namespace Mantid
-
-#endif // MANTID_API_MATRIXWORKSPACE_FWD_H_

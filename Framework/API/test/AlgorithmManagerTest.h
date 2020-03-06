@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef AlgorithmManagerTest_H_
-#define AlgorithmManagerTest_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -389,5 +388,3 @@ public:
 
   int m_notificationValue;
 };
-
-#endif /* AlgorithmManagerTest_H_*/

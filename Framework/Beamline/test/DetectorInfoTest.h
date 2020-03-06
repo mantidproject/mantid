@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_BEAMLINE_DETECTORINFOTEST_H_
-#define MANTID_BEAMLINE_DETECTORINFOTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -290,5 +289,3 @@ public:
                      (std::vector<std::pair<int64_t, int64_t>>{{0, 1}}));
   }
 };
-
-#endif /* MANTID_BEAMLINE_DETECTORINFOTEST_H_ */

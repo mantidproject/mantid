@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_FUNCTIONDOMAINGENERAL_H_
-#define MANTID_API_FUNCTIONDOMAINGENERAL_H_
+#pragma once
 
 #include "MantidAPI/FunctionDomain.h"
 #include <boost/shared_ptr.hpp>
@@ -37,5 +36,3 @@ private:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_FUNCTIONDOMAINGENERAL_H_*/

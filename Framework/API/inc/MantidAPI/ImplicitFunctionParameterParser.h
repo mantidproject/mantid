@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PARAMETER_PARSER_H_
-#define PARAMETER_PARSER_H_
+#pragma once
 
 /* Used to register classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator
@@ -81,5 +80,3 @@ protected:
 };
 } // namespace API
 } // namespace Mantid
-
-#endif

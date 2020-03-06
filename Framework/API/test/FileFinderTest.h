@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FILEFINDERTEST_H_
-#define FILEFINDERTEST_H_
+#pragma once
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/ConfigService.h"
@@ -675,5 +674,3 @@ private:
   // Number of files to find.
   size_t m_filesToFind;
 };
-
-#endif /*FILEFINDERTEST_H_*/

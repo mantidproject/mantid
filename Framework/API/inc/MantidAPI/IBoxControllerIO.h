@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef H_IBOXCONTROLLER_IO
-#define H_IBOXCONTROLLER_IO
+#pragma once
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/System.h"
 
@@ -72,4 +71,3 @@ public:
 };
 } // namespace API
 } // namespace Mantid
-#endif

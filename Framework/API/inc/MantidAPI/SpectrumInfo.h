@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SPECTRUMINFO_H_
-#define MANTID_API_SPECTRUMINFO_H_
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/SpectrumInfoIterator.h"
@@ -110,5 +109,3 @@ using SpectrumInfoConstIt = SpectrumInfoIterator<const SpectrumInfo>;
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_SPECTRUMINFO_H_ */

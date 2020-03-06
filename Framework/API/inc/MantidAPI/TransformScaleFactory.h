@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_TRANSFORMSCALEFACTORY_H_
-#define MANTID_API_TRANSFORMSCALEFACTORY_H_
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
@@ -63,5 +62,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::TransformScaleFactoryImpl>;
 }
 } // namespace Mantid
-
-#endif /* MANTID_API_TRANSFORMSCALEFACTORY_H_ */

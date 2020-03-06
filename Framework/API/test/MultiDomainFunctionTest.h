@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MULTIDOMAINFUNCTIONTEST_H_
-#define MULTIDOMAINFUNCTIONTEST_H_
+#pragma once
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -504,5 +503,3 @@ private:
   MultiDomainFunction multi;
   JointDomain domain;
 };
-
-#endif /*MULTIDOMAINFUNCTIONTEST_H_*/
