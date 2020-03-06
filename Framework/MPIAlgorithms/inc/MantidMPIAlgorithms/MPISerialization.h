@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPI_SERIALIZE_HPP___
-#define MPI_SERIALIZE_HPP___
+#pragma once
 
 #include "MantidMPIAlgorithms/GatherWorkspaces.h"
 #include "boost/serialization/split_free.hpp"
@@ -159,4 +158,3 @@ inline void load_construct_data(Archive &ar,
 }
 } // namespace serialization
 } // namespace boost
-#endif

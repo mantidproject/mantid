@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_REFLECTOMETRYTRANFORMQXQZTEST_H_
-#define MANTID_MDEVENTS_REFLECTOMETRYTRANFORMQXQZTEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/ReflectometryTransformQxQz.h"
@@ -164,5 +163,3 @@ public:
 
   //---- End Tests for Qz Calculator ---- //
 };
-
-#endif /* MANTID_MDEVENTS_REFLECTOMETRYTRANFORMQXQZTEST_H_ */

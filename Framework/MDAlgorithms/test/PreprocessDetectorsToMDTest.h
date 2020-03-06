@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDALGORITHMS_PREPROCESS_DETECTORS2MD_TEST_H_
-#define MDALGORITHMS_PREPROCESS_DETECTORS2MD_TEST_H_
+#pragma once
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -303,5 +302,3 @@ public:
     API::AnalysisDataService::Instance().addOrReplace("testMatrWS", ws2D);
   }
 };
-
-#endif

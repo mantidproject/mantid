@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQTEST_H_
-#define MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -373,5 +372,3 @@ public:
     TS_ASSERT_EQUALS(out->getNumDims(), 2);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_CONVERTTOREFLECTOMETRYQTEST_H_ */

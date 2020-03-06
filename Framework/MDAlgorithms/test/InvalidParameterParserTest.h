@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TEST_INVALID_PARAMETER_PARSER_H_
-#define TEST_INVALID_PARAMETER_PARSER_H_
+#pragma once
 
 #include "MantidMDAlgorithms/InvalidParameter.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
@@ -42,5 +41,3 @@ public:
                       "x", invalparam->getValue());
   }
 };
-
-#endif

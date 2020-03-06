@@ -11,8 +11,7 @@
  *      Author: spu92482
  */
 
-#ifndef CONVERTMDHISTOTOMATRIXWORKSPACETEST_H_
-#define CONVERTMDHISTOTOMATRIXWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -571,4 +570,3 @@ public:
 private:
   IAlgorithm_sptr alg;
 };
-#endif /* CONVERTMDHISTOTOMATRIXWORKSPACETEST_H_ */

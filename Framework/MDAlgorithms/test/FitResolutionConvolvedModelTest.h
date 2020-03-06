@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_FITRESOLUTIONCONVOLVEDMODELTEST_H_
-#define MANTID_MDALGORITHMS_FITRESOLUTIONCONVOLVEDMODELTEST_H_
+#pragma once
 
 #include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
 #include <cxxtest/TestSuite.h>
@@ -57,5 +56,3 @@ private:
 
   std::string m_inputName;
 };
-
-#endif /* MANTID_MDALGORITHMS_FITRESOLUTIONCONVOLVEDMODELTEST_H_ */
