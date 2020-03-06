@@ -105,14 +105,15 @@ void LoadMuonLog::addLogValueFromIndex(
   // check if log name already exists
   if (logNames.find(logNameLower) != logNames.end()) {
     g_log.warning("The log " + newLogName +
-                  " is already in the nexus file. The sample log names are case insensitive.");
+                  " is already in the nexus file. The sample log names are "
+                  "case insensitive.");
     return;
   }
   logNames.insert(newLogName);
-      auto l_PropertyDouble =
+  auto l_PropertyDouble =
       std::make_unique<TimeSeriesProperty<double>>(newLogName);
   auto l_PropertyString =
-          std::make_unique<TimeSeriesProperty<std::string>>(newLogName);
+      std::make_unique<TimeSeriesProperty<std::string>>(newLogName);
 
   // Read log file into Property which is then stored in Sample object
   if (!nxload.logTypeNumeric(index)) {
