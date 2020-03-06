@@ -76,7 +76,7 @@ private:
   /// Initialisation code
   void init() override;
   /// Name of a string component wich may be defined in parameters file
-  std::string componentName(const std::string &propertyName,
+  std::string componentName(const std::string &inputName,
                             Mantid::Geometry::Instrument_const_sptr &instr);
   /// Final angle definition between source and sample
   double finalAngle(const double k, const double theta);

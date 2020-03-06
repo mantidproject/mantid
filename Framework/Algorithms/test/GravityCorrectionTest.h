@@ -26,8 +26,6 @@ public:
   }
   static void destroySuite(GravityCorrectionTest *suite) { delete suite; }
 
-  // Functional tests
-
   void testName() {
     GravityCorrection gc0;
     TS_ASSERT_EQUALS(gc0.name(), "GravityCorrection")
@@ -75,7 +73,7 @@ public:
     TS_ASSERT(gc30.isExecuted())
 
     CompareWorkspaces replace;
-    comparer(replace, "myOutput1", "myOutput2", "1", "1", "1");
+    compare(replace, "myOutput1", "myOutput2", "1", "1", "1");
   }
 
   void testSlitPosDiffers() {
@@ -106,8 +104,8 @@ public:
     const std::string instrumentCheck = "0";
     const std::string axesCheck = "1";
     CompareWorkspaces beamInvariant;
-    comparer(beamInvariant, "outWSName1", "outWSName2", dataCheck,
-             instrumentCheck, axesCheck);
+    compare(beamInvariant, "outWSName1", "outWSName2", dataCheck,
+            instrumentCheck, axesCheck);
   }
 
   void testSlitInputInvariant() {
@@ -119,36 +117,7 @@ public:
     this->runGravityCorrection(gc8, inWS1, "out2", "slit2", "slit1");
     // Output workspace comparison
     CompareWorkspaces slitInvariant1;
-    comparer(slitInvariant1, "out1", "out2", TRUE);
-
-    Mantid::Kernel::V3D minus{-1., -1., -1.};
-    Mantid::API::MatrixWorkspace_sptr wsSlitB{
-        WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument(
-            0.5, minus * s1, minus * s2, 0.2, 0.2, minus * source,
-            minus * monitor, minus * sample, minus * detector)};
-    // First algorithm run
-    GravityCorrection gc14;
-    this->runGravityCorrection(gc14, wsSlitB, "out3", "slit1", "slit2");
-    // Second algorithm run
-    GravityCorrection gc15;
-    this->runGravityCorrection(gc15, wsSlitB, "out4", "slit2", "slit1");
-    // Output workspace comparison
-    CompareWorkspaces slitInvariant2;
-    comparer(slitInvariant2, "out3", "out4", TRUE);
-
-    // Output workspace comparison
-    CompareWorkspaces slitInvariant3;
-    comparer(slitInvariant3, "out1", "out4", FALSE);
-    if (slitInvariant3.getPropertyValue("Result") == FALSE) {
-      // check explicitly that the messages are only for data!
-      Mantid::API::ITableWorkspace_sptr table =
-          Mantid::API::AnalysisDataService::Instance()
-              .retrieveWS<Mantid::API::ITableWorkspace>("compare_msgs");
-      TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Data mismatch")
-      TS_ASSERT_THROWS_ANYTHING(table->cell<std::string>(1, 0))
-    }
-    TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::AnalysisDataService::Instance().clear())
+    compare(slitInvariant1, "out1", "out2", "1");
   }
 
   void testInstrumentUnchanged() {
@@ -157,8 +126,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().add(inWSName, inWS1))
     CompareWorkspaces instrumentNotModified;
-    comparer(instrumentNotModified, inWS1->getName(), outWSName, FALSE);
-    if (instrumentNotModified.getPropertyValue("Result") == FALSE) {
+    compare(instrumentNotModified, inWS1->getName(), outWSName, "0");
+    if (instrumentNotModified.getPropertyValue("Result") == "0") {
       // check explicitly that the messages are only for data!
       Mantid::API::ITableWorkspace_sptr table =
           Mantid::API::AnalysisDataService::Instance()
@@ -192,19 +161,6 @@ public:
       TS_ASSERT_EQUALS(list.second, (val++)->second)
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().clear())
-  }
-
-  void testHistoryCheck() {
-    GravityCorrection gc11;
-    auto ws = this->runGravityCorrection(gc11, inWS1, "out1");
-    TS_ASSERT_THROWS_NOTHING(gc11.initialize())
-    gc11.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(gc11.setProperty("InputWorkspace", ws))
-    TS_ASSERT_THROWS_NOTHING(gc11.setProperty("OutputWorkspace", "out2"))
-    TSM_ASSERT_THROWS_ANYTHING(
-        "Running GravityCorrection again should not be possible",
-        gc11.execute())
-    TS_ASSERT(gc11.isExecuted())
   }
 
   void testMonitor() {
@@ -265,7 +221,7 @@ public:
     this->runGravityCorrection(gc17, inWS1, "out2");
 
     CompareWorkspaces rotatedWS;
-    comparer(rotatedWS, "out1", "out2", "1", "0", "1");
+    compare(rotatedWS, "out1", "out2", "1", "0", "1");
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().clear())
   }
@@ -288,7 +244,7 @@ public:
 
     // Data and x axis (TOF) must be identical
     CompareWorkspaces translatedWS;
-    comparer(translatedWS, "origin", "translated", "1", "0", "1");
+    compare(translatedWS, "origin", "translated", "1", "0", "1");
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().clear())
   }
@@ -311,7 +267,7 @@ public:
 
     // Data and x axis (TOF) must be identical
     CompareWorkspaces translatedWS;
-    comparer(translatedWS, "origin", "translated", "1", "0", "1");
+    compare(translatedWS, "origin", "translated", "1", "0", "1");
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().clear())
   }
@@ -351,10 +307,6 @@ public:
     // TOF values, first spectrum
     const auto x1 = ws->x(0);
     const auto x2 = corrected->x(0);
-    // TS_ASSERT_EQUALS(x1[0], 0.)tbc
-    // TS_ASSERT_EQUALS(x2[0], 0.)tbc
-    // TS_ASSERT_EQUALS(x1[1], 0.)tbc
-    // TS_ASSERT_EQUALS(x2[1], 0.)tbc
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().clear())
   }
@@ -377,10 +329,6 @@ public:
     // TOF values, first spectrum
     const auto x1 = cws->x(0);
     const auto x2 = corrected->x(0);
-    // TS_ASSERT_EQUALS(x1[0], 0.)tbc
-    // TS_ASSERT_EQUALS(x2[0], 0.)tbc
-    // TS_ASSERT_EQUALS(x1[1], 0.)tbc
-    // TS_ASSERT_EQUALS(x2[1], 0.)tbc
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::AnalysisDataService::Instance().clear())
   }
@@ -431,10 +379,10 @@ public:
     }
   }
 
-  void comparer(CompareWorkspaces &compare, const std::string &in1,
-                const std::string &in2, const std::string property_value,
-                std::string property_instrument = "1",
-                std::string property_axes = "0") {
+  void compare(CompareWorkspaces &compare, const std::string &in1,
+               const std::string &in2, const std::string property_value,
+               std::string property_instrument = "1",
+               std::string property_axes = "0") {
     // Output workspace comparison
     compare.initialize();
     TS_ASSERT_THROWS_NOTHING(compare.setPropertyValue("Workspace1", in1))
@@ -451,8 +399,6 @@ public:
 private:
   const std::string outWSName{"GravityCorrectionTest_OutputWorkspace"};
   const std::string inWSName{"GravityCorrectionTest_InputWorkspace"};
-  const std::string TRUE{"1"};
-  const std::string FALSE{"0"};
   Mantid::Kernel::V3D source{Mantid::Kernel::V3D(0., 0., 0.)};
   Mantid::Kernel::V3D monitor{Mantid::Kernel::V3D(0.5, 0., 0.)};
   Mantid::Kernel::V3D s1{Mantid::Kernel::V3D(1., 0., 0.)};
@@ -484,17 +430,21 @@ public:
   }
 
   GravityCorrectionTestPerformance() {
-    Mantid::API::MatrixWorkspace_sptr ws{
-        WorkspaceCreationHelper::
-            create2DWorkspaceWithReflectometryInstrument()};
+    Mantid::API::FrameworkManager::Instance().exec(
+        "LoadILLReflectometry", 6, "Filename", "ILL/Figaro/592724.nxs",
+        "OutputWorkspace", "ws", "XUnit", "TimeOfFlight");
     alg.initialize();
-    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("InputWorkspace", "ws");
     alg.setProperty("OutputWorkspace", "anon");
   }
 
-  ~GravityCorrectionTestPerformance() override { alg.clear(); }
-
-  void test_performace() { alg.execute(); }
+  void test_performace() {
+    int i = 0;
+    while (i < 10) {
+      alg.execute();
+      ++i;
+    }
+  }
 
 private:
   GravityCorrection alg;
