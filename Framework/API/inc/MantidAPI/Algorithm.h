@@ -338,7 +338,6 @@ protected:
 
   void setExecutionState(const ExecutionState state); ///< Sets the current execution state
   void setResultState(const ResultState state); ///< Sets the result execution state
-  void setExecuted(bool state);
 
   void store();
 

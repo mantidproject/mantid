@@ -144,23 +144,6 @@ bool Algorithm::isExecuted() const {
 }
 
 //---------------------------------------------------------------------------------------------
-/** Set the executed flag to the specified state
-// Public in Gaudi - don't know why and will leave here unless we find a reason
-otherwise
-//     Also don't know reason for different return type and argument.
-@param state :: New executed state
-*/
-void Algorithm::setExecuted(bool state) {
-  if (state) {
-    setExecutionState(ExecutionState::FINISHED);
-    setResultState(ResultState::SUCCESS);
-  } else {
-    setExecutionState(ExecutionState::FINISHED);
-    setResultState(ResultState::FAILED);
-  }
-}
-
-//---------------------------------------------------------------------------------------------
 /** To query whether algorithm is a child.
  *  @returns true - the algorithm is a child algorithm.  False - this is a full
  * managed algorithm.
@@ -765,7 +748,7 @@ bool Algorithm::executeInternal() {
   // Only gets to here if algorithm ended normally
   if (algIsExecuted) {
     setExecutionState(ExecutionState::FINISHED);
-    setResultState(ResultState::FAILED);
+    setResultState(ResultState::SUCCESS);
   }
   notificationCenter().postNotification(
       new FinishedNotification(this, algIsExecuted));
