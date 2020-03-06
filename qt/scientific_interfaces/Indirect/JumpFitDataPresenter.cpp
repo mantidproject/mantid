@@ -25,9 +25,9 @@ JumpFitDataPresenter::JumpFitDataPresenter(
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),
       m_jumpModel(model) {
   connect(view, SIGNAL(singleDataViewSelected()), this,
-          SLOT(showParameterComboBoxes()));
+          SLOT(handleSingleInputSelected()));
   connect(view, SIGNAL(multipleDataViewSelected()), this,
-          SLOT(hideParameterComboBoxes()));
+          SLOT(handleMultipleInputSelected()));
 
   connect(this, SIGNAL(requestedAddWorkspaceDialog()), this,
           SLOT(updateActiveDataIndex()));
@@ -37,18 +37,38 @@ JumpFitDataPresenter::JumpFitDataPresenter(
   connect(cbParameter, SIGNAL(currentIndexChanged(int)), this,
           SLOT(handleSpectrumSelectionChanged(int)));
 
-  connect(view, SIGNAL(sampleLoaded(const QString &)), this,
-          SLOT(updateAvailableParameterTypes()));
-  connect(view, SIGNAL(sampleLoaded(const QString &)), this,
-          SLOT(updateAvailableParameters()));
-  connect(view, SIGNAL(sampleLoaded(const QString &)), this,
-          SLOT(updateParameterSelectionEnabled()));
-  connect(view, SIGNAL(sampleLoaded(const QString &)), this,
-          SIGNAL(updateAvailableFitTypes()));
-
   updateParameterSelectionEnabled();
   m_notifier = Notifier<IFQFitObserver>();
   m_notifier.subscribe(fQTemplateBrowser);
+}
+
+void JumpFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
+  setModelWorkspace(workspaceName);
+  updateAvailableParameterTypes();
+  updateAvailableParameters();
+  updateParameterSelectionEnabled();
+  setModelSpectrum(0);
+  emit dataChanged();
+  updateRanges();
+  emit dataChanged();
+  emit updateAvailableFitTypes();
+}
+
+void JumpFitDataPresenter::handleMultipleInputSelected() {
+  hideParameterComboBoxes();
+  m_notifier.notify(
+      [](IFQFitObserver &obs) { obs.updateDataType(DataType::ALL); });
+}
+
+void JumpFitDataPresenter::handleSingleInputSelected() {
+  showParameterComboBoxes();
+  m_dataIndex = TableDatasetIndex{0};
+  std::string currentText = m_cbParameterType->currentText().toStdString();
+  auto dataType = m_cbParameterType->currentText() == QString("Width")
+                      ? DataType::WIDTH
+                      : DataType::EISF;
+  m_notifier.notify(
+      [&dataType](IFQFitObserver &obs) { obs.updateDataType(dataType); });
 }
 
 void JumpFitDataPresenter::hideParameterComboBoxes() {
@@ -193,13 +213,8 @@ void JumpFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
 }
 
 void JumpFitDataPresenter::handleSpectrumSelectionChanged(int parameterIndex) {
-  // setSingleModelSpectrum(parameterIndex);
-  auto spectra =
-      m_jumpModel->getSpectra(m_dataIndex)[TableRowIndex{parameterIndex}];
-  m_notifier.notify([&parameterIndex](IFQFitObserver &obs) {
-    obs.spectrumChanged(parameterIndex);
-  });
-  emit spectrumChanged(spectra);
+  setSingleModelSpectrum(parameterIndex);
+  emit dataChanged();
 }
 
 void JumpFitDataPresenter::setModelSpectrum(int index) {

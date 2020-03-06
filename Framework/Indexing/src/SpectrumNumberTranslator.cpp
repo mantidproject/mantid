@@ -39,6 +39,16 @@ auto find(T &map, const Key key) -> decltype(map.begin()) {
     return it;
   return map.end();
 }
+
+template <class MapT, class KeyT>
+void checkPartitionContainsValue(const MapT &map, const KeyT key) {
+  // These can be replaced with .contains(x) in C++-20
+  auto it = map.find(key);
+  if (it == map.end()) {
+    throw std::out_of_range("The following value is out of range: " +
+                            key.str());
+  }
+}
 } // namespace
 
 SpectrumNumberTranslator::SpectrumNumberTranslator(
@@ -107,9 +117,8 @@ SpectrumIndexSet
 SpectrumNumberTranslator::makeIndexSet(SpectrumNumber min,
                                        SpectrumNumber max) const {
   checkUniqueSpectrumNumbers();
-  // Range check
-  static_cast<void>(m_spectrumNumberToPartition.at(min));
-  static_cast<void>(m_spectrumNumberToPartition.at(max));
+  checkPartitionContainsValue(m_spectrumNumberToPartition, min);
+  checkPartitionContainsValue(m_spectrumNumberToPartition, max);
 
   std::call_once(m_mapSetup,
                  &SpectrumNumberTranslator::setupSpectrumNumberToIndexMap,
@@ -129,8 +138,8 @@ SpectrumNumberTranslator::makeIndexSet(GlobalSpectrumIndex min,
     throw std::logic_error(
         "SpectrumIndexTranslator: specified min is larger than max.");
   if (max >= m_spectrumNumberToPartition.size())
-    throw std::out_of_range(
-        "SpectrumIndexTranslator: specified max value is out of range.");
+    throw std::out_of_range("The following value is out of range: " +
+                            max.str());
 
   const auto begin = lower_bound(m_globalToLocal, min);
   const auto end = upper_bound(m_globalToLocal, max);
@@ -148,10 +157,13 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
                  &SpectrumNumberTranslator::setupSpectrumNumberToIndexMap,
                  this);
   std::vector<size_t> indices;
-  for (const auto &spectrumNumber : spectrumNumbers)
+  for (const auto &spectrumNumber : spectrumNumbers) {
+    checkPartitionContainsValue(m_spectrumNumberToPartition, spectrumNumber);
+
     if (m_spectrumNumberToPartition.at(spectrumNumber) == m_partition)
       indices.emplace_back(
           find(m_spectrumNumberToIndex, spectrumNumber)->second);
+  }
   return SpectrumIndexSet(indices, m_spectrumNumberToIndex.size());
 }
 
@@ -160,8 +172,8 @@ SpectrumIndexSet SpectrumNumberTranslator::makeIndexSet(
   std::vector<size_t> indices;
   for (const auto &globalIndex : globalIndices) {
     if (globalIndex >= m_spectrumNumberToPartition.size())
-      throw std::out_of_range(
-          "SpectrumIndexTranslator: specified index is out of range.");
+      throw std::out_of_range("The following value is out of range: " +
+                              globalIndex.str());
     const auto it = find(m_globalToLocal, globalIndex);
     if (it != m_globalToLocal.end())
       indices.emplace_back(it->second);

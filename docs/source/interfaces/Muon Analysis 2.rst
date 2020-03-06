@@ -40,10 +40,12 @@ Tabs
 
 All these tabs can be dragged away from the interface into their own window.
 
+* :ref:`Plotting Window <muon_plotting_window-ref>`
 * :ref:`Home Tab <muon_home_tab-ref>`
 * :ref:`Grouping Tab <muon_grouping_tab-ref>`
 * :ref:`Phase Table Tab <muon_phase_table_tab-ref>`
 * :ref:`Fitting Tab <muon_fitting_tab-ref>`
+* :ref:`Sequential Fitting Tab <muon_sequential_fitting_tab-ref>`
 * :ref:`Results Table Tab <muon_results_tab-ref>`
 
 Feedback & Comments

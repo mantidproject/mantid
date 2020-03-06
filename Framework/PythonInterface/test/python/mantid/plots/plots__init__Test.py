@@ -481,6 +481,8 @@ class Plots__init__Test(unittest.TestCase):
         self.ax.plot(ws)
         ws_artist = self.ax.tracked_workspaces[ws_name][0]
         self.assertEqual(1, ws_artist.spec_num)
+        self.assertTrue('specNum' in self.ax.creation_args[0])
+        self.assertFalse('wkspIndex' in self.ax.creation_args[0])
 
     def test_that_plotting_ws_without_giving_spec_num_raises_if_ws_has_more_than_1_histogram(self):
         self.assertRaises(RuntimeError, self.ax.plot, self.ws2d_histo)

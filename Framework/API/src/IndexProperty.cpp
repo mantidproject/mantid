@@ -34,8 +34,9 @@ std::string IndexProperty::isValid() const {
     getIndices();
   } catch (std::runtime_error &e) {
     error = e.what();
-  } catch (std::out_of_range &) {
-    error = "Indices provided to IndexProperty are out of range.";
+  } catch (std::out_of_range &e) {
+    error = "Indices provided to IndexProperty are out of range: ";
+    error.append(e.what());
   } catch (std::logic_error &) {
     error = "Duplicate indices supplied to IndexProperty.";
   }

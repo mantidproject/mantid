@@ -46,17 +46,7 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
       m_plotGuessInSeparateWindow(false),
       m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {
   connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
-          SLOT(setActiveIndex(TableDatasetIndex)));
-  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
-          SLOT(updateAvailableSpectra()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
-          SLOT(updatePlots()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
-          SLOT(updateFitRangeSelector()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
-          SLOT(updateGuess()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
-          SIGNAL(selectedFitDataChanged(TableDatasetIndex)));
+          SLOT(handleSelectedFitDataChanged(TableDatasetIndex)));
 
   connect(m_view, SIGNAL(plotSpectrumChanged(WorkspaceIndex)), this,
           SLOT(handlePlotSpectrumChanged(WorkspaceIndex)));
@@ -95,6 +85,16 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
 
   updateRangeSelectors();
   updateAvailableSpectra();
+}
+
+void IndirectFitPlotPresenter::handleSelectedFitDataChanged(
+    TableDatasetIndex index) {
+  setActiveIndex(index);
+  updateAvailableSpectra();
+  updatePlots();
+  updateFitRangeSelector();
+  updateGuess();
+  emit selectedFitDataChanged(index);
 }
 
 void IndirectFitPlotPresenter::handlePlotSpectrumChanged(

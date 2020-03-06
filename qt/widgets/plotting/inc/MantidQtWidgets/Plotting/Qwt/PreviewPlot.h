@@ -111,6 +111,7 @@ public:
   QString getAxisType(int axisID);
 
   void disableYAxisMenu();
+  void disableContextMenu();
 
 signals:
   /// Signals that the plot should be refreshed

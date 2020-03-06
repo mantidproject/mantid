@@ -25,8 +25,14 @@ QStringList widthFits = QStringList(
 QStringList eisfFits = QStringList(
     {"None", "EISFDiffCylinder", "EISFDiffSphere", "EISFDiffSphereAlkyl"});
 
-std::unordered_map<DataType, QStringList> dataTypeFitTypeMap(
-    {{DataType::WIDTH, widthFits}, {DataType::EISF, eisfFits}});
+QStringList combinedFits = QStringList(
+    {"None", "ChudleyElliot", "HallRoss", "FickDiffusion", "TeixeiraWater",
+     "EISFDiffCylinder", "EISFDiffSphere", "EISFDiffSphereAlkyl"});
+
+std::unordered_map<DataType, QStringList>
+    dataTypeFitTypeMap({{DataType::WIDTH, widthFits},
+                        {DataType::EISF, eisfFits},
+                        {DataType::ALL, combinedFits}});
 
 FQFunctionModel::FQFunctionModel() {
   for (auto functionName : widthFits + eisfFits) {

@@ -496,7 +496,8 @@ void MultiDatasetFit::finishFit(bool error) {
     Mantid::API::IFunction_sptr fun;
     auto algorithm = m_fitRunner->getAlgorithm();
     if (m_fitOptionsBrowser->getCurrentFittingType() ==
-        MantidWidgets::FitOptionsBrowser::Simultaneous) {
+            MantidWidgets::FitOptionsBrowser::Simultaneous ||
+        getNumberOfSpectra() == 1) {
       // After a simultaneous fit
       fun = algorithm->getProperty("Function");
       updateParameters(*fun);

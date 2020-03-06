@@ -5,6 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
+from collections import OrderedDict
 
 import glob
 import os
@@ -21,8 +22,8 @@ num_files_per_detector = 3
 class LModel(object):
     def __init__(self):
         self.run = 0
-        self.num_loaded_detectors ={}
-        self.loaded_runs = {}
+        self.num_loaded_detectors =OrderedDict()
+        self.loaded_runs = OrderedDict()
         self.last_loaded_runs = []
 
     def _load(self, inputs):
@@ -50,7 +51,7 @@ class LModel(object):
             loaded_detectors[ws_name[0]] = 1
         num_loaded_detectors = len(loaded_detectors)
         self._load(workspaces)
-        self.loaded_runs[self.run] = merge_workspaces(self.run, workspaces.values())
+        self.loaded_runs.update({self.run: merge_workspaces(self.run, workspaces.values())})
         self.num_loaded_detectors[self.run] = num_loaded_detectors
         self.last_loaded_runs.append(self.run)
         return self.loaded_runs[self.run]
@@ -214,9 +215,8 @@ def replace_workspace_name_suffix(name, suffix):
 
 def flatten_run_data(*workspaces):
     out = []
-    for workspace in workspaces:
-        detectors = [mantid.mtd[detector] for detector in workspace]
-        out.append(sorted([_workspace.getName() for detector in detectors for _workspace in detector]))
+    for workspace_list in workspaces:
+        out.append(sorted([ws_name for ws_name in workspace_list]))
     return out
 
 

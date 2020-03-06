@@ -84,6 +84,7 @@ private slots:
   void emitFitSingleSpectrum();
   void emitFWHMChanged(double minimum, double maximum);
   void setActiveSpectrum(WorkspaceIndex spectrum);
+  void handleSelectedFitDataChanged(TableDatasetIndex index);
 
 private:
   void disableAllDataSelection();

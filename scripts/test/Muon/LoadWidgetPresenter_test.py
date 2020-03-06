@@ -12,7 +12,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.Common.load_widget.load_presenter import LoadPresenter
 from Muon.GUI.Common.load_widget.load_view import LoadView
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
-
+from collections import OrderedDict
 
 @start_qapplication
 class LoadPresenterTest(unittest.TestCase):
@@ -24,11 +24,24 @@ class LoadPresenterTest(unittest.TestCase):
         self._view, self._load_model, self._co_model)
         self.view = self.presenter.view
 
-    def test_equalise_loaded_runs(self):
-        self.presenter.co_model.loaded_runs = 5
-        self.presenter.load_model.loaded_runs = 10
-        self.presenter.equalise_loaded_runs()
-        self.assertEqual(self.presenter.co_model.loaded_runs, 10)
+    def test_equalise_last_loaded_run_empty(self):
+        runs = OrderedDict()
+        self.presenter.co_model.loaded_runs = runs
+        self.presenter.load_model.loaded_runs = runs
+        self.presenter.equalise_last_loaded_run(runs)
+        self.assertEqual(self.presenter._current_run, None)
+
+    def test_equalise_last_loaded_run_data(self):
+        # need to add each in tern for Python 2
+        runs = OrderedDict()
+        runs[1]=[]
+        runs[2] =[]
+        runs[5] =[]
+        runs[3]=[]
+        self.presenter.co_model.loaded_runs = runs
+        self.presenter.load_model.loaded_runs = runs
+        self.presenter.equalise_last_loaded_run(runs)
+        self.assertEqual(self.presenter._current_run, '3')
 
     def test_update_models(self):
         self.presenter.load_model = LoadModel()
@@ -46,6 +59,47 @@ class LoadPresenterTest(unittest.TestCase):
         self.presenter.disable_buttons()
         self.assertEqual(self.view.disable_buttons.call_count, 1)
 
+    def test_set_coadd_loaded_run(self):
+        self.presenter.equalise_last_loaded_run = mock.Mock()
+        runs = OrderedDict()
+        self.presenter.co_model.loaded_runs = runs
+        self.presenter.load_model.loaded_runs = OrderedDict()
+        self.presenter.set_coadd_loaded_run()
+        self.presenter.equalise_last_loaded_run.assert_called_with(runs.keys())      
+
+    def test_set_loaded_run(self):
+        self.presenter.equalise_last_loaded_run = mock.Mock()
+        runs = OrderedDict()
+        self.presenter.co_model.loaded_runs = OrderedDict()
+        self.presenter.load_model.loaded_runs = runs
+        self.presenter.set_loaded_run()
+        self.presenter.equalise_last_loaded_run.assert_called_with(runs.keys())      
+
+    def test_end_load_thread(self):
+        self.presenter.set_loaded_run = mock.Mock()
+        self.presenter.enable_buttons = mock.Mock()
+        self.presenter.load_thread = mock.Mock()
+        self.presenter.load_thread.deleteLater = mock.Mock()
+
+        self.presenter.end_load_thread()
+        self.assertEqual(self.presenter.set_loaded_run.call_count, 1)
+        self.assertEqual(self.presenter.enable_buttons.call_count, 1)
+        self.assertEqual(self.presenter.load_thread, None)
+
+    def test_end_co_thread(self):
+        self.presenter.set_coadd_loaded_run = mock.Mock()
+        self.presenter.enable_buttons = mock.Mock()
+        self.presenter.co_thread = mock.Mock()
+        self.presenter.co_thread.deleteLater = mock.Mock()
+
+        self.presenter.end_co_thread()
+        self.assertEqual(self.presenter.set_coadd_loaded_run.call_count, 1)
+        self.assertEqual(self.presenter.enable_buttons.call_count, 1)
+        self.assertEqual(self.presenter.co_thread, None)
+
+    def test_last_loaded_run(self):
+        self.presenter._current_run = 5
+        self.assertEquals(self.presenter.last_loaded_run(), 5)
 
 if __name__ == "__main__":
     unittest.main()

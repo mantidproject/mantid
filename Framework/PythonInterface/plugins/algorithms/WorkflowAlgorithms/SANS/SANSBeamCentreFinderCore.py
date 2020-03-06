@@ -119,16 +119,14 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         state.mask.phi_max = -90.0
         state.mask.use_mask_phi_mirror = True
 
-        # Set compatibility mode
-        # state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
+        component_as_string = self.getProperty("Component").value
 
         # Set test centre
-        state.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = \
+        state.move.detectors[component_as_string].sample_centre_pos1 = \
             self.getProperty("Centre1").value
-        state.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = \
+        state.move.detectors[component_as_string].sample_centre_pos2 = \
             self.getProperty("Centre2").value
 
-        component_as_string = self.getProperty("Component").value
         progress = self._get_progress()
 
         # --------------------------------------------------------------------------------------------------------------
