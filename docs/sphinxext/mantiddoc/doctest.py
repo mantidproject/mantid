@@ -134,6 +134,7 @@ try:
     import lxml.etree as ElementTree
 except ImportError:
     import xml.etree.ElementTree as ElementTree
+from sphinx.util import logging
 
 # Name of file produced by doctest target. It is assumed that it is created
 # in app.outdir
@@ -529,19 +530,21 @@ def doctest_to_xunit(app, exception):
       exception: (Exception): If an exception was raised then it is given here.
                               It is simply re-raised if an error occurred
     """
+    logger = logging.getLogger(__name__)
+
     if exception:
         import traceback
         traceback.print_exc()
     if app.builder.name != "doctest":
-        app.debug("Skipping xunit parsing for builder '%s'" % app.builder.name)
+        logger.debug("Skipping xunit parsing for builder '%s'" % app.builder.name)
         return
 
     import os
 
     doctest_file = os.path.join(app.builder.outdir, DOCTEST_OUTPUT)
-    app.debug("Parsing doctest output file '%s'" % doctest_file)
+    logger.debug("Parsing doctest output file '%s'" % doctest_file)
     doctests = DocTestOutputParser(doctest_file)
-    app.debug("Saving doctest as xunit to file '%s'" % doctest_file)
+    logger.debug("Saving doctest as xunit to file '%s'" % doctest_file)
     xunit_file = os.path.join(app.builder.outdir, XUNIT_OUTPUT)
 
     doctests.as_xunit(xunit_file)
