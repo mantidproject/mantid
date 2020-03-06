@@ -61,7 +61,6 @@ Changes
    *
 
 - :doc:`Framework <framework>`
-- :doc:`General UI & Usability <ui>`
 
   - :doc:`MantidPlot <mantidplot>`
 

@@ -6,7 +6,7 @@ MantidWorkbench Changes
 .. contents:: Table of Contents
    :local:
 
-.. figure:: ../../images/ArtWaterallN1.png
+.. figure:: ../../images/ArtWaterfallN1.png
    :align: right
 
    *Waterfall Plots new to Workbench*
