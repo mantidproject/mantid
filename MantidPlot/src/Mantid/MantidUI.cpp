@@ -2363,13 +2363,11 @@ MantidMatrix *MantidUI::getMantidMatrix(const QString &wsName) {
   return m;
 }
 
-bool MantidUI::createScriptInputDialog(const QString &alg_name,
+bool MantidUI::createScriptInputDialog(const IAlgorithm_sptr &alg,
                                        const QString &preset_values,
                                        const QString &optional_msg,
                                        const QStringList &enabled,
                                        const QStringList &disabled) {
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().newestInstanceOf(alg_name.toStdString());
   if (!alg) {
     return false;
   }

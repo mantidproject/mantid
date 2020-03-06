@@ -205,18 +205,6 @@ void AlgorithmManagerImpl::notifyAlgorithmStarting(AlgorithmID id) {
   notificationCenter.postNotification(new AlgorithmStartingNotification(alg));
 }
 
-/// Returns the most recently created instance of the named algorithm (or null
-/// if not found)
-IAlgorithm_sptr
-AlgorithmManagerImpl::newestInstanceOf(const std::string &algorithmName) const {
-  for (auto it = m_managed_algs.rbegin(); it != m_managed_algs.rend(); ++it) {
-    if ((*it)->name() == algorithmName)
-      return *it;
-  }
-
-  return IAlgorithm_sptr();
-}
-
 /// Returns all running (& managed) occurances of the named algorithm, oldest
 /// first
 std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(

@@ -377,7 +377,7 @@ public:
   MantidMatrix *getMantidMatrix(const QString &wsName);
 
   void setIsRunning(bool running);
-  bool createScriptInputDialog(const QString &alg_name,
+  bool createScriptInputDialog(const Mantid::API::IAlgorithm_sptr &alg,
                                const QString &preset_values,
                                const QString &optional_msg,
                                const QStringList &enabled,

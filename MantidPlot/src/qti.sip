@@ -1466,6 +1466,7 @@ class MantidUI: QObject
 {
 %TypeHeaderCode
 #include "src/Mantid/MantidUI.h"
+#include <boost/python/extract.hpp>
 %End
 %ConvertToSubClassCode
 // we have to do this to override casting in qt/qobject.sip (PyQt 3.16)
@@ -1510,8 +1511,10 @@ public:
   Table* createDetectorTable(const QString & wsName);
 
   void setIsRunning(bool running);
-  bool createScriptInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
-
+  bool createScriptInputDialog(SIP_PYOBJECT, const QString &, const QString&, const QStringList&, const QStringList&);
+%MethodCode
+  sipCpp->createScriptInputDialog(boost::python::extract<Mantid::API::IAlgorithm_sptr>(a0), *a1, *a2, *a3, *a4);
+%End
    MantidQt::MantidWidgets::FitPropertyBrowser* fitFunctionBrowser();
 private:
   MantidUI(const MantidUI &);
