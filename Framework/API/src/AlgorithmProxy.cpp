@@ -30,10 +30,9 @@ AlgorithmProxy::AlgorithmProxy(Algorithm_sptr alg)
       m_alias(alg->alias()), m_summary(alg->summary()),
       m_version(alg->version()), m_alg(alg),
       m_executionState(ExecutionState::Initialized),
-      m_resultState(ResultState::NotFinished), 
-      m_isLoggingEnabled(true), m_loggingOffset(0),
-      m_isAlgStartupLoggingEnabled(true), m_rethrow(false), m_isChild(false),
-      m_setAlwaysStoreInADS(true) {
+      m_resultState(ResultState::NotFinished), m_isLoggingEnabled(true),
+      m_loggingOffset(0), m_isAlgStartupLoggingEnabled(true), m_rethrow(false),
+      m_isChild(false), m_setAlwaysStoreInADS(true) {
   if (!alg) {
     throw std::logic_error("Unable to create a proxy algorithm.");
   }
@@ -110,7 +109,7 @@ bool AlgorithmProxy::executeAsyncImpl(const Poco::Void &dummy) {
     throw;
   }
   stopped();
-  return (resultState()==ResultState::Success);
+  return (resultState() == ResultState::Success);
 }
 
 /// Gets the current execution state
@@ -132,7 +131,9 @@ bool AlgorithmProxy::isInitialized() const {
 }
 
 /// Has the AlgorithmProxy already been executed successfully
-bool AlgorithmProxy::isExecuted() const { return resultState() == ResultState::Success; }
+bool AlgorithmProxy::isExecuted() const {
+  return resultState() == ResultState::Success;
+}
 
 /// Cancel the execution of the algorithm
 void AlgorithmProxy::cancel() {

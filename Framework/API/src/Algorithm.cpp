@@ -101,11 +101,10 @@ Algorithm::Algorithm()
       m_executionState(ExecutionState::Uninitialized),
       m_resultState(ResultState::NotFinished), m_isExecuted(false),
       m_isChildAlgorithm(false), m_recordHistoryForChild(false),
-      m_alwaysStoreInADS(true), m_runningAsync(false),
-      m_rethrow(false), m_isAlgStartupLoggingEnabled(true),
-      m_startChildProgress(0.), m_endChildProgress(0.), m_algorithmID(this),
-      m_singleGroup(-1), m_groupsHaveSimilarNames(false),
-      m_inputWorkspaceHistories(),
+      m_alwaysStoreInADS(true), m_runningAsync(false), m_rethrow(false),
+      m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
+      m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
+      m_groupsHaveSimilarNames(false), m_inputWorkspaceHistories(),
       m_communicator(std::make_unique<Parallel::Communicator>()) {}
 
 /// Virtual destructor
@@ -193,7 +192,9 @@ bool Algorithm::getAlwaysStoreInADS() const { return m_alwaysStoreInADS; }
 void Algorithm::setRethrows(const bool rethrow) { this->m_rethrow = rethrow; }
 
 /// True if the algorithm is running.
-bool Algorithm::isRunning() const { return (executionState() == ExecutionState::Running); }
+bool Algorithm::isRunning() const {
+  return (executionState() == ExecutionState::Running);
+}
 
 //---------------------------------------------------------------------------------------------
 /**  Add an observer to a notification
