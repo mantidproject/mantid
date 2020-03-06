@@ -171,6 +171,13 @@ Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceBinned(size_t nhist, size_t numVals, double x0 = 0.0,
                         double deltax = 1.0);
 
+/** Create a 2D workspace with this many point-histograms and bins.
+ * Filled with Y = 2.0 and E = M_SQRT2
+ */
+Mantid::DataObjects::Workspace2D_sptr
+create2DWorkspacePoints(size_t nhist, size_t numVals, double x0 = 0.0,
+                        double deltax = 1.0);
+
 /** Create a 2D workspace with this many histograms and bins. The bins are
  * assumed to be non-uniform and given by the input array
  * Filled with Y = 2.0 and E = sqrt(2.0)w

@@ -10,10 +10,11 @@
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAlgorithms/Rebin2D.h"
 #include "MantidDataObjects/RebinnedOutput.h"
+#include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-
-#include "MantidKernel/Timer.h"
+//#include "../../TestHelpers/src/WorkspaceCreationHelper.cpp"
 
 using Mantid::Algorithms::Rebin2D;
 using namespace Mantid::API;
@@ -27,7 +28,8 @@ namespace {
 /// Return the input workspace. All Y values are 2 and E values sqrt(2)
 MatrixWorkspace_sptr makeInputWS(const bool distribution,
                                  const bool perf_test = false,
-                                 const bool small_bins = false) {
+                                 const bool small_bins = false,
+                                 const bool isHisto = true) {
   size_t nhist(0), nbins(0);
   double x0(0.0), deltax(0.0);
 
@@ -47,20 +49,31 @@ MatrixWorkspace_sptr makeInputWS(const bool distribution,
     }
   }
 
-  MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceBinned(
-      int(nhist), int(nbins), x0, deltax);
+  MatrixWorkspace_sptr ws;
 
-  // We need something other than a spectrum axis, call this one theta
-  auto thetaAxis = std::make_unique<BinEdgeAxis>(nhist + 1);
-  for (size_t i = 0; i < nhist + 1; ++i) {
-    thetaAxis->setValue(i, -0.5 + static_cast<double>(i));
+  if (isHisto) {
+    ws = WorkspaceCreationHelper::create2DWorkspaceBinned(
+        int(nhist), int(nbins), x0, deltax);
+    // We need something other than a spectrum axis, call this one theta
+    auto thetaAxis = std::make_unique<BinEdgeAxis>(nhist + 1);
+    for (size_t i = 0; i < nhist + 1; ++i) {
+      thetaAxis->setValue(i, -0.5 + static_cast<double>(i));
+    }
+    ws->replaceAxis(1, std::move(thetaAxis));
+    if (distribution) {
+      Mantid::API::WorkspaceHelpers::makeDistribution(ws);
+    }
+  } else {
+    // create histograms with points (which cannot be a distirbution)
+    ws = WorkspaceCreationHelper::create2DWorkspacePoints(
+        int(nhist), int(nbins), x0 + 0.5, deltax);
+    // convert axis from spectrum to theta
+    auto thetaAxis = std::make_unique<NumericAxis>(nhist);
+    for (size_t i = 0; i < nhist; ++i) {
+      thetaAxis->setValue(i, static_cast<double>(i));
+    }
+    ws->replaceAxis(1, std::move(thetaAxis));
   }
-  ws->replaceAxis(1, std::move(thetaAxis));
-
-  if (distribution) {
-    Mantid::API::WorkspaceHelpers::makeDistribution(ws);
-  }
-
   return ws;
 }
 
@@ -182,6 +195,33 @@ public:
           // Last bin
           TS_ASSERT_DELTA(e[j], sqrt(0.8), epsilon);
         }
+      }
+    }
+  }
+
+  void test_BothAxes_PointData() {
+    MatrixWorkspace_sptr inputWS =
+        makeInputWS(false, false, false, false); // 10 spectra, 10 points
+    MatrixWorkspace_sptr outputWS =
+        runAlgorithm(inputWS, "5.,1.8,15", "-0.5,2.5,9.5");
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 4);
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 6);
+
+    double errors[6] = {3., 3., 3., 3., 3., 2.236067977};
+    auto nhist = outputWS->getNumberHistograms();
+    const double epsilon(1e-08);
+    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
+      const auto &y = outputWS->y(i);
+      const auto &e = outputWS->e(i);
+      const size_t numBins = y.size();
+      for (size_t j = 0; j < numBins; ++j) {
+        if (j < 5) {
+          TS_ASSERT_DELTA(y[j], 9, epsilon);
+        } else {
+          // Last bin
+          TS_ASSERT_DELTA(y[j], 5, epsilon);
+        }
+        TS_ASSERT_DELTA(e[j], errors[j], epsilon);
       }
     }
   }
