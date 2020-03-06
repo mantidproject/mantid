@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_DATAPROCESSORALGORITHM_H_
-#define MANTID_API_DATAPROCESSORALGORITHM_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -151,5 +150,3 @@ using DistributedDataProcessorAlgorithm =
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_DATAPROCESSORALGORITHM_H_ */

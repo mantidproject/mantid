@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_GRIDDOMAIN_H_
-#define MANTID_API_GRIDDOMAIN_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -47,5 +46,3 @@ using GridDomain_sptr = boost::shared_ptr<GridDomain>;
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_GRIDDOMAIN_H_*/

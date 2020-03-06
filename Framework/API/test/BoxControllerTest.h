@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BOXPLITCONTROLLER_TEST_H
-#define BOXPLITCONTROLLER_TEST_H
+#pragma once
 
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IBoxControllerIO.h"
@@ -396,5 +395,3 @@ public:
                !pS->isOpened());
   }
 };
-
-#endif

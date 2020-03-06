@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IMMUTABLECOMPOSITEFUNCTIONTEST_H_
-#define IMMUTABLECOMPOSITEFUNCTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -333,5 +332,3 @@ public:
     TS_ASSERT(fun->getTie(3));
   }
 };
-
-#endif /*IMMUTABLECOMPOSITEFUNCTIONTEST_H_*/

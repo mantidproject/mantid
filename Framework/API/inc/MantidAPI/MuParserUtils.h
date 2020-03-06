@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_MUPARSERUTILS_H_
-#define MANTID_API_MUPARSERUTILS_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -36,5 +35,3 @@ void MANTID_API_DLL extraOneVarFunctions(mu::Parser &parser);
 } // namespace MuParserUtils
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_MUPARSERUTILS_H_ */

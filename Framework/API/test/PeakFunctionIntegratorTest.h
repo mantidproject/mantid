@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PEAKFUNCTIONINTEGRATORTEST_H
-#define PEAKFUNCTIONINTEGRATORTEST_H
+#pragma once
 
 #include "MantidAPI/PeakFunctionIntegrator.h"
 #include <cxxtest/TestSuite.h>
@@ -194,5 +193,3 @@ public:
                     integrator.requiredRelativePrecision());
   }
 };
-
-#endif // PEAKFUNCTIONINTEGRATORTEST_H

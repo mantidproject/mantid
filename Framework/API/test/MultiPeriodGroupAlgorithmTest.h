@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_MultiPeriodGroupAlgorithmTEST_H_
-#define MANTID_API_MultiPeriodGroupAlgorithmTEST_H_
+#pragma once
 
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -251,5 +250,3 @@ public:
     TS_ASSERT_EQUALS(a->size(), wsgroup->size());
   }
 };
-
-#endif /* MANTID_API_MultiPeriodGroupAlgorithmTEST_H_ */

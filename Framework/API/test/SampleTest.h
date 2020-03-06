@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TESTSAMPLE_H_
-#define TESTSAMPLE_H_
+#pragma once
 
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
@@ -361,5 +360,3 @@ public:
     TS_ASSERT(loaded.getName().empty());
   }
 };
-
-#endif /*TESTSAMPLE_H_*/

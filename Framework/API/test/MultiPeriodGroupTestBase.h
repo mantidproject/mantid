@@ -11,8 +11,7 @@
  *      Author: spu92482
  */
 
-#ifndef MANTID_API_MULTIPERIODGROUPTESTBASE_H_
-#define MANTID_API_MULTIPERIODGROUPTESTBASE_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -62,5 +61,3 @@ protected:
     return group;
   }
 };
-
-#endif /* MANTID_API_MULTIPERIODGROUPTESTBASE_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ICOLUMN_H_
-#define MANTID_API_ICOLUMN_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -238,4 +237,3 @@ using Column_const_sptr = boost::shared_ptr<const Column>;
 
 } // namespace API
 } // Namespace Mantid
-#endif /*MANTID_API_ICOLUMN_H_*/

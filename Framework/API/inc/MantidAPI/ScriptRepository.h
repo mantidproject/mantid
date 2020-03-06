@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SCRIPTREPOSITORY_H_
-#define MANTID_API_SCRIPTREPOSITORY_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -593,5 +592,3 @@ public:
 using ScriptRepository_sptr = boost::shared_ptr<ScriptRepository>;
 } // namespace API
 } // namespace Mantid
-
-#endif // MANTID_API_SCRIPTREPOSITORY_H_

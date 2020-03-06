@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NUMERICAXISTEST_H_
-#define NUMERICAXISTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -224,5 +223,3 @@ public:
 private:
   Axis *numericAxis;
 };
-
-#endif /*NUMERICAXISTEST_H_*/

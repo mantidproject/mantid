@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_PROJECTION_H_
-#define MANTID_API_PROJECTION_H_
+#pragma once
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/V3D.h"
@@ -71,5 +70,3 @@ using Projection_sptr = boost::shared_ptr<Projection>;
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_PROJECTION_H_*/

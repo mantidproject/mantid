@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LIVELISTENERFACTORYTEST_H_
-#define LIVELISTENERFACTORYTEST_H_
+#pragma once
 
 #include "LiveListenerTest.h"
 #include "MantidAPI/Algorithm.h"
@@ -169,5 +168,3 @@ public:
     factory.unsubscribe("MockLiveListener");
   }
 };
-
-#endif /* LIVELISTENERFACTORYTEST_H_ */

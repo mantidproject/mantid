@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef RUNTEST_H_
-#define RUNTEST_H_
+#pragma once
 
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -642,5 +641,3 @@ public:
   Run m_testRun;
   std::string m_propName;
 };
-
-#endif

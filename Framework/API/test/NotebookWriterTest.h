@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_NOTEBOOKWRITERTEST_H_
-#define MANTID_NOTEBOOKWRITERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -60,5 +59,3 @@ public:
     TS_ASSERT_EQUALS(notebookLines[3], "   \"input\" : \"" + test_data + "\",")
   }
 };
-
-#endif // MANTID_NOTEBOOKWRITERTEST_H_

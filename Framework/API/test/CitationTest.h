@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef CITATIONTEST_H_
-#define CITATIONTEST_H_
+#pragma once
 
 #include "MantidAPI/Citation.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
@@ -119,5 +118,3 @@ public:
     TS_ASSERT_EQUALS(cite2.bibtex(), "bibtex")
   }
 };
-
-#endif /* CITATIONTEST_H_ */

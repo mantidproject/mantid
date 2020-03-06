@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SINGLE_VALUE_PARAMETER_PARSER_H_
-#define SINGLE_VALUE_PARAMETER_PARSER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -112,5 +111,3 @@ void SingleValueParameterParser<SingleValueParameterType>::setSuccessorParser(
 }
 } // namespace API
 } // namespace Mantid
-
-#endif
