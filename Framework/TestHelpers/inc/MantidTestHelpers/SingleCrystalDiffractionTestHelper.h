@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SINGLECRYSTALDIFFRACTIONHELPER_H_
-#define SINGLECRYSTALDIFFRACTIONHELPER_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -111,5 +110,3 @@ private:
 };
 } // namespace SingleCrystalDiffractionTestHelper
 } // namespace Mantid
-
-#endif

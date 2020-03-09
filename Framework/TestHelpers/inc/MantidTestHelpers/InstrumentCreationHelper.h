@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENTCREATIONHELPER_H_
-#define INSTRUMENTCREATIONHELPER_H_
+#pragma once
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -34,5 +33,3 @@ void addDetector(Mantid::Geometry::Instrument_sptr &instrument,
                  const Mantid::Kernel::V3D &position, const int ID,
                  const std::string &name);
 } // namespace InstrumentCreationHelper
-
-#endif /* INSTRUMENTCREATIONHELPER_H_ */

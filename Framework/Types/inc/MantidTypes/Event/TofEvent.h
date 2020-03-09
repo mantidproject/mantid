@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TYPES_TOFEVENT_H
-#define MANTID_TYPES_TOFEVENT_H
+#pragma once
 
 #include "MantidTypes/Core/DateAndTime.h"
 #include "MantidTypes/DllConfig.h"
@@ -138,4 +137,3 @@ inline double TofEvent::errorSquared() const { return 1.0; }
 } // namespace Event
 } // namespace Types
 } // namespace Mantid
-#endif // MANTID_TYPES_TOFEVENT_H

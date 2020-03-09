@@ -11,8 +11,7 @@
  *      Author: janik
  */
 
-#ifndef DATEANDTIMETEST_H_
-#define DATEANDTIMETEST_H_
+#pragma once
 
 #include "MantidTypes/Core/DateAndTime.h"
 #include <ctime>
@@ -471,5 +470,3 @@ public:
     }
   }
 };
-
-#endif /* DATEANDTIMETEST_H_ */

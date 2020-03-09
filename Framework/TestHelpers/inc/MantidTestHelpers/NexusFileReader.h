@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_NEXUSGEOMETRY_NEXUSFILEREADER_H_
-#define MANTID_NEXUSGEOMETRY_NEXUSFILEREADER_H_
+#pragma once
 
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
@@ -417,4 +416,3 @@ private:
 }; // NexusFileReader
 } // namespace NexusGeometry
 } // namespace Mantid
-#endif

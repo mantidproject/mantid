@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TESTHELPERS_ONCATHELPER_H_
-#define MANTID_TESTHELPERS_ONCATHELPER_H_
+#pragma once
 
 #include "MantidCatalog/ONCat.h"
 #include "MantidKernel/Exception.h"
@@ -74,5 +73,3 @@ IOAuthTokenStore_uptr make_mock_token_store_already_logged_in();
 
 } // namespace TestHelpers
 } // namespace Mantid
-
-#endif // MANTID_TESTHELPERS_ONCATHELPER_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TYPES_CORE_DATEANDTIMEHELPERS_H_
-#define MANTID_TYPES_CORE_DATEANDTIMEHELPERS_H_
+#pragma once
 
 #include "MantidTypes/DllConfig.h"
 
@@ -21,5 +20,3 @@ MANTID_TYPES_DLL bool stringIsPosix(const std::string &date);
 } // namespace Core
 } // namespace Types
 } // namespace Mantid
-
-#endif /* MANTID_TYPES_CORE_DATEANDTIMEHELPERS_H_ */

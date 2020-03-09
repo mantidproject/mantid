@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TESTHELPERS_REFLECTOMETRYHELPER_H_
-#define MANTID_TESTHELPERS_REFLECTOMETRYHELPER_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
@@ -64,5 +63,3 @@ MatrixWorkspace_sptr createWorkspaceSingle(const double startX = 1,
                                            const double deltaX = 1);
 } // namespace TestHelpers
 } // namespace Mantid
-
-#endif // MANTID_TESTHELPERS_REFLECTOMETRYHELPER_H_

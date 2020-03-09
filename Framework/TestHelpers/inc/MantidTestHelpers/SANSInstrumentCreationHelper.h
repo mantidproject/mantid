@@ -13,8 +13,7 @@
  *  I.e. It can only be used by plugin/algorithm-level packages (e.g.
  *DataHandling)
  *********************************************************************************/
-#ifndef SANSINSTRUMENTCREATIONHELPER_H_
-#define SANSINSTRUMENTCREATIONHELPER_H_
+#pragma once
 
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -52,5 +51,3 @@ public:
   runLoadMappingTable(Mantid::DataObjects::Workspace2D_sptr workspace,
                       int nxbins, int nybins);
 };
-
-#endif // SANSINSTRUMENTCREATIONHELPER_H_
