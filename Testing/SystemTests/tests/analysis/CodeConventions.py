@@ -10,8 +10,6 @@ import re
 import mantid
 from mantid.simpleapi import *
 from six.moves import range
-from six import iteritems
-
 MAX_ALG_LEN = 40 # TODO convention says 20 is the maximum
 
 SPECIAL = ["InputWorkspace", "OutputWorkspace", "Workspace",
@@ -139,7 +137,7 @@ class Algorithms(systemtesting.MantidSystemTest):
     def runTest(self):
         algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 
-        for (name, versions) in iteritems(algs):
+        for (name, versions) in algs.items():
             if not self.verifyAlgName(name):
                 self.__ranOk += 1
                 continue

@@ -10,9 +10,6 @@ import re
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
-from six import iteritems
-
-
 class LRScalingFactors(PythonAlgorithm):
     """
         This algorithm runs through a sequence of direct beam data sets
@@ -401,7 +398,7 @@ class LRScalingFactors(PythonAlgorithm):
         fd.write("# y=a+bx\n#\n")
         fd.write("# LambdaRequested[Angstroms] S1H[mm] (S2/Si)H[mm] S1W[mm] (S2/Si)W[mm] a b error_a error_b\n#\n")
 
-        for k, v in iteritems(scaling_file_meta):
+        for k, v in scaling_file_meta.items():
             fd.write("%s\n" % v)
         for item in scaling_file_content:
             fd.write("IncidentMedium=%s " % item["IncidentMedium"])

@@ -33,8 +33,6 @@ import os
 import sys
 
 import six
-from six import iteritems
-
 import mantid
 # This is a simple API so give access to the aliases by default as well
 from mantid import __gui__, api as _api, kernel as _kernel, apiVersion
@@ -1107,7 +1105,7 @@ def set_properties(alg_object, *args, **kwargs):
         mandatory_props = []
 
     postponed = []
-    for (key, value) in iteritems(kwargs):
+    for (key, value) in kwargs.items():
         if key in mandatory_props:
             mandatory_props.remove(key)
         if "IndexSet" in key:
@@ -1445,7 +1443,7 @@ def _translate():
 
     algs = AlgorithmFactory.getRegisteredAlgorithms(True)
     algorithm_mgr = AlgorithmManager
-    for name, versions in iteritems(algs):
+    for name, versions in algs.items():
         if specialization_exists(name):
             continue
         try:

@@ -7,9 +7,6 @@
 # pylint: disable=no-init,invalid-name
 import systemtesting
 from mantid.geometry import *
-from six import iteritems
-
-
 class SpaceGroupUnitCellTest(systemtesting.MantidSystemTest):
     '''
     This test checks that SpaceGroup.isAllowedUnitCell produces the expected result for each registered space group.
@@ -39,7 +36,7 @@ class SpaceGroupUnitCellTest(systemtesting.MantidSystemTest):
                 self._check_spacegroup(sg, monoclinic_c_cells, monoclinic_c_compatiblity[lattice_system])
 
     def _check_spacegroup(self, sg, cells, compatible_metrics):
-        for system, cell in iteritems(cells):
+        for system, cell in cells.items():
             is_allowed = sg.isAllowedUnitCell(cell)
             should_be_allowed = system in compatible_metrics
 

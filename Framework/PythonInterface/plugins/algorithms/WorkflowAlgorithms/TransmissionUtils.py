@@ -9,9 +9,6 @@ from mantid.api import *
 from mantid.kernel import *
 import os
 import sys
-from six import iteritems
-
-
 def simple_algorithm(algorithm_str, parameters):
     return _execute(algorithm_str, parameters)
 
@@ -23,7 +20,7 @@ def _execute(algorithm_str, parameters, is_name=True):
         alg = Algorithm.fromString(algorithm_str)
     alg.initialize()
     alg.setChild(True)
-    for key, value in iteritems(parameters):
+    for key, value in parameters.items():
         if value is None:
             Logger("TransmissionUtils").error("Trying to set %s=None" % key)
         if alg.existsProperty(key):

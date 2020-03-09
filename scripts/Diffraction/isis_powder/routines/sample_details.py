@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from six import iteritems
 from isis_powder.routines import common
 import math
 from mantid import logger
@@ -93,7 +92,7 @@ class SampleDetails(object):
 
         # Attempt to convert them all to floating point relying on the fact on
         # the way Python has aliases to an object
-        for key, value in iteritems(values_to_check):
+        for key, value in values_to_check.items():
             _check_value_is_physical(property_name=key, value=value)
             _check_can_convert_to_float(property_name=key, value=value)
 
@@ -224,7 +223,7 @@ class _Cylinder(object):
 
         # Attempt to convert them all to floating point relying on the fact on
         # the way Python has aliases to an object
-        for key, value in iteritems(values_to_check):
+        for key, value in values_to_check.items():
             _check_value_is_physical(property_name=key, value=value)
             _check_can_convert_to_float(property_name=key, value=value)
 

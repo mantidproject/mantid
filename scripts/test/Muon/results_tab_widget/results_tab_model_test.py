@@ -12,7 +12,7 @@ import unittest
 
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
-from mantid.py3compat import iteritems, mock, string_types
+from mantid.py3compat import mock, string_types
 from mantid.simpleapi import Load
 from mantidqt.utils.qt.testing import start_qapplication
 
@@ -49,7 +49,7 @@ def create_test_fits(input_workspaces,
         'Name': name,
         'Value': value,
         'Error': error
-    } for name, (value, error) in iteritems(parameters)]
+    } for name, (value, error) in parameters.items()]
 
     fits = []
     for name in input_workspaces:

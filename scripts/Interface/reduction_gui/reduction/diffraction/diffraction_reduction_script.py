@@ -303,7 +303,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
             runsetupdict.pop('ExpIniFile', None)
 
         # c) all properties
-        for propname, propvalue in runsetupdict.iteritems():
+        for propname, propvalue in runsetupdict.items():
             # skip these pseudo-properties
             if propname in ['DisableBackgroundCorrection', 'DisableVanadiumCorrection',
                             'DisableVanadiumBackgroundCorrection', 'DoReSampleX']:
@@ -328,7 +328,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         # ENDFOR
 
         # 2. Advanced setup
-        for propname, propvalue in advsetupdict.iteritems():
+        for propname, propvalue in advsetupdict.items():
             if propvalue == '' or propvalue is None:
                 # Skip not-defined value
                 continue

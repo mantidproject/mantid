@@ -13,9 +13,6 @@ import numpy
 import sys
 import os
 import json
-from six import iteritems
-
-
 class USANSReduction(PythonAlgorithm):
 
     wl_list = None
@@ -319,7 +316,7 @@ def _execute(algorithm_name, **parameters):
     alg = AlgorithmManager.create(algorithm_name)
     alg.initialize()
     alg.setChild(True)
-    for key, value in iteritems(parameters):
+    for key, value in parameters.items():
         if value is None:
             Logger("USANSReduction").error("Trying to set %s=None" % key)
         if alg.existsProperty(key):

@@ -7,7 +7,7 @@
 from collections import OrderedDict
 import unittest
 
-from mantid.py3compat import iteritems, mock
+from mantid.py3compat import mock
 from Muon.GUI.Common.contexts.fitting_context import FitParameters
 
 
@@ -17,7 +17,7 @@ def create_test_fit_parameters(test_parameters, global_parameters=None):
         'Name': name,
         'Value': value,
         'Error': error
-    } for name, (value, error) in iteritems(test_parameters)]
+    } for name, (value, error) in test_parameters.items()]
 
     parameter_workspace = mock.MagicMock()
     parameter_workspace.workspace.__iter__.return_value = fit_table

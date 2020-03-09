@@ -17,7 +17,7 @@ import inspect
 import math
 import os
 import re
-from six import types, iteritems, PY3
+from six import types, PY3
 import numpy as np
 import h5py as h5
 
@@ -1970,7 +1970,7 @@ def createUnmanagedAlgorithm(name, **kwargs):
     alg = AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     alg.setChild(True)
-    for key, value in iteritems(kwargs):
+    for key, value in kwargs.items():
         alg.setProperty(key, value)
     return alg
 

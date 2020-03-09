@@ -15,7 +15,7 @@
 import inspect as _inspect
 import sys
 
-from six import Iterator, get_function_code, iteritems
+from six import Iterator, get_function_code
 
 from mantid.api import AnalysisDataServiceImpl, ITableWorkspace, Workspace, WorkspaceGroup, performBinaryOp
 from mantid.kernel.funcinspect import customise_func, lhs_info
@@ -62,7 +62,7 @@ def attach_binary_operators_to_workspace():
     operations["Divide"] = divops
 
     # Loop through and add each one in turn
-    for alg, attributes in iteritems(operations):
+    for alg, attributes in operations.items():
         if type(attributes) == str: attributes = [attributes]
         for attr in attributes:
             add_operator_func(attr, alg, attr.startswith('__i'), attr.startswith('__r'))
@@ -148,7 +148,7 @@ def attach_unary_operators_to_workspace():
         'NotMD': '__invert__'
     }
     # Loop through and add each one in turn
-    for alg, attributes in iteritems(operations):
+    for alg, attributes in operations.items():
         if type(attributes) == str: attributes = [attributes]
         for attr in attributes:
             add_operator_func(attr, alg)

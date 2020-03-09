@@ -24,7 +24,6 @@ from matplotlib.collections import Collection
 from mantid.api import AnalysisDataService as ads
 from mantid.plots import datafunctions, MantidAxes
 from mantid.plots.utility import zoom, MantidAxType
-from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties
@@ -306,7 +305,7 @@ class FigureInteraction(object):
         axes_menu = QMenu("Axes", menu)
         axes_actions = QActionGroup(axes_menu)
         current_scale_types = (ax.get_xscale(), ax.get_yscale())
-        for label, scale_types in iteritems(AXES_SCALE_MENU_OPTS):
+        for label, scale_types in AXES_SCALE_MENU_OPTS.items():
             action = axes_menu.addAction(label, partial(self._quick_change_axes, scale_types, ax))
             if current_scale_types == scale_types:
                 action.setCheckable(True)
@@ -344,7 +343,7 @@ class FigureInteraction(object):
         axes_menu = QMenu("Color bar", menu)
         axes_actions = QActionGroup(axes_menu)
         images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
-        for label, scale_type in iteritems(COLORBAR_SCALE_MENU_OPTS):
+        for label, scale_type in COLORBAR_SCALE_MENU_OPTS.items():
             action = axes_menu.addAction(label, partial(self._change_colorbar_axes, scale_type))
             if type(images[0].norm) == scale_type:
                 action.setCheckable(True)

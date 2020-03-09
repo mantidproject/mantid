@@ -9,9 +9,6 @@ import systemtesting
 import json
 from mantid.simpleapi import *
 from mantid.geometry import PointGroupFactory
-from six import iteritems
-
-
 class HKLStatisticsTestMixin(object):
     def _init_test_data(self):
         self._ws = CreateSimulationWorkspace(Instrument='TOPAZ',
@@ -42,7 +39,7 @@ class HKLStatisticsTestMixin(object):
             ub_parameters.update(
                 dict(
                     [(str(x), y if isinstance(y, float) else str(y))
-                     for x, y in iteritems(raw_ub_parameters)]
+                     for x, y in raw_ub_parameters.items()]
                 ))
 
         return ub_parameters
@@ -149,7 +146,7 @@ class SortHKLTest(HKLStatisticsTestMixin, systemtesting.MantidSystemTest):
                 unique_map[unique].append(peak)
 
         # pylint: disable=unused-variable
-        for unique_hkl, equivalents in iteritems(unique_map):
+        for unique_hkl, equivalents in unique_map.items():
             if len(equivalents) > 1:
                 reference_peak = equivalents[0]
                 for peak in equivalents[1:]:

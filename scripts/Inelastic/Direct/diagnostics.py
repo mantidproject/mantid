@@ -23,7 +23,6 @@ from mantid.kernel.funcinspect import lhs_info
 import os
 import Direct.RunDescriptor as RunDescriptor
 from Direct.PropertyManager import PropertyManager
-from six import iteritems
 # Reference to reducer used if necessary for working with run descriptors (in diagnostics)
 __Reducer__ = None
 
@@ -476,5 +475,5 @@ class ArgumentParser(object):
     def __init__(self, keywords):
         self.start_index = None # Make this more general for anything that is missing!
         self.end_index = None
-        for key, value in iteritems(keywords):
+        for key, value in keywords.items():
             setattr(self, key, value)

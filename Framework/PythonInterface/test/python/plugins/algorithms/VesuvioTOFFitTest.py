@@ -10,8 +10,6 @@ Unit test for Vesuvio reduction
 Assumes that mantid can be imported and the data paths
 are configured to find the Vesuvio data
 """
-from six import iteritems
-
 import unittest
 import numpy as np
 import sys
@@ -187,7 +185,7 @@ class VesuvioTOFFitTest(unittest.TestCase):
         alg.setChild(True)
         alg.setProperty("OutputWorkspace", "__unused")
         alg.setProperty("FitParameters", "__unused")
-        for key, value in iteritems(kwargs):
+        for key, value in kwargs.items():
             alg.setProperty(key, value)
         return alg
 

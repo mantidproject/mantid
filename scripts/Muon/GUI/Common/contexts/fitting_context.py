@@ -8,7 +8,7 @@ from collections import OrderedDict
 import re
 
 from mantid.api import AnalysisDataService
-from mantid.py3compat import iteritems, iterkeys, string_types
+from mantid.py3compat import iterkeys, string_types
 import numpy as np
 
 from mantidqt.utils.observer_pattern import Observable
@@ -84,7 +84,7 @@ def _move_globals_to_front(unique_params):
     :return: The updated parameters list reordered
     """
     return OrderedDict(
-        sorted(iteritems(unique_params), key=lambda x: not x[1].is_global))
+        sorted(unique_params.items(), key=lambda x: not x[1].is_global))
 
 
 class Parameter(object):

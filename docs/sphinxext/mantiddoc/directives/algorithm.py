@@ -7,8 +7,6 @@
 from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
 import os
 import re
-from six import iteritems
-
 REDIRECT_TEMPLATE = "redirect.html"
 
 DEPRECATE_USE_ALG_RE = re.compile(r"Use\s(([A-Z][a-zA-Z0-9]+)\s(version ([0-9])+)?)\s*instead.")
@@ -218,7 +216,7 @@ def html_collect_pages(dummy_app):
     template = REDIRECT_TEMPLATE
     all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 
-    for name, versions in iteritems(all_algs):
+    for name, versions in all_algs.items():
         redirect_pagename = "algorithms/%s" % name
         versions.sort()
         highest_version = versions[-1]

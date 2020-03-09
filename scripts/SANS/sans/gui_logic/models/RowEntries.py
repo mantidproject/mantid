@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from six import iteritems, iterkeys
+
+from six import iterkeys
 
 from sans.common.enums import RowState, SampleShape
 from sans.common.file_information import SANSFileInformationFactory
@@ -56,7 +57,7 @@ class RowEntries(_UserEntries):
 
         self._start_observing = True  # Allow init to use setattr without validation
 
-        for k, v in iteritems(kwargs):
+        for k, v in kwargs.items():
             setattr(self, k, v)
 
     @property

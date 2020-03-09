@@ -14,7 +14,7 @@ import copy
 from datetime import date
 import time
 from xml.dom import minidom
-from six import iteritems, string_types
+from six import string_types
 
 # the list of instruments this configuration is applicable to
 INELASTIC_INSTRUMENTS = ['MAPS', 'LET', 'MERLIN', 'MARI', 'HET']
@@ -93,7 +93,7 @@ class UserProperties(object):
         self._rb_dirs[recent_date_id] = rb_folder_or_id
         if self._recent_dateID:
             max_date = self._start_dates[self._recent_dateID]
-            for date_key, a_date in iteritems(self._start_dates):
+            for date_key, a_date in self._start_dates.items():
                 if a_date > max_date:
                     self._recent_dateID = date_key
                     max_date = a_date

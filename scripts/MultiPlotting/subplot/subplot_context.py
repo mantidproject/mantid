@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from six import iteritems
 from mantid import plots
 from copy import copy
 
@@ -192,7 +191,7 @@ class subplotContext(object):
         del self._specNum[name]
         # remove line for ws
         to_delete = []
-        for key, list in iteritems(self._ws):
+        for key, list in self._ws.items():
             if name in list:
                 list.remove(name)
                 if len(list) == 0:

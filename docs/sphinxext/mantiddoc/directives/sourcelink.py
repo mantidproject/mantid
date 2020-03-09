@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import subprocess
-from six import iteritems
-
 import mantid
 from .base import AlgorithmBaseDirective #pylint: disable=unused-import
 
@@ -202,7 +200,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         valid_ext_list = []
 
         self.add_rst(self.make_header("Source"))
-        for extension, filepath in iteritems(file_paths):
+        for extension, filepath in file_paths.items():
             if filepath is not None:
                 self.output_path_to_page(filepath, extension)
                 valid_ext_list.append(extension)

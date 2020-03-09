@@ -7,7 +7,7 @@
 import numpy as np
 import re
 import warnings
-from six import string_types, iteritems
+from six import string_types
 
 
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma.
@@ -1003,7 +1003,7 @@ class CrystalField(object):
                 params['ion1.' + bparam] = other[bparam]
             ties = {}
             fixes = []
-            for prefix, obj in iteritems({'ion0.':self, 'ion1.':other}):
+            for prefix, obj in {'ion0.':self, 'ion1.':other}.items():
                 tiestr = obj.function.getTies()
                 if tiestr:
                     for tiepair in [tie.split('=') for tie in tiestr.split(',')]:

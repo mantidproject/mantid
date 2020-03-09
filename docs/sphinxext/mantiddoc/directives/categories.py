@@ -16,7 +16,7 @@ from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and
 from sphinx.util.osutil import relative_uri
 import os
 import posixpath
-from six import iteritems, itervalues
+from six import itervalues
 
 CATEGORY_PAGE_TEMPLATE = "category.html"
 ALG_CATEGORY_PAGE_TEMPLATE = "algorithmcategories.html"
@@ -344,7 +344,7 @@ def create_category_pages(app):
     template = CATEGORY_PAGE_TEMPLATE
 
     categories = env.categories
-    for name, category in iteritems(categories):
+    for name, category in categories.items():
         context = {}
         # First write out the named page
         context["title"] = category.name
@@ -408,7 +408,7 @@ def create_top_algorithm_category(categories):
     all_top_categories = []
     category_src_dir = ''
     # If the category is a top category it will not contain "\\"
-    for top_name, top_category in iteritems(categories):
+    for top_name, top_category in categories.items():
         #Add all the top level categories
         if "\\" not in top_name and top_category.section == 'algorithms':
             #get additional text for each category

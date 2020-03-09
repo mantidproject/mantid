@@ -17,7 +17,7 @@ import math
 import time
 import numpy as np
 import collections
-from six import iteritems, string_types
+from six import string_types
 from six.moves import range
 
 import Direct.CommonFunctions  as common
@@ -1518,7 +1518,7 @@ class DirectEnergyConversion(object):
 
         scale_factor = van_multiplier * sample_multiplier / xsection
 
-        for norm_type,val in iteritems(norm_factor):
+        for norm_type,val in norm_factor.items():
             norm_factor[norm_type] = val * scale_factor
 
         # check for NaN

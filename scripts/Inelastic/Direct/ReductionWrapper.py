@@ -16,7 +16,7 @@ from types import MethodType  # noqa
 import os
 import re
 import time
-from six import iteritems, string_types
+from six import string_types
 
 try:
     import h5py
@@ -133,7 +133,7 @@ class ReductionWrapper(object):
         f = open(FileName, 'w')
         f.write("standard_vars = {\n")
         str_wrapper = '         '
-        for key, val in iteritems(self._wvs.standard_vars):
+        for key, val in self._wvs.standard_vars.items():
             if isinstance(val, string_types):
                 row = "{0}\'{1}\':\'{2}\'".format(str_wrapper, key, val)
             else:
@@ -143,7 +143,7 @@ class ReductionWrapper(object):
         f.write("\n}\nadvanced_vars={\n")
         # print advances variables
         str_wrapper = '         '
-        for key, val in iteritems(self._wvs.advanced_vars):
+        for key, val in self._wvs.advanced_vars.items():
             if isinstance(val, string_types):
                 row = "{0}\'{1}\':\'{2}\'".format(str_wrapper, key, val)
             else:

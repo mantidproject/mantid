@@ -13,9 +13,6 @@ It also detects if a new category is created (i.e. someone uses Utilities instea
 import systemtesting
 import mantid
 import re
-from six import iteritems
-
-
 class SphinxWarnings(systemtesting.MantidSystemTest):
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)
@@ -87,7 +84,7 @@ class SphinxWarnings(systemtesting.MantidSystemTest):
 
     def runTest(self):
         algs = mantid.AlgorithmFactory.getRegisteredAlgorithms(True)
-        for (name, versions) in iteritems(algs):
+        for (name, versions) in algs.items():
             for version in versions:
                 if mantid.api.DeprecatedAlgorithmChecker(name,version).isDeprecated()=='':
                     # get an instance

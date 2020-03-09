@@ -10,7 +10,6 @@ from mantid.simpleapi import *
 from mantid.api import *
 from mantid.geometry import SpaceGroupFactory, CrystalStructure, UnitCell
 
-from six import iteritems
 import re
 import numpy as np
 
@@ -250,7 +249,7 @@ class AtomListBuilder(object):
                 anisoLabels = self._get_ansitropic_labels(cifData)
                 equivalentUMap = self._getEquivalentUs(cifData, anisoLabels, unitCell)
 
-                for key, uIso in iteritems(isotropicUMap):
+                for key, uIso in isotropicUMap.items():
                     if uIso is None and key in equivalentUMap:
                         isotropicUMap[key] = equivalentUMap[key]
 
@@ -267,7 +266,7 @@ class AtomListBuilder(object):
         # Return U_equiv calculated according to [Fischer & Tillmanns, Acta Cryst C44, p775, 10.1107/S0108270187012745]
         # in a dict like { 'label1': 'U_equiv1' ... }. Invalid matrices (containing None) are excluded.
         return dict([(label, np.around(np.sum(np.multiply(uMatrix, sumWeights)) / 3., decimals=5))
-                     for label, uMatrix in iteritems(anisotropicParameters) if uMatrix.dtype.type != np.object_])
+                     for label, uMatrix in anisotropicParameters.items() if uMatrix.dtype.type != np.object_])
 
     def _getAnisotropicParametersU(self, cifData, labels):
         # Try to extract U or if that fails, B.
@@ -279,7 +278,7 @@ class AtomListBuilder(object):
             bTensors = self._getTensors(cifData, labels,
                                         ['_atom_site_aniso_b_11', '_atom_site_aniso_b_12', '_atom_site_aniso_b_13',
                                          '_atom_site_aniso_b_22', '_atom_site_aniso_b_23', '_atom_site_aniso_b_33'])
-            return dict([(label, convertBtoU(bTensor)) for label, bTensor in iteritems(bTensors)])
+            return dict([(label, convertBtoU(bTensor)) for label, bTensor in bTensors.items()])
 
     def _get_ansitropic_labels(self, cifData):
         anisoLabel = '_atom_site_aniso_label'

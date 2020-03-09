@@ -625,7 +625,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
             self._set_x_label(wsname)
 
-        for energy, ws_list in iteritems(self._all_runs[label]):
+        for energy, ws_list in self._all_runs[label].items():
             for ws in ws_list:
                 DeleteWorkspace(ws)
 

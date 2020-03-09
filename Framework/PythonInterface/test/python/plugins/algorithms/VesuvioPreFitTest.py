@@ -11,8 +11,6 @@ Assumes that mantid can be imported and the data paths
 are configured to find the Vesuvio data
 """
 
-from six import iteritems
-
 from mantid.api import AlgorithmManager
 
 import numpy as np
@@ -113,7 +111,7 @@ class VesuvioPreFitTest(unittest.TestCase):
         alg.initialize()
         alg.setChild(True)
         alg.setProperty("OutputWorkspace", "__unused")
-        for key, value in iteritems(kwargs):
+        for key, value in kwargs.items():
             alg.setProperty(key, value)
         return alg
 

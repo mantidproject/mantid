@@ -101,7 +101,7 @@ class WikiURL(object):
             raise RuntimeError("Failed to fetch JSON describing image page: {}".format(str(err)))
         apicall = json.loads(json_str)
         pages = apicall['query']['pages']
-        for _, page in pages.iteritems():
+        for _, page in pages.items():
             return page['imageinfo'][0]['url']
 
 # ------------------------------------------------------------------------------

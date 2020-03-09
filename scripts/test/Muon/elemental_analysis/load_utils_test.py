@@ -12,9 +12,6 @@ from Muon.GUI.ElementalAnalysis.LoadWidget import load_utils as lutils
 import mantid.simpleapi as mantid
 from mantid import config
 import numpy as np
-from six import iteritems
-
-
 class LoadUtilsTest(unittest.TestCase):
     def setUp(self):
         self.test_path = r"test\path\to\ral012345.rooth2020.dat"
@@ -26,7 +23,7 @@ class LoadUtilsTest(unittest.TestCase):
 
     def test_pad_run(self):
         tests = {123: "00123", 0: "00000", 12345: "12345", 123456: "123456"}
-        for run, padded_run in iteritems(tests):
+        for run, padded_run in tests.items():
             self.assertEqual(lutils.pad_run(run), padded_run)
 
     @mock.patch('Muon.GUI.ElementalAnalysis.LoadWidget.load_utils.glob.iglob')
@@ -67,7 +64,7 @@ class LoadUtilsTest(unittest.TestCase):
 
     def test_hyphenise(self):
         tests = {"1-5": [1, 2, 3, 4, 5], "1, 4-5": [1, 4, 5], "1-3, 5": [1, 3, 2, 5], "1, 3, 5": [1, 5, 3]}
-        for out, arg in iteritems(tests):
+        for out, arg in tests.items():
             self.assertEqual(lutils.hyphenise(arg), out)
 
     def test_merge_workspaces(self):
@@ -159,7 +156,7 @@ class LoadUtilsTest(unittest.TestCase):
     def test_replace_workspace_name_suffix(self):
         tests = {self.test_ws_name: "suffix", "_".join([self.test_ws_name, "test"]): "suffix"}
 
-        for workspace_name, suffix in iteritems(tests):
+        for workspace_name, suffix in tests.items():
             self.assertEquals(lutils.replace_workspace_name_suffix(workspace_name, suffix),
                               self.var_ws_name.format(1, suffix))
 
