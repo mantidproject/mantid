@@ -152,6 +152,7 @@ Bugfixes
 - Axes editor menu now reads the state of the grids on the plot. 
 - Fixed a bug which caused graphic scaling issues when the double-click menu was used to set an axis as log-scaled.
 - There is now appropriate protection around setting the colrbar scale to logarithmic while the min and/or max value is negative.
+- Toggling error bars on a line with markers no longer causes an unhandled exception.
 
 **Fitting**
 
