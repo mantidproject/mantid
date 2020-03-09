@@ -514,7 +514,7 @@ public:
   // Check if this class has an oriented lattice on a sample object
   virtual bool hasOrientedLattice() const override;
 
-  virtual std::pair<int64_t, int64_t> find(double value) const;
+  virtual int64_t find(double value) const;
 
   //=====================================================================================
   // End IMDWorkspace methods

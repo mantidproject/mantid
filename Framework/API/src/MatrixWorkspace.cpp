@@ -1931,7 +1931,7 @@ MantidImage_sptr MatrixWorkspace::getImage(
   return image;
 }
 
-std::pair<int64_t, int64_t> MatrixWorkspace::find(double value) const {
+int64_t MatrixWorkspace::find(double value) const {
   std::pair<int64_t, int64_t> out(-1, -1);
   const int64_t numHists = static_cast<int64_t>(this->getNumberHistograms());
   for (int64_t i = 0; i < numHists; ++i) {
@@ -1941,7 +1941,7 @@ std::pair<int64_t, int64_t> MatrixWorkspace::find(double value) const {
       break;
     }
   }
-  return out;
+  return out.first;
 }
 
 /**
