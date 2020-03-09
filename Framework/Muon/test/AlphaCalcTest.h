@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MUONALPHACALCTEST_H_
-#define MUONALPHACALCTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -98,5 +97,3 @@ private:
   AlphaCalc alphaCalc;
   Mantid::DataHandling::LoadMuonNexus2 loader;
 };
-
-#endif /*MUONALPHACALCTEST_H_*/

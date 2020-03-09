@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_APPLYDEADTIMECORRTEST_H_
-#define MANTID_ALGORITHMS_APPLYDEADTIMECORRTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -259,5 +258,3 @@ private:
   /// Test dead time value
   double deadValue() const { return -0.00456; }
 };
-
-#endif /* MANTID_ALGORITHMS_APPLYDEADTIMECORRTEST_H_ */

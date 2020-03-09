@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MUON_MUONPAIRINGASYMMETRY_H_
-#define MANTID_MUON_MUONPAIRINGASYMMETRY_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -73,5 +72,3 @@ private:
 
 } // namespace Muon
 } // namespace Mantid
-
-#endif /* MANTID_MUON_MUONPAIRINGASYMMETRY_H_ */

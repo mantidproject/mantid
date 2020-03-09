@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ASYMMETRYCALCTEST_H_
-#define ASYMMETRYCALCTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -195,5 +194,3 @@ private:
     }
   }
 };
-
-#endif /*ASYMMETRYCALCTEST_H_*/
