@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_WORKFLOWALGORITHMS_LOADEVENTANDCOMPRESS_H_
-#define MANTID_WORKFLOWALGORITHMS_LOADEVENTANDCOMPRESS_H_
+#pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -46,5 +45,3 @@ private:
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_WORKFLOWALGORITHMS_LOADEVENTANDCOMPRESS_H_ */

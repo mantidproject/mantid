@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_WORKFLOWALGORITHMS_MUONGROUPASYMMETRYCALCULATOR_H_
-#define MANTID_WORKFLOWALGORITHMS_MUONGROUPASYMMETRYCALCULATOR_H_
+#pragma once
 
 #include "MantidWorkflowAlgorithms/MuonGroupCalculator.h"
 
@@ -36,5 +35,3 @@ private:
 double getStoredNorm();
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_WORKFLOWALGORITHMS_MUONGROUPASYMMETRYCALCULATOR_H_ */
