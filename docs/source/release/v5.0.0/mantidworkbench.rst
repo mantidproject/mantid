@@ -71,6 +71,7 @@ Improvements
 ############
 
 **General**
+
 - The way scripts are parsed and executed has been vastly improved, solving issues related to the progress arrow, blank lines after a colon and tabs in strings.
 - Progress reporting for scripts has been vastly improved and now reports at the line level.
 - Toggle Whitespace in the editor now shows line endings as well as spaces and tabs
@@ -88,12 +89,14 @@ Improvements
 - Most changes in the settings dialog now take place immediately, no longer needing a restart, such as changing default instrument, hiding categories of algorithms and interfaces, or choosing whether to see invisible workspaces.
 
 **Fitting**
+
 - Fit functions can now be put into nested categories and into multiple categories.
 - Now able to exclude regions of data from a fit, within the fit property browser.
 - You can now search for functions when doing fits.
 - A help button has been added to the fitting add function dialog.
 
 **Plotting**
+
 - Figure options>Images tab no longer requires Max > Min value. If Min > Max, they will be swapped!
 - A warning now appears if you attempt to plot more than ten spectra.
 - Normalization options have been added to 2d plots and sliceviewer.
@@ -106,12 +109,13 @@ Improvements
    *Save drop-down menu*
 
 **Algorithms**
+
 - Table Workspaces can be saved to Ascii using the :ref:`SaveAscii <algm-SaveAscii>` algorithm, and the *Save > Ascii drop-down* option above the Workspaces Toolbox.
 - The *Save drop-down* menu in the workspaces toolbox no longer has the old SaveAscii (version 1) as no one was using it and it only added confusion. The most recent version of SaveASCII is still available.
 - The algorithm progress details dialog now fills immediately with all running algorithms rather than waiting for a progress update for the algorithm to appear.
 - Algorithm dialogs will now use the selected workspace as the InputWorkspace when running an algorithm from the algorithms toolbox.
 
-.. figure:: ../../images/SaveButton.png
+.. figure:: ../../images/LiveDataCancel.png
    :align: right
 
    *Live Data Details - easier to cancel*
@@ -124,6 +128,7 @@ Bugfixes
 ########
 
 **General**
+
 - Scripts with syntax errors can now be opened.
 - Scripts are saved properly on windows (no longer double line spaced).
 - Scripts generated from plots now work for newer versions of Matplotlib.
@@ -134,6 +139,7 @@ Bugfixes
 - Colorbar scale on Instrument view shows labelled ticks when the range is within an order of magnitude, in the SymmetricLog10 setting.
 
 **Plotting**
+
 - Overplots will be normalized by bin width if they are overplotting a curve from a distribution workspace.
 - Colorbar scale shows helpful minor ticks and no longer vanishes on colorfill plots with a logarithmic scale.
 - Axes limits of a plot no longer automatically rescale when errorbars are on/off. 
@@ -148,11 +154,13 @@ Bugfixes
 - There is now appropriate protection around setting the colrbar scale to logarithmic while the min and/or max value is negative.
 
 **Fitting**
+
 - Fitting a distribution workspace is normalised correctly.
 - The help button in fitting now finds the page for the relevant function.
 - Fixed an issue where adding a Bk2BkExpConvPV function to the fit browser caused a crash
 
 **Algorithms**
+
 - In the Algorithm Toolbox, double-clicking on an algorithm always executes the algorithm. In the case, where previous versions of an algorithm are still available, this would show the other versions. You can still click on the triangle to see and execute previous versions.
 - Unrolling consecutive workflow algorithms in Workspace History correctly includes every algorithm.
 

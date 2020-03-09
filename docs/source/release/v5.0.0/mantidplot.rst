@@ -5,6 +5,7 @@ MantidPlot Changes
 .. contents:: Table of Contents
    :local:
 
+The vast majority of development effort for user interfaces is now directed towards the :doc:`Mantid workbench <mantidworkbench>`, for now only significant bugs will be fixed within MantidPlot.
 
 Bugfixes
 ########
