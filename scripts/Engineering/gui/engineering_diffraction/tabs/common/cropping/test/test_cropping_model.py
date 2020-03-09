@@ -45,9 +45,9 @@ class CroppingModelTest(unittest.TestCase):
         self.assertEqual(self.model._clean_spectrum_numbers("2-1, 76-5, 3"), "1-2,5-76,3")
 
     def test_clean_spectrum_numbers_equal_range(self):
-        self.assertRaisesRegexp(ValueError,
-                                "Ranges cannot contain the same value twice. Invalid Range:*",
-                                self.model._clean_spectrum_numbers, "1-1, 76-76, 3")
+        self.assertRaisesRegex(ValueError,
+                               "Ranges cannot contain the same value twice. Invalid Range:*",
+                               self.model._clean_spectrum_numbers, "1-1, 76-76, 3")
 
     def test_validate_and_clean_with_valid_input(self):
         self.assertEqual(self.model.validate_and_clean_spectrum_numbers("1-6, 7-23, 46, 1"),

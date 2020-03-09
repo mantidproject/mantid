@@ -215,7 +215,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
             'child': True
         }
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        self.assertRaisesRegexp(RuntimeError, 'Some invalid Properties found', alg.execute)
+        self.assertRaisesRegex(RuntimeError, 'Some invalid Properties found', alg.execute)
         self.assertTrue(alg.isExecuted)
 
     def testNotSummedDirectForegroundRaises(self):
@@ -231,7 +231,7 @@ class ReflectometryILLSumForegroundTest(unittest.TestCase):
             'child': True
         }
         alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        self.assertRaisesRegexp(RuntimeError, 'Some invalid Properties found', alg.execute)
+        self.assertRaisesRegex(RuntimeError, 'Some invalid Properties found', alg.execute)
         self.assertTrue(alg.isExecuted)
 
     def testReflectedBeamSumInLambdaNoRotation(self):

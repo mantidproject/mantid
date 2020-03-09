@@ -11,7 +11,7 @@ import unittest
 
 from isis_powder.routines import sample_details
 
-from six import assertRaisesRegex, assertRegex
+from six import assertRegex
 
 
 class ISISPowderSampleDetailsTest(unittest.TestCase):
@@ -59,34 +59,34 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         char_input_value = 'a'
 
         # Check it handles empty input
-        with assertRaisesRegex(self, ValueError, "Could not convert the height to a number"):
+        with self.assertRaisesRegex(ValueError, "Could not convert the height to a number"):
             sample_details.SampleDetails(height=empty_input_value, radius=good_input,
                                          center=good_center_input, shape="cylinder")
 
         # Does it handle bad input and tell us what we put in
-        with assertRaisesRegex(self, ValueError, ".*to a number. The input was: '" + char_input_value + "'"):
+        with self.assertRaisesRegex(ValueError, ".*to a number. The input was: '" + char_input_value + "'"):
             sample_details.SampleDetails(height=char_input_value, radius=good_input,
                                          center=good_center_input, shape="cylinder")
 
         # Does it indicate which field was incorrect
-        with assertRaisesRegex(self, ValueError, "radius"):
+        with self.assertRaisesRegex(ValueError, "radius"):
             sample_details.SampleDetails(height=good_input, radius=char_input_value,
                                          center=good_center_input, shape="cylinder")
 
         # Can it handle bad center values
-        with assertRaisesRegex(self, ValueError, "center"):
+        with self.assertRaisesRegex(ValueError, "center"):
             sample_details.SampleDetails(height=good_input, radius=good_input, center=["", 2, 3], shape="cylinder")
 
         # Does it throw if were not using a list for the input
-        with assertRaisesRegex(self, ValueError, "must be specified as a list of X, Y, Z"):
+        with self.assertRaisesRegex(ValueError, "must be specified as a list of X, Y, Z"):
             sample_details.SampleDetails(height=good_input, radius=good_input, center=1, shape="cylinder")
 
         # Does it throw if we are using a list of incorrect length (e.g. not 3D)
-        with assertRaisesRegex(self, ValueError, "must have three values corresponding to"):
+        with self.assertRaisesRegex(ValueError, "must have three values corresponding to"):
             sample_details.SampleDetails(height=good_input, radius=good_input, center=[], shape="cylinder")
-        with assertRaisesRegex(self, ValueError, "must have three values corresponding to"):
+        with self.assertRaisesRegex(ValueError, "must have three values corresponding to"):
             sample_details.SampleDetails(height=good_input, radius=good_input, center=[1, 2], shape="cylinder")
-        with assertRaisesRegex(self, ValueError, "must have three values corresponding to"):
+        with self.assertRaisesRegex(ValueError, "must have three values corresponding to"):
             sample_details.SampleDetails(height=good_input, radius=good_input, center=[1, 2, 3, 4], shape="cylinder")
 
     def test_constructor_with_impossible_val(self):
@@ -98,22 +98,22 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         negative_string = "-1"
 
         # Check it handles zero
-        with assertRaisesRegex(self, ValueError, "The value set for height was: 0"):
+        with self.assertRaisesRegex(ValueError, "The value set for height was: 0"):
             sample_details.SampleDetails(height=zero_value, radius=good_input,
                                          center=good_center_input, shape="cylinder")
 
         # Very small negative
-        with assertRaisesRegex(self, ValueError, "which is impossible for a physical object"):
+        with self.assertRaisesRegex(ValueError, "which is impossible for a physical object"):
             sample_details.SampleDetails(height=good_input, radius=negative_value,
                                          center=good_center_input, shape="cylinder")
 
         # Integer negative
-        with assertRaisesRegex(self, ValueError, "The value set for height was: -1"):
+        with self.assertRaisesRegex(ValueError, "The value set for height was: -1"):
             sample_details.SampleDetails(height=negative_int, radius=good_input,
                                          center=good_center_input, shape="cylinder")
 
         # String negative
-        with assertRaisesRegex(self, ValueError, "The value set for radius was: -1"):
+        with self.assertRaisesRegex(ValueError, "The value set for radius was: -1"):
             sample_details.SampleDetails(height=good_input, radius=negative_string,
                                          center=good_center_input, shape="cylinder")
 
@@ -125,7 +125,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertIsNotNone(sample_details_obj.material_object)
 
         # Check that the material is now immutable
-        with assertRaisesRegex(self, RuntimeError, "The material has already been set to the above details"):
+        with self.assertRaisesRegex(RuntimeError, "The material has already been set to the above details"):
             sample_details_obj.set_material(chemical_formula='V')
 
         # Check resetting it works
@@ -142,7 +142,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertIsNone(sample_details_obj.material_object)
 
         # Check we cannot set a material property without setting the underlying material
-        with assertRaisesRegex(self, RuntimeError, "The material has not been set"):
+        with self.assertRaisesRegex(RuntimeError, "The material has not been set"):
             sample_details_obj.set_material_properties(absorption_cross_section=1.0, scattering_cross_section=2.0)
 
         # Check that with a material object we are allowed to set material properties
@@ -178,7 +178,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertEqual(material_obj_number_density.number_density, number_density_sample)
 
         # Check that it raises an error if we have a non-elemental formula without number density
-        with assertRaisesRegex(self, ValueError, "A number density formula must be set on a chemical formula"):
+        with self.assertRaisesRegex(ValueError, "A number density formula must be set on a chemical formula"):
             sample_details._Material(chemical_formula=chemical_formula_complex)
 
         # Check it constructs if it is given the number density too
@@ -195,14 +195,14 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         good_scattering = 2.0
 
         material_obj = sample_details._Material(chemical_formula='V')
-        with assertRaisesRegex(self, ValueError, "absorption_cross_section was: -1 which is impossible for a physical "
+        with self.assertRaisesRegex(ValueError, "absorption_cross_section was: -1 which is impossible for a physical "
                                                  "object"):
             material_obj.set_material_properties(abs_cross_sect=bad_absorb, scattering_cross_sect=good_scattering)
 
         # Check the immutability flag has not been set on a failure
         self.assertFalse(material_obj._is_material_props_set)
 
-        with assertRaisesRegex(self, ValueError, "scattering_cross_section was: 0"):
+        with self.assertRaisesRegex(ValueError, "scattering_cross_section was: 0"):
             material_obj.set_material_properties(abs_cross_sect=good_absorb, scattering_cross_sect=bad_scattering)
 
         # Check nothing has been set yet
@@ -216,7 +216,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
         self.assertEqual(material_obj.scattering_cross_section, float(good_scattering))
 
         # Check we cannot set it twice and fields do not change
-        with assertRaisesRegex(self, RuntimeError, "The material properties have already been set"):
+        with self.assertRaisesRegex(RuntimeError, "The material properties have already been set"):
             material_obj.set_material_properties(abs_cross_sect=999, scattering_cross_sect=999)
         self.assertEqual(material_obj.absorption_cross_section, float(good_absorb))
         self.assertEqual(material_obj.scattering_cross_section, float(good_scattering))

@@ -7,8 +7,6 @@
 import mantid.simpleapi as mantid
 import unittest
 
-from six import assertRaisesRegex
-
 from isis_powder.routines import absorb_corrections, SampleDetails
 
 
@@ -41,11 +39,11 @@ class ISISPowderAbsorptionTest(unittest.TestCase):
             modified_dict.pop(blacklisted_key)
 
             # Check that is raises an error
-            with assertRaisesRegex(self, KeyError, "The following key was not found in the advanced configuration"):
+            with self.assertRaisesRegex(KeyError, "The following key was not found in the advanced configuration"):
                 absorb_corrections.create_vanadium_sample_details_obj(config_dict=modified_dict)
 
             # Then check the error actually has the key name in it
-            with assertRaisesRegex(self, KeyError, blacklisted_key):
+            with self.assertRaisesRegex(KeyError, blacklisted_key):
                 absorb_corrections.create_vanadium_sample_details_obj(config_dict=modified_dict)
 
 

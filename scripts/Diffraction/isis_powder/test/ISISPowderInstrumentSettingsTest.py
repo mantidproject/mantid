@@ -7,7 +7,7 @@
 import unittest
 import warnings
 
-from six import assertRaisesRegex, assertRegex
+from six import assertRegex
 
 from isis_powder.routines import instrument_settings, param_map_entry
 
@@ -18,7 +18,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
         inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry])
 
-        with assertRaisesRegex(self, AttributeError, "is required but was not set or passed"):
+        with self.assertRaisesRegex(AttributeError, "is required but was not set or passed"):
             foo = inst_settings_obj.script_facing_name
             del foo
 
@@ -28,7 +28,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
         inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry])
 
         # Check it still prints the acceptable values when it fails
-        with assertRaisesRegex(self, AttributeError, "A BAR"):
+        with self.assertRaisesRegex(AttributeError, "A BAR"):
             foo = inst_settings_obj.script_facing_name
             del foo
 
@@ -37,7 +37,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
         inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry])
 
-        with assertRaisesRegex(self, AttributeError, "Please contact the development team"):
+        with self.assertRaisesRegex(AttributeError, "Please contact the development team"):
             foo = inst_settings_obj.not_known
             del foo
 
@@ -141,7 +141,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
         # First test we cannot set it to a different value
         incorrect_value_dict = {"user_facing_name": "wrong"}
-        with assertRaisesRegex(self, ValueError, "The user specified value: 'wrong' is unknown"):
+        with self.assertRaisesRegex(ValueError, "The user specified value: 'wrong' is unknown"):
             instrument_settings.InstrumentSettings(param_map=[param_entry],
                                                    adv_conf_dict=incorrect_value_dict)
 
@@ -157,7 +157,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
 
     def test_param_map_rejects_enum_missing_friendly_name(self):
         # Check that is the friendly name is not set it is correctly detected
-        with assertRaisesRegex(self, RuntimeError,
+        with self.assertRaisesRegex(RuntimeError,
                                "'enum_friendly_name' was not set. Please contact development team."):
             param_map_entry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
                                           enum_class=BadSampleEnum)
