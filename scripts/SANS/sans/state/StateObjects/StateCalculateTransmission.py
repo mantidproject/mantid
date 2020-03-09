@@ -11,7 +11,6 @@
 import json
 import copy
 import abc
-from six import add_metaclass
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSInstrument)
@@ -336,8 +335,7 @@ def set_default_monitors(calculate_transmission_info, data_info):
 # ---------------------------------------
 # State builders
 # ---------------------------------------
-@add_metaclass(abc.ABCMeta)
-class StateCalculateTransmissionBuilderCommon(object):
+class StateCalculateTransmissionBuilderCommon(object, metaclass=abc.ABCMeta):
     def __init__(self, state):
         self.state = state
 
