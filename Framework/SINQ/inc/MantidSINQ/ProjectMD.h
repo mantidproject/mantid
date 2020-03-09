@@ -12,8 +12,7 @@
  *
  *
  */
-#ifndef PROJECTMD_H_
-#define PROJECTMD_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
@@ -55,5 +54,3 @@ private:
   void putValue(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim, double val);
   unsigned int calcIndex(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
 };
-
-#endif /*PROJECTMD_H_*/

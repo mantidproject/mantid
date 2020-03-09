@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDIRESIDUALCORRELATIONCORETEST_H_
-#define MANTID_SINQ_POLDIRESIDUALCORRELATIONCORETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -152,5 +151,3 @@ private:
         : PoldiResidualCorrelationCore(logger) {}
   };
 };
-
-#endif /* MANTID_SINQ_POLDIRESIDUALCORRELATIONCORETEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDITIMETRANSFORMER_H_
-#define MANTID_SINQ_POLDITIMETRANSFORMER_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidSINQ/DllConfig.h"
@@ -118,5 +117,3 @@ using PoldiTimeTransformer_sptr = boost::shared_ptr<PoldiTimeTransformer>;
 
 } // namespace Poldi
 } // namespace Mantid
-
-#endif /* MANTID_SINQ_POLDITIMETRANSFORMER_H_ */

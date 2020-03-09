@@ -12,8 +12,7 @@
  *
  *
  */
-#ifndef SLICEMDHISTO_H_
-#define SLICEMDHISTO_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
@@ -57,5 +56,3 @@ private:
   void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
                     Mantid::API::IMDHistoWorkspace_sptr outws);
 };
-
-#endif /*SLICEMDHISTO_H_*/

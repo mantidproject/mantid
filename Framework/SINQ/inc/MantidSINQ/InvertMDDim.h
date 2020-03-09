@@ -13,8 +13,7 @@
  *
  *
  */
-#ifndef INVERTMDDIM_H_
-#define INVERTMDDIM_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
@@ -55,5 +54,3 @@ private:
   unsigned int calcInvertedIndex(Mantid::API::IMDHistoWorkspace_sptr ws,
                                  int *dim);
 };
-
-#endif /*INVERTMDDIM_H_*/

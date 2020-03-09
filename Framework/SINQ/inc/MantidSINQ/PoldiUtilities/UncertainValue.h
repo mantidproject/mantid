@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef UNCERTAINVALUE_H
-#define UNCERTAINVALUE_H
+#pragma once
 
 #include "MantidSINQ/DllConfig.h"
 #include <cmath>
@@ -59,5 +58,3 @@ UncertainValue MANTID_SINQ_DLL operator+(double d, const UncertainValue &v);
 UncertainValue MANTID_SINQ_DLL operator-(double d, const UncertainValue &v);
 } // namespace Poldi
 } // namespace Mantid
-
-#endif // UNCERTAINVALUE_H

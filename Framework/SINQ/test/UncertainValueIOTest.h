@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef UNCERTAINVALUEIOTEST_H
-#define UNCERTAINVALUEIOTEST_H
+#pragma once
 
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
@@ -69,4 +68,3 @@ public:
     TS_ASSERT_EQUALS(convertedValue.error(), uncertainValue.error());
   }
 };
-#endif // UNCERTAINVALUEIOTEST_H
