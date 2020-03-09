@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDNEXUSGEOMETRY_H5FORWARDCOMPATIBILITY
-#define MANTIDNEXUSGEOMETRY_H5FORWARDCOMPATIBILITY
+#pragma once
 
 #include "MantidNexusGeometry/DllConfig.h"
 #include <H5Cpp.h>
@@ -31,5 +30,3 @@ std::string getObjName(const H5::H5File &obj);
 } // namespace H5ForwardCompatibility
 } // namespace NexusGeometry
 } // namespace Mantid
-
-#endif // MANTIDNEXUSGEOMETRY_H5FORWARDCOMPATIBILITY

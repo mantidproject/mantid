@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NEXUSGEOMETRYPARSERTEST_H_
-#define NEXUSGEOMETRYPARSERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -392,4 +391,3 @@ private:
   std::string m_sans2dHDF5DefinitionPath;
   std::string m_lokiHDF5DefinitionPath;
 };
-#endif
