@@ -19,8 +19,7 @@
  *
  *
  */
-#ifndef TRANSPOSE3D_H_
-#define TRANSPOSE3D_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
@@ -63,5 +62,3 @@ private:
   void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
                     Mantid::API::IMDHistoWorkspace_sptr outws);
 };
-
-#endif /*TRANSPOSE3D_H_*/

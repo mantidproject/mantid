@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef POLDIDETECTORTEST_H
-#define POLDIDETECTORTEST_H
+#pragma once
 
 #include "MantidAPI/TableRow.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
@@ -99,5 +98,3 @@ public:
     TS_ASSERT_EQUALS(availableElements.back(), 399);
   }
 };
-
-#endif // POLDIDETECTORTEST_H

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef POLDIHELIUMDETECTOR_H
-#define POLDIHELIUMDETECTOR_H
+#pragma once
 
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractDetector.h"
@@ -76,5 +75,3 @@ protected:
 };
 } // namespace Poldi
 } // namespace Mantid
-
-#endif // POLDIHELIUMDETECTOR_H

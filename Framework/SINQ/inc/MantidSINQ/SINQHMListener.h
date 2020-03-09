@@ -15,8 +15,7 @@
  *
  */
 
-#ifndef SINQHMLISTENER_H_
-#define SINQHMLISTENER_H_
+#pragma once
 
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidAPI/LiveListener.h"
@@ -63,5 +62,3 @@ private:
 
   ILiveListener::RunStatus oldStatus;
 };
-
-#endif /* SINQHMLISTENER_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_MILLERINDICES_H
-#define MANTID_SINQ_MILLERINDICES_H
+#pragma once
 
 #include "MantidKernel/V3D.h"
 #include "MantidSINQ/DllConfig.h"
@@ -52,5 +51,3 @@ private:
 };
 } // namespace Poldi
 } // namespace Mantid
-
-#endif // MANTID_SINQ_MILLERINDICES_H
