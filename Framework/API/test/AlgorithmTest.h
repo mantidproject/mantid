@@ -291,11 +291,16 @@ public:
 
   void testExecute() {
     ToyAlgorithm myAlg;
+    TS_ASSERT_EQUALS(ExecutionState::Uninitialized, myAlg.executionState());
     TS_ASSERT_THROWS(myAlg.execute(), const std::runtime_error &);
     TS_ASSERT(!myAlg.isExecuted());
+    TS_ASSERT_EQUALS( ExecutionState::Uninitialized, myAlg.executionState());
     TS_ASSERT_THROWS_NOTHING(myAlg.initialize());
+    TS_ASSERT_EQUALS(ExecutionState::Initialized, myAlg.executionState());
     TS_ASSERT_THROWS_NOTHING(myAlg.execute());
     TS_ASSERT(myAlg.isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Finished, myAlg.executionState());
+    TS_ASSERT_EQUALS(ResultState::Success, myAlg.resultState());
   }
 
   void testSetPropertyValue() {
@@ -333,10 +338,14 @@ public:
     alg.setProperty("PropertyB", 5);
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
     TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Finished, alg.executionState());
+    TS_ASSERT_EQUALS(ResultState::Failed, alg.resultState());
 
     alg.setProperty("PropertyB", 15);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Finished, alg.executionState());
+    TS_ASSERT_EQUALS(ResultState::Success, alg.resultState());
   }
 
   void test_WorkspaceMethodFunctionsReturnEmptyByDefault() {
