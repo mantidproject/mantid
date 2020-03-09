@@ -200,9 +200,9 @@ foo()
     # -------------------------------------------------------------------------
     # Helpers
     # -------------------------------------------------------------------------
-    def _verify_serial_execution_successful(self, code, line_offset=0):
+    def _verify_serial_execution_successful(self, code):
         executor = PythonCodeExecution()
-        executor.execute(code, line_offset)
+        executor.execute(code)
         return executor.globals_ns
 
     def _verify_async_execution_successful(self, code, line_offset=0):
@@ -211,9 +211,9 @@ foo()
         task.join()
         return executor.globals_ns
 
-    def _verify_failed_serial_execute(self, expected_exc_type, code, line_offset=0):
+    def _verify_failed_serial_execute(self, expected_exc_type, code):
         executor = PythonCodeExecution()
-        self.assertRaises(expected_exc_type, executor.execute, code, line_offset)
+        self.assertRaises(expected_exc_type, executor.execute, code)
 
     def _run_async_code(self, code, filename=None, line_no=0):
         executor = PythonCodeExecution()
