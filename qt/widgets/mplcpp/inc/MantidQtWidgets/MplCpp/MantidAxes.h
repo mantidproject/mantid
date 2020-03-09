@@ -47,8 +47,8 @@ public:
 
   /// @name Artist removal/replacement
   ///@{
-  void removeWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &ws);
-  void replaceWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &newWS);
+  bool removeWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &ws);
+  bool replaceWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &newWS);
   ///@}
 };
 
