@@ -12,7 +12,7 @@ import unittest
 
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
-from mantid.py3compat import mock, string_types
+from mantid.py3compat import mock
 from mantid.simpleapi import Load
 from mantidqt.utils.qt.testing import start_qapplication
 
@@ -380,7 +380,7 @@ class ResultsTabModelTest(unittest.TestCase):
             self.assertEqual(len(expected_row), len(actual_row))
             for col_index, expected in enumerate(expected_row):
                 actual = table.cell(row_index, col_index)
-                if isinstance(expected, string_types):
+                if isinstance(expected, str):
                     self.assertEqual(expected, actual)
                 else:
                     # Fit pushes things back/forth through strings so exact match is not possible

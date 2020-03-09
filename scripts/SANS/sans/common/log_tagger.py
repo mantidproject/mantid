@@ -10,9 +10,6 @@
 
 from hashlib import sha224
 from mantid.api import (MatrixWorkspace, WorkspaceGroup)
-from six import string_types
-
-
 def get_hash_value(value):
     """
     Converts a value into a hash
@@ -33,7 +30,7 @@ def check_if_valid_tag_and_workspace(tag, workspace):
     :param tag: the tag
     :param workspace: the workspace
     """
-    if not(isinstance(tag, string_types) and isinstance(workspace, MatrixWorkspace)):
+    if not(isinstance(tag, str) and isinstance(workspace, MatrixWorkspace)):
         raise RuntimeError("SANSLogTagger: Either tag {0} or workspace are invalid. The tag has to be a string"
                            " and the workspace {1} has to be a MatrixWorkspace".format(str(tag), str(workspace)))
 

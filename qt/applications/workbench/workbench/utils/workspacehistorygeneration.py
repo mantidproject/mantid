@@ -36,7 +36,7 @@ def get_workspace_history_list(workspace):
 def convert_list_to_string(to_convert, add_new_line=True, fix_comments=False):
     string = ""
     for line in to_convert:
-        if isinstance(line, six.string_types):
+        if isinstance(line, str):
             string += line
         elif fix_comments and isinstance(line, tuple):
             string += line[0]

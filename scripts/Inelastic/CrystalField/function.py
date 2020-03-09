@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
-from six import string_types
-
 parNamePattern = re.compile(r'([a-zA-Z][\w.]+)')
 
 
@@ -506,7 +504,7 @@ class PhysicalProperties(object):
         self._physpropTemperature = 1.
         self._lambda = 0.    # Exchange parameter (for susceptibility only)
         self._chi0 = 0.      # Residual/background susceptibility (for susceptibility only)
-        self._typeid = self._str2id(typeid) if isinstance(typeid, string_types) else int(typeid)
+        self._typeid = self._str2id(typeid) if isinstance(typeid, str) else int(typeid)
         try:
             initialiser = getattr(self, 'init' + str(self._typeid))
         except AttributeError:
@@ -529,7 +527,7 @@ class PhysicalProperties(object):
     def _checkhdir(self, hdir):
         import numpy as np
         try:
-            if isinstance(hdir, string_types):
+            if isinstance(hdir, str):
                 if 'powder' in hdir.lower():
                     return 'powder'
                 else:
@@ -562,7 +560,7 @@ class PhysicalProperties(object):
     @Inverse.setter
     def Inverse(self, value):
         if (self._typeid == self.SUSCEPTIBILITY or self._typeid == self.MAGNETICMOMENT):
-            if isinstance(value, string_types):
+            if isinstance(value, str):
                 self._suscInverseFlag = value.lower() in ['true', 't', '1', 'yes', 'y']
             else:
                 self._suscInverseFlag = bool(value)  # In some cases will always be true...

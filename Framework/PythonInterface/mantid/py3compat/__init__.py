@@ -90,7 +90,7 @@ if not hasattr(six, "ensure_str"):
 def is_text_string(obj):
     """Return True if `obj` is a text string, False if it is anything else,
     like binary data (Python 3) or QString (Python 2, PyQt API #1)"""
-    return isinstance(obj, string_types)
+    return isinstance(obj, str)
 
 
 def to_text_string(obj, encoding=None):

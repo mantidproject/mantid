@@ -30,7 +30,7 @@ class UnitLabelTest(unittest.TestCase):
 
     def test_str_function_produces_ascii_string_from_label(self):
         label = UnitLabel("MyLabel", u"\u03bcs","\mu s")
-        self.assertTrue(isinstance(str(label), six.string_types))
+        self.assertTrue(isinstance(str(label), str))
         self.assertEqual("MyLabel", str(label))
 
     def test_unicode_function_produces_unicode_string_from_label_py2(self):

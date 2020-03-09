@@ -14,8 +14,6 @@ import numpy as np
 import math
 import re
 from collections import Iterable
-from six import string_types
-
 import mantid.simpleapi as mantid
 from mantid import api
 
@@ -189,7 +187,7 @@ class IncidentEnergy(PropDescriptor):
         """ Set up incident energy or range of energies in various formats
             or define autoEi"""
         if value is not None:
-            if isinstance(value, string_types):
+            if isinstance(value, str):
                 # Check autoEi
                 if value.lower() == 'auto':
                     self._use_autoEi = True
@@ -404,7 +402,7 @@ class EnergyBins(PropDescriptor):
 
     def __set__(self, instance, values):
         if values is not None:
-            if isinstance(values, string_types):
+            if isinstance(values, str):
                 values = values.replace('[', '').replace(']', '').strip()
                 lst = values.split(',')
                 self.__set__(instance, lst)
@@ -621,7 +619,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
         """ set detector calibration file using various formats """
         if isinstance(val, list):
             self._relative_range = self._check_range(val, instance)
-        elif isinstance(val, string_types):
+        elif isinstance(val, str):
             val = self._parce_string2list(val)
             self.__set__(instance, val)
         else:
@@ -743,7 +741,7 @@ class DetCalFile(PropDescriptor):
             self._det_cal_file = val
             self._calibrated_by_run = False
             return
-        if isinstance(val, string_types):
+        if isinstance(val, str):
             if val in mantid.mtd:
                 val = mantid.mtd[val]
                 self._det_cal_file = val
@@ -797,7 +795,7 @@ class DetCalFile(PropDescriptor):
             return (True, 'Workspace {0} used for detectors calibration'.format(self._det_cal_file.name()))
 
         dcf_val = self._det_cal_file
-        if isinstance(dcf_val, string_types):  # it may be string representation of runN
+        if isinstance(dcf_val, str):  # it may be string representation of runN
             try:
                 dcf_val = int(dcf_val)
             except ValueError:
@@ -938,7 +936,7 @@ class HardMaskOnly(prop_helpers.ComplexProperty):
         if isinstance(value, bool) or isinstance(value, int):
             use_hard_mask_only = bool(value)
             hard_mask_file = instance.hard_mask_file
-        elif isinstance(value, string_types):
+        elif isinstance(value, str):
             if value.lower() in ['true', 'yes']:
                 use_hard_mask_only = True
             elif value.lower() in ['false', 'no']:
@@ -1035,7 +1033,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
                 self._rel_range = False
                 self._other_prop = ['monovan_lo_value', 'monovan_hi_value']
 
-            if isinstance(value, string_types):
+            if isinstance(value, str):
                 values = value.split(',')
                 result = []
                 for val in values:
@@ -1103,7 +1101,7 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
         else:
             tDict = instance.__dict__
 
-        if isinstance(value, string_types):
+        if isinstance(value, str):
             val = value.replace('[', '').replace(']', '').strip()
             if val.find(':') > -1:
                 val = val.split(':')
@@ -1149,7 +1147,7 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
         properties and these properties are currently standard properties
         """
 
-        if isinstance(mon_range, string_types):
+        if isinstance(mon_range, str):
             mon_val = mon_range.split(',')
         else:
             mon_val = mon_range
@@ -1199,7 +1197,7 @@ class SpectraToMonitorsList(PropDescriptor):
         if spectra_list is None:
             return None
 
-        if isinstance(spectra_list, string_types):
+        if isinstance(spectra_list, str):
             if spectra_list.lower() == 'none':
                 result = None
             else:
@@ -1254,7 +1252,7 @@ class SaveFormat(PropDescriptor):
             return
 
         # check string
-        if isinstance(value, string_types):
+        if isinstance(value, str):
             value = value.strip('[]().')
             subformats = value.split(',')
             if len(subformats) > 1:
@@ -1318,7 +1316,7 @@ class DiagSpectra(PropDescriptor):
         """ process IDF description of the spectra string """
         if specta_sring is None:
             return None
-        if isinstance(specta_sring, string_types):
+        if isinstance(specta_sring, str):
             if specta_sring.lower() in ['none', 'no']:
                 return None
             else:
@@ -1363,7 +1361,7 @@ class BackbgroundTestRange(PropDescriptor):
         if value is None:
             self._background_test_range = None
             return
-        if isinstance(value, string_types):
+        if isinstance(value, str):
             value = value.split(',')
         if len(value) != 2:
             raise ValueError("background test range can be only a 2 element list of floats")
@@ -1408,7 +1406,7 @@ class MultirepTOFSpectraList(PropDescriptor):
         if value is None:
             self._spectra_list = None
             return
-        if isinstance(value, string_types):
+        if isinstance(value, str):
             value = value.split(',')
             self.__set__(instance, value)
             return
@@ -1521,7 +1519,7 @@ class MotorLogName(PropDescriptor):
         return self._log_names
 
     def __set__(self, instance, value):
-        if isinstance(value, string_types):
+        if isinstance(value, str):
             val_list = value.split(';')
         elif isinstance(value, list):
             val_list = []
@@ -1589,7 +1587,7 @@ class RotationAngle(PropDescriptor):
         return self.read_psi_from_workspace(self._log_ws_name)
 
     def __set__(self, instance, value):
-        if isinstance(value, string_types):
+        if isinstance(value, str):
             if value in mantid.mtd:  ## its workspace
                 self._log_ws_name = value
                 self._own_psi_value = None
@@ -1614,7 +1612,7 @@ class RotationAngle(PropDescriptor):
         if working_ws is None:
             raise RuntimeError("No workspace provided. Can not read logs to identify psi")
         else:
-            if isinstance(external_ws, string_types):
+            if isinstance(external_ws, str):
                 working_ws = mantid.mtd[external_ws]
 
         value = None
@@ -1706,7 +1704,7 @@ class AbsCorrInfo(PropDescriptor):
             self._is_fast  = False
             return
         val_dict =  {}
-        if isinstance(value, string_types):
+        if isinstance(value, str):
             val = re.sub(' u ', ' ', re.sub(r'[{}\[\]"=:;,\']', ' ', value))
             val_list = re.split(r'\s+',val)
             ik = 0
@@ -1787,7 +1785,7 @@ class AbsorptionShapesContainer(PropDescriptor):
         if value is None:
             self._theShapeHolder = None
             return
-        if isinstance(value, string_types):
+        if isinstance(value, str):
             self._theShapeHolder = anAbsorptionShape.from_str(value)
         elif isinstance(value,anAbsorptionShape):
             self._theShapeHolder = value

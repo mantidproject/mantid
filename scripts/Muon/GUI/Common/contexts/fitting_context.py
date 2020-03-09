@@ -8,7 +8,6 @@ from collections import OrderedDict
 import re
 
 from mantid.api import AnalysisDataService
-from mantid.py3compat import string_types
 import numpy as np
 
 from mantidqt.utils.observer_pattern import Observable
@@ -198,9 +197,9 @@ class FitInformation(object):
                                              global_parameters)
         self.fit_function_name = fit_function_name
         self.input_workspaces = [input_workspace] if isinstance(
-            input_workspace, string_types) else input_workspace
+            input_workspace, str) else input_workspace
         self.output_workspace_names = [output_workspace_names] if isinstance(
-            output_workspace_names, string_types) else output_workspace_names
+            output_workspace_names, str) else output_workspace_names
 
     def __eq__(self, other):
         """Objects are equal if each member is equal to the other"""

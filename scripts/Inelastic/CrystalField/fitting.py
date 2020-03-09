@@ -7,9 +7,6 @@
 import numpy as np
 import re
 import warnings
-from six import string_types
-
-
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma.
 FN_PATTERN = re.compile('f(\\d+)\\.(.+)')
 
@@ -902,7 +899,7 @@ class CrystalField(object):
             ws_index = args.pop(0)
 
         pptype = 'M(T)' if (typeid == 4) else 'M(H)'
-        self._typeid = self._str2id(typeid) if isinstance(typeid, string_types) else int(typeid)
+        self._typeid = self._str2id(typeid) if isinstance(typeid, str) else int(typeid)
 
         return self._getPhysProp(PhysicalProperties(pptype, *args, **kwargs), workspace, ws_index)
 
@@ -1158,7 +1155,7 @@ class CrystalField(object):
         alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
         alg.initialize()
         alg.setChild(True)
-        alg.setProperty('Function', i if isinstance(i, string_types) else self.makeSpectrumFunction(i))
+        alg.setProperty('Function', i if isinstance(i, str) else self.makeSpectrumFunction(i))
         alg.setProperty("InputWorkspace", workspace)
         alg.setProperty('WorkspaceIndex', ws_index)
         alg.setProperty('OutputWorkspace', 'dummy')

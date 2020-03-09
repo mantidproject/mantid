@@ -11,7 +11,6 @@
 from Direct.NonIDF_Properties import *
 
 from collections import OrderedDict, Iterable
-from six import string_types
 from mantid.kernel import funcinspect
 
 
@@ -164,7 +163,7 @@ class PropertyManager(NonIDF_Properties):
         #end
 
         # replace common substitutions for string value
-        if isinstance(val, string_types):
+        if isinstance(val, str):
             val1 = val.lower()
             if val1 == 'none' or len(val1) == 0:
                 val = None

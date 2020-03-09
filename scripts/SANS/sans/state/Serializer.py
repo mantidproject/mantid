@@ -53,7 +53,7 @@ class SerializerImpl(json.JSONEncoder):
     @staticmethod
     def obj_hook(o):
         for type_tag, internal_dict in o.items():
-            assert isinstance(type_tag, six.string_types)
+            assert isinstance(type_tag, str)
 
             cls_type = JsonSerializable.class_type_from_tag(type_tag)
             if cls_type:

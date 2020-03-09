@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
-from six import string_types
 from scipy import constants
 import warnings
 
@@ -132,7 +131,7 @@ class PointCharge(object):
         from mantid.simpleapi import mtd, LoadCIF, CreateWorkspace, DeleteWorkspace
         import uuid
         self._fromCIF = False
-        if isinstance(structure, string_types):
+        if isinstance(structure, str):
             if mtd.doesExist(structure):
                 try:
                     self._cryst = self._copyCrystalStructure(mtd[structure].sample().getCrystalStructure())

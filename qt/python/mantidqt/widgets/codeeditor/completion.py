@@ -36,7 +36,7 @@ import warnings
 
 from lib2to3.pgen2.tokenize import detect_encoding
 from io import BytesIO
-from six import PY2, string_types
+from six import PY2
 
 if PY2:  # noqa
     from inspect import getargspec as getfullargspec
@@ -179,7 +179,7 @@ def generate_call_tips(definitions, prepend_module_name=None):
         else:
             module_name = prepend_module_name
         if inspect.isfunction(py_object) or inspect.isbuiltin(py_object):
-            if isinstance(module_name, string_types):
+            if isinstance(module_name, str):
                 call_tips.append(module_name + '.' + name + get_function_spec(py_object))
             else:
                 call_tips.append(name + get_function_spec(py_object))
@@ -197,7 +197,7 @@ def generate_call_tips(definitions, prepend_module_name=None):
                     call_tip = name + '.' + attr + get_function_spec(f_attr)
                 else:
                     call_tip = name + '.' + attr
-                if isinstance(module_name, string_types):
+                if isinstance(module_name, str):
                     call_tips.append(module_name + '.' + call_tip)
             except Exception:
                 continue

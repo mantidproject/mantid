@@ -8,9 +8,6 @@
 import systemtesting
 import os
 from mantid.simpleapi import *
-from six import string_types
-
-
 def _skip_test():
     """Helper function to determine if we run the test"""
     import platform
@@ -48,7 +45,7 @@ class PG3Calibration(systemtesting.MantidSystemTest):
                                                MaxOffset=0.01, PeakPositions = '.6866,.7283,.8185,.8920,1.0758,1.2615,2.0599',
                                                CrossCorrelation = False, RunNumber = 'PG3_2538')
 
-        if isinstance(output, string_types):
+        if isinstance(output, str):
             self.saved_cal_file = output.replace('.h5','.cal')
         else:
             raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")
@@ -96,7 +93,7 @@ class PG3CCCalibration(systemtesting.MantidSystemTest):
                                                MaxOffset=0.01, PeakPositions = '0.7282933,1.261441',DetectorsPeaks = '17,6',
                                                CrossCorrelation = True, RunNumber = 'PG3_2538')
 
-        if isinstance(output, string_types):
+        if isinstance(output, str):
             self.saved_cal_file = output.replace('.h5','.cal')
         else:
             raise NotImplementedError("Output from CalibrateRectangularDetectors is NOT string for calibration file name!")

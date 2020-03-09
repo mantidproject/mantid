@@ -160,7 +160,7 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0,
     app = get_application()
     if widget_or_name is not None:
         widget_name = 'Widget to test'
-        if isinstance(widget_or_name, six.string_types):
+        if isinstance(widget_or_name, str):
             widget = create_widget(widget_or_name)
             widget_name = widget_or_name
         elif isinstance(widget_or_name, QWidget):
@@ -199,7 +199,7 @@ def run_script(script_or_name, widget):
     :param widget: A widget to interact with.
     :return: Output of the script or an Exception object.
     """
-    if isinstance(script_or_name, six.string_types):
+    if isinstance(script_or_name, str):
         module_name, fun_name = split_qualified_name(script_or_name)
         m = __import__(module_name, fromlist=[fun_name])
         fun = getattr(m, fun_name)

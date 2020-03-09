@@ -57,7 +57,7 @@ class ProjectRecoveryModel(QObject):
         :return: List of 3 Strings; [0] Checkpoint name, [1] Number of workspaces, [2] Whether checkpoint has been tried
          or not
         """
-        if isinstance(checkpoint, six.string_types):
+        if isinstance(checkpoint, str):
             # Assume if there is a T then it is a checkpoint and it needs to be replaced with a space
             checkpoint = checkpoint.replace("T", " ")
             for index in self.rows:

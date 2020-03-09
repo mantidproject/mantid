@@ -18,7 +18,7 @@ from matplotlib.legend import Legend
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import ConfigService
 from mantid.plots import datafunctions, MantidAxes
-from mantid.py3compat import is_text_string, string_types
+from mantid.py3compat import is_text_string
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -350,7 +350,7 @@ def _validate_workspace_names(workspaces):
     :return: A list of workspaces
     """
     try:
-        raise_if_not_sequence(workspaces, 'workspaces', string_types)
+        raise_if_not_sequence(workspaces, 'workspaces', str)
     except ValueError:
         return workspaces
     else:
