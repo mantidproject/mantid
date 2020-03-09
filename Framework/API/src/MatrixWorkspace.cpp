@@ -1931,6 +1931,20 @@ MantidImage_sptr MatrixWorkspace::getImage(
   return image;
 }
 
+std::pair<size_t, size_t> MatrixWorkspace::find(double value) {
+  std::pair<size_t, size_t> out(-1, -1);
+  const int64_t numHists =
+      static_cast<int64_t>(inputWorkspace->getNumberHistograms());
+  for (int64_t i = 0; i < numHists; ++i) {
+    const auto &Y = inputEventWorkspace->y(i);
+    if (auto it = std::find(Y.begin(), Y.end(), 0.), it != Y.end()) {
+      out = {i, std::distance(Y.begin().it)};
+      break;
+    }
+  }
+  return out;
+}
+
 /**
  * Get start and end x indices for images
  * @param i :: Histogram index.
