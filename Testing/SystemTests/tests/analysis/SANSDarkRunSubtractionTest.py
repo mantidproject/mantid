@@ -8,7 +8,6 @@
 #pylint: disable=invalid-name
 #pylint: disable=too-many-arguments
 #pylint: disable=too-many-public-methods
-from __future__ import (absolute_import, division, print_function)
 import unittest
 import systemtesting
 from mantid.simpleapi import *

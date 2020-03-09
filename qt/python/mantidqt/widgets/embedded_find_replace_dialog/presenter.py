@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-from __future__ import (absolute_import, division, print_function)
-
 from enum import Enum
 from mantidqt.widgets.embedded_find_replace_dialog.view import EmbeddedFindReplaceDialogView
 

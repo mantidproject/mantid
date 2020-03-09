@@ -8,8 +8,6 @@
 """ Main view for the ISIS SANS reduction interface.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 from abc import ABCMeta, abstractmethod
 
 from qtpy.QtCore import QRegExp

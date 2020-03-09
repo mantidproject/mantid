@@ -20,7 +20,6 @@ The bulk of the work is done by pandoc, which is expected to be in the PATH. The
     the inline to normal format.
  3. Image links cannot have spaces in the filename in rst.
     The spaces are removed in the downloaded file names, but not the links in the rst files."""
-from __future__ import (absolute_import, division, print_function)
 import argparse
 import json
 import os

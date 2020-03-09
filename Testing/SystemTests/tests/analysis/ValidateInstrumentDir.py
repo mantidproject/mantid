@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 #pylint: disable=no-init
-from __future__ import (absolute_import, division, print_function)
-
 import glob
 import os
 

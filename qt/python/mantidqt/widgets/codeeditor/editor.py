@@ -7,8 +7,6 @@
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 # 3rd party imports
 
 # local imports

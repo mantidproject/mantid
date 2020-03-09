@@ -10,7 +10,6 @@ Test some features of MDWorkspaces, such as
 file-backed MDWorkspaces.
 """
 
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 import os
 from mantid.simpleapi import *

@@ -7,8 +7,6 @@
 #  This file is part of the mantid package
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 # local imports
 from mantid.kernel import Logger
 from mantid.plots.utility import MantidAxType

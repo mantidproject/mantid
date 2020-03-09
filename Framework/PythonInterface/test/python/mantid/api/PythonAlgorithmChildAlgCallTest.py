@@ -7,8 +7,6 @@
 """A test for the simple API dedicated to Python algorithms. Checks
 things like Child Algorithm calls
 """
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from testhelpers import run_algorithm
 

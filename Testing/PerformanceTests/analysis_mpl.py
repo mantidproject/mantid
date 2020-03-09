@@ -7,8 +7,6 @@
 """ Module containing functions for test
 performance analysis, plotting, and saving
 to other formats (CSV, PDF) """
-from __future__ import (absolute_import, division, print_function)
-
 import datetime
 import os
 

@@ -9,8 +9,6 @@
 """
 Defines interaction behaviour for plotting.
 """
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
 from collections import OrderedDict
 from copy import copy

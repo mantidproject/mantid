@@ -10,8 +10,6 @@ The view for the masking table displays all available masks for a SANS reduction
 and masked SANS workspace.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 from abc import ABCMeta, abstractmethod
 from qtpy import QtWidgets
 from six import with_metaclass

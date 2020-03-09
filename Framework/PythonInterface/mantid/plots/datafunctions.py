@@ -7,8 +7,6 @@
 #  This file is part of the mantid package
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 import datetime
 
 import numpy as np

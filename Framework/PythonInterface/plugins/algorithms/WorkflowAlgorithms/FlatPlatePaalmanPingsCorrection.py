@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-instance-attributes
 
-from __future__ import (absolute_import, division, print_function)
 import math
 from six import iteritems
 from six import integer_types

@@ -12,7 +12,6 @@
     creates "index" pages that lists the contents of each category. The display of each
     "index" page is controlled by a jinja2 template.
 """
-from __future__ import (absolute_import, division, print_function)
 from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version #pylint: disable=unused-import
 from sphinx.util.osutil import relative_uri
 import os

@@ -7,8 +7,6 @@
 #    This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division)
-
 import unittest
 
 import matplotlib as mpl

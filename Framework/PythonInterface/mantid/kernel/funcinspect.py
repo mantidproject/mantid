@@ -12,8 +12,7 @@
                    arguments that are being assigned to a function
                    return
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+
 import opcode
 import inspect
 import sys

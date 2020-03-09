@@ -5,7 +5,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from compile_util import compile_ui
 
 # Compile resource files for Diffraction instruments

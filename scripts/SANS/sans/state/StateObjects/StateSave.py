@@ -8,7 +8,6 @@
 
 """ Defines the state of saving."""
 
-from __future__ import (absolute_import, division, print_function)
 import copy
 
 from six import with_metaclass

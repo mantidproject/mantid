@@ -26,8 +26,6 @@ and assign it to the rebinned variable.
 
 Importing this module starts the FrameworkManager instance.
 """
-from __future__ import (absolute_import, division, print_function)
-
 # std libs
 from collections import OrderedDict, namedtuple
 import inspect

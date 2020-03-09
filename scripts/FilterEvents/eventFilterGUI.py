@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, too-many-lines, too-many-instance-attributes
-from __future__ import (absolute_import, division, print_function)
 import numpy
 
 from qtpy.QtWidgets import (QFileDialog, QMainWindow, QMessageBox, QSlider, QVBoxLayout, QWidget)  # noqa

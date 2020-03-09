@@ -8,7 +8,6 @@
 
 # pylint: disable=too-few-public-methods, invalid-name
 
-from __future__ import (absolute_import, division, print_function)
 import os
 import h5py as h5
 import re

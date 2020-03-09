@@ -8,8 +8,6 @@
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
-from __future__ import (absolute_import, unicode_literals)
-
 import sys
 from functools import wraps
 

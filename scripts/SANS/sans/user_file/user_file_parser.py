@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, too-many-instance-attributes, too-many-branches, too-few-public-methods
 
-from __future__ import (absolute_import, division, print_function)
 import abc
 import re
 from math import copysign

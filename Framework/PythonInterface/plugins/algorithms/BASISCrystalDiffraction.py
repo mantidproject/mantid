@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-branches
 
-from __future__ import (absolute_import, division, print_function)
-
 import os
 import tempfile
 from collections import namedtuple

@@ -9,7 +9,6 @@
 """ File contains collection of Descriptors used to define complex
     properties in NonIDF_Properties and PropertyManager classes
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
 import os
 import numpy as np
 import math

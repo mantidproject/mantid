@@ -11,7 +11,6 @@ from the individual rows in the data table. This view is useful for checking the
 and helps the developer to identify issues.
 """
 
-from __future__ import (absolute_import, division, print_function)
 from abc import ABCMeta, abstractmethod
 import os
 from qtpy import QtWidgets

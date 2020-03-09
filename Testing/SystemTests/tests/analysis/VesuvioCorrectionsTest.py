@@ -12,7 +12,6 @@ Unit test for Vesuvio corrections steps
 Assumes that mantid can be imported and the data paths
 are configured to find the Vesuvio data
 """
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 import numpy as np
 

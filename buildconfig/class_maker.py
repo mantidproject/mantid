@@ -6,8 +6,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Utility for generating a class file, header, and test file """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import argparse
 import sys
 import os

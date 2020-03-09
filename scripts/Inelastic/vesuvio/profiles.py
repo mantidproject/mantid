@@ -9,7 +9,6 @@
 This is all essentially about parsing the user input and putting it into a form
 the Mantid fitting algorithm will understand
 """
-from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 
 import ast

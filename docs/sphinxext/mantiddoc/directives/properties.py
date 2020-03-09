@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,deprecated-module
-from __future__ import (absolute_import, division, print_function)
 from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
 import re
 from string import punctuation

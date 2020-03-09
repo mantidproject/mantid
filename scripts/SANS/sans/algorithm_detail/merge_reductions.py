@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Merges two reduction types to single reduction"""
 
-from __future__ import (absolute_import, division, print_function)
-
 from abc import (ABCMeta, abstractmethod)
 
 from six import with_metaclass

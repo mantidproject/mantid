@@ -7,9 +7,6 @@
 """ The SANSConfigurations class holds instrument-specific configs to centralize instrument-specific magic numbers"""
 # pylint: disable=too-few-public-methods
 
-from __future__ import (absolute_import, division, print_function)
-
-
 class Configurations(object):
 
     class LARMOR(object):

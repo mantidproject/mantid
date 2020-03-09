@@ -48,7 +48,6 @@ Adding to the cache(ADS) is supported for the TubeCalibration file.
 Reading from the cache is supported for all files. This avoids data reloads if the correct file is already in the
 cache.
 """
-from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
 from six import with_metaclass
 import os

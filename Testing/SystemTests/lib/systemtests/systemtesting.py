@@ -11,8 +11,6 @@ or by importing them into MantidPlot.
 
 File change history is stored at: <https://github.com/mantidproject/systemtests>.
 """
-from __future__ import (absolute_import, division, print_function)
-
 # == for testing conda build of mantid-framework ==========
 import os
 

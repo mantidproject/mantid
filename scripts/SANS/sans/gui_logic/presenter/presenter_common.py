@@ -10,8 +10,6 @@ This abstract class allows other presenters to share functions which set attribu
 the view or retrieve them from the view
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 from abc import ABCMeta, abstractmethod
 from six import with_metaclass
 

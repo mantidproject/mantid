@@ -7,8 +7,6 @@
 """
     Specifically tests the RenameWorkspace algorithm in the simple API
 """
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import testhelpers
 import platform

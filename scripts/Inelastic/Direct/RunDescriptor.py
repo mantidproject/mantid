@@ -9,7 +9,6 @@
 #pylint: disable=attribute-defined-outside-init
 """ File contains Descriptors used describe run for direct inelastic reduction """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
 from six import string_types
 from mantid.simpleapi import *
 from mantid.kernel import funcinspect

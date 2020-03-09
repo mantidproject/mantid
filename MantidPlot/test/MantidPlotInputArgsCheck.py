@@ -11,7 +11,6 @@ All these functions should throw a ValueError exception when, for example:
  - the specified workspaces don't exist
  - the index(es) of spectra, bin or dimension is wrong
 """
-from __future__ import (absolute_import, division, print_function)
 import mantidplottests
 from mantidplottests import *
 import time

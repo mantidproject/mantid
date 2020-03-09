@@ -7,8 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+
 
 from mantid.py3compat import is_text_string
 from posixpath import join as joinsettings

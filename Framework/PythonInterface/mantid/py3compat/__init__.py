@@ -20,8 +20,6 @@ This module should be fully compatible with:
     * Python 3
 """
 
-from __future__ import (absolute_import, print_function, unicode_literals)
-
 import inspect
 import six
 from six import *  # noqa

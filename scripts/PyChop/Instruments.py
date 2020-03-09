@@ -9,7 +9,6 @@ This module is a wrapper around a set of instrument parameters (to be read from 
 and methods which then call either Chop.py or MulpyRep.py to do the resolution calculations.
 """
 
-from __future__ import (absolute_import, division, print_function)
 from six import string_types
 import numpy as np
 import yaml

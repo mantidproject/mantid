@@ -25,8 +25,6 @@ For these reasons it was agreed jedi would be dropped, possibly
 revisiting when we move to Python 3.
 """
 
-from __future__ import (absolute_import, unicode_literals)
-
 import ast
 from collections import namedtuple
 import contextlib

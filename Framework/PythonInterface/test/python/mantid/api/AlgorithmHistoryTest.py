@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.simpleapi import CreateWorkspace, set_properties
 from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, AlgorithmManager,

@@ -10,7 +10,6 @@
 # This module contains utility functions common to the
 # SANS data reduction scripts
 ########################################################
-from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry, FileFinder
 from mantid.kernel import DateAndTime

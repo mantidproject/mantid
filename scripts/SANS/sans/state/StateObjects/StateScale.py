@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Defines the state of the geometry and unit scaling."""
 
-from __future__ import (absolute_import, division, print_function)
 import copy
 
 from six import with_metaclass

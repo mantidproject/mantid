@@ -7,8 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.simpleapi import CreateMDHistoWorkspace, CreateWorkspace, CreateMDWorkspace, FakeMDEventData
 from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE
 from numpy.testing import assert_equal, assert_allclose

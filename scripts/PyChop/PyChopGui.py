@@ -14,7 +14,6 @@
 This module contains a class to create a graphical user interface for PyChop.
 """
 
-from __future__ import (absolute_import, division, print_function)
 from six import string_types
 import sys
 import re

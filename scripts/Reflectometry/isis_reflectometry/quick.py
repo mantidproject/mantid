@@ -15,7 +15,6 @@
 '''
 # these need to be moved into one NR folder or so
 # from ReflectometerCors import *
-from __future__ import (absolute_import, division, print_function)
 from isis_reflectometry.l2q import *
 from isis_reflectometry.combineMulti import *
 from mantid.simpleapi import *  # New API

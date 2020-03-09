@@ -10,8 +10,7 @@
 
     It is intended for internal use.
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+
 
 import inspect as _inspect
 import sys

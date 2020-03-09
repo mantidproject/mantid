@@ -8,8 +8,7 @@
 MantidPlot module to gain access to plotting functions etc.
 Requires that the main script be run from within MantidPlot
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+
 # Requires MantidPlot
 try:
     import _qti

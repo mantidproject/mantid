@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 
-from __future__ import (absolute_import, division, print_function)
 import unittest
 import os
 import systemtesting

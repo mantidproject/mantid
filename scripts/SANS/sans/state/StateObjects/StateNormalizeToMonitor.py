@@ -8,7 +8,6 @@
 
 """State describing the normalization to the incident monitor for SANS reduction."""
 
-from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 

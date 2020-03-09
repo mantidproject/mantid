@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=too-many-arguments
 
-from __future__ import (absolute_import, division, print_function)
 import numpy
 from wand.image import Image
 from wand.drawing import Drawing

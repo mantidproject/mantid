@@ -7,7 +7,6 @@
 #pylint: disable=no-init,too-few-public-methods
 
 # test batch mode with sans2d and selecting a period in batch mode
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 from mantid.api import AnalysisDataService
 from ISISCommandInterface import *

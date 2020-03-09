@@ -8,7 +8,6 @@
 
 """State describing the creation of pixel and wavelength adjustment workspaces for SANS reduction."""
 
-from __future__ import (absolute_import, division, print_function)
 import json
 import copy
 

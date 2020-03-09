@@ -14,7 +14,6 @@
 # - Download from internet to cache (download-mode)
 #
 ################################################################################
-from __future__ import (absolute_import, division, print_function)
 import bisect
 try:
     # python3

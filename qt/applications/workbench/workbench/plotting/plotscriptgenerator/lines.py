@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from __future__ import (absolute_import, unicode_literals)
-
 from matplotlib import rcParams
 from matplotlib.container import ErrorbarContainer
 

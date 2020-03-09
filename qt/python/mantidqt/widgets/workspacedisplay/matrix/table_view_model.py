@@ -8,8 +8,6 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtGui
 from qtpy.QtCore import QVariant, Qt, QAbstractTableModel
 from enum import Enum

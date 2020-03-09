@@ -12,7 +12,6 @@
    that we are dealing with a bug
 """
 
-from __future__ import (absolute_import, division, print_function)
 import copy
 
 from six import with_metaclass

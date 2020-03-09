@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+
 
 import unittest
 

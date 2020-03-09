@@ -9,7 +9,6 @@
 These system tests are to verify the behaviour of the ISIS reflectometry reduction scripts
 """
 
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 from mantid.simpleapi import *
 import mantid.api

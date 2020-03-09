@@ -10,8 +10,6 @@ This is one of the two models which is used for the data reduction. It contains 
 are not available in the model associated with the data table.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.py3compat import ensure_str
 from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SaveType,
                                DetectorType)

@@ -10,7 +10,6 @@ Unit test for Vesuvio reduction
 Assumes that mantid can be imported and the data paths
 are configured to find the Vesuvio data
 """
-from __future__ import (absolute_import, division, print_function)
 from six import iteritems
 
 import unittest
