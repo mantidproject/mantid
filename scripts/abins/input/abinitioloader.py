@@ -168,9 +168,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         atoms = abins.AtomsData(num_atoms=self._num_atoms)
         atoms.set(data["atoms"])
 
-        result_data = abins.AbinsData()
-        result_data.set(k_points_data=k_points, atoms_data=atoms)
-        return result_data
+        return abins.AbinsData(k_points_data=k_points, atoms_data=atoms)
 
     def save_ab_initio_data(self, data=None):
         """
