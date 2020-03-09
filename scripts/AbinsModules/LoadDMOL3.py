@@ -254,9 +254,8 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
 
         end_msg = "Molecular Mass:"
         key = "Atom"
-        if not six.PY2:
-            end_msg = bytes(end_msg, "utf8")
-            key = bytes(key, "utf8")
+        end_msg = bytes(end_msg, "utf8")
+        key = bytes(key, "utf8")
 
         while not self._parser.file_end(file_obj=obj_file):
             line = obj_file.readline()

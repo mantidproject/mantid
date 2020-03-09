@@ -223,7 +223,7 @@ class BatchCsvParserTest(unittest.TestCase):
         expected_file_path = "/foo/bar.csv"
         parser = BatchCsvParser()
 
-        patchable = "__builtin__.open" if six.PY2 else "builtins.open"
+        patchable = "builtins.open"
         with mock.patch(patchable, mocked_handle):
             parser.save_batch_file(rows=[], file_path=expected_file_path)
 
@@ -255,7 +255,7 @@ class BatchCsvParserTest(unittest.TestCase):
         mocked_handle = mock.mock_open()
         parser = BatchCsvParser()
 
-        patchable = "__builtin__.open" if six.PY2 else "builtins.open"
+        patchable = "builtins.open"
         with mock.patch(patchable, mocked_handle):
             parser.save_batch_file(rows=[test_row], file_path='')
 

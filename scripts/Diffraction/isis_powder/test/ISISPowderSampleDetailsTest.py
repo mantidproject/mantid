@@ -352,10 +352,7 @@ def get_std_out_buffer_obj():
     # Because of the way that strings and bytes
     # have changed between Python 2/3 we need to
     # return a buffer which is appropriate to the current version
-    if six.PY2:
-        return io.BytesIO()
-    elif six.PY3:
-        return io.StringIO()
+    return io.StringIO()
 
 
 if __name__ == "__main__":

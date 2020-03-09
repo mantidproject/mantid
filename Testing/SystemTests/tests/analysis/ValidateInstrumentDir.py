@@ -13,8 +13,6 @@ from mantid import config
 import six
 import systemtesting
 
-if six.PY2:
-    from io import open  # noqa
 
 # Constants
 FILE_TO_TEST = None  # "MARI_Definition.xml"

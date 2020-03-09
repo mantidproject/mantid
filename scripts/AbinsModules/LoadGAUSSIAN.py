@@ -196,9 +196,8 @@ class LoadGAUSSIAN(AbinsModules.GeneralAbInitioProgram):
 
         end_msg = "Molecular mass:"
         key = "Atom"
-        if not six.PY2:
-            end_msg = bytes(end_msg, "utf8")
-            key = bytes(key, "utf8")
+        end_msg = bytes(end_msg, "utf8")
+        key = bytes(key, "utf8")
 
         while not self._parser.file_end(file_obj=file_obj):
 

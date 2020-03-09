@@ -574,18 +574,11 @@ def focus_texture_mode(run_number, van_curves, van_int, focus_directory, focus_g
     banks = {}
     # read the csv file to work out the banks
     # ensure csv reading works on python 2 or 3
-    if not six.PY2:
-        with open(dg_file, 'r', newline='', encoding='utf-8') as grouping_file:
-            group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
+    with open(dg_file, 'r', newline='', encoding='utf-8') as grouping_file:
+        group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
 
-            for row in group_reader:
-                banks.update({row[0]: ','.join(row[1:])})
-    else:
-        with open(dg_file, 'r') as grouping_file:
-            group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
-
-            for row in group_reader:
-                banks.update({row[0]: ','.join(row[1:])})
+        for row in group_reader:
+            banks.update({row[0]: ','.join(row[1:])})
 
     # loop through the banks described in the csv, focusing and saing them out
     for bank in banks:

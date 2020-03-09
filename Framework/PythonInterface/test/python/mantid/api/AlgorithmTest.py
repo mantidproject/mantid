@@ -66,12 +66,7 @@ class AlgorithmTest(unittest.TestCase):
         data = [1.5,2.5,3.5]
         kwargs = {'child':True}
         unitx = 'Wavelength'
-        if six.PY2:
-            # force a property value to be unicode to assert conversion happens correctly
-            # this is only an issue in python2
-            kwargs[unicode('UnitX')] = unicode(unitx)
-        else:
-            kwargs['UnitX'] = unitx
+        kwargs['UnitX'] = unitx
 
 
         alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,**kwargs)

@@ -41,12 +41,12 @@ __all__ = dir(six)
 # -----------------------------------------------------------------------------
 # Library functions
 # -----------------------------------------------------------------------------
-if six.PY2 or sys.version_info[0:2] < (3, 2):
+if sys.version_info[0:2] < (3, 2):
     setswitchinterval = sys.setcheckinterval
 else:
     setswitchinterval = sys.setswitchinterval
 
-if six.PY2 or sys.version_info[0:2] < (3, 5):
+if sys.version_info[0:2] < (3, 5):
     # getfullargspec deprecated up until python 3.5, so use getargspec
     getfullargspec = inspect.getargspec
 else:
@@ -56,10 +56,7 @@ else:
 # -----------------------------------------------------------------------------
 # File manipulation
 # -----------------------------------------------------------------------------
-if six.PY2:
-    csv_open_type = 'wb'
-else:
-    csv_open_type = 'w'
+csv_open_type = 'w'
 
 
 # -----------------------------------------------------------------------------
@@ -80,7 +77,7 @@ if not hasattr(six, "ensure_str"):
         """
         if not isinstance(s, (text_type, binary_type)):
             raise TypeError("not expecting type '%s'" % type(s))
-        if PY2 and isinstance(s, text_type):
+        if isinstance(s, text_type):
             s = s.encode(encoding, errors)
         elif PY3 and isinstance(s, binary_type):
             s = s.decode(encoding, errors)
@@ -96,21 +93,13 @@ def is_text_string(obj):
 def to_text_string(obj, encoding=None):
     """Convert `obj` to (unicode) text string"""
 
-    if PY2:
-        # Python 2
-        if encoding is None:
-            return unicode(obj)
-        else:
-            return unicode(obj, encoding)
+    if encoding is None:
+        return str(obj)
+    elif isinstance(obj, str):
+        # In case this function is not used properly, this could happen
+        return obj
     else:
-        # Python 3
-        if encoding is None:
-            return str(obj)
-        elif isinstance(obj, str):
-            # In case this function is not used properly, this could happen
-            return obj
-        else:
-            return str(obj, encoding)
+        return str(obj, encoding)
 
 
 def qbytearray_to_str(qba):

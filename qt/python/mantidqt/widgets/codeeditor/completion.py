@@ -36,12 +36,8 @@ import warnings
 
 from lib2to3.pgen2.tokenize import detect_encoding
 from io import BytesIO
-from six import PY2
 
-if PY2:  # noqa
-    from inspect import getargspec as getfullargspec
-else:  # noqa
-    from inspect import getfullargspec
+from inspect import getfullargspec
 
 from mantidqt.widgets.codeeditor.editor import CodeEditor
 

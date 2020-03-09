@@ -743,10 +743,7 @@ def _get_function_spec(func):
     """
     import inspect
     try:
-        if six.PY2:
-            argspec = inspect.getargspec(func)
-        else:
-            argspec = inspect.getfullargspec(func)
+        argspec = inspect.getfullargspec(func)
     except TypeError:
         return ''
     # Algorithm functions have varargs set not args

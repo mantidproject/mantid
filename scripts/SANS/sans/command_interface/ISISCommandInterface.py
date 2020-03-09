@@ -29,10 +29,6 @@ from sans.common.general_functions import (convert_bank_name_to_detector_type_is
 from sans.gui_logic.models.RowEntries import RowEntries
 from sans.sans_batch import SANSBatchReduction, SANSCentreFinder
 
-if six.PY2:
-    # This can be swapped with in box FileNotFoundError
-    FileNotFoundError = IOError
-
 
 # Disable plotting if running outside Mantidplot
 try:

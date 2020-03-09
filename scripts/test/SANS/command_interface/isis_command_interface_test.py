@@ -14,9 +14,6 @@ import six
 from mantid.py3compat import mock
 from sans.command_interface.ISISCommandInterface import MaskFile
 
-if six.PY2:
-    FileNotFoundError = IOError
-
 
 class ISISCommandInterfaceTest(unittest.TestCase):
     def test_mask_file_raises_for_empty_file_name(self):
