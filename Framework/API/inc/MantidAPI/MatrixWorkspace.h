@@ -514,20 +514,19 @@ public:
   // Check if this class has an oriented lattice on a sample object
   virtual bool hasOrientedLattice() const override;
 
-  virtual std::pair<size_t, size_t> find(double value)
-      :
+  virtual std::pair<int64_t, int64_t> find(double value) const;
 
-        //=====================================================================================
-        // End IMDWorkspace methods
-        //=====================================================================================
+  //=====================================================================================
+  // End IMDWorkspace methods
+  //=====================================================================================
 
-        //=====================================================================================
-        // Image methods
-        //=====================================================================================
+  //=====================================================================================
+  // Image methods
+  //=====================================================================================
 
-        /// Get start and end x indices for images
-        std::pair<size_t, size_t> getImageStartEndXIndices(
-            size_t i, double startX, double endX) const;
+  /// Get start and end x indices for images
+  std::pair<size_t, size_t> getImageStartEndXIndices(size_t i, double startX,
+                                                     double endX) const;
   /// Create an image of Ys.
   MantidImage_sptr getImageY(size_t start = 0, size_t stop = 0,
                              size_t width = 0, double startX = EMPTY_DBL(),
