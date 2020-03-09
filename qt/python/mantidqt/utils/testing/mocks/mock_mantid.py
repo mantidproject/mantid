@@ -114,3 +114,5 @@ class MockWorkspace:
         self.emit_repaint = StrictMock()
 
         self.getPlotType = StrictMock()
+
+        self.getLinkedYCol = StrictMock()

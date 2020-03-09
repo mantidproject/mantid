@@ -149,6 +149,10 @@ public:
   /// Set plot type where
   void setPlotType(int t);
 
+  int getLinkedYCol() const { return m_linkedYCol; }
+
+  void setLinkedYCol(const int yCol);
+
   /**
    * Fills a std vector with values from the column if the types are compatible.
    * @param maxSize :: Set size to less than the full column.
@@ -200,6 +204,9 @@ protected:
   /// NotSet = -1000 (this is the default and means plot style has not been set)
   /// X = 1, Y = 2, Z = 3, xErr = 4, yErr = 5, Label = 6
   int m_plotType;
+
+  /// For error columns - the index of the related data column
+  int m_linkedYCol = -1;
 
   /// Column read-only flag
   bool m_isReadOnly;
