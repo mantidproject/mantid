@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/SetUncertainties.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
@@ -124,7 +125,7 @@ void SetUncertainties::exec() {
   double valueToSet = resetOne ? 1.0 : getProperty("SetErrorTo");
   double valueToCompare = resetOne ? 0.0 : getProperty("IfEqualTo");
   int precision = getProperty("Precision");
-  double tolerance = resetOne ? 1E-10 : std::pow(10.0, std : negate(precision));
+  double tolerance = resetOne ? 1E-10 : std::pow(10.0, -1. * precision);
 
   // Create the output workspace. This will copy many aspects from the input
   // one.
