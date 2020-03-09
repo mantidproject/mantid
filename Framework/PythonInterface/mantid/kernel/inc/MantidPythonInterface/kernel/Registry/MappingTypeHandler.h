@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_MAPPINGTYPEHANDLER_H
-#define MANTID_PYTHONINTERFACE_MAPPINGTYPEHANDLER_H
+#pragma once
 
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
 
@@ -29,5 +28,3 @@ class MappingTypeHandler final : public PropertyValueHandler {
 } // namespace Registry
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif // MANTID_PYTHONINTERFACE_MAPPINGTYPEHANDLER_H

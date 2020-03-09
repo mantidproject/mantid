@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINERFACE_PYOBJECTTOMATRIX_H_
-#define MANTID_PYTHONINERFACE_PYOBJECTTOMATRIX_H_
+#pragma once
 
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
@@ -34,5 +33,3 @@ private:
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINERFACE_PYOBJECTTOMATRIX_H_ */

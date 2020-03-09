@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_NDARRAYTYPEINDEX_H_
-#define MANTID_PYTHONINTERFACE_NDARRAYTYPEINDEX_H_
+#pragma once
 
 #include "MantidPythonInterface/core/DllConfig.h"
 
@@ -30,5 +29,3 @@ template <typename T> struct MANTID_PYTHONINTERFACE_CORE_DLL NDArrayTypeIndex {
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_NDARRAYTYPEINDEX_H_*/

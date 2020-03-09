@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTERTEST_H
-#define MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTERTEST_H
+#pragma once
 
 #include "FunctionAdapterTestCommon.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
@@ -150,5 +149,3 @@ private:
   TestDataType m_xdata;
   TestDataType m_result;
 };
-
-#endif // MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTERTEST_H

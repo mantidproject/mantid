@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_BINARYOPERATIONS_H_
-#define MANTID_PYTHONINTERFACE_BINARYOPERATIONS_H_
+#pragma once
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
@@ -46,5 +45,3 @@ ResultType performBinaryOpMDWithDouble(const LHSType lhs, const double value,
 //@}
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_BINARYOPERATIONS_H_ */

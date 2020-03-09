@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_MATRIXTONUMPY_H_
-#define MANTID_PYTHONINTERFACE_MATRIXTONUMPY_H_
+#pragma once
 
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
@@ -123,5 +122,3 @@ struct MatrixToNumpy {
 } // namespace Policies
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_MATRIXTONUMPY_H_ */

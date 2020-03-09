@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PYTHONINTERFACE_CORE_NDARRAY_H_
-#define PYTHONINTERFACE_CORE_NDARRAY_H_
+#pragma once
 #include "MantidPythonInterface/core/DllConfig.h"
 
 #include <boost/python/object.hpp>
@@ -64,5 +63,3 @@ struct MANTID_PYTHONINTERFACE_CORE_DLL
 } // end namespace converter
 } // end namespace python
 } // end namespace boost
-
-#endif // PYTHONINTERFACE_CORE_NDARRAY_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINERFACE_CORE_DATEANDTIME_H_
-#define MANTID_PYTHONINERFACE_CORE_DATEANDTIME_H_
+#pragma once
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidPythonInterface/core/DllConfig.h"
@@ -28,5 +27,3 @@ to_dateandtime(const boost::python::api::object &value);
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINERFACE_CORE_DATEANDTIME_H_ */

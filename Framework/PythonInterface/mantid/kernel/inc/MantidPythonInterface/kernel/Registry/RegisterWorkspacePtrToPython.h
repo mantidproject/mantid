@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_DATEITEMINTERFACE_H_
-#define MANTID_PYTHONINTERFACE_DATEITEMINTERFACE_H_
+#pragma once
 
 #include "MantidPythonInterface/core/WeakPtr.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
@@ -41,5 +40,3 @@ template <typename IType> struct DLLExport RegisterWorkspacePtrToPython {
 } // namespace Registry
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_DATEITEMINTERFACE_H_ */

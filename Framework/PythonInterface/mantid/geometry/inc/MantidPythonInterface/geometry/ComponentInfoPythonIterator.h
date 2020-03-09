@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_COMPONENTINFOPYTHONITERATOR_H_
-#define MANTID_PYTHONINTERFACE_COMPONENTINFOPYTHONITERATOR_H_
+#pragma once
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoItem.h"
@@ -53,5 +52,3 @@ private:
 
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_COMPONENTINFOPYTHONITERATOR_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_ALGORITHMIDPROXY_H_
-#define MANTID_PYTHONINTERFACE_ALGORITHMIDPROXY_H_
+#pragma once
 
 #include "MantidAPI/IAlgorithm.h" // for AlgorithmID typedef
 
@@ -25,5 +24,3 @@ struct AlgorithmIDProxy {
 };
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_ALGORITHMIDPROXY_H_ */

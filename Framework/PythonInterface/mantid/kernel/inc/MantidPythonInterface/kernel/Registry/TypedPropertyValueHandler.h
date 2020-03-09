@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_
-#define MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_
+#pragma once
 
 #include "MantidPythonInterface/core/ExtractWorkspace.h"
 #include "MantidPythonInterface/core/IsNone.h" // includes object.hpp
@@ -144,5 +143,3 @@ struct DLLExport TypedPropertyValueHandler<
 } // namespace Registry
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_TYPEDPROPERTYVALUEHANDLER_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_ASTYPE_H_
-#define MANTID_PYTHONINTERFACE_ASTYPE_H_
+#pragma once
 
 #include <boost/mpl/and.hpp>
 #include <boost/python/detail/prefix.hpp>
@@ -69,5 +68,3 @@ template <class ReturnType> struct AsType {
 } // namespace Policies
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_ASTYPE_H */
