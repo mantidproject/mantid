@@ -124,34 +124,30 @@ void SetUncertainties::exec() {
   double valueToSet = resetOne ? 1.0 : getProperty("SetErrorTo");
   double valueToCompare = resetOne ? 0.0 : getProperty("IfEqualTo");
   int precision = getProperty("Precision");
-  double tolerance = resetOne ? 1E-10 : std::pow(10.0, precision * (-1));
-  
-  if (inputEventWorkspace && inputEventWorkspace->getEventType() == Mantid::API::TOF) {
-    bool NonzeroUncertainty = true;
-    const int64_t numHists = static_cast<int64_t>(inputWorkspace->getNumberHistograms());
-    for (int64_t i = 0; i < numHists; ++i) {
-      const auto &Y = inputEventWorkspace->y(i);
-      auto it = std::find(Y.begin(), Y.end(), 0.);
-      if (it != Y.end()) {
-        NonzeroUncertainty = false;
-        break;
-      }
-    }
-    if(NonzeroUncertainty) {
-      if (inputWorkspace != outputWorkspace) {
-        outputWorkspace = inputWorkspace->clone();
-      }
-      this->setProperty("OutputWorkspace", outputWorkspace);
-      return;
-    }
-  }    
+  double tolerance = resetOne ? 1E-10 : std::pow(10.0, std : negate(precision));
 
-  // Create the output workspace. This will copy many aspects from the input one.
-  if (inputWorkspace != outputWorkspace || inputEventWorkspace) {
+  // Create the output workspace. This will copy many aspects from the input
+  // one.
+
+  const int64_t numHists =
+      static_cast<int64_t>(inputWorkspace->getNumberHistograms());
+  if (inputEventWorkspace) {
+    outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
+    PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
+    for (int64_t i = 0; i < numHists; ++i) {
+      PARALLEL_START_INTERUPT_REGION
+      // copy  X/Y/E
+      outputWorkspace->setSharedX(i, inputWorkspace->sharedX(i));
+      outputWorkspace->setSharedY(i, inputWorkspace->sharedY(i));
+      outputWorkspace->setSharedE(i, inputWorkspace->sharedE(i));
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+  } else if (inputWorkspace != outputWorkspace) {
     outputWorkspace = inputWorkspace->clone();
   }
+
   const auto &spectrumInfo = inputWorkspace->spectrumInfo();
-  const int64_t numHists = static_cast<int64_t>(inputWorkspace->getNumberHistograms());
   Progress prog(this, 0.0, 1.0, numHists);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
   for (int64_t i = 0; i < numHists; ++i) {
