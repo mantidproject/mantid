@@ -97,7 +97,7 @@ class CurvePropertiesTest(unittest.TestCase):
                          'label': 'ax0',
                          'linestyle': 'dashdot',
                          'linewidth': 4.0,
-                         'marker': 'triangle_down',
+                         'marker': 'v',
                          'markeredgecolor': '#008000',
                          'markerfacecolor': '#000000',
                          'markersize': 10.0,
