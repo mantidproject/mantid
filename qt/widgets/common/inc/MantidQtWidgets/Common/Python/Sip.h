@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTWIDGETS_SIPUTILS_H
-#define MANTIDQTWIDGETS_SIPUTILS_H
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
@@ -48,5 +47,3 @@ template <typename T> T *extract(const Object &obj) {
 } // namespace Widgets
 
 } // namespace MantidQt
-
-#endif // MPLCPP_SIPUTILS_H

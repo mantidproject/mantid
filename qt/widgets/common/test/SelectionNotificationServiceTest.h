@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_SELECTION_NOTIFICATION_SERVICE_H_
-#define MANTIDQT_API_SELECTION_NOTIFICATION_SERVICE_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/SelectionNotificationService.h"
 #include <cxxtest/TestSuite.h>
@@ -20,5 +19,3 @@ public:
             .sendQPointSelection(false, 1, 2, 3));
   }
 };
-
-#endif /* MANTIDQT_API_SELECTION_NOTIFICATION_SERVICE_H_ */

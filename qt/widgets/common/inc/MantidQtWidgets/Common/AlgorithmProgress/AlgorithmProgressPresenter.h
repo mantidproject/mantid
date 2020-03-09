@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALGORITHMPROGRESSPRESENTER_H
-#define ALGORITHMPROGRESSPRESENTER_H
+#pragma once
 
 #include "MantidKernel/Timer.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
@@ -61,5 +60,3 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // ALGORITHMPROGRESSPRESENTER_H

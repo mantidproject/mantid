@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_SCALARMAPPABLE_H
-#define MPLCPP_SCALARMAPPABLE_H
+#pragma once
 
 #include "MantidQtWidgets/MplCpp/Colormap.h"
 #include "MantidQtWidgets/MplCpp/Colors.h"
@@ -45,5 +44,3 @@ public:
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt
-
-#endif // MPLCPP_SCALARMAPPABLE_H

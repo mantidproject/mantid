@@ -1,5 +1,4 @@
-#ifndef MANTID_MANTIDWIDGETS_MOCKALGORITHMPROGRESSDIALOGWIDGET_H
-#define MANTID_MANTIDWIDGETS_MOCKALGORITHMPROGRESSDIALOGWIDGET_H
+#pragma once
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
@@ -36,4 +35,3 @@ public:
   // always shown on the Workbench GUI
   std::shared_ptr<MockAlgorithmProgressWidget> mainProgressBar;
 };
-#endif // MANTID_MANTIDWIDGETS_MOCKALGORITHMPROGRESSWIDGET_H

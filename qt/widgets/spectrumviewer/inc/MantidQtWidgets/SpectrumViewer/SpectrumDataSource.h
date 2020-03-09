@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SPECTRUM_DATA_SOURCE_H
-#define SPECTRUM_DATA_SOURCE_H
+#pragma once
 
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/SpectrumViewer/DataArray.h"
@@ -98,5 +97,3 @@ using SpectrumDataSource_const_sptr =
 
 } // namespace SpectrumView
 } // namespace MantidQt
-
-#endif // SPECTRUM_DATA_SOURCE_H

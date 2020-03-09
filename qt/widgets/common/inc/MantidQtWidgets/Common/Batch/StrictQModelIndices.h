@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_STRICTQMODELINDICES_H_
-#define MANTIDQTMANTIDWIDGETS_STRICTQMODELINDICES_H_
+#pragma once
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QModelIndex>
@@ -100,4 +99,3 @@ inline QModelIndexForMainModel fromMainModel(QModelIndex const &mainModelIndex,
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_STRICTQMODELINDICES_H_

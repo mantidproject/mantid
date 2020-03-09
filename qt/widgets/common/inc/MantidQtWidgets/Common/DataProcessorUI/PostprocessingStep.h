@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTWIDGETS_POSTPROCESSINGSTEP
-#define MANTIDQTWIDGETS_POSTPROCESSINGSTEP
+#pragma once
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingAlgorithm.h"
@@ -46,4 +45,3 @@ private:
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTWIDGETS_POSTPROCESSINGSTEP

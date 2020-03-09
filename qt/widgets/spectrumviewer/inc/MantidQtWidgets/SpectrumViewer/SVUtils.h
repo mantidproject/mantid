@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SV_UTILS_H
-#define SV_UTILS_H
+#pragma once
 
 #include <QVector>
 
@@ -66,5 +65,3 @@ public:
 
 } // namespace SpectrumView
 } // namespace MantidQt
-
-#endif // SV_UTILS_H

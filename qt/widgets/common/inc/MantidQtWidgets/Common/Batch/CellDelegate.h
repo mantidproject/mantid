@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_CELLDELEGATE_H_
-#define MANTIDQTMANTIDWIDGETS_CELLDELEGATE_H_
+#pragma once
 #include "MantidQtWidgets/Common/Batch/FilteredTreeModel.h"
 #include <QStandardItemModel>
 #include <QStyledItemDelegate>
@@ -34,4 +33,3 @@ private:
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_CELLDELEGATE_H_

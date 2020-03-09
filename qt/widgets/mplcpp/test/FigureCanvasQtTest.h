@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_FIGURECANVASQTTEST_H
-#define MPLCPP_FIGURECANVASQTTEST_H
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -62,5 +61,3 @@ public:
       TS_ASSERT_EQUALS(true, legend.pyobj().attr("get_draggable")());
   }
 };
-
-#endif // MPLCPP_FIGURECANVASQTTEST_H

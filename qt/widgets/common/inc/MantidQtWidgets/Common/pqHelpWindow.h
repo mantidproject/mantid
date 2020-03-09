@@ -29,8 +29,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ========================================================================*/
-#ifndef __pqHelpWindow_h
-#define __pqHelpWindow_h
+#pragma once
 
 #include "DllOption.h"
 #include <QMainWindow>
@@ -123,5 +122,3 @@ private:
   class pqNetworkAccessManager;
   friend class pqNetworkAccessManager;
 };
-
-#endif

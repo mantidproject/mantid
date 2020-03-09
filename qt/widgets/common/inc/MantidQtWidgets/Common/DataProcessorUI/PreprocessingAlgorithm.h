@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSINGALGORITHM_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSINGALGORITHM_H
+#pragma once
 
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h"
 #include "MantidQtWidgets/Common/DllOption.h"
@@ -61,4 +60,3 @@ private:
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORPREPROCESSINGALGORITHM_H*/

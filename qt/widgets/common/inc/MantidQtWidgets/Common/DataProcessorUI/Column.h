@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLUMN_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLUMN_H
+#pragma once
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QString>
 namespace MantidQt {
@@ -39,4 +38,3 @@ private:
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSORCOLUMN_H

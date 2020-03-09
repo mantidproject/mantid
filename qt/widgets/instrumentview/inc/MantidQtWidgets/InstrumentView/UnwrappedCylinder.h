@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef UNWRAPPEDCYLINDER_H
-#define UNWRAPPEDCYLINDER_H
+#pragma once
 
 #include "RotationSurface.h"
 
@@ -29,5 +28,3 @@ protected:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // UNWRAPPEDCYLINDER_H

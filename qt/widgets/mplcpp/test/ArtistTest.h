@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_ARTISTTEST_H
-#define MPLCPP_ARTISTTEST_H
+#pragma once
 
 #include "MantidQtWidgets/MplCpp/Artist.h"
 
@@ -51,5 +50,3 @@ public:
     TS_ASSERT_THROWS(Artist artist(none), const std::invalid_argument &);
   }
 };
-
-#endif // ARTISTTEST_H

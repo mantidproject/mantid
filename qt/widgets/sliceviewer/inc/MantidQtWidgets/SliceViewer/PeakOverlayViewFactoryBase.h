@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAKOVERLAYVIEWFACTORYBASE_H_
-#define MANTID_SLICEVIEWER_PEAKOVERLAYVIEWFACTORYBASE_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidQtWidgets/SliceViewer/PeakOverlayViewFactory.h"
@@ -41,5 +40,3 @@ public:
 };
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif /*MANTID_SLICEVIEWER_PEAKOVERLAYVIEWFACTORYBASE_H_*/

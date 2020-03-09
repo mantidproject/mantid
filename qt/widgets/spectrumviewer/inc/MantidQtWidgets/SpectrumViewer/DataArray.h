@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATA_ARRAY_H
-#define DATA_ARRAY_H
+#pragma once
 
 #include <cstddef>
 #include <vector>
@@ -115,5 +114,3 @@ using DataArray_const_sptr = boost::shared_ptr<const DataArray>;
 
 } // namespace SpectrumView
 } // namespace MantidQt
-
-#endif // DATA_ARRAY_H

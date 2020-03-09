@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_WIDGETS_INSTRUMENTVIEWTESTINITIALIZATION_H
-#define MANTIDQT_WIDGETS_INSTRUMENTVIEWTESTINITIALIZATION_H
+#pragma once
 
 #include "MantidPythonInterface/core/Testing/PythonInterpreterGlobalFixture.h"
 #include "MantidQtWidgets/Common/Testing/QApplicationGlobalFixture.h"
@@ -18,5 +17,3 @@
 //------------------------------------------------------------------------------
 static PythonInterpreterGlobalFixture PYTHON_INTERPRETER;
 static QApplicationGlobalFixture MAIN_QAPPLICATION;
-
-#endif // MANTIDQT_WIDGETS_INSTRUMENTVIEWTESTINITIALIZATION_H

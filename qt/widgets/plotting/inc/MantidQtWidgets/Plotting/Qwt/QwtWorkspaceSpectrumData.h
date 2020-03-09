@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
-#define MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/cow_ptr.h"
@@ -116,4 +115,3 @@ private:
   ///// y-axis offset for waterfall plots
   // double m_offsetY;
 };
-#endif

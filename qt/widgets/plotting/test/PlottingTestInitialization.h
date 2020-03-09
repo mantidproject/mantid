@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PLOTTINGTESTINITIALIZATION_H
-#define PLOTTINGTESTINITIALIZATION_H
+#pragma once
 #include "MantidQtWidgets/Common/Testing/QApplicationGlobalFixture.h"
 
 //------------------------------------------------------------------------------
@@ -15,5 +14,3 @@
 // statements do not cause multiple-definition errors.
 //------------------------------------------------------------------------------
 static QApplicationGlobalFixture MAIN_QAPPLICATION;
-
-#endif // PLOTTINGTESTINITIALIZATION_H

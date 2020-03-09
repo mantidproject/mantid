@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DISTRIBUTIONOPTIONS_H_
-#define DISTRIBUTIONOPTIONS_H_
+#pragma once
 
 /**
  * This file contains declarations of options which control
@@ -20,5 +19,3 @@ enum DistributionFlag {
   DistributionFalse        // Disable distribution plotting
 };
 } // namespace MantidQt
-
-#endif // DISTRIBUTIONOPTIONS_H_

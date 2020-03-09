@@ -11,8 +11,7 @@
  *      Author: spu92482
  */
 
-#ifndef INTERFACEMANAGERTEST_H_
-#define INTERFACEMANAGERTEST_H_
+#pragma once
 
 #include "MantidKernel/Exception.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
@@ -28,5 +27,3 @@ public:
     TS_ASSERT_DIFFERS(&objA, &objB);
   }
 };
-
-#endif /* INTERFACEMANAGERTEST_H_ */

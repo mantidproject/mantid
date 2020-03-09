@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_PLOTTING_MPL_SINGLESELECTOR_H_
-#define MANTIDQT_PLOTTING_MPL_SINGLESELECTOR_H_
+#pragma once
 
 #include "MantidQtWidgets/MplCpp/SingleMarker.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
@@ -73,5 +72,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDQT_PLOTTING_MPL_SINGLESELECTOR_H_

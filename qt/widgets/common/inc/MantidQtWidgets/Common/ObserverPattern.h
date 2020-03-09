@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_OBSERVERPATTERN_H_
-#define MANTIDQT_CUSTOMINTERFACES_OBSERVERPATTERN_H_
+#pragma once
 #include <functional>
 #include <set>
 #include <string>
@@ -72,5 +71,3 @@ public:
 private:
   std::function<void()> m_slot;
 };
-
-#endif /* MANTIDQT_CUSTOMINTERFACES_OBSERVERPATTERN_H_ */

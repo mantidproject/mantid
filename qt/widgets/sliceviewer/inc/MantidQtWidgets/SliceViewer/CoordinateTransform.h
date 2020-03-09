@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_SLICEVIEWER_COORDINATETRANSFORM_H
-#define MANTIDQT_SLICEVIEWER_COORDINATETRANSFORM_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -54,4 +53,3 @@ createCoordinateTransform(const Mantid::API::IMDWorkspace &ws, size_t dimX,
                           size_t dimY);
 } // namespace SliceViewer
 } // namespace MantidQt
-#endif

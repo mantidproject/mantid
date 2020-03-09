@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_CELL_H_
-#define MANTIDQTMANTIDWIDGETS_CELL_H_
+#pragma once
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <string>
 #include <vector>
@@ -86,4 +85,3 @@ paddedCellsToWidth(std::vector<Cell> const &cells, Cell const &paddingCell,
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_CELL_H_

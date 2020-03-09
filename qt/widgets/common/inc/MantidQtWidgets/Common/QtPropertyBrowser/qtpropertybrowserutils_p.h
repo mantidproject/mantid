@@ -96,8 +96,7 @@
 // We mean it.
 //
 
-#ifndef QTPROPERTYBROWSERUTILS_H
-#define QTPROPERTYBROWSERUTILS_H
+#pragma once
 
 #include <QIcon>
 #include <QMap>
@@ -203,6 +202,4 @@ private:
 
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif
-
 #endif

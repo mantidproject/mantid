@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_H_
-#define MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_H_
+#pragma once
 
 #include "MantidDataObjects/AffineMatrixParameter.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
@@ -86,5 +85,3 @@ using PeakOverlayView_const_sptr = boost::shared_ptr<const PeakOverlayView>;
 using PeakOverlayView_sptr = boost::shared_ptr<PeakOverlayView>;
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif /* MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_H_ */

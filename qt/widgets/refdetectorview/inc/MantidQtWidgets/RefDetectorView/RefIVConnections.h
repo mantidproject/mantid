@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REF_IV_CONNECTIONS_H
-#define REF_IV_CONNECTIONS_H
+#pragma once
 
 #include <QActionGroup>
 #include <QWidget>
@@ -101,5 +100,3 @@ private:
 
 } // namespace RefDetectorViewer
 } // namespace MantidQt
-
-#endif // REF_IV_CONNECTIONS_H

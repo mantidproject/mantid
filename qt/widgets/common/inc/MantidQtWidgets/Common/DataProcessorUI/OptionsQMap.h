@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSQMAP_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSQMAP_H
+#pragma once
 /** This file defines utilities for handling option maps used by the data
     processor widget. These are QVariantMap equivalents of the types in
     OptionsMap.h. The QVariantMap types are required in the sip conversions for
@@ -29,4 +28,3 @@ using ColumnOptionsQMap = QVariantMap;
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSOROPTIONSQMAP_H

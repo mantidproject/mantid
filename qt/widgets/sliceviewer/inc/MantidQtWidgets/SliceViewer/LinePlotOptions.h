@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LINEPLOTOPTIONS_H
-#define LINEPLOTOPTIONS_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -61,5 +60,3 @@ private:
   /// Chosen normalization method
   Mantid::API::MDNormalization m_normalize;
 };
-
-#endif // LINEPLOTOPTIONS_H

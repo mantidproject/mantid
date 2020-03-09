@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_WIDGETS_ALTERNATECSPYTHONLEXER_H
-#define MANTIDQT_WIDGETS_ALTERNATECSPYTHONLEXER_H
+#pragma once
 
 #include <Qsci/qscilexerpython.h>
 
@@ -23,5 +22,3 @@ public:
 private:
   QFont m_font;
 };
-
-#endif // MANTIDQT_WIDGETS_ALTERNATECSPYTHONLEXER_H

@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEPRESENTERTEST_H
-#define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEPRESENTERTEST_H
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -362,5 +361,3 @@ public:
     }
   }
 };
-
-#endif

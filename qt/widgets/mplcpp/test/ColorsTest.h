@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_COLORSTEST_H
-#define MPLCPP_COLORSTEST_H
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -80,5 +79,3 @@ private:
     TS_ASSERT_EQUALS(vmax, norm.pyobj().attr("vmax"));
   }
 };
-
-#endif // MPLCPP_COLORSTEST_H

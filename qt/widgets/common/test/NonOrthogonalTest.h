@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_NONORTHOGONALTEST_H_
-#define MANTIDQT_API_NONORTHOGONALTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -292,5 +291,3 @@ private:
 
   enum DimensionIndex { DimX = 0, DimY = 1, SliceDim = 2 };
 };
-
-#endif /* MANTIDQT_API_NONORTHOGONALTEST_H_ */

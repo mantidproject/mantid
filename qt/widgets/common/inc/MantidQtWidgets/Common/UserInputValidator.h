@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_
-#define MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataSelector.h"
@@ -157,5 +156,3 @@ UserInputValidator::getADSWorkspace(std::string const &workspaceName) {
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTID_CUSTOMINTERFACES_USERINPUTVALIDATOR_H_

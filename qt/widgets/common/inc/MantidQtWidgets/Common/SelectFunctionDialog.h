@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_
-#define MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_
+#pragma once
 
 //--------------------------------------------------
 // Includes
@@ -64,5 +63,3 @@ private slots:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_

@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_JOBTREEVIEWSIGNALADAPTER_H_
-#define MANTIDQTMANTIDWIDGETS_JOBTREEVIEWSIGNALADAPTER_H_
+#pragma once
 #include "MantidQtWidgets/Common/Batch/JobTreeView.h"
 #include "MantidQtWidgets/Common/DllOption.h"
 namespace MantidQt {
@@ -58,4 +57,3 @@ signals:
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_JOBTREEVIEWSIGNALADAPTER_H_

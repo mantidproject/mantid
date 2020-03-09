@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_ROW_H_
-#define MANTIDQTMANTIDWIDGETS_ROW_H_
+#pragma once
 #include "MantidQtWidgets/Common/Batch/Cell.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/DllOption.h"
@@ -47,4 +46,3 @@ EXPORT_OPT_MANTIDQT_COMMON bool operator>=(Row const &lhs, Row const &rhs);
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif

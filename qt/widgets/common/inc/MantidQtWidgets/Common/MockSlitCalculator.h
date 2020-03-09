@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_MOCKSLITCALCULATOR_H
-#define MANTID_MANTIDWIDGETS_MOCKSLITCALCULATOR_H
+#pragma once
 
 #include "ISlitCalculator.h"
 #include <gmock/gmock.h>
@@ -19,5 +18,3 @@ public:
   MOCK_METHOD0(show, void());
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
-
-#endif /* MANTID_MANTIDWIDGETS_MOCKSLITCALCULATOR_H */

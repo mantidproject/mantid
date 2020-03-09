@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MiniPlotQwt_H_
-#define MiniPlotQwt_H_
+#pragma once
 
 #include <QList>
 #include <QMap>
@@ -92,4 +91,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif /*MiniPlotQwt_H_*/

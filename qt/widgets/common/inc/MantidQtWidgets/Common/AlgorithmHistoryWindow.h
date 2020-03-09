@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALGORITHMHISTORYWINDOW_H
-#define ALGORITHMHISTORYWINDOW_H
+#pragma once
 
 #include "DllOption.h"
 
@@ -217,5 +216,3 @@ private:
 
   std::vector<Mantid::Kernel::PropertyHistory_sptr> m_Histprop;
 };
-
-#endif // ALGORITHMHISTORYWINDOW_H

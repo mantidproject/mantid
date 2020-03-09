@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_WIDGETS_INSTRUMENTWIDGETDECODERTEST_H_
-#define MANTIDQT_WIDGETS_INSTRUMENTWIDGETDECODERTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -76,5 +75,3 @@ private:
   InstrumentWidgetDecoder *m_decoder;
   QMap<QString, QVariant> m_infoMap;
 };
-
-#endif /* MANTIDQT_WIDGETS_INSTRUMENTWIDGETDECODERTEST_H_ */

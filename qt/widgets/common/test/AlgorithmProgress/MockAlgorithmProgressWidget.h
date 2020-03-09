@@ -1,5 +1,4 @@
-#ifndef MANTID_MANTIDWIDGETS_MOCKALGORITHMPROGRESSWIDGET_H
-#define MANTID_MANTIDWIDGETS_MOCKALGORITHMPROGRESSWIDGET_H
+#pragma once
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
@@ -31,4 +30,3 @@ public:
 
   std::shared_ptr<AlgorithmProgressPresenter> m_presenter;
 };
-#endif // MANTID_MANTIDWIDGETS_MOCKALGORITHMPROGRESSWIDGET_H

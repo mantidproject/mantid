@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MULTIFITSETUPTDIALOG_H
-#define MULTIFITSETUPTDIALOG_H
+#pragma once
 
 #include "ui_MultifitSetupDialog.h"
 #include <QDialog>
@@ -49,5 +48,3 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /* MULTIFITSETUPTDIALOG_H */

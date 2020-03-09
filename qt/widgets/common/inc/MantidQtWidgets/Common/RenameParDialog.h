@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_RENAMEPARDIALOG_H_
-#define MANTIDQTMANTIDWIDGETS_RENAMEPARDIALOG_H_
+#pragma once
 
 #include "DllOption.h"
 #include "ui_RenameParDialog.h"
@@ -42,5 +41,3 @@ protected:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDQTMANTIDWIDGETS_RENAMEPARDIALOG_H_

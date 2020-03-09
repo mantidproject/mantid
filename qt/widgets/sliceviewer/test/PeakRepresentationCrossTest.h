@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
-#define SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
+#pragma once
 
 #include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
 #include "MockObjects.h"
@@ -279,5 +278,3 @@ public:
     }
   }
 };
-
-#endif

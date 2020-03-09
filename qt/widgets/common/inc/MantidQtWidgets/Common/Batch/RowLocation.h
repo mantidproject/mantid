@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_ROWLOCATION_H_
-#define MANTIDQTMANTIDWIDGETS_ROWLOCATION_H_
+#pragma once
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <boost/optional.hpp>
 #include <ostream>
@@ -55,4 +54,3 @@ pathsSameUntilDepth(int depth, RowLocation const &locationA,
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif
