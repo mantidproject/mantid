@@ -7,7 +7,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # vim: encoding=utf-8
 
-from __future__ import print_function
 import shutil, os, sys
 from os.path import isdir, isfile, islink, join
 from optparse import OptionParser

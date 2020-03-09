@@ -7,8 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import absolute_import
-
 from collections import Counter, namedtuple
 import unittest
 

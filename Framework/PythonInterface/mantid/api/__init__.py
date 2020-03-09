@@ -11,8 +11,6 @@ api
 Defines Python objects that wrap the C++ API namespace.
 
 """
-from __future__ import absolute_import
-
 ###############################################################################
 # Load the C++ library
 ###############################################################################

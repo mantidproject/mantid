@@ -15,8 +15,6 @@
 #  because we do not consider the upper and lower position of the tubes around the
 # WISH instrument.
 #
-from __future__ import absolute_import, division, print_function
-
 import tube
 import mantid.simpleapi as mantid
 

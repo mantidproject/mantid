@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
-from __future__ import absolute_import
-
 try:
    from collections.abc import Iterable
 except ImportError:

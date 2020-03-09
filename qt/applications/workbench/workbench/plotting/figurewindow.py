@@ -8,8 +8,6 @@
 #
 #
 """Provides the QMainWindow subclass for a plotting window"""
-from __future__ import absolute_import
-
 # std imports
 import weakref
 

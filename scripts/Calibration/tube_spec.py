@@ -12,9 +12,6 @@
 
 # Author: Karl Palmen ISIS
 
-from __future__ import absolute_import, division, print_function
-
-
 class TubeSpec:
     """
     The python class :class:`~tube_spec.TubeSpec` provides a way of specifying a set of tubes for

@@ -7,8 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import absolute_import, print_function
-
 import re
 from qtpy.QtCore import Qt, Signal, QMutex, QMutexLocker
 from qtpy.QtWidgets import (QAbstractItemView, QAction, QActionGroup, QFileDialog, QHBoxLayout, QHeaderView, QLineEdit,

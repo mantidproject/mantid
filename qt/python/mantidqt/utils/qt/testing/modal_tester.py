@@ -25,8 +25,6 @@ class TestModalDialog(unittest.TestCase):
         tester.start()
         self.assertTrue(tester.passed)
 """
-from __future__ import absolute_import
-
 import traceback
 
 from qtpy.QtCore import QTimer

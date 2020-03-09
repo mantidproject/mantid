@@ -7,8 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import absolute_import
-
 # std imports
 from unittest import TestCase, main
 
