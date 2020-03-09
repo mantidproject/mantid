@@ -114,18 +114,18 @@ class PythonCodeExecution(QObject):
         # Stack is chopped on error to avoid the  AsyncTask.run->self.execute calls appearing
         # as these are not useful for the user in this context
         if not blocking:
-            task = AsyncTask(self.execute, args=(code_str, line_offset, filename),
+            task = AsyncTask(self.execute, args=(code_str, filename, line_offset),
                              success_cb=self._on_success, error_cb=self._on_error)
             task.start()
             self._task = task
             return task
         else:
-            self._task = BlockingAsyncTaskWithCallback(self.execute, args=(code_str, line_offset, filename),
+            self._task = BlockingAsyncTaskWithCallback(self.execute, args=(code_str, filename, line_offset),
                                                        success_cb=self._on_success, error_cb=self._on_error,
                                                        blocking_cb=QApplication.processEvents)
             return self._task.start()
 
-    def execute(self, code_str,  line_offset, filename=None):
+    def execute(self, code_str, filename=None, line_offset=0):
         """Execute the given code on the calling thread
         within the provided context.
 
