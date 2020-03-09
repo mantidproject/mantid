@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGERTEST_H_
-#define MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -488,5 +487,3 @@ private:
 const std::string MantidWebServiceAPIJobManagerTest::SNSFac = "SNS";
 const std::string MantidWebServiceAPIJobManagerTest::ISISFac = "ISIS";
 const std::string MantidWebServiceAPIJobManagerTest::FermiName = "Fermi";
-
-#endif // MANTID_REMOTEJOGMANAGERS_MANTIDWEBSERVICEJOBMANAGERTEST_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_REMOTEALGORITHMS_AUTHENTICATE2TEST_H_
-#define MANTID_REMOTEALGORITHMS_AUTHENTICATE2TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -132,5 +131,3 @@ private:
   Mantid::API::IAlgorithm_sptr testAlg;
   std::vector<std::pair<std::string, std::string>> testFacilities;
 };
-
-#endif // MANTID_REMOTEALGORITHMS_AUTHENTICATE2TEST_H_
