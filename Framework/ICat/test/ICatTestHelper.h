@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ICATTESTHELPER_H_
-#define ICATTESTHELPER_H_
+#pragma once
 
 #include "MantidICat/CatalogLogin.h"
 #include "MantidICat/CatalogLogout.h"
@@ -21,5 +20,3 @@ bool login();
 /// Helper to logout of ICat
 void logout();
 } // namespace ICatTestHelper
-
-#endif

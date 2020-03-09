@@ -14,8 +14,7 @@ This program is released under the GPL with the additional exemption that
 compiling, linking, and/or using OpenSSL is allowed.
 */
 
-#ifndef soapserializersH_H
-#define soapserializersH_H
+#pragma once
 #include "soapserializersStub.h"
 #ifndef WITH_NOIDREF
 
@@ -704,7 +703,3 @@ SOAP_FMAC3 char **SOAP_FMAC4 soap_get_string(struct soap *, char **,
        soap_end_recv(soap),                                                    \
    soap->error)
 #endif
-
-#endif
-
-/* End of soapserializersH.h */
