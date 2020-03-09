@@ -1,7 +1,7 @@
 .. _Elwin-iqt-ref:
 
-Elwin and IQt
-=============
+Elwin and I(Q, t)
+=================
 
 .. contents:: Table of Contents
   :local:
@@ -229,5 +229,7 @@ SampleBins
 ResolutionBins
   The number of bins in the resolution after rebinning. Typically this should be at
   least 5 and a warning will be shown if it is less.
+
+:ref:`Indirect Data Analysis <interface-indirect-data-analysis>`
 
 .. categories:: Interfaces Indirect
