@@ -114,5 +114,6 @@ Bugfixes
 - Fixed bug that caused an error if a MDHistoWorkspace was plotted and a user attempted to open a context menu.
 - Fixed a bug which caused graphic scaling issues when the double-click menu was used to set an axis as log-scaled.
 - Fixed a bug where the colorbar in the instrument view would sometimes have no markers if the scale was set to SymmetricLog10.
+- Fixed an unhandled exception when you set the min or max value of the colorbar scale in a colorfill plot to negative when the scale is set to logarithmic.
 
 :ref:`Release 5.0.0 <v5.0.0>`
