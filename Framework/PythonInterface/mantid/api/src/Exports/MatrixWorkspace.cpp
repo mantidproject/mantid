@@ -71,32 +71,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_YUnitLabelOverloads,
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
-// Converts a std::pair instance to a Python tuple.
-template <typename T1, typename T2>
-struct std_pair_to_tuple
-{
-  static PyObject* convert(std::pair<T1, T2> const& p)
-  {
-    return boost::python::incref(
-      boost::python::make_tuple(p.first, p.second).ptr());
-  }
-  static PyTypeObject const *get_pytype () {return &PyTuple_Type; }
-};
-
-// Helper for convenience.
-template <typename T1, typename T2>
-struct std_pair_to_python_converter
-{
-  std_pair_to_python_converter()
-  {
-    boost::python::to_python_converter<
-      std::pair<T1, T2>,
-      std_pair_to_tuple<T1, T2>,
-      true //std_pair_to_tuple has get_pytype
-      >();
-  }
-};
-
 /**
  * Set the values from an python array-style object into the given spectrum in
  * the workspace
@@ -391,7 +365,7 @@ void export_MatrixWorkspace() {
            ":class:`~mantid.api.MatrixWorkspace.hasMaskedBins` MUST be called "
            "first to check if any bins are "
            "masked, otherwise an exception will be thrown")
-      .def("find", &MatrixWorkspace::find, (arg("self"), arg("value")), "find index of Y value")
+
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
            "Returns size of the Y data array (deprecated, use "
