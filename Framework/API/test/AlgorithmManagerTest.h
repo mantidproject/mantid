@@ -84,14 +84,13 @@ public:
   const std::string summary() const override { return "Test summary"; }
   // Override methods so we can manipulate whether it appears to be running
   ExecutionState executionState() const override {
-    return isRunningFlag?ExecutionState::Running:ExecutionState::Finished;
+    return isRunningFlag ? ExecutionState::Running : ExecutionState::Finished;
   }
   ResultState resultState() const override {
-    return isRunningFlag?ResultState::NotFinished:ResultState::Failed;
+    return isRunningFlag ? ResultState::NotFinished : ResultState::Failed;
   }
   void setIsRunningTo(bool runningFlag) { isRunningFlag = runningFlag; }
   void cancel() override { isRunningFlag = false; }
-
 };
 
 DECLARE_ALGORITHM(AlgTest)
