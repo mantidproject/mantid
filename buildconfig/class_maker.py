@@ -59,8 +59,7 @@ private:
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef {guard}
-#define {guard}
+#pragma once
 
 #include "Mantid{subproject}/DllConfig.h"
 {alg_include}
@@ -75,11 +74,8 @@ public:{algorithm_header}}};
 
 }} // namespace {subproject}
 }} // namespace Mantid
-
-#endif /* {guard} */""".format(guard=guard, subproject=subproject,
-       alg_include=alg_include, classname=classname,
-       year=get_year(), subproject_upper=subproject_upper,
-       alg_class_declare=alg_class_declare, algorithm_header=algorithm_header)
+""".format(guard=guard, subproject=subproject, alg_include=alg_include, classname=classname, year=get_year(),
+           subproject_upper=subproject_upper, alg_class_declare=alg_class_declare, algorithm_header=algorithm_header)
 
     f.write(s)
     f.close()
@@ -158,8 +154,8 @@ namespace {subproject} {{
 }} // namespace {subproject}
 }} // namespace Mantid
 """.format(
-        year=get_year(), subproject=subproject, subfolder=args.subfolder, classname=classname, algorithm_top=algorithm_top,
-        algorithm_source=algorithm_source)
+        year=get_year(), subproject=subproject, subfolder=args.subfolder, classname=classname,
+        algorithm_top=algorithm_top, algorithm_source=algorithm_source)
     f.write(s)
     f.close()
 
@@ -213,8 +209,7 @@ def write_test(subproject, classname, filename, args):
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef {guard}
-#define {guard}
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -237,11 +232,8 @@ public:
 
 
 }};
-
-
-#endif /* {guard} */""".format(year=get_year(),
-          guard=guard, subproject=subproject, subfolder=args.subfolder, classname=classname,
-          algorithm_test=algorithm_test)
+""".format(year=get_year(), guard=guard, subproject=subproject, subfolder=args.subfolder, classname=classname,
+           algorithm_test=algorithm_test)
     f.write(s)
     f.close()
 
