@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_EVENTLOADERHELPERS_H_
-#define MANTID_PARALLEL_EVENTLOADERHELPERS_H_
+#pragma once
 
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/DllConfig.h"
@@ -119,5 +118,3 @@ template <class... T> void load(const H5::DataType &type, T &&... args) {
 } // namespace IO
 } // namespace Parallel
 } // namespace Mantid
-
-#endif /* MANTID_PARALLEL_EVENTLOADERHELPERS_H_ */

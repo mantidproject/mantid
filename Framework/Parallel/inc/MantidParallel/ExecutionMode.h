@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_EXECUTIONMODE_H_
-#define MANTID_PARALLEL_EXECUTIONMODE_H_
+#pragma once
 
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/StorageMode.h"
@@ -41,5 +40,3 @@ MANTID_PARALLEL_DLL std::string toString(ExecutionMode mode);
 
 } // namespace Parallel
 } // namespace Mantid
-
-#endif /* MANTID_PARALLEL_EXECUTIONMODE_H_ */

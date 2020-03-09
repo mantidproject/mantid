@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_COMMUNICATORTEST_H_
-#define MANTID_PARALLEL_COMMUNICATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -125,5 +124,3 @@ public:
 
   void test_isend_irecv() { runParallel(isend_irecv); }
 };
-
-#endif /* MANTID_PARALLEL_COMMUNICATORTEST_H_ */

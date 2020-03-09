@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_DLLCONFIG_H_
-#define MANTID_PARALLEL_DLLCONFIG_H_
+#pragma once
 
 /*
   This file contains the DLLExport/DLLImport linkage configuration for the
@@ -18,5 +17,3 @@
 #else
 #define MANTID_PARALLEL_DLL DLLImport
 #endif // IN_MANTID_PARALLEL
-
-#endif // MANTID_PARALLEL_DLLCONFIG_H_
