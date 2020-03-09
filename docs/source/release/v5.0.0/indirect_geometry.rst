@@ -5,18 +5,20 @@ Indirect Geometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
+.. figure::  ../../images/ConvFitFull.png
+   :height: 400px
+   :align: center
 
 New
 ###
 
-  - Simultaneous fitting has been added as an option on the convolutional fitting tab of data analysis.
-  - Simultaneous fitting has been added as an option on the FQ fitting tab of data analysis.
+- Simultaneous fitting has been added as an option on the convolutional, F(Q) and Msd fitting tabs in QENS Data Analysis. This allows multiple spectra from one or more reductions
+  to be fitted with parameters tied together. For more infomation on these changes see the updated documentation :ref:`Indirect Data Analysis <interface-indirect-data-analysis>`.
 
 Improvements
 ############
+
+- On workbench an issue with plotting was slowing down mantid when some of the interfaces were open. This has been resolved speeding up many of the indirect workflows.
 
 - In Abins the instrumental broadening implementation has been overhauled.
 
@@ -53,5 +55,6 @@ BugFixes
 - Indirect ILL reductions for BATS and Doppler QENS modes will now flag the outputs as distributions if the data is normalised by the monitor.
 - :ref:`IndirectILLReductionFWS <algm-IndirectILLReductionFWS>` will now allow for manual setting of the inelastic peak channels.
 - The context menu on the fitting preview plots for Data Analysis has been temporarily disabled due to lack of communication between it and the interface causing bugs.
+- Fixed an issue which caused the Indirect Data Analysis Gui to crash when a function was changed in the I(Q, t) Fit tab.
 
 :ref:`Release 5.0.0 <v5.0.0>`
