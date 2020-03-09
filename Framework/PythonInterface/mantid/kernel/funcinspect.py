@@ -17,8 +17,6 @@ import opcode
 import inspect
 import sys
 import dis
-from six import PY3
-
 
 def replace_signature(func, signature):
     """
@@ -107,45 +105,8 @@ def decompile(code_object):
     ins = decompile(f.f_code)
     """
     instructions = []
-
-    if PY3:
-        for ins in dis.get_instructions(code_object):
-            instructions.append( (ins.offset, ins.opcode, ins.opname, ins.arg, ins.argval) )
-    else:
-        code = code_object.co_code
-        variables = code_object.co_cellvars + code_object.co_freevars
-        n = len(code)
-        i = 0
-        e = 0
-        while i < n:
-            i_offset = i
-            i_opcode = ord(code[i])
-            i = i + 1
-            if i_opcode >= opcode.HAVE_ARGUMENT:
-                i_argument = ord(code[i]) + (ord(code[i+1]) << (4*2)) + e
-                i = i + 2
-                if i_opcode == opcode.EXTENDED_ARG:
-                    e = i_argument << 16
-                else:
-                    e = 0
-                if i_opcode in opcode.hasconst:
-                    i_arg_value = repr(code_object.co_consts[i_argument])
-                elif i_opcode in opcode.hasname:
-                    i_arg_value = code_object.co_names[i_argument]
-                elif i_opcode in opcode.hasjrel:
-                    i_arg_value = repr(i + i_argument)
-                elif i_opcode in opcode.haslocal:
-                    i_arg_value = code_object.co_varnames[i_argument]
-                elif i_opcode in opcode.hascompare:
-                    i_arg_value = opcode.cmp_op[i_argument]
-                elif i_opcode in opcode.hasfree:
-                    i_arg_value = variables[i_argument]
-                else:
-                    i_arg_value = i_argument
-            else:
-                i_argument = None
-                i_arg_value = None
-            instructions.append( (i_offset, i_opcode, opcode.opname[i_opcode], i_argument, i_arg_value) )
+    for ins in dis.get_instructions(code_object):
+        instructions.append( (ins.offset, ins.opcode, ins.opname, ins.arg, ins.argval) )
     return instructions
 
 #-------------------------------------------------------------------------------

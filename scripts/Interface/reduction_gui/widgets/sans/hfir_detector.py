@@ -21,8 +21,7 @@ except ImportError:
 from mantid.api import AnalysisDataService
 from reduction_gui.reduction.scripter import execute_script
 
-if six.PY3:
-    unicode = str
+unicode = str
 
 
 class DetectorWidget(BaseWidget):

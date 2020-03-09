@@ -21,8 +21,7 @@ except ImportError:
     from mantidplot import load_ui
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import ExtractMask
-if six.PY3:
-    unicode = str
+unicode = str
 
 
 class SANSInstrumentWidget(BaseWidget):

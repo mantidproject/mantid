@@ -112,7 +112,6 @@ class BatchProcessRunner(QObject):
 
     def _handle_err(self, index, e):
         # We manually have to extract out the traceback, since going to a str for Qt signals will strip this
-        if six.PY3:
-            self._logger.error(''.join(traceback.format_tb(e.__traceback__)))
+        self._logger.error(''.join(traceback.format_tb(e.__traceback__)))
         self._logger.error(str(e))
         self.row_failed_signal.emit(index, str(e))

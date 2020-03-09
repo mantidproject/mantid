@@ -19,7 +19,6 @@ if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
     import matplotlib
 
 # =========================================================
-from six import PY3
 import datetime
 import difflib
 import imp
@@ -762,9 +761,8 @@ class TestSuite(object):
         self._result.status = status
         self._result.addItem(['status', status])
         # Dump std out so we know what happened
-        if PY3:
-            if isinstance(output, bytes):
-                output = output.decode()
+        if isinstance(output, bytes):
+            output = output.decode()
         self._result.output = '\n' + output
         all_lines = output.split('\n')
         # Find the test results

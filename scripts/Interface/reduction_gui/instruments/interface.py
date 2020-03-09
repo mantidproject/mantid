@@ -15,8 +15,7 @@ import os
 import traceback
 from reduction_gui.reduction.scripter import BaseReductionScripter
 
-if six.PY3:
-    unicode = str
+unicode = str
 
 
 class InstrumentInterface(object):

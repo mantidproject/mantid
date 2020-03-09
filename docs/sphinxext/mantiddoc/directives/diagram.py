@@ -9,7 +9,6 @@ from sphinx.locale import _ #pylint: disable=unused-import
 import os
 from string import Template
 import subprocess
-from six import PY3
 
 ######################
 #CONFIGURABLE OPTIONS#
@@ -93,8 +92,7 @@ class DiagramDirective(BaseDirective):
             raise RuntimeError("Cannot find dot-file: '" + diagram_name + "' in '" + os.path.join(env.srcdir,"diagrams"))
 
         out_src = Template(in_src).substitute(STYLE)
-        if PY3:
-            out_src = out_src.encode()
+        out_src = out_src.encode()
         gviz = subprocess.Popen([dot_executable,"-Tpng","-o",out_path], stdin=subprocess.PIPE)
         gviz.communicate(input=out_src)
         gviz.wait()

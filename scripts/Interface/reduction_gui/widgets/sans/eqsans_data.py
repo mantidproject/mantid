@@ -20,8 +20,7 @@ except ImportError:
     Logger("DataSetsWidget").information('Using legacy ui importer')
     from mantidplot import load_ui
 
-if six.PY3:
-    unicode = str
+unicode = str
 
 
 class DataSetsWidget(BaseWidget):

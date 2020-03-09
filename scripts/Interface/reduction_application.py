@@ -30,8 +30,7 @@ except ImportError:
     Logger("ReductionGUI").information('Using legacy ui importer')
     from mantidplot import load_ui  # noqa
 
-if six.PY3:
-    unicode = str
+unicode = str
 
 STARTUP_WARNING = ""
 

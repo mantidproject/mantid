@@ -79,7 +79,7 @@ if not hasattr(six, "ensure_str"):
             raise TypeError("not expecting type '%s'" % type(s))
         if isinstance(s, text_type):
             s = s.encode(encoding, errors)
-        elif PY3 and isinstance(s, binary_type):
+        elif isinstance(s, binary_type):
             s = s.decode(encoding, errors)
         return s
 

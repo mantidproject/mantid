@@ -17,7 +17,7 @@ import inspect
 import math
 import os
 import re
-from six import types, PY3
+from six import types
 import numpy as np
 import h5py as h5
 
@@ -735,14 +735,9 @@ def check_if_is_event_data(file_name):
         is_event_mode = False
         for value in list(first_entry.values()):
             if "NX_class" in value.attrs:
-                if PY3:
-                    if "NXevent_data" == value.attrs["NX_class"].decode() :
-                        is_event_mode = True
-                        break
-                else:
-                    if "NXevent_data" == value.attrs["NX_class"]:
-                        is_event_mode = True
-                        break
+                if "NXevent_data" == value.attrs["NX_class"].decode() :
+                    is_event_mode = True
+                    break
 
     return is_event_mode
 

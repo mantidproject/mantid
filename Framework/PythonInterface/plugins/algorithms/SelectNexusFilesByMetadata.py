@@ -8,8 +8,6 @@
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
-from six import PY3
-
 
 class SelectNexusFilesByMetadata(PythonAlgorithm):
 
@@ -106,8 +104,7 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
 
                     if str(value.dtype).startswith('|S'):
                         # string value, need to quote for eval
-                        if PY3:
-                            value = value.decode()
+                        value = value.decode()
                         toeval += '\"' + value + '\"'
                     else:
                         toeval += str(value)

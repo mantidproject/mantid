@@ -14,7 +14,6 @@ and helps the developer to identify issues.
 from abc import ABCMeta, abstractmethod
 import os
 from qtpy import QtWidgets
-from six import PY3
 
 from mantidqt.utils.qt import load_ui
 
@@ -22,8 +21,7 @@ from mantid import UsageService
 from mantid.kernel import FeatureType
 from sans.gui_logic.gui_common import (GENERIC_SETTINGS, JSON_SUFFIX, load_file)
 
-if PY3:
-    unicode = str
+unicode = str
 
 Ui_SettingsDiagnosticTab, _ = load_ui(__file__, "settings_diagnostic_tab.ui")
 

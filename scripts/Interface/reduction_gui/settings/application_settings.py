@@ -19,8 +19,7 @@ From mantidplot:
 
 from qtpy.QtCore import (QObject, QSettings, Signal)  # noqa
 
-if six.PY3:
-    unicode = str
+unicode = str
 
 
 class GeneralSettings(QObject):
