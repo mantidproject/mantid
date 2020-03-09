@@ -7,7 +7,7 @@ Exercises
 Exercise 1
 ==========
 
--  **Load** *SXD23767.raw* into MantidPlot
+-  **Load** *SXD23767.raw* into Mantid
 -  Open the Instrument View
 -  Make sure the colour map is set to "jet" and the display type to "Spherical Z".
 -  Change the colour scale to *SymmetricLog10* set the scale range to be between

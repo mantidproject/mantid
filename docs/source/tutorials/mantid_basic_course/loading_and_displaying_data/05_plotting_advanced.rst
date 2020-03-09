@@ -1,8 +1,8 @@
-.. _05_plotting_multiple_workspaces:
+.. _05_plotting_advanced:
 
-============================
-Plotting Multiple Workspaces 
-============================
+=================
+Advanced Plotting  
+=================
 
 .. This should be updated as Mantid Workbench gains more Plot Advanced features.
 

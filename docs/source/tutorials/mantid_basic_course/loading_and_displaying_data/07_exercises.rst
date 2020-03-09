@@ -38,11 +38,11 @@ Part 3
 ======
 
 Using the workspaces MAR11015 and MAR11060 try to reproduce the plot
-below. Note it contains sepctra 2 and 3 of both Workspaces
+below. Note it contains spectra 2 and 3 of both Workspaces
 
 -  You must either Plot and then Overplot, or Group the Workspaces before plotting: try both!
 -  Then adjust the axes to use log(x), linear(y) scaling
-- I have also Applied to All curves a size 4 point Marker and Errorbars with Capsize 2, which can be done in Figure Options.
+- I have also Applied to All curves a size 4 point Marker and Error bars with Capsize 2, which can be done in Figure Options.
 
 .. figure:: /images/MultiLayerGraph.png
    :alt: center
