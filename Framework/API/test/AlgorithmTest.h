@@ -294,7 +294,7 @@ public:
     TS_ASSERT_EQUALS(ExecutionState::Uninitialized, myAlg.executionState());
     TS_ASSERT_THROWS(myAlg.execute(), const std::runtime_error &);
     TS_ASSERT(!myAlg.isExecuted());
-    TS_ASSERT_EQUALS( ExecutionState::Uninitialized, myAlg.executionState());
+    TS_ASSERT_EQUALS(ExecutionState::Uninitialized, myAlg.executionState());
     TS_ASSERT_THROWS_NOTHING(myAlg.initialize());
     TS_ASSERT_EQUALS(ExecutionState::Initialized, myAlg.executionState());
     TS_ASSERT_THROWS_NOTHING(myAlg.execute());
