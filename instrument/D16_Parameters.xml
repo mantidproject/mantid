@@ -13,6 +13,13 @@
       <parameter name="y-pixel-size" type="number">
         <value val="1"/>
       </parameter>
+      <!-- The size of the detector (in mm or pixel) -->
+      <parameter name="detector-width" type="number">
+        <value val="320"/>
+      </parameter>
+      <parameter name="detector-height" type="number">
+        <value val="320"/>
+      </parameter>
     </component-link>
 
 </parameter-file>

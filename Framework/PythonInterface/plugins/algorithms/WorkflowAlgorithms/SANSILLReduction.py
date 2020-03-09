@@ -510,6 +510,9 @@ class SANSILLReduction(PythonAlgorithm):
         if process != 'Transmission':
             if self._instrument == 'D33':
                 CalculateDynamicRange(Workspace=ws, ComponentNames=['back_detector', 'front_detector'])
+            elif self._instrument == 'D16' and len(mtd[ws].getAxis(0)) > 1:
+                # D16 omega scan case : we have an histogram indexed by omega, not wavelength
+                pass
             else:
                 CalculateDynamicRange(Workspace=ws)
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
@@ -535,7 +538,9 @@ class SANSILLReduction(PythonAlgorithm):
         ws = '__' + self.getPropertyValue('OutputWorkspace')
         # we do not want the summing done by LoadAndMerge since it will be pair-wise and slow
         # instead we load and list, and merge once with merge runs
-        LoadAndMerge(Filename=self.getPropertyValue('Run').replace('+',','), LoaderName='LoadILLSANS', OutputWorkspace=ws)
+        if not mtd.doesExist(ws):
+            LoadAndMerge(Filename=self.getPropertyValue('Run').replace('+', ','), LoaderName='LoadILLSANS', OutputWorkspace=ws)
+
         if isinstance(mtd[ws], WorkspaceGroup):
             tmp = '__tmp'+ws
             MergeRuns(InputWorkspaces=ws, OutputWorkspace=tmp)
@@ -603,6 +608,7 @@ class SANSILLReduction(PythonAlgorithm):
                         self._process_sample(ws)
                         progress.report()
         self._finalize(ws, process)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSILLReduction)
