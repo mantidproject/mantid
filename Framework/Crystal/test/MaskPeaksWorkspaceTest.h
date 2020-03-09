@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_MaskPeaksWorkspaceTEST_H_
-#define MANTID_DATAHANDLING_MaskPeaksWorkspaceTEST_H_
+#pragma once
 
 #include "MantidCrystal/MaskPeaksWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -176,4 +175,3 @@ private:
   MaskPeaksWorkspace mpwAlg;
   std::string inputWSName = "inputWS";
 };
-#endif /* MANTID_DATAHANDLING_MaskPeaksWorkspaceTEST_H_ */

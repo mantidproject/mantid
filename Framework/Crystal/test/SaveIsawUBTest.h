@@ -10,8 +10,7 @@
  *      Author: ruth
  */
 
-#ifndef MANTID_CRYSTAL_SAVEISAWUBTEST_H_
-#define MANTID_CRYSTAL_SAVEISAWUBTEST_H_
+#pragma once
 
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/SaveIsawUB.h"
@@ -154,5 +153,3 @@ public:
     remove(File2.c_str());
   }
 };
-
-#endif /* SAVEISAWUBTEST_H_ */

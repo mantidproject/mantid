@@ -11,8 +11,7 @@
  *      Author: Brendan Sullivan
  */
 
-#ifndef SETCRYSTALLOCATION_H_
-#define SETCRYSTALLOCATION_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
@@ -53,5 +52,3 @@ private:
 };
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* SETCRYSTALLOCATION_H_ */

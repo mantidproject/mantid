@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_MaskPeaksWorkspace_H_
-#define MANTID_DATAHANDLING_MaskPeaksWorkspace_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -66,5 +65,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_MaskPeaksWorkspace_H_*/

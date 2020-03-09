@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_PREDICTFRACTIONALPEAKS_H_
-#define MANTID_CRYSTAL_PREDICTFRACTIONALPEAKS_H_
+#pragma once
 #include "MantidAPI/Algorithm.h"
 #include "MantidCrystal/PeakAlgorithmHelpers.h"
 #include <tuple>
@@ -42,5 +41,3 @@ private:
 };
 
 } // namespace Mantid::Crystal
-
-#endif /* MANTID_CRYSTAL_PREDICTFRACTIONALPEAKS */

@@ -19,8 +19,7 @@ offset and run number and detector number
 @author Ruth Mikkelson, SNS, ORNL
 @date 05/13/2013
 */
-#ifndef SHOWPEAKHKLOFFSETS_H_
-#define SHOWPEAKHKLOFFSETS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
@@ -51,5 +50,3 @@ private:
 };
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* ShowPeakHKLOffsets_H_ */

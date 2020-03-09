@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_LOADISAWUBTEST_H_
-#define MANTID_CRYSTAL_LOADISAWUBTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
@@ -122,5 +121,3 @@ MaskPeaksWorkspace("TOPAZ_3007", "peaks")
     TS_ASSERT_EQUALS(pw->getNumberPeaks(), 220);
   }
 };
-
-#endif /* MANTID_CRYSTAL_LOADISAWUBTEST_H_ */

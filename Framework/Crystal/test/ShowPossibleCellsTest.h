@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SHOW_POSSIBLE_CELLS_TEST_H_
-#define MANTID_CRYSTAL_SHOW_POSSIBLE_CELLS_TEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -107,5 +106,3 @@ public:
     AnalysisDataService::Instance().remove(WSName);
   }
 };
-
-#endif /* MANTID_CRYSTAL_SHOW_POSSIBLE_CELLS_TEST_H_ */

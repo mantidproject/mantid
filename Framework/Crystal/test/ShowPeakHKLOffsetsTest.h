@@ -11,8 +11,7 @@
  *      Author: ruth
  */
 
-#ifndef SHOWPEAKHKLOFFSETSTEST_H_
-#define SHOWPEAKHKLOFFSETSTEST_H_
+#pragma once
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/ShowPeakHKLOffsets.h"
@@ -65,5 +64,3 @@ public:
     TS_ASSERT_DELTA(Offsets->Double(23, 0), -0.00976605, .1)
   }
 };
-
-#endif /* SHOWPEAKHKLOFFSETSTEST_H_ */

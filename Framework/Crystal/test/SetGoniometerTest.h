@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SETGONIOMETERTEST_H_
-#define MANTID_CRYSTAL_SETGONIOMETERTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/SetGoniometer.h"
@@ -235,5 +234,3 @@ public:
 
   void test_ok() { do_test_param("name, 1.0, 2.0, 3.0, 1", 1); }
 };
-
-#endif /* MANTID_CRYSTAL_SETGONIOMETERTEST_H_ */

@@ -11,8 +11,7 @@
  *      Author: ruth
  */
 
-#ifndef INTEGRATEPEAKTIMESLICESTEST_H_
-#define INTEGRATEPEAKTIMESLICESTEST_H_
+#pragma once
 
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -287,4 +286,3 @@ private:
     return wsPtr;
   }
 };
-#endif /* INTEGRATEPEAKTIMESLICESTEST_H_ */

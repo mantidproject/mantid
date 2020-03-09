@@ -11,8 +11,7 @@
  *      Author: spu92482
  */
 
-#ifndef CRYSTALTEST_CLUSTERINTEGRATIONBASETEST_H_
-#define CRYSTALTEST_CLUSTERINTEGRATIONBASETEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
@@ -195,5 +194,3 @@ protected:
 public:
   virtual ~ClusterIntegrationBaseTest() {}
 };
-
-#endif /* CRYSTALTEST_CLUSTERINTEGRATIONBASETEST_H_ */

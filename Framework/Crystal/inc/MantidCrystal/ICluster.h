@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_ICLUSTER_H_
-#define MANTID_CRYSTAL_ICLUSTER_H_
+#pragma once
 
 #include "MantidCrystal/DisjointElement.h"
 #include "MantidKernel/System.h"
@@ -64,5 +63,3 @@ public:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_ICLUSTER_H_ */

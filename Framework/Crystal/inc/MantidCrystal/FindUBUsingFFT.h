@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_FIND_UB_USING_FFT_H_
-#define MANTID_CRYSTAL_FIND_UB_USING_FFT_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 
@@ -48,5 +47,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_FIND_UB_USING_FFT_H_ */

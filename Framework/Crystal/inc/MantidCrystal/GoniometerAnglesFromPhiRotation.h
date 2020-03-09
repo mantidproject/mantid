@@ -17,8 +17,7 @@
  @author Ruth Mikkelson, SNS, ORNL
  @date 04/15/2013
  */
-#ifndef GoniometerAnglesFromPhiRotation_H_
-#define GoniometerAnglesFromPhiRotation_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -69,5 +68,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* GoniometerAnglesFromPhiRotation_H_ */
