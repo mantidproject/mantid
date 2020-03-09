@@ -5,19 +5,18 @@ Reflectometry Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
 ISIS Reflectometry Interface
 ############################
 
-**The old ISIS Reflectometry Interface has been removed. If required then please use the previous release, version 4.2.0**
+Removed
+-------
+
+Please note that the old ISIS Reflectometry Interface has been removed from MantidPlot. We highly recommend that you use the new interface, which is available in both MantidWorkbench and MantidPlot. However, if the old interface is required in the short term, you can still use it in the previous release, version 4.2.0.
 
 Improved
 --------
 
-- The per-angle defaults table on the Experiment now has column-specific tooltips on the table cells which correspond to the [ReflectometryISISLoadAndProcess](https://docs.mantidproject.org/nightly/algorithms/ReflectometryISISLoadAndProcess-v1.html?highlight=reflectometryisisloadandprocess) documentation
+- The per-angle defaults table on the Experiment now has column-specific tooltips. These correspond to the documentation for the relevant properties in the underlying workflow algorithm, :ref:`algm-ReflectometryISISLoadAndProcess`.
 
 Algorithms
 ##########
@@ -31,19 +30,19 @@ New
 
   - The affected algorithms are: :ref:`algm-CreateTransmissionWorkspace`, :ref:`algm-ReflectometryReductionOne`, :ref:`algm-ReflectometryReductionOneAuto`, :ref:`algm-ReflectometryISISLoadAndProcess`.
 
-  - **Note that this may break existing scripts if you assign outputs directly to a python list**
+  - **Note that this may break existing scripts if you assign outputs directly to a python list:**
 
     e.g. if previously you called an algorithm as:
     
-    ``IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)``
+    ``qbin, q = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)``
     
     then this will now need to be as follows (note that the optional ``IvsLam`` also needs to be added here because it is declared before the transmission output and the list must always be in the same order):
     
-    ``IvsQ, IvsQ_unbinned, IvsLam, transLam = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)``
+    ``qbin, q, lam, trans = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)``
 
     If your scripts use the output property instead then they will not be affected, e.g. calls like this will still work as before:
     
-    ``ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7, OutputWorkspaceBinned='ivsq_bin')``
+    ``ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7, OutputWorkspaceBinned='qbin')``
 
   
 Bug fixes
