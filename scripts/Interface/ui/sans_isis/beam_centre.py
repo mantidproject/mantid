@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from abc import ABCMeta, abstractmethod
 from qtpy import QtGui, QtCore, QtWidgets
-from six import with_metaclass
-
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import messagedisplay
 
@@ -26,7 +24,7 @@ Ui_BeamCentre, _ = load_ui(__file__, "beam_centre.ui")
 
 
 class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
-    class BeamCentreListener(with_metaclass(ABCMeta, object)):
+    class BeamCentreListener(metaclass=ABCMeta):
         """
         Defines the elements which a presenter can listen to for the beam centre finder
         """

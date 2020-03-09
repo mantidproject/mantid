@@ -9,8 +9,6 @@
 import json
 import copy
 
-from six import with_metaclass
-
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message)
@@ -21,7 +19,7 @@ from sans.common.enums import SANSFacility
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class StateSliceEvent(with_metaclass(JsonSerializable)):
+class StateSliceEvent(metaclass=JsonSerializable):
     def __init__(self):
         super(StateSliceEvent, self).__init__()
 

@@ -9,12 +9,10 @@ import systemtesting
 from mantid.simpleapi import *
 
 from abc import ABCMeta, abstractmethod
-from six import with_metaclass
-
 #----------------------------------------------------------------------
 
 
-class ISISMuonAnalysisGrouping(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class ISISMuonAnalysisGrouping(metaclass=ABCMeta):
     """A base class for the ISIS Muon Analysis tests
 
     The workflow is defined in the runTest() method, simply

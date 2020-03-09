@@ -11,8 +11,6 @@
 import json
 import copy
 
-from six import with_metaclass
-
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (ReductionDimensionality, RangeStepType, SANSFacility)
 from sans.state.automatic_setters import automatic_setters
@@ -24,7 +22,7 @@ from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_an
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class StateConvertToQ(with_metaclass(JsonSerializable)):
+class StateConvertToQ(metaclass=JsonSerializable):
 
     def __init__(self):
         super(StateConvertToQ, self).__init__()

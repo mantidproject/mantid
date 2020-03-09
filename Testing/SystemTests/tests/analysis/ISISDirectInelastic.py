@@ -13,11 +13,8 @@ import shutil
 
 from abc import ABCMeta, abstractmethod
 from Direct.PropertyManager  import PropertyManager
-from six import with_metaclass
-
-
 #----------------------------------------------------------------------
-class ISISDirectInelasticReduction(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class ISISDirectInelasticReduction(metaclass=ABCMeta):
     """A base class for the ISIS direct inelastic tests
 
     The workflow is defined in the runTest() method, simply

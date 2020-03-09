@@ -11,10 +11,7 @@ the view or retrieve them from the view
 """
 
 from abc import ABCMeta, abstractmethod
-from six import with_metaclass
-
-
-class PresenterCommon(with_metaclass(ABCMeta)):
+class PresenterCommon(metaclass=ABCMeta):
     def __init__(self, view, model):
         self._view = view
         self._model = model

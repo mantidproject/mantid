@@ -10,10 +10,7 @@ from abc import ABCMeta, abstractmethod
 import systemtesting
 import mantid.simpleapi as ms
 from mantid import mtd
-from six import with_metaclass
-
-
-class ISISIndirectDiffractionReduction(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class ISISIndirectDiffractionReduction(metaclass=ABCMeta):
     """
     Base class for tests that use the ISISIndirectDiffractionReduction algorithm.
     """

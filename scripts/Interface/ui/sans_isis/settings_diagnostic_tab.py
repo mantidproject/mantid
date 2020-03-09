@@ -14,7 +14,7 @@ and helps the developer to identify issues.
 from abc import ABCMeta, abstractmethod
 import os
 from qtpy import QtWidgets
-from six import with_metaclass, PY3
+from six import PY3
 
 from mantidqt.utils.qt import load_ui
 
@@ -29,7 +29,7 @@ Ui_SettingsDiagnosticTab, _ = load_ui(__file__, "settings_diagnostic_tab.ui")
 
 
 class SettingsDiagnosticTab(QtWidgets.QWidget, Ui_SettingsDiagnosticTab):
-    class SettingsDiagnosticTabListener(with_metaclass(ABCMeta, object)):
+    class SettingsDiagnosticTabListener(metaclass=ABCMeta):
         """
         Defines the elements which a presenter can listen to for the diagnostic tab
         """

@@ -25,9 +25,6 @@ from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 import math
 import re
 import abc
-from six import with_metaclass
-
-
 def enum(**enums):
     return type('Enum', (), enums)
 
@@ -35,7 +32,7 @@ def enum(**enums):
 PolarisationCorrection = enum(PNR=1, PA=2, NONE=3)
 
 
-class CorrectionStrategy(with_metaclass(abc.ABCMeta, object)):
+class CorrectionStrategy(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def apply(self, to_correct):
         pass

@@ -8,8 +8,6 @@
 
 import copy
 
-from six import with_metaclass
-
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import SampleShape, SANSFacility
 
@@ -20,7 +18,7 @@ from sans.common.enums import SampleShape, SANSFacility
 from sans.state.automatic_setters import automatic_setters
 
 
-class StateScale(with_metaclass(JsonSerializable)):
+class StateScale(metaclass=JsonSerializable):
 
     def __init__(self):
         super(StateScale, self).__init__()

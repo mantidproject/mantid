@@ -9,8 +9,6 @@
 import copy
 import json
 
-from six import (with_metaclass)
-
 from sans.common.enums import (ReductionMode, ReductionDimensionality, FitModeForMerge,
                                SANSFacility, DetectorType)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
@@ -18,7 +16,7 @@ from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
 
 
-class StateReductionMode(with_metaclass(JsonSerializable)):
+class StateReductionMode(metaclass=JsonSerializable):
     def __init__(self):
         super(StateReductionMode, self).__init__()
         self.reduction_mode = ReductionMode.LAB

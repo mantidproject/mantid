@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from abc import (ABCMeta, abstractmethod)
 
-from six import with_metaclass
-
 from mantid.kernel import Logger
 
 from sans.algorithm_detail.mask_functions import SpectraBlock
@@ -354,7 +352,7 @@ def mask_beam_stop(mask_info, workspace, instrument, detector_names):
 # Masker classes
 # ------------------------------------------------------------------
 
-class Masker(with_metaclass(ABCMeta, object)):
+class Masker(metaclass=ABCMeta):
     def __init__(self):
         super(Masker, self).__init__()
 

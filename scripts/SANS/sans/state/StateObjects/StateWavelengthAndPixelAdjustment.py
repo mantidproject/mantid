@@ -11,15 +11,13 @@
 import json
 import copy
 
-from six import with_metaclass
-
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_not_none_and_first_larger_than_second, one_is_none, validation_message)
 from sans.common.enums import (RangeStepType, DetectorType, SANSFacility)
 
 
-class StateAdjustmentFiles(with_metaclass(JsonSerializable)):
+class StateAdjustmentFiles(metaclass=JsonSerializable):
     def __init__(self):
         super(StateAdjustmentFiles, self).__init__()
         self.pixel_adjustment_file = None  # : Str()
@@ -35,7 +33,7 @@ class StateAdjustmentFiles(with_metaclass(JsonSerializable)):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-class StateWavelengthAndPixelAdjustment(with_metaclass(JsonSerializable)):
+class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
     def __init__(self):
         super(StateWavelengthAndPixelAdjustment, self).__init__()
         self.wavelength_low = None  # : List[Float] (Positive)

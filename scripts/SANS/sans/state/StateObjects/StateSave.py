@@ -10,14 +10,12 @@
 
 import copy
 
-from six import with_metaclass
-
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (SaveType, SANSFacility)
 from sans.state.automatic_setters import automatic_setters
 
 
-class StateSave(with_metaclass(JsonSerializable)):
+class StateSave(metaclass=JsonSerializable):
     def __init__(self):
         super(StateSave, self).__init__()
         self.zero_free_correction = True  # : Bool

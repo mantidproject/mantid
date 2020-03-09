@@ -8,8 +8,6 @@ from abc import ABCMeta, abstractmethod
 from qtpy import QtCore, QtWidgets
 
 from mantidqt.utils.qt import load_ui
-from six import with_metaclass
-
 from sans.gui_logic.gui_common import (load_file, GENERIC_SETTINGS)
 
 try:
@@ -22,7 +20,7 @@ Ui_DiagnosticsPage, _ = load_ui(__file__, "diagnostics_page.ui")
 
 
 class DiagnosticsPage(QtWidgets.QWidget, Ui_DiagnosticsPage):
-    class DiagnosticsPageListener(with_metaclass(ABCMeta, object)):
+    class DiagnosticsPageListener(metaclass=ABCMeta):
         """
         Defines the elements which a presenter can listen to for the beam centre finder
         """

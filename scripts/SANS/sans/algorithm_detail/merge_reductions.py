@@ -8,15 +8,13 @@
 
 from abc import (ABCMeta, abstractmethod)
 
-from six import with_metaclass
-
 import mantid.simpleapi as mantid_api
 from sans.algorithm_detail.bundles import MergeBundle
 from sans.common.enums import (SANSFacility, DataType)
 from sans.common.general_functions import create_child_algorithm
 
 
-class Merger(with_metaclass(ABCMeta, object)):
+class Merger(metaclass=ABCMeta):
     """ Merger interface"""
 
     @abstractmethod

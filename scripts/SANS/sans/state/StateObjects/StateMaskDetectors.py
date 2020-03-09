@@ -11,8 +11,6 @@
 import json
 import copy
 
-from six import with_metaclass
-
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_pure_none_or_not_none, validation_message, set_detector_names)
@@ -82,7 +80,7 @@ def is_spectrum_range_all_on_one_detector(start, stop, invalid_dict, start_name,
 # StateData
 # ------------------------------------------------
 
-class StateMaskDetectors(with_metaclass(JsonSerializable)):
+class StateMaskDetectors(metaclass=JsonSerializable):
     def __init__(self):
         super(StateMaskDetectors, self).__init__()
         # Vertical strip masks
@@ -170,7 +168,7 @@ class StateMaskDetectors(with_metaclass(JsonSerializable)):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-class StateMask(with_metaclass(JsonSerializable)):
+class StateMask(metaclass=JsonSerializable):
     def __init__(self):
         super(StateMask, self).__init__()
         # Radius Mask

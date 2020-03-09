@@ -8,8 +8,6 @@
 import copy
 import json
 
-from six import with_metaclass
-
 from sans.common.enums import SANSFacility
 from sans.state.JsonSerializable import JsonSerializable
 from sans.state.StateObjects.StateCompatibility import get_compatibility_builder
@@ -22,7 +20,7 @@ from sans.state.automatic_setters import automatic_setters
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class AllStates(with_metaclass(JsonSerializable)):
+class AllStates(metaclass=JsonSerializable):
 
     def __init__(self):
 

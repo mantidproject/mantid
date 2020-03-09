@@ -14,10 +14,7 @@ from mantid.simpleapi import *
 import mantid.api
 
 from abc import ABCMeta, abstractmethod
-from six import with_metaclass
-
-
-class LoadAndCheckBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class LoadAndCheckBase(metaclass=ABCMeta):
 
     __comparison_out_workspace_name = 'a_integrated'
 

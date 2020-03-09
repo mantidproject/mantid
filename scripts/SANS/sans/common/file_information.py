@@ -17,8 +17,6 @@ from mantid.kernel import (DateAndTime, ConfigService, Logger)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType, SampleShape)
 from sans.common.general_functions import (get_instrument, instrument_name_correction, get_facility)
-from six import with_metaclass
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Constants
 # ----------------------------------------------------------------------------------------------------------------------
@@ -718,7 +716,7 @@ def get_geometry_information_raw(file_name):
 # ----------------------------------------------------------------------------------------------------------------------
 # SANS file Information
 # ----------------------------------------------------------------------------------------------------------------------
-class SANSFileInformation(with_metaclass(ABCMeta, object)):
+class SANSFileInformation(metaclass=ABCMeta):
     logger = Logger("SANS")
 
     def __init__(self, full_file_name):

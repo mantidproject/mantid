@@ -11,7 +11,7 @@
 import json
 import copy
 import abc
-from six import with_metaclass, add_metaclass
+from six import add_metaclass
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSInstrument)
@@ -22,7 +22,7 @@ from sans.state.state_functions import (is_pure_none_or_not_none, validation_mes
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
-class StateTransmissionFit(with_metaclass(JsonSerializable)):
+class StateTransmissionFit(metaclass=JsonSerializable):
 
     def __init__(self):
         super(StateTransmissionFit, self).__init__()
@@ -58,7 +58,7 @@ class StateTransmissionFit(with_metaclass(JsonSerializable)):
                              "Please see: {0}".format(json.dumps(is_invalid)))
 
 
-class StateCalculateTransmission(with_metaclass(JsonSerializable)):
+class StateCalculateTransmission(metaclass=JsonSerializable):
     def __init__(self):
         super(StateCalculateTransmission, self).__init__()
         # -----------------------

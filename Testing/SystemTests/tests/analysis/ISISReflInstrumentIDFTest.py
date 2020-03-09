@@ -13,10 +13,7 @@ import systemtesting
 from mantid.simpleapi import *
 import os
 from abc import ABCMeta, abstractmethod
-from six import with_metaclass
-
-
-class ISISReflInstrumentIDFTest(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class ISISReflInstrumentIDFTest(metaclass=ABCMeta):
 
     @abstractmethod
     def get_IDF_name(self):

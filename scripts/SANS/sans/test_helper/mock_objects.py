@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from functools import (partial)
 
-from six import with_metaclass
-
 from mantid.py3compat import mock
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument)
@@ -238,7 +236,7 @@ def create_mock_view2(user_file_path, batch_file_path=None):
     return view
 
 
-class FakeState(with_metaclass(JsonSerializable)):
+class FakeState(metaclass=JsonSerializable):
     def __init__(self):
         super(FakeState, self).__init__()
         self.dummy_state = "dummy_state"

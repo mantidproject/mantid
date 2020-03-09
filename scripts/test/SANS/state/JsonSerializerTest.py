@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from six import with_metaclass
-
 from mantid.api import Algorithm
 from mantid.py3compat import Enum
 
@@ -21,7 +19,7 @@ from sans.state.JsonSerializable import JsonSerializable, json_serializable
 from sans.state.Serializer import Serializer
 
 
-class TestClass(with_metaclass(JsonSerializable)):
+class TestClass(metaclass=JsonSerializable):
     string_parameter = None  # : Str()
     bool_parameter = None  # : Bool
     float_parameter = None  # : Float
@@ -47,7 +45,7 @@ class FakeEnumClass(Enum):
     BAR = "2"
 
 
-class ExampleWrapper(with_metaclass(JsonSerializable)):
+class ExampleWrapper(metaclass=JsonSerializable):
     # This has to be at the top module level, else the module name finding will fail
     def __init__(self):
         self._foo = FakeEnumClass.FOO
@@ -57,7 +55,7 @@ class ExampleWrapper(with_metaclass(JsonSerializable)):
         return True
 
 
-class VerySimpleState(with_metaclass(JsonSerializable)):
+class VerySimpleState(metaclass=JsonSerializable):
     string_parameter = None  # : Str()
 
     def __init__(self):
@@ -68,7 +66,7 @@ class VerySimpleState(with_metaclass(JsonSerializable)):
         pass
 
 
-class SimpleState(with_metaclass(JsonSerializable)):
+class SimpleState(metaclass=JsonSerializable):
     def __init__(self):
         super(SimpleState, self).__init__()
         self.string_parameter = "String_in_SimpleState"
@@ -88,7 +86,7 @@ class SimpleState(with_metaclass(JsonSerializable)):
         pass
 
 
-class ComplexState(with_metaclass(JsonSerializable)):
+class ComplexState(metaclass=JsonSerializable):
     def __init__(self):
         super(ComplexState, self).__init__()
         self.float_parameter = 23.
