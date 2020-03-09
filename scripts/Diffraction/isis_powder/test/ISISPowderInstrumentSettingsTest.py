@@ -7,8 +7,6 @@
 import unittest
 import warnings
 
-from six import assertRegex
-
 from isis_powder.routines import instrument_settings, param_map_entry
 
 
@@ -63,9 +61,9 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
             inst_settings_obj = instrument_settings.InstrumentSettings(param_map=[param_entry], kwargs=keyword_args,
                                                                        adv_conf_dict=adv_config)
 
-            assertRegex(self, str(warning_capture[-1].message), "which was previously set to")
-            assertRegex(self, str(warning_capture[-1].message), str(original_value))
-            assertRegex(self, str(warning_capture[-1].message), str(new_value))
+            self.assertRegex(str(warning_capture[-1].message), "which was previously set to")
+            self.assertRegex(str(warning_capture[-1].message), str(original_value))
+            self.assertRegex(str(warning_capture[-1].message), str(new_value))
 
         self.assertEqual(inst_settings_obj.script_facing_name, new_value)
 
@@ -90,9 +88,9 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
             warnings.simplefilter("always")
 
             inst_settings_obj.update_attributes(basic_config=config_dict)
-            assertRegex(self, str(warning_capture[-1].message), "which was previously set to")
-            assertRegex(self, str(warning_capture[-1].message), str(original_value))
-            assertRegex(self, str(warning_capture[-1].message), str(new_value))
+            self.assertRegex(str(warning_capture[-1].message), "which was previously set to")
+            self.assertRegex(str(warning_capture[-1].message), str(original_value))
+            self.assertRegex(str(warning_capture[-1].message), str(new_value))
             warnings_current_length = len(warning_capture)
 
             # Then check that we only get one additional warning when replacing values again not two

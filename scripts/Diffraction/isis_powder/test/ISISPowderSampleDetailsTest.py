@@ -11,8 +11,6 @@ import unittest
 
 from isis_powder.routines import sample_details
 
-from six import assertRegex
-
 
 class ISISPowderSampleDetailsTest(unittest.TestCase):
     def test_constructor(self):
@@ -242,19 +240,19 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
             # Test with most defaults set
             sample_details_obj.print_sample_details()
             captured_std_out_default = std_out_buffer.getvalue()
-            assertRegex(self, captured_std_out_default, "Height: " + str(float(expected_height)))
-            assertRegex(self, captured_std_out_default, "Radius: " + str(float(expected_radius)))
-            assertRegex(self, captured_std_out_default, "Center X:" + str(float(expected_center[0])))
-            assertRegex(self, captured_std_out_default, "Material has not been set")
+            self.assertRegex(captured_std_out_default, "Height: " + str(float(expected_height)))
+            self.assertRegex(captured_std_out_default, "Radius: " + str(float(expected_radius)))
+            self.assertRegex(captured_std_out_default, "Center X:" + str(float(expected_center[0])))
+            self.assertRegex(captured_std_out_default, "Material has not been set")
 
             # Test with material set but not number density
             sys.stdout = std_out_buffer = get_std_out_buffer_obj()
             sample_details_obj.set_material(chemical_formula=chemical_formula)
             sample_details_obj.print_sample_details()
             captured_std_out_material_default = std_out_buffer.getvalue()
-            assertRegex(self, captured_std_out_material_default, "Material properties:")
-            assertRegex(self, captured_std_out_material_default, "Chemical formula: " + chemical_formula)
-            assertRegex(self, captured_std_out_material_default, "Number Density: Set from elemental properties")
+            self.assertRegex(captured_std_out_material_default, "Material properties:")
+            self.assertRegex(captured_std_out_material_default, "Chemical formula: " + chemical_formula)
+            self.assertRegex(captured_std_out_material_default, "Number Density: Set from elemental properties")
 
             # Test with material and number density
             sys.stdout = std_out_buffer = get_std_out_buffer_obj()
@@ -263,13 +261,13 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
                                             number_density=expected_number_density)
             sample_details_obj.print_sample_details()
             captured_std_out_material_set = std_out_buffer.getvalue()
-            assertRegex(self, captured_std_out_material_set, "Chemical formula: " + chemical_formula_two)
-            assertRegex(self, captured_std_out_material_set, "Number Density: " + str(expected_number_density))
+            self.assertRegex(captured_std_out_material_set, "Chemical formula: " + chemical_formula_two)
+            self.assertRegex(captured_std_out_material_set, "Number Density: " + str(expected_number_density))
 
             # Test with no material properties set - we can reuse buffer from previous test
-            assertRegex(self, captured_std_out_material_default, "Absorption cross section: Calculated by Mantid")
-            assertRegex(self, captured_std_out_material_default, "Scattering cross section: Calculated by Mantid")
-            assertRegex(self, captured_std_out_material_default, "Note to manually override these call")
+            self.assertRegex(captured_std_out_material_default, "Absorption cross section: Calculated by Mantid")
+            self.assertRegex(captured_std_out_material_default, "Scattering cross section: Calculated by Mantid")
+            self.assertRegex(captured_std_out_material_default, "Note to manually override these call")
 
             expected_abs_x_section = 2.13
             expected_scattering_x_section = 5.32
@@ -280,10 +278,10 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
                                                        scattering_cross_section=expected_scattering_x_section)
             sample_details_obj.print_sample_details()
             captured_std_out_material_props = std_out_buffer.getvalue()
-            assertRegex(self, captured_std_out_material_props, "Absorption cross section: "
-                        + str(expected_abs_x_section))
-            assertRegex(self, captured_std_out_material_props, "Scattering cross section: "
-                        + str(expected_scattering_x_section))
+            self.assertRegex(captured_std_out_material_props, "Absorption cross section: "
+                             + str(expected_abs_x_section))
+            self.assertRegex(captured_std_out_material_props, "Scattering cross section: "
+                             + str(expected_scattering_x_section))
         finally:
             # Ensure std IO is restored. Do NOT remove this line as all std out will pipe into our buffer otherwise
             sys.stdout = old_std_out
