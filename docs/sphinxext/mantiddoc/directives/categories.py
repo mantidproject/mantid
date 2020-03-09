@@ -16,7 +16,6 @@ from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and
 from sphinx.util.osutil import relative_uri
 import os
 import posixpath
-from six import itervalues
 
 CATEGORY_PAGE_TEMPLATE = "category.html"
 ALG_CATEGORY_PAGE_TEMPLATE = "algorithmcategories.html"
@@ -484,7 +483,7 @@ def purge_categories(app, env, docname):
         return
 
     deadref = PageRef(name, docname)
-    for category in itervalues(categories):
+    for category in categories.values():
         pages = category.pages
         if deadref in pages:
             pages.remove(deadref)

@@ -11,7 +11,7 @@
 import json
 import copy
 import abc
-from six import with_metaclass, itervalues, add_metaclass
+from six import with_metaclass, add_metaclass
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (RebinType, RangeStepType, FitType, DataType, SANSInstrument)
@@ -256,7 +256,7 @@ class StateCalculateTransmission(with_metaclass(JsonSerializable)):
                                                     "background_TOF_monitor_stop": self.background_TOF_monitor_stop})
                         is_invalid.update(entry)
 
-        for fit_type in itervalues(self.fit):
+        for fit_type in self.fit.values():
             fit_type.validate()
 
         if is_invalid:

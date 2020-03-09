@@ -129,7 +129,7 @@ class GlobalFigureManager(object):
     def destroy_fig(cls, fig):
         "*fig* is a Figure instance"
         num = None
-        for manager in six.itervalues(cls.figs):
+        for manager in cls.figs.values():
             if manager.canvas.figure == fig:
                 num = manager.num
                 break
