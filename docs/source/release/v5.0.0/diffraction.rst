@@ -26,7 +26,7 @@ Several improvements have been made to the total scattering functionality in the
 
 - Merging banks now matches spectra to the spectrum with the largest x range.
 - Merging banks no longer matches spectra with scale, it now only matches with offset.
-- It can now be given an parameter `output_binning` that will be used to rebin the output_pdf.
+- It can now be given a parameter `output_binning` that will be used to rebin the output_pdf.
 - It can now accept a `pdf_type` argument to set the pdf_output type.
 - It can now accept a `freq_params` argument to perform a fourier filter on the run.
 - A :ref:`SaveRMCProfile <algm-SaveRMCProfile-v1>` algorithm has been made that saves workspaces in a format readable by the RMCProfile package.
@@ -54,7 +54,7 @@ Single Crystal Diffraction
 
 - The output peak workspace from :ref:`PredictFractionalPeaks<algm-PredictFractionalPeaks-v1>` now keeps the same lattice parameters as the input workspace. 
 - :ref:`SaveReflections <algm-SaveReflections>` now has the option to save peaks to separate files based on their associated modulation vectors when using the Jana format.
-- ``IndexPeaksWithsatellites`` has been deleted as it had been deprecated and superseded by :ref:`IndexPeaks <algm-IndexPeaks-v1>`.
+- ``IndexPeaksWithSatellites`` has been deleted as it had been deprecated and superseded by :ref:`IndexPeaks <algm-IndexPeaks-v1>`.
 
 Miscellaneous
 ------------------
