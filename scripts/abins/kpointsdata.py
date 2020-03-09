@@ -6,12 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 
-from abins import GeneralData
 from abins.constants import (ACOUSTIC_PHONON_THRESHOLD, ALL_KEYWORDS_K_DATA,
                              COMPLEX_ID, FLOAT_ID, GAMMA_POINT, SMALL_K)
 
 
-class KpointsData(GeneralData):
+class KpointsData:
     """
     Class for storing k-points data. The data is arranged as a dictionary.
     The dictionary has the following form:

@@ -4,11 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from abins import GeneralData
 from abins.constants import ALL_KEYWORDS_POWDER_DATA, GAMMA_POINT
 
 
-class PowderData(GeneralData):
+class PowderData:
     """
     Class for storing powder data.
     """

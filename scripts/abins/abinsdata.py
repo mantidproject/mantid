@@ -8,7 +8,7 @@ import abins
 from abins.generaldata import GeneralData
 
 
-class AbinsData(GeneralData):
+class AbinsData:
     """
     Class for storing input DFT data.
     """

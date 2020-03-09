@@ -8,8 +8,7 @@ import numpy as np
 import abins
 
 
-class AtomsData(abins.GeneralData):
-
+class AtomsData:
     def __init__(self, num_atoms=None):
         super(AtomsData, self).__init__()
         if not isinstance(num_atoms, int):
