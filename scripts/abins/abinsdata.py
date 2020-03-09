@@ -17,7 +17,6 @@ class AbinsData(GeneralData):
         super().__init__()
         self._atoms_data = None
         self._kpoints_data = None
-        self._data = None
 
     @staticmethod
     def from_calculation_data(filename, ab_initio_program):
@@ -41,7 +40,9 @@ class AbinsData(GeneralData):
                              "supported loaders: {}".format(ab_initio_program.upper(),
                                                             ' '.join(ab_initio_loaders.keys())))
         loader = ab_initio_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename)
-        return loader.get_formatted_data()
+        data = loader.get_formatted_data()
+        data.check_consistent_dimensions()
+        return data
 
     def set(self, k_points_data=None, atoms_data=None):
         """
@@ -60,20 +61,21 @@ class AbinsData(GeneralData):
         else:
             raise ValueError("Invalid type of atoms data.")
 
-        self._data = {"k_points_data": k_points_data.extract(), "atoms_data": atoms_data.extract()}
-
     def get_kpoints_data(self):
         return self._kpoints_data
 
     def get_atoms_data(self):
         return self._atoms_data
 
-    def extract(self):
-        for k in self._data["k_points_data"]["atomic_displacements"]:
-            if self._data["k_points_data"]["atomic_displacements"][k].shape[0] != len(self._data["atoms_data"]):
+    def check_consistent_dimensions(self):
+        data = self.extract()
+        for k in data["k_points_data"]["atomic_displacements"]:
+            if data["k_points_data"]["atomic_displacements"][k].shape[0] != len(data["atoms_data"]):
                 raise ValueError("Abins data is inconsistent.")
 
-        return self._data
+    def extract(self):
+        return {"k_points_data": self.get_kpoints_data().extract(),
+                "atoms_data": self.get_atoms_data().extract()}
 
     def __str__(self):
         return "DFT data"
