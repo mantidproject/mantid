@@ -13,15 +13,16 @@ import unittest
 
 
 class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
-    def setUp(self):
-        red_ws = Load('irs26176_graphite002_red.nxs')
-        red_ws = ConvertUnits(
-            InputWorkspace=red_ws,
+    @classmethod
+    def setUpClass(self):
+        __red_ws = Load('irs26176_graphite002_red.nxs')
+        __red_ws = ConvertUnits(
+            InputWorkspace=__red_ws,
             Target='Wavelength',
             EMode='Indirect',
             EFixed=1.845)
 
-        self._red_ws = red_ws
+        self._red_ws = __red_ws
 
         self._arguments = {'ChemicalFormula': 'H2-O',
                            'DensityType': 'Mass Density',
@@ -38,7 +39,7 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
             'OuterRadius': 2.0
         })
 
-        corrected = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
+        __corrected_flat_plate = SimpleShapeMonteCarloAbsorption(InputWorkspace=self._red_ws,
                                                     Shape='FlatPlate',
                                                     Width=2.0,
                                                     Thickness=2.0,
@@ -46,7 +47,12 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
         # store the basic flat plate workspace so it can be compared with
         # others
-        self._corrected_flat_plate = corrected
+        self._corrected_flat_plate = __corrected_flat_plate
+
+    @classmethod
+    def tearDownClass(self):
+        DeleteWorkspace(self._red_ws)
+        DeleteWorkspace(self._corrected_flat_plate)
 
     def _test_corrections_workspace(self, corr_ws):
         x_unit = corr_ws.getAxis(0).getUnit().unitID()
@@ -60,10 +66,6 @@ class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
 
         blocksize = corr_ws.blocksize()
         self.assertEqual(blocksize, 1905)
-
-    def tearDown(self):
-        DeleteWorkspace(self._red_ws)
-        DeleteWorkspace(self._corrected_flat_plate)
 
     def test_flat_plate(self):
         # Test flat plate shape
