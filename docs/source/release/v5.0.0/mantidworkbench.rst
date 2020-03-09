@@ -131,7 +131,7 @@ Bugfixes
 - Fixed a bug on the instrument viewer where changing projection and back to Full 3D would display the wrong point of view.
 - Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters. 
 - Warnings from the Python ``warnings`` module are now show as warnings and not errors in the log display.
-- Colorbar scale on Instrument view shows labelled ticks when the range is within an order of magnitude.
+- Colorbar scale on Instrument view shows labelled ticks when the range is within an order of magnitude, in the SymmetricLog10 setting.
 
 **Plotting**
 - Overplots will be normalized by bin width if they are overplotting a curve from a distribution workspace.
@@ -145,6 +145,7 @@ Bugfixes
 - Fixed an issue with changing normalisation on single spectra plots done from a script.
 - Axes editor menu now reads the state of the grids on the plot. 
 - Fixed a bug which caused graphic scaling issues when the double-click menu was used to set an axis as log-scaled.
+- There is now appropriate protection around setting the colrbar scale to logarithmic while the min and/or max value is negative.
 
 **Fitting**
 - Fitting a distribution workspace is normalised correctly.

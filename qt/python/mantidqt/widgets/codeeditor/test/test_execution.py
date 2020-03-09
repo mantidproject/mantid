@@ -20,7 +20,7 @@ from qtpy.QtCore import QCoreApplication, QObject
 
 # local imports
 from mantid.py3compat import StringIO
-from mantid.py3compat.mock import patch
+from mantid.py3compat.mock import patch, Mock
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.codeeditor.execution import PythonCodeExecution, _get_imported_from_future
@@ -48,7 +48,7 @@ class PythonCodeExecutionTest(unittest.TestCase):
 
     def test_reset_context_remove_user_content(self):
         executor = PythonCodeExecution()
-        executor.execute("x = 1")
+        executor.execute("x = 1", line_offset=0)
         self.assertTrue('x' in executor.globals_ns)
         executor.reset_context()
 
@@ -68,13 +68,13 @@ class PythonCodeExecutionTest(unittest.TestCase):
     def test_filename_sets__file__attr(self):
         executor = PythonCodeExecution()
         test_filename = 'script.py'
-        executor.execute('x=1', filename=test_filename)
+        executor.execute('x=1', filename=test_filename, line_offset=0)
         self.assertTrue('__file__' in executor.globals_ns)
         self.assertEqual(test_filename, executor.globals_ns['__file__'])
 
     def test_empty_filename_sets_identifier(self):
         executor = PythonCodeExecution()
-        executor.execute('x=1')
+        executor.execute('x=1', line_offset=0)
         self.assertTrue('__file__' in executor.globals_ns)
 
     def test_execute_async_calls_success_signal_on_completion(self):
@@ -87,15 +87,28 @@ class PythonCodeExecutionTest(unittest.TestCase):
         code = "import sys; syspath = sys.path"
         test_filename = '/path/to/script/called/script.py'
         executor = PythonCodeExecution()
-        executor.execute(code, filename=test_filename)
+        executor.execute(code, filename=test_filename, line_offset=0)
         self.assertIn('/path/to/script/called', executor.globals_ns['syspath'])
 
     def test_script_dir_removed_from_path_after_execution(self):
         code = "import sys; syspath = sys.path"
         test_filename = '/path/to/script/called/script.py'
         executor = PythonCodeExecution()
-        executor.execute(code, filename=test_filename)
+        executor.execute(code, filename=test_filename, line_offset=0)
         self.assertNotIn('/path/to/script/called', sys.path)
+
+    def test_line_offset_forwarded_on(self):
+        executor = PythonCodeExecution()
+        code = "x=0"
+        offset = 10
+        with patch("mantidqt.widgets.codeeditor.execution.CodeExecution") as patched_constructor:
+            mocked_executor = Mock()
+            patched_constructor.return_value = mocked_executor
+
+            executor.execute(code, offset)
+            self.assertTrue(mocked_executor.execute.called)
+            args, _ = mocked_executor.execute.call_args_list[0]
+            self.assertTrue(offset in args, "Line offset was not passed in")
 
     def test_get_imported_from_future_gets_imports_and_ignores_comments(self):
         code = ("from __future__ import division, print_function\n"
@@ -108,7 +121,7 @@ class PythonCodeExecutionTest(unittest.TestCase):
         code = ("from __future__ import division\n"
                 "{} = 1/2\n".format(global_var))
         executor = PythonCodeExecution()
-        executor.execute(code)
+        executor.execute(code, line_offset=0)
         self.assertAlmostEqual(0.50, executor.globals_ns[global_var])
 
     @patch('sys.stdout', new_callable=StringIO)
@@ -116,7 +129,7 @@ class PythonCodeExecutionTest(unittest.TestCase):
         code = ("from __future__ import division, print_function\n"
                 "print('This', 'should', 'have', 'no', 'brackets')\n")
         executor = PythonCodeExecution()
-        executor.execute(code)
+        executor.execute(code, line_offset=0)
         self.assertEqual("This should have no brackets\n", mock_stdout.getvalue())
 
     @unittest.skipIf(sys.version_info < (3,),
@@ -126,7 +139,7 @@ class PythonCodeExecutionTest(unittest.TestCase):
         code = ("from __future__ import unicode_literals\n"
                 "print('£')\n")
         executor = PythonCodeExecution()
-        executor.execute(code)
+        executor.execute(code, line_offset=0)
         self.assertEqual("£\n", mock_stdout.getvalue())
 
     # ---------------------------------------------------------------------------
@@ -187,27 +200,27 @@ foo()
     # -------------------------------------------------------------------------
     # Helpers
     # -------------------------------------------------------------------------
-    def _verify_serial_execution_successful(self, code):
+    def _verify_serial_execution_successful(self, code, line_offset=0):
         executor = PythonCodeExecution()
-        executor.execute(code)
+        executor.execute(code, line_offset)
         return executor.globals_ns
 
-    def _verify_async_execution_successful(self, code):
+    def _verify_async_execution_successful(self, code, line_offset=0):
         executor = PythonCodeExecution()
-        task = executor.execute_async(code)
+        task = executor.execute_async(code, line_offset)
         task.join()
         return executor.globals_ns
 
-    def _verify_failed_serial_execute(self, expected_exc_type, code):
+    def _verify_failed_serial_execute(self, expected_exc_type, code, line_offset=0):
         executor = PythonCodeExecution()
-        self.assertRaises(expected_exc_type, executor.execute, code)
+        self.assertRaises(expected_exc_type, executor.execute, code, line_offset)
 
-    def _run_async_code(self, code, filename=None):
+    def _run_async_code(self, code, filename=None, line_no=0):
         executor = PythonCodeExecution()
         recv = Receiver()
         executor.sig_exec_success.connect(recv.on_success)
         executor.sig_exec_error.connect(recv.on_error)
-        task = executor.execute_async(code, filename)
+        task = executor.execute_async(code, line_no, filename)
         task.join()
         QCoreApplication.processEvents()
 

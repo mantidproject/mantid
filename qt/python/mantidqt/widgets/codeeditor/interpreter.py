@@ -316,7 +316,9 @@ class PythonFileInterpreterPresenter(QObject):
         self.is_executing = True
         self.view.set_editor_readonly(True)
         self.view.set_status_message(RUNNING_STATUS_MSG)
-        return self.model.execute_async(code_str, self.view.filename, blocking)
+        return self.model.execute_async(code_str=code_str,
+                                        line_offset=self._code_start_offset,
+                                        filename=self.view.filename, blocking=blocking)
 
     def _get_code_for_execution(self, ignore_selection):
         editor = self.view.editor
@@ -362,8 +364,3 @@ class PythonFileInterpreterPresenter(QObject):
 
     def _create_status_msg(self, status, timestamp, elapsed_time):
         return IDLE_STATUS_MSG + ' ' + LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)
-
-    def _on_progress_update(self, lineno):
-        """Update progress on the view taking into account if a selection of code is
-        running"""
-        self.view.editor.updateProgressMarker(lineno + self._code_start_offset, False)
