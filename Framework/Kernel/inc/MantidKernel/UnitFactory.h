@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_UNITFACTORYIMPL_H_
-#define MANTID_KERNEL_UNITFACTORYIMPL_H_
+#pragma once
 
 /* Used to register unit classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator
@@ -86,5 +85,3 @@ using UnitFactory = SingletonHolder<UnitFactoryImpl>;
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /*MANTID_KERNEL_UNITFACTORYIMPL_H_*/

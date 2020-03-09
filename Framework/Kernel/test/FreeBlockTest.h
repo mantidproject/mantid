@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_FREEBLOCKTEST_H_
-#define MANTID_API_FREEBLOCKTEST_H_
+#pragma once
 
 #include "MantidKernel/FreeBlock.h"
 #include "MantidKernel/System.h"
@@ -76,5 +75,3 @@ public:
     TS_ASSERT_EQUALS(blocks[0].getSize(), 17);
   }
 };
-
-#endif /* MANTID_API_FREEBLOCKTEST_H_ */

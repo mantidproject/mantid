@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_SpecialCoordinateSystem_H_
-#define MANTID_KERNEL_SpecialCoordinateSystem_H_
+#pragma once
 
 namespace Mantid {
 namespace Kernel {
@@ -20,5 +19,3 @@ enum SpecialCoordinateSystem {
 }; // Do NOT alter existing values
 } // namespace Kernel
 } // namespace Mantid
-
-#endif

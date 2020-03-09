@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_DISKBUFFER_ISAVEABLE_TEST_H_
-#define MANTID_KERNEL_DISKBUFFER_ISAVEABLE_TEST_H_
+#pragma once
 
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DiskBuffer.h"
@@ -480,5 +479,3 @@ public:
               << " into MRU (no write buffer).\n";
   }
 };
-
-#endif /* MANTID_KERNEL_DISKBUFFERTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REMOTEJOBMANAGER_H
-#define REMOTEJOBMANAGER_H
+#pragma once
 
 #include <iosfwd>
 #include <map>
@@ -112,5 +111,3 @@ private:
 
 } // end namespace Kernel
 } // end namespace Mantid
-
-#endif // REMOTEJOBMANAGER_H

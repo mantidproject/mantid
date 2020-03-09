@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MAGNETICIONTEST_H_
-#define MAGNETICIONTEST_H_
+#pragma once
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MagneticIon.h"
@@ -84,5 +83,3 @@ private:
     }
   }
 };
-
-#endif // MAGNETICIONTEST_H_

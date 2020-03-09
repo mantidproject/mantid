@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_ISAVEABLETEST_H_
-#define MANTID_MDEVENTS_ISAVEABLETEST_H_
+#pragma once
 
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
@@ -20,5 +19,3 @@ public:
     // Bare interface, so nothing to test.
   }
 };
-
-#endif /* MANTID_MDEVENTS_ISAVEABLETEST_H_ */

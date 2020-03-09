@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DYNAMICFACTORYTEST_H_
-#define DYNAMICFACTORYTEST_H_
+#pragma once
 
 #include "MantidKernel/DynamicFactory.h"
 #include <cxxtest/TestSuite.h>
@@ -203,5 +202,3 @@ private:
       m_notificationObserver;
   bool m_updateNoticeReceived;
 };
-
-#endif /*DYNAMICFACTORYTEST_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROPERTYWITHVALUEJSON_H
-#define PROPERTYWITHVALUEJSON_H
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
@@ -167,5 +166,3 @@ Json::Value encodeAsJson(const Kernel::Matrix<ValueType> &) {
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif // PROPERTYWITHVALUEJSON_H

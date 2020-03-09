@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BINFINDERTEST_H_
-#define BINFINDERTEST_H_
+#pragma once
 
 #include "MantidKernel/BinFinder.h"
 #include "MantidKernel/System.h"
@@ -118,5 +117,3 @@ public:
     compareBin(1.0, -1, 16.1);
   }
 };
-
-#endif /*BINFINDERTEST_H_*/

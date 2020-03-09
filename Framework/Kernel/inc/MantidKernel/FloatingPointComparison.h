@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_FLOATINGPOINTCOMPARISON_H_
-#define MANTID_KERNEL_FLOATINGPOINTCOMPARISON_H_
+#pragma once
 
 //-----------------------------------------------------------------------------
 // Includes
@@ -22,5 +21,3 @@ template <typename T> MANTID_KERNEL_DLL bool ltEquals(const T x, const T y);
 template <typename T> MANTID_KERNEL_DLL bool gtEquals(const T x, const T y);
 } // namespace Kernel
 } // namespace Mantid
-
-#endif // MANTID_KERNEL_FLOATINGPOINTCOMPARISON_H_

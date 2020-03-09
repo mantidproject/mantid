@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_IVALIDATORTEST_H_
-#define MANTID_KERNEL_IVALIDATORTEST_H_
+#pragma once
 
 #include "MantidKernel/IValidator.h"
 #include <boost/make_shared.hpp>
@@ -54,5 +53,3 @@ public:
     TS_ASSERT_EQUALS(noCopy.head(), testData.data());
   }
 };
-
-#endif /* MANTID_KERNEL_IVALIDATORTEST_H_ */

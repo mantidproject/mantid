@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TESTQUAT__
-#define MANTID_TESTQUAT__
+#pragma once
 
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Quat.h"
@@ -591,5 +590,3 @@ public:
     TS_ASSERT_EQUALS(b, Quat(4, 5, 6, 7));
   }
 };
-
-#endif

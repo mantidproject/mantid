@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANDATORYVALIDATORTEST_H_
-#define MANDATORYVALIDATORTEST_H_
+#pragma once
 
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
@@ -107,5 +106,3 @@ public:
     TS_ASSERT(validator.isValid(notDefaultIsFalse).empty());
   }
 };
-
-#endif /*MANDATORYVALIDATORTEST_H_*/

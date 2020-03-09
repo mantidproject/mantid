@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef Mantid_make_cow_h
-#define Mantid_make_cow_h
+#pragma once
 
 #include "MantidKernel/cow_ptr.h"
 #include <boost/make_shared.hpp>
@@ -24,4 +23,3 @@ template <class T, class... Args> inline cow_ptr<T> make_cow(Args &&... args) {
 
 } // namespace Kernel
 } // namespace Mantid
-#endif // Mantid_cow_unique_h

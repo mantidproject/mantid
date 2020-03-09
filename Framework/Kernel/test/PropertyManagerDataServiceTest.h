@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROPERTYMANAGERDATASERVICETEST_H_
-#define PROPERTYMANAGERDATASERVICETEST_H_
+#pragma once
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyManager.h"
@@ -112,5 +111,3 @@ public:
 private:
   boost::shared_ptr<PropertyManager> inst1, inst2;
 };
-
-#endif /*PROPERTYMANAGERDATASERVICETEST_H_*/

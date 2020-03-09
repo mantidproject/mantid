@@ -11,8 +11,7 @@
  *      Author: janik
  */
 
-#ifndef DATEANDTIMETEST_H_
-#define DATEANDTIMETEST_H_
+#pragma once
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
@@ -463,5 +462,3 @@ public:
     TS_ASSERT_EQUALS(times[3], DateAndTime("1990-01-02 03:04:02.000"));
   }
 };
-
-#endif /* DATEANDTIMETEST_H_ */

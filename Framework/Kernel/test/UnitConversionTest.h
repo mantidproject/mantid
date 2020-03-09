@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_UNITCONVERTERTEST_H_
-#define MANTID_KERNEL_UNITCONVERTERTEST_H_
+#pragma once
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -74,5 +73,3 @@ public:
     TS_ASSERT_DELTA(result, expected, 1e-12);
   }
 };
-
-#endif /* MANTID_KERNEL_UNITCONVERTERTEST_H_ */

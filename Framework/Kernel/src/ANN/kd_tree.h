@@ -24,8 +24,7 @@
 //		Added fixed radius kNN search
 //----------------------------------------------------------------------
 
-#ifndef ANN_kd_tree_H
-#define ANN_kd_tree_H
+#pragma once
 
 #include "MantidKernel/ANN/ANNx.h" // all ANN includes
 
@@ -187,5 +186,3 @@ ANNkd_ptr rkd_tree(           // recursive construction of kd-tree
     int bsp,                  // bucket space
     ANNorthRect &bnd_box,     // bounding box for current node
     ANNkd_splitter splitter); // splitting routine
-
-#endif

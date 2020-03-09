@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATE_AND_TIME_H
-#define DATE_AND_TIME_H
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidTypes/Core/DateAndTime.h"
@@ -66,5 +65,3 @@ private:
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif // DATE_AND_TIME_H

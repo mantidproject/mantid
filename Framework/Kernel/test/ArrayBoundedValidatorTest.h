@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ARRAYBOUNDEDVALIDATORTEST_H_
-#define ARRAYBOUNDEDVALIDATORTEST_H_
+#pragma once
 
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include <array>
@@ -160,5 +159,3 @@ public:
     TS_ASSERT_EQUALS(vd.isValid(ad), "");
   }
 };
-
-#endif // ARRAYBOUNDEDVALIDATORTEST_H_

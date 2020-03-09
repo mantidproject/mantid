@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROPERTYTEST_H_
-#define PROPERTYTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -121,5 +120,3 @@ public:
 private:
   std::unique_ptr<Property> p;
 };
-
-#endif /*PROPERTYTEST_H_*/

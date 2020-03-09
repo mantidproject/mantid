@@ -17,8 +17,7 @@
   RGM - 23 July 2012
   ******************************************************************/
 
-#ifndef SIMPLEJSON_H
-#define SIMPLEJSON_H
+#pragma once
 
 #include <istream>
 #include <map>
@@ -121,5 +120,3 @@ class DLLExport JSONParseException : public JSONException {
 public:
   JSONParseException(const std::string &msg) : JSONException(msg) {}
 };
-
-#endif

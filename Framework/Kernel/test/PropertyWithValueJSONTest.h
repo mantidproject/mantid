@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROPERTYWITHVALUEJSONDECODERTEST_H
-#define PROPERTYWITHVALUEJSONDECODERTEST_H
+#pragma once
 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
@@ -209,5 +208,3 @@ private:
     return jsonVal;
   }
 };
-
-#endif // PROPERTYWITHVALUEJSONDECODERTEST_H

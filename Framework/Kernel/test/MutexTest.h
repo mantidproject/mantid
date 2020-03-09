@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MUTEXTEST_H
-#define MUTEXTEST_H
+#pragma once
 
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/FunctionTask.h"
@@ -97,5 +96,3 @@ public:
                       DATA_SIZE + numTasks / 10)
   }
 };
-
-#endif /* MUTEXTEST_H */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDKERNEL_COW_PTR_H
-#define MANTIDKERNEL_COW_PTR_H
+#pragma once
 
 #include "MultiThreaded.h"
 
@@ -193,5 +192,3 @@ using MantidVec = std::vector<double>;
 using MantidVecPtr = Kernel::cow_ptr<MantidVec>;
 
 } // NAMESPACE Mantid
-
-#endif // MANTIDKERNEL_COW_PTR_H

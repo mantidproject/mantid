@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INTERPOLATIONTEST_H_
-#define INTERPOLATIONTEST_H_
+#pragma once
 
 #include "MantidKernel/Interpolation.h"
 #include <ctime>
@@ -318,5 +317,3 @@ private:
     ~TestableInterpolation() override {}
   };
 };
-
-#endif /*INTERPOLATIONTEST_H_*/

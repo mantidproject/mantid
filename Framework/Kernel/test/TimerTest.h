@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TIMERTEST_H_
-#define TIMERTEST_H_
+#pragma once
 
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
@@ -44,5 +43,3 @@ public:
 #endif
   }
 };
-
-#endif /*TIMERTEST_H_*/

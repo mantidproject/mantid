@@ -15,8 +15,7 @@
 //
 //
 
-#ifndef STDOUTCHANNEL_H
-#define STDOUTCHANNEL_H
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include <Poco/ConsoleChannel.h>
@@ -27,4 +26,3 @@ public:
   StdoutChannel();
 };
 } // namespace Poco
-#endif // STDOUTCHANNEL_H

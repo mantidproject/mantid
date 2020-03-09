@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef UNITTEST_H_
-#define UNITTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -1537,5 +1536,3 @@ private:
   Units::Temperature temperature;
   Units::AtomicDistance atomicDistance;
 };
-
-#endif /*UNITTEST_H_*/

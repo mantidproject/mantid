@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SHRINKTOFITTEST_H_
-#define MANTID_SHRINKTOFITTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <string>
@@ -53,5 +52,3 @@ public:
     TS_ASSERT_LESS_THAN_EQUALS(capacityAfterShrinkToFit, original.capacity());
   }
 };
-
-#endif // MANTID_SHRINKTOFITTEST_H_

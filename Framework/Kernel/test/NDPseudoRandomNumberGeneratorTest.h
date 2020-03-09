@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NDPSEUDORANDOMNUMBERGENERATORTEST_H_
-#define NDPSEUDORANDOMNUMBERGENERATORTEST_H_
+#pragma once
 
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/NDPseudoRandomNumberGenerator.h"
@@ -88,5 +87,3 @@ private:
     return values;
   }
 };
-
-#endif // NDPSEUDORANDOMNUMBERGENERATORTEST_H_

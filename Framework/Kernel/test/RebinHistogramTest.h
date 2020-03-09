@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REBINHISTOGRAM_TEST_H_
-#define REBINHISTOGRAM_TEST_H_
+#pragma once
 
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
@@ -127,5 +126,3 @@ private:
       largerBinEdges[i] = binEdges[(2 * i)];
   }
 };
-
-#endif // REBINHISTOGRAM_TEST_H_/

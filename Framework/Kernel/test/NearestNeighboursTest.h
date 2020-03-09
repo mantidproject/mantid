@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_NEARESTNEIGHBOURSTEST_H_
-#define MANTID_KERNEL_NEARESTNEIGHBOURSTEST_H_
+#pragma once
 
 #include "MantidKernel/NearestNeighbours.h"
 #include <cxxtest/TestSuite.h>
@@ -73,5 +72,3 @@ public:
     TS_ASSERT_DELTA(dist, 2.21, 0.01)
   }
 };
-
-#endif
