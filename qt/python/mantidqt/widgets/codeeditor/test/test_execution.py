@@ -105,7 +105,7 @@ class PythonCodeExecutionTest(unittest.TestCase):
             mocked_executor = Mock()
             patched_constructor.return_value = mocked_executor
 
-            executor.execute(code, offset)
+            executor.execute(code, line_offset=offset)
             self.assertTrue(mocked_executor.execute.called)
             args, _ = mocked_executor.execute.call_args_list[0]
             self.assertTrue(offset in args, "Line offset was not passed in")
