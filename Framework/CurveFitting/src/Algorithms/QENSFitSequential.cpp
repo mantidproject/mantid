@@ -155,17 +155,25 @@ std::string constructInputString(MatrixWorkspace_sptr workspace, int specMin,
   return input.str();
 }
 
-std::vector<MatrixWorkspace_sptr> extractWorkspaces(const std::string &input) {
-  std::vector<MatrixWorkspace_sptr> workspaces;
-
-  auto extractWorkspace = [&](const std::string &name) {
-    workspaces.emplace_back(getADSMatrixWorkspace(name));
-  };
-
+std::vector<std::string> extractWorkspaceNames(const std::string &input) {
+  std::vector<std::string> v;
   boost::regex reg("([^,;]+),");
   std::for_each(
       boost::sregex_token_iterator(input.begin(), input.end(), reg, 1),
-      boost::sregex_token_iterator(), extractWorkspace);
+      boost::sregex_token_iterator(),
+      [&v](const std::string &name) { v.emplace_back(name); });
+  return v;
+}
+
+std::vector<MatrixWorkspace_sptr> extractWorkspaces(const std::string &input) {
+  const auto workspaceNames = extractWorkspaceNames(input);
+
+  std::vector<MatrixWorkspace_sptr> workspaces;
+
+  for (const auto &wsName : workspaceNames) {
+    workspaces.emplace_back(getADSMatrixWorkspace(wsName));
+  }
+
   return workspaces;
 }
 
@@ -532,11 +540,13 @@ void QENSFitSequential::exec() {
   AnalysisDataService::Instance().addOrReplace(
       getPropertyValue("OutputWorkspace"), resultWs);
 
-  if (containsMultipleData(workspaces))
+  if (containsMultipleData(workspaces)) {
+    const auto inputString = getPropertyValue("Input");
     renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace",
-                     inputWorkspaces);
-  else
+                     extractWorkspaceNames(inputString));
+  } else {
     renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace");
+  }
 
   copyLogs(resultWs, workspaces);
 
@@ -691,10 +701,12 @@ QENSFitSequential::processParameterTable(ITableWorkspace_sptr parameterTable) {
 void QENSFitSequential::renameWorkspaces(
     WorkspaceGroup_sptr outputGroup, std::vector<std::string> const &spectra,
     std::string const &outputBaseName, std::string const &endOfSuffix,
-    std::vector<MatrixWorkspace_sptr> const &inputWorkspaces) {
+    std::vector<std::string> const &inputWorkspaceNames) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
   const auto getNameSuffix = [&](std::size_t i) {
-    return inputWorkspaces[i]->getName() + "_" + spectra[i] + endOfSuffix;
+    std::string workspaceName =
+        inputWorkspaceNames[i] + "_" + spectra[i] + endOfSuffix;
+    return workspaceName;
   };
   return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
                                    endOfSuffix + "s", getNameSuffix);
@@ -763,8 +775,10 @@ std::string QENSFitSequential::getInputString(
 
 std::vector<MatrixWorkspace_sptr> QENSFitSequential::getWorkspaces() const {
   const auto inputString = getPropertyValue("Input");
-  if (!inputString.empty())
-    return extractWorkspaces(inputString);
+  if (!inputString.empty()) {
+    auto workspaceList = extractWorkspaces(inputString);
+    return workspaceList;
+  }
   // The static_cast should not be necessary but it is required to avoid a
   // "internal compiler error: segmentation fault" when compiling with gcc
   // and std=c++1z

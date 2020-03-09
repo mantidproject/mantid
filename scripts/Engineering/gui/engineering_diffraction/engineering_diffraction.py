@@ -29,14 +29,14 @@ Ui_main_window, _ = load_ui(__file__, "main_window.ui")
 
 class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
     """
-    The engineering diffraction interface v2.0
+    The engineering diffraction interface
     """
     def __init__(self, parent=None):
         super(EngineeringDiffractionGui, self).__init__(parent)
 
         # Main Window
         self.setupUi(self)
-        self.doc = "Engineering Diffraction 2"
+        self.doc = "Engineering Diffraction"
         self.tabs = self.tab_main
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.calibration_presenter = None

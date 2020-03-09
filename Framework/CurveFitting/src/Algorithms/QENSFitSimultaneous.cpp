@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/QENSFitSimultaneous.h"
+#include "MantidCurveFitting/Algorithms/QENSFitUtilities.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -436,6 +437,12 @@ void QENSFitSimultaneous::execConcrete() {
   const auto groupWs = makeGroup(fitResult.second);
   const auto resultWs = processIndirectFitParameters(
       parameterWs, createDatasetGrouping(workspaces));
+
+  if (containsMultipleData(workspaces)) {
+    renameWorkspaces(groupWs, getWorkspaceIndices(), outputBaseName,
+                     "_Workspace", getWorkspaceNames());
+  }
+
   copyLogs(resultWs, workspaces);
 
   const bool doExtractMembers = getProperty("ExtractMembers");
@@ -606,6 +613,26 @@ std::vector<MatrixWorkspace_sptr> QENSFitSimultaneous::getWorkspaces() const {
   return workspaces;
 }
 
+std::vector<std::string> QENSFitSimultaneous::getWorkspaceIndices() const {
+  std::vector<std::string> workspaceIndices;
+  workspaceIndices.reserve(m_workspaceIndexPropertyNames.size());
+  for (const auto &propertName : m_workspaceIndexPropertyNames) {
+    std::string workspaceIndex = getPropertyValue(propertName);
+    workspaceIndices.emplace_back(workspaceIndex);
+  }
+  return workspaceIndices;
+}
+
+std::vector<std::string> QENSFitSimultaneous::getWorkspaceNames() const {
+  std::vector<std::string> workspaceNames;
+  workspaceNames.reserve(m_workspacePropertyNames.size());
+  for (const auto &propertName : m_workspacePropertyNames) {
+    std::string workspaceName = getPropertyValue(propertName);
+    workspaceNames.emplace_back(workspaceName);
+  }
+  return workspaceNames;
+}
+
 std::vector<MatrixWorkspace_sptr> QENSFitSimultaneous::convertInputToElasticQ(
     const std::vector<MatrixWorkspace_sptr> &workspaces) const {
   return convertToElasticQ(workspaces, throwIfElasticQConversionFails());
@@ -667,6 +694,21 @@ QENSFitSimultaneous::getAdditionalLogNumbers() const {
 ITableWorkspace_sptr QENSFitSimultaneous::processParameterTable(
     ITableWorkspace_sptr parameterTable) {
   return parameterTable;
+}
+
+void QENSFitSimultaneous::renameWorkspaces(
+    API::WorkspaceGroup_sptr outputGroup,
+    std::vector<std::string> const &spectra, std::string const &outputBaseName,
+    std::string const &endOfSuffix,
+    std::vector<std::string> const &inputWorkspaceNames) {
+  auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
+  const auto getNameSuffix = [&](std::size_t i) {
+    std::string workspaceName =
+        inputWorkspaceNames[i] + "_" + spectra[i] + endOfSuffix;
+    return workspaceName;
+  };
+  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
+                                   endOfSuffix + "s", getNameSuffix);
 }
 
 } // namespace Algorithms

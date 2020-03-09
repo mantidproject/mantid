@@ -1,8 +1,8 @@
 .. _03_workspaces:
 
-=================================================================
-"What is a Bin?", What is a Workspace?"" and the "Power of Rebin" 
-=================================================================
+===========================================================
+What is a Bin?, What is a Workspace? and the Power of Rebin 
+===========================================================
 
 Most data within Mantid are Histogram-like, so imagine a plot: There is an X-axis with a measured/calculated 
 unit, such as Time-of-Flight (TOF) in μs. The Y-axis is the Counts (How many neutrons / positrons were detected 
@@ -14,7 +14,7 @@ If Algorithms are the verbs of Mantid, then Workspaces are the nouns.
 Workspaces are used to store data within Mantid, and when you manipulate data, 
 you output to a new Workspace.
 
-Workspaces come in several forms, but the most common two are the :ref:`Workspace2D` and the :ref:`EventWorkspace`. Their data are in an XYE format (the genereal Mantid term is :ref:`MatrixWorkspace`)
+Workspaces come in several forms, but the most common two are the :ref:`Workspace2D` and the :ref:`EventWorkspace`. Their data are in an XYE format (the general Mantid term is :ref:`MatrixWorkspace`)
 containing 1 or more spectra.
 
 
@@ -27,6 +27,7 @@ A :ref:`Workspace2D` is histogrammed data, with one or more spectra. For each sp
 .. figure:: /images/MBC_Workspace2D.png
    :width: 600px
    :alt: Workspace2D
+   :align: center
 
 When the Matrix table of a Workspace is displayed (via right-click > "Show Data"):
 - Each row is a different Spectra. 
@@ -41,29 +42,37 @@ Note as the X-data refers to the Bin boundaries, there is one more column in the
 Correct Binning
 ---------------
 
-Where bin boundaries are set along the X-axis deteremines, how long or short bins are. The overall arrangement 
+Where bin boundaries are set along the X-axis determines, how long or short bins are. The overall arrangement 
 of bins for a spectrum is called its **binning**. Converting units can lead to a *ragged workspace*, with inconsistent binning 
 between different spectra! A Colorfill plot of ragged data looks poor and often algorithms will not accept a ragged input. 
 
 To fix this **Rebin** the ragged workspace with regular binning:
 
-#. **Load** the *GEM38370_Focussed.nxs* file, naming the **OutputWorkspace** to be *ws*
-#. Execute the Algorithm **ConvertUnits** with *ws* as the InputWorkspace, *ws_lambda* as the **OutputWorkspace**,
+1. **Load** the *GEM38370_Focussed.nxs* file, naming the **OutputWorkspace** to be *ws*
+2. Execute the Algorithm **ConvertUnits** with *ws* as the InputWorkspace, *ws_lambda* as the **OutputWorkspace**,
    **Target**\ =\ *Wavelength*, **EMode**\ =\ *Elastic*. 
-#. Plotting the *ws_lambda* Workspace as a Colorfill demonstrates the ragged X-bins :-( .
+3. Plotting the *ws_lambda* Workspace as a Colorfill demonstrates the ragged X-bins :-( .
+
+( You may need to alter the max value of the colorbar to around 300 by double-click on the right of the colorbar)
 
 .. figure:: /images/MBC_Ragged.png
-   :width: 400px
+   :width: 600px
    :alt: Ragged
+   :align: center
 
 
-#. Execute the **Rebin** Algorithm on *ws_lambda* setting **Params** to *0.5* (setting the width of each bin to 0.5  Å) and
+4. Execute the **Rebin** Algorithm on *ws_lambda* setting **Params** to *0.5* (setting the width of each bin to 0.5  Å) and
    **OutputWorkspace** to *Rebinned*. Plot this as a Colorfill to show uniform binning across all spectra has been
    achieved! :-)
 
 .. figure:: /images/MBC_Rebinned.png
-   :width: 400px
+   :width: 600px
    :alt: Rebinned
+   :align: center
+
+As you can see **Rebin** is a very useful Algorithm for fixing ragged workspaces.
+Another important use of rebinning is prior to point-by-point normalisation (e.g. correcting for incident flux and detector efficiency) by normalising to a vanadium run). This is something that may be handled for you if executing an algorithm such as :ref:`algm-NormaliseToMonitor`.
+
 
 
 Event Workspaces
@@ -75,7 +84,7 @@ neutron spallation source, this means that the Time of arrival and
 Detector ID of each individual neutron is recorded. Only fairly recent
 advances in computer and acquisition hardware have made storing this
 detailed knowledge a practical solution. For example at the SNS facility
-all data, except for data collected in monitors, are as Event data.
+all data, except for data collected in monitors, are in Event mode.
 
 Event specifies “when” and “where”
 
@@ -85,13 +94,13 @@ Event specifies “when” and “where”
 the detector
 
 
-
 Binning of Event Workspaces
 ---------------------------
 
 .. figure:: /images/Binning_example.png
    :alt: Binning_example.png
    :width: 500px
+   :align: center
 
 This extra information that Event Data has over Workspace2D (histogram) data
 means that rebinning is simply moving the Bin edges and summing the number of Counts 
@@ -102,19 +111,17 @@ and so if bins were split they would be split more "correctly".
 
 Note: If you Execute **Rebin** on an EventWorkspace *AND* the PreserveEvents box is not ticked, it will be converted to a Workspace2D.
 
+
 Performance
 -----------
 
-Operating on an EventWorkspace is slower than on a Workspace2D, or ut more techincally:
+Operating on an EventWorkspace is slower than on a Workspace2D, or put more technically:
 
 - Each event list is separate
 - Sorting events is O(n) = n log(n)
 - Histogramming is O(n) = n
 - Only convert an EventWorkspace to a Workspace2D (histogram) when performance is a concern.
 
-.. figure:: /images/Rebin_example.png
-   :alt: Rebin_example.png
-   :width: 800px
 
 Example of Workspace usage
 ==========================
@@ -123,13 +130,20 @@ Example of Workspace usage
 #. Execute the **SumSpectra** algorithm and output to a sensible workspace name such as "HYS_sum" 
 #. Rebin this summed Workspace with Params=10 (the width of each bin) with the box ticked to Preserve Events. 
 #. Rebin again to binwidths of 100, 300 and 1000.
-#. Observe that as the bins get larger, finer detail is "lost". It's nice to see rebinning graphically.
+#. Observe, on the plots below, that as the bins get larger, finer detail is "lost". It's nice to see rebinning graphically.
 
 **Keep these workspace open for the next page.**
 
+.. figure:: /images/Rebin_example.png
+   :alt: Rebin_example.png
+   :width: 800px
+   :align: center
+
 .. figure:: /images/peaksworkspace.png
    :alt: PeaksWorkspace
-   :width: 300px
+   :width: 600px
+   :align: right
+
 
 TableWorkspaces
 ===============
@@ -140,8 +154,8 @@ A :ref:`PeaksWorkspace` is a special type of TableWorkspace with additional supp
 See right for an example of a PeaksWorkspace.
 
 
-OtherWorkspace Types
-====================
+Other Workspace Types
+=====================
 
 -  A :ref:`WorkspaceGroup` allows you to organise Workspaces into groups.
    To create a group simply select more than one workspace in the Workspace Toolbox and click the "**Group**" button.

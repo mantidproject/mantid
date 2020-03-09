@@ -18,6 +18,7 @@ This is quickly accessible through the top Toolbar in Mantid "Help > Mantid Foru
 
 .. figure:: /images/MantidHelpForum.png
    :alt: Mantid Help Forum
+   :align: center
 
 2. Mantid Help email: mantid-help@mantidproject.org 
 
@@ -31,6 +32,7 @@ At some stage you will inevitably see an Error Reporter. Please provide your nam
 
 .. figure:: /images/ErrorReporterTutorial.PNG
    :alt: Error Reporter
+   :align: center
 
 
 Documentation

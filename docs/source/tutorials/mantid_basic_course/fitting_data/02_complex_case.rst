@@ -32,7 +32,9 @@ Three things happens when you click on the Fit Toolbar button:
    -  Fit function items are adding to the plot, initially the two green vertical
    dashed lines
 
-|FirstStartMantidPlotFitting_MBC.png|
+.. figure:: /images/FirstStartMantidPlotFitting_MBC.png
+   :alt: FirstStartMantidPlotFitting_MBC.png
+   :align: center
 
 
 Select the Fitting range
@@ -73,18 +75,20 @@ Let's build a model consisting of a peak and a background function.
 2. Click on the central solid red line and drag it sideways and upwards to set the initial peak centre and height. Drag either one of the dashed red lines to set the initial 
    Full Width Half Maximum (FWHM) of the peak.
 
-|ChangePeakWidth.png|
+.. figure:: /images/ChangePeakWidth.png
+   :alt: ChangePeakWidth.png
+   :align: center
 
 3. Again, right-click on the plot, and choose 'Add background' --> select *FlatBackground*
 
 Note that two fit functions have appeared in the Fit
 Property Browser called ``f0-Gaussian`` and ``f1-FlatBackground``.
 Click on the triangles beside these functions to reveal their fit parameters.
-Just as with the StartX/EndX values, dragging on the plot and changing these values update eachother.
+Just as with the StartX/EndX values, dragging on the plot and changing these values update each other.
 
 .. figure:: /images/PeakAndBackgroundSetup.png
    :alt: PeakAndBackgroundSetup.png
-   :width: 500px
+   :align: center
 
 Now you have created a **CompositeFunction** model, which is the sum of a Gaussian and a
 Flat-background 
@@ -109,7 +113,7 @@ This plots the :orange:`model of the initial parameters` on top of the :blue:`ra
 
 .. figure:: /images/PlotGuess.png
    :alt: PlotGuess.png
-   :width: 400px
+   :align: center
 
 The aim is to have this plot and your data overlap reasonable well
 before you do the actual fit. Note this is not an absolute requirement
@@ -134,7 +138,7 @@ The Mantid fitting framework allows you to tie or constrain parameters.
 **Tying** sets a parameter equal to an expression
 of other parameters (from any of the selected functions). 
 
-**Fixing** is bascially tying a parameter to a number (constant).
+**Fixing** is basically tying a parameter to a number (constant).
 
 **Constraining** a parameter keeps its value above a lower bound,
 below an upper bound, or both!
@@ -176,16 +180,14 @@ selecting the Fit option from the Fit menu:
    :alt: JustRunFitOption.png
 
 Now examine the results in the Fit Property Browser and the output workspaces, as before.
+You can even show error bars to compare how good your fit is to the errors. To do so, as below, enter Figure Options (Gear Symbol) > Curves tab, check the curve selected is "spec 1". Then un-Hide Errorbars, giving them a capsize of 2, displaying an Error (bar) Every 2 (points) and click "Apply" at the bottom of the window.
 
-.. |FirstStartMantidPlotFitting_MBC.png| image:: /images/FirstStartMantidPlotFitting_MBC.png
-   :width: 500px
-.. |ChangePeakWidth.png| image:: /images/ChangePeakWidth.png
-   :width: 400px
+.. figure:: /images/HRPFitError.png
+   :alt: HRPFitError
+   :align: center
+
 .. |SaveSetup.png| image:: /images/SaveSetup.png
-   :width: 300px
 .. |ArrowRight.png| image:: /images/ArrowRight.png
-   :width: 100px
 .. |SaveSetupDialog.png| image:: /images/SaveSetupDialog.png
-   :width: 100px
-.. |PeakFitToolbar.png| image:: /images/SaveSetupDialog.png
-   :width: 500px
+.. |PeakFitToolbar.png| image:: /images/PeakFitToolbar.png
+

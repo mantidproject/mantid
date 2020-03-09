@@ -658,6 +658,15 @@ class FigureInteraction(object):
         waterfall = isinstance(ax, MantidAxes) and ax.is_waterfall()
         if waterfall:
             x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
+            has_fill = ax.waterfall_has_fill()
+
+            if has_fill:
+                line_colour_fill = datafunctions.waterfall_fill_is_line_colour(ax)
+                if line_colour_fill:
+                    fill_colour = None
+                else:
+                    fill_colour = datafunctions.get_waterfall_fills(ax)[0].get_facecolor()
+
             ax.update_waterfall(0, 0)
 
         is_normalized = self._is_normalized(ax)
@@ -690,9 +699,12 @@ class FigureInteraction(object):
 
         ax.autoscale()
 
+        datafunctions.set_initial_dimensions(ax)
         if waterfall:
-            datafunctions.set_initial_dimensions(ax)
             ax.update_waterfall(x, y)
+
+            if has_fill:
+                ax.set_waterfall_fill(True, fill_colour)
 
         self.canvas.draw()
 
@@ -706,9 +718,15 @@ class FigureInteraction(object):
         :return: bool
         """
         plotted_normalized = []
+        if not ax.creation_args:
+            return False
         axis = ax.creation_args[0].get('axis', None)
         for workspace_name, artists in ax.tracked_workspaces.items():
-            if axis != MantidAxType.BIN and not ads.retrieve(workspace_name).isDistribution() and ax.data_replaced:
+            if hasattr(ads.retrieve(workspace_name), "isDistribution"):
+                is_dist = ads.retrieve(workspace_name).isDistribution()
+            else:
+                is_dist = True
+            if axis != MantidAxType.BIN and not is_dist and ax.data_replaced:
                 plotted_normalized += [a.is_normalized for a in artists]
             else:
                 return False

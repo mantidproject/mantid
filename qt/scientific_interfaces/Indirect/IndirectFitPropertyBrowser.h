@@ -63,9 +63,10 @@ public:
   void setFitEnabled(bool enable);
   void setCurrentDataset(TableRowIndex i);
   TableRowIndex currentDataset() const;
-  void updateFunctionBrowserData(TableRowIndex nData,
-                                 const QStringList &datasetNames,
-                                 const std::vector<double> &qValues);
+  void updateFunctionBrowserData(
+      TableRowIndex nData, const QStringList &datasetNames,
+      const std::vector<double> &qValues,
+      const std::vector<std::pair<std::string, int>> &fitResolutions);
   void updatePlotGuess(MatrixWorkspace_const_sptr sampleWorkspace);
   void setErrorsEnabled(bool enabled);
   void

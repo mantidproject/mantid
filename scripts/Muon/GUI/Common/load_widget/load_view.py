@@ -9,6 +9,7 @@ from __future__ import absolute_import
 from qtpy import QtWidgets, QtCore
 
 from mantidqt.widgets import manageuserdirectories
+from Muon.GUI.Common import message_box
 
 
 class LoadView(QtWidgets.QWidget):
@@ -84,3 +85,6 @@ class LoadView(QtWidgets.QWidget):
             self.sig_loading_finished.disconnect(slot)
         except TypeError:
             return
+
+    def warning(self,msg):
+        message_box.warning(msg)

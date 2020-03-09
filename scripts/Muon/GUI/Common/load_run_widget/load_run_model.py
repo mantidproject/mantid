@@ -33,13 +33,15 @@ class LoadRunWidgetModel(object):
         for filename in self._filenames:
             try:
                 ws, run, filename, _ = load_utils.load_workspace_from_filename(filename)
-            except Exception as error:
+            except ValueError as error:
                 failed_files += [(filename, error)]
                 continue
             self._loaded_data_store.remove_data(run=[run])
-            self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename, instrument=self._data_context.instrument)
+            self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename,
+                                             instrument=self._data_context.instrument)
         if failed_files:
-            message = load_utils.exception_message_for_failed_files(failed_files)
+            message = "The requested run could not be found. This could be due to: \n - The run does not yet exist." \
+                      "\n - The file was not found locally (please check the user directories)."
             raise ValueError(message)
 
     # This is needed to work with thread model

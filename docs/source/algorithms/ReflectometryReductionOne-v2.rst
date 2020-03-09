@@ -253,17 +253,17 @@ Output:
    trans1 = Load(Filename='INTER00013463.nxs')
    trans2 = Load(Filename='INTER00013464.nxs')
    # Basic reduction with two transmission runs
-   IvsQ, IvsLam = ReflectometryReductionOne(InputWorkspace=run,
-                                            WavelengthMin=1.0,
-                                            WavelengthMax=17.0,
-                                            ProcessingInstructions='4',
-                                            I0MonitorIndex=2,
-                                            MonitorBackgroundWavelengthMin=15.0,
-                                            MonitorBackgroundWavelengthMax=17.0,
-                                            MonitorIntegrationWavelengthMin=4.0,
-                                            MonitorIntegrationWavelengthMax=10.0,
-					    FirstTransmissionRun=trans1,
-					    SecondTransmissionRun=trans2)
+   IvsQ, IvsLam, TRANS = ReflectometryReductionOne(InputWorkspace=run,
+                                                   WavelengthMin=1.0,
+                                                   WavelengthMax=17.0,
+                                                   ProcessingInstructions='4',
+                                                   I0MonitorIndex=2,
+                                                   MonitorBackgroundWavelengthMin=15.0,
+                                                   MonitorBackgroundWavelengthMax=17.0,
+                                                   MonitorIntegrationWavelengthMin=4.0,
+                                                   MonitorIntegrationWavelengthMax=10.0,
+					           FirstTransmissionRun=trans1,
+					           SecondTransmissionRun=trans2)
 
    print("{:.4f}".format(IvsLam.readY(0)[480]))
    print("{:.4f}".format(IvsLam.readY(0)[481]))

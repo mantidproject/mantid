@@ -14,5 +14,5 @@ Getting Started
 
 **Sections** 
 
-* :ref:`getting_started`
+* :ref:`getting started`
 * :ref:`main_window`

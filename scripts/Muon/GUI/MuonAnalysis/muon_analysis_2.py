@@ -172,26 +172,25 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.context.gui_context.gui_variables_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
 
-        self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
-            self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
-
-        self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
-            self.dockable_plot_widget.presenter.added_group_or_pair_observer)
-
-        self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
-            self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
-
-        self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
-            self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
-
-        self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
-            self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
-
-        self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
-            self.dockable_plot_widget.presenter.added_group_or_pair_observer)
-
         self.context.gui_context.gui_variable_non_calulation_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.gui_context_observer)
+
+        self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
+
+        self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
+            self.dockable_plot_widget.presenter.added_group_or_pair_observer)
+
+        self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
+
+        self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
+            self.dockable_plot_widget.presenter.added_group_or_pair_observer)
+
+        self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
+        self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
+            self.seq_fitting_tab.seq_fitting_tab_presenter.selected_workspaces_observer)
 
         self.fitting_tab.fitting_tab_presenter.fit_function_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.fit_function_updated_observer)

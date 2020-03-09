@@ -23,6 +23,7 @@ to the model. The peaks don't have to be of the same type.
 .. figure:: /images/FittingMultiplePeaks.png
    :alt: FittingMultiplePeaks.png
    :width: 900px
+   :align: center
 
 
 Non peak model + background
@@ -34,7 +35,7 @@ function".
 
 .. figure:: /images/AddOtherFunctionOptionEMU.png
    :alt: AddOtherFunctionOption.png
-   :width: 400px
+   :align: center
 
 
 Custom fitting function
@@ -55,7 +56,7 @@ Browser or with the help of the User Function Dialog:
 
 .. figure:: /images/UserFunctionDialog.png
    :alt: UserFunctionDialog.png
-   :width: 500px
+   :align: center
 
 Type your function in the large lower text field. Browse the built-in functions above and add (|AddButton.png|) them
 to your formula. The fitting parameters are displayed in the Parameters 
@@ -72,7 +73,7 @@ Now your function appears in the list of available functions:
 
 .. figure:: /images/SavedFunctionRecord.png
    :alt: SavedFunctionRecord.png
-   :width: 600px
+   :align: center
 
 Any unwanted function can be removed from the list using
 |RemoveButton.png| button.

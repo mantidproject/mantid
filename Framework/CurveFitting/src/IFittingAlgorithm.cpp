@@ -169,10 +169,15 @@ void IFittingAlgorithm::setFunction() {
   size_t ndom = m_function->getNumberDomains();
   if (ndom > 1) {
     m_workspacePropertyNames.resize(ndom);
+    m_workspaceIndexPropertyNames.resize(ndom);
     m_workspacePropertyNames[0] = "InputWorkspace";
+    m_workspaceIndexPropertyNames[0] = "WorkspaceIndex";
     for (size_t i = 1; i < ndom; ++i) {
       std::string workspacePropertyName = "InputWorkspace_" + std::to_string(i);
       m_workspacePropertyNames[i] = workspacePropertyName;
+      std::string workspaceIndexPropertyName =
+          "WorkspaceIndex_" + std::to_string(i);
+      m_workspaceIndexPropertyNames[i] = workspaceIndexPropertyName;
       if (!existsProperty(workspacePropertyName)) {
         declareProperty(
             std::make_unique<API::WorkspaceProperty<API::Workspace>>(
@@ -182,6 +187,7 @@ void IFittingAlgorithm::setFunction() {
     }
   } else {
     m_workspacePropertyNames.resize(1, "InputWorkspace");
+    m_workspaceIndexPropertyNames.resize(1, "WorkspaceIndex");
   }
 }
 
@@ -288,6 +294,7 @@ void IFittingAlgorithm::addWorkspaces() {
     creator->declareDatasetProperties("", true);
     m_domainCreator.reset(creator.release());
     m_workspacePropertyNames.clear();
+    m_workspaceIndexPropertyNames.clear();
   }
 }
 

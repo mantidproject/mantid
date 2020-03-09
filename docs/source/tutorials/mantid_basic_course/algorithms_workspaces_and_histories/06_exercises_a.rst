@@ -15,7 +15,7 @@ Exercise 1
    **PreserveEvents** ticked
 #. Right-click the workspace called *binned* and choose the **Plot
    Spectrum** option. Once the graph is plotted, leave do not delete it
-#. Events in a EventWorkspace may get filtered according to other
+#. Events in an EventWorkspace may get filtered according to other
    recorded events during the experiments. At perhaps the simplest level
    you can filter out events between specific times. Use
    :ref:`algm-FilterByTime` for this. It has a parameter called
@@ -30,8 +30,7 @@ Exercise 1
    :align: center
    :width: 700px
 
-#. Replay by the steps used to create the *FilteredByTime* workspace
-   from the history of this workspace
+Show the History of the *FilteredByTime* workspace, which should match the steps above.
 
 Exercise 2
 ==========
@@ -50,8 +49,8 @@ Exercise 2
    :align: center
    :width: 700px
 
-Exercise 3 - now you choose the OutpuWorkspace names!
-=====================================================
+Exercise 3 - now you choose the OutputWorkspace names!
+======================================================
 
 #. **Load** *HYS_11388_event.nxs* as in Exercise 1, but this time perform 
    the filtering as part of the Loading, by setting **FilterByTimeStart**\ =\ *4000*

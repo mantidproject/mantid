@@ -608,7 +608,11 @@ def get_sample_log(workspace, **kwargs):
     if not run.hasProperty(LogName):
         raise ValueError('The workspace does not contain the {} sample log'.format(LogName))
     tsp = run[LogName]
-    units = tsp.units
+    try:
+        units = tsp.units
+    except UnicodeDecodeError as exc:
+        mantid.kernel.logger.warning("Error retrieving units for log {}: {}".format(LogName, str(exc)))
+        units = "unknown"
     if not isinstance(tsp, (mantid.kernel.FloatTimeSeriesProperty,
                             mantid.kernel.Int32TimeSeriesProperty,
                             mantid.kernel.Int64TimeSeriesProperty)):
@@ -1009,8 +1013,14 @@ def update_colorbar_scale(figure, image, scale, vmin, vmax):
     :param vmin: the minimum value on the colorbar
     :param vmax: the maximum value on the colorbar
     """
-    if vmin == 0 and scale == LogNorm:
-        vmin += 1e-6  # Avoid 0 log scale error
+    if vmin <= 0 and scale == LogNorm:
+        vmin = 0.0001  # Avoid 0 log scale error
+        mantid.kernel.logger.error("Scale is set to logarithmic so non-positive min value has been changed to 0.0001.")
+
+    if vmax <= 0 and scale == LogNorm:
+        vmax = 1  # Avoid 0 log scale error
+        mantid.kernel.logger.error("Scale is set to logarithmic so non-positive max value has been changed to 1.")
+
     image.set_norm(scale(vmin=vmin, vmax=vmax))
     if image.colorbar:
         image.colorbar.remove()

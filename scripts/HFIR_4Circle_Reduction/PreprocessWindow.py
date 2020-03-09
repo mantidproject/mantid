@@ -7,10 +7,10 @@
 import os
 import time
 import csv
-import reduce4circleControl
-import guiutility as gui_util
-import HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
-import NTableWidget
+from HFIR_4Circle_Reduction import reduce4circleControl
+from HFIR_4Circle_Reduction import guiutility as gui_util
+from HFIR_4Circle_Reduction import fourcircle_utility as fourcircle_utility
+from HFIR_4Circle_Reduction import NTableWidget
 from qtpy.QtWidgets import (QFileDialog, QMainWindow)  # noqa
 from mantid.kernel import Logger
 try:

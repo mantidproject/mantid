@@ -22,57 +22,54 @@ from sans.user_file.txt_parsers.CommandInterfaceAdapter import CommandInterfaceA
 
 
 class GuiStateDirector(object):
-    def __init__(self, table_model, state_gui_model, facility):
-        self._table_model = table_model
+    def __init__(self, state_gui_model, facility):
         self._state_gui_model = state_gui_model
         self._facility = facility
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
-    def create_state(self, row, file_lookup=True):
+    def create_state(self, row_entry, file_lookup=True, user_file=""):
         # 1. Get the data settings, such as sample_scatter, etc... and create the data state.
-        table_index_model = self._table_model.get_table_entry(row)
         if file_lookup:
-            file_information = table_index_model.file_information
+            file_information = row_entry.file_information
         else:
             file_information = SANSFileInformationBlank()
 
         data_builder = get_data_builder(self._facility, file_information)
 
-        self._set_data_entry(data_builder.set_sample_scatter, table_index_model.sample_scatter)
-        self._set_data_period_entry(data_builder.set_sample_scatter_period, table_index_model.sample_scatter_period)
-        self._set_data_entry(data_builder.set_sample_transmission, table_index_model.sample_transmission)
-        self._set_data_period_entry(data_builder.set_sample_transmission_period, table_index_model.sample_transmission_period)  # noqa
-        self._set_data_entry(data_builder.set_sample_direct, table_index_model.sample_direct)
-        self._set_data_period_entry(data_builder.set_sample_direct_period, table_index_model.sample_direct_period)
-        self._set_data_entry(data_builder.set_can_scatter, table_index_model.can_scatter)
-        self._set_data_period_entry(data_builder.set_can_scatter_period, table_index_model.can_scatter_period)
-        self._set_data_entry(data_builder.set_can_transmission, table_index_model.can_transmission)
-        self._set_data_period_entry(data_builder.set_can_transmission_period, table_index_model.can_transmission_period)
-        self._set_data_entry(data_builder.set_can_direct, table_index_model.can_direct)
-        self._set_data_period_entry(data_builder.set_can_direct_period, table_index_model.can_direct_period)
+        self._set_data_entry(data_builder.set_sample_scatter, row_entry.sample_scatter)
+        self._set_data_period_entry(data_builder.set_sample_scatter_period, row_entry.sample_scatter_period)
+        self._set_data_entry(data_builder.set_sample_transmission, row_entry.sample_transmission)
+        self._set_data_period_entry(data_builder.set_sample_transmission_period, row_entry.sample_transmission_period)  # noqa
+        self._set_data_entry(data_builder.set_sample_direct, row_entry.sample_direct)
+        self._set_data_period_entry(data_builder.set_sample_direct_period, row_entry.sample_direct_period)
+        self._set_data_entry(data_builder.set_can_scatter, row_entry.can_scatter)
+        self._set_data_period_entry(data_builder.set_can_scatter_period, row_entry.can_scatter_period)
+        self._set_data_entry(data_builder.set_can_transmission, row_entry.can_transmission)
+        self._set_data_period_entry(data_builder.set_can_transmission_period, row_entry.can_transmission_period)
+        self._set_data_entry(data_builder.set_can_direct, row_entry.can_direct)
+        self._set_data_period_entry(data_builder.set_can_direct_period, row_entry.can_direct_period)
 
         data = data_builder.build()
 
         # 2. Add elements from the options column
         state_gui_model = copy.deepcopy(self._state_gui_model)
-        options_column_model = table_index_model.options_column_model
-        self._apply_column_options_to_state(options_column_model, state_gui_model)
+        self._apply_column_options_to_state(row_entry, state_gui_model)
 
         # 3. Add other columns
-        output_name = table_index_model.output_name
+        output_name = row_entry.output_name
         if output_name:
             state_gui_model.output_name = output_name
 
-        if table_index_model.sample_thickness:
-            state_gui_model.sample_thickness = float(table_index_model.sample_thickness)
-        if table_index_model.sample_height:
-            state_gui_model.sample_height = float(table_index_model.sample_height)
-        if table_index_model.sample_width:
-            state_gui_model.sample_width = float(table_index_model.sample_width)
-        if table_index_model.sample_shape:
-            state_gui_model.sample_shape = table_index_model.sample_shape
+        if row_entry.sample_thickness:
+            state_gui_model.sample_thickness = float(row_entry.sample_thickness)
+        if row_entry.sample_height:
+            state_gui_model.sample_height = float(row_entry.sample_height)
+        if row_entry.sample_width:
+            state_gui_model.sample_width = float(row_entry.sample_width)
+        if row_entry.sample_shape:
+            state_gui_model.sample_shape = row_entry.sample_shape
 
         # 4. Create the rest of the state based on the builder.
         settings = copy.deepcopy(state_gui_model.settings)
@@ -99,7 +96,7 @@ class GuiStateDirector(object):
                 pass
 
     @staticmethod
-    def _apply_column_options_to_state(options_column_model, state_gui_model):
+    def _apply_column_options_to_state(table_index_model, state_gui_model):
         """
         Apply the column setting of the user to the state for that particular row.
 
@@ -107,7 +104,7 @@ class GuiStateDirector(object):
         :param options_column_model: the option column model with the row specific settings
         :param state_gui_model: the state gui model
         """
-        options = options_column_model.get_options()
+        options = table_index_model.options.get_options_dict()
 
         # Here we apply the correction to the state depending on the settings in the options. This is not very nice,
         # but currently it is not clear how to solve this differently.

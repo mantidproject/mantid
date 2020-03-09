@@ -1,7 +1,7 @@
 .. _03_differences:
 
 =================================
-Extra functionslity of MantidPlot
+Extra functionality of MantidPlot
 =================================
 
 While we are working to bring Workbench functionality in line with Mantid Plot, there are a few features are as yet obly available in Plot.
@@ -14,7 +14,7 @@ While we are working to bring Workbench functionality in line with Mantid Plot, 
 Interfaces
 ----------
 
-Almost all interfaces have been moved over to Workbench, with the execption of the 
+Almost all interfaces have been moved over to Workbench, with the exception of the 
 General category.
 
 
@@ -31,13 +31,15 @@ General category.
    :align: center
    :width: 250px
 
-Spectrum Viewer
----------------
+Spectrum / Slice Viewer
+--------------------------------
 
-In Mantid Plot you can right-click on a workspace and show SliceViewer or SpectrumViewer. Within workbench we are combining these (into just the SliceViewer). Some of the functionality of SpectrumViewer withi Plot has been implemented in Workbench but not all. Open Spectrum Viewer to see what options there are!
+In Mantid Plot you can right-click on a workspace and show SliceViewer or SpectrumViewer. Within workbench we are combining these (into just the SliceViewer). Some of the functionality of SpectrumViewer within Plot has been implemented in Workbench but not all. Open Spectrum Viewer to see what options there are!
 
 .. figure:: /images/PlotSliceviewer.png
    :align: center
-   :width: 250px
 
-A key feature of SpectrumViewer is the the peaks viewer functionality. It can show you where assigned peaks are in comparsion to the raw data. This is being added to Workbench very soon!
+Also a key feature of SliceViewer in MantidPlot is the peaks viewer functionality. It can show you where assigned peaks are in comparison to the raw data. This is being added to Workbench very soon!
+
+.. figure:: /images/PlotPeaksviewer.png
+   :align: center

@@ -79,6 +79,7 @@ public:
   virtual void setHWHMRangeVisible(bool visible) = 0;
 
   virtual void displayMessage(const std::string &message) const = 0;
+  virtual void disableSpectrumPlotSelection() = 0;
 
 public slots:
   virtual void clearTopPreview() = 0;

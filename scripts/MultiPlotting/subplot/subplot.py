@@ -253,7 +253,7 @@ class subplot(QtWidgets.QWidget):
         self.signal_rm_subplot.emit(subplot_name)
 
     def _rm_ws_from_plots(self, workspace_name):
-        keys = deepcopy(self._context.subplots.keys())
+        keys = deepcopy(list(self._context.subplots.keys()))
         for subplot in keys:
             labels = self._context.get_lines_from_WS(subplot, workspace_name)
             for label in labels:

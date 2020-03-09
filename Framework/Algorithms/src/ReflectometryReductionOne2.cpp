@@ -17,6 +17,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
@@ -171,6 +172,11 @@ void ReflectometryReductionOne2::init() {
                       "OutputWorkspaceWavelength", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output Workspace IvsLam. Intermediate workspace.");
+  setPropertySettings(
+      "OutputWorkspaceWavelength",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+
+  initTransmissionOutputProperties();
 }
 
 /** Validate inputs
@@ -257,6 +263,7 @@ void ReflectometryReductionOne2::exec() {
   // Convert to Q
   auto IvsQ = convertToQ(IvsLam);
 
+  // Set outputs
   if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
     setProperty("OutputWorkspaceWavelength", IvsLam);
   }
@@ -522,6 +529,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     MatrixWorkspace_sptr detectorWS, const bool detectorWSReduced) {
 
   MatrixWorkspace_sptr transmissionWS = getProperty("FirstTransmissionRun");
+  auto transmissionWSName = transmissionWS->getName();
 
   // Reduce the transmission workspace, if not already done (assume that if
   // the workspace is in wavelength then it has already been reduced)
@@ -539,6 +547,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
           getPropertyValue("TransmissionProcessingInstructions");
     }
 
+    bool const isDebug = getProperty("Debug");
     MatrixWorkspace_sptr secondTransmissionWS =
         getProperty("SecondTransmissionRun");
     auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
@@ -564,18 +573,14 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     alg->setProperty("ProcessingInstructions", transmissionCommands);
     alg->setProperty("NormalizeByIntegratedMonitors",
                      getPropertyValue("NormalizeByIntegratedMonitors"));
-    alg->setPropertyValue("Debug", getPropertyValue("Debug"));
+    alg->setProperty("Debug", isDebug);
     alg->execute();
     transmissionWS = alg->getProperty("OutputWorkspace");
+    transmissionWSName = alg->getPropertyValue("OutputWorkspace");
 
-    // Add the output transmission workspace to the ADS otherwise it gets
-    // swallowed by this algorithm as it's not one of the output properties (it
-    // might be better to make it an output property but currently users always
-    // accept the default name so are unlikely to use it)
-    auto transmissionWSName = alg->getPropertyValue("OutputWorkspace");
-    if (!transmissionWSName.empty())
-      AnalysisDataService::Instance().addOrReplace(transmissionWSName,
-                                                   transmissionWS);
+    // Set interim workspace outputs
+    setWorkspacePropertyFromChild(alg, "OutputWorkspaceFirstTransmission");
+    setWorkspacePropertyFromChild(alg, "OutputWorkspaceSecondTransmission");
   }
 
   // Rebin the transmission run to be the same as the input.
@@ -593,6 +598,13 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
   }
 
   MatrixWorkspace_sptr normalized = divide(detectorWS, transmissionWS);
+
+  // Set output transmission workspace
+  if (isDefault("OutputWorkspaceTransmission") && !transmissionWSName.empty()) {
+    setPropertyValue("OutputWorkspaceTransmission", transmissionWSName);
+  }
+  setProperty("OutputWorkspaceTransmission", transmissionWS);
+
   return normalized;
 }
 

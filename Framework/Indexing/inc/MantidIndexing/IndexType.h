@@ -7,6 +7,7 @@
 #ifndef MANTID_INDEXING_INDEXTYPE_H_
 #define MANTID_INDEXING_INDEXTYPE_H_
 
+#include <string>
 #include <type_traits>
 
 namespace Mantid {
@@ -48,6 +49,7 @@ public:
   template <class T> bool operator<=(const T &other) const noexcept {
     return m_data <= IndexType(other).m_data;
   }
+  std::string str() const { return std::to_string(m_data); }
 
 private:
   Int m_data;

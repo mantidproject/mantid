@@ -40,14 +40,14 @@ class SANSILLReduction(PythonAlgorithm):
 
     @staticmethod
     def _get_solid_angle_method(instrument):
-        if instrument in ['D11', 'D11lr']:
+        if instrument in ['D11', 'D11lr', 'D16']:
             return 'Rectangle'
         else:
             return 'GenericShape'
 
     @staticmethod
     def _make_solid_angle_name(ws):
-        return mtd[ws].getInstrument().getName()+'_'+str(int(mtd[ws].getRun().getLogData('L2').value))+'m_SolidAngle'
+        return mtd[ws].getInstrument().getName()+'_'+str(round(mtd[ws].getRun().getLogData('L2').value))+'m_SolidAngle'
 
     @staticmethod
     def _check_distances_match(ws1, ws2):
@@ -117,7 +117,7 @@ class SANSILLReduction(PythonAlgorithm):
                              doc='Choose the normalisation type.')
 
         self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.),
-                             doc='Beam raduis [m]; used for beam center finding, transmission and flux calculations.')
+                             doc='Beam radius [m]; used for beam center finding, transmission and flux calculations.')
 
         self.setPropertySettings('BeamRadius',
                                  EnabledWhenProperty(beam, transmission, LogicOperator.Or))
@@ -219,13 +219,16 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('DefaultMaskedInputWorkspace', sample)
 
+        self.declareProperty('ThetaDependent', True,
+                             doc='Whether or not to use 2theta dependent transmission correction')
+
     def _normalise(self, ws):
         """
             Normalizes the workspace by time (SampleLog Timer) or Monitor (ID=100000)
             @param ws : the input workspace
         """
         normalise_by = self.getPropertyValue('NormaliseBy')
-        monID = 100000 if self._instrument != 'D33' else 500000
+        monID = 100000 if (self._instrument != 'D33' and self._instrument != 'D16') else 500000
         if normalise_by == 'Monitor':
             mon = ws + '_mon'
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=mon)
@@ -267,6 +270,7 @@ class SANSILLReduction(PythonAlgorithm):
         run = mtd[ws].getRun()
         if run.hasProperty('attenuator.attenuation_coefficient'):
             att_coeff = run.getLogData('attenuator.attenuation_coefficient').value
+            self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
         elif run.hasProperty('attenuator.attenuation_value'):
             att_value = run.getLogData('attenuator.attenuation_value').value
             if float(att_value) < 10. and self._instrument == 'D33':
@@ -278,9 +282,10 @@ class SANSILLReduction(PythonAlgorithm):
                     raise RuntimeError('Unable to find the attenuation coefficient for D33 attenuator #'+str(int(att_value)))
             else:
                 att_coeff = att_value
+            self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
         else:
-            raise RuntimeError('Unable to process as beam: could not find attenuation coefficient nor value.')
-        self.log().information('Found attenuator coefficient/value: {0}'.format(att_coeff))
+            att_coeff = 1
+            self.log().notice('Unable to process as beam: could not find attenuation coefficient nor value. Assuming 1.')
         flux_out = self.getPropertyValue('FluxOutputWorkspace')
         if flux_out:
             flux = ws + '_flux'
@@ -333,15 +338,6 @@ class SANSILLReduction(PythonAlgorithm):
             Processes the sample
             @param ws: input workspace
         """
-        reference_ws = self.getProperty('ReferenceInputWorkspace').value
-        coll_ws = None
-        if reference_ws:
-            if not self._check_processed_flag(reference_ws, 'Sample'):
-                self.log().warning('Reference input workspace is not processed as sample.')
-            Divide(LHSWorkspace=ws, RHSWorkspace=reference_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
-            Scale(InputWorkspace=ws, Factor=self.getProperty('WaterCrossSection').value, OutputWorkspace=ws)
-            self._mask(ws, reference_ws)
-            coll_ws = reference_ws
         sensitivity_in = self.getProperty('SensitivityInputWorkspace').value
         if sensitivity_in:
             if not self._check_processed_flag(sensitivity_in, 'Sensitivity'):
@@ -357,21 +353,67 @@ class SANSILLReduction(PythonAlgorithm):
                 DeleteWorkspace(flux_ws)
             else:
                 Divide(LHSWorkspace=ws, RHSWorkspace=flux_in, OutputWorkspace=ws, WarnOnZeroDivide=False)
-        if coll_ws:
-            self._check_distances_match(mtd[ws], coll_ws)
-            sample_coll = mtd[ws].getRun().getLogData('collimation.actual_position').value
-            ref_coll = coll_ws.getRun().getLogData('collimation.actual_position').value
-            flux_factor = (sample_coll ** 2) / (ref_coll ** 2)
-            self.log().notice('Flux factor is: ' + str(flux_factor))
-            Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
-            ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
-                                 NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
+            AddSampleLog(Workspace=ws, LogText='True', LogType='String', LogName='NormalisedByFlux')
+            self._do_rescale_flux(ws, flux_in)
+        reference_ws = self.getProperty('ReferenceInputWorkspace').value
+        if reference_ws:
+            if not self._check_processed_flag(reference_ws, 'Sample'):
+                self.log().warning('Reference input workspace is not processed as sample.')
+            Divide(LHSWorkspace=ws, RHSWorkspace=reference_ws, OutputWorkspace=ws, WarnOnZeroDivide=False)
+            Scale(InputWorkspace=ws, Factor=self.getProperty('WaterCrossSection').value, OutputWorkspace=ws)
+            self._mask(ws, reference_ws)
+            self._rescale_flux(ws, reference_ws)
+        ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
+                             NaNValue=0., NaNError=0., InfinityValue=0., InfinityError=0.)
+
+    def _rescale_flux(self, ws, ref_ws):
+        """
+            This adjusts the absolute scale after normalising by water
+            If both sample and water runs are normalised by flux, there is nothing to do
+            If one is normalised, the other is not, we log a warning
+            If neither is normalised by flux, we have to rescale by the factor
+            @param ws : the workspace to scale (sample)
+            @param ref_ws : the reference workspace (water)
+        """
+        message = 'Sample and water runs are not consistent in terms of flux normalisation; ' \
+                  'the absolute scale will not be correct. ' \
+                  'Make sure they are either both normalised or both not normalised by flux.' \
+                  'Consider specifying the sample flux also to water reduction.' \
+                  'Even if it would be at different distance, it will be rescaled correctly.'
+        run = mtd[ws].getRun()
+        run_ref = ref_ws.getRun()
+        has_log = run.hasProperty('NormalisedByFlux')
+        has_log_ref = run_ref.hasProperty('NormalisedByFlux')
+        if has_log != has_log_ref:
+            raise RuntimeError(message)
+        if has_log and has_log_ref:
+            log_val = run.getLogData('NormalisedByFlux').value
+            log_val_ref = run_ref.getLogData('NormalisedByFlux').value
+            if log_val != log_val_ref:
+                raise RuntimeError(message)
+            elif log_val == 'False':
+                self._do_rescale_flux(ws, ref_ws)
+        else:
+            self._do_rescale_flux(ws, ref_ws)
+
+    def _do_rescale_flux(self, ws, ref_ws):
+        """
+            Scales ws by the flux factor wrt the reference
+            @ws : input workspace to scale (sample)
+            @ref_ws : reference workspace (water)
+        """
+        self._check_distances_match(mtd[ws], ref_ws)
+        sample_l2 = mtd[ws].getRun().getLogData('L2').value
+        ref_l2 = ref_ws.getRun().getLogData('L2').value
+        flux_factor = (sample_l2 ** 2) / (ref_l2 ** 2)
+        self.log().notice('Flux factor is: ' + str(flux_factor))
+        Scale(InputWorkspace=ws, Factor=flux_factor, OutputWorkspace=ws)
 
     def _apply_absorber(self, ws, absorber_ws):
         """
             Subtracts the dark current
             @param ws: input workspace
-            @parma absorber_ws: dark current workspace
+            @param absorber_ws: dark current workspace
         """
         if not self._check_processed_flag(absorber_ws, 'Absorber'):
             self.log().warning('Absorber input workspace is not processed as absorber.')
@@ -399,6 +441,7 @@ class SANSILLReduction(PythonAlgorithm):
             @param ws: input workspace
             @param transmission_ws: transmission workspace
         """
+        theta_dependent = self.getProperty('ThetaDependent').value
         if not self._check_processed_flag(transmission_ws, 'Transmission'):
             self.log().warning('Transmission input workspace is not processed as transmission.')
         if transmission_ws.blocksize() == 1:
@@ -406,14 +449,15 @@ class SANSILLReduction(PythonAlgorithm):
             transmission = transmission_ws.readY(0)[0]
             transmission_err = transmission_ws.readE(0)[0]
             ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionValue=transmission,
-                                        TransmissionError=transmission_err, OutputWorkspace=ws)
+                                        TransmissionError=transmission_err, ThetaDependent=theta_dependent,
+                                        OutputWorkspace=ws)
         else:
             # wavelenght dependent transmission, need to rebin
             transmission_rebinned = ws + '_tr_rebinned'
             RebinToWorkspace(WorkspaceToRebin=transmission_ws, WorkspaceToMatch=ws,
                              OutputWorkspace=transmission_rebinned)
             ApplyTransmissionCorrection(InputWorkspace=ws, TransmissionWorkspace=transmission_rebinned,
-                                        OutputWorkspace=ws)
+                                        ThetaDependent=theta_dependent, OutputWorkspace=ws)
             DeleteWorkspace(transmission_rebinned)
 
     def _apply_container(self, ws, container_ws):
@@ -524,12 +568,19 @@ class SANSILLReduction(PythonAlgorithm):
                         self._apply_transmission(ws, transmission_ws)
                     solid_angle = self._make_solid_angle_name(ws)
                     cache = self.getProperty('CacheSolidAngle').value
-                    if cache:
-                        if not mtd.doesExist(solid_angle):
-                            SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle,
-                                       Method=self._get_solid_angle_method(self._instrument))
-                    else:
-                        SolidAngle(InputWorkspace=ws, OutputWorkspace=solid_angle,
+                    if (cache and not mtd.doesExist(solid_angle)) or not cache:
+                        if self._instrument == "D16":
+                            run = mtd[ws].getRun()
+                            distance = run.getLogData('L2').value
+                            CloneWorkspace(InputWorkspace=ws, OutputWorkspace=solid_angle)
+                            MoveInstrumentComponent(Workspace=solid_angle, X=0, Y=0, Z=distance,
+                                                    RelativePosition=False, ComponentName="detector")
+                            RotateInstrumentComponent(Workspace=solid_angle, X=0, Y=1, Z=0, angle=0,
+                                                      RelativeRotation=False, ComponentName="detector")
+                            input_solid = solid_angle
+                        else:
+                            input_solid = ws
+                        SolidAngle(InputWorkspace=input_solid, OutputWorkspace=solid_angle,
                                    Method=self._get_solid_angle_method(self._instrument))
                     Divide(LHSWorkspace=ws, RHSWorkspace=solid_angle, OutputWorkspace=ws, WarnOnZeroDivide=False)
                     if not cache:

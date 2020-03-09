@@ -33,6 +33,7 @@ protected:
   void initBackgroundProperties();
   /// Initialize transmission properties
   void initTransmissionProperties();
+  void initTransmissionOutputProperties();
   /// Initialize properties for stitching transmission runs
   void initStitchProperties();
   /// Initialize corection algorithm properties
@@ -100,6 +101,9 @@ protected:
   std::string convertProcessingInstructionsToSpectrumNumbers(
       const std::string &instructions,
       Mantid::API::MatrixWorkspace_const_sptr ws) const;
+
+  void setWorkspacePropertyFromChild(Algorithm_sptr alg,
+                                     std::string const &propertyName);
 };
 } // namespace Algorithms
 } // namespace Mantid

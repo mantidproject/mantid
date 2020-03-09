@@ -307,7 +307,9 @@ void FitOptionsBrowser::createSequentialFitProperties() {
   // Create LogValue property
   m_plotParameter = m_enumManager->addProperty("Plot parameter");
   {
-    m_propertyNameMap["PlotParameter"] = m_plotParameter;
+    addProperty("PlotParameter", m_plotParameter,
+                &FitOptionsBrowser::getStringEnumProperty,
+                &FitOptionsBrowser::setStringEnumProperty);
     m_sequentialProperties << m_plotParameter;
   }
 }

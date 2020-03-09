@@ -195,7 +195,7 @@ class ColorbarWidget(QWidget):
                 try:
                     self.cmin_value = data[~data.mask].min()
                     self.cmax_value = data[~data.mask].max()
-                except AttributeError:
+                except (AttributeError, IndexError):
                     self.cmin_value = np.nanmin(data)
                     self.cmax_value = np.nanmax(data)
             except (ValueError, RuntimeWarning):

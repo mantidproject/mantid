@@ -13,13 +13,13 @@ Loading a File
 First, let's use the Workspaces Toolbox to load the dataset MAR11060.raw collected on the ISIS MARI
 instrument:
 
-#. In Workbench click on the the "Load" button (as shown highlighted in
+#. In Workbench click on the "Load" button (as shown highlighted in
    red), and select "File". This will open the Load Dialog window.
 #. Browse to the location of the file MAR11060.raw.
 
    -  If you successfully added the "TrainingCourseData" directory 
       to the data search directories (see
-      :ref:`getting started`) then you can simply
+      :ref:`getting_started`) then you can simply
       enter the filename "MAR11060.raw" in the File textbox.
    -  Actually, typing "MAR11060" would be enough for Workbench to find
       the data.
@@ -49,7 +49,7 @@ Mantid can load many different data formats. A few examples are:
 -  Live data streams.
 
 Fortunately, you don't have to learn how to use all of these Load
-algorithms. In fact, you only need to know one : "Load". Whenever you use "Load" Mantid determines the format of the file and uses the correct algorithm to read it.
+algorithms. In fact, you only need to know one: "Load". Whenever you use "Load" Mantid determines the format of the file and uses the correct algorithm to read it.
 
 Loading Lots of Data Files
 ==========================

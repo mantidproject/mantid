@@ -7,7 +7,7 @@ Exercises
 Exercise 1
 ==========
 
--  **Load** *SXD23767.raw* into MantidPlot
+-  **Load** *SXD23767.raw* into Mantid
 -  Open the Instrument View
 -  Make sure the colour map is set to "jet" and the display type to "Spherical Z".
 -  Change the colour scale to *SymmetricLog10* set the scale range to be between
@@ -24,7 +24,12 @@ Exercise 1
    should be shown in the instrument view. A workspace (PeaksWorkspace)
    called *SingleCrystalPeakTable* should also exist now in the
    Workspace Toolbox.
-   |MBC_PickDemo.png|
+
+.. figure:: /images/MBC_PickDemo.png
+   :alt: MBC_PickDemo.png
+   :align: center
+
+
 -  Double click the new PeaksWorkspace to open it as a table and verify
    that the TOF value is the same as shown in the mini-plot and the
    detector ID is the same as shown in the text area above the mini plot
@@ -79,8 +84,6 @@ detector for a small angle dataset.
 
 
 .. |PickTabAddPeakButton.png| image:: /images/PickTabAddPeakButton.png
-.. |MBC_PickDemo.png| image:: /images/MBC_PickDemo.png
-   :width: 600px
 .. |PickTabEraseButton.png| image:: /images/PickTabEraseButton.png
 .. |LOQForMasking.png| image:: /images/LOQForMasking.png
    :width: 200px

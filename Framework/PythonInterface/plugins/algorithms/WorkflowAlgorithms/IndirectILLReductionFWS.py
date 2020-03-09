@@ -138,6 +138,12 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         self.declareProperty(name='DiscardSingleDetectors', defaultValue=False,
                              doc='Whether to discard the spectra of single detectors.')
 
+        self.declareProperty(name='ManualInelasticPeakChannels', defaultValue=[-1,-1],
+                             doc='The channel indices for the inelastic peak positions in the beginning '
+                                 'and in the end of the spectra; by default the maxima of the monitor '
+                                 'spectrum will be used for this. The intensities will be integrated symmetrically '
+                                 'around each peak.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -145,6 +151,16 @@ class IndirectILLReductionFWS(PythonAlgorithm):
         if self.getPropertyValue('CalibrationBackgroundRun') and not self.getPropertyValue('CalibrationRun'):
             issues['CalibrationRun'] = 'Calibration runs are required, ' \
                                        'if background for calibration is given.'
+
+        if not self.getProperty('ManualInelasticPeakChannels').isDefault:
+            peaks = self.getProperty('ManualInelasticPeakChannels').value
+            if len(peaks) != 2:
+                issues['ManualInelasticPeakChannels'] = 'Invalid value for peak channels, ' \
+                                                        'provide two comma separated positive integers.'
+            elif peaks[0] >= peaks[1]:
+                issues['ManualInelasticPeakChannels'] = 'First peak channel must be less than the second'
+            elif peaks[0] <= 0:
+                issues['ManualInelasticPeakChannels'] = 'Non negative integers are required'
 
         return issues
 
@@ -219,14 +235,23 @@ class IndirectILLReductionFWS(PythonAlgorithm):
 
         return files
 
-    @staticmethod
-    def _ifws_peak_bins(ws):
+    def _ifws_peak_bins(self, ws):
         '''
-        Gives the bin indices of the first and last peaks of monitors from the sample logs
+        Gives the bin indices of the first and last inelastic peaks
+        By default they are taken from the maxima of the monitor spectrum
+        Or they can be specified manually as input parameters
         @param ws :: input workspace
         return    :: [imin,imax]
         '''
-
+        if not self.getProperty('ManualInelasticPeakChannels').isDefault:
+            peak_channels = self.getProperty('ManualInelasticPeakChannels').value
+            blocksize = mtd[ws].blocksize()
+            if peak_channels[1] >= blocksize:
+                raise RuntimeError('Manual peak channel {0} is out of range {1}'.format(peak_channels[1], blocksize))
+            else:
+                AddSampleLogMultiple(Workspace=ws, LogNames=['ManualInelasticLeftPeak', 'ManualInelasticRightPeak'],
+                                     LogValues=str(peak_channels[0])+','+str(peak_channels[1]))
+                return peak_channels
         run = mtd[ws].getRun()
         if not run.hasProperty('MonitorLeftPeak') or not run.hasProperty('MonitorRightPeak'):
             raise RuntimeError('Unable to retrieve the monitor peak information from the sample logs.')

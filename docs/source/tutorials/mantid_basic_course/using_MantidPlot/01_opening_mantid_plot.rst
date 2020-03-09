@@ -1,8 +1,8 @@
 .. _01_Opening_Mantid_Plot:
 
-========================
+===================
 Opening Mantid Plot
-========================
+===================
 
 MantidPlot was built
 on Qt4, but as Qt4 is no longer being supported, the Mantid Workbench was made using Matplotlib as the underlying tool for generating plots.
@@ -17,7 +17,7 @@ Launching Mantid Plot
 ==========================
 
 .. figure:: /images/mantid_folder.png
-   :width: 700px
+   :width: 400px
    :alt: Mantid applications in windows start menu
 
 Currently Mantid Plot comes with any install of Mantid.
@@ -27,10 +27,12 @@ MantidPlot and the Mantid Workbench are visually different. Mantid Workbench has
 .. figure:: /images/MantidPlot_example.png
    :width: 700px
    :alt: The example of MantidPlot
+   :align: center
 
 .. figure:: /images/MantidWorkbench_example.png
    :width: 700px
    :alt: The example of the Mantid Workbench
+   :align: center
 
 You can tell the difference by the name in the top left corner, and the icon on the taskbar.
 
@@ -40,5 +42,4 @@ You still load workspaces as you did before but the workspaces right-click menu 
 .. figure:: /images/Workbench_workspace_context_menu.png
    :width: 700px
    :alt: Context menus for MantidPlot and Workbench
-
-
+   :align: center

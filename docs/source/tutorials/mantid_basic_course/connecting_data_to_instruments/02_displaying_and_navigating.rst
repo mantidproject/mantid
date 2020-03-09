@@ -34,7 +34,7 @@ screen. Use this drop-down menu to select the type of the projection
 
 .. figure:: /images/InstrumentViewTypeDropDown.png
    :alt: InstrumentViewTypeDropDown.png
-   :width: 150px
+
 
 Here is an example of how an instrument may look in different views:
 
@@ -50,7 +50,7 @@ the Display Settings drop-down menu.
 
 .. figure:: /images/DisplaySettings.png
    :alt: DisplaySettings.png
-   :width: 150px
+
 
 Navigating in 3D
 ================
@@ -60,6 +60,8 @@ In the 3D view:
 -  :red:`The X axis is red.`
 -  :green:`The Y axis is green.`
 -  :blue:`The Z axis is blue.`
+
+In most cases, the :blue:`Z axis` is the direction of the incident beam, but not for every instrument!
 
 Rotate the instrument by left-clicking and dragging.
 

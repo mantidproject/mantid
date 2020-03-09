@@ -7,6 +7,7 @@ Investigating Data
 The Pick tab on the controls panel allows you to see the data in the
 workspace.
 
+
 The Toolbar
 ===========
 
@@ -26,6 +27,7 @@ The Toolbar
 - |PickTabCPCompare.png| - Compare single crystal peaks.
 - |PickTabCPAlign.png| - Crystal Peak alignment tool.
 
+
 Picking a Single Detector
 =========================
 
@@ -36,6 +38,8 @@ data in the mini-plot at the bottom of the tab.
    :alt: Miniplot.png
 
 Hover the mouse over a detector and see the mini-plot update.
+To zoom in on this mini-plot, select the |PickTabAddPeakButton.png| button, then click and drag on the mini-plot.
+If you don't drag (just click), you will add a SingleCrystalPeak (appearing in a new TableWorkspace).
 
 Picking a Tube
 ==============
@@ -49,7 +53,6 @@ to display the following menu:
 .. figure:: /images/SumIntegrateMenu.png
    :alt: SumIntegrateMenu.png
 
-| 
 
 Summing over the detectors
 --------------------------
@@ -59,6 +62,7 @@ detectors in a tube vs time of flight.
 
 .. figure:: /images/MiniplotSum.png
    :alt: MiniplotSum.png
+
 
 Integrating over the time of flight
 -----------------------------------
@@ -74,11 +78,13 @@ over time of flight vs detector position in the tube.
 .. figure:: /images/DetectorPositionOptions.png
    :alt: DetectorPositionOptions.png
 
+
 Navigate
 ========
 
 The |PickTabZoomButton.png| tool button switches on the navigation mode
 which is the same as in Render Tab.
+
 
 Selecting Arbitrary Sets of Detectors
 =====================================
@@ -87,6 +93,7 @@ The rest of the buttons in the top row are for making complex
 selections. Buttons
 |PickTabEllipseButton.png|\ |PickTabRectButton.png|\ |PickTabElRingButton.png|\ |PickTabRectRingButton.png|
 are for drawing shapes, |PickTabEditButton.png| is for editing them.
+
 
 Draw an ellipse
 ---------------
@@ -98,6 +105,7 @@ Draw an ellipse
 .. figure:: /images/DrawingEllipse.png
    :alt: DrawingEllipse.png
    :width: 300px
+
 
 Edit a shape
 ------------
@@ -123,11 +131,12 @@ of them.
 
 Only translation is possible for a multiple selection.
 
+
 Sum selected detectors
 ----------------------
 
 The mini-plot automatically sums the counts in the detectors covered by
-the shapes and plots them vs time of flight.
+the shapes and plots this vs time of flight.
 
 
 .. |PickTabToolButtons.png| image:: /images/PickTabToolButtons.png

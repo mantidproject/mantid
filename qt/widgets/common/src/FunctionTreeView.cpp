@@ -983,8 +983,8 @@ FunctionTreeView::addConstraintProperties(QtProperty *prop,
   auto const parts = splitConstraintString(constraint);
   if (parts.first.isEmpty())
     return QList<FunctionTreeView::AProperty>();
-  double lowerBound = parts.second.first.toDouble();
-  double upperBound = parts.second.second.toDouble();
+  auto lowerBound = parts.second.first;
+  auto upperBound = parts.second.second;
 
   // add properties
   QList<FunctionTreeView::AProperty> plist;
@@ -992,17 +992,21 @@ FunctionTreeView::addConstraintProperties(QtProperty *prop,
   ac.paramProp = prop;
   ac.lower = ac.upper = nullptr;
 
-  auto apLower =
-      addProperty(prop, m_constraintManager->addProperty("LowerBound"));
-  plist << apLower;
-  ac.lower = apLower.prop;
-  m_constraintManager->setValue(ac.lower, lowerBound);
+  if (!lowerBound.isEmpty()) {
+    auto apLower =
+        addProperty(prop, m_constraintManager->addProperty("LowerBound"));
+    plist << apLower;
+    ac.lower = apLower.prop;
+    m_constraintManager->setValue(ac.lower, lowerBound.toDouble());
+  }
 
-  auto apUpper =
-      addProperty(prop, m_constraintManager->addProperty("UpperBound"));
-  plist << apUpper;
-  ac.upper = apUpper.prop;
-  m_constraintManager->setValue(ac.upper, upperBound);
+  if (!upperBound.isEmpty()) {
+    auto apUpper =
+        addProperty(prop, m_constraintManager->addProperty("UpperBound"));
+    plist << apUpper;
+    ac.upper = apUpper.prop;
+    m_constraintManager->setValue(ac.upper, upperBound.toDouble());
+  }
 
   if (ac.lower || ac.upper) {
     m_constraints.insert(m_properties[prop].parent, ac);
@@ -1069,11 +1073,14 @@ bool FunctionTreeView::hasUpperBound(QtProperty *prop) const {
 QString FunctionTreeView::getConstraint(const QString &paramName,
                                         const double &lowerBound,
                                         const double &upperBound) const {
-  QString constraint;
 
-  constraint += QString::number(lowerBound) + "<";
+  QString constraint;
+  if (lowerBound != Mantid::EMPTY_DBL())
+    constraint += QString::number(lowerBound) + "<";
+
   constraint += paramName;
-  constraint += "<" + QString::number(upperBound);
+  if (upperBound != Mantid::EMPTY_DBL())
+    constraint += "<" + QString::number(upperBound);
 
   return constraint;
 }
@@ -1659,17 +1666,20 @@ void FunctionTreeView::removeConstraint() {
 std::pair<QString, QString>
 FunctionTreeView::getFunctionAndConstraint(QtProperty *prop) const {
   auto const parName = getParameterName(prop);
-  double lower, upper;
+  double lower = Mantid::EMPTY_DBL();
+  double upper = Mantid::EMPTY_DBL();
   for (auto p : prop->subProperties()) {
     if (p->propertyName() == "LowerBound")
       lower = m_constraintManager->value(p);
     if (p->propertyName() == "UpperBound")
       upper = m_constraintManager->value(p);
   }
-
-  QString functionIndex, name;
-  std::tie(functionIndex, name) = splitParameterName(parName);
-  return std::make_pair(functionIndex, getConstraint(name, lower, upper));
+  if (lower != Mantid::EMPTY_DBL() || upper != Mantid::EMPTY_DBL()) {
+    QString functionIndex, name;
+    std::tie(functionIndex, name) = splitParameterName(parName);
+    return std::make_pair(functionIndex, getConstraint(name, lower, upper));
+  }
+  return std::make_pair("", "");
 } // namespace MantidWidgets
 
 /**

@@ -36,6 +36,8 @@ def _plot_quartiles_matplotlib(output_workspaces, sample_scatter):
     if not isinstance(output_workspaces, list):
         output_workspaces = [output_workspaces]
 
+    assert output_workspaces, "No workspaces were passed into plotting"
+
     plot(output_workspaces, wksp_indices=[0], ax_properties=ax_properties, overplot=True,
          plot_kwargs=plot_kwargs, window_title=title)
 

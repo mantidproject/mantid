@@ -135,6 +135,7 @@ target_link_libraries(HistogramData
                       LINK_PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
+                      Kernel
                       ${MANTIDLIBS})
 
 # Add the unit tests directory

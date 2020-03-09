@@ -30,6 +30,8 @@ set PV_PLUGIN_PATH=%_INSTALL_DIR%\plugins\paraview\qt4
 if "%MPLBACKEND%"=="" (
   set MPLBACKEND=qt4agg
 )
+:: Ignore Python SyntaxWarning
+set PYTHONWARNINGS=default::DeprecationWarning:__main__,ignore::DeprecationWarning,ignore::PendingDeprecationWarning,ignore::ImportWarning,ignore::ResourceWarning,ignore::SyntaxWarning
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Start MantidPlot
@@ -43,5 +45,8 @@ start "MantidPlot" /B /WAIT %_BIN_DIR%\MantidPlot.exe %*
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 if %errorlevel% NEQ 0 (
 set QT_API=pyqt4
+:: sip is now private inside PyQt4 folder but qtpy tries to "import sip" plain. Fixup the path so
+:: it can find the private sip.
+set PYTHONPATH=%_INSTALL_DIR%\bin\Lib\site-packages\PyQt4;%PYTHONPATH%
 python %_INSTALL_DIR%\scripts\ErrorReporter\error_dialog_app.py --exitcode=%errorlevel% --directory=%_BIN_DIR% --application=mantidplot
 )

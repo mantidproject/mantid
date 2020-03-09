@@ -58,7 +58,7 @@ class WorkHandler(object):
         self.thread_pool = QThreadPool()
 
     def _add_listener(self, listener, process_id, id):
-        if not isinstance(listener, WorkHandler.WorkListener):
+        if not isinstance(listener, self.WorkListener):
             raise ValueError("The listener is not of type "
                              "WorkListener but rather {}".format(type(listener)))
         self._listener.update({process_id: {'id': id, 'listener': listener}})

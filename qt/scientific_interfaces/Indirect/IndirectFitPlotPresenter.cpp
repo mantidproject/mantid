@@ -46,26 +46,10 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
       m_plotGuessInSeparateWindow(false),
       m_plotter(std::make_unique<IndirectPlotter>(pythonRunner)) {
   connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
-          SLOT(setActiveIndex(TableDatasetIndex)));
-  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
-          SLOT(updateAvailableSpectra()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
-          SLOT(updatePlots()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
-          SLOT(updateFitRangeSelector()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
-          SLOT(updateGuess()));
-  connect(m_view, SIGNAL(selectedFitDataChanged(TableDatasetIndex)), this,
-          SIGNAL(selectedFitDataChanged(TableDatasetIndex)));
+          SLOT(handleSelectedFitDataChanged(TableDatasetIndex)));
 
   connect(m_view, SIGNAL(plotSpectrumChanged(WorkspaceIndex)), this,
-          SLOT(setActiveSpectrum(WorkspaceIndex)));
-  connect(m_view, SIGNAL(plotSpectrumChanged(WorkspaceIndex)), this,
-          SLOT(updatePlots()));
-  connect(m_view, SIGNAL(plotSpectrumChanged(WorkspaceIndex)), this,
-          SLOT(updateFitRangeSelector()));
-  connect(m_view, SIGNAL(plotSpectrumChanged(WorkspaceIndex)), this,
-          SIGNAL(plotSpectrumChanged(WorkspaceIndex)));
+          SLOT(handlePlotSpectrumChanged(WorkspaceIndex)));
 
   connect(m_view, SIGNAL(plotCurrentPreview()), this,
           SLOT(plotCurrentPreview()));
@@ -103,6 +87,24 @@ IndirectFitPlotPresenter::IndirectFitPlotPresenter(IndirectFittingModel *model,
   updateAvailableSpectra();
 }
 
+void IndirectFitPlotPresenter::handleSelectedFitDataChanged(
+    TableDatasetIndex index) {
+  setActiveIndex(index);
+  updateAvailableSpectra();
+  updatePlots();
+  updateFitRangeSelector();
+  updateGuess();
+  emit selectedFitDataChanged(index);
+}
+
+void IndirectFitPlotPresenter::handlePlotSpectrumChanged(
+    WorkspaceIndex spectrum) {
+  setActiveSpectrum(spectrum);
+  updatePlots();
+  updateFitRangeSelector();
+  emit plotSpectrumChanged(spectrum);
+}
+
 void IndirectFitPlotPresenter::watchADS(bool watch) { m_view->watchADS(watch); }
 
 TableDatasetIndex IndirectFitPlotPresenter::getSelectedDataIndex() const {
@@ -133,6 +135,11 @@ void IndirectFitPlotPresenter::setActiveIndex(TableDatasetIndex index) {
 
 void IndirectFitPlotPresenter::setActiveSpectrum(WorkspaceIndex spectrum) {
   m_model->setActiveSpectrum(spectrum);
+  m_view->setPlotSpectrum(spectrum);
+}
+
+void IndirectFitPlotPresenter::disableSpectrumPlotSelection() {
+  m_view->disableSpectrumPlotSelection();
 }
 
 void IndirectFitPlotPresenter::setModelStartX(double startX) {

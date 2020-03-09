@@ -93,14 +93,16 @@ class TiledPlotsTest(TestCase):
         self.assertEqual(fig, initial_fig)
         self.assertEqual(6, len(fig.axes))
 
-    def test_get_plot_fig_with_no_figure_provided_and_overplot_is_true_returns_current_figure_unmodified(self):
+    def test_get_plot_fig_with_no_figure_provided_and_overplot_is_true_returns_new_figure(self):
         initial_fig = plt.Figure()
         set_figure_as_current_figure(initial_fig)
 
+        # If not figure is provided we provide a user a new figure plot, since this allows
+        # overplotting in a loop, which requires there to be a figure with an associated axis
         fig, axes = get_plot_fig(overplot=True)
 
-        self.assertEqual(fig, initial_fig)
-        self.assertEqual(0, len(fig.axes))
+        self.assertNotEqual(fig, initial_fig)
+        self.assertNotEqual(0, len(fig.axes))
 
     def test_no_figure_provided_and_overplot_is_false_returns_new_figure_with_correct_axes_number(self):
         fig, axes = get_plot_fig(overplot=False, axes_num=5)

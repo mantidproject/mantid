@@ -21,6 +21,7 @@ Error Reporter test
   suitable method and update these instructions.
 - Make sure the location of this file is included in your search directories. Full instructions :ref:`are available online <mantid:getting started>`.
 - These tests should be run with someone who has access to the error reports database. Please contact Daniel Murphy when you are going to run these tests.
+- Test Workbench and Plot
 
 **Time required 10 - 20  minutes**
 
@@ -102,3 +103,5 @@ Error Reporter test
 - Click the `Yes, share information` box
 - Mantid should shut down
 - Check with the database admin
+
+**Repeat these 6 steps for Workbench**

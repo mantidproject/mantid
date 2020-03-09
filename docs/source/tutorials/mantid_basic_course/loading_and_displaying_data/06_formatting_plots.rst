@@ -7,7 +7,7 @@ Formatting Plots
 Plot Toolbar
 ============
 
-The usual buttons on the Plot Toolbar:
+The usual buttons on the Plot Toolbar: |PlotToolbar.png|
 
 - Home: Rescales the Axes on the plot
 - Arrows: move back and forward between zoom levels (only activated after zooming or moving)
@@ -22,21 +22,22 @@ The usual buttons on the Plot Toolbar:
 
 We will cover use of the Fitting Tab later...
 
-.. figure:: /images/PlotToolbar.png
-   :align: center
-   :alt: Plot Toolbar
 
 Plots Toolbox
 =============
 
 .. figure:: /images/PlotsWindow.png
-   :align: left
+   :align: center
    :alt: Plots Window
 
-To show this window you may have to click on the Plots tab higlighted in Red.
+To show this window you may have to click on the Plots tab highlighted in Red.
 
-The Plots Window great tool for organising your plots. It allows you to Show, Rename, Delete, Search for and Export Plots. It become very useful when you produce many plots and are struggling to find the one that you want!
+The Plots Window great tool for organising your plots. It allows you to Show, Rename, Delete, Search for and Export Plots. It becomes very useful when you produce many plots and are struggling to find the one that you want!
 
+.. figure:: /images/1DPlotmarkers.png
+   :alt: Plot markers
+   :align: right
+   :width: 500px
 
 Quickly adjusting 1D Plots
 ==========================
@@ -60,10 +61,6 @@ Right-clicking on the centre of the Plot you can:
 Plot a 1D spectrum from the MARI or EMU workspaces we have used before and 
 have a go at adjusting these plotting options. If you create a marker, have a go at dragging it and editing it!
 
-.. figure:: /images/1DPlotmarkers.png
-   :alt: Plot markers
-   :align: center
-   :width: 500px
 
 Figure Options Menu
 ===================
@@ -86,3 +83,4 @@ if you wish to change the label of a curve in the Legend, then edit the "Set
 curve label" entry on the Curves tab. Then on the Legend tab you will see 
 Color and Font options.
 
+.. |PlotToolbar.png| image:: /images/PlotToolbar.png

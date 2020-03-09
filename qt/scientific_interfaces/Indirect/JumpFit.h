@@ -7,7 +7,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 #define MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 
-#include "IndirectFitAnalysisTabLegacy.h"
+#include "IndirectFitAnalysisTab.h"
 #include "JumpFitModel.h"
 #include "ui_JumpFit.h"
 
@@ -17,7 +17,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport JumpFit : public IndirectFitAnalysisTabLegacy {
+class DLLExport JumpFit : public IndirectFitAnalysisTab {
   Q_OBJECT
 
 public:
@@ -37,11 +37,8 @@ protected:
   void setRunIsRunning(bool running) override;
   void setRunEnabled(bool enable) override;
 
-private slots:
-  void updateAvailableFitTypes();
-
 private:
-  void addFunctions(std::vector<std::string> const &functions);
+  EstimationDataSelector getEstimationDataSelector() const override;
 
   JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::JumpFit> m_uiForm;

@@ -22,7 +22,7 @@ You will learn how to load, process, visualise and analyse data using Mantid.
 
 **Sections** 
 
-* :ref:`getting started`
+* :ref:`getting_started_index`
 * :ref:`loading_and_displaying_data`
 * :ref:`algorithms_workspaces_and_histories`
 * :ref:`connecting_data_to_instruments`  

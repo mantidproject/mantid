@@ -136,7 +136,7 @@ class PythonFileInterpreter(QWidget):
         self.setLayout(self.layout)
         self._setup_editor(content, filename)
 
-        self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(content))
+        self._presenter = PythonFileInterpreterPresenter(self, PythonCodeExecution(self.editor))
         self.code_commenter = CodeCommenter(self.editor)
         self.code_completer = CodeCompleter(self.editor, self._presenter.model.globals_ns)
 
@@ -146,7 +146,6 @@ class PythonFileInterpreter(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
         # Connect the model signals to the view's signals so they can be accessed from outside the MVP
-        self._presenter.model.sig_exec_progress.connect(self.sig_progress)
         self._presenter.model.sig_exec_error.connect(self.sig_exec_error)
         self._presenter.model.sig_exec_success.connect(self.sig_exec_success)
 
@@ -285,7 +284,6 @@ class PythonFileInterpreterPresenter(QObject):
         # connect signals
         self.model.sig_exec_success.connect(self._on_exec_success)
         self.model.sig_exec_error.connect(self._on_exec_error)
-        self.model.sig_exec_progress.connect(self._on_progress_update)
 
         # starts idle
         self.view.set_status_message(IDLE_STATUS_MSG)
@@ -318,7 +316,9 @@ class PythonFileInterpreterPresenter(QObject):
         self.is_executing = True
         self.view.set_editor_readonly(True)
         self.view.set_status_message(RUNNING_STATUS_MSG)
-        return self.model.execute_async(code_str, self.view.filename, blocking)
+        return self.model.execute_async(code_str=code_str,
+                                        line_offset=self._code_start_offset,
+                                        filename=self.view.filename, blocking=blocking)
 
     def _get_code_for_execution(self, ignore_selection):
         editor = self.view.editor
@@ -340,7 +340,14 @@ class PythonFileInterpreterPresenter(QObject):
         if hasattr(exc_value, 'lineno'):
             lineno = exc_value.lineno + self._code_start_offset
         elif exc_stack is not None:
-            lineno = exc_stack[-1][1] + self._code_start_offset
+            try:
+                lineno = exc_stack[0].lineno + self._code_start_offset
+            except (AttributeError, IndexError):
+                # Python 2 fallback
+                try:
+                    lineno = exc_stack[-1][1] + self._code_start_offset
+                except IndexError:
+                    lineno = -1
         else:
             lineno = -1
         sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + os.linesep)
@@ -357,8 +364,3 @@ class PythonFileInterpreterPresenter(QObject):
 
     def _create_status_msg(self, status, timestamp, elapsed_time):
         return IDLE_STATUS_MSG + ' ' + LAST_JOB_MSG_TEMPLATE.format(status, timestamp, elapsed_time)
-
-    def _on_progress_update(self, lineno):
-        """Update progress on the view taking into account if a selection of code is
-        running"""
-        self.view.editor.updateProgressMarker(lineno + self._code_start_offset, False)

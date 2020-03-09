@@ -108,8 +108,8 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
     def check_placeholder_text(self):
         if not self.free_text_edited:
-            self.input_free_text.setPlainText("")
             self.free_text_edited = True
+            self.input_free_text.setPlainText("")
 
     def launch_privacy_policy(self, link):
         self.interface_manager.showWebPage(link)

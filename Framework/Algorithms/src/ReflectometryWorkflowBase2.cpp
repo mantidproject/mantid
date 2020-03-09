@@ -241,6 +241,33 @@ void ReflectometryWorkflowBase2::initTransmissionProperties() {
   setPropertyGroup("StartOverlap", "Transmission");
   setPropertyGroup("EndOverlap", "Transmission");
   setPropertyGroup("ScaleRHSWorkspace", "Transmission");
+  setPropertyGroup("TransmissionProcessingInstructions", "Transmission");
+}
+
+/** Initialize output properties related to transmission normalization
+ */
+void ReflectometryWorkflowBase2::initTransmissionOutputProperties() {
+  // Add additional output workspace properties
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceTransmission", "", Direction::Output,
+                      PropertyMode::Optional),
+                  "Output transmissison workspace in wavelength");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceFirstTransmission", "", Direction::Output,
+                      PropertyMode::Optional),
+                  "First transmissison workspace in wavelength");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
+                      "OutputWorkspaceSecondTransmission", "",
+                      Direction::Output, PropertyMode::Optional),
+                  "Second transmissison workspace in wavelength");
+
+  // Specify conditional output properties for when debug is on
+  setPropertySettings(
+      "OutputWorkspaceFirstTransmission",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+  setPropertySettings(
+      "OutputWorkspaceSecondTransmission",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
 }
 
 /** Initialize properties used for stitching transmission runs
@@ -335,13 +362,12 @@ void ReflectometryWorkflowBase2::initMomentumTransferProperties() {
 /** Initialize properties for diagnostics
  */
 void ReflectometryWorkflowBase2::initDebugProperties() {
-  // Diagnostics
+  declareProperty("Debug", false,
+                  "Whether to enable the output of extra workspaces.");
   declareProperty("Diagnostics", false,
                   "Whether to enable the output of "
                   "interim workspaces for debugging "
                   "purposes.");
-  declareProperty("Debug", false,
-                  "Whether to enable the output of extra workspaces.");
 }
 
 /** Validate background properties, if given
@@ -907,6 +933,21 @@ void ReflectometryWorkflowBase2::convertProcessingInstructions(
   m_processingInstructionsWorkspaceIndex =
       convertProcessingInstructionsToWorkspaceIndices(m_processingInstructions,
                                                       inputWS);
+}
+
+// Create an on-the-fly property to set an output workspace from a child
+// algorithm, if the child has that output value set
+void ReflectometryWorkflowBase2::setWorkspacePropertyFromChild(
+    Algorithm_sptr alg, std::string const &propertyName) {
+  if (alg->isDefault(propertyName))
+    return;
+
+  if (isDefault(propertyName)) {
+    std::string const workspaceName = alg->getPropertyValue(propertyName);
+    setPropertyValue(propertyName, workspaceName);
+  }
+  MatrixWorkspace_sptr workspace = alg->getProperty(propertyName);
+  setProperty(propertyName, workspace);
 }
 } // namespace Algorithms
 } // namespace Mantid

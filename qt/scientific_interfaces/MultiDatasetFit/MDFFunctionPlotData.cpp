@@ -56,6 +56,7 @@ void MDFFunctionPlotData::setDomain(double startX, double endX, size_t nX) {
   Mantid::API::FunctionDomain1DVector x(startX, endX, nX);
   Mantid::API::FunctionValues y(x);
   try {
+    m_function.get()->setUpForFit();
     m_function->function(x, y);
   } catch (std::invalid_argument &) {
     // Do nothing.

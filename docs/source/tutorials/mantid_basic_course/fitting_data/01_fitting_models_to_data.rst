@@ -16,9 +16,9 @@ Fitting Models To Data
 .. role:: green
 .. role:: orange
 
-Fitting is the modelling of data where parameters of a model are allowed
-to vary during a fitting process until the agreement between model and
-data has seen an improvement according to some cost function.
+Fitting is iteratively searching for the parameter values that minimise some cost function to obtain
+the best fit of the model to the data.
+
 
 In summary the Mantid fitting provides
 
@@ -47,9 +47,14 @@ Simple fitting
 
 4. Choose ExpDecay and click OK
 |ChooseExpDecay.png|
-5. Notice how the ExpDecay function has appeared in the Functions list on the Fit Property Browser, and there are preset Settings below.
+
+5. Notice how the ExpDecay function has appeared in the Functions list on the Fit Property Browser, and there are pre-set Settings below.
 For now, just click on the drop-down menu "Fit" and run a normal Fit.
-|RunFitOption.png|
+
+.. figure:: /images/RunFitOption.png
+   :alt: RunFitOption
+   :align: center
+
 6. Examine the results... 
 
 Fit results
@@ -70,16 +75,15 @@ C. **Output workspaces** will be created and available via the main Mantid Works
 
 .. figure:: /images/FitResults.png
    :alt: FitResults.png
-   :width: 600px
 
-   There are three output workspaces:
+
+**There are three output workspaces**:
 
    1. A TableWorkspace with the name suffixed with "_Parameters". It
    contains the fitting parameters and their corresponding errors.
 
    .. figure:: /images/ParametersTable.png
       :alt: ParametersTable.png
-      :width: 300px
 
    2. A MatrixWorkspace with the name suffixed with "_Workspace". Its first
    three spectra are: the original data, the calculated model, and the
@@ -87,7 +91,6 @@ C. **Output workspaces** will be created and available via the main Mantid Works
 
    .. figure:: /images/FitResultWorkspace.png
       :alt: FitResultWorkspace.png
-      :width: 350px
 
    3. Another TableWorkspace with the name suffixed with
    "_NormalisedCovarianceMatrix". It contains the variance-covariance
@@ -95,18 +98,14 @@ C. **Output workspaces** will be created and available via the main Mantid Works
 
    .. figure:: /images/CovarianceTable.png
       :alt: Covariance Table
-      :width: 300px
 
 
 .. |MUSRDataSet.png| image:: /images/MUSRDataSet.png
-   :width: 400px
 .. |PeakFitToolbar.png| image:: /images/PeakFitToolbar.png
 .. |MUSRDataSetFittingOn.png| image:: /images/MUSRDataSetFittingOn.png
-   :width: 500px
 .. |AddOtherFunctionOption.png| image:: /images/AddOtherFunctionOption.png
    :width: 500px
 .. |ChooseExpDecay.png| image:: /images/ChooseExpDecay.png
-.. |RunFitOption.png| image:: /images/RunFitOption.png
 .. |MUSRDataSetFittingResults.png| image:: /images/MUSRDataSetFittingResults.png
-   :width: 500px
+
 

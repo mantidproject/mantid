@@ -49,7 +49,7 @@ public:
   /// Default Constructor
   EnggDiffractionViewQtGUI(QWidget *parent = nullptr);
   /// Interface name
-  static std::string name() { return "Engineering Diffraction"; }
+  static std::string name() { return "Engineering Diffraction (Old)"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Diffraction"; }
 
