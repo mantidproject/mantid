@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_TYPEREGISTRY_H_
-#define MANTID_PYTHONINTERFACE_TYPEREGISTRY_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include <typeinfo>
@@ -46,5 +45,3 @@ public:
 } // namespace Registry
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_TYPEREGISTRY_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINERFACE_MAPTOPYDICTIONARY_H_
-#define MANTID_PYTHONINERFACE_MAPTOPYDICTIONARY_H_
+#pragma once
 
 /** Converter to generate a python dictionary from a std::map
  */
@@ -43,5 +42,3 @@ private:
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINERFACE_MAPTOPYDICTIONARY_H_ */

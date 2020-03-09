@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_RUNPYTHONSCRIPTTEST_H_
-#define MANTID_PYTHONINTERFACE_RUNPYTHONSCRIPTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -45,5 +44,3 @@ public:
     TS_ASSERT(alg.existsProperty("Filename"));
   }
 };
-
-#endif /* MANTID_PYTHONINTERFACE_RUNPYTHONSCRIPTTEST_H_ */

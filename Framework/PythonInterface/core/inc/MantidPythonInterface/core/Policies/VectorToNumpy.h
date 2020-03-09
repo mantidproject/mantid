@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_VECTORTONUMPY_H_
-#define MANTID_PYTHONINTERFACE_VECTORTONUMPY_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
@@ -120,5 +119,3 @@ struct VectorToNumpy {
 } // namespace Policies
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif // MANTID_PYTHONINTERFACE_VECTORTONUMPY_H_

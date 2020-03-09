@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_ANALYSISDATASERVICEOBSERVERADAPTER_H_
-#define MANTID_PYTHONINTERFACE_ANALYSISDATASERVICEOBSERVERADAPTER_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 #include <boost/python/wrapper.hpp>
@@ -54,5 +53,3 @@ private:
 
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /*MANTID_PYTHONINTERFACE_ANALYSISDATASERVICEOBSERVERADAPTER_H_*/
