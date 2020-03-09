@@ -7,7 +7,7 @@
 import mantid.simpleapi as mantid
 import unittest
 
-from six import iterkeys,  assertRaisesRegex
+from six import assertRaisesRegex
 
 from isis_powder.routines import absorb_corrections, SampleDetails
 
@@ -35,7 +35,7 @@ class ISISPowderAbsorptionTest(unittest.TestCase):
         }
 
         # Test each key one at a time
-        for blacklisted_key in iterkeys(sample_properties):
+        for blacklisted_key in sample_properties.keys():
             # Force python to make a shallow copy
             modified_dict = sample_properties.copy()
             modified_dict.pop(blacklisted_key)

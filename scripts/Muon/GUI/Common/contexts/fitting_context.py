@@ -8,7 +8,7 @@ from collections import OrderedDict
 import re
 
 from mantid.api import AnalysisDataService
-from mantid.py3compat import iterkeys, string_types
+from mantid.py3compat import string_types
 import numpy as np
 
 from mantidqt.utils.observer_pattern import Observable
@@ -58,7 +58,7 @@ def _create_unique_param_lookup(parameter_workspace, global_parameters):
             return False, False
 
         # Do we have this parameter already?
-        for unique_name in iterkeys(unique_params):
+        for unique_name in unique_params.keys():
             if is_same_parameter(unique_name, global_name):
                 return True, True
 

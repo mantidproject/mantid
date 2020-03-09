@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from six import PY2, iterkeys
+from six import PY2
 import collections
 import warnings
 
@@ -145,7 +145,7 @@ def dictionary_key_helper(dictionary, key, throws=True, case_insensitive=False, 
     if case_insensitive:
         # Convert key to str
         lower_key = str(key).lower()
-        for dict_key in iterkeys(dictionary):
+        for dict_key in dictionary.keys():
             if str(dict_key).lower() == lower_key:
                 # Found it
                 return dictionary[dict_key]

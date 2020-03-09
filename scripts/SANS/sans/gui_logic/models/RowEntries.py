@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from six import iterkeys
-
 from sans.common.enums import RowState, SampleShape
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.models.RowOptionsModel import RowOptionsModel
@@ -101,7 +99,7 @@ class RowEntries(_UserEntries):
                     self.can_scatter_period, self.can_transmission_period, self.can_direct_period))
 
     def is_empty(self):
-        return not any(getattr(self, attr) for attr in iterkeys(self._data_vars))
+        return not any(getattr(self, attr) for attr in self._data_vars.keys())
 
     def reset_row_state(self):
         self.state = RowState.UNPROCESSED
