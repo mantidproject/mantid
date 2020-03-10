@@ -949,6 +949,9 @@ def waterfall_fill_is_line_colour(ax):
 
 
 def waterfall_create_fill(ax):
+    if ax.waterfall_has_fill():
+        return
+
     errorbar_cap_lines = remove_and_return_errorbar_cap_lines(ax)
 
     for i, line in enumerate(ax.get_lines()):

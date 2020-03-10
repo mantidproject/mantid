@@ -489,4 +489,6 @@ then it is possible to plot this PDF data using the output options at the bottom
 1. Peters & Kneller, Journal of Chemical Physics, 139, 165102 (2013)
 2. Yi et al, J Phys Chem B 116, 5028 (2012) 
 
+:ref:`Indirect Data Analysis <interface-indirect-data-analysis>`
+
 .. categories:: Interfaces Indirect

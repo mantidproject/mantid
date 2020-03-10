@@ -12,7 +12,6 @@ from __future__ import (absolute_import, division, print_function)
 
 from abc import ABCMeta, abstractmethod
 
-from qtpy import PYQT4
 from qtpy.QtCore import QRegExp
 from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
 from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)
@@ -37,16 +36,6 @@ from sans.gui_logic.models.SumRunsModel import SumRunsModel
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 from ui.sans_isis.work_handler import WorkHandler
-
-if PYQT4:
-    IN_MANTIDPLOT = False
-    try:
-        from pymantidplot import proxies
-
-        IN_MANTIDPLOT = True
-    except ImportError:
-        # We are not in MantidPlot e.g. testing
-        pass
 
 Ui_SansDataProcessorWindow, _ = load_ui(__file__, "sans_data_processor_window.ui")
 
@@ -531,11 +520,8 @@ class SANSDataProcessorGui(QMainWindow,
 
     @staticmethod
     def _on_help_button_clicked():
-        if PYQT4:
-            proxies.showCustomInterfaceHelp('ISIS SANS v2')
-        else:
-            InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/'
-                                            'interfaces/ISIS%20SANS%20v2.html')
+        InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/'
+                                        'interfaces/isis_sans/ISIS%20SANS.html')
 
     def _on_output_mode_clicked(self):
         """This method is called when an output mode is clicked on the gui"""

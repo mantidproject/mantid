@@ -649,6 +649,21 @@ class Plots__init__Test(unittest.TestCase):
         # Check that there are now three filled areas and the new fill colour matches the others.
         self.assertTrue((ax.collections[2].get_facecolor() == [1, 0, 0, 1]).all())
 
+    def test_fills_not_created_if_waterfall_plot_already_has_filled_areas(self):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot
+        ax.set_waterfall(True)
+
+        # Add filled areas twice
+        ax.set_waterfall_fill(True)
+        ax.set_waterfall_fill(True)
+
+        # There should still be only two filled areas (one for each line)
+        self.assertEqual(len(datafunctions.get_waterfall_fills(ax)), 2)
+
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {
             'ws': [
