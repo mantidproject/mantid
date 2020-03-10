@@ -2039,6 +2039,28 @@ public:
     TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "");
   }
 
+  void test_findY() {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->initialize(2, 2, 2);
+    ws->mutableY(0) = 1.;
+    ws->mutableY(1) = 2.;
+    auto idx = ws->findY(0., {0, 0});
+    TS_ASSERT_EQUALS(idx.first, -1);
+    TS_ASSERT_EQUALS(idx.second, -1);
+    idx = ws->findY(1., {0, 0});
+    TS_ASSERT_EQUALS(idx.first, 0);
+    TS_ASSERT_EQUALS(idx.second, 0);
+    idx = ws->findY(1., {0, 1});
+    TS_ASSERT_EQUALS(idx.first, 0);
+    TS_ASSERT_EQUALS(idx.second, 1);
+    idx = ws->findY(2., {1, 0});
+    TS_ASSERT_EQUALS(idx.first, 1);
+    TS_ASSERT_EQUALS(idx.second, 0);
+    idx = ws->findY(2., {1, 1});
+    TS_ASSERT_EQUALS(idx.first, 1);
+    TS_ASSERT_EQUALS(idx.second, 1);
+  }
+
 private:
   boost::shared_ptr<WorkspaceTester>
   generateTestWorkspaceWithDistributionAndLabelSet(const bool distribution,
@@ -2391,22 +2413,6 @@ public:
   void test_isGroup() {
     boost::shared_ptr<MatrixWorkspace> ws(makeWorkspaceWithDetectors(3, 1));
     TS_ASSERT_EQUALS(ws->isGroup(), false);
-  }
-
-  void test_findY() {
-    boost::shared_ptr<MatrixWorkspace> ws(makeWorkspaceWithDetectors(3, 1));
-    auto idx = ws->findY(0., {0, 0});
-    TS_ASSERT_EQUALS(idx.first, -1);
-    TS_ASSERT_EQUALS(idx.second, -1);
-    idx = ws->findY(1., {0, 0});
-    TS_ASSERT_EQUALS(idx.first, 0);
-    TS_ASSERT_EQUALS(idx.second, 0);
-    idx = ws->findY(1., {0, 1});
-    TS_ASSERT_EQUALS(idx.first, 0);
-    TS_ASSERT_EQUALS(idx.second, 1);
-    idx = ws->findY(1., {1, 0});
-    TS_ASSERT_EQUALS(idx.first, 1);
-    TS_ASSERT_EQUALS(idx.second, 0);
   }
 
 private:
