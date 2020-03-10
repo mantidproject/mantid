@@ -7,10 +7,8 @@
 import os
 import unittest
 
-import six
-
 import mantid
-from mantid.py3compat import csv_open_type, mock
+from mantid.py3compat import mock
 from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.gui_logic.models.RowEntries import RowEntries
@@ -227,7 +225,7 @@ class BatchCsvParserTest(unittest.TestCase):
         with mock.patch(patchable, mocked_handle):
             parser.save_batch_file(rows=[], file_path=expected_file_path)
 
-        mocked_handle.assert_called_with(expected_file_path, csv_open_type)
+        mocked_handle.assert_called_with(expected_file_path, "w")
 
     def test_parses_row_to_csv_correctly(self):
         test_row = RowEntries()

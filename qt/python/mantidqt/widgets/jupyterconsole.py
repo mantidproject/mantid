@@ -24,7 +24,7 @@ except ImportError:
     from IPython.qt.inprocess import QtInProcessKernelManager
 
 # local imports
-from mantid.py3compat import getfullargspec
+from inspect import getfullargspec
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 
 

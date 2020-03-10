@@ -10,7 +10,7 @@ import sys
 import threading
 import types
 import warnings
-from mantid.py3compat import getfullargspec
+from inspect import getfullargspec
 from PyQt4 import QtGui
 
 # IPython monkey patches the  pygments.lexer.RegexLexer.get_tokens_unprocessed method

@@ -18,7 +18,6 @@ from matplotlib.legend import Legend
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import ConfigService
 from mantid.plots import datafunctions, MantidAxes
-from mantid.py3compat import is_text_string
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -73,7 +72,7 @@ def figure_title(workspaces, fig_num):
     def wsname(w):
         return w.name() if hasattr(w, 'name') else w
 
-    if is_text_string(workspaces) or not isinstance(workspaces, collections.Sequence):
+    if isinstance(workspaces, str) or not isinstance(workspaces, collections.Sequence):
         # assume a single workspace
         first = workspaces
     else:

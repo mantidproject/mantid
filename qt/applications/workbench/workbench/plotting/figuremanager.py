@@ -22,7 +22,6 @@ from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
 from mantid.plots import datafunctions, MantidAxes
-from mantid.py3compat import text_type
 from mantidqt.io import open_a_file_dialog
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
@@ -365,7 +364,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.toolbar.hold()
 
     def get_window_title(self):
-        return text_type(self.window.windowTitle())
+        return isinstance(self.window.windowTitle(), str)
 
     def set_window_title(self, title):
         self.window.setWindowTitle(title)

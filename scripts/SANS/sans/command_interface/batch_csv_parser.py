@@ -9,7 +9,6 @@ import re
 from csv import reader
 from enum import Enum
 
-from mantid.py3compat import csv_open_type
 from sans.common.constants import ALL_PERIODS
 from sans.common.file_information import find_full_file_path
 from sans.gui_logic.models.RowEntries import RowEntries
@@ -70,7 +69,7 @@ class BatchCsvParser(object):
         for row in rows:
             to_write.append(self._convert_row_to_list(row))
 
-        with open(file_path, csv_open_type) as outfile:
+        with open(file_path, "w") as outfile:
             writer_handle = csv.writer(outfile)
             for line in to_write:
                 writer_handle.writerow(line)
