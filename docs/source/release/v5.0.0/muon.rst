@@ -50,7 +50,7 @@ Algorithms
 
 Bug Fixes
 ---------
-- :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` can produce an empty dead time table, the time data is offset such that the start of thepulse is at time zero. The start and end date logs have been fixed and if no group name is present a default is generated.
+- :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` can produce an empty deadtime table, where the time data is offset such that the start of the pulse is at time zero. The start and end date logs have been fixed and if there is no group name present a default is generated.
 
 Muon Analysis (old)
 ###################
