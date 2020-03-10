@@ -1936,6 +1936,7 @@ std::pair<int64_t, int64_t> MatrixWorkspace::findY(double value) const {
   const int64_t numHists = static_cast<int64_t>(this->getNumberHistograms());
   for (int64_t i = 0; i < numHists; ++i) {
     const auto &Y = this->y(i);
+    // cppcheck-suppress syntaxError
     if (auto it = std::find(Y.begin(), Y.end(), value); it != Y.end()) {
       out = {i, std::distance(Y.begin(), it)};
       break;
