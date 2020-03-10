@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_WORKFLOWALGORITHMS_LOADEVENTANDCOMPRESSTEST_H_
-#define MANTID_WORKFLOWALGORITHMS_LOADEVENTANDCOMPRESSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -133,5 +132,3 @@ public:
     AnalysisDataService::Instance().remove(WS_NAME);
   }
 };
-
-#endif /* MANTID_WORKFLOWALGORITHMS_LOADEVENTANDCOMPRESSTEST_H_ */

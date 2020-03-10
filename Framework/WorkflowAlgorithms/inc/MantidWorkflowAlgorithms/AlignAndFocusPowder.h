@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_AlignAndFocusPowder_H_
-#define MANTID_ALGORITHM_AlignAndFocusPowder_H_
+#pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -140,5 +139,3 @@ private:
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_AlignAndFocusPowder_H_*/

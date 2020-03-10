@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SANSSOLIDANGLECORRECTIONTEST_H_
-#define SANSSOLIDANGLECORRECTIONTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -113,5 +112,3 @@ private:
   Mantid::WorkflowAlgorithms::SANSSolidAngleCorrection correction;
   std::string inputWS;
 };
-
-#endif /*SANSSOLIDANGLECORRECTIONTEST_H_*/
