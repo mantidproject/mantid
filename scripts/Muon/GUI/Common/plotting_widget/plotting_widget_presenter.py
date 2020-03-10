@@ -106,11 +106,14 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             # handle any updates
             return
 
+        # clear previous data from plot
+        self._model.clear_plot_model(self._view.get_axes())
+
         if self._view.is_tiled_plot():
             self.update_model_tile_plot_positions()
             self.new_plot_figure(self._model.number_of_axes)
 
-        self.plot_all_selected_workspaces()
+        self.plot_all_selected_workspaces(autoscale=False)
 
     def handle_workspace_deleted_from_ads(self, workspace):
         """
@@ -119,7 +122,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         if self._view.is_tiled_plot():
             self.update_model_tile_plot_positions()
             self.new_plot_figure(self._model.number_of_axes)
-            self.plot_all_selected_workspaces()
+            self.plot_all_selected_workspaces(autoscale=False)
             return
 
         if workspace.name() in self._model.plotted_workspaces:
@@ -147,7 +150,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self._view.set_raw_checkbox_state(True)
             self._view.warning_popup('No rebin options specified')
             return
-        self.plot_all_selected_workspaces()
+        self.plot_all_selected_workspaces(autoscale=True)
 
     def handle_plot_type_changed(self):
         """
@@ -165,7 +168,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self.context._frequency_context.plot_type = self._view.get_selected()[len(FREQ_PLOT_TYPE):]
         self.plot_type_changed_notifier.notify_subscribers(current_plot_type)
         self._model.clear_plot_model(self._view.get_axes())
-        self.plot_all_selected_workspaces()
+        self.plot_all_selected_workspaces(autoscale=True)
 
     def handle_error_selection_changed(self, error_state):
         """
@@ -240,11 +243,11 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         if state == 2:  # tiled plot
             self.update_model_tile_plot_positions()
             self.new_plot_figure(self._model.number_of_axes)
-            self.plot_all_selected_workspaces()
+            self.plot_all_selected_workspaces(autoscale=True)
         if state == 0:  # not tiled plot
             self.new_plot_figure(num_axes=1)
             self._model.number_of_axes = 1
-            self.plot_all_selected_workspaces()
+            self.plot_all_selected_workspaces(autoscale=True)
 
         self._model.plotted_fit_workspaces = []
 
@@ -276,11 +279,11 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         if self._view.is_tiled_plot() and self._view.get_tiled_by_type() == 'group':
             self.update_model_tile_plot_positions()
             self.new_plot_figure(self._model.number_of_axes)
-            self.plot_all_selected_workspaces()
+            self.plot_all_selected_workspaces(autoscale=True)
             self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
             self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
         else:  # add plots to existing axes
-            self.plot_all_selected_workspaces()
+            self.plot_all_selected_workspaces(autoscale=False)
 
         return
 
@@ -291,7 +294,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         if self._view.is_tiled_plot() and self._view.get_tiled_by_type():
             self.update_model_tile_plot_positions()
             self.new_plot_figure(self._model.number_of_axes)
-            self.plot_all_selected_workspaces()
+            self.plot_all_selected_workspaces(autoscale=False)
             self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
             self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
             return
@@ -302,7 +305,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             if ws not in workspace_list:
                 self._model.remove_workspace_from_plot(ws, self._view.get_axes())
 
-        self._model.autoscale_axes(self._view.get_axes(), self.get_x_limits())
         self._view.force_redraw()
 
     def handle_fit_completed(self, fit):
@@ -362,7 +364,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             else:
                 self.update_model_tile_plot_positions()
             self.new_plot_figure(self._model.number_of_axes)
-            self.plot_all_selected_workspaces()
+            self.plot_all_selected_workspaces(autoscale=True)
             self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
             self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
 
@@ -395,7 +397,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
     # Plotting controls
     # ------------------------------------------------------------------------------------------------------------------
 
-    def plot_all_selected_workspaces(self):
+    def plot_all_selected_workspaces(self, autoscale=False):
         """
         Plots all the selected workspaces (from grouping tab) in the plot window,
         clearing any previous plots
@@ -420,7 +422,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
         # scale the axis and set title
         self._view.set_fig_titles(self.get_plot_title())
-        self._model.autoscale_axes(self._view.get_axes(), self.get_x_limits())
+        self._set_axis_limits(autoscale)
         self.update_options_view_from_model()
         self._view.force_redraw()
 
@@ -548,6 +550,15 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             return selected_axes
         else:
             return []  # no subplots are avaiable
+
+    def _set_axis_limits(self, autoscale):
+        if autoscale:  # autoscale the axes
+            self._model.autoscale_axes(self._view.get_axes(), self.get_x_limits())
+        else:  # maintain the original axes scaling
+            xlims = self._view.plot_options.get_plot_x_range()
+            # If the xlimits boxes in the plotting options are empty auto scale the data to the default limits
+            if xlims[1] - xlims[0] == 0:
+                self._model.autoscale_axes(self._view.get_axes(), self.get_x_limits())
 
     # Note: These methods should be implemented as lower level properties
     # as currently they are specialised methods dependent on the workspace name format.
