@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_ANALYSISMODE_H_
-#define MANTID_CUSTOMINTERFACES_ANALYSISMODE_H_
+#pragma once
 #include <stdexcept>
 #include <string>
 namespace MantidQt {
@@ -34,4 +33,3 @@ inline std::string analysisModeToString(AnalysisMode analysisMode) {
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_ANALYSISMODE_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INDIRECTSPECTRUMSELECTIONPRESENTERTEST_H_
-#define MANTIDQT_INDIRECTSPECTRUMSELECTIONPRESENTERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -365,5 +364,3 @@ private:
   std::unique_ptr<MockIndirectSpectrumSelectionModel> m_model;
   std::unique_ptr<IndirectSpectrumSelectionPresenterLegacy> m_presenter;
 };
-
-#endif

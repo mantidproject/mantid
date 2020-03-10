@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_ALGORITHMPROPERTIES_H_
-#define MANTID_CUSTOMINTERFACES_ALGORITHMPROPERTIES_H_
+#pragma once
 
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidKernel/Strings.h"
@@ -65,5 +64,3 @@ void update(std::string const &property, std::vector<VALUE_TYPE> const &values,
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTID_CUSTOMINTERFACES_ALGORITHMPROPERTIES_H_

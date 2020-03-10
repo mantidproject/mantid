@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_MAP_H
-#define MANTID_ISISREFLECTOMETRY_MAP_H
+#pragma once
 #include <algorithm>
 #include <boost/optional.hpp>
 #include <iterator>
@@ -46,4 +45,3 @@ std::string optionalToString(boost::optional<T> maybeValue) {
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_ISISREFLECTOMETRY_MAP_H

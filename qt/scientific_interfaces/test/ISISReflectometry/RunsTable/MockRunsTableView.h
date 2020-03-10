@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_MOCKRUNSTABLEVIEW_H_
-#define MANTID_CUSTOMINTERFACES_MOCKRUNSTABLEVIEW_H_
+#pragma once
 #include "GUI/RunsTable/IRunsTableView.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <gmock/gmock.h>
@@ -43,4 +42,3 @@ public:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-#endif // MANTID_CUSTOMINTERFACES_MOCKRUNSTABLEVIEW_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_VALUEOR_H
-#define MANTID_ISISREFLECTOMETRY_VALUEOR_H
+#pragma once
 #include <boost/optional.hpp>
 
 /**
@@ -20,5 +19,3 @@ template <typename T, typename U>
 T value_or(boost::optional<T> const &value, U &&ifEmpty) {
   return value.get_value_or(ifEmpty);
 }
-
-#endif // MANTID_ISISREFLECTOMETRY_VALUEOR_H

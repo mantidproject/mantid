@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_JUMPFITADDWORKSPACEDIALOG_H_
-#define MANTIDQTCUSTOMINTERFACES_JUMPFITADDWORKSPACEDIALOG_H_
+#pragma once
 
 #include "IAddWorkspaceDialog.h"
 #include "ui_JumpFitAddWorkspaceDialog.h"
@@ -50,5 +49,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACES_JUMPFITADDWORKSPACEDIALOG_H_ */

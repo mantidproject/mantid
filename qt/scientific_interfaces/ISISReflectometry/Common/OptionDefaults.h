@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_OPTIONDEFAULTS_H
-#define MANTID_ISISREFLECTOMETRY_OPTIONDEFAULTS_H
+#pragma once
 #include "Common/DllConfig.h"
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidGeometry/Instrument_fwd.h"
@@ -82,4 +81,3 @@ T OptionDefaults::getValue(std::string const &propertyName,
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_ISISREFLECTOMETRY_OPTIONDEFAULTS_H

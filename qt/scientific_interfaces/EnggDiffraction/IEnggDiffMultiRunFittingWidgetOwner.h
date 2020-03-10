@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETOWNER_H_
-#define MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETOWNER_H_
+#pragma once
 
 #include <boost/shared_ptr.hpp>
 
@@ -23,5 +22,3 @@ public:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETOWNER_H_

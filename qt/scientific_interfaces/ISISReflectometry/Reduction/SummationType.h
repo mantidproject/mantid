@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_SUMMATIONTYPE_H_
-#define MANTID_CUSTOMINTERFACES_SUMMATIONTYPE_H_
+#pragma once
 #include <boost/optional.hpp>
 #include <stdexcept>
 #include <string>
@@ -40,4 +39,3 @@ inline std::string summationTypeToString(SummationType summationType) {
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_SUMMATIONTYPE_H_

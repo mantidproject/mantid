@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ENGGDIFFRUNLABEL_H_
-#define MANTIDQT_CUSTOMINTERFACES_ENGGDIFFRUNLABEL_H_
+#pragma once
 
 #include "DllConfig.h"
 #include <cstddef>
@@ -37,5 +36,3 @@ MANTIDQT_ENGGDIFFRACTION_DLL bool operator<(const RunLabel &lhs,
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFRUNLABEL_H_

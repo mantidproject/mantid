@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDIRECT_IPYRUNNER_H
-#define MANTID_INDIRECT_IPYRUNNER_H
+#pragma once
 
 #include <string>
 
@@ -24,5 +23,3 @@ public:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_INDIRECT_IPYRUNNER_H */

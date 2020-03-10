@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETPRESENTERMOCK_H_
-#define MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETPRESENTERMOCK_H_
+#pragma once
 
 #include "../EnggDiffraction/IEnggDiffMultiRunFittingWidgetPresenter.h"
 #include "EnggDiffMultiRunFittingWidgetAdderFake.h"
@@ -55,5 +54,3 @@ MockEnggDiffMultiRunFittingWidgetPresenter::getWidgetAdder() const {
 }
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-#endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETPRESENTERMOCK_H_

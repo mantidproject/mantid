@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_VALIDATEPERTHETADEFAULTSTEST_H_
-#define MANTID_CUSTOMINTERFACES_VALIDATEPERTHETADEFAULTSTEST_H_
+#pragma once
 #include "../../../ISISReflectometry/Reduction/ValidatePerThetaDefaults.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <cxxtest/TestSuite.h>
@@ -136,5 +135,3 @@ public:
 };
 
 GNU_DIAG_ON("missing-braces")
-
-#endif // MANTID_CUSTOMINTERFACES_VALIDATEPERTHETADEFAULTSTEST_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INDIRECTPLOTTERTEST_H_
-#define MANTIDQT_INDIRECTPLOTTERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -170,5 +169,3 @@ private:
   std::unique_ptr<MockIPyRunner> m_pyRunner;
   std::unique_ptr<IndirectPlotter> m_plotter;
 };
-
-#endif /* MANTIDQT_INDIRECTPLOTTERTEST_H_ */

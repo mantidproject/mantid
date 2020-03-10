@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_JUMPFITMODELTEST_H_
-#define MANTIDQT_JUMPFITMODELTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -317,5 +316,3 @@ private:
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   std::unique_ptr<JumpFitModel> m_model;
 };
-
-#endif /* MANTIDQT_JUMPFITMODELTEST_H_ */

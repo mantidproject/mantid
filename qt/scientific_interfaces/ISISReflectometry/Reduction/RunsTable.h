@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_CUSTOMINTERFACES_RUNSTABLE_H_
-#define MANTID_CUSTOMINTERFACES_RUNSTABLE_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "ReductionJobs.h"
@@ -68,4 +67,3 @@ bool RunsTable::isInSelection(
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_RUNSTABLE_H_

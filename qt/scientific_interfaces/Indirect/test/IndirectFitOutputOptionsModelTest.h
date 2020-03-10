@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INDIRECTFITOUTPUTOPTIONSMODELTEST_H_
-#define MANTIDQT_INDIRECTFITOUTPUTOPTIONSMODELTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -312,5 +311,3 @@ private:
   WorkspaceGroup_sptr m_groupWorkspace;
   std::unique_ptr<IndirectFitOutputOptionsModel> m_model;
 };
-
-#endif

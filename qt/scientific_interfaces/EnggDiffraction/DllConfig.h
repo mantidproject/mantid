@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_ENGGDIFFRACTION_DLLCONFIG_H_
-#define MANTIDQT_ENGGDIFFRACTION_DLLCONFIG_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 
@@ -20,5 +19,3 @@
 #define MANTIDQT_ENGGDIFFRACTION_DLL DLLImport
 #define EXTERN_MANTIDQT_ENGGDIFFRACTION EXTERN_IMPORT
 #endif
-
-#endif // MANTIDQT_ENGGDIFFRACTION_DLLCONFIG_H_

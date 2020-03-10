@@ -9,8 +9,7 @@
 #include "MantidKernel/V3D.h"
 #include <vector>
 
-#ifndef INTERFACES_MANTID_EV_WORKER_H
-#define INTERFACES_MANTID_EV_WORKER_H
+#pragma once
 
 /**
    @class MantidEVWorker
@@ -168,5 +167,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // INTERFACES_MANTID_EV_WORKER_H

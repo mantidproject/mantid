@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INDIRECT_FQTEMPLATEBROWSER_H_
-#define INDIRECT_FQTEMPLATEBROWSER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "FQTemplatePresenter.h"
@@ -96,5 +95,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*INDIRECT_FQTEMPLATEBROWSER_H_*/

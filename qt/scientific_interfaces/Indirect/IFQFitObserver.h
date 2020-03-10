@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_IFQFITOBSERVER_H_
-#define MANTIDQTCUSTOMINTERFACES_IFQFITOBSERVER_H_
+#pragma once
 
 enum DataType {
   WIDTH,
@@ -19,5 +18,3 @@ public:
   virtual void updateDataType(DataType) = 0;
   virtual void spectrumChanged(int) = 0;
 };
-
-#endif

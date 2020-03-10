@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_ISISREFLECTOMETRY_JOBVIEWUPDATER_H
-#define MANTID_ISISREFLECTOMETRY_JOBVIEWUPDATER_H
+#pragma once
 #include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
@@ -100,4 +99,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_ISISREFLECTOMETRY_JOBVIEWUPDATER_H

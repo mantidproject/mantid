@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_CUSTOMINTERFACES_SLICING_H_
-#define MANTID_CUSTOMINTERFACES_SLICING_H_
+#pragma once
 #include "Common/DllConfig.h"
 #include <boost/variant.hpp>
 #include <ostream>
@@ -101,5 +100,3 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool isNoSlicing(Slicing const &slicing);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTID_CUSTOMINTERFACES_SLICING_H_

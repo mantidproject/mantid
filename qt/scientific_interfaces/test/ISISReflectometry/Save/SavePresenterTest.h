@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_SAVEPRESENTERTEST_H_
-#define MANTID_CUSTOMINTERFACES_SAVEPRESENTERTEST_H_
+#pragma once
 
 #include "../ReflMockObjects.h"
 #include "GUI/Save/IAsciiSaver.h"
@@ -484,4 +483,3 @@ private:
   std::string m_separator;
   bool m_includeQResolution;
 };
-#endif // MANTID_CUSTOMINTERFACES_SAVEPRESENTERTEST_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDIRECTFITTINGMODELTEST_H_
-#define MANTID_INDIRECTFITTINGMODELTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -749,5 +748,3 @@ public:
     TS_ASSERT(!ads.doesExist("__ConvolutionFitSequential_ws1"));
   }
 };
-
-#endif // MANTID_INDIRECTFITTINGMODELTEST_H

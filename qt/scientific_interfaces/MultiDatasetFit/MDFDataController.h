@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDFDATACONTROLLER_H_
-#define MDFDATACONTROLLER_H_
+#pragma once
 
 #include "MantidKernel/Statistics.h"
 #include <QObject>
@@ -85,5 +84,3 @@ private:
 } // namespace MDF
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*MDFDATACONTROLLER_H_*/

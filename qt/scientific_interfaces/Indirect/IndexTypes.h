@@ -8,8 +8,7 @@
 // This file contains the implimentation of type safe indices for use
 // in the indirect interface code.
 // TODO merge this to use the generic index framework from IndexType.h
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDEXTYPE_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDEXTYPE_H_
+#pragma once
 
 #include <QMetaType>
 #include <ostream>
@@ -133,5 +132,3 @@ operator<<(std::ostream &out,
 Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::TableRowIndex)
 Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::WorkspaceIndex)
 Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::WorkspaceGroupIndex)
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_INDEXTYPE_H_ */

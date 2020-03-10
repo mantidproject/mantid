@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_INDIRECTDATAVALIDATIONHELPER_H_
-#define MANTID_CUSTOMINTERFACES_INDIRECTDATAVALIDATIONHELPER_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -45,5 +44,3 @@ bool validateDataIsACorrectionsFile(
     std::string const &inputType, bool silent = false);
 
 } // namespace IndirectDataValidationHelper
-
-#endif /* MANTID_CUSTOMINTERFACES_INDIRECTDATAVALIDATIONHELPER_H_ */

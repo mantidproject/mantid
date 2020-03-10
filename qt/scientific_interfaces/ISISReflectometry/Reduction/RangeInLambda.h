@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_RANGEINLAMBDA_H_
-#define MANTID_CUSTOMINTERFACES_RANGEINLAMBDA_H_
+#pragma once
 #include "Common/DllConfig.h"
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -34,4 +33,3 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(RangeInLambda const &lhs,
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_RANGEINLAMBDA_H_

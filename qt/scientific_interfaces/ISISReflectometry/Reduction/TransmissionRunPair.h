@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_TRANSMISSIONRUNPAIR_H_
-#define MANTID_CUSTOMINTERFACES_TRANSMISSIONRUNPAIR_H_
+#pragma once
 #include "Common/DllConfig.h"
 #include <string>
 #include <utility>
@@ -45,4 +44,3 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(TransmissionRunPair const &lhs,
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_TRANSMISSIONRUNPAIR_H_

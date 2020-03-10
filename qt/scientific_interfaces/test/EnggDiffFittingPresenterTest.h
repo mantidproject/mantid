@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
-#define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
+#pragma once
 
 #include "../EnggDiffraction/EnggDiffFittingPresenter.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -760,5 +759,3 @@ const std::string EnggDiffFittingPresenterTest::g_focusedFittingRunNo =
     "241391-241394";
 
 const std::string EnggDiffFittingPresenterTest::EMPTY = "";
-
-#endif // MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H

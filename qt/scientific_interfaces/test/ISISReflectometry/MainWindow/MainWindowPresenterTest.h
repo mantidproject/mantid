@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_MAINWINDOWPRESENTERTEST_H_
-#define MANTID_CUSTOMINTERFACES_MAINWINDOWPRESENTERTEST_H_
+#pragma once
 
 #include "../../../ISISReflectometry/GUI/MainWindow/MainWindowPresenter.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
@@ -513,5 +512,3 @@ private:
   std::string backup_facility;
   std::string backup_instrument;
 };
-
-#endif // MANTID_CUSTOMINTERFACES_MAINWINDOWPRESENTERTEST_H_

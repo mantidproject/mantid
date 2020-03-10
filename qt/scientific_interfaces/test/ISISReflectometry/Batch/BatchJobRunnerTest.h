@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERTEST_H_
-#define MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERTEST_H_
+#pragma once
 
 #include "../../../ISISReflectometry/GUI/Batch/BatchJobRunner.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
@@ -114,5 +113,3 @@ protected:
         MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex});
   }
 };
-
-#endif // MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERTEST_H_

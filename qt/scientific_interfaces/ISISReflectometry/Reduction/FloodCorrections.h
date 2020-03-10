@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_FLOODCORRECTIONS_H_
-#define MANTID_CUSTOMINTERFACES_FLOODCORRECTIONS_H_
+#pragma once
 #include "Common/DllConfig.h"
 #include <boost/optional.hpp>
 #include <string>
@@ -64,4 +63,3 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(FloodCorrections const &lhs,
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_FLOODCORRECTIONS_H_

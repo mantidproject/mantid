@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_CUSTOMINTERFACES_PARSE_H_
-#define MANTID_CUSTOMINTERFACES_PARSE_H_
+#pragma once
 #include "DllConfig.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/optional.hpp>
@@ -60,4 +59,3 @@ parseList(std::string commaSeparatedValues, ParseItemFunction parseItem) {
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_PARSE_H_

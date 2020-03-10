@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_IALCBASELINEMODELLINGVIEW_H_
-#define MANTIDQT_CUSTOMINTERFACES_IALCBASELINEMODELLINGVIEW_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 
@@ -154,5 +153,3 @@ signals:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQT_CUSTOMINTERFACES_IALCBASELINEMODELLINGVIEW_H_ */
