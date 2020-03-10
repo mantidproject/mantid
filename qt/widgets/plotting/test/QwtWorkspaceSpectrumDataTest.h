@@ -58,8 +58,7 @@ public:
 
   void test_copy() {
     QwtWorkspaceSpectrumData data1(*ws, 1, false, false);
-    QwtWorkspaceSpectrumData *data2 =
-        dynamic_cast<QwtWorkspaceSpectrumData *>(data1.copy());
+    auto *data2 = dynamic_cast<QwtWorkspaceSpectrumData *>(data1.copy());
     checkHistogramData(*data2, 1.0);
   }
 

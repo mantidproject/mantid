@@ -411,7 +411,7 @@ void SANSPlotSpecial::setupTable() {
   m_derivatives["Intercept"] = new QTableWidgetItem(*m_emptyCell);
   m_derivatives["Chi Squared"] = new QTableWidgetItem(*m_emptyCell);
 
-  QTableWidgetItem *lbl = new QTableWidgetItem(*m_emptyCell);
+  auto *lbl = new QTableWidgetItem(*m_emptyCell);
   lbl->setText("Gradient");
   m_uiForm.tbDerived->setItem(0, SANSPlotSpecial::FitInformation, lbl);
   m_uiForm.tbDerived->setItem(0, SANSPlotSpecial::FitInformationValues,

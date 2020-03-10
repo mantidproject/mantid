@@ -78,7 +78,7 @@ SelectWorkspacesDialog::SelectWorkspacesDialog(
   m_wsList->addItems(tmp);
   m_wsList->setSelectionMode(QAbstractItemView::MultiSelection);
 
-  QDialogButtonBox *btnBox = new QDialogButtonBox(Qt::Horizontal);
+  auto *btnBox = new QDialogButtonBox(Qt::Horizontal);
 
   if (!customButtonLabel.empty()) {
     m_customButton = new QPushButton(QString::fromStdString(customButtonLabel));
@@ -87,13 +87,13 @@ SelectWorkspacesDialog::SelectWorkspacesDialog(
   }
 
   m_okButton = new QPushButton("Select");
-  QPushButton *cancelButton = new QPushButton("Cancel");
+  auto *cancelButton = new QPushButton("Cancel");
   btnBox->addButton(m_okButton, QDialogButtonBox::AcceptRole);
   btnBox->addButton(cancelButton, QDialogButtonBox::RejectRole);
   connect(btnBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(btnBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-  QVBoxLayout *vLayout = new QVBoxLayout();
+  auto *vLayout = new QVBoxLayout();
   vLayout->addWidget(m_wsList);
   vLayout->addWidget(btnBox);
 

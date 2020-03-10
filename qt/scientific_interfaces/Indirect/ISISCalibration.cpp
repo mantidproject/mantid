@@ -51,7 +51,7 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
   m_uiForm.ppCalibration->watchADS(false);
   m_uiForm.ppResolution->watchADS(false);
 
-  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
+  auto *doubleEditorFactory = new DoubleEditorFactory();
 
   // CAL PROPERTY TREE
   m_propTrees["CalPropTree"] = new QtTreePropertyBrowser();

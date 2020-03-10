@@ -530,7 +530,7 @@ public:
 template <class Editor>
 Editor *EditorFactoryPrivate<Editor>::createEditor(QtProperty *property,
                                                    QWidget *parent) {
-  Editor *editor = new Editor(parent);
+  auto *editor = new Editor(parent);
   initializeEditor(property, editor);
   return editor;
 }

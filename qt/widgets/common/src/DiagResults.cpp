@@ -58,7 +58,7 @@ DiagResults::DiagResults(QWidget *parent)
     row = addRow(col1, col2);
   }
   row++;
-  QPushButton *close = new QPushButton("Close");
+  auto *close = new QPushButton("Close");
   m_Grid->addWidget(close, row, 1);
   connect(close, SIGNAL(clicked()), this, SLOT(close()));
 

@@ -175,12 +175,12 @@ void SortTableWorkspaceDialog::addColumn() {
   auto newRow = m_sortColumns.size();
   assert(newRow <= m_columnNames.size());
   QLabel *label = new QLabel(QString("Column %1").arg(newRow + 1));
-  QComboBox *columnName = new QComboBox();
+  auto *columnName = new QComboBox();
   columnName->addItems(m_columnNames);
   columnName->setToolTip(m_form.cbColumnName->toolTip());
   connect(columnName, SIGNAL(currentIndexChanged(int)), this,
           SLOT(changedColumnName(int)));
-  QComboBox *ascending = new QComboBox();
+  auto *ascending = new QComboBox();
   ascending->addItem("Ascending");
   ascending->addItem("Descending");
   ascending->setToolTip(m_form.cbAscending->toolTip());

@@ -1338,7 +1338,7 @@ QValidator::State IntervalListValidator::validate(QString &input,
 MantidWSIndexWidget::QLineEditWithErrorMark::QLineEditWithErrorMark(
     QWidget *parent)
     : QWidget(parent) {
-  QGridLayout *layout = new QGridLayout();
+  auto *layout = new QGridLayout();
   _lineEdit = new QLineEdit();
   m_validLbl = new QLabel("*"); // make it red
   QPalette pal = m_validLbl->palette();

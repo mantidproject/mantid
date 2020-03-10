@@ -32,18 +32,18 @@ void StringDialogEditorFactory::disconnectPropertyManager(
  */
 StringDialogEditor::StringDialogEditor(QtProperty *property, QWidget *parent)
     : QWidget(parent), m_property(property) {
-  QHBoxLayout *layout = new QHBoxLayout;
+  auto *layout = new QHBoxLayout;
   m_lineEdit = new QLineEdit(this);
   layout->addWidget(m_lineEdit);
   setFocusProxy(m_lineEdit);
   connect(m_lineEdit, SIGNAL(editingFinished()), this, SLOT(updateProperty()));
-  QtStringPropertyManager *mgr =
+  auto *mgr =
       dynamic_cast<QtStringPropertyManager *>(property->propertyManager());
   if (mgr) {
     m_lineEdit->setText(mgr->value(property));
   }
 
-  QPushButton *button = new QPushButton("...", this);
+  auto *button = new QPushButton("...", this);
   button->setMaximumSize(20, 1000000);
   connect(button, SIGNAL(clicked()), this, SLOT(runDialog()));
   layout->addWidget(button);
@@ -72,7 +72,7 @@ StringDialogEditor::~StringDialogEditor() {}
  * Slot which sets the property with the current text in the editor.
  */
 void StringDialogEditor::updateProperty() {
-  QtStringPropertyManager *mgr =
+  auto *mgr =
       dynamic_cast<QtStringPropertyManager *>(m_property->propertyManager());
   if (mgr) {
     mgr->setValue(m_property, m_lineEdit->text());

@@ -91,7 +91,7 @@ void QwtRasterDataMDNonOrthogonal::setSliceParams(
 //-------------------------------------------------------------------------
 /** Perform a copy of this data object */
 QwtRasterDataMDNonOrthogonal *QwtRasterDataMDNonOrthogonal::copy() const {
-  QwtRasterDataMDNonOrthogonal *out = new QwtRasterDataMDNonOrthogonal();
+  auto *out = new QwtRasterDataMDNonOrthogonal();
   this->copyFrom(*this, *out);
   return out;
 }

@@ -69,7 +69,7 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
     IMDDimension_sptr LDim = createExpectedMDDimension("L");
 
     // Create the mock MD geometry
-    MockMDGeometry *pGeometry = new MockMDGeometry;
+    auto *pGeometry = new MockMDGeometry;
     EXPECT_CALL(*pGeometry, getNumDims()).WillRepeatedly(Return(3));
     EXPECT_CALL(*pGeometry, getDimension(0)).WillRepeatedly(Return(HDim));
     EXPECT_CALL(*pGeometry, getDimension(1)).WillRepeatedly(Return(KDim));

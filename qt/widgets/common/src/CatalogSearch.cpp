@@ -1049,7 +1049,7 @@ void CatalogSearch::addCheckBoxColumn(QTableWidget *table) {
 
   // Add a checkbox to all rows in the first column.
   for (int row = 0; row < table->rowCount(); row++) {
-    QTableWidgetItem *newItem = new QTableWidgetItem();
+    auto *newItem = new QTableWidgetItem();
     // Allow the widget to take on checkbox functionality.
     newItem->setCheckState(Qt::Unchecked);
     // Allow the user to select and check the box.
@@ -1368,7 +1368,7 @@ void CatalogSearch::sortByFileSize(int column) {
     // Convert cell value to int within the datamodel.
     // This allows us to sort by the specific column.
     for (int row = 0; row < table->rowCount(); row++) {
-      QTableWidgetItem *item = new QTableWidgetItem;
+      auto *item = new QTableWidgetItem;
       item->setData(Qt::EditRole, table->item(row, byteColumn)->text().toInt());
       table->setItem(row, byteColumn, item);
     }

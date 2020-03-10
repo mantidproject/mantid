@@ -210,7 +210,7 @@ void MuonFitPropertyBrowser::init() {
           SLOT(currentItemChanged(QtBrowserItem *)));
 
   m_btnGroup = new QGroupBox(tr("Reselect Data"));
-  QHBoxLayout *btnLayout = new QHBoxLayout;
+  auto *btnLayout = new QHBoxLayout;
   m_reselectGroupBtn = new QPushButton("Groups/Pairs");
   m_reselectPeriodBtn = new QPushButton("Periods");
   m_generateBtn = new QPushButton("Combine Periods");
@@ -1470,7 +1470,7 @@ void MuonFitPropertyBrowser::genGroupWindow() {
   QtGroupPropertyManager *groupManager =
       new QtGroupPropertyManager(m_groupWindow);
   QVBoxLayout *layout = new QVBoxLayout(m_groupWindow);
-  QtTreePropertyBrowser *groupBrowser = new QtTreePropertyBrowser();
+  auto *groupBrowser = new QtTreePropertyBrowser();
   QtProperty *groupSettings = groupManager->addProperty("Group/Pair selection");
   for (auto iter = m_groupBoxes.constBegin(); iter != m_groupBoxes.constEnd();
        ++iter) {
@@ -1763,7 +1763,7 @@ void MuonFitPropertyBrowser::genPeriodWindow() {
   QtGroupPropertyManager *groupManager =
       new QtGroupPropertyManager(m_periodWindow);
   QVBoxLayout *layout = new QVBoxLayout(m_periodWindow);
-  QtTreePropertyBrowser *groupBrowser = new QtTreePropertyBrowser();
+  auto *groupBrowser = new QtTreePropertyBrowser();
   QtProperty *groupSettings = groupManager->addProperty("Period selection");
   for (auto iter = m_periodBoxes.constBegin(); iter != m_periodBoxes.constEnd();
        ++iter) {
@@ -1785,14 +1785,14 @@ void MuonFitPropertyBrowser::genCombinePeriodWindow() {
   // reset combine window
   m_comboWindow = new QDialog(this);
   QVBoxLayout *layout = new QVBoxLayout(m_comboWindow);
-  QFormLayout *formLayout = new QFormLayout;
+  auto *formLayout = new QFormLayout;
   m_positiveCombo = new QLineEdit();
   m_negativeCombo = new QLineEdit();
   formLayout->addRow(new QLabel(tr("Combine:")), m_positiveCombo);
   formLayout->addRow(new QLabel(tr("   -    ")), m_negativeCombo);
   layout->addLayout(formLayout);
 
-  QPushButton *applyBtn = new QPushButton("Apply");
+  auto *applyBtn = new QPushButton("Apply");
 
   connect(applyBtn, SIGNAL(released()), this, SLOT(combineBtnPressed()));
 

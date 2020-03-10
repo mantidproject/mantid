@@ -48,7 +48,7 @@ public:
   void test_create_instance() {
     // fake repo contains the files Repo/README.txt, Repo/TofConverter.py,
     // Repo/reflectometry/Reduction.py and Repo/reflectometry/script.py
-    RepoModel *model = new RepoModel();
+    auto *model = new RepoModel();
     // contains TofConv and reflectometry folders
     TS_ASSERT_EQUALS(1, model->rowCount());
     TS_ASSERT_EQUALS(4, model->columnCount());
@@ -63,7 +63,7 @@ public:
   // test the data in the first column is displayed correctly. This column
   // contains the name of the file
   void test_data_first_column_entries() {
-    RepoModel *model = new RepoModel();
+    auto *model = new RepoModel();
     int role = Qt::DisplayRole;
     std::string expectedEntries[6] = {
         "Repo",          "README.txt",   "TofConverter.py",
@@ -78,7 +78,7 @@ public:
   // test the data in the second column is displayed correctly. This column
   // contains the status of the file
   void test_data_second_column_entries() {
-    RepoModel *model = new RepoModel();
+    auto *model = new RepoModel();
     int role = Qt::DisplayRole;
     std::string expectedEntries[6] = {"LOCAL_ONLY",     "UPDATED",
                                       "REMOTE_ONLY",    "CHANGED",
@@ -93,7 +93,7 @@ public:
   // test the data in the first column is displayed correctly. This column
   // contains whether the file is set to update.
   void test_data_third_column_entries() {
-    RepoModel *model = new RepoModel();
+    auto *model = new RepoModel();
     int role = Qt::DisplayRole;
     auto filenames = scriptRepoMock.listFiles();
     // expect empty string for local only and remote only as not applicable
@@ -108,7 +108,7 @@ public:
   // test the data in the fourth column is displayed correctly. This column
   // contains whether the file can be deleted.
   void test_data_fourth_column_entries() {
-    RepoModel *model = new RepoModel();
+    auto *model = new RepoModel();
     int role = Qt::DisplayRole;
     auto filenames = scriptRepoMock.listFiles();
     std::string expectedEntries[6] = {"protected", "deletable", "protected",
@@ -122,7 +122,7 @@ public:
 
   // test setData will download file if download selected
   void test_setData_sets_download() {
-    RepoModel *model = new RepoModel();
+    auto *model = new RepoModel();
     auto index = getIndex(model, 1, 1);
     auto isDataSet = model->setData(index, "Download", Qt::EditRole);
     TS_ASSERT_EQUALS(true, isDataSet);
@@ -143,7 +143,7 @@ public:
 
   // test setData will not change the data if the index is out of range
   void test_setData_index_out_of_range() {
-    RepoModel *model = new RepoModel();
+    auto *model = new RepoModel();
     QModelIndex index = model->index(10, 10);
     QString value = "";
     int role = Qt::EditRole;
@@ -152,7 +152,7 @@ public:
 
   // test setData will not change the data if the role is not Qt::EditRole
   void test_setData_not_editable() {
-    RepoModel *model = new RepoModel();
+    auto *model = new RepoModel();
     auto index = getIndex(model, 1, 1);
     QString value = "";
     int role = Qt::DisplayRole;
@@ -162,7 +162,7 @@ public:
   // test setData will not change the data in the first column - the path of the
   // file
   void test_setData_column_0_should_not_change() {
-    RepoModel *model = new RepoModel();
+    auto *model = new RepoModel();
     auto index = getIndex(model, 1, 0);
     QString value = "";
     int role = Qt::EditRole;
@@ -170,7 +170,7 @@ public:
   }
 
   void test_file_description_gives_file_path() {
-    RepoModel *model = new RepoModel();
+    auto *model = new RepoModel();
     auto filenames = scriptRepoMock.listFiles();
     for (auto i = 0; i < 6; ++i) {
       for (auto j = 0; j < model->columnCount(); ++j) {
@@ -182,7 +182,7 @@ public:
   }
 
   void test_author_returns_correct_author() {
-    RepoModel *model = new RepoModel();
+    auto *model = new RepoModel();
     for (auto i = 0; i < 6; ++i) {
       for (auto j = 0; j < model->columnCount(); ++j) {
         auto index = getIndex(model, i, j);
@@ -195,7 +195,7 @@ public:
   void test_filepath_returns_correct_path() {
     auto repo_path = Mantid::Kernel::ConfigService::Instance().getString(
         "ScriptLocalRepository");
-    RepoModel *model = new RepoModel();
+    auto *model = new RepoModel();
     auto filenames = scriptRepoMock.listFiles();
     for (auto i = 0; i < 6; ++i) {
       std::string expectedPath = "";

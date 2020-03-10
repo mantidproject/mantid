@@ -132,7 +132,7 @@ public:
   */
   void test_updateWithSlicePoint_default() {
     // Create a default.
-    MockPeaksPresenter *mockDefault = new MockPeaksPresenter;
+    auto *mockDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(mockDefault);
     EXPECT_CALL(*mockDefault, updateWithSlicePoint(_))
         .Times(1); // Expect the method on the default to be called.
@@ -147,7 +147,7 @@ public:
   }
 
   void test_updateWithSlicePoint() {
-    MockPeaksPresenter *mockPresenter = new MockPeaksPresenter;
+    auto *mockPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(mockPresenter);
     EXPECT_CALL(*mockPresenter, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allows us to add to composite
@@ -169,7 +169,7 @@ public:
   }
 
   void test_getTransformName_default() {
-    MockPeaksPresenter *mockDefault = new MockPeaksPresenter;
+    auto *mockDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(mockDefault);
     EXPECT_CALL(*mockDefault, getTransformName())
         .Times(1)
@@ -181,7 +181,7 @@ public:
   }
 
   void test_getTransformName() {
-    MockPeaksPresenter *mockPresenter = new MockPeaksPresenter;
+    auto *mockPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(mockPresenter);
     EXPECT_CALL(*mockPresenter, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allows us to add to composite
@@ -206,7 +206,7 @@ public:
   */
   void test_update_default() {
     // Create a default.
-    MockPeaksPresenter *mockDefault = new MockPeaksPresenter;
+    auto *mockDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(mockDefault);
     EXPECT_CALL(*mockDefault, update())
         .Times(1); // Expect the method on the default to be called.
@@ -220,7 +220,7 @@ public:
   }
 
   void test_update() {
-    MockPeaksPresenter *mockPresenter = new MockPeaksPresenter;
+    auto *mockPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(mockPresenter);
     EXPECT_CALL(*mockPresenter, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allows us to add to composite
@@ -242,7 +242,7 @@ public:
   void test_presentedWorkspaces() {
     // One nested presenter
     SetPeaksWorkspaces setA;
-    MockPeaksPresenter *pA = new MockPeaksPresenter;
+    auto *pA = new MockPeaksPresenter;
     EXPECT_CALL(*pA, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allows us to add to composite
     PeaksPresenter_sptr A(pA);
@@ -251,7 +251,7 @@ public:
 
     // Another nested presenter
     SetPeaksWorkspaces setB;
-    MockPeaksPresenter *pB = new MockPeaksPresenter;
+    auto *pB = new MockPeaksPresenter;
     EXPECT_CALL(*pB, contentsDifferent(_))
         .WillRepeatedly(Return(true)); // Allows us to add to composite
     PeaksPresenter_sptr B(pB);
@@ -433,7 +433,7 @@ public:
         boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     SetPeaksWorkspaces set;
     set.insert(peaksWS);
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, setBackgroundColor(newColor)).Times(1);
@@ -462,7 +462,7 @@ public:
         boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     SetPeaksWorkspaces set;
     set.insert(peaksWS);
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, setForegroundColor(newColor)).Times(1);
@@ -566,7 +566,7 @@ public:
         boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     SetPeaksWorkspaces set;
     set.insert(peaksWS);
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, setShown(expectedToShow)).Times(1);
@@ -597,7 +597,7 @@ public:
     const bool expectedFlag = true;
 
     // Create a default.
-    MockPeaksPresenter *mockDefault = new MockPeaksPresenter;
+    auto *mockDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(mockDefault);
     EXPECT_CALL(*mockDefault, setShown(expectedFlag))
         .Times(1); // Expect the method on the default to be called.
@@ -616,7 +616,7 @@ public:
     const bool expectedFlag = true;
 
     // Create a default.
-    MockPeaksPresenter *mockDefault = new MockPeaksPresenter;
+    auto *mockDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(mockDefault);
     EXPECT_CALL(*mockDefault, showBackgroundRadius(expectedFlag))
         .Times(1); // Expect the method on the default to be called.
@@ -658,7 +658,7 @@ public:
         boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
     SetPeaksWorkspaces set;
     set.insert(peaksWS);
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, getBoundingBox(peakIndex))
@@ -685,7 +685,7 @@ public:
   void test_setPeakSizeOnProjection() {
     const double fraction = 0.5;
 
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, setPeakSizeOnProjection(fraction)).Times(1);
@@ -702,7 +702,7 @@ public:
   void test_setPeakSizeIntoProjection() {
     const double fraction = 0.5;
 
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, setPeakSizeIntoProjection(fraction)).Times(1);
@@ -717,7 +717,7 @@ public:
   }
 
   void test_getPeakSizeOnProjection_default() {
-    MockPeaksPresenter *pDefault = new MockPeaksPresenter;
+    auto *pDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(pDefault);
     EXPECT_CALL(*pDefault, getPeakSizeOnProjection()).WillOnce(Return(0));
 
@@ -728,7 +728,7 @@ public:
   }
 
   void test_getPeakSizeIntoProjection_default() {
-    MockPeaksPresenter *pDefault = new MockPeaksPresenter;
+    auto *pDefault = new MockPeaksPresenter;
     PeaksPresenter_sptr defaultPresenter(pDefault);
     EXPECT_CALL(*pDefault, getPeakSizeIntoProjection()).WillOnce(Return(0));
 
@@ -739,7 +739,7 @@ public:
   }
 
   void test_getPeakSizeOnProjection() {
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, getPeakSizeOnProjection()).WillOnce(Return(1));
@@ -754,7 +754,7 @@ public:
   }
 
   void test_getPeakSizeIntoProjection() {
-    MockPeaksPresenter *pSubject = new MockPeaksPresenter;
+    auto *pSubject = new MockPeaksPresenter;
     PeaksPresenter_sptr subject(pSubject);
     EXPECT_CALL(*pSubject, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pSubject, getPeakSizeIntoProjection()).WillOnce(Return(1));
@@ -788,7 +788,7 @@ public:
     SetPeaksWorkspaces set;
     set.insert(peaksWS_1);
     set.insert(peaksWS_2);
-    MockPeaksPresenter *pPresenter = new MockPeaksPresenter;
+    auto *pPresenter = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter(pPresenter);
     EXPECT_CALL(*pPresenter, registerOwningPresenter(_)).Times(AtLeast(1));
     EXPECT_CALL(*pPresenter, presentedWorkspaces()).WillRepeatedly(Return(set));
@@ -839,10 +839,10 @@ public:
     SetPeaksWorkspaces set2;
     set2.insert(peaksWS_2);
 
-    MockPeaksPresenter *pPresenter1 = new MockPeaksPresenter;
+    auto *pPresenter1 = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter1(pPresenter1);
 
-    MockPeaksPresenter *pPresenter2 = new MockPeaksPresenter;
+    auto *pPresenter2 = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter2(pPresenter2);
 
     EXPECT_CALL(*pPresenter1, registerOwningPresenter(_)).Times(AtLeast(1));
@@ -903,10 +903,10 @@ public:
     SetPeaksWorkspaces set2;
     set2.insert(peaksWS_2);
 
-    MockPeaksPresenter *pPresenter1 = new MockPeaksPresenter;
+    auto *pPresenter1 = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter1(pPresenter1);
 
-    MockPeaksPresenter *pPresenter2 = new MockPeaksPresenter;
+    auto *pPresenter2 = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter2(pPresenter2);
 
     EXPECT_CALL(*pPresenter1, registerOwningPresenter(_)).Times(AtLeast(1));
@@ -973,10 +973,10 @@ public:
     SetPeaksWorkspaces set2;
     set2.insert(peaksWS_2);
 
-    MockPeaksPresenter *pPresenter1 = new MockPeaksPresenter;
+    auto *pPresenter1 = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter1(pPresenter1);
 
-    MockPeaksPresenter *pPresenter2 = new MockPeaksPresenter;
+    auto *pPresenter2 = new MockPeaksPresenter;
     PeaksPresenter_sptr presenter2(pPresenter2);
 
     EXPECT_CALL(*pPresenter1, registerOwningPresenter(_)).Times(AtLeast(1));

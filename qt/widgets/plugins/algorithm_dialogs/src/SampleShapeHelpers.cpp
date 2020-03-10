@@ -22,7 +22,7 @@ using namespace MantidQt::CustomDialogs;
 //--------------------------------------------------------//
 
 PointGroupBox::PointGroupBox(QWidget *parent) : QGroupBox(parent), m_icoord(0) {
-  QGridLayout *grid = new QGridLayout;
+  auto *grid = new QGridLayout;
 
   // The line edit fields
   m_midx = new QLineEdit;
@@ -177,7 +177,7 @@ QString Operation::toString(QString left, QString right) const {
  * Create a QComboBox filled with length units (static)
  */
 QComboBox *ShapeDetails::createLengthUnitsCombo() {
-  QComboBox *units = new QComboBox;
+  auto *units = new QComboBox;
   QStringList unit_labels("mm");
   unit_labels << "cm"
               << "m";
@@ -229,11 +229,11 @@ SphereDetails::SphereDetails(QWidget *parent) : ShapeDetails(parent) {
   ++g_nspheres;
   m_idvalue = "sphere_" + QString::number(g_nspheres);
 
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
+  auto *main_layout = new QVBoxLayout(this);
   // radius
   m_radius_box = new QLineEdit;
   m_runits = createLengthUnitsCombo();
-  QHBoxLayout *rad_layout = new QHBoxLayout;
+  auto *rad_layout = new QHBoxLayout;
   rad_layout->addWidget(new QLabel("Radius: "));
   rad_layout->addWidget(m_radius_box);
   rad_layout->addWidget(m_runits);
@@ -274,11 +274,11 @@ CylinderDetails::CylinderDetails(QWidget *parent) : ShapeDetails(parent) {
   ++g_ncylinders;
   m_idvalue = "cylinder_" + QString::number(g_ncylinders);
 
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
+  auto *main_layout = new QVBoxLayout(this);
   // radius
   m_radius_box = new QLineEdit;
   m_runits = createLengthUnitsCombo();
-  QHBoxLayout *rad_layout = new QHBoxLayout;
+  auto *rad_layout = new QHBoxLayout;
   rad_layout->addWidget(new QLabel("Radius: "));
   rad_layout->addWidget(m_radius_box);
   rad_layout->addWidget(m_runits);
@@ -286,7 +286,7 @@ CylinderDetails::CylinderDetails(QWidget *parent) : ShapeDetails(parent) {
   // height
   m_height_box = new QLineEdit;
   m_hunits = createLengthUnitsCombo();
-  QHBoxLayout *hgt_layout = new QHBoxLayout;
+  auto *hgt_layout = new QHBoxLayout;
   hgt_layout->addWidget(new QLabel("Height:  "));
   hgt_layout->addWidget(m_height_box);
   hgt_layout->addWidget(m_hunits);
@@ -342,11 +342,11 @@ InfiniteCylinderDetails::InfiniteCylinderDetails(QWidget *parent)
   ++g_ninfcyls;
   m_idvalue = "infcyl_" + QString::number(g_ninfcyls);
 
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
+  auto *main_layout = new QVBoxLayout(this);
   // radius
   m_radius_box = new QLineEdit;
   m_runits = createLengthUnitsCombo();
-  QHBoxLayout *rad_layout = new QHBoxLayout;
+  auto *rad_layout = new QHBoxLayout;
   rad_layout->addWidget(new QLabel("Radius: "));
   rad_layout->addWidget(m_radius_box);
   rad_layout->addWidget(m_runits);
@@ -393,32 +393,32 @@ SliceOfCylinderRingDetails::SliceOfCylinderRingDetails(QWidget *parent)
   ++g_ncylrings;
   m_idvalue = "cylslice_" + QString::number(g_ncylrings);
 
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
+  auto *main_layout = new QVBoxLayout(this);
   // inner radius
   m_rinner_box = new QLineEdit;
   m_iunits = createLengthUnitsCombo();
-  QHBoxLayout *rad_layout = new QHBoxLayout;
+  auto *rad_layout = new QHBoxLayout;
   rad_layout->addWidget(new QLabel("Inner radius: "));
   rad_layout->addWidget(m_rinner_box);
   rad_layout->addWidget(m_iunits);
   // Outer
   m_router_box = new QLineEdit;
   m_ounits = createLengthUnitsCombo();
-  QHBoxLayout *rad2_layout = new QHBoxLayout;
+  auto *rad2_layout = new QHBoxLayout;
   rad2_layout->addWidget(new QLabel("Outer radius: "));
   rad2_layout->addWidget(m_router_box);
   rad2_layout->addWidget(m_ounits);
   // Depth
   m_depth_box = new QLineEdit;
   m_dunits = createLengthUnitsCombo();
-  QHBoxLayout *dep_layout = new QHBoxLayout;
+  auto *dep_layout = new QHBoxLayout;
   dep_layout->addWidget(new QLabel("       Depth: "));
   dep_layout->addWidget(m_depth_box);
   dep_layout->addWidget(m_dunits);
 
   // Arc
   m_arc_box = new QLineEdit;
-  QHBoxLayout *arc_layout = new QHBoxLayout;
+  auto *arc_layout = new QHBoxLayout;
   arc_layout->addWidget(new QLabel("Arc: "));
   arc_layout->addWidget(m_arc_box);
   arc_layout->addWidget(new QLabel(" deg "));
@@ -481,18 +481,18 @@ ConeDetails::ConeDetails(QWidget *parent) : ShapeDetails(parent) {
   ++g_ncones;
   m_idvalue = "cone_" + QString::number(g_ncones);
 
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
+  auto *main_layout = new QVBoxLayout(this);
   // Height
   m_height_box = new QLineEdit;
   m_hunits = createLengthUnitsCombo();
-  QHBoxLayout *hgt_layout = new QHBoxLayout;
+  auto *hgt_layout = new QHBoxLayout;
   hgt_layout->addWidget(new QLabel("Height: "));
   hgt_layout->addWidget(m_height_box);
   hgt_layout->addWidget(m_hunits);
 
   // Angle
   m_angle_box = new QLineEdit;
-  QHBoxLayout *ang_layout = new QHBoxLayout;
+  auto *ang_layout = new QHBoxLayout;
   ang_layout->addWidget(new QLabel("Angle: "));
   ang_layout->addWidget(m_angle_box);
   ang_layout->addWidget(new QLabel(" deg "));
@@ -548,10 +548,10 @@ InfiniteConeDetails::InfiniteConeDetails(QWidget *parent)
   ++g_ninfcones;
   m_idvalue = "infcone_" + QString::number(g_ninfcones);
 
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
+  auto *main_layout = new QVBoxLayout(this);
   // Angle
   m_angle_box = new QLineEdit;
-  QHBoxLayout *ang_layout = new QHBoxLayout;
+  auto *ang_layout = new QHBoxLayout;
   ang_layout->addWidget(new QLabel("Angle: "));
   ang_layout->addWidget(m_angle_box);
   ang_layout->addWidget(new QLabel(" deg "));
@@ -599,7 +599,7 @@ InfinitePlaneDetails::InfinitePlaneDetails(QWidget *parent)
   ++g_ninfplanes;
   m_idvalue = "infplane_" + QString::number(g_ninfplanes);
 
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
+  auto *main_layout = new QVBoxLayout(this);
 
   // Point boxes
   m_plane = new PointGroupBox;
@@ -636,7 +636,7 @@ CuboidDetails::CuboidDetails(QWidget *parent) : ShapeDetails(parent) {
   ++g_ncuboids;
   m_idvalue = "cuboid_" + QString::number(g_ncuboids);
 
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
+  auto *main_layout = new QVBoxLayout(this);
 
   // Point boxes
   m_left_frt_bot = new PointGroupBox;
@@ -682,7 +682,7 @@ HexahedronDetails::HexahedronDetails(QWidget *parent) : ShapeDetails(parent) {
   ++g_nhexahedrons;
   m_idvalue = "hexahedron_" + QString::number(g_nhexahedrons);
 
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
+  auto *main_layout = new QVBoxLayout(this);
 
   // Point boxes
   m_left_bck_bot = new PointGroupBox;

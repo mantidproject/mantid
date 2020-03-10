@@ -434,7 +434,7 @@ void AlgorithmDialog::addOptionalMessage(QVBoxLayout *mainLay) {
   inputMessage->setAlignment(Qt::AlignJustify);
   inputMessage->setMargin(3);
   inputMessage->setText(getOptionalMessage());
-  QHBoxLayout *msgArea = new QHBoxLayout;
+  auto *msgArea = new QHBoxLayout;
   msgArea->addWidget(inputMessage);
   mainLay->addLayout(msgArea, 0);
 }
@@ -667,7 +667,7 @@ QLayout *AlgorithmDialog::createDefaultButtonLayout(
   m_exitButton = new QPushButton(cancelText);
   connect(m_exitButton, SIGNAL(clicked()), this, SLOT(reject()));
 
-  QHBoxLayout *buttonRowLayout = new QHBoxLayout;
+  auto *buttonRowLayout = new QHBoxLayout;
   buttonRowLayout->addWidget(createHelpButton(helpText));
   buttonRowLayout->addStretch();
 
@@ -693,7 +693,7 @@ QLayout *AlgorithmDialog::createDefaultButtonLayout(
  * for that algorithm
  */
 QPushButton *AlgorithmDialog::createHelpButton(const QString &helpText) const {
-  QPushButton *help = new QPushButton(helpText);
+  auto *help = new QPushButton(helpText);
   help->setMaximumWidth(25);
   connect(help, SIGNAL(clicked()), this, SLOT(helpClicked()));
   return help;

@@ -381,7 +381,7 @@ QSize QtPropertyEditorDelegate::sizeHint(const QStyleOptionViewItem &option,
 
 bool QtPropertyEditorDelegate::eventFilter(QObject *object, QEvent *event) {
   if (event->type() == QEvent::FocusOut) {
-    QFocusEvent *fe = static_cast<QFocusEvent *>(event);
+    auto *fe = static_cast<QFocusEvent *>(event);
     if (fe->reason() == Qt::ActiveWindowFocusReason)
       return false;
   }
@@ -426,7 +426,7 @@ static QIcon drawIndicatorIcon(const QPalette &palette, QStyle *style) {
 void QtTreePropertyBrowserPrivate::init(QWidget *parent,
                                         const QStringList &options,
                                         bool darkTopLevel) {
-  QHBoxLayout *layout = new QHBoxLayout(parent);
+  auto *layout = new QHBoxLayout(parent);
   layout->setMargin(0);
   m_treeWidget = new QtPropertyEditorView(parent, darkTopLevel);
   m_treeWidget->setEditorPrivate(this);

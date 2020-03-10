@@ -22,7 +22,7 @@ namespace SpectrumView {
 void QtUtils::SetTableEntry(int row, int col, const std::string &string,
                             QTableWidget *table) {
   QString qString = QString::fromStdString(string).simplified();
-  QTableWidgetItem *item = new QTableWidgetItem(qString);
+  auto *item = new QTableWidgetItem(qString);
   table->setItem(row, col, item);
 }
 

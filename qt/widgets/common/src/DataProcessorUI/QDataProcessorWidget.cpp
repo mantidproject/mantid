@@ -131,7 +131,7 @@ void QDataProcessorWidget::createTable() {
   ui.setupUi(this);
 
   // Allow rows and columns to be reordered
-  QHeaderView *header = new QHeaderView(Qt::Horizontal);
+  auto *header = new QHeaderView(Qt::Horizontal);
   header->setStretchLastSection(true);
   header->setStyleSheet("QHeaderView {font-size:11pt;}");
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)

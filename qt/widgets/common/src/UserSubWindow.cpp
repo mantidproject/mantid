@@ -154,7 +154,7 @@ QString UserSubWindow::openFileDialog(const bool save,
  *  @param parent :: a pointer to an object that will look after it deleting it
  */
 QLabel *UserSubWindow::newValidator(QWidget *parent) {
-  QLabel *validLbl = new QLabel("*", parent);
+  auto *validLbl = new QLabel("*", parent);
   QPalette pal = validLbl->palette();
   pal.setColor(QPalette::WindowText, Qt::darkRed);
   validLbl->setPalette(pal);

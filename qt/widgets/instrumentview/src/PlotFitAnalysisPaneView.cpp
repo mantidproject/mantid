@@ -60,16 +60,16 @@ QWidget *PlotFitAnalysisPaneView::createFitPane(const double &start,
   m_fitBrowser = new MantidWidgets::FunctionBrowser(this);
   fitPaneLayout->addWidget(m_fitBrowser);
 
-  QLabel *startText = new QLabel("Fit from:");
+  auto *startText = new QLabel("Fit from:");
   m_start = new QLineEdit(QString::number(start));
   auto startValidator = new QDoubleValidator(m_start);
   auto endValidator = new QDoubleValidator(m_start);
   m_start->setValidator(startValidator);
-  QLabel *endText = new QLabel("to:");
+  auto *endText = new QLabel("to:");
   m_end = new QLineEdit(QString::number(end));
   m_end->setValidator(endValidator);
-  QWidget *range = new QWidget();
-  QHBoxLayout *rangeLayout = new QHBoxLayout(range);
+  auto *range = new QWidget();
+  auto *rangeLayout = new QHBoxLayout(range);
   rangeLayout->addWidget(startText);
   rangeLayout->addWidget(m_start);
   rangeLayout->addWidget(endText);

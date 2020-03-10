@@ -66,7 +66,7 @@ GenericDialog::~GenericDialog() {}
 void GenericDialog::initLayout() {
 
   // Add a layout for QDialog
-  QVBoxLayout *dialog_layout = new QVBoxLayout();
+  auto *dialog_layout = new QVBoxLayout();
   setLayout(dialog_layout);
   // Add the helpful summary message
   if (isMessageAvailable())

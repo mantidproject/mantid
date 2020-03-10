@@ -21,7 +21,7 @@ namespace MantidWidgets {
 
 InstrumentWidgetTreeTab::InstrumentWidgetTreeTab(InstrumentWidget *instrWidget)
     : InstrumentWidgetTab(instrWidget) {
-  QVBoxLayout *layout = new QVBoxLayout(this);
+  auto *layout = new QVBoxLayout(this);
   // Tree Controls
   m_instrumentTree = new InstrumentTreeWidget(nullptr);
   layout->addWidget(m_instrumentTree);

@@ -66,7 +66,7 @@ void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   painter->setPen(Qt::blue);
 
   // peak1
-  float peakLeft = float(m_limitsHandler->getPeakLeft());
+  auto peakLeft = float(m_limitsHandler->getPeakLeft());
 
   if (peakLeft != 0) {
     coeff_top_right = float(y_max) - float(peakLeft);
@@ -76,7 +76,7 @@ void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   }
 
   // peak2
-  float peakRight = float(m_limitsHandler->getPeakRight());
+  auto peakRight = float(m_limitsHandler->getPeakRight());
   if (peakRight != 0) {
     coeff_top_right = float(y_max) - float(peakRight);
     pixel_value = int((coeff_top_right / coeff_left) + float(pix_y_max));
@@ -88,7 +88,7 @@ void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   painter->setPen(Qt::red);
 
   // back1
-  float backLeft = float(m_limitsHandler->getBackLeft());
+  auto backLeft = float(m_limitsHandler->getBackLeft());
   if (backLeft != 0) {
     coeff_top_right = float(y_max) - float(backLeft);
     pixel_value = int((coeff_top_right / coeff_left) + float(pix_y_max));
@@ -97,7 +97,7 @@ void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   }
 
   // back2
-  float backRight = float(m_limitsHandler->getBackRight());
+  auto backRight = float(m_limitsHandler->getBackRight());
   if (backRight != 0) {
     coeff_top_right = float(y_max) - float(backRight);
     pixel_value = int((coeff_top_right / coeff_left) + float(pix_y_max));
@@ -114,7 +114,7 @@ void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   float coeff_bottom_right;
 
   // tof min
-  float TOFmin = float(m_limitsHandler->getTOFmin());
+  auto TOFmin = float(m_limitsHandler->getTOFmin());
   if (TOFmin != 0) {
     coeff_bottom_right = float(TOFmin) - float(x_min);
     tof_value =
@@ -124,7 +124,7 @@ void RefImagePlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   }
 
   // tof max
-  float TOFmax = float(m_limitsHandler->getTOFmax());
+  auto TOFmax = float(m_limitsHandler->getTOFmax());
   if (TOFmax != 0) {
     coeff_bottom_right = float(TOFmax) - float(x_min);
     tof_value = int(coeff_left * coeff_bottom_right + float(pix_x_min));
