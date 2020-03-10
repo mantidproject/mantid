@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import six
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantid import ConfigService

@@ -12,7 +12,6 @@ except ImportError:
     PATHOS_FOUND = False
 
 import numpy as np
-import six
 import os
 import re
 

@@ -10,7 +10,6 @@
 # MainWindow application for reducing HFIR 4-circle
 #
 ################################################################################
-import six
 import os
 import sys
 import csv

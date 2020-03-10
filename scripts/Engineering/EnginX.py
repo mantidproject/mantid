@@ -10,8 +10,6 @@ import numpy as np
 import os
 from platform import system
 from shutil import copy2
-import six
-
 import mantid.plots  # noqa
 import Engineering.EnggUtils as Utils
 import mantid.simpleapi as simple
@@ -626,7 +624,7 @@ def _save_out(run_number, focus_directory, focus_general, output, enginx_file_na
     dat_name, genie_filename, gss_name, hdf5_name, nxs_name = _find_focus_file_location(bank_id, focus_directory,
                                                                                         enginx_file_name_format,
                                                                                         run_number)
-    if not six.u(bank_id).isnumeric():
+    if not str(bank_id).isnumeric():
         bank_id = 0
     # save the files out to the user directory
     simple.SaveFocusedXYE(InputWorkspace=output, Filename=dat_name, SplitFiles=False,

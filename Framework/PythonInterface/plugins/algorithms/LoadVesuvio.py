@@ -14,8 +14,6 @@ import copy
 import numpy as np
 import os
 import re
-import six
-
 RUN_PROP = "Filename"
 WKSP_PROP = "OutputWorkspace"
 MODE_PROP = "Mode"

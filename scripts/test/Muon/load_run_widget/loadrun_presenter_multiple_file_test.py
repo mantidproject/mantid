@@ -9,8 +9,6 @@ import unittest
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication, QWidget
-import six
-
 from Muon.GUI.Common.load_run_widget.load_run_model import LoadRunWidgetModel
 from Muon.GUI.Common.load_run_widget.load_run_presenter import LoadRunWidgetPresenter
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView

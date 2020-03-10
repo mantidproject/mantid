@@ -8,7 +8,6 @@
 #
 #
 import inspect
-import six
 import traceback
 
 from qtpy.QtCore import QTimer, QMetaObject, Qt

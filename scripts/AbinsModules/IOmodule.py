@@ -8,7 +8,6 @@ import hashlib
 import io
 import json
 import os
-import six
 import subprocess
 import shutil
 import h5py

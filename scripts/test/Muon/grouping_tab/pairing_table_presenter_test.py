@@ -7,7 +7,6 @@
 import unittest
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import start_qapplication
-import six
 from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel

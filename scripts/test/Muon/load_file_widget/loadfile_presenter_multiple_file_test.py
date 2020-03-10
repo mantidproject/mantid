@@ -9,8 +9,6 @@ import unittest
 from mantid.py3compat import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication
-import six
-
 from Muon.GUI.Common.load_file_widget.model import BrowseFileWidgetModel
 from Muon.GUI.Common.load_file_widget.presenter import BrowseFileWidgetPresenter
 from Muon.GUI.Common.load_file_widget.view import BrowseFileWidgetView
