@@ -196,16 +196,16 @@ def generate_call_tips(definitions, prepend_module_name=None):
         for attr in dir(py_object):
             try:
                 f_attr = getattr(py_object, attr)
+                if attr.startswith('_'):
+                    continue
+                if hasattr(f_attr, 'im_func') or inspect.isfunction(f_attr) or inspect.ismethod(f_attr):
+                    call_tip = name + '.' + attr + get_function_spec(f_attr)
+                else:
+                    call_tip = name + '.' + attr
+                if isinstance(module_name, string_types):
+                    call_tips.append(module_name + '.' + call_tip)
             except Exception:
                 continue
-            if attr.startswith('_'):
-                continue
-            if hasattr(f_attr, 'im_func') or inspect.isfunction(f_attr) or inspect.ismethod(f_attr):
-                call_tip = name + '.' + attr + get_function_spec(f_attr)
-            else:
-                call_tip = name + '.' + attr
-            if isinstance(module_name, string_types):
-                call_tips.append(module_name + '.' + call_tip)
     return call_tips
 
 

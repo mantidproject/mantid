@@ -283,7 +283,7 @@ class MainWindow(QMainWindow):
         self._baseTitle = 'Title is not initialized'
 
         # Timing and thread 'global'
-        self._startMeringScans = time.clock()
+        self._startMeringScans = time.process_time()
         self._errorMessageEnsemble = ''
 
         # QSettings

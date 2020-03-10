@@ -88,8 +88,11 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
                                                               plotting_widget=self.dockable_plot_widget.view)
         self.dockable_plot_widget_window.setMinimumWidth(575)
 
-        # # add dock widget to main Muon analysis window
+        # Add dock widget to main Muon analysis window
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockable_plot_widget_window)
+        # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
+        # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
+        self.resizeDocks({self.dockable_plot_widget_window}, {40}, QtCore.Qt.Horizontal)
 
         # set up other widgets
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
