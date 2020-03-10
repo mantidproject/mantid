@@ -300,7 +300,7 @@ class PyChopGui(QMainWindow):
         line, = self.qeaxes.plot(np.hstack(q2), np.concatenate((np.flipud(en), en)).tolist() * len(self.engine.detector.tthlims))
         line.set_label(label_text)
         self.qeaxes.set_xlim([0, self.qeaxes_xlim])
-        legend_set_draggable(self.qesaxes.legend(), True)
+        legend_set_draggable(self.qeaxes.legend(), True)
         self.qeaxes.set_xlabel(r'$|Q| (\mathrm{\AA}^{-1})$')
         self.qeaxes.set_ylabel('Energy Transfer (meV)')
         self.qecanvas.draw()
