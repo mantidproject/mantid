@@ -300,11 +300,18 @@ class FigureInteraction(object):
             self.add_error_bars_menu(menu, event.inaxes)
             self._add_marker_option_menu(menu, event)
 
+        # Error bar caps are considered lines so they are removed before checking the number of lines on the axes so
+        # they aren't confused for "actual" lines.
+        error_bar_caps = datafunctions.remove_and_return_errorbar_cap_lines(event.inaxes)
+
         # Able to change the plot type to waterfall if there is only one axes, it is a MantidAxes, and there is more
         # than one line on the axes.
         if len(event.inaxes.get_figure().get_axes()) == 1 and isinstance(event.inaxes, MantidAxes)\
                 and len(event.inaxes.get_lines()) > 1:
             self._add_plot_type_option_menu(menu, event.inaxes)
+
+        # Re-add error bar caps
+        event.inaxes.lines += error_bar_caps
 
         menu.exec_(QCursor.pos())
 
