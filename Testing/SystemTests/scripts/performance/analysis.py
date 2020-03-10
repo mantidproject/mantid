@@ -7,7 +7,6 @@
 """ Module containing functions for test
 performance analysis, plotting, and saving
 to other formats (CSV, PDF) """
-from six.moves import range
 import testresult
 import os
 import sys

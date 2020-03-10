@@ -8,8 +8,6 @@
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
-from six.moves import range #pylint: disable=redefined-builtin
-
 _OUTPUTLEVEL = "NOOUTPUT"
 
 

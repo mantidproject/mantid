@@ -12,9 +12,6 @@ from testhelpers import run_algorithm
 import numpy as np
 from SANSDarkRunBackgroundCorrection import DarkRunMonitorAndDetectorRemover
 from SANSDarkRunBackgroundCorrection import SANSDarkRunBackgroundCorrection
-from six.moves import range
-
-
 class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
     #-----
     # Workspace2D tests

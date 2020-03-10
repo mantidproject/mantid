@@ -15,8 +15,6 @@ from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DistributedDa
 from mantid.kernel import ConfigService, Direction, FloatArrayProperty, FloatBoundedValidator, \
     IntArrayBoundedValidator, IntArrayProperty, Property, PropertyManagerDataService, StringListValidator
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
-from six.moves import range #pylint: disable=redefined-builtin
-
 if AlgorithmFactory.exists('GatherWorkspaces'):
     HAVE_MPI = True
     from mpi4py import MPI

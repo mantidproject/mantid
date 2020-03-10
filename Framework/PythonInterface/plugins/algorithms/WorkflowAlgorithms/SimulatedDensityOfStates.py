@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,too-many-locals,too-many-lines, redefined-builtin
-from six.moves import range
-
 import numpy as np
 import re
 import os.path

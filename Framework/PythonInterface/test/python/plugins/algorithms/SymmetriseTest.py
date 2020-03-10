@@ -8,8 +8,6 @@
 import numpy as np
 import unittest
 
-from six.moves import range
-
 from mantid.api import *
 from mantid.simpleapi import CreateWorkspace, ScaleX, Symmetrise
 

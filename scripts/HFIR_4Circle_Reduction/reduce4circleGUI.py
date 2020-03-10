@@ -10,7 +10,6 @@
 # MainWindow application for reducing HFIR 4-circle
 #
 ################################################################################
-from six.moves import range
 import six
 import os
 import sys

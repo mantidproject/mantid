@@ -7,7 +7,6 @@
 #
 # GUI Utility Methods
 #
-from six.moves import range
 import math
 import numpy
 import os

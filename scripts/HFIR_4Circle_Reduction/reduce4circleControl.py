@@ -24,7 +24,6 @@ except ImportError:
     from urllib2 import urlopen
     from urllib2 import HTTPError
     from urllib2 import URLError
-from six.moves import range
 import math
 import csv
 import random

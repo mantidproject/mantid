@@ -12,8 +12,6 @@ import os
 
 import numpy as np
 from pylab import close, figure, gcf, plot, xticks, ylabel, xlabel, title, savefig
-from six.moves import range
-
 import sqlresults
 from sqlresults import get_results
 

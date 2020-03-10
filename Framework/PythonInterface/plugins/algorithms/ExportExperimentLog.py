@@ -11,8 +11,6 @@ from mantid.kernel import *
 import datetime
 import time
 import os
-from six.moves import range
-
 #pylint: disable=too-many-instance-attributes
 
 

@@ -17,8 +17,6 @@ import math
 import time
 import numpy as np
 import collections
-from six.moves import range
-
 import Direct.CommonFunctions  as common
 import Direct.diagnostics      as diagnostics
 from Direct.PropertyManager  import PropertyManager

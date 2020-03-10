@@ -9,9 +9,6 @@ Module containing classes that act as proxies to the various MantidPlot gui obje
 accessible from python. They listen for the QObject 'destroyed' signal and set the wrapped
 reference to None, thus ensuring that further attempts at access do not cause a crash.
 """
-
-from six.moves import range
-
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, pyqtSlot
 try:

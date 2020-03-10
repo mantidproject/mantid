@@ -11,9 +11,6 @@ from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 import os
 from distutils.version import LooseVersion
-from six.moves import range
-
-
 class ExportVulcanSampleLogTest(unittest.TestCase):
 
     def test_exportFileOnly(self):

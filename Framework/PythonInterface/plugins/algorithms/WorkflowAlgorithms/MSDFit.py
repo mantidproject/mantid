@@ -8,9 +8,6 @@
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
-from six.moves import range  # pylint: disable=redefined-builti
-
-
 class MSDFit(DataProcessorAlgorithm):
     _output_fit_ws = None
     _model = None

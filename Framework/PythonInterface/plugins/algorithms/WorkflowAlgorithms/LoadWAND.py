@@ -8,7 +8,6 @@ from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MultipleFilePro
 from mantid.kernel import Direction, UnitConversion, Elastic, Property, IntArrayProperty, StringListValidator
 from mantid.simpleapi import (mtd, SetGoniometer, AddSampleLog, MaskBTP, RenameWorkspace, GroupWorkspaces,
                               CreateWorkspace, LoadNexusLogs, LoadInstrument)
-from six.moves import range
 import numpy as np
 import h5py
 

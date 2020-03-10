@@ -10,7 +10,6 @@ from mantid.kernel import *
 from mantid.api import *
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
-from six.moves import range
 import os
 
 class CreateLeBailFitInputTest(unittest.TestCase):

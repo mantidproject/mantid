@@ -10,8 +10,6 @@ import math
 from mantid.api import AnalysisDataService
 import numpy
 import numpy.linalg
-from six.moves import range
-
 # This module does absorption correction
 
 

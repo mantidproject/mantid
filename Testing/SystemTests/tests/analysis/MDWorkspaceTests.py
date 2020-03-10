@@ -15,8 +15,6 @@ import os
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
-from six.moves import range
-
 ###############################################################################
 
 

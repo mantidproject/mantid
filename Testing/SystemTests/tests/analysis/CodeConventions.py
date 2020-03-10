@@ -9,7 +9,6 @@ import systemtesting
 import re
 import mantid
 from mantid.simpleapi import *
-from six.moves import range
 MAX_ALG_LEN = 40 # TODO convention says 20 is the maximum
 
 SPECIAL = ["InputWorkspace", "OutputWorkspace", "Workspace",

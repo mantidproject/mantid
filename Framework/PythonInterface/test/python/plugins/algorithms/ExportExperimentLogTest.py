@@ -13,8 +13,6 @@ import mantid.kernel as kernel
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 import os
-from six.moves import range
-
 class ExportExperimentLogTest(unittest.TestCase):
 
     def test_exportFileNew(self):

@@ -33,8 +33,6 @@ import mantidqtpython
 from mantidqtpython import GraphOptions # noqa
 # historical names in MantidPlot
 from mantidqtpython import MantidQt as _MantidQt
-from six.moves import range
-
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
 from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker, InstrumentView) # noqa
 

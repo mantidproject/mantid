@@ -8,8 +8,6 @@
 from mantid import config
 import os
 import re
-from six.moves import range
-
 """
 Set of functions to assist with processing instrument parameters relevant to reduction.
 """

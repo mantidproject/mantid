@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=C0103,W0403
-from six.moves import range
 import sys
 import numpy as np
 from qtpy.QtWidgets import (QMainWindow)

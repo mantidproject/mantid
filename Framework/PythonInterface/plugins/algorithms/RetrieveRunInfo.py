@@ -10,8 +10,7 @@ from mantid.simpleapi import *
 from mantid.kernel import StringMandatoryValidator, Direction
 from mantid import config
 import os
-from six.moves import filterfalse
-
+from itertools import filterfalse
 
 class Intervals(object):
     # Having "*intervals" as a parameter instead of "intervals" allows us

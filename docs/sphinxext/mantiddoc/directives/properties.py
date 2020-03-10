@@ -8,8 +8,6 @@
 from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
 import re
 from string import punctuation
-from six.moves import range
-
 SUBSTITUTE_REF_RE = re.compile(r'\|(.+?)\|')
 
 class PropertiesDirective(AlgorithmBaseDirective):
