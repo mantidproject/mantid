@@ -9,7 +9,7 @@
 #
 from qtpy.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QSlider, QDoubleSpinBox, QSpinBox
 from qtpy.QtCore import Qt, Signal
-from mantid.py3compat.enum import Enum
+from enum import Enum
 
 
 class State(Enum):

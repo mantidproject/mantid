@@ -14,7 +14,7 @@ import threading
 import time
 from traceback import extract_tb
 
-from mantid.py3compat.enum import Enum
+from enum import Enum
 
 
 class TaskExitCode(Enum):

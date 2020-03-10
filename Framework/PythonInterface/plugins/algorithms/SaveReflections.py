@@ -8,7 +8,7 @@ import os.path as osp
 import numpy as np
 from mantid.api import (AlgorithmFactory, FileProperty, FileAction, IPeaksWorkspaceProperty, PythonAlgorithm)
 from mantid.kernel import StringListValidator, Direction
-from mantid.py3compat.enum import Enum
+from enum import Enum
 
 
 def num_modulation_vectors(workspace):

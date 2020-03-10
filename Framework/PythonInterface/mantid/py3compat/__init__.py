@@ -30,7 +30,7 @@ try:
     from enum import Enum
 except ImportError:
     # use a compatability layer
-    from mantid.py3compat.enum import Enum  # noqa
+    from enum import Enum  # noqa
 
 # -----------------------------------------------------------------------------
 # Globals and constants

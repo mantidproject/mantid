@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from collections import (namedtuple, Sequence)
 
-from mantid.py3compat import Enum
+from enum import Enum
 from sans.common.enums import (DetectorType, SANSInstrument)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 

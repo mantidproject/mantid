@@ -7,7 +7,7 @@
 import unittest
 
 from mantid.api import Algorithm
-from mantid.py3compat import Enum
+from enum import Enum
 
 
 # ----------------------------------------------------------------------------------------------------------------------

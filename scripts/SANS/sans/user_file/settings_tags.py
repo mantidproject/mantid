@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from collections import namedtuple
 
-from mantid.py3compat import Enum
+from enum import Enum
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Named tuples for passing around data in a structured way, a bit like a plain old c-struct.
