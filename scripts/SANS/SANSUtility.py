@@ -17,7 +17,7 @@ import inspect
 import math
 import os
 import re
-from six import types
+import types
 import numpy as np
 import h5py as h5
 

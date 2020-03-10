@@ -7,7 +7,6 @@
 # pylint: disable=no-init,invalid-name,too-many-instance-attributes
 
 import math
-from six import integer_types
 
 import numpy as np
 from mantid.simpleapi import *
@@ -546,7 +545,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         for key, value in sample_logs.items():
             if isinstance(value, bool):
                 log_type = 'String'
-            elif isinstance(value, (integer_types, float)):
+            elif isinstance(value, (int, float)):
                 log_type = 'Number'
             else:
                 log_type = 'String'

@@ -8,8 +8,7 @@ import inspect
 import os
 import re
 
-import six
-from six import types
+import types
 
 from SANSadd2 import add_runs
 from mantid.api import (AnalysisDataService, WorkspaceGroup)
