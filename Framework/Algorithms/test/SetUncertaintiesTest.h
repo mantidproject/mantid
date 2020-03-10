@@ -280,6 +280,42 @@ public:
     }
     API::AnalysisDataService::Instance().remove(outWS->getName());
   }
+
+  /**
+   * Create and execute the algorithm in the specified mode.
+   * @param mode The name of the SetError property SetUncertainties
+   * @return The name that the output workspace will be registered as.
+   */
+  void test_EventWorkspacePlace() {
+    // random data mostly works
+    auto inWksp =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument2(10,
+                                                                         10);
+    std::string outWSname = "SetUncertainties_oneIfZero";
+    WorkspaceCreationHelper::storeWS(outWSname, inWksp);
+    SetUncertainties alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    alg.setProperty("InputWorkspace", inWksp);
+    alg.setProperty("SetError", "oneIfZero");
+    alg.setProperty("OutputWorkspace", outWSname);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    const auto outWS =
+        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+            outWSname);
+    TS_ASSERT(bool(outWS)); // non-null pointer
+
+    const auto &E = outWS->e(0);
+    const auto &Y = outWS->y(0);
+    for (size_t i = 0; i < E.size(); ++i) {
+      if (Y[i] == 0.) {
+        TS_ASSERT_EQUALS(E[i], 1.);
+      } else {
+        TS_ASSERT_DELTA(Y[i], E[i] * E[i], .001);
+      }
+    }
+  }
 };
 
 class SetUncertaintiesTestPerformance : public CxxTest::TestSuite {
