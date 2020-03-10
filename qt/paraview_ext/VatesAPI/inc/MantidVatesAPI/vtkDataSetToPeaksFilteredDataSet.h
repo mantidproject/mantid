@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_PeaksFilter_H
-#define MANTID_VATES_PeaksFilter_H
+#pragma once
 
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeBase.h"
@@ -67,4 +66,3 @@ private:
 };
 } // namespace VATES
 } // namespace Mantid
-#endif

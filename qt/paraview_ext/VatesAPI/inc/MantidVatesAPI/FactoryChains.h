@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_FACTORY_CHAINS_H
-#define MANTID_VATES_FACTORY_CHAINS_H
+#pragma once
 
 #include "MantidKernel/System.h"
 
@@ -45,5 +44,3 @@ vtkSmartPointer<vtkPVClipDataSet>
 std::string DLLExport createTimeStampedName(const std::string &name);
 } // namespace VATES
 } // namespace Mantid
-
-#endif

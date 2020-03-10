@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef _vtkMDEWNexusReader_h
-#define _vtkMDEWNexusReader_h
+#pragma once
 
 #include "MantidVatesAPI/MDEWEventNexusLoadingPresenter.h"
 #include "MantidVatesAPI/Normalization.h"
@@ -76,4 +75,3 @@ private:
 
   Mantid::VATES::VisualNormalization m_normalization;
 };
-#endif

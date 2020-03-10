@@ -42,8 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  @date 19/04/2017
 */
 
-#ifndef pqCameraToolbarNonOrthogonalAxes_h
-#define pqCameraToolbarNonOrthogonalAxes_h
+#pragma once
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "pqApplicationComponentsModule.h"
@@ -80,5 +79,3 @@ private:
   void constructor();
   QAction *ZoomToDataAction;
 };
-
-#endif

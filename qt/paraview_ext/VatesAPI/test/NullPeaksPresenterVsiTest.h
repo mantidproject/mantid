@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NULL_PEAKS_PRESENTER_VSI_TEST_H_
-#define NULL_PEAKS_PRESENTER_VSI_TEST_H_
+#pragma once
 
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
@@ -51,4 +50,3 @@ public:
         const std::runtime_error &);
   }
 };
-#endif

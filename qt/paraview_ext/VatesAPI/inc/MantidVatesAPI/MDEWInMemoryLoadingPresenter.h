@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_MDEW_IN_MEMORY_LOADING_PRESENTER
-#define MANTID_VATES_MDEW_IN_MEMORY_LOADING_PRESENTER
+#pragma once
 
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
 #include <boost/scoped_ptr.hpp>
@@ -50,5 +49,3 @@ private:
 };
 } // namespace VATES
 } // namespace Mantid
-
-#endif

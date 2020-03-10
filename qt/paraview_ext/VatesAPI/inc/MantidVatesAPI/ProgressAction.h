@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef _EVENT_HANDLER_H_
-#define _EVENT_HANDLER_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include <Poco/ActiveMethod.h>
@@ -37,4 +36,3 @@ public:
 };
 } // namespace VATES
 } // namespace Mantid
-#endif

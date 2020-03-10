@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VATES_API_MD_LOADING_PRESENTER_TEST_H
-#define VATES_API_MD_LOADING_PRESENTER_TEST_H
+#pragma once
 
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/MDLoadingPresenter.h"
@@ -109,5 +108,3 @@ public:
     TS_ASSERT_EQUALS(10.0, bounds[5]);
   }
 };
-
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ADS_WORKSPACE_PROVIDER_TEST_H_
-#define ADS_WORKSPACE_PROVIDER_TEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -67,5 +66,3 @@ public:
                                wsProvider.fetchWorkspace("WS"));
   }
 };
-
-#endif

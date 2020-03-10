@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARAVIEW_TIMESTEP_TO_TIMESTEP
-#define MANTID_PARAVIEW_TIMESTEP_TO_TIMESTEP
+#pragma once
 
 #include "MantidKernel/System.h"
 
@@ -34,5 +33,3 @@ public:
 };
 } // namespace VATES
 } // namespace Mantid
-
-#endif

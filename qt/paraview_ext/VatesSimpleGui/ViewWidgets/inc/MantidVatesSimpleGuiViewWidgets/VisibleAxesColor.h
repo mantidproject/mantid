@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VISIBLEAXESCOLOR_H_
-#define MANTID_VISIBLEAXESCOLOR_H_
+#pragma once
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "pqRenderView.h"
 
@@ -32,5 +31,3 @@ private:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-
-#endif // MANTID_VISIBLEAXESCOLOR_H_

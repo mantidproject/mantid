@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef _vtkScaleWorkspace_h
-#define _vtkScaleWorkspace_h
+#pragma once
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/VatesConfigurations.h"
 #include "vtkPointSetAlgorithm.h"
@@ -47,4 +46,3 @@ private:
   boost::scoped_ptr<Mantid::VATES::MetadataJsonManager> m_metadataJsonManager;
   boost::scoped_ptr<Mantid::VATES::VatesConfigurations> m_vatesConfigurations;
 };
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MULTISLICEVIEW_H_
-#define MULTISLICEVIEW_H_
+#pragma once
 
 #include "MantidKernel/VMD.h"
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
@@ -109,5 +108,3 @@ private:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-
-#endif // MULTISLICEVIEW_H_

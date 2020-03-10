@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef _vtkMDEWNexusReader_h
-#define _vtkMDEWNexusReader_h
+#pragma once
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -165,4 +164,3 @@ private:
   /// Mutex for thread-safe progress reporting.
   Mantid::Kernel::Mutex progressMutex;
 };
-#endif

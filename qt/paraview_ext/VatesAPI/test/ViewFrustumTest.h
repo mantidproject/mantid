@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VIEWFRUSTUM_TEST_H_
-#define VIEWFRUSTUM_TEST_H_
+#pragma once
 
 #include "MantidVatesAPI/ViewFrustum.h"
 #include <cxxtest/TestSuite.h>
@@ -106,5 +105,3 @@ public:
                       frustum.toExtents(), const std::runtime_error &);
   }
 };
-
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REBINNING_XML_GENERATOR_TEST_H
-#define REBINNING_XML_GENERATOR_TEST_H
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -172,5 +171,3 @@ public:
                       true, withFullGeometryAndWSInfo.hasGeometryInfo());
   }
 };
-
-#endif

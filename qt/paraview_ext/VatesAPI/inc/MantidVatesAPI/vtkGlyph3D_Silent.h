@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VTKGLYPH3D_SILENT_H
-#define VTKGLYPH3D_SILENT_H
+#pragma once
 
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
 #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 8)
@@ -19,5 +18,3 @@
 #pragma GCC diagnostic pop
 #endif
 #endif
-
-#endif // VTKGLYPH3D_SILENT_H
