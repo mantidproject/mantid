@@ -41,6 +41,7 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
                                                   ['62264'], ['62265'], ['62266'], ['62267']]
         self.view.plot_options.get_errors = mock.MagicMock(return_value=True)
         self.presenter.get_x_limits = mock.MagicMock(return_value=[0, 15])
+        self.presenter.get_y_limits = mock.MagicMock(return_value=[0, 1])
         self.presenter.get_x_lim_from_subplot = mock.MagicMock(return_value=[0, 15])
         self.presenter.get_y_lim_from_subplot = mock.MagicMock(return_value=[-1, 1])
 
