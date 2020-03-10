@@ -9,12 +9,11 @@
 #
 import unittest
 
-from time import sleep
-
-from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from qtpy.QtWidgets import QApplication
-from mantidqt.utils.qt.testing import start_qapplication
+
 from mantidqt.utils.asynchronous import AsyncTask, TaskExitCode
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
+from mantidqt.utils.qt.testing import start_qapplication
 
 class CustomException(Exception):
     pass
