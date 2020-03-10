@@ -18,6 +18,8 @@ Algorithms
 Data Objects
 ------------
 
+- Added MatrixWorkspace::findY to find the histogram and bin with a given value 
+
 Python
 ------
 - A list of spectrum numbers can be got by calling getSpectrumNumbers on a 
