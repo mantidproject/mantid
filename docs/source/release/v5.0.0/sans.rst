@@ -54,6 +54,7 @@ Fixed
 - A zero monitor shift did not previously account for the position
   of the rear detector for Zoom. A 0.0mm offset now works correctly when
   processing data from the SANS GUI or command interface.
+- The help documentation now loads correctly
 - Saving a CSV with sample geometry enabled, then reloading works correctly.
 - Hitting Shift+Enter on the top row no longer causes an error.
 
