@@ -49,11 +49,13 @@ public:
   MatrixWorkspace_sptr
   loadDataFile(const std::string dataFile, const size_t numberOfHistograms,
                const size_t numberOfMonitors, const size_t numberOfChannels,
-               const double tofDelay, const double tofChannelWidth) {
+               const double tofDelay, const double tofChannelWidth,
+               const bool convertToTOF) {
     LoadILLTOF2 loader;
     loader.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", dataFile))
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("convertToTOF", convertToTOF))
 
     std::string outputSpace = "LoadILLTOFTest_out";
     TS_ASSERT_THROWS_NOTHING(
@@ -80,11 +82,19 @@ public:
                        Mantid::HistogramData::Histogram::YMode::Counts)
       TS_ASSERT_EQUALS(histogram.size(), numberOfChannels)
       const auto &xs = histogram.x();
-      for (size_t channelIndex = 0; channelIndex != xs.size(); ++channelIndex) {
-        const double binEdge =
-            tofDelay + static_cast<double>(channelIndex) * tofChannelWidth -
-            tofChannelWidth / 2;
-        TS_ASSERT_DELTA(xs[channelIndex], binEdge, 1e-3)
+      if (convertToTOF) {
+        for (size_t channelIndex = 0; channelIndex != xs.size();
+             ++channelIndex) {
+          const double binEdge =
+              tofDelay + static_cast<double>(channelIndex) * tofChannelWidth -
+              tofChannelWidth / 2;
+          TS_ASSERT_DELTA(xs[channelIndex], binEdge, 1e-3)
+        }
+      } else {
+        for (size_t channelIndex = 0; channelIndex != xs.size();
+             ++channelIndex) {
+          TS_ASSERT_EQUALS(xs[channelIndex], channelIndex)
+        }
       }
       const auto &ys = histogram.y();
       const auto &es = histogram.e();
@@ -117,7 +127,7 @@ public:
     const size_t monitorCount = 1;
     MatrixWorkspace_sptr ws =
         loadDataFile("ILL/IN4/084446.nxs", histogramCount, monitorCount,
-                     channelCount, tofDelay, tofChannelWidth);
+                     channelCount, tofDelay, tofChannelWidth, true);
 
     const double pulseInterval =
         ws->run().getLogAsSingleValue("pulse_interval");
@@ -132,7 +142,7 @@ public:
     const size_t histogramCount = 98305;
     const size_t monitorCount = 1;
     loadDataFile("ILL/IN5/104007.nxs", histogramCount, monitorCount,
-                 channelCount, tofDelay, tofChannelWidth);
+                 channelCount, tofDelay, tofChannelWidth, true);
   }
 
   void test_IN6_load() {
@@ -144,7 +154,7 @@ public:
     const size_t monitorCount = 3;
     MatrixWorkspace_sptr ws =
         loadDataFile("ILL/IN6/164192.nxs", histogramCount, monitorCount,
-                     channelCount, tofDelay, tofChannelWidth);
+                     channelCount, tofDelay, tofChannelWidth, true);
 
     const double pulseInterval =
         ws->run().getLogAsSingleValue("pulse_interval");
@@ -218,7 +228,18 @@ public:
     const size_t histogramCount = 73729;
     const size_t monitorCount = 1;
     loadDataFile("ILL/PANTHER/001723.nxs", histogramCount, monitorCount,
-                 channelCount, tofDelay, tofChannelWidth);
+                 channelCount, tofDelay, tofChannelWidth, false);
+  }
+
+  void test_convertToTOF() {
+    // From the input test file.
+    const double tofDelay = 0;
+    const double tofChannelWidth = 0; // should not be usesd
+    const size_t channelCount = 512;
+    const size_t histogramCount = 98305;
+    const size_t monitorCount = 1;
+    loadDataFile("ILL/IN5/104007.nxs", histogramCount, monitorCount,
+                 channelCount, tofDelay, tofChannelWidth, false);
   }
 };
 
