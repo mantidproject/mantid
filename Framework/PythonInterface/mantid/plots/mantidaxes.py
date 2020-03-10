@@ -1024,7 +1024,7 @@ class MantidAxes(Axes):
         else:
             if bool(x_offset) or bool(y_offset) or fill:
                 raise RuntimeError("You have set waterfall to false but have given a non-zero value for the offset or "
-                                "set fill to true.")
+                                   "set fill to true.")
 
             if not self.is_waterfall():
                 # Nothing needs to be changed.
