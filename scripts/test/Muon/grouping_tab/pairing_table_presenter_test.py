@@ -257,7 +257,7 @@ class PairingTablePresenterTest(unittest.TestCase):
         self.assertEqual(str(self.view.get_table_item_text(0, 0)), "pair_1")
         self.assertEqual(str(self.view.get_table_item_text(1, 0)), "pair_2")
         self.assertEqual(str(self.view.get_table_item_text(2, 0)), "pair_3")
-        six.assertCountEqual(self, self.model.pair_names, ["pair_1", "pair_2", "pair_3"])
+        self.assertCountEqual(self.model.pair_names, ["pair_1", "pair_2", "pair_3"])
 
 
 if __name__ == '__main__':

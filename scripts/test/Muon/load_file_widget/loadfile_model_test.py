@@ -44,8 +44,8 @@ class LoadFileWidgetModelTest(unittest.TestCase):
 
         self.model.execute()
 
-        six.assertCountEqual(self, [os.path.split(filename)[-1] for filename in self.model.loaded_filenames], files)
-        six.assertCountEqual(self, self.model.loaded_runs, [[19489], [6473], [6475]])
+        self.assertCountEqual([os.path.split(filename)[-1] for filename in self.model.loaded_filenames], files)
+        self.assertCountEqual(self.model.loaded_runs, [[19489], [6473], [6475]])
 
     def test_model_is_cleared_correctly(self):
         files = ['EMU00019489.nxs', 'emu00006473.nxs', 'emu00006475.nxs']
@@ -64,9 +64,9 @@ class LoadFileWidgetModelTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.model.execute()
 
-        six.assertCountEqual(self, [os.path.split(filename)[-1] for filename in self.model.loaded_filenames],
+        self.assertCountEqual([os.path.split(filename)[-1] for filename in self.model.loaded_filenames],
                              ['EMU00019489.nxs', 'emu00006473.nxs'])
-        six.assertCountEqual(self, self.model.loaded_runs, [[19489], [6473]])
+        self.assertCountEqual(self.model.loaded_runs, [[19489], [6473]])
 
 
 if __name__ == '__main__':

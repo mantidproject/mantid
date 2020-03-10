@@ -114,9 +114,9 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.presenter.handle_decrement_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        six.assertCountEqual(self, self.model.loaded_filenames, ["file1.nxs", "file2.nxs", "file3.nxs", "file4.nxs"])
-        six.assertCountEqual(self, self.model.loaded_workspaces, [[1], [2], [3], [4]])
-        six.assertCountEqual(self, self.model.loaded_runs, [[1], [2], [3], [4]])
+        self.assertCountEqual(self.model.loaded_filenames, ["file1.nxs", "file2.nxs", "file3.nxs", "file4.nxs"])
+        self.assertCountEqual(self.model.loaded_workspaces, [[1], [2], [3], [4]])
+        self.assertCountEqual(self.model.loaded_runs, [[1], [2], [3], [4]])
 
         self.assertEqual(self.view.get_run_edit_text(), "1")
 
@@ -128,9 +128,9 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.presenter.handle_increment_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        six.assertCountEqual(self, self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs", "file5.nxs"])
-        six.assertCountEqual(self, self.model.loaded_workspaces, [[2], [3], [4], [5]])
-        six.assertCountEqual(self, self.model.loaded_runs, [[2], [3], [4], [5]])
+        self.assertCountEqual(self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs", "file5.nxs"])
+        self.assertCountEqual(self.model.loaded_workspaces, [[2], [3], [4], [5]])
+        self.assertCountEqual(self.model.loaded_runs, [[2], [3], [4], [5]])
 
         self.assertEqual(self.view.get_run_edit_text(), "5")
 
@@ -143,9 +143,9 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.presenter.handle_decrement_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        six.assertCountEqual(self, self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs"])
-        six.assertCountEqual(self, self.model.loaded_workspaces, [[2], [3], [4]])
-        six.assertCountEqual(self, self.model.loaded_runs, [[2], [3], [4]])
+        self.assertCountEqual(self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs"])
+        self.assertCountEqual(self.model.loaded_workspaces, [[2], [3], [4]])
+        self.assertCountEqual(self.model.loaded_runs, [[2], [3], [4]])
 
         self.assertEqual(self.view.get_run_edit_text(), '2-4')
 
@@ -158,9 +158,9 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
         self.presenter.handle_increment_run()
         self.wait_for_thread(self.presenter._load_thread)
 
-        six.assertCountEqual(self, self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs"])
-        six.assertCountEqual(self, self.model.loaded_workspaces, [[2], [3], [4]])
-        six.assertCountEqual(self, self.model.loaded_runs, [[2], [3], [4]])
+        self.assertCountEqual(self.model.loaded_filenames, ["file2.nxs", "file3.nxs", "file4.nxs"])
+        self.assertCountEqual(self.model.loaded_workspaces, [[2], [3], [4]])
+        self.assertCountEqual(self.model.loaded_runs, [[2], [3], [4]])
 
         self.assertEqual(self.view.get_run_edit_text(), '2-4')
 

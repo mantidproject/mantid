@@ -147,9 +147,9 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         # Load will take the last occurrence of the run from the list
-        six.assertCountEqual(self, self.model.loaded_filenames, ["C:/dir1/file2.nxs"])
-        six.assertCountEqual(self, self.model.loaded_workspaces, [workspace_2])
-        six.assertCountEqual(self, self.model.loaded_runs, [[1234]])
+        self.assertCountEqual(self.model.loaded_filenames, ["C:/dir1/file2.nxs"])
+        self.assertCountEqual(self.model.loaded_workspaces, [workspace_2])
+        self.assertCountEqual(self.model.loaded_runs, [[1234]])
 
     #
     @run_test_with_and_without_threading
@@ -165,9 +165,9 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         self.wait_for_thread(self.presenter._load_thread)
 
         # Load will take the last occurrence of the run from the user input
-        six.assertCountEqual(self, self.model.loaded_filenames, ["C:/dir1/file2.nxs"])
-        six.assertCountEqual(self, self.model.loaded_workspaces, [workspace_2])
-        six.assertCountEqual(self, self.model.loaded_runs, [[1234]])
+        self.assertCountEqual(self.model.loaded_filenames, ["C:/dir1/file2.nxs"])
+        self.assertCountEqual(self.model.loaded_workspaces, [workspace_2])
+        self.assertCountEqual(self.model.loaded_runs, [[1234]])
 
     @run_test_with_and_without_threading
     def test_that_loading_two_files_from_browse_sets_model_and_interface_correctly(self):
@@ -246,10 +246,10 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
 
-        six.assertCountEqual(self, self.model.loaded_filenames,
+        self.assertCountEqual(self.model.loaded_filenames,
                              ["C:/dir1/file1.nxs", "C:/dir2/file2.nxs", "C:/dir1/file3.nxs"])
-        six.assertCountEqual(self, self.model.loaded_workspaces, [workspace_1, workspace_2, workspace_3])
-        six.assertCountEqual(self, self.model.loaded_runs, [[1234], [1235], [1236]])
+        self.assertCountEqual(self.model.loaded_workspaces, [workspace_1, workspace_2, workspace_3])
+        self.assertCountEqual(self.model.loaded_runs, [[1234], [1235], [1236]])
 
         self.assertEqual(self.view.get_file_edit_text(), "C:/dir1/file3.nxs")
 
@@ -271,9 +271,9 @@ class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):
         self.presenter.on_browse_button_clicked()
         self.wait_for_thread(self.presenter._load_thread)
 
-        six.assertCountEqual(self, self.model.loaded_filenames, ["C:/dir2/file1.nxs", "C:/dir2/file2.nxs"])
-        six.assertCountEqual(self, self.model.loaded_workspaces, [workspace_3, workspace_2])
-        six.assertCountEqual(self, self.model.loaded_runs, [[1234], [1235]])
+        self.assertCountEqual(self.model.loaded_filenames, ["C:/dir2/file1.nxs", "C:/dir2/file2.nxs"])
+        self.assertCountEqual(self.model.loaded_workspaces, [workspace_3, workspace_2])
+        self.assertCountEqual(self.model.loaded_runs, [[1234], [1235]])
 
         self.assertEqual(self.view.get_file_edit_text(), "C:/dir2/file1.nxs")
 

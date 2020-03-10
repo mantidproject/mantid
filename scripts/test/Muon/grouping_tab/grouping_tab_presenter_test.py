@@ -143,8 +143,8 @@ class GroupingTabPresenterTest(unittest.TestCase):
             mock_load.return_value = (groups, pairs, 'description', 'pair1')
             self.view.load_grouping_button.clicked.emit(True)
 
-            six.assertCountEqual(self, self.model.group_names, ["grp1", "grp2"])
-            six.assertCountEqual(self, self.model.pair_names, ["pair1"])
+            self.assertCountEqual(self.model.group_names, ["grp1", "grp2"])
+            self.assertCountEqual(self.model.pair_names, ["pair1"])
             self.assertEqual(self.grouping_table_view.num_rows(), 2)
             self.assertEqual(self.pairing_table_view.num_rows(), 1)
             self.assertEqual(self.pairing_table_view.pairing_table.cellWidget(0, 2).currentText(), "grp1")
@@ -162,8 +162,8 @@ class GroupingTabPresenterTest(unittest.TestCase):
             self.view.load_grouping_button.clicked.emit(True)
 
             self.view.display_warning_box.assert_called_once_with('Invalid detectors in group grp2')
-            six.assertCountEqual(self, self.model.group_names, ["grp1"])
-            six.assertCountEqual(self, self.model.pair_names, [])
+            self.assertCountEqual(self.model.group_names, ["grp1"])
+            self.assertCountEqual(self.model.pair_names, [])
             self.assertEqual(self.grouping_table_view.num_rows(), 1)
             self.assertEqual(self.pairing_table_view.num_rows(), 0)
 
