@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef COLORBOX_H
-#define COLORBOX_H
+#pragma once
 
 #include <QComboBox>
 
@@ -76,5 +75,3 @@ protected:
   //! Array containing the 24 predefined colors
   static const QColor colors[];
 };
-
-#endif

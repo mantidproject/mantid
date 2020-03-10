@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef RECOVERYTHREAD_H_
-#define RECOVERYTHREAD_H_
+#pragma once
 
 #include <Poco/Path.h>
 #include <QThread>
@@ -31,5 +30,3 @@ private:
   Poco::Path m_checkpoint;
   MantidQt::ProjectRecovery *m_projRec;
 };
-
-#endif /*RECOVERYTHREAD_H_*/

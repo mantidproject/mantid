@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MENU_WITH_TOOLTIPS
-#define MENU_WITH_TOOLTIPS
+#pragma once
 
 #include <QMenu>
 
@@ -19,5 +18,3 @@ public:
   MenuWithToolTips(const QString &title, QWidget *parent = nullptr);
   bool event(QEvent *e) override;
 };
-
-#endif // MENU_WITH_TOOLTIPS

@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SYMBOLBOX_H
-#define SYMBOLBOX_H
+#pragma once
 
 #include <QComboBox>
 #include <qwt_symbol.h>
@@ -55,5 +54,3 @@ private:
 
   static const QwtSymbol::Style symbols[];
 };
-
-#endif

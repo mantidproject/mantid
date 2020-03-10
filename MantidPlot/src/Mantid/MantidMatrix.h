@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDMATRIX_H
-#define MANTIDMATRIX_H
+#pragma once
 
 #include <map>
 #include <math.h>
@@ -368,5 +367,3 @@ private:
   bool m_colormapPen;
   ContourLinesEditor *m_ContourLinesEditor;
 };
-
-#endif

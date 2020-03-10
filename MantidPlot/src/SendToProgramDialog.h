@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SendToProgramDialog_H
-#define SendToProgramDialog_H
+#pragma once
 
 #include "ui_SendToProgramDialog.h"
 #include <QDialog>
@@ -58,5 +57,3 @@ private:
   Ui::SendToProgramDialog m_uiform;
   std::pair<std::string, std::map<std::string, std::string>> m_settings;
 };
-
-#endif // SendToProgram_H

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDPLOT_IMANTIDMATRIXEXTENSIONHANDLER_H
-#define MANTIDPLOT_IMANTIDMATRIXEXTENSIONHANDLER_H
+#pragma once
 
 #include "MantidKernel/Chainable.h"
 #include "MantidMatrixTabExtension.h"
@@ -29,4 +28,3 @@ public:
                                         int width) = 0;
   virtual int getColumnWidthPreference(MantidMatrixTabExtension &extension) = 0;
 };
-#endif

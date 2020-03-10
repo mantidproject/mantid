@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SIGMOIDALFIT_H
-#define SIGMOIDALFIT_H
+#pragma once
 
 #include "Fit.h"
 
@@ -44,5 +43,3 @@ private:
 
   bool d_logistic;
 };
-
-#endif

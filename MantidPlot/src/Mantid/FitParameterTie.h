@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FITPARAMETERTIE_H
-#define FITPARAMETERTIE_H
+#pragma once
 
 #include <QList>
 #include <QString>
@@ -59,5 +58,3 @@ private:
   /// The property
   QtProperty *m_prop;
 };
-
-#endif /* FITPARAMETERTIE_H */

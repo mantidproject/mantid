@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FITDIALOG_H
-#define FITDIALOG_H
+#pragma once
 
 #include "Graph.h"
 #include <QCheckBox>
@@ -146,4 +145,3 @@ private:
   QCheckBox *plotLabelBox, *logBox, *scaleErrorsBox, *globalParamTableBox;
   QCheckBox *previewBox;
 };
-#endif // FITDIALOG_H

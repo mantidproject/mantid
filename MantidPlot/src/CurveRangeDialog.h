@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef CURVERANGEDIALOG_H
-#define CURVERANGEDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -47,5 +46,3 @@ private:
   QSpinBox *boxStart;
   QSpinBox *boxEnd;
 };
-
-#endif

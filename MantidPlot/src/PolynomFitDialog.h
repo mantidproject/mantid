@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef POLINOMFITDIALOG_H
-#define POLINOMFITDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -66,5 +65,3 @@ private:
   QLineEdit *boxEnd;
   ColorBox *boxColor;
 };
-
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REMOVEERRORSDIALOG_H
-#define REMOVEERRORSDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -33,5 +32,3 @@ protected slots:
 private:
   Ui::RemoveErrorsDialog *ui;
 };
-
-#endif // REMOVEERRORSDIALOG_H

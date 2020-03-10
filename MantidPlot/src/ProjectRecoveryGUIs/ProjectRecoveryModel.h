@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROJECTRECOVERYMODEL_H
-#define PROJECTRECOVERYMODEL_H
+#pragma once
 
 #include <Poco/Path.h>
 #include <memory>
@@ -42,5 +41,3 @@ private:
   bool m_failedRun;
   bool m_recoveryRunning;
 };
-
-#endif // PROJECTRECOVERYMODEL_H

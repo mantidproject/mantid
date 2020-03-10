@@ -29,8 +29,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MULTILAYER_H
-#define MULTILAYER_H
+#pragma once
 
 #include "Graph.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
@@ -314,5 +313,3 @@ private:
   QRadioButton *m_lineRadioButton;
   ColorButton *m_colourBox;
 };
-
-#endif

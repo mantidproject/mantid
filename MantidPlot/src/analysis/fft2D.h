@@ -16,11 +16,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef FOURIER_H
-#define FOURIER_H
+#pragma once
 
 void fft2d(double **xtre, double **xtim, int width, int height);
 void fft2d_inv(double **xtre, double **xtim, double **xrec_re, double **xrec_im,
                int width, int height);
-
-#endif

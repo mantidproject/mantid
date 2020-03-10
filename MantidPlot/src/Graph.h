@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef GRAPH_H
-#define GRAPH_H
+#pragma once
 
 #include <QEvent>
 #include <QList>
@@ -988,5 +987,3 @@ private:
 };
 
 Q_DECLARE_METATYPE(GraphOptions::CurveType)
-
-#endif // GRAPH_H

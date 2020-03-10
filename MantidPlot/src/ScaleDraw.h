@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SCALES_H
-#define SCALES_H
+#pragma once
 
 #include <QDateTime>
 #include <QLocale>
@@ -129,4 +128,3 @@ private:
   //! Stores the labels for Txt scales
   QStringList d_text_labels;
 };
-#endif

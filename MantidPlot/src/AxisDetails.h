@@ -13,8 +13,7 @@ from the University of Derby
 @date 15/09/2013
 */
 
-#ifndef AXISDETAILS_H_
-#define AXISDETAILS_H_
+#pragma once
 
 #include <QList>
 #include <QWidget>
@@ -88,4 +87,3 @@ private:
   void updateLabelsFormat(int);
   void setBaselineDist(int);
 };
-#endif /* AxisDetails_H_ */

@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MVALUESDIALOG_H
-#define MVALUESDIALOG_H
+#pragma once
 
 #include "Matrix.h"
 #include "Script.h"
@@ -68,5 +67,3 @@ private:
   QSpinBox *startRow, *endRow, *startCol, *endCol;
   QPushButton *btnApply;
 };
-
-#endif //

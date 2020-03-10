@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDPLOTTINGCMAPSPROVIDER_H_
-#define MDPLOTTINGCMAPSPROVIDER_H_
+#pragma once
 
 #include <QString>
 #include <vector>
@@ -68,5 +67,3 @@ private:
   getSliceViewerIndicesForCommonColorMaps(QStringList colorMapNamesSliceViewer,
                                           QStringList colorMapNamesVsi);
 };
-
-#endif

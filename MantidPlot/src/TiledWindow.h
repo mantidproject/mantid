@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TiledWindow_H
-#define TiledWindow_H
+#pragma once
 
 #include "MdiSubWindow.h"
 
@@ -215,5 +214,3 @@ private:
   /// Accepts drops flag
   bool m_acceptDrop;
 };
-
-#endif // TiledWindow_H

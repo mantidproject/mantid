@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef RANGE_SELECTOR_TOOL_H
-#define RANGE_SELECTOR_TOOL_H
+#pragma once
 
 #include "PlotToolInterface.h"
 #include <qwt_double_rect.h>
@@ -109,5 +108,3 @@ private:
   bool d_enabled;
   bool d_visible;
 };
-
-#endif // ifndef RANGE_SELECTOR_TOOL_H

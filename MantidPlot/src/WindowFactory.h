@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WINDOWFACTORY_H
-#define WINDOWFACTORY_H
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -171,5 +170,3 @@ template class Mantid::Kernel::SingletonHolder<WindowFactoryImpl>;
 using WindowFactory = Mantid::Kernel::SingletonHolder<WindowFactoryImpl>;
 } // namespace API
 } // namespace Mantid
-
-#endif // WINDOWFACTORY_H

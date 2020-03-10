@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NRUTIL_H
-#define NRUTIL_H
+#pragma once
 
 #define NR_END 1
 #define FREE_ARG char *
@@ -27,5 +26,3 @@ void ludcmp(double **a, int n, int *indx, double *d);
 void savgol(double *c, int np, int nl, int nr, int ld, int m);
 
 void polint(double xa[], double ya[], int n, double x, double *y, double *dy);
-
-#endif // NRUTIL_H

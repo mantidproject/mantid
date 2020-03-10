@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef IMAGEDIALOG_H
-#define IMAGEDIALOG_H
+#pragma once
 
 #include <QCheckBox>
 #include <QDialog>
@@ -64,5 +63,3 @@ private:
   QSpinBox *boxX, *boxY, *boxWidth, *boxHeight;
   QCheckBox *keepRatioBox;
 };
-
-#endif // IMAGEDIALOG_H

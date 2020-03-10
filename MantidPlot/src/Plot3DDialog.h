@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef PLOT3DDIALOG_H
-#define PLOT3DDIALOG_H
+#pragma once
 
 #include "Graph3D.h"
 #include <QCheckBox>
@@ -114,5 +113,3 @@ private:
   double zScale;
   double zoom;
 };
-
-#endif

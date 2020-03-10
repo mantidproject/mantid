@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef LOGISTICFIT_H
-#define LOGISTICFIT_H
+#pragma once
 
 #include "Fit.h"
 
@@ -40,5 +39,3 @@ private:
   void init();
   void calculateFitCurveData(double *X, double *Y) override;
 };
-
-#endif

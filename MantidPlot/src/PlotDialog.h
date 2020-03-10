@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef PLOTDIALOG_H
-#define PLOTDIALOG_H
+#pragma once
 
 #include "MultiLayer.h"
 #include <QDialog>
@@ -321,5 +320,3 @@ public:
 protected:
   QwtPlotItem *d_curve;
 };
-
-#endif
