@@ -768,7 +768,7 @@ class Abins(PythonAlgorithm):
         :param message_end: closing part of the error message.
         """
         optimal_size = AbinsParameters.performance['optimal_size']
-        if not (isinstance(optimal_size, six.integer_types) and optimal_size > 0):
+        if not (isinstance(optimal_size, int) and optimal_size > 0):
             raise RuntimeError("Invalid value of optimal_size" + message_end)
 
     def _check_threads(self, message_end=None):
@@ -778,7 +778,7 @@ class Abins(PythonAlgorithm):
         """
         if PATHOS_FOUND:
             threads = AbinsModules.AbinsParameters.performance['threads']
-            if not (isinstance(threads, six.integer_types) and 1 <= threads <= mp.cpu_count()):
+            if not (isinstance(threads, int) and 1 <= threads <= mp.cpu_count()):
                 raise RuntimeError("Invalid number of threads for parallelisation over atoms" + message_end)
 
     def _validate_ab_initio_file_extension(self, filename_full_path=None, expected_file_extension=None):

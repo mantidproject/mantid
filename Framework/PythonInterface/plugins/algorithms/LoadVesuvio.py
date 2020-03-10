@@ -395,7 +395,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """Given a string containing either a filename/partial filename or run number find the correct
         file prefix"""
         vesuvio = config.getInstrument("VESUVIO")
-        if isinstance(run_or_filename, six.integer_types):
+        if isinstance(run_or_filename, int):
             run_no = run_or_filename
             return vesuvio.filePrefix(int(run_no)) + str(run_or_filename)
         else:

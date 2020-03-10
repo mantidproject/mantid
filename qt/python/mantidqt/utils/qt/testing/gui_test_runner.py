@@ -98,7 +98,7 @@ class ScriptRunner(object):
                     if inspect.isgenerator(ret):
                         self.script_iter.append(ret)
                         ret = None
-                    elif isinstance(ret, six.integer_types) or isinstance(ret, float):
+                    elif isinstance(ret, int) or isinstance(ret, float):
                         # Start non-blocking pause in seconds
                         self.pause_timer.start(int(ret * 1000))
                         ret = None

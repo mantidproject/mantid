@@ -51,7 +51,7 @@ class AtomsData(AbinsModules.GeneralData):
 
         # "sort"
         sort = item["sort"]
-        if not (isinstance(sort, six.integer_types) or np.issubdtype(sort.dtype, np.integer)):
+        if not (isinstance(sort, int) or np.issubdtype(sort.dtype, np.integer)):
             raise ValueError("Parameter sort  should be integer.")
         if sort < 0:
             raise ValueError("Parameter sort cannot be negative.")

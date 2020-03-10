@@ -15,7 +15,7 @@ class PowderData(AbinsModules.GeneralData):
     def __init__(self, num_atoms=None):
         super(PowderData, self).__init__()
 
-        if isinstance(num_atoms, six.integer_types) and num_atoms > 0:
+        if isinstance(num_atoms, int) and num_atoms > 0:
             self._num_atoms = num_atoms
         else:
             raise ValueError("Invalid value of atoms.")
