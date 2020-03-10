@@ -309,7 +309,7 @@ class IOmodule(object):
         :param item: item to convert to unicode str if Python 2 str
         :returns: laundered item
         """
-        if isinstance(item, six.text_type):
+        if isinstance(item, str):
             return item.encode('utf-8')
         else:
             return item

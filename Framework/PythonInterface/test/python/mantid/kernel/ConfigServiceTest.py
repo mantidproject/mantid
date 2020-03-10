@@ -109,7 +109,7 @@ class ConfigServiceTest(unittest.TestCase):
     def test_appending_paths(self):
         new_path_list = self._setup_test_areas()
         try:
-            config.appendDataSearchDir(six.text_type(new_path_list[0]))
+            config.appendDataSearchDir(str(new_path_list[0]))
             updated_paths = config.getDataSearchDirs()
         finally:
             self._clean_up_test_areas()

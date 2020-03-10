@@ -24,7 +24,7 @@ class UnitLabelTest(unittest.TestCase):
     def test_utf8_is_converted_to_unicode_object(self):
         tof = UnitFactory.Instance().create("TOF")
         unit_lbl = tof.symbol()
-        self.assertTrue(isinstance(unit_lbl.utf8(), six.text_type))
+        self.assertTrue(isinstance(unit_lbl.utf8(), str))
         self.assertEqual(u"\u03bcs", unit_lbl.utf8())
         self.assertEqual("\mu s", unit_lbl.latex())
 
@@ -36,7 +36,7 @@ class UnitLabelTest(unittest.TestCase):
     def test_unicode_function_produces_unicode_string_from_label_py2(self):
         if sys.version_info[0] < 3:
             label = UnitLabel("MyLabel", u"\u03bcs","\mu s")
-            self.assertTrue(isinstance(unicode(label), six.text_type))
+            self.assertTrue(isinstance(unicode(label), str))
             self.assertEqual(u"\u03bcs", unicode(label))
         else:
             pass
