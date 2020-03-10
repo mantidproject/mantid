@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_WIDGETS_COMMON_PLUGINLIBRARIES_H
-#define MANTIDQT_WIDGETS_COMMON_PLUGINLIBRARIES_H
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 
@@ -23,5 +22,3 @@ EXPORT_OPT_MANTIDQT_COMMON int loadPluginsFromCfgPath(std::string key);
 EXPORT_OPT_MANTIDQT_COMMON int loadPluginsFromPath(std::string path);
 } // namespace API
 } // namespace MantidQt
-
-#endif // PLUGINLIBRARYLOADER_H

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_QTADAPTEDMODELTEST_H
-#define MANTID_MANTIDWIDGETS_QTADAPTEDMODELTEST_H
+#pragma once
 
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include <QModelIndex>
@@ -114,5 +113,3 @@ public:
                      QString::fromStdString(cells[1].contentText()));
   }
 };
-
-#endif // MANTID_MANTIDWIDGETS_QTADAPTEDMODELTEST_H

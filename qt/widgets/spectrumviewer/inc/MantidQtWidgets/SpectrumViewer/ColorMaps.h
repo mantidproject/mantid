@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COLOR_MAPS_H
-#define COLOR_MAPS_H
+#pragma once
 
 #include "MantidQtWidgets/SpectrumViewer/DllOptionSV.h"
 #include <QColor>
@@ -57,5 +56,3 @@ private:
 
 } // namespace SpectrumView
 } // namespace MantidQt
-
-#endif // COLOR_MAPS_H

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef QWT_SCALE_DRAW_NON_ORTHOGONAL_H
-#define QWT_SCALE_DRAW_NON_ORTHOGONAL_H
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -65,5 +64,3 @@ private:
   double m_angleY;
   MantidQt::SliceViewer::NonOrthogonalOverlay *m_gridPlot;
 };
-
-#endif

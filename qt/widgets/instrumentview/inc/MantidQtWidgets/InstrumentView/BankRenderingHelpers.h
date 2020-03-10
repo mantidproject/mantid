@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BANKRENDERINGHELPERS_H
-#define BANKRENDERINGHELPERS_H
+#pragma once
 #include "DllOption.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
 #include "MantidQtWidgets/InstrumentView/GridTextureFace.h"
@@ -58,5 +57,3 @@ renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo,
 } // namespace BankRenderingHelpers
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // BANKRENDERINGHELPERS_H

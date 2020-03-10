@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MATRIX_WS_DATA_SOURCE_H
-#define MATRIX_WS_DATA_SOURCE_H
+#pragma once
 
 #include <cstddef>
 
@@ -95,5 +94,3 @@ using MatrixWSDataSource_const_sptr =
 
 } // namespace SpectrumView
 } // namespace MantidQt
-
-#endif // MATRIX_WS_DATA_SOURCE_H

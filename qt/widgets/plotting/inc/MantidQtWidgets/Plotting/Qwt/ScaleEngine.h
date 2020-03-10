@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SCALE_ENGINE_H
-#define SCALE_ENGINE_H
+#pragma once
 
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include <float.h>
@@ -131,5 +130,3 @@ private:
   //! Nth Power for a power scale
   double d_nth_power;
 };
-
-#endif

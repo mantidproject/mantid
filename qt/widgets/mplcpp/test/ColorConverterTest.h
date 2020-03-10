@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_COLORCONVERTERTEST_H
-#define MPLCPP_COLORCONVERTERTEST_H
+#pragma once
 
 #include "MantidQtWidgets/MplCpp/ColorConverter.h"
 #include <QRgb>
@@ -29,5 +28,3 @@ public:
     TS_ASSERT_EQUALS(191, color.green());
   }
 };
-
-#endif // MPLCPP_COLORCONVERTERTEST_H

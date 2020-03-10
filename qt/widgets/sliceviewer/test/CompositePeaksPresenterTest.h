@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SLICE_VIEWER_COMPOSITEPEAKSPRESENTER_TEST_H_
-#define SLICE_VIEWER_COMPOSITEPEAKSPRESENTER_TEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -1070,5 +1069,3 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(pSubjectB));
   }
 };
-
-#endif

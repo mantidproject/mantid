@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SLICE_VIEWER_ELLIPSOID_PLANE_SLICE_CALCULATOR_TEST_H_
-#define SLICE_VIEWER_ELLIPSOID_PLANE_SLICE_CALCULATOR_TEST_H_
+#pragma once
 
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
@@ -637,5 +636,3 @@ private:
                      info.origin.Z(), 1.5, delta);
   }
 };
-
-#endif

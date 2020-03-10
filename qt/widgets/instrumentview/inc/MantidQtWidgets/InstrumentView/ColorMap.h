@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_WIDGETS_INSTRUMENTVIEW_COLORMAP_H
-#define MANTIDQT_WIDGETS_INSTRUMENTVIEW_COLORMAP_H
+#pragma once
 
 #include <QtGlobal>
 
@@ -24,5 +23,3 @@ using ColorMap = MantidQt::Widgets::MplCpp::MantidColorMap;
 #endif
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDQT_WIDGETS_INSTRUMENTVIEW_COLORMAP_H

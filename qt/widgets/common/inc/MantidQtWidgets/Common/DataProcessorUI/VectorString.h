@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORVECTORSTRING_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORVECTORSTRING_H
+#pragma once
 
 /** @class VectorString
  */
@@ -71,4 +70,3 @@ QString vectorParamString(const QString &param_name,
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_DATAPROCESSORVECTORSTRING_H

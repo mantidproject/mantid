@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_PROGRESSPRESENTER_H
-#define MANTIDQTMANTIDWIDGETS_PROGRESSPRESENTER_H
+#pragma once
 
 #include "MantidKernel/ProgressBase.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
@@ -40,4 +39,3 @@ public:
   void setAsEndlessIndicator() { m_progressableView->setAsEndlessIndicator(); }
   ~ProgressPresenter() {}
 };
-#endif /* MANTIDQTMANTIDWIDGETS_PROGRESSPRESENTER_H */

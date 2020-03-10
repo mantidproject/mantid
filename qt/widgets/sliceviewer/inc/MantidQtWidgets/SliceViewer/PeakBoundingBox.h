@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAK_BOUNDING_BOX_H_
-#define MANTID_SLICEVIEWER_PEAK_BOUNDING_BOX_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
@@ -111,5 +110,3 @@ public:
 };
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif /* MANTID_SLICEVIEWER_PEAK_BOUNDING_BOX_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef RECTF_H
-#define RECTF_H
+#pragma once
 
 #include <QPoint>
 #include <QRectF>
@@ -208,5 +207,3 @@ inline std::ostream &operator<<(std::ostream &ostr, const QPointF &p) {
 }
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // RECTF_H

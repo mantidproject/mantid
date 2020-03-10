@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_FILEDIALOGHANDLER_H_
-#define MANTIDQT_API_FILEDIALOGHANDLER_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include <QFileDialog>
@@ -68,5 +67,3 @@ DLLExport QString getCaption(const std::string &dialogName,
 } // namespace FileDialogHandler
 } // namespace API
 } // namespace MantidQt
-
-#endif // MANTIDQT_API_FILEDIALOGHANDLER_H_

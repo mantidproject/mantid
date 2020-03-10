@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_PLOTTEST_H
-#define MPLCPP_PLOTTEST_H
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -167,5 +166,3 @@ private:
 
   constexpr static auto m_testws_name = "ws";
 };
-
-#endif // MPLCPP_PLOTTEST_H

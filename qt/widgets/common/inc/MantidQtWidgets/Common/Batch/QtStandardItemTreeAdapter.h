@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_TREEITEMMODELADAPTER_H_
-#define MANTIDQTMANTIDWIDGETS_TREEITEMMODELADAPTER_H_
+#pragma once
 #include "MantidQtWidgets/Common/Batch/Row.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
 #include "MantidQtWidgets/Common/DllOption.h"
@@ -91,4 +90,3 @@ modelItemFromIndex(QStandardItemModel const &model,
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_TREEITEMMODELADAPTER_H_

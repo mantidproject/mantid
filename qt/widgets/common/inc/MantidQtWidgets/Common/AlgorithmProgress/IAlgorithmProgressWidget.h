@@ -1,5 +1,4 @@
-#ifndef IALGORITHMPROGRESSWIDGET_H
-#define IALGORITHMPROGRESSWIDGET_H
+#pragma once
 class QString;
 
 namespace MantidQt {
@@ -17,5 +16,3 @@ public:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // IALGORITHMPROGRESSWIDGET_H

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DRAGGABLECOLORBARWIDGET_H_
-#define DRAGGABLECOLORBARWIDGET_H_
+#pragma once
 
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include <QFrame>
@@ -84,5 +83,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // DRAGGABLECOLORBARWIDGET_H_

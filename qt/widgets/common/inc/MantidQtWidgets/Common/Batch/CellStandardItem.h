@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_CELLSTANDARDITEM_H_
-#define MANTIDQTMANTIDWIDGETS_CELLSTANDARDITEM_H_
+#pragma once
 #include "MantidQtWidgets/Common/Batch/Cell.h"
 #include <QColor>
 #include <QStandardItem>
@@ -47,4 +46,3 @@ Cell extractCellPropertiesFromItem(QStandardItem const &item);
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_CELLSTANDARDITEM_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef QwtRasterDataMDNonOrthogonal_H_
-#define QwtRasterDataMDNonOrthogonal_H_
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Matrix.h"
@@ -41,5 +40,3 @@ protected:
 
 } // namespace API
 } // namespace MantidQt
-
-#endif /* QwtRasterDataMDNonOrthogonal_H_ */

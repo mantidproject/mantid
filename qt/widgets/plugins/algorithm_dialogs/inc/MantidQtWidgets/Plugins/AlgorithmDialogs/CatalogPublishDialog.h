@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOM_DIALOGS_CATALOGPUBLISHDIALOG_H
-#define MANTIDQT_CUSTOM_DIALOGS_CATALOGPUBLISHDIALOG_H
+#pragma once
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "ui_CatalogPublishDialog.h"
@@ -52,5 +51,3 @@ protected:
 };
 } // namespace CustomDialogs
 } // namespace MantidQt
-
-#endif /* MANTIDQT_CUSTOM_DIALOGS_CATALOGPUBLISHDIALOG_H */

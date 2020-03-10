@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COMPOSITEEDITORFACTORY_H
-#define COMPOSITEEDITORFACTORY_H
+#pragma once
 
 #include "qtpropertybrowser.h"
 #include <QPushButton>
@@ -64,5 +63,3 @@ private:
   FactoryBaseType *m_secondaryFactory;
   QString m_optionName;
 };
-
-#endif // COMPOSITEEDITORFACTORY_H

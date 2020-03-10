@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_MANTIDWIDGETS_MOCKALGORITHMRUNNER_H
-#define MANTIDQT_MANTIDWIDGETS_MOCKALGORITHMRUNNER_H
+#pragma once
 
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -38,5 +37,3 @@ private:
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-#endif

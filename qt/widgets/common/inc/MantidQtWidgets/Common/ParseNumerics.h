@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_DATAPOCESSORPARSENUMERICS_H
-#define MANTID_MANTIDWIDGETS_DATAPOCESSORPARSENUMERICS_H
+#pragma once
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QString>
 /**
@@ -21,4 +20,3 @@ double EXPORT_OPT_MANTIDQT_COMMON parseDouble(QString const &in);
 int EXPORT_OPT_MANTIDQT_COMMON parseDenaryInteger(QString const &in);
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTID_MANTIDWIDGETS_DATAPOCESSORPARSENUMERICS_H

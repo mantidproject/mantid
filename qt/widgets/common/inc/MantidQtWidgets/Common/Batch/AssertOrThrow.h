@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_ASSERTORTHROW_H_
-#define MANTIDQTMANTIDWIDGETS_ASSERTORTHROW_H_
+#pragma once
 #include <stdexcept>
 #include <string>
 
@@ -17,5 +16,3 @@ inline void assertOrThrow(bool condition, std::string const &message) {
   if (!condition)
     throw std::runtime_error(message);
 }
-
-#endif

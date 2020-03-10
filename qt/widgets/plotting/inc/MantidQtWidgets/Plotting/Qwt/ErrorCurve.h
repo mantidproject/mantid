@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDWIDGETS_ERRORCURVE_H
-#define MANTIDWIDGETS_ERRORCURVE_H
+#pragma once
 
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include <qwt_plot_curve.h>
@@ -38,5 +37,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /* MANTIDWIDGETS_ERRORCURVE_H */

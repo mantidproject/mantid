@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_WIDGETS_COMMON_QAPPLICATIONHOLDER_H
-#define MANTIDQT_WIDGETS_COMMON_QAPPLICATIONHOLDER_H
+#pragma once
 
 #include <cxxtest/GlobalFixture.h>
 
@@ -36,5 +35,3 @@ public:
   GNU_DIAG_ON("pedantic")
   QApplication *m_app;
 };
-
-#endif // MANTIDQT_WIDGETS_COMMON_QAPPLICATIONHOLDER_H

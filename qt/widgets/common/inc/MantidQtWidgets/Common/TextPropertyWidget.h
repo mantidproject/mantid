@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_TEXTPROPERTYWIDGET_H_
-#define MANTID_API_TEXTPROPERTYWIDGET_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
@@ -43,5 +42,3 @@ protected:
 
 } // namespace API
 } // namespace MantidQt
-
-#endif /* MANTID_API_TEXTPROPERTYWIDGET_H_ */

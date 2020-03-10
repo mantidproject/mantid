@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GRIDTEXTUREFACE_H
-#define GRIDTEXTUREFACE_H
+#pragma once
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -15,4 +14,3 @@ enum class GridTextureFace { Front = 0, Back, Left, Right, Top, Bottom };
 }
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // GRIDTEXTUREFACE_H

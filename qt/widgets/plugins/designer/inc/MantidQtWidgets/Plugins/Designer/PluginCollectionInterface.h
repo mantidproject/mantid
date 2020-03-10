@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PLUGINCOLLECTIONINTERFACE_H_
-#define PLUGINCOLLECTIONINTERFACE_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmSelectorWidget.h"
@@ -153,5 +152,3 @@ DECLARE_WIDGET_PLUGIN(MuonFitDataSelectorPlugin,
 DECLARE_WIDGET_PLUGIN(LogValueSelectorPlugin,
                       MantidQt::MantidWidgets::LogValueSelector,
                       "Select a log name and function");
-
-#endif

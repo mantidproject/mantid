@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_SIGNALRANGETEST_H_
-#define MANTIDQT_API_SIGNALRANGETEST_H_
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
@@ -224,5 +223,3 @@ public:
     TS_ASSERT_DELTA(5.0, range.maxValue(), 1e-10);
   }
 };
-
-#endif /* MANTIDQT_API_SIGNALRANGETEST */

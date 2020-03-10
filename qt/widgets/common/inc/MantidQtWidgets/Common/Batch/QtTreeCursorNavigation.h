@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_QTTREECURSORNAVIGATION_H_
-#define MANTIDQTMANTIDWIDGETS_QTTREECURSORNAVIGATION_H_
+#pragma once
 #include <QModelIndex>
 #include <utility>
 namespace MantidQt {
@@ -45,4 +44,3 @@ private:
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_QTTREECURSORNAVIGATION_H_

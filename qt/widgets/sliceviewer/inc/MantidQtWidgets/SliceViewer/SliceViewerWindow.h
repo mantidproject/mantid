@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SLICEVIEWERWINDOW_H
-#define SLICEVIEWERWINDOW_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -122,5 +121,3 @@ protected:
 
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif // SLICEVIEWERWINDOW_H

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAKPALETTE_H
-#define MANTID_SLICEVIEWER_PEAKPALETTE_H
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
@@ -141,4 +140,3 @@ template <> DLLExport PeakPalette<PeakViewColor>::PeakPalette();
 
 } // namespace SliceViewer
 } // namespace MantidQt
-#endif // MANTID_SLICEVIEWER_PEAKSPALETTE_H

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_BATCHALGORITHMRUNNERTEST_H_
-#define MANTIDQT_API_BATCHALGORITHMRUNNERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -177,5 +176,3 @@ private:
   BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCropProps;
   BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromScaleProps;
 };
-
-#endif /* MANTIDQT_API_BATCHALGORITHMRUNNERTEST_H_ */

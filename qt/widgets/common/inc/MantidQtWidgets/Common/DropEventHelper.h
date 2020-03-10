@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_MANTIDWIDGETS_DROPEVENTHELPER_H
-#define MANTIDQT_MANTIDWIDGETS_DROPEVENTHELPER_H
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 
@@ -25,5 +24,3 @@ extractPythonFiles(const QDropEvent *event);
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif

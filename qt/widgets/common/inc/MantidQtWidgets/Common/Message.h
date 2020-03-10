@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MESSAGE_H_
-#define MESSAGE_H_
+#pragma once
 
 //----------------------------------
 // Includes
@@ -71,5 +70,3 @@ private:
 
 /// Required to operate in signals/slots
 Q_DECLARE_METATYPE(MantidQt::MantidWidgets::Message)
-
-#endif // MESSAGE_H_

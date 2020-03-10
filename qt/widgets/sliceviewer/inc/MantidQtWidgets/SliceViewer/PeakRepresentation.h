@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_H
-#define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_H
+#pragma once
 
 #include "MantidDataObjects/AffineMatrixParameter.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
@@ -76,5 +75,3 @@ using PeakRepresentation_sptr = std::shared_ptr<PeakRepresentation>;
 using VecPeakRepresentation = std::vector<PeakRepresentation_sptr>;
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif

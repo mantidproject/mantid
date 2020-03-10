@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BANKTEXTUREBUILDER_H
-#define BANKTEXTUREBUILDER_H
+#pragma once
 
 #include "GLColor.h"
 #include "MantidBeamline/ComponentType.h"
@@ -68,4 +67,3 @@ private:
 } // namespace detail
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif

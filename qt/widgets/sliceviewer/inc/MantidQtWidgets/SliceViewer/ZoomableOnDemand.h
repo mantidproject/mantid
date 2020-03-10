@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ZOOMABLEONDEMAND_H_
-#define ZOOMABLEONDEMAND_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 
@@ -31,5 +30,3 @@ public:
 };
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif /* ZOOMABLEONDEMAND_H_ */

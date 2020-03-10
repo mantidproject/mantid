@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETSDATAPROCESSOR_WORKSPACENAMEUTILS_H
-#define MANTIDQTMANTIDWIDGETSDATAPROCESSOR_WORKSPACENAMEUTILS_H
+#pragma once
 
 /** Utilities for finding the output name of reduced workspaces based
 on the reduction algorithm's input values and preprocessing settings
@@ -43,5 +42,3 @@ OptionsMap DLLExport getCanonicalOptions(
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDQTMANTIDWIDGETSDATAPROCESSOR_WORKSPACENAMEUTILS_H

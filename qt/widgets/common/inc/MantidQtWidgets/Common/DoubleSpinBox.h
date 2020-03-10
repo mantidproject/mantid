@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef DoubleSpinBox_H
-#define DoubleSpinBox_H
+#pragma once
 
 #include "DllOption.h"
 #include <map>
@@ -110,4 +109,3 @@ private:
   QCheckBox *d_checkbox;
   LimitType d_type;
 };
-#endif // FITDIALOG_H

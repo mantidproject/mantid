@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_PARSEKEYVALUESTRINGTEST_H
-#define MANTID_MANTIDWIDGETS_PARSEKEYVALUESTRINGTEST_H
+#pragma once
 
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <cxxtest/TestSuite.h>
@@ -102,5 +101,3 @@ private:
     TS_ASSERT_EQUALS(kvp["g"], "'");
   }
 };
-
-#endif // MANTID_MANTIDWIDGETS_PARSEKEYVALUESTRINGTEST_H

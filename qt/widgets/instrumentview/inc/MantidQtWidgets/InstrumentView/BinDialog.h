@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BINDIALOG_H_
-#define BINDIALOG_H_
+#pragma once
 
 #include <QCheckBox>
 #include <QDialog>
@@ -52,5 +51,3 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*BINDIALOG_H_*/

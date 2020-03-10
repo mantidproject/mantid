@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_SUBTREE_H_
-#define MANTIDQTMANTIDWIDGETS_SUBTREE_H_
+#pragma once
 #include "MantidQtWidgets/Common/Batch/Row.h"
 
 namespace MantidQt {
@@ -78,4 +77,3 @@ bool allSubtreeRootsShareAParentAndAllSubtreeNodesAreConnected(
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_SUBTREE_H_

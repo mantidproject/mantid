@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CUSTOMTOOLS_H_
-#define CUSTOMTOOLS_H_
+#pragma once
 #include <QMouseEvent>
 #include <qwt_picker_machine.h>
 #include <qwt_plot_canvas.h>
@@ -96,5 +95,3 @@ protected:
 
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif /* CUSTOMTOOLS_H_ */

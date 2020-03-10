@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDWIDGETS_CONVOLUTIONFUNCTIONMODEL_H_
-#define MANTIDWIDGETS_CONVOLUTIONFUNCTIONMODEL_H_
+#pragma once
 
 #include "DllOption.h"
 #include "FunctionModel.h"
@@ -78,5 +77,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDWIDGETS_CONVOLUTIONFUNCTIONMODEL_H_

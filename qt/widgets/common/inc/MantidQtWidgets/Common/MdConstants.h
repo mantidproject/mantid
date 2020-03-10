@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDCONSTANTS_H_
-#define MDCONSTANTS_H_
+#pragma once
 
 #include "DllOption.h"
 #include <QColor>
@@ -86,5 +85,3 @@ private:
 };
 } // namespace API
 } // namespace MantidQt
-
-#endif

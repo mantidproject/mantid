@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_MANTIDWIDGETS_WORKSPACEDOCKMOCKOBJECTS_H
-#define MANTIDQT_MANTIDWIDGETS_WORKSPACEDOCKMOCKOBJECTS_H
+#pragma once
 
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -111,5 +110,3 @@ public:
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-#endif // MANTIDQT_MANTIDWIDGETS_WORKSPACEDOCKMOCKOBJECTS_H

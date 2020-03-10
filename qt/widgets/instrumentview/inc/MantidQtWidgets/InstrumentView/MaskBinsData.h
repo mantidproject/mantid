@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MASKBINSDATA_H_
-#define MASKBINSDATA_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
@@ -50,5 +49,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*MASKBINSDATA_H_*/

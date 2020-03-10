@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef SCRIPTEDITOR_H_
-#define SCRIPTEDITOR_H_
+#pragma once
 
 //----------------------------------
 // Includes
@@ -188,5 +187,3 @@ private:
   /// Name of group that the settings are stored under
   QString m_settingsGroup;
 };
-
-#endif // SCRIPTEDITOR_H_

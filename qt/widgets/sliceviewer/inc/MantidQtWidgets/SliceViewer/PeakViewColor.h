@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAK_VIEW_COLOR_H_
-#define MANTID_SLICEVIEWER_PEAK_VIEW_COLOR_H_
+#pragma once
 
 #include <QColor>
 
@@ -44,5 +43,3 @@ struct PeakViewColor {
   QColor colorSphere;
   QColor colorEllipsoid;
 };
-
-#endif

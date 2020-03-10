@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDPLOT_PEAKMARKER2D_H_
-#define MANTIDPLOT_PEAKMARKER2D_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "Shape2D.h"
@@ -86,5 +85,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*MANTIDPLOT_PEAKMARKER2D_H_*/

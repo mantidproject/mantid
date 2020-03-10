@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTIDQT_MANTIDWIDGETS_QTJSONUTILSTEST_H
-#define MANTIDQT_MANTIDWIDGETS_QTJSONUTILSTEST_H
+#pragma once
 
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 
@@ -78,5 +77,3 @@ private:
                      map1[QString("list")].toList())
   }
 };
-
-#endif /* MANTIDQT_MANTIDWIDGETS_QTJSONUTILSTEST_H */

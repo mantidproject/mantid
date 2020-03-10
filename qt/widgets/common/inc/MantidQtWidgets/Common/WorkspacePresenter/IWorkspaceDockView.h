@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_
-#define MANTIDQT_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_
+#pragma once
 
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -93,5 +92,3 @@ public:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDQT_MANTIDWIDGETS_IWORKSPACEDOCKVIEW_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BUTTONEDITORFACTORY_H
-#define BUTTONEDITORFACTORY_H
+#pragma once
 
 #include "ParameterPropertyManager.h"
 #include "qtpropertymanager.h"
@@ -66,5 +65,3 @@ public:
 Q_SIGNALS:
   void buttonClicked(QtProperty * /*_t1*/);
 };
-
-#endif // BUTTONEDITORFACTORY_H

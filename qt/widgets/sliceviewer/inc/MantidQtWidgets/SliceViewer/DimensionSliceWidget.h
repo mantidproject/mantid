@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DIMENSIONSLICEWIDGET_H
-#define DIMENSIONSLICEWIDGET_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -97,5 +96,3 @@ private:
 
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif // DIMENSIONSLICEWIDGET_H

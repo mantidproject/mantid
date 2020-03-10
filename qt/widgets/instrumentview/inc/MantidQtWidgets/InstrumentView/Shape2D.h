@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDPLOT_SHAPE2D_H_
-#define MANTIDPLOT_SHAPE2D_H_
+#pragma once
 
 #include "RectF.h"
 
@@ -338,5 +337,3 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*MANTIDPLOT_SHAPE2D_H_*/

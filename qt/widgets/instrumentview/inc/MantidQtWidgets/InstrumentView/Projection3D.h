@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROJECTION3D_H_
-#define PROJECTION3D_H_
+#pragma once
 
 #include "ProjectionSurface.h"
 #include "Viewport.h"
@@ -86,5 +85,3 @@ protected:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /* PROJECTION3D_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHMBASETEST_H_
-#define MANTID_MANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHMBASETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -55,5 +54,3 @@ public:
     TS_ASSERT_EQUALS(alg.getInputWsProperties(), std::vector<QString>());
   }
 };
-
-#endif /* MANTID_MANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHMBASETEST_H_ */

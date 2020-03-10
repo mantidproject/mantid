@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_PERIODICTABLEWIDGET_H_
-#define MANTID_MANTIDWIDGETS_PERIODICTABLEWIDGET_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "ui_PeriodicTableWidget.h"
@@ -98,5 +97,3 @@ private:
   /// Colour all of the elements by calls to individual group colouring methods
   void ColourElements();
 };
-
-#endif // !MANTID_MANTIDWIDGETS_PERIODICTABLE_H_

@@ -1,5 +1,4 @@
-#ifndef MANTIDQT_MANTIDWIDGETS_ALGORITHMPROGRESSTEST_H_
-#define MANTIDQT_MANTIDWIDGETS_ALGORITHMPROGRESSTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -148,4 +147,3 @@ public:
 private:
   std::unique_ptr<NiceMock<MockAlgorithmProgressWidget>> mockView;
 };
-#endif // MANTIDQT_MANTIDWIDGETS_ALGORITHMPROGRESSTEST_H_
