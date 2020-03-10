@@ -18,6 +18,7 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/StringTokenizer.h"
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 #include <sstream>
 
 namespace Mantid {
@@ -71,6 +72,37 @@ FunctionFactoryImpl::createInitialized(const std::string &input) const {
   }
 
   return createSimple(e, parentAttributes);
+}
+
+/**
+ * @param input :: An input string which defines the function and initial values
+ * for the parameters.
+ * Parameters of different functions are separated by ';'. Parameters of the
+ * same function
+ * are separated by ','. parameterName=value pairs are used to set a parameter
+ * value. For each function
+ * "name" parameter must be set to a function name. E.g.
+ * input = "name=LinearBackground,A0=0,A1=1; name = Gaussian,
+ * PeakCentre=10.,Sigma=1"
+ * @param domainNumber :: The number of domains to add to the function.
+ * @return A pointer to the created function.
+ */
+boost::shared_ptr<MultiDomainFunction>
+FunctionFactoryImpl::createInitializedMultiDomainFunction(
+    const std::string &input, size_t domainNumber) {
+  auto singleFunction = createInitialized(input);
+  auto multiDomainFunction = boost::make_shared<MultiDomainFunction>();
+
+  if (!singleFunction) {
+    return multiDomainFunction;
+  }
+
+  for (size_t i = 0; i < domainNumber; ++i) {
+    multiDomainFunction->addFunction(singleFunction->clone());
+    multiDomainFunction->setDomainIndex(i, i);
+  }
+
+  return multiDomainFunction;
 }
 
 /**
