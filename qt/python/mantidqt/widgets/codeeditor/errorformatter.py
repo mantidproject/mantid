@@ -11,7 +11,6 @@
 import traceback
 
 # third-party imports
-import six
 
 
 class ErrorFormatter(object):

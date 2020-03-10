@@ -8,7 +8,6 @@
 """
     Main window for reduction UIs
 """
-import six
 import sys
 import os
 import traceback

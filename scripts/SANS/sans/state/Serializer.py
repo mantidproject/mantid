@@ -7,7 +7,6 @@
 import json
 from enum import Enum
 
-import six
 
 from sans.state.JsonSerializable import JsonSerializable
 

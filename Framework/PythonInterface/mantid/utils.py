@@ -70,7 +70,6 @@ def _shared_cextension():
         yield
         return
 
-    import six
     import os as dl
     flags_orig = sys.getdlopenflags()
     sys.setdlopenflags(dl.RTLD_NOW | dl.RTLD_GLOBAL)

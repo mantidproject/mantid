@@ -32,7 +32,6 @@ import inspect
 import os
 import sys
 
-import six
 import mantid
 # This is a simple API so give access to the aliases by default as well
 from mantid import __gui__, api as _api, kernel as _kernel, apiVersion

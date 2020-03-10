@@ -13,7 +13,6 @@ import traceback
 import unittest
 
 # third-party imports
-import six
 
 # local imports
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter

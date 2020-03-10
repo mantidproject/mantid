@@ -8,7 +8,6 @@
 #
 
 import os
-import six
 
 from qtpy.QtCore import Slot, QObject
 

@@ -12,7 +12,6 @@ import atexit
 import gc
 
 # 3rd party imports
-import six
 
 from enum import Enum
 from .observabledictionary import DictionaryAction, ObservableDictionary

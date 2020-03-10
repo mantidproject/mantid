@@ -8,7 +8,6 @@
 """
     Base class for instrument-specific user interface
 """
-import six
 from qtpy.QtWidgets import (QMessageBox)  # noqa
 import sys
 import os

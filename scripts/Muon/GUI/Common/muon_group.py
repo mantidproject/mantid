@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=C0111
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-import six
 
 
 class MuonGroup(object):

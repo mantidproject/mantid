@@ -10,7 +10,6 @@ import glob
 import os
 
 from mantid import config
-import six
 import systemtesting
 
 

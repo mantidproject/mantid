@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import traceback
 
-import six
 from qtpy.QtCore import Slot, QThreadPool, Signal, QObject
 
 from mantid.kernel import Logger

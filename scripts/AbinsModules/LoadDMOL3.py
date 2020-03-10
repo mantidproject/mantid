@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import AbinsModules
 import io
-import six
 import numpy as np
 from math import sqrt
 from mantid.kernel import Atom
