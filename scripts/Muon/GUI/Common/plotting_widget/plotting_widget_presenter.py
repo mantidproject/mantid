@@ -454,6 +454,11 @@ class PlotWidgetPresenter(HomeTabSubWidget):
     def new_plot_figure(self, num_axes):
         self._model.clear_plot_model(self._view.get_axes())
         self._view.new_plot_figure(num_axes)
+        xlims = self.get_x_limits()
+        ylims = self.get_y_limts()
+        for ax in self._view.get_axes():
+            self._model.set_axis_xlim(ax, xlims)
+            self._model.set_axis_ylim(ax, ylims)
 
     def get_plot_title(self):
         """
@@ -541,6 +546,13 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             return xlims
         else:
             return default_xlimits[self.get_domain()]
+
+    def get_y_limts(self):
+        ylims = self._view.plot_options.get_plot_y_range()
+        if ylims[1] - ylims[0] > 0:
+            return ylims
+        else:
+            return [0, 1]
 
     def get_selected_axes(self):
         subplots = self._view.plot_options.get_selection()
