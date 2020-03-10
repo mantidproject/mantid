@@ -455,7 +455,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self._model.clear_plot_model(self._view.get_axes())
         self._view.new_plot_figure(num_axes)
         xlims = self.get_x_limits()
-        ylims = self.get_y_limts()
+        ylims = self.get_y_limits()
         for ax in self._view.get_axes():
             self._model.set_axis_xlim(ax, xlims)
             self._model.set_axis_ylim(ax, ylims)
@@ -547,7 +547,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         else:
             return default_xlimits[self.get_domain()]
 
-    def get_y_limts(self):
+    def get_y_limits(self):
         ylims = self._view.plot_options.get_plot_y_range()
         if ylims[1] - ylims[0] > 0:
             return ylims
