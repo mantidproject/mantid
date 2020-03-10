@@ -70,6 +70,7 @@ private:
   static double calculateError(double in) { return sqrt(in); }
 
   API::MatrixWorkspace_sptr m_localWorkspace;
+  bool m_convertToTOF;
 
   std::string m_instrumentName = ""; ///< Name of the instrument
   std::string m_instrumentPath = ""; ///< Name of the instrument path
