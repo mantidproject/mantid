@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_LEBAILFITTEST_H_
-#define MANTID_CURVEFITTING_LEBAILFITTEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include <cxxtest/TestSuite.h>
@@ -1484,5 +1483,3 @@ private:
   TableWorkspace_sptr hkl220ws;
   TableWorkspace_sptr hkl111110ws;
 };
-
-#endif /* MANTID_CURVEFITTING_LEBAILFITTEST_H_ */

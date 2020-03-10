@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_PSEUDOVOIGTTEST_H_
-#define MANTID_CURVEFITTING_PSEUDOVOIGTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -512,5 +511,3 @@ private:
 
   std::vector<double> m_xValues;
 };
-
-#endif /* MANTID_CURVEFITTING_PSEUDOVOIGTTEST_H_ */

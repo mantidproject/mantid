@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_BK2BKEXPCONVPV_H_
-#define MANTID_CURVEFITTING_BK2BKEXPCONVPV_H_
+#pragma once
 
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -80,5 +79,3 @@ using Bk2BkExpConvPV_sptr = boost::shared_ptr<Bk2BkExpConvPV>;
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_BK2BKEXPCONVPV_H_ */

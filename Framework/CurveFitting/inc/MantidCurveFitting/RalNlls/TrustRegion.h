@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CURVEFITTING_RAL_NLLS_TRUST_REGION_H_
-#define CURVEFITTING_RAL_NLLS_TRUST_REGION_H_
+#pragma once
 
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/FortranDefs.h"
@@ -46,5 +45,3 @@ void allEigSymm(const DoubleFortranMatrix &A, DoubleFortranVector &ew,
 } // namespace NLLS
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif // CURVEFITTING_RAL_NLLS_TRUST_REGION_H_

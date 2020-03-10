@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_CRYSTALFIELDENERGIES_H_
-#define MANTID_CURVEFITTING_CRYSTALFIELDENERGIES_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidCurveFitting/DllConfig.h"
@@ -29,5 +28,3 @@ private:
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_CRYSTALFIELDENERGIES_H_ */

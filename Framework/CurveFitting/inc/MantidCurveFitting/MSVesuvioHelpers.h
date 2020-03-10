@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_MSVESUVIOHELPERS_H
-#define MANTID_CURVEFITTING_MSVESUVIOHELPERS_H
+#pragma once
 
 #include "MantidKernel/normal_distribution.h"
 #include <random>
@@ -66,5 +65,3 @@ struct SimulationAggregator {
 } // namespace MSVesuvioHelper
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif // MANTID_CURVEFITTING_MSVESUVIOHELPERS_H

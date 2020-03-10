@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_PAWLEYFUNCTIONTEST_H_
-#define MANTID_CURVEFITTING_PAWLEYFUNCTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -442,5 +441,3 @@ private:
     TS_ASSERT_DELTA(cell.gamma(), gamma, 1e-9);
   }
 };
-
-#endif /* MANTID_CURVEFITTING_PAWLEYFUNCTIONTEST_H_ */

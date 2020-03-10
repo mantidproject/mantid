@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SPECIALFUNCTIONSUPPORT_H_
-#define SPECIALFUNCTIONSUPPORT_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -34,5 +33,3 @@ std::complex<double>
 } // namespace SpecialFunctionSupport
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*SPECIALFUNCTIONSUPPORT_H_*/

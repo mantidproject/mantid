@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SPECIALFUNCTIONSUPPORTTEST_H_
-#define SPECIALFUNCTIONSUPPORTTEST_H_
+#pragma once
 
 #include "MantidCurveFitting/SpecialFunctionSupport.h"
 #include <complex>
@@ -72,5 +71,3 @@ public:
     TS_ASSERT_DELTA(z.imag(), -0.0984, 0.001);
   }
 };
-
-#endif /*SPECIALFUNCTIONSUPPORTTEST_H_*/

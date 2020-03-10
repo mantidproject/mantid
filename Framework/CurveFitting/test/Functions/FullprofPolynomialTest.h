@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_FULLPROFPOLYNOMIALTEST_H_
-#define MANTID_CURVEFITTING_FULLPROFPOLYNOMIALTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -81,5 +80,3 @@ public:
     TS_ASSERT_DELTA(yValues[999], 0.55583, 1.0E-5);
   }
 };
-
-#endif /* MANTID_CURVEFITTING_FULLPROFPOLYNOMIALTEST_H_ */

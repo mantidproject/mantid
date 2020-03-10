@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CURVEFITTING_LEVENBERGMARQUARDTTEST_H_
-#define CURVEFITTING_LEVENBERGMARQUARDTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -333,5 +332,3 @@ public:
     TS_ASSERT_EQUALS(s.getError(), "Changes in function value are too small");
   }
 };
-
-#endif /*CURVEFITTING_LEVENBERGMARQUARDTTEST_H_*/

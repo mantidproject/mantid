@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TEIXEIRAWATERSQE_H_
-#define MANTID_TEIXEIRAWATERSQE_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -49,5 +48,3 @@ protected:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif // MANTID_TEIXEIRAWATERSQE_H_

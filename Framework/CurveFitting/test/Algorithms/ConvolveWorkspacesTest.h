@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ConvolveWorkspacesTEST_H_
-#define ConvolveWorkspacesTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -127,5 +126,3 @@ public:
 private:
   Workspace2D_sptr ws1, ws2;
 };
-
-#endif /*ConvolveWorkspacesTEST_H_*/

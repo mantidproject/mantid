@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_FUNCTIONQDEPENDSTEST_H
-#define MANTID_CURVEFITTING_FUNCTIONQDEPENDSTEST_H
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 
@@ -175,5 +174,3 @@ private:
     return WorkspaceCreationHelper::createEventWorkspace();
   }
 };
-
-#endif /* MANTID_API_FUNCTIONQDEPENDSTEST_H */

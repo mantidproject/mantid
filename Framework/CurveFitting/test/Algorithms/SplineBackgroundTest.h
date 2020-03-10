@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SPLINEBACKGROUNDTEST_H_
-#define SPLINEBACKGROUNDTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -118,4 +117,3 @@ private:
     double operator()(double x, int) { return std::sin(x); }
   };
 };
-#endif /*SPLINEBACKGROUNDTEST_H_*/

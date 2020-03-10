@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GAUSSIANTEST_H_
-#define GAUSSIANTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -172,5 +171,3 @@ public:
     TS_ASSERT_DELTA(fn.getParameter("Height"), 0.398942, 1e-6);
   }
 };
-
-#endif /*GAUSSIANTEST_H_*/

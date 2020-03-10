@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_GENERALDOMAINCREATOR_H_
-#define MANTID_CURVEFITTING_GENERALDOMAINCREATOR_H_
+#pragma once
 
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -87,5 +86,3 @@ private:
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_GENERALDOMAINCREATOR_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef STRETCHEXPTEST_H_
-#define STRETCHEXPTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -59,5 +58,3 @@ public:
     TS_ASSERT_THROWS(fn.function(x, y), const std::runtime_error &);
   }
 };
-
-#endif /*STRETCHEXPTEST_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REFLECTIVITYMULFTEST_H_
-#define REFLECTIVITYMULFTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -81,5 +80,3 @@ public:
     TS_ASSERT_EQUALS(fun.getAttribute("nlayer").asInt(), 2);
   }
 };
-
-#endif /*REFLECTIVITYMULFTEST_H_*/

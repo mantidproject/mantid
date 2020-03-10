@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_COMPTONSCATTERINGCOUNTRATETEST_H_
-#define MANTID_CURVEFITTING_COMPTONSCATTERINGCOUNTRATETEST_H_
+#pragma once
 
 #include "ComptonProfileTestHelpers.h"
 #include "MantidCurveFitting/Functions/ComptonScatteringCountRate.h"
@@ -336,5 +335,3 @@ private:
     return profile;
   }
 };
-
-#endif /* MANTID_CURVEFITTING_COMPTONSCATTERINGCOUNTRATETEST_H_ */

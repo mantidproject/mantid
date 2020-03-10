@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_CubicSpline_H_
-#define MANTID_CURVEFITTING_CubicSpline_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -106,5 +105,3 @@ using CubicSpline_const_sptr = const boost::shared_ptr<CubicSpline>;
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_CubicSpline_H_*/

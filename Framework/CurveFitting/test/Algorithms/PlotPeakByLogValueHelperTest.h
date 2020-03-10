@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PLOTPEAKBYLOGVALUEHELPERTEST_H_
-#define PLOTPEAKBYLOGVALUEHELPERTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -114,5 +113,3 @@ public:
     TS_ASSERT_EQUALS(inputWithWorkspace.name, "saveNISTDAT_data.nxs");
   }
 };
-
-#endif /*PLOTPEAKBYLOGVALUEHELPERTEST_H_*/
