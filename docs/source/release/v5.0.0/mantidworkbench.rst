@@ -88,6 +88,7 @@ Improvements
 - A help button has been added to the fitting add function dialog.
 - The progress reporting for scripts has been vastly improved and now reports at the line level.
 - Warnings from the Python ``warnings`` module are now show as warnings and not errors in the log display.
+- The mechanism for keeping plot windows on top of the main window has been changed to avoid some scenarios where the script editor could not be accessed.
 
 Bugfixes
 ########
@@ -108,12 +109,14 @@ Bugfixes
 - Fixed an issue where adding a Bk2BkExpConvPV function to the fit browser caused a crash
 - Overplots will be normalized by bin width if they are overplotting a curve from a workspace which is a distribution.
 - Several bugs in the way Python scripts were parsed and executed, including blank lines after a colon and tabs in strings, have been fixed.
-- Axes limits of a plot no longer automatically rescale when errorbars are on/off 
+- Axes limits of a plot no longer automatically rescale when errorbars are on/off
 - Axes editor menu now reads the grid visibility of the plot (i.e. the grid checkbox will always show the current grid visibility when an axis is double clicked)
-- Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters. 
+- Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters.
 - Fixed bug that caused an error if a MDHistoWorkspace was plotted and a user attempted to open a context menu.
 - Fixed a bug which caused graphic scaling issues when the double-click menu was used to set an axis as log-scaled.
 - Fixed a bug where the colorbar in the instrument view would sometimes have no markers if the scale was set to SymmetricLog10.
 - Fixed an unhandled exception when you set the min or max value of the colorbar scale in a colorfill plot to negative when the scale is set to logarithmic.
+- The mechanism to keep plots on top of the main Workbench window has been changed because some window managers would not release focus to their script editor rendering it useless.
+  This has the effect on some Linux environments of removing the ability to minimize the figure. The control within the Plots toolbox still allows visibility to be toggled on/off if required.
 
 :ref:`Release 5.0.0 <v5.0.0>`
