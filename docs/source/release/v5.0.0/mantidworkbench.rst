@@ -15,7 +15,7 @@ New
 ###
 
 - *Waterfall Plots* with options for spacing and filling curves.
-- Workbench has many more options in the :ref:`01_save_settings <settings menu>`, including setting defaults for plotting and fitting!
+- Workbench has many more options in the :ref:`settings menu <01_save_settings>`, including setting defaults for plotting and fitting!
 - Mantid Workbench can now load all of the workspaces from projects saved from Mantidplot.  Graphs and interface values are not imported from the project.
 - Added a compatibility implementation of plotSpectrum and plotBin for python scripts in Workbench, all of the previous arguments are supported with the exception of distribution, which will be ignored. For example the following commands are supported.
 
