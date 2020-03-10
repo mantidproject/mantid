@@ -1931,13 +1931,16 @@ MantidImage_sptr MatrixWorkspace::getImage(
   return image;
 }
 
-std::pair<int64_t, int64_t> MatrixWorkspace::findY(double value) const {
+std::pair<int64_t, int64_t>
+MatrixWorkspace::findY(double value,
+                       const std::pair<int64_t, int64_t> &idx) const {
   std::pair<int64_t, int64_t> out(-1, -1);
   const int64_t numHists = static_cast<int64_t>(this->getNumberHistograms());
-  for (int64_t i = 0; i < numHists; ++i) {
+  for (int64_t i = idx.first; i < numHists; ++i) {
     const auto &Y = this->y(i);
     // cppcheck-suppress syntaxError
-    if (auto it = std::find(Y.begin(), Y.end(), value); it != Y.end()) {
+    if (auto it = std::find(std::next(Y.begin(), idx.second), Y.end(), value);
+        it != Y.end()) {
       out = {i, std::distance(Y.begin(), it)};
       break;
     }

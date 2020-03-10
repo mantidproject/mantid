@@ -2393,6 +2393,22 @@ public:
     TS_ASSERT_EQUALS(ws->isGroup(), false);
   }
 
+  void test_findY() {
+    boost::shared_ptr<MatrixWorkspace> ws(makeWorkspaceWithDetectors(3, 1));
+    auto idx = ws->findY(0., {0, 0});
+    TS_ASSERT_EQUALS(idx.first, -1);
+    TS_ASSERT_EQUALS(idx.second, -1);
+    idx = ws->findY(1., {0, 0});
+    TS_ASSERT_EQUALS(idx.first, 0);
+    TS_ASSERT_EQUALS(idx.second, 0);
+    idx = ws->findY(1., {0, 1});
+    TS_ASSERT_EQUALS(idx.first, 0);
+    TS_ASSERT_EQUALS(idx.second, 1);
+    idx = ws->findY(1., {1, 0});
+    TS_ASSERT_EQUALS(idx.first, 1);
+    TS_ASSERT_EQUALS(idx.second, 0);
+  }
+
 private:
   WorkspaceTester m_workspace;
   WorkspaceTester m_workspaceSans;

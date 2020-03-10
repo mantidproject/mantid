@@ -515,9 +515,11 @@ public:
   virtual bool hasOrientedLattice() const override;
 
   /// Find first index in Y equal to value.
-  /// @param value Number to find in Y/
+  /// @param value Number to find in Y
+  /// @param idx starting indices for search
   /// @return Tuple with the ihistogram and bin indices.
-  virtual std::pair<int64_t, int64_t> findY(double value) const;
+  virtual std::pair<int64_t, int64_t>
+  findY(double value, const std::pair<int64_t, int64_t> &idx = {0, 0}) const;
 
   //=====================================================================================
   // End IMDWorkspace methods
