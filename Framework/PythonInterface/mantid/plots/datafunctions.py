@@ -87,10 +87,7 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
                 [artist[0].is_normalized for artist in current_artists])
             normalization = current_normalization
         else:
-            if mantid.kernel.config['graph1d.autodistribution'].lower() == 'on':
-                normalization = True
-            else:
-                normalization, _ = check_resample_to_regular_grid(workspace, **kwargs)
+            normalization = mantid.kernel.config['graph1d.autodistribution'].lower() == 'on'
     return normalization, kwargs
 
 
