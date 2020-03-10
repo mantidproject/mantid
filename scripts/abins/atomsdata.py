@@ -4,34 +4,35 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import re
+import collections.abc
 import numbers
-from typing import Any, Dict, Sequence
+from typing import Any, Dict, List, overload, Sequence
+import re
 
 >>>>>>> Abins AtomsData: Rework to be immutable
 import numpy as np
 import abins
 
 
-class AtomsData:
-    def __init__(self, atoms_data: Sequence[Dict[str, Any]]):
-        self._data = {}
+class AtomsData(collections.abc.Sequence):
+    def __init__(self, atoms_data: Sequence[Dict[str, Any]]) -> None:
 
+        # Make a map matching int indices to atoms_data keys
         test = re.compile(r'^atom_(\d+)$')
-        for key, atom_data in atoms_data.items():
-            match = test.match(key)
-            if match is not None:
-                atom_index = int(match.groups()[0])
-                self._check_item(atom_data)
-                self._data.update({f'atom_{atom_index}': atom_data})
+        atom_keys = {int(test.match(key).groups()[0]): key for key in atoms_data if test.match(key)}
+        sorted_atom_keys = [atom_keys[index] for index in sorted(atom_keys)]
 
-        expected_keys = [f'atom_{i}' for i in range(len(self._data))]
-        if set(expected_keys) != set(self._data.keys()):
-            raise ValueError('Missing some atom data. Only these entries were found: {}. key format must be "atom_I" '
-                             'where I is count starting from zero.'.format(' '.join(sorted(self._data.keys()))))
+        # Check that indices run up from zero with no gaps
+        if set(atom_keys) != set(range(len(atom_keys))):
+            raise ValueError('Missing some atom data. Only these entries were found: \n'
+                             '{}. key format must be "atom_I" '
+                             'where I is count starting from zero.'.format('\n'.join(sorted_atom_keys)))
+
+        # Store in a list. Indices should correspond to input keys if the above test passed.
+        self._data = [self._check_item(atoms_data[key]) for key in sorted_atom_keys]
 
     @staticmethod
-    def _check_item(item):
+    def _check_item(item: Dict[str, Any]) -> Dict[str, Any]:
         """
         Raise an error if Atoms data item is unsuitable
 
@@ -74,8 +75,25 @@ class AtomsData:
         if mass < 0:
             raise ValueError("Mass of atom cannot be negative.")
 
+        return item
+
+    def __len__(self) -> int:
+        return len(self._data)
+
+    @overload  # noqa F811
+    def __getitem__(self, item: int) -> Dict[str, Any]:
+        ...
+
+    @overload  # noqa F811
+    def __getitem__(self, item: slice) -> List[Dict[str, Any]]:
+        ...
+
+    def __getitem__(self, item):  # noqa F811
+        return self._data[item]
+
     def extract(self):
-        return self._data
+        # For compatibility, regenerate the dict format on-the-fly
+        return {f'atom_{i}': item for i, item in enumerate(self._data)}
 
     def __str__(self):
         return "Atoms data"

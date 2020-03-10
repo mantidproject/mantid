@@ -7,6 +7,7 @@
 import numpy as np
 
 from mantid.kernel import logger as mantid_logger
+
 import abins
 from abins.constants import ALL_KEYWORDS_ATOMS_S_DATA, ALL_SAMPLE_FORMS, ATOM_LABEL, FLOAT_TYPE, S_LABEL
 
