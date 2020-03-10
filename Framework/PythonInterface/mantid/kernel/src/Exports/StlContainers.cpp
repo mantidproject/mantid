@@ -10,6 +10,7 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 
+using Mantid::PythonInterface::std_pair_to_python_converter;
 using Mantid::PythonInterface::std_set_exporter;
 using Mantid::PythonInterface::std_vector_exporter;
 
@@ -29,4 +30,5 @@ void exportStlContainers() {
   // std::set
   std_set_exporter<int>::wrap("std_set_int");
   std_set_exporter<std::string>::wrap("std_set_str");
+  std_pair_to_python_converter<int64_t, int64_t>();
 }

@@ -365,7 +365,9 @@ void export_MatrixWorkspace() {
            ":class:`~mantid.api.MatrixWorkspace.hasMaskedBins` MUST be called "
            "first to check if any bins are "
            "masked, otherwise an exception will be thrown")
-      .def("find", &find, (arg("self"), arg("value")), "find index of Y value")
+      .def("findY", &MatrixWorkspace::findY, (arg("self"), arg("value")),
+           "Find first index in Y equal to value. Returns tuple with the "
+           "ihistogram and bin indices.")
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
            "Returns size of the Y data array (deprecated, use "
