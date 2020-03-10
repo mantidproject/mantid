@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_HISTOGRAMDATA_HISTOGRAMITERATOR_H_
-#define MANTID_HISTOGRAMDATA_HISTOGRAMITERATOR_H_
+#pragma once
 
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/HistogramItem.h"
@@ -79,5 +78,3 @@ private:
 
 } // namespace HistogramData
 } // namespace Mantid
-
-#endif

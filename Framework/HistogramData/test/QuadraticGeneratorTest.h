@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_QUADRATICGENERATORTEST_H_
-#define MANTID_HISTOGRAMDATA_QUADRATICGENERATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -42,5 +41,3 @@ public:
     TS_ASSERT_DELTA(x, std::vector<double>({3, 6}), 1e-14);
   }
 };
-
-#endif /* MANTID_HISTOGRAMDATA_QUADRATICGENERATORTEST_H_ */

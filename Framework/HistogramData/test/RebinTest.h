@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_REBINTEST_H_
-#define MANTID_HISTOGRAMDATA_REBINTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -464,5 +463,3 @@ private:
     histFreq.setFrequencyStandardDeviations(freqErrors);
   }
 };
-
-#endif /* MANTID_HISTOGRAMDATA_REBINTEST_H_ */

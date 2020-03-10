@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_VALIDATION_H_
-#define MANTID_HISTOGRAMDATA_VALIDATION_H_
+#pragma once
 
 #include <algorithm>
 #include <cfloat>
@@ -94,5 +93,3 @@ template <class T> void Validator<HistogramE>::checkValidity(const T &data) {
 } // namespace detail
 } // namespace HistogramData
 } // namespace Mantid
-
-#endif /* MANTID_HISTOGRAMDATA_VALIDATION_H_ */
