@@ -231,7 +231,7 @@ class WorkspaceWidget(PluginWidget):
             TableWorkspaceDisplay.supports(ws)
             self._do_show_data([name])
         except ValueError:
-            if ws.blocksize() == 1:
+            if hasattr(ws, 'blocksize') and ws.blocksize() == 1:
                 #this is just single bin data, it makes more sense to plot the bin
                 plot_kwargs = {"axis": MantidAxType.BIN}
                 plot([ws],errors=False, overplot=False, wksp_indices=[0], plot_kwargs=plot_kwargs)

@@ -588,15 +588,21 @@ QStringList PreviewPlot::linesWithErrors() const {
  */
 void PreviewPlot::onWorkspaceRemoved(
     Mantid::API::WorkspacePreDeleteNotification_ptr nf) {
+  if (m_lines.isEmpty()) {
+    return;
+  }
   // Ignore non matrix workspaces
   if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
     // the artist may have already been removed. ignore the event is that is the
     // case
+    bool removed = false;
     try {
-      m_canvas->gca<MantidAxes>().removeWorkspaceArtists(ws);
+      removed = m_canvas->gca<MantidAxes>().removeWorkspaceArtists(ws);
     } catch (Mantid::PythonInterface::PythonException &) {
     }
-    this->replot();
+    if (removed) {
+      this->replot();
+    }
   }
 }
 
@@ -606,13 +612,17 @@ void PreviewPlot::onWorkspaceRemoved(
  */
 void PreviewPlot::onWorkspaceReplaced(
     Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf) {
+  if (m_lines.isEmpty()) {
+    return;
+  }
   // Ignore non matrix workspaces
   if (auto oldWS =
           boost::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
     if (auto newWS =
             boost::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
-      m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS);
-      this->replot();
+      if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS)) {
+        this->replot();
+      }
     }
   }
 }
