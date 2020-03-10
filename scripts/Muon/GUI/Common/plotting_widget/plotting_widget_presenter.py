@@ -291,10 +291,10 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         """
         Handles a group or pair being removed in grouping widget analysis table
         """
-        if self._view.is_tiled_plot() and self._view.get_tiled_by_type():
+        if self._view.is_tiled_plot() and self._view.get_tiled_by_type() == 'group':
             self.update_model_tile_plot_positions()
             self.new_plot_figure(self._model.number_of_axes)
-            self.plot_all_selected_workspaces(autoscale=False)
+            self.plot_all_selected_workspaces(autoscale=True)
             self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
             self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
             return
