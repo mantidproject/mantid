@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __FAKE__COMMCTRL_H__
-#define __FAKE__COMMCTRL_H__
+#pragma once
 
 #include <windows.h>
 
@@ -27,5 +26,3 @@ struct INITCOMMONCONTROLSEX
 
 inline void InitCommonControls() {}
 inline int InitCommonControlsEx(INITCOMMONCONTROLSEX *) { return 0; }
-
-#endif // __FAKE__COMMCTRL_H__

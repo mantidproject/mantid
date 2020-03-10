@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __cxxtest__TeeListener_h__
-#define __cxxtest__TeeListener_h__
+#pragma once
 
 //
 // A TeeListener notifies two "regular" TestListeners
@@ -202,5 +201,3 @@ namespace CxxTest
     };
 }
 
-
-#endif // __cxxtest__TeeListener_h__

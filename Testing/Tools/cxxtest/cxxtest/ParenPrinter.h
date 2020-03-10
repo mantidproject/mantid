@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __cxxtest__ParenPrinter_h__
-#define __cxxtest__ParenPrinter_h__
+#pragma once
 
 //
 // The ParenPrinter is identical to the ErrorPrinter, except it
@@ -23,5 +22,3 @@ namespace CxxTest
         ParenPrinter( CXXTEST_STD(ostream) &o = CXXTEST_STD(cout) ) : ErrorPrinter( o, "(", ")" ) {}
     };
 }
-
-#endif // __cxxtest__ParenPrinter_h__

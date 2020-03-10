@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 // fake qwidget.h
-#ifndef __FAKE__QWIDGET_H
-#define __FAKE__QWIDGET_H
+#pragma once
 
 class QString;
 
@@ -25,5 +24,3 @@ public:
     int height() { return 0; }
     void setGeometry( int, int, int, int ) {}
 };
-
-#endif // __FAKE__QWIDGET_H
