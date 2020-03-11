@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATAHANDLING_SAVE_ENVIRONMENT_H_
-#define DATAHANDLING_SAVE_ENVIRONMENT_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Matrix.h"
@@ -58,5 +57,3 @@ const Mantid::Geometry::MeshObject &
 toMeshObject(const Mantid::Geometry::IObject &object);
 } // end namespace DataHandling
 } // namespace Mantid
-
-#endif /* DATAHANDLING_SAVE_ENVIRONMENT_H_ */

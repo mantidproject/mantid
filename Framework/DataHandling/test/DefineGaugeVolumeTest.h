@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DEFINEGAUGEVOLUMETEST_H_
-#define DEFINEGAUGEVOLUMETEST_H_
+#pragma once
 
 #include "MantidDataHandling/DefineGaugeVolume.h"
 #include <cxxtest/TestSuite.h>
@@ -82,5 +81,3 @@ public:
     AnalysisDataService::Instance().remove("EmptyWorkspace");
   }
 };
-
-#endif

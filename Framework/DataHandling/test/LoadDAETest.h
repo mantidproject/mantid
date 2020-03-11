@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADDAETEST_H_
-#define LOADDAETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -32,5 +31,3 @@ public:
         "LoadDAE is deprecated (on 2013-04-22). Use StartLiveData instead.");
   }
 };
-
-#endif /*LOADDAETEST_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COMPRESSEVENTSTEST_H_
-#define COMPRESSEVENTSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -155,5 +154,3 @@ public:
     doTest("CompressEvents_input", "CompressEvents_input", 0.0, 50, .001);
   }
 };
-
-#endif

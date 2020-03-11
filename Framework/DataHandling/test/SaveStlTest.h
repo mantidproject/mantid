@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVE_STL_TEST_H_
-#define SAVE_STL_TEST_H_
+#pragma once
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling//SaveStl.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
@@ -89,4 +88,3 @@ public:
       FileFinder::Instance().getFullPath("cubeBin.stl");
   std::string path;
 };
-#endif /*SAVE_STL_TEST_H_*/

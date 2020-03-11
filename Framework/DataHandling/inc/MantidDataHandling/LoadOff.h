@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADOFF_H_
-#define MANTID_DATAHANDLING_LOADOFF_H_
+#pragma once
 #include "MantidDataHandling/MeshFileIO.h"
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/Logger.h"
@@ -41,5 +40,3 @@ private:
 };
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_LOADOFF_H_ */

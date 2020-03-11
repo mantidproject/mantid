@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADPARAMETERFILETEST_H_
-#define LOADPARAMETERFILETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -239,5 +238,3 @@ private:
   std::string inputFile;
   std::string wsName;
 };
-
-#endif /*LOADPARAMETERFILETEST_H_*/

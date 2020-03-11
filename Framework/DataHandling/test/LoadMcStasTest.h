@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef LOADMCSTASTEST_H_
-#define LOADMCSTASTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -225,5 +224,3 @@ public:
 private:
   LoadMcStas loadFile;
 };
-
-#endif /*LoadMcStasTEST_H_*/

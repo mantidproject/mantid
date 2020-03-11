@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATAHANDLING_LOAD_SHAPE_H_
-#define DATAHANDLING_LOAD_SHAPE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/MeshFileIO.h"
@@ -56,4 +55,3 @@ void DLLExport rotate(Geometry::MeshObject &sampleMesh,
 
 } // namespace DataHandling
 } // namespace Mantid
-#endif /* DATAHANDLING_LOAD_SHAPE_H_ */

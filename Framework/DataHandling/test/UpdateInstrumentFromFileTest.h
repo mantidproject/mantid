@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef UPDATEINSTRUMENTTESTFROMFILE_H_
-#define UPDATEINSTRUMENTTESTFROMFILE_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -311,5 +310,3 @@ private:
   std::string wsName;
   std::string xmlFile;
 };
-
-#endif /*UPDATEINSTRUMENTTESTFROMFILE_H_*/

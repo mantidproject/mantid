@@ -1,5 +1,4 @@
-#ifndef DATAHANDING_ANSTOEVENTFILE_H_
-#define DATAHANDING_ANSTOEVENTFILE_H_
+#pragma once
 
 #include <cstdio>
 #include <stdexcept>
@@ -358,5 +357,3 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
 } // namespace ANSTO
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif // DATAHANDING_ANSTOEVENTFILE_H_

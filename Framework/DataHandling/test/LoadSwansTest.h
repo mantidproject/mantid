@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADSWANSTEST_H_
-#define MANTID_DATAHANDLING_LOADSWANSTEST_H_
+#pragma once
 
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadSwans.h"
@@ -76,5 +75,3 @@ public:
         outputWS->run().getPropertyValueAsType<double>("wavelength"), 3.5);
   }
 };
-
-#endif /* MANTID_DATAHANDLING_LOADSWANSTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GROUPDETECTORS2TEST_H_
-#define GROUPDETECTORS2TEST_H_
+#pragma once
 
 #include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -1263,5 +1262,3 @@ private:
 
   GroupDetectors2 alg;
 };
-
-#endif /*GROUPDETECTORS2TEST_H_*/

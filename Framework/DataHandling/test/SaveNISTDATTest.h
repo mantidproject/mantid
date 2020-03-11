@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVENISTDATTEST_H_
-#define SAVENISTDATTEST_H_
+#pragma once
 
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/SaveNISTDAT.h"
@@ -54,5 +53,3 @@ public:
     Poco::File(outputFile).remove();
   }
 };
-
-#endif /*SAVENISTDATTEST_H_*/

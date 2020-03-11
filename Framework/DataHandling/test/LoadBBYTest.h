@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef LOADMCSTASTEST_H_
-#define LOADMCSTASTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -181,5 +180,3 @@ public:
     TS_ASSERT_LESS_THAN(0.0399999, minTime);
   }
 };
-
-#endif /*LoadBBYTEST_H_*/

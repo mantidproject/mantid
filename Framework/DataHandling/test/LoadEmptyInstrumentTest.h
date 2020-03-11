@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADEMPTYINSTRUMENTTEST_H_
-#define LOADEMPTYINSTRUMENTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -1114,5 +1113,3 @@ private:
   std::string inputFile;
   std::string wsName;
 };
-
-#endif /*LOADEMPTYINSTRUMENTTEST_H_*/

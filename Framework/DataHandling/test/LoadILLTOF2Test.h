@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADILLTOF2TEST_H_
-#define LOADILLTOF2TEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -243,5 +242,3 @@ public:
 private:
   std::string m_dataFile;
 };
-
-#endif /*LOADILLTOF2TEST_H_*/

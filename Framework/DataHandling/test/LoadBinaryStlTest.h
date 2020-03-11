@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOAD_BINARYSTL_TEST_H_
-#define LOAD_BINARYSTL_TEST_H_
+#pragma once
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
@@ -90,4 +89,3 @@ private:
 
   const ScaleUnits units = ScaleUnits::metres;
 };
-#endif /* LOAD_BINARYSTL_TEST_H_ */

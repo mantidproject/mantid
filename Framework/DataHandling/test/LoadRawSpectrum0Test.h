@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LoadRawSpectrum0Test_H_
-#define LoadRawSpectrum0Test_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -169,5 +168,3 @@ private:
   std::string inputFile;
   std::string outputSpace;
 };
-
-#endif /*LoadRawSpectrum0Test_H_*/

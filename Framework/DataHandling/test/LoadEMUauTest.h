@@ -1,6 +1,5 @@
 
-#ifndef LOADEMUAUTEST_H_
-#define LOADEMUAUTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -93,5 +92,3 @@ public:
     TS_ASSERT_DELTA(iparam("SampleAnalyser"), 1.8, 1.0e-3);
   }
 };
-
-#endif /*LOADEMUAUTEST_H_*/

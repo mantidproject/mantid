@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVECANSAS1DTEST_H
-#define SAVECANSAS1DTEST_H
+#pragma once
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
@@ -276,5 +275,3 @@ private:
   std::string m_runNum;
   MatrixWorkspace_sptr ws;
 };
-
-#endif

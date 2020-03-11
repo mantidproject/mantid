@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_PROCESSBANKDATA_H
-#define MANTID_DATAHANDLING_PROCESSBANKDATA_H
+#pragma once
 
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidGeometry/IDTypes.h"
@@ -96,5 +95,3 @@ private:
 }; // ENDDEF-CLASS ProcessBankData
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif

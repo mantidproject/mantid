@@ -1,5 +1,4 @@
-#ifndef DATAHANDING_LOADEMU_H_
-#define DATAHANDING_LOADEMU_H_
+#pragma once
 
 //---------------------------------------------------
 // Includes
@@ -187,5 +186,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif // DATAHANDING_LOADEMU_H_

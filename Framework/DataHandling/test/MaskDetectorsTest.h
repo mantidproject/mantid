@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MARKDEADDETECTORSTEST_H_
-#define MARKDEADDETECTORSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -822,5 +821,3 @@ public:
 private:
   MaskDetectors marker;
 };
-
-#endif /*MARKDEADDETECTORSTEST_H_*/

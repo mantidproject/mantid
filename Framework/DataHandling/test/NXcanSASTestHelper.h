@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLINGTEST_NXCANSASTESTHELPER_H
-#define MANTID_DATAHANDLINGTEST_NXCANSASTESTHELPER_H
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include <Poco/TemporaryFile.h>
@@ -122,4 +121,3 @@ void set2DValues(Mantid::API::MatrixWorkspace_sptr ws);
 
 void removeFile(std::string filename);
 } // namespace NXcanSASTestHelper
-#endif
