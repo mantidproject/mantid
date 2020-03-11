@@ -210,9 +210,9 @@ class IN6(systemtesting.MantidSystemTest):
 class IN5_Tube_Background(systemtesting.MantidSystemTest):
 
     def runTest(self):
-        Load(Filename='ILL/IN5/Epp.nxs', OutputWorkspace='Epp')
-        Load(Filename='ILL/IN5/Sample.nxs', OutputWorkspace='Sample')
-        Load(Filename='ILL/IN5/Vmask.nxs', OutputWorkspace='Vmask')
+        Load(Filename='ILL/IN5/Epp.nxs', OutputWorkspace='Epp', convertToTOF=True)
+        Load(Filename='ILL/IN5/Sample.nxs', OutputWorkspace='Sample', convertToTOF=True)
+        Load(Filename='ILL/IN5/Vmask.nxs', OutputWorkspace='Vmask', convertToTOF=True)
         args = {'InputWorkspace':'Sample',
                 'DiagnosticsWorkspace':'Vmask',
                 'EPPWorkspace':'Epp',
@@ -249,7 +249,7 @@ class IN5_Mask_Non_Overlapping_Bins(systemtesting.MantidSystemTest):
             OutputEPPWorkspace='Epp'
         )
 
-        ws = Load(run)
+        ws = Load(run, convertToTOF=True)
         self.ecrase(ws)
 
         DirectILLCollectData(
