@@ -151,7 +151,7 @@ class ISISPowderYamlParserTest(unittest.TestCase):
         file_handle.close()
 
         with self.assertRaisesRegex(ValueError, "Found a run range in calibration mapping overlaps an unbounded run "
-                                                 "range"):
+                                    "range"):
             yaml_parser.get_run_dictionary(run_number_string="32", file_path=file_path)
 
 

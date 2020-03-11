@@ -193,7 +193,7 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
 
         material_obj = sample_details._Material(chemical_formula='V')
         with self.assertRaisesRegex(ValueError, "absorption_cross_section was: -1 which is impossible for a physical "
-                                                 "object"):
+                                    "object"):
             material_obj.set_material_properties(abs_cross_sect=bad_absorb, scattering_cross_sect=good_scattering)
 
         # Check the immutability flag has not been set on a failure

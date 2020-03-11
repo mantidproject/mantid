@@ -156,7 +156,7 @@ class ISISPowderInstrumentSettingsTest(unittest.TestCase):
     def test_param_map_rejects_enum_missing_friendly_name(self):
         # Check that is the friendly name is not set it is correctly detected
         with self.assertRaisesRegex(RuntimeError,
-                               "'enum_friendly_name' was not set. Please contact development team."):
+                                    "'enum_friendly_name' was not set. Please contact development team."):
             param_map_entry.ParamMapEntry(ext_name="user_facing_name", int_name="script_facing_name",
                                           enum_class=BadSampleEnum)
 
