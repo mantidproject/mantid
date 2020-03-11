@@ -72,7 +72,7 @@ void LoadILLTOF2::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "The name to use for the output workspace");
-  declareProperty("convertToTOF", false, Direction::Input);
+  declareProperty("ConvertToTOF", false, Direction::Input);
 }
 
 /**
