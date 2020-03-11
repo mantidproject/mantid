@@ -16,7 +16,7 @@ from matplotlib.legend import Legend
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
-from mantid.kernel import ConfigService
+from mantid.kernel import ConfigService, Logger
 from mantid.plots import datafunctions, MantidAxes
 
 # -----------------------------------------------------------------------------
@@ -36,6 +36,8 @@ MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
               'plus': '+', 'triangle_down': 'v', 'triangle_up': '^', 'x': 'x',
               'caretup': 6, 'caretup (centered at base)': 10,
               'caretdown (centered at base)': 11, 'None': 'None'}
+
+LOGGER = Logger("plotfunctions")
 
 # -----------------------------------------------------------------------------
 # Decorators
@@ -111,6 +113,9 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         plot_kwargs = {}
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)
     workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
+    
+    if not workspaces:
+        return
 
     if spectrum_nums is not None:
         kw, nums = 'specNum', spectrum_nums
