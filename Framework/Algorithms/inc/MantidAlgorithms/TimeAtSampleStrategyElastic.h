@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAlgorithms/TimeAtSampleStrategy.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <boost/shared_ptr.hpp>
 
@@ -21,7 +20,7 @@ namespace Algorithms {
 
 /** TimeAtSampleStrategyElastic : Time at sample stragegy for elastic scattering
  */
-class DLLExport TimeAtSampleStrategyElastic
+class MANTID_ALGORITHMS_DLL TimeAtSampleStrategyElastic
     : public Mantid::Algorithms::TimeAtSampleStrategy {
 public:
   TimeAtSampleStrategyElastic(

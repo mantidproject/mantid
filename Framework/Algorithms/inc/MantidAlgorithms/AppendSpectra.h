@@ -26,7 +26,7 @@ namespace Algorithms {
 
   @date 2012-02-20
 */
-class DLLExport AppendSpectra : public WorkspaceJoiners {
+class MANTID_ALGORITHMS_DLL AppendSpectra : public WorkspaceJoiners {
 public:
   const std::string name() const override;
   int version() const override;

@@ -8,10 +8,10 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -46,7 +46,7 @@ struct FitPeakOffsetResult {
  @author Vickie Lynch, SNS
  @date 12/12/2011
  */
-class DLLExport GetDetOffsetsMultiPeaks : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GetDetOffsetsMultiPeaks : public API::Algorithm {
 public:
   /// Default constructorMatrix
   GetDetOffsetsMultiPeaks();

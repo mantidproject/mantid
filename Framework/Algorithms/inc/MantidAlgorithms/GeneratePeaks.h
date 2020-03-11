@@ -11,9 +11,9 @@
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -23,7 +23,7 @@ namespace Algorithms {
 
   @date 2012-04-10
 */
-class DLLExport GeneratePeaks : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GeneratePeaks : public API::Algorithm {
 public:
   GeneratePeaks();
 

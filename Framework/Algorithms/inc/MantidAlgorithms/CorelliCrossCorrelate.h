@@ -7,15 +7,15 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 /** CorelliCrossCorrelate : TODO: DESCRIPTION
  */
-class DLLExport CorelliCrossCorrelate : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CorelliCrossCorrelate : public API::Algorithm {
 public:
   const std::string name() const override { return "CorelliCrossCorrelate"; };
   int version() const override { return 1; };

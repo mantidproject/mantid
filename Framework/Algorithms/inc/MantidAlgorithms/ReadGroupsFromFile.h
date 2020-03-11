@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <unordered_map>
 
@@ -55,7 +56,7 @@ namespace Algorithms {
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
     @date 09/03/2009
 */
-class DLLExport ReadGroupsFromFile : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ReadGroupsFromFile : public API::Algorithm {
 public:
   /// (Empty) Constructor
   ReadGroupsFromFile();

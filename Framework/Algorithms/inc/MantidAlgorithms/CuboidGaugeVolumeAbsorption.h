@@ -25,7 +25,8 @@ namespace Algorithms {
     @author Russell Taylor, Tessella
     @date 1/11/2010
 */
-class DLLExport CuboidGaugeVolumeAbsorption : public FlatPlateAbsorption {
+class MANTID_ALGORITHMS_DLL CuboidGaugeVolumeAbsorption
+    : public FlatPlateAbsorption {
 public:
   /// Algorithm's name
   const std::string name() const override {

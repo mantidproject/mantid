@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,7 +20,7 @@ namespace Algorithms {
   @author Michael Whitty
   @date 24/01/2011
 */
-class DLLExport IdentifyNoisyDetectors : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL IdentifyNoisyDetectors : public API::Algorithm {
 public:
   const std::string name() const override {
     return "IdentifyNoisyDetectors";

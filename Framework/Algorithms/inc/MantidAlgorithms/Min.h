@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -37,7 +38,7 @@ namespace Algorithms {
     @author L C Chapon, ISIS, Rutherford Appleton Laboratory
     @date 11/08/2009
  */
-class DLLExport Min : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Min : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Min"; }

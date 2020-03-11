@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 
@@ -26,7 +27,7 @@ namespace Algorithms {
   @author Martyn Gigg, Tessella plc
   @date 2010-12-09
 */
-class DLLExport DetectorDiagnostic : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DetectorDiagnostic : public API::Algorithm {
 public:
   /// Default constructor
   DetectorDiagnostic();

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Unit.h"
 
@@ -48,7 +49,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 06/03/2008
 */
-class DLLExport ConvertUnits : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL ConvertUnits : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ConvertUnits"; }

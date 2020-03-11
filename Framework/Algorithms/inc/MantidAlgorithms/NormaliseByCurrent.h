@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include <boost/shared_ptr.hpp>
 namespace Mantid {
 namespace API {
@@ -31,7 +32,8 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 25/08/2008
 */
-class DLLExport NormaliseByCurrent : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL NormaliseByCurrent
+    : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "NormaliseByCurrent"; }

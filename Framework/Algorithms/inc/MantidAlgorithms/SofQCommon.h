@@ -8,13 +8,14 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
 // Routines used by all SofQW algorithms intended to provide united
 // user interface to all SofQ algorihtms.
 namespace Mantid {
 namespace Algorithms {
 
-struct DLLExport SofQCommon {
+struct MANTID_ALGORITHMS_DLL SofQCommon {
 
   /// E Mode
   int m_emode;

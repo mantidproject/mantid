@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -28,7 +29,7 @@ struct Correction {
 
   SampleT = PulseT + [TOF to sample]
 */
-class DLLExport TimeAtSampleStrategy {
+class MANTID_ALGORITHMS_DLL TimeAtSampleStrategy {
 public:
   virtual Correction calculate(const size_t &workspace_index) const = 0;
   virtual ~TimeAtSampleStrategy() = default;

@@ -8,7 +8,7 @@
 
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,7 +18,8 @@ namespace Algorithms {
   @author
   @date 2011-07-18
 */
-class DLLExport RemovePromptPulse : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL RemovePromptPulse
+    : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override;

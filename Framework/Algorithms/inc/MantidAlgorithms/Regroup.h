@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -33,7 +34,7 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 16/07/2008
  */
-class DLLExport Regroup : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Regroup : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Regroup"; }

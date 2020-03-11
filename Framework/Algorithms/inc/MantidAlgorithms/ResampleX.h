@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/Rebin.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 #include <map>
 
@@ -17,7 +17,7 @@ namespace Algorithms {
 
 /** ResampleX : TODO: DESCRIPTION
  */
-class DLLExport ResampleX : public Algorithms::Rebin {
+class MANTID_ALGORITHMS_DLL ResampleX : public Algorithms::Rebin {
 public:
   const std::string name() const override;
   int version() const override;

@@ -13,7 +13,7 @@ namespace Algorithms {
 
 /** Comment : Adds a note into the history record of a workspace
  */
-class DLLExport Comment : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL Comment : public API::DistributedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -30,7 +30,7 @@ namespace Algorithms {
   @author Martyn Gigg, Tessella plc
   @date 2011-01-10
 */
-class DLLExport CreatePSDBleedMask : public DetectorDiagnostic {
+class MANTID_ALGORITHMS_DLL CreatePSDBleedMask : public DetectorDiagnostic {
 public:
   /// Default constructor
   CreatePSDBleedMask();

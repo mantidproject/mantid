@@ -23,7 +23,7 @@ Required Properties:
 @author
 @date 11/07/2008
 */
-class DLLExport ChangeBinOffset : public SpectrumAlgorithm {
+class MANTID_ALGORITHMS_DLL ChangeBinOffset : public SpectrumAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ChangeBinOffset"; }

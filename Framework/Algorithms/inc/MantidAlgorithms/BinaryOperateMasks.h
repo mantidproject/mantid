@@ -7,14 +7,14 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 /** BinaryOperateMasks : TODO: DESCRIPTION
  */
-class DLLExport BinaryOperateMasks : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL BinaryOperateMasks : public API::Algorithm {
 public:
   BinaryOperateMasks();
   ~BinaryOperateMasks() override;

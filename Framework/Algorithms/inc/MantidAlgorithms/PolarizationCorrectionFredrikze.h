@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -24,7 +24,8 @@ namespace Algorithms {
  Fredrikze, H, et al. "Calibration of a polarized neutron reflectometer" Physica
  B 297 (2001)
  */
-class DLLExport PolarizationCorrectionFredrikze : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PolarizationCorrectionFredrikze
+    : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

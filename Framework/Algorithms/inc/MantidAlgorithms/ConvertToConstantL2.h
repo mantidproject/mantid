@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
@@ -24,7 +25,7 @@ namespace Algorithms {
  @author Ricardo Ferraz Leal
  @date 30/01/2013
  */
-class DLLExport ConvertToConstantL2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConvertToConstantL2 : public API::Algorithm {
 public:
   /// Default constructor
   ConvertToConstantL2();

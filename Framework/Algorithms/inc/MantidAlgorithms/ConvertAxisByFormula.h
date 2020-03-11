@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 // forward declaration
 namespace mu {
@@ -25,7 +25,7 @@ namespace Algorithms {
 /** ConvertAxisByFormula : Performs a unit conversion based on a supplied
   formula
 */
-class DLLExport ConvertAxisByFormula : public ConvertUnits {
+class MANTID_ALGORITHMS_DLL ConvertAxisByFormula : public ConvertUnits {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

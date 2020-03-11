@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,7 +21,7 @@ namespace Algorithms {
  * @copyright GNU General Public License
  */
 
-class DLLExport SortXAxis : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SortXAxis : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

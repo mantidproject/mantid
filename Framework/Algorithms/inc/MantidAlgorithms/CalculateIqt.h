@@ -8,12 +8,13 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/MersenneTwister.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-class DLLExport CalculateIqt : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateIqt : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

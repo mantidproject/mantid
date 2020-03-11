@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/WeightingStrategy.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -22,7 +23,7 @@ using SpectraDistanceMap = std::map<specnum_t, Mantid::Kernel::V3D>;
 /*
 Filters spectra detector list by radius.
 */
-class DLLExport RadiusFilter {
+class MANTID_ALGORITHMS_DLL RadiusFilter {
 public:
   /**
   Constructor
@@ -62,7 +63,7 @@ private:
   @authors Janik Zikovsky, Vickie Lynch, SNS
   @date Oct 2010
 */
-class DLLExport SmoothNeighbours : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SmoothNeighbours : public API::Algorithm {
 public:
   /// Default constructor
   SmoothNeighbours();

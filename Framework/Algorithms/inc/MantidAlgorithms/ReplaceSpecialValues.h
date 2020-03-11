@@ -21,7 +21,7 @@ namespace Algorithms {
  @author Nicholas Draper, Tessella plc
  @date 18/06/2009
  */
-class DLLExport ReplaceSpecialValues : public UnaryOperation {
+class MANTID_ALGORITHMS_DLL ReplaceSpecialValues : public UnaryOperation {
 public:
   /// Default constructor
   ReplaceSpecialValues();

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <map>
@@ -19,7 +19,7 @@ namespace Algorithms {
 /** ConvertAxesToRealSpace : Converts the spectrum and TOF axes to real space
   values, integrating the data in the process
 */
-class DLLExport ConvertAxesToRealSpace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConvertAxesToRealSpace : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

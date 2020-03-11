@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAlgorithms/TimeAtSampleStrategy.h"
-#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -20,7 +19,8 @@ namespace Algorithms {
 /** TimeAtSampleStrategyDirect : Determine the Time at Sample corrections for a
   Direct Geometry instrument
 */
-class DLLExport TimeAtSampleStrategyDirect : public TimeAtSampleStrategy {
+class MANTID_ALGORITHMS_DLL TimeAtSampleStrategyDirect
+    : public TimeAtSampleStrategy {
 public:
   TimeAtSampleStrategyDirect(
       boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws, double ei);

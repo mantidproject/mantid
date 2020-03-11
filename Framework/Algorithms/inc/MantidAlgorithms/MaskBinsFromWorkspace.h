@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
 
 namespace Mantid {
@@ -15,7 +16,8 @@ namespace Histogram {
 class BinEdges;
 }
 namespace Algorithms {
-class DLLExport MaskBinsFromWorkspace : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL MaskBinsFromWorkspace
+    : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "MaskBinsFromWorkspace"; }

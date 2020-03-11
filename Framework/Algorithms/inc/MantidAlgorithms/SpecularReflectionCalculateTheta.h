@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,7 +16,7 @@ namespace Algorithms {
 /** SpecularReflectionCorrectTheta : Calculates a theta value based on the
   specular reflection condition.
 */
-class DLLExport SpecularReflectionCalculateTheta
+class MANTID_ALGORITHMS_DLL SpecularReflectionCalculateTheta
     : public SpecularReflectionAlgorithm {
 public:
   const std::string name() const override;

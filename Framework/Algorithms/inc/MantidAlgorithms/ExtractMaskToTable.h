@@ -8,9 +8,9 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,7 +18,7 @@ namespace Algorithms {
 /** ExtractMaskToTable : Extract the mask in a workspace to a table workspace.
   The table workspace must be compatible to algorithm MaskBinsFromTable.
 */
-class DLLExport ExtractMaskToTable : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ExtractMaskToTable : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ExtractMaskToTable"; }

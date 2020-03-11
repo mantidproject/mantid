@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 #include <boost/tuple/tuple.hpp>
 
@@ -16,7 +17,7 @@ namespace Algorithms {
 
 /** Stitch1D : Stitches two Matrix Workspaces together into a single output.
  */
-class DLLExport Stitch1D : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Stitch1D : public API::Algorithm {
 public:
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string name() const override { return "Stitch1D"; }

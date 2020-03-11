@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-
+#include "MantidAlgorithms/DllConfig.h"
 namespace Mantid {
 
 namespace API {
@@ -16,7 +16,7 @@ class Run;
 
 namespace Algorithms {
 
-class DLLExport AddTimeSeriesLog : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AddTimeSeriesLog : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

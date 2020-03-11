@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,7 +21,7 @@ namespace Algorithms {
     @author Nick Draper, Tessella Support Services plc
     @date 26/01/2009
 */
-class DLLExport SolidAngle : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SolidAngle : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SolidAngle"; }

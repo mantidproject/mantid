@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
@@ -55,7 +56,7 @@ namespace Algorithms {
  *
  *
  */
-class DLLExport CompareWorkspaces : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CompareWorkspaces : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CompareWorkspaces"; }

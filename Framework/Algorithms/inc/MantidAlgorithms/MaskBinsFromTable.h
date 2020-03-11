@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,7 +17,7 @@ namespace Algorithms {
 
   @date 2012-06-04
 */
-class DLLExport MaskBinsFromTable : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MaskBinsFromTable : public API::Algorithm {
 public:
   MaskBinsFromTable();
 

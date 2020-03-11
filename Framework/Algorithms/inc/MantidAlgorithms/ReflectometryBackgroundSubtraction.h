@@ -9,6 +9,7 @@
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,7 +17,7 @@ namespace Algorithms {
 /** ReflectometryBackgroundSubtraction : This is an algorithm that computes the
  * background of a given workspace and removes it from the input workspace.
  */
-class DLLExport ReflectometryBackgroundSubtraction
+class MANTID_ALGORITHMS_DLL ReflectometryBackgroundSubtraction
     : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;

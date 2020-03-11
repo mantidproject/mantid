@@ -29,7 +29,7 @@ data </LI>
 @author Dickon Champion, RAL
 @date 12/12/2007
 */
-class DLLExport Plus : public CommutativeBinaryOperation {
+class MANTID_ALGORITHMS_DLL Plus : public CommutativeBinaryOperation {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Plus"; }

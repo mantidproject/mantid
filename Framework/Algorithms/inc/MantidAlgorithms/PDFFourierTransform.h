@@ -8,14 +8,14 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 /** PDFFourierTransform : TODO: DESCRIPTION
  */
-class DLLExport PDFFourierTransform : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PDFFourierTransform : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override;

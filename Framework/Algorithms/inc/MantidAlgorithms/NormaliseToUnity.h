@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -38,7 +39,7 @@ namespace Algorithms {
    (default yes)
     </UL>
  */
-class DLLExport NormaliseToUnity : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL NormaliseToUnity : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "NormaliseToUnity"; }

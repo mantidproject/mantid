@@ -21,7 +21,8 @@ It inherits from the BinaryOperation class.
 @author Nick Draper
 @date 23/01/2008
 */
-class DLLExport CommutativeBinaryOperation : public BinaryOperation {
+class MANTID_ALGORITHMS_DLL CommutativeBinaryOperation
+    : public BinaryOperation {
 public:
 protected:
   // Overridden BinaryOperation method

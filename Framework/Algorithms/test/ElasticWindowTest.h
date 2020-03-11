@@ -17,7 +17,6 @@
 #include "MantidAlgorithms/ElasticWindow.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/SetInstrumentParameter.h"
-#include "MantidKernel/System.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;

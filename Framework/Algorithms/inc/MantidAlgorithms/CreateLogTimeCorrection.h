@@ -8,9 +8,9 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 #include <vector>
 
 namespace Mantid {
@@ -28,7 +28,7 @@ namespace Algorithms {
   and the input event workspace contains the neutron with time recorded at the
   detector.
 */
-class DLLExport CreateLogTimeCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateLogTimeCorrection : public API::Algorithm {
 public:
   const std::string name() const override { return "CreateLogTimeCorrection"; }
   /// Summary of algorithms purpose

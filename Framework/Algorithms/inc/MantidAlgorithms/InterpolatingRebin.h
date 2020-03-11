@@ -54,7 +54,7 @@ namespace Algorithms {
     @author Steve Williams, STFC
     @date 05/05/2010
  */
-class DLLExport InterpolatingRebin : public Rebin {
+class MANTID_ALGORITHMS_DLL InterpolatingRebin : public Rebin {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "InterpolatingRebin"; }

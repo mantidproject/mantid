@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,7 +16,7 @@ namespace Algorithms {
 /** SpecularReflectionPositionCorrect : Algorithm to perform vertical position
  corrections based on the specular reflection condition.
  */
-class DLLExport SpecularReflectionPositionCorrect
+class MANTID_ALGORITHMS_DLL SpecularReflectionPositionCorrect
     : public SpecularReflectionAlgorithm {
 public:
   const std::string name() const override;

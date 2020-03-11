@@ -8,7 +8,7 @@
 
 #include "MantidAPI/DistributedAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 
@@ -27,7 +27,7 @@ namespace Algorithms {
 
 /** PDDetermineCharacterizations
  */
-class DLLExport PDDetermineCharacterizations
+class MANTID_ALGORITHMS_DLL PDDetermineCharacterizations
     : public API::DistributedAlgorithm {
 public:
   const std::string name() const override;

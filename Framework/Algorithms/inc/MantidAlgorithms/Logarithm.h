@@ -33,7 +33,7 @@ namespace Algorithms {
     @author AB,    ISIS, Rutherford Appleton Laboratory
     @date 12/05/2010
  */
-class DLLExport Logarithm : public UnaryOperation {
+class MANTID_ALGORITHMS_DLL Logarithm : public UnaryOperation {
 public:
   Logarithm();
   /// Algorithm's name for identification

@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/RebinByTimeBase.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -15,7 +15,7 @@ namespace Algorithms {
 /** RebinByPulseTimes : Rebin an input EventWorkspace according to the pulse
  times of the events.
  */
-class DLLExport RebinByPulseTimes : public RebinByTimeBase {
+class MANTID_ALGORITHMS_DLL RebinByPulseTimes : public RebinByTimeBase {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

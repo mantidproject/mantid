@@ -41,7 +41,7 @@ common bins. </LI>
 
 struct SofQCommon;
 
-class DLLExport SofQW : public API::DataProcessorAlgorithm {
+class MANTID_ALGORITHMS_DLL SofQW : public API::DataProcessorAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SofQW"; }

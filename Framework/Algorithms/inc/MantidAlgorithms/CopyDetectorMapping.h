@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,7 +21,7 @@ namespace Algorithms {
 
     @author Dan Nixon
 */
-class DLLExport CopyDetectorMapping : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CopyDetectorMapping : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CopyDetectorMapping"; }

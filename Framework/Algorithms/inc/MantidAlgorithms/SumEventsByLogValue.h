@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -21,7 +22,7 @@ namespace Algorithms {
   events in the workspace
   as a function of a specified log.
 */
-class DLLExport SumEventsByLogValue : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SumEventsByLogValue : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SumEventsByLogValue"; }

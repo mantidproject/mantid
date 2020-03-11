@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 
@@ -26,7 +27,7 @@ namespace Algorithms {
    </UL>
 */
 
-class DLLExport RebinToWorkspace : public Mantid::API::Algorithm {
+class MANTID_ALGORITHMS_DLL RebinToWorkspace : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "RebinToWorkspace"; }

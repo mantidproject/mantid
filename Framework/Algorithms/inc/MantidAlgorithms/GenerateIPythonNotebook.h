@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -23,7 +23,7 @@ namespace Algorithms {
   <li>InputWorkspace - the workspace name who's history is to be saved.</li>
   </ul>
 */
-class DLLExport GenerateIPythonNotebook : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GenerateIPythonNotebook : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "GenerateIPythonNotebook"; };

@@ -5,8 +5,9 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "MantidAPI/Algorithm.h"
 
+#include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 namespace Mantid {
 namespace Algorithms {
 
@@ -15,7 +16,7 @@ namespace Algorithms {
   algorithm of Jerry Mayers.
   See https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
 */
-class DLLExport MayersSampleCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MayersSampleCorrection : public API::Algorithm {
 public:
   MayersSampleCorrection();
 
