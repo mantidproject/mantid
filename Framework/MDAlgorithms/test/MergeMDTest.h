@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_MERGEMDTEST_H_
-#define MANTID_MDALGORITHMS_MERGEMDTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -233,5 +232,3 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_MERGEMDTEST_H_ */

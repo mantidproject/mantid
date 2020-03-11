@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_COMPACTMD_H_
-#define MANTID_MDALGORITHMS_COMPACTMD_H_
+#pragma once
 
 /** An algorithm used to crop an MDHistoWorkspace based on the first
     non-zero signals found in each dimension.
@@ -45,5 +44,3 @@ public:
 };
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif // MANTID_MDALGORITHMS_COMPACTMD_H_

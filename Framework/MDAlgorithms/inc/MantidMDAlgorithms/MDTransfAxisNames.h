@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_MDTRANSF_AXIS_NAMES_H
-#define MANTID_MDALGORITHMS_MDTRANSF_AXIS_NAMES_H
+#pragma once
 //#include "MantidDataObjects/MDTransfDEHelper.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/V3D.h"
@@ -61,5 +60,3 @@ std::string DLLExport sprintfd(const double data, const double eps);
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif

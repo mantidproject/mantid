@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_BOOLEANBINARYOPERATIONMDTEST_H_
-#define MANTID_MDALGORITHMS_BOOLEANBINARYOPERATIONMDTEST_H_
+#pragma once
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidMDAlgorithms/BooleanBinaryOperationMD.h"
@@ -34,5 +33,3 @@ public:
                testing::Mock::VerifyAndClearExpectations(&alg));
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_BOOLEANBINARYOPERATIONMDTEST_H_ */

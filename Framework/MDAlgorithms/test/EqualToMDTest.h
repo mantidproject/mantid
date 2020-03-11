@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_EQUALTOMDTEST_H_
-#define MANTID_MDALGORITHMS_EQUALTOMDTEST_H_
+#pragma once
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/EqualToMD.h"
@@ -61,5 +60,3 @@ public:
     TS_ASSERT_DELTA(out->getSignalAt(0), 1.0, 1e-5);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_EQUALTOMDTEST_H_ */

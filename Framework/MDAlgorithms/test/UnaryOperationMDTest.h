@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_UNARYOPERATIONMDTEST_H_
-#define MANTID_MDALGORITHMS_UNARYOPERATIONMDTEST_H_
+#pragma once
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -150,5 +149,3 @@ public:
     TSM_ASSERT("Operation performed in place.", out == event);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_UNARYOPERATIONMDTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_DISPLAYNORMALIZATIONSETTERTEST_H_
-#define MANTID_MDALGORITHMS_DISPLAYNORMALIZATIONSETTERTEST_H_
+#pragma once
 
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
@@ -113,5 +112,3 @@ public:
                       Mantid::API::VolumeNormalization);
   }
 };
-
-#endif

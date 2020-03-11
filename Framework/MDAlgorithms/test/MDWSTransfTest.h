@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDWS_SLICE_H_
-#define MANTID_MDWS_SLICE_H_
+#pragma once
 
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -429,4 +428,3 @@ public:
     PermHM.Invert();
   }
 };
-#endif

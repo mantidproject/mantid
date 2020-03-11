@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_SLICINGALGORITHMTEST_H_
-#define MANTID_MDEVENTS_SLICINGALGORITHMTEST_H_
+#pragma once
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
@@ -1173,5 +1172,3 @@ public:
     TS_ASSERT(!func->isPointContained(point));
   }
 };
-
-#endif /* MANTID_MDEVENTS_SLICINGALGORITHMTEST_H_ */

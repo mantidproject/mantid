@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_MD_TRANSFORMATION_FACTORYIMPL_H
-#define MANTID_MDALGORITHMS_MD_TRANSFORMATION_FACTORYIMPL_H
+#pragma once
 
 /* Used to register unit classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator
@@ -106,5 +105,3 @@ EXTERN_MANTID_MDALGORITHMS template class MANTID_MDALGORITHMS_DLL
     Mantid::Kernel::SingletonHolder<Mantid::MDAlgorithms::MDTransfFactoryImpl>;
 }
 } // namespace Mantid
-
-#endif

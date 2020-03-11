@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IDYNAMIC_REBINNING_H
-#define IDYNAMIC_REBINNING_H
+#pragma once
 #include "MantidKernel/Logger.h"
 //
 namespace Mantid {
@@ -77,5 +76,3 @@ protected:
 }; // end IDynamicRebinning
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif

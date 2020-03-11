@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef SINGLE_VALUE_PARAMETER_TEST_H
-#define SINGLE_VALUE_PARAMETER_TEST_H
+#pragma once
 
 template <typename SingleValueParameter> class SingleValueParameterTests {
 public:
@@ -87,5 +86,3 @@ public:
         A, B);
   }
 };
-
-#endif

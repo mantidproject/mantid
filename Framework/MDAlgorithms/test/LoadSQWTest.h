@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_LOAD_SQW_TEST_H_
-#define MANTID_MDEVENTS_LOAD_SQW_TEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
@@ -361,5 +360,3 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of dimensions", 4, ws->getNumDims());
   };
 };
-
-#endif
