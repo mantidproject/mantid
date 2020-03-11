@@ -337,7 +337,8 @@ def execute_script_async(script, error_cb=None):
         executioner.sig_exec_error.connect(on_error)
     else:
         executioner.sig_exec_error.connect(error_cb)
-    executioner.execute_async(script, '<string>')
+
+    executioner.execute_async(script, 0)
 
 
 class BaseReductionScripter(object):
