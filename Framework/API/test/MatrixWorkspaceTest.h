@@ -2059,6 +2059,10 @@ public:
     idx = ws->findY(2., {1, 1});
     TS_ASSERT_EQUALS(idx.first, 1);
     TS_ASSERT_EQUALS(idx.second, 1);
+    ws->mutableY(1) = NAN;
+    idx = ws->findY(NAN, {0, 0});
+    TS_ASSERT_EQUALS(idx.first,1);
+    TS_ASSERT_EQUALS(idx.second,0);
   }
 
 private:
