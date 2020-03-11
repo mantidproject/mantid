@@ -49,6 +49,7 @@ Bug Fixes
 - The elemental analysis GUI can now handle legacy data which is missing a response dataset, e.g Delayed.
 - Fixed a bug where Elemental analysis gave an error when loading data.
 - Elemental analysis bug has been fixed that prevented co-adding data.
+- Peak data file has been updated. It now includes the same transition for different isotopes.
 
 Muon Analysis (old)
 ###################
