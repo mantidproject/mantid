@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDSURFACECONTOURPLOTGENERATOR_H_
-#define MANTIDSURFACECONTOURPLOTGENERATOR_H_
+#pragma once
 
 #include "Graph3D.h"
 #include "MantidAPI/NumericAxis.h"
@@ -89,5 +88,3 @@ private:
   /// Pointer to the Mantid UI
   MantidQt::MantidWidgets::MantidDisplayBase *const m_mantidUI;
 };
-
-#endif

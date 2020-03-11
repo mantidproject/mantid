@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DOCKEDWINDOW_H
-#define DOCKEDWINDOW_H
+#pragma once
 
 #include <QMdiSubWindow>
 
@@ -41,5 +40,3 @@ private:
   bool m_dragMouseDown;
   QPoint m_dragStartPos;
 };
-
-#endif // DOCKEDWINDOW_H

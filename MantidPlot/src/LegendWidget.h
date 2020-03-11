@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef LEGENDWIDGET_H
-#define LEGENDWIDGET_H
+#pragma once
 
 #include <QWidget>
 #include <qwt_plot.h>
@@ -120,5 +119,3 @@ signals:
   void showMenu();
   void enableEditor();
 };
-
-#endif

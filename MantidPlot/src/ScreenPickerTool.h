@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SCREEN_PICKER_TOOL_H
-#define SCREEN_PICKER_TOOL_H
+#pragma once
 
 #include "PlotToolInterface.h"
 #include <QObject>
@@ -86,5 +85,3 @@ protected:
   Table *d_table;
   ApplicationWindow *d_app;
 };
-
-#endif // ifndef SCREEN_PICKER_TOOL_H

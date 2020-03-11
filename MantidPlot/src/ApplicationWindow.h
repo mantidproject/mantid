@@ -29,8 +29,7 @@ Description          : QtiPlot's main window
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#pragma once
 
 #include <QBuffer>
 #include <QFile>
@@ -1666,4 +1665,3 @@ public:
   MantidUI *mantidUI;
   QSettings settings;
 };
-#endif

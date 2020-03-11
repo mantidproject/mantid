@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef RECOVERYFAILUREVIEW_H
-#define RECOVERYFAILUREVIEW_H
+#pragma once
 
 #include "ProjectRecoveryPresenter.h"
 #include "ui_RecoveryFailure.h"
@@ -44,5 +43,3 @@ private:
   std::unique_ptr<Ui::RecoveryFailure> m_ui;
   ProjectRecoveryPresenter *m_presenter;
 };
-
-#endif // RECOVERYFAILUREVIEW_H

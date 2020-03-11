@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MATRIX_COMMAND_H
-#define MATRIX_COMMAND_H
+#pragma once
 
 #include "Matrix.h"
 #include "MatrixModel.h"
@@ -289,4 +288,3 @@ private:
       d_old_rows, d_old_cols;
   double *d_clipboard_data, *d_backup_data;
 };
-#endif

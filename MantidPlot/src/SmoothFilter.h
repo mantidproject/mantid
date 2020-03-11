@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SMOOTHFILTER_H
-#define SMOOTHFILTER_H
+#pragma once
 
 #include "Filter.h"
 
@@ -60,5 +59,3 @@ private:
   // C for details).
   int d_polynom_order;
 };
-
-#endif

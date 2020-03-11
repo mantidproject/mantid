@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef EXTENSIBLE_FILE_DIALOG_H
-#define EXTENSIBLE_FILE_DIALOG_H
+#pragma once
 
 #include <QFileDialog>
 #include <QPushButton>
@@ -87,5 +86,3 @@ private:
   //! The layout row (of the assumed QGridLayout) used for extensions
   int d_extension_row;
 };
-
-#endif // ifndef EXTENSIBLE_FILE_DIALOG_H

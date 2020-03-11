@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef IMPORTFILESDIALOG_H
-#define IMPORTFILESDIALOG_H
+#pragma once
 
 #include "ExtensibleFileDialog.h"
 
@@ -204,5 +203,3 @@ private:
   QStackedWidget *d_preview_stack;
   QString d_current_path;
 };
-
-#endif

@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SCRIPTING_LANG_DIALOG_H
-#define SCRIPTING_LANG_DIALOG_H
+#pragma once
 
 #include "Scripted.h"
 #include "ScriptingEnv.h"
@@ -54,5 +53,3 @@ private:
   QListWidget *langList;
   QPushButton *btnOK, *btnCancel;
 };
-
-#endif

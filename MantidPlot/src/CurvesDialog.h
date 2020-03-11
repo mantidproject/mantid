@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef CURVESDIALOG_H
-#define CURVESDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <QMap>
@@ -91,5 +90,3 @@ private:
   QCheckBox *boxShowCurrentFolder;
   QMap<QString, PlotCurve *> d_plotCurves;
 };
-
-#endif // CurvesDialog_H

@@ -16,8 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef TEXTEDITOR_H
-#define TEXTEDITOR_H
+#pragma once
 
 #include <QTextEdit>
 
@@ -41,5 +40,3 @@ private:
   QString d_initial_text;
   QWidget *d_target;
 };
-
-#endif

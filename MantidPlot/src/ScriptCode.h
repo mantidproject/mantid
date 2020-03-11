@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SCRIPTCODE_H_
-#define SCRIPTCODE_H_
+#pragma once
 
 #include <QString>
 
@@ -43,5 +42,3 @@ private:
   /// The offset within a larger chunk of code
   int m_offset;
 };
-
-#endif /* SCRIPTCODE_H_ */

@@ -29,8 +29,7 @@
 
 /* Origin 7.5 column value display : see FORMAT */
 
-#ifndef OPJFILE_H
-#define OPJFILE_H
+#pragma once
 
 /* version 0.0 2007-09-26 */
 #define LIBORIGIN_VERSION 0x00070926
@@ -1037,5 +1036,3 @@ private:
   std::vector<note> NOTE;
   tree<projectNode> projectTree;
 };
-
-#endif // OPJFILE_H

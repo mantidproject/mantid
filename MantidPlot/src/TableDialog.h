@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef TABLEDIALOG_H
-#define TABLEDIALOG_H
+#pragma once
 
 #include "Table.h"
 
@@ -92,5 +91,3 @@ private:
   QTextEdit *comments;
   QCheckBox *boxShowTableComments, *boxReadOnly, *boxHideColumn;
 };
-
-#endif // TABLEDIALOG_H

@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef PYTHON_SCRIPT_H
-#define PYTHON_SCRIPT_H
+#pragma once
 
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
@@ -195,5 +194,3 @@ private:
   /// as they need to store state between calls.
   PyGILState_STATE m_recursiveAsyncGIL;
 };
-
-#endif

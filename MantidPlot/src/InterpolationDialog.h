@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef INTERPOLATIONDIALOG_H
-#define INTERPOLATIONDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -63,5 +62,3 @@ private:
   QLineEdit *boxEnd;
   ColorBox *boxColor;
 };
-
-#endif

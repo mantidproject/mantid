@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef PYTHON_SCRIPTING_H
-#define PYTHON_SCRIPTING_H
+#pragma once
 
 #include "PythonScript.h"
 #include "ScriptingEnv.h"
@@ -129,5 +128,3 @@ private:
   /// Pointer to the main threads state
   PyThreadState *m_mainThreadState;
 };
-
-#endif

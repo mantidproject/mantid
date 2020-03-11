@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef CustomActionDialog_H
-#define CustomActionDialog_H
+#pragma once
 
 #include <QDialog>
 #include <QXmlDefaultHandler>
@@ -95,4 +94,3 @@ private:
   QString d_widget_name;
   QAction *d_action;
 };
-#endif

@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MdiSubWindow_H
-#define MdiSubWindow_H
+#pragma once
 
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
@@ -371,5 +370,3 @@ using MDIWindowList = QList<MdiSubWindow *>;
 // Helper macro to subscribe a class to the factory with the same name as the
 // class name
 #define DECLARE_WINDOW(classname) DECLARE_WINDOW_WITH_NAME(classname, classname)
-
-#endif

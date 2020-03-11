@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INPUTHISTORY_H
-#define INPUTHISTORY_H
+#pragma once
 
 #include "MantidKernel/SingletonHolder.h"
 #include <boost/shared_ptr.hpp>
@@ -74,5 +73,3 @@ private:
 };
 
 using InputHistory = Mantid::Kernel::SingletonHolder<InputHistoryImpl>;
-
-#endif /* INPUTHISTORY_H */

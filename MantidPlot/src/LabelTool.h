@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LABEL_TOOL_H
-#define LABEL_TOOL_H
+#pragma once
 
 #include "PlotToolInterface.h"
 #include <QObject>
@@ -82,5 +81,3 @@ private slots:
   void insertErrorValue();
   void showLogValuesDialog();
 };
-
-#endif // ifndef LABEL_TOOL_H

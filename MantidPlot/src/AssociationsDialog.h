@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef ASSOCIATIONSDIALOG_H
-#define ASSOCIATIONSDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <QTableWidgetItem>
@@ -76,5 +75,3 @@ private:
   QPushButton *btnOK, *btnCancel, *btnApply;
   QListWidget *associations;
 };
-
-#endif // ASSOCIATIONSDIALOG_H

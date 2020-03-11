@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef PLOT_H
-#define PLOT_H
+#pragma once
 
 #include <QLocale>
 #include <QMap>
@@ -143,4 +142,3 @@ protected:
   int marker_key;
   int curve_key;
 };
-#endif

@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef LINEDIALOG_H
-#define LINEDIALOG_H
+#pragma once
 
 #include <qdialog.h>
 
@@ -71,5 +70,3 @@ private:
   QSpinBox *xStartPixelBox, *yStartPixelBox, *xEndPixelBox, *yEndPixelBox;
   QSpinBox *boxHeadAngle, *boxHeadLength;
 };
-
-#endif // LINEDIALOG_H

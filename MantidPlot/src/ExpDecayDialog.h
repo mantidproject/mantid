@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef EXPDECAYDIALOG_H
-#define EXPDECAYDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -79,5 +78,3 @@ private:
   QLabel *thirdLabel, *dampingLabel;
   ColorBox *boxColor;
 };
-
-#endif

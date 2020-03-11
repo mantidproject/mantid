@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDMDCURVEDIALOG_H
-#define MANTIDMDCURVEDIALOG_H
+#pragma once
 
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
 #include "ui_MantidMDCurveDialog.h"
@@ -38,5 +37,3 @@ private:
   /// Widget with MD plot options
   LinePlotOptions *m_lineOptions;
 };
-
-#endif // MANTIDMDCURVEDIALOG_H

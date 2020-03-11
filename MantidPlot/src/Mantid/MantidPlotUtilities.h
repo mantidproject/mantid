@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDPLOTUTILITIES_H_
-#define MANTIDPLOTUTILITIES_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 
@@ -30,5 +29,3 @@ double getSingleWorkspaceLogValue(
 /// Returns a single custom log value
 double getSingleWorkspaceLogValue(size_t wsIndex,
                                   const std::set<double> &logValues);
-
-#endif // MANTIDPLOTUTILITIES_H_

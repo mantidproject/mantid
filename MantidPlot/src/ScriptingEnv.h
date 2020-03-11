@@ -28,8 +28,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SCRIPTINGENV_H
-#define SCRIPTINGENV_H
+#pragma once
 
 #include "Script.h"
 
@@ -178,5 +177,3 @@ private:
   /// Available languages
   static ScriptingLang g_langs[];
 };
-
-#endif

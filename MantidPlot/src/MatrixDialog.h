@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MATRIXDIALOG_H
-#define MATRIXDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -54,5 +53,3 @@ private:
   QSpinBox *boxColWidth, *boxPrecision;
   QComboBox *boxFormat, *boxNumericDisplay;
 };
-
-#endif // MATRIXDIALOG_H

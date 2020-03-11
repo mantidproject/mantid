@@ -27,8 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef TEXTDLG_H
-#define TEXTDLG_H
+#pragma once
 
 #include <QDialog>
 class QGroupBox;
@@ -119,5 +118,3 @@ protected:
   Graph *d_graph;
   QwtScaleWidget *d_scale;
 };
-
-#endif // TEXTDLG_H

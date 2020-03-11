@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FFT_H
-#define FFT_H
+#pragma once
 
 #include "Filter.h"
 
@@ -58,5 +57,3 @@ private:
 
   int d_real_col, d_imag_col;
 };
-
-#endif

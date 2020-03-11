@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDPLOT_MANTIDMATRIXTABEXTENSION_H
-#define MANTIDPLOT_MANTIDMATRIXTABEXTENSION_H
+#pragma once
 
 #include "MantidMatrixModel.h"
 
@@ -31,4 +30,3 @@ struct MantidMatrixTabExtension {
 
 using MantidMatrixTabExtensionMap =
     std::map<MantidMatrixModel::Type, MantidMatrixTabExtension>;
-#endif

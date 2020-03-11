@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef USERFUNCTION_H
-#define USERFUNCTION_H
+#pragma once
 
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 
@@ -74,5 +73,3 @@ public:
 private:
   QString d_formula;
 };
-
-#endif

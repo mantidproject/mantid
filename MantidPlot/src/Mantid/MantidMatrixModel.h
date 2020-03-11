@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDPLOT_MANTIDMATRIXMODEL_H
-#define MANTIDPLOT_MANTIDMATRIXMODEL_H
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
@@ -98,5 +97,3 @@ private:
   mutable QSet<int> m_maskCache; // masked flag cache
   mutable QHash<int, QSet<int>> m_maskBinCache; // cache for masked bins
 };
-
-#endif

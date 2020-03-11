@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SURFACEDIALOG_H
-#define SURFACEDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -78,5 +77,3 @@ private:
   QCheckBox *boxUPeriodic, *boxVPeriodic;
   QSpinBox *boxColumns, *boxRows, *boxFuncColumns, *boxFuncRows;
 };
-
-#endif

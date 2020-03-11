@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LABELTOOLLOGVALUESDIALOG_H_
-#define LABELTOOLLOGVALUESDIALOG_H_
+#pragma once
 
 //----------------------------------
 // Includes
@@ -53,5 +52,3 @@ private:
   /// Tracks which statistic of the log is selected
   QRadioButton *statRadioChoice[NUM_STATS];
 };
-
-#endif // LABELTOOLLOGVALUESDIALOG_H_

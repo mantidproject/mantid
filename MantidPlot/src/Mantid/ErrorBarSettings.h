@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ERRORBARSETTINGS_H
-#define ERRORBARSETTINGS_H
+#pragma once
 
 #include <QColor>
 #include <QObject>
@@ -56,5 +55,3 @@ private:
   friend class MantidMatrixCurve;
   friend class MantidMDCurve;
 };
-
-#endif

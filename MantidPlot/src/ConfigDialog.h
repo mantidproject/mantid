@@ -26,8 +26,7 @@ Description          : Preferences dialog
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef ConfigDialog_H
-#define ConfigDialog_H
+#pragma once
 
 #include "MantidQtWidgets/Common/MantidDialog.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
@@ -324,5 +323,3 @@ public slots:
   void changeUsageGeneralMdColorMap();
   void changeUsageLastSession();
 };
-
-#endif // CONFIGDIALOG_H

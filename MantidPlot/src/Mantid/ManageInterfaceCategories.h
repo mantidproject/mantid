@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANAGE_INTERFACE_CATEGORIES_H
-#define MANTID_MANAGE_INTERFACE_CATEGORIES_H
+#pragma once
 
 #include <QAbstractListModel>
 #include <QDialog>
@@ -93,5 +92,3 @@ private:
   /// The model used by the View of this dialog.
   InterfaceCategoryModel m_model;
 };
-
-#endif /* MANTID_MANAGE_INTERFACE_CATEGORIES_H */

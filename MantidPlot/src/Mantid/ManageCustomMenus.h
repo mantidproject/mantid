@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANAGE_CUSTOM_MENUS_H
-#define MANTID_MANAGE_CUSTOM_MENUS_H
+#pragma once
 
 #include "MantidQtWidgets/Common/MantidDialog.h"
 #include "ui_ManageCustomMenus.h"
@@ -46,5 +45,3 @@ private:
   QTreeWidget *m_menusTree;
   ApplicationWindow *m_appWindow;
 };
-
-#endif /* MANTID_MANAGE_CUSTOM_MENUS_H */

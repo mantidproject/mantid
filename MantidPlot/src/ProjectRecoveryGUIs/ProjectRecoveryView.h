@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROJECTRECOVERYVIEW_H
-#define PROJECTRECOVERYVIEW_H
+#pragma once
 
 #include "ProjectRecoveryPresenter.h"
 #include "ui_ProjectRecoveryWidget.h"
@@ -42,5 +41,3 @@ private:
   std::unique_ptr<Ui::ProjectRecoveryWidget> m_ui;
   ProjectRecoveryPresenter *m_presenter;
 };
-
-#endif // PROJECTRECOVERYVIEW_H
