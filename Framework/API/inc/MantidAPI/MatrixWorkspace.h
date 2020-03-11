@@ -514,6 +514,13 @@ public:
   // Check if this class has an oriented lattice on a sample object
   virtual bool hasOrientedLattice() const override;
 
+  /// Find first index in Y equal to value.
+  /// @param value Number to find in Y
+  /// @param idx starting indices for search
+  /// @return Tuple with the ihistogram and bin indices.
+  virtual std::pair<int64_t, int64_t>
+  findY(double value, const std::pair<int64_t, int64_t> &idx = {0, 0}) const;
+
   //=====================================================================================
   // End IMDWorkspace methods
   //=====================================================================================
