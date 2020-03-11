@@ -61,5 +61,8 @@ Python
 ------
 
 - :py:meth:`mantid.api.Run.getTimeAveragedStd` method has been added to the :py:obj:`mantid.api.Run` object.
+- All simpleapi Dialog functions that raised the corresponding algorithm dialog from a
+  script have been deprecated. They had low to zero usage and will not work in the future workbench.
+  They will be deleted in a future release.
 
 :ref:`Release 5.0.0 <v5.0.0>`
