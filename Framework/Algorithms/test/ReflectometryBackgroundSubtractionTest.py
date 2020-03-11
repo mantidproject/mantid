@@ -135,15 +135,13 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
                 'OutputWorkspace': 'output'}
         self._assert_run_algorithm_throws(args)
 
-    # TODO: This test fails in python 2. It can be re-added when we
-    # move fully to python 3.
-    #def test_AveragePixelFit_error_peakRange_outside_spectra(self):
-    #    args = {'InputWorkspace' : 'workspace_with_peak',
-    #            'ProcessingInstructions' : '1-7',
-    #            'BackgroundCalculationMethod' : 'AveragePixelFit',
-    #            'PeakRange' : '3-9',
-    #            'OutputWorkspace': 'output'}
-    #    self._assert_run_algorithm_invalid_property(args)
+    def test_AveragePixelFit_error_peakRange_outside_spectra(self):
+        args = {'InputWorkspace' : 'workspace_with_peak',
+                'ProcessingInstructions' : '1-7',
+                'BackgroundCalculationMethod' : 'AveragePixelFit',
+                'PeakRange' : '3-9',
+                'OutputWorkspace': 'output'}
+        self._assert_run_algorithm_invalid_property(args)
 
     def test_AveragePixelFit_error_peakRange_two_ranges(self):
         args = {'InputWorkspace' : 'workspace_with_peak',
