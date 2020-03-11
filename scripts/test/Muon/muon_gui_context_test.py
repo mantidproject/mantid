@@ -12,6 +12,7 @@ from mantid.py3compat import mock
 from mantidqt.utils.observer_pattern import Observer
 from mantidqt.utils.qt.testing import start_qapplication
 
+
 @start_qapplication
 class MuonGUIContextTest(unittest.TestCase):
     def test_can_set_variables(self):

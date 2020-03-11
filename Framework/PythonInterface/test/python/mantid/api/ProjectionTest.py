@@ -10,6 +10,7 @@ from mantid.kernel import V3D
 from mantid.simpleapi import mtd
 import numpy as np
 
+
 class ProjectionTest(unittest.TestCase):
 
     def test_constructors(self):

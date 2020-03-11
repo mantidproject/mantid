@@ -7,6 +7,7 @@
 import unittest
 from mantid.kernel import IPropertySettings
 
+
 class IPropertySettingsTest(unittest.TestCase):
 
     def test_construction_raises_an_exception(self):

@@ -8,6 +8,7 @@ import unittest
 from mantid.kernel import CompositeValidator, CompositeRelation, FloatBoundedValidator
 from mantid.api import PythonAlgorithm
 
+
 class CompositeValidatorTest(unittest.TestCase):
 
     def test_creation_with_add_succeeds_correctly_in_algorithm(self):

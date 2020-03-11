@@ -11,12 +11,14 @@ from mantid.kernel import PropertyManagerProperty, Direction, PropertyManager
 from mantid.api import Algorithm
 import numpy as np
 
+
 class FakeAlgorithm(Algorithm):
     def PyInit(self):
         self.declareProperty(PropertyManagerProperty("Args"))
 
     def PyExec(self):
         pass
+
 
 class PropertyManagerPropertyTest(unittest.TestCase):
 

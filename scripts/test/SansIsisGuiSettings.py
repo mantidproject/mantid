@@ -10,6 +10,7 @@ import ISISCommandInterface as i
 
 MASKFILE = 'MaskSANS2D.txt'
 
+
 class Sans2DIsisGuiSettings(unittest.TestCase):
 
     def setUp(self):

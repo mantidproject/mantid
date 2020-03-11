@@ -38,6 +38,7 @@ from . import logger, Logger, config
 # String that separates paths (should be in the ConfigService)
 PATH_SEPARATOR=";"
 
+
 class PluginLoader(object):
 
     extension = ".py"
@@ -68,6 +69,7 @@ class PluginLoader(object):
 # High-level functions to assist with loading
 #======================================================================================================================
 
+
 def get_plugin_paths_as_set(key):
     """
         Returns the value of the given key in the config service
@@ -80,6 +82,7 @@ def get_plugin_paths_as_set(key):
     if '' in s:
         s.remove('')
     return s
+
 
 def check_for_plugins(top_dir):
     """
@@ -119,6 +122,7 @@ def find_plugins(top_dir):
 
 #======================================================================================================================
 
+
 def load(path):
     """
         High-level function to import the module(s) on the given path.
@@ -151,6 +155,7 @@ def load(path):
 
 #======================================================================================================================
 
+
 def load_from_list(paths):
     """
         Load all modules in the given list
@@ -168,6 +173,7 @@ def load_from_list(paths):
 
 #======================================================================================================================
 
+
 def load_from_dir(directory):
     """
         Load all modules in the given directory
@@ -182,6 +188,7 @@ def load_from_dir(directory):
     return loaded
 
 #======================================================================================================================
+
 
 def load_from_file(filepath):
     """
@@ -200,6 +207,7 @@ def load_from_file(filepath):
 
 #======================================================================================================================
 
+
 def load_plugin(plugin_path):
     """
         Load a plugin and return the name & module object
@@ -214,6 +222,7 @@ def load_plugin(plugin_path):
     return module.__name__, module
 
 #======================================================================================================================
+
 
 def sync_attrs(source, attrs, clients):
     """
@@ -233,6 +242,7 @@ def sync_attrs(source, attrs, clients):
                 setattr(plugin, func_name, attr)
 
 #======================================================================================================================
+
 
 def contains_algorithm(filename):
     """

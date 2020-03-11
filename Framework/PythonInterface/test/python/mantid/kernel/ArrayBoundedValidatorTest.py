@@ -10,6 +10,7 @@ import testhelpers
 from mantid.kernel import FloatArrayBoundedValidator, FloatArrayProperty
 from mantid.api import PythonAlgorithm
 
+
 class ArrayBoundedValidatorTest(unittest.TestCase):
 
     def test_empty_constructor_gives_no_lower_upper_bound_set(self):

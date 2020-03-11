@@ -8,6 +8,7 @@ import unittest
 from mantid.geometry import *
 from testhelpers import can_be_instantiated, WorkspaceCreationHelper
 
+
 class RectangularDetectorTest(unittest.TestCase):
 
     def test_RectangularDetector_cannot_be_instantiated(self):

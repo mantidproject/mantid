@@ -12,6 +12,8 @@ from mantid.simpleapi import (CreateWorkspace, LoadInstrument,
                               MoveInstrumentComponent, CropWorkspace,
                               SANSWideAngleCorrection, Min, Max, Transpose,
                               Multiply)
+
+
 class SANSWideAngleCorrectionTest(unittest.TestCase):
     _sample = None
     _trans = None

@@ -11,6 +11,7 @@ import numpy
 
 DELTA_PLACES = 10
 
+
 class StatisticsTest(unittest.TestCase):
 
     def test_getStatistics_with_floats(self):

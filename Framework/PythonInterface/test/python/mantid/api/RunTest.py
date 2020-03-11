@@ -11,6 +11,7 @@ from mantid.kernel import DateAndTime, FloatTimeSeriesProperty
 from mantid.api import Run
 import numpy as np
 
+
 class RunTest(unittest.TestCase):
 
     _expt_ws = None

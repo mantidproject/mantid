@@ -8,6 +8,7 @@ import unittest
 from testhelpers import WorkspaceCreationHelper
 from mantid.api import ExperimentInfo
 
+
 class MultipleExperimentInfoTest(unittest.TestCase):
 
     def test_information_access(self):

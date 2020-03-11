@@ -8,6 +8,7 @@ import unittest
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 
+
 class LoadMultipleGSSTest(unittest.TestCase):
 
     def test_LoadMultipleGSSTest(self):

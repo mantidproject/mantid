@@ -10,6 +10,7 @@ import testhelpers
 from mantid.kernel import FloatArrayLengthValidator, FloatArrayProperty
 from mantid.api import PythonAlgorithm
 
+
 class ArrayLengthValidatorTest(unittest.TestCase):
 
     def test_empty_constructor_has_no_lengths_set(self):

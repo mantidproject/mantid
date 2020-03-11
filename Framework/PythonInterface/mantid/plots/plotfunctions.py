@@ -40,6 +40,8 @@ MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
 # -----------------------------------------------------------------------------
 # Decorators
 # -----------------------------------------------------------------------------
+
+
 def manage_workspace_names(func):
     """
     A decorator to go around plotting functions.
@@ -80,6 +82,7 @@ def figure_title(workspaces, fig_num):
         first = workspaces[0]
 
     return wsname(first) + '-' + str(fig_num)
+
 
 @manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,

@@ -9,6 +9,7 @@ from mantid.simpleapi import *
 from mantid.api import *
 import vesuvio.testing as testing
 
+
 class VesuvioResolutionTest(unittest.TestCase):
 
     def setUp(self):

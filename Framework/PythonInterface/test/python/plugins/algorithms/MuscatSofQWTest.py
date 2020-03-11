@@ -8,6 +8,7 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 
+
 class MuscatSofQWTest(unittest.TestCase):
 
     def setUp(self):

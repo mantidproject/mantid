@@ -10,6 +10,7 @@ from mantid.kernel import *
 from mantid.api import *
 from testhelpers import run_algorithm
 
+
 class ConjoinSpectraTest(unittest.TestCase):
 
     _aWS= None

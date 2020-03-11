@@ -10,6 +10,7 @@ from mantid.api import *
 import os
 import math
 
+
 class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
     def setUp(self):
         data_dirs = config['datasearch.directories'].split(';')

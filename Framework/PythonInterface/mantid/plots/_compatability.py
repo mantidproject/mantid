@@ -19,6 +19,8 @@ LOGGER = Logger("mantid.plots.plotCompatability")
 # ================================================
 # Compatability functions
 # ================================================
+
+
 def plotSpectrum(workspaces, indices=None, distribution=None, error_bars=False,
                  type=None, window=None, clearWindow=None,
                  waterfall=None, spectrum_nums=None):

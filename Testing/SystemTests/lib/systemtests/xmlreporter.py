@@ -9,6 +9,7 @@ import sys
 from xml.dom.minidom import getDOMImplementation
 import systemtesting
 
+
 class XmlResultReporter(systemtesting.ResultReporter):
 
 	_time_taken = 0.0

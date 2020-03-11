@@ -10,6 +10,7 @@ from mantid.geometry import UnitCell, AngleUnits
 from mantid.kernel import V3D
 import numpy as np
 
+
 class UnitCellTest(unittest.TestCase):
 
     def test_invalid_parameters_throw(self):

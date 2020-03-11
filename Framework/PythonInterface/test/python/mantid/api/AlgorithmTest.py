@@ -10,6 +10,7 @@ import json
 from mantid.api import AlgorithmID, AlgorithmManager, FrameworkManagerImpl
 from testhelpers import run_algorithm
 
+
 class AlgorithmTest(unittest.TestCase):
 
     _load = None

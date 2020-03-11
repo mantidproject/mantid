@@ -24,6 +24,8 @@ from PyQt4 import QtCore
 
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
+
+
 def plot(source, *args, **kwargs):
     """Create a new plot given a workspace, table or matrix.
 

@@ -8,6 +8,7 @@ import unittest
 from mantid.simpleapi import LRPeakSelection, CreateSampleWorkspace, DeleteWorkspace
 import logging
 
+
 class LRPeakSelectionTest(unittest.TestCase):
     def setUp(self):
         self.ws = None

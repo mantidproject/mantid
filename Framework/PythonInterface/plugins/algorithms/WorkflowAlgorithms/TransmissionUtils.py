@@ -9,6 +9,8 @@ from mantid.api import *
 from mantid.kernel import *
 import os
 import sys
+
+
 def simple_algorithm(algorithm_str, parameters):
     return _execute(algorithm_str, parameters)
 

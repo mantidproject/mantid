@@ -11,6 +11,7 @@ inBlock = 0
 options=None
 lastLineVoid = False
 
+
 def scanInputFiles(files, _options):
     '''Scan all input files for test suites'''
     global options
@@ -30,6 +31,8 @@ def scanInputFiles(files, _options):
     return [options,suites]
 
 lineCont_re = re.compile('(.*)\\\s*$')
+
+
 def scanInputFile(fileName):
     '''Scan single input file for test suites'''
     file = open(fileName)
@@ -56,6 +59,7 @@ def scanInputFile(fileName):
     closeSuite()
     file.close()
 
+
 def scanInputLine( fileName, lineNo, line ):
     '''Scan single input line for interesting stuff'''
     scanLineForExceptionHandling( line )
@@ -67,6 +71,7 @@ def scanInputLine( fileName, lineNo, line ):
     if suite:
         scanLineInsideSuite( suite, lineNo, line )
 
+
 def scanLineInsideSuite( suite, lineNo, line ):
     '''Analyze line which is part of a suite'''
     global inBlock
@@ -74,6 +79,7 @@ def scanLineInsideSuite( suite, lineNo, line ):
         scanLineForTest( suite, lineNo, line )
         scanLineForCreate( suite, lineNo, line )
         scanLineForDestroy( suite, lineNo, line )
+
 
 def lineBelongsToSuite( suite, lineNo, line ):
     '''Returns whether current line is part of the current suite.
@@ -91,6 +97,8 @@ def lineBelongsToSuite( suite, lineNo, line ):
 
 
 std_re = re.compile( r"\b(std\s*::|CXXTEST_STD|using\s+namespace\s+std\b|^\s*\#\s*include\s+<[a-z0-9]+>)" )
+
+
 def scanLineForStandardLibrary( line ):
     '''Check if current line uses standard library'''
     global options
@@ -99,6 +107,8 @@ def scanLineForStandardLibrary( line ):
             options.haveStandardLibrary = 1
 
 exception_re = re.compile( r"\b(throw|try|catch|TSM?_ASSERT_THROWS[A-Z_]*)\b" )
+
+
 def scanLineForExceptionHandling( line ):
     '''Check if current line uses exception handling'''
     global options
@@ -112,6 +122,8 @@ testsuite = '(?:(?:::)?\s*CxxTest\s*::\s*)?TestSuite'
 suite_re = re.compile( r"\bclass\s+(%s)\s*:(?:\s*%s\s*,)*\s*public\s+%s"
                        % (classdef, baseclassdef, testsuite) )
 generatedSuite_re = re.compile( r'\bCXXTEST_SUITE\s*\(\s*(\w*)\s*\)' )
+
+
 def scanLineForSuiteStart( fileName, lineNo, line ):
     '''Check if current line starts a new test suite'''
     m = suite_re.search( line )
@@ -121,6 +133,7 @@ def scanLineForSuiteStart( fileName, lineNo, line ):
     if m:
         sys.stdout.write( "%s:%s: Warning: Inline test suites are deprecated.\n" % (fileName, lineNo) )
         startSuite( m.group(1), fileName, lineNo, 1 )
+
 
 def startSuite( name, file, line, generated ):
     '''Start scanning a new suite'''
@@ -138,6 +151,7 @@ def startSuite( name, file, line, generated ):
               'tests'        : [],
               'lines'        : [] }
 
+
 def lineStartsBlock( line ):
     '''Check if current line starts a new CXXTEST_CODE() block'''
     return re.search( r'\bCXXTEST_CODE\s*\(', line ) is not None
@@ -145,6 +159,8 @@ def lineStartsBlock( line ):
 test_re = re.compile( r'^([^/]|/[^/])*\bvoid\s+([Tt]est\w+)\s*\(\s*(void)?\s*\)' )
 void_re = re.compile( r'^([^/]|/[^/])*\bvoid\s*$' )
 test_novoid_re = re.compile( r'^([^/]|/[^/])*\b([Tt]est\w+)\s*\(\s*(void)?\s*\)' )
+
+
 def scanLineForTest( suite, lineNo, line ):
     '''Check if current line starts a test'''
     global lastLineVoid
@@ -162,6 +178,7 @@ def scanLineForTest( suite, lineNo, line ):
         if m3:
             lastLineVoid = True
 
+
 def addTest( suite, name, line ):
     '''Add a test function to the current suite'''
     test = { 'name'   : name,
@@ -171,6 +188,7 @@ def addTest( suite, name, line ):
              'line'   : line,
              }
     suite['tests'].append( test )
+
 
 def addLineToBlock( suite, lineNo, line ):
     '''Append the line to the current CXXTEST_CODE() block'''
@@ -183,6 +201,7 @@ def addLineToBlock( suite, lineNo, line ):
     suite['lines'].append( line )
     return e is None
 
+
 def fixBlockLine( suite, lineNo, line):
     '''Change all [E]TS_ macros used in a line to _[E]TS_ macros with the correct file/line'''
     return re.sub( r'\b(E?TSM?_(ASSERT[A-Z_]*|FAIL))\s*\(',
@@ -190,16 +209,21 @@ def fixBlockLine( suite, lineNo, line):
                    line, 0 )
 
 create_re = re.compile( r'\bstatic\s+\w+\s*\*\s*createSuite\s*\(\s*(void)?\s*\)' )
+
+
 def scanLineForCreate( suite, lineNo, line ):
     '''Check if current line defines a createSuite() function'''
     if create_re.search( line ):
         addSuiteCreateDestroy( suite, 'create', lineNo )
 
 destroy_re = re.compile( r'\bstatic\s+void\s+destroySuite\s*\(\s*\w+\s*\*\s*\w*\s*\)' )
+
+
 def scanLineForDestroy( suite, lineNo, line ):
     '''Check if current line defines a destroySuite() function'''
     if destroy_re.search( line ):
         addSuiteCreateDestroy( suite, 'destroy', lineNo )
+
 
 def cstr( s ):
     '''Convert a string to its C representation'''
@@ -212,6 +236,7 @@ def addSuiteCreateDestroy( suite, which, line ):
         abort( '%s:%s: %sSuite() already declared' % ( suite['file'], str(line), which ) )
     suite[which] = line
 
+
 def closeSuite():
     '''Close current suite and add it to the list if valid'''
     global suite
@@ -221,6 +246,7 @@ def closeSuite():
             rememberSuite(suite)
         suite = None
 
+
 def verifySuite(suite):
     '''Verify current suite is legal'''
     if 'create' in suite and 'destroy' not in suite:
@@ -229,6 +255,7 @@ def verifySuite(suite):
     elif 'destroy' in suite and 'create' not in suite:
         abort( '%s:%s: Suite %s has destroySuite() but no createSuite()' %
                (suite['file'], suite['destroy'], suite['name']) )
+
 
 def rememberSuite(suite):
     '''Add current suite to list'''

@@ -32,6 +32,7 @@ except:
     qtest = False
     print("QTest not available")
 
+
 def moveMouseToCentre(widget):
     """Moves the mouse over the widget
     """
@@ -39,6 +40,7 @@ def moveMouseToCentre(widget):
         QtCore.QCoreApplication.processEvents()
         threadsafe_call(QTest.mouseMove, widget)
         QtCore.QCoreApplication.processEvents()
+
 
 def runTests(classname):
     """ Run the test suite in the class.

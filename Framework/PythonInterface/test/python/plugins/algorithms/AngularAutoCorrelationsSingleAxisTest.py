@@ -8,6 +8,7 @@ import unittest
 import mantid
 from mantid.simpleapi import AngularAutoCorrelationsSingleAxis
 
+
 class AngularAutoCorrelationsSingleAxisTest(unittest.TestCase):
 
     def test_simple(self):

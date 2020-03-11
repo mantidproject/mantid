@@ -13,6 +13,8 @@ It also detects if a new category is created (i.e. someone uses Utilities instea
 import systemtesting
 import mantid
 import re
+
+
 class SphinxWarnings(systemtesting.MantidSystemTest):
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)

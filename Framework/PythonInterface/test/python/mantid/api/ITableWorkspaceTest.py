@@ -11,6 +11,7 @@ from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory
 from mantid.dataobjects import TableWorkspace
 import numpy
 
+
 class ITableWorkspaceTest(unittest.TestCase):
 
     _test_ws = None

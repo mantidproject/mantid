@@ -10,6 +10,7 @@ import testhelpers
 from mantid.kernel import StringContainsValidator
 from mantid.api import PythonAlgorithm
 
+
 class StringContainsValidatorTest(unittest.TestCase):
 
 

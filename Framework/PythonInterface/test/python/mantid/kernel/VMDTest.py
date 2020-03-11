@@ -8,6 +8,7 @@ from mantid.kernel import VMD
 import math
 import unittest
 
+
 class VMDTest(unittest.TestCase):
 
     def test_default_construction_gives_object_with_single_dimension(self):

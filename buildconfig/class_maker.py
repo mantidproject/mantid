@@ -17,11 +17,15 @@ from cmakelists_utils import *
 VERSION = "1.0"
 
 #======================================================================
+
+
 def get_year():
     """returns the current year"""
     return datetime.datetime.now().year
 
 #======================================================================
+
+
 def write_header(subproject, classname, filename, args):
     """Write a class header file"""
     print("Writing header file to", filename)

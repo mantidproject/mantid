@@ -26,6 +26,7 @@ class TestPyAlg(PythonAlgorithm):
 AlgorithmFactory.subscribe(TestPyAlg)
 """
 
+
 class PythonPluginsTest(unittest.TestCase):
 
     def setUp(self):

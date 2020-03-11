@@ -9,6 +9,7 @@ import testhelpers
 from mantid.kernel import FloatArrayProperty, StringMandatoryValidator, FloatArrayMandatoryValidator
 from mantid.api import PythonAlgorithm
 
+
 class MandatoryValidatorTest(unittest.TestCase):
 
     def test_constructor_does_not_raise_error(self):

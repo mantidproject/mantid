@@ -14,6 +14,7 @@ from mantid.geometry import CSGObject
 from mantid.simpleapi import *
 from itertools import islice
 
+
 class ComponentInfoTest(unittest.TestCase):
 
     _ws = None

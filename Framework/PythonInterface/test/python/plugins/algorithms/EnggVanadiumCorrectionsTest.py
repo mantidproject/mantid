@@ -8,6 +8,7 @@ import unittest
 from mantid.api import *
 import mantid.simpleapi as sapi
 
+
 class EnggVanadiumCorrectionsTest(unittest.TestCase):
 
     _data_ws = None

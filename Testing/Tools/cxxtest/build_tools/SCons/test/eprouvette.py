@@ -18,6 +18,7 @@ args    = []
 available_types = set(['scons'])
 tool_stdout = PIPE
 
+
 def main():
     global options
     global args
@@ -75,10 +76,12 @@ def main():
         for t in tests:
             clean_test(t)
         
+
 def crawl_tests(target):
     """Gather the directories in the test directory."""
     files = os.listdir(target)
     return [f for f in files if isdir(f) and f[0] != '.']
+
 
 def purge_tests(dirs):
     """Look at the test candidates and purge those that aren't from the list"""
@@ -90,20 +93,24 @@ def purge_tests(dirs):
             warn("{0} is not a test (missing TestDef.py file).".format(t))
     return tests
 
+
 def warn(msg):
     """A general warning function."""
     if options.verbose:
         print('[Warn]: ' + msg, file=sys.stderr)
+
 
 def notice(msg):
     """A general print function."""
     if options.verbose:
         print(msg)
 
+
 def debug(msg):
     """A debugging function"""
     if options.debug:
         print(msg)
+
 
 def run_test(t):
     """Runs the test in directory t."""
@@ -137,6 +144,7 @@ def run_test(t):
     else:
         print("test '{0}' successful.".format(t))
 
+
 def read_opts(t):
     """Read the test options and return them."""
     opts = {
@@ -146,6 +154,7 @@ def read_opts(t):
             }
     exec(open(join(t, "TestDef.py")), opts)
     return opts 
+
 
 def setup_env(t, opts):
     """Set up the environment for the test."""
@@ -159,6 +168,7 @@ def setup_env(t, opts):
             os.unlink(to)
         os.symlink(frm, to)
 
+
 def teardown_env(t, opts):
     """Remove all files generated for the test."""
     links = opts['links']
@@ -166,6 +176,7 @@ def teardown_env(t, opts):
         to  = join(t, link)
         debug('removing link {0}'.format(to))
         os.unlink(to)
+
 
 def clean_test(t):
     """Remove all generated files."""
@@ -175,6 +186,7 @@ def clean_test(t):
         setup_env(t, opts) # scons needs the environment links to work
         clean_scons(t, opts)
     teardown_env(t, opts)
+
 
 def clean_scons(t, opts):
     """Make scons clean after itself."""
@@ -188,6 +200,7 @@ def clean_scons(t, opts):
     sconsign = join(t, '.sconsign.dblite')
     if isfile(sconsign):
         os.unlink(sconsign)
+
 
 def run_scons(t, opts):
     """Run scons test."""

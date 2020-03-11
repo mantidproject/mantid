@@ -8,6 +8,8 @@
 import systemtesting
 import os
 from mantid.simpleapi import *
+
+
 def _skip_test():
     """Helper function to determine if we run the test"""
     import platform

@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantidqt package.
+
+
 class MarkedColumns:
     X_LABEL = "[X{}]"
     Y_LABEL = "[Y{}]"

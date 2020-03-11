@@ -12,6 +12,7 @@ from mantid.simpleapi import CreateWorkspace, Fit, mtd, SaveNexus
 from mantid.api import AnalysisDataService
 import sys
 
+
 class DSFinterp1DTestTest(unittest.TestCase):
 
   def generateWorkspaces(self, nf, startf, df, e=False, seed=10):

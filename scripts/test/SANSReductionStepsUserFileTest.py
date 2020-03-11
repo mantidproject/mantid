@@ -110,6 +110,7 @@ class SANSReductionStepsUserFileTest(unittest.TestCase):
         self.assertEqual(merge_Range.q_max, None, 'The q_max should have been read in')
         self.assertEqual(merge_Range.q_merge_range, False, 'q_merge_range should be true')
 
+
 class MockConvertTOQISISQResolution(object):
     def __init__(self):
         super(MockConvertTOQISISQResolution, self).__init__()
@@ -151,10 +152,12 @@ class MockConvertTOQISISQResolution(object):
     def set_use_q_resolution(self, enabled):
         self.on_off = enabled
 
+
 class MockReducerQResolution(object):
     def __init__(self):
         super(MockReducerQResolution, self).__init__()
         self.to_Q = MockConvertTOQISISQResolution()
+
 
 class TestQResolutionInUserFile(unittest.TestCase):
     def test_that_good_input_is_accepted(self):

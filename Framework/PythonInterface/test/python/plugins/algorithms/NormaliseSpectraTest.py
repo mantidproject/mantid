@@ -9,6 +9,7 @@ import platform
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 
+
 class NormaliseSpectraTest(unittest.TestCase):
 
     _positive ='1,2,3,4,5'

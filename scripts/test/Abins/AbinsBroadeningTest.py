@@ -12,6 +12,7 @@ from scipy.stats import norm as spnorm
 
 from AbinsModules.Instruments import Broadening
 
+
 class AbinsBroadeningTest(unittest.TestCase):
     """
     Test Abins broadening functions

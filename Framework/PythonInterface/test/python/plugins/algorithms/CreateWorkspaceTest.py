@@ -10,6 +10,7 @@ from mantid.simpleapi import CreateWorkspace
 from testhelpers import run_algorithm
 import numpy as np
 
+
 class CreateWorkspaceTest(unittest.TestCase):
 
     def test_create_with_1D_numpy_array(self):

@@ -20,12 +20,15 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 # this class is required to keep track of error signal emissions since the output is garbage collected by the time
 # we reach the equal assertion
+
+
 class MockSignalHandler(object):
     def __init__(self, parent=None):
         self.call_count = 0
 
     def signalReceived(self):
         self.call_count+=1
+
 
 @start_qapplication
 class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):

@@ -11,6 +11,7 @@ from mantid.kernel import (DateAndTime, BoolTimeSeriesProperty, FloatTimeSeriesP
                            StringTimeSeriesProperty)
 from testhelpers import run_algorithm
 
+
 class TimeSeriesPropertyTest(unittest.TestCase):
 
     _test_ws = None

@@ -13,6 +13,7 @@ from mantid.api import AnalysisDataService
 
 import os
 
+
 class LoadFullprofFileTest(unittest.TestCase):
 
     def test_LoadHKLFile(self):

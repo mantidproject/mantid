@@ -16,6 +16,7 @@ import numpy as np
 from mantid.simpleapi import *
 import IndirectCommon as indirect_common
 
+
 class IndirectCommonTests(unittest.TestCase):
 
     _default_config = {}

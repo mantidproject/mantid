@@ -7,6 +7,7 @@
 import unittest
 from mantid.kernel import Direction, OptionalBool, OptionalBoolValue, OptionalBoolPropertyWithValue
 
+
 class OptionalBoolTest(unittest.TestCase):
 
 

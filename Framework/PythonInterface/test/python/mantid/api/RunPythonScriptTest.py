@@ -13,6 +13,7 @@ from mantid.simpleapi import *
 
 from testhelpers import WorkspaceCreationHelper
 
+
 class RunPythonScriptTest(unittest.TestCase):
     """
     Try out RunPythonScript

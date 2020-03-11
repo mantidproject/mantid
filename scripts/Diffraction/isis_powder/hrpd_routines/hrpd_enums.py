@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+
+
 class HRPD_TOF_WINDOWS(object):
     enum_friendly_name = "TOF windows"
     window_10_50 = "10-50"

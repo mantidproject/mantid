@@ -16,6 +16,7 @@ from mantid.api import (WorkspaceUnitValidator, HistogramValidator,
                         InstrumentValidator, MDFrameValidator,
                         OrientedLatticeValidator)
 
+
 class WorkspaceValidatorsTest(unittest.TestCase):
 
     def test_WorkspaceUnitValidator_construction(self):

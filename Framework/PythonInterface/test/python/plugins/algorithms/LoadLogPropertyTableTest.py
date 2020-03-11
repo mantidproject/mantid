@@ -13,6 +13,7 @@ from mantid.api import AnalysisDataService
 
 import os
 
+
 class LoadLogPropertyTableTest(unittest.TestCase):
     def test_LoadValidFilesComments(self):
         outputWorskapceName = "LoadLogPropertyTableTest_Test1"

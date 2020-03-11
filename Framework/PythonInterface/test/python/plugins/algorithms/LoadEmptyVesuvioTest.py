@@ -8,6 +8,7 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 
+
 class LoadEmptyVesuvioTest(unittest.TestCase):
 
     def test_load_empty_no_par_file(self):

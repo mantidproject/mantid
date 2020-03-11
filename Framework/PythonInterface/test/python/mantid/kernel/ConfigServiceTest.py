@@ -11,6 +11,8 @@ import unittest
 
 from mantid.kernel import (ConfigService, ConfigServiceImpl, config,
                            std_vector_str, FacilityInfo, InstrumentInfo)
+
+
 class ConfigServiceTest(unittest.TestCase):
 
     __dirs_to_rm = []

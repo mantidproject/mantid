@@ -9,6 +9,7 @@ from mantid.simpleapi import CalculateFlux, CreateSampleWorkspace, FindDetectors
 import numpy as np
 import testhelpers
 
+
 class CalculateFluxTest(unittest.TestCase):
 
     pixels_in_shape = 0

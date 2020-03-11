@@ -7,6 +7,7 @@
 import unittest
 from mantid.simpleapi import *
 
+
 class ExtractMonitorsTest(unittest.TestCase):
 
     def setUp(self):

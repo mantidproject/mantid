@@ -12,6 +12,8 @@ from testhelpers import run_algorithm
 import numpy as np
 from SANSDarkRunBackgroundCorrection import DarkRunMonitorAndDetectorRemover
 from SANSDarkRunBackgroundCorrection import SANSDarkRunBackgroundCorrection
+
+
 class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
     #-----
     # Workspace2D tests
@@ -555,6 +557,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
                 ws.setE(element, ws.dataE(element)*0.0 + dataE)
 
         return ws
+
 
 class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
 

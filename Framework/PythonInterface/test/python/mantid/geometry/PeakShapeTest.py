@@ -8,6 +8,7 @@ import unittest
 from mantid.simpleapi import CreatePeaksWorkspace, CreateSampleWorkspace
 from mantid.geometry import PeakShape
 
+
 class PeakShapeTest(unittest.TestCase):
 
     def test_basic_access(self):

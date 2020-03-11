@@ -13,6 +13,7 @@ import platform
 from mantid.api import mtd
 from mantid.simpleapi import CreateSampleWorkspace,RenameWorkspace
 
+
 class SimpleAPIRenameWorkspaceTest(unittest.TestCase):
 
     _raw_ws = None

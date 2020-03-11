@@ -8,6 +8,8 @@
 import systemtesting
 from mantid.simpleapi import *
 from mantid.geometry import *
+
+
 class SpaceGroupReflectionConditionsTest(systemtesting.MantidSystemTest):
     '''
     This test uses PoldiCreatePeaksFromCell to generate lists of reflections for fake crystal structures, one for each

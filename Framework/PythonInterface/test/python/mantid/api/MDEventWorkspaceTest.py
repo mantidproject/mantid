@@ -9,6 +9,7 @@ from testhelpers import run_algorithm
 from mantid import mtd
 import mantid
 
+
 class MDEventWorkspaceTest(unittest.TestCase):
     """
     Test the interface to MDEventWorkspaces

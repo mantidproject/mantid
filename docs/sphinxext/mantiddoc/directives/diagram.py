@@ -106,6 +106,7 @@ class DiagramDirective(BaseDirective):
 
 #------------------------------------------------------------------------------------------------------------
 
+
 def setup(app):
     """
     Setup the directives when the extension is activated

@@ -8,6 +8,7 @@ import unittest
 from mantid.kernel import UnitConversion, DeltaEModeType
 import math
 
+
 class UnitConversionTest(unittest.TestCase):
 
     def test_run_accepts_string_units(self):

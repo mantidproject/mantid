@@ -17,6 +17,7 @@ import MariReduction as mr
 import unittest
 import imp
 
+
 class test_helper(ReductionWrapper):
     def __init__(self,web_var=None):
        """ sets properties defaults for the instrument with Name"""
@@ -80,6 +81,8 @@ class test_helper(ReductionWrapper):
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
+
+
 class ReductionWrapperTest(unittest.TestCase):
 
     def __init__(self, methodName):

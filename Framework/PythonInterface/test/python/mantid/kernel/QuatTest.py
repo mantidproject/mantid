@@ -9,6 +9,7 @@ import math
 
 from mantid.kernel import Quat, V3D
 
+
 class QuatTest(unittest.TestCase):
 
     def test_empty_constructor(self):

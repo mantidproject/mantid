@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+
 class ObservingView(object):
     """
     This class provides some common functions needed across views observers the ADS.

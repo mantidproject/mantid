@@ -8,6 +8,7 @@ import unittest
 from mantid.kernel import UnitFactory, UnitLabel
 import sys
 
+
 class UnitLabelTest(unittest.TestCase):
 
     def test_UnitLabel_can_be_built_from_simple_string(self):

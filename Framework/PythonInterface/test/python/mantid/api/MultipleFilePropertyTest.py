@@ -8,6 +8,7 @@ import unittest
 from mantid.api import MultipleFileProperty, mtd
 from testhelpers import create_algorithm
 
+
 class MultipleFilePropertyTest(unittest.TestCase):
 
     def tearDown(self):

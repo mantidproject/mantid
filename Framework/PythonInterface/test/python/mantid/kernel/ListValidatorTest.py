@@ -10,6 +10,7 @@ import testhelpers
 from mantid.kernel import StringListValidator, Direction
 from mantid.api import PythonAlgorithm
 
+
 class ListValidatorTest(unittest.TestCase):
 
     def test_empty_ListValidator_allows_nothing(self):

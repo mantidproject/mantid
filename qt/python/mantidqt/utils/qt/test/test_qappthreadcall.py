@@ -15,8 +15,10 @@ from mantidqt.utils.asynchronous import AsyncTask, TaskExitCode
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from mantidqt.utils.qt.testing import start_qapplication
 
+
 class CustomException(Exception):
     pass
+
 
 @start_qapplication
 class QAppThreadCallTest(unittest.TestCase):

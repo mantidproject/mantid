@@ -8,6 +8,7 @@ import unittest
 import mantid
 from mantid.simpleapi import IndirectResolution
 
+
 class IndirectResolutionTest(unittest.TestCase):
 
     def test_simple(self):

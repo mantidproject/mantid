@@ -8,6 +8,7 @@ import unittest
 from mantid.api import (WorkspaceFactory, WorkspaceFactoryImpl, MatrixWorkspace,
                     ITableWorkspace, IPeaksWorkspace)
 
+
 class WorkspaceFactoryTest(unittest.TestCase):
 
 

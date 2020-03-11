@@ -8,6 +8,8 @@
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
+
+
 class MSDFit(DataProcessorAlgorithm):
     _output_fit_ws = None
     _model = None

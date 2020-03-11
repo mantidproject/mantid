@@ -18,6 +18,7 @@ from mantid.api import mtd, MatrixWorkspace, ITableWorkspace, IFunction
 import numpy as np
 from testhelpers import run_algorithm
 
+
 class SimpleAPIFitTest(unittest.TestCase):
 
     _raw_ws = None

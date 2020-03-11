@@ -12,6 +12,7 @@ from testhelpers import run_algorithm
 
 import os, mantid, hashlib
 
+
 class CreateCacheFilename(unittest.TestCase):
 
     def test1(self):

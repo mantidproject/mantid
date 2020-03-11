@@ -9,6 +9,7 @@ import unittest
 from mantid.api import *
 import mantid.simpleapi as sapi
 
+
 class EnggCalibrateTest(unittest.TestCase):
 
     _data_ws = None

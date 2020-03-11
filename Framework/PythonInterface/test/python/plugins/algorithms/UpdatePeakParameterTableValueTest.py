@@ -11,6 +11,7 @@ from mantid.api import *
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 
+
 class UpdatePeakParameterTableValueTest(unittest.TestCase):
 
     def test_updateDouble(self):

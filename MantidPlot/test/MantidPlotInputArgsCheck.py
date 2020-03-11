@@ -39,6 +39,7 @@ CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m
 
 WrongWorkspaceName = 'foo inexistent'
 
+
 class MantidPlotInputArgsCheck(unittest.TestCase):
 
     def setUp(self):

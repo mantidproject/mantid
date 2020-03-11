@@ -8,6 +8,7 @@ import unittest
 from testhelpers import run_algorithm
 from mantid.api import Workspace
 
+
 class WorkspaceTest(unittest.TestCase):
 
     def test_that_one_cannot_be_instantiated(self):

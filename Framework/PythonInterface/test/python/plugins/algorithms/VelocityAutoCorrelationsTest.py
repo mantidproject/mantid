@@ -8,6 +8,7 @@ import unittest
 import mantid
 from mantid.simpleapi import VelocityAutoCorrelations
 
+
 class VelocityAutoCorrelationsTest(unittest.TestCase):
 
     def test_simple(self):

@@ -11,6 +11,7 @@ from mantid.simpleapi import Fit
 import testhelpers
 import numpy
 
+
 class AttributeExample(IFunction1D):
     
         def init(self):
@@ -36,6 +37,7 @@ class AttributeExample(IFunction1D):
             return ybins
 
 FunctionFactory.subscribe(AttributeExample)
+
 
 class AttributeTest(unittest.TestCase):
 

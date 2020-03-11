@@ -7,6 +7,7 @@
 import unittest
 from mantid.api import Jacobian
 
+
 class JacobianTest(unittest.TestCase):
 
     def test_class_has_expected_attrs(self):

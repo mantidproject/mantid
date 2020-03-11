@@ -14,6 +14,7 @@ from mantid.simpleapi import logger
 from AbinsModules import FrequencyPowderGenerator, AbinsParameters, AbinsConstants
 from AbinsModules.AbinsConstants import INT_TYPE, FLOAT_TYPE
 
+
 class AbinsFrequencyPowderGeneratorTest(unittest.TestCase):
 
     def setUp(self):

@@ -10,6 +10,7 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
 
+
 class FilterLogByTimeTest(unittest.TestCase):
 
     __ws = None

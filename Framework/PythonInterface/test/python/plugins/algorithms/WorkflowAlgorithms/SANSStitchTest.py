@@ -10,6 +10,7 @@ import numpy as np
 
 from SANSStitch import QErrorCorrectionForMergedWorkspaces
 
+
 class SANSStitchTest(unittest.TestCase):
     def test_initalize(self):
         alg = AlgorithmManager.create('SANSStitch')

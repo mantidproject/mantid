@@ -35,6 +35,8 @@ WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
 # -----------------------------------------------------------------------------
 # Decorators
 # -----------------------------------------------------------------------------
+
+
 def plot_decorator(func):
     def wrapper(self, *args, **kwargs):
         func_value = func(self, *args, **kwargs)
@@ -56,6 +58,8 @@ def plot_decorator(func):
 # -----------------------------------------------------------------------------
 # MantidAxes
 # -----------------------------------------------------------------------------
+
+
 class MantidAxes(Axes):
     """
     This class defines the **mantid** projection for 2d plotting. One chooses
@@ -1101,6 +1105,8 @@ class MantidAxes(Axes):
 # -----------------------------------------------------------------------------
 # MantidAxes3D
 # -----------------------------------------------------------------------------
+
+
 class MantidAxes3D(Axes3D):
     """
     This class defines the **mantid3d** projection for 3d plotting. One chooses

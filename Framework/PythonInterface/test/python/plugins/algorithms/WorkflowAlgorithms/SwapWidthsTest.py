@@ -8,6 +8,7 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 
+
 class SwapWidthsTest(unittest.TestCase):
 
     _input_ws = 'IN16B_125878_QLd_Result'

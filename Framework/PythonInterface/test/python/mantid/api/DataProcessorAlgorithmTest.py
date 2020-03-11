@@ -10,12 +10,14 @@ from mantid.api import (Algorithm, DataProcessorAlgorithm, AlgorithmFactory,
                         AlgorithmManager, WorkspaceProperty)
 from mantid.kernel import Direction
 
+
 class TestDataProcessor(DataProcessorAlgorithm):
     def PyInit(self):
         pass
     def PyExec(self):
         pass
 # end v1 alg
+
 
 class DataProcessorAlgorithmTest(unittest.TestCase):
 

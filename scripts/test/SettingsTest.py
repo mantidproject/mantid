@@ -14,6 +14,8 @@ RAII Test helper class. Equivalent to the ScopedFileHelper.
 
 If this proves useful. It would be sensible to make it more accessible for other testing classes.
 '''
+
+
 class TempFile(object):
 
     __tempFile = None
@@ -37,6 +39,8 @@ class TempFile(object):
 '''
 Determine if all tests should be skipped. Check for the expat module to decide.
 '''
+
+
 def skipAllTests():
     skiptests = False
     try:

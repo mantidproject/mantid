@@ -11,6 +11,7 @@ from mantid.api import AnalysisDataService, WorkspaceGroup
 from scipy.constants import h, m_n, eV
 import numpy as np
 
+
 class CorrectTOFTest(unittest.TestCase):
 
     def setUp(self):

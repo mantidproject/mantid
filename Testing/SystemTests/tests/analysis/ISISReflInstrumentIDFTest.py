@@ -13,6 +13,8 @@ import systemtesting
 from mantid.simpleapi import *
 import os
 from abc import ABCMeta, abstractmethod
+
+
 class ISISReflInstrumentIDFTest(metaclass=ABCMeta):
 
     @abstractmethod

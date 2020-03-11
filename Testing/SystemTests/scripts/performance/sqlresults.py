@@ -20,6 +20,8 @@ import math
 import random
 
 #====================================================================================
+
+
 def getSourceDir():
     """Returns the location of the source code."""
     import os
@@ -42,17 +44,23 @@ TABLE_FIELDS = ['date', 'name', 'type', 'host', 'environment', 'runner',
 database_file = os.path.join(getSourceDir(), "MantidSystemTests.db")
 
 #=====================================================================
+
+
 def get_database_filename():
     """Return the path to the database to use """
     return database_file
 
 #=====================================================================
+
+
 def set_database_filename(value):
     """Override the default database location"""
     global database_file
     database_file = value
 
 #=====================================================================
+
+
 def SQLgetConnection():
     """ Get a connection to the SQL database """
     # These are automatic conversion factors
@@ -101,6 +109,8 @@ def get_latest_result(name=''):
         return None
 
 #=====================================================================
+
+
 def get_results(name, type="", where_clause='', orderby_clause=''):
     """Return a list of testresult.TestResult objects
     generated from looking up in the table
@@ -177,6 +187,8 @@ def get_all_field_values(field_name, where_clause=""):
     return out
 
 #=====================================================================
+
+
 def get_latest_revison():
     """ Return the latest revision number """
     # Now get the latest revision
@@ -191,6 +203,8 @@ def get_latest_revison():
         return 0
 
 #=====================================================================
+
+
 def add_revision():
     """ Adds an entry with the current date/time to the table.
     Retrieve the index of that entry = the "revision".

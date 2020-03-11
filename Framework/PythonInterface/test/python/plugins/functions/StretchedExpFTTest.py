@@ -8,6 +8,7 @@ import unittest
 
 from StretchedExpFTTestHelper import isregistered, do_fit
 
+
 class StretchedExpFTTest(unittest.TestCase):
 
     def testRegistered(self):

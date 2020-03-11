@@ -14,6 +14,8 @@ import shutil
 from abc import ABCMeta, abstractmethod
 from Direct.PropertyManager  import PropertyManager
 #----------------------------------------------------------------------
+
+
 class ISISDirectInelasticReduction(metaclass=ABCMeta):
     """A base class for the ISIS direct inelastic tests
 

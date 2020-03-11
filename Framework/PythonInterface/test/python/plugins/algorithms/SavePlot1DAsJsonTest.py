@@ -15,6 +15,7 @@ from mantid.api import AnalysisDataService
 
 import os, json
 
+
 class SavePlot1DAsJsonTest(unittest.TestCase):
 
     def test_save_one_curve(self):

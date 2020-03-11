@@ -8,6 +8,7 @@ import unittest
 from mantid.api import *
 import numpy as np
 
+
 class MyPeak(IPeakFunction):
 
     def init(self):
@@ -17,6 +18,7 @@ class MyPeak(IPeakFunction):
 
     def functionLocal(self, xvals):
         return 5*xvals
+
 
 class RectangularFunction(IPeakFunction):
     def init(self):
@@ -52,6 +54,7 @@ class RectangularFunction(IPeakFunction):
         values[nonZero] = height
 
         return values
+
 
 class IPeakFunctionTest(unittest.TestCase):
 

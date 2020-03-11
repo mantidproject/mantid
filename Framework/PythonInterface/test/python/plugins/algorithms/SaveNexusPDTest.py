@@ -19,6 +19,7 @@ try:
 except ImportError:
     runTests = False
 
+
 class SaveNexusPDTest(unittest.TestCase):
     def saveFilePath(self, wkspname):
         dataDir = mantid.config.getString('defaultsave.directory')

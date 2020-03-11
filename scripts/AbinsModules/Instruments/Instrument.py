@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # noinspection PyPep8Naming
+
+
 class Instrument(object):
 
     _name = None

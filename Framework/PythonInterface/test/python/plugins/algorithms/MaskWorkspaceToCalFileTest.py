@@ -11,6 +11,7 @@ from mantid.api import *
 from mantid.simpleapi import *
 from testhelpers import run_algorithm
 
+
 class MaskWorkspaceToCalFileTest(unittest.TestCase):
 
     def get_masking_for_index(self, cal_file, requested_index):

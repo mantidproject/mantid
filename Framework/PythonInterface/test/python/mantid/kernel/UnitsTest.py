@@ -8,6 +8,7 @@ import unittest
 from mantid.kernel import UnitFactory, Unit, Label, UnitLabel
 import types
 
+
 class UnitsTest(unittest.TestCase):
 
     def test_Label_is_returned_from_Factory(self):

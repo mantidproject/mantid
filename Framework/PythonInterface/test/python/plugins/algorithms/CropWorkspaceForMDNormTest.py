@@ -7,6 +7,7 @@
 import unittest,os
 from mantid.simpleapi import CreateSampleWorkspace, CropWorkspaceForMDNorm
 
+
 class CropWorkspaceForMDNormTest(unittest.TestCase):
     def test_simple(self):
         ws_in = CreateSampleWorkspace(WorkspaceType='Event',

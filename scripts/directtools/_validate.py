@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+
+
 def _isDOS(workspace):
     """Return True if workspace looks like a valid DOS workspace, False otherwise."""
     singleHistogram = workspace.getNumberHistograms() == 1

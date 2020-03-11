@@ -7,6 +7,8 @@
 # pylint: disable=no-init,invalid-name
 import systemtesting
 from mantid.geometry import *
+
+
 class SpaceGroupUnitCellTest(systemtesting.MantidSystemTest):
     '''
     This test checks that SpaceGroup.isAllowedUnitCell produces the expected result for each registered space group.

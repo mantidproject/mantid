@@ -8,6 +8,7 @@ import unittest
 
 from mantid.api import AlgorithmFactory
 
+
 class ImportModuleTest(unittest.TestCase):
 
     def test_import_succeeds(self):

@@ -15,6 +15,7 @@ from mantid.api import (WorkspaceProperty, WorkspaceGroupProperty, MatrixWorkspa
                         PropertyMode, LockMode)
 from mantid.kernel import Direction, Property
 
+
 class WorkspacePropertiesTest(unittest.TestCase):
 
     def _do_test(self, classtype):

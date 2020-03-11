@@ -10,6 +10,8 @@ import re
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
+
+
 class LRScalingFactors(PythonAlgorithm):
     """
         This algorithm runs through a sequence of direct beam data sets

@@ -11,6 +11,7 @@ from testhelpers import run_algorithm, can_be_instantiated, WorkspaceCreationHel
 from mantid.api import (IEventWorkspace, IEventList, IWorkspaceProperty,
                         AlgorithmManager)
 
+
 class IEventWorkspaceTest(unittest.TestCase):
 
     _test_ws = None

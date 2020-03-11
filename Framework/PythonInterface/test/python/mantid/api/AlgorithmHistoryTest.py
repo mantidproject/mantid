@@ -9,6 +9,8 @@ from mantid.simpleapi import CreateWorkspace, set_properties
 from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, AlgorithmManager,
                         DataProcessorAlgorithm, PythonAlgorithm)
 from mantid.kernel import Direction
+
+
 class ChildAlg(PythonAlgorithm):
 
     def PyInit(self):

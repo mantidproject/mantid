@@ -14,6 +14,7 @@ from mantid.geometry import Instrument
 from mantid.api import Sample, Run
 from math import pi
 
+
 class ExperimentInfoTest(unittest.TestCase):
 
     _expt_ws = None

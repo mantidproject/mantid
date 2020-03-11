@@ -8,6 +8,7 @@ import unittest
 from mantid.geometry import BoundingBox
 from mantid.kernel import V3D
 
+
 class BoundingBoxTest(unittest.TestCase):
 
     def test_default_construction_is_allowed(self):

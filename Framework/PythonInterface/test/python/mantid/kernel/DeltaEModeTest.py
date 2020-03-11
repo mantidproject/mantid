@@ -7,6 +7,7 @@
 import unittest
 from mantid.kernel import DeltaEMode, DeltaEModeType
 
+
 class DeltaEModeTest(unittest.TestCase):
 
     def test_availableTypes_contains_three_modes(self):

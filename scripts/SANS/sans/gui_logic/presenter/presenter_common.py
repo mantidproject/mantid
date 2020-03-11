@@ -11,6 +11,8 @@ the view or retrieve them from the view
 """
 
 from abc import ABCMeta, abstractmethod
+
+
 class PresenterCommon(metaclass=ABCMeta):
     def __init__(self, view, model):
         self._view = view

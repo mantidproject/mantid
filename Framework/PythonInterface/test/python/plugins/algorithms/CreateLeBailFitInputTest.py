@@ -12,6 +12,7 @@ from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 import os
 
+
 class CreateLeBailFitInputTest(unittest.TestCase):
 
     def test_LoadHKLFile(self):

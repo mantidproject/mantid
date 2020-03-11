@@ -10,6 +10,7 @@ from mantid import api
 import unittest
 import Direct.ReductionHelpers as helpers
 
+
 class SomeDescriptor(object):
     def __init__(self):
         self._val=None

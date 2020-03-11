@@ -13,6 +13,8 @@ import systemtesting
 from mantid.simpleapi import *
 
 from abc import ABCMeta, abstractmethod
+
+
 class ReflectometryISIS(metaclass=ABCMeta):
 
     @abstractmethod

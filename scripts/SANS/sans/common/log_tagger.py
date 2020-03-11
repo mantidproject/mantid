@@ -10,6 +10,8 @@
 
 from hashlib import sha224
 from mantid.api import (MatrixWorkspace, WorkspaceGroup)
+
+
 def get_hash_value(value):
     """
     Converts a value into a hash

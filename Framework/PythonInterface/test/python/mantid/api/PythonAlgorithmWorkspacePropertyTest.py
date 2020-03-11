@@ -11,6 +11,7 @@ import unittest
 from mantid.api import PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction
 
+
 class PythonAlgorithmWorkspacePropertyTest(unittest.TestCase):
 
     def _do_test(self, classtype):

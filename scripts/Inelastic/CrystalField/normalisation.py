@@ -7,6 +7,8 @@
 import numpy as np
 from CrystalField.energies import energies as CFEnergy
 from CrystalField.fitting import ionname2Nre
+
+
 def _get_normalisation(nre, bnames):
     """ Helper function to calculate the normalisation factor.
         Defined as: ||Blm|| = sum_{Jz,Jz'} |<Jz|Blm|Jz'>|^2 / (2J+1)

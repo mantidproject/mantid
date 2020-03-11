@@ -20,6 +20,8 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
 from reduction_gui.reduction.reflectometer.refl_data_script import DataSets
+
+
 class LRAutoReduction(PythonAlgorithm):
 
     def category(self):

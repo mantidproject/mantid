@@ -12,6 +12,7 @@ import sys
 
 QT_TAG_RE = re.compile(r'Qt_\d+_\d+_\d+')
 
+
 class PyQtConfig(object):
 
     version_hex = None
@@ -95,6 +96,7 @@ def main():
 
     print(PyQtConfig('PyQt%d' % args.version))
     return 0
+
 
 def get_options():
     parser = argparse.ArgumentParser(description='Extract PyQt config information')

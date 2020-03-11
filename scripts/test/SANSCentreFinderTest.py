@@ -68,6 +68,7 @@ class SANSBeamCentrePositionUpdater(unittest.TestCase):
         self.assertEqual(x_expected, x_new, "The x value should have been incremented.")
         self.assertEqual(y_expected, y_new, "The y value should have been incremented.")
 
+
 class TestPositionProvider(unittest.TestCase):
     workspace_name = 'dummy_ws'
 

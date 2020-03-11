@@ -12,6 +12,8 @@ from Muon.GUI.ElementalAnalysis.LoadWidget import load_utils as lutils
 import mantid.simpleapi as mantid
 from mantid import config
 import numpy as np
+
+
 class LoadUtilsTest(unittest.TestCase):
     def setUp(self):
         self.test_path = r"test\path\to\ral012345.rooth2020.dat"

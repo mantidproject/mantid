@@ -14,6 +14,8 @@ from mantid.geometry import Detector
 from mantid.kernel import Direction, V3D
 from mantid.simpleapi import CreateSampleWorkspace, Rebin
 import numpy as np
+
+
 class MatrixWorkspaceTest(unittest.TestCase):
 
     _test_ws_prop = None

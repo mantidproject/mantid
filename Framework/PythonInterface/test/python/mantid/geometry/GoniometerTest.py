@@ -11,6 +11,7 @@ from testhelpers import can_be_instantiated
 from testhelpers import run_algorithm
 import numpy as np
 
+
 class GoniometerTest(unittest.TestCase):
     
     def test_Goniometer_can_be_instantiated(self):

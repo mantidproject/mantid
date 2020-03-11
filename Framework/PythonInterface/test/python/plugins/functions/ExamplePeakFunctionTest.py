@@ -10,6 +10,7 @@ from mantid.api import *
 from mantid.simpleapi import Fit
 import testhelpers
 
+
 class _InternalMakeGaussian(PythonAlgorithm):
 
     def PyInit(self):
@@ -42,6 +43,7 @@ class _InternalMakeGaussian(PythonAlgorithm):
             prog_reporter.report("Setting %dth bin in workspace" % (i-1))
 
         self.setProperty("OutputWorkspace", wspace) # Stores the workspace as the given name
+
 
 class ExamplePeakFunctionTest(unittest.TestCase):
 

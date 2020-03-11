@@ -12,6 +12,7 @@ from AbinsModules import AbinsConstants, AbinsTestHelpers
 import numpy as np
 from numpy.testing import assert_array_almost_equal
 
+
 class AbinsBasicTest(unittest.TestCase):
 
     _si2 = "Si2-sc_Abins"

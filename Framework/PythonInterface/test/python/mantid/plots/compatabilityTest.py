@@ -21,6 +21,7 @@ from mantid.py3compat.mock import patch
 from mantid.plots._compatability import plotSpectrum, plotBin
 from mantid.plots.utility import MantidAxType
 
+
 class compatabilityTest(unittest.TestCase):
 
     @patch('mantid.plots._compatability.plot')

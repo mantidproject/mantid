@@ -9,6 +9,7 @@ from mantid.geometry import SymmetryOperation, SymmetryOperationFactory
 from mantid.geometry import SymmetryElement, SymmetryElementFactory
 from mantid.kernel import V3D
 
+
 class SymmetryElementTest(unittest.TestCase):
 
     def test_creation_axis(self):

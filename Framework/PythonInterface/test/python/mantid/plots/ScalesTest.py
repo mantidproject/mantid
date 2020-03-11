@@ -18,6 +18,7 @@ from mantid.plots.scales import PowerScale, SquareScale
 import numpy as np
 import testhelpers
 
+
 class ScalesTest(unittest.TestCase):
 
     def test_power_scale_registered_in_factory(self):

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+
 class ObservingPresenter(object):
     """
     This class provides some common functions for classes that need to be observable.

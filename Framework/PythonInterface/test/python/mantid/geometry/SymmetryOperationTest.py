@@ -8,6 +8,7 @@ import unittest
 from mantid.geometry import SymmetryOperation, SymmetryOperationFactory
 from mantid.kernel import V3D
 
+
 class SymmetryOperationTest(unittest.TestCase):
 
     def test_creation(self):

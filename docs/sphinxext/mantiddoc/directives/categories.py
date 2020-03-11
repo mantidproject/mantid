@@ -27,6 +27,7 @@ CATEGORIES_DIR = "categories"
 # directory of the document and the category directory
 INDEX_CATEGORIES = ["Algorithms", "FitFunctions", "Concepts", "Techniques", "Interfaces"]
 
+
 class LinkItem(object):
     """
     Defines a linkable item with a name and html reference
@@ -81,6 +82,7 @@ class LinkItem(object):
 
 # endclass
 
+
 class PageRef(LinkItem):
     """
     Store details of a single page reference
@@ -90,6 +92,7 @@ class PageRef(LinkItem):
         super(PageRef, self).__init__(name, location)
 
 #endclass
+
 
 class Category(LinkItem):
     """
@@ -313,6 +316,7 @@ def to_unix_style_path(path):
 
 #---------------------------------------------------------------------------------
 
+
 def html_collect_pages(app):
     """
     Callback for the 'html-collect-pages' Sphinx event. Adds category
@@ -330,6 +334,7 @@ def html_collect_pages(app):
     for name, context, template in create_category_pages(app):
         yield (name, context, template)
 # enddef
+
 
 def create_category_pages(app):
     """
@@ -391,6 +396,8 @@ def create_category_pages(app):
 # enddef
 
 #-----------------------------------------------------------------------------------------------------------
+
+
 def create_top_algorithm_category(categories):
     """
     Returns a tuple of (category_name, context, "category.html")
@@ -443,6 +450,7 @@ def create_top_algorithm_category(categories):
     top_html_path_noext = posixpath.join('algorithms', 'index')
     return (top_html_path_noext, top_context, template)
 
+
 def extract_matching_categories(input_categories,filepath):
     """
     Extract entries with a name matching that included the supplied file.
@@ -464,6 +472,8 @@ def extract_matching_categories(input_categories,filepath):
         input_categories[:] = [category for category in input_categories if category.name not in name_list] 
     
     return extracted_list
+
+
 def purge_categories(app, env, docname):
     """
     Purge information about the given document name from the tracked algorithms
@@ -489,6 +499,8 @@ def purge_categories(app, env, docname):
             pages.remove(deadref)
 
 #------------------------------------------------------------------------------
+
+
 def setup(app):
     # Add categories directive
     app.add_directive('categories', CategoriesDirective)

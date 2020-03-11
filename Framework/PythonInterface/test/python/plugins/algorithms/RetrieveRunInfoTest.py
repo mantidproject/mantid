@@ -12,6 +12,7 @@ from mantid import config
 from mantid.simpleapi import *
 from testhelpers import run_algorithm
 
+
 class RetrieveRunInfoTest(unittest.TestCase):
 
     class_has_been_set_up = False

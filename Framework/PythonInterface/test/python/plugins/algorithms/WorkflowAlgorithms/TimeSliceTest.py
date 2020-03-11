@@ -8,6 +8,7 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 
+
 class TimeSliceTest(unittest.TestCase):
 
     def test_basic(self):

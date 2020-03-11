@@ -8,6 +8,7 @@ import unittest
 
 from mantid.kernel import PropertyManager, PropertyManagerDataService
 
+
 class PropertyManagerDataServiceTest(unittest.TestCase):
 
     def test_add_existing_mgr_object(self):

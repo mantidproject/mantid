@@ -9,6 +9,7 @@ from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.api import SpectrumDefinition
 
+
 class SpectrumInfoTest(unittest.TestCase):
 
     _ws = None

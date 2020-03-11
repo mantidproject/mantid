@@ -10,6 +10,7 @@ import numpy
 import pdb
 from mantid.kernel import logger
 
+
 class DSFinterpTest(unittest.TestCase):
 
   def generateWorkspaces(self, nf):

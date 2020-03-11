@@ -12,6 +12,7 @@ from mantid import config
 import os
 from itertools import filterfalse
 
+
 class Intervals(object):
     # Having "*intervals" as a parameter instead of "intervals" allows us
     # to type "Intervals( (0,3), (6, 8) )" instead of "Intervals( ( (0,3), (6, 8) ) )"

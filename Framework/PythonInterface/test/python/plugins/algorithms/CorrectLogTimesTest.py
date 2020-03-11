@@ -10,6 +10,7 @@ from mantid.api import *
 from testhelpers import *
 from numpy import *
 
+
 class CorrectLogTimesTest(unittest.TestCase):
 
     def testCLTWrongLog(self):

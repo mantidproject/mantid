@@ -18,6 +18,7 @@ import inspect
 import sys
 import dis
 
+
 def replace_signature(func, signature):
     """
     Replace the signature of the given function object with that given by
@@ -74,6 +75,8 @@ def customise_func(func, name, signature, docstring):
     return func
 
 #-------------------------------------------------------------------------------
+
+
 def decompile(code_object):
     """
     Taken from
@@ -127,6 +130,7 @@ __operator_names = set(['CALL_FUNCTION', 'CALL_FUNCTION_VAR', 'CALL_FUNCTION_KW'
                         'INPLACE_OR', 'COMPARE_OP',
                         'CALL_FUNCTION_EX', 'LOAD_METHOD', 'CALL_METHOD'])
 #--------------------------------------------------------------------------------------
+
 
 def process_frame(frame):
     """Returns the number of arguments on the left of assignment along
@@ -215,6 +219,7 @@ def process_frame(frame):
     return (max_returns, tuple(output_var_names))
 
 #-------------------------------------------------------------------------------
+
 
 def lhs_info(output_type='both', frame=None):
     """Returns the number of arguments on the left of assignment along

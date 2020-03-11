@@ -9,6 +9,7 @@ import numpy
 from mantid.simpleapi import *
 from isis_reflectometry import quick
 
+
 class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
 
     __wsName = None

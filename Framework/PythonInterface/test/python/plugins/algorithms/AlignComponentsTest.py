@@ -8,6 +8,7 @@ import unittest
 from mantid.simpleapi import AlignComponents, CreateSampleWorkspace, MoveInstrumentComponent, CreateEmptyTableWorkspace, mtd, RotateInstrumentComponent
 from mantid.api import AlgorithmFactory
 
+
 class AlignComponentsTest(unittest.TestCase):
 
     def testAlignComponentsPositionXY(self):

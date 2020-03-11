@@ -10,6 +10,8 @@ import numpy as np
 import unittest
 import mantid
 from mantid.simpleapi import ExportSpectraMask,DeleteWorkspace
+
+
 class ExportSpectraMaskTest(unittest.TestCase):
     def __init__(self,method_name):
         unittest.TestCase.__init__(self,method_name)

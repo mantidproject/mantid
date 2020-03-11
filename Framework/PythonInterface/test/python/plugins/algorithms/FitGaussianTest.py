@@ -8,6 +8,7 @@ import unittest
 from mantid.simpleapi import FitGaussian, CreateSampleWorkspace, DeleteWorkspace
 import logging
 
+
 class FitGaussianTest(unittest.TestCase):
     def setUp(self):
         self.ws = None

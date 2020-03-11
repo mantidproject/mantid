@@ -9,6 +9,7 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
 
+
 class SelectNexusFilesByMetadata(PythonAlgorithm):
 
     _criteria_splitted = []

@@ -318,6 +318,7 @@ def _is_name_in_group(wks_group, name_to_find):
     else:
         return True
 
+
 def _perform_group_name_search(wks_group, name_to_find):
     """
     Performs the search for a name in a group and returns

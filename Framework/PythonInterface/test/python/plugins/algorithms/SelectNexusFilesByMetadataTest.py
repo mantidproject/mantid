@@ -8,6 +8,7 @@
 import unittest
 from mantid.simpleapi import *
 
+
 class SelectNexusFilesByMetadataTest(unittest.TestCase):
 
     _fileslist = 'INTER00013460,13463,13464.nxs'

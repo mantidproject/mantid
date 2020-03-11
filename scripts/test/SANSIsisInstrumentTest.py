@@ -40,6 +40,7 @@ class SANSIsisInstrumentTest(unittest.TestCase):
         self.assertEqual(None, start_Tof)
         self.assertEqual(None, end_Tof)
 
+
 class TestParameterMapModifications(unittest.TestCase):
     def create_sample_workspace(self, ws_name, types, values, names):
         ws = CreateSampleWorkspace(OutputWorkspace = ws_name)

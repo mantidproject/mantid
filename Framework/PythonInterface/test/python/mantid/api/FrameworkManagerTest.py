@@ -8,6 +8,7 @@ import unittest
 import testhelpers
 from mantid.api import FrameworkManager, FrameworkManagerImpl, IAlgorithm, AlgorithmProxy
 
+
 class FrameworkManagerTest(unittest.TestCase):
 
     def test_clear_functions_do_not_throw(self):

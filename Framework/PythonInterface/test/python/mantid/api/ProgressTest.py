@@ -8,6 +8,7 @@ import unittest
 from mantid.api import Progress,PythonAlgorithm
 from mantid.kernel import ProgressBase
 
+
 class ProgressTest(unittest.TestCase):
 
     def test_class_inherits_ProgressBase(self):

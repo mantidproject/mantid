@@ -7,6 +7,7 @@
 import unittest
 from mantid.kernel import UnitFactory, UnitFactoryImpl, Unit
 
+
 class UnitFactoryTest(unittest.TestCase):
 
     def test_alias_is_of_type_UnitFactoryImpl(self):

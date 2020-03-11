@@ -10,6 +10,7 @@ import re
 from string import punctuation
 SUBSTITUTE_REF_RE = re.compile(r'\|(.+?)\|')
 
+
 class PropertiesDirective(AlgorithmBaseDirective):
 
     """

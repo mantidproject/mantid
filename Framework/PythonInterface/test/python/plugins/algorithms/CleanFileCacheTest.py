@@ -14,6 +14,7 @@ from mantid.simpleapi import CreateCacheFilename
 
 import os, sys, hashlib, tempfile, glob, shutil, time
 
+
 class CleanFileCache(unittest.TestCase):
 
     def test1(self):
@@ -162,6 +163,7 @@ def createFile(f, daysbefore):
 def computeTime(daysbefore):
     "compute time as float of the time at n=daysbefore days before today"
     return time.time() - daysbefore * 24*60*60
+
 
 def touch(f):
     with open(f, 'w') as stream:

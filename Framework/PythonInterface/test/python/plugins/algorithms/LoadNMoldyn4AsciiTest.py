@@ -11,6 +11,7 @@ from mantid.api import *
 
 import os
 
+
 class LoadNMoldyn4AsciiTest(unittest.TestCase):
     """
     Note that the test files used here are not axactly in the same format as

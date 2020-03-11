@@ -8,6 +8,7 @@ import unittest
 from mantid.kernel import MemoryStats
 import sys
 
+
 class MemoryStatsTest(unittest.TestCase):
 
     def test_values_are_all_greater_than_zero(self):

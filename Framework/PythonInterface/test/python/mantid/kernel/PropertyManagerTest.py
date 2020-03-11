@@ -7,6 +7,7 @@
 import unittest
 from mantid.kernel import PropertyManager, IPropertyManager
 
+
 class PropertyManagerTest(unittest.TestCase):
     def test_propertymanager_population(self):
         manager = PropertyManager()

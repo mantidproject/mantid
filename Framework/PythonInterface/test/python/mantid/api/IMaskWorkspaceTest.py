@@ -8,6 +8,7 @@ import unittest
 from mantid.api import AnalysisDataService, IMaskWorkspace
 from testhelpers import run_algorithm, WorkspaceCreationHelper
 
+
 class IMaskWorkspaceTest(unittest.TestCase):
 
     def test_MaskWorkspace_Is_Retrievable(self):

@@ -13,6 +13,7 @@ from mantid.api import PythonAlgorithm
 import numpy as np
 import sys
 
+
 class ArrayPropertyTest(unittest.TestCase):
 
     def test_default_constructor_raises_an_exception(self):

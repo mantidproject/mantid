@@ -8,6 +8,7 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 
+
 class MeanTest(unittest.TestCase):
 
     def test_throws_if_non_existing_names(self):

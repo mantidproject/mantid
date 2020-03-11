@@ -14,6 +14,7 @@ from Muon.GUI.Common.load_widget.load_view import LoadView
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
 from collections import OrderedDict
 
+
 @start_qapplication
 class LoadPresenterTest(unittest.TestCase):
     def setUp(self):

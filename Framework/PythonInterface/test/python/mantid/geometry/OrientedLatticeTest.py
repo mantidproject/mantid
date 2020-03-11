@@ -10,6 +10,7 @@ from mantid.geometry import OrientedLattice, UnitCell
 from mantid.kernel import V3D
 import numpy as np
 
+
 class OrientedLatticeTest(unittest.TestCase):
 
     def test_OrientedLattice_is_subclass_of_UnitCell(self):

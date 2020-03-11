@@ -8,6 +8,7 @@ import unittest
 from mantid.kernel import FacilityInfo, InstrumentInfo, ConfigService
 import pytz
 
+
 class FacilityInfoTest(unittest.TestCase):
 
     def test_construction_raies_an_error(self):

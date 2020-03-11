@@ -25,6 +25,8 @@ from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 import math
 import re
 import abc
+
+
 def enum(**enums):
     return type('Enum', (), enums)
 

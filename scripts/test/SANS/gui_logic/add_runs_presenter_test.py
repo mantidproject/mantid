@@ -179,6 +179,7 @@ def create_mocked_runs(start, len):
         mock_instance.display_name.return_value = start + x
     return run_selection
 
+
 class BaseFileNameTest(AddRunsPagePresenterTestCase):
     def setUp(self):
         self.view = self._make_mock_view()

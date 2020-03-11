@@ -11,6 +11,7 @@ import unittest
 import numpy as np
 from Direct.AbsorptionShapes import (anAbsorptionShape,Cylinder,FlatPlate,HollowCylinder,Sphere)
 
+
 class AbsorbtionShapesTest(unittest.TestCase):
     def __init__(self, methodName):
         return super(AbsorbtionShapesTest, self).__init__(methodName)

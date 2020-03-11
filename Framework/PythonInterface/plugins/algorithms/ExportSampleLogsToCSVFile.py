@@ -10,6 +10,8 @@ from mantid.kernel import *
 from distutils.version import LooseVersion
 import numpy as np
 import os
+
+
 class ExportSampleLogsToCSVFile(PythonAlgorithm):
     """ Python algorithm to export sample logs to spread sheet file
     for VULCAN

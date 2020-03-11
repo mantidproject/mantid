@@ -7,6 +7,7 @@
 import unittest
 from mantid.kernel import ProgressBase
 
+
 class ProgressBaseTest(unittest.TestCase):
 
     def test_class_has_expected_attributes(self):

@@ -17,6 +17,8 @@ DEPRECATE_USE_ALG_RE = re.compile(r"Use\s(([A-Z][a-zA-Z0-9]+)\s(version ([0-9])+
 SCREENSHOT_MAX_HEIGHT = 250
 
 #--------------------------------------------------------------------------
+
+
 class AlgorithmDirective(AlgorithmBaseDirective):
 
     """
@@ -225,6 +227,7 @@ def html_collect_pages(dummy_app):
         yield (redirect_pagename, context, template)
 
 #------------------------------------------------------------------------------------------------------------
+
 
 def setup(app):
     """

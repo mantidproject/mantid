@@ -15,12 +15,14 @@ from mantid.api import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm,
 
 ########################### Test classes #####################################
 
+
 class TestPyAlgDefaultAttrs(PythonAlgorithm):
     def PyInit(self):
         pass
 
     def PyExec(self):
         pass
+
 
 class TestPyAlgOverriddenAttrs(PythonAlgorithm):
 
@@ -42,6 +44,7 @@ class TestPyAlgOverriddenAttrs(PythonAlgorithm):
     def PyExec(self):
         pass
 
+
 class TestPyAlgIsRunningReturnsNonBool(PythonAlgorithm):
 
     def isRunning(self):
@@ -52,6 +55,7 @@ class TestPyAlgIsRunningReturnsNonBool(PythonAlgorithm):
 
     def PyExec(self):
         pass
+
 
 class CancellableAlg(PythonAlgorithm):
 
@@ -70,6 +74,7 @@ class CancellableAlg(PythonAlgorithm):
         self.is_running = False
 
 ###############################################################################
+
 
 class PythonAlgorithmTest(unittest.TestCase):
 

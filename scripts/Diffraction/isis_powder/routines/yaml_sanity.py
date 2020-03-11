@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+
+
 def calibration_file_sanity_check(yaml_dict, file_path):
     # Check that the dictionary has data
     if not yaml_dict:

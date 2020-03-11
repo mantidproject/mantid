@@ -7,6 +7,7 @@
 import unittest
 from mantid.geometry import ReferenceFrame
 
+
 class ReferenceFrameTest(object):
     def test_ReferenceFrame_cannot_be_instantiated(self):
         self.assertFalse(can_be_instantiated(Instrument))

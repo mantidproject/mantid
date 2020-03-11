@@ -8,6 +8,7 @@ import unittest
 import testhelpers
 from mantid.kernel import FloatBoundedValidator, IntBoundedValidator
 
+
 class BoundedValidatorTest(unittest.TestCase):
 
     def test_construction_does_not_raise_error_when_both_are_floats(self):

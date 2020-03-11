@@ -9,6 +9,7 @@ from testhelpers import run_algorithm
 from mantid.api import NumericAxis, SpectraAxis, TextAxis, mtd
 import numpy as np
 
+
 class AxisTest(unittest.TestCase):
 
     _test_ws = None

@@ -11,6 +11,7 @@ import unittest
 from mantid.simpleapi import Load, LoadDialog
 from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
 
+
 class SimpleAPILoadTest(unittest.TestCase):
 
     def tearDown(self):

@@ -9,6 +9,8 @@ import systemtesting
 import json
 from mantid.simpleapi import *
 from mantid.geometry import PointGroupFactory
+
+
 class HKLStatisticsTestMixin(object):
     def _init_test_data(self):
         self._ws = CreateSimulationWorkspace(Instrument='TOPAZ',

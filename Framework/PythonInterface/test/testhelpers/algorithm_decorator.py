@@ -7,6 +7,7 @@
 import inspect
 import re
 
+
 def make_decorator(algorithm_to_decorate):
     """
     Dynamically create a builder pattern style decorator around a Mantid algorithm.
