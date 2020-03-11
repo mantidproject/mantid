@@ -296,6 +296,35 @@ class FigureInteractionTest(unittest.TestCase):
         self.assertTrue(
             any(FigureInteraction.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
 
+    def test_context_menu_includes_plot_type_if_plot_has_multiple_lines(self):
+        fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.ax.plot([0, 1], [0, 1])
+        self.ax.plot([0, 1], [0, 1])
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        self.interactor._add_plot_type_option_menu(main_menu, self.ax)
+
+        added_menu = main_menu.children()[1]
+        self.assertEqual(added_menu.children()[0].text(), "Plot Type")
+
+    def test_context_menu_does_not_include_plot_type_if_plot_has_one_line(self):
+        fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.ax.errorbar([0, 1], [0, 1], capsize=1)
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        self.interactor._add_plot_type_option_menu(main_menu, self.ax)
+
+        # Number of children should remain unchanged
+        self.assertEqual(1, len(main_menu.children()))
+
     def test_scripted_plot_show_and_hide_all(self):
         self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
         self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
@@ -358,7 +387,7 @@ class FigureInteractionTest(unittest.TestCase):
         return fig_manager
 
     def _create_mock_right_click(self):
-        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = [], creation_args = [{}], lines=[]))
+        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = [], creation_args = [{}]))
         type(mouse_event).button = PropertyMock(return_value=3)
         return mouse_event
 
