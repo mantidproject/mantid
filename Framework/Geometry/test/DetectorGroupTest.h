@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TESTDETECTORGROUP_H_
-#define TESTDETECTORGROUP_H_
+#pragma once
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -138,5 +137,3 @@ private:
   boost::shared_ptr<DetectorGroup> m_detGroup;
   Component m_origin;
 };
-
-#endif /*TESTDETECTORGROUP_H_*/

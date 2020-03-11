@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TESTPARCOMPASSEMBLY_H_
-#define MANTID_TESTPARCOMPASSEMBLY_H_
+#pragma once
 
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidKernel/Quat.h"
@@ -152,5 +151,3 @@ public:
   //  // Keep references to detectors alive
   //  boost::shared_ptr<Component> m_det1, m_det2, m_det3
 };
-
-#endif

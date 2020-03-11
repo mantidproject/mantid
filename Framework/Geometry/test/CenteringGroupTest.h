@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_CENTERINGGROUPTEST_H_
-#define MANTID_GEOMETRY_CENTERINGGROUPTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -93,5 +92,3 @@ private:
            collection.end();
   }
 };
-
-#endif /* MANTID_GEOMETRY_CENTERINGGROUPTEST_H_ */

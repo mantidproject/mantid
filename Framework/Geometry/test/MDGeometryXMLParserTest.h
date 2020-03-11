@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MDGEOMETRY_XML_PARSER_TEST_H_
-#define MDGEOMETRY_XML_PARSER_TEST_H_
+#pragma once
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLParser.h"
 #include <cxxtest/TestSuite.h>
@@ -361,5 +360,3 @@ public:
     TS_ASSERT_THROWS(xmlParser.execute(), const std::runtime_error &);
   }
 };
-
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_BRAGGSCATTERERINCRYSTALSTRUCTURE_H_
-#define MANTID_GEOMETRY_BRAGGSCATTERERINCRYSTALSTRUCTURE_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/BraggScatterer.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
@@ -81,5 +80,3 @@ getTokenizedPositionString(const std::string &position);
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_BRAGGSCATTERERINCRYSTALSTRUCTURE_H_ */

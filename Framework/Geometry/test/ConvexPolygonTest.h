@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVEXPOLYGONTEST_H_
-#define CONVEXPOLYGONTEST_H_
+#pragma once
 
 #include "MantidGeometry/Math/ConvexPolygon.h"
 #include "MantidKernel/Exception.h"
@@ -191,5 +190,3 @@ public:
     }
   }
 };
-
-#endif // CONVEXPOLYGONTEST_H_

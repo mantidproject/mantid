@@ -1,5 +1,4 @@
-#ifndef MANTID_GEOMETRY_COMPONENTINFOBANKHELPERS_H_
-#define MANTID_GEOMETRY_COMPONENTINFOBANKHELPERS_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include <Eigen/Core>
@@ -26,5 +25,3 @@ offsetFromAncestor(const Mantid::Geometry::ComponentInfo &compInfo,
 } // namespace ComponentInfoBankHelpers
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_COMPONENTINFOBANKHELPERS_H_ */

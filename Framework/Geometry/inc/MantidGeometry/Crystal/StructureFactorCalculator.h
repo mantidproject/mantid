@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_STRUCTUREFACTORCALCULATOR_H_
-#define MANTID_GEOMETRY_STRUCTUREFACTORCALCULATOR_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/DllConfig.h"
@@ -62,5 +61,3 @@ create(const CrystalStructure &crystalStructure) {
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_STRUCTUREFACTORCALCULATOR_H_ */

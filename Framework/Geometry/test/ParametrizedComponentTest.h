@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TESTPARCOMPONENT__
-#define MANTID_TESTPARCOMPONENT__
+#pragma once
 
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/Component.h"
@@ -264,5 +263,3 @@ private:
   const std::string m_quatName;
   const Quat m_quatValue;
 };
-
-#endif

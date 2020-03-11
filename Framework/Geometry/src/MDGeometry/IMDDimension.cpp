@@ -4,8 +4,6 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef I_MDDIMENSION_H
-#define I_MDDIMENSION_H
 
 /** The class discribes one dimension of multidimensional dataset representing
 an ortogonal dimension and linear axis.
@@ -27,5 +25,3 @@ namespace Geometry {
   }*/
 }
 } // namespace Mantid
-
-#endif

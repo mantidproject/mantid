@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TESTALGEBRA__
-#define MANTID_TESTALGEBRA__
+#pragma once
 
 #include <algorithm>
 #include <cmath>
@@ -181,5 +180,3 @@ public:
                      "b'+a'+((g'+j+(n'm')+(k'l))(c+g+h+i+(e'd'f)))");
   }
 };
-
-#endif

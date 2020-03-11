@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CONETEST__
-#define MANTID_CONETEST__
+#pragma once
 
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
@@ -156,4 +155,3 @@ private:
     return output.str();
   }
 };
-#endif

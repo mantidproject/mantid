@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_CRYSTALSTRUCTURETEST_H_
-#define MANTID_GEOMETRY_CRYSTALSTRUCTURETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -112,5 +111,3 @@ private:
   SpaceGroup_const_sptr m_spaceGroup;
   CompositeBraggScatterer_sptr m_scatterers;
 };
-
-#endif /* MANTID_GEOMETRY_CRYSTALSTRUCTURETEST_H_ */

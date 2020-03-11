@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SAMPLEENVIRONMENT_H_
-#define MANTID_GEOMETRY_SAMPLEENVIRONMENT_H_
+#pragma once
 
 //------------------------------------------------------------------------------
 // Includes
@@ -69,5 +68,3 @@ using SampleEnvironment_uptr = std::unique_ptr<SampleEnvironment>;
 using SampleEnvironment_const_uptr = std::unique_ptr<const SampleEnvironment>;
 } // namespace Geometry
 } // namespace Mantid
-
-#endif // MANTID_GEOMETRY_SAMPLEENVIRONMENT_H_

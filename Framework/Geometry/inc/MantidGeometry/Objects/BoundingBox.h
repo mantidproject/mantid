@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDGEOMETRY_BOUNDINGBOX_H_
-#define MANTIDGEOMETRY_BOUNDINGBOX_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/Tolerance.h"
@@ -212,5 +211,3 @@ MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,
                                              const BoundingBox &box);
 } // namespace Geometry
 } // namespace Mantid
-
-#endif // MANTIDGEOMETRY_BOUNDINGBOX_H_

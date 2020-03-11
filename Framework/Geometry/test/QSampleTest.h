@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_QSAMPLETEST_H_
-#define MANTID_GEOMETRY_QSAMPLETEST_H_
+#pragma once
 
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/MDUnit.h"
@@ -44,5 +43,3 @@ public:
         Mantid::Kernel::SpecialCoordinateSystem::QSample);
   }
 };
-
-#endif /* MANTID_GEOMETRY_QSAMPLETEST_H_ */

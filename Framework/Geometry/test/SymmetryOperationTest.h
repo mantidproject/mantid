@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SYMMETRYOPERATIONTEST_H_
-#define MANTID_GEOMETRY_SYMMETRYOPERATIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -468,5 +467,3 @@ private:
 
   std::vector<V3D> m_allHkl;
 };
-
-#endif /* MANTID_GEOMETRY_SYMMETRYOPERATIONTEST_H_ */

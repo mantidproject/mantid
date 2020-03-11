@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_IDFOBJECT_H_
-#define MANTID_GEOMETRY_IDFOBJECT_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #ifndef Q_MOC_RUN
@@ -102,5 +101,3 @@ using IDFObject_const_sptr = boost::shared_ptr<const AbstractIDFObject>;
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_IDFOBJECT_H_ */

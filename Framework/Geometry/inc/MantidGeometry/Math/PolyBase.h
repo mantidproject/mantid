@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef mathLevel_PolyBase_h
-#define mathLevel_PolyBase_h
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 
@@ -103,4 +102,3 @@ std::ostream &operator<<(std::ostream &, const PolyBase &);
 } // namespace mathLevel
 
 } // NAMESPACE Mantid
-#endif

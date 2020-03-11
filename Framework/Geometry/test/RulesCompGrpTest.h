@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_RULESCOMPGRPTEST__
-#define MANTID_RULESCOMPGRPTEST__
+#pragma once
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include <cfloat>
@@ -162,5 +161,3 @@ private:
 };
 //---------------------------------End of
 // CompGrp----------------------------------------
-
-#endif
