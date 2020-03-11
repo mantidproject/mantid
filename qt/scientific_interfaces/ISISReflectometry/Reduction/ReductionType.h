@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_REDUCTIONTYPE_H_
-#define MANTID_CUSTOMINTERFACES_REDUCTIONTYPE_H_
+#pragma once
 #include "Common/DllConfig.h"
 #include <boost/optional.hpp>
 namespace MantidQt {
@@ -41,4 +40,3 @@ inline std::string reductionTypeToString(ReductionType reductionType) {
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_REDUCTIONTYPE_H_

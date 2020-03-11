@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CONVFITMODELTEST_H_
-#define MANTIDQT_CONVFITMODELTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -261,5 +260,3 @@ private:
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   std::unique_ptr<ConvFitModel> m_model;
 };
-
-#endif /* MANTIDQT_CONVFITMODELTEST_H_ */

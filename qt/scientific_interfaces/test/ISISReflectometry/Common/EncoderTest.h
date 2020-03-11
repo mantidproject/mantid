@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef ISISREFLECTOMETRY_TEST_ENCODER_TEST_H_
-#define ISISREFLECTOMETRY_TEST_ENCODER_TEST_H_
+#pragma once
 
 #include "../../../ISISReflectometry/GUI/Common/Encoder.h"
 #include "../ReflMockObjects.h"
@@ -58,5 +57,3 @@ public:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* ISISREFLECTOMETRY_TEST_ENCODER_TEST_H_ */

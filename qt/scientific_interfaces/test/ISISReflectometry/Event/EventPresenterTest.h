@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_REFLEVENTPRESENTERTEST_H_
-#define MANTID_CUSTOMINTERFACES_REFLEVENTPRESENTERTEST_H_
+#pragma once
 
 #include "../../../ISISReflectometry/GUI/Event/EventPresenter.h"
 #include "../ReflMockObjects.h"
@@ -238,4 +237,3 @@ private:
     EXPECT_CALL(m_view, enableSliceType(newSliceType)).Times(1);
   }
 };
-#endif // MANTID_CUSTOMINTERFACES_REFLEVENTPRESENTERTEST_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
-#define MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H
+#pragma once
 
 #include "GUI/Batch/IBatchJobAlgorithm.h"
 #include "GUI/Batch/IBatchJobRunner.h"
@@ -333,5 +332,3 @@ public:
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-#endif /*MANTID_CUSTOMINTERFACES_REFLMOCKOBJECTS_H*/

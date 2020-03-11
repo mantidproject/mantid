@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_MOCKBATCHPRESENTER_H_
-#define MANTID_CUSTOMINTERFACES_MOCKBATCHPRESENTER_H_
+#pragma once
 #include "../../../ISISReflectometry/GUI/Common/Plotter.h"
 #include "../../../ISISReflectometry/GUI/RunsTable/RunsTablePresenter.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -43,4 +42,3 @@ public:
 } // namespace CustomInterfaces
 } // namespace MantidQt
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-#endif // MANTID_CUSTOMINTERFACES_MOCKRUNSTABLEPRESENTER_H_

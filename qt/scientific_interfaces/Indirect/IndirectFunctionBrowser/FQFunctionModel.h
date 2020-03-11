@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_FQFUNCTIONMODEL_H
-#define MANTID_FQFUNCTIONMODEL_H
+#pragma once
 
 #include "DllConfig.h"
 #include "IFQFitObserver.h"
@@ -55,5 +54,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTID_FQFUNCTIONMODEL_H

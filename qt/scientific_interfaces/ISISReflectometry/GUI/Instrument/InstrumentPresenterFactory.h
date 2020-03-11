@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTERFACTORY_H
-#define MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTERFACTORY_H
+#pragma once
 #include "../../Reduction/Instrument.h"
 #include "Common/DllConfig.h"
 #include "IInstrumentPresenter.h"
@@ -28,4 +27,3 @@ public:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTERFACTORY_H

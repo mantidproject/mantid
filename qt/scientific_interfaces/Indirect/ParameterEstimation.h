@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_PARAMETERESTIMATION_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_PARAMETERESTIMATION_H_
+#pragma once
 
 #include "MantidKernel/cow_ptr.h"
 #include <functional>
@@ -28,5 +27,3 @@ using EstimationDataSelector = std::function<DataForParameterEstimation(
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_PARAMETERESTIMATION_H_ */

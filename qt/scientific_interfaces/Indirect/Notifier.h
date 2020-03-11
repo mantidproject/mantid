@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_NOTIFIER_H_
-#define MANTIDQTCUSTOMINTERFACES_NOTIFIER_H_
+#pragma once
 
 template <class T> class Notifier {
 public:
@@ -19,5 +18,3 @@ public:
 private:
   std::vector<T *> m_subscribers;
 };
-
-#endif

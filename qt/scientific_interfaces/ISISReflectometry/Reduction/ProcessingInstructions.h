@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_PROCESSINGINSTRUCTIONS_H_
-#define MANTID_CUSTOMINTERFACES_PROCESSINGINSTRUCTIONS_H_
+#pragma once
 
 #include "Common/DllConfig.h"
 #include <boost/optional.hpp>
@@ -20,4 +19,3 @@ using ProcessingInstructions = std::string;
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_PROCESSINGINSTRUCTIONS_H_

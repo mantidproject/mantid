@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATOR_H
-#define MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATOR_H
+#pragma once
 #include "Common/ValidationResult.h"
 #include "PerThetaDefaultsTableValidationError.h"
 #include "Reduction/PerThetaDefaults.h"
@@ -48,4 +47,3 @@ public:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_ISISREFLECTOMETRY_PERTHETADEFAULTSTABLEVALIDATOR_H

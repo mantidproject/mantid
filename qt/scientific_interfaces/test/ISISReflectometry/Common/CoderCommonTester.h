@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef CODER_COMMON_TESTER_H_
-#define CODER_COMMON_TESTER_H_
+#pragma once
 
 #include "../../../ISISReflectometry/GUI/Batch/BatchPresenter.h"
 #include "../../../ISISReflectometry/GUI/Batch/QtBatchView.h"
@@ -331,5 +330,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* CODER_COMMON_TESTER_H_ */

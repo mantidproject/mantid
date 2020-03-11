@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_
-#define MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_
+#pragma once
 #include "../../../ISISReflectometry/Common/Parse.h"
 #include "../../../ISISReflectometry/Reduction/ValidateRow.h"
 #include <cxxtest/TestSuite.h>
@@ -236,4 +235,3 @@ public:
     TS_ASSERT_EQUALS(expected, result);
   }
 };
-#endif // MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_

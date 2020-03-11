@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H
-#define MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H
+#pragma once
 
 #include "../EnggDiffraction/IEnggDiffractionView.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -191,5 +190,3 @@ public:
   MOCK_METHOD1(updateTabsInstrument, void(const std::string &newInstrument));
 };
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-#endif // MANTID_CUSTOMINTERFACES_ENGGDIFFRACTIONVIEWMOCK_H

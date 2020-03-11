@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETMODELTEST_H_
-#define MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETMODELTEST_H_
+#pragma once
 
 #include "../EnggDiffraction/EnggDiffMultiRunFittingWidgetModel.h"
 
@@ -101,5 +100,3 @@ public:
     TS_ASSERT_THROWS_ANYTHING(model.removeRun(RunLabel("456", 2)));
   }
 };
-
-#endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETMODELTEST_H_

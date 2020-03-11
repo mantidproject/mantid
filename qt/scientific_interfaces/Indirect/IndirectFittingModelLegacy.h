@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODELLEGACY_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITTINGMODELLEGACY_H_
+#pragma once
 
 #include "IndirectFitDataLegacy.h"
 #include "IndirectFitOutputLegacy.h"
@@ -224,5 +223,3 @@ void IndirectFittingModelLegacy::applySpectra(std::size_t index,
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

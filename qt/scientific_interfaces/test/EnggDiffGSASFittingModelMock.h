@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOM_INTERFACES_ENGGDIFFFITTINGMODELMOCK_H_
-#define MANTID_CUSTOM_INTERFACES_ENGGDIFFFITTINGMODELMOCK_H_
+#pragma once
 
 #include "../EnggDiffraction/IEnggDiffGSASFittingModel.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -51,5 +50,3 @@ public:
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-#endif // MANTID_CUSTOM_INTERFACES_ENGGDIFFFITTINGMODELMOCK_H_

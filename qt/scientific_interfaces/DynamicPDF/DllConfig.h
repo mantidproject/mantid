@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_DYNAMICPDF_DLLCONFIG_H_
-#define MANTIDQT_DYNAMICPDF_DLLCONFIG_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 
@@ -20,5 +19,3 @@
 #define MANTIDQT_DYNAMICPDF_DLL DLLImport
 #define EXTERN_MANTIDQT_DYNAMICPDF EXTERN_IMPORT
 #endif
-
-#endif // MANTIDQT_DYNAMICPDF_DLLCONFIG_H_

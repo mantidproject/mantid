@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGOBSERVER_H_
-#define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGOBSERVER_H_
+#pragma once
 
 #include "GSASIIRefineFitPeaksOutputProperties.h"
 
@@ -39,5 +38,3 @@ public:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGOBSERVER_H_

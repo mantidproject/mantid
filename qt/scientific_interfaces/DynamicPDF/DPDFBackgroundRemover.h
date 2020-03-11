@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_BACKGROUNDREMOVER_H_
-#define MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_BACKGROUNDREMOVER_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -71,5 +70,3 @@ private:
 } // namespace DynamicPDF
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_BACKGROUNDREMOVER_H_

@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
-#define MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_
+#pragma once
 #include "../Runs/IRunsPresenter.h"
 #include "Common/Clipboard.h"
 #include "Common/DllConfig.h"
@@ -177,4 +176,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_RUNSTABLEPRESENTER_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERPROGRESBARTEST_H_
-#define MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERPROGRESBARTEST_H_
+#pragma once
 
 #include "BatchJobRunnerTest.h"
 
@@ -327,5 +326,3 @@ public:
     TS_ASSERT_EQUALS(jobRunner.percentComplete(), 33);
   }
 };
-
-#endif // MANTID_CUSTOMINTERFACES_BATCHJOBRUNNERPROGRESSBARTEST_H_

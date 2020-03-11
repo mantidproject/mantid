@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_IPYTHONRUNNER_H
-#define MANTID_ISISREFLECTOMETRY_IPYTHONRUNNER_H
+#pragma once
 
 #include <string>
 
@@ -27,4 +26,3 @@ public:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif

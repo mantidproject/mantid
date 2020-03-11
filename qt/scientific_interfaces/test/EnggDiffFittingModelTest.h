@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGMODELTEST_H_
-#define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGMODELTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -310,5 +309,3 @@ const std::string EnggDiffFittingModelTest::FOCUSED_WS_FILENAME =
 
 const RunLabel EnggDiffFittingModelTest::FOCUSED_WS_RUN_LABEL =
     RunLabel("277208", 2);
-
-#endif

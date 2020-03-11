@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_CUSTOMINTERFACES_CLIPBOARD_H_
-#define MANTID_CUSTOMINTERFACES_CLIPBOARD_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
@@ -72,4 +71,3 @@ bool MANTIDQT_ISISREFLECTOMETRY_DLL containsGroups(Clipboard const &clipboard);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_CLIPBOARD_H_
