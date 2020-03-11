@@ -126,6 +126,30 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
       }
     }
     return true;
+  } else if (e->type() == QEvent::KeyPress) {
+    QKeyEvent *keyEv = static_cast<QKeyEvent *>(e);
+    int step = 1;
+    int sliderx = m_slider->x();
+    int slidery = m_slider->y();
+    if (keyEv->key() == Qt::Key_Left) {
+      if (sliderx >= step) {
+        m_slider->move(sliderx - step, slidery);
+      } else {
+        m_slider->move(0, slidery);
+      }
+      m_changed = true;
+      updateMinMax();
+    } else if (keyEv->key() == Qt::Key_Right) {
+      int totalWidth = this->width();
+      if (sliderx + slider->width() + step < totalWidth) {
+        m_slider->move(sliderx + step, slidery);
+      } else {
+        m_slider->move(totalWidth - slider->width(), slidery);
+      }
+      m_changed = true;
+      updateMinMax();
+    }
+    return true;
   }
   return false;
 }
