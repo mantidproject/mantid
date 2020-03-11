@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BOXCONTROLLER_NEXUS_IO_TEST_H
-#define BOXCONTROLLER_NEXUS_IO_TEST_H
+#pragma once
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
@@ -240,4 +239,3 @@ private:
     return new Mantid::DataObjects::BoxControllerNeXusIO(sc.get());
   }
 };
-#endif

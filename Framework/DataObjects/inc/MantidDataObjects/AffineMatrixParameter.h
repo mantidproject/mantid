@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_AFFINE_MATRIX_PARAMETER
-#define MANTID_DATAOBJECTS_AFFINE_MATRIX_PARAMETER
+#pragma once
 
 #include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -58,5 +57,3 @@ private:
 };
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif

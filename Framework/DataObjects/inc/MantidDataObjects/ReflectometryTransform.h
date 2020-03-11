@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_REFLECTOMETRYMDTRANFORM_H_
-#define MANTID_DATAOBJECTS_REFLECTOMETRYMDTRANFORM_H_
+#pragma once
 
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
@@ -111,4 +110,3 @@ initAngularCaches(const Mantid::API::MatrixWorkspace *const workspace);
 using ReflectometryTransform_sptr = boost::shared_ptr<ReflectometryTransform>;
 } // namespace DataObjects
 } // namespace Mantid
-#endif

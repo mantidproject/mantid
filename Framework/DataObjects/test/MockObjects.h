@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MOCKOBJECTS_H_
-#define MOCKOBJECTS_H_
+#pragma once
 
 #include "MantidDataObjects/PeakShapeFactory.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
@@ -44,5 +43,3 @@ public:
 } // namespace Mantid
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-#endif /* MOCKOBJECTS_H_ */

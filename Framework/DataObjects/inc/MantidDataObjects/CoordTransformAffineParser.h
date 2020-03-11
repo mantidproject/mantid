@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_COORDTRANSFORMPARSER_H_
-#define MANTID_DATAOBJECTS_COORDTRANSFORMPARSER_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
@@ -50,5 +49,3 @@ private:
 };
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif

@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_DATAOBJECTS_MORTONINDEX_BITINTERLEAVING_H_
-#define MANTID_DATAOBJECTS_MORTONINDEX_BITINTERLEAVING_H_
+#pragma once
 
 #include <cinttypes>
 #include <cstddef>
@@ -352,4 +351,3 @@ template <size_t ND, typename IntT> struct Interleaver<ND, IntT, Morton96> {
 };
 
 } // namespace morton_index
-#endif // MANTID_DATAOBJECTS_MORTONINDEX_BITINTERLEAVING_H_

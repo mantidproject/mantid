@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCEPARSERTEST_H_
-#define MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCEPARSERTEST_H_
+#pragma once
 
 #include "MantidDataObjects/CoordTransformAffine.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
@@ -112,4 +111,3 @@ public:
     delete product;
   }
 };
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_EVENTWORKSPACEMRU_H_
-#define MANTID_DATAOBJECTS_EVENTWORKSPACEMRU_H_
+#pragma once
 
 #include "MantidHistogramData/HistogramE.h"
 #include "MantidHistogramData/HistogramY.h"
@@ -102,5 +101,3 @@ protected:
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_EVENTWORKSPACEMRU_H_ */

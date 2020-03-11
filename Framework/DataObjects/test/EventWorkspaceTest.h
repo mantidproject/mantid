@@ -11,8 +11,7 @@
  *      Author: Janik Zikovsky
  */
 
-#ifndef EVENTWORKSPACETEST_H_
-#define EVENTWORKSPACETEST_H_
+#pragma once
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -844,5 +843,3 @@ public:
     static_cast<void>(new (memory) EventList());
   }
 };
-
-#endif /* EVENTWORKSPACETEST_H_ */
