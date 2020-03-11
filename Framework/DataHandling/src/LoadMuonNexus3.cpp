@@ -5,18 +5,18 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMuonNexus3.h"
-#include "MantidAPI/GroupingLoader.h"
+#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/LoadMuonNexus3Helper.h"
+#include "MantidDataHandling/SinglePeriodLoadMuonStrategy.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-
-#include "MantidDataHandling/ISISRunLogs.h"
-#include "MantidDataObjects/Workspace2D.h"
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -115,28 +115,26 @@ void LoadMuonNexus3::exec() {
   NXRoot root(m_filename);
   // Open the raw data group 'raw_data_1'
   NXEntry entry = root.openEntry("raw_data_1");
-  // What do we have to do next? At this point we have all the workspaces loaded
-  // If its multi period we have a workspace group
+  // Check if multi period file
   isEntryMultiPeriod(entry);
-
   // DO lots of stuff to this workspace
   if (m_multiPeriodsLoaded) {
     WorkspaceGroup_sptr wksp_grp =
         boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
-    addGoodFrames(wksp_grp, entry);
   } else {
     // we just have a single workspace
     Workspace2D_sptr workspace2D =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(outWS);
-    int64_t numberOfSpectra =
-        static_cast<int64_t>(workspace2D->getNumberHistograms());
-    // Load the log data
-    loadMuonLogData(entry, workspace2D);
-    addGoodFrames(workspace2D, entry);
-    Workspace_sptr table = loadDetectorGrouping(root, workspace2D);
-    setProperty("DetectorGroupingTable",
-                boost::dynamic_pointer_cast<Workspace>(table));
+        boost::dynamic_pointer_cast<Workspace2D>(outWS);
+    m_loadMuonStrategy = std::make_unique<SinglePeriodLoadMuonStrategy>(
+        entry, workspace2D, m_entrynumber, m_isFileMultiPeriod);
   }
+  m_loadMuonStrategy->loadGoodFrames();
+  // // Load the log data
+  // loadMuonLogData(entry, workspace2D);
+  // // Load good frames
+  // addGoodFrames(workspace2D, entry);
+  // // Load detector grouping
+  // loadDetectorGrouping(root, workspace2D);
 }
 // Determine whether file is multi period, and whether we have more than 1
 // period loaded
@@ -166,11 +164,21 @@ void LoadMuonNexus3::runLoadISISNexus() {
   ISISLoader->executeAsChildAlg();
   this->copyPropertiesFrom(*ISISLoader);
 }
-
+// Loads MuonLogData for a single period file
 void LoadMuonNexus3::loadMuonLogData(
     const NXEntry &entry, DataObjects::Workspace2D_sptr &localWorkspace) {
-  int a = 3;
-  int b = 4;
+  IAlgorithm_sptr loadLog = createChildAlgorithm("LoadMuonLog");
+  // Pass through the same input filename
+  loadLog->setPropertyValue("Filename", m_filename);
+  // Set the workspace property to be the same one filled above
+  loadLog->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+  try {
+    loadLog->execute();
+  } catch (std::runtime_error &) {
+    g_log.error("Unable to successfully run LoadMuonLog Child Algorithm");
+  }
+
   std::string mainFieldDirection =
       LoadMuonNexus3Helper::loadMainFieldDirectionFromNexus(entry);
   // set output property and add to workspace logs
@@ -178,23 +186,6 @@ void LoadMuonNexus3::loadMuonLogData(
   run.addProperty("main_field_direction", mainFieldDirection);
 }
 
-/**
- * Loads the good frames assuming we have just one workspace loaded
- * for a workspace 2d object
- */
-void LoadMuonNexus3::addGoodFrames(
-    DataObjects::Workspace2D_sptr &localWorkspace, const NXEntry &entry) {
-
-  auto &run = localWorkspace->mutableRun();
-  run.removeProperty("goodfrm");
-  NXInt goodframes = LoadMuonNexus3Helper::loadGoodFramesDataFromNexus(
-      entry, m_isFileMultiPeriod);
-  if (m_isFileMultiPeriod) {
-    run.addProperty("goodfrm", goodframes[static_cast<int>(m_entrynumber - 1)]);
-  } else {
-    run.addProperty("goodfrm", goodframes[0]);
-  }
-}
 // Overload #2 Takes in a workspace_group if we have loaded multiple periods
 void LoadMuonNexus3::addGoodFrames(WorkspaceGroup_sptr &workspaceGroup,
                                    const NXEntry &entry) {
@@ -217,29 +208,7 @@ void LoadMuonNexus3::addGoodFrames(WorkspaceGroup_sptr &workspaceGroup,
     run.addProperty("goodfrm", goodframes[static_cast<int>(index)]);
   }
 }
-/**
- * Loads detector grouping.
- * If no entry in NeXus file for grouping, load it from the IDF.
- * @param root :: Root entry of the Nexus file to read from
- * @param localWorkspace :: A pointer to the workspace in which the data is
- * stored
- * @returns :: Grouping table
- */
-Workspace_sptr LoadMuonNexus3::loadDetectorGrouping(
-    NXRoot &root, DataObjects::Workspace2D_sptr &localWorkspace) const {
 
-  TableWorkspace_sptr table =
-      LoadMuonNexus3Helper::loadDetectorGroupingFromNexus(root, localWorkspace,
-                                                          m_isFileMultiPeriod);
-  Workspace_sptr table_workspace;
-  if (table->rowCount() != 0) {
-    table_workspace = boost::dynamic_pointer_cast<Workspace>(table);
-  } else {
-    g_log.warning("Loading grouping from IDF");
-    table_workspace = loadDefaultDetectorGrouping(root, localWorkspace);
-  }
-  return table_workspace;
-}
 /**
  * Loads default detector grouping, if this isn't present
  * return dummy grouping

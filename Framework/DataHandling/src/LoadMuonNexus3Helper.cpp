@@ -5,6 +5,9 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
+
+// These functions handle the nexus operations needed to load
+// the information from the Muon Nexus V2 file
 #include "MantidDataHandling/LoadMuonNexus3Helper.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -47,46 +50,48 @@ NXInt loadGoodFramesDataFromNexus(const NXEntry &entry,
 }
 // Loads the detector grouping from the Muon Nexus V2 entry
 DataObjects::TableWorkspace_sptr
-loadDetectorGroupingFromNexus(NXRoot &root,
+loadDetectorGroupingFromNexus(NXEntry &entry,
                               DataObjects::Workspace2D_sptr &localWorkspace,
                               bool isFileMultiPeriod) {
 
   int64_t numberOfSpectra =
       static_cast<int64_t>(localWorkspace->getNumberHistograms());
 
-  // Open nexus entry
-  NXEntry dataEntry = root.openEntry("raw_data_1/instrument/detector_1");
-  NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
+  std::cout << "GOT INTO THIS FUNCCTION" << std::endl;
 
-  if (infoGrouping.stat != NX_ERROR) {
-    NXInt groupingData = dataEntry.openNXInt("grouping");
-    groupingData.load();
-    int numGroupingEntries = groupingData.dim0();
+  // // Open nexus entry
+  // NXEntry dataEntry = root.openEntry("raw_data_1/instrument/detector_1");
+  // NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
 
-    std::vector<detid_t> detectorsLoaded;
-    std::vector<detid_t> grouping;
-    // Return the detectors which are loaded
-    // then find the grouping ID for each detector
-    for (int64_t spectraIndex = 0; spectraIndex < numberOfSpectra;
-         spectraIndex++) {
-      const auto detIdSet =
-          localWorkspace->getSpectrum(spectraIndex).getDetectorIDs();
-      for (auto detector : detIdSet) {
-        detectorsLoaded.emplace_back(detector);
-      }
-    }
-    if (!isFileMultiPeriod) {
-      // Simplest case - one grouping entry per detector
-      for (const auto &detectorNumber : detectorsLoaded) {
-        grouping.emplace_back(groupingData[detectorNumber - 1]);
-      }
-    }
-    DataObjects::TableWorkspace_sptr table =
-        createDetectorGroupingTable(detectorsLoaded, grouping);
+  // if (infoGrouping.stat != NX_ERROR) {
+  //   NXInt groupingData = dataEntry.openNXInt("grouping");
+  //   groupingData.load();
+  //   int numGroupingEntries = groupingData.dim0();
 
-    return table;
-  }
+  //   std::vector<detid_t> detectorsLoaded;
+  //   std::vector<detid_t> grouping;
+  //   // Return the detectors which are loaded
+  //   // then find the grouping ID for each detector
+  //   for (int64_t spectraIndex = 0; spectraIndex < numberOfSpectra;
+  //        spectraIndex++) {
+  //     const auto detIdSet =
+  //         localWorkspace->getSpectrum(spectraIndex).getDetectorIDs();
+  //     for (auto detector : detIdSet) {
+  //       detectorsLoaded.emplace_back(detector);
+  //     }
+  //   }
+  //   if (!isFileMultiPeriod) {
+  //     // Simplest case - one grouping entry per detector
+  //     for (const auto &detectorNumber : detectorsLoaded) {
+  //       grouping.emplace_back(groupingData[detectorNumber - 1]);
+  //     }
+  //   }
+  //   DataObjects::TableWorkspace_sptr table =
+  //       createDetectorGroupingTable(detectorsLoaded, grouping);
+
+  // return table;
 }
+} // namespace LoadMuonNexus3Helper
 /**
  * Creates Detector Grouping Table .
  * @param detectorsLoaded :: Vector containing the list of detectorsLoaded
@@ -135,6 +140,6 @@ std::string loadMainFieldDirectionFromNexus(const NeXus::NXEntry &entry) {
   return mainFieldDirection;
 }
 
-} // namespace LoadMuonNexus3Helper
 } // namespace DataHandling
+} // namespace Mantid
 } // namespace Mantid

@@ -88,6 +88,7 @@ set(SRC_FILES
     src/LoadMuonNexus2.cpp
     src/LoadMuonNexus3.cpp
     src/LoadMuonNexus3Helper.cpp
+    src/SinglePeriodLoadMuonStrategy.cpp
     src/LoadNXSPE.cpp
     src/LoadNXcanSAS.cpp
     src/LoadNexus.cpp
@@ -300,6 +301,8 @@ set(INC_FILES
     inc/MantidDataHandling/LoadMuonNexus2.h
     inc/MantidDataHandling/LoadMuonNexus3.h
     inc/MantidDataHandling/LoadMuonNexus3Helper.h
+    inc/MantidDataHandling/LoadMuonStrategy.h
+    inc/MantidDataHandling/SinglePeriodLoadMuonStrategy.h
     inc/MantidDataHandling/LoadNXSPE.h
     inc/MantidDataHandling/LoadNXcanSAS.h
     inc/MantidDataHandling/LoadNexus.h

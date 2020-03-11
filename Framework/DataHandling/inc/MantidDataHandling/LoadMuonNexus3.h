@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LoadMuonNexus3_H_
-#define MANTID_DATAHANDLING_LoadMuonNexus3_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/DataBlockComposite.h"
+#include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDTypes.h"
@@ -26,7 +26,7 @@ namespace Mantid {
 namespace DataHandling {
 /** @class LoadMuonNexus3 LoadMuonNexus3.h DataHandling/LoadMuonNexus3.h
 
-Loads an file in Nexus Muon format version 2 and stores it in a 2D workspace
+Loads a file in the Nexus Muon format version 2 and stores it in a 2D workspace
 (Workspace2D class). LoadMuonNexus is an algorithm and as such inherits
 from the Algorithm class, via DataHandlingCommand, and overrides
 the init() & exec() methods.
@@ -98,9 +98,8 @@ private:
   createDeadTimeTable(const std::vector<int> &specToLoad,
                       const std::vector<double> &deadTimes);
   // Load the detector grouping
-  API::Workspace_sptr
-  loadDetectorGrouping(NeXus::NXRoot &root,
-                       DataObjects::Workspace2D_sptr &localWorkspace) const;
+  void loadDetectorGrouping(NeXus::NXRoot &root,
+                            DataObjects::Workspace2D_sptr &localWorkspace);
   // Load the default dectory grouping
   API::Workspace_sptr loadDefaultDetectorGrouping(
       NeXus::NXRoot &root, DataObjects::Workspace2D_sptr &localWorkspace) const;
@@ -134,9 +133,9 @@ private:
   int64_t m_specMax;
   /// The group which each detector belongs to in order
   std::vector<specnum_t> m_groupings;
+  // The loading stratergy used
+  std::unique_ptr<LoadMuonStrategy> m_loadMuonStrategy;
 };
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif

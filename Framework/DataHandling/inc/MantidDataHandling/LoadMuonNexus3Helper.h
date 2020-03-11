@@ -26,7 +26,7 @@ NeXus::NXInt loadGoodFramesDataFromNexus(const NeXus::NXEntry &entry,
                                          bool isFileMultiPeriod);
 // Loads the grouping data from the nexus file
 DataObjects::TableWorkspace_sptr
-loadDetectorGroupingFromNexus(NeXus::NXRoot &root,
+loadDetectorGroupingFromNexus(NeXus::NXEntry &entry,
                               DataObjects::Workspace2D_sptr &localWorkspace,
                               bool isFileMultiPeriod);
 
