@@ -370,5 +370,3 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs):
     if set_title:
         title = workspaces[0].name()
         ax.set_title(title)
-
-

@@ -40,4 +40,3 @@ from mantid.api import _adsimports
 # Make aliases accessible in this namespace
 ###############################################################################
 from mantid.api._aliases import *
-

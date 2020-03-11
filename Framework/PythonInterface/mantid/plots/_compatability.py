@@ -97,4 +97,3 @@ def _report_deprecated_parameter(param_name,param_value):
     """Logs a warning message if the parameter value is not None"""
     if param_value is not None:
         LOGGER.warning("The argument '{}' is not supported in workbench and has been ignored".format(param_name))
-
