@@ -208,7 +208,6 @@ public:
     TS_ASSERT_EQUALS(outputWS->blocksize(), 6);
 
     double errors[6] = {3., 3., 3., 3., 3., 2.236067977};
-    auto nhist = outputWS->getNumberHistograms();
     const double epsilon(1e-08);
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
       const auto &y = outputWS->y(i);
