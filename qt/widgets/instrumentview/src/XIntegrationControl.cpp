@@ -131,7 +131,10 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
     int step = 1;
     int sliderx = m_slider->x();
     int slidery = m_slider->y();
-    if (keyEv->key() == Qt::Key_Left) {
+    int totalWidth = this->width();
+
+    switch (keyEv->key()) {
+    case Qt::Key_Left:
       if (sliderx >= step) {
         m_slider->move(sliderx - step, slidery);
       } else {
@@ -139,8 +142,9 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
       }
       m_changed = true;
       updateMinMax();
-    } else if (keyEv->key() == Qt::Key_Right) {
-      int totalWidth = this->width();
+      break;
+
+    case Qt::Key_Right:
       if (sliderx + slider->width() + step < totalWidth) {
         m_slider->move(sliderx + step, slidery);
       } else {
@@ -148,6 +152,17 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
       }
       m_changed = true;
       updateMinMax();
+      break;
+
+    default:
+      break;
+    }
+    return true;
+  } else if (e->type() == QEvent::KeyRelease) {
+    QKeyEvent *keyEv = static_cast<QKeyEvent *>(e);
+    if ((keyEv->key() == Qt::Key_Left || keyEv->key() == Qt::Key_Right) &&
+        !keyEv->isAutoRepeat()) {
+      emit changed(m_minimum, m_maximum);
     }
     return true;
   }
