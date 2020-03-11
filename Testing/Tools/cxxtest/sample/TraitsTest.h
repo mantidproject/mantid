@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __TRAITSTEST_H
-#define __TRAITSTEST_H
+#pragma once
 
 //
 // This example shows how to use TS_ASSERT_EQUALS for your own classes
@@ -71,5 +70,3 @@ public:
 #endif // _CXXTEST_HAVE_STD
     }
 };
-
-#endif // __TRAITSTEST_H

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __cxxtest__StdioPrinter_h__
-#define __cxxtest__StdioPrinter_h__
+#pragma once
 
 //
 // The StdioPrinter is an StdioFilePrinter which defaults to stdout.
@@ -24,5 +23,3 @@ namespace CxxTest
             StdioFilePrinter( o, preLine, postLine ) {}
     };
 }
-
-#endif // __cxxtest__StdioPrinter_h__

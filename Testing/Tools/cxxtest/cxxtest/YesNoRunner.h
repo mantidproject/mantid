@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __cxxtest__YesNoRunner_h__
-#define __cxxtest__YesNoRunner_h__
+#pragma once
 
 //
 // The YesNoRunner is a simple TestListener that
@@ -31,5 +30,3 @@ namespace CxxTest
         }
     };
 }
-
-#endif // __cxxtest__YesNoRunner_h__

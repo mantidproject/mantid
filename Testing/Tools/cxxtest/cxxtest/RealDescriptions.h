@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __cxxtest__RealDescriptions_h__
-#define __cxxtest__RealDescriptions_h__
+#pragma once
 
 //
 // The "real" description classes
@@ -227,6 +226,3 @@ namespace CxxTest
     void activateAllTests();
     bool leaveOnly( const char *suiteName, const char *testName = 0 );
 }
-
-#endif // __cxxtest__RealDescriptions_h__
-

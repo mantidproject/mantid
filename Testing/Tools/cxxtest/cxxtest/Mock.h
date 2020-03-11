@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __cxxtest__Mock_h__
-#define __cxxtest__Mock_h__
+#pragma once
 
 //
 // The default namespace is T::
@@ -352,5 +351,3 @@ __CXXTEST_MOCK__TRAITS;
             static TYPE defaultValue() { return VALUE; } \
         }; \
     }
-
-#endif // __cxxtest__Mock_h__

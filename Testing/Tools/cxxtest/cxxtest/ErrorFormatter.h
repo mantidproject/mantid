@@ -1,5 +1,4 @@
-#ifndef __cxxtest__ErrorFormatter_h__
-#define __cxxtest__ErrorFormatter_h__
+#pragma once
 
 //
 // The ErrorFormatter is a TestListener that
@@ -285,8 +284,6 @@ namespace CxxTest
         const char *_postLine;
     };
 }
-
-#endif // __cxxtest__ErrorFormatter_h__
 
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government

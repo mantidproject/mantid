@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __MESSAGETEST_H
-#define __MESSAGETEST_H
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -31,6 +30,3 @@ public:
         TSM_ASSERT_EQUALS( message, value, value * value );
     }
 };
-
-
-#endif // __MESSAGETEST_H
