@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_SNSLIVEEVENTDATALISTENERTEST_H_
-#define MANTID_LIVEDATA_SNSLIVEEVENTDATALISTENERTEST_H_
+#pragma once
 
 /* This code is largely based on Russell Taylor's test for the
  * FakeEventDataLister class. */
@@ -105,5 +104,3 @@ public:
 private:
   boost::shared_ptr<ILiveListener> sns_l;
 };
-
-#endif /* MANTID_LIVEDATA_SNSLIVEEVENTDATALISTENERTEST_H_ */

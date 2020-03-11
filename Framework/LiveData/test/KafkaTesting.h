@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_ISISKAFKATESTING_H_
-#define MANTID_LIVEDATA_ISISKAFKATESTING_H_
+#pragma once
 
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -756,5 +755,3 @@ private:
   std::vector<int32_t> m_detid = {1001, 1002, 1100, 901000, 10100};
 };
 } // namespace KafkaTesting
-
-#endif // MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODERTESTMOCKS_H_

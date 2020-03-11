@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_KAFKATOPICSUBSCRIBERTEST_H_
-#define MANTID_LIVEDATA_KAFKATOPICSUBSCRIBERTEST_H_
+#pragma once
 
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
 #include <cxxtest/TestSuite.h>
@@ -36,5 +35,3 @@ public:
     TS_ASSERT_EQUALS(topic, subscriber->topics()[0]);
   }
 };
-
-#endif /* MANTID_LIVEDATA_KAFKATOPICSUBSCRIBERTEST_H_ */

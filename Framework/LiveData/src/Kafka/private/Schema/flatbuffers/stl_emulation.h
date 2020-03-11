@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef FLATBUFFERS_STL_EMULATION_H_
-#define FLATBUFFERS_STL_EMULATION_H_
+#pragma once
 
 // clang-format off
 
@@ -234,5 +233,3 @@ inline void vector_emplace_back(std::vector<T> *vector, V &&data) {
 #endif  // !FLATBUFFERS_CPP98_STL
 
 }  // namespace flatbuffers
-
-#endif  // FLATBUFFERS_STL_EMULATION_H_

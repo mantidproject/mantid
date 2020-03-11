@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
-#define MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -426,5 +425,3 @@ public:
 #endif
   }
 };
-
-#endif /* MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_IKAFKASTREAMDECODER_H_
-#define MANTID_LIVEDATA_IKAFKASTREAMDECODER_H_
+#pragma once
 
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -243,4 +242,3 @@ protected:
 };
 } // namespace LiveData
 } // namespace Mantid
-#endif // MANTID_LIVEDATA_IKAFKASTREAMDECODER_H_

@@ -4,10 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_PRECOMPILEDHEADER_H_
-#define MANTID_LIVEDATA_PRECOMPILEDHEADER_H_
+#pragma once
 
 // Algorithm
 #include "MantidAPI/Algorithm.h"
-
-#endif // MANTID_LIVEDATA_PRECOMPILEDHEADER_H_

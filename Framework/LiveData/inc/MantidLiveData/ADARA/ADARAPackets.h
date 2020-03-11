@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __ADARA_PACKETS_H
-#define __ADARA_PACKETS_H
+#pragma once
 
 #include <cstdint>
 #include <cstring>
@@ -752,5 +751,3 @@ private:
 };
 
 } // namespace ADARA
-
-#endif /* __ADARA_PACKETS_H */
