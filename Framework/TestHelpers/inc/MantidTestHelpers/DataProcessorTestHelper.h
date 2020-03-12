@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATAPROCESSORTESTHELPER_H
-#define DATAPROCESSORTESTHELPER_H
+#pragma once
 
 #include "MantidKernel/System.h"
 
@@ -42,5 +41,3 @@ makeRowData(const std::vector<std::string> &list,
             const std::vector<std::string> &prefixes = {"TOF_", "", "TRANS_"},
             const size_t numSlices = 0);
 } // namespace DataProcessorTestHelper
-
-#endif /*DATAPROCESSORTESTHELPER_H*/

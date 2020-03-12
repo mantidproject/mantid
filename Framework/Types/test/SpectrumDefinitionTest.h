@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TYPES_SPECTRUMDEFINITIONTEST_H_
-#define MANTID_TYPES_SPECTRUMDEFINITIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -107,5 +106,3 @@ public:
     TS_ASSERT_EQUALS(*(def.cbegin()), (std::pair<size_t, size_t>(1, 0)));
   }
 };
-
-#endif /* MANTID_TYPES_SPECTRUMDEFINITIONTEST_H_ */

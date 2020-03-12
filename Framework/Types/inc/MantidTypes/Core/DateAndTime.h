@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TYPES_DATE_AND_TIME_H
-#define MANTID_TYPES_DATE_AND_TIME_H
+#pragma once
 
 #include "MantidTypes/DllConfig.h"
 #ifndef Q_MOC_RUN
@@ -198,5 +197,3 @@ inline int64_t DateAndTime::nanosecondsFromSeconds(double sec) {
 } // namespace Core
 } // namespace Types
 } // namespace Mantid
-
-#endif // MANTID_TYPES_DATE_AND_TIME_H

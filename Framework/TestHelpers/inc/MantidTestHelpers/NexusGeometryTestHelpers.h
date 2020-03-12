@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NEXUSGEOMETRYTESTHELPERS_H
-#define NEXUSGEOMETRYTESTHELPERS_H
+#pragma once
 
 #include <boost/shared_ptr.hpp>
 #include <vector>
@@ -24,5 +23,3 @@ Pixels generateCoLinearPixels();
 Pixels generateNonCoLinearPixels();
 std::vector<int> getFakeDetIDs();
 } // namespace NexusGeometryTestHelpers
-
-#endif // NEXUSGEOMETRYTESTHELPERS_H

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TOFEVENTTEST_H_
-#define TOFEVENTTEST_H_ 1
+#pragma once
 
 #include "MantidTypes/Event/TofEvent.h"
 #include <cmath>
@@ -51,5 +50,3 @@ public:
     TS_ASSERT_EQUALS(e3.pulseTime(), 321);
   }
 };
-
-#endif
