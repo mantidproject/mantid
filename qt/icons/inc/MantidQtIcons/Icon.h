@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_ICONS_ICONLOADER_H_
-#define MANTIDQT_ICONS_ICONLOADER_H_
+#pragma once
 
 #include "MantidQtIcons/CharIconEngine.h"
 #include "MantidQtIcons/CharIconPainter.h"
@@ -58,5 +57,3 @@ private:
 
 } // namespace Icons
 } // namespace MantidQt
-
-#endif /* MANTIDQT_ICONS_ICONLOADER_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_NULL_PEAKS_PRESENTER
-#define MANTID_VATES_NULL_PEAKS_PRESENTER
+#pragma once
 
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
@@ -48,5 +47,3 @@ public:
 };
 } // namespace VATES
 } // namespace Mantid
-
-#endif

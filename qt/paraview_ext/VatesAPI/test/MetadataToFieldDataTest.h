@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef METADATATOFIELDDATATEST_H_
-#define METADATATOFIELDDATATEST_H_
+#pragma once
 
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include <boost/algorithm/string.hpp>
@@ -70,5 +69,3 @@ public:
         testData, convertCharArrayToString(carry));
   }
 };
-
-#endif

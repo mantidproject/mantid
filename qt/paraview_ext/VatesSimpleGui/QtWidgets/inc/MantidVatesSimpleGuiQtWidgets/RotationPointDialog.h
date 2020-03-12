@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ROTATIONPOINTDIALOG_H
-#define ROTATIONPOINTDIALOG_H
+#pragma once
 
 #include "MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h"
 #include "ui_RotationPointDialog.h"
@@ -50,5 +49,3 @@ private:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-
-#endif // ROTATIONPOINTDIALOG_H

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MODECONTROLWIDGET_H_
-#define MODECONTROLWIDGET_H_
+#pragma once
 
 #include "MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h"
 #include "ui_ModeControlWidget.h"
@@ -97,5 +96,3 @@ private:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-
-#endif // MODECONTROLWIDGET_H_

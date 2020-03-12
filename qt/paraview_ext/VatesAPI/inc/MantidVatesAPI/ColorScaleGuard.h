@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_API_COLOR_SCALE_LOCK_H
-#define MANTID_VATES_API_COLOR_SCALE_LOCK_H
+#pragma once
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 
@@ -44,4 +43,3 @@ private:
 };
 } // namespace VATES
 } // namespace Mantid
-#endif

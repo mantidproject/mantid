@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VTKNULLUNSTRUCTUREDGRID_TEST_H_
-#define VTKNULLUNSTRUCTUREDGRID_TEST_H_
+#pragma once
 
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 #include "MockObjects.h"
@@ -39,4 +38,3 @@ public:
     TSM_ASSERT("X should be in the center", coord[2] == 0.0);
   }
 };
-#endif

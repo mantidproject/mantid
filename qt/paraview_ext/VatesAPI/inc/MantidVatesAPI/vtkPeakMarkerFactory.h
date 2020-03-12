@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_VTKPEAKMARKER_FACTORY_H_
-#define MANTID_VATES_VTKPEAKMARKER_FACTORY_H_
+#pragma once
 
 /**
   Create markers that will highlight the position of a Peak
@@ -92,5 +91,3 @@ private:
 };
 } // namespace VATES
 } // namespace Mantid
-
-#endif

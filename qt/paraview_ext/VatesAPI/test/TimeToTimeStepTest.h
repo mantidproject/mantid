@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TIME_TO_TIMESTEP_TEST_H_
-#define TIME_TO_TIMESTEP_TEST_H_
+#pragma once
 
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include <cxxtest/TestSuite.h>
@@ -116,5 +115,3 @@ public:
         converter(1), const std::runtime_error &);
   }
 };
-
-#endif

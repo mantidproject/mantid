@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef VTKDATASETFACTORYTEST_H_
-#define VTKDATASETFACTORYTEST_H_
+#pragma once
 
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -132,5 +131,3 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   }
 };
-
-#endif

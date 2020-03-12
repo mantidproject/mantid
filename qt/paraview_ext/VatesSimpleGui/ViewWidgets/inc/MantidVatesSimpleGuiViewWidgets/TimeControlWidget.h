@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TIMECONTROLWIDGET_H_
-#define TIMECONTROLWIDGET_H_
+#pragma once
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
@@ -50,5 +49,3 @@ private:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-
-#endif // TIMECONTROLWIDGET_H_

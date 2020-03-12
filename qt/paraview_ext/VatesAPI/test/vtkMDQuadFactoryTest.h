@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VTK_MD_QUAD_FACTORY_TEST
-#define VTK_MD_QUAD_FACTORY_TEST
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -175,5 +174,3 @@ public:
     TS_ASSERT_EQUALS(640000, product->GetNumberOfPoints());
   }
 };
-
-#endif

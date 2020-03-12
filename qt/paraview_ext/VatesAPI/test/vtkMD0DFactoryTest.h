@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VTK_MD_0D_FACTORY_TEST
-#define VTK_MD_0D_FACTORY_TEST
+#pragma once
 #include <cxxtest/TestSuite.h>
 
 #include "MantidVatesAPI/vtkMD0DFactory.h"
@@ -32,5 +31,3 @@ public:
                dataSet->GetNumberOfCells() == 1);
   }
 };
-
-#endif

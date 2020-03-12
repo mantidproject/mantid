@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NORMALIZATIONTEST_H_
-#define NORMALIZATIONTEST_H_
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/Normalization.h"
@@ -26,5 +25,3 @@ public:
                      static_cast<int>(Mantid::VATES::NumEventsNormalization));
   }
 };
-
-#endif

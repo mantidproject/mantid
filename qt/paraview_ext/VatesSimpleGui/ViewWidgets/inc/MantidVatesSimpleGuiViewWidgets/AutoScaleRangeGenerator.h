@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef AUTOSCALERANGEGENERATOR_H
-#define AUTOSCALERANGEGENERATOR_H
+#pragma once
 
 /**
     Generates information for the color scale, e.g. minimum level, maximum
@@ -85,4 +84,3 @@ private:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-#endif

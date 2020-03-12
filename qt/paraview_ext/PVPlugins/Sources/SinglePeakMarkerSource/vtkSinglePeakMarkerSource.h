@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef _vtkSinglePeakMarkerSource_h
-#define _vtkSinglePeakMarkerSource_h
+#pragma once
 #include "vtkPolyDataAlgorithm.h"
 
 /**
@@ -46,4 +45,3 @@ private:
   double m_position3;
   double m_radius;
 };
-#endif

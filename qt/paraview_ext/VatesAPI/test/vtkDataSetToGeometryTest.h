@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef VTKDATASET_TO_GEOMETRY_TEST_H_
-#define VTKDATASET_TO_GEOMETRY_TEST_H_
+#pragma once
 
 #include "MantidVatesAPI/vtkDataSetToGeometry.h"
 
@@ -317,5 +316,3 @@ public:
         A.getNonMappedDimensions().size(), B.getNonMappedDimensions().size());
   }
 };
-
-#endif

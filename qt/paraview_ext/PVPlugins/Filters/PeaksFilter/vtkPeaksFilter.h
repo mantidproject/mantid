@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef _VTKPEAKSFILTER_h
-#define _VTKPEAKSFILTER_h
+#pragma once
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidKernel/StringTokenizer.h"
@@ -48,4 +47,3 @@ private:
   boost::scoped_ptr<Mantid::VATES::MetadataJsonManager> m_metadataJsonManager;
   boost::scoped_ptr<Mantid::VATES::VatesConfigurations> m_vatesConfigurations;
 };
-#endif

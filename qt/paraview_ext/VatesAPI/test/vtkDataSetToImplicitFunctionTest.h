@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VTK_DATASET_TO_WS_IMPLICITFUNCTION_TEST
-#define VTK_DATASET_TO_WS_IMPLICITFUNCTION_TEST
+#pragma once
 
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidVatesAPI/vtkDataSetToImplicitFunction.h"
@@ -52,5 +51,3 @@ public:
     TS_ASSERT_EQUALS("NullImplicitFunction", func->getName());
   }
 };
-
-#endif

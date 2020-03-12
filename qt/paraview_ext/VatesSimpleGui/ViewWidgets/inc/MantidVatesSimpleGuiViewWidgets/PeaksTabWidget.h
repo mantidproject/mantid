@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VSI_PEAKSTABWIDGET_H
-#define VSI_PEAKSTABWIDGET_H
+#pragma once
 
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
@@ -71,4 +70,3 @@ private:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-#endif // PEAKSWORKSPACEWIDGET_H

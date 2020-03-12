@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_COMMON_H_
-#define MANTID_VATES_COMMON_H_
+#pragma once
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
@@ -48,5 +47,3 @@ void setAxisLabel(const std::string &metadataLabel,
                   const std::string &labelString, vtkFieldData *fieldData);
 } // namespace VATES
 } // namespace Mantid
-
-#endif

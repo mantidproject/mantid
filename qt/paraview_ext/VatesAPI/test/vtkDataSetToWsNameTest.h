@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VTK_DATASET_TO_WS_NAME_TEST
-#define VTK_DATASET_TO_WS_NAME_TEST
+#pragma once
 
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
@@ -52,5 +51,3 @@ public:
     TS_ASSERT_EQUALS("WS_NAME", vtkDataSetToWsName::exec(ds.GetPointer()));
   }
 };
-
-#endif

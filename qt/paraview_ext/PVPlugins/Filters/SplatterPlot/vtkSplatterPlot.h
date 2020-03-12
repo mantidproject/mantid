@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef _vtkSplatterPlot_h
-#define _vtkSplatterPlot_h
+#pragma once
 
 #include "vtkUnstructuredGridAlgorithm.h"
 #include <string>
@@ -53,4 +52,3 @@ private:
   /// Time.
   double m_time;
 };
-#endif
