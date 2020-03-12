@@ -126,11 +126,19 @@ void LoadMuonNexus3::exec() {
     Workspace2D_sptr workspace2D =
         boost::dynamic_pointer_cast<Workspace2D>(outWS);
     m_loadMuonStrategy = std::make_unique<SinglePeriodLoadMuonStrategy>(
-        entry, workspace2D, m_entrynumber, m_isFileMultiPeriod);
+        g_log, m_filename, entry, workspace2D, m_entrynumber,
+        m_isFileMultiPeriod);
   }
+  // Load log data
+  m_loadMuonStrategy->loadMuonLogData();
+  // Load good frames
   m_loadMuonStrategy->loadGoodFrames();
-  // // Load the log data
-  // loadMuonLogData(entry, workspace2D);
+  // Load grouping information
+  auto loadedGrouping = m_loadMuonStrategy->loadDetectorGrouping();
+  setProperty("DetectorGroupingTable", loadedGrouping);
+  // Load dead time table
+  m_loadMuonStrategy->loadDeadTimeTable();
+
   // // Load good frames
   // addGoodFrames(workspace2D, entry);
   // // Load detector grouping
@@ -219,7 +227,6 @@ void LoadMuonNexus3::addGoodFrames(WorkspaceGroup_sptr &workspaceGroup,
  */
 Workspace_sptr LoadMuonNexus3::loadDefaultDetectorGrouping(
     NXRoot &root, DataObjects::Workspace2D_sptr &localWorkspace) const {
-  int a = 3;
   auto instrument = localWorkspace->getInstrument();
   auto &run = localWorkspace->mutableRun();
   std::string mainFieldDirection =

@@ -57,41 +57,38 @@ loadDetectorGroupingFromNexus(NXEntry &entry,
   int64_t numberOfSpectra =
       static_cast<int64_t>(localWorkspace->getNumberHistograms());
 
-  std::cout << "GOT INTO THIS FUNCCTION" << std::endl;
+  // Open nexus entry
+  NXClass detectorGroup = entry.openNXGroup("instrument/detector_1");
 
-  // // Open nexus entry
-  // NXEntry dataEntry = root.openEntry("raw_data_1/instrument/detector_1");
-  // NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
+  if (detectorGroup.containsDataSet("grouping")) {
+    NXInt groupingData = detectorGroup.openNXInt("grouping");
+    groupingData.load();
+    int numGroupingEntries = groupingData.dim0();
 
-  // if (infoGrouping.stat != NX_ERROR) {
-  //   NXInt groupingData = dataEntry.openNXInt("grouping");
-  //   groupingData.load();
-  //   int numGroupingEntries = groupingData.dim0();
+    std::vector<detid_t> detectorsLoaded;
+    std::vector<detid_t> grouping;
+    // Return the detectors which are loaded
+    // then find the grouping ID for each detector
+    for (int64_t spectraIndex = 0; spectraIndex < numberOfSpectra;
+         spectraIndex++) {
+      const auto detIdSet =
+          localWorkspace->getSpectrum(spectraIndex).getDetectorIDs();
+      for (auto detector : detIdSet) {
+        detectorsLoaded.emplace_back(detector);
+      }
+    }
+    if (!isFileMultiPeriod) {
+      // Simplest case - one grouping entry per detector
+      for (const auto &detectorNumber : detectorsLoaded) {
+        grouping.emplace_back(groupingData[detectorNumber - 1]);
+      }
+    }
+    DataObjects::TableWorkspace_sptr table =
+        createDetectorGroupingTable(detectorsLoaded, grouping);
 
-  //   std::vector<detid_t> detectorsLoaded;
-  //   std::vector<detid_t> grouping;
-  //   // Return the detectors which are loaded
-  //   // then find the grouping ID for each detector
-  //   for (int64_t spectraIndex = 0; spectraIndex < numberOfSpectra;
-  //        spectraIndex++) {
-  //     const auto detIdSet =
-  //         localWorkspace->getSpectrum(spectraIndex).getDetectorIDs();
-  //     for (auto detector : detIdSet) {
-  //       detectorsLoaded.emplace_back(detector);
-  //     }
-  //   }
-  //   if (!isFileMultiPeriod) {
-  //     // Simplest case - one grouping entry per detector
-  //     for (const auto &detectorNumber : detectorsLoaded) {
-  //       grouping.emplace_back(groupingData[detectorNumber - 1]);
-  //     }
-  //   }
-  //   DataObjects::TableWorkspace_sptr table =
-  //       createDetectorGroupingTable(detectorsLoaded, grouping);
-
-  // return table;
+    return table;
+  }
 }
-} // namespace LoadMuonNexus3Helper
 /**
  * Creates Detector Grouping Table .
  * @param detectorsLoaded :: Vector containing the list of detectorsLoaded
@@ -140,6 +137,6 @@ std::string loadMainFieldDirectionFromNexus(const NeXus::NXEntry &entry) {
   return mainFieldDirection;
 }
 
+} // namespace LoadMuonNexus3Helper
 } // namespace DataHandling
-} // namespace Mantid
 } // namespace Mantid

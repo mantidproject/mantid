@@ -88,6 +88,7 @@ set(SRC_FILES
     src/LoadMuonNexus2.cpp
     src/LoadMuonNexus3.cpp
     src/LoadMuonNexus3Helper.cpp
+    src/LoadMuonStrategy.cpp
     src/SinglePeriodLoadMuonStrategy.cpp
     src/LoadNXSPE.cpp
     src/LoadNXcanSAS.cpp

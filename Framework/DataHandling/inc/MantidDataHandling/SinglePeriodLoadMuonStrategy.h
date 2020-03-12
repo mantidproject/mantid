@@ -21,13 +21,21 @@ namespace DataHandling {
 class DLLExport SinglePeriodLoadMuonStrategy : public LoadMuonStrategy {
 public:
   // Constructor
-  SinglePeriodLoadMuonStrategy(NeXus::NXEntry entry,
+  SinglePeriodLoadMuonStrategy(Kernel::Logger &g_log,
+                               const std::string &filename,
+                               NeXus::NXEntry entry,
                                DataObjects::Workspace2D_sptr workspace,
                                int entryNumber, bool isFileMultiPeriod);
+  // Loads the muon log data
+  void loadMuonLogData() override;
   // Returns the good frames from the nexus entry
   void loadGoodFrames() override;
   // Load detector grouping
   API::Workspace_sptr loadDetectorGrouping() override;
+  // Load default grouping from ID
+  API::Workspace_sptr loadDefaultDetectorGrouping() const;
+  // Load dead time table
+  void loadDeadTimeTable() const override;
 
 private:
   NeXus::NXEntry m_entry;

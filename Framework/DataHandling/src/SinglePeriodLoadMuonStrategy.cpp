@@ -7,9 +7,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/SinglePeriodLoadMuonStrategy.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidDataHandling/LoadMuonLog.h"
 #include "MantidDataHandling/LoadMuonNexus3Helper.h"
 
 #include <iostream>
@@ -17,7 +19,6 @@
 namespace Mantid {
 namespace DataHandling {
 
-using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 using namespace HistogramData;
@@ -26,10 +27,33 @@ using namespace DataObjects;
 
 // Constructor
 SinglePeriodLoadMuonStrategy::SinglePeriodLoadMuonStrategy(
-    NXEntry entry, Workspace2D_sptr workspace, int entryNumber,
-    bool isFileMultiPeriod)
-    : m_entry(entry), m_workspace(workspace), m_entryNumber(entryNumber),
-      m_isFileMultiPeriod(isFileMultiPeriod) {}
+    Kernel::Logger &g_log, const std::string &filename, NXEntry entry,
+    Workspace2D_sptr workspace, int entryNumber, bool isFileMultiPeriod)
+    : LoadMuonStrategy(g_log, filename), m_entry(entry), m_workspace(workspace),
+      m_entryNumber(entryNumber), m_isFileMultiPeriod(isFileMultiPeriod) {}
+
+// Loads MuonLogData for a single period file
+void SinglePeriodLoadMuonStrategy::loadMuonLogData() {
+
+  auto loadMuonLogs = AlgorithmFactory::Instance().create("LoadMuonLog", 1);
+  loadMuonLogs->initialize();
+  // Pass through the same input filename
+  loadMuonLogs->setAlwaysStoreInADS(false);
+  loadMuonLogs->setProperty("Filename", m_filename);
+  loadMuonLogs->setProperty<MatrixWorkspace_sptr>("Workspace", m_workspace);
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+  try {
+    m_logger.notice("Loading Muon Log data");
+    loadMuonLogs->executeAsChildAlg();
+  } catch (std::runtime_error &) {
+    m_logger.error("Unable to successfully run LoadMuonLog Child Algorithm");
+  }
+  std::string mainFieldDirection =
+      LoadMuonNexus3Helper::loadMainFieldDirectionFromNexus(m_entry);
+  // set output property and add to workspace logs
+  auto &run = m_workspace->mutableRun();
+  run.addProperty("main_field_direction", mainFieldDirection);
+}
 
 /**
  * Loads the good frames assuming we have just one workavoid if else in c++space
@@ -65,8 +89,10 @@ Workspace_sptr SinglePeriodLoadMuonStrategy::loadDetectorGrouping() {
   if (table->rowCount() != 0) {
     table_workspace = boost::dynamic_pointer_cast<Workspace>(table);
   } else {
-    table_workspace = loadDefaultDetectorGrouping(m_entry, m_workspace);
+    m_logger.notice("Loading grouping information from IDF");
+    table_workspace = loadDefaultDetectorGrouping();
   }
+  return table_workspace;
 }
 /**
  * Loads default detector grouping, if this isn't present
@@ -77,8 +103,8 @@ Workspace_sptr SinglePeriodLoadMuonStrategy::loadDetectorGrouping() {
 Workspace_sptr
 SinglePeriodLoadMuonStrategy::loadDefaultDetectorGrouping() const {
 
-  auto instrument = localWorkspace->getInstrument();
-  auto &run = localWorkspace->mutableRun();
+  auto instrument = m_workspace->getInstrument();
+  auto &run = m_workspace->mutableRun();
   std::string mainFieldDirection =
       run.getLogData("main_field_direction")->value();
   API::GroupingLoader groupLoader(instrument, mainFieldDirection);
@@ -92,12 +118,22 @@ SinglePeriodLoadMuonStrategy::loadDefaultDetectorGrouping() const {
     } else {
       // Make sure it uses the right number of detectors
       std::ostringstream oss;
-      oss << "1-" << localWorkspace->getNumberHistograms();
+      oss << "1-" << m_workspace->getNumberHistograms();
       dummyGrouping->groups.emplace_back(oss.str());
       dummyGrouping->groupNames.emplace_back("all");
     }
     return dummyGrouping->toTable();
   }
+}
+/**
+ * Loads dead time table, if this isn't present
+ * @returns :: Dead time table
+ */
+void SinglePeriodLoadMuonStrategy::loadDeadTimeTable() const {
+
+  int b = 3;
+  int c = 3;
+  std::cout << "LOADING DEAD TIME TABLE" << std::endl;
 }
 
 } // namespace DataHandling
