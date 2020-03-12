@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -21,7 +22,7 @@ namespace Algorithms {
     property into which the result is stored, whereas the former puts the result
     into a workspace with the same name as the first input workspace.
   */
-class DLLExport WorkspaceJoiners : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL WorkspaceJoiners : public API::Algorithm {
 public:
   WorkspaceJoiners();
 

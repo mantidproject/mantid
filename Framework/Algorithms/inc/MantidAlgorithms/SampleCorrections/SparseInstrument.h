@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 #include <array>
 #include <tuple>
@@ -32,29 +32,31 @@ namespace SparseInstrument {
   Defines functions and utilities to create and deal with sparse instruments.
 */
 
-DLLExport std::tuple<double, double, double, double>
+MANTID_ALGORITHMS_DLL std::tuple<double, double, double, double>
 extremeAngles(const API::MatrixWorkspace &ws);
-DLLExport std::pair<double, double>
+MANTID_ALGORITHMS_DLL std::pair<double, double>
 geographicalAngles(const Kernel::V3D &p,
                    const Geometry::ReferenceFrame &refFrame);
-DLLExport std::tuple<double, double>
+MANTID_ALGORITHMS_DLL std::tuple<double, double>
 extremeWavelengths(const API::MatrixWorkspace &ws);
-DLLExport HistogramData::Histogram
+MANTID_ALGORITHMS_DLL HistogramData::Histogram
 modelHistogram(const API::MatrixWorkspace &modelWS,
                const size_t wavelengthPoints);
-DLLExport API::MatrixWorkspace_uptr
+MANTID_ALGORITHMS_DLL API::MatrixWorkspace_uptr
 createSparseWS(const API::MatrixWorkspace &modelWS,
                const Algorithms::DetectorGridDefinition &grid,
                const size_t wavelengthPoints);
-DLLExport double greatCircleDistance(const double lat1, const double long1,
-                                     const double lat2, const double long2);
-DLLExport std::array<double, 4>
+MANTID_ALGORITHMS_DLL double greatCircleDistance(const double lat1,
+                                                 const double long1,
+                                                 const double lat2,
+                                                 const double long2);
+MANTID_ALGORITHMS_DLL std::array<double, 4>
 inverseDistanceWeights(const std::array<double, 4> &distances);
-DLLExport HistogramData::Histogram
+MANTID_ALGORITHMS_DLL HistogramData::Histogram
 interpolateFromDetectorGrid(const double lat, const double lon,
                             const API::MatrixWorkspace &ws,
                             const std::array<size_t, 4> &indices);
-DLLExport std::unique_ptr<const Algorithms::DetectorGridDefinition>
+MANTID_ALGORITHMS_DLL std::unique_ptr<const Algorithms::DetectorGridDefinition>
 createDetectorGridDefinition(const API::MatrixWorkspace &modelWS,
                              const size_t rows, const size_t columns);
 } // namespace SparseInstrument

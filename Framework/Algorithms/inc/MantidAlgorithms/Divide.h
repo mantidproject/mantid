@@ -26,7 +26,7 @@ data </LI>
 @author Nick Draper
 @date 14/12/2007
 */
-class DLLExport Divide : public BinaryOperation {
+class MANTID_ALGORITHMS_DLL Divide : public BinaryOperation {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Divide"; }

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
@@ -19,7 +19,7 @@ namespace Algorithms {
   @author Janik Zikovsky
   @date 2011-09-16
 */
-class DLLExport AddLogDerivative : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AddLogDerivative : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "AddLogDerivative"; };

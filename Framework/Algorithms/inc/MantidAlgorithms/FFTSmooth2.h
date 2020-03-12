@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,7 +17,7 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 07/07/2009
  */
-class DLLExport FFTSmooth2 : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL FFTSmooth2 : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FFTSmooth"; }

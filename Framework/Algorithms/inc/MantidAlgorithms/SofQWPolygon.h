@@ -38,7 +38,7 @@ common bins. </LI>
 @author Martyn Giggg
 @date 2011-07-15
  */
-class DLLExport SofQWPolygon : public Rebin2D {
+class MANTID_ALGORITHMS_DLL SofQWPolygon : public Rebin2D {
 public:
   /// Default constructor
   SofQWPolygon();

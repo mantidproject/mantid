@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -47,7 +48,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 15/10/2008
 */
-class DLLExport CropWorkspace : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL CropWorkspace : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CropWorkspace"; }

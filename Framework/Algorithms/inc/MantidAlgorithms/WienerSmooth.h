@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -17,7 +18,7 @@ namespace Algorithms {
   workspace
   using the Wiener filter smoothing.
 */
-class DLLExport WienerSmooth : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL WienerSmooth : public API::Algorithm {
 public:
   const std::string name() const override { return "WienerSmooth"; }
   int version() const override;

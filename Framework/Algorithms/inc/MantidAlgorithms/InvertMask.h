@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,7 +16,7 @@ namespace Algorithms {
 
   @date 2012-06-01
 */
-class DLLExport InvertMask : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL InvertMask : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "InvertMask"; };

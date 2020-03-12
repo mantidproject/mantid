@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -20,7 +20,7 @@ namespace Algorithms {
 
   @author Gesner Passos, ISIS
 */
-class DLLExport RadiusSum : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RadiusSum : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

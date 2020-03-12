@@ -7,13 +7,13 @@
 #pragma once
 
 #include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 namespace Mantid {
 namespace Algorithms {
 
 /** ConvertDiffCal : TODO: DESCRIPTION
  */
-class DLLExport ConvertDiffCal : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL ConvertDiffCal : public API::ParallelAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

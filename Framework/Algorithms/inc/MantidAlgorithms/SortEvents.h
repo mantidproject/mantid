@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -23,7 +24,7 @@ namespace Algorithms {
     @author Janik Zikovsky, SNS
     @date Friday, August 13, 2010.
  */
-class DLLExport SortEvents : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL SortEvents : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SortEvents"; }

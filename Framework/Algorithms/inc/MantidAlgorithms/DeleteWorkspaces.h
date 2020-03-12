@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,7 +20,7 @@ namespace Algorithms {
   @author Nick Draper, Tessella plc
   @date 2017-02-17
 */
-class DLLExport DeleteWorkspaces : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DeleteWorkspaces : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "DeleteWorkspaces"; }

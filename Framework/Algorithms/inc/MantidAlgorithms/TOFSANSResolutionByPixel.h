@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -22,7 +23,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport TOFSANSResolutionByPixel : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL TOFSANSResolutionByPixel : public API::Algorithm {
 public:
   /// Default constructor
   TOFSANSResolutionByPixel();

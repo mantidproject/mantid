@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -29,7 +30,8 @@ namespace Algorithms {
  @author Roman Tolchenov, Tessella plc
  @date 25/01/2012
  */
-class DLLExport ConvertTableToMatrixWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConvertTableToMatrixWorkspace
+    : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override {

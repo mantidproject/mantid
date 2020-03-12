@@ -17,7 +17,7 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 01/10/2009
  */
-class DLLExport RealFFT : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL RealFFT : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "RealFFT"; }

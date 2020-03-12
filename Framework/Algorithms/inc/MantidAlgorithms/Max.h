@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-
+#include "MantidAlgorithms/DllConfig.h"
 namespace Mantid {
 namespace Algorithms {
 /** Takes a 2D workspace as input and find the maximum in each 1D spectrum.
@@ -37,7 +37,7 @@ namespace Algorithms {
     @author L C Chapon, ISIS, Rutherford Appleton Laboratory
     @date 11/08/2009
  */
-class DLLExport Max : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Max : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Max"; }

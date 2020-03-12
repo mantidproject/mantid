@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 //#include "MantidAPI/IAlgorithm.h"
 
@@ -26,7 +26,7 @@ namespace Algorithms {
 
 /** Estimate all incident energies, used by chopper instrument.
  */
-class DLLExport GetAllEi : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GetAllEi : public API::Algorithm {
 public:
   GetAllEi();
   /// Algorithms name for identification. @see Algorithm::name

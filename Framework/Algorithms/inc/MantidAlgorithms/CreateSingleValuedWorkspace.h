@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -24,7 +25,8 @@ namespace Algorithms {
    @author Martyn Gigg, Tessella Support Services plc
    @date 28/01/2009
 */
-class DLLExport CreateSingleValuedWorkspace : public Mantid::API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateSingleValuedWorkspace
+    : public Mantid::API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override {

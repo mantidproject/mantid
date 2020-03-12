@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -30,7 +30,7 @@ namespace Algorithms {
     @author Peter Peterson, ORNL
     @date 21/12/10
 */
-class DLLExport FilterBadPulses : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL FilterBadPulses : public API::DistributedAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

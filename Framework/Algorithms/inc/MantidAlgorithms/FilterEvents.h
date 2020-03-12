@@ -9,10 +9,10 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ISplittersWorkspace.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/TimeSplitter.h"
 
@@ -26,7 +26,7 @@ class TimeAtSampleStrategy;
 
   @date 2012-04-04
 */
-class DLLExport FilterEvents : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL FilterEvents : public API::Algorithm {
 
   enum TOFCorrectionType {
     NoneCorrect,

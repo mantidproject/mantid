@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -25,7 +26,7 @@ namespace Algorithms {
     @author Michael Whitty, STFC ISIS
     @date 21/09/2010
 */
-class DLLExport ExtractFFTSpectrum : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ExtractFFTSpectrum : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ExtractFFTSpectrum"; }

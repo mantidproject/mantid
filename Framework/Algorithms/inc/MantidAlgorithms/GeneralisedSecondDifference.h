@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -37,7 +38,8 @@ namespace Algorithms {
     @author Laurent C Chapon, ISIS Facility Rutherford Appleton Laboratory
     @date 26/12/2008
 */
-class DLLExport GeneralisedSecondDifference : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GeneralisedSecondDifference
+    : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override {

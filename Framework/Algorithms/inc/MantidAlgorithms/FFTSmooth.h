@@ -12,6 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,8 +21,8 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 07/07/2009
  */
-class DLLExport FFTSmooth : public API::Algorithm,
-                            public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL FFTSmooth : public API::Algorithm,
+                                        public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   FFTSmooth() { this->useAlgorithm("FFTSmooth", 2); }

@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,7 +21,7 @@ namespace Algorithms {
    algorithms
     to provide an integrated value over q and q^2..
 */
-class DLLExport ElasticWindow : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ElasticWindow : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ElasticWindow"; }

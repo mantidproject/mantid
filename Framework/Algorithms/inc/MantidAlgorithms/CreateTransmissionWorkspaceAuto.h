@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 #include <boost/optional.hpp>
 
 namespace Mantid {
@@ -17,7 +17,7 @@ namespace Algorithms {
 /** CreateTransmissionWorkspaceAuto : Creates a transmission run workspace in
 Wavelength from input TOF workspaces.
 */
-class DLLExport CreateTransmissionWorkspaceAuto
+class MANTID_ALGORITHMS_DLL CreateTransmissionWorkspaceAuto
     : public API::DataProcessorAlgorithm {
 public:
   //----------------------------------------------------------------------------------------------

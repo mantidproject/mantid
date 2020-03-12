@@ -15,7 +15,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/FFT.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

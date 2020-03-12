@@ -7,11 +7,12 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-class DLLExport DeleteLog : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DeleteLog : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

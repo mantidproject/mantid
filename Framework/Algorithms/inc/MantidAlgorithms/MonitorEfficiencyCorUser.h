@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -18,7 +19,7 @@ class HistogramE;
 } // namespace HistogramData
 namespace Algorithms {
 
-class DLLExport MonitorEfficiencyCorUser : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MonitorEfficiencyCorUser : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "MonitorEfficiencyCorUser"; }

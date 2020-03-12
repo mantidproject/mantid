@@ -36,7 +36,7 @@ the correction function</LI>
 @author Russell Taylor, Tessella plc
 @date 24/03/2009
 */
-class DLLExport OneMinusExponentialCor : public UnaryOperation {
+class MANTID_ALGORITHMS_DLL OneMinusExponentialCor : public UnaryOperation {
 public:
   /// Default constructor
   OneMinusExponentialCor();

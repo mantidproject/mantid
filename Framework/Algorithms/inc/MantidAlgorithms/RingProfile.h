@@ -8,8 +8,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidKernel/System.h"
 #include <vector>
 
 namespace Mantid {
@@ -20,7 +20,7 @@ namespace Algorithms {
 
   @author Gesner Passos, ISIS
 */
-class DLLExport RingProfile : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RingProfile : public API::Algorithm {
 public:
   RingProfile();
 

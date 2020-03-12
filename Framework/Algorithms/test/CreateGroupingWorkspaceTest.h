@@ -10,7 +10,6 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 

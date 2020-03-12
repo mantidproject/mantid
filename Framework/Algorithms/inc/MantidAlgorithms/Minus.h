@@ -25,7 +25,7 @@ difference data </LI>
 @author Nick Draper
 @date 14/12/2007
 */
-class DLLExport Minus : public BinaryOperation {
+class MANTID_ALGORITHMS_DLL Minus : public BinaryOperation {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Minus"; }

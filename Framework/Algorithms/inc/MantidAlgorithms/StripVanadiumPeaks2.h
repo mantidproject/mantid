@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,7 +17,8 @@ namespace Algorithms {
   @author Wenduo Zhou
   @date 2011-10-07
 */
-class DLLExport StripVanadiumPeaks2 : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL StripVanadiumPeaks2
+    : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "StripVanadiumPeaks"; }

@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,7 +17,7 @@ namespace Algorithms {
 
   @date 2012-04-25
 */
-class DLLExport FilterByTime2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL FilterByTime2 : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FilterByTime"; };

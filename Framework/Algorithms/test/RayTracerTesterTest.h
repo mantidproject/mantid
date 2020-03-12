@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAlgorithms/RayTracerTester.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 

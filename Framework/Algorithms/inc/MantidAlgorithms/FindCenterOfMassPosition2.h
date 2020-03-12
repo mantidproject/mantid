@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -44,7 +45,7 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FindCenterOfMassPosition2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL FindCenterOfMassPosition2 : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "FindCenterOfMassPosition"; }

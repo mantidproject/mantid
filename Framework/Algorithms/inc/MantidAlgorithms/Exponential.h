@@ -29,7 +29,7 @@ data </LI>
 @author Ron Fowler
 @date 12/05/2010
 */
-class DLLExport Exponential : public UnaryOperation {
+class MANTID_ALGORITHMS_DLL Exponential : public UnaryOperation {
 public:
   /// Default constructor
   Exponential();

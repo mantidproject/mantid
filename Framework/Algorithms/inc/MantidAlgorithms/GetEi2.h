@@ -12,7 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 //----------------------------------------------------------------------
@@ -45,7 +45,7 @@ namespace Algorithms {
   National Laboratory
     @date 31/03/2010
 */
-class DLLExport GetEi2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GetEi2 : public API::Algorithm {
 public:
   /// Default constructor
   GetEi2();

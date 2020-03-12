@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
-#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -28,7 +28,7 @@ namespace Algorithms {
 
   @date 2012-07-17
 */
-class DLLExport NormaliseByDetector : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL NormaliseByDetector : public API::Algorithm {
 public:
   NormaliseByDetector(bool parallelExecution = true);
 

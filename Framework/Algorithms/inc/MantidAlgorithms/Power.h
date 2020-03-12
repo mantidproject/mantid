@@ -30,7 +30,7 @@ namespace Algorithms {
  @date 12/04/2010
  */
 
-class DLLExport Power : public UnaryOperation {
+class MANTID_ALGORITHMS_DLL Power : public UnaryOperation {
 public:
   /// Default constructor
   Power();

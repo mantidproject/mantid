@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/UnaryOperation.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,7 +17,7 @@ namespace Algorithms {
 
   @date 2011-12-05
 */
-class DLLExport SignalOverError : public UnaryOperation {
+class MANTID_ALGORITHMS_DLL SignalOverError : public UnaryOperation {
 public:
   SignalOverError();
 

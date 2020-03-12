@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,7 +19,7 @@ as absolute positions and so this update can be repeated.
 
 @author Karl Palmen
 */
-class DLLExport ApplyCalibration : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ApplyCalibration : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ApplyCalibration"; }

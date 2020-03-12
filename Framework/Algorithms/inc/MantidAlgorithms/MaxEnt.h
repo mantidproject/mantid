@@ -21,7 +21,7 @@ namespace Algorithms {
   111-124
 */
 
-class DLLExport MaxEnt : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MaxEnt : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override;

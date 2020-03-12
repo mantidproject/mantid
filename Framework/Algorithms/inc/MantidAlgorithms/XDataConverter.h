@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -25,7 +26,7 @@ namespace Algorithms {
   @author Martyn Gigg, Tessella plc
   @date 2010-12-14
 */
-class DLLExport XDataConverter : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL XDataConverter : public API::DistributedAlgorithm {
 public:
   /// Default constructor
   XDataConverter();

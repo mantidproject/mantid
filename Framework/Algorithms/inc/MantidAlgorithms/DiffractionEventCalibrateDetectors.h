@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include <gsl/gsl_blas.h>
@@ -22,7 +23,8 @@ namespace Algorithms {
  @author Vickie Lynch SNS, ORNL
  @date 12/02/2010
  */
-class DLLExport DiffractionEventCalibrateDetectors : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DiffractionEventCalibrateDetectors
+    : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {

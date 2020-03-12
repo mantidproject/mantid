@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
@@ -62,7 +63,7 @@ namespace Algorithms {
     @author Vickie Lynch, SNS
     @date 08/16/2011
 */
-class DLLExport SphericalAbsorption : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SphericalAbsorption : public API::Algorithm {
 public:
   /// (Empty) Constructor
   SphericalAbsorption();

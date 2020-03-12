@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,7 +17,7 @@ namespace Algorithms {
  * @author
  * @date 2011-03-31 09:31:55.674594
  */
-class DLLExport ChangePulsetime : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ChangePulsetime : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ChangePulsetime"; };

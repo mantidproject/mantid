@@ -11,7 +11,6 @@
 
 // Mantid
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
 
 // STL
 #include <set>

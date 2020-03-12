@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -55,7 +56,7 @@ namespace Algorithms {
   @author Jose Borreguero
   @date 03/04/2013
 */
-class DLLExport ModeratorTzero : public Mantid::API::Algorithm {
+class MANTID_ALGORITHMS_DLL ModeratorTzero : public Mantid::API::Algorithm {
 public:
   /// Default constructor
   ModeratorTzero();

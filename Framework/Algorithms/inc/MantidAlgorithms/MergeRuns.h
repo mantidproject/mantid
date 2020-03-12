@@ -9,9 +9,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidKernel/System.h"
 
 #include <boost/optional.hpp>
 
@@ -59,7 +59,7 @@ static const std::string FAIL_MERGE = "sample_logs_fail";
 static const std::string FAIL_MERGE_TOLERANCES = "sample_logs_fail_tolerances";
 } // namespace MergeRunsParameter
 
-class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm {
+class MANTID_ALGORITHMS_DLL MergeRuns : public API::MultiPeriodGroupAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "MergeRuns"; }

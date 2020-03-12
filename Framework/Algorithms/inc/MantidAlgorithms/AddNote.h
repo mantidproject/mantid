@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,8 +20,8 @@ namespace Algorithms {
   @author Elliot Oram, ISIS, RAL
   @date 17/07/2015
 */
-class DLLExport AddNote : public API::Algorithm,
-                          public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL AddNote : public API::Algorithm,
+                                      public API::DeprecatedAlgorithm {
 public:
   AddNote();
 

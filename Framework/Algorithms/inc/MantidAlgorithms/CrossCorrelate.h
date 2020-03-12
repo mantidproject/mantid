@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -40,7 +41,7 @@ namespace Algorithms {
     @author Laurent C Chapon, ISIS Facility Rutherford Appleton Laboratory
     @date 15/12/2008
 */
-class DLLExport CrossCorrelate : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CrossCorrelate : public API::Algorithm {
 public:
   /// (Empty) Constructor
   CrossCorrelate() : API::Algorithm() {}

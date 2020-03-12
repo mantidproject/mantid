@@ -58,7 +58,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella plc
     @date 15/01/2010
 */
-class DLLExport FlatPlateAbsorption : public AbsorptionCorrection {
+class MANTID_ALGORITHMS_DLL FlatPlateAbsorption : public AbsorptionCorrection {
 public:
   /// (Empty) Constructor
   FlatPlateAbsorption();
