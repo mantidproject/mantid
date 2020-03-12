@@ -9,7 +9,7 @@ ThermalNeutronBk2BkExpAlpha
 Description
 -----------
 
-ThermalNeutronBk2BkExpAlpha is a function to calculate :math:`\alpha` of :ref:`ThermalNeutronBk2BkExpConvPVoigt <func-ThermalNeutronBk2BkExpConvPVoigt>`.
+ThermalNeutronBk2BkExpAlpha is a function to calculate :math:`\alpha(d_h)` of :ref:`ThermalNeutronBk2BkExpConvPVoigt <func-ThermalNeutronBk2BkExpConvPVoigt>`.
 It is defined as
 
 .. math:: \alpha(d_h)  = \left(n\alpha_0 + \alpha_1 d_h + (1-n)\alpha_0^t - \frac{\alpha_1^t}{d_h}\right)^{-1}

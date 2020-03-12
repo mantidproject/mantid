@@ -9,7 +9,7 @@ ThermalNeutronBk2BkExpBeta
 Description
 -----------
 
-ThermalNeutronBk2BkExpBeta is a function to calculate :math:`\beta` of :ref:`ThermalNeutronBk2BkExpConvPVoigt <func-ThermalNeutronBk2BkExpConvPVoigt>`.
+ThermalNeutronBk2BkExpBeta is a function to calculate :math:`\beta(d_h)` of :ref:`ThermalNeutronBk2BkExpConvPVoigt <func-ThermalNeutronBk2BkExpConvPVoigt>`.
 It is defined as
 
 .. math:: \beta(d_h)  = \left(n\beta_0 + \beta_1 d_h + (1-n)\beta_0^t - \frac{\beta_1^t}{d_h}\right)^{-1}
