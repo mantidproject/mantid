@@ -28,6 +28,10 @@ class JupyterConsoleTest(unittest.TestCase):
         widget = JupyterConsole(main_window)
         self.assertTrue(hasattr(widget, "console"))
         self.assertTrue(isinstance(widget.console, InProcessJupyterConsole))
+        console = widget.console
+        console.kernel_manager.shutdown_kernel()
+        widget.console = None
+        del console
 
 
 if __name__ == '__main__':
