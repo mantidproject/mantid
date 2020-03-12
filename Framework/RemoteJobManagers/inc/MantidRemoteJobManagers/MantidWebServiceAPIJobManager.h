@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGER_H
-#define MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGER_H
+#pragma once
 
 #include "MantidAPI/IRemoteJobManager.h"
 #include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
@@ -85,5 +84,3 @@ private:
 
 } // namespace RemoteJobManagers
 } // namespace Mantid
-
-#endif // MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGER_H
