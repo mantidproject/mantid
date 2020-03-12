@@ -6,7 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
-from qtpy import QtWidgets, QtCore
+
+from qtpy import QtWidgets, QtCore, QT_VERSION
+from distutils.version import LooseVersion
 
 from mantid.kernel import ConfigServiceImpl
 
@@ -97,7 +99,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockable_plot_widget_window)
         # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
         # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
-        self.resizeDocks({self.dockable_plot_widget_window}, {40}, QtCore.Qt.Horizontal)
+        if QT_VERSION >= LooseVersion("5.6"):
+            self.resizeDocks({self.dockable_plot_widget_window}, {40}, QtCore.Qt.Horizontal)
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
