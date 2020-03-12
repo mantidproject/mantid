@@ -7,6 +7,7 @@
 from docutils import statemachine
 from docutils.parsers.rst import Directive #pylint: disable=unused-import
 import re
+from sphinx.util import logging
 
 ALG_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$')
 FIT_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)$')
@@ -174,8 +175,8 @@ class AlgorithmBaseDirective(BaseDirective):
 
         # warn the user
         if len(msg) > 0:
-            env = self.state.document.settings.env
-            env.app.verbose(msg)
+            logger = logging.getLogger(__name__)
+            logger.verbose(msg)
         return msg
 
     def algorithm_name(self):
