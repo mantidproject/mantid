@@ -23,6 +23,7 @@ import mantiddoc.directives.relatedalgorithms
 import mantiddoc.directives.sourcelink
 import mantiddoc.directives.summary
 
+
 def setup(app):
     """
     Setup the directives when the extension is activated

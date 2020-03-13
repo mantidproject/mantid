@@ -130,11 +130,12 @@
     0 failures in cleanup code
 """
 import re
+
 try:
     import lxml.etree as ElementTree
 except ImportError:
     import xml.etree.ElementTree as ElementTree
-from sphinx.util import logging
+from mantiddoc import get_logger
 
 # Name of file produced by doctest target. It is assumed that it is created
 # in app.outdir
@@ -148,15 +149,15 @@ TEST_FAILURE_TYPE = "UsageFailure"
 PACKAGE_NAME = "docs"
 
 # No Test found error message
-NO_TEST_ERROR = "\n*************************************************\n"\
-                "* No test code has been found in given file(s). * \n"\
+NO_TEST_ERROR = "\n*************************************************\n" \
+                "* No test code has been found in given file(s). * \n" \
                 "*************************************************"
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Define parts of lines that denote a document
 DOCTEST_DOCUMENT_BEGIN = "Document:"
 DOCTEST_SUMMARY_TITLE = "Doctest summary"
-FAILURE_MARKER = "*"*70
+FAILURE_MARKER = "*" * 70
 
 # Regexes
 ALLPASS_TEST_NAMES_RE = re.compile(r"^\s+(\d+) tests in (.+)$")
@@ -167,7 +168,8 @@ TEST_FAILED_END_RE = re.compile(r"\*\*\*Test Failed\*\*\* (\d+) failures.")
 FAILURE_LOC_RE = re.compile(r"^File \"(.+)\",\s+line\s+(\d+),\s+in\s+(\S+)(\s\((setup|cleanup) code\))?$")
 MIX_FAIL_RE = re.compile(r'^\s+(\d+)\s+of\s+(\d+)\s+in\s+(\w+)$')
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 class TestSuiteReport(object):
 
     def __init__(self, name, cases, package=None):
@@ -193,7 +195,8 @@ class TestSuiteReport(object):
     def npassed(self):
         return self.ntests - self.nfailed
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 class TestCaseReport(object):
 
     def __init__(self, classname, name, failure_descr):
@@ -221,14 +224,15 @@ class TestCaseReport(object):
     def iscleanup(self):
         return "cleanup code" in self.failure_descr
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 class DocTestOutputParser(object):
     """
     Process a doctest output file and convert it
     to a different format
     """
 
-    def __init__(self, doctest_output, isfile = True):
+    def __init__(self, doctest_output, isfile=True):
         """
         Parses the given doctest output
 
@@ -239,7 +243,7 @@ class DocTestOutputParser(object):
                           as a filename
         """
         if isfile:
-            with open(doctest_output,'r') as results:
+            with open(doctest_output, 'r') as results:
                 self.testsuite = self.__parse(results)
         else:
             self.testsuite = self.__parse(doctest_output.splitlines())
@@ -293,7 +297,7 @@ class DocTestOutputParser(object):
                 document_txt = [line]
                 in_doc = True
                 continue
-            if line.startswith(DOCTEST_SUMMARY_TITLE): # end of tests
+            if line.startswith(DOCTEST_SUMMARY_TITLE):  # end of tests
                 in_doc = False
                 if document_txt:
                     cases.extend(self.__parse_document(document_txt))
@@ -318,10 +322,10 @@ class DocTestOutputParser(object):
         """
         fullname = self.__extract_fullname(results[0])
         if not results[1].startswith("-"):
-            raise ValueError("Invalid second line of output: '%s'. "\
+            raise ValueError("Invalid second line of output: '%s'. " \
                              "Expected a title underline."
                              % text[1])
-        results = results[2:] # trim off top two lines of header information
+        results = results[2:]  # trim off top two lines of header information
         maintests, cleanup = self.__split_on_cleanup(results)
         overall_success = not maintests[0] == FAILURE_MARKER
 
@@ -361,13 +365,13 @@ class DocTestOutputParser(object):
         summaryline_idx = None
         for idx, line in enumerate(results):
             if TEST_PASSED_END_RE.match(line) or \
-               TEST_FAILED_END_RE.match(line):
+                    TEST_FAILED_END_RE.match(line):
                 summaryline_idx = idx
                 break
 
         if summaryline_idx:
             # +1 includes the summary line itself
-            return (results[:summaryline_idx+1], results[summaryline_idx+1:])
+            return (results[:summaryline_idx + 1], results[summaryline_idx + 1:])
         else:
             return results
 
@@ -389,7 +393,7 @@ class DocTestOutputParser(object):
         classname = self.__create_classname(fullname)
         nitems = int(match.group(1))
         cases = []
-        for line in results[1:1+nitems]:
+        for line in results[1:1 + nitems]:
             match = ALLPASS_TEST_NAMES_RE.match(line)
             if not match:
                 raise ValueError("Unexpected information line in "
@@ -397,7 +401,7 @@ class DocTestOutputParser(object):
             ntests, name = int(match.group(1)), match.group(2)
             for idx in range(ntests):
                 cases.append(TestCaseReport(classname, name, failure_descr=None))
-        #endfor
+        # endfor
         return cases
 
     def __parse_failures(self, fullname, results):
@@ -433,7 +437,7 @@ class DocTestOutputParser(object):
         nmarkers = len(fail_markers)
         failcases = []
         for i in range(0, nmarkers - 1):
-            start, end = fail_markers[i] + 1, fail_markers[i+1]
+            start, end = fail_markers[i] + 1, fail_markers[i + 1]
             failcases.append(self.__create_failure_report(classname,
                                                           results[start:end]))
 
@@ -449,7 +453,7 @@ class DocTestOutputParser(object):
 
         # The final puzzle piece is that some tests that have failed
         # may have the same names as those that have passed.
-        for line in results[end+1:]:
+        for line in results[end + 1:]:
             match = MIX_FAIL_RE.match(line)
             if not match:
                 continue
@@ -511,13 +515,14 @@ class DocTestOutputParser(object):
                 for maincase in passes:
                     if case.name == maincase.name:
                         maincase.failure_descr = case.failure_descr
-                        break # only do the first match
+                        break  # only do the first match
             else:
                 merged.append(case)
 
         return merged
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 
 def doctest_to_xunit(app, exception):
     """
@@ -530,7 +535,7 @@ def doctest_to_xunit(app, exception):
       exception: (Exception): If an exception was raised then it is given here.
                               It is simply re-raised if an error occurred
     """
-    logger = logging.getLogger(__name__)
+    logger = get_logger(__name__, app)
 
     if exception:
         import traceback
@@ -549,7 +554,8 @@ def doctest_to_xunit(app, exception):
 
     doctests.as_xunit(xunit_file)
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 
 def setup(app):
     """
