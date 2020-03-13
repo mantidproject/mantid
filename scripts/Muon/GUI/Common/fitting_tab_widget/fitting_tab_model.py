@@ -386,6 +386,26 @@ class FittingTabModel(object):
             if AnalysisDataService.doesExist(guess_ws_name):
                 self.context.fitting_context.notify_plot_guess_changed(plot_guess, guess_ws_name)
 
+    def update_plot_guess(self, fit_function, workspace_name):
+
+        if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
+            guess_ws_name = MUON_ANALYSIS_GUESS_WS
+        elif self.context.workspace_suffix == FREQUENCY_DOMAIN_ANALYSIS_SUFFIX:
+            guess_ws_name = FREQUENCY_DOMAIN_ANALYSIS_GUESS_WS
+        else:
+            guess_ws_name = '__unknown_interface_fitting_guess'
+        try:
+            EvaluateFunction(InputWorkspace=workspace_name,
+                             Function=fit_function,
+                             StartX=self.startX,
+                             EndX=self.endX,
+                             OutputWorkspace=guess_ws_name)
+        except RuntimeError:
+            mantid.logger.error('Could not evaluate the function.')
+            return
+        if AnalysisDataService.doesExist(guess_ws_name):
+            self.context.fitting_context.notify_plot_guess_changed(True, guess_ws_name)
+
     # update model information
     def update_stored_fit_function(self, fit_function):
         self.fit_function = fit_function

@@ -203,6 +203,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_tab.fitting_tab_presenter.fit_type_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.fit_type_changed_observer)
 
+        self.seq_fitting_tab.seq_fitting_tab_presenter.selected_sequential_fit_notifier.add_subscriber(
+            self.dockable_plot_widget.presenter.plot_sequential_fit_observer)
+
     def setup_grouping_changed_observers(self):
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
             self.home_tab.home_tab_widget.groupingObserver)

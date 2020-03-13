@@ -48,6 +48,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self.plot_guess_observer = GenericObserver(self.handle_plot_guess_changed)
         self.workspace_deleted_from_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_deleted_from_ads)
         self.workspace_replaced_in_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_replaced_in_ads)
+        self.plot_sequential_fit_observer = GenericObserverWithArgPassing(self.handle_plot_single_sequential_fit)
         self.plot_type_changed_notifier = GenericObservable()
 
         self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
@@ -429,6 +430,63 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             workspace: self.context.group_pair_context.get_equivalent_group_pair(workspace)
             for workspace in workspace_list
             if self.context.group_pair_context.get_equivalent_group_pair(workspace)}
+
+    def handle_plot_single_sequential_fit(self, workspace_list):
+        errors = self._view.plot_options.get_errors()
+
+        # get corresponding fit for the workspace_list, if it exists
+        fit = self.context.fitting_context.find_fit_for_input_workspace_list(workspace_list)
+        if fit is not None:
+            fitted_workspace_list = fit.output_workspace_names
+        else:
+            fitted_workspace_list = []
+
+        for ws in self._model.plotted_workspaces:
+            if ws not in workspace_list:
+                self._model.remove_workspace_from_plot(ws, self._view.get_axes())
+
+        for ws in self._model.plotted_fit_workspaces:
+            if ws not in fitted_workspace_list:
+                self._model.remove_workspace_from_plot(ws, self._view.get_axes())
+
+        for workspace in workspace_list:
+            if workspace not in self._model.plotted_workspaces:
+                ax = self.get_workspace_plot_axis(workspace)
+                label = self.get_workspace_legend_label(workspace)
+                self._model.add_workspace_to_plot(ax, workspace, [0], errors=errors,
+                                                  plot_kwargs={'distribution': True, 'autoscale_on_update': False,
+                                                               'label': label})
+                self._model.add_workspace_to_plotted_workspaces(workspace)
+
+        for workspace_name in fitted_workspace_list:
+            if workspace_name in self._model.plotted_fit_workspaces:
+                continue
+
+            label = self.get_workspace_legend_label(workspace_name)
+            ax = self.get_workspace_plot_axis(workspace_name)
+            fit_function = fit.fit_function_name
+
+            self._model.add_workspace_to_plotted_fit_workspaces(workspace_name)
+
+            # handle tf asymmetry fits
+            first_fit_index = 1
+            if TF_ASYMMETRY_PREFIX in workspace_name:
+                first_fit_index = 3
+
+            self._model.add_workspace_to_plot(ax, workspace_name, [first_fit_index],
+                                              errors=False,
+                                              plot_kwargs={'distribution': True, 'autoscale_on_update': False,
+                                                           'label': label + fit_function + ': Fit'})
+            self._model.add_workspace_to_plot(ax, workspace_name, [2],
+                                              errors=False,
+                                              plot_kwargs={'distribution': True, 'autoscale_on_update': False,
+                                                           'label': label + fit_function + ': Diff'})
+
+        # scale the axis and set title
+        self._view.set_fig_titles(self.get_plot_title())
+        self._set_axis_limits(False)
+        self.update_options_view_from_model()
+        self._view.force_redraw()
 
     def update_model_tile_plot_positions(self):
         """

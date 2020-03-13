@@ -382,6 +382,18 @@ class FittingContext(object):
 
         return workspace_list
 
+    def find_fit_for_input_workspace_list(
+            self, input_workspace_list):
+        """
+        Find the fits in the list whose input workspace matches
+        :param input_workspace_name: The name of the input_workspace
+        :return: A list of matching fits
+        """
+        for fit in self.fit_list:
+            print("INPUT WORKSPACES", fit.input_workspaces, "WORKSPACE LIST", input_workspace_list)
+            if fit.input_workspaces == input_workspace_list:
+                return fit
+
     def remove_workspace_by_name(self, workspace_name):
         list_of_fits_to_remove = []
         for fit in self.fit_list:

@@ -22,3 +22,7 @@ class SeqFittingTabWidget(object):
                                                                        handle_sequential_fit_requested)
         self.seq_fitting_tab_view.setup_slot_for_table_parameter_changed(
             self.seq_fitting_tab_presenter.handle_updated_fit_parameter_in_table)
+
+        self.seq_fitting_tab_view.setup_slot_for_table_selection_changed(
+            self.seq_fitting_tab_presenter.handle_fit_selected_in_table)
+
