@@ -164,6 +164,7 @@ class FigureInteractionTest(unittest.TestCase):
         mouse_event = self._create_mock_right_click()
         mouse_event.inaxes.get_xlim.return_value = (1, 2)
         mouse_event.inaxes.get_ylim.return_value = (1, 2)
+        mouse_event.inaxes.lines = []
         mocked_figure_type.return_value = FigureType.Line
 
         # Expect a call to QMenu() for the outer menu followed by two more calls
