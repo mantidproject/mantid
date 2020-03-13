@@ -25,21 +25,12 @@ set(TEST_FILES
     test/ALCLatestFileFinderTest.h
     test/ALCPeakFittingModelTest.h
     test/ALCPeakFittingPresenterTest.h
-    test/EnggDiffGSASFittingModelTest.h
-    test/EnggDiffGSASFittingPresenterTest.h
-    test/EnggDiffMultiRunFittingWidgetModelTest.h
-    test/EnggDiffMultiRunFittingWidgetPresenterTest.h
-    test/EnggDiffFittingModelTest.h
-    test/EnggDiffFittingPresenterTest.h
-    test/EnggDiffractionPresenterTest.h
-    test/EnggVanadiumCorrectionsModelTest.h
     test/IO_MuonGroupingTest.h
     test/MuonAnalysisDataLoaderTest.h
     test/MuonAnalysisFitDataPresenterTest.h
     test/MuonAnalysisFitFunctionPresenterTest.h
     test/MuonAnalysisHelperTest.h
     test/MuonAnalysisResultTableCreatorTest.h
-    test/RunMapTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerProcessingTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerProgressBarTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerWorkspacesTest.h
@@ -113,7 +104,6 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    MantidScientificInterfacesDirect
                    MantidScientificInterfacesMuon
                    MantidScientificInterfacesISISReflectometry
-                   MantidScientificInterfacesEnggDiffraction
                    MantidScientificInterfacesMultiDatasetFit
                    MantidQtWidgetsCommon
                  PARENT_DEPENDENCIES
