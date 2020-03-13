@@ -1950,7 +1950,6 @@ MatrixWorkspace::findY(double value,
   } else {
     for (int64_t i = idx.first; i < numHists; ++i) {
       const auto &Y = this->y(i);
-      // cppcheck-suppress syntaxError
       if (auto it = std::find(std::next(Y.begin(), idx.second), Y.end(), value);
           it != Y.end()) {
         out = {i, std::distance(Y.begin(), it)};
