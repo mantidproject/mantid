@@ -13,7 +13,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** RecordPythonScript : TODO: DESCRIPTION
+/** RecordPythonScript :
 
   An Algorithm to generate a Python script file to reproduce the history of a
   workspace.

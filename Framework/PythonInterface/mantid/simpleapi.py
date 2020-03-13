@@ -1327,7 +1327,7 @@ def set_properties_dialog(algm_object, *args, **kwargs):
 
     # finally run the configured dialog
     import mantidplot
-    dialog_accepted = mantidplot.createScriptInputDialog(algm_object.name(), presets, message,
+    dialog_accepted = mantidplot.createScriptInputDialog(algm_object, presets, message,
                                                          enabled_list, disabled_list)
     if not dialog_accepted:
         raise RuntimeError('Algorithm input cancelled')
