@@ -14,7 +14,7 @@ namespace Crystal {
 /** PeaksOnSurface : Check peak workspace interaction with a single surface. Any
   peaks whos extents intersect the plane are identified.
 */
-class DLLExport PeaksOnSurface : public PeaksIntersection {
+class MANTID_CRYSTAL_DLL PeaksOnSurface : public PeaksIntersection {
 public:
   PeaksOnSurface();
 
@@ -63,10 +63,9 @@ private:
 };
 
 /// Non-member helper function
-bool DLLExport lineIntersectsSphere(const Mantid::Kernel::V3D &line,
-                                    const Mantid::Kernel::V3D &lineStart,
-                                    const Mantid::Kernel::V3D &peakCenter,
-                                    const double peakRadius);
+bool MANTID_CRYSTAL_DLL lineIntersectsSphere(
+    const Mantid::Kernel::V3D &line, const Mantid::Kernel::V3D &lineStart,
+    const Mantid::Kernel::V3D &peakCenter, const double peakRadius);
 
 } // namespace Crystal
 } // namespace Mantid

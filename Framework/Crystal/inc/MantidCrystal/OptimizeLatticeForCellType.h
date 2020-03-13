@@ -9,10 +9,10 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ILatticeFunction.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidKernel/System.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
@@ -26,7 +26,7 @@ namespace Crystal {
  @author Vickie Lynch, SNS
  @date 02/06/2012
  */
-class DLLExport OptimizeLatticeForCellType : public API::Algorithm {
+class MANTID_CRYSTAL_DLL OptimizeLatticeForCellType : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {

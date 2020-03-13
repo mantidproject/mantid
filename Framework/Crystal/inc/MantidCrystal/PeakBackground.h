@@ -9,8 +9,8 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/HardThresholdBackground.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <boost/function.hpp>
 
@@ -26,7 +26,7 @@ the peaks radius limits (no mater what their theshold is). For pixels inside the
 radius, they must also be above the threshold value.
 */
 
-class DLLExport PeakBackground : public HardThresholdBackground {
+class MANTID_CRYSTAL_DLL PeakBackground : public HardThresholdBackground {
 private:
   /// Peak workspace containing peaks of interest
   Mantid::API::IPeaksWorkspace_const_sptr m_peaksWS;

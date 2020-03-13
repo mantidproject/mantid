@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
@@ -21,7 +22,7 @@ namespace Crystal {
  @author Vickie Lynch, SNS, ORNL
  @date 02/08/2011
  */
-class DLLExport MaskPeaksWorkspace : public API::Algorithm {
+class MANTID_CRYSTAL_DLL MaskPeaksWorkspace : public API::Algorithm {
 public:
   /// Default constructor
   MaskPeaksWorkspace();

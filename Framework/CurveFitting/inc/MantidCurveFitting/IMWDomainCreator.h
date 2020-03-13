@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IDomainCreator.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <boost/weak_ptr.hpp>
@@ -29,7 +30,7 @@ namespace CurveFitting {
 A base class for domain creators taking 1D data from a spectrum of a matrix
 workspace.
 */
-class DLLExport IMWDomainCreator : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL IMWDomainCreator : public API::IDomainCreator {
 public:
   /// Constructor
   IMWDomainCreator(Kernel::IPropertyManager *fit,

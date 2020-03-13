@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 #include <complex>
 
@@ -21,8 +22,9 @@ namespace Functions {
 
   @date 2012-06-06
 */
-class DLLExport Bk2BkExpConvPV : virtual public API::IPeakFunction,
-                                 virtual public API::IFunctionMW {
+class MANTID_CURVEFITTING_DLL Bk2BkExpConvPV
+    : virtual public API::IPeakFunction,
+      virtual public API::IFunctionMW {
 public:
   Bk2BkExpConvPV();
 

@@ -7,14 +7,14 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
 
 /** AddPeakHKL : Algorithm to add a peaks to a PeaksWorkspace in the HKL frame
  */
-class DLLExport AddPeakHKL : public API::Algorithm {
+class MANTID_CRYSTAL_DLL AddPeakHKL : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

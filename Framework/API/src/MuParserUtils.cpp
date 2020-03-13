@@ -41,7 +41,7 @@ const std::map<double, std::string> MUPARSER_CONSTANTS = {
 /** The added constants are defined in MUPARSER_CONSTANTS.
  *  @param parser The parser to be initialized.
  */
-void DLLExport addDefaultConstants(mu::Parser &parser) {
+void MANTID_API_DLL addDefaultConstants(mu::Parser &parser) {
   for (const auto &constant : MUPARSER_CONSTANTS) {
     parser.DefineConst(constant.second, constant.first);
   }
@@ -51,7 +51,7 @@ using oneVarFun = double (*)(double); // pointer to a function of one variable
 const std::map<std::string, oneVarFun> MUPARSER_ONEVAR_FUNCTIONS = {
     {"erf", gsl_sf_erf}, {"erfc", gsl_sf_erfc}};
 
-void DLLExport extraOneVarFunctions(mu::Parser &parser) {
+void MANTID_API_DLL extraOneVarFunctions(mu::Parser &parser) {
   for (const auto &function : MUPARSER_ONEVAR_FUNCTIONS) {
     parser.DefineFun(function.first, function.second);
   }

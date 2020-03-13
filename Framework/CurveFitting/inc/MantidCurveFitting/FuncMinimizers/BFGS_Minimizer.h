@@ -22,7 +22,7 @@ namespace FuncMinimisers {
     @author Anders Markvardsen, ISIS, RAL
     @date 13/1/2010
 */
-class DLLExport BFGS_Minimizer : public DerivMinimizer {
+class MANTID_CURVEFITTING_DLL BFGS_Minimizer : public DerivMinimizer {
 public:
   /// Constructor.
   BFGS_Minimizer() : DerivMinimizer() {}

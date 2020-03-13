@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -16,7 +16,7 @@ namespace Crystal {
  rounding or optimization
  *  of the UB Matrix.
 */
-class DLLExport CalculatePeaksHKL : public API::Algorithm {
+class MANTID_CRYSTAL_DLL CalculatePeaksHKL : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

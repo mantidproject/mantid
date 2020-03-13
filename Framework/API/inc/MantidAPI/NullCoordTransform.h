@@ -17,7 +17,7 @@ namespace API {
  * @author Owen Arnold
  * @date 14/09/2011
  */
-class DLLExport NullCoordTransform : public Mantid::API::CoordTransform {
+class MANTID_API_DLL NullCoordTransform : public Mantid::API::CoordTransform {
 public:
   NullCoordTransform(size_t ndims = 3);
   std::string toXMLString() const override;

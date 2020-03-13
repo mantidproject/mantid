@@ -24,7 +24,7 @@ namespace Algorithms {
 /** Convolution of two workspaces
  */
 
-class DLLExport ConvolveWorkspaces : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL ConvolveWorkspaces : public API::Algorithm {
 public:
   ConvolveWorkspaces() : API::Algorithm() {}
   ~ConvolveWorkspaces() override {}

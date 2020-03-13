@@ -17,6 +17,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
@@ -210,7 +211,8 @@ private:
   }
 };
 
-class DLLExport IntegratePeakTimeSlices : public Mantid::API::Algorithm {
+class MANTID_CRYSTAL_DLL IntegratePeakTimeSlices
+    : public Mantid::API::Algorithm {
 public:
   /// Default constructor
   IntegratePeakTimeSlices();

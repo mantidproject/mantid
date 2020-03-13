@@ -9,6 +9,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/IFittingAlgorithm.h"
 #include "MantidKernel/IValidator.h"
 
@@ -19,7 +20,7 @@ namespace Algorithms {
 /**
   QENSFitSimultaneous - Algorithm for performing a simultaneous QENS fit
 */
-class DLLExport QENSFitSimultaneous : public IFittingAlgorithm {
+class MANTID_CURVEFITTING_DLL QENSFitSimultaneous : public IFittingAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

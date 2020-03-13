@@ -18,7 +18,7 @@ namespace Functions {
 
   Main functionality is implemented in ChebfunBase class.
 */
-class DLLExport SimpleChebfun {
+class MANTID_CURVEFITTING_DLL SimpleChebfun {
 public:
   /// Constructor.
   SimpleChebfun(size_t n, ChebfunFunctionType fun, double start, double end);

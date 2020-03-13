@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -44,7 +45,8 @@ namespace CurveFitting {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class DLLExport GeneralDomainCreator : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL GeneralDomainCreator
+    : public API::IDomainCreator {
 public:
   GeneralDomainCreator(const API::IFunctionGeneral &fun,
                        Kernel::IPropertyManager &manager,

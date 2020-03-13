@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -20,7 +20,7 @@ using VecVecV3D = std::vector<VecV3D>;
   identify peaks interacting with one or more surfaces
   i.e. a flat surface or a box made out of flat surfaces.
 */
-class DLLExport PeaksIntersection : public API::Algorithm {
+class MANTID_CRYSTAL_DLL PeaksIntersection : public API::Algorithm {
 public:
   static std::string detectorSpaceFrame();
   static std::string qLabFrame();

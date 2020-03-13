@@ -25,7 +25,7 @@ A wrapper around GSL functions implementing a B-spline.
 This function can also calculate derivatives up to order 2 as a by product of
 the spline.
 */
-class DLLExport BSpline : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL BSpline : public BackgroundFunction {
 
 public:
   /// Constructor

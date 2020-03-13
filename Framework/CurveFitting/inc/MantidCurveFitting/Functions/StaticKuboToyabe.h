@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -22,8 +23,8 @@ Provide static Kubo Toyabe fitting function
  @date 20/03/2012
  */
 
-class DLLExport StaticKuboToyabe : public API::ParamFunction,
-                                   public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL StaticKuboToyabe : public API::ParamFunction,
+                                                 public API::IFunction1D {
 public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "StaticKuboToyabe"; }

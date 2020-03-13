@@ -28,7 +28,7 @@ the spline.
 @author Samuel Jackson, STFC
 @date 05/07/2013
 */
-class DLLExport CubicSpline : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL CubicSpline : public BackgroundFunction {
 
 public:
   /// Constructor

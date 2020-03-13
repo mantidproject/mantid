@@ -27,7 +27,7 @@ Uses the Clenshaw algorithm to evaluate the expansion.
 @author Roman Tolchenov, Tessella inc
 @date 14/05/2010
 */
-class DLLExport Chebyshev : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL Chebyshev : public BackgroundFunction {
 public:
   /// Constructor
   Chebyshev();

@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 #include <gsl/gsl_bspline.h>
 #include <gsl/gsl_multifit.h>
@@ -25,7 +26,7 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 09/10/2009
  */
-class DLLExport SplineBackground : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL SplineBackground : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SplineBackground"; }

@@ -39,7 +39,8 @@ namespace API {
      FileAction type parameter in the constructor.
 
  */
-class DLLExport FileProperty : public Kernel::PropertyWithValue<std::string> {
+class MANTID_API_DLL FileProperty
+    : public Kernel::PropertyWithValue<std::string> {
 public:
   /// An enumeration for load/save types. This is passed on to the FileValidator
   /// as a constructor parameter.

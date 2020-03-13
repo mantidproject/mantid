@@ -5,6 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/System.h"
 
@@ -22,7 +23,7 @@ namespace API {
 
  */
 
-class DLLExport IBoxControllerIO : public Kernel::DiskBuffer {
+class MANTID_API_DLL IBoxControllerIO : public Kernel::DiskBuffer {
 public:
   /** open file for i/o operations
    * @param fileName -- the name of the file to open

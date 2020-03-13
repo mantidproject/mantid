@@ -23,7 +23,8 @@ namespace Algorithms {
 
 /** RefinePowderInstrumentParameters3 :
  */
-class DLLExport RefinePowderInstrumentParameters3 : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL RefinePowderInstrumentParameters3
+    : public API::Algorithm {
 public:
   RefinePowderInstrumentParameters3();
 

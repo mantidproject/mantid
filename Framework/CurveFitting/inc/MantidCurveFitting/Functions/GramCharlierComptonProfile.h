@@ -19,7 +19,8 @@ namespace Functions {
   convoluted with an instrument resolution function that is approximated by a
   Voigt function.
 */
-class DLLExport GramCharlierComptonProfile : public ComptonProfile {
+class MANTID_CURVEFITTING_DLL GramCharlierComptonProfile
+    : public ComptonProfile {
 public:
   /// Default constructor required by factory
   GramCharlierComptonProfile();

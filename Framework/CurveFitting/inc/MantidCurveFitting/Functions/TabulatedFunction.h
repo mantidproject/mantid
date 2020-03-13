@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 #include <cmath>
 
@@ -52,8 +53,8 @@ along the abscissas 'Shift'
 @author Roman Tolchenov, Tessella plc
 @date 4/09/2012
 */
-class DLLExport TabulatedFunction : public API::ParamFunction,
-                                    public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL TabulatedFunction : public API::ParamFunction,
+                                                  public API::IFunction1D {
 public:
   /// Constructor
   TabulatedFunction();

@@ -19,7 +19,7 @@ namespace Algorithms {
   Optionally outputs slices of the chi^2 along the parameter axes
   and estimates the standard deviations.
 */
-class DLLExport CalculateChiSquared : public IFittingAlgorithm {
+class MANTID_CURVEFITTING_DLL CalculateChiSquared : public IFittingAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

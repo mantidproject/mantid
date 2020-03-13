@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 #include <cmath>
@@ -19,8 +20,8 @@ namespace Functions {
 
 /** ReflectivityMulf : Calculate the ReflectivityMulf from a simple layer model.
  */
-class DLLExport ReflectivityMulf : public API::IFunction1D,
-                                   public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL ReflectivityMulf : public API::IFunction1D,
+                                                 public API::ParamFunction {
 public:
   ReflectivityMulf();
 

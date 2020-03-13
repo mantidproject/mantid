@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -20,7 +21,7 @@ namespace Crystal {
    given lhs peak if
     the tolerance is too large/the peaks are close together.
 */
-class DLLExport CombinePeaksWorkspaces : public API::Algorithm {
+class MANTID_CRYSTAL_DLL CombinePeaksWorkspaces : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

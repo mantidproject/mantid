@@ -15,7 +15,7 @@ namespace Functions {
 
 /** FullprofPolynomial : Polynomial background defined in Fullprof
  */
-class DLLExport FullprofPolynomial : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL FullprofPolynomial : public BackgroundFunction {
 public:
   FullprofPolynomial();
 

@@ -12,6 +12,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 // Mantid headers from other projects
 // N/A
 // 3rd party library headers
@@ -35,8 +36,9 @@ namespace Functions {
     @date 12/10/2016
 */
 
-class DLLExport FunctionQDepends : virtual public Mantid::API::IFunction1D,
-                                   virtual public Mantid::API::ParamFunction {
+class MANTID_CURVEFITTING_DLL FunctionQDepends
+    : virtual public Mantid::API::IFunction1D,
+      virtual public Mantid::API::ParamFunction {
 
 public:
   /* -------------------

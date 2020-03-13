@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/ICluster.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
@@ -18,7 +19,7 @@ namespace Crystal {
 
 /** Cluster : Image cluster used by connected component labeling
  */
-class DLLExport Cluster : public ICluster {
+class MANTID_CRYSTAL_DLL Cluster : public ICluster {
 
 public:
   /// Constructor

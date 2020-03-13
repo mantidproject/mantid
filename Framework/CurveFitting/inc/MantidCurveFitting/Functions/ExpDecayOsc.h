@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -23,8 +24,8 @@ h*exp(-lambda.x)*(cos(2pi*f*x+phi))
  @date 06/01/2012
  */
 
-class DLLExport ExpDecayOsc : public API::ParamFunction,
-                              public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL ExpDecayOsc : public API::ParamFunction,
+                                            public API::IFunction1D {
 public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "ExpDecayOsc"; }

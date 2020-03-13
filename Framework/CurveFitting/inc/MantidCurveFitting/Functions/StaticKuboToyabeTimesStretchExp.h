@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -22,8 +23,9 @@ Stretched Exponential Decay.
 @author Lamar Moore
 @date 13/11/2015
 */
-class DLLExport StaticKuboToyabeTimesStretchExp : public API::ParamFunction,
-                                                  public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL StaticKuboToyabeTimesStretchExp
+    : public API::ParamFunction,
+      public API::IFunction1D {
 public:
   std::string name() const override {
     return "StaticKuboToyabeTimesStretchExp";

@@ -42,7 +42,7 @@ namespace Algorithms {
   instrument
   parameters. Its output will be used by RefinePowderInstrumentParameters().
 */
-class DLLExport FitPowderDiffPeaks : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL FitPowderDiffPeaks : public API::Algorithm {
 public:
   FitPowderDiffPeaks();
 

@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -57,7 +58,7 @@ const double radtodeg_half = 180.0 / M_PI / 2.;
     @author Vickie Lynch, Dennis Mikkelson SNS
     @date 06/14/2011
 */
-class DLLExport AnvredCorrection : public API::Algorithm {
+class MANTID_CRYSTAL_DLL AnvredCorrection : public API::Algorithm {
 public:
   /// (Empty) Constructor
   AnvredCorrection();

@@ -23,7 +23,7 @@ namespace Algorithms {
   @author Samuel Jackson, STFC
   @date 24/07/2013
 */
-class DLLExport SplineSmoothing : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL SplineSmoothing : public API::Algorithm {
 public:
   SplineSmoothing();
 

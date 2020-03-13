@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IConstraint.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -25,7 +26,7 @@ upper or lower (or both) boundaries on a single parameter.
 @author Anders Markvardsen, ISIS, RAL
 @date 13/11/2009
 */
-class DLLExport BoundaryConstraint : public API::IConstraint {
+class MANTID_CURVEFITTING_DLL BoundaryConstraint : public API::IConstraint {
 public:
   /// Default constructor
   BoundaryConstraint();

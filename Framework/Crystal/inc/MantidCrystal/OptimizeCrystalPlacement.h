@@ -14,7 +14,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -30,7 +30,7 @@ orientation .
 @author Ruth Mikkelson, SNS,ORNL
 @date 01/26/2013
 */
-class DLLExport OptimizeCrystalPlacement : public API::Algorithm {
+class MANTID_CRYSTAL_DLL OptimizeCrystalPlacement : public API::Algorithm {
 public:
   const std::string name() const override {
     return "OptimizeCrystalPlacement";

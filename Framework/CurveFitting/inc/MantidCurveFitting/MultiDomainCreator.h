@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IDomainCreator.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 
@@ -20,7 +21,7 @@ Creates a composite domain.
 @author Roman Tolchenov, Tessella plc
 @date 06/12/2011
 */
-class DLLExport MultiDomainCreator : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL MultiDomainCreator : public API::IDomainCreator {
   /// A friend that can create instances of this class
   // friend class Fit;
 public:

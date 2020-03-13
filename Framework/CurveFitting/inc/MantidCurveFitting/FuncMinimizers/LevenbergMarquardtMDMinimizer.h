@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/GSLVector.h"
 
@@ -26,7 +27,8 @@ namespace FuncMinimisers {
 
     @author Roman Tolchenov, Tessella plc
 */
-class DLLExport LevenbergMarquardtMDMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL LevenbergMarquardtMDMinimizer
+    : public API::IFuncMinimizer {
 public:
   /// Constructor
   LevenbergMarquardtMDMinimizer();

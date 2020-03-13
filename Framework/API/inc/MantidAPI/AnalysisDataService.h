@@ -40,7 +40,7 @@ class WorkspaceGroup;
 
     Modified to inherit from DataService
 */
-class DLLExport AnalysisDataServiceImpl final
+class MANTID_API_DLL AnalysisDataServiceImpl final
     : public Kernel::DataService<API::Workspace> {
 public:
   /** @name Extra notifications only applicable to the ADS */

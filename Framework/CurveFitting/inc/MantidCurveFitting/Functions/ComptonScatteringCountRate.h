@@ -19,7 +19,8 @@ namespace Functions {
   ComptonProfile functions
   that give the Neutron count rate.
 */
-class DLLExport ComptonScatteringCountRate : public API::CompositeFunction {
+class MANTID_CURVEFITTING_DLL ComptonScatteringCountRate
+    : public API::CompositeFunction {
 public:
   /// Constructor
   ComptonScatteringCountRate();

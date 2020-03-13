@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <boost/optional.hpp>
@@ -44,7 +45,7 @@ class BackgroundStrategy;
 /** ConnectedComponentLabelling : Implements connected component labeling on
  MDHistoWorkspaces.
  */
-class DLLExport ConnectedComponentLabeling {
+class MANTID_CRYSTAL_DLL ConnectedComponentLabeling {
 
 public:
   /// Constructor

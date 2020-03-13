@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
-
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -31,7 +29,7 @@ namespace Crystal {
  * @author Vickie Lynch, SNS
  * @date 2012-01-20
  */
-class DLLExport SortHKL : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SortHKL : public API::Algorithm {
 public:
   SortHKL();
   ~SortHKL() override;

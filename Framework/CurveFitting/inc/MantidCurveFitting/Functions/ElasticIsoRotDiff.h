@@ -24,7 +24,7 @@ namespace Functions {
 /**
  * @brief Elastic part of the DiffSphere function
  */
-class DLLExport ElasticIsoRotDiff : public DeltaFunction {
+class MANTID_CURVEFITTING_DLL ElasticIsoRotDiff : public DeltaFunction {
 public:
   /// Constructor
   ElasticIsoRotDiff();

@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -21,7 +22,8 @@ Provide exponential decay function: h*exp(-(x-c)/t)
 @author Roman Tolchenov, Tessella plc
 @date 05/11/2010
 */
-class DLLExport ExpDecay : public API::ParamFunction, public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL ExpDecay : public API::ParamFunction,
+                                         public API::IFunction1D {
 public:
   /// Constructor
   ExpDecay();

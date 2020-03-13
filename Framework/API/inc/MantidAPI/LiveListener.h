@@ -14,7 +14,7 @@ namespace API {
   Base implementation for common behaviour of all live listener classes. It
   implements the ILiveListener interface.
 */
-class DLLExport LiveListener : public API::ILiveListener {
+class MANTID_API_DLL LiveListener : public API::ILiveListener {
 public:
   bool dataReset() override;
   void setSpectra(const std::vector<specnum_t> &specList) override;

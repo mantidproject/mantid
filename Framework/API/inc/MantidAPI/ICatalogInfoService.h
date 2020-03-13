@@ -19,7 +19,7 @@ namespace API {
  @author Jay Rainey, ISIS Rutherford Appleton Laboratory
  @date 24/02/2010
  */
-class DLLExport ICatalogInfoService {
+class ICatalogInfoService {
 public:
   // Virtual destructor
   virtual ~ICatalogInfoService() = default;

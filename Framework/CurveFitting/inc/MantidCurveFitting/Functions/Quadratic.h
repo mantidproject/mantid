@@ -28,7 +28,7 @@ Quadratic parameters:
 @author Anders Markvardsen, ISIS, RAL
 @date 20/10/2009
 */
-class DLLExport Quadratic : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL Quadratic : public BackgroundFunction {
 public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "Quadratic"; }

@@ -24,7 +24,7 @@ namespace Algorithms {
     , ; [ ] (space)
 
 */
-struct DLLExport V3DFromHKLColumnExtractor {
+struct MANTID_CURVEFITTING_DLL V3DFromHKLColumnExtractor {
   Kernel::V3D operator()(const API::Column_const_sptr &hklColumn,
                          size_t i) const;
 
@@ -49,7 +49,7 @@ protected:
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 15/03/2015
 */
-class DLLExport PawleyFit : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL PawleyFit : public API::Algorithm {
 public:
   PawleyFit();
   const std::string name() const override { return "PawleyFit"; }

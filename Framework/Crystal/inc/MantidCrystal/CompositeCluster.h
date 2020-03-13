@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/ICluster.h"
 #include "MantidKernel/System.h"
 #include <boost/optional.hpp>
@@ -16,7 +17,7 @@ namespace Crystal {
 
 /** CompositeCluster : Cluster made by by merging other IClusters.
  */
-class DLLExport CompositeCluster : public ICluster {
+class MANTID_CRYSTAL_DLL CompositeCluster : public ICluster {
 public:
   CompositeCluster() = default;
   CompositeCluster(const CompositeCluster &) = delete;

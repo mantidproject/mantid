@@ -27,7 +27,7 @@ LinearBackground parameters:
 @author Anders Markvardsen, ISIS, RAL
 @date 23/10/2009
 */
-class DLLExport LinearBackground : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL LinearBackground : public BackgroundFunction {
 public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "LinearBackground"; }

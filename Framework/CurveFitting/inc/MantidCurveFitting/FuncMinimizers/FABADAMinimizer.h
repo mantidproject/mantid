@@ -29,7 +29,7 @@ namespace FuncMinimisers {
   Algorithm extended with Gibbs Sampling. Designed to obtain the Bayesian
   posterior PDFs
 */
-class DLLExport FABADAMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL FABADAMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor
   FABADAMinimizer();

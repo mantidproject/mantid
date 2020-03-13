@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -18,8 +19,9 @@ namespace Functions {
   function from
   Thermal Neutron Function's beta0, Alph1, Alph0t, Alph1t, Dtt1, and etc.
 */
-class DLLExport ThermalNeutronBk2BkExpBeta : virtual public API::IFunction1D,
-                                             public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL ThermalNeutronBk2BkExpBeta
+    : virtual public API::IFunction1D,
+      public API::ParamFunction {
 public:
   /// Override
   void function1D(double *out, const double *xValues,
