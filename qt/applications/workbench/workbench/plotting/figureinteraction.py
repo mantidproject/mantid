@@ -12,6 +12,7 @@ Defines interaction behaviour for plotting.
 from __future__ import (absolute_import, unicode_literals)
 
 # std imports
+from contextlib import contextmanager
 from collections import OrderedDict
 from copy import copy
 from functools import partial
@@ -43,6 +44,16 @@ AXES_SCALE_MENU_OPTS = OrderedDict(
      ("Lin x/Log y", ("linear", "log")), ("Log x/Lin y", ("log", "linear"))])
 COLORBAR_SCALE_MENU_OPTS = OrderedDict(
     [("Linear", Normalize), ("Log", LogNorm)])
+
+
+@contextmanager
+def errorbar_caps_removed(ax):
+    # Error bar caps are considered lines so they are removed before checking the number of lines on the axes so
+    # they aren't confused for "actual" lines.
+    error_bar_caps = datafunctions.remove_and_return_errorbar_cap_lines(ax)
+    yield
+    # Re-add error bar caps
+    ax.lines += error_bar_caps
 
 
 class FigureInteraction(object):
@@ -436,17 +447,11 @@ class FigureInteraction(object):
         menu.addMenu(marker_menu)
 
     def _add_plot_type_option_menu(self, menu, ax):
-        # Error bar caps are considered lines so they are removed before checking the number of lines on the axes so
-        # they aren't confused for "actual" lines.
-        error_bar_caps = datafunctions.remove_and_return_errorbar_cap_lines(ax)
-
-        # Able to change the plot type to waterfall if there is only one axes, it is a MantidAxes, and there is more
-        # than one line on the axes.
-        if len(ax.get_figure().get_axes()) > 1 or not isinstance(ax, MantidAxes) or len(ax.get_lines()) <= 1:
-            return
-
-        # Re-add error bar caps
-        ax.lines += error_bar_caps
+        with errorbar_caps_removed(ax):
+            # Able to change the plot type to waterfall if there is only one axes, it is a MantidAxes, and there is more
+            # than one line on the axes.
+            if len(ax.get_figure().get_axes()) > 1 or not isinstance(ax, MantidAxes) or len(ax.get_lines()) <= 1:
+                return
 
         plot_type_menu = QMenu("Plot Type", menu)
         plot_type_action_group = QActionGroup(plot_type_menu)
