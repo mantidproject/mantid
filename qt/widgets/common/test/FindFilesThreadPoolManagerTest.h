@@ -32,7 +32,7 @@ public:
 
   void test_find_single_file() {
     // Arrange
-    FakeMWRunFiles *widget = new FakeMWRunFiles();
+    auto *widget = new FakeMWRunFiles();
 
     // The parameters of the search
     FindFilesSearchParameters parameters;

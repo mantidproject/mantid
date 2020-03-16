@@ -39,8 +39,8 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
   m_uiForm.properties->addWidget(m_propTrees["SlicePropTree"]);
 
   // Editor Factories
-  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
-  QtCheckBoxFactory *checkboxFactory = new QtCheckBoxFactory();
+  auto *doubleEditorFactory = new DoubleEditorFactory();
+  auto *checkboxFactory = new QtCheckBoxFactory();
   m_propTrees["SlicePropTree"]->setFactoryForManager(m_dblManager,
                                                      doubleEditorFactory);
   m_propTrees["SlicePropTree"]->setFactoryForManager(m_blnManager,

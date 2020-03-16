@@ -380,10 +380,10 @@ QRect ProjectionSurface::selectionRect() const {
 }
 
 RectF ProjectionSurface::selectionRectUV() const {
-  double left = static_cast<double>(m_selectRect.left());
-  double right = static_cast<double>(m_selectRect.right());
-  double top = static_cast<double>(m_selectRect.top());
-  double bottom = static_cast<double>(m_selectRect.bottom());
+  auto left = static_cast<double>(m_selectRect.left());
+  auto right = static_cast<double>(m_selectRect.right());
+  auto top = static_cast<double>(m_selectRect.top());
+  auto bottom = static_cast<double>(m_selectRect.bottom());
 
   if (left > right) {
     std::swap(left, right);

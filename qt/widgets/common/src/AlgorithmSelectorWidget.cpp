@@ -33,7 +33,7 @@ AlgorithmSelectorWidget::AlgorithmSelectorWidget(QWidget *parent)
       m_updateObserver(*this,
                        &AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate),
       m_updateInProgress(false) {
-  QHBoxLayout *buttonLayout = new QHBoxLayout();
+  auto *buttonLayout = new QHBoxLayout();
 
   m_tree = new AlgorithmTreeWidget(this);
   m_tree->setHeaderLabel("Algorithms");
@@ -249,7 +249,7 @@ void AlgorithmTreeWidget::mouseMoveEvent(QMouseEvent *e) {
 
   // Start dragging
   QDrag *drag = new QDrag(this);
-  QMimeData *mimeData = new QMimeData;
+  auto *mimeData = new QMimeData;
 
   mimeData->setText("Algorithm");
   drag->setMimeData(mimeData);

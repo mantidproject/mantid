@@ -122,7 +122,7 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e) {
   // Start dragging - Qt docs say not to delete the QDrag object
   // manually
   QDrag *drag = new QDrag(this);
-  QMimeData *mimeData = new QMimeData;
+  auto *mimeData = new QMimeData;
   drag->setMimeData(mimeData);
   mimeData->setObjectName("MantidWorkspace");
   mimeData->setText(wsNames.join("\n"));

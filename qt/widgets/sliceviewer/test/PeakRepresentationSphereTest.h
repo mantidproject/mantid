@@ -142,7 +142,7 @@ public:
 
   void test_move_position_produces_correct_position() {
     // Arrange
-    MockPeakTransform *pMockTransform = new MockPeakTransform;
+    auto *pMockTransform = new MockPeakTransform;
     EXPECT_CALL(*pMockTransform, transform(_))
         .Times(1)
         .WillOnce(Return(Mantid::Kernel::V3D(0, 0, 0)));

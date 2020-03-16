@@ -26,7 +26,7 @@ BinDialog::BinDialog(QWidget *parent) : QDialog(parent) {
   setWindowTitle(QString("Select X Range"));
 
   // frame for group box
-  QFrame *groupBox = new QFrame();
+  auto *groupBox = new QFrame();
   // Double Validator
   QValidator *validator = new QDoubleValidator(this);
   // Input value for Integral option
@@ -41,7 +41,7 @@ BinDialog::BinDialog(QWidget *parent) : QDialog(parent) {
           SLOT(mEntireRange_toggled(bool)));
 
   // Create a grid layout
-  QGridLayout *gridbox = new QGridLayout;
+  auto *gridbox = new QGridLayout;
   gridbox->addWidget(new QLabel("Min X Value:"), 0, 0);
   gridbox->addWidget(mIntegralMinValue, 0, 1);
   gridbox->addWidget(new QLabel("Max X Value:"), 1, 0);
@@ -50,14 +50,14 @@ BinDialog::BinDialog(QWidget *parent) : QDialog(parent) {
   groupBox->setLayout(gridbox);
 
   // create a frame for Ok and Cancel btn
-  QFrame *okcancelFrame = new QFrame();
-  QPushButton *okButton = new QPushButton("Ok");
-  QPushButton *cancelButton = new QPushButton("Cancel");
-  QHBoxLayout *okcancelLayout = new QHBoxLayout;
+  auto *okcancelFrame = new QFrame();
+  auto *okButton = new QPushButton("Ok");
+  auto *cancelButton = new QPushButton("Cancel");
+  auto *okcancelLayout = new QHBoxLayout;
   okcancelLayout->addWidget(okButton);
   okcancelLayout->addWidget(cancelButton);
   okcancelFrame->setLayout(okcancelLayout);
-  QVBoxLayout *dialogLayout = new QVBoxLayout();
+  auto *dialogLayout = new QVBoxLayout();
   dialogLayout->addWidget(groupBox);
   dialogLayout->addWidget(okcancelFrame);
   this->setLayout(dialogLayout);

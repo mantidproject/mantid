@@ -127,8 +127,7 @@ void WidgetFactory::closeSliceViewerWindow(SliceViewerWindow *w) {
  */
 MantidQt::SliceViewer::SliceViewer *
 WidgetFactory::createSliceViewer(const QString &wsName) {
-  MantidQt::SliceViewer::SliceViewer *slicer =
-      new MantidQt::SliceViewer::SliceViewer();
+  auto *slicer = new MantidQt::SliceViewer::SliceViewer();
   // TODO: Save in a list ?
   if (!wsName.isEmpty())
     slicer->setWorkspace(wsName);

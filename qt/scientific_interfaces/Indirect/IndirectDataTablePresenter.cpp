@@ -49,7 +49,7 @@ public:
 
   void setModelData(QWidget *editor, QAbstractItemModel *model,
                     const QModelIndex &index) const override {
-    QLineEdit *lineEdit = static_cast<QLineEdit *>(editor);
+    auto *lineEdit = static_cast<QLineEdit *>(editor);
     model->setData(index, lineEdit->text(), Qt::EditRole);
   }
 

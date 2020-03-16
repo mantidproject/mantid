@@ -56,8 +56,7 @@ public:
 
   void test_copy() {
     QwtWorkspaceBinData data1(*ws, 1, false);
-    QwtWorkspaceBinData *data2 =
-        dynamic_cast<QwtWorkspaceBinData *>(data1.copy());
+    auto *data2 = dynamic_cast<QwtWorkspaceBinData *>(data1.copy());
     checkData(*data2, 1.0);
   }
 

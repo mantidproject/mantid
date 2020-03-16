@@ -193,7 +193,7 @@ RangeLimitBox::RangeLimitBox(LimitType type, QWidget *parent)
   d_spin_box->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
   d_spin_box->setEnabled(false);
 
-  QHBoxLayout *l = new QHBoxLayout(this);
+  auto *l = new QHBoxLayout(this);
   l->setMargin(0);
   l->setSpacing(0);
   l->addWidget(d_checkbox);

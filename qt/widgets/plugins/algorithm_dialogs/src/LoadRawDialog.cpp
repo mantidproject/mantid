@@ -60,7 +60,7 @@ void LoadRawDialog::initLayout() {
     this->addOptionalMessage(main_layout);
 
   //------------- Filename property ---------------------
-  QHBoxLayout *prop_line = new QHBoxLayout;
+  auto *prop_line = new QHBoxLayout;
   prop_line->addWidget(new QLabel("Select a file to load:"));
 
   m_pathBox = new QLineEdit;
@@ -68,7 +68,7 @@ void LoadRawDialog::initLayout() {
   prop_line->addWidget(m_pathBox);
   tie(m_pathBox, "Filename", prop_line);
 
-  QPushButton *browseBtn = new QPushButton("Browse");
+  auto *browseBtn = new QPushButton("Browse");
   connect(browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
   browseBtn->setEnabled(isWidgetEnabled("Filename"));
   prop_line->addWidget(browseBtn);
@@ -86,10 +86,10 @@ void LoadRawDialog::initLayout() {
   main_layout->addLayout(prop_line);
 
   //------------- Spectra properties ---------------------
-  QGroupBox *groupbox = new QGroupBox("Spectra Options");
+  auto *groupbox = new QGroupBox("Spectra Options");
   prop_line = new QHBoxLayout;
 
-  QLineEdit *text_field = new QLineEdit;
+  auto *text_field = new QLineEdit;
   text_field->setMaximumWidth(m_wsBox->fontMetrics().width("888888"));
   prop_line->addWidget(new QLabel("Start:"));
   prop_line->addWidget(text_field);
@@ -125,7 +125,7 @@ void LoadRawDialog::initLayout() {
 
   Mantid::Kernel::Property *cacheProp = getAlgorithmProperty("Cache");
   if (cacheProp) {
-    QComboBox *cacheBox = new QComboBox;
+    auto *cacheBox = new QComboBox;
     std::vector<std::string> items = cacheProp->allowedValues();
     std::vector<std::string>::const_iterator vend = items.end();
     for (std::vector<std::string>::const_iterator vitr = items.begin();
@@ -152,7 +152,7 @@ void LoadRawDialog::initLayout() {
   // add a check box for it ----
   Mantid::Kernel::Property *loadMonitors = getAlgorithmProperty("LoadMonitors");
   if (loadMonitors) {
-    QComboBox *monitorsBox = new QComboBox;
+    auto *monitorsBox = new QComboBox;
     std::vector<std::string> monitoritems = loadMonitors->allowedValues();
     std::vector<std::string>::const_iterator mend = monitoritems.end();
     for (std::vector<std::string>::const_iterator mitr = monitoritems.begin();

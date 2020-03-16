@@ -139,7 +139,7 @@ void SpectrumPlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
   size_t lut_index;
   size_t image_index = 0;
 
-  unsigned int *rgb_buffer = new unsigned int[n_rows * n_cols];
+  auto *rgb_buffer = new unsigned int[n_rows * n_cols];
   double val = 0;
   for (int row = (int)n_rows - 1; row >= 0; row--) {
     size_t data_index = row * n_cols;
@@ -178,7 +178,7 @@ void SpectrumPlotItem::draw(QPainter *painter, const QwtScaleMap &xMap,
     }
   }
 
-  uchar *buffer = (uchar *)rgb_buffer;
+  auto *buffer = (uchar *)rgb_buffer;
   QImage image(buffer, (int)n_cols, (int)n_rows, QImage::Format_RGB32);
   QPixmap pixmap = QPixmap::fromImage(image);
 

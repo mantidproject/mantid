@@ -58,7 +58,7 @@ EnggDiffGSASFittingViewQtWidget::~EnggDiffGSASFittingViewQtWidget() {
 
 void EnggDiffGSASFittingViewQtWidget::addWidget(
     IEnggDiffMultiRunFittingWidgetView *widget) {
-  QWidget *qWidget = dynamic_cast<QWidget *>(widget);
+  auto *qWidget = dynamic_cast<QWidget *>(widget);
   m_ui.gridLayout_multiRunWidget->addWidget(qWidget, 0, 0);
 }
 

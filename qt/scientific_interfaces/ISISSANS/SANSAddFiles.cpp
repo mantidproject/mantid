@@ -166,7 +166,7 @@ void SANSAddFiles::setToolTips() {
  *  @return a pointer to the inserted widget
  */
 QListWidgetItem *SANSAddFiles::insertListFront(const QString &text) {
-  QListWidgetItem *newItem = new QListWidgetItem(text);
+  auto *newItem = new QListWidgetItem(text);
   newItem->setFlags(newItem->flags() | Qt::ItemIsEditable);
   m_SANSForm->toAdd_List->insertItem(0, newItem);
   return newItem;

@@ -283,10 +283,8 @@ std::vector<int> MuonGroupingHelper::whichPairToWhichRow() const {
       continue;
 
     // test if content in combo boxes
-    QComboBox *qwF =
-        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 1));
-    QComboBox *qwB =
-        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 2));
+    auto *qwF = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 1));
+    auto *qwB = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 2));
     if (!qwF || !qwB)
       continue;
     if (qwF->count() < 2 || qwB->count() < 2)

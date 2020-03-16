@@ -339,8 +339,8 @@ int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
   bool addValidator(true);
 
   // Boolean properties use the name labels differently
-  if (const FileProperty *fileType = dynamic_cast<const FileProperty *>(prop)) {
-    MWRunFiles *fileFinder = new MWRunFiles(parent);
+  if (const auto *fileType = dynamic_cast<const FileProperty *>(prop)) {
+    auto *fileFinder = new MWRunFiles(parent);
     inputWidget = fileFinder;
     fileFinder->setLabelText(propName);
     fileFinder->isForRunFiles(false);
@@ -352,13 +352,13 @@ int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
     QLabel *nameLbl = new QLabel(propName, parent);
     nameLbl->setToolTip(QString::fromStdString(prop->briefDocumentation()));
     if (dynamic_cast<const PropertyWithValue<bool> *>(prop)) {
-      QCheckBox *checkBox = new QCheckBox(parent);
+      auto *checkBox = new QCheckBox(parent);
       inputWidget = checkBox;
       addValidator = false;
     }
     // Options box
     else if (!prop->allowedValues().empty()) {
-      QComboBox *optionsBox = new QComboBox(parent);
+      auto *optionsBox = new QComboBox(parent);
       inputWidget = optionsBox;
       std::vector<std::string> items = prop->allowedValues();
       std::vector<std::string>::const_iterator vend = items.end();
@@ -375,7 +375,7 @@ int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop,
     }
     // else render a text box
     else {
-      QLineEdit *textBox = new QLineEdit(parent);
+      auto *textBox = new QLineEdit(parent);
       inputWidget = textBox;
       if (dynamic_cast<const MaskedProperty<std::string> *>(prop)) {
         textBox->setEchoMode(QLineEdit::Password);

@@ -20,7 +20,7 @@ public:
   static void destroySuite(SignalBlockerTest *suite) { delete suite; }
 
   void test_obtain_and_release_behaviour() {
-    QObject *toBlock = new QObject;
+    auto *toBlock = new QObject;
     {
       SignalBlocker scopedObj(toBlock);
       TSM_ASSERT("Should now block", toBlock->signalsBlocked());

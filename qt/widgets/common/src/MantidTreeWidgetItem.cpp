@@ -38,8 +38,7 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {
   // what the user has seletected in terms of order or scheme.
 
   bool thisShouldBeSorted = m_sortPos == 0;
-  const MantidTreeWidgetItem *mantidOther =
-      dynamic_cast<const MantidTreeWidgetItem *>(&other);
+  const auto *mantidOther = dynamic_cast<const MantidTreeWidgetItem *>(&other);
   int otherSortPos = mantidOther ? mantidOther->getSortPos() : 0;
   bool otherShouldBeSorted = otherSortPos == 0;
 

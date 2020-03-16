@@ -146,9 +146,8 @@ FindFilesWorker::getFilesFromAlgorithm() {
   Property *prop = algorithm->getProperty(propName);
   std::string valueForProperty = prop->value();
 
-  FileProperty *fileProp = dynamic_cast<FileProperty *>(prop);
-  MultipleFileProperty *multiFileProp =
-      dynamic_cast<MultipleFileProperty *>(prop);
+  auto *fileProp = dynamic_cast<FileProperty *>(prop);
+  auto *multiFileProp = dynamic_cast<MultipleFileProperty *>(prop);
 
   if (fileProp) {
     filenames.emplace_back(fileProp->value());

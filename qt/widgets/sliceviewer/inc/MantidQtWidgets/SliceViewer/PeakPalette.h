@@ -36,7 +36,7 @@ private:
   ColourMapType m_foregroundMap;
   typename ColourMapType::iterator safeFetchPair(ColourMapType &map,
                                                  const int index) {
-    typename ColourMapType::iterator it = map.find(index);
+    auto it = map.find(index);
     if (it == map.end()) {
       std::stringstream stream;
       stream << "Index " << index << " is out of range";

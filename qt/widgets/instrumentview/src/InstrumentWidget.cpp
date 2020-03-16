@@ -125,7 +125,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
       m_wsReplace(false), m_help(nullptr) {
   setFocusPolicy(Qt::StrongFocus);
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
-  QSplitter *controlPanelLayout = new QSplitter(Qt::Horizontal);
+  auto *controlPanelLayout = new QSplitter(Qt::Horizontal);
 
   // Add Tab control panel
   mControlsTab = new QTabWidget(this);
@@ -158,7 +158,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
           SLOT(setIntegrationRange(double, double)));
 
   // Set the mouse/keyboard operation info and help button
-  QHBoxLayout *infoLayout = new QHBoxLayout();
+  auto *infoLayout = new QHBoxLayout();
   mInteractionInfo = new QLabel();
   infoLayout->addWidget(mInteractionInfo);
   m_help = new QPushButton("?");
@@ -419,7 +419,7 @@ void InstrumentWidget::setSurfaceType(int type) {
 
   if (type < RENDERMODE_SIZE) {
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    SurfaceType surfaceType = SurfaceType(type);
+    auto surfaceType = SurfaceType(type);
     if (!m_instrumentActor)
       return;
 
@@ -1132,8 +1132,7 @@ void InstrumentWidget::setSurface(ProjectionSurface *surface) {
     m_simpleDisplay->setSurface(sharedSurface);
     m_simpleDisplay->update();
   }
-  UnwrappedSurface *unwrappedSurface =
-      dynamic_cast<UnwrappedSurface *>(surface);
+  auto *unwrappedSurface = dynamic_cast<UnwrappedSurface *>(surface);
   if (unwrappedSurface) {
     m_renderTab->flipUnwrappedView(unwrappedSurface->isFlippedView());
   }

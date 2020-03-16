@@ -403,7 +403,7 @@ private:
 
   /// Create parameter table output from a fit
   ITableWorkspace_sptr getParamTable(int runNumber, bool makeGlobals = false) {
-    const double base = static_cast<double>(runNumber - m_firstRun);
+    const auto base = static_cast<double>(runNumber - m_firstRun);
     auto table = WorkspaceFactory::Instance().createTable();
     // Create columns
     table->addColumn("str", "Name");

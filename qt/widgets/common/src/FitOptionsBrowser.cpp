@@ -55,7 +55,7 @@ FitOptionsBrowser::FitOptionsBrowser(QWidget *parent, FittingType fitType)
   createBrowser();
   createProperties();
 
-  QVBoxLayout *layout = new QVBoxLayout(this);
+  auto *layout = new QVBoxLayout(this);
   layout->addWidget(m_browser);
   layout->setContentsMargins(0, 0, 0, 0);
 }
@@ -74,11 +74,11 @@ void FitOptionsBrowser::createBrowser() {
   m_groupManager = new QtGroupPropertyManager(this);
 
   // create editor factories
-  QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(this);
-  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(this);
-  QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
-  QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
-  QtEnumEditorFactory *comboBoxFactory = new QtEnumEditorFactory(this);
+  auto *spinBoxFactory = new QtSpinBoxFactory(this);
+  auto *doubleEditorFactory = new DoubleEditorFactory(this);
+  auto *lineEditFactory = new QtLineEditFactory(this);
+  auto *checkBoxFactory = new QtCheckBoxFactory(this);
+  auto *comboBoxFactory = new QtEnumEditorFactory(this);
 
   m_browser = new QtTreePropertyBrowser(nullptr, QStringList(), false);
   // assign factories to property managers

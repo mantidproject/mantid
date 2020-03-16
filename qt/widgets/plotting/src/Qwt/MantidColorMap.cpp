@@ -118,7 +118,7 @@ MantidColorMap::~MantidColorMap() {}
  * Create a clone of the color map
  */
 QwtColorMap *MantidColorMap::copy() const {
-  MantidColorMap *map = new MantidColorMap;
+  auto *map = new MantidColorMap;
   *map = *this;
 
   return map;
@@ -350,7 +350,7 @@ std::vector<QRgb> MantidColorMap::rgb(double vmin, double vmax,
  */
 QRgb MantidColorMap::rgb(const QwtDoubleInterval &interval,
                          double value) const {
-  short ci = static_cast<short>(colorIndex(interval, value));
+  auto ci = static_cast<short>(colorIndex(interval, value));
   if (ci >= 0 && ci < m_num_colors) {
     return m_colors[ci];
   }
@@ -376,7 +376,7 @@ unsigned char MantidColorMap::colorIndex(const QwtDoubleInterval &interval,
   if (fraction < 0.0)
     return static_cast<unsigned char>(1);
 
-  short index = short(std::floor(fraction * m_num_colors));
+  auto index = short(std::floor(fraction * m_num_colors));
   // If the ratio gives back 1 then we need to adjust the index down 1
   if (index >= m_num_colors) {
     index = short(m_num_colors - 1);

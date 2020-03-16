@@ -78,10 +78,10 @@ QColor MdSettings::getUserSettingBackgroundColor() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QColor backgroundColor = settings
-                               .value(m_lblUserSettingBackgroundColor,
-                                      m_mdConstants.getDefaultBackgroundColor())
-                               .value<QColor>();
+  auto backgroundColor = settings
+                             .value(m_lblUserSettingBackgroundColor,
+                                    m_mdConstants.getDefaultBackgroundColor())
+                             .value<QColor>();
   settings.endGroup();
 
   return backgroundColor;
@@ -99,10 +99,10 @@ QColor MdSettings::getLastSessionBackgroundColor() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QColor backgroundColor = settings
-                               .value(m_lblLastSessionBackgroundColor,
-                                      m_mdConstants.getDefaultBackgroundColor())
-                               .value<QColor>();
+  auto backgroundColor = settings
+                             .value(m_lblLastSessionBackgroundColor,
+                                    m_mdConstants.getDefaultBackgroundColor())
+                             .value<QColor>();
   settings.endGroup();
 
   return backgroundColor;

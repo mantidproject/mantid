@@ -99,13 +99,13 @@ DataArray_const_sptr ArrayDataSource::getDataArray(double xMin, double xMax,
     SVUtils::Interpolate(m_totalYMin, m_totalYMax, midY, 0.0,
                          (double)m_totalRows, yIndex);
 
-    size_t sourceRow = (size_t)yIndex;
+    auto sourceRow = (size_t)yIndex;
     for (size_t col = 0; col < nCols; col++) {
       double midX = xMin + ((double)col + 0.5) * xStep;
       SVUtils::Interpolate(m_totalXMin, m_totalXMax, midX, 0.0,
                            (double)m_totalCols, xIndex);
 
-      size_t sourceCol = (size_t)xIndex;
+      auto sourceCol = (size_t)xIndex;
 
       newData[index] = m_data[sourceRow * m_totalCols + sourceCol];
       index++;

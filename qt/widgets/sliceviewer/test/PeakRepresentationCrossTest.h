@@ -41,7 +41,7 @@ public:
     PeakRepresentationCross peak(origin, maxZ, minZ);
 
     /* Provide a mocked transform */
-    MockPeakTransform *mockTransform = new MockPeakTransform;
+    auto *mockTransform = new MockPeakTransform;
     EXPECT_CALL(*mockTransform, transform(_))
         .Times(1)
         .WillOnce(Return(Mantid::Kernel::V3D(0, 0, 0)));
