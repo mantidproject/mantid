@@ -16,7 +16,7 @@ from matplotlib.legend import Legend
 
 # local imports
 from mantid.api import AnalysisDataService, MatrixWorkspace
-from mantid.kernel import ConfigService, Logger
+from mantid.kernel import ConfigService
 from mantid.plots import datafunctions, MantidAxes
 
 # -----------------------------------------------------------------------------
@@ -36,8 +36,6 @@ MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
               'plus': '+', 'triangle_down': 'v', 'triangle_up': '^', 'x': 'x',
               'caretup': 6, 'caretup (centered at base)': 10,
               'caretdown (centered at base)': 11, 'None': 'None'}
-
-LOGGER = Logger("plotfunctions")
 
 # -----------------------------------------------------------------------------
 # Decorators
@@ -113,9 +111,6 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         plot_kwargs = {}
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)
     workspaces = [ws for ws in workspaces if isinstance(ws, MatrixWorkspace)]
-    
-    if not workspaces:
-        return
 
     if spectrum_nums is not None:
         kw, nums = 'specNum', spectrum_nums
@@ -246,12 +241,7 @@ def raise_if_not_sequence(value, seq_name, element_type=None):
     if element_type is not None:
         def raise_if_not_type(x):
             if not isinstance(x, element_type):
-                if element_type == MatrixWorkspace:
-                    # If the workspace is the wrong type, log the error and remove it from the list so that the other
-                    # workspaces can still be plotted.
-                    LOGGER.warning("{} has unexpected type '{}'".format(x, x.__class__.__name__))
-                else:
-                    raise ValueError("Unexpected type: '{}'".format(x.__class__.__name__))
+                raise ValueError(f"{x} has unexpected type: '{x.__class__.__name__}'")
 
         # Map in Python3 is an iterator, so ValueError will not be raised unless the values are yielded.
         # converting to a list forces yielding
