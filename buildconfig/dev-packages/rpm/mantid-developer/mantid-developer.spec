@@ -1,11 +1,5 @@
-%if 0%{?fedora} || 0%{?rhel} >= 7
-  %global with_python3 1
-%else
-  %global with_python3 0
-%endif
-
 Name:           mantid-developer
-Version:        1.39
+Version:        1.40
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -18,9 +12,8 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %{?rhel:Requires: epel-release}
 %{?fedora:Requires: cmake-gui}
 %{?rhel:Requires: cmake3-gui}
-%{?fedora:Requires: python2-qtconsole}
 Requires: boost169-devel
-Requires: boost169-python2-devel
+Requires: boost169-python3-devel
 Requires: clang
 Requires: doxygen
 Requires: dvipng
@@ -43,25 +36,27 @@ Requires: ninja-build
 Requires: numpy
 Requires: OCE-devel
 Requires: openssl-devel
+Requires: python%{python3_pkgversion}-dateutil
+Requires: python%{python3_pkgversion}-h5py
+Requires: python%{python3_pkgversion}-ipython
+Requires: python%{python3_pkgversion}-ipython-gui
+Requires: python%{python3_pkgversion}-matplotlib-qt5
+Requires: python%{python3_pkgversion}-matplotlib-qt4
+Requires: python%{python3_pkgversion}-numpy
+Requires: python%{python3_pkgversion}-psutil
+%{?fedora:Requires: python%{python3_pkgversion}-PyQt4-devel}
+Requires: python%{python3_pkgversion}-PyYAML
+Requires: python%{python3_pkgversion}-qt5-devel
+%{?fedora:Requires: python%{python3_pkgversion}-qtconsole}
+Requires: python%{python3_pkgversion}-QtPy
+Requires: python%{python3_pkgversion}-requests
+Requires: python%{python3_pkgversion}-scipy
+Requires: python%{python3_pkgversion}-setuptools
+Requires: python%{python3_pkgversion}-sphinx
+Requires: python%{python3_pkgversion}-sphinx-bootstrap-theme
+Requires: python%{python3_pkgversion}-toml
+Requires: python%{python3_pkgversion}-PyYAML
 Requires: poco-devel >= 1.4.6
-Requires: PyQt4-devel
-Requires: python2-h5py >= 2.3.1
-Requires: python2-matplotlib
-Requires: python2-matplotlib-qt4
-Requires: python2-mock
-Requires: python2-psutil
-Requires: python2-qt5-devel
-%{?fedora:Requires: python2-qtconsole}
-Requires: python2-sphinx-bootstrap-theme
-Requires: python-devel
-Requires: python-enum34
-Requires: python-ipython >= 1.1
-Requires: python-pip
-Requires: python-QtPy
-Requires: python-requests
-Requires: python-setuptools
-Requires: python-sphinx
-Requires: PyYAML
 Requires: qscintilla-devel
 Requires: qscintilla-qt5-devel
 Requires: qt5-qtbase-devel
@@ -89,30 +84,6 @@ Requires: texlive-was
 Requires: tex-preview
 Requires: zeromq
 
-%if %{with_python3}
-Requires: boost169-python3-devel
-Requires: python%{python3_pkgversion}-dateutil
-Requires: python%{python3_pkgversion}-h5py
-Requires: python%{python3_pkgversion}-ipython
-Requires: python%{python3_pkgversion}-ipython-gui
-Requires: python%{python3_pkgversion}-matplotlib-qt5
-Requires: python%{python3_pkgversion}-matplotlib-qt4
-Requires: python%{python3_pkgversion}-numpy
-Requires: python%{python3_pkgversion}-psutil
-%{?fedora:Requires: python%{python3_pkgversion}-PyQt4-devel}
-Requires: python%{python3_pkgversion}-PyYAML
-Requires: python%{python3_pkgversion}-qt5-devel
-%{?fedora:Requires: python%{python3_pkgversion}-qtconsole}
-Requires: python%{python3_pkgversion}-QtPy
-Requires: python%{python3_pkgversion}-requests
-Requires: python%{python3_pkgversion}-scipy
-Requires: python%{python3_pkgversion}-setuptools
-Requires: python%{python3_pkgversion}-sphinx
-Requires: python%{python3_pkgversion}-sphinx-bootstrap-theme
-Requires: python%{python3_pkgversion}-toml
-Requires: python%{python3_pkgversion}-PyYAML
-%endif
-
 BuildArch: noarch
 
 %description
@@ -134,11 +105,14 @@ required for Mantid development.
 %files
 
 %changelog
+* Mon Mar 16 2020 Martyn Gigg <martyn.gigg@stfc.ac.uk>
+- Remove Python 2 dependencies
+
 * Mon Jan 28 2020 David Fairbrother <david.fairbrother@stfc.ac.uk>
 - Added Python TOML library
 
 * Fri Jan 24 2020 Martyn Gigg <martyn.gigg@stfc.ac.uk>
-- Att matplotlib backend for Python 3
+- Add matplotlib backend for Python 3
 
 * Thu Jan 16 2020 Martyn Gigg <martyn.gigg@stfc.ac.uk>
 - Merge fedora and rhel python 3 packages using python3_pkgversion
