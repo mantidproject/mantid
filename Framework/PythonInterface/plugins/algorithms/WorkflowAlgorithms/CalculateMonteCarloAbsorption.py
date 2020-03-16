@@ -398,11 +398,13 @@ class CalculateMonteCarloAbsorption(DataProcessorAlgorithm):
             elif self._shape == 'Annulus':
                 ss_monte_carlo_alg.setProperty("InputWorkspace", container_wave_1)
                 ss_monte_carlo_alg.setProperty("InnerRadius", self._container_inner_radius)
-                ss_monte_carlo_alg.setProperty("OuterRadius", self._container_outer_radius)
+                ss_monte_carlo_alg.setProperty("OuterRadius", self._sample_inner_radius)
                 ss_monte_carlo_alg.execute()
                 acc_1 = ss_monte_carlo_alg.getProperty("OutputWorkspace").value
 
                 ss_monte_carlo_alg.setProperty("InputWorkspace", container_wave_2)
+                ss_monte_carlo_alg.setProperty("InnerRadius", self._sample_outer_radius)
+                ss_monte_carlo_alg.setProperty("OuterRadius", self._container_outer_radius)
                 ss_monte_carlo_alg.execute()
                 acc_2 = ss_monte_carlo_alg.getProperty("OutputWorkspace").value
 
