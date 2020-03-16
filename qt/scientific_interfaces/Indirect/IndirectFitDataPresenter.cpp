@@ -247,7 +247,11 @@ IndirectFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
 }
 
 void IndirectFitDataPresenter::addData() {
-  addData(m_addWorkspaceDialog.get());
+  if (const auto indirectDialog = dynamic_cast<AddWorkspaceDialog const *>(
+          m_addWorkspaceDialog.get())) {
+    addData(indirectDialog->workspaceName(),
+            indirectDialog->workspaceIndices());
+  }
 }
 
 void IndirectFitDataPresenter::closeDialog() {
@@ -258,9 +262,10 @@ void IndirectFitDataPresenter::closeDialog() {
   m_addWorkspaceDialog->close();
 }
 
-void IndirectFitDataPresenter::addData(IAddWorkspaceDialog const *dialog) {
+void IndirectFitDataPresenter::addData(const std::string &workspaceName,
+                                       const std::string &spectra) {
   try {
-    addDataToModel(dialog);
+    m_model->addWorkspace(workspaceName, spectra);
     m_tablePresenter->addData(m_model->numberOfWorkspaces() -
                               TableDatasetIndex{1});
     emit dataAdded();

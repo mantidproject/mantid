@@ -59,6 +59,7 @@ public:
                      const Workspace_sptr &workspace) override;
   DataForParameterEstimationCollection
   getDataForParameterEstimation(const EstimationDataSelector &selector) const;
+  void addData(const std::string &workspaceName, const std::string &spectra);
 
 public slots:
   void updateSpectraInTable(TableDatasetIndex dataIndex);
@@ -90,7 +91,6 @@ signals:
 
 protected:
   IIndirectFitDataView const *getView() const;
-  void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
   void setSingleModelData(const std::string &name);
   void updateRanges();
