@@ -103,5 +103,6 @@ class ProjectReaderTest(unittest.TestCase):
         project_reader.read_project(mplot_project_file)
         self.assertEqual(["ws1","ws2"], project_reader.workspace_names)
 
+
 if __name__ == "__main__":
     unittest.main()

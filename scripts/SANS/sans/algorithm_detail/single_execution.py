@@ -352,10 +352,10 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
     # |  True        |        False                        |           True                      |    True     |
     # |  True        |        False                        |           False                     |    False    |
 
-    is_invalid_partial_workspaces = ((output_parts_bundle.output_workspace_count is None and
-                                      output_parts_bundle.output_workspace_norm is not None) or
-                                     (output_parts_bundle.output_workspace_count is not None and
-                                      output_parts_bundle.output_workspace_norm is None))
+    is_invalid_partial_workspaces = ((output_parts_bundle.output_workspace_count is None
+                                      and output_parts_bundle.output_workspace_norm is not None)
+                                     or (output_parts_bundle.output_workspace_count is not None
+                                         and output_parts_bundle.output_workspace_norm is None))
     is_invalid_transmission_workspaces = (output_transmission_bundle.calculated_transmission_workspace is None
                                           or output_transmission_bundle.unfitted_transmission_workspace is None)
     partial_output_require_reload = output_parts and is_invalid_partial_workspaces
@@ -391,8 +391,8 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
                                                   workspace=output_transmission_bundle.unfitted_transmission_workspace,
                                                   partial_type=TransmissionType.UNFITTED,
                                                   reduction_mode=reduction_mode)
-        if (output_parts_bundle.output_workspace_count is not None and
-                output_parts_bundle.output_workspace_norm is not None):
+        if (output_parts_bundle.output_workspace_count is not None
+                and output_parts_bundle.output_workspace_norm is not None):
             write_hash_into_reduced_can_workspace(state=output_parts_bundle.state,
                                                   workspace=output_parts_bundle.output_workspace_count,
                                                   partial_type=OutputParts.COUNT,

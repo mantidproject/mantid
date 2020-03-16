@@ -471,9 +471,9 @@ class QECoverageGUI(QtWidgets.QWidget):
             Emax_min = -4896
 
         self.emaxfield_msgbox.setText("Invalid input has been provided for Emax. "
-                                      "Emax cannot be less than " +
-                                      str(Emax_min) + ", when Ef is set as " +
-                                      ana + "! Please try again.")
+                                      "Emax cannot be less than "
+                                      + str(Emax_min) + ", when Ef is set as "
+                                      + ana + "! Please try again.")
 
         if float(self.indirect_emax_input.text()) < Emax_min:
             self.indirect_emax_input.setText(str(Emax_min))

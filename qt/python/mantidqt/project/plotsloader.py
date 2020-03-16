@@ -40,8 +40,7 @@ class PlotsLoader(object):
                 # Catch all errors in here so it can fail silently-ish
                 if isinstance(e, KeyboardInterrupt):
                     raise KeyboardInterrupt(str(e))
-                logger.warning("A plot was unable to be loaded from the save file. Error: " +
-                               str(e))
+                logger.warning("A plot was unable to be loaded from the save file. Error: " + str(e))
 
     def make_fig(self, plot_dict, create_plot=True):
         """

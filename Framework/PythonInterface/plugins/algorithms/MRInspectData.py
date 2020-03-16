@@ -603,5 +603,6 @@ def chi2(data, model):
     err[err<=0] = 1
     return np.sum((data.ravel() - model.ravel())**2 / err) / len(data.ravel())
 
+
 # Register
 AlgorithmFactory.subscribe(MRInspectData)

@@ -476,8 +476,8 @@ class EnergyBins(PropDescriptor):
         if isinstance(ei, list) or owner.incident_energy.autoEi_mode():  # ebin expected to be relative
             if ebin[2] > 1:
                 return (False, 1,
-                        "Binning for multiple energy range should be relative to incident energy. Got ebin_max={0} > 1\n" +
-                        "Energy range will be normalized and treated as relative range")
+                        "Binning for multiple energy range should be relative to incident energy. Got ebin_max={0} > 1\n"
+                        + "Energy range will be normalized and treated as relative range")
         else:
             if not owner.incident_energy.autoEi_mode() and ebin[2] > ei:
                 return (False, 2, 'Max rebin range {0:f} exceeds incident energy {1:f}'.format(ebin[2], ei))
@@ -1708,8 +1708,8 @@ class AbsCorrInfo(PropDescriptor):
             return
         val_dict =  {}
         if isinstance(value, string_types):
-            val = re.sub(' u ', ' ', re.sub('[{}\[\]"=:;,\']', ' ', value))
-            val_list = re.split('\s+',val)
+            val = re.sub(' u ', ' ', re.sub(r'[{}\[\]"=:;,\']', ' ', value))
+            val_list = re.split(r'\s+',val)
             ik = 0
             while ik < len(val_list):
                 key = val_list[ik]

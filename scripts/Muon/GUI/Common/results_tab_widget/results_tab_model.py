@@ -218,9 +218,7 @@ class ResultsTabModel(object):
                 missing_msg.append("  Fit '{}' is missing the logs {}".format(
                     fit.parameters.parameter_workspace_name, missing))
         if missing_msg:
-            raise RuntimeError(
-                "The logs for each selected fit do not match:\n" +
-                "\n".join(missing_msg))
+            raise RuntimeError("The logs for each selected fit do not match:\n" + "\n".join(missing_msg))
 
     def _raise_if_result_selection_is_invalid(self, results_selection):
         """

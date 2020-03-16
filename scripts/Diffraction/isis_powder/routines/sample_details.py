@@ -155,9 +155,9 @@ class _Material(object):
         # If it is not an element Mantid requires us to provide the number density
         # which is required for absorption corrections.
         if len(chemical_formula) > 2 and number_density is None:
-                raise ValueError("A number density formula must be set on a chemical formula which is not elemental."
-                                 " An element can only be a maximum of 2 characters (e.g. 'Si' or 'V'). The number"
-                                 " density can be set using the following key: number_density")
+            raise ValueError("A number density formula must be set on a chemical formula which is not elemental."
+                             " An element can only be a maximum of 2 characters (e.g. 'Si' or 'V'). The number"
+                             " density can be set using the following key: number_density")
         if number_density:
             # Always check value is sane if user has given one
             _check_value_is_physical(property_name="number_density", value=number_density)

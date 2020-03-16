@@ -744,9 +744,9 @@ class _CalibrationParameterHelper(object):
 
     @staticmethod
     def validate_known_positions(known_positions):
-        if not (isinstance(known_positions, list) or
-                isinstance(known_positions, tuple) or
-                isinstance(known_positions, numpy.ndarray)):
+        if not (isinstance(known_positions, list)
+                or isinstance(known_positions, tuple)
+                or isinstance(known_positions, numpy.ndarray)):
             raise RuntimeError(
                 "Wrong argument knownPositions. It expects a list of values for the positions expected for the peaks in"
                 "relation to the center of the tube")

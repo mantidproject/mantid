@@ -96,8 +96,8 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         # Log time tolerance
         self.declareProperty("TimeTolerance", 0.01,
-                             "If any 2 log entries with log times within the time tolerance, " +
-                             "they will be recorded in one line. Unit is second. ")
+                             "If any 2 log entries with log times within the time tolerance, "
+                             + "they will be recorded in one line. Unit is second. ")
 
         return
 

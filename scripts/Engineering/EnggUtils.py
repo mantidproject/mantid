@@ -62,8 +62,8 @@ def read_in_expected_peaks(filename, expected_peaks):
         if not ex_peak_array:
             # "File could not be read. Defaults in alternative option used."
             if not expected_peaks:
-                raise ValueError("Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '" +
-                                 filename + "', and no expected peaks were given in the property "
+                raise ValueError("Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '"
+                                 + filename + "', and no expected peaks were given in the property "
                                  "'ExpectedPeaks' either. Cannot continue without a list of expected peaks.")
             expected_peaks_d = sorted(expected_peaks)
 
@@ -132,8 +132,8 @@ def parse_spectrum_indices(workspace, spectrum_numbers):
     max_index = workspace.getNumberHistograms()
     if indices[-1] >= max_index:
         raise ValueError("A workspace index equal or bigger than the number of histograms available in the "
-                         "workspace '" + workspace.name() + "' (" + str(workspace.getNumberHistograms()) +
-                         ") has been given. Please check the list of indices.")
+                         "workspace '" + workspace.name() + "' (" + str(workspace.getNumberHistograms())
+                         + ") has been given. Please check the list of indices.")
     # and finally translate from 'spectrum numbers' to 'workspace indices'
     return [workspace.getIndexFromSpectrumNumber(sn) for sn in indices]
 
@@ -206,8 +206,7 @@ def get_detector_ids_for_bank(bank):
     mantid.DeleteWorkspace(grouping)
 
     if len(detector_ids) == 0:
-        raise ValueError('Could not find any detector for this bank: ' + bank +
-                         '. This looks like an unknown bank')
+        raise ValueError('Could not find any detector for this bank: ' + bank + '. This looks like an unknown bank')
 
     return detector_ids
 

@@ -148,5 +148,6 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
         self.assert_called_x_times_with(3, expected_call_args,
                                         mock_view.add_tab_widget)
 
+
 if __name__ == '__main__':
     unittest.main()

@@ -191,5 +191,5 @@ try:
     import dsfinterp  # noqa
     FunctionFactory.subscribe(DSFinterp1DFit)
 except ImportError:
-    logger.debug('Failed to subscribe fit function DSFinterp1DFit. ' +
-                 'Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')
+    logger.debug('Failed to subscribe fit function DSFinterp1DFit. '
+                 + 'Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')

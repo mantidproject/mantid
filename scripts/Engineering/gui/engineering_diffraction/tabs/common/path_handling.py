@@ -31,6 +31,6 @@ def load_workspace(file_path):
     except Exception as e:
         logger.error("Error while loading workspace. "
                      "Could not run the algorithm Load successfully for the data file "
-                     "(path: " + str(file_path) + "). Error description: " + str(e) +
-                     " Please check also the previous log messages for details.")
+                     "(path: " + str(file_path) + "). Error description: " + str(e)
+                     + " Please check also the previous log messages for details.")
         raise RuntimeError

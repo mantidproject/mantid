@@ -56,7 +56,7 @@ def OUTSPEC(
         mylog.debug("Points:{0}".format(npts))
         mylog.debug("Last half sum:{0}".format(bum))
     # add in backgrounds (no dead time adjustment yet)
-    guess = ((guess + np.outer(DETECT_e, DETECT_d)) /
-             RUNDATA_fnorm)  # convert from 10Mevent normalisation to original stats
+    guess = ((guess + np.outer(DETECT_e, DETECT_d))
+             / RUNDATA_fnorm)  # convert from 10Mevent normalisation to original stats
 
     return test, guess

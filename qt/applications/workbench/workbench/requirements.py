@@ -41,5 +41,5 @@ def check_qt():
                                                   actual_ver)
             )
     except ImportError as exc:
-        show_warning("Failed to import qtpy: '{}'\n".format(str(exc)) +
-                     "Please check the installation.")
+        show_warning("Failed to import qtpy: '{}'\n".format(str(exc))
+                     + "Please check the installation.")

@@ -89,8 +89,7 @@ class FocusPresenter(object):
             create_error_message(
                 self.view,
                 "Please make sure the selected instrument matches instrument for the current calibration.\n"
-                "The instrument for the current calibration is: " +
-                self.current_calibration.get_instrument())
+                "The instrument for the current calibration is: " + self.current_calibration.get_instrument())
             return False
         if self.view.get_crop_checked() and not self.cropping_widget.is_valid():
             create_error_message(self.view, "Check cropping values are valid.")

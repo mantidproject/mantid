@@ -64,7 +64,7 @@ class EQSANSDataSet(DataSet):
             EQSANS_([0-9]+).nxs
         """
         file_path = file_path.strip()
-        r_re = re.search("EQSANS_([0-9]+)(_event|\.nxs)", file_path)
+        r_re = re.search(r"EQSANS_([0-9]+)(_event|\.nxs)", file_path)
         if r_re is not None:
             return r_re.group(1)
         else:
@@ -74,7 +74,6 @@ class EQSANSDataSet(DataSet):
                 return file_path
             except:
                 return None
-        return None
 
     @classmethod
     def read_properties(cls, ws, run, cursor):

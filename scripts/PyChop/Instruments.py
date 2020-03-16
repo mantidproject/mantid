@@ -682,8 +682,8 @@ class Instrument(object):
                     instrument = yaml.safe_load(f)
             except (OSError, IOError) as e:
                 raise RuntimeError('Cannot open file %s . Error is %s' % (instrument, e))
-        if ((hasattr(instrument, 'moderator') or hasattr(instrument, 'chopper_system')) or
-           ('moderator' in instrument or 'chopper_system' in instrument)):
+        if ((hasattr(instrument, 'moderator') or hasattr(instrument, 'chopper_system'))
+                or ('moderator' in instrument or 'chopper_system' in instrument)):
             wrap_attributes(self, instrument, self.__allowed_var_names)
             if isinstance(self.moderator, dict) and isinstance(self.chopper_system, dict):
                 for key in ['source_rep', 'n_frame', 'emission_time']:

@@ -96,8 +96,8 @@ class FocusModel(object):
             return EnggFocus(**kwargs)
         except RuntimeError as e:
             logger.error(
-                "Error in focusing, Could not run the EnggFocus algorithm successfully for bank " +
-                str(bank) + ". Error Description: " + str(e))
+                "Error in focusing, Could not run the EnggFocus algorithm successfully for bank "
+                + str(bank) + ". Error Description: " + str(e))
             raise RuntimeError()
 
     @staticmethod

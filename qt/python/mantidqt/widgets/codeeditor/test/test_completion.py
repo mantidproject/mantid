@@ -42,18 +42,18 @@ class CodeCompletionTest(unittest.TestCase):
 
     def test_Rebin_call_tips_generated_on_construction_when_api_import_in_script(self):
         self._run_check_call_tip_generated("from mantid.simpleapi import *\n# My code",
-                                           "Rebin\(InputWorkspace, .*\)")
+                                           r"Rebin\(InputWorkspace, .*\)")
 
     def test_numpy_call_tips_generated_if_numpy_imported_in_script(self):
         self._run_check_call_tip_generated("import numpy as np\n# My code",
-                                           "np\.asarray\(a, \[dtype\], .*\)")
+                                           r"np\.asarray\(a, \[dtype\], .*\)")
 
     def test_call_tips_generated_if_syntax_errors_in_script(self):
         self._run_check_call_tip_generated("from mantid.simpleapi import *\n print 'Hello', 'World'", "Rebin")
 
     def test_pyplot_call_tips_generated_if_imported_in_script(self):
         self._run_check_call_tip_generated("import matplotlib.pyplot as plt\n# My code",
-                                           "plt\.figure\(\[num\], .*\)")
+                                           r"plt\.figure\(\[num\], .*\)")
 
     def test_simple_api_call_tips_not_generated_on_construction_if_api_import_not_in_script(self):
         self._run_check_call_tip_not_generated("import numpy as np\n# My code", "Rebin")

@@ -445,8 +445,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             for i, run in enumerate(flattened_run_list):
                 self._model.tiled_plot_positions[instrument + str(run)] = i
         else:  # tile by group or pair
-            for i, grppair in enumerate(self.context.group_pair_context.selected_groups +
-                                        self.context.group_pair_context.selected_pairs):
+            for i, grppair in enumerate(self.context.group_pair_context.selected_groups
+                                        + self.context.group_pair_context.selected_pairs):
                 self._model.tiled_plot_positions[grppair] = i
 
         self._model.number_of_axes = len(self._model.tiled_plot_positions)

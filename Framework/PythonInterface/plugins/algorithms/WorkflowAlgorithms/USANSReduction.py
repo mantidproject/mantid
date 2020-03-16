@@ -168,10 +168,12 @@ class USANSReduction(PythonAlgorithm):
                     self.iq_output[i_wl][point+index_offset] = i_q.dataY(0)[0]
                     self.iq_err_output[i_wl][point+index_offset] = i_q.dataE(0)[0]
                 except:
-                    Logger("USANSReduction").error("Exception caught for "+
-                                                   "%s on peak %s, point %s. Offset=%s" % (file_info.workspace, i_wl, point, index_offset))
-                    Logger("USANSReduction").error("Array: "+
-                                                   "%s x %s    Data: %s" % (len(self.wl_list), self.total_points, file_info.max_index))
+                    Logger("USANSReduction").error("Exception caught for "
+                                                   + "%s on peak %s, point %s. Offset=%s" %
+                                                   (file_info.workspace, i_wl, point, index_offset))
+                    Logger("USANSReduction").error("Array: "
+                                                   + "%s x %s    Data: %s" %
+                                                   (len(self.wl_list), self.total_points, file_info.max_index))
                     Logger("USANSReduction").error(sys.exc_info()[1])
         return file_info.max_index
 

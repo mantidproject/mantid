@@ -15,7 +15,7 @@ try:
     if not periodictable.__version__.startswith("1.3."):
         print("*****Require periodictable 1.3.*")
         sys.exit(-1)
-except ImportError as e:
+except ImportError:
     print("*****To use this you must 'easy_install periodictable'")
     sys.exit(-1)
 

@@ -189,14 +189,13 @@ def _medianDeltaTheta(ws):
     thetas = list()
     spectrumInfo = ws.spectrumInfo()
     for i in range(ws.getNumberHistograms()):
-        if (not spectrumInfo.isMasked(i) and spectrumInfo.hasDetectors(i) and
-                not spectrumInfo.isMonitor(i)):
+        if (not spectrumInfo.isMasked(i) and spectrumInfo.hasDetectors(i)
+                and not spectrumInfo.isMonitor(i)):
             det = ws.getDetector(i)
             twoTheta = ws.detectorTwoTheta(det)
             thetas.append(twoTheta)
     if not thetas:
-        raise RuntimeError('No usable detectors for median DTheta ' +
-                           'calculation.')
+        raise RuntimeError('No usable detectors for median DTheta calculation.')
     dThetas = numpy.abs(numpy.diff(thetas))
     return numpy.median(dThetas[dThetas > numpy.deg2rad(0.1)])
 
@@ -208,8 +207,8 @@ def _minMaxQ(ws):
     minW = xs[0] * 1e-3 * constants.e  # in Joules
     maxEf = Ei - minW
     # In Ånströms
-    maxQ = numpy.sqrt(2.0 * constants.m_n / constants.hbar**2 *
-                      (Ei + maxEf - 2 * numpy.sqrt(Ei * maxEf) * -1.0)) * 1e-10
+    maxQ = numpy.sqrt(2.0 * constants.m_n / constants.hbar**2
+                      * (Ei + maxEf - 2 * numpy.sqrt(Ei * maxEf) * -1.0)) * 1e-10
     minQ = 0.0
     return (minQ, maxQ)
 
@@ -337,8 +336,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                  common.SUBALG_LOGGING_OFF,
                                  common.SUBALG_LOGGING_ON]),
                              direction=Direction.Input,
-                             doc='Enable or disable subalgorithms to ' +
-                                 'print in the logs.')
+                             doc='Enable or disable subalgorithms to print in the logs.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_VANA_WS,
             defaultValue='',

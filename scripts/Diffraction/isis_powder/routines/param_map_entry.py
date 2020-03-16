@@ -13,8 +13,8 @@ def enum_has_required_attr(enum_cls):
     try:
         enum_cls.enum_friendly_name
     except AttributeError:
-        raise RuntimeError("'enum_friendly_name' was not set. Please contact development team.\nEnum name: " +
-                           str(enum_cls))
+        raise RuntimeError("'enum_friendly_name' was not set. Please contact development team.\nEnum name: "
+                           + str(enum_cls))
 
 
 class ParamMapEntry(object):

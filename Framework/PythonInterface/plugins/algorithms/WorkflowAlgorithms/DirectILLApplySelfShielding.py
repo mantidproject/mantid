@@ -115,8 +115,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
                                  common.SUBALG_LOGGING_OFF,
                                  common.SUBALG_LOGGING_ON]),
                              direction=Direction.Input,
-                             doc='Enable or disable subalgorithms to ' +
-                                 'print in the logs.')
+                             doc='Enable or disable subalgorithms to print in the logs.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_EC_WS,
             defaultValue='',
@@ -128,8 +127,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
                              defaultValue=1.0,
                              validator=mustBePositive,
                              direction=Direction.Input,
-                             doc='A multiplier (transmission, if no self ' +
-                                 'shielding is applied) for the empty container.')
+                             doc='A multiplier (transmission, if no self shielding is applied) for the empty container.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_SELF_SHIELDING_CORRECTION_WS,
             defaultValue='',

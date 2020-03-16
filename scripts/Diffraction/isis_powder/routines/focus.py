@@ -193,8 +193,8 @@ def _test_splined_vanadium_exists(instrument, run_details):
     # Check the necessary splined vanadium file has been created
     if not os.path.isfile(run_details.splined_vanadium_file_path):
         raise ValueError("Processed vanadium runs not found at this path: "
-                         + str(run_details.splined_vanadium_file_path) +
-                         " \nHave you run the method to create a Vanadium spline with these settings yet?\n")
+                         + str(run_details.splined_vanadium_file_path)
+                         + " \nHave you run the method to create a Vanadium spline with these settings yet?\n")
 
 
 def _crop_spline_to_percent_of_max(spline, input_ws, output_workspace, min_value, max_value):

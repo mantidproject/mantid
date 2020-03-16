@@ -11,7 +11,6 @@ from mantid.api import FrameworkManager
 import os
 import glob
 import tempfile
-from re import sub
 
 temp_dir = tempfile.gettempdir()
 EXPECTED_EXT = '.expected'
@@ -117,7 +116,7 @@ class LoadAndSaveLotsOfInstruments(object):
             except ValueError as e:
                 print("FAILED TO LOAD AND SAVE '%s' WITH ERROR:" % filename)
                 print(e)
-                failed.append(sub("\%s" % direc, '', filename))
+                failed.append(filename)
             finally:
                 # Clear everything for the next test
                 FrameworkManager.Instance().clear()

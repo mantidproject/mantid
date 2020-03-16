@@ -100,4 +100,5 @@ class MRGetTheta(PythonAlgorithm):
             return value * _units[units][target_units]
         return value
 
+
 AlgorithmFactory.subscribe(MRGetTheta)

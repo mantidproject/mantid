@@ -66,4 +66,5 @@ class ApplyDetectorScanEffCorr(PythonAlgorithm):
             MaskDetectors(Workspace=output, DetectorList=det_IDs[:-1])
         self.setProperty("OutputWorkspace", output)
 
+
 AlgorithmFactory.subscribe(ApplyDetectorScanEffCorr)

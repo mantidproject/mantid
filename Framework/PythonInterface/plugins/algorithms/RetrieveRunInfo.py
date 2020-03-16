@@ -139,8 +139,7 @@ class FileBackedWsIterator(object):
         # any are missing.
         missing_files = list(filterfalse(os.path.exists, filenames))
         if len(missing_files) > 0:
-            raise ValueError("One or more files are missing: " +
-                             str(missing_files))
+            raise ValueError("One or more files are missing: " + str(missing_files))
 
         self._filenames = filenames
         self._loaded_ws = None
