@@ -44,39 +44,51 @@ public:
     MOCK_METHOD0(averageTube, void());
 };
 
-class ALFViewTest : public ALFCustomInstrumentView{
+//class ALFViewTest : public IALFCustomInstrumentView, public IBaseCustomInstrumentView{
+class ALFViewTest : public IALFCustomInstrumentView{//, public IBaseCustomInstrumentView{
 public:
-    ALFViewTest(const std::string &instrument, QWidget *parent = nullptr):ALFCustomInstrumentView(instrument,parent){};
+    ALFViewTest(const std::string &instrument, QWidget *parent = nullptr) {};
+    ~ALFViewTest(){};
+
     MOCK_METHOD1(observeExtractSingleTube, void(Observer *listner));
     MOCK_METHOD1(observeAverageTube, void(Observer *listner));
-    MOCK_METHOD2(setUpInstrument,void(const std::string &fileName, std::vector<std::function<bool(std::map<std::string,bool>)>> &binders));
-    MOCK_METHOD1(addObserver, void(std::tuple<std::string, Observer *> &listener));
     MOCK_METHOD1(addSpectrum, void(std::string name));
     MOCK_METHOD1(setupAnalysisPane, void(PlotFitAnalysisPaneView *analysis));
 
+    MOCK_METHOD0(getFile, std::string());
+    MOCK_METHOD1(setRunQuietly, void(const std::string &runNumber));
+    MOCK_METHOD1(observeLoadRun, void( Observer *listener));
+    MOCK_METHOD1(warningBox, void(const std::string &error));
+    MOCK_METHOD1(setInstrumentWidget, void(InstrumentWidget *instrument));
+    MOCK_METHOD0(getInstrumentView, InstrumentWidget*());
+    MOCK_METHOD2(setUpInstrument,void(const std::string &fileName, std::vector<std::function<bool(std::map<std::string,bool>)>> &binders));
+    MOCK_METHOD1(addObserver, void(std::tuple<std::string, Observer *> &listener));
+    MOCK_METHOD1(setupInstrumentAnalysisSplitters, void(QWidget *analysis));
+    MOCK_METHOD0(setupHelp, void());
+   
 };
 
 class paneTest : public MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter{
 public:
     // define init
-    paneTest(PlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model):PlotFitAnalysisPanePresenter(view, model){}; 
+    paneTest(PlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model):PlotFitAnalysisPanePresenter(view, model) {}; 
     MOCK_METHOD1(addSpectrum, void (const std::string &name));
 };
 
-class paneViewTest: public MantidQt::MantidWidgets::PlotFitAnalysisPaneView{
+class paneViewTest : public MantidQt::MantidWidgets::IPlotFitAnalysisPaneView{
 public:
-    paneViewTest(const double &start=1., const double &end=5., QWidget *parent = nullptr):PlotFitAnalysisPaneView(start,end,parent){};
+   paneViewTest(const double &start=1., const double &end=5., QWidget *parent = nullptr){};
    MOCK_METHOD1(observeFitButton, void(Observer *listener));
    MOCK_METHOD0(getRange, std::pair<double, double>());
    MOCK_METHOD0(getFunction, Mantid::API::IFunction_sptr());
    MOCK_METHOD1(addSpectrum, void(std::string name));
    MOCK_METHOD1(addFitSpectrum, void(std::string name));
+   MOCK_METHOD1(addFunction, void(Mantid::API::IFunction_sptr));
    MOCK_METHOD1(updateFunction, void(Mantid::API::IFunction_sptr));
-   MOCK_METHOD1(fitWarning, void(std::string &message));
+   MOCK_METHOD1(fitWarning, void(const std::string &message));
    
    MOCK_METHOD2(setupPlotFitSplitter, void(const double &start, const double &end)); 
-   MOCK_METHOD2(createFitPane, QWidget(const double &start, const double &end)); 
-   void test(){};
+   MOCK_METHOD2(createFitPane, QWidget*(const double &start, const double &end)); 
 };
 class paneModelTest : public MantidQt::MantidWidgets::PlotFitAnalysisPaneModel{
     void empty(){};
@@ -130,12 +142,12 @@ public:
 private:
   //MatrixWorkspace_sptr m_workspace;
   //std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  ALFModelTest *m_model;
-  ALFViewTest *m_view;
-  paneViewTest *m_paneView;
-  paneModelTest *m_paneModel;
-  paneTest *m_pane;
-  ALFCustomInstrumentPresenter *m_presenter;
+  NiceMock<ALFModelTest> *m_model;
+  NiceMock<ALFViewTest> *m_view;
+  NiceMock<paneViewTest> *m_paneView;
+  NiceMock<paneModelTest> *m_paneModel;
+  NiceMock<paneTest> *m_pane;
+  NiceMock<ALFCustomInstrumentPresenter> *m_presenter;
 };
 
 #endif /* MANTIDQT_ALFCUSTOMINSTRUMENTPRESENTERTEST_H_ */
