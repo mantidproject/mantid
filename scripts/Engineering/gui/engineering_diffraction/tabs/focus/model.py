@@ -127,8 +127,8 @@ class FocusModel(object):
                                                  rb_num)
         self._save_focused_output_files_as_gss(instrument, sample_path, bank, sample_workspace,
                                                rb_num)
-        self._save_focused_output_files_as_xye(instrument, sample_path, bank, sample_workspace,
-                                               rb_num)
+        self._save_focused_output_files_as_topas_xye(instrument, sample_path, bank, sample_workspace,
+                                                     rb_num)
 
     def _save_focused_output_files_as_gss(self, instrument, sample_path, bank, sample_workspace,
                                           rb_num):
@@ -154,19 +154,23 @@ class FocusModel(object):
                 self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
             SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
 
-    def _save_focused_output_files_as_xye(self, instrument, sample_path, bank, sample_workspace,
-                                          rb_num):
+    def _save_focused_output_files_as_topas_xye(self, instrument, sample_path, bank,
+                                                sample_workspace, rb_num):
         xye_output_path = path.join(
             path_handling.get_output_path(), "Focus",
-            self._generate_output_file_name(instrument, sample_path, bank, ".dat"))
-        SaveFocusedXYE(InputWorkspace=sample_workspace, Filename=xye_output_path, SplitFiles=False)
+            self._generate_output_file_name(instrument, sample_path, bank, ".abc"))
+        SaveFocusedXYE(InputWorkspace=sample_workspace,
+                       Filename=xye_output_path,
+                       SplitFiles=False,
+                       Format="TOPAS")
         if rb_num:
             xye_output_path = path.join(
                 path_handling.get_output_path(), "User", rb_num, "Focus",
-                self._generate_output_file_name(instrument, sample_path, bank, ".dat"))
+                self._generate_output_file_name(instrument, sample_path, bank, ".abc"))
             SaveFocusedXYE(InputWorkspace=sample_workspace,
                            Filename=xye_output_path,
-                           SplitFiles=False)
+                           SplitFiles=False,
+                           Format="TOPAS")
 
     @staticmethod
     def _generate_output_file_name(instrument, sample_path, bank, suffix):
