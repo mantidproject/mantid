@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore, QtGui
+from qtpy.QtCore import QEvent
 from mantidqt.utils.qt import load_ui
 from Muon.GUI.Common.message_box import warning
 from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableWidget import SequentialTableWidget
@@ -34,10 +35,7 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
 
         self.tableLayout.addWidget(self.fit_results_table)
         self.fit_results_table.resizeColumnsToContents()
-
         self.setup_default_fit_results_table()
-
-        self.plot_fit_results_checkbox.setChecked(False)
 
     def warning_popup(self, message):
         warning(message, parent=self)
@@ -177,3 +175,6 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
 
     def setup_slot_for_key_enter_pressed(self, slot):
         self.fit_results_table.set_slot_key_enter_pressed(slot)
+
+    def setup_slot_for_focus_out_event(self, slot):
+        self.fit_results_table.set_slot_for_focus_out_event(slot)

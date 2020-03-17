@@ -49,6 +49,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self.workspace_deleted_from_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_deleted_from_ads)
         self.workspace_replaced_in_ads_observer = GenericObserverWithArgPassing(self.handle_workspace_replaced_in_ads)
         self.plot_sequential_fit_observer = GenericObserverWithArgPassing(self.handle_plot_single_sequential_fit)
+        self.plot_selected_workspaces_observer = GenericObserverWithArgPassing(self.plot_all_selected_workspaces)
+
         self.plot_type_changed_notifier = GenericObservable()
 
         self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
@@ -139,7 +141,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         if workspace in self._model.plotted_workspaces or workspace in self._model.plotted_fit_workspaces:
             ax = self.get_workspace_plot_axis(workspace)
             self._model.replace_workspace_plot(workspace, ax)
-            self._model.autoscale_axes(self._view.get_axes(), self.get_x_limits())
             self._view.force_redraw()
 
     def handle_use_raw_workspaces_changed(self):
@@ -341,6 +342,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
                                               errors=False,
                                               plot_kwargs={'distribution': True, 'autoscale_on_update': False,
                                                            'label': label + fit_function + ': Diff'})
+
         self._view.force_redraw()
 
     def handle_fit_removed(self, fits):

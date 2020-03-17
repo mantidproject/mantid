@@ -15,6 +15,7 @@ class SequentialTableWidget(QtWidgets.QTableWidget):
 
     keyUpDownPressed = Signal()
     keyEnterPressed = Signal()
+    focusOut = Signal()
 
     def __init__(self, parent):
         super(SequentialTableWidget, self).__init__(parent)
@@ -28,8 +29,17 @@ class SequentialTableWidget(QtWidgets.QTableWidget):
         elif event.key() == Qt.Key_Return:
             self.keyEnterPressed.emit()
 
+    def focusOutEvent(self, event):
+        self.clearSelection()
+        self.focusOut.emit()
+
     def set_slot_key_up_down_pressed(self, slot):
         self.keyUpDownPressed.connect(slot)
 
     def set_slot_key_enter_pressed(self, slot):
         self.keyEnterPressed.connect(slot)
+
+    def set_slot_for_focus_out_event(self, slot):
+        self.focusOut.connect(slot)
+
+

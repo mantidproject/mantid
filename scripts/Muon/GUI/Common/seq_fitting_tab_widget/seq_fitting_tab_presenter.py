@@ -29,6 +29,7 @@ class SeqFittingTabPresenter(object):
         self.fit_parameter_updated_observer = GenericObserver(self.handle_fit_function_parameter_changed)
         self.fit_parameter_changed_in_view = GenericObserverWithArgPassing(self.handle_updated_fit_parameter_in_table)
         self.selected_sequential_fit_notifier = GenericObservable()
+        self.leaving_sequential_table_notifer = GenericObservable()
 
     def create_thread(self, callback):
         self.fitting_calculation_model = ThreadModelWrapperWithOutput(callback)
@@ -164,6 +165,9 @@ class SeqFittingTabPresenter(object):
         row = self.view.get_selected_row()
         workspace_names = self.get_workspaces_for_entry_in_fit_table(row)
         self.selected_sequential_fit_notifier.notify_subscribers(workspace_names)
+
+    def handle_leaving_table_focus(self):
+        self.leaving_sequential_table_notifer.notify_subscribers()
 
     def get_workspaces_for_entry_in_fit_table(self, entry):
         runs, group_and_pairs = self.view.get_workspace_info_from_fit_table_row(entry)
