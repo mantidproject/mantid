@@ -39,7 +39,7 @@ public:
 };
 
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentView
-    : public QSplitter, IBaseCustomInstrumentView {
+    : public QSplitter, virtual IBaseCustomInstrumentView {
   Q_OBJECT
 
 public:
