@@ -28,7 +28,9 @@ if(QT_QCOLLECTIONGENERATOR_EXECUTABLE)
   set(BUILDER qthelp)
   configure_file(runsphinx.py.in runsphinx_qthelp.py @ONLY)
 
-  add_custom_command(OUTPUT qthelp/MantidProject.qhcp qthelp/MantidProject.qhp
+  set_source_files_properties(dummyoutput_alwaysrun PROPERTIES SYMBOLIC 1)
+
+  add_custom_command(OUTPUT qthelp/MantidProject.qhcp qthelp/MantidProject.qhp dummyoutput_alwaysrun
                      COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_qthelp.py
                      DEPENDS Framework AllQt4
                              ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_qthelp.py
