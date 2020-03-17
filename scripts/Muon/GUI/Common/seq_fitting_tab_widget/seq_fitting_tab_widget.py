@@ -26,3 +26,10 @@ class SeqFittingTabWidget(object):
         self.seq_fitting_tab_view.setup_slot_for_table_selection_changed(
             self.seq_fitting_tab_presenter.handle_fit_selected_in_table)
 
+        self.seq_fitting_tab_view.setup_slot_for_key_up_down(
+            self.seq_fitting_tab_presenter.handle_fit_selected_in_table)
+
+        self.seq_fitting_tab_view.setup_slot_for_key_enter_pressed(
+            self.seq_fitting_tab_presenter.handle_single_fit_requested
+        )
+

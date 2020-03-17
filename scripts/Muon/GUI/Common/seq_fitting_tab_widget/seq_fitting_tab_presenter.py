@@ -91,11 +91,13 @@ class SeqFittingTabPresenter(object):
     def handle_fit_started(self):
         self.view.seq_fit_button.setEnabled(False)
         self.view.fit_selected_button.setEnabled(False)
+        self.view.fit_results_table.blockSignals(True)
 
     def handle_fit_error(self, error):
         self.view.warning_popup(error)
         self.view.fit_selected_button.setEnabled(True)
         self.view.seq_fit_button.setEnabled(True)
+        self.view.fit_results_table.blockSignals(False)
 
     def handle_single_fit_finished(self):
         if self.fitting_calculation_model.result is None:
@@ -110,6 +112,7 @@ class SeqFittingTabPresenter(object):
         self.view.set_fit_quality(self.selected_row, fit_status, fit_chi_squared)
         self.view.seq_fit_button.setEnabled(True)
         self.view.fit_selected_button.setEnabled(True)
+        self.view.fit_results_table.blockSignals(False)
 
     def handle_sequential_fit_requested(self):
         if self.model.fit_function is None:
@@ -146,6 +149,7 @@ class SeqFittingTabPresenter(object):
             row_number += 1
         self.view.seq_fit_button.setEnabled(True)
         self.view.fit_selected_button.setEnabled(True)
+        self.view.fit_results_table.blockSignals(False)
 
     def handle_updated_fit_parameter_in_table(self, row, column):
         # make sure its a parameter we changed
@@ -155,8 +159,9 @@ class SeqFittingTabPresenter(object):
         params = self.view.get_entry_fit_parameter_values(row)
         self.model.update_ws_fit_function_parameters(workspaces, params)
 
-    def handle_fit_selected_in_table(self, row, column):
+    def handle_fit_selected_in_table(self):
         # print workspaces that are part of the fit
+        row = self.view.get_selected_row()
         workspace_names = self.get_workspaces_for_entry_in_fit_table(row)
         self.selected_sequential_fit_notifier.notify_subscribers(workspace_names)
 

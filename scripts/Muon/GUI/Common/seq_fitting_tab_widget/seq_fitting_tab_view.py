@@ -7,6 +7,7 @@
 from qtpy import QtWidgets, QtCore, QtGui
 from mantidqt.utils.qt import load_ui
 from Muon.GUI.Common.message_box import warning
+from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableWidget import SequentialTableWidget
 
 ui_seq_fitting_tab, _ = load_ui(__file__, "seq_fitting_tab.ui")
 
@@ -29,10 +30,14 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.setupUi(self)
         self.fit_function = None
 
+        self.fit_results_table = SequentialTableWidget(parent)
+
+        self.tableLayout.addWidget(self.fit_results_table)
+        self.fit_results_table.resizeColumnsToContents()
+
         self.setup_default_fit_results_table()
 
         self.plot_fit_results_checkbox.setChecked(False)
-
 
     def warning_popup(self, message):
         warning(message, parent=self)
@@ -166,3 +171,9 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
 
     def setup_slot_for_table_selection_changed(self, slot):
         self.fit_results_table.cellClicked.connect(slot)
+
+    def setup_slot_for_key_up_down(self, slot):
+        self.fit_results_table.set_slot_key_up_down_pressed(slot)
+
+    def setup_slot_for_key_enter_pressed(self, slot):
+        self.fit_results_table.set_slot_key_enter_pressed(slot)
