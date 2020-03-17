@@ -406,11 +406,8 @@ class MantidAxes(Axes):
             self.update_datalim(xys)
 
     def make_legend(self):
-        if self.legend_ is None:
-            legend_set_draggable(self.legend(), True)
-        else:
-            props = LegendProperties.from_legend(self.legend_)
-            LegendProperties.create_legend(props, self)
+        props = LegendProperties.from_legend(self.legend_)
+        LegendProperties.create_legend(props, self)
 
     @staticmethod
     def is_empty(axes):

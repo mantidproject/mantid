@@ -40,11 +40,17 @@ class LegendTabWidgetPresenter:
         self.view.advanced_options.rejected.connect(self.advanced_options_cancelled)
 
     def init_view(self):
+        """Sets all of the initial values of the input fields when the tab is first loaded"""
         if int(matplotlib.__version__[0]) < 2:
             self.view.hide_box_properties()
 
-        """Sets all of the initial values of the input fields when the tab is first loaded"""
-        legend_props = LegendProperties.from_legend(self.axes[0].get_legend())
+        legend_props = None
+        for ax in self.axes:
+            if ax.get_legend():
+                legend_props = LegendProperties.from_legend(ax.get_legend())
+
+        assert legend_props, "None of the axes have a legend."
+
         self.check_font_in_list(legend_props.entries_font)
         self.check_font_in_list(legend_props.title_font)
 
@@ -93,7 +99,8 @@ class LegendTabWidgetPresenter:
             return
 
         for ax in self.axes:
-            LegendProperties.create_legend(props, ax)
+            if ax.get_legend():
+                LegendProperties.create_legend(props, ax)
 
         self.current_view_properties = props
 
