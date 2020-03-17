@@ -22,7 +22,6 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW IPlotFitAnalysisPaneView{
 
 public:

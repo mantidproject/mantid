@@ -20,8 +20,12 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
+<<<<<<< HEAD
 class MANTIDQT_DIRECT_DLL IALFCustomInstrumentView
     : public virtual MantidWidgets::IBaseCustomInstrumentView {
+=======
+class  MANTIDQT_DIRECT_DLL IALFCustomInstrumentView{
+>>>>>>> 007af7e61a7b988dc769248a2ab9ecdbf6a1501c
 public:
   virtual void observeExtractSingleTube(Observer *listner)=0;
   virtual void observeAverageTube(Observer *listner)=0;
