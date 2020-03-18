@@ -207,7 +207,7 @@ void export_Run() {
            "Return the list of run properties managed by this object.")
 
       .def("getLogData",
-           (Property * (Run::*)(const std::string &) const) & Run::getLogData,
+           (Property * (Run::*)(const std::string &)const) & Run::getLogData,
            (arg("self"), arg("name")), return_value_policy<return_by_value>(),
            "Returns the named log. Use '.value' to return the value. The "
            "same "

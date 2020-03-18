@@ -29,6 +29,7 @@ CUSTOM = "Custom"
 CONTOUR = "Contour"
 SURFACE = "Surface"
 
+
 def red_asterisk():
     global RED_ASTERISK
     if RED_ASTERISK is None:
