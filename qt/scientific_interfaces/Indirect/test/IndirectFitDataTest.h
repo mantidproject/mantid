@@ -64,7 +64,10 @@ public:
     Spectra const spectra = Spectra("0-5,8,10");
 
     std::string const spectraString = "0-5,8,10";
-    std::vector<IDA::WorkspaceIndex> const spectraVec{0, 1, 2, 3, 4, 5, 8, 10};
+    std::vector<IDA::WorkspaceIndex> const spectraVec{
+        IDA::WorkspaceIndex(0), IDA::WorkspaceIndex(1), IDA::WorkspaceIndex(2),
+        IDA::WorkspaceIndex(3), IDA::WorkspaceIndex(4), IDA::WorkspaceIndex(5),
+        IDA::WorkspaceIndex(8), IDA::WorkspaceIndex(10)};
 
     TS_ASSERT_EQUALS(spectra.getString(), spectraString);
     for (auto it = spectra.begin(); it < spectra.end(); ++it)
@@ -160,9 +163,7 @@ public:
   void
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_workspace() {
     auto workspace = std::make_shared<Workspace2D>();
-    Spectra const spec =
-        Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
-                MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0});
+    Spectra const spec = Spectra("");
     IndirectFitData const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.zeroSpectra(), true);
@@ -188,7 +189,8 @@ public:
   void
   test_that_correct_excludeRegion_is_returned_when_regions_are_in_correct_order() {
     /// When each pair of numbers in the string are in order, then the whole
-    /// string is in the correct order(unordered: 10,11 9,7 ordered:10,11,7,9)
+    /// string is in the correct order(unordered: 10,11 9,7
+    /// ordered:10,11,7,9)
     auto data = getIndirectFitData(4);
 
     data->setExcludeRegionString(
@@ -215,7 +217,8 @@ public:
   void
   test_that_correct_excludeRegionVector_is_returned_when_regions_are_in_correct_order() {
     /// When each pair of numbers in the string are in order, then the whole
-    /// string is in the correct order(unordered: 10,11 9,7 ordered:10,11,7,9)
+    /// string is in the correct order(unordered: 10,11 9,7
+    /// ordered:10,11,7,9)
     auto data = getIndirectFitData(4);
 
     data->setExcludeRegionString(
@@ -311,11 +314,9 @@ public:
     std::vector<Spectra> const spectraPairs{
         Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
                 MantidQt::CustomInterfaces::IDA::WorkspaceIndex{11}),
-        Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
-                MantidQt::CustomInterfaces::IDA::WorkspaceIndex{1000000000}),
         Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{10},
                 MantidQt::CustomInterfaces::IDA::WorkspaceIndex{10})};
-    std::vector<std::string> const spectraStrings{"10", "1000000000", "1,5,10",
+    std::vector<std::string> const spectraStrings{"10", "1,5,10",
                                                   "1,2,3,4,5,6,22"};
 
     for (auto i = 0u; i < spectraPairs.size(); ++i)
