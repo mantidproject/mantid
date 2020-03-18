@@ -30,7 +30,7 @@ public:
 };
 
 class DLLExport ALFCustomInstrumentView
-    : public virtual MantidWidgets::BaseCustomInstrumentView,
+    : public MantidWidgets::BaseCustomInstrumentView,
       public IALFCustomInstrumentView
   {Q_OBJECT
 
