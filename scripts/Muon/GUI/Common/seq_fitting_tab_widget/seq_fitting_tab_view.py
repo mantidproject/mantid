@@ -37,6 +37,9 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.fit_results_table.resizeColumnsToContents()
         self.setup_default_fit_results_table()
 
+        self.plot_fit_results_checkbox.setVisible(False)
+        self.fit_selected_button.setVisible(False)
+
     def warning_popup(self, message):
         warning(message, parent=self)
 
@@ -47,9 +50,6 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.fit_results_table.setHorizontalHeaderLabels(list(default_columns.keys()))
         self.fit_results_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
         self.fit_results_table.blockSignals(False)
-
-        self.fit_results_table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.fit_results_table.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
 
     def set_fit_table_workspaces(self, runs, group_and_pairs):
         self.fit_results_table.blockSignals(True)
@@ -151,6 +151,16 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
 
     def get_selected_row(self):
         return self.fit_results_table.selectionModel().currentIndex().row()
+
+    def get_selected_rows(self):
+        rowSelectionModels = self.fit_results_table.selectionModel().selectedRows()
+        selected_rows = []
+        for rowSelectionModel in rowSelectionModels:
+            selected_rows += [rowSelectionModel.row()]
+        return selected_rows
+
+    def set_table_selection_to_last_row(self):
+        self.fit_results_table.set_selection_to_last_row()
 
     def is_plotting_checked(self):
         return self.plot_fit_results_checkbox.isChecked()

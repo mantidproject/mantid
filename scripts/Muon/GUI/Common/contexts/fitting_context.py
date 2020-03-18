@@ -390,7 +390,6 @@ class FittingContext(object):
         :return: A list of matching fits
         """
         for fit in self.fit_list:
-            print("INPUT WORKSPACES", fit.input_workspaces, "WORKSPACE LIST", input_workspace_list)
             if fit.input_workspaces == input_workspace_list:
                 return fit
 

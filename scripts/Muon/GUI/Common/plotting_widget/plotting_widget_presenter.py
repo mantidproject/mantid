@@ -409,7 +409,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         workspace_list = self.workspace_finder.get_workspace_list_to_plot(self._view.if_raw(),
                                                                           self._view.get_selected())
 
-        for ws in self._model.plotted_workspaces:
+        for ws in self._model.plotted_workspaces + self._model.plotted_fit_workspaces:
             if ws not in workspace_list:
                 self._model.remove_workspace_from_plot(ws, self._view.get_axes())
 
@@ -433,15 +433,19 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             for workspace in workspace_list
             if self.context.group_pair_context.get_equivalent_group_pair(workspace)}
 
-    def handle_plot_single_sequential_fit(self, workspace_list):
+    def handle_plot_single_sequential_fit(self, selected_workspaces):
         errors = self._view.plot_options.get_errors()
 
+        fitted_workspace_list = []
+        workspace_list = []
         # get corresponding fit for the workspace_list, if it exists
-        fit = self.context.fitting_context.find_fit_for_input_workspace_list(workspace_list)
-        if fit is not None:
-            fitted_workspace_list = fit.output_workspace_names
-        else:
-            fitted_workspace_list = []
+        for _, workspaces in selected_workspaces.items():
+            workspace_list += workspaces
+            fit = self.context.fitting_context.find_fit_for_input_workspace_list(workspaces)
+            if fit is not None:
+                fitted_workspace_list += fit.output_workspace_names
+            else:
+                fitted_workspace_list += []
 
         for ws in self._model.plotted_workspaces:
             if ws not in workspace_list:

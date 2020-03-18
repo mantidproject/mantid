@@ -30,7 +30,7 @@ class SeqFittingTabWidget(object):
             self.seq_fitting_tab_presenter.handle_fit_selected_in_table)
 
         self.seq_fitting_tab_view.setup_slot_for_key_enter_pressed(
-            self.seq_fitting_tab_presenter.handle_single_fit_requested)
+            self.seq_fitting_tab_presenter.handle_sequential_fit_requested)
 
         self.seq_fitting_tab_view.setup_slot_for_focus_out_event(
             self.seq_fitting_tab_presenter.handle_leaving_table_focus)

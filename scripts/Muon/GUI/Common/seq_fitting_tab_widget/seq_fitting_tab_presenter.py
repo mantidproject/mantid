@@ -7,6 +7,8 @@
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common import thread_model
+
+from collections import defaultdict
 import functools
 
 
@@ -50,7 +52,7 @@ class SeqFittingTabPresenter(object):
             ws_names = self.get_workspaces_for_entry_in_fit_table(i)
             fit_function = self.model.get_ws_fit_function(ws_names)
             parameter_values.append([fit_function.getParameterValue(parameters[j]) for j in
-                                    range(number_of_parameters)])
+                                     range(number_of_parameters)])
 
         self.view.set_fit_table_function_parameters(parameters, parameter_values)
 
@@ -120,7 +122,13 @@ class SeqFittingTabPresenter(object):
             return
 
         workspace_names = []
-        for i in range(self.view.get_number_of_entries()):
+        rows = self.view.get_selected_rows()
+        if len(rows) == 0: # if none selected, assume we are doing a sequential fit over everything
+            self.selected_rows = [i for i in range(self.view.get_number_of_entries())]
+        else:
+            self.selected_rows = rows
+
+        for i in self.selected_rows:
             workspace_names += [self.get_workspaces_for_entry_in_fit_table(i)]
 
         calculation_function = functools.partial(
@@ -139,18 +147,23 @@ class SeqFittingTabPresenter(object):
             return
 
         fit_functions, fit_statuses, fit_chi_squareds = self.fitting_calculation_model.result
-        row_number = 0
-        for fit_function, fit_status, fit_chi_squared in zip(fit_functions, fit_statuses, fit_chi_squareds):
+        for fit_function, fit_status, fit_chi_squared, row in zip(fit_functions, fit_statuses, fit_chi_squareds,
+                                                                  self.selected_rows):
             number_of_parameters = fit_function.nParams()
             parameters = [fit_function.parameterName(i) for i in range(number_of_parameters)]
             parameter_values = [fit_function.getParameterValue(parameters[i]) for i in
                                 range(number_of_parameters)]
-            self.view.set_fit_function_parameters(row_number, parameter_values)
-            self.view.set_fit_quality(row_number, fit_status, fit_chi_squared)
-            row_number += 1
+            self.view.set_fit_function_parameters(row, parameter_values)
+            self.view.set_fit_quality(row, fit_status, fit_chi_squared)
+
         self.view.seq_fit_button.setEnabled(True)
         self.view.fit_selected_button.setEnabled(True)
         self.view.fit_results_table.blockSignals(False)
+
+        # if no row is selected (select the last)
+        if len(self.view.get_selected_rows()) == 0:
+            print("got here got here got here")
+            self.view.set_table_selection_to_last_row()
 
     def handle_updated_fit_parameter_in_table(self, row, column):
         # make sure its a parameter we changed
@@ -161,10 +174,14 @@ class SeqFittingTabPresenter(object):
         self.model.update_ws_fit_function_parameters(workspaces, params)
 
     def handle_fit_selected_in_table(self):
-        # print workspaces that are part of the fit
-        row = self.view.get_selected_row()
-        workspace_names = self.get_workspaces_for_entry_in_fit_table(row)
-        self.selected_sequential_fit_notifier.notify_subscribers(workspace_names)
+        rows = self.view.get_selected_rows()
+        workspace_names = []
+        workspaces = defaultdict(list)
+        for i, row in enumerate(rows):
+            workspaces[i] = self.get_workspaces_for_entry_in_fit_table(row)
+            workspace_names += self.get_workspaces_for_entry_in_fit_table(row)
+
+        self.selected_sequential_fit_notifier.notify_subscribers(workspaces)
 
     def handle_leaving_table_focus(self):
         self.leaving_sequential_table_notifer.notify_subscribers()
