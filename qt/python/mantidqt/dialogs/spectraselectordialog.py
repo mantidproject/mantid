@@ -222,6 +222,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         if self._is_input_valid() or ui.wkspIndices.text() == "":
             ui.wkspIndicesValid.setVisible(False)
             ui.wkspIndicesValid.setToolTip("")
+        elif ui.plotType.currentText() == SURFACE or ui.plotType.currentText() == CONTOUR:
+            ui.wkspIndicesValid.setVisible(True)
+            ui.wkspIndicesValid.setToolTip("Enter one workspace index in " + ui.wkspIndices.placeholderText())
         else:
             ui.wkspIndicesValid.setVisible(True)
             ui.wkspIndicesValid.setToolTip("Not in " + ui.wkspIndices.placeholderText())
@@ -241,6 +244,9 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         if self._is_input_valid() or ui.specNums.text() == "":
             ui.specNumsValid.setVisible(False)
             ui.specNumsValid.setToolTip("")
+        elif ui.plotType.currentText() == SURFACE or ui.plotType.currentText() == CONTOUR:
+            ui.specNumsValid.setVisible(True)
+            ui.specNumsValid.setToolTip("Enter one spectrum number in " + ui.specNums.placeholderText())
         else:
             ui.specNumsValid.setVisible(True)
             ui.specNumsValid.setToolTip("Not in " + ui.specNums.placeholderText())
@@ -376,7 +382,8 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
             self.ui.logs_valid.hide()
             # If the custom log values were the only thing stopping the input from being valid then the OK button can
             # be re-enabled
-            if not self._parent._ui.specNumsValid.isVisible() and not self._parent._ui.wkspIndicesValid.isVisible():
+            if not self._parent._ui.specNumsValid.isVisible() and not self._parent._ui.wkspIndicesValid.isVisible()\
+                    and (self._parent._ui.specNums.text() or self._parent._ui.wkspIndices.text()):
                 self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
         else:
             self._validate_custom_logs(self.ui.custom_log_line_edit.text())
@@ -396,7 +403,11 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
     def _populate_log_combo_box(self) -> None:
         self.ui.log_value_combo_box.addItem(WORKSPACE_NAME)
 
+        # Create a map of all logs and their double representation.
+        # Only logs that can be converted to a double and are not all equal will be used.
+        # It is a map of log_name -> [value, is_constant]
         usable_logs = {}
+        # Add the logs that are present in the first workspace
         ws = self._parent._workspaces[0]
         if ws:
             run_object = ws.getRun()
@@ -411,6 +422,7 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
                 except:
                     pass
 
+        # Loop over all of the workspaces to see if each log value has changed.
         for ws in self._parent._workspaces:
             if ws:
                 run_object = ws.getRun()
@@ -418,17 +430,19 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
                     if run_object.hasProperty(log_name):
                         if usable_logs[log_name][1]:
                             value = run_object.getPropertyAsSingleValueWithTimeAveragedMean(log_name)
+                            # Set the bool to whether the value is the same
                             usable_logs[log_name][1] = value == usable_logs[log_name][0]
                     else:
                         usable_logs.pop(log_name)
 
+        # Add the log names to the combo box if they appear in all workspaces and are non-constant.
         for log_name in usable_logs:
             if not usable_logs[log_name][1]:
                 self.ui.log_value_combo_box.addItem(log_name)
 
         self.ui.log_value_combo_box.addItem(CUSTOM)
 
-    def _validate_custom_logs(self, text, plot_all: bool = False) -> None:
+    def _validate_custom_logs(self, text: str, plot_all: bool = False) -> None:
         if self.ui.log_value_combo_box.currentText() == CUSTOM:
             valid_options = True
             values = text.split(',')
