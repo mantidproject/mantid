@@ -8,9 +8,12 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
+import tempfile
+import shutil
 from os import path
 
-from mantid.py3compat.mock import patch
+from mantid.py3compat.mock import patch, MagicMock
+from mantid.simpleapi import CreateSampleWorkspace
 from Engineering.gui.engineering_diffraction.tabs.focus import model
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
@@ -20,10 +23,14 @@ file_path = "Engineering.gui.engineering_diffraction.tabs.focus.model"
 
 class FocusModelTest(unittest.TestCase):
     def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
         self.model = model.FocusModel()
         self.current_calibration = CalibrationInfo(vanadium_path="/mocked/out/anyway",
                                                    sample_path="this_is_mocked_out_too",
                                                    instrument="ENGINX")
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir)
 
     @patch(file_path + ".path_handling.load_workspace")
     @patch(file_path + ".vanadium_corrections.Ads.doesExist")
@@ -125,6 +132,36 @@ class FocusModelTest(unittest.TestCase):
         self.assertEqual(nexus.call_count, 2)
         self.assertEqual(gss.call_count, 2)
         self.assertEqual(xye.call_count, 2)
+
+    @patch(file_path + ".logger")
+    @patch(file_path + ".path_handling.get_output_path")
+    @patch(file_path + ".csv")
+    def test_output_sample_logs_with_rb_number(self, mock_csv, mock_path, mock_logger):
+        mock_writer = MagicMock()
+        mock_csv.writer.return_value = mock_writer
+        mock_path.return_value = self.test_dir
+        ws = CreateSampleWorkspace()
+
+        self.model._output_sample_logs("ENGINX", "00000", ws, "0")
+
+        self.assertEqual(5, len(ws.getRun().keys()))
+        self.assertEqual(1, mock_logger.information.call_count)
+        self.assertEqual(8, mock_writer.writerow.call_count)
+
+    @patch(file_path + ".logger")
+    @patch(file_path + ".path_handling.get_output_path")
+    @patch(file_path + ".csv")
+    def test_output_sample_logs_without_rb_number(self, mock_csv, mock_path, mock_logger):
+        mock_writer = MagicMock()
+        mock_csv.writer.return_value = mock_writer
+        mock_path.return_value = self.test_dir
+        ws = CreateSampleWorkspace()
+
+        self.model._output_sample_logs("ENGINX", "00000", ws, None)
+
+        self.assertEqual(5, len(ws.getRun().keys()))
+        self.assertEqual(1, mock_logger.information.call_count)
+        self.assertEqual(4, mock_writer.writerow.call_count)
 
 
 if __name__ == '__main__':
