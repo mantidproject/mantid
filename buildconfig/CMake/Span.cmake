@@ -16,5 +16,5 @@ FetchContent_Declare(
 FetchContent_GetProperties(span)
 if(NOT span_POPULATED)
   FetchContent_Populate(span)
-  add_subdirectory(${span_SOURCE_DIR} ${span_BINARY_DIR})
+  add_subdirectory(${span_SOURCE_DIR} ${span_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
