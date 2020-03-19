@@ -183,14 +183,22 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
   g_log.information() << "Number of activated single detectors is: "
                       << m_numberOfSimpleDetectors << std::endl;
 
-  NXInt mode = entry.openNXInt("acquisition_mode");
-  mode.load();
-  m_bats = mode[0] == 1;
+  try {
+    NXInt mode = entry.openNXInt("acquisition_mode");
+    mode.load();
+    m_bats = mode[0] == 1;
+  } catch (...) {
+    g_log.information() << "Unable to read acquisition_mode, assuming doppler";
+  }
 
-  NXFloat firstTubeAngle = entry.openNXFloat("instrument/PSD/PSD angle 1");
-  firstTubeAngle.load();
-  m_firstTubeAngleRounded =
-      static_cast<size_t>(std::round(10 * firstTubeAngle[0]));
+  try {
+    NXFloat firstTubeAngle = entry.openNXFloat("instrument/PSD/PSD angle 1");
+    firstTubeAngle.load();
+    m_firstTubeAngleRounded =
+        static_cast<size_t>(std::round(10 * firstTubeAngle[0]));
+  } catch (...) {
+    g_log.information() << "Unable to read first tube anlge, assuming 25.1";
+  }
 }
 
 /**
