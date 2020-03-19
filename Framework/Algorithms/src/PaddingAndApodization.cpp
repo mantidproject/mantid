@@ -115,7 +115,6 @@ void PaddingAndApodization::exec() {
   fptr apodizationFunction = getApodizationFunction(method);
   // Do the specified spectra only
   auto specLength = static_cast<int>(spectra.size());
-  std::vector<double> norm(specLength, 0.0);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < specLength; ++i) {
     PARALLEL_START_INTERUPT_REGION

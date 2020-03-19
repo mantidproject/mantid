@@ -318,7 +318,6 @@ void SaveIsawPeaks::exec() {
     const int run = runBankMap.first;
     const auto &bankMap = runBankMap.second;
 
-    bankMap_t::iterator bankMap_it;
     for (const auto &bankIDs : bankMap) {
       // Start of a new bank.
       const int bank = bankIDs.first;

@@ -589,9 +589,7 @@ void GroupDetectors2::processXMLFile(const std::string &fname,
       if (ind != detIdToWiMap.end()) {
         size_t wsid = ind->second;
         wsindexes.emplace_back(wsid);
-        if (unUsedSpec[wsid] != (USED)) {
-          unUsedSpec[wsid] = (USED);
-        }
+        unUsedSpec[wsid] = (USED);
       } else {
         g_log.error() << "Detector with ID " << detid
                       << " is not found in instrument \n";
@@ -615,9 +613,7 @@ void GroupDetectors2::processXMLFile(const std::string &fname,
       if (ind != specs2index.end()) {
         size_t wsid = ind->second;
         wsindexes.emplace_back(wsid);
-        if (unUsedSpec[wsid] != (USED)) {
-          unUsedSpec[wsid] = (USED);
-        }
+        unUsedSpec[wsid] = (USED);
       } else {
         g_log.error() << "Spectrum with ID " << specNum
                       << " is not found in instrument \n";
@@ -649,6 +645,7 @@ void GroupDetectors2::processGroupingWorkspace(
     size_t groupid = static_cast<int>(groupWS->y(i)[0]);
     // group 0 is are unused spectra - don't process them
     if (groupid > 0) {
+      // cppcheck-suppress stlFindInsert
       if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end()) {
         // not found - create an empty set
         group2WSIndexSetmap.emplace(groupid, std::set<size_t>());
@@ -662,9 +659,7 @@ void GroupDetectors2::processGroupingWorkspace(
             detIdToWiMap[detectorIDs[spectrumDefinition.first]];
         targetWSIndexSet.insert(targetWSIndex);
         // mark as used
-        if (unUsedSpec[targetWSIndex] != (USED)) {
-          unUsedSpec[targetWSIndex] = (USED);
-        }
+        unUsedSpec[targetWSIndex] = (USED);
       }
     }
   }
@@ -701,6 +696,7 @@ void GroupDetectors2::processMatrixWorkspace(
     // read spectra from groupingws
     size_t groupid = i;
 
+    // cppcheck-suppress stlFindInsert
     if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end()) {
       // not found - create an empty set
       group2WSIndexSetmap.emplace(groupid, std::set<size_t>());
@@ -716,9 +712,7 @@ void GroupDetectors2::processMatrixWorkspace(
             detIdToWiMap[detectorIDs[spectrumDefinition.first]];
         targetWSIndexSet.insert(targetWSIndex);
         // mark as used
-        if (unUsedSpec[targetWSIndex] != (USED)) {
-          unUsedSpec[targetWSIndex] = (USED);
-        }
+        unUsedSpec[targetWSIndex] = (USED);
       }
     }
   }

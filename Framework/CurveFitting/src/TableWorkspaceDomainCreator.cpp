@@ -174,8 +174,6 @@ void TableWorkspaceDomainCreator::declareDatasetProperties(
         "(default the highest value of x)");
     if (m_domainType != Simple &&
         !m_manager->existsProperty(m_maxSizePropertyName)) {
-      auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
-      mustBePositive->setLower(0);
       declareProperty(
           new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
           "The maximum number of values per a simple domain.");

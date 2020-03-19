@@ -40,9 +40,7 @@ MaxentTransformMultiFourier::imageToData(const std::vector<double> &image) {
   std::vector<double> data;
   data.reserve(m_numSpec * dataOneSpec.size());
   for (size_t s = 0; s < m_numSpec; s++) {
-    for (const double &data_item : dataOneSpec) {
-      data.emplace_back(data_item);
-    }
+    std::copy(dataOneSpec.begin(), dataOneSpec.end(), std::back_inserter(data));
   }
 
   // Apply adjustments (we assume there are sufficient adjustments supplied)

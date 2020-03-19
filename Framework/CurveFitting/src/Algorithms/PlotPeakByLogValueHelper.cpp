@@ -212,7 +212,6 @@ std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace &ws,
       }
     }
   } else { // numeric axis
-    spectrumNumber = SpecialIndex::NOT_SET;
     if (workspaceIndex >= 0) {
       out.clear();
     } else {

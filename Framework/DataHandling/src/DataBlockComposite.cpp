@@ -208,9 +208,12 @@ std::vector<std::pair<int64_t, int64_t>> spectrumIDIntervals(
     const std::vector<Mantid::DataHandling::DataBlock> &blocks) {
   std::vector<std::pair<int64_t, int64_t>> intervals;
   intervals.reserve(blocks.size());
-  for (const auto &block : blocks) {
-    intervals.emplace_back(block.getMinSpectrumID(), block.getMaxSpectrumID());
-  }
+
+  std::transform(blocks.begin(), blocks.end(), std::back_inserter(intervals),
+                 [](const auto &block) {
+                   return std::make_pair(block.getMinSpectrumID(),
+                                         block.getMaxSpectrumID());
+                 });
   return intervals;
 }
 } // namespace

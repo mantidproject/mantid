@@ -108,9 +108,9 @@ void FindUBUsingIndexedPeaks::exec() {
   {                    // from the full list of peaks, and
     q_vectors.clear(); // save the UB in the sample
     q_vectors.reserve(n_peaks);
-    for (const auto &peak : peaks) {
-      q_vectors.emplace_back(peak.getQSampleFrame());
-    }
+
+    std::transform(peaks.begin(), peaks.end(), std::back_inserter(q_vectors),
+                   [](const auto &peak) { return peak.getQSampleFrame(); });
 
     int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
     int sate_indexed = 0;

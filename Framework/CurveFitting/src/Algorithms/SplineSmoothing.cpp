@@ -306,9 +306,10 @@ void SplineSmoothing::addSmoothingPoints(const std::set<int> &points,
   std::vector<double> breakPoints;
   breakPoints.reserve(num_points);
   // set each of the x and y points to redefine the spline
-  for (auto const &point : points) {
-    breakPoints.emplace_back(xs[point]);
-  }
+
+  std::transform(points.begin(), points.end(), std::back_inserter(breakPoints),
+                 [&xs](const auto &point) { return xs[point]; });
+
   m_cspline->setAttribute("BreakPoints",
                           API::IFunction::Attribute(breakPoints));
 
@@ -367,7 +368,7 @@ void SplineSmoothing::selectSmoothingPoints(
         break;
       }
 
-    } else if (!incBreaks) {
+    } else {
       if (smoothPts.size() >= xs.size() - 1) {
         break;
       }

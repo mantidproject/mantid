@@ -1569,6 +1569,7 @@ void Algorithm::copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum) {
   const auto &props = this->getProperties();
   for (const auto &prop : props) {
     if (prop) {
+
       auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       // Copy the property using the string
       if (!wsProp)

@@ -1361,9 +1361,10 @@ IFunction_sptr IFunction::getFunction(std::size_t) const {
 std::vector<std::string> IFunction::getAttributeNames() const {
   std::vector<std::string> names;
   names.reserve(m_attrs.size());
-  for (const auto &attr : m_attrs) {
-    names.emplace_back(attr.first);
-  }
+
+  std::transform(m_attrs.begin(), m_attrs.end(), std::back_inserter(names),
+                 [](const auto &attr) { return attr.first; });
+
   return names;
 }
 

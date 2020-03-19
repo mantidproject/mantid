@@ -151,9 +151,9 @@ void ResetNegatives::pushMinimum(MatrixWorkspace_const_sptr minWS,
     if (minValue <= 0) {
       minValue *= -1.;
       auto &y = wksp->mutableY(i);
-      for (double &value : y) {
-        value = fixZero(value + minValue);
-      }
+      std::transform(y.begin(), y.end(), y.begin(), [minValue](double value) {
+        return fixZero(value + minValue);
+      });
     }
     prog.report();
     PARALLEL_END_INTERUPT_REGION

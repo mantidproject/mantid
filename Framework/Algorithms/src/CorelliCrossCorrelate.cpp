@@ -157,8 +157,9 @@ void CorelliCrossCorrelate::exec() {
 
   int offset_int = getProperty("TimingOffset");
   const auto offset = static_cast<int64_t>(offset_int);
-  for (auto &timing : tdc)
-    timing += offset;
+
+  std::transform(tdc.begin(), tdc.end(), tdc.begin(),
+                 [offset](auto timing) { return timing + offset; });
 
   // Determine period from chopper frequency.
   auto motorSpeed = dynamic_cast<TimeSeriesProperty<double> *>(

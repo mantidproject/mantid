@@ -91,7 +91,6 @@ CalculatePlaczekSelfScattering::validateInputs() {
 void CalculatePlaczekSelfScattering::exec() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpecta");
-  API::MatrixWorkspace_sptr outWS = getProperty("OutputWorkspace");
   constexpr double factor =
       1.0 / 1.66053906660e-27; // atomic mass unit-kilogram relationship
   constexpr double neutronMass = factor * 1.674927471e-27; // neutron mass
@@ -99,11 +98,15 @@ void CalculatePlaczekSelfScattering::exec() {
   // of each species
   auto atomSpecies = getSampleSpeciesInfo(inWS);
   // calculate summation term w/ neutron mass over molecular mass ratio
-  double summationTerm = 0.0;
-  for (auto atom : atomSpecies) {
-    summationTerm += atom.second["concentration"] * atom.second["bSqrdBar"] *
+
+  auto sumLambda = [&neutronMass](double sum, auto &atom) {
+    return sum + atom.second["concentration"] * atom.second["bSqrdBar"] *
                      neutronMass / atom.second["mass"];
-  }
+  };
+
+  double summationTerm =
+      std::accumulate(atomSpecies.begin(), atomSpecies.end(), 0.0, sumLambda);
+
   // get incident spectrum and 1st derivative
   const MantidVec xLambda = incidentWS->readX(0);
   const MantidVec incident = incidentWS->readY(0);

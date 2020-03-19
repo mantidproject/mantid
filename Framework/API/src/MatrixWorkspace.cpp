@@ -1237,9 +1237,10 @@ MatrixWorkspace::maskedBinsIndices(const size_t &workspaceIndex) const {
   auto maskedBins = it->second;
   std::vector<size_t> maskedIds;
   maskedIds.reserve(maskedBins.size());
-  for (const auto &mb : maskedBins) {
-    maskedIds.emplace_back(mb.first);
-  }
+
+  std::transform(maskedBins.begin(), maskedBins.end(),
+                 std::back_inserter(maskedIds),
+                 [](const auto &mb) { return mb.first; });
   return maskedIds;
 }
 
@@ -1939,7 +1940,8 @@ MatrixWorkspace::findY(double value,
   if (std::isnan(value)) {
     for (int64_t i = idx.first; i < numHists; ++i) {
       const auto &Y = this->y(i);
-      // cppcheck-suppress syntaxError
+      // https://trac.cppcheck.net/ticket/9237 if init buggy with cppcheck
+      // cppcheck-suppress stlIfFind
       if (auto it = std::find_if(std::next(Y.begin(), idx.second), Y.end(),
                                  [](double v) { return std::isnan(v); });
           it != Y.end()) {
@@ -1950,6 +1952,7 @@ MatrixWorkspace::findY(double value,
   } else {
     for (int64_t i = idx.first; i < numHists; ++i) {
       const auto &Y = this->y(i);
+      // cppcheck-suppress stlIfFind
       if (auto it = std::find(std::next(Y.begin(), idx.second), Y.end(), value);
           it != Y.end()) {
         out = {i, std::distance(Y.begin(), it)};

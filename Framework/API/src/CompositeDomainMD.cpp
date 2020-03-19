@@ -25,7 +25,14 @@ CompositeDomainMD::CompositeDomainMD(IMDWorkspace_const_sptr ws,
                                      size_t maxDomainSize)
     : m_iterator(ws->createIterator()) {
   m_totalSize = m_iterator->getDataSize();
-  size_t nParts = m_totalSize / maxDomainSize + 1;
+
+  size_t maxDomainSizeDiv = maxDomainSize + 1;
+  if (maxDomainSizeDiv == 0) {
+    throw std::runtime_error(
+        "Attempted to use a maximum domain size that equals 0");
+  }
+  size_t nParts = m_totalSize / maxDomainSizeDiv;
+
   m_domains.resize(nParts);
   for (size_t i = 0; i < nParts - 1; ++i) {
     size_t start = i * maxDomainSize;

@@ -418,9 +418,7 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv,
       }
     }
     m_dirtyDeriv = false;
-  }
 
-  if (evalDeriv) {
     if (m_includePenalty) {
       size_t i = 0;
       for (size_t ip = 0; ip < np; ++ip) {

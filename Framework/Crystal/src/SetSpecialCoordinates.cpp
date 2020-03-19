@@ -95,7 +95,7 @@ void SetSpecialCoordinates::init() {
 bool SetSpecialCoordinates::writeCoordinatesToMDEventWorkspace(
     Workspace_sptr inWS, SpecialCoordinateSystem /*unused*/) {
   bool written = false;
-  if (auto mdEventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS)) {
+  if (boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS)) {
     g_log.warning("SetSpecialCoordinates: This algorithm cannot set the "
                   "special coordinate system for an MDEvent workspace any "
                   "longer.");
@@ -107,7 +107,7 @@ bool SetSpecialCoordinates::writeCoordinatesToMDEventWorkspace(
 bool SetSpecialCoordinates::writeCoordinatesToMDHistoWorkspace(
     Workspace_sptr inWS, SpecialCoordinateSystem /*unused*/) {
   bool written = false;
-  if (auto mdHistoWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
+  if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
     g_log.warning("SetSpecialCoordinates: This algorithm cannot set the "
                   "special coordinate system for an MDHisto workspace any "
                   "longer.");

@@ -709,7 +709,7 @@ void ReflectometryReductionOne2::findDetectorGroups() {
   // Sort the groups by the first spectrum number in the group (to give the same
   // output order as GroupDetectors)
   std::sort(m_detectorGroups.begin(), m_detectorGroups.end(),
-            [](const std::vector<size_t> a, const std::vector<size_t> b) {
+            [](const std::vector<size_t> &a, const std::vector<size_t> &b) {
               return a.front() < b.front();
             });
 
