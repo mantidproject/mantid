@@ -647,10 +647,13 @@ class FittingTabPresenter(object):
 
     def get_selected_fit_workspaces(self):
         # only ever going to return one fit
-        if self._get_fit_type() == "Single":
-            return {0: [self.view.display_workspace]}
+        if self.selected_data:
+            if self._get_fit_type() == "Single":
+                return {0: [self.view.display_workspace]}
+            else:
+                return {0: self.selected_data}
         else:
-            return {0: self.selected_data}
+            return {}
 
     def _get_selected_groups_and_pairs(self):
         return self.context.group_pair_context.selected_groups + self.context.group_pair_context.selected_pairs
