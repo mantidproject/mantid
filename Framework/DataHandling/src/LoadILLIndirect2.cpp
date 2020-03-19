@@ -333,9 +333,8 @@ void LoadILLIndirect2::runLoadInstrument() {
 }
 
 /**
- * Makes up the full path of the relevant IDF dependent on resolution mode
- * @param instName : the name of the instrument (including the resolution mode
- * suffix)
+ * Makes up the full path of the relevant IDF dependent on first tube angle and
+ * mode
  * @return : the full path to the corresponding IDF
  */
 std::string LoadILLIndirect2::getInstrumentFilePath() {
