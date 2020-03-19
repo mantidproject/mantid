@@ -12,6 +12,6 @@ Direct Geometry Changes
 Improvements
 ############
 
-For ILL time-of-flight instruments, :ref:`LoadILLTOF <alg-LoadILLTOF-v2>` now allows bin edges determined by channel number rather than time-of-flight values.
+For ILL time-of-flight instruments, :ref:`LoadILLTOF <algm-LoadILLTOF-v2>` now allows bin edges determined by channel number rather than time-of-flight values.
 
 :ref:`Release 5.1.0 <v5.1.0>`
