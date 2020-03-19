@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include <string>
 
@@ -20,9 +21,9 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentPresenter
   Q_OBJECT
 
 public:
-  BaseCustomInstrumentPresenter(BaseCustomInstrumentView *view,
+  BaseCustomInstrumentPresenter(IBaseCustomInstrumentView *view,
                                 BaseCustomInstrumentModel *model,
-                                QWidget *analysisView);
+      PlotFitAnalysisPanePresenter *analysisView);
   ~BaseCustomInstrumentPresenter() { delete m_loadRunObserver; };
 
   typedef std::pair<
@@ -49,12 +50,12 @@ private:
   virtual void setUpInstrumentAnalysisSplitter();
   std::pair<instrumentSetUp, instrumentObserverOptions> setupInstrument();
 
-  BaseCustomInstrumentView *m_view;
+  IBaseCustomInstrumentView *m_view;
   BaseCustomInstrumentModel *m_model;
   int m_currentRun;
   std::string m_currentFile;
   VoidObserver *m_loadRunObserver;
-  QWidget *m_analysisPaneView;
+  PlotFitAnalysisPanePresenter *m_analysisPanePresenter;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

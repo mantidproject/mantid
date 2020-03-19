@@ -20,13 +20,13 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPanePresenter
   Q_OBJECT
 
 public:
-  PlotFitAnalysisPanePresenter(PlotFitAnalysisPaneView *m_view,
+  PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *m_view,
                                PlotFitAnalysisPaneModel *m_model);
   ~PlotFitAnalysisPanePresenter() {
     delete m_model;
     delete m_fitObserver;
   };
-  PlotFitAnalysisPaneView *getView() { return m_view; };
+  IPlotFitAnalysisPaneView *getView() { return m_view; };
   std::string getCurrentWS() { return m_currentName; };
   void clearCurrentWS() { m_currentName = ""; };
   void doFit();
@@ -35,7 +35,7 @@ public:
 
 private:
   VoidObserver *m_fitObserver;
-  PlotFitAnalysisPaneView *m_view;
+  IPlotFitAnalysisPaneView *m_view;
   PlotFitAnalysisPaneModel *m_model;
   std::string m_currentName;
 };

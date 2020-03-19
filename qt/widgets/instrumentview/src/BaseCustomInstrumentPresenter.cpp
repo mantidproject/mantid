@@ -8,18 +8,20 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentModel.h"
 #include "MantidQtWidgets/InstrumentView/BaseCustomInstrumentView.h"
+#include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 
 #include <functional>
 #include <tuple>
+#include<qobject.h>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
 BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(
-    BaseCustomInstrumentView *view, BaseCustomInstrumentModel *model,
-    QWidget *analysisPaneView)
+    IBaseCustomInstrumentView *view, BaseCustomInstrumentModel *model,
+    PlotFitAnalysisPanePresenter *analysisPanePresenter)
     : m_view(view), m_model(model), m_currentRun(0), m_currentFile(""),
-      m_loadRunObserver(nullptr), m_analysisPaneView(analysisPaneView) {
+      m_loadRunObserver(nullptr), m_analysisPanePresenter(analysisPanePresenter) {
   m_loadRunObserver = new VoidObserver();
   m_model->loadEmptyInstrument();
 }
@@ -42,7 +44,7 @@ void BaseCustomInstrumentPresenter::initLayout(
 }
 
 void BaseCustomInstrumentPresenter::setUpInstrumentAnalysisSplitter() {
-  m_view->setupInstrumentAnalysisSplitters(m_analysisPaneView);
+  m_view->setupInstrumentAnalysisSplitters(m_analysisPanePresenter->getView()->getQWidget());
 }
 
 void BaseCustomInstrumentPresenter::loadAndAnalysis(

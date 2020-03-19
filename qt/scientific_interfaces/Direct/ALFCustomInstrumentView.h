@@ -26,7 +26,7 @@ public:
   virtual void observeExtractSingleTube(Observer *listner)=0;
   virtual void observeAverageTube(Observer *listner)=0;
   virtual void addSpectrum(std::string wsName) = 0;
-  virtual void setupAnalysisPane(MantidWidgets::PlotFitAnalysisPaneView *analysis) = 0;
+  virtual void setupAnalysisPane(MantidWidgets::IPlotFitAnalysisPaneView *analysis) = 0;
 };
 
 class DLLExport ALFCustomInstrumentView
@@ -46,7 +46,8 @@ public:
 
   void addObserver(std::tuple<std::string, Observer *> &listener) override final;
   void addSpectrum(std::string wsName) override final;
-  void setupAnalysisPane(MantidWidgets::PlotFitAnalysisPaneView *analysis) override final;
+  void setupAnalysisPane(
+      MantidWidgets::IPlotFitAnalysisPaneView *analysis) override final;
 
 public slots:
   void extractSingleTube();
@@ -57,7 +58,7 @@ private:
   Observable *m_averageTubeObservable;
   QAction *m_extractAction;
   QAction *m_averageAction;
-  MantidWidgets::PlotFitAnalysisPaneView *m_analysisPane;
+  MantidWidgets::IPlotFitAnalysisPaneView *m_analysisPane;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

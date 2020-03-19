@@ -17,9 +17,9 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 ALFCustomInstrumentPresenter::ALFCustomInstrumentPresenter(
-    ALFCustomInstrumentView *view, ALFCustomInstrumentModel *model,
+    IALFCustomInstrumentView *view, ALFCustomInstrumentModel *model,
     MantidWidgets::PlotFitAnalysisPanePresenter *analysisPane)
-    : BaseCustomInstrumentPresenter(view, model, analysisPane->getView()),
+    : BaseCustomInstrumentPresenter(view, model, analysisPane),
       m_view(view), m_model(model), m_analysisPane(analysisPane),
       m_extractSingleTubeObserver(nullptr), m_averageTubeObserver(nullptr) {
   addInstrument();
