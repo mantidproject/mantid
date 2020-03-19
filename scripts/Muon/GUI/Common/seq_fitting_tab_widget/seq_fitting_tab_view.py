@@ -8,7 +8,7 @@ from qtpy import QtWidgets, QtCore, QtGui
 from qtpy.QtCore import QEvent
 from mantidqt.utils.qt import load_ui
 from Muon.GUI.Common.message_box import warning
-from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableWidget import SequentialTableWidget
+from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableWidget import SequentialTableWidget, TableParameterWidget
 
 ui_seq_fitting_tab, _ = load_ui(__file__, "seq_fitting_tab.ui")
 
@@ -38,7 +38,7 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.setup_default_fit_results_table()
 
         self.plot_fit_results_checkbox.setVisible(False)
-        self.fit_selected_button.setVisible(False)
+        self.plot_fit_results_checkbox.setChecked(False)
 
     def warning_popup(self, message):
         warning(message, parent=self)
@@ -87,7 +87,7 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.fit_results_table.blockSignals(True)
         for i in range(self.get_number_of_entries()):
             for j, parameter in enumerate(parameter_values[i]):
-                parameterItem = QtWidgets.QTableWidgetItem(str(parameter))
+                parameterItem = TableParameterWidget(parameter)
                 self.fit_results_table.setItem(i, len(default_columns) + j, parameterItem)
                 self.fit_results_table.item(i, default_columns["Fit quality"]).setText("No fit")
                 self.fit_results_table.item(i, default_columns["Fit quality"]).setForeground(QtGui.QBrush(
@@ -98,7 +98,7 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.fit_results_table.blockSignals(True)
         for j, parameter in enumerate(parameter_values):
             parameter_item = self.fit_results_table.item(row, len(default_columns) + j)
-            parameter_item.setText("{:.6f}".format(parameter))
+            parameter_item.setValue(parameter)
         self.fit_results_table.blockSignals(False)
 
     def set_fit_quality_to_default(self):
@@ -185,6 +185,3 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
 
     def setup_slot_for_key_enter_pressed(self, slot):
         self.fit_results_table.set_slot_key_enter_pressed(slot)
-
-    def setup_slot_for_focus_out_event(self, slot):
-        self.fit_results_table.set_slot_for_focus_out_event(slot)

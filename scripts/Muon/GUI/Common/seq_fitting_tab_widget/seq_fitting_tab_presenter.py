@@ -73,6 +73,13 @@ class SeqFittingTabPresenter(object):
         self.view.set_fit_table_workspaces(runs, groups_and_pairs)
         self.handle_fit_function_updated()
 
+    def handle_fit_selected_pressed(self):
+        self.handle_sequential_fit_requested()
+
+    def handle_sequential_fit_all_pressed(self):
+        self.view.fit_results_table.clearSelection()
+        self.handle_sequential_fit_requested()
+
     def handle_single_fit_requested(self):
         if self.model.fit_function is None or self.view.get_selected_row() == -1:
             return
@@ -162,8 +169,9 @@ class SeqFittingTabPresenter(object):
 
         # if no row is selected (select the last)
         if len(self.view.get_selected_rows()) == 0:
-            print("got here got here got here")
             self.view.set_table_selection_to_last_row()
+        else:
+            self.handle_fit_selected_in_table()
 
     def handle_updated_fit_parameter_in_table(self, row, column):
         # make sure its a parameter we changed
