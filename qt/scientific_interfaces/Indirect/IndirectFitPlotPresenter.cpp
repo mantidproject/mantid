@@ -93,7 +93,6 @@ void IndirectFitPlotPresenter::handleSelectedFitDataChanged(
   setActiveIndex(index);
   updateAvailableSpectra();
   updatePlots();
-  updateFitRangeSelector();
   updateGuess();
   emit selectedFitDataChanged(index);
 }
@@ -102,7 +101,6 @@ void IndirectFitPlotPresenter::handlePlotSpectrumChanged(
     WorkspaceIndex spectrum) {
   setActiveSpectrum(spectrum);
   updatePlots();
-  updateFitRangeSelector();
   emit plotSpectrumChanged(spectrum);
 }
 
