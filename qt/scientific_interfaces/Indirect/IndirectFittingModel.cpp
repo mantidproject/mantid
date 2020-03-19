@@ -776,8 +776,8 @@ IndirectFittingModel::mapDefaultParameterNames() const {
 }
 
 std::unordered_map<std::string, ParameterValue>
-    IndirectFittingModel::createDefaultParameters(
-        TableDatasetIndex /*unused*/) const {
+IndirectFittingModel::createDefaultParameters(
+    TableDatasetIndex /*unused*/) const {
   return std::unordered_map<std::string, ParameterValue>();
 }
 

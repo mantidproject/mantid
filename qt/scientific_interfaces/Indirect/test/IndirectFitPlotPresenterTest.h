@@ -38,9 +38,10 @@ getFunctionWithWorkspaceName(std::string const &workspaceName) {
       "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
       "(composite=Convolution,FixResolution=true,NumDeriv=true;"
       "name=Resolution,Workspace=" +
-      workspaceName + ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
-                      "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
-                      "0175)))";
+      workspaceName +
+      ",WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
+      "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
+      "0175)))";
   return getFunction(functionString);
 }
 

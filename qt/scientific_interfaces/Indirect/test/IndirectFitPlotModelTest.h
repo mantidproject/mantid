@@ -139,52 +139,42 @@ IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
   return alg;
 }
 
-<<<<<<< HEAD
-IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModelLegacy *model,
+IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModel *model,
                                      const MatrixWorkspace_sptr &workspace,
                                      std::string const &workspaceName) {
-  setFittingFunction(model, getFittingFunctionString(workspaceName), true);
+  setFittingFunction(model, getFittingFunctionString(workspaceName), true, 20);
   auto alg = setupFitAlgorithm(std::move(workspace),
                                getFittingFunctionString(workspaceName));
-  == == == = IAlgorithm_sptr getSetupFitAlgorithm(
-               IndirectFittingModel * model, MatrixWorkspace_sptr workspace,
-               std::string const &workspaceName) {
-    setFittingFunction(model, getFittingFunctionString(workspaceName), true,
-                       20);
-    auto alg =
-        setupFitAlgorithm(workspace, getFittingFunctionString(workspaceName));
->>>>>>> Updated IndirectFitPlotModelTest to work with new base classes Re #28057
-    return alg;
-  }
+  return alg;
+}
 
-  IAlgorithm_sptr getExecutedFitAlgorithm(IndirectFittingModel * model,
-                                          MatrixWorkspace_sptr workspace,
-                                          std::string const &workspaceName) {
-    auto const alg =
-        getSetupFitAlgorithm(model, std::move(workspace), workspaceName);
-    alg->execute();
-    return alg;
-  }
+IAlgorithm_sptr getExecutedFitAlgorithm(IndirectFittingModel *model,
+                                        MatrixWorkspace_sptr workspace,
+                                        std::string const &workspaceName) {
+  auto const alg =
+      getSetupFitAlgorithm(model, std::move(workspace), workspaceName);
+  alg->execute();
+  return alg;
+}
 
-  IndirectFittingModel *getModelWithFitOutputData() {
-    auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
-    auto const modelWorkspace = model->getWorkspace(TableDatasetIndex{0});
+IndirectFittingModel *getModelWithFitOutputData() {
+  auto model = createModelWithSingleInstrumentWorkspace("__ConvFit", 6, 5);
+  auto const modelWorkspace = model->getWorkspace(TableDatasetIndex{0});
 
-    auto const alg =
-        getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
-    model->addOutput(alg);
-    return model;
-  }
+  auto const alg = getExecutedFitAlgorithm(model, modelWorkspace, "__ConvFit");
+  model->addOutput(alg);
+  return model;
+}
 
-  IndirectFitPlotModel getFitPlotModel(bool setFitFunction = true) {
-    return IndirectFitPlotModel(createModelWithMultipleWorkspaces(
-        10, setFitFunction,
-        std::vector<std::string>({"Workspace1", "Workspace2"})));
-  }
+IndirectFitPlotModel getFitPlotModel(bool setFitFunction = true) {
+  return IndirectFitPlotModel(createModelWithMultipleWorkspaces(
+      10, setFitFunction,
+      std::vector<std::string>({"Workspace1", "Workspace2"})));
+}
 
-  IndirectFitPlotModel getFitPlotModelWithFitData() {
-    return IndirectFitPlotModel(getModelWithFitOutputData());
-  }
+IndirectFitPlotModel getFitPlotModelWithFitData() {
+  return IndirectFitPlotModel(getModelWithFitOutputData());
+}
 
 } // namespace
 

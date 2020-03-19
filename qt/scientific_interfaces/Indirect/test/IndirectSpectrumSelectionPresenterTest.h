@@ -72,7 +72,8 @@ public:
   MOCK_CONST_METHOD0(maskString, std::string());
 
   MOCK_METHOD1(displaySpectra, void(std::string const &spectraString));
-  MOCK_METHOD1(displaySpectra, void(std::pair<IDA::WorkspaceIndex, IDA::WorkspaceIndex>));
+  MOCK_METHOD1(displaySpectra,
+               void(std::pair<IDA::WorkspaceIndex, IDA::WorkspaceIndex>));
 
   MOCK_METHOD2(setSpectraRange,
                void(IDA::WorkspaceIndex minimum, IDA::WorkspaceIndex maximum));
@@ -97,8 +98,8 @@ public:
 class MockIndirectSpectrumSelectionModel : public IndirectFittingModel {
 public:
   /// Public methods
-  MOCK_CONST_METHOD2(getExcludeRegion,
-                     std::string(TableDatasetIndex dataIndex, IDA::WorkspaceIndex index));
+  MOCK_CONST_METHOD2(getExcludeRegion, std::string(TableDatasetIndex dataIndex,
+                                                   IDA::WorkspaceIndex index));
   MOCK_CONST_METHOD0(isMultiFit, bool());
 
 private:
@@ -175,14 +176,15 @@ public:
   test_that_invoking_a_presenter_method_will_call_the_relevant_methods_in_the_model_and_view() {
     std::string const excludeRegion("0-1");
 
-    ON_CALL(*m_model, getExcludeRegion(TableDatasetIndex(0), IDA::WorkspaceIndex(0)))
+    ON_CALL(*m_model,
+            getExcludeRegion(TableDatasetIndex(0), IDA::WorkspaceIndex(0)))
         .WillByDefault(Return(excludeRegion));
 
     Expectation getMask =
         EXPECT_CALL(*m_model, getExcludeRegion(TableDatasetIndex(0),
                                                IDA::WorkspaceIndex(0)))
-                              .Times(1)
-                              .WillOnce(Return(excludeRegion));
+            .Times(1)
+            .WillOnce(Return(excludeRegion));
     EXPECT_CALL(*m_view, setMaskString(excludeRegion)).Times(1).After(getMask);
 
     m_presenter->displayBinMask();
@@ -229,7 +231,8 @@ public:
     IDA::WorkspaceIndex const maskSpectrum(0);
 
     Expectation getMask =
-        EXPECT_CALL(*m_model, getExcludeRegion(TableDatasetIndex(0), maskSpectrum))
+        EXPECT_CALL(*m_model,
+                    getExcludeRegion(TableDatasetIndex(0), maskSpectrum))
             .Times(1)
             .WillOnce(Return("0"));
     EXPECT_CALL(*m_view, setMaskString("0")).Times(1).After(getMask);
@@ -317,11 +320,12 @@ public:
     IDA::WorkspaceIndex const minSpectrum(2);
     IDA::WorkspaceIndex const maxSpectrum(5);
 
-    EXPECT_CALL(*m_view, displaySpectra(std::make_pair(minSpectrum, maxSpectrum))).Times(1);
+    EXPECT_CALL(*m_view,
+                displaySpectra(std::make_pair(minSpectrum, maxSpectrum)))
+        .Times(1);
     EXPECT_CALL(*m_view, spectraString()).Times(1).WillOnce(Return("2-5"));
 
-    m_view->displaySpectra(
-        std::make_pair(minSpectrum, maxSpectrum));
+    m_view->displaySpectra(std::make_pair(minSpectrum, maxSpectrum));
     m_view->spectraString();
   }
 
