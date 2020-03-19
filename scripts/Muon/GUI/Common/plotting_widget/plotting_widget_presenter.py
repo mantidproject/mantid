@@ -488,8 +488,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
                                               plot_kwargs={'distribution': True, 'autoscale_on_update': False,
                                                            'label': label + fit_function + ': Diff'})
 
-        # scale the axis and set title
-        self._view.set_fig_titles(self.get_plot_title())
+        # Redraw the axis
         self._set_axis_limits(False)
         self.update_options_view_from_model()
         self._view.force_redraw()
@@ -540,8 +539,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             else:
                 for grouppair in self.context.group_pair_context.selected_groups + \
                                  self.context.group_pair_context.selected_pairs:
-                    title = self.context.data_context.instrument + ' ' + run_list_to_string(flattened_run_list) + \
-                            ' ' + str(grouppair)
+                    title = self.context.data_context.instrument + ' ' + str(grouppair)
                     plot_titles.append(title)
             return plot_titles
         else:

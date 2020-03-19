@@ -31,6 +31,7 @@ from Muon.GUI.Common.plotting_widget.plotting_widget import PlottingWidget
 from Muon.GUI.Common.plotting_dock_widget.plotting_dock_widget import PlottingDockWidget
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
+TAB_ORDER = ["Home", "Grouping", "Phase Table", "Fitting", "Sequential Fitting", "Results"]
 
 
 def check_facility():
@@ -157,6 +158,16 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.seq_fitting_tab.seq_fitting_tab_view, 'Sequential Fitting')
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
 
+        self.tabs.set_slot_for_tab_changed(self.tab_changed)
+
+    def tab_changed(self, index):
+        if TAB_ORDER[index] in ["Home", "Grouping", "Phase Table"]: # Plot all the selected data
+            self.dockable_plot_widget.presenter.plot_all_selected_workspaces()
+        elif TAB_ORDER[index] == "Fitting": # Plot the displayed workspace
+            self.dockable_plot_widget.presenter.handle_plot_single_sequential_fit(
+                self.fitting_tab.fitting_tab_presenter.get_selected_fit_workspaces()
+            )
+
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.home_tab.home_tab_widget.loadObserver)
@@ -202,6 +213,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.fitting_tab.fitting_tab_presenter.fit_type_changed_notifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.fit_type_changed_observer)
+
+        self.fitting_tab.fitting_tab_presenter.selected_single_fit_notifier.add_subscriber(
+            self.dockable_plot_widget.presenter.plot_sequential_fit_observer)
 
         self.seq_fitting_tab.seq_fitting_tab_presenter.selected_sequential_fit_notifier.add_subscriber(
             self.dockable_plot_widget.presenter.plot_sequential_fit_observer)
