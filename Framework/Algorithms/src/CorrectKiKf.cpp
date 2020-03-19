@@ -279,7 +279,7 @@ void CorrectKiKf::execEvent() {
 template <class T>
 void CorrectKiKf::correctKiKfEventHelper(std::vector<T> &wevector,
                                          double efixed,
-                                         const std::string emodeStr) {
+                                         const std::string &emodeStr) {
   double Ei, Ef;
   float kioverkf;
   typename std::vector<T>::iterator it;

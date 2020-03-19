@@ -72,7 +72,7 @@ private:
                             double &eta) const;
 
   /// constrain all parameters to be non-negative
-  void lowerConstraint0(std::string paramName);
+  void lowerConstraint0(const std::string &paramName);
 };
 
 } // namespace Functions

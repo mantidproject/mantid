@@ -427,7 +427,7 @@ public:
     TS_ASSERT_EQUALS(runCopy.getGoniometer().getNumberAxes(), 3);
   }
 
-  void addTimeSeriesEntry(Run &runInfo, std::string name, double val) {
+  void addTimeSeriesEntry(Run &runInfo, const std::string &name, double val) {
     TimeSeriesProperty<double> *tsp;
     tsp = new TimeSeriesProperty<double>(name);
     tsp->addValue("2011-05-24T00:00:00", val);

@@ -585,7 +585,7 @@ void LoadRKH::skipLines(std::istream &strm, int nlines) {
  *  @param[out] toCenter an array that is one shorter than oldBoundaries, the
  * values of the means of pairs of values from the input
  */
-void LoadRKH::binCenter(const MantidVec oldBoundaries,
+void LoadRKH::binCenter(const MantidVec &oldBoundaries,
                         MantidVec &toCenter) const {
   VectorHelper::convertToBinCentre(oldBoundaries, toCenter);
 }

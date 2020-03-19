@@ -67,7 +67,7 @@ private:
   /// Updates the image
   std::vector<double> updateImage(const std::vector<double> &image,
                                   const std::vector<double> &delta,
-                                  const std::vector<std::vector<double>> dirs);
+                                  const std::vector<std::vector<double>> &dirs);
 
   /// Populates the output workspace containing the reconstructed data
   void populateDataWS(API::MatrixWorkspace_const_sptr &inWS, size_t spec,

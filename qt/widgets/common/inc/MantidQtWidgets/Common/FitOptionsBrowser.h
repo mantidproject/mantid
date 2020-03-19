@@ -64,7 +64,7 @@ public:
   void setLogNames(const QStringList &logNames);
   void setParameterNamesForPlotting(const QStringList &parNames);
   QString getParameterToPlot() const;
-  bool addPropertyToBlacklist(QString);
+  bool addPropertyToBlacklist(const QString &);
 
 signals:
   void changedToSequentialFitting();

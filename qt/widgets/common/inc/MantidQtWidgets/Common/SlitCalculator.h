@@ -37,10 +37,10 @@ private:
   Mantid::Geometry::Instrument_const_sptr instrument;
   std::string currentInstrumentName;
   void setupSlitCalculatorWithInstrumentValues(
-      Mantid::Geometry::Instrument_const_sptr /*instrument*/);
+      const Mantid::Geometry::Instrument_const_sptr & /*instrument*/);
   std::string getCurrentInstrumentName();
   Mantid::Geometry::Instrument_const_sptr getInstrument();
-  void setInstrument(std::string instrumentName);
+  void setInstrument(const std::string &instrumentName);
 private slots:
   void on_recalculate_triggered();
 };

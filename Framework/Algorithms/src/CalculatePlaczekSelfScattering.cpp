@@ -21,7 +21,7 @@ namespace Mantid {
 namespace Algorithms {
 
 std::map<std::string, std::map<std::string, double>>
-getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr ws) {
+getSampleSpeciesInfo(const API::MatrixWorkspace_const_sptr &ws) {
   // get sample information : mass, total scattering length, and concentration
   // of each species
   double totalStoich = 0.0;

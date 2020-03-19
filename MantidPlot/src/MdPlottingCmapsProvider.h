@@ -52,8 +52,8 @@ private:
    */
   void appendAllFileNamesForFileType(QStringList &colorMapNames,
                                      QStringList &colorMapFiles,
-                                     QString colorMapDirectory,
-                                     QString fileType);
+                                     const QString &colorMapDirectory,
+                                     const QString &fileType);
 
   /**
    * Compare the colormap names of the Slice Viewer and the VSI and extract all
@@ -65,5 +65,5 @@ private:
    */
   std::vector<int>
   getSliceViewerIndicesForCommonColorMaps(QStringList colorMapNamesSliceViewer,
-                                          QStringList colorMapNamesVsi);
+                                          const QStringList &colorMapNamesVsi);
 };

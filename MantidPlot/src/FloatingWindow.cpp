@@ -24,7 +24,8 @@
 /**
  * Constructor.
  */
-FloatingWindow::FloatingWindow(ApplicationWindow *appWindow, Qt::WindowFlags f)
+FloatingWindow::FloatingWindow(ApplicationWindow *appWindow,
+                               const Qt::WindowFlags &f)
     :
 #ifdef Q_OS_WIN
       QMainWindow(appWindow, f),

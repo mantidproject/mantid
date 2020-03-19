@@ -94,8 +94,9 @@ private:
   /// Log any errors with spectra that occurred
   void logErrors() const;
   /// Retrieve the detector parameters from workspace or detector properties
-  double getParameter(std::string wsPropName, std::size_t currentIndex,
-                      std::string detPropName, const Geometry::IDetector &idet);
+  double getParameter(const std::string &wsPropName, std::size_t currentIndex,
+                      const std::string &detPropName,
+                      const Geometry::IDetector &idet);
   /// Helper for event handling
   template <class T> void eventHelper(std::vector<T> &events, double expval);
   /// Function to calculate exponential contribution

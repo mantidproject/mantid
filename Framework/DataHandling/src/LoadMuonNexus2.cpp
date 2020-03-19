@@ -335,8 +335,8 @@ Histogram LoadMuonNexus2::loadData(const BinEdges &edges,
  *   @param entry :: The Nexus entry
  *   @param period :: The period of this workspace
  */
-void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
-                              int period) {
+void LoadMuonNexus2::loadLogs(const API::MatrixWorkspace_sptr &ws,
+                              NXEntry &entry, int period) {
   // Avoid compiler warning
   (void)period;
 
@@ -373,7 +373,7 @@ void LoadMuonNexus2::loadLogs(API::MatrixWorkspace_sptr ws, NXEntry &entry,
  * @param localWorkspace :: The workspace details to use
  */
 void LoadMuonNexus2::loadRunDetails(
-    DataObjects::Workspace2D_sptr localWorkspace) {
+    const DataObjects::Workspace2D_sptr &localWorkspace) {
   API::Run &runDetails = localWorkspace->mutableRun();
 
   runDetails.addProperty("run_title", localWorkspace->getTitle(), true);

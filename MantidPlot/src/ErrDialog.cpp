@@ -45,7 +45,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-ErrDialog::ErrDialog(ApplicationWindow *parent, Qt::WFlags fl)
+ErrDialog::ErrDialog(ApplicationWindow *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl) {
   setFocusPolicy(Qt::StrongFocus);
   setSizeGripEnabled(true);
@@ -166,7 +166,7 @@ void ErrDialog::setCurveNames(const QStringList &names) {
   nameLabel->addItems(names);
 }
 
-void ErrDialog::setSrcTables(QList<MdiSubWindow *> tables) {
+void ErrDialog::setSrcTables(const QList<MdiSubWindow *> &tables) {
   if (tables.isEmpty())
     return;
 

@@ -12,6 +12,9 @@
 #include <nexus/NeXusFile.hpp>
 #include <numeric>
 #include <string>
+#include <utility>
+
+#include <utility>
 
 namespace Mantid {
 namespace NeXus {
@@ -46,8 +49,8 @@ namespace {
     throw std::runtime_error("Unknown type in Nexus file");                    \
   }
 
-std::pair<::NeXus::Info, bool> checkIfOpenAndGetInfo(::NeXus::File &file,
-                                                     std::string entry) {
+std::pair<::NeXus::Info, bool>
+checkIfOpenAndGetInfo(::NeXus::File &file, const std::string &&entry) {
   std::pair<::NeXus::Info, bool> info_and_close;
   info_and_close.second = false;
   if (!file.isDataSetOpen()) {
@@ -160,8 +163,10 @@ T readNexusAnyVariable(::NeXus::File &file, bool close_file) {
  * and calls readNexusAnyVector via the RUN_NEXUSIOHELPER_FUNCTION macro.
  */
 template <typename T>
-std::vector<T> readNexusVector(::NeXus::File &file, std::string entry = "") {
-  auto info_and_close = checkIfOpenAndGetInfo(file, entry);
+std::vector<T> readNexusVector(::NeXus::File &file,
+                               const std::string &entry = "") {
+  auto info_and_close =
+      checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   auto dims = (info_and_close.first).dims;
   auto total_size = std::accumulate(dims.begin(), dims.end(), int64_t{1},
                                     std::multiplies<>());
@@ -173,17 +178,19 @@ std::vector<T> readNexusVector(::NeXus::File &file, std::string entry = "") {
  * readNexusAnySlab via the RUN_NEXUSIOHELPER_FUNCTION macro.
  */
 template <typename T>
-std::vector<T> readNexusSlab(::NeXus::File &file, std::string entry,
+std::vector<T> readNexusSlab(::NeXus::File &file, const std::string &entry,
                              const std::vector<int64_t> &start,
                              const std::vector<int64_t> &size) {
-  auto info_and_close = checkIfOpenAndGetInfo(file, entry);
+  auto info_and_close =
+      checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnySlab,
                              file, start, size, info_and_close.second);
 }
 
 template <typename T>
-T readNexusValue(::NeXus::File &file, std::string entry = "") {
-  auto info_and_close = checkIfOpenAndGetInfo(file, entry);
+T readNexusValue(::NeXus::File &file, const std::string &entry = "") {
+  auto info_and_close =
+      checkIfOpenAndGetInfo(file, std::move(std::move(entry)));
   RUN_NEXUSIOHELPER_FUNCTION((info_and_close.first).type, readNexusAnyVariable,
                              file, info_and_close.second);
 }

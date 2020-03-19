@@ -399,7 +399,7 @@ void GetDetOffsetsMultiPeaks::processProperties() {
  *  @throw Exception::RuntimeError If ... ...
  */
 void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(
-    TableWorkspace_sptr windowtablews) {
+    const TableWorkspace_sptr &windowtablews) {
   // Check number of columns matches number of peaks
   size_t numcols = windowtablews->columnCount();
   size_t numpeaks = m_peakPositions.size();
@@ -831,7 +831,7 @@ void deletePeaks(std::vector<size_t> &banned, std::vector<double> &peakPosToFit,
  * @return The number of peaks in range
  */
 int GetDetOffsetsMultiPeaks::fitSpectra(
-    const int64_t wi, MatrixWorkspace_sptr inputW,
+    const int64_t wi, const MatrixWorkspace_sptr &inputW,
     const std::vector<double> &peakPositions,
     const std::vector<double> &fitWindows, size_t &nparams, double &minD,
     double &maxD, std::vector<double> &peakPosToFit,
@@ -1178,7 +1178,7 @@ void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
  * (thread-safe)
  */
 void GetDetOffsetsMultiPeaks::addInfoToReportWS(
-    int wi, FitPeakOffsetResult offsetresult,
+    int wi, const FitPeakOffsetResult &offsetresult,
     const std::vector<double> &tofitpeakpositions,
     const std::vector<double> &fittedpeakpositions) {
   // Offset calculation status

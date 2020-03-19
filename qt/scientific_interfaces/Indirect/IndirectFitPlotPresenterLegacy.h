@@ -85,13 +85,14 @@ private:
   void plotInput(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotInput(Mantid::API::MatrixWorkspace_sptr workspace,
                  std::size_t spectrum);
-  void plotFit(Mantid::API::MatrixWorkspace_sptr workspace);
+  void plotFit(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void plotFit(Mantid::API::MatrixWorkspace_sptr workspace,
                std::size_t spectrum);
   void plotDifference(Mantid::API::MatrixWorkspace_sptr workspace,
                       std::size_t spectrum);
   void plotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
-  void plotGuessInSeparateWindow(Mantid::API::MatrixWorkspace_sptr workspace);
+  void
+  plotGuessInSeparateWindow(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void plotLines();
   void updatePlotRange(const std::pair<double, double> &range);
   void clearGuess();

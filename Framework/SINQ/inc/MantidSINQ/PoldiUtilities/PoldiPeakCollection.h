@@ -84,7 +84,7 @@ protected:
   std::string getUnitCellStringFromLog(const API::LogManager_sptr &tableLog);
 
   std::string getStringValueFromLog(const API::LogManager_sptr &logManager,
-                                    std::string valueName);
+                                    const std::string &valueName);
 
   std::string intensityTypeToString(IntensityType type) const;
   IntensityType intensityTypeFromString(std::string typeString) const;

@@ -99,7 +99,7 @@ void LoadSampleShape::exec() {
  * @param inputWS The workspace to get the rotation from
  * @returns a shared pointer to the newly rotated Shape
  */
-void rotate(MeshObject &sampleMesh, MatrixWorkspace_const_sptr inputWS) {
+void rotate(MeshObject &sampleMesh, const MatrixWorkspace_const_sptr &inputWS) {
   const std::vector<double> rotationMatrix =
       inputWS->run().getGoniometer().getR();
   sampleMesh.rotate(rotationMatrix);

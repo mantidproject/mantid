@@ -21,6 +21,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include <boost/algorithm/string/trim.hpp>
+#include <utility>
 
 using Mantid::Kernel::Strings::getWord;
 using Mantid::Kernel::Strings::readToEndOfLine;
@@ -124,7 +125,7 @@ void LoadIsawPeaks::exec() {
  * @param T0 :: Time offset
  * @return the first word on the next line
  */
-std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
+std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS,
                                       std::ifstream &in, double &T0) {
   std::string tag;
   std::string r = getWord(in, false);
@@ -260,7 +261,7 @@ std::string LoadIsawPeaks::readHeader(PeaksWorkspace_sptr outWS,
  * @param qSign :: For inelastic this is 1; for crystallography this is -1
  * @return the Peak the Peak object created
  */
-DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
+DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS,
                                           std::string &lastStr,
                                           std::ifstream &in, int &seqNum,
                                           std::string bankName, double qSign) {
@@ -339,8 +340,8 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
   if (!inst)
     throw std::runtime_error("No instrument in PeaksWorkspace!");
 
-  int pixelID =
-      findPixelID(inst, bankName, static_cast<int>(col), static_cast<int>(row));
+  int pixelID = findPixelID(inst, std::move(bankName), static_cast<int>(col),
+                            static_cast<int>(row));
 
   // Create the peak object
   Peak peak(outWS->getInstrument(), pixelID, wl);
@@ -356,10 +357,10 @@ DataObjects::Peak LoadIsawPeaks::readPeak(PeaksWorkspace_sptr outWS,
 }
 
 //----------------------------------------------------------------------------------------------
-int LoadIsawPeaks::findPixelID(Instrument_const_sptr inst, std::string bankName,
-                               int col, int row) {
+int LoadIsawPeaks::findPixelID(const Instrument_const_sptr &inst,
+                               const std::string &bankName, int col, int row) {
   boost::shared_ptr<const IComponent> parent =
-      getCachedBankByName(bankName, inst);
+      getCachedBankByName(std::move(bankName), inst);
 
   if (!parent)
     return -1; // peak not in any detector.
@@ -404,7 +405,7 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
                                                int &detName, double &chi,
                                                double &phi, double &omega,
                                                double &monCount) {
-  std::string s = lastStr;
+  std::string s = std::move(lastStr);
 
   if (s.length() < 1 && in.good()) // blank line
   {
@@ -445,8 +446,8 @@ std::string LoadIsawPeaks::readPeakBlockHeader(std::string lastStr,
  * @param outWS :: the workspace in which to place the information
  * @param filename :: path to the .peaks file
  */
-void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
-                               std::string filename) {
+void LoadIsawPeaks::appendFile(const PeaksWorkspace_sptr &outWS,
+                               const std::string &filename) {
   // HKL's are flipped by -1 because of the internal Q convention
   // unless Crystallography convention
   double qSign = -1.0;
@@ -564,8 +565,8 @@ void LoadIsawPeaks::appendFile(PeaksWorkspace_sptr outWS,
  * @param outWS :: the workspace in which to place the information
  * @param filename :: path to the .peaks file
  */
-void LoadIsawPeaks::checkNumberPeaks(PeaksWorkspace_sptr outWS,
-                                     std::string filename) {
+void LoadIsawPeaks::checkNumberPeaks(const PeaksWorkspace_sptr &outWS,
+                                     const std::string &filename) {
 
   // Open the file
   std::ifstream in(filename.c_str());
@@ -601,7 +602,7 @@ void LoadIsawPeaks::checkNumberPeaks(PeaksWorkspace_sptr outWS,
  *found)
  */
 boost::shared_ptr<const IComponent> LoadIsawPeaks::getCachedBankByName(
-    std::string bankname,
+    const std::string &bankname,
     const boost::shared_ptr<const Geometry::Instrument> &inst) {
   if (m_banks.count(bankname) == 0)
     m_banks[bankname] = inst->getComponentByName(bankname);

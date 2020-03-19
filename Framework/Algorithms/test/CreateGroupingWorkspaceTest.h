@@ -25,7 +25,7 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void doTest(std::string outWSName) {
+  void doTest(const std::string &outWSName) {
     // Retrieve the workspace from data service.
     GroupingWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(

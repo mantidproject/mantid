@@ -200,7 +200,7 @@ std::vector<std::string> TableWorkspace::getColumnNames() const {
   return nameList;
 }
 
-void TableWorkspace::addColumn(boost::shared_ptr<API::Column> column) {
+void TableWorkspace::addColumn(const boost::shared_ptr<API::Column> &column) {
   auto ci = std::find_if(m_columns.begin(), m_columns.end(),
                          FindName(column->name()));
   if (ci != m_columns.end()) {

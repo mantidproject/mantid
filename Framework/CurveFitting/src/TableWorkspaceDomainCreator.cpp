@@ -461,7 +461,7 @@ void TableWorkspaceDomainCreator::addFunctionValuesToWS(
     const API::IFunction_sptr &function,
     boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
     const boost::shared_ptr<API::FunctionDomain> &domain,
-    boost::shared_ptr<API::FunctionValues> resultValues) const {
+    const boost::shared_ptr<API::FunctionValues> &resultValues) const {
   const size_t nData = resultValues->size();
   resultValues->zeroCalculated();
 
@@ -726,7 +726,7 @@ void TableWorkspaceDomainCreator::setParameters() const {
  */
 
 void TableWorkspaceDomainCreator::setXYEColumnNames(
-    API::ITableWorkspace_sptr ws) const {
+    const API::ITableWorkspace_sptr &ws) const {
 
   auto columnNames = ws->getColumnNames();
 
@@ -782,7 +782,7 @@ void TableWorkspaceDomainCreator::setXYEColumnNames(
  * entries.
  */
 void TableWorkspaceDomainCreator::setAndValidateWorkspace(
-    API::Workspace_sptr ws) const {
+    const API::Workspace_sptr &ws) const {
   auto tableWorkspace = boost::dynamic_pointer_cast<API::ITableWorkspace>(ws);
   if (!tableWorkspace) {
     throw std::invalid_argument("InputWorkspace must be a TableWorkspace.");

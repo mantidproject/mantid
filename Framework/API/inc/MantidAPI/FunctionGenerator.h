@@ -31,7 +31,7 @@ belongs to. By default if a name has the signature of a composite function
 class MANTID_API_DLL FunctionGenerator : public IFunction {
 public:
   /// Constructor
-  FunctionGenerator(IFunction_sptr source);
+  FunctionGenerator(const IFunction_sptr &source);
 
   /// @name Overrides implementing composition of two functions:
   /// m_source and m_target.

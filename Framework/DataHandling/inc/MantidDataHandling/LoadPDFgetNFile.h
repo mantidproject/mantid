@@ -46,7 +46,7 @@ private:
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
   /// Parse PDFgetN data file
-  void parseDataFile(std::string filename);
+  void parseDataFile(const std::string &filename);
 
   /// Check whether a string starts from a specified sub-string
   bool startsWith(const std::string &s, const std::string &header) const;
@@ -70,7 +70,7 @@ private:
   void generateDataWorkspace();
 
   /// Set X and Y axis unit and lebel
-  void setUnit(DataObjects::Workspace2D_sptr ws);
+  void setUnit(const DataObjects::Workspace2D_sptr &ws);
 
   void checkSameSize(const std::vector<size_t> &numptsvec, size_t numsets);
 };

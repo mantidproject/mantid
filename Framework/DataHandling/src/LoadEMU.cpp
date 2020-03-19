@@ -680,7 +680,7 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
 
   // lambda to simplify loading instrument parameters
   auto instr = m_localWorkspace->getInstrument();
-  auto iparam = [&instr](std::string tag) {
+  auto iparam = [&instr](const std::string &tag) {
     return instr->getNumberParameter(tag)[0];
   };
 

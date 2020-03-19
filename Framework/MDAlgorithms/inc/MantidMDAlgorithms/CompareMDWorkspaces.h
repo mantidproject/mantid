@@ -34,10 +34,11 @@ private:
   void init() override;
   void exec() override;
   void doComparison();
-  void compareMDGeometry(Mantid::API::IMDWorkspace_sptr ws1,
-                         Mantid::API::IMDWorkspace_sptr ws2);
-  void compareMDHistoWorkspaces(Mantid::DataObjects::MDHistoWorkspace_sptr ws1,
-                                Mantid::DataObjects::MDHistoWorkspace_sptr ws2);
+  void compareMDGeometry(const Mantid::API::IMDWorkspace_sptr &ws1,
+                         const Mantid::API::IMDWorkspace_sptr &ws2);
+  void compareMDHistoWorkspaces(
+      const Mantid::DataObjects::MDHistoWorkspace_sptr &ws1,
+      const Mantid::DataObjects::MDHistoWorkspace_sptr &ws2);
 
   template <typename MDE, size_t nd>
   void compareMDWorkspaces(

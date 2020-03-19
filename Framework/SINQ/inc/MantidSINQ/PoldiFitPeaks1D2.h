@@ -106,10 +106,11 @@ protected:
   API::IFunction_sptr getPeakProfile(const PoldiPeak_sptr &poldiPeak) const;
 
   void
-  setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak,
+  setValuesFromProfileFunction(const PoldiPeak_sptr &poldiPeak,
                                const API::IFunction_sptr &fittedFunction) const;
 
-  double getFwhmWidthRelation(API::IPeakFunction_sptr peakFunction) const;
+  double
+  getFwhmWidthRelation(const API::IPeakFunction_sptr &peakFunction) const;
 
   API::IAlgorithm_sptr
   getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace,

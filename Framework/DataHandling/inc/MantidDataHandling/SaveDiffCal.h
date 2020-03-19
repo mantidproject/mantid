@@ -37,8 +37,9 @@ private:
 
   void writeDoubleFieldFromTable(H5::Group &group, const std::string &name);
   void writeIntFieldFromTable(H5::Group &group, const std::string &name);
-  void writeIntFieldFromSVWS(H5::Group &group, const std::string &name,
-                             DataObjects::SpecialWorkspace2D_const_sptr ws);
+  void
+  writeIntFieldFromSVWS(H5::Group &group, const std::string &name,
+                        const DataObjects::SpecialWorkspace2D_const_sptr &ws);
   void generateDetidToIndex();
   bool tableHasColumn(const std::string &ColumnName) const;
 

@@ -36,7 +36,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewerWindow
 
 public:
   SliceViewerWindow(const QString &wsName, const QString &label = QString(),
-                    Qt::WindowFlags f = nullptr);
+                    const Qt::WindowFlags &f = nullptr);
   ~SliceViewerWindow() override;
   MantidQt::SliceViewer::SliceViewer *getSlicer();
   MantidQt::SliceViewer::LineViewer *getLiner();
@@ -66,7 +66,7 @@ protected slots:
   void closeWindow();
   void updateWorkspace();
   void slicerWorkspaceChanged();
-  void changedSlicePoint(Mantid::Kernel::VMD /*slice*/);
+  void changedSlicePoint(const Mantid::Kernel::VMD & /*slice*/);
   void lineChanging(QPointF start, QPointF end, double width);
   void lineChanged(QPointF start, QPointF end, double width);
   void changeStartOrEnd(Mantid::Kernel::VMD /*start*/,

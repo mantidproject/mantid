@@ -21,7 +21,7 @@ namespace API {
  * @param ws :: Pointer to a workspace.
  * @param maxDomainSize :: The maximum size each domain can have.
  */
-CompositeDomainMD::CompositeDomainMD(IMDWorkspace_const_sptr ws,
+CompositeDomainMD::CompositeDomainMD(const IMDWorkspace_const_sptr &ws,
                                      size_t maxDomainSize)
     : m_iterator(ws->createIterator()) {
   m_totalSize = m_iterator->getDataSize();

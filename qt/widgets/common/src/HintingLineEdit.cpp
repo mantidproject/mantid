@@ -11,11 +11,12 @@
 #include <QStyle>
 #include <QToolTip>
 #include <boost/algorithm/string.hpp>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
 HintingLineEdit::HintingLineEdit(QWidget *parent, std::vector<Hint> hints)
-    : QLineEdit(parent), m_hints(hints), m_dontComplete(false) {
+    : QLineEdit(parent), m_hints(std::move(hints)), m_dontComplete(false) {
   m_hintLabel = new QLabel(this, Qt::ToolTip);
   m_hintLabel->setMargin(1 +
                          style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth,

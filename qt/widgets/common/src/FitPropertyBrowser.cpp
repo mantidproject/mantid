@@ -55,6 +55,7 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
+#include <utility>
 
 namespace MantidQt {
 using API::MantidDesktopServices;
@@ -66,7 +67,7 @@ Mantid::Kernel::Logger g_log("FitPropertyBrowser");
 
 using namespace Mantid::API;
 
-int getNumberOfSpectra(MatrixWorkspace_sptr workspace) {
+int getNumberOfSpectra(const MatrixWorkspace_sptr &workspace) {
   return static_cast<int>(workspace->getNumberHistograms());
 }
 
@@ -774,7 +775,7 @@ void FitPropertyBrowser::closeFit() { m_fitSelector->close(); }
  * @param func :: [input] Pointer to function
  */
 void FitPropertyBrowser::createCompositeFunction(
-    const Mantid::API::IFunction_sptr func) {
+    const Mantid::API::IFunction_sptr &func) {
   if (m_compositeFunction) {
     emit functionRemoved();
     m_autoBackground = nullptr;
@@ -1598,8 +1599,8 @@ void FitPropertyBrowser::setCurrentFunction(PropertyHandler *h) const {
  * @param f :: New current function
  */
 void FitPropertyBrowser::setCurrentFunction(
-    Mantid::API::IFunction_const_sptr f) const {
-  setCurrentFunction(getHandler()->findHandler(f));
+    const Mantid::API::IFunction_const_sptr &f) const {
+  setCurrentFunction(getHandler()->findHandler(std::move(f)));
 }
 
 /**
@@ -2716,7 +2717,7 @@ void FitPropertyBrowser::reset() {
 }
 
 void FitPropertyBrowser::setWorkspace(
-    Mantid::API::IFunction_sptr function) const {
+    const Mantid::API::IFunction_sptr &function) const {
   std::string wsName = workspaceName();
   if (!wsName.empty()) {
     try {
@@ -2979,7 +2980,7 @@ bool FitPropertyBrowser::rawData() const {
   return m_boolManager->value(m_rawData);
 }
 
-void FitPropertyBrowser::setTextPlotGuess(const QString text) {
+void FitPropertyBrowser::setTextPlotGuess(const QString &text) {
   m_displayActionPlotGuess->setText(text);
 }
 

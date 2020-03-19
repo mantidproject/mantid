@@ -88,9 +88,9 @@ WorkspaceGroup_sptr getPopulatedGroup(std::size_t const &size) {
 }
 
 std::unique_ptr<IndirectFitOutputLegacy>
-createFitOutput(WorkspaceGroup_sptr resultGroup,
-                ITableWorkspace_sptr parameterTable,
-                WorkspaceGroup_sptr resultWorkspace,
+createFitOutput(const WorkspaceGroup_sptr &resultGroup,
+                const ITableWorkspace_sptr &parameterTable,
+                const WorkspaceGroup_sptr &resultWorkspace,
                 IndirectFitDataLegacy *fitData, std::size_t spectrum) {
   return std::make_unique<IndirectFitOutputLegacy>(
       resultGroup, parameterTable, resultWorkspace, fitData, spectrum);
@@ -324,9 +324,9 @@ private:
   }
 
   /// Store workspaces in ADS and won't destruct the ADS when leaving scope
-  void storeWorkspacesInADS(WorkspaceGroup_sptr workspacesGroup,
-                            WorkspaceGroup_sptr resultGroup,
-                            ITableWorkspace_sptr table) {
+  void storeWorkspacesInADS(const WorkspaceGroup_sptr &workspacesGroup,
+                            const WorkspaceGroup_sptr &resultGroup,
+                            const ITableWorkspace_sptr &table) {
     std::string const nameStart = resultGroup->size() > 1 ? "Multi" : "";
     m_ads = std::make_unique<SetUpADSWithWorkspace>(
         nameStart + "ConvFit_1L_Workspaces", workspacesGroup);

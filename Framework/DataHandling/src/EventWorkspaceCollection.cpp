@@ -162,7 +162,7 @@ EventWorkspaceCollection::getSpectrum(const size_t index) const {
   return m_WsVec[0]->getSpectrum(index);
 }
 void EventWorkspaceCollection::setSpectrumNumbersFromUniqueSpectra(
-    const std::set<int> uniqueSpectra) {
+    const std::set<int> &uniqueSpectra) {
   // For each workspace, update all the spectrum numbers
   for (auto &ws : m_WsVec) {
     size_t counter = 0;
@@ -279,14 +279,14 @@ void EventWorkspaceCollection::setWidth(const float flag) {
   }
 }
 
-void EventWorkspaceCollection::setTitle(std::string title) {
+void EventWorkspaceCollection::setTitle(const std::string &title) {
   for (auto &ws : m_WsVec) {
     ws->setTitle(title);
   }
 }
 
 void EventWorkspaceCollection::applyFilter(
-    boost::function<void(MatrixWorkspace_sptr)> func) {
+    const boost::function<void(MatrixWorkspace_sptr)> &func) {
   for (auto &ws : m_WsVec) {
     func(ws);
   }

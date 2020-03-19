@@ -148,8 +148,9 @@ public:
     return goodWS;
   }
 
-  void configure_ring_profile(RingProfile &alg, MatrixWorkspace_sptr inws,
-                              std::vector<double> centre, int num_bins,
+  void configure_ring_profile(RingProfile &alg,
+                              const MatrixWorkspace_sptr &inws,
+                              const std::vector<double> &centre, int num_bins,
                               double start_angle = 0, double min_radius = 0,
                               double max_radius = 1000, bool anticlock = true) {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

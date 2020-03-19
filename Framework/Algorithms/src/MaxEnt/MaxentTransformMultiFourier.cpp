@@ -7,15 +7,17 @@
 #include "MantidAlgorithms/MaxEnt/MaxentTransformMultiFourier.h"
 #include <gsl/gsl_fft_complex.h>
 
+#include <utility>
+
 namespace Mantid {
 namespace Algorithms {
 
 /** Constructor */
 MaxentTransformMultiFourier::MaxentTransformMultiFourier(
-    MaxentSpaceComplex_sptr dataSpace, MaxentSpace_sptr imageSpace,
+    const MaxentSpaceComplex_sptr &dataSpace, MaxentSpace_sptr imageSpace,
     size_t numSpec)
-    : MaxentTransformFourier(dataSpace, imageSpace), m_numSpec(numSpec),
-      m_linearAdjustments(), m_constAdjustments() {}
+    : MaxentTransformFourier(dataSpace, std::move(imageSpace)),
+      m_numSpec(numSpec), m_linearAdjustments(), m_constAdjustments() {}
 
 /**
  * Transforms a 1D signal from image space to data space, performing an

@@ -23,6 +23,7 @@
 #include <QPushButton>
 #include <QSettings>
 #include <QSignalMapper>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("DynamicPDF");
@@ -312,7 +313,7 @@ void FitControl::fitIndividual(const bool &isEvaluation) {
  * @param fun A function from which to retrieve the parameters
  */
 void FitControl::updateFunctionBrowser(Mantid::API::IFunction_sptr fun) {
-  m_functionBrowser->setFunction(fun);
+  m_functionBrowser->setFunction(std::move(fun));
 }
 
 /*

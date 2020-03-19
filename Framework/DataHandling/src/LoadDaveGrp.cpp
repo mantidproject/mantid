@@ -176,7 +176,7 @@ API::MatrixWorkspace_sptr LoadDaveGrp::setupWorkspace() const {
   return outputWorkspace;
 }
 
-void LoadDaveGrp::setWorkspaceAxes(API::MatrixWorkspace_sptr workspace,
+void LoadDaveGrp::setWorkspaceAxes(const API::MatrixWorkspace_sptr &workspace,
                                    const std::vector<double> &xAxis,
                                    const std::vector<double> &yAxis) const {
 
@@ -231,7 +231,7 @@ void LoadDaveGrp::getAxisValues(std::vector<double> &axis,
   }
 }
 
-void LoadDaveGrp::getData(API::MatrixWorkspace_sptr workspace) {
+void LoadDaveGrp::getData(const API::MatrixWorkspace_sptr &workspace) {
   double data_val = 0.0;
   double err_val = 0.0;
 

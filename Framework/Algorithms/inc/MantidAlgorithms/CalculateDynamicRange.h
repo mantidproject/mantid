@@ -25,8 +25,8 @@ public:
 private:
   void init() override;
   void exec() override;
-  void calculateQMinMax(API::MatrixWorkspace_sptr, const std::vector<size_t> &,
-                        const std::string &);
+  void calculateQMinMax(const API::MatrixWorkspace_sptr &,
+                        const std::vector<size_t> &, const std::string &);
 };
 
 } // namespace Algorithms

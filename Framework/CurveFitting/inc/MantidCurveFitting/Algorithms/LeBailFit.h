@@ -103,8 +103,8 @@ private:
   void createLeBailFunction();
 
   /// Crop the workspace for better usage
-  API::MatrixWorkspace_sptr cropWorkspace(API::MatrixWorkspace_sptr inpws,
-                                          size_t wsindex);
+  API::MatrixWorkspace_sptr
+  cropWorkspace(const API::MatrixWorkspace_sptr &inpws, size_t wsindex);
 
   /// Process and calculate input background
   void processInputBackground();
@@ -123,10 +123,10 @@ private:
   void parseBraggPeaksParametersTable();
 
   /// Parse content in a table workspace to vector for background parameters
-  void
-  parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr bkgdparamws,
-                                std::vector<std::string> &bkgdparnames,
-                                std::vector<double> &bkgdorderparams);
+  void parseBackgroundTableWorkspace(
+      const DataObjects::TableWorkspace_sptr &bkgdparamws,
+      std::vector<std::string> &bkgdparnames,
+      std::vector<double> &bkgdorderparams);
 
   /// Create and set up output table workspace for peaks
   void exportBraggPeakParameterToTable();
@@ -153,12 +153,12 @@ private:
   /// Set up Monte Carlo random walk strategy
   void setupBuiltInRandomWalkStrategy();
 
-  void
-  setupRandomWalkStrategyFromTable(DataObjects::TableWorkspace_sptr tablews);
+  void setupRandomWalkStrategyFromTable(
+      const DataObjects::TableWorkspace_sptr &tablews);
 
   /// Add parameter (to a vector of string/name) for MC random walk
   void addParameterToMCMinimize(std::vector<std::string> &parnamesforMC,
-                                std::string parname);
+                                const std::string &parname);
 
   /// Calculate diffraction pattern in Le Bail algorithm for MC Random walk
   bool calculateDiffractionPattern(
@@ -171,7 +171,8 @@ private:
   bool acceptOrDeny(Kernel::Rfactor currR, Kernel::Rfactor newR);
 
   /// Propose new parameters
-  bool proposeNewValues(std::vector<std::string> mcgroup, Kernel::Rfactor r,
+  bool proposeNewValues(const std::vector<std::string> &mcgroup,
+                        Kernel::Rfactor r,
                         std::map<std::string, Parameter> &curparammap,
                         std::map<std::string, Parameter> &newparammap,
                         bool prevBetterRwp);
@@ -308,7 +309,7 @@ private:
 /// Write a set of (XY) data to a column file
 void writeRfactorsToFile(std::vector<double> vecX,
                          std::vector<Kernel::Rfactor> vecR,
-                         std::string filename);
+                         const std::string &filename);
 
 } // namespace Algorithms
 } // namespace CurveFitting

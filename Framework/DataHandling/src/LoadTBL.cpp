@@ -81,7 +81,7 @@ int LoadTBL::confidence(Kernel::FileDescriptor &descriptor) const {
  * @param line the line to count from
  * @returns a size_t of how many commas were in line
  */
-size_t LoadTBL::countCommas(std::string line) const {
+size_t LoadTBL::countCommas(const std::string &line) const {
   size_t found = 0;
   size_t pos = line.find(',', 0);
   if (pos != std::string::npos) {
@@ -104,7 +104,7 @@ size_t LoadTBL::countCommas(std::string line) const {
  * @returns a size_t of how many pairs of quotes were in line
  */
 size_t
-LoadTBL::findQuotePairs(std::string line,
+LoadTBL::findQuotePairs(const std::string &line,
                         std::vector<std::vector<size_t>> &quoteBounds) const {
   size_t quoteOne = 0;
   size_t quoteTwo = 0;
@@ -137,7 +137,7 @@ LoadTBL::findQuotePairs(std::string line,
  * @throws std::length_error if anything other than 17 columns (or 16
  * cell-delimiting commas) is found
  */
-void LoadTBL::csvParse(std::string line, std::vector<std::string> &cols,
+void LoadTBL::csvParse(const std::string &line, std::vector<std::string> &cols,
                        std::vector<std::vector<size_t>> &quoteBounds,
                        size_t expectedCommas) const {
   size_t pairID = 0;

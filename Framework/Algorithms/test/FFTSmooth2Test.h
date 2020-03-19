@@ -169,8 +169,9 @@ public:
   }
 
   //-------------------------------------------------------------------------------------------------
-  void performTest(bool event, std::string filter, std::string params,
-                   bool AllSpectra, int WorkspaceIndex, bool inPlace = false) {
+  void performTest(bool event, const std::string &filter,
+                   const std::string &params, bool AllSpectra,
+                   int WorkspaceIndex, bool inPlace = false) {
     MatrixWorkspace_sptr ws1, out;
     int numPixels = 10;
     int numBins = 20;

@@ -256,7 +256,7 @@ std::unique_ptr<DataBlockGenerator> DataBlockComposite::getGenerator() const {
   return std::make_unique<DataBlockGenerator>(intervals);
 }
 
-void DataBlockComposite::addDataBlock(DataBlock dataBlock) {
+void DataBlockComposite::addDataBlock(const DataBlock &dataBlock) {
   // Set the number of periods, number of spectra and number of channel
   m_numberOfPeriods = dataBlock.getNumberOfPeriods();
   m_numberOfChannels = dataBlock.getNumberOfChannels();

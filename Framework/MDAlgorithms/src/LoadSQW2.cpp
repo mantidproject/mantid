@@ -595,7 +595,7 @@ void LoadSQW2::setupBoxController() {
  * box controller has already been initialized
  * @param filebackPath Path to the file used for backend storage
  */
-void LoadSQW2::setupFileBackend(std::string filebackPath) {
+void LoadSQW2::setupFileBackend(const std::string &filebackPath) {
   using DataObjects::BoxControllerNeXusIO;
   auto savemd = this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
   savemd->setProperty("InputWorkspace", m_outputWS);

@@ -28,7 +28,7 @@ public:
 private:
   Mantid::API::IAlgorithm_sptr
   setUpSaveAlgorithm(std::string const &saveDirectory,
-                     Mantid::API::Workspace_sptr workspace,
+                     const Mantid::API::Workspace_sptr &workspace,
                      std::vector<std::string> const &logParameters,
                      FileFormatOptions const &fileFormat) const;
 
@@ -38,7 +38,7 @@ private:
                                std::string const &extension) const;
 
   Mantid::API::Workspace_sptr workspace(std::string const &workspaceName) const;
-  void save(Mantid::API::Workspace_sptr workspace,
+  void save(const Mantid::API::Workspace_sptr &workspace,
             std::string const &saveDirectory,
             std::vector<std::string> const &logParameters,
             FileFormatOptions const &fileFormat) const;

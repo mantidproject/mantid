@@ -309,7 +309,7 @@ void CreateSampleWorkspace::addChopperParameters(
  */
 MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
     int numPixels, int numBins, int numMonitors, double x0, double binDelta,
-    Geometry::Instrument_sptr inst, const std::string &functionString,
+    const Geometry::Instrument_sptr &inst, const std::string &functionString,
     bool isRandom) {
   BinEdges x(numBins + 1, LinearGenerator(x0, binDelta));
 
@@ -330,8 +330,9 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createHistogramWorkspace(
 /** Create scanning histogram workspace
  */
 MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
-    int numBins, double x0, double binDelta, Geometry::Instrument_sptr inst,
-    const std::string &functionString, bool isRandom, int numScanPoints) {
+    int numBins, double x0, double binDelta,
+    const Geometry::Instrument_sptr &inst, const std::string &functionString,
+    bool isRandom, int numScanPoints) {
   auto builder = ScanningWorkspaceBuilder(inst, numScanPoints, numBins);
 
   auto angles = std::vector<double>();
@@ -359,7 +360,7 @@ MatrixWorkspace_sptr CreateSampleWorkspace::createScanningWorkspace(
  */
 EventWorkspace_sptr CreateSampleWorkspace::createEventWorkspace(
     int numPixels, int numBins, int numMonitors, int numEvents, double x0,
-    double binDelta, Geometry::Instrument_sptr inst,
+    double binDelta, const Geometry::Instrument_sptr &inst,
     const std::string &functionString, bool isRandom) {
   DateAndTime run_start("2010-01-01T00:00:00");
 

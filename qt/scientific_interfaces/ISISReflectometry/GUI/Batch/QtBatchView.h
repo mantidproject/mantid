@@ -47,7 +47,7 @@ private slots:
   void onAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
   void onAlgorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm);
   void onAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm,
-                        std::string errorMessage);
+                        const std::string &errorMessage);
 
 private:
   void initLayout();

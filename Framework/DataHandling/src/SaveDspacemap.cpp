@@ -56,8 +56,8 @@ void SaveDspacemap::exec() {
  * @param offsetsWS :: OffsetsWorkspace with instrument and offsets
  */
 void SaveDspacemap::CalculateDspaceFromCal(
-    Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS,
-    std::string DFileName) {
+    const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS,
+    const std::string &DFileName) {
   const char *filename = DFileName.c_str();
   // Get a pointer to the instrument contained in the workspace
   Instrument_const_sptr instrument = offsetsWS->getInstrument();

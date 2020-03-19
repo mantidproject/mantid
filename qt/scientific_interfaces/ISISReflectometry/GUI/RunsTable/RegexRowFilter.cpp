@@ -13,7 +13,7 @@ namespace ISISReflectometry {
 using MantidQt::MantidWidgets::Batch::IJobTreeView;
 using MantidQt::MantidWidgets::Batch::RowLocation;
 
-RegexFilter::RegexFilter(boost::regex regex, IJobTreeView const &view,
+RegexFilter::RegexFilter(const boost::regex &regex, IJobTreeView const &view,
                          ReductionJobs const &jobs)
     : m_filter(std::move(regex)), m_view(view), m_jobs(jobs) {}
 

@@ -98,7 +98,7 @@ public:
   }
 
 private:
-  void showResults(Links &results, Instrument_const_sptr inst) {
+  void showResults(Links &results, const Instrument_const_sptr &inst) {
     Links::const_iterator resultItr = results.begin();
     for (; resultItr != results.end(); resultItr++) {
       IComponent_const_sptr component =

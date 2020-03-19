@@ -427,7 +427,8 @@ API::MatrixWorkspace_sptr generateArgSiPeak220() {
 //----------------------------------------------------------------------------------------------
 /** Import data from a column data file
  */
-void importDataFromColumnFile(std::string filename, std::string wsname) {
+void importDataFromColumnFile(const std::string &filename,
+                              const std::string &wsname) {
   DataHandling::LoadAscii2 load;
   load.initialize();
 
@@ -1295,7 +1296,7 @@ public:
    * Parse parameter table workspace to 2 map
    */
   void
-  parseParameterTableWorkspace(DataObjects::TableWorkspace_sptr paramws,
+  parseParameterTableWorkspace(const DataObjects::TableWorkspace_sptr &paramws,
                                std::map<std::string, double> &paramvalues,
                                std::map<std::string, char> &paramfitstatus) {
 

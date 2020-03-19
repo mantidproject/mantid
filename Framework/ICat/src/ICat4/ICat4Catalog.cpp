@@ -435,7 +435,7 @@ void ICat4Catalog::getDataSets(const std::string &investigationId,
  * @param response :: A vector containing the results of the search query.
  * @param outputws :: Shared pointer to output workspace.
  */
-void ICat4Catalog::saveDataSets(std::vector<xsd__anyType *> response,
+void ICat4Catalog::saveDataSets(const std::vector<xsd__anyType *> &response,
                                 API::ITableWorkspace_sptr &outputws) {
   if (outputws->getColumnNames().empty()) {
     // Add rows headers to the output workspace.

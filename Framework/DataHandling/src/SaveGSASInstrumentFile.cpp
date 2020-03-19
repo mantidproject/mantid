@@ -505,7 +505,7 @@ void SaveGSASInstrumentFile::initConstants(
 /** Parse profile table workspace to a map (the new ...
  */
 void SaveGSASInstrumentFile::parseProfileTableWorkspace(
-    ITableWorkspace_sptr ws,
+    const ITableWorkspace_sptr &ws,
     map<unsigned int, map<string, double>> &profilemap) {
   size_t numbanks = ws->columnCount() - 1;
   size_t numparams = ws->rowCount();
@@ -1086,7 +1086,7 @@ double SaveGSASInstrumentFile::calDspRange(double dtt1, double zero,
  * @param irffilename
  */
 void SaveGSASInstrumentFile::loadFullprofResolutionFile(
-    std::string irffilename) {
+    const std::string &irffilename) {
   IAlgorithm_sptr loadfpirf;
   try {
     loadfpirf = createChildAlgorithm("LoadFullprofResolution");

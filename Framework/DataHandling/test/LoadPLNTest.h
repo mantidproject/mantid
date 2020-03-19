@@ -74,7 +74,7 @@ public:
         run.getProperty("end_time")->value().find("2018-11-12T11:45:06.6") == 0)
 
     // test some data properties
-    auto logpm = [&run](std::string tag) {
+    auto logpm = [&run](const std::string &tag) {
       return dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(tag))
           ->firstValue();
     };
@@ -129,7 +129,7 @@ public:
         run.getProperty("end_time")->value().find("2018-11-12T11:45:06.6") == 0)
 
     // test some data properties
-    auto logpm = [&run](std::string tag) {
+    auto logpm = [&run](const std::string &tag) {
       return dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(tag))
           ->firstValue();
     };

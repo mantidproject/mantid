@@ -53,7 +53,7 @@ public:
     loadFailureTest("invalid_triangle.stl");
   }
 
-  void loadFailureTest(const std::string filename) {
+  void loadFailureTest(const std::string &filename) {
     std::string path = FileFinder::Instance().getFullPath(filename);
     auto Loader = LoadAsciiStl(path, units);
     TS_ASSERT_THROWS_ANYTHING(Loader.readStl());

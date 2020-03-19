@@ -309,8 +309,8 @@ MatrixWorkspace_sptr PolarizationEfficiencyCor::convertToHistogram(
 //----------------------------------------------------------------------------------------------
 /// Convert the efficiencies to histogram
 MatrixWorkspace_sptr
-PolarizationEfficiencyCor::interpolate(MatrixWorkspace_sptr efficiencies,
-                                       MatrixWorkspace_sptr inWS) {
+PolarizationEfficiencyCor::interpolate(const MatrixWorkspace_sptr &efficiencies,
+                                       const MatrixWorkspace_sptr &inWS) {
 
   efficiencies->setDistribution(true);
   auto alg = createChildAlgorithm("RebinToWorkspace");

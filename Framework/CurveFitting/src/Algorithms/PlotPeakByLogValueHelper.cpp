@@ -85,8 +85,8 @@ void addMatrixworkspace(
     const boost::optional<API::Workspace_sptr> &workspaceOptional,
     const boost::shared_ptr<API::MatrixWorkspace> &wsMatrix);
 /// Create a list of input workspace names
-std::vector<InputSpectraToFit> makeNames(std::string inputList, int default_wi,
-                                         int default_spec) {
+std::vector<InputSpectraToFit> makeNames(const std::string &inputList,
+                                         int default_wi, int default_spec) {
   std::vector<InputSpectraToFit> nameList;
 
   double start = 0;

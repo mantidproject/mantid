@@ -32,7 +32,7 @@ private:
   void init() override;
   void exec() override;
   std::vector<std::string> getFilenames();
-  int readFocusInfo(std::ifstream &file, const std::string filename);
+  int readFocusInfo(std::ifstream &file, const std::string &filename);
   void readCharInfo(std::ifstream &file, API::ITableWorkspace_sptr &wksp,
                     const std::string &filename, int linenum);
   void readVersion0(const std::string &filename,

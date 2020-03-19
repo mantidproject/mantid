@@ -580,7 +580,7 @@ private:
     }
   }
 
-  MatrixWorkspace_sptr runWienerSmooth(MatrixWorkspace_sptr inputWS,
+  MatrixWorkspace_sptr runWienerSmooth(const MatrixWorkspace_sptr &inputWS,
                                        const std::vector<int> &wsIndexList) {
     // Name of the output workspace.
     std::string outWSName("WienerSmoothTest_OutputWS");

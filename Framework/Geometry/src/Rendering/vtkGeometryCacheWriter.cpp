@@ -22,6 +22,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <utility>
 
 using Poco::XML::AutoPtr;
 using Poco::XML::Document;
@@ -41,7 +42,7 @@ Kernel::Logger g_log("vtkGeometryCacheWriter");
  * Constructor
  */
 vtkGeometryCacheWriter::vtkGeometryCacheWriter(std::string filename) {
-  mFileName = filename;
+  mFileName = std::move(filename);
 
   mDoc = new Document();
   Init();

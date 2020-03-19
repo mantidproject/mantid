@@ -3,3 +3,6 @@
 //      as different build servers have different starts to the file path
 // Example:
 // memsetClassFloat:/Users/builder/Jenkins/workspace/cppcheck-1.72/
+
+// Hide warnings about using explicit keyword constructors as we have "too many"
+noExplicitConstructor

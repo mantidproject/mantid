@@ -671,8 +671,8 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
  * @param logtitle :: title of the log to be inserted to workspace
  * @param mindex ::  index of the the series in the wrong detectors map
  */
-void FilterEventsByLogValuePreNexus::addToWorkspaceLog(std::string logtitle,
-                                                       size_t mindex) {
+void FilterEventsByLogValuePreNexus::addToWorkspaceLog(
+    const std::string &logtitle, size_t mindex) {
   // Create TimeSeriesProperty
   auto property = new TimeSeriesProperty<double>(logtitle);
 
@@ -770,7 +770,8 @@ void FilterEventsByLogValuePreNexus::doStatToEventLog(size_t mindex) {
  *  geometry
  */
 void FilterEventsByLogValuePreNexus::runLoadInstrument(
-    const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace) {
+    const std::string &eventfilename,
+    const MatrixWorkspace_sptr &localWorkspace) {
   // start by getting just the filename
   string instrument = Poco::Path(eventfilename).getFileName();
 
@@ -2118,7 +2119,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
  * We want to pad out empty pixels: monitor
  */
 size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
-    DataObjects::EventWorkspace_sptr eventws) {
+    const DataObjects::EventWorkspace_sptr &eventws) {
   const auto &detectorInfo = eventws->detectorInfo();
   const auto &detIDs = detectorInfo.detectorIDs();
 
@@ -2158,7 +2159,7 @@ size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
  * pixel-spectrum map
  */
 void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
-    DataObjects::EventWorkspace_sptr eventws) {
+    const DataObjects::EventWorkspace_sptr &eventws) {
   const auto &detectorInfo = eventws->detectorInfo();
   const auto &detIDs = detectorInfo.detectorIDs();
 

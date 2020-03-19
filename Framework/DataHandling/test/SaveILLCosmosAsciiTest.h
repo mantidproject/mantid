@@ -228,7 +228,8 @@ public:
 
 private:
   void headingsTests(std::ifstream &in, std::string &fullline,
-                     bool propertiesLogs = false, std::string sep = "\t") {
+                     bool propertiesLogs = false,
+                     const std::string &sep = "\t") {
     getline(in, fullline);
     TS_ASSERT_EQUALS(fullline, "MFT");
     getline(in, fullline);

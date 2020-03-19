@@ -826,7 +826,7 @@ std::vector<double> MaxEnt::applyDistancePenalty(
 std::vector<double>
 MaxEnt::updateImage(const std::vector<double> &image,
                     const std::vector<double> &delta,
-                    const std::vector<std::vector<double>> dirs) {
+                    const std::vector<std::vector<double>> &dirs) {
 
   if (image.empty() || dirs.empty() || (delta.size() != dirs.size())) {
     throw std::runtime_error("Cannot calculate new image");

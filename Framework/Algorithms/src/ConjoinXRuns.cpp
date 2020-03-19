@@ -198,7 +198,7 @@ std::map<std::string, std::string> ConjoinXRuns::validateInputs() {
  * @return : empty if the log exists, is numeric, and matches the size of the
  * workspace, error message otherwise
  */
-std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
+std::string ConjoinXRuns::checkLogEntry(const MatrixWorkspace_sptr &ws) const {
   std::string result;
   if (!m_logEntry.empty()) {
 
@@ -250,7 +250,8 @@ std::string ConjoinXRuns::checkLogEntry(MatrixWorkspace_sptr ws) const {
  * @param ws : the input workspace
  * @return : the x-axis to use for the output workspace
  */
-std::vector<double> ConjoinXRuns::getXAxis(MatrixWorkspace_sptr ws) const {
+std::vector<double>
+ConjoinXRuns::getXAxis(const MatrixWorkspace_sptr &ws) const {
 
   std::vector<double> axis;
   axis.reserve(ws->y(0).size());

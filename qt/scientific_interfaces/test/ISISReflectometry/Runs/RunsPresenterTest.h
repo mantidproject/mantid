@@ -24,6 +24,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <utility>
+
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::
     ModelCreationHelper;
@@ -708,7 +710,7 @@ private:
   }
 
   AlgorithmRuntimeProps defaultLiveMonitorReductionOptions(
-      std::string instrument = std::string("OFFSPEC")) {
+      const std::string &instrument = std::string("OFFSPEC")) {
     return AlgorithmRuntimeProps{
         {"GetLiveValueAlgorithm", "GetLiveInstrumentValue"},
         {"InputWorkspace", "TOF_live"},
@@ -1005,7 +1007,7 @@ private:
     expectGetUpdateInterval(updateInterval);
     EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
         .Times(1)
-        .WillOnce(Return(options));
+        .WillOnce(Return(std::move(options)));
   }
 
   void expectGetLiveDataOptions(std::string const &instrument,

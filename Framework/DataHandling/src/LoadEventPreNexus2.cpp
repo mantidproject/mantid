@@ -405,7 +405,7 @@ void LoadEventPreNexus2::exec() {
 /** Create and set up output Event Workspace
  */
 void LoadEventPreNexus2::createOutputWorkspace(
-    const std::string event_filename) {
+    const std::string &event_filename) {
   // Create the output workspace
   localWorkspace = EventWorkspace_sptr(new EventWorkspace());
 
@@ -570,7 +570,7 @@ void LoadEventPreNexus2::processImbedLogs() {
  * @param mindex :: index of the log in pulse time ...
  * - mindex:  index of the the series in the list
  */
-void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle,
+void LoadEventPreNexus2::addToWorkspaceLog(const std::string &logtitle,
                                            size_t mindex) {
   // Create TimeSeriesProperty
   auto property = new TimeSeriesProperty<double>(logtitle);
@@ -601,7 +601,8 @@ void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle,
  * geometry
  */
 void LoadEventPreNexus2::runLoadInstrument(
-    const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace) {
+    const std::string &eventfilename,
+    const MatrixWorkspace_sptr &localWorkspace) {
   // start by getting just the filename
   string instrument = Poco::Path(eventfilename).getFileName();
 

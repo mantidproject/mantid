@@ -40,7 +40,7 @@ struct TestWorkspaceDescriptor {
   double beamHeight;
 };
 
-void addSample(Mantid::API::MatrixWorkspace_sptr ws,
+void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
                const Environment environment, double beamWidth = 0.,
                double beamHeight = 0.) {
   using namespace Mantid::API;
@@ -403,7 +403,7 @@ private:
   }
 
   Mantid::API::MatrixWorkspace_const_sptr
-  getOutputWorkspace(Mantid::API::IAlgorithm_sptr alg) {
+  getOutputWorkspace(const Mantid::API::IAlgorithm_sptr &alg) {
     using Mantid::API::MatrixWorkspace_sptr;
     MatrixWorkspace_sptr output = alg->getProperty("OutputWorkspace");
     TS_ASSERT(output);
@@ -412,8 +412,9 @@ private:
     return output;
   }
 
-  void verifyDimensions(TestWorkspaceDescriptor wsProps,
-                        Mantid::API::MatrixWorkspace_const_sptr outputWS) {
+  void
+  verifyDimensions(TestWorkspaceDescriptor wsProps,
+                   const Mantid::API::MatrixWorkspace_const_sptr &outputWS) {
     TS_ASSERT_EQUALS(wsProps.nspectra, outputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(wsProps.nbins, outputWS->blocksize());
   }

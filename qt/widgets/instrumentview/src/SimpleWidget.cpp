@@ -9,6 +9,7 @@
 
 #include <QApplication>
 #include <QPixmap>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -25,7 +26,7 @@ SimpleWidget::~SimpleWidget() {}
 
 /// Assign a surface to draw on
 void SimpleWidget::setSurface(boost::shared_ptr<ProjectionSurface> surface) {
-  m_surface = surface;
+  m_surface = std::move(surface);
   connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()),
           Qt::QueuedConnection);
 }

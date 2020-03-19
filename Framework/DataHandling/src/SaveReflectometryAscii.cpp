@@ -141,7 +141,7 @@ void SaveReflectometryAscii::separator() {
  * @param write :: if true, write string
  * @param s :: string
  */
-bool SaveReflectometryAscii::writeString(bool write, std::string s) {
+bool SaveReflectometryAscii::writeString(bool write, const std::string &s) {
   if (write) {
     if (m_ext == "custom" || m_ext == ".txt")
       m_file << m_sep << s;
@@ -172,7 +172,7 @@ void SaveReflectometryAscii::outputval(double val) {
 /** Write formatted line of data
  *  @param val :: a string value to be written
  */
-void SaveReflectometryAscii::outputval(std::string val) {
+void SaveReflectometryAscii::outputval(const std::string &val) {
   m_file << std::setw(28) << val;
 }
 
@@ -201,8 +201,8 @@ std::string SaveReflectometryAscii::sampleLogUnit(const std::string &logName) {
  *  @param logName :: the name of a SampleLog entry to get its value from
  *  @param logNameFixed :: the name of the SampleLog entry defined by the header
  */
-void SaveReflectometryAscii::writeInfo(const std::string logName,
-                                       const std::string logNameFixed) {
+void SaveReflectometryAscii::writeInfo(const std::string &logName,
+                                       const std::string &logNameFixed) {
   const std::string logValue = sampleLogValue(logName);
   const std::string logUnit = sampleLogUnit(logName);
   if (!logNameFixed.empty()) {
@@ -255,7 +255,7 @@ void SaveReflectometryAscii::header() {
 }
 
 /// Check file
-void SaveReflectometryAscii::checkFile(const std::string filename) {
+void SaveReflectometryAscii::checkFile(const std::string &filename) {
   if (Poco::File(filename).exists()) {
     g_log.warning("File already exists and will be overwritten");
     try {

@@ -283,7 +283,7 @@ private:
     TS_ASSERT(!alg->isExecuted())
   }
 
-  static API::Algorithm_sptr make_alg(API::MatrixWorkspace_sptr inputWS,
+  static API::Algorithm_sptr make_alg(const API::MatrixWorkspace_sptr &inputWS,
                                       const std::string &sumType,
                                       const std::vector<int> &foreground) {
     auto alg = boost::make_shared<Algorithms::ReflectometryMomentumTransfer>();

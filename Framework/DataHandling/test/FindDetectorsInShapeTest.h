@@ -117,7 +117,7 @@ public:
     runTest(xmlShape, "320,340,360,380", false);
   }
 
-  void runTest(std::string xmlShape, std::string expectedHits,
+  void runTest(const std::string &xmlShape, std::string expectedHits,
                bool includeMonitors = true) {
     Mantid::DataHandling::FindDetectorsInShape alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

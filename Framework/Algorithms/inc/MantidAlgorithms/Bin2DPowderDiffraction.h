@@ -47,7 +47,7 @@ private:
   DataObjects::EventWorkspace_sptr
       m_inputWS;         ///< Pointer to the input event workspace
   int m_numberOfSpectra; ///< The number of spectra in the workspace
-  void normalizeToBinArea(API::MatrixWorkspace_sptr outWS);
+  void normalizeToBinArea(const API::MatrixWorkspace_sptr &outWS);
 };
 
 double calcD(double wavelength, double sintheta);

@@ -158,7 +158,7 @@ void SplineSmoothing::calculateSpectrumDerivatives(const int index,
  * @param ws :: The input workspace
  * @param row :: The row of spectra to use
  */
-void SplineSmoothing::performAdditionalFitting(MatrixWorkspace_sptr ws,
+void SplineSmoothing::performAdditionalFitting(const MatrixWorkspace_sptr &ws,
                                                const int row) {
   // perform additional fitting of the points
   auto fit = createChildAlgorithm("Fit");

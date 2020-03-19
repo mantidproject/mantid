@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Points.h"
@@ -29,7 +31,7 @@ FunctionDomain1DSpectrumCreator::FunctionDomain1DSpectrumCreator()
  */
 void FunctionDomain1DSpectrumCreator::setMatrixWorkspace(
     MatrixWorkspace_sptr matrixWorkspace) {
-  m_matrixWorkspace = matrixWorkspace;
+  m_matrixWorkspace = std::move(matrixWorkspace);
 }
 
 /**

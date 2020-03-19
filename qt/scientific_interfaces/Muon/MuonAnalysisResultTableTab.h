@@ -98,7 +98,8 @@ private:
   void populateLogsAndValues(const QStringList &fittedWsList);
   void populateFittings(
       const QStringList &names,
-      std::function<Mantid::API::Workspace_sptr(const QString &)> wsFromName);
+      const std::function<Mantid::API::Workspace_sptr(const QString &)>
+          &wsFromName);
 
   /// Creates the results table
   void createTable(bool multipleFits);

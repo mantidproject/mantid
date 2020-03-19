@@ -63,7 +63,7 @@ API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram,
   return ws2;
 }
 
-void doTestExecPointData(API::MatrixWorkspace_sptr ws2,
+void doTestExecPointData(const API::MatrixWorkspace_sptr &ws2,
                          bool performance = false) {
   API::IFunction_sptr fun(new ExpDecay);
   fun->setParameter("Height", 1.);
@@ -169,7 +169,7 @@ void doTestExecPointData(API::MatrixWorkspace_sptr ws2,
     TS_ASSERT_DELTA(fun->getParameter("Lifetime"), 1.0, 1e-4);
   }
 }
-void doTestExecHistogramData(API::MatrixWorkspace_sptr ws2,
+void doTestExecHistogramData(const API::MatrixWorkspace_sptr &ws2,
                              bool performance = false) {
   API::IFunction_sptr fun(new ExpDecay);
   fun->setParameter("Height", 1.);

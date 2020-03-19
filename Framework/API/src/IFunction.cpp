@@ -38,6 +38,7 @@
 #include <algorithm>
 #include <limits>
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -87,7 +88,7 @@ boost::shared_ptr<IFunction> IFunction::clone() const {
  */
 void IFunction::setProgressReporter(
     boost::shared_ptr<Kernel::ProgressBase> reporter) {
-  m_progReporter = reporter;
+  m_progReporter = std::move(reporter);
   m_progReporter->setNotifyStep(0.01);
 }
 
@@ -1241,9 +1242,10 @@ void IFunction::setMatrixWorkspace(
  *  @param wsIndex :: workspace index
  *  @return converted value
  */
-double IFunction::convertValue(double value, Kernel::Unit_sptr &outUnit,
-                               boost::shared_ptr<const MatrixWorkspace> ws,
-                               size_t wsIndex) const {
+double
+IFunction::convertValue(double value, Kernel::Unit_sptr &outUnit,
+                        const boost::shared_ptr<const MatrixWorkspace> &ws,
+                        size_t wsIndex) const {
   // only required if formula or look-up-table different from ws unit
   const auto &wsUnit = ws->getAxis(0)->unit();
   if (outUnit->unitID() == wsUnit->unitID())
@@ -1271,7 +1273,7 @@ double IFunction::convertValue(double value, Kernel::Unit_sptr &outUnit,
  */
 void IFunction::convertValue(std::vector<double> &values,
                              Kernel::Unit_sptr &outUnit,
-                             boost::shared_ptr<const MatrixWorkspace> ws,
+                             const boost::shared_ptr<const MatrixWorkspace> &ws,
                              size_t wsIndex) const {
   // only required if  formula or look-up-table different from ws unit
   const auto &wsUnit = ws->getAxis(0)->unit();
@@ -1448,7 +1450,7 @@ void IFunction::storeReadOnlyAttribute(
  * @param covar :: A matrix to set.
  */
 void IFunction::setCovarianceMatrix(
-    boost::shared_ptr<Kernel::Matrix<double>> covar) {
+    const boost::shared_ptr<Kernel::Matrix<double>> &covar) {
   // the matrix shouldn't be empty
   if (!covar) {
     throw std::invalid_argument(

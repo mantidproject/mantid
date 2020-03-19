@@ -146,7 +146,7 @@ public:
 private:
   /// Helper method to run common set of tests on a workspace in a multi-period
   /// group.
-  void doTestMultiPeriodWorkspace(MatrixWorkspace_sptr workspace,
+  void doTestMultiPeriodWorkspace(const MatrixWorkspace_sptr &workspace,
                                   int expected_period) {
     // Check the current period property.
     const Mantid::API::Run &run = workspace->run();

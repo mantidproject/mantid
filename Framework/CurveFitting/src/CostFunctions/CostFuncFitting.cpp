@@ -15,6 +15,7 @@
 
 #include <gsl/gsl_multifit_nlin.h>
 #include <limits>
+#include <utility>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -81,9 +82,9 @@ size_t CostFuncFitting::nParams() const {
 void CostFuncFitting::setFittingFunction(API::IFunction_sptr function,
                                          API::FunctionDomain_sptr domain,
                                          API::FunctionValues_sptr values) {
-  m_function = function;
-  m_domain = domain;
-  m_values = values;
+  m_function = std::move(function);
+  m_domain = std::move(domain);
+  m_values = std::move(values);
   reset();
 }
 

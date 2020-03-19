@@ -105,7 +105,7 @@ void Q1DWeighted::exec() {
  * initializes the user inputs
  * @param inputWS : input workspace
  */
-void Q1DWeighted::bootstrap(MatrixWorkspace_const_sptr inputWS) {
+void Q1DWeighted::bootstrap(const MatrixWorkspace_const_sptr &inputWS) {
   // Get pixel size and pixel sub-division
   m_pixelSizeX = getProperty("PixelSizeX");
   m_pixelSizeY = getProperty("PixelSizeY");
@@ -167,7 +167,7 @@ void Q1DWeighted::bootstrap(MatrixWorkspace_const_sptr inputWS) {
  * Performs the azimuthal averaging for each wavelength bin
  * @param inputWS : the input workspace
  */
-void Q1DWeighted::calculate(MatrixWorkspace_const_sptr inputWS) {
+void Q1DWeighted::calculate(const MatrixWorkspace_const_sptr &inputWS) {
   // Set up the progress
   Progress progress(this, 0.0, 1.0, m_nSpec * m_nLambda);
 
@@ -313,7 +313,7 @@ void Q1DWeighted::calculate(MatrixWorkspace_const_sptr inputWS) {
  * performs final averaging and sets the output workspaces
  * @param inputWS : the input workspace
  */
-void Q1DWeighted::finalize(MatrixWorkspace_const_sptr inputWS) {
+void Q1DWeighted::finalize(const MatrixWorkspace_const_sptr &inputWS) {
   MatrixWorkspace_sptr outputWS =
       createOutputWorkspace(inputWS, m_nQ, m_qBinEdges);
   setProperty("OutputWorkspace", outputWS);
@@ -383,7 +383,7 @@ void Q1DWeighted::finalize(MatrixWorkspace_const_sptr inputWS) {
  * @return output I(Q) workspace
  */
 MatrixWorkspace_sptr
-Q1DWeighted::createOutputWorkspace(MatrixWorkspace_const_sptr parent,
+Q1DWeighted::createOutputWorkspace(const MatrixWorkspace_const_sptr &parent,
                                    const size_t nBins,
                                    const std::vector<double> &binEdges) {
 

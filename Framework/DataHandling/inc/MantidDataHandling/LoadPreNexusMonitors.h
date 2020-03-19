@@ -55,7 +55,7 @@ private:
   bool instrument_loaded_correctly;
 
   void runLoadInstrument(const std::string &instrument,
-                         API::MatrixWorkspace_sptr localWorkspace);
+                         const API::MatrixWorkspace_sptr &localWorkspace);
 };
 
 } // namespace DataHandling

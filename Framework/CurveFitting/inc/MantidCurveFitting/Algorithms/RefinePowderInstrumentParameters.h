@@ -67,20 +67,22 @@ private:
 
   //----------------  Processing Input ---------------------
   /// Import instrument parameter from table (workspace)
-  void importParametersFromTable(DataObjects::TableWorkspace_sptr parameterWS,
-                                 std::map<std::string, double> &parameters);
+  void
+  importParametersFromTable(const DataObjects::TableWorkspace_sptr &parameterWS,
+                            std::map<std::string, double> &parameters);
 
   /// Import the Monte Carlo related parameters from table
   void importMonteCarloParametersFromTable(
-      DataObjects::TableWorkspace_sptr tablews,
-      std::vector<std::string> parameternames, std::vector<double> &stepsizes,
-      std::vector<double> &lowerbounds, std::vector<double> &upperbounds);
+      const DataObjects::TableWorkspace_sptr &tablews,
+      const std::vector<std::string> &parameternames,
+      std::vector<double> &stepsizes, std::vector<double> &lowerbounds,
+      std::vector<double> &upperbounds);
 
   /// Generate (output) workspace of peak centers
   void genPeakCentersWorkspace(bool montecarlo, size_t numbestfit);
 
   /// Generate peaks from table (workspace)
-  void genPeaksFromTable(DataObjects::TableWorkspace_sptr peakparamws);
+  void genPeaksFromTable(const DataObjects::TableWorkspace_sptr &peakparamws);
 
   //---------------  Processing Output ------------------
   /// Generate (output) table worksspace for instrument parameters
@@ -94,12 +96,12 @@ private:
   void fitInstrumentParameters();
 
   /// Calculate function's statistic
-  double calculateFunctionStatistic(API::IFunction_sptr func,
-                                    API::MatrixWorkspace_sptr dataws,
+  double calculateFunctionStatistic(const API::IFunction_sptr &func,
+                                    const API::MatrixWorkspace_sptr &dataws,
                                     size_t workspaceindex);
 
   /// Fit function to data
-  bool fitFunction(API::IFunction_sptr func, double &gslchi2);
+  bool fitFunction(const API::IFunction_sptr &func, double &gslchi2);
 
   /// Parse Fit() output parameter workspace
   std::string parseFitParameterWorkspace(API::ITableWorkspace_sptr paramws);
@@ -108,9 +110,8 @@ private:
   std::string parseFitResult(API::IAlgorithm_sptr fitalg, double &chi2);
 
   /// Set up and run a monte carlo simulation to refine the peak parameters
-  void
-  refineInstrumentParametersMC(DataObjects::TableWorkspace_sptr parameterWS,
-                               bool fit2 = false);
+  void refineInstrumentParametersMC(
+      const DataObjects::TableWorkspace_sptr &parameterWS, bool fit2 = false);
 
   /// Core Monte Carlo random walk on parameter-space
   void doParameterSpaceRandomWalk(std::vector<std::string> parnames,
@@ -124,8 +125,8 @@ private:
   void getD2TOFFuncParamNames(std::vector<std::string> &parnames);
 
   /// Calculate the value and chi2
-  double calculateD2TOFFunction(API::IFunction_sptr func,
-                                API::FunctionDomain1DVector domain,
+  double calculateD2TOFFunction(const API::IFunction_sptr &func,
+                                const API::FunctionDomain1DVector &domain,
                                 API::FunctionValues &values,
                                 const Mantid::HistogramData::HistogramY &rawY,
                                 const Mantid::HistogramData::HistogramE &rawE);
@@ -135,7 +136,7 @@ private:
 
   /// Calculate value n for thermal neutron peak profile
   void
-  calculateThermalNeutronSpecial(API::IFunction_sptr m_Function,
+  calculateThermalNeutronSpecial(const API::IFunction_sptr &m_Function,
                                  const Mantid::HistogramData::HistogramX &xVals,
                                  std::vector<double> &vec_n);
 

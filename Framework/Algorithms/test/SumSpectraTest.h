@@ -277,8 +277,8 @@ public:
                      const std::runtime_error &);
   }
 
-  void dotestExecEvent(std::string inName, std::string outName,
-                       std::string indices_list) {
+  void dotestExecEvent(const std::string &inName, const std::string &outName,
+                       const std::string &indices_list) {
     int numPixels = 100;
     int numBins = 20;
     int numEvents = 20;

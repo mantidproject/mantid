@@ -93,7 +93,7 @@ private:
                       const std::string &fileName);
   /// Run LoadInstrument Child Algorithm
   void runLoadInstrument(const std::string &inst_name,
-                         DataObjects::Workspace2D_sptr localWorkspace);
+                         const DataObjects::Workspace2D_sptr &localWorkspace);
 
   void setInputPropertiesAsMemberProperties();
 

@@ -399,7 +399,7 @@ public:
   IBoxControllerIO *getFileIO() { return m_fileIO.get(); }
   /// makes box controller file based by providing class, responsible for
   /// fileIO.
-  void setFileBacked(boost::shared_ptr<IBoxControllerIO> newFileIO,
+  void setFileBacked(const boost::shared_ptr<IBoxControllerIO> &newFileIO,
                      const std::string &fileName = "");
   void clearFileBacked();
   //-----------------------------------------------------------------------------------

@@ -98,8 +98,8 @@ public:
 
 private:
   // loopOrientation 0=Horizontal, 1=Vertical
-  void checkData(MatrixWorkspace_sptr work_in1,
-                 MatrixWorkspace_sptr work_out1) {
+  void checkData(const MatrixWorkspace_sptr &work_in1,
+                 const MatrixWorkspace_sptr &work_out1) {
 
     for (size_t i = 0; i < work_out1->size(); i++) {
       double sig1 =
@@ -123,7 +123,7 @@ private:
     }
   }
   // loopOrientation 0=Horizontal, 1=Vertical
-  void setError(MatrixWorkspace_sptr work_in1) {
+  void setError(const MatrixWorkspace_sptr &work_in1) {
 
     for (size_t i = 0; i < work_in1->size(); i++) {
       double sig1 =

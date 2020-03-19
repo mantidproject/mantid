@@ -36,8 +36,9 @@ private:
   void init() override;
   void exec() override;
   void writeMetaData(std::ofstream &out,
-                     API::MatrixWorkspace_const_sptr inputWS);
-  void writeWSData(std::ofstream &out, API::MatrixWorkspace_const_sptr inputWS);
+                     const API::MatrixWorkspace_const_sptr &inputWS);
+  void writeWSData(std::ofstream &out,
+                   const API::MatrixWorkspace_const_sptr &inputWS);
 };
 
 } // namespace DataHandling

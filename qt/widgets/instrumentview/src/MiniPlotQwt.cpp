@@ -24,6 +24,7 @@
 #include <QPainter>
 
 #include <cmath>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("MiniPlotQwt");
@@ -72,7 +73,7 @@ MiniPlotQwt::~MiniPlotQwt() { clearAll(); }
  * @param xunit
  */
 void MiniPlotQwt::setXLabel(QString xunit) {
-  m_xUnits = xunit;
+  m_xUnits = std::move(xunit);
   this->setAxisTitle(xBottom, m_xUnits);
 }
 
@@ -238,8 +239,8 @@ void MiniPlotQwt::setData(std::vector<double> x, std::vector<double> y,
     return;
   }
 
-  m_xUnits = xunit;
-  m_label = curveLabel;
+  m_xUnits = std::move(xunit);
+  m_label = std::move(curveLabel);
   if (!m_curve) {
     m_curve = new QwtPlotCurve();
     m_curve->attach(this);

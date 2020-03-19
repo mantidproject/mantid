@@ -95,8 +95,9 @@ public:
   }
 
   /// Run the mock algorithm
-  void doTest(MockBinaryOperationMD &alg, std::string lhs, std::string rhs,
-              std::string outName, bool succeeds = true) {
+  void doTest(MockBinaryOperationMD &alg, const std::string &lhs,
+              const std::string &rhs, const std::string &outName,
+              bool succeeds = true) {
     out.reset();
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

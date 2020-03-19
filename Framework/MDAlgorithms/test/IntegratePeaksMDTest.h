@@ -48,10 +48,11 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the IntegratePeaksMD with the given peak radius integration param */
-  static void doRun(double PeakRadius, double BackgroundRadius,
-                    std::string OutputWorkspace = "IntegratePeaksMDTest_peaks",
-                    double BackgroundStartRadius = 0.0, bool edge = true,
-                    bool cyl = false, std::string fnct = "NoFit") {
+  static void
+  doRun(double PeakRadius, double BackgroundRadius,
+        const std::string &OutputWorkspace = "IntegratePeaksMDTest_peaks",
+        double BackgroundStartRadius = 0.0, bool edge = true, bool cyl = false,
+        const std::string &fnct = "NoFit") {
     IntegratePeaksMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

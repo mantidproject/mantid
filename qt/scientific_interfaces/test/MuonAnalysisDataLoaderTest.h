@@ -10,6 +10,8 @@
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
+#include <utility>
+
 #include "../Muon/MuonAnalysisDataLoader.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -42,9 +44,10 @@ public:
                  const QStringList &instruments,
                  const std::string &deadTimesFile = "")
       : MuonAnalysisDataLoader(deadTimesType, instruments, deadTimesFile){};
-  void setProcessAlgorithmProperties(IAlgorithm_sptr alg,
+  void setProcessAlgorithmProperties(const IAlgorithm_sptr &alg,
                                      const AnalysisOptions &options) const {
-    MuonAnalysisDataLoader::setProcessAlgorithmProperties(alg, options);
+    MuonAnalysisDataLoader::setProcessAlgorithmProperties(std::move(alg),
+                                                          options);
   }
 };
 

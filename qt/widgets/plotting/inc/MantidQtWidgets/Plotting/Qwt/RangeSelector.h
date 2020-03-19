@@ -56,7 +56,7 @@ public slots:
   void setMaximum(double /*val*/); ///< outside setting of value
   void reapply();                  ///< re-apply the range selector lines
   void detach(); ///< Detach range selector lines from the plot
-  void setColour(QColor colour);
+  void setColour(const QColor &colour);
   void setInfoOnly(bool state);
   void setVisible(bool state);
 

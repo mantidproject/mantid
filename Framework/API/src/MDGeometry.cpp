@@ -14,6 +14,7 @@
 
 #include <Poco/NObserver.h>
 #include <boost/make_shared.hpp>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -244,7 +245,7 @@ size_t MDGeometry::getDimensionIndexById(const std::string &id) const {
 /** Add a dimension
  * @param dim :: shared pointer to the dimension object   */
 void MDGeometry::addDimension(
-    boost::shared_ptr<Mantid::Geometry::IMDDimension> dim) {
+    const boost::shared_ptr<Mantid::Geometry::IMDDimension> &dim) {
   m_dimensions.emplace_back(dim);
 }
 
@@ -382,7 +383,7 @@ void MDGeometry::setOriginalWorkspace(boost::shared_ptr<Workspace> ws,
                                       size_t index) {
   if (index >= m_originalWorkspaces.size())
     m_originalWorkspaces.resize(index + 1);
-  m_originalWorkspaces[index] = ws;
+  m_originalWorkspaces[index] = std::move(ws);
   m_notificationHelper->watchForWorkspaceDeletions();
 }
 

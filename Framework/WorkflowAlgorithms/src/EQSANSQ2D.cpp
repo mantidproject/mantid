@@ -39,7 +39,8 @@ void EQSANSQ2D::init() {
 /// Returns the value of a run property from a given workspace
 /// @param inputWS :: input workspace
 /// @param pname :: name of the property to retrieve
-double getRunProperty(MatrixWorkspace_sptr inputWS, const std::string &pname) {
+double getRunProperty(const MatrixWorkspace_sptr &inputWS,
+                      const std::string &pname) {
   return inputWS->run().getPropertyValueAsType<double>(pname);
 }
 

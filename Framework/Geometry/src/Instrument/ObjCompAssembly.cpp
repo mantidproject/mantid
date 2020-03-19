@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <ostream>
 #include <stdexcept>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("ObjCompAssembly");
@@ -609,7 +610,7 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
  * @param obj :: The outline shape created previously fith createOutline()
  */
 void ObjCompAssembly::setOutline(boost::shared_ptr<const IObject> obj) {
-  m_shape = obj;
+  m_shape = std::move(obj);
 }
 
 /** Print information about elements in the assembly to a stream

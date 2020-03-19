@@ -121,8 +121,8 @@ void MantidTreeModel::showAlgorithmDialog(const QString &algName,
  * This creates an algorithm dialog (the default property entry thingie).
  * Helper function not required by interface
  */
-MantidQt::API::AlgorithmDialog *
-MantidTreeModel::createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg) {
+MantidQt::API::AlgorithmDialog *MantidTreeModel::createAlgorithmDialog(
+    const Mantid::API::IAlgorithm_sptr &alg) {
   QHash<QString, QString> presets;
   QStringList enabled;
 

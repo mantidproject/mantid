@@ -48,12 +48,12 @@ private:
                             std::map<detid_t, double> &vulcan);
 
   void CalculateOffsetsFromDSpacemapFile(
-      const std::string DFileName,
-      Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS);
+      const std::string &DFileName,
+      const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS);
 
   void CalculateOffsetsFromVulcanFactors(
       std::map<detid_t, double> &vulcan,
-      Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS);
+      const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS);
 };
 
 } // namespace DataHandling

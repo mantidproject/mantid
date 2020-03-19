@@ -1151,7 +1151,7 @@ public:
 private:
   /// Helper method to run common set of tests on a workspace in a multi-period
   /// group.
-  void doTestMultiPeriodWorkspace(MatrixWorkspace_sptr workspace,
+  void doTestMultiPeriodWorkspace(const MatrixWorkspace_sptr &workspace,
                                   const size_t &nHistograms,
                                   int expected_period) {
     // Check the number of histograms.
@@ -1173,8 +1173,8 @@ private:
   }
 
   /// Check that two matrix workspaces match
-  std::string checkWorkspacesMatch(Workspace_sptr workspace1,
-                                   Workspace_sptr workspace2) {
+  std::string checkWorkspacesMatch(const Workspace_sptr &workspace1,
+                                   const Workspace_sptr &workspace2) {
     auto ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace1);
     auto ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace2);
     if (!ws1 || !ws2) {

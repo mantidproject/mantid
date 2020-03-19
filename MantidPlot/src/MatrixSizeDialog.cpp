@@ -26,7 +26,8 @@
 #include <QPushButton>
 #include <QSpinBox>
 
-MatrixSizeDialog::MatrixSizeDialog(Matrix *m, QWidget *parent, Qt::WFlags fl)
+MatrixSizeDialog::MatrixSizeDialog(Matrix *m, QWidget *parent,
+                                   const Qt::WFlags &fl)
     : QDialog(parent, fl), d_matrix(m) {
   setWindowTitle(tr("MantidPlot - Matrix Dimensions"));
 

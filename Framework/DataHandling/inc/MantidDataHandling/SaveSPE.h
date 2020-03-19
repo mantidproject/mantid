@@ -82,9 +82,9 @@ private:
 
   void writeSPEFile(FILE *outSPEFile,
                     const API::MatrixWorkspace_const_sptr &inputWS);
-  void writeHists(const API::MatrixWorkspace_const_sptr WS,
+  void writeHists(const API::MatrixWorkspace_const_sptr &WS,
                   FILE *const outFile);
-  void writeHist(const API::MatrixWorkspace_const_sptr WS, FILE *const outFile,
+  void writeHist(const API::MatrixWorkspace_const_sptr &WS, FILE *const outFile,
                  const int wsIn) const;
   void writeMaskFlags(FILE *const outFile) const;
   void writeBins(const std::vector<double> &Vs, FILE *const outFile) const;

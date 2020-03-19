@@ -17,6 +17,8 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <boost/scoped_ptr.hpp>
 #include <cmath>
+#include <utility>
+
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -36,7 +38,7 @@ private:
   class WritableHistoWorkspace : public Mantid::DataObjects::MDHistoWorkspace {
   public:
     WritableHistoWorkspace(MDHistoDimension_sptr x)
-        : Mantid::DataObjects::MDHistoWorkspace(x) {}
+        : Mantid::DataObjects::MDHistoWorkspace(std::move(x)) {}
     void setMaskValueAt(size_t at, bool value) { m_masks[at] = value; }
   };
 
@@ -366,8 +368,8 @@ public:
   }
 
   void do_test_neighbours_1d(
-      boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)>
-          findNeighbourMemberFunction) {
+      const boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)>
+          &findNeighbourMemberFunction) {
     const size_t nd = 1;
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);

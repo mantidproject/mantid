@@ -63,7 +63,8 @@ void addTestTimeSeries(LogManager &run, const std::string &name) {
 }
 } // namespace
 
-void addTimeSeriesEntry(LogManager &runInfo, std::string name, double val) {
+void addTimeSeriesEntry(LogManager &runInfo, const std::string &name,
+                        double val) {
   TimeSeriesProperty<double> *tsp;
   tsp = new TimeSeriesProperty<double>(name);
   tsp->addValue("2011-05-24T00:00:00", val);

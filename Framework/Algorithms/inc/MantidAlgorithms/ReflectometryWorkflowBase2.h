@@ -54,10 +54,10 @@ protected:
   std::map<std::string, std::string> validateWavelengthRanges() const;
   /// Convert a workspace from TOF to wavelength
   Mantid::API::MatrixWorkspace_sptr
-  convertToWavelength(Mantid::API::MatrixWorkspace_sptr inputWS);
+  convertToWavelength(const Mantid::API::MatrixWorkspace_sptr &inputWS);
   /// Crop a workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
-  cropWavelength(Mantid::API::MatrixWorkspace_sptr inputWS,
+  cropWavelength(const Mantid::API::MatrixWorkspace_sptr &inputWS,
                  const bool useArgs = false, const double argMin = 0.0,
                  const double argMax = 0.0);
   // Create a detector workspace from input workspace in wavelength
@@ -66,43 +66,44 @@ protected:
                  const bool convert = true, const bool sum = true);
   // Create a monitor workspace from input workspace in wavelength
   Mantid::API::MatrixWorkspace_sptr
-  makeMonitorWS(Mantid::API::MatrixWorkspace_sptr inputWS,
+  makeMonitorWS(const Mantid::API::MatrixWorkspace_sptr &inputWS,
                 bool integratedMonitors);
   // Rebin detectors to monitors
   Mantid::API::MatrixWorkspace_sptr
-  rebinDetectorsToMonitors(Mantid::API::MatrixWorkspace_sptr detectorWS,
-                           Mantid::API::MatrixWorkspace_sptr monitorWS);
+  rebinDetectorsToMonitors(const Mantid::API::MatrixWorkspace_sptr &detectorWS,
+                           const Mantid::API::MatrixWorkspace_sptr &monitorWS);
   // Read monitor properties from instrument
-  void
-  populateMonitorProperties(Mantid::API::IAlgorithm_sptr alg,
-                            Mantid::Geometry::Instrument_const_sptr instrument);
+  void populateMonitorProperties(
+      const Mantid::API::IAlgorithm_sptr &alg,
+      const Mantid::Geometry::Instrument_const_sptr &instrument);
   /// Populate processing instructions
-  std::string
-  findProcessingInstructions(Mantid::Geometry::Instrument_const_sptr instrument,
-                             Mantid::API::MatrixWorkspace_sptr inputWS) const;
+  std::string findProcessingInstructions(
+      const Mantid::Geometry::Instrument_const_sptr &instrument,
+      const Mantid::API::MatrixWorkspace_sptr &inputWS) const;
   /// Populate transmission properties
-  bool populateTransmissionProperties(Mantid::API::IAlgorithm_sptr alg) const;
+  bool
+  populateTransmissionProperties(const Mantid::API::IAlgorithm_sptr &alg) const;
   /// Find theta from a named log value
-  double getThetaFromLogs(Mantid::API::MatrixWorkspace_sptr inputWs,
+  double getThetaFromLogs(const Mantid::API::MatrixWorkspace_sptr &inputWs,
                           const std::string &logName);
   // Retrieve the run number from the logs of the input workspace.
   std::string getRunNumber(Mantid::API::MatrixWorkspace const &ws) const;
 
-  void convertProcessingInstructions(Instrument_const_sptr instrument,
-                                     MatrixWorkspace_sptr inputWS);
-  void convertProcessingInstructions(MatrixWorkspace_sptr inputWS);
+  void convertProcessingInstructions(const Instrument_const_sptr &instrument,
+                                     const MatrixWorkspace_sptr &inputWS);
+  void convertProcessingInstructions(const MatrixWorkspace_sptr &inputWS);
   std::string m_processingInstructionsWorkspaceIndex;
   std::string m_processingInstructions;
 
 protected:
-  std::string
-  convertToSpectrumNumber(const std::string &workspaceIndex,
-                          Mantid::API::MatrixWorkspace_const_sptr ws) const;
+  std::string convertToSpectrumNumber(
+      const std::string &workspaceIndex,
+      const Mantid::API::MatrixWorkspace_const_sptr &ws) const;
   std::string convertProcessingInstructionsToSpectrumNumbers(
       const std::string &instructions,
-      Mantid::API::MatrixWorkspace_const_sptr ws) const;
+      const Mantid::API::MatrixWorkspace_const_sptr &ws) const;
 
-  void setWorkspacePropertyFromChild(Algorithm_sptr alg,
+  void setWorkspacePropertyFromChild(const Algorithm_sptr &alg,
                                      std::string const &propertyName);
 };
 } // namespace Algorithms

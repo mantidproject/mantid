@@ -162,7 +162,7 @@ AffineMatrixParameter::AffineMatrixParameter(const AffineMatrixParameter &other)
  *
  * @param newMatrix : new matrix to use.
  */
-void AffineMatrixParameter::setMatrix(const AffineMatrixType newMatrix) {
+void AffineMatrixParameter::setMatrix(const AffineMatrixType &newMatrix) {
   if (newMatrix.numRows() != this->m_affineMatrix.numRows())
     throw std::runtime_error("setMatrix(): Number of rows must match!");
   if (newMatrix.numCols() != this->m_affineMatrix.numCols())

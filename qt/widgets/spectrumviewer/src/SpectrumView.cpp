@@ -99,7 +99,7 @@ void SpectrumView::resizeEvent(QResizeEvent *event) {
  * @param wksp The matrix workspace to render
  */
 void SpectrumView::renderWorkspace(
-    Mantid::API::MatrixWorkspace_const_sptr wksp) {
+    const Mantid::API::MatrixWorkspace_const_sptr &wksp) {
 
   // Handle rendering of a workspace we already track
   if (replaceExistingWorkspace(wksp->getName(), wksp))

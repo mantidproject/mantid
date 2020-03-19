@@ -82,7 +82,7 @@ const char *emptyURL =
 /**
 Write json object to file
 */
-void writeJsonFile(const std::string &filename, Json::Value json,
+void writeJsonFile(const std::string &filename, const Json::Value &json,
                    const std::string &error) {
   Poco::FileOutputStream filestream(filename);
   if (!filestream.good()) {

@@ -29,6 +29,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <algorithm>
 #include <sstream>
+#include <utility>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -67,9 +68,9 @@ DECLARE_FUNCTION(PLOTPEAKBYLOGVALUETEST_Fun)
 
 class PropertyNameIs {
 public:
-  PropertyNameIs(std::string name) : m_name(name){};
+  PropertyNameIs(std::string name) : m_name(std::move(name)){};
 
-  bool operator()(Mantid::Kernel::PropertyHistory_sptr p) {
+  bool operator()(const Mantid::Kernel::PropertyHistory_sptr &p) {
     return p->name() == m_name;
   }
 

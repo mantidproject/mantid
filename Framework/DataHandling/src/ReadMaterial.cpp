@@ -118,7 +118,7 @@ std::unique_ptr<Kernel::Material> ReadMaterial::buildMaterial() {
   return std::make_unique<Kernel::Material>(builder.build());
 }
 
-void ReadMaterial::setMaterial(const std::string chemicalSymbol,
+void ReadMaterial::setMaterial(const std::string &chemicalSymbol,
                                const int atomicNumber, const int massNumber) {
   if (!chemicalSymbol.empty()) {
     builder.setFormula(chemicalSymbol);

@@ -30,11 +30,12 @@ public:
 private:
   void init() override;
   void exec() override;
-  void pushMinimum(API::MatrixWorkspace_const_sptr minWS,
-                   API::MatrixWorkspace_sptr wksp, API::Progress &prog);
-  void changeNegatives(API::MatrixWorkspace_const_sptr minWS,
+  void pushMinimum(const API::MatrixWorkspace_const_sptr &minWS,
+                   const API::MatrixWorkspace_sptr &wksp, API::Progress &prog);
+  void changeNegatives(const API::MatrixWorkspace_const_sptr &minWS,
                        const double spectrumNegativeValues,
-                       API::MatrixWorkspace_sptr wksp, API::Progress &prog);
+                       const API::MatrixWorkspace_sptr &wksp,
+                       API::Progress &prog);
 };
 
 } // namespace Algorithms

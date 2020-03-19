@@ -50,7 +50,7 @@ IAlgorithm_sptr algorithmWithPropertiesSet(const std::string &inputWSName,
 // algorithm (a MatrixWorkspace and an empty GroupWorkspace).
 class setUpADSWithWorkspace {
 public:
-  setUpADSWithWorkspace(Workspace_sptr ws) {
+  setUpADSWithWorkspace(const Workspace_sptr &ws) {
     AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
     wsGroup = boost::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().addOrReplace(groupWSName, wsGroup);

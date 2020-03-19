@@ -145,8 +145,9 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
  * @param unit: the selected unit
  * @returns a unique pointer to an MDFrame
  */
-MDFrame_uptr ImportMDHistoWorkspaceBase::createMDFrame(std::string frame,
-                                                       std::string unit) {
+MDFrame_uptr
+ImportMDHistoWorkspaceBase::createMDFrame(const std::string &frame,
+                                          const std::string &unit) {
   auto frameFactory = makeMDFrameFactoryChain();
   MDFrameArgument frameArg(frame, unit);
   return frameFactory->create(frameArg);

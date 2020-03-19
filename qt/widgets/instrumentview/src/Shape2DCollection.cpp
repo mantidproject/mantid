@@ -677,7 +677,7 @@ void Shape2DCollection::saveToTableWorkspace() {
  * @param ws :: table workspace to load shapes from.
  */
 void Shape2DCollection::loadFromTableWorkspace(
-    Mantid::API::ITableWorkspace_const_sptr ws) {
+    const Mantid::API::ITableWorkspace_const_sptr &ws) {
   using namespace Mantid::API;
   auto columnNames = ws->getColumnNames();
 

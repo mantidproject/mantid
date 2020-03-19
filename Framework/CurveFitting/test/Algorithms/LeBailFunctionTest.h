@@ -428,7 +428,8 @@ public:
     return ws;
   }
 
-  void importDataFromColumnFile(std::string filename, std::vector<double> &vecX,
+  void importDataFromColumnFile(const std::string &filename,
+                                std::vector<double> &vecX,
                                 std::vector<double> &vecY,
                                 std::vector<double> &vecE) {
     std::ifstream ins;

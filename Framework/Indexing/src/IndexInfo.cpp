@@ -174,7 +174,8 @@ void IndexInfo::setSpectrumDefinitions(
  * indices. Validation requires access to the instrument and thus cannot be done
  * internally in IndexInfo, i.e., spectrum definitions must be set by hand. */
 void IndexInfo::setSpectrumDefinitions(
-    Kernel::cow_ptr<std::vector<SpectrumDefinition>> spectrumDefinitions) {
+    const Kernel::cow_ptr<std::vector<SpectrumDefinition>>
+        &spectrumDefinitions) {
   if (!spectrumDefinitions || (size() != spectrumDefinitions->size()))
     throw std::runtime_error(
         "IndexInfo: Size mismatch when setting new spectrum definitions");

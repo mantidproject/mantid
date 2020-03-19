@@ -256,7 +256,8 @@ PoldiFitPeaks1D2::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
 }
 
 void PoldiFitPeaks1D2::setValuesFromProfileFunction(
-    PoldiPeak_sptr poldiPeak, const IFunction_sptr &fittedFunction) const {
+    const PoldiPeak_sptr &poldiPeak,
+    const IFunction_sptr &fittedFunction) const {
   IPeakFunction_sptr peakFunction =
       boost::dynamic_pointer_cast<IPeakFunction>(fittedFunction);
 
@@ -271,8 +272,8 @@ void PoldiFitPeaks1D2::setValuesFromProfileFunction(
   }
 }
 
-double
-PoldiFitPeaks1D2::getFwhmWidthRelation(IPeakFunction_sptr peakFunction) const {
+double PoldiFitPeaks1D2::getFwhmWidthRelation(
+    const IPeakFunction_sptr &peakFunction) const {
   return peakFunction->fwhm() / peakFunction->getParameter(2);
 }
 

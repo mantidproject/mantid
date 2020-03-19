@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <utility>
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidQtWidgets/Common/HintStrategy.h"
@@ -18,7 +20,7 @@ class AlgorithmHintStrategy : public HintStrategy {
 public:
   AlgorithmHintStrategy(Mantid::API::IAlgorithm_sptr algorithm,
                         std::vector<std::string> blacklist)
-      : m_algorithm(algorithm), m_blacklist(blacklist) {}
+      : m_algorithm(std::move(algorithm)), m_blacklist(std::move(blacklist)) {}
 
   AlgorithmHintStrategy(std::string const &algorithmName,
                         std::vector<std::string> blacklist)

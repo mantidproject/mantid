@@ -31,7 +31,7 @@ private:
   Helper function. Creates a peaksworkspace with a single peak
   */
   PeakWorkspaceWithExtents
-  createPeaksWorkspace(const std::string coordFrame, double xMinFromPeak,
+  createPeaksWorkspace(const std::string &coordFrame, double xMinFromPeak,
                        double xMaxFromPeak, double yMinFromPeak,
                        double yMaxFromPeak, double zMinFromPeak,
                        double zMaxFromPeak) {
@@ -267,7 +267,7 @@ public:
                                       -0.5); // outside zmax
   }
 
-  void do_test_bounds_check_extents(const std::string coordFrame,
+  void do_test_bounds_check_extents(const std::string &coordFrame,
                                     double xMinFromPeak, double xMaxFromPeak,
                                     double yMinFromPeak, double yMaxFromPeak,
                                     double zMinFromPeak, double zMaxFromPeak,

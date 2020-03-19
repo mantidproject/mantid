@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidMDAlgorithms/ConvertCWPDMDToSpectra.h"
 
 #include "MantidAPI/Axis.h"
@@ -208,8 +210,9 @@ void ConvertCWPDMDToSpectra::exec() {
  * @return
  */
 API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
-    API::IMDEventWorkspace_const_sptr dataws,
-    IMDEventWorkspace_const_sptr monitorws, const std::string targetunit,
+    const API::IMDEventWorkspace_const_sptr &dataws,
+    const IMDEventWorkspace_const_sptr &monitorws,
+    const std::string &targetunit,
     const std::map<int, double> &map_runwavelength, const double xmin,
     const double xmax, const double binsize, bool dolinearinterpolation,
     const std::vector<detid_t> &vec_excludeddets) {
@@ -259,7 +262,8 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     unitchar = 'q';
 
   binMD(dataws, unitchar, map_runwavelength, vecx, vecy, vec_excludeddets);
-  binMD(monitorws, unitchar, map_runwavelength, vecx, vecm, vec_excludeddets);
+  binMD(std::move(monitorws), unitchar, map_runwavelength, vecx, vecm,
+        vec_excludeddets);
 
   // Normalize by division
   double maxmonitorcounts = 0;
@@ -317,7 +321,8 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
  * @param xmax :: (output) upper binning boundary
  */
 void ConvertCWPDMDToSpectra::findXBoundary(
-    API::IMDEventWorkspace_const_sptr dataws, const std::string &targetunit,
+    const API::IMDEventWorkspace_const_sptr &dataws,
+    const std::string &targetunit,
     const std::map<int, double> &map_runwavelength, double &xmin,
     double &xmax) {
   // Go through all instruments
@@ -425,12 +430,10 @@ void ConvertCWPDMDToSpectra::findXBoundary(
  * @param vecy
  * @param vec_excludedet
  */
-void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
-                                   const char &unitbit,
-                                   const std::map<int, double> &map_runlambda,
-                                   const std::vector<double> &vecx,
-                                   std::vector<double> &vecy,
-                                   const std::vector<detid_t> &vec_excludedet) {
+void ConvertCWPDMDToSpectra::binMD(
+    const API::IMDEventWorkspace_const_sptr &mdws, const char &unitbit,
+    const std::map<int, double> &map_runlambda, const std::vector<double> &vecx,
+    std::vector<double> &vecy, const std::vector<detid_t> &vec_excludedet) {
   // Check whether MD workspace has proper instrument and experiment Info
   if (mdws->getNumExperimentInfo() == 0)
     throw std::runtime_error(
@@ -599,7 +602,7 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
  * @param infinitesimal
  */
 void ConvertCWPDMDToSpectra::linearInterpolation(
-    API::MatrixWorkspace_sptr matrixws, const double &infinitesimal) {
+    const API::MatrixWorkspace_sptr &matrixws, const double &infinitesimal) {
   g_log.debug() << "Number of spectrum = " << matrixws->getNumberHistograms()
                 << " Infinitesimal = " << infinitesimal << "\n";
   size_t numspec = matrixws->getNumberHistograms();
@@ -670,8 +673,8 @@ void ConvertCWPDMDToSpectra::linearInterpolation(
  * @param inputmdws
  */
 void ConvertCWPDMDToSpectra::setupSampleLogs(
-    API::MatrixWorkspace_sptr matrixws,
-    API::IMDEventWorkspace_const_sptr inputmdws) {
+    const API::MatrixWorkspace_sptr &matrixws,
+    const API::IMDEventWorkspace_const_sptr &inputmdws) {
   // get hold of the last experiment info from md workspace to copy over
   auto lastindex = static_cast<uint16_t>(inputmdws->getNumExperimentInfo() - 1);
   ExperimentInfo_const_sptr lastexpinfo =
@@ -696,7 +699,7 @@ void ConvertCWPDMDToSpectra::setupSampleLogs(
  * @param infinitesimal
  */
 void ConvertCWPDMDToSpectra::scaleMatrixWorkspace(
-    API::MatrixWorkspace_sptr matrixws, const double &scalefactor,
+    const API::MatrixWorkspace_sptr &matrixws, const double &scalefactor,
     const double &infinitesimal) {
   size_t numspec = matrixws->getNumberHistograms();
   for (size_t iws = 0; iws < numspec; ++iws) {

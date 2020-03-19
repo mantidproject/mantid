@@ -49,7 +49,7 @@ private:
   void exec() override;
 
   /// Load file to a vector of strings
-  void loadFile(std::string filename, std::vector<std::string> &lines);
+  void loadFile(const std::string &filename, std::vector<std::string> &lines);
 
   /// Get Histogram type
   std::string getHistogramType(const std::vector<std::string> &lines);

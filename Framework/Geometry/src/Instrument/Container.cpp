@@ -16,6 +16,7 @@
 #include "Poco/SAX/InputSource.h"
 #include "Poco/SAX/SAXException.h"
 #include <boost/make_shared.hpp>
+#include <utility>
 
 namespace Mantid {
 namespace Geometry {
@@ -55,7 +56,7 @@ void updateTreeValues(Poco::XML::Element *root,
 //------------------------------------------------------------------------------
 Container::Container() : m_shape(boost::make_shared<CSGObject>()) {}
 
-Container::Container(IObject_sptr shape) : m_shape(shape) {}
+Container::Container(IObject_sptr shape) : m_shape(std::move(shape)) {}
 
 Container::Container(const Container &container)
     : m_shape(IObject_sptr(container.m_shape->clone())),

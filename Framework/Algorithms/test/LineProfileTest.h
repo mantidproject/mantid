@@ -584,9 +584,9 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr profileOverTwoSpectra(MatrixWorkspace_sptr inputWS,
-                                             const int start, const int end,
-                                             const std::string &mode) {
+  MatrixWorkspace_sptr
+  profileOverTwoSpectra(const MatrixWorkspace_sptr &inputWS, const int start,
+                        const int end, const std::string &mode) {
     LineProfile alg;
     // Don't put output in ADS by default
     alg.setChild(true);

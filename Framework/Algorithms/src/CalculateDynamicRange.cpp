@@ -73,9 +73,9 @@ void CalculateDynamicRange::init() {
  * @param indices : the list of workspace indices
  * @param compName : the name of the detector component
  */
-void CalculateDynamicRange::calculateQMinMax(MatrixWorkspace_sptr workspace,
-                                             const std::vector<size_t> &indices,
-                                             const std::string &compName = "") {
+void CalculateDynamicRange::calculateQMinMax(
+    const MatrixWorkspace_sptr &workspace, const std::vector<size_t> &indices,
+    const std::string &compName = "") {
   const auto &spectrumInfo = workspace->spectrumInfo();
   double min = std::numeric_limits<double>::max(),
          max = std::numeric_limits<double>::min();

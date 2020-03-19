@@ -187,7 +187,7 @@ public:
   }
 
 private:
-  void setUnits(MatrixWorkspace_sptr ws) {
+  void setUnits(const MatrixWorkspace_sptr &ws) {
     ws->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
     ws->getAxis(1)->unit() = UnitFactory::Instance().create("Momentum");
     ws->setYUnit("Counts");

@@ -49,7 +49,7 @@ const static std::string STATUS("FitStatus");
  *
  * @param ws The TableWorkspace to add the columns to.
  */
-void addEPPColumns(API::ITableWorkspace_sptr ws) {
+void addEPPColumns(const API::ITableWorkspace_sptr &ws) {
   ws->addColumn("int", ColumnNames::WS_INDEX);
   ws->addColumn("double", ColumnNames::PEAK_CENTRE);
   ws->addColumn("double", ColumnNames::PEAK_CENTRE_ERR);

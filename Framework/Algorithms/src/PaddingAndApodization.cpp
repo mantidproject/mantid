@@ -144,7 +144,7 @@ using fptr = double (*)(const double, const double);
  * @param method :: [input] The name of the chosen function
  * @returns :: pointer to the function
  */
-fptr PaddingAndApodization::getApodizationFunction(const std::string method) {
+fptr PaddingAndApodization::getApodizationFunction(const std::string &method) {
   if (method == "None") {
     return ApodizationFunctions::none;
   } else if (method == "Lorentz") {

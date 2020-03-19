@@ -93,7 +93,7 @@ private:
 
   /// Saves out x errors
   void saveXerrors(std::ofstream &stream,
-                   const Mantid::DataObjects::Workspace2D_sptr workspace,
+                   const Mantid::DataObjects::Workspace2D_sptr &workspace,
                    const size_t numberOfHist);
 
   /// The name of the file used for storing the workspace

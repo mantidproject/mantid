@@ -18,6 +18,8 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
+#include <utility>
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace MDF {
@@ -38,7 +40,7 @@ auto FUNCTION_CURVE_COLOR = Qt::magenta;
 MDFFunctionPlotData::MDFFunctionPlotData(
     boost::shared_ptr<Mantid::API::IFunction> fun, double startX, double endX,
     size_t nX)
-    : m_function(fun), m_functionCurve(new QwtPlotCurve()) {
+    : m_function(std::move(fun)), m_functionCurve(new QwtPlotCurve()) {
   setDomain(startX, endX, nX);
   auto pen = m_functionCurve->pen();
   pen.setColor(FUNCTION_CURVE_COLOR);

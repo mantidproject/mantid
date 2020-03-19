@@ -14,22 +14,23 @@ using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
-void observeFinish(AlgorithmObserver &self, boost::python::object alg) {
+void observeFinish(AlgorithmObserver &self, const boost::python::object &alg) {
   IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.observeFinish(calg);
 }
 
-void observeError(AlgorithmObserver &self, boost::python::object alg) {
+void observeError(AlgorithmObserver &self, const boost::python::object &alg) {
   IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.observeError(calg);
 }
 
-void observeProgress(AlgorithmObserver &self, boost::python::object alg) {
+void observeProgress(AlgorithmObserver &self,
+                     const boost::python::object &alg) {
   IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.observeProgress(calg);
 }
 
-void stopObserving(AlgorithmObserver &self, boost::python::object alg) {
+void stopObserving(AlgorithmObserver &self, const boost::python::object &alg) {
   IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.stopObserving(calg);
 }

@@ -19,6 +19,8 @@
 #include "MantidKernel/System.h"
 #include "Poco/Path.h"
 #include <stdexcept>
+#include <utility>
+
 #ifdef MPI_BUILD
 #include <boost/mpi.hpp>
 #endif
@@ -135,7 +137,7 @@ void GenericDataProcessorAlgorithm<Base>::mapPropertyName(
  */
 template <class Base>
 void GenericDataProcessorAlgorithm<Base>::copyProperty(
-    API::Algorithm_sptr alg, const std::string &name) {
+    const API::Algorithm_sptr &alg, const std::string &name) {
   if (!alg->existsProperty(name)) {
     std::stringstream msg;
     msg << "Algorithm \"" << alg->name() << "\" does not have property \""
@@ -232,7 +234,7 @@ GenericDataProcessorAlgorithm<Base>::loadChunk(const size_t rowIndex) {
 template <class Base>
 Workspace_sptr
 GenericDataProcessorAlgorithm<Base>::assemble(Workspace_sptr partialWS) {
-  Workspace_sptr outputWS = partialWS;
+  Workspace_sptr outputWS = std::move(partialWS);
 #ifdef MPI_BUILD
   IAlgorithm_sptr gatherAlg = createChildAlgorithm("GatherWorkspaces");
   gatherAlg->setLogging(true);

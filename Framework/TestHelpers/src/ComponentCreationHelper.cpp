@@ -531,7 +531,7 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
 //----------------------------------------------------------------------------------------------
 
 void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
-                        double pixelSpacing, std::string bankName,
+                        double pixelSpacing, const std::string &bankName,
                         const V3D &bankPos, const Quat &bankRot) {
 
   const double cylRadius(pixelSpacing / 2);

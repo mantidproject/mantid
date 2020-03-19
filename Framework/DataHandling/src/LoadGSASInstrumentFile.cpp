@@ -214,7 +214,8 @@ void LoadGSASInstrumentFile::exec() {
  * @param filename :: string for name of the .prm file
  * @param lines :: vector of strings for each non-empty line in .prm file
  */
-void LoadGSASInstrumentFile::loadFile(string filename, vector<string> &lines) {
+void LoadGSASInstrumentFile::loadFile(const string &filename,
+                                      vector<string> &lines) {
   string line;
 
   // the variable of type ifstream:

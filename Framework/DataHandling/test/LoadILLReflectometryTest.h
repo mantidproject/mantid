@@ -34,7 +34,7 @@ private:
   // Name of the default output workspace
   const std::string m_outWSName{"LoadILLReflectometryTest_OutputWS"};
 
-  static void commonProperties(MatrixWorkspace_sptr output,
+  static void commonProperties(const MatrixWorkspace_sptr &output,
                                const std::string &instrName) {
     TS_ASSERT(output->isHistogramData())
     const auto &spectrumInfo = output->spectrumInfo();
@@ -59,7 +59,7 @@ private:
                      "degree")
   }
 
-  static double detCounts(MatrixWorkspace_sptr output) {
+  static double detCounts(const MatrixWorkspace_sptr &output) {
     // sum of detector counts
     double counts{0.0};
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {

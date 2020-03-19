@@ -105,7 +105,7 @@ public:
   }
   static void destroySuite(DownloadInstrumentTest *suite) { delete suite; }
 
-  void createDirectory(Poco::Path path) {
+  void createDirectory(const Poco::Path &path) {
     Poco::File file(path);
     if (file.createDirectory()) {
       m_directoriesToRemove.emplace_back(file);

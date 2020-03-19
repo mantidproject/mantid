@@ -45,7 +45,8 @@ public:
     TS_ASSERT(!alg.isExecuted());
   }
 
-  void doTest(MatrixWorkspace_sptr inws, MatrixWorkspace_sptr monws) {
+  void doTest(const MatrixWorkspace_sptr &inws,
+              const MatrixWorkspace_sptr &monws) {
     inws->setMonitorWorkspace(monws);
     TS_ASSERT_EQUALS(inws->monitorWorkspace(), monws);
 

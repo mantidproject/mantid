@@ -12,6 +12,7 @@
 #include <boost/format.hpp>
 
 #include <sstream>
+#include <utility>
 
 using namespace Mantid::API;
 
@@ -227,7 +228,7 @@ tryPassFormatArgument(boost::basic_format<char> &formatString,
   }
 }
 
-std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
+std::pair<double, double> getBinRange(const MatrixWorkspace_sptr &workspace) {
   return std::make_pair(workspace->x(0).front(), workspace->x(0).back());
 }
 
@@ -275,7 +276,8 @@ namespace IDA {
 
 IndirectFitDataLegacy::IndirectFitDataLegacy(MatrixWorkspace_sptr workspace,
                                              const SpectraLegacy &spectra)
-    : m_workspace(workspace), m_spectra(DiscontinuousSpectra<std::size_t>("")) {
+    : m_workspace(std::move(workspace)),
+      m_spectra(DiscontinuousSpectra<std::size_t>("")) {
   setSpectra(spectra);
 }
 

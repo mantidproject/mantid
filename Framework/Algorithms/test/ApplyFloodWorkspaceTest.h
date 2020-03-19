@@ -65,9 +65,9 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr
-  createFloodWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
-                       std::string const &xUnit = "TOF") {
+  MatrixWorkspace_sptr createFloodWorkspace(
+      const Mantid::Geometry::Instrument_const_sptr &instrument,
+      std::string const &xUnit = "TOF") {
     MatrixWorkspace_sptr flood = create2DWorkspace(4, 1);
     flood->mutableY(0)[0] = 0.7;
     flood->mutableY(1)[0] = 1.0;

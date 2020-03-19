@@ -121,7 +121,7 @@ void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
 // TODO should flip for mask
 void SaveDiffCal::writeIntFieldFromSVWS(
     H5::Group &group, const std::string &name,
-    DataObjects::SpecialWorkspace2D_const_sptr ws) {
+    const DataObjects::SpecialWorkspace2D_const_sptr &ws) {
   const bool isMask = (name == "use");
 
   // output array defaults to all one (one group, use the pixel)

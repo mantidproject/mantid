@@ -64,7 +64,8 @@ void LinePlotOptions::addPlotRadioButton(const std::string &text,
 
 //------------------------------------------------------------------------------
 /** Set the original workspace, to show the axes plot choice */
-void LinePlotOptions::setOriginalWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
+void LinePlotOptions::setOriginalWorkspace(
+    const Mantid::API::IMDWorkspace_sptr &ws) {
   if (!ws)
     return;
 

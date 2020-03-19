@@ -35,13 +35,13 @@ private:
   void exec() override;
 
   DataObjects::EventWorkspace_sptr
-  getMonitorWorkspace(API::MatrixWorkspace_sptr inputWS);
+  getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWS);
   DataObjects::EventWorkspace_sptr
-  cloneInputWorkspace(API::Workspace_sptr inputWS);
-  void runMaskDetectors(API::MatrixWorkspace_sptr inputWS,
-                        API::MatrixWorkspace_sptr maskWS);
-  void runFilterByXValue(API::MatrixWorkspace_sptr inputWS, const double xmin,
-                         const double xmax);
+  cloneInputWorkspace(const API::Workspace_sptr &inputWS);
+  void runMaskDetectors(const API::MatrixWorkspace_sptr &inputWS,
+                        const API::MatrixWorkspace_sptr &maskWS);
+  void runFilterByXValue(const API::MatrixWorkspace_sptr &inputWS,
+                         const double xmin, const double xmax);
 };
 
 } // namespace WorkflowAlgorithms

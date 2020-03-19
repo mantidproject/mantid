@@ -26,9 +26,9 @@ public:
     const static std::string SAMPLE_WAVINESS;
     const static std::string SECOND_SLIT_ANGULAR_SPREAD;
   };
-  static double slitSeparation(Geometry::Instrument_const_sptr instrument,
-                               const std::string &slit1Name,
-                               const std::string &slit2Name);
+  static double
+  slitSeparation(const Geometry::Instrument_const_sptr &instrument,
+                 const std::string &slit1Name, const std::string &slit2Name);
   const std::string name() const override;
   int version() const override;
   const std::string category() const override;

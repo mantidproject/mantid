@@ -34,8 +34,8 @@ using namespace Mantid::Types::Core;
 
 namespace {
 MatrixWorkspace_sptr createTestScanningWS(size_t nTubes, size_t nPixelsPerTube,
-                                          std::vector<double> rotations,
-                                          std::string name = "testWS") {
+                                          const std::vector<double> &rotations,
+                                          const std::string &name = "testWS") {
   const auto instrument = ComponentCreationHelper::createInstrumentWithPSDTubes(
       nTubes, nPixelsPerTube, true);
   size_t nTimeIndexes = rotations.size();
@@ -131,7 +131,7 @@ public:
       TS_ASSERT_DELTA(yAxis->getValue(i), 0.003 * double(i), 1e-6)
   }
 
-  void verifySpectraHaveSameCounts(MatrixWorkspace_sptr outWS,
+  void verifySpectraHaveSameCounts(const MatrixWorkspace_sptr &outWS,
                                    double expectedCounts = 2.0,
                                    double expectedErrors = sqrt(2.0),
                                    bool checkErrors = true) {
@@ -143,7 +143,7 @@ public:
       }
   }
 
-  void verifySpectraCountsForScan(MatrixWorkspace_sptr outWS) {
+  void verifySpectraCountsForScan(const MatrixWorkspace_sptr &outWS) {
     size_t bin = 0;
     for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
       TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)

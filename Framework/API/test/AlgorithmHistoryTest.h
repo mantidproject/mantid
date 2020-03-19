@@ -239,7 +239,7 @@ private:
     return AlgorithmHistory(&alg, execTime, 14.0, m_execCount++);
   }
 
-  AlgorithmHistory createFromTestAlg(std::string paramValue) {
+  AlgorithmHistory createFromTestAlg(const std::string &paramValue) {
     Algorithm *testInput = new testalg;
     testInput->initialize();
     testInput->setPropertyValue("arg1_param", paramValue);

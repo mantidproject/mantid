@@ -405,7 +405,7 @@ std::string SpaceGroupFactoryImpl::getTransformedSymbolOrthorhombic(
 /// Returns a copy-constructed instance of the supplied space group prototype
 /// object.
 SpaceGroup_const_sptr SpaceGroupFactoryImpl::constructFromPrototype(
-    const SpaceGroup_const_sptr prototype) const {
+    const SpaceGroup_const_sptr &prototype) const {
   return boost::make_shared<const SpaceGroup>(*prototype);
 }
 

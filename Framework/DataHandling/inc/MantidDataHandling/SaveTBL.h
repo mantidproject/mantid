@@ -53,7 +53,7 @@ private:
   /// the separator
   const char m_sep;
   // populates the map and vector containing grouping information
-  void findGroups(API::ITableWorkspace_sptr ws);
+  void findGroups(const API::ITableWorkspace_sptr &ws);
   /// Map the separator options to their string equivalents
   std::map<int, std::vector<size_t>> m_stichgroups;
   std::vector<size_t> m_nogroup;

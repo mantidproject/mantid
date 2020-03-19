@@ -55,7 +55,7 @@ private:
                        const int maxVal,
                        const Kernel::TimeSeriesProperty<int> *log,
                        std::vector<int> &Y);
-  void addMonitorCounts(API::ITableWorkspace_sptr outputWorkspace,
+  void addMonitorCounts(const API::ITableWorkspace_sptr &outputWorkspace,
                         const Kernel::TimeSeriesProperty<int> *log,
                         const int minVal, const int maxVal);
   std::vector<std::pair<std::string, const Kernel::ITimeSeriesProperty *>>

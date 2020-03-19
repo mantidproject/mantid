@@ -474,7 +474,7 @@ void SANSPlotSpecial::setupTable() {
 
 QwtPlotCurve *SANSPlotSpecial::plotMiniplot(
     QwtPlotCurve *curve,
-    boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace,
+    const boost::shared_ptr<Mantid::API::MatrixWorkspace> &workspace,
     size_t workspaceIndex) {
   bool data = (curve == m_dataCurve);
 

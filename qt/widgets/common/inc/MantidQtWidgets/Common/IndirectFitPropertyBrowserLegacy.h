@@ -34,7 +34,7 @@ public:
   boost::optional<size_t> backgroundIndex() const;
 
   boost::optional<size_t>
-  functionIndex(Mantid::API::IFunction_sptr function) const;
+  functionIndex(const Mantid::API::IFunction_sptr &function) const;
 
   QString selectedFitType() const;
 
@@ -55,7 +55,7 @@ public:
   void setParameterValue(const std::string &functionName,
                          const std::string &parameterName, double value);
 
-  void setParameterValue(Mantid::API::IFunction_sptr function,
+  void setParameterValue(const Mantid::API::IFunction_sptr &function,
                          const std::string &parameterName, double value);
 
   void setBackground(const std::string &backgroundName);
@@ -134,7 +134,8 @@ public:
 
   void setWorkspaceIndex(int i) override;
 
-  void updatePlotGuess(Mantid::API::MatrixWorkspace_const_sptr sampleWorkspace);
+  void updatePlotGuess(
+      const Mantid::API::MatrixWorkspace_const_sptr &sampleWorkspace);
 
 public slots:
   void fit() override;

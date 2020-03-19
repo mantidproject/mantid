@@ -148,7 +148,8 @@ SANSEventSlicing::runSliceEvent(const QString &code) {
   return values2ChargeAndTime(result);
 }
 
-void SANSEventSlicing::raiseWarning(QString title, QString message) {
+void SANSEventSlicing::raiseWarning(const QString &title,
+                                    const QString &message) {
   QMessageBox::warning(this, title, message);
 }
 

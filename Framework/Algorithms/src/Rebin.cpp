@@ -309,8 +309,9 @@ void Rebin::exec() {
  *  @param outputWS :: The output workspace
  *  @param hist ::    The index of the current histogram
  */
-void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
-                           API::MatrixWorkspace_sptr outputWS, int hist) {
+void Rebin::propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS,
+                           const API::MatrixWorkspace_sptr &outputWS,
+                           int hist) {
   // Not too happy with the efficiency of this way of doing it, but it's a lot
   // simpler to use the
   // existing rebin algorithm to distribute the weights than to re-implement it
