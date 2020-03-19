@@ -300,4 +300,5 @@ class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):
             raise RuntimeError("Interval was not specified")
         return float(value_as_list[0])
 
+
 AlgorithmFactory.subscribe(ReflectometrySliceEventWorkspace())

@@ -279,8 +279,7 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         self.declareProperty('BackgroundRuns', '', 'Background run numbers')
         self.setPropertyGroup('BackgroundRuns', background_title)
         self.declareProperty("BackgroundScale", 1.0,
-                             doc='The background will be scaled by this ' +
-                                 'number before being subtracted.')
+                             doc='The background will be scaled by this ' + 'number before being subtracted.')
         self.setPropertyGroup('BackgroundScale', background_title)
         self.declareProperty(WorkspaceProperty('OutputBackground', '',
                                                optional=PropertyMode.Optional,

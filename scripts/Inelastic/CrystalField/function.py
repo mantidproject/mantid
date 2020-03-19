@@ -625,7 +625,7 @@ class PhysicalProperties(object):
         # Handles special case of first argument being a unit type
         if len(args) > 0:
             try:
-                if self._checkmagunits(args[0], 'bad') is not 'bad':
+                if self._checkmagunits(args[0], 'bad') != 'bad':
                     kwargs['Unit'] = args.pop(0)
             except AttributeError:
                 pass

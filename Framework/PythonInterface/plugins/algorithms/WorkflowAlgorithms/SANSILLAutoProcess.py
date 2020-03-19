@@ -478,4 +478,5 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                            AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
                            PanelOutputWorkspaces=panel_ws_group)
 
+
 AlgorithmFactory.subscribe(SANSILLAutoProcess)

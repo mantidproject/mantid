@@ -563,8 +563,8 @@ class SNAPReduce(DataProcessorAlgorithm):
                 outputWksp = normalizedWS
 
                 if norm == "Extracted from Data" and Process_Mode == "Production":
-                        DeleteWorkspace(Workspace=redWS)
-                        DeleteWorkspace(Workspace=normalizationWS)
+                    DeleteWorkspace(Workspace=redWS)
+                    DeleteWorkspace(Workspace=normalizationWS)
 
             # Save requested formats - function checks that saving is requested
             self._save(runnumber, basename, outputWksp)

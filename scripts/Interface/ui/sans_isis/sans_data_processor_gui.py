@@ -754,7 +754,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.q_1d_max_line_edit.setEnabled(not is_variable)
         self.q_1d_step_line_edit.setEnabled(not is_variable)
         if is_variable:
-            comma_separated_floats_regex_string = "^(\s*[-+]?[0-9]*\.?[0-9]*)(\s*,\s*[-+]?[0-9]*\.?[0-9]*)+\s*$"
+            comma_separated_floats_regex_string = r"^(\s*[-+]?[0-9]*\.?[0-9]*)(\s*,\s*[-+]?[0-9]*\.?[0-9]*)+\s*$"
             reg_ex = QRegExp(comma_separated_floats_regex_string)
             validator = QRegExpValidator(reg_ex)
             self.q_1d_min_line_edit.setValidator(validator)

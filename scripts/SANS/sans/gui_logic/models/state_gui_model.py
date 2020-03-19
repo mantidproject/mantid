@@ -253,8 +253,8 @@ class StateGuiModel(ModelCommon):
 
     @reduction_mode.setter
     def reduction_mode(self, value):
-        if (value is ReductionMode.LAB or value is ReductionMode.HAB or
-            value is ReductionMode.MERGED or value is ReductionMode.ALL):  # noqa
+        if (value is ReductionMode.LAB or value is ReductionMode.HAB
+                or value is ReductionMode.MERGED or value is ReductionMode.ALL):  # noqa
             if DetectorId.REDUCTION_MODE in self._user_file_items:
                 del self._user_file_items[DetectorId.REDUCTION_MODE]
             new_state_entries = {DetectorId.REDUCTION_MODE: [value]}

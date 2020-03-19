@@ -153,8 +153,8 @@ baseUrl = "http://www.mantidproject.org/"
 if args.s is not None:
     baseUrl = args.s
 if args.i is None:
-    urlList = getTestablePages(baseUrl +
-                               "api.php?action=query&list=categorymembers&format=json&cmlimit=500&cmtitle=Category:Tested%20Examples")
+    urlList = getTestablePages(baseUrl
+                               + "api.php?action=query&list=categorymembers&format=json&cmlimit=500&cmtitle=Category:Tested%20Examples")
 else:
     urlList.append(args.i)
 

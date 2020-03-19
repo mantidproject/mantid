@@ -119,8 +119,8 @@ def is_transmission_type(to_check):
     :param to_check: A SANSDataType object.
     :return: true if the SANSDataType object is a transmission object (transmission or direct) else false.
     """
-    return ((to_check is SANSDataType.SAMPLE_TRANSMISSION) or (to_check is SANSDataType.SAMPLE_DIRECT) or
-            (to_check is SANSDataType.CAN_TRANSMISSION) or (to_check is SANSDataType.CAN_DIRECT))
+    return ((to_check is SANSDataType.SAMPLE_TRANSMISSION) or (to_check is SANSDataType.SAMPLE_DIRECT)
+            or (to_check is SANSDataType.CAN_TRANSMISSION) or (to_check is SANSDataType.CAN_DIRECT))
 
 
 def get_expected_file_tags(file_information, is_transmission, period):

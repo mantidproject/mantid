@@ -126,8 +126,8 @@ class EnginXFocusWithVanadiumCorrection(systemtesting.MantidSystemTest):
         self.assertEqual(integ_tbl.rowCount(), precalc_integ_tbl.rowCount())
         self.assertEqual(integ_tbl.columnCount(), precalc_integ_tbl.columnCount())
         for i in range(integ_tbl.rowCount()):
-            self.assertTrue((0 == integ_tbl.cell(i, 0) and 0 == precalc_integ_tbl.cell(i, 0)) or
-                            rel_err_less_delta(integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0), delta),
+            self.assertTrue((0 == integ_tbl.cell(i, 0) and 0 == precalc_integ_tbl.cell(i, 0))
+                            or rel_err_less_delta(integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0), delta),
                             "Relative difference bigger than gaccepted error (%f) when comparing the "
                             "integration of a spectrum (%f) against the integration previously calculated and "
                             "saved (%f)." % (delta, integ_tbl.cell(i, 0), precalc_integ_tbl.cell(i, 0)))

@@ -897,8 +897,8 @@ class ISISReducer(Reducer):
         if su.are_two_files_identical(idf_path_workspace, idf_path_reducer):
             return
         else:
-            logger.notice("Updating the IDF of the Reducer. Switching from " +
-                          str(idf_path_reducer) + " to " + str(idf_path_workspace))
+            logger.notice("Updating the IDF of the Reducer. Switching from "
+                          + str(idf_path_reducer) + " to " + str(idf_path_workspace))
             idf_path = os.path.basename(idf_path_workspace)
             instrument = self._get_correct_instrument(instrument_name, idf_path)
 

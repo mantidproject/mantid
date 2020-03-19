@@ -90,8 +90,8 @@ class EnggFitTOFFromPeaks(PythonAlgorithm):
 
         num_peaks = fitted_peaks_table.rowCount()
         if num_peaks < 3:
-            raise ValueError('Cannot fit a quadratic function with less than three peaks. Got a table of ' +
-                             'peaks with ' + str(num_peaks) + ' peaks')
+            raise ValueError('Cannot fit a quadratic function with less than three peaks. Got a table of '
+                             + 'peaks with ' + str(num_peaks) + ' peaks')
 
         convert_tbl_alg = self.createChildAlgorithm('ConvertTableToMatrixWorkspace')
         convert_tbl_alg.setProperty('InputWorkspace', fitted_peaks_table)

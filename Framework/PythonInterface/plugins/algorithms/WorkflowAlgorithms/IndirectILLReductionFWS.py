@@ -207,9 +207,9 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                          '$/entry0/instrument/Doppler/velocity_profile$ == 1)'
 
         # force sort x-axis, if interpolation is requested
-        if ((self._back_option == 'Interpolate' and self._background_files) or
-                (self._calib_option == 'Interpolate' and self._calibration_files) or
-                (self._back_calib_option == 'Interpolate' and self._background_calib_files)) \
+        if ((self._back_option == 'Interpolate' and self._background_files)
+            or (self._calib_option == 'Interpolate' and self._calibration_files)
+            or (self._back_calib_option == 'Interpolate' and self._background_calib_files)) \
                 and not self._sortX:
             self.log().warning('Interpolation option requested, X-axis will be sorted.')
             self._sortX = True

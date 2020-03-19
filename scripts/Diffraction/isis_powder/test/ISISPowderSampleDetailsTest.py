@@ -282,10 +282,10 @@ class ISISPowderSampleDetailsTest(unittest.TestCase):
                                                        scattering_cross_section=expected_scattering_x_section)
             sample_details_obj.print_sample_details()
             captured_std_out_material_props = std_out_buffer.getvalue()
-            assertRegex(self, captured_std_out_material_props, "Absorption cross section: " +
-                        str(expected_abs_x_section))
-            assertRegex(self, captured_std_out_material_props, "Scattering cross section: " +
-                        str(expected_scattering_x_section))
+            assertRegex(self, captured_std_out_material_props, "Absorption cross section: "
+                        + str(expected_abs_x_section))
+            assertRegex(self, captured_std_out_material_props, "Scattering cross section: "
+                        + str(expected_scattering_x_section))
         finally:
             # Ensure std IO is restored. Do NOT remove this line as all std out will pipe into our buffer otherwise
             sys.stdout = old_std_out

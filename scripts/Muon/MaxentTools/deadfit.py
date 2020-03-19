@@ -36,12 +36,7 @@ def DEADFIT(
     DETECT_c = scale - DETECT_d
     DETECT_d = scale
     corr = datt**2 * tau[np.newaxis, :]
-    datum = np.where(
-        sigma <= 1.E3,
-        datt +
-        corr -
-        np.outer(DETECT_e, DETECT_d),
-        datum)
+    datum = np.where(sigma <= 1.E3, datt + corr - np.outer(DETECT_e, DETECT_d), datum)
 
     mylog.debug("amplitudes of exponentials:" + str(DETECT_d))
     mylog.debug("changes this cycle:" + str(DETECT_c))

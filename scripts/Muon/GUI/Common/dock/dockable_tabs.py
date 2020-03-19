@@ -179,7 +179,7 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
         """
         # Remove the tab if it is attached
         attached = False
-        for index in xrange(self.count()):
+        for index in range(self.count()):
             if str(name) == str(self.tabText(index)):
                 self.removeTab(index)
                 attached = True

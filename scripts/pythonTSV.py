@@ -48,6 +48,7 @@ def loadFromTSV(TSV, key, value):
     else:
         raise TypeError("Value is not recognised by TSVSerialiser")
 
+
 """
 The line name cannot contain:
 spaces, underscores or dashes

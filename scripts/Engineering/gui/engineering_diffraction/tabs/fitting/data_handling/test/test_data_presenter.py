@@ -146,7 +146,7 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         self.assertEqual({"new": "ws1", "name2": "ws2"}, model_dict)
         self.assertTrue("new" in self.presenter.row_numbers)
-        self.assertFalse("name1" is self.presenter.row_numbers)
+        self.assertFalse("name1" == self.presenter.row_numbers)
         self.assertEqual(1, self.presenter.all_plots_removed_notifier.notify_subscribers.call_count)
 
     def test_rename_workspace_not_tracked(self):

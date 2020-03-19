@@ -43,8 +43,7 @@ def select_reduction_alg(split_for_event_slices, use_compatibility_mode,
     :return:whether or not we're event slicing (bool); reduction packages
     """
     if (split_for_event_slices and not
-            use_compatibility_mode and
-            event_slice_optimisation_selected):
+            use_compatibility_mode and event_slice_optimisation_selected):
         # If using compatibility mode we convert to histogram immediately after taking event slices,
         # so would not be able to perform operations on event workspaces pre-slicing.
         event_slice_optimisation = True
@@ -866,8 +865,8 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
     is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
     is_part_of_wavelength_range_reduction = reduction_package.is_part_of_wavelength_range_reduction
-    is_group = (is_part_of_multi_period_reduction or is_part_of_event_slice_reduction or
-                is_part_of_wavelength_range_reduction or event_slice_optimisation)
+    is_group = (is_part_of_multi_period_reduction or is_part_of_event_slice_reduction
+                or is_part_of_wavelength_range_reduction or event_slice_optimisation)
     multi_reduction_type = {"period": is_part_of_multi_period_reduction,
                             "event_slice": is_part_of_event_slice_reduction,
                             "wavelength_range": is_part_of_wavelength_range_reduction}

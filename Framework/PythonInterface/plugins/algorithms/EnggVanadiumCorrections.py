@@ -302,15 +302,15 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
         output_params_prop_name = "OutputParameters"
         if not hasattr(fit_output, output_params_prop_name):
-            raise RuntimeError("Could not find the parameters workspace expected in the output property " +
-                               output_params_prop_name + " from the algorithm Fit. It seems that this algorithm failed."
-                               + failure_msg)
+            raise RuntimeError("Could not find the parameters workspace expected in the output property "
+                               + output_params_prop_name
+                               + " from the algorithm Fit. It seems that this algorithm failed." + failure_msg)
 
         try:
             fit_ws = fit_output.OutputWorkspace
         except AttributeError:
-            raise RuntimeError("Could not find the data workspace expected in the output property " +
-                               "OutputWorkspace" + ". " + failure_msg)
+            raise RuntimeError("Could not find the data workspace expected in the output property "
+                               + "OutputWorkspace" + ". " + failure_msg)
 
         mtd['engg_van_ws_dsp'] = vanadium_ws
         mtd['engg_fit_ws_dsp'] = fit_ws

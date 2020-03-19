@@ -399,5 +399,6 @@ class SANSILLIntegration(PythonAlgorithm):
                 for i in range(mtd[ws_out].getNumberHistograms()):
                     mtd[ws_out].setDx(i, res)
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSILLIntegration)

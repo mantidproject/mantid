@@ -49,10 +49,10 @@ def check_future_import(content):
 
 def mantid_algorithm_used_without_import(content):
     for attr in dir(simpleapi):
-        if (not attr.startswith('_') and attr == attr.title() and
-                attr_called(attr, content) and not
-                attr_imported(attr, content)):
-                return True
+        if (not attr.startswith('_') and attr == attr.title()
+                and attr_called(attr, content)
+                and not attr_imported(attr, content)):
+            return True
     return False
 
 

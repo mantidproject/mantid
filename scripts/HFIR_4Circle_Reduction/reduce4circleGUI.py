@@ -61,7 +61,7 @@ if PYQT4:
     try:
         from mantidqtpython import MantidQt
         SCROLL_AVAILABLE = True
-    except ImportError as e:
+    except ImportError:
         SCROLL_AVAILABLE = False
 if six.PY3:
     unicode = str

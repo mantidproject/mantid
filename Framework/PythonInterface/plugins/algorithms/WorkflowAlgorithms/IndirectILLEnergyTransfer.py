@@ -772,5 +772,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
                              NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLEnergyTransfer)
