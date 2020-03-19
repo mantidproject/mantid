@@ -932,8 +932,7 @@ void EventList::clearData() { this->clear(false); }
  */
 void EventList::setMRU(EventWorkspaceMRU *newMRU) { mru = newMRU; }
 
-/** Reserve a certain number of entries in  event list of the specified
- *eventType
+/** Reserve a certain number of entries in event list of the specified eventType
  *
  * Calls std::vector<>::reserve() in order to pre-allocate the length of the
  *event list vector.
