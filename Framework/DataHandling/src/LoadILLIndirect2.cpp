@@ -13,9 +13,11 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <cmath>
@@ -94,7 +96,7 @@ void LoadILLIndirect2::exec() {
   NeXus::NXRoot dataRoot(filenameData);
   NXEntry firstEntry = dataRoot.openFirstEntry();
 
-  // Load Data details (number of tubes, channels, etc)
+  // Load Data details (number of tubes, channels, mode, etc)
   loadDataDetails(firstEntry);
   progress.report("Loaded metadata");
 
@@ -180,6 +182,15 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
 
   g_log.information() << "Number of activated single detectors is: "
                       << m_numberOfSimpleDetectors << std::endl;
+
+  NXInt mode = entry.openNXInt("acquisition_mode");
+  mode.load();
+  m_bats = mode[0] == 1;
+
+  NXFloat firstTubeAngle = entry.openNXFloat("instrument/PSD/PSD angle 1");
+  firstTubeAngle.load();
+  m_firstTubeAngleRounded =
+      static_cast<size_t>(std::round(10 * firstTubeAngle[0]));
 }
 
 /**
@@ -301,6 +312,7 @@ void LoadILLIndirect2::runLoadInstrument() {
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {
+    loadInst->setPropertyValue("Filename", getInstrumentFilePath());
     loadInst->setPropertyValue("InstrumentName", m_instrumentName);
     loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
     loadInst->setProperty("RewriteSpectraMap",
@@ -310,6 +322,25 @@ void LoadILLIndirect2::runLoadInstrument() {
   } catch (std::runtime_error &) {
     g_log.information("Cannot load the instrument definition.");
   }
+}
+
+/**
+ * Makes up the full path of the relevant IDF dependent on resolution mode
+ * @param instName : the name of the instrument (including the resolution mode
+ * suffix)
+ * @return : the full path to the corresponding IDF
+ */
+std::string LoadILLIndirect2::getInstrumentFilePath() {
+  Poco::Path directory(ConfigService::Instance().getInstrumentDirectory());
+  std::string idf = m_instrumentName;
+  if (!m_bats && m_firstTubeAngleRounded == 251) {
+    // load the instrument with the first tube analyser focused at the midpoint
+    // of sample to tube center
+    idf += "F";
+  }
+  Poco::Path file(idf + "_Definition.xml");
+  Poco::Path fullPath(directory, file);
+  return fullPath.toString();
 }
 
 /**
@@ -366,27 +397,19 @@ void LoadILLIndirect2::moveSingleDetectors(NeXus::NXEntry &entry) {
  * in which case all the tubes should be rotated around the sample.
  */
 void LoadILLIndirect2::rotateTubes() {
-  const auto &run = m_localWorkspace->run();
-  if (run.hasProperty("PSD.PSD Angle 1")) {
-    const double firstTubeAngle =
-        run.getPropertyAsSingleValue("PSD.PSD Angle 1");
-    const int firstTubeAngleRounded =
-        static_cast<int>(std::round(firstTubeAngle * 10));
-    if (firstTubeAngleRounded != 251 && firstTubeAngleRounded != 331) {
-      g_log.warning() << "Unexpected first tube angle found: " << firstTubeAngle
-                      << " degrees. Check your instrument configuration. "
-                         "Assuming 25.1 degrees instead.";
-    } else if (firstTubeAngleRounded == 331) {
-      auto rotator = this->createChildAlgorithm("RotateInstrumentComponent");
-      rotator->setProperty("Workspace", m_localWorkspace);
-      rotator->setProperty("RelativeRotation", false);
-      rotator->setPropertyValue("ComponentName", "psds");
-      rotator->setProperty("Y", 1.);
-      rotator->setProperty("Angle", -8.);
-      rotator->execute();
-    }
-  } else {
-    g_log.warning("Unable to find first tube angle, assuming 25.1 degree");
+  if (m_firstTubeAngleRounded != 251 && m_firstTubeAngleRounded != 331) {
+    g_log.warning() << "Unexpected first tube angle found: "
+                    << m_firstTubeAngleRounded
+                    << " degrees. Check your instrument configuration. "
+                       "Assuming 25.1 degrees instead.";
+  } else if (m_firstTubeAngleRounded == 331) {
+    auto rotator = this->createChildAlgorithm("RotateInstrumentComponent");
+    rotator->setProperty("Workspace", m_localWorkspace);
+    rotator->setProperty("RelativeRotation", false);
+    rotator->setPropertyValue("ComponentName", "psds");
+    rotator->setProperty("Y", 1.);
+    rotator->setProperty("Angle", -8.);
+    rotator->execute();
   }
 }
 
