@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IndirectDataTablePresenterLegacy.h"
-#include "IndirectFittingModelLegacy.h"
+#include "IndirectDataTablePresenter.h"
+#include "IndirectFittingModel.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -20,6 +20,7 @@ using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace testing;
+using namespace MantidQt::CustomInterfaces;
 
 namespace {
 
@@ -54,30 +55,30 @@ private:
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the model
-class MockIndirectDataTableModel : public IndirectFittingModelLegacy {
+class MockIndirectDataTableModel : public IndirectFittingModel {
 public:
   /// Public methods
   MOCK_CONST_METHOD2(getFittingRange,
-                     std::pair<double, double>(std::size_t dataIndex,
-                                               std::size_t spectrum));
-  MOCK_CONST_METHOD2(getExcludeRegion,
-                     std::string(std::size_t dataIndex, std::size_t index));
+                     std::pair<double, double>(TableDatasetIndex dataIndex,
+                                               IDA::WorkspaceIndex spectrum));
+  MOCK_CONST_METHOD2(getExcludeRegion, std::string(TableDatasetIndex dataIndex,
+                                                   IDA::WorkspaceIndex index));
   MOCK_CONST_METHOD0(isMultiFit, bool());
-  MOCK_CONST_METHOD0(numberOfWorkspaces, std::size_t());
+  MOCK_CONST_METHOD0(numberOfWorkspaces, TableDatasetIndex());
 
-  MOCK_METHOD3(setStartX, void(double startX, std::size_t dataIndex,
-                               std::size_t spectrum));
-  MOCK_METHOD3(setEndX,
-               void(double endX, std::size_t dataIndex, std::size_t spectrum));
+  MOCK_METHOD3(setStartX, void(double startX, TableDatasetIndex dataIndex,
+                               IDA::WorkspaceIndex spectrum));
+  MOCK_METHOD3(setEndX, void(double endX, TableDatasetIndex dataIndex,
+                             IDA::WorkspaceIndex spectrum));
   MOCK_METHOD3(setExcludeRegion,
-               void(std::string const &exclude, std::size_t dataIndex,
-                    std::size_t spectrum));
+               void(std::string const &exclude, TableDatasetIndex dataIndex,
+                    IDA::WorkspaceIndex spectrum));
 
 private:
   std::string sequentialFitOutputName() const override { return ""; };
   std::string simultaneousFitOutputName() const override { return ""; };
-  std::string singleFitOutputName(std::size_t index,
-                                  std::size_t spectrum) const override {
+  std::string singleFitOutputName(TableDatasetIndex index,
+                                  IDA::WorkspaceIndex spectrum) const override {
     UNUSED_ARG(index);
     UNUSED_ARG(spectrum);
     return "";
@@ -106,7 +107,7 @@ public:
   void setUp() override {
     m_model = std::make_unique<NiceMock<MockIndirectDataTableModel>>();
     m_table = createEmptyTableWidget(5, 5);
-    m_presenter = std::make_unique<IndirectDataTablePresenterLegacy>(
+    m_presenter = std::make_unique<IndirectDataTablePresenter>(
         std::move(m_model.get()), std::move(m_table.get()));
 
     SetUpADSWithWorkspace ads("WorkspaceName", createWorkspace(5));
@@ -139,10 +140,13 @@ public:
   void
   test_that_invoking_setStartX_will_alter_the_relevant_column_in_the_table() {
     TableItem const startX(2.2);
+    EXPECT_CALL(*m_model, numberOfWorkspaces())
+        .WillRepeatedly(Return(TableDatasetIndex{1}));
+    m_presenter->addData(TableDatasetIndex(0));
 
     m_presenter->setStartX(startX.asDouble(), 0, 0);
 
-    assertValueIsGlobal(START_X_COLUMN, startX);
+    TS_ASSERT_EQUALS(startX.asString(), getTableItem(0, START_X_COLUMN));
   }
 
   ///----------------------------------------------------------------------
@@ -151,47 +155,63 @@ public:
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_startX_when_the_relevant_column_is_changed() {
-    EXPECT_CALL(*m_model, setStartX(2.0, 0, 0)).Times(1);
+    EXPECT_CALL(*m_model,
+                setStartX(2.0, TableDatasetIndex(0), IDA::WorkspaceIndex(0)))
+        .Times(1);
     m_table->item(0, START_X_COLUMN)->setText("2.0");
   }
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_endX_when_the_relevant_column_is_changed() {
-    EXPECT_CALL(*m_model, setEndX(2.0, 0, 0)).Times(1);
+    EXPECT_CALL(*m_model,
+                setEndX(2.0, TableDatasetIndex(0), IDA::WorkspaceIndex(0)))
+        .Times(1);
     m_table->item(0, END_X_COLUMN)->setText("2.0");
   }
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_excludeRegion_when_the_relevant_column_is_changed() {
-    EXPECT_CALL(*m_model, setExcludeRegion("0-4", 0, 0)).Times(1);
+    EXPECT_CALL(*m_model, setExcludeRegion("0-4", TableDatasetIndex(0),
+                                           IDA::WorkspaceIndex(0)))
+        .Times(1);
     m_table->item(0, EXCLUDE_REGION_COLUMN)->setText("0-4");
   }
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_startX_in_every_row_when_the_relevant_column_is_changed() {
     TableItem const startX(1.5);
+    EXPECT_CALL(*m_model, numberOfWorkspaces())
+        .WillRepeatedly(Return(TableDatasetIndex{1}));
+    m_presenter->addData(TableDatasetIndex(0));
 
     m_table->item(0, START_X_COLUMN)->setText(startX.asQString());
 
-    assertValueIsGlobal(START_X_COLUMN, startX);
+    TS_ASSERT_EQUALS(startX.asString(), getTableItem(0, START_X_COLUMN));
   }
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_endX_in_every_row_when_the_relevant_column_is_changed() {
     TableItem const endX(2.5);
+    EXPECT_CALL(*m_model, numberOfWorkspaces())
+        .WillRepeatedly(Return(TableDatasetIndex{1}));
+    m_presenter->addData(TableDatasetIndex(0));
 
     m_table->item(0, END_X_COLUMN)->setText(endX.asQString());
 
-    assertValueIsGlobal(END_X_COLUMN, endX);
+    TS_ASSERT_EQUALS(endX.asString(), getTableItem(0, END_X_COLUMN));
   }
 
   void
   test_that_the_cellChanged_signal_will_set_the_models_excludeRegion_in_every_row_when_the_relevant_column_is_changed() {
     TableItem const excludeRegion("2-4");
+    EXPECT_CALL(*m_model, numberOfWorkspaces())
+        .WillRepeatedly(Return(TableDatasetIndex{1}));
+    m_presenter->addData(TableDatasetIndex(0));
 
     m_table->item(0, EXCLUDE_REGION_COLUMN)->setText(excludeRegion.asQString());
 
-    assertValueIsGlobal(EXCLUDE_REGION_COLUMN, excludeRegion);
+    TS_ASSERT_EQUALS(excludeRegion.asString(),
+                     getTableItem(0, EXCLUDE_REGION_COLUMN));
   }
 
   ///----------------------------------------------------------------------
@@ -200,7 +220,7 @@ public:
 
   void
   test_that_tableDatasetsMatchModel_returns_false_if_the_number_of_data_positions_is_not_equal_to_the_numberOfWorkspaces() {
-    std::size_t const numberOfWorkspaces(2);
+    TableDatasetIndex const numberOfWorkspaces(2);
     ON_CALL(*m_model, numberOfWorkspaces())
         .WillByDefault(Return(numberOfWorkspaces));
 
@@ -219,15 +239,17 @@ public:
 
   void
   test_that_addData_will_add_new_data_if_the_index_is_smaller_than_the_number_of_data_positions() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
 
     ON_CALL(*m_model, numberOfWorkspaces()).WillByDefault(Return(2));
 
     EXPECT_CALL(*m_model, numberOfWorkspaces()).Times(1);
 
     ExpectationSet getRanges =
-        EXPECT_CALL(*m_model, getFittingRange(index, 0)).Times(1);
-    for (auto spectrum = 1; spectrum < m_table->rowCount(); ++spectrum)
+        EXPECT_CALL(*m_model, getFittingRange(index, IDA::WorkspaceIndex(0)))
+            .Times(1);
+    for (auto spectrum = IDA::WorkspaceIndex(1); spectrum < m_table->rowCount();
+         ++spectrum)
       getRanges += EXPECT_CALL(*m_model, getFittingRange(index, spectrum))
                        .Times(1)
                        .After(getRanges);
@@ -238,40 +260,47 @@ public:
   void
   test_that_the_setStartX_slot_will_alter_the_relevant_startX_column_in_the_table() {
     TableItem const startX(1.1);
+    EXPECT_CALL(*m_model, numberOfWorkspaces())
+        .WillRepeatedly(Return(TableDatasetIndex{1}));
+    m_presenter->addData(TableDatasetIndex(0));
 
-    m_presenter->setStartX(startX.asDouble(), 0);
+    m_presenter->setStartX(startX.asDouble(), TableDatasetIndex(0));
 
-    assertValueIsGlobal(START_X_COLUMN, startX);
+    TS_ASSERT_EQUALS(startX.asString(), getTableItem(0, START_X_COLUMN));
   }
 
   void
   test_that_the_setEndX_slot_will_alter_the_relevant_endX_column_in_the_table() {
     TableItem const endX(1.1);
+    EXPECT_CALL(*m_model, numberOfWorkspaces())
+        .WillRepeatedly(Return(TableDatasetIndex{1}));
+    m_presenter->addData(TableDatasetIndex(0));
 
-    m_presenter->setEndX(endX.asDouble(), 0);
-
-    assertValueIsGlobal(END_X_COLUMN, endX);
+    m_presenter->setEndX(endX.asDouble(), TableDatasetIndex(0));
+    TS_ASSERT_EQUALS(endX.asString(), getTableItem(0, END_X_COLUMN));
   }
 
   void
   test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
     TableItem const excludeRegion("2-3");
 
-    m_presenter->setExcludeRegion(excludeRegion.asString(), 0);
+    m_presenter->setExcludeRegion(excludeRegion.asString(), TableRowIndex(0));
 
     assertValueIsGlobal(EXCLUDE_REGION_COLUMN, excludeRegion);
   }
 
   void
   test_that_setGlobalFittingRange_will_set_the_startX_and_endX_taken_from_the_fitting_range() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
     TableItem const startX(1.0);
     TableItem const endX(2.0);
     auto const range = std::make_pair(startX.asDouble(), endX.asDouble());
 
-    ON_CALL(*m_model, getFittingRange(index, 0)).WillByDefault(Return(range));
+    ON_CALL(*m_model, getFittingRange(index, IDA::WorkspaceIndex(0)))
+        .WillByDefault(Return(range));
 
-    EXPECT_CALL(*m_model, getFittingRange(index, 0)).Times(1);
+    EXPECT_CALL(*m_model, getFittingRange(index, IDA::WorkspaceIndex(0)))
+        .Times(1);
 
     m_presenter->setGlobalFittingRange(true);
 
@@ -281,12 +310,14 @@ public:
 
   void
   test_that_setGlobalFittingRange_will_set_the_excludeRegion_when_passed_true() {
-    std::size_t const index(0);
+    TableDatasetIndex const index(0);
     TableItem const excludeRegion("1-2");
 
-    ON_CALL(*m_model, getExcludeRegion(index, 0)).WillByDefault(Return("1-2"));
+    ON_CALL(*m_model, getExcludeRegion(index, IDA::WorkspaceIndex(0)))
+        .WillByDefault(Return("1-2"));
 
-    EXPECT_CALL(*m_model, getExcludeRegion(index, 0)).Times(1);
+    EXPECT_CALL(*m_model, getExcludeRegion(index, IDA::WorkspaceIndex(0)))
+        .Times(1);
 
     m_presenter->setGlobalFittingRange(true);
 
@@ -367,5 +398,5 @@ private:
 
   std::unique_ptr<QTableWidget> m_table;
   std::unique_ptr<MockIndirectDataTableModel> m_model;
-  std::unique_ptr<IndirectDataTablePresenterLegacy> m_presenter;
+  std::unique_ptr<IndirectDataTablePresenter> m_presenter;
 };
