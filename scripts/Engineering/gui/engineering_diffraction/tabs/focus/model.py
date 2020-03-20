@@ -193,15 +193,16 @@ class FocusModel(object):
             except ValueError:
                 logger.information(f"Could not convert {name} to a numerical value. It will not be included in the "
                                    f"sample logs output file.")
-
-        makedirs(path.join(path_handling.get_output_path(), "Focus"))
-        output_path = path.join(path_handling.get_output_path(), "Focus",
-                                (instrument + "_" + run_number + "_sample_logs.csv"))
+        focus_dir = path.join(path_handling.get_output_path(), "Focus")
+        if not path.exists(focus_dir):
+            makedirs(focus_dir)
+        output_path = path.join(focus_dir, (instrument + "_" + run_number + "_sample_logs.csv"))
         write_to_file()
         if rb_num:
-            makedirs(path.join(path_handling.get_output_path(), "User", rb_num, "Focus"))
-            output_path = path.join(path_handling.get_output_path(), "User", rb_num, "Focus",
-                                    (instrument + "_" + run_number + "_sample_logs.csv"))
+            focus_user_dir = path.join(path_handling.get_output_path(), "User", rb_num, "Focus")
+            if not path.exists(focus_user_dir):
+                makedirs(focus_user_dir)
+            output_path = path.join(focus_user_dir, (instrument + "_" + run_number + "_sample_logs.csv"))
             write_to_file()
 
     @staticmethod
