@@ -31,5 +31,3 @@ class SeqFittingTabWidget(object):
 
         self.seq_fitting_tab_view.setup_slot_for_key_enter_pressed(
             self.seq_fitting_tab_presenter.handle_sequential_fit_requested)
-
-

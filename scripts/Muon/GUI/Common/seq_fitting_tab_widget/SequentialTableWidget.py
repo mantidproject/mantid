@@ -7,7 +7,7 @@
 # pylint: disable=C0103,R0904
 # N(DAV)TableWidget
 from __future__ import (absolute_import, division, print_function)
-from qtpy import QtWidgets, QtCore, QtGui
+from qtpy import QtWidgets
 from qtpy.QtCore import Qt, Signal
 
 
