@@ -28,32 +28,56 @@
 
 #include <string>
 #include <utility>
-
+#include<iostream>
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 using Mantid::Geometry::Instrument;
 using namespace MantidQt::MantidWidgets;
 
-
-// need to add mock objects..
 class ALFModelTest : public ALFCustomInstrumentModel{
 public:
-    ALFModelTest(){};
+    ALFModelTest():m_loadCount(0),m_transformCount(0){};
+    ~ALFModelTest(){};
+    void loadAlg(const std::string &name) override{(void) name;m_loadCount+=1;};
+    void transformData() override {m_transformCount+=1;};
     MOCK_METHOD0(extractSingleTube, void());
     MOCK_METHOD0(averageTube, void());
+
+    int getLoadCount(){return m_loadCount;};
+    int getTransformCount(){return m_transformCount;};
+private:
+    int m_loadCount;
+    int m_transformCount;
 };
 
+
+//// need to add mock objects..
+//class ALFModelTest : public ALFCustomInstrumentModel{
+//public:
+//    ALFModelTest(){};
+//    ~ALFModelTest(){};
+//    MOCK_METHOD1(loadAlg, void(const std::string &name));
+//    MOCK_METHOD0(TransgormData, void());
+//    MOCK_METHOD1(loadData, 
+//    MOCK_METHOD1
+//    MOCK_METHOD1
+//    MOCK_METHOD1
+//    MOCK_METHOD1
+//    MOCK_METHOD0(extractSingleTube, void());
+//    MOCK_METHOD0(averageTube, void());
+//};
+//
 //class ALFViewTest : public IALFCustomInstrumentView, public IBaseCustomInstrumentView{
 class ALFViewTest : public IALFCustomInstrumentView{//, public IBaseCustomInstrumentView{
 public:
-    ALFViewTest(const std::string &instrument, QWidget *parent = nullptr) {};
+    explicit ALFViewTest(const std::string &instrument, QWidget *parent = nullptr) {};
     ~ALFViewTest(){};
 
     MOCK_METHOD1(observeExtractSingleTube, void(Observer *listner));
     MOCK_METHOD1(observeAverageTube, void(Observer *listner));
     MOCK_METHOD1(addSpectrum, void(std::string name));
-    MOCK_METHOD1(setupAnalysisPane, void(PlotFitAnalysisPaneView *analysis));
+    MOCK_METHOD1(setupAnalysisPane, void(IPlotFitAnalysisPaneView *analysis));
 
     MOCK_METHOD0(getFile, std::string());
     MOCK_METHOD1(setRunQuietly, void(const std::string &runNumber));
@@ -71,13 +95,15 @@ public:
 class paneTest : public MantidQt::MantidWidgets::PlotFitAnalysisPanePresenter{
 public:
     // define init
-    paneTest(PlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model):PlotFitAnalysisPanePresenter(view, model) {}; 
+    paneTest(IPlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model):PlotFitAnalysisPanePresenter(view, model) {}; 
+    ~paneTest(){};
     MOCK_METHOD1(addSpectrum, void (const std::string &name));
 };
 
 class paneViewTest : public MantidQt::MantidWidgets::IPlotFitAnalysisPaneView{
 public:
-   paneViewTest(const double &start=1., const double &end=5., QWidget *parent = nullptr){};
+   explicit paneViewTest(const double &start=1., const double &end=5., QWidget *parent = nullptr){};
+   ~paneViewTest(){};
    MOCK_METHOD1(observeFitButton, void(Observer *listener));
    MOCK_METHOD0(getRange, std::pair<double, double>());
    MOCK_METHOD0(getFunction, Mantid::API::IFunction_sptr());
@@ -87,6 +113,7 @@ public:
    MOCK_METHOD1(updateFunction, void(Mantid::API::IFunction_sptr));
    MOCK_METHOD1(fitWarning, void(const std::string &message));
    
+   MOCK_METHOD0(getQWidget, QWidget*());
    MOCK_METHOD2(setupPlotFitSplitter, void(const double &start, const double &end)); 
    MOCK_METHOD2(createFitPane, QWidget*(const double &start, const double &end)); 
 };
@@ -115,13 +142,15 @@ public:
   }
 
   void tearDown() override {
+  std::cout<<"hi"<<std::endl;
     AnalysisDataService::Instance().clear();
     delete m_presenter;
-    delete m_model;
+    m_model = NULL;
     delete m_view;
-    delete m_pane;
-    delete m_paneModel;
+    m_pane = NULL;
+    m_paneModel = NULL;
     delete m_paneView;
+  std::cout<<"bye"<<std::endl;
     //m_ads.reset();
     //m_workspace.reset();
     //m_model.reset();
@@ -135,8 +164,8 @@ public:
     //TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), 1);
   }
   void test_extractSingleTube(){
-   m_presenter->extractSingleTube();
-   EXPECT_CALL(*m_model, averageTube()).Times(1);
+  m_presenter->extractSingleTube();
+  EXPECT_CALL(*m_model, averageTube()).Times(1);
 }
 
 private:
@@ -147,7 +176,7 @@ private:
   NiceMock<paneViewTest> *m_paneView;
   NiceMock<paneModelTest> *m_paneModel;
   NiceMock<paneTest> *m_pane;
-  NiceMock<ALFCustomInstrumentPresenter> *m_presenter;
+  ALFCustomInstrumentPresenter *m_presenter;
 };
 
 #endif /* MANTIDQT_ALFCUSTOMINSTRUMENTPRESENTERTEST_H_ */
