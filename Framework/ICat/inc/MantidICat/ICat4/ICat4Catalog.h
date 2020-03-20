@@ -79,7 +79,7 @@ private:
   void saveDataFiles(std::vector<ICat4::xsd__anyType *> response,
                      API::ITableWorkspace_sptr &outputws);
   // Saves "DataSets" information to the output workspace.
-  void saveDataSets(const std::vector<ICat4::xsd__anyType *> &response,
+  void saveDataSets(std::vector<ICat4::xsd__anyType *> response,
                     API::ITableWorkspace_sptr &outputws);
   // Convert a file size to human readable file format.
   std::string bytesToString(int64_t &fileSize);

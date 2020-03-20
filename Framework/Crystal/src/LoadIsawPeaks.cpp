@@ -68,7 +68,7 @@ int LoadIsawPeaks::confidence(Kernel::FileDescriptor &descriptor) const {
       throw std::logic_error(std::string("No Version for Peaks file"));
 
     getWord(in, false); // tag
-    std::string C_Facility = getWord(in, false);
+    getWord(in, false); // C_Facility
 
     getWord(in, false); // tag
     std::string C_Instrument = getWord(in, false);
@@ -142,7 +142,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS,
     throw std::logic_error(std::string("No Version for Peaks file"));
 
   getWord(in, false); // tag
-  std::string C_Facility = getWord(in, false);
+  getWord(in, false); // C_Facility
 
   getWord(in, false); // tag
   std::string C_Instrument = getWord(in, false);

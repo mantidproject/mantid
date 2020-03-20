@@ -11,8 +11,10 @@ if ( CPPCHECK_EXECUTABLE )
   # setup the standard arguments
   set ( CPPCHECK_ARGS --enable=all --inline-suppr --max-configs=120
   --suppressions-list=${CMAKE_BINARY_DIR}/CppCheck_Suppressions.txt
-  --suppress=*:*${CMAKE_BINARY_DIR}/*
   --project=${CMAKE_BINARY_DIR}/compile_commands.json
+  # Force cppcheck to check when we use project-wide macros
+  -DDLLExport=
+  -DMANTID_ALGORITHMS_DLL=
   )
 
   set (_cppcheck_args "${CPPCHECK_ARGS}")

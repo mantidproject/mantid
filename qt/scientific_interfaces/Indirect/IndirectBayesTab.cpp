@@ -13,7 +13,9 @@ IndirectBayesTab::IndirectBayesTab(QWidget *parent)
     : IndirectTab(parent), m_propTree(new QtTreePropertyBrowser()) {
   m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
+  // cppcheck-suppress pureVirtualCall
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          // cppcheck-suppress pureVirtualCall
           SLOT(updateProperties(QtProperty *, double)));
 }
 
