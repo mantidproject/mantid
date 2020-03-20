@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IPowderDiffPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -20,7 +21,7 @@ namespace Functions {
   It is the number 3 neutron TOF function of GSAS and number 9 peak profile of
   FullProf.
 */
-class DLLExport NeutronBk2BkExpConvPVoigt
+class MANTID_CURVEFITTING_DLL NeutronBk2BkExpConvPVoigt
     : public API::IPowderDiffPeakFunction {
 
 public:

@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -34,7 +35,8 @@ Function parameters:
 @author Anders Markvardsen, ISIS, RAL
 @date 9/11/2009
 */
-class DLLExport BackToBackExponential : public API::IPeakFunction {
+class MANTID_CURVEFITTING_DLL BackToBackExponential
+    : public API::IPeakFunction {
 public:
   /// Default constructor.
   BackToBackExponential() : API::IPeakFunction() {}

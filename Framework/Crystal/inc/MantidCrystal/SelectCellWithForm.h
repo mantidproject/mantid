@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -20,7 +20,7 @@ namespace Crystal {
     @author Dennis Mikkelson
     @date   2012-02-13
   */
-class DLLExport SelectCellWithForm : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SelectCellWithForm : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SelectCellWithForm"; };

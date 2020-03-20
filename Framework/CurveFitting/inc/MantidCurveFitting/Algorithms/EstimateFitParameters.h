@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidCurveFitting/IFittingAlgorithm.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -17,7 +16,7 @@ namespace Algorithms {
 
   Estimate parameters of a fitting function using a Monte Carlo algorithm.
 */
-class DLLExport EstimateFitParameters : public IFittingAlgorithm {
+class MANTID_CURVEFITTING_DLL EstimateFitParameters : public IFittingAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

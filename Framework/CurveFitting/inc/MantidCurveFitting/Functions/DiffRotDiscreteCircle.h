@@ -30,7 +30,8 @@ namespace Functions {
  * jump to neighboring sites. This is the most common type of discrete
  * rotational diffusion in a circle.
  */
-class DLLExport DiffRotDiscreteCircle : public API::ImmutableCompositeFunction {
+class MANTID_CURVEFITTING_DLL DiffRotDiscreteCircle
+    : public API::ImmutableCompositeFunction {
 public:
   std::string name() const override { return "DiffRotDiscreteCircle"; }
 

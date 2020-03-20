@@ -10,6 +10,7 @@
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -27,7 +28,8 @@ namespace CurveFitting {
       @date 28/05/2014
   */
 
-class DLLExport SeqDomainSpectrumCreator : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL SeqDomainSpectrumCreator
+    : public API::IDomainCreator {
 public:
   SeqDomainSpectrumCreator(Kernel::IPropertyManager *manager,
                            const std::string &workspacePropertyName);

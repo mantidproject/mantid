@@ -21,7 +21,7 @@ namespace FuncMinimisers {
 
     @author Roman Tolchenov, Tessella plc
 */
-class DLLExport SteepestDescentMinimizer : public DerivMinimizer {
+class MANTID_CURVEFITTING_DLL SteepestDescentMinimizer : public DerivMinimizer {
 public:
   /// Constructor.
   SteepestDescentMinimizer() : DerivMinimizer() {}

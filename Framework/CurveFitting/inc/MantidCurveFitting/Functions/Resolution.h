@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/TabulatedFunction.h"
 
 namespace Mantid {
@@ -23,8 +24,8 @@ TabulatedFunction's attributes.
 @author Roman Tolchenov, Tessella plc
 @date 12/02/2010
 */
-class DLLExport Resolution : public API::ParamFunction,
-                             public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL Resolution : public API::ParamFunction,
+                                           public API::IFunction1D {
 public:
   /// Constructor
   Resolution();

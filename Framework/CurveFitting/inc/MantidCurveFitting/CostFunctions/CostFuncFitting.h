@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/GSLVector.h"
 
@@ -25,7 +26,7 @@ namespace CostFunctions {
     @author Roman Tolchenov, Tessella plc
     @date 10/04/2012
 */
-class DLLExport CostFuncFitting : public API::ICostFunction {
+class MANTID_CURVEFITTING_DLL CostFuncFitting : public API::ICostFunction {
 public:
   CostFuncFitting();
   /// Number of parameters

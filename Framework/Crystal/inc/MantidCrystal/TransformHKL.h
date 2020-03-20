@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -17,7 +18,7 @@ namespace Crystal {
     @author Dennis Mikkelson
     @date   2012-04-24
   */
-class DLLExport TransformHKL : public API::Algorithm {
+class MANTID_CRYSTAL_DLL TransformHKL : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override;

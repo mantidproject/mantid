@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IDomainCreator.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -26,7 +27,8 @@ class TableWorkspace;
 
 namespace CurveFitting {
 
-class DLLExport TableWorkspaceDomainCreator : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL TableWorkspaceDomainCreator
+    : public API::IDomainCreator {
 public:
   // Constructor
   TableWorkspaceDomainCreator(Kernel::IPropertyManager *fit,

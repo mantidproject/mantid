@@ -7,14 +7,14 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
 
 /** IntegratePeaksHybrid : Integrate single crystal peaks algorithm
  */
-class DLLExport IntegratePeaksHybrid : public API::Algorithm {
+class MANTID_CRYSTAL_DLL IntegratePeaksHybrid : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

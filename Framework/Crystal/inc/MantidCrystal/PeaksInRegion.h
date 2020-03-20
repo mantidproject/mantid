@@ -14,7 +14,7 @@ namespace Crystal {
 /** PeaksInRegion : Find peaks that are either inside a box region, or that have
   a radius of sufficent size, that they intersect the box.
 */
-class DLLExport PeaksInRegion : public PeaksIntersection {
+class MANTID_CRYSTAL_DLL PeaksInRegion : public PeaksIntersection {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

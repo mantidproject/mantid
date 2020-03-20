@@ -21,7 +21,8 @@ namespace CurveFitting {
 namespace FuncMinimisers {
 /** Trust Region minimizer class using the DTRS method of GALAHAD.
  */
-class DLLExport TrustRegionMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL TrustRegionMinimizer
+    : public API::IFuncMinimizer {
 public:
   /// constructor and destructor
   TrustRegionMinimizer();

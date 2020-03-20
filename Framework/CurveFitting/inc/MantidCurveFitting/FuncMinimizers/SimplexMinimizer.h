@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 #include <gsl/gsl_multimin.h>
 
@@ -22,7 +23,7 @@ namespace FuncMinimisers {
     @author Anders Markvardsen, ISIS, RAL
     @date 8/1/2010
 */
-class DLLExport SimplexMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL SimplexMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor setting a value for the relative error acceptance
   /// (default=0.01)

@@ -12,6 +12,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 // 3rd party library headers (N/A)
 // standard library headers (N/A)
 
@@ -26,8 +27,8 @@ namespace Functions {
 /**
  * @brief Inelastic part of the IsoRotDiff function.
  */
-class DLLExport InelasticIsoRotDiff : public API::ParamFunction,
-                                      public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL InelasticIsoRotDiff : public API::ParamFunction,
+                                                    public API::IFunction1D {
 public:
   InelasticIsoRotDiff();
 

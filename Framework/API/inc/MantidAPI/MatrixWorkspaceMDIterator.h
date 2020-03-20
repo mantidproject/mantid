@@ -21,7 +21,7 @@ namespace API {
 
   @date 2012-02-08
 */
-class DLLExport MatrixWorkspaceMDIterator : public IMDIterator {
+class MANTID_API_DLL MatrixWorkspaceMDIterator : public IMDIterator {
 public:
   MatrixWorkspaceMDIterator(const MatrixWorkspace *workspace,
                             Mantid::Geometry::MDImplicitFunction *function,

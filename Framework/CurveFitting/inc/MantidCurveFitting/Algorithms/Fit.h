@@ -75,7 +75,7 @@ to create a workspace
 @author Roman Tolchenov, Tessella plc
 @date 06/12/2011
 */
-class DLLExport Fit : public IFittingAlgorithm {
+class MANTID_CURVEFITTING_DLL Fit : public IFittingAlgorithm {
 public:
   /// Default constructor
   Fit();

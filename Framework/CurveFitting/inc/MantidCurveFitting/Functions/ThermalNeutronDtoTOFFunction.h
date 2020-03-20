@@ -11,6 +11,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 
@@ -23,8 +24,9 @@ namespace Functions {
 
 /** ThermalNeutronDtoTOFFunction : TODO: DESCRIPTION
  */
-class DLLExport ThermalNeutronDtoTOFFunction : virtual public API::IFunction1D,
-                                               public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL ThermalNeutronDtoTOFFunction
+    : virtual public API::IFunction1D,
+      public API::ParamFunction {
 public:
   /// Override
   void function1D(double *out, const double *xValues,

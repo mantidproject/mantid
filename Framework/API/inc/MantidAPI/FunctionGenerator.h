@@ -28,7 +28,7 @@ Virtual method isSourceName(name) decides to which function a parameter
 belongs to. By default if a name has the signature of a composite function
 (f<number>.name) then it is attributed to the target function.
 */
-class DLLExport FunctionGenerator : public IFunction {
+class MANTID_API_DLL FunctionGenerator : public IFunction {
 public:
   /// Constructor
   FunctionGenerator(IFunction_sptr source);

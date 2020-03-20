@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -21,7 +21,7 @@ namespace Crystal {
  * @author Janik Zikovsky, SNS
  * @date 2011-03-07 15:22:11.897153
  */
-class DLLExport LoadIsawPeaks
+class MANTID_CRYSTAL_DLL LoadIsawPeaks
     : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
   /// Algorithm's name for identification

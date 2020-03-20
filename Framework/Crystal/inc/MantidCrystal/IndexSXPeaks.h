@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/V3D.h"
 #include <boost/tuple/tuple.hpp>
@@ -25,7 +26,7 @@ namespace Crystal {
     @date 11/08/2009
  */
 
-struct DLLExport index {
+struct MANTID_CRYSTAL_DLL index {
   index(int h, int k, int l) : _h(h), _k(k), _l(l) {}
   friend bool operator<(const index &i1, const index &i2) {
     if (i1._h < i2._h)
@@ -58,7 +59,7 @@ struct DLLExport index {
   int _h, _k, _l;
 };
 
-class DLLExport PeakCandidate {
+class MANTID_CRYSTAL_DLL PeakCandidate {
 public:
   PeakCandidate(double qx, double qy, double qz) : _Q(qx, qy, qz) {}
   double getdSpacing() const { return 1 / _Q.norm(); }
@@ -135,7 +136,7 @@ private:
   std::set<index> _hkls;
 };
 
-class DLLExport IndexSXPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL IndexSXPeaks : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "IndexSXPeaks"; }

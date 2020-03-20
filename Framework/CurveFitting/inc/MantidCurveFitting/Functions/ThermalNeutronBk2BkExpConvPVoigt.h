@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IPowderDiffPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 #include <complex>
@@ -22,7 +23,7 @@ namespace Functions {
     It will involve the calculation from peak's miller indices
 */
 
-class DLLExport ThermalNeutronBk2BkExpConvPVoigt
+class MANTID_CURVEFITTING_DLL ThermalNeutronBk2BkExpConvPVoigt
     : public API::IPowderDiffPeakFunction {
 public:
   ThermalNeutronBk2BkExpConvPVoigt();

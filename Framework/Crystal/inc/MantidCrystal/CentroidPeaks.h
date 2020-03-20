@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -20,7 +20,7 @@ namespace Crystal {
  * @author Janik Zikovsky
  * @date 2011-06-01
  */
-class DLLExport CentroidPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL CentroidPeaks : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CentroidPeaks"; };

@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include <boost/shared_array.hpp>
 
 namespace mu {
@@ -26,8 +27,8 @@ A user defined function.
 @author Roman Tolchenov, Tessella plc
 @date 15/01/2010
 */
-class DLLExport UserFunction : public API::ParamFunction,
-                               public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL UserFunction : public API::ParamFunction,
+                                             public API::IFunction1D {
 public:
   /// Constructor
   UserFunction();

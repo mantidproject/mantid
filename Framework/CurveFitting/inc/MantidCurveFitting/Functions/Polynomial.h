@@ -16,7 +16,7 @@ namespace Functions {
 
 /** Polynomial : N-th polynomial background function.
  */
-class DLLExport Polynomial : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL Polynomial : public BackgroundFunction {
 public:
   Polynomial();
 

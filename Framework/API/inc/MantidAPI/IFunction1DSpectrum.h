@@ -23,7 +23,7 @@ namespace API {
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 03/06/2014
   */
-class DLLExport IFunction1DSpectrum : public virtual IFunction {
+class MANTID_API_DLL IFunction1DSpectrum : public virtual IFunction {
 public:
   void function(const FunctionDomain &domain,
                 FunctionValues &values) const override;

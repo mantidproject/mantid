@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -29,7 +30,7 @@ const double radtodeg_half = 180.0 / M_PI / 2.;
     @author Vickie Lynch SNS
     @date 10/09/2011
 */
-class DLLExport NormaliseVanadium : public API::Algorithm {
+class MANTID_CRYSTAL_DLL NormaliseVanadium : public API::Algorithm {
 public:
   /// (Empty) Constructor
   NormaliseVanadium();

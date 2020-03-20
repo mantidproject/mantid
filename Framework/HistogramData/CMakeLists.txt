@@ -143,7 +143,7 @@ add_subdirectory(test)
 
 # Auto-generate exports header
 target_include_directories(HistogramData PUBLIC ${CMAKE_BINARY_DIR}/Framework/HistogramData)
-generate_mantid_export_header(HistogramData)
+generate_mantid_export_header(HistogramData FALSE)
 
 # Installation settings
 mtd_install_targets(TARGETS

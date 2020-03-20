@@ -7,13 +7,14 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
 namespace Algorithms {
 //---------------------------------------------------------------------------
 
-class DLLExport EstimatePeakErrors : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL EstimatePeakErrors : public API::Algorithm {
 public:
   EstimatePeakErrors();
 

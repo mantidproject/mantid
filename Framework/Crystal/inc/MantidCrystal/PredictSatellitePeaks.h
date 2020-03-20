@@ -9,6 +9,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include "MantidKernel/System.h"
@@ -23,7 +24,7 @@ namespace Crystal {
     @date   2019-03-2019
 
 */
-class DLLExport PredictSatellitePeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL PredictSatellitePeaks : public API::Algorithm {
 public:
   PredictSatellitePeaks();
   /// Algorithm's name for identification

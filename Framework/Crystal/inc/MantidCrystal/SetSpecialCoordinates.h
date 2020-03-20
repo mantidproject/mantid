@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 #include <string>
 #include <vector>
 
@@ -21,7 +21,7 @@ namespace Crystal {
   Set the special coordinates on an IMDWorspace or peaksworkspace. Also print
  out any existing special coordinates.
 */
-class DLLExport SetSpecialCoordinates : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SetSpecialCoordinates : public API::Algorithm {
 public:
   SetSpecialCoordinates();
 

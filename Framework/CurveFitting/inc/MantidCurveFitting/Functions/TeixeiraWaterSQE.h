@@ -31,7 +31,7 @@ namespace Functions {
 /**
  * @brief Teixeira's model to describe the translational diffusion of water
  */
-class DLLExport TeixeiraWaterSQE : public FunctionQDepends {
+class MANTID_CURVEFITTING_DLL TeixeiraWaterSQE : public FunctionQDepends {
 
 public:
   std::string name() const override { return "TeixeiraWaterSQE"; }

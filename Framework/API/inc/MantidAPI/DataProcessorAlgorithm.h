@@ -27,7 +27,7 @@ namespace API {
    @date 2012-04-04
  */
 template <class Base>
-class DLLExport GenericDataProcessorAlgorithm : public Base {
+class MANTID_API_DLL GenericDataProcessorAlgorithm : public Base {
 public:
   GenericDataProcessorAlgorithm();
   std::string getPropertyValue(const std::string &name) const override;

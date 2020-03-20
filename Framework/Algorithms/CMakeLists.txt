@@ -1083,7 +1083,7 @@ add_subdirectory(test)
 
 # Auto-generate exports header
 target_include_directories(Algorithms PUBLIC ${CMAKE_BINARY_DIR}/Framework/Algorithms)
-generate_mantid_export_header(Algorithms)
+generate_mantid_export_header(Algorithms FALSE)
 
 # Installation settings
 

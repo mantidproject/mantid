@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/FindSXPeaksHelper.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
@@ -34,7 +35,7 @@ using peakvector = std::vector<FindSXPeaksHelper::SXPeak>;
   @author L C Chapon, ISIS, Rutherford Appleton Laboratory
   @date 11/08/2009
 */
-class DLLExport FindSXPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL FindSXPeaks : public API::Algorithm {
 public:
   /// Default constructor
   FindSXPeaks();
