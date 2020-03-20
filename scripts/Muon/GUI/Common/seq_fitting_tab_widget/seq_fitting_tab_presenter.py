@@ -20,7 +20,7 @@ class SeqFittingTabPresenter(object):
         self.context = context
 
         self.fit_function = None
-        self.selected_row = -1
+        self.selected_rows = []
         self.calculation_thread = None
         self.fitting_calculation_model = None
 
@@ -74,29 +74,14 @@ class SeqFittingTabPresenter(object):
         self.handle_fit_function_updated()
 
     def handle_fit_selected_pressed(self):
+        self.selected_rows = self.view.get_selected_rows()
         self.handle_sequential_fit_requested()
 
-    def handle_sequential_fit_all_pressed(self):
+    def handle_sequential_fit_pressed(self):
+        # Clear selection in fit table
         self.view.fit_results_table.clearSelection()
+        self.selected_rows = [i for i in range(self.view.get_number_of_entries())]
         self.handle_sequential_fit_requested()
-
-    def handle_single_fit_requested(self):
-        if self.model.fit_function is None or self.view.get_selected_row() == -1:
-            return
-
-        self.selected_row = self.view.get_selected_row()
-        workspace_names = self.get_workspaces_for_entry_in_fit_table(self.selected_row)
-
-        calculation_function = functools.partial(
-            self.model.evaluate_single_fit, workspace_names, self.view.is_plotting_checked())
-        self.calculation_thread = self.create_thread(
-            calculation_function)
-
-        self.calculation_thread.threadWrapperSetUp(on_thread_start_callback=self.handle_fit_started,
-                                                   on_thread_end_callback=self.handle_single_fit_finished,
-                                                   on_thread_exception_callback=self.handle_fit_error)
-
-        self.calculation_thread.start()
 
     def handle_fit_started(self):
         self.view.seq_fit_button.setEnabled(False)
@@ -109,37 +94,16 @@ class SeqFittingTabPresenter(object):
         self.view.seq_fit_button.setEnabled(True)
         self.view.fit_results_table.blockSignals(False)
 
-    def handle_single_fit_finished(self):
-        if self.fitting_calculation_model.result is None:
-            return
-
-        fit_function, fit_status, fit_chi_squared = self.fitting_calculation_model.result
-        number_of_parameters = fit_function.nParams()
-        parameters = [fit_function.parameterName(i) for i in range(number_of_parameters)]
-        parameter_values = [fit_function.getParameterValue(parameters[i]) for i in
-                            range(number_of_parameters)]
-        self.view.set_fit_function_parameters(self.selected_row, parameter_values)
-        self.view.set_fit_quality(self.selected_row, fit_status, fit_chi_squared)
-        self.view.seq_fit_button.setEnabled(True)
-        self.view.fit_selected_button.setEnabled(True)
-        self.view.fit_results_table.blockSignals(False)
-
     def handle_sequential_fit_requested(self):
-        if self.model.fit_function is None:
+        if self.model.fit_function is None or len(self.selected_rows) == 0:
             return
 
         workspace_names = []
-        rows = self.view.get_selected_rows()
-        if len(rows) == 0: # if none selected, assume we are doing a sequential fit over everything
-            self.selected_rows = [i for i in range(self.view.get_number_of_entries())]
-        else:
-            self.selected_rows = rows
-
         for i in self.selected_rows:
             workspace_names += [self.get_workspaces_for_entry_in_fit_table(i)]
 
         calculation_function = functools.partial(
-            self.model.evaluate_sequential_fit, workspace_names, self.view.is_plotting_checked(),
+            self.model.evaluate_sequential_fit, workspace_names, False,
             self.view.use_initial_values_for_fits())
         self.calculation_thread = self.create_thread(
             calculation_function)
@@ -183,16 +147,11 @@ class SeqFittingTabPresenter(object):
 
     def handle_fit_selected_in_table(self):
         rows = self.view.get_selected_rows()
-        workspace_names = []
         workspaces = defaultdict(list)
         for i, row in enumerate(rows):
             workspaces[i] = self.get_workspaces_for_entry_in_fit_table(row)
-            workspace_names += self.get_workspaces_for_entry_in_fit_table(row)
 
         self.selected_sequential_fit_notifier.notify_subscribers(workspaces)
-
-    def handle_leaving_table_focus(self):
-        self.leaving_sequential_table_notifer.notify_subscribers()
 
     def get_workspaces_for_entry_in_fit_table(self, entry):
         runs, group_and_pairs = self.view.get_workspace_info_from_fit_table_row(entry)

@@ -37,9 +37,6 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
         self.fit_results_table.resizeColumnsToContents()
         self.setup_default_fit_results_table()
 
-        self.plot_fit_results_checkbox.setVisible(False)
-        self.plot_fit_results_checkbox.setChecked(False)
-
     def warning_popup(self, message):
         warning(message, parent=self)
 
@@ -161,9 +158,6 @@ class SeqFittingTabView(QtWidgets.QWidget, ui_seq_fitting_tab):
 
     def set_table_selection_to_last_row(self):
         self.fit_results_table.set_selection_to_last_row()
-
-    def is_plotting_checked(self):
-        return self.plot_fit_results_checkbox.isChecked()
 
     def use_initial_values_for_fits(self):
         return self.initial_fit_values_radio.isChecked()

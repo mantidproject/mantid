@@ -19,7 +19,7 @@ class SeqFittingTabWidget(object):
         self.seq_fitting_tab_view.setup_slot_for_fit_selected_button(self.seq_fitting_tab_presenter.
                                                                      handle_fit_selected_pressed)
         self.seq_fitting_tab_view.setup_slot_for_sequential_fit_button(self.seq_fitting_tab_presenter.
-                                                                       handle_sequential_fit_all_pressed)
+                                                                       handle_sequential_fit_pressed)
         self.seq_fitting_tab_view.setup_slot_for_table_parameter_changed(
             self.seq_fitting_tab_presenter.handle_updated_fit_parameter_in_table)
 
