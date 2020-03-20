@@ -304,14 +304,12 @@ public:
     double peakRadius = 0.49; // not enough for the sphere to penetrate the
                               // bounding box. Expect failure
     do_test_bounds_check_extents(coordinateFrame, -wallDistanceFromPeakCenter,
-                                 1, 1, 1, 1, 1, peakRadius,
-                                 peakRadius > wallDistanceFromPeakCenter);
+                                 1, 1, 1, 1, 1, peakRadius, false);
 
     peakRadius = 0.51; // just enough for the sphere to penetrate the bounding
                        // box. Expect pass.
     do_test_bounds_check_extents(coordinateFrame, -wallDistanceFromPeakCenter,
-                                 1, 1, 1, 1, 1, peakRadius,
-                                 peakRadius > wallDistanceFromPeakCenter);
+                                 1, 1, 1, 1, 1, peakRadius, true);
   }
 
   void test_peak_intersects_xmax_boundary_when_radius_large_enough() {
@@ -320,15 +318,15 @@ public:
 
     double peakRadius = 0.49; // not enough for the sphere to penetrate the
                               // bounding box. Expect failure
-    do_test_bounds_check_extents(
-        coordinateFrame, 1, -wallDistanceFromPeakCenter, 1, 1, 1, 1, peakRadius,
-        peakRadius > wallDistanceFromPeakCenter);
+    do_test_bounds_check_extents(coordinateFrame, 1,
+                                 -wallDistanceFromPeakCenter, 1, 1, 1, 1,
+                                 peakRadius, false);
 
     peakRadius = 0.51; // just enough for the sphere to penetrate the bounding
                        // box. Expect pass.
-    do_test_bounds_check_extents(
-        coordinateFrame, 1, -wallDistanceFromPeakCenter, 1, 1, 1, 1, peakRadius,
-        peakRadius > wallDistanceFromPeakCenter);
+    do_test_bounds_check_extents(coordinateFrame, 1,
+                                 -wallDistanceFromPeakCenter, 1, 1, 1, 1,
+                                 peakRadius, true);
   }
 
   void test_peak_intersects_ymin_boundary_when_radius_large_enough() {
@@ -337,15 +335,15 @@ public:
 
     double peakRadius = 0.49; // not enough for the sphere to penetrate the
                               // bounding box. Expect failure
-    do_test_bounds_check_extents(
-        coordinateFrame, 1, 1, -wallDistanceFromPeakCenter, 1, 1, 1, peakRadius,
-        peakRadius > wallDistanceFromPeakCenter);
+    do_test_bounds_check_extents(coordinateFrame, 1, 1,
+                                 -wallDistanceFromPeakCenter, 1, 1, 1,
+                                 peakRadius, false);
 
     peakRadius = 0.51; // just enough for the sphere to penetrate the bounding
                        // box. Expect pass.
-    do_test_bounds_check_extents(
-        coordinateFrame, 1, 1, -wallDistanceFromPeakCenter, 1, 1, 1, peakRadius,
-        peakRadius > wallDistanceFromPeakCenter);
+    do_test_bounds_check_extents(coordinateFrame, 1, 1,
+                                 -wallDistanceFromPeakCenter, 1, 1, 1,
+                                 peakRadius, true);
   }
 
   void test_peak_intersects_ymax_boundary_when_radius_large_enough() {
@@ -356,13 +354,13 @@ public:
                               // bounding box. Expect failure
     do_test_bounds_check_extents(coordinateFrame, 1, 1, 1,
                                  -wallDistanceFromPeakCenter, 1, 1, peakRadius,
-                                 peakRadius > wallDistanceFromPeakCenter);
+                                 false);
 
     peakRadius = 0.51; // just enough for the sphere to penetrate the bounding
                        // box. Expect pass.
     do_test_bounds_check_extents(coordinateFrame, 1, 1, 1,
                                  -wallDistanceFromPeakCenter, 1, 1, peakRadius,
-                                 peakRadius > wallDistanceFromPeakCenter);
+                                 true);
   }
 
   void test_peak_intersects_zmin_boundary_when_radius_large_enough() {
@@ -373,13 +371,13 @@ public:
                               // bounding box. Expect failure
     do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1,
                                  -wallDistanceFromPeakCenter, 1, peakRadius,
-                                 peakRadius > wallDistanceFromPeakCenter);
+                                 false);
 
     peakRadius = 0.51; // just enough for the sphere to penetrate the bounding
                        // box. Expect pass.
     do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1,
                                  -wallDistanceFromPeakCenter, 1, peakRadius,
-                                 peakRadius > wallDistanceFromPeakCenter);
+                                 true);
   }
 
   void test_peak_intersects_zmax_boundary_when_radius_large_enough() {
@@ -390,13 +388,12 @@ public:
                               // bounding box. Expect failure
     do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1, 1,
                                  -wallDistanceFromPeakCenter, peakRadius,
-                                 peakRadius > wallDistanceFromPeakCenter);
+                                 false);
 
     peakRadius = 0.51; // just enough for the sphere to penetrate the bounding
                        // box. Expect pass.
     do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1, 1,
-                                 -wallDistanceFromPeakCenter, peakRadius,
-                                 peakRadius > wallDistanceFromPeakCenter);
+                                 -wallDistanceFromPeakCenter, peakRadius, true);
   }
 
   void test_false_intersection_when_check_peak_extents() {

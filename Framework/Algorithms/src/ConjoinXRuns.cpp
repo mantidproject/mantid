@@ -404,7 +404,7 @@ void ConjoinXRuns::exec() {
                       << ". Reason: \"" << e.what() << "\". Skipping.\n";
         sampleLogsBehaviour.resetSampleLogs(temp);
         // remove the skipped one from the list
-        m_inputWS.erase(it);
+        it = m_inputWS.erase(it);
         --it;
       } else {
         throw std::invalid_argument(e);

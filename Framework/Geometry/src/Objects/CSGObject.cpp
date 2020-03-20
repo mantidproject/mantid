@@ -1594,6 +1594,7 @@ double CSGObject::singleShotMonteCarloVolume(const int shotSize,
     const auto threadCount = PARALLEL_NUMBER_OF_THREADS;
     const auto currentThreadNum = PARALLEL_THREAD_NUMBER;
     size_t blocksize = shotSize / threadCount;
+    // cppcheck-suppress knownConditionTrueFalse
     if (currentThreadNum == threadCount - 1) {
       // Last thread may have to do threadCount extra iterations in
       // the worst case.

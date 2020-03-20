@@ -1076,9 +1076,7 @@ void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws,
   loadinst->setProperty("RewriteSpectraMap",
                         Mantid::Kernel::OptionalBool(true));
   loadinst->execute();
-  if (loadinst->isExecuted())
-    matrixws = loadinst->getProperty("Workspace");
-  else
+  if (!loadinst->isExecuted())
     g_log.error("Unable to load instrument to output workspace");
 }
 

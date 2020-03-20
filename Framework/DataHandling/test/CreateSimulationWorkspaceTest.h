@@ -235,10 +235,6 @@ private:
 class CreateSimulationWorkspaceTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
-
-    // Starting bin, bin width, last bin
-    const std::string binParams("-30,3,279");
-
     alg.initialize();
 
     alg.setPropertyValue("Instrument", "HET");

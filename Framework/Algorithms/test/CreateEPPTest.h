@@ -177,7 +177,7 @@ private:
       return false;
     }
     for (const auto &columnName : columnNames) {
-      if (std::find(names.cbegin(), names.cend(), columnName) == names.end()) {
+      if (std::find(names.cbegin(), names.cend(), columnName) == names.cend()) {
         return false;
       }
     }

@@ -568,7 +568,6 @@ public:
     testSig = std::sqrt(testSig);
     // Set the properties
     alg2.setProperty("InputWorkspace", tws);
-    const std::string outputSpace2 = "SumSpectraOut2";
     alg2.setPropertyValue("OutputWorkspace", outName);
     alg2.setProperty("IncludeMonitors", false);
     alg2.setProperty("WeightedSum", true);

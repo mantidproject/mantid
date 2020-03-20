@@ -758,7 +758,6 @@ void LoadEventPreNexus2::procEvents(
   partWorkspaces.resize(numThreads);
   buffers.resize(numThreads);
   eventVectors = new EventVector_pt *[numThreads];
-
   // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for if (parallelProcessing) )
     for (int i = 0; i < int(numThreads); i++) {
@@ -781,7 +780,7 @@ void LoadEventPreNexus2::procEvents(
       // value = pointer to the events vector
       eventVectors[i] = new EventVector_pt[detid_max + 1];
       EventVector_pt *theseEventVectors = eventVectors[i];
-      for (detid_t j = 0; j < detid_max + 1; j++) {
+      for (detid_t j = 0; j < detid_max + 1; ++j) {
         size_t wi = pixel_to_wkspindex[j];
         // Save a POINTER to the vector<tofEvent>
         if (wi != static_cast<size_t>(-1))
@@ -1323,7 +1322,6 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
   }
 
   if (num_pulses > 0) {
-    double temp;
     DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(num_pulses);
     for (const auto &pulse : pulses) {
@@ -1337,7 +1335,7 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
       else
         lastPulseDateTime = pulseDateTime;
 
-      temp = pulse.pCurrent;
+      double temp = pulse.pCurrent;
       this->proton_charge.emplace_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");

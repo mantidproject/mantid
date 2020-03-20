@@ -1940,8 +1940,6 @@ MatrixWorkspace::findY(double value,
   if (std::isnan(value)) {
     for (int64_t i = idx.first; i < numHists; ++i) {
       const auto &Y = this->y(i);
-      // https://trac.cppcheck.net/ticket/9237 if init buggy with cppcheck
-      // cppcheck-suppress stlIfFind
       if (auto it = std::find_if(std::next(Y.begin(), idx.second), Y.end(),
                                  [](double v) { return std::isnan(v); });
           it != Y.end()) {
@@ -1952,7 +1950,6 @@ MatrixWorkspace::findY(double value,
   } else {
     for (int64_t i = idx.first; i < numHists; ++i) {
       const auto &Y = this->y(i);
-      // cppcheck-suppress stlIfFind
       if (auto it = std::find(std::next(Y.begin(), idx.second), Y.end(), value);
           it != Y.end()) {
         out = {i, std::distance(Y.begin(), it)};

@@ -87,7 +87,7 @@ void SaveDspacemap::CalculateDspaceFromCal(
   std::ofstream fout(filename, std::ios_base::out | std::ios_base::binary);
   Progress prog(this, 0.0, 1.0, maxdetID);
 
-  for (detid_t i = 0; i != maxdetID; i++) {
+  for (detid_t i = 0; i != maxdetID; ++i) {
     // Compute the factor
     double factor;
     Geometry::IDetector_const_sptr det;

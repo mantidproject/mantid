@@ -255,7 +255,7 @@ LoadGSASInstrumentFile::getHistogramType(const vector<string> &lines) {
   // We assume there is just one HTYPE line, look for it from beginning and
   // return its value.
   std::string lookFor = "INS   HTYPE";
-  for (size_t i = 0; i <= lines.size(); ++i) {
+  for (size_t i = 0; i < lines.size(); ++i) {
     if (lines[i].substr(0, lookFor.size()) == lookFor) {
       if (lines[i].size() < lookFor.size() + 7) {
         // line too short
@@ -275,7 +275,7 @@ size_t LoadGSASInstrumentFile::getNumberOfBanks(const vector<string> &lines) {
   // We assume there is just one BANK line, look for it from beginning and
   // return its value.
   std::string lookFor = "INS   BANK";
-  for (size_t i = 0; i <= lines.size(); ++i) {
+  for (size_t i = 0; i < lines.size(); ++i) {
     if (lines[i].substr(0, lookFor.size()) == lookFor) {
       if (lines[i].size() < lookFor.size() + 3) {
         // line too short

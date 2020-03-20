@@ -1771,7 +1771,6 @@ double FitPeaks::fitFunctionSD(
     errorid << ": " << e.what();
     g_log.warning() << "While fitting " + errorid.str();
     return DBL_MAX; // probably the wrong thing to do
-    throw std::runtime_error("While fitting " + errorid.str());
   }
 
   // Retrieve result
@@ -1847,7 +1846,6 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function,
   double chi2 = DBL_MAX;
   if (fitStatus == "success") {
     chi2 = fit->getProperty("OutputChi2overDoF");
-    fit_function = fit->getProperty("Function");
   }
 
   return chi2;
@@ -1883,9 +1881,8 @@ double FitPeaks::fitFunctionHighBackground(
       createMatrixWorkspace(vec_x, vec_y, vec_e);
 
   // Fit peak with background
-  double cost = fitFunctionSD(fit, peakfunction, bkgdfunc, reduced_bkgd_ws, 0,
-                              vec_x.front(), vec_x.back(), expected_peak_center,
-                              observe_peak_shape, false);
+  fitFunctionSD(fit, peakfunction, bkgdfunc, reduced_bkgd_ws, 0, vec_x.front(),
+                vec_x.back(), expected_peak_center, observe_peak_shape, false);
 
   // add the reduced background back
   bkgdfunc->setParameter(0, bkgdfunc->getParameter(0) +
@@ -1893,9 +1890,9 @@ double FitPeaks::fitFunctionHighBackground(
   bkgdfunc->setParameter(1, bkgdfunc->getParameter(1) +
                                 high_bkgd_function->getParameter(1));
 
-  cost = fitFunctionSD(fit, peakfunction, bkgdfunc, m_inputMatrixWS, ws_index,
-                       vec_x.front(), vec_x.back(), expected_peak_center, false,
-                       false);
+  double cost = fitFunctionSD(fit, peakfunction, bkgdfunc, m_inputMatrixWS,
+                              ws_index, vec_x.front(), vec_x.back(),
+                              expected_peak_center, false, false);
 
   return cost;
 }

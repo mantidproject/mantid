@@ -721,7 +721,7 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
 
   // Set up GSL minimzer
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-  gsl_multimin_fminimizer *s = nullptr;
+
   gsl_vector *ss, *x;
   gsl_multimin_function minex_func;
 
@@ -729,7 +729,6 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
   size_t nopt = 1;
   size_t iter = 0;
   int status = 0;
-  double size;
 
   /* Starting point */
   x = gsl_vector_alloc(nopt);
@@ -744,7 +743,7 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
   minex_func.f = &gsl_costFunction;
   minex_func.params = &params;
 
-  s = gsl_multimin_fminimizer_alloc(T, nopt);
+  gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc(T, nopt);
   gsl_multimin_fminimizer_set(s, &minex_func, x, ss);
 
   do {
@@ -753,7 +752,7 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
     if (status)
       break;
 
-    size = gsl_multimin_fminimizer_size(s);
+    double size = gsl_multimin_fminimizer_size(s);
     status = gsl_multimin_test_size(size, 1e-4);
 
   } while (status == GSL_CONTINUE && iter < 50);

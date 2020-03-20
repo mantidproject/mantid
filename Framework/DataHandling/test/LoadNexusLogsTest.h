@@ -272,7 +272,6 @@ public:
 
   void test_last_time_series_log_entry_equals_end_time() {
     LoadNexusLogs ld;
-    std::string outws_name = "REF_L_instrument";
     ld.initialize();
     ld.setPropertyValue("Filename", "REF_L_32035.nxs");
     MatrixWorkspace_sptr ws = createTestWorkspace();

@@ -128,7 +128,8 @@ void CostFuncFitting::calActiveCovarianceMatrix(GSLMatrix &covar,
   // construct the jacobian
   GSLJacobian J(*m_function, m_values->size());
   size_t na = this->nParams(); // number of active parameters
-  assert(J.getJ()->size2 == na);
+  auto j = J.getJ();
+  assert(j->size2 == na);
   covar.resize(na, na);
 
   // calculate the derivatives

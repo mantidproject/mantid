@@ -361,10 +361,9 @@ public:
       auto &fitted_x = fitted->x(0);
 
       //  TS_ASSERT_EQUALS(fitted_y.size(), unfitted_y.size());
-      double x;
 
       for (unsigned int i = 0; i < fitted_y.size(); ++i) {
-        x = fitted_x[i]; //(fitted_x[i] + fitted_x[i+1])* 0.5;
+        double x = fitted_x[i]; //(fitted_x[i] + fitted_x[i+1])* 0.5;
         TS_ASSERT_DELTA(fitted_y[i],
                         26.6936 - 9.31494 * x + 1.11532 * x * x -
                             0.044502 * x * x * x,
@@ -405,10 +404,9 @@ public:
       auto &fitted_x = fitted->x(0);
 
       //  TS_ASSERT_EQUALS(fitted_y.size(), unfitted_y.size());
-      double x;
 
       for (unsigned int i = 0; i < fitted_y.size(); ++i) {
-        x = (fitted_x[i] + fitted_x[i + 1]) * 0.5;
+        double x = (fitted_x[i] + fitted_x[i + 1]) * 0.5;
         TS_ASSERT_DELTA(fitted_y[i],
                         26.6936 - 9.31494 * x + 1.11532 * x * x -
                             0.044502 * x * x * x,

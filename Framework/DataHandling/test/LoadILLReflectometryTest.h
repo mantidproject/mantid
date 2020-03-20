@@ -696,10 +696,12 @@ public:
     auto instrument = output->getInstrument();
     auto slit1 = instrument->getComponentByName("slit2");
     auto slit2 = instrument->getComponentByName("slit3");
+    // cppcheck-suppress unreadVariable
     const double S2z =
         -output->run().getPropertyValueAsType<double>("Distance.S2toSample") *
         1e-3;
     TS_ASSERT_EQUALS(slit1->getPos(), V3D(0.0, 0.0, S2z))
+    // cppcheck-suppress unreadVariable
     const double S3z =
         -output->run().getPropertyValueAsType<double>("Distance.S3toSample") *
         1e-3;

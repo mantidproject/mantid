@@ -373,6 +373,7 @@ public:
     va_start(vl, num);
     for (int i = 0; i < num; i++)
       retVal.emplace_back(va_arg(vl, int));
+    va_end(vl);
     return retVal;
   }
 

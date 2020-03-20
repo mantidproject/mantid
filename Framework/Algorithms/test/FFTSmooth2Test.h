@@ -277,9 +277,11 @@ public:
             }
 
             if (!AllSpectra) {
+              bool allSpectraGtZero = false;
+
               for (int WorkspaceIndex = 0; WorkspaceIndex < 10;
                    WorkspaceIndex++) {
-                performTest((event > 0), filter, params, (AllSpectra > 0),
+                performTest((event > 0), filter, params, allSpectraGtZero,
                             WorkspaceIndex, (inPlace > 0));
               }
             } else {

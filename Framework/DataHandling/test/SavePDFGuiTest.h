@@ -112,9 +112,6 @@ public:
     grpAlg->setPropertyValue("OutputWorkspace", groupName);
     grpAlg->execute();
 
-    // name of the output file
-    const std::string outFilename("SavePDFGUIGroup.gr");
-
     // run the algorithm with a group
     SavePDFGui alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

@@ -119,8 +119,7 @@ public:
 
     std::string currentVersion =
         alg.PropertyManagerOwner::getProperty("CurrentVersion");
-    std::string mostRecentVersion =
-        alg.PropertyManagerOwner::getProperty("MostRecentVersion");
+    alg.PropertyManagerOwner::getProperty("MostRecentVersion");
     bool isNewVersionAvailable =
         alg.PropertyManagerOwner::getProperty("IsNewVersionAvailable");
 

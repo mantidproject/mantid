@@ -10,6 +10,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Kernel;
 

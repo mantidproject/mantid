@@ -931,7 +931,6 @@ void FilterEventsByLogValuePreNexus::procEvents(
                       << " threads"
                       << " in " << numBlocks << " blocks. "
                       << "\n";
-
   // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for schedule(dynamic, 1) if (m_parallelProcessing) )
     for (int i = 0; i < int(numThreads); i++) {
@@ -955,7 +954,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
       // value = pointer to the events vector
       eventVectors[i] = new EventVector_pt[m_detid_max + 1];
       EventVector_pt *theseEventVectors = eventVectors[i];
-      for (detid_t j = 0; j < m_detid_max + 1; j++) {
+      for (detid_t j = 0; j < m_detid_max + 1; ++j) {
         size_t wi = m_pixelToWkspindex[j];
         // Save a POINTER to the vector<tofEvent>
         theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
@@ -1134,15 +1133,13 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
                 << m_maxNumEvents << "\n";
   maxeventid = m_maxNumEvents + 1;
 
-  size_t numbadeventindex = 0;
-
   int numeventswritten = 0;
 
   // Declare local statistic parameters
   size_t local_numErrorEvents = 0;
   size_t local_numBadEvents = 0;
-  size_t local_numWrongdetidEvents = 0;
   size_t local_numIgnoredEvents = 0;
+  size_t local_numWrongdetidEvents = 0;
   size_t local_numGoodEvents = 0;
   double local_m_shortestTof =
       static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
@@ -1162,8 +1159,6 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
   int64_t i_pulse = 0;
 
   for (size_t ievent = 0; ievent < current_event_buffer_size; ++ievent) {
-    bool iswrongdetid = false;
-
     // Load DasEvent
     DasEvent &tempevent = *(event_buffer + ievent);
 
@@ -1187,6 +1182,7 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
         pixelid = this->m_pixelmap[unmapped_pid];
       }
 
+      bool iswrongdetid = false;
       // Check special/wrong pixel IDs against max Detector ID
       if (pixelid > static_cast<PixelType>(m_detid_max)) {
         // Record the wrong/special ID
@@ -1367,12 +1363,6 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
       m_shortestTof = local_m_shortestTof;
     if (local_m_longestTof > m_longestTof)
       m_longestTof = local_m_longestTof;
-  }
-
-  if (numbadeventindex > 0) {
-    g_log.notice() << "Single block: Encountered " << numbadeventindex
-                   << " bad event indexes"
-                   << "\n";
   }
 }
 
@@ -1559,7 +1549,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       // value = pointer to the events vector
       eventVectors[i] = new EventVector_pt[m_detid_max + 1];
       EventVector_pt *theseEventVectors = eventVectors[i];
-      for (detid_t j = 0; j < m_detid_max + 1; j++) {
+      for (detid_t j = 0; j < m_detid_max + 1; ++j) {
         size_t wi = m_pixelToWkspindex[j];
         // Save a POINTER to the vector<tofEvent>
         if (wi != static_cast<size_t>(-1))
@@ -1738,8 +1728,6 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
                  << m_maxNumEvents << "\n";
   maxeventid = m_maxNumEvents + 1;
 
-  size_t numbadeventindex = 0;
-
   // Declare local statistic parameters
   size_t local_numErrorEvents = 0;
   size_t local_numBadEvents = 0;
@@ -1825,8 +1813,6 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
   g_log.notice() << "[DB] L1 = " << l1 << "\n";
 
   for (size_t ievent = 0; ievent < current_event_buffer_size; ++ievent) {
-    bool iswrongdetid = false;
-    bool islogevent = false;
 
     // Load DasEvent
     DasEvent &tempevent = *(event_buffer + ievent);
@@ -1841,6 +1827,9 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
       local_numBadEvents++;
       continue;
     } else {
+      bool islogevent = false;
+      bool iswrongdetid = false;
+
       // Covert DAS Pixel ID to Mantid Pixel ID
       if (pixelid == 1073741843) {
         // downstream monitor pixel for SNAP
@@ -2108,8 +2097,6 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
       m_longestTof = local_m_longestTof;
   }
 
-  g_log.notice() << "Encountered " << numbadeventindex << " bad event indexes"
-                 << "\n";
 } // FilterEventsLinearly
 
 //----------------------------------------------------------------------------------------------
@@ -2369,8 +2356,6 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
     }
   }
 
-  double temp;
-
   if (m_numPulses > 0) {
     DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(m_numPulses);
@@ -2385,7 +2370,7 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
       else
         lastPulseDateTime = pulseDateTime;
 
-      temp = pulse.pCurrent;
+      double temp = pulse.pCurrent;
       this->m_protonCharge.emplace_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");

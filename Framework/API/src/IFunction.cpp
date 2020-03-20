@@ -559,10 +559,11 @@ std::vector<std::string> IFunction::getParameterNames() const {
  * @param handler :: A new handler
  */
 void IFunction::setHandler(std::unique_ptr<FunctionHandler> handler) {
-  m_handler = std::move(handler);
   if (handler && handler->function().get() != this) {
     throw std::runtime_error("Function handler points to a different function");
   }
+
+  m_handler = std::move(handler);
   m_handler->init();
 }
 
@@ -661,6 +662,7 @@ private:
 /// @param attr :: The attribute to copy from.
 IFunction::Attribute &IFunction::Attribute::operator=(const Attribute &attr) {
   m_data = attr.m_data;
+  m_quoteValue = attr.m_quoteValue;
   return *this;
 }
 

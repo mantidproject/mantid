@@ -190,9 +190,6 @@ public:
   }
 
   int runDownloadInstrument() {
-    // Name of the output workspace.
-    std::string outWSName("DownloadInstrumentTest_OutputWS");
-
     MockedDownloadInstrument alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

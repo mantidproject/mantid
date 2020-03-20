@@ -104,7 +104,6 @@ public:
 
   void test_Shared_Pointer() {
     FunctionProperty prop("fun");
-    std::string error;
     boost::shared_ptr<FunctionPropertyTest_Function> fun_p(
         new FunctionPropertyTest_Function);
     TS_ASSERT(fun_p);

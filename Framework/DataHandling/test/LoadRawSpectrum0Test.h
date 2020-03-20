@@ -110,7 +110,7 @@ public:
     wsNamevec = sptrWSGrp->getNames();
     int period = 1;
     std::vector<std::string>::const_iterator it = wsNamevec.begin();
-    for (; it != wsNamevec.end(); it++) {
+    for (; it != wsNamevec.end(); ++it) {
       std::stringstream count;
       count << period;
       std::string wsName = "multiperiod_" + count.str();
@@ -119,7 +119,7 @@ public:
     }
     std::vector<std::string>::const_iterator itr1 = wsNamevec.begin();
     int expectedPeriod = 0;
-    for (; itr1 != wsNamevec.end(); itr1++) {
+    for (; itr1 != wsNamevec.end(); ++itr1) {
       MatrixWorkspace_sptr outsptr;
       TS_ASSERT_THROWS_NOTHING(
           outsptr = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(

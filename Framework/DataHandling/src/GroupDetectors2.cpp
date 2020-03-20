@@ -646,7 +646,6 @@ void GroupDetectors2::processGroupingWorkspace(
     size_t groupid = static_cast<int>(groupWS->y(i)[0]);
     // group 0 is are unused spectra - don't process them
     if (groupid > 0) {
-      // cppcheck-suppress stlFindInsert
       if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end()) {
         // not found - create an empty set
         group2WSIndexSetmap.emplace(groupid, std::set<size_t>());
@@ -697,8 +696,6 @@ void GroupDetectors2::processMatrixWorkspace(
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     // read spectra from groupingws
     size_t groupid = i;
-
-    // cppcheck-suppress stlFindInsert
     if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end()) {
       // not found - create an empty set
       group2WSIndexSetmap.emplace(groupid, std::set<size_t>());

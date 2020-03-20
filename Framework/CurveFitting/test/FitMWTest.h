@@ -497,8 +497,6 @@ public:
   test_Composite_Function_With_SeparateMembers_Option_On_FitMW_Outputs_Composite_Values_Plus_Each_Member() {
     const bool histogram = true;
     auto ws2 = createTestWorkspace(histogram);
-    const std::string inputWSName = "FitMWTest_CompositeTest";
-    // AnalysisDataService::Instance().add(inputWSName, ws2);
 
     auto composite = boost::make_shared<API::CompositeFunction>();
     API::IFunction_sptr expDecay(new ExpDecay);

@@ -697,9 +697,8 @@ public:
     auto outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("outWS"));
 
-    const auto &xAxis = outWS->getAxis(0);
-    TS_ASSERT_EQUALS(xAxis->length(), 296)
-    const auto &yAxis = outWS->getAxis(1);
+    auto yAxis = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->length(), 296)
     TS_ASSERT_EQUALS(yAxis->length(), 256)
 
     for (size_t i = 0; i < 256; i++) {
@@ -735,9 +734,8 @@ public:
     auto outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("outWS"));
 
-    const auto &xAxis = outWS->getAxis(0);
-    TS_ASSERT_EQUALS(xAxis->length(), 296)
-    const auto &yAxis = outWS->getAxis(1);
+    auto yAxis = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->length(), 296)
     TS_ASSERT_EQUALS(yAxis->length(), 256)
 
     for (size_t i = 0; i < 256; i++) {

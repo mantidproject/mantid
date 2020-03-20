@@ -79,8 +79,6 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
     if (canCalculateMassDensity) {
       result["SampleMassDensity"] =
           "Cannot give SampleMassDensity with SampleNumberDensity set";
-      result["SampleMassDensity"] =
-          "Cannot give SampleMassDensity with SampleNumberDensity set";
     }
   }
   return result;

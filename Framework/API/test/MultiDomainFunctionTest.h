@@ -324,7 +324,6 @@ public:
   void test_attribute_domain_range() {
     multi.clearDomainIndices();
     multi.setLocalAttributeValue(0, "domains", "0-2");
-    return;
     multi.setLocalAttributeValue(1, "domains", "i");
     multi.setLocalAttributeValue(2, "domains", "i");
 

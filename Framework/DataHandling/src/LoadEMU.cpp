@@ -690,7 +690,7 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
   //
   double sampleAnalyser = iparam("SampleAnalyser");
   auto endID = static_cast<detid_t>(DETECTOR_TUBES * PIXELS_PER_TUBE);
-  for (detid_t detID = 0; detID < endID; detID++)
+  for (detid_t detID = 0; detID < endID; ++detID)
     updateNeutronicPostions(detID, sampleAnalyser);
 
   // get the detector map from raw input to a physical detector

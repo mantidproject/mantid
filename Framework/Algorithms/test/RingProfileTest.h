@@ -39,14 +39,6 @@ public:
                      const std::invalid_argument &);
 
     // centre must be 2 or 3 values (x,y) or (x,y,z)
-    std::vector<double> justOne(1);
-    justOne[0] = -0.35;
-    // TS_ASSERT_THROWS(alg.setProperty("Centre",justOne),
-    // const std::invalid_argument &);
-
-    std::vector<double> fourInputs(4, -0.45);
-    // TS_ASSERT_THROWS(alg.setProperty("Centre", fourInputs),
-    // const std::invalid_argument &);
 
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));

@@ -632,10 +632,8 @@ public:
   void test_Accessing_Single_Value_From_Times_Series_A_Large_Number_Of_Times() {
     double value(0.0);
     for (size_t i = 0; i < 20000; ++i) {
-      value = m_testRun.getPropertyAsSingleValue(m_propName);
+      m_testRun.getPropertyAsSingleValue(m_propName);
     }
-    // Enure variable is used so that it is not optimised away by the compiler
-    value += 1.0;
   }
 
   Run m_testRun;

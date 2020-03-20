@@ -153,7 +153,7 @@ public:
     detectorgroup = output2D->getSpectrum(2083).getDetectorIDs();
     std::set<detid_t>::const_iterator it;
     int pixnum = 101191;
-    for (it = detectorgroup.begin(); it != detectorgroup.end(); it++)
+    for (it = detectorgroup.begin(); it != detectorgroup.end(); ++it)
       TS_ASSERT_EQUALS(*it, pixnum++);
 
     AnalysisDataService::Instance().remove(outputSpace);
@@ -375,7 +375,7 @@ public:
     wsNamevec = sptrWSGrp->getNames();
     int period = 1;
     std::vector<std::string>::const_iterator it = wsNamevec.begin();
-    for (; it != wsNamevec.end(); it++) {
+    for (; it != wsNamevec.end(); ++it) {
       std::stringstream count;
       count << period;
       std::string wsName = "multiperiod_" + count.str();
@@ -385,7 +385,7 @@ public:
     std::vector<std::string>::const_iterator itr1 = wsNamevec.begin();
     int periodNumber = 0;
     const int nHistograms = 4;
-    for (; itr1 != wsNamevec.end(); itr1++) {
+    for (; itr1 != wsNamevec.end(); ++itr1) {
       MatrixWorkspace_sptr outsptr;
       TS_ASSERT_THROWS_NOTHING(
           outsptr = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -581,7 +581,7 @@ public:
     detectorgroup = output2D->getSpectrum(2079).getDetectorIDs();
     std::set<detid_t>::const_iterator it;
     int pixnum = 101191;
-    for (it = detectorgroup.begin(); it != detectorgroup.end(); it++)
+    for (it = detectorgroup.begin(); it != detectorgroup.end(); ++it)
       TS_ASSERT_EQUALS(*it, pixnum++);
 
     // Test if filename log is found in both monitor and sata workspace
@@ -626,7 +626,7 @@ public:
         monitorsptrWSGrp->getNames();
     int period = 1;
     std::vector<std::string>::const_iterator it = monitorwsNamevec.begin();
-    for (; it != monitorwsNamevec.end(); it++) {
+    for (; it != monitorwsNamevec.end(); ++it) {
       std::stringstream count;
       count << period;
       std::string wsName = "multiperiod_monitors_" + count.str();
@@ -634,7 +634,7 @@ public:
       period++;
     }
     std::vector<std::string>::const_iterator itr1 = monitorwsNamevec.begin();
-    for (; itr1 != monitorwsNamevec.end(); itr1++) {
+    for (; itr1 != monitorwsNamevec.end(); ++itr1) {
       MatrixWorkspace_sptr outsptr;
       TS_ASSERT_THROWS_NOTHING(
           outsptr = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -674,7 +674,7 @@ public:
     const std::vector<std::string> wsNamevec = sptrWSGrp->getNames();
     period = 1;
     it = wsNamevec.begin();
-    for (; it != wsNamevec.end(); it++) {
+    for (; it != wsNamevec.end(); ++it) {
       std::stringstream count;
       count << period;
       std::string wsName = "multiperiod_" + count.str();
@@ -684,7 +684,7 @@ public:
     itr1 = wsNamevec.begin();
     int periodNumber = 0;
     const int nHistograms = 2;
-    for (; itr1 != wsNamevec.end(); itr1++) {
+    for (; itr1 != wsNamevec.end(); ++itr1) {
       MatrixWorkspace_sptr outsptr;
       TS_ASSERT_THROWS_NOTHING(
           outsptr = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(

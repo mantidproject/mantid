@@ -462,14 +462,14 @@ public:
     while (ins.getline(line, 256)) {
       if (line[0] != '#') {
         std::string parname;
-        double parvalue, parmin, parmax, parstepsize;
-
+        double parvalue;
         std::stringstream ss;
         ss.str(line);
         ss >> parname >> parvalue;
         parameters.emplace(parname, parvalue);
 
         try {
+          double parmin, parmax, parstepsize;
           ss >> parmin >> parmax >> parstepsize;
           vector<double> mcpars;
           mcpars.emplace_back(parmin);

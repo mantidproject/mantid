@@ -37,26 +37,26 @@ namespace Algorithms {
 struct Parameter {
   // Regular
   std::string name;
-  double curvalue;
-  double prevalue;
-  double minvalue;
-  double maxvalue;
-  bool fit;
-  double stepsize;
-  double fiterror;
+  double curvalue = 0;
+  double prevalue = 0;
+  double minvalue = 0;
+  double maxvalue = 0;
+  bool fit = false;
+  double stepsize = 0;
+  double fiterror = 0;
   // Monte Carlo
-  bool nonnegative;
-  double mcA0;
-  double mcA1;
+  bool nonnegative = false;
+  double mcA0 = 0;
+  double mcA1 = 0;
   // Monte Carlo record
-  double sumstepsize;
-  double maxabsstepsize;
-  double maxrecordvalue;
-  double minrecordvalue;
-  size_t numpositivemove;
-  size_t numnegativemove;
-  size_t numnomove;
-  int movedirection;
+  double sumstepsize = 0;
+  double maxabsstepsize = 0;
+  double maxrecordvalue = 0;
+  double minrecordvalue = 0;
+  size_t numpositivemove = 0;
+  size_t numnegativemove = 0;
+  size_t numnomove = 0;
+  int movedirection = 0;
 };
 
 class MANTID_CURVEFITTING_DLL LeBailFit : public API::Algorithm {

@@ -755,14 +755,13 @@ double fitDIFCtZeroDIFA(std::vector<double> &peaks, double &difc, double &t0,
   size_t iter = 0; // number of iterations
   const size_t MAX_ITER = 75 * numParams;
   int status = 0;
-  double size;
   do {
     iter++;
     status = gsl_multimin_fminimizer_iterate(minimizer);
     if (status)
       break;
 
-    size = gsl_multimin_fminimizer_size(minimizer);
+    double size = gsl_multimin_fminimizer_size(minimizer);
     status = gsl_multimin_test_size(size, 1e-4);
 
   } while (status == GSL_CONTINUE && iter < MAX_ITER);

@@ -78,7 +78,6 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
             static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(max)));
       }
     } else {
-      // cppcheck-suppress constArgument
       MSVC_DIAG_OFF(4244);
       switch (type) {
       case IndexType::WorkspaceIndex:

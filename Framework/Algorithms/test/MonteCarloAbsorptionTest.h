@@ -87,7 +87,6 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
     ws->mutableSample().setShape(sampleShape);
 
     if (environment == Environment::SamplePlusContainer) {
-      const std::string id("container");
       constexpr double containerWallThickness{0.002};
       constexpr double containerInnerRadius{1.2 * sampleHeight};
       constexpr double containerOuterRadius{containerInnerRadius +

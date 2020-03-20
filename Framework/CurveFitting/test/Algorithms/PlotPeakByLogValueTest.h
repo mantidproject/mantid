@@ -625,8 +625,6 @@ private:
     ws->setSharedX(1, ws->sharedX(0));
     ws->setSharedX(2, ws->sharedX(0));
 
-    std::vector<double> amps{20.0, 30.0, 25.0};
-    std::vector<double> cents{0.0, 0.1, -1.0};
     std::vector<double> fwhms{1.0, 1.1, 0.6};
     for (size_t i = 0; i < 3; ++i) {
       std::string fun = "name=FlatBackground,A0=" + std::to_string(fwhms[i]);

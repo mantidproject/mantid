@@ -60,8 +60,6 @@ public:
 
   void doTestVulcan(const std::string &dspaceFile,
                     const std::string &fileType) {
-    std::string outputFile = "./VULCAN_dspacemaptocal_test.cal";
-
     LoadDspacemap testerDSP;
     TS_ASSERT_THROWS_NOTHING(testerDSP.initialize());
     TS_ASSERT_THROWS_NOTHING(testerDSP.isInitialized());

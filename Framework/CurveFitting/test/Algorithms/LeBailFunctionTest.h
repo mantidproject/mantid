@@ -216,7 +216,7 @@ public:
          << imax111 << "-th points.\n";
 
     // Calculate diffraction patters
-    auto out = lebailfunction.function(vecX, true, false);
+    lebailfunction.function(vecX, true, false);
     TS_ASSERT_THROWS_ANYTHING(lebailfunction.function(vecX, true, true));
 
     vector<string> vecbkgdparnames(2);
@@ -228,7 +228,7 @@ public:
     lebailfunction.addBackgroundFunction("Polynomial", 2, vecbkgdparnames,
                                          bkgdvec, vecX.front(), vecX.back());
 
-    out = lebailfunction.function(vecX, true, true);
+    auto out = lebailfunction.function(vecX, true, true);
 
     double v1 = out[imax111];
     double v2 = out[imax110];
@@ -441,7 +441,6 @@ public:
       if (line[0] != '#') {
         double x, y;
         std::stringstream ss;
-        std::string dataline(line);
         ss.str(line);
         ss >> x >> y;
         vecX.emplace_back(x);

@@ -96,30 +96,22 @@ void fourInputsCorrectedAndErrors(
   const auto diag1 = 1. / f1;
   const auto off1 = (f1 - 1.) / f1;
   Eigen::Matrix4d F1m;
-  // Suppress warnings about suspicious init with Eigen
-  // cppcheck-suppress constStatement
   F1m << 1., 0., 0., 0., 0., 1., 0., 0., off1, 0., diag1, 0., 0., off1, 0.,
       diag1;
 
   const auto diag2 = 1. / f2;
   const auto off2 = (f2 - 1.) / f2;
   Eigen::Matrix4d F2m;
-
-  // cppcheck-suppress constStatement
   F2m << 1., 0., 0., 0., off2, diag2, 0., 0., 0., 0., 1., 0., 0., 0., off2,
       diag2;
   const auto diag3 = (p1 - 1.) / (2. * p1 - 1.);
   const auto off3 = p1 / (2. * p1 - 1);
   Eigen::Matrix4d P1m;
-
-  // cppcheck-suppress constStatement
   P1m << diag3, 0, off3, 0, 0, diag3, 0, off3, off3, 0, diag3, 0, 0, off3, 0,
       diag3;
   const auto diag4 = (p2 - 1.) / (2. * p2 - 1.);
   const auto off4 = p2 / (2. * p2 - 1.);
   Eigen::Matrix4d P2m;
-
-  // cppcheck-suppress constStatement
   P2m << diag4, off4, 0., 0., off4, diag4, 0., 0., 0., 0., diag4, off4, 0., 0.,
       off4, diag4;
   const Eigen::Vector4d intensities(ppy, pmy, mpy, mmy);
@@ -131,26 +123,18 @@ void fourInputsCorrectedAndErrors(
   // the matrices above, multiplied by the error.
   const auto elemE1 = -1. / pow<2>(f1) * f1E;
   Eigen::Matrix4d F1Em;
-
-  // cppcheck-suppress constStatement
   F1Em << 0., 0., 0., 0., 0., 0., 0., 0., -elemE1, 0., elemE1, 0., 0., -elemE1,
       0., elemE1;
   const auto elemE2 = -1. / pow<2>(f2) * f2E;
   Eigen::Matrix4d F2Em;
-
-  // cppcheck-suppress constStatement
   F2Em << 0., 0., 0., 0., -elemE2, elemE2, 0., 0., 0., 0., 0., 0., 0., 0.,
       -elemE2, elemE2;
   const auto elemE3 = 1. / pow<2>(2. * p1 - 1.) * p1E;
   Eigen::Matrix4d P1Em;
-
-  // cppcheck-suppress constStatement
   P1Em << elemE3, 0., -elemE3, 0., 0., elemE3, 0., -elemE3, -elemE3, 0., elemE3,
       0., 0., -elemE3, 0., elemE3;
   const auto elemE4 = 1. / pow<2>(2. * p2 - 1.) * p2E;
   Eigen::Matrix4d P2Em;
-
-  // cppcheck-suppress constStatement
   P2Em << elemE4, -elemE4, 0., 0., -elemE4, elemE4, 0., 0., 0., 0., elemE4,
       -elemE4, 0., 0., -elemE4, elemE4;
   const Eigen::Vector4d yErrors(ppyE, pmyE, mpyE, mmyE);

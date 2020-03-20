@@ -432,7 +432,6 @@ void CreateGroupingWorkspace::exec() {
       sortnames = true;
       GroupNames = "";
       int maxRecurseDepth = this->getProperty("MaxRecursionDepth");
-
       // cppcheck-suppress syntaxError
           PRAGMA_OMP(parallel for schedule(dynamic, 1) )
           for (int num = 0; num < 300; ++num) {

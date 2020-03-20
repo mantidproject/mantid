@@ -236,6 +236,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Indirect"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EFixed", 1.84))
     const double dE{0.3};
+    // cppcheck-suppress unreadVariable
     const std::vector<double> eBinParams{dE};
     std::vector<double> expectedEBinEdges;
     const auto firstEdge = inWS->x(0).front();

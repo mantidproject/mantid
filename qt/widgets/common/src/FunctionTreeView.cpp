@@ -904,10 +904,6 @@ void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie) {
   if (!prop) {
     throw std::runtime_error("FunctionTreeView: null property pointer");
   }
-  AProperty ap;
-  ap.item = nullptr;
-  ap.prop = nullptr;
-  ap.parent = nullptr;
 
   if (!isParameter(prop))
     return;
@@ -918,7 +914,7 @@ void FunctionTreeView::addTieProperty(QtProperty *prop, const QString &tie) {
   m_tieManager->blockSignals(true);
   QtProperty *tieProp = m_tieManager->addProperty("Tie");
   m_tieManager->setValue(tieProp, tie);
-  ap = addProperty(prop, tieProp);
+  addProperty(prop, tieProp);
   m_tieManager->blockSignals(false);
 
   const auto parName = getParameterName(prop);

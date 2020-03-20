@@ -119,8 +119,7 @@ public:
     TS_ASSERT_EQUALS(outXs.size(), inXs.size())
     TS_ASSERT(outputWS->hasDx(0))
     const auto &inYs = inputWS->y(0);
-    const auto &outYs = outputWS->y(0);
-    TS_ASSERT_EQUALS(outYs.rawData(), inYs.rawData())
+    TS_ASSERT_EQUALS(outputWS->y(0).rawData(), inYs.rawData())
     const auto &inEs = inputWS->e(0);
     const auto &outEs = outputWS->e(0);
     TS_ASSERT_EQUALS(outEs.rawData(), inEs.rawData())

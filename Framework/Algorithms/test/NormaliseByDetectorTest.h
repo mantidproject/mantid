@@ -400,10 +400,11 @@ public:
     MatrixWorkspace_sptr inputWS = create_workspace_with_fitting_functions();
     // Extract the output workspace so that we can verify the normalisation.
     const bool parallel = true;
+    const bool sequential = false;
     MatrixWorkspace_sptr outWS_parallel = do_test_doesnt_throw_on_execution(
         inputWS, parallel); // EXECUTES THE ALG IN PARALLEL.
     MatrixWorkspace_sptr outWS_sequential = do_test_doesnt_throw_on_execution(
-        inputWS, !parallel); // EXECUTES THE ALG SEQUENTIALLY.
+        inputWS, sequential); // EXECUTES THE ALG SEQUENTIALLY.
 
     // Output workspaces should have same number of histograms.
     TS_ASSERT_EQUALS(2, outWS_parallel->getNumberHistograms());

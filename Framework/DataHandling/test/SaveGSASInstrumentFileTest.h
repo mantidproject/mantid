@@ -497,7 +497,6 @@ public:
 
     while (!file2.eof()) {
       getline(file2, str);
-      c2++;
     }
 
     // Reset file stream pointer
