@@ -98,15 +98,12 @@ class DrillView(QMainWindow):
     settings_listeners = []
     job_tree_view = None
 
-    def __init__(self, instrument):
+    def __init__(self):
         super(DrillView, self).__init__()
         self.here = os.path.dirname(os.path.realpath(__file__))
         uic.loadUi(os.path.join(self.here, 'main.ui'), self)
-        self.instrument = instrument
-        self.technique = RundexSettings.get_technique(instrument)
         self.setup_header()
-        self.setup_center()
-        self.show()
+        self.choose_instrument(config['default.instrument'])
 
     def setup_header(self):
         self.instrumentselector = instrumentselector.InstrumentSelector(self)
@@ -182,11 +179,20 @@ class DrillView(QMainWindow):
         settings.show()
 
     def setup_center(self):
-        if hasattr(self, 'job_tree_view'):
-            if self.job_tree_view:
-                self.job_tree_view.setParent(None)
-                self.job_tree_view = None
-        self.job_tree_view = DrillJobTreeView(RundexSettings.COLUMNS[self.technique])
+        if self.job_tree_view:
+            self.job_tree_view.setParent(None)
+
+        if (self.technique == None):
+            self.job_tree_view = DrillJobTreeView(list())
+            self.job_tree_view.setVisible(False)
+        else:
+            self.job_tree_view = DrillJobTreeView(
+                    RundexSettings.COLUMNS[self.technique])
+            self.job_tree_view.setVisible(True)
+        sp = self.job_tree_view.sizePolicy()
+        sp.setRetainSizeWhenHidden(True)
+        self.job_tree_view.setSizePolicy(sp)
+
         self.center.addWidget(self.job_tree_view)
         self.table_signals = JobTreeViewSignalAdapter(self.job_tree_view, self)
         self.table_signals.cellTextChanged.connect(self.data_changed)
@@ -236,13 +242,16 @@ class DrillView(QMainWindow):
         fname = QFileDialog.getOpenFileName(self, 'Load rundex', '~')
 
     def choose_instrument(self, instrument):
-        if instrument in ['D11', 'D16', 'D22', 'D33', 'D17', 'FIGARO']:
+        if (instrument in RundexSettings.TECHNIQUE_MAP):
             config['default.instrument'] = instrument
             self.instrument = instrument
             self.technique = RundexSettings.get_technique(self.instrument)
-            self.setup_center()
         else:
-            logger.error('Instrument {0} is not supported yet.'.format(instrument))
+            logger.error('Instrument {0} is not supported yet.'
+                         .format(instrument))
+            self.instrument = None
+            self.technique = None
+        self.setup_center()
 
     def show_directory_manager(self):
         manageuserdirectories.ManageUserDirectories(self).exec_()
