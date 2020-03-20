@@ -180,6 +180,11 @@ void Material::calculateTotalScatterXSection() {
     m_totalScatterXSection = weightedTotal;
   }
 }
+
+void Material::setAttenuationProfile(AttenuationProfile attenuationOverride) {
+  m_attenuationOverride = attenuationOverride;
+}
+
 /**
  * Returns the name
  * @returns A string containing the name of the material
@@ -256,8 +261,13 @@ double Material::absorbXSection(const double lambda) const {
  * @return The dimensionless attenuation coefficient
  */
 double Material::attenuation(const double distance, const double lambda) const {
-  return exp(-100 * numberDensity() *
-             (totalScatterXSection() + absorbXSection(lambda)) * distance);
+  if (!m_attenuationOverride) {
+    return exp(-100 * numberDensity() *
+               (totalScatterXSection() + absorbXSection(lambda)) * distance);
+  } else {
+    return exp(-m_attenuationOverride->getAttenuationCoefficient(lambda) *
+               distance);
+  }
 }
 
 // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1

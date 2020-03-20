@@ -20,11 +20,12 @@ namespace {
 Logger g_log("Interpolation");
 } // namespace
 
-/* Functor for findIndexOfNextLargerValue, used in std::lower_bound to replicate
-   the original behavior.
-*/
+/* Functor used in std::lower_bound to replicate the original behavior.
+ */
 struct LessOrEqualFunctor {
-  bool operator()(const double &lhs, const double &rhs) { return lhs <= rhs; }
+  bool operator()(const DataXY &lhs, const DataXY &rhs) {
+    return lhs.first <= rhs.first;
+  }
 };
 
 /** Constructor default to linear interpolation and x-unit set to TOF
@@ -34,18 +35,22 @@ Interpolation::Interpolation() : m_method("linear") {
   m_yUnit = UnitFactory::Instance().create("TOF");
 }
 
-size_t
-Interpolation::findIndexOfNextLargerValue(const std::vector<double> &data,
-                                          double key) const {
-  auto begin = data.begin();
-  auto end = data.end();
-  auto pos = std::lower_bound(begin, end, key, LessOrEqualFunctor());
+/** Get iterator of item that is next larger than the supplied x value
+ * @param key :: the x value to base the search on
+ * @return iterator of the next largest x value
+ */
+std::vector<DataXY>::const_iterator
+Interpolation::findIndexOfNextLargerValue(double key) const {
+  return std::lower_bound(m_data.begin(), m_data.end(), DataXY(key, 0),
+                          LessOrEqualFunctor());
+}
 
-  if (pos == end || pos == begin) {
-    throw std::range_error("Value is not in the interpolation range.");
-  }
+std::vector<DataXY>::const_iterator Interpolation::cbegin() const {
+  return m_data.cbegin();
+}
 
-  return std::distance(begin, pos);
+std::vector<DataXY>::const_iterator Interpolation::cend() const {
+  return m_data.cend();
 }
 
 void Interpolation::setXUnit(const std::string &unit) {
@@ -61,7 +66,7 @@ void Interpolation::setYUnit(const std::string &unit) {
  * @return the value
  */
 double Interpolation::value(const double &at) const {
-  size_t N = m_x.size();
+  size_t N = m_data.size();
 
   if (N == 0) {
     g_log.error() << "Need at least one value for interpolation. Return "
@@ -70,26 +75,39 @@ double Interpolation::value(const double &at) const {
   }
 
   if (N == 1) {
-    return m_y[0];
+    return m_data[0].second;
   }
 
   // check first if at is within the limits of interpolation interval
 
-  if (at < m_x[0]) {
-    return m_y[0] - (m_x[0] - at) * (m_y[1] - m_y[0]) / (m_x[1] - m_x[0]);
+  if (at < m_data[0].first) {
+    return m_data[0].second - (m_data[0].first - at) *
+                                  (m_data[1].second - m_data[0].second) /
+                                  (m_data[1].first - m_data[0].first);
   }
 
-  if (at >= m_x[N - 1]) {
-    return m_y[N - 1] + (at - m_x[N - 1]) * (m_y[N - 1] - m_y[N - 2]) /
-                            (m_x[N - 1] - m_x[N - 2]);
+  if (at > m_data[N - 1].first) {
+    return m_data[N - 1].second +
+           (at - m_data[N - 1].first) *
+               (m_data[N - 1].second - m_data[N - 2].second) /
+               (m_data[N - 1].first - m_data[N - 2].first);
   }
 
   try {
     // otherwise
     // General case. Find index of next largest value by std::lower_bound.
-    size_t idx = findIndexOfNextLargerValue(m_x, at);
-    return m_y[idx - 1] + (at - m_x[idx - 1]) * (m_y[idx] - m_y[idx - 1]) /
-                              (m_x[idx] - m_x[idx - 1]);
+    auto pos = findIndexOfNextLargerValue(at);
+
+    auto posBefore = std::prev(pos);
+    if (posBefore->first == at) {
+      return posBefore->second;
+    } else {
+      double interpolatedY =
+          posBefore->second + (at - posBefore->first) *
+                                  (pos->second - posBefore->second) /
+                                  (pos->first - posBefore->first);
+      return interpolatedY;
+    }
   } catch (const std::range_error &) {
     return 0.0;
   }
@@ -101,41 +119,35 @@ double Interpolation::value(const double &at) const {
  * @param yy :: y-value
  */
 void Interpolation::addPoint(const double &xx, const double &yy) {
-  size_t N = m_x.size();
-  std::vector<double>::iterator it;
+  size_t N = m_data.size();
+  std::vector<DataXY>::const_iterator it;
 
   if (N == 0) {
-    m_x.emplace_back(xx);
-    m_y.emplace_back(yy);
+    std::pair<double, double> newpair(xx, yy);
+    m_data.emplace_back(newpair);
     return;
   }
 
   // check first if xx is within the limits of interpolation interval
 
-  if (xx <= m_x[0]) {
-    it = m_x.begin();
-    it = m_x.insert(it, xx);
-    it = m_y.begin();
-    it = m_y.insert(it, yy);
+  if (xx < m_data[0].first) {
+    it = m_data.begin();
+    it = m_data.insert(it, DataXY(xx, yy));
     return;
   }
 
-  if (xx >= m_x[N - 1]) {
-    m_x.emplace_back(xx);
-    m_y.emplace_back(yy);
+  if (xx > m_data[N - 1].first) {
+    m_data.emplace_back(DataXY(xx, yy));
     return;
   }
 
   // otherwise
 
-  for (unsigned int i = 1; i < N; i++) {
-    if (m_x[i] > xx) {
-      it = m_x.begin();
-      it = m_x.insert(it + i, xx);
-      it = m_y.begin();
-      it = m_y.insert(it + i, yy);
-      return;
-    }
+  it = findIndexOfNextLargerValue(xx);
+
+  auto posBefore = std::prev(it);
+  if (posBefore->first != xx) {
+    m_data.insert(it, DataXY(xx, yy));
   }
 }
 
@@ -146,18 +158,15 @@ void Interpolation::addPoint(const double &xx, const double &yy) {
 void Interpolation::printSelf(std::ostream &os) const {
   os << m_method << " ; " << m_xUnit->unitID() << " ; " << m_yUnit->unitID();
 
-  for (unsigned int i = 0; i < m_x.size(); i++) {
-    os << " ; " << m_x[i] << " " << m_y[i];
+  for (unsigned int i = 0; i < m_data.size(); i++) {
+    os << " ; " << m_data[i].first << " " << m_data[i].second;
   }
 }
 
 /**
   Resets interpolation data by clearing the internal storage for x- and y-values
 */
-void Interpolation::resetData() {
-  m_x.clear();
-  m_y.clear();
-}
+void Interpolation::resetData() { m_data.clear(); }
 
 /**
   Prints the value of parameter

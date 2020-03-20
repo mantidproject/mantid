@@ -18,6 +18,8 @@
 
 namespace Mantid {
 namespace Kernel {
+
+using DataXY = std::pair<double, double>;
 /**
  Provide interpolation over a series of points.
 
@@ -26,10 +28,8 @@ namespace Kernel {
 */
 class MANTID_KERNEL_DLL Interpolation {
 private:
-  /// internal storage of x values
-  std::vector<double> m_x;
-  /// internal storage of y values
-  std::vector<double> m_y;
+  /// internal storage of x and y values
+  std::vector<DataXY> m_data;
 
   /// method used for doing the interpolation
   std::string m_method;
@@ -41,8 +41,10 @@ private:
   Unit_sptr m_yUnit;
 
 protected:
-  size_t findIndexOfNextLargerValue(const std::vector<double> &data,
-                                    double key) const;
+  std::vector<DataXY>::const_iterator
+  findIndexOfNextLargerValue(double key) const;
+  std::vector<DataXY>::const_iterator cbegin() const;
+  std::vector<DataXY>::const_iterator cend() const;
 
 public:
   /// Constructor default to linear interpolation and x-unit set to TOF
@@ -74,7 +76,7 @@ public:
   Unit_sptr getYUnit() const { return m_yUnit; };
 
   /// return false if no data has been added
-  bool containData() const { return !m_x.empty() ? true : false; }
+  bool containData() const { return !m_data.empty() ? true : false; }
 
   /// Prints object to stream
   void printSelf(std::ostream &os) const;

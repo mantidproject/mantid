@@ -9,8 +9,10 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include "MantidKernel/AttenuationProfile.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include <boost/optional/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
@@ -74,6 +76,8 @@ public:
       const double pressure = PhysicalConstants::StandardAtmosphere);
   /// Virtual destructor.
   virtual ~Material() = default;
+
+  void setAttenuationProfile(AttenuationProfile attenuationOverride);
 
   /// Returns the name of the material
   const std::string &name() const;
@@ -202,6 +206,8 @@ private:
   double m_pressure;
   double m_linearAbsorpXSectionByWL;
   double m_totalScatterXSection;
+
+  boost::optional<AttenuationProfile> m_attenuationOverride;
 };
 
 /// Typedef for a shared pointer
