@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "TiledWindow.h"
 #include "ApplicationWindow.h"
@@ -76,8 +76,7 @@ void Tile::removeWidget() {
   m_widget = nullptr;
 }
 
-/**
- */
+
 void Tile::paintEvent(QPaintEvent *ev) {
   QPainter painter(this);
   QRect bkGround = this->rect().adjusted(0, 0, -1, -1);

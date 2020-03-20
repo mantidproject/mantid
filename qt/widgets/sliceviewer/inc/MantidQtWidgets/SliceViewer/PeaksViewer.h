@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -25,9 +25,7 @@ namespace SliceViewer {
 class ProxyCompositePeaksPresenter;
 class PeaksWorkspaceWidget;
 
-/**
 
-*/
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeaksViewer : public QWidget,
                                                     public UpdateableOnDemand {
   Q_OBJECT

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSpiceXML2DDet.h"
 #include "MantidAPI/Axis.h"
@@ -813,8 +813,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceUnknowGeometry(
   return outws;
 }
 
-/**
- */
+
 API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(
     const std::string &detvaluestr, bool loadinstrument, double &max_counts) {
   // Split to lines

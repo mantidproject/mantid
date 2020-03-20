@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -83,14 +83,14 @@ public:
   void setFileBacked() override;
   void clearFileBacked(bool loadDiskBackedData) override;
   //-----------------------------------------------------------------------------------------------
-  void saveAt(API::IBoxControllerIO *const /* */,
+  void saveAt(API::IBoxControllerIO *const ,
               uint64_t /*position*/) const override;
-  void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/,
+  void loadAndAddFrom(API::IBoxControllerIO *const , uint64_t /*position*/,
                       size_t /* Size */) override;
   void reserveMemoryForLoad(uint64_t /* Size */) override;
   /**drop events data from memory but keep averages (and file-backed info) */
   void clearDataFromMemory() override;
-  /** */
+  
   void clear() override;
 
   uint64_t getNPoints() const override;

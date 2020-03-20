@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -187,8 +187,7 @@ void VesuvioResolution::function1D(double *out, const double *xValues,
   std::copy(outVec.begin(), outVec.end(), out);
 }
 
-/**
- */
+
 void VesuvioResolution::declareAttributes() {
   declareAttribute(MASS_NAME, IFunction::Attribute(m_mass));
 }

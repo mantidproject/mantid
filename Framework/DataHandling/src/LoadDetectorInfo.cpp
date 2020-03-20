@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "LoadRaw/isisraw2.h"
@@ -65,8 +65,7 @@ void LoadDetectorInfo::init() {
                   Direction::Input);
 }
 
-/**
- */
+
 void LoadDetectorInfo::exec() {
   cacheInputs();
   std::string filename = getPropertyValue("DataFilename");

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/IFileLoader.h"
@@ -176,8 +176,7 @@ FileLoaderRegistryImpl::FileLoaderRegistryImpl()
     : m_names(2, std::multimap<std::string, int>()), m_totalSize(0),
       m_log("FileLoaderRegistry") {}
 
-/**
- */
+
 FileLoaderRegistryImpl::~FileLoaderRegistryImpl() = default;
 
 /**
