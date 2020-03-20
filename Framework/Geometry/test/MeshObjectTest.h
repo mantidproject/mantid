@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TESTMESHOBJECT__
-#define MANTID_TESTMESHOBJECT__
+#pragma once
 
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Objects/MeshObject.h"
@@ -1184,5 +1183,3 @@ private:
   V3D translation;
   Kernel::Matrix<double> rotation;
 };
-
-#endif // MANTID_TESTMESHOBJECT__

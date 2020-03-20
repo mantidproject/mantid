@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PLOTASYMMETRYBYLOGVALUTEST_H_
-#define PLOTASYMMETRYBYLOGVALUTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -624,5 +623,3 @@ private:
   PlotAsymmetryByLogValue alg;
   std::string firstRun, lastRun;
 };
-
-#endif /*PLOTASYMMETRYBYLOGVALUTEST_H_*/

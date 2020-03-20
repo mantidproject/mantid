@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FloatingWindow_H
-#define FloatingWindow_H
+#pragma once
 
 #include <QMainWindow>
 
@@ -52,5 +51,3 @@ private:
   bool m_dragMouseDown;
   QPoint m_dragStartPos;
 };
-
-#endif

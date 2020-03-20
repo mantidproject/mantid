@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_WRAPWITHNDARRAY_H_
-#define MANTID_PYTHONINTERFACE_WRAPWITHNDARRAY_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include <boost/python/detail/prefix.hpp>
@@ -100,5 +99,3 @@ struct WrapReadWrite {
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif // MANTID_PYTHONINTERFACE_WRAPWITHNDARRAY_H_

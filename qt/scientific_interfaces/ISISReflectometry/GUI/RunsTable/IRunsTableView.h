@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_CUSTOMINTERFACES_IBATCHVIEW_H_
-#define MANTID_CUSTOMINTERFACES_IBATCHVIEW_H_
+#pragma once
 #include "Common/DllConfig.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 
@@ -85,4 +84,3 @@ public:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_IBATCHVIEW_H_

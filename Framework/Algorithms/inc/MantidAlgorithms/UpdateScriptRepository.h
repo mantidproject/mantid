@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,7 +17,7 @@ namespace Algorithms {
     Pratically, it will checkout the state of the Central Repository, and
     after, it will download all the scripts marked as AutoUpdate.
 */
-class DLLExport UpdateScriptRepository : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL UpdateScriptRepository : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

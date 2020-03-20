@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -24,7 +25,7 @@ namespace Algorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport EQSANSCorrectFrame : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL EQSANSCorrectFrame : public API::Algorithm {
 public:
   /// Default constructor
   EQSANSCorrectFrame();

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __cxxtest__QtGui_h__
-#define __cxxtest__QtGui_h__
+#pragma once
 
 //
 // The QtGui displays a simple progress bar using the Qt Toolkit.  It
@@ -273,5 +272,3 @@ namespace CxxTest
         }
     };
 }
-
-#endif // __cxxtest__QtGui_h__

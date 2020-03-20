@@ -22,8 +22,7 @@
 //		Initial release
 //----------------------------------------------------------------------
 
-#ifndef PR_QUEUE_K_H
-#define PR_QUEUE_K_H
+#pragma once
 
 #include "MantidKernel/ANN/ANNperf.h" // performance evaluation
 #include "MantidKernel/ANN/ANNx.h"    // all ANN includes
@@ -125,5 +124,3 @@ public:
     ANN_FLOP(k - i + 1) // increment floating ops
   }
 };
-
-#endif

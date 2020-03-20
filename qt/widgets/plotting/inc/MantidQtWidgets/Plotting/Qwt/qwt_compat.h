@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_QWT_COMPAT
-#define MANTID_QWT_COMPAT
+#pragma once
 
 #include <qwt_global.h>
 
@@ -23,5 +22,3 @@
 #define lowerMargin() loMargin()
 #define upperMargin() hiMargin()
 #endif /* QWT_VERSION >= 0x050200 */
-
-#endif /* MANTID_QWT_COMPAT */

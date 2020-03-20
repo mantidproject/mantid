@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_COMPOSITECLUSTERTEST_H_
-#define MANTID_CRYSTAL_COMPOSITECLUSTERTEST_H_
+#pragma once
 
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidCrystal/CompositeCluster.h"
@@ -183,5 +182,3 @@ public:
     TS_ASSERT(composite.containsLabel(2));
   }
 };
-
-#endif /* MANTID_CRYSTAL_COMPOSITECLUSTERTEST_H_ */

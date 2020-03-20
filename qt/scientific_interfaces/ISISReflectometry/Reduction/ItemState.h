@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_CUSTOMINTERFACES_STATE_H_
-#define MANTID_CUSTOMINTERFACES_STATE_H_
+#pragma once
 #include "Common/DllConfig.h"
 #include <boost/optional.hpp>
 #include <string>
@@ -56,4 +55,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACE_STATE_H_

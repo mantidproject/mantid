@@ -28,8 +28,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef PLOTWIZARD_H
-#define PLOTWIZARD_H
+#pragma once
 
 #include <QDialog>
 class QGroupBox;
@@ -118,5 +117,3 @@ signals:
   //! Emitted when new plots need to be created
   void plot(const QStringList &);
 };
-
-#endif //  PLOTWIZARD_H

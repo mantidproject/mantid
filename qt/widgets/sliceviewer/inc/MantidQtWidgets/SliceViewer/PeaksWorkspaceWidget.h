@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PEAKSWORKSPACEWIDGET_H
-#define PEAKSWORKSPACEWIDGET_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
@@ -103,4 +102,3 @@ private slots:
 
 } // namespace SliceViewer
 } // namespace MantidQt
-#endif // PEAKSWORKSPACEWIDGET_H

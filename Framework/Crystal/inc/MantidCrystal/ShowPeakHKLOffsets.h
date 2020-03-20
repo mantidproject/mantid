@@ -19,15 +19,14 @@ offset and run number and detector number
 @author Ruth Mikkelson, SNS, ORNL
 @date 05/13/2013
 */
-#ifndef SHOWPEAKHKLOFFSETS_H_
-#define SHOWPEAKHKLOFFSETS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
-class DLLExport ShowPeakHKLOffsets : public API::Algorithm {
+class MANTID_CRYSTAL_DLL ShowPeakHKLOffsets : public API::Algorithm {
 public:
   const std::string name() const override { return "ShowPeakHKLOffsets"; };
 
@@ -51,5 +50,3 @@ private:
 };
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* ShowPeakHKLOffsets_H_ */

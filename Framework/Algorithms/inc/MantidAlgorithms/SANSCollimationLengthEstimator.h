@@ -7,13 +7,13 @@
 #pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/System.h"
 /**Helper class which provides the Collimation Length for SANS instruments
  */
 namespace Mantid {
 namespace Algorithms {
-class DLLExport SANSCollimationLengthEstimator {
+class MANTID_ALGORITHMS_DLL SANSCollimationLengthEstimator {
 public:
   double provideCollimationLength(Mantid::API::MatrixWorkspace_sptr workspace);
 

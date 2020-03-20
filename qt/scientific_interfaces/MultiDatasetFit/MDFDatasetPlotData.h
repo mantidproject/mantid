@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDFDATASETPLOTDATA_H_
-#define MDFDATASETPLOTDATA_H_
+#pragma once
 
 #include <QString>
 
@@ -66,5 +65,3 @@ private:
 } // namespace MDF
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*MDFDATASETPLOTDATA_H_*/

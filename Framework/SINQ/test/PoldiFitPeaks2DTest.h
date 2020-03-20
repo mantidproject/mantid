@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDICALCULATESPECTRUM2DTEST_H_
-#define MANTID_SINQ_POLDICALCULATESPECTRUM2DTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -509,5 +508,3 @@ private:
     ~TestablePoldiFitPeaks2D() override {}
   };
 };
-
-#endif // MANTID_SINQ_POLDICALCULATESPECTRUM2DTEST_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVTEST_H_
-#define MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVTEST_H_
+#pragma once
 
 #include <array>
 #include <cmath>
@@ -384,5 +383,3 @@ public:
         0.106100, 0.105800};
   }
 };
-
-#endif /* MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVTEST_H_ */

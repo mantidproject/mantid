@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_LIBRARY_MANAGER_H_
-#define MANTID_KERNEL_LIBRARY_MANAGER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -72,5 +71,3 @@ using LibraryManager = Mantid::Kernel::SingletonHolder<LibraryManagerImpl>;
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif // MANTID_KERNEL_LIBRARY_MANAGER_H_

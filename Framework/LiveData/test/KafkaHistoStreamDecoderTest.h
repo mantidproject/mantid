@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_KAFKAHISTOSTREAMDECODERTEST_H_
-#define MANTID_LIVEDATA_KAFKAHISTOSTREAMDECODERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -185,5 +184,3 @@ private:
   std::condition_variable m_callbackCondition;
   uint8_t m_niterations = 0;
 };
-
-#endif /* MANTID_LIVEDATA_KAFKAHISTOSTREAMDECODERTEST_H_ */

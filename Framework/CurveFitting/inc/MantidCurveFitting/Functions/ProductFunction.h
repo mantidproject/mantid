@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_PRODUCTFUNCTION_H_
-#define MANTID_CURVEFITTING_PRODUCTFUNCTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include <boost/shared_array.hpp>
 #include <cmath>
 
@@ -24,7 +24,7 @@ more other fit functions.
 @author Anders Markvardsen, ISIS, RAL
 @date 4/4/2011
 */
-class DLLExport ProductFunction : public API::CompositeFunction {
+class MANTID_CURVEFITTING_DLL ProductFunction : public API::CompositeFunction {
 public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "ProductFunction"; }
@@ -46,5 +46,3 @@ protected:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_PRODUCTFUNCTIONMW_H_*/

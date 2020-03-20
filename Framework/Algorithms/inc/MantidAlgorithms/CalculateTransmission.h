@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -47,7 +47,8 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 22/01/2009
 */
-class DLLExport CalculateTransmission : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL CalculateTransmission
+    : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CalculateTransmission"; }

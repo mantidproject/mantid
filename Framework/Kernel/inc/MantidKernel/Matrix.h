@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_MATRIX_H_
-#define MANTID_KERNEL_MATRIX_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include <cfloat>
@@ -233,4 +232,3 @@ template <typename T>
 void fillFromStream(std::istream &, Kernel::Matrix<T> &, const char);
 } // namespace Kernel
 } // namespace Mantid
-#endif // MANTID_KERNEL_MATRIX_H_

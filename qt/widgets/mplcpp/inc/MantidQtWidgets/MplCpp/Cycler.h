@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_CYCLER_H
-#define MPLCPP_CYCLER_H
+#pragma once
 
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #pragma push_macro("slots")
@@ -37,5 +36,3 @@ MANTID_MPLCPP_DLL Cycler cycler(const char *label, const char *iterable);
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt
-
-#endif // MPLCPP_CYCLER_H

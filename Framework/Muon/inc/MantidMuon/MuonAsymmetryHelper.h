@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_MUONASYMMETRYHELPER_H_
-#define MANTID_ALGORITHM_MUONASYMMETRYHELPER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -44,5 +43,3 @@ void updateNormalizationTable(Mantid::API::ITableWorkspace_sptr &table,
                               const std::vector<std::string> &methods);
 
 } // namespace Mantid
-
-#endif /*MANTID_MUONASYMMETRYHELPER_H_*/

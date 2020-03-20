@@ -4,14 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_LOGNORMAL_H_
-#define MANTID_CURVEFITTING_LOGNORMAL_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -22,7 +22,8 @@ Provide Log Normal function: h*exp(-(log(x)-t)^2 / (2*b^2) )/x
 @author Jose Borreguero, NScD
 @date 11/14/2011
 */
-class DLLExport LogNormal : public API::ParamFunction, public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL LogNormal : public API::ParamFunction,
+                                          public API::IFunction1D {
 public:
   /// Constructor
   LogNormal();
@@ -41,5 +42,3 @@ protected:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_LOGNORMAL_H_*/

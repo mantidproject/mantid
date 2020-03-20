@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_COMMUNICATOR_H_
-#define MANTID_PARALLEL_COMMUNICATOR_H_
+#pragma once
 
 #include "MantidParallel/DllConfig.h"
 #include "MantidParallel/Request.h"
@@ -107,5 +106,3 @@ template <typename... T> Request Communicator::irecv(T &&... args) const {
 
 } // namespace Parallel
 } // namespace Mantid
-
-#endif /* MANTID_PARALLEL_COMMUNICATOR_H_ */

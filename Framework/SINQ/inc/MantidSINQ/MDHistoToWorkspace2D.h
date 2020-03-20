@@ -13,8 +13,7 @@
  *
  *
  */
-#ifndef MDHISTOTOWORKSPACE2D_H_
-#define MDHISTOTOWORKSPACE2D_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
@@ -62,5 +61,3 @@ private:
   void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inWS,
                     Mantid::DataObjects::Workspace2D_sptr outWS);
 };
-
-#endif /*MDHISTOTOWORKSPACE2D_H_*/

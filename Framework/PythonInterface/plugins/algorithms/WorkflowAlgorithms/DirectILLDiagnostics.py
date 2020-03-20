@@ -432,8 +432,8 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                                  common.SUBALG_LOGGING_OFF,
                                  common.SUBALG_LOGGING_ON]),
                              direction=Direction.Input,
-                             doc='Enable or disable subalgorithms to ' +
-                                 'print in the logs.')
+                             doc='Enable or disable subalgorithms to '
+                                 + 'print in the logs.')
         self.declareProperty(ITableWorkspaceProperty(
             name=common.PROP_EPP_WS,
             defaultValue='',
@@ -454,32 +454,30 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              defaultValue=3.0,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc="Integration half width of the elastic peak in multiples " +
-                                 " of 'Sigma' in the EPP table.")
+                             doc="Integration half width of the elastic peak in multiples "
+                                 + " of 'Sigma' in the EPP table.")
         self.setPropertyGroup(common.PROP_ELASTIC_PEAK_SIGMA_MULTIPLIER,
                               PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD,
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='Multiplier for lower acceptance limit ' +
-                                 'used in elastic peak diagnostics.')
+                             doc='Multiplier for lower acceptance limit ' + 'used in elastic peak diagnostics.')
         self.setPropertyGroup(common.PROP_PEAK_DIAGNOSTICS_LOW_THRESHOLD,
                               PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD,
                              defaultValue=Property.EMPTY_DBL,
                              validator=greaterThanUnityFloat,
                              direction=Direction.Input,
-                             doc='Multiplier for higher acceptance limit ' +
-                                 'used in elastic peak diagnostics.')
+                             doc='Multiplier for higher acceptance limit ' + 'used in elastic peak diagnostics.')
         self.setPropertyGroup(common.PROP_PEAK_DIAGNOSTICS_HIGH_THRESHOLD,
                               PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='To fail the elastic peak diagnostics, the intensity must also exceed ' +
-                                 'this number of error bars with respect to the median intensity.')
+                             doc='To fail the elastic peak diagnostics, the intensity must also exceed '
+                                 + 'this number of error bars with respect to the median intensity.')
         self.setPropertyGroup(common.PROP_PEAK_DIAGNOSTICS_SIGNIFICANCE_TEST,
                               PROPGROUP_PEAK_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS,
@@ -495,32 +493,30 @@ class DirectILLDiagnostics(DataProcessorAlgorithm):
                              defaultValue=10.0,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc="Width of the range excluded from background integration around " +
-                                 "the elastic peaks in multiplies of 'Sigma' in the EPP table")
+                             doc="Width of the range excluded from background integration around "
+                                 + "the elastic peaks in multiplies of 'Sigma' in the EPP table")
         self.setPropertyGroup(common.PROP_BKG_SIGMA_MULTIPLIER,
                               PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='Multiplier for lower acceptance limit ' +
-                                 'used in noisy background diagnostics.')
+                             doc='Multiplier for lower acceptance limit used in noisy background diagnostics.')
         self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS_LOW_THRESHOLD,
                               PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
                              defaultValue=Property.EMPTY_DBL,
                              validator=greaterThanUnityFloat,
                              direction=Direction.Input,
-                             doc='Multiplier for higher acceptance limit ' +
-                                 'used in noisy background diagnostics.')
+                             doc='Multiplier for higher acceptance limit used in noisy background diagnostics.')
         self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS_HIGH_THRESHOLD,
                               PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='To fail the background diagnostics, the background level must also exceed ' +
-                                 'this number of error bars with respect to the median level.')
+                             doc='To fail the background diagnostics, the background level must also exceed '
+                                 + 'this number of error bars with respect to the median level.')
         self.setPropertyGroup(common.PROP_BKG_DIAGNOSTICS_SIGNIFICANCE_TEST,
                               PROPGROUP_BKG_DIAGNOSTICS)
         self.declareProperty(name=common.PROP_BEAM_STOP_DIAGNOSTICS,

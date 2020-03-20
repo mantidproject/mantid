@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CALCULATEMUONASYMMETRYTEST_H_
-#define CALCULATEMUONASYMMETRYTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -368,4 +367,3 @@ private:
   MatrixWorkspace_sptr input;
 };
 } // namespace
-#endif /*CALCULATEMUONASYMMETRYF_H_*/

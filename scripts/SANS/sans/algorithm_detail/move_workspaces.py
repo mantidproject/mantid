@@ -490,16 +490,16 @@ class SANSMoveSANS2D(SANSMove):
         lab_detector = move_info.detectors[DetectorType.LAB.value]
         rotation_in_radians = math.pi * (hab_detector_rotation + hab_detector.rotation_correction)/180.
 
-        x_shift = ((lab_detector_x + lab_detector.x_translation_correction -
-                    hab_detector_x - hab_detector.x_translation_correction -
-                    hab_detector.side_correction*(1.0 - math.cos(rotation_in_radians)) +
-                    (hab_detector_radius + hab_detector.radius_correction)*(math.sin(rotation_in_radians))) -
-                   hab_detector_default_x_m - x)
+        x_shift = ((lab_detector_x + lab_detector.x_translation_correction
+                    - hab_detector_x - hab_detector.x_translation_correction
+                    - hab_detector.side_correction*(1.0 - math.cos(rotation_in_radians))
+                    + (hab_detector_radius + hab_detector.radius_correction)*(math.sin(rotation_in_radians)))
+                   - hab_detector_default_x_m - x)
 
         y_shift = hab_detector.y_translation_correction - y
-        z_shift = (hab_detector_z + hab_detector.z_translation_correction +
-                   (hab_detector_radius + hab_detector.radius_correction) * (1.0 - math.cos(rotation_in_radians)) -
-                   hab_detector.side_correction * math.sin(rotation_in_radians)) - hab_detector_default_sd_m
+        z_shift = (hab_detector_z + hab_detector.z_translation_correction
+                   + (hab_detector_radius + hab_detector.radius_correction) * (1.0 - math.cos(rotation_in_radians))
+                   - hab_detector.side_correction * math.sin(rotation_in_radians)) - hab_detector_default_sd_m
 
         offset = {CanonicalCoordinates.X: x_shift,
                   CanonicalCoordinates.Y: y_shift,

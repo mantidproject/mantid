@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,7 +18,7 @@ namespace Algorithms {
   replaces a block of data within a destination workspace. Where this block of
   data is inserted is decided by an InsertionYIndex and an InsertionXIndex.
  */
-class DLLExport CopyDataRange : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CopyDataRange : public API::Algorithm {
 public:
   std::string const name() const override;
   int version() const override;

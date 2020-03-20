@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef STRUCTURED_DETECTOR_TEST_H
-#define STRUCTURED_DETECTOR_TEST_H
+#pragma once
 
 #include "MantidGeometry/Instrument/StructuredDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -246,5 +245,3 @@ public:
     TS_ASSERT_EQUALS(det->getChild(1)->getName(), "MyStructuredDetector(x=1)");
   }
 };
-
-#endif

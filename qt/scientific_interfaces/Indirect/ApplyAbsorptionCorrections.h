@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_APPLYABSORPTIONCORRECTIONS_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_APPLYABSORPTIONCORRECTIONS_H_
+#pragma once
 
 #include "CorrectionsTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -74,5 +73,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_APPLYABSORPTIONCORRECTIONS_H_ */

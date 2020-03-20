@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PYSEQUENCETOVECTORCONVERTERTEST_H_
-#define PYSEQUENCETOVECTORCONVERTERTEST_H_
+#pragma once
 
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include <boost/python/dict.hpp>
@@ -67,5 +66,3 @@ public:
     return testlist;
   }
 };
-
-#endif /* PYSEQUENCETOVECTORCONVERTERTEST_H_ */

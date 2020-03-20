@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef _MANTIDSCRIPTREPOSITORY_SCRIPTREPOSITORYIMPL_H_
-#define _MANTIDSCRIPTREPOSITORY_SCRIPTREPOSITORYIMPL_H_
+#pragma once
 
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidKernel/DateAndTime.h"
@@ -180,5 +179,3 @@ private:
 
 } // namespace API
 } // namespace Mantid
-
-#endif // _MANTIDSCRIPTREPOSITORY_SCRIPTREPOSITORYIMPL_H_

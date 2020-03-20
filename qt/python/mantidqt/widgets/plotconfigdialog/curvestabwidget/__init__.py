@@ -119,6 +119,12 @@ class CurveProperties(dict):
             if k not in ['hide', 'hide_errors']:
                 kwargs[k] = v
         kwargs['visible'] = not self.hide
+
+        # If the long form of the marker name is currently being used, it is changed to the short form which is
+        # understood by matplotlib.
+        if kwargs['marker'] in MARKER_MAP:
+            kwargs['marker'] = MARKER_MAP[kwargs['marker']]
+
         return kwargs
 
     @classmethod

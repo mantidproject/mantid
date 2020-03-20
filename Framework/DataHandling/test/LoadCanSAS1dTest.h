@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADCANSAS1DTEST_H
-#define LOADCANSAS1DTEST_H
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -238,5 +237,3 @@ const double LoadCanSAS1dTest::es808[] = {
     0.153269,  0.141219,  0.13289,   0.130725,  0.123281,  0.11705,
     0.104102,  0.0991949, 0.0933884, 0.082556,  0.0757769, 0.0715806,
     0.0674828, 0.064006,  0.0600373, 0.0581645, 0.0766164};
-
-#endif

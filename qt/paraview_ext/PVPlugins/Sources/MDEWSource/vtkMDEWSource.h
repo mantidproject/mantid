@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef _vtkMDEWSource_h
-#define _vtkMDEWSource_h
+#pragma once
 
 #include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
@@ -85,4 +84,3 @@ private:
   Mantid::VATES::VisualNormalization m_normalization;
   void setTimeRange(vtkInformationVector *outputVector);
 };
-#endif

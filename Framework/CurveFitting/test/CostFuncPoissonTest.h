@@ -1,5 +1,4 @@
-#ifndef MANTID_CURVEFITTING_COSTFUNCPOISSONTEST_H_
-#define MANTID_CURVEFITTING_COSTFUNCPOISSONTEST_H_
+#pragma once
 
 #include <cmath>
 #include <numeric>
@@ -305,5 +304,3 @@ public:
     }
   }
 };
-
-#endif /* MANTID_CURVEFITTING_COSTFUNCPOISSONTEST_H_ */

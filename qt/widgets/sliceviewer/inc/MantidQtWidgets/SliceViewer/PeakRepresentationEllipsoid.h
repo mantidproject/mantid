@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
-#define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_ELLIPSOID_H
+#pragma once
 
 #include "MantidKernel/V2D.h"
 #include "MantidQtWidgets/SliceViewer/EllipsoidPlaneSliceCalculator.h"
@@ -115,4 +114,3 @@ private:
 };
 } // namespace SliceViewer
 } // namespace MantidQt
-#endif

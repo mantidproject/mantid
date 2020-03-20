@@ -1006,9 +1006,8 @@ def _parse_hydrogen_constraint(constraint):
     symbol = constraint.pop("symbol", None)
 
     if symbol is None:
-        raise RuntimeError("Invalid hydrogen constraint: " +
-                           str(constraint) +
-                           " - No symbol provided")
+        raise RuntimeError("Invalid hydrogen constraint: "
+                           + str(constraint) + " - No symbol provided")
     return {symbol: constraint}
 
 

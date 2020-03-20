@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_LOADSQW2TEST_H_
-#define MANTID_MDALGORITHMS_LOADSQW2TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -366,5 +365,3 @@ private:
   std::string m_4DFilename;
   std::string m_3DCutFilename;
 };
-
-#endif /* MANTID_MDALGORITHMS_LOADSQW2TEST_H_ */

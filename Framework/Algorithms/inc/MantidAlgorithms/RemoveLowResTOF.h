@@ -7,13 +7,14 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 
 namespace Mantid {
 
 namespace Algorithms {
-class DLLExport RemoveLowResTOF : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL RemoveLowResTOF : public API::DistributedAlgorithm {
 public:
   RemoveLowResTOF();
   const std::string name() const override;

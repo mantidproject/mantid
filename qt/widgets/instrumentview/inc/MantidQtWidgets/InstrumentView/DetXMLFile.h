@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DETXMLFILE_H
-#define DETXMLFILE_H
+#pragma once
 
 #include <QList>
 #include <QString>
@@ -54,5 +53,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // DETXMLFILE_H

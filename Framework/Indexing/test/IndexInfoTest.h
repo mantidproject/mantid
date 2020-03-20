@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDEXING_INDEXINFOTEST_H_
-#define MANTID_INDEXING_INDEXINFOTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -454,5 +453,3 @@ private:
   boost::mpi::environment m_environment;
 #endif
 };
-
-#endif /* MANTID_INDEXING_INDEXINFOTEST_H_ */

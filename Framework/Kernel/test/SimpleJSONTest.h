@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_REMOTEALGORITHMS_SIMPLEJSONTEST_H_
-#define MANTID_REMOTEALGORITHMS_SIMPLEJSONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -235,5 +234,3 @@ const std::string SimpleJSONTest::versVal = "1";
 const std::string SimpleJSONTest::impName =
     "Implementation_Specific_Post_Variables";
 const std::string SimpleJSONTest::impVal = "example_POST_var1";
-
-#endif // MANTID_REMOTEALGORITHMS_SIMPLEJSONTEST_H_

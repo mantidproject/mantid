@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_PEAKSHAPE_H_
-#define MANTID_GEOMETRY_PEAKSHAPE_H_
+#pragma once
 
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/System.h"
@@ -45,5 +44,3 @@ using PeakShape_const_sptr = boost::shared_ptr<const PeakShape>;
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_PEAKSHAPE_H_ */

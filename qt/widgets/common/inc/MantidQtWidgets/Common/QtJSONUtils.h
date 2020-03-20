@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTIDQT_API_QJSONUTILS_H
-#define MANTIDQT_API_QJSONUTILS_H
+#pragma once
 
 #include "DllOption.h"
 
@@ -29,5 +28,3 @@ QMap<QString, QVariant>
 
 } // namespace API
 } // namespace MantidQt
-
-#endif /* MANTIDQT_API_QJSONUTILS_H */

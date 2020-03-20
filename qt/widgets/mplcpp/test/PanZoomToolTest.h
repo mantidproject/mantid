@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_PANPanpanZoomToolTest_H
-#define MPLCPP_PANPanpanZoomToolTest_H
+#pragma once
 
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 #include "MantidQtWidgets/MplCpp/PanZoomTool.h"
@@ -105,5 +104,3 @@ private:
     }
   }
 };
-
-#endif // MPLCPP_PanpanZoomToolTest_H

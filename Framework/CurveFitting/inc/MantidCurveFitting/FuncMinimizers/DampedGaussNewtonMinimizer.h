@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_DAMPEDGAUSSNEWTONMINIMIZER_H_
-#define MANTID_CURVEFITTING_DAMPEDGAUSSNEWTONMINIMIZER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -27,7 +26,8 @@ namespace FuncMinimisers {
 
     @author Roman Tolchenov, Tessella plc
 */
-class DLLExport DampedGaussNewtonMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL DampedGaussNewtonMinimizer
+    : public API::IFuncMinimizer {
 public:
   /// Constructor
   DampedGaussNewtonMinimizer(double relTol = 0.0001);
@@ -53,5 +53,3 @@ private:
 } // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_DAMPEDGAUSSNEWTONMINIMIZER_H_*/

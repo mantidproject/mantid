@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_COSTFUNCUNWEIGHTEDLEASTSQUARESTEST_H_
-#define MANTID_CURVEFITTING_COSTFUNCUNWEIGHTEDLEASTSQUARESTEST_H_
+#pragma once
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -89,5 +88,3 @@ private:
     friend class CostFuncUnweightedLeastSquaresTest;
   };
 };
-
-#endif /* MANTID_CURVEFITTING_COSTFUNCUNWEIGHTEDLEASTSQUARESTEST_H_ */

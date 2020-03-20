@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROJECTIONSURFACE_H
-#define PROJECTIONSURFACE_H
+#pragma once
 
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/Quat.h"
@@ -395,5 +394,3 @@ using ProjectionSurface_sptr = boost::shared_ptr<ProjectionSurface>;
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // PROJECTIONSURFACE_H

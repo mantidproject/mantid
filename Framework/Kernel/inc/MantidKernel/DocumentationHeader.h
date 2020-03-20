@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_DOCUMENTATIONHEADER_H_
-#define MANTID_KERNEL_DOCUMENTATIONHEADER_H_
+#pragma once
 
 // The following stuff is for the doxygen title page
 /**  \mainpage Mantid - Manipulation and Analysis Toolkit for Instrument Data -
@@ -50,5 +49,3 @@ Geometry.  </li>
   Refer to the conding standards page on the project wiki <a
 href="http://www.mantidproject.org/Coding_Standards">here</a>.
 */
-
-#endif /*MANTID_KERNEL_DOCUMENTATIONHEADER_H_*/

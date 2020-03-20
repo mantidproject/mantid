@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_CUSTOMINTERFACES_ROWFILTER_H_
-#define MANTID_CUSTOMINTERFACES_ROWFILTER_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include "MantidQtWidgets/Common/Batch/RowPredicate.h"
@@ -41,5 +40,3 @@ filterFromRegexString(std::string const &regex,
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTID_CUSTOMINTERFACES_ROWFILTER_H_

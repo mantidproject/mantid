@@ -8,8 +8,7 @@ This program is released under the GPL with the additional exemption that
 compiling, linking, and/or using OpenSSL is allowed.
 */
 
-#ifndef ICat3ICATPortBindingProxy_H
-#define ICat3ICATPortBindingProxy_H
+#pragma once
 #include "MantidICat/ICat3/GSoapGenerated/ICat3H.h"
 
 namespace ICat3 {
@@ -2062,5 +2061,3 @@ public:
 };
 
 } // namespace ICat3
-
-#endif

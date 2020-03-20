@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_PEAKSHAPENONETEST_H_
-#define MANTID_DATAOBJECTS_PEAKSHAPENONETEST_H_
+#pragma once
 
 #ifdef _MSC_VER
 // 'identifier' : class 'type' needs to have dll-interface to be used by clients
@@ -64,5 +63,3 @@ public:
     TS_ASSERT_EQUALS("none", shape.shapeName());
   }
 };
-
-#endif /* MANTID_DATAOBJECTS_PEAKSHAPENONETEST_H_ */

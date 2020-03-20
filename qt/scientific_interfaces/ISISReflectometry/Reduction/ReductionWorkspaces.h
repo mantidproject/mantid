@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_CUSTOMINTERFACES_REDUCTIONWORKSPACES_H_
-#define MANTID_CUSTOMINTERFACES_REDUCTIONWORKSPACES_H_
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "TransmissionRunPair.h"
@@ -68,4 +67,3 @@ MANTIDQT_ISISREFLECTOMETRY_DLL std::string postprocessedWorkspaceName(
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_REDUCTIONWORKSPACES_H_

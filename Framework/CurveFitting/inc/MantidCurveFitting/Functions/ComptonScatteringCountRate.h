@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_COMPTONSCATTERINGCOUNTRATE_H_
-#define MANTID_CURVEFITTING_COMPTONSCATTERINGCOUNTRATE_H_
+#pragma once
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
@@ -20,7 +19,8 @@ namespace Functions {
   ComptonProfile functions
   that give the Neutron count rate.
 */
-class DLLExport ComptonScatteringCountRate : public API::CompositeFunction {
+class MANTID_CURVEFITTING_DLL ComptonScatteringCountRate
+    : public API::CompositeFunction {
 public:
   /// Constructor
   ComptonScatteringCountRate();
@@ -81,5 +81,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_COMPTONSCATTERINGCOUNTRATE_H_ */

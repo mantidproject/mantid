@@ -4,11 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_STATICKUBOTOYABETIMESGAUSDECAY_H_
-#define MANTID_CURVEFITTING_STATICKUBOTOYABETIMESGAUSDECAY_H_
+#pragma once
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -23,8 +23,9 @@ namespace Functions {
   @author Arturs Bekasovs
   @date 27/09/2013
 */
-class DLLExport StaticKuboToyabeTimesGausDecay : public API::ParamFunction,
-                                                 public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL StaticKuboToyabeTimesGausDecay
+    : public API::ParamFunction,
+      public API::IFunction1D {
 public:
   std::string name() const override { return "StaticKuboToyabeTimesGausDecay"; }
 
@@ -40,5 +41,3 @@ protected:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_STATICKUBOTOYABETIMESGAUSDECAY_H_ */

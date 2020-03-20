@@ -7,11 +7,12 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-class DLLExport ChangeLogTime : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ChangeLogTime : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

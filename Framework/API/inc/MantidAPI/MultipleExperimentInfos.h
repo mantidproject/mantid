@@ -17,7 +17,7 @@ namespace API {
 
   @date 2011-11-28
 */
-class DLLExport MultipleExperimentInfos {
+class MANTID_API_DLL MultipleExperimentInfos {
 public:
   MultipleExperimentInfos() = default;
   MultipleExperimentInfos(const MultipleExperimentInfos &other);

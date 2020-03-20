@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __cxxtest__ValueTraits_h__
-#define __cxxtest__ValueTraits_h__
+#pragma once
 
 //
 // ValueTraits are used by CxxTest to convert arbitrary
@@ -391,5 +390,3 @@ namespace CxxTest
 #ifdef __INTEL_COMPILER
   #pragma warning enable 191
 #endif
-
-#endif // __cxxtest__ValueTraits_h__

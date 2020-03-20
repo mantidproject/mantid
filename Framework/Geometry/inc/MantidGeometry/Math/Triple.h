@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef Triple_h
-#define Triple_h
+#pragma once
 #include "MantidGeometry/DllConfig.h"
 
 namespace Mantid {
@@ -70,4 +69,3 @@ public:
   bool operator!=(const DTriple<F, S, T> &) const;
 };
 } // NAMESPACE Mantid
-#endif

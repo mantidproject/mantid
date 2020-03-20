@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SCRIPTREPOSITORYIMPLTEST_H_
-#define SCRIPTREPOSITORYIMPLTEST_H_
+#pragma once
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidScriptRepository/ScriptRepositoryImpl.h"
@@ -955,5 +954,3 @@ public:
     TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::REMOTE_ONLY);
   }
 };
-
-#endif

@@ -89,4 +89,5 @@ class ExportSampleLogsToHDF5(PythonAlgorithm):
         return isinstance(prop, (FloatTimeSeriesProperty, Int32TimeSeriesProperty, Int64TimeSeriesProperty,
                                  BoolTimeSeriesProperty, StringTimeSeriesProperty))
 
+
 AlgorithmFactory.subscribe(ExportSampleLogsToHDF5)

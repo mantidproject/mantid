@@ -310,9 +310,9 @@ def _clean_up_author_list(author_list):
     untranslated = set(ifilterfalse(_translations.keys().__contains__, result))
     if untranslated:
         raise Exception(
-            'No translation exists for the following Git author(s): \n' +
-            '\n'.join(untranslated) + '\n' +
-            'Please edit the translations table accordingly.')
+            'No translation exists for the following Git author(s): \n'
+            + '\n'.join(untranslated) + '\n'
+            + 'Please edit the translations table accordingly.')
 
     # Translate all remaining names.
     result = [_translations[a] for a in result]

@@ -66,7 +66,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella plc
     @date 11/03/2010
 */
-class DLLExport AnyShapeAbsorption : public AbsorptionCorrection {
+class MANTID_ALGORITHMS_DLL AnyShapeAbsorption : public AbsorptionCorrection {
 public:
   /// (Empty) Constructor
   AnyShapeAbsorption();

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATREADER_H_
-#define DATREADER_H_
+#pragma once
 
 #include <fstream>
 #include <string>
@@ -24,5 +23,3 @@ public:
 private:
   std::ifstream m_datfile;
 };
-
-#endif

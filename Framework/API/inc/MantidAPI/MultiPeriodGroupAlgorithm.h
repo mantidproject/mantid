@@ -20,7 +20,7 @@ algorithm rather than from Algorithm directly. This algorithm processes
 workspaces in each group input in a pair-wise fashion to give a group workspace
 output.
   */
-class DLLExport MultiPeriodGroupAlgorithm : public Algorithm {
+class MANTID_API_DLL MultiPeriodGroupAlgorithm : public Algorithm {
 public:
   MultiPeriodGroupAlgorithm();
 

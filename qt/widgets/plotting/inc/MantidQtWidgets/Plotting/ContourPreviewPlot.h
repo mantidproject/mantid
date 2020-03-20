@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_CONTOURPREVIEWPLOT_H_
-#define MANTIDQTMANTIDWIDGETS_CONTOURPREVIEWPLOT_H_
+#pragma once
 
 #include <QtGlobal>
 
@@ -14,5 +13,3 @@
 #else
 #include "MantidQtWidgets/Plotting/Mpl/ContourPreviewPlot.h"
 #endif
-
-#endif // MANTIDQTMANTIDWIDGETS_CONTOURPREVIEWPLOT_H_

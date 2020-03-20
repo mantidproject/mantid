@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -47,7 +48,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella
     @date 03/02/2011
 */
-class DLLExport IQTransform : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL IQTransform : public API::Algorithm {
 public:
   IQTransform();
   const std::string name() const override { return "IQTransform"; }

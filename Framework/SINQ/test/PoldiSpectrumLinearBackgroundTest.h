@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUNDTEST_H_
-#define MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUNDTEST_H_
+#pragma once
 
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
 
@@ -146,5 +145,3 @@ public:
 private:
   std::vector<double> m_xValues;
 };
-
-#endif /* MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUNDTEST_H_ */

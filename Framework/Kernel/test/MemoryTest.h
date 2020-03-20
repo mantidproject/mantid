@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_MEMORYTEST_H_
-#define MANTID_KERNEL_MEMORYTEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -62,5 +61,3 @@ public:
     pool.joinAll();
   }
 };
-
-#endif /* MANTID_KERNEL_MEMORYTEST_H_ */

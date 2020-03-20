@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TIMESERIESPROPERTYTEST_H_
-#define TIMESERIESPROPERTYTEST_H_
+#pragma once
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -2505,5 +2504,3 @@ private:
   TimeSeriesProperty<double> *dProp;
   TimeSeriesProperty<std::string> *sProp;
 };
-
-#endif /*TIMESERIESPROPERTYTEST_H_*/

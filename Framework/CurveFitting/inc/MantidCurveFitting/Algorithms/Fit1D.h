@@ -4,14 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_FIT1D_H_
-#define MANTID_CURVEFITTING_FIT1D_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 
@@ -43,7 +43,7 @@ Direction::Output</LI>
 @author Anders Markvardsen, ISIS, RAL
 @date 15/5/2009
 */
-class DLLExport Fit1D : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL Fit1D : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Fit1D"; }
@@ -125,5 +125,3 @@ protected:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_FIT1D_H_*/

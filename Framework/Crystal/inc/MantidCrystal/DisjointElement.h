@@ -4,17 +4,16 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_DISJOINTELEMENT_H_
-#define MANTID_CRYSTAL_DISJOINTELEMENT_H_
+#pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
 
 /** DisjointElement : Cluster item used in a disjoint-set data structure.
  */
-class DLLExport DisjointElement {
+class MANTID_CRYSTAL_DLL DisjointElement {
 public:
   /// Default constructor
   DisjointElement();
@@ -69,5 +68,3 @@ void unionElements(DisjointElement *a, DisjointElement *b);
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_DISJOINTELEMENT_H_ */

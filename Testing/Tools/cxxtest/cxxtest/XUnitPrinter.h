@@ -1,5 +1,4 @@
-#ifndef __CXXTEST__XUNIT_PRINTER_H
-#define __CXXTEST__XUNIT_PRINTER_H
+#pragma once
 
 //
 // XUnitPrinter combines an ErrorPrinter with an XML formatter.
@@ -32,8 +31,6 @@ namespace CxxTest
         }
     };
 }
-
-#endif //__CXXTEST__XUNIT_PRINTER_H
 
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_STORAGEMODETEST_H_
-#define MANTID_PARALLEL_STORAGEMODETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -59,5 +58,3 @@ public:
                      StorageMode::MasterOnly);
   }
 };
-
-#endif /* MANTID_PARALLEL_STORAGEMODETEST_H_ */

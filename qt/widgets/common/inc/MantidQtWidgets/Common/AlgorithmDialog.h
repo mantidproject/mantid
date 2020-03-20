@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_ALGORITHMDIALOG_H_
-#define MANTIDQT_API_ALGORITHMDIALOG_H_
+#pragma once
 
 /* Used to register classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator
@@ -344,4 +343,3 @@ protected:
 };
 } // namespace API
 } // namespace MantidQt
-#endif // MANTIDQT_API_ALGORITHMDIALOG_H_

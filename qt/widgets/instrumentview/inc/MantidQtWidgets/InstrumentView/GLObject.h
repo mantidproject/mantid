@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDPLOT_GLOBJECT_H_
-#define MANTIDPLOT_GLOBJECT_H_
+#pragma once
 
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include <string>
@@ -58,5 +57,3 @@ protected:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*MANTIDPLOT_GLOBJECT_H*/

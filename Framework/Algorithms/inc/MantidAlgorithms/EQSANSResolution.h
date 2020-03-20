@@ -38,7 +38,8 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport EQSANSResolution : public Algorithms::TOFSANSResolution {
+class MANTID_ALGORITHMS_DLL EQSANSResolution
+    : public Algorithms::TOFSANSResolution {
 public:
   /// Algorithm's name
   const std::string name() const override { return "EQSANSResolution"; }

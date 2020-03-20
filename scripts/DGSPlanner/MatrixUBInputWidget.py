@@ -144,6 +144,7 @@ class MatrixUBInputWidget(QtWidgets.QWidget):
         except Exception as e:
             mantid.logger.error("Could not open the Nexus file, or could not find UB matrix: {}".format(e))
 
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
     inputol=mantid.geometry.OrientedLattice(2,3,4,90,90,90)

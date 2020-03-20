@@ -46,7 +46,7 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   m_uiForm.propertiesPreview->addWidget(m_propTrees["SymmPVPropTree"]);
 
   // Editor Factories
-  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
+  auto *doubleEditorFactory = new DoubleEditorFactory();
   m_propTrees["SymmPropTree"]->setFactoryForManager(m_dblManager,
                                                     doubleEditorFactory);
 

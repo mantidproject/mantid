@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IMANTID_GEOMETRY_OBJCOMPONENT_H_
-#define IMANTID_GEOMETRY_OBJCOMPONENT_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
@@ -110,5 +109,3 @@ using IObjComponent_const_sptr = boost::shared_ptr<const IObjComponent>;
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /*MANTID_GEOMETRY_OBJCOMPONENT_H_*/

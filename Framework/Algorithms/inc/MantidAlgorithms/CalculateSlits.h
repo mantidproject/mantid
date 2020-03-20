@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include <boost/optional.hpp>
 
 namespace Mantid {
@@ -17,7 +17,8 @@ namespace Algorithms {
 /** CalculateSlits
  */
 
-class DLLExport CalculateSlits : public API::DataProcessorAlgorithm {
+class MANTID_ALGORITHMS_DLL CalculateSlits
+    : public API::DataProcessorAlgorithm {
 public:
   CalculateSlits();
   ~CalculateSlits() override;

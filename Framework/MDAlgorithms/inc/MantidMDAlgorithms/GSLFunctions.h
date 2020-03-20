@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDAlgorithms_GSLFUNCTIONS_H_
-#define MANTID_MDAlgorithms_GSLFUNCTIONS_H_
+#pragma once
 #include "MantidAPI/CompositeFunction.h"
 
 namespace Mantid {
@@ -14,5 +13,3 @@ double f_eval(double x, void *params);
 double f_eval2(double x, void *params);
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /*MANTID_MDAlgorithms_GSLFUNCTIONS_H_*/

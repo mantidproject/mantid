@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REF_LIMITS_HANDLER_H
-#define REF_LIMITS_HANDLER_H
+#pragma once
 
 #include "ui_RefImageView.h"
 
@@ -42,5 +41,3 @@ private:
 
 } // namespace RefDetectorViewer
 } // namespace MantidQt
-
-#endif // REF_LIMITS_HANDLER_H

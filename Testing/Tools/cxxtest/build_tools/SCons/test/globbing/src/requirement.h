@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REQUIREMENT_H
-#define REQUIREMENT_H
+#pragma once
 /**
  * @file requirement.h
  * Prototype for the call_a_requirement() function.
@@ -16,5 +15,3 @@
  */
 
 bool call_a_requirement();
-
-#endif

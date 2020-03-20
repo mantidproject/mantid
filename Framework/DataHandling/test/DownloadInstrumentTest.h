@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_DOWNLOADINSTRUMENTTEST_H_
-#define MANTID_DATAHANDLING_DOWNLOADINSTRUMENTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -207,5 +206,3 @@ public:
   std::vector<std::string> m_originalInstDir;
   std::vector<Poco::File> m_directoriesToRemove;
 };
-
-#endif /* MANTID_DATAHANDLING_DOWNLOADINSTRUMENTTEST_H_ */

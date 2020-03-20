@@ -47,7 +47,8 @@ namespace Algorithms {
    @author Steve D Williams, ISIS Facility Rutherford Appleton Laboratory
    @date 07/07/2009
 */
-class DLLExport FindDetectorsOutsideLimits : public DetectorDiagnostic {
+class MANTID_ALGORITHMS_DLL FindDetectorsOutsideLimits
+    : public DetectorDiagnostic {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {

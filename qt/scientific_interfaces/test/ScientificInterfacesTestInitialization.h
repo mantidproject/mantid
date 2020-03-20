@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REFLMPLCPPTESTGLOBALINITIALIZATION_H
-#define REFLMPLCPPTESTGLOBALINITIALIZATION_H
+#pragma once
 
 #include "MantidPythonInterface/core/Testing/PythonInterpreterGlobalFixture.h"
 
@@ -16,5 +15,3 @@
 // statements do not cause multiple-definition errors.
 //------------------------------------------------------------------------------
 static PythonInterpreterGlobalFixture PYTHON_INTERPRETER;
-
-#endif // REFLMPLCPPTESTGLOBALINITIALIZATION_H

@@ -123,5 +123,6 @@ class PDConvertReciprocalSpace(PythonAlgorithm):
             output_ws.setY(sp_num, new_y)
             output_ws.setE(sp_num, new_e)
 
+
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(PDConvertReciprocalSpace)

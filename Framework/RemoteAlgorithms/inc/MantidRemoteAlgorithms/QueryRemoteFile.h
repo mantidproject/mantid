@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef QUERYREMOTEFILE_H_
-#define QUERYREMOTEFILE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
@@ -39,4 +38,3 @@ private:
 
 } // end namespace RemoteAlgorithms
 } // end namespace Mantid
-#endif /*QUERYREMOTEFILE_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADFULLPROFRESOLUTIONTEST_H_
-#define MANTID_DATAHANDLING_LOADFULLPROFRESOLUTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -1177,5 +1176,3 @@ public:
 private:
   std::string wsName; // For Workspace property
 };
-
-#endif /* MANTID_DATAHANDLING_LOADFULLPROFRESOLUTIONTEST_H_ */

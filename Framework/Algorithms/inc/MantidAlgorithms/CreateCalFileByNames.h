@@ -12,6 +12,7 @@
 
 // To be compatible with MSVC++ Express Edition that does not have TR1 headers
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include <map>
 
 namespace Mantid {
@@ -44,7 +45,7 @@ namespace Algorithms {
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
     @date 01/03/2009
 */
-class DLLExport CreateCalFileByNames : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateCalFileByNames : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CreateCalFileByNames"; }

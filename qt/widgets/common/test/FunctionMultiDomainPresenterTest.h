@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_
-#define MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_
+#pragma once
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -516,5 +515,3 @@ public:
     TS_ASSERT_EQUALS(locals[0], "A1");
   }
 };
-
-#endif // MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_PROPERTYHELPER_H_
-#define MANTID_KERNEL_PROPERTYHELPER_H_
+#pragma once
 
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
@@ -378,5 +377,3 @@ inline std::vector<std::string> determineAllowedValues(const OptionalBool &,
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_PROPERTYHELPER_H_ */

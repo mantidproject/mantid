@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDIRECTFITDATACREATIONHELPER_H_
-#define MANTID_INDIRECTFITDATACREATIONHELPER_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -113,5 +112,3 @@ struct AreSpectraEqual : public boost::static_visitor<bool> {
 
 } // namespace IndirectFitDataCreationHelper
 } // namespace Mantid
-
-#endif // MANTID_INDIRECTFITDATACREATIONHELPER_H

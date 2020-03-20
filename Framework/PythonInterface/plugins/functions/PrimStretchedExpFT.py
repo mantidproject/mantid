@@ -69,8 +69,7 @@ class PrimStretchedExpFT(IFunction1D):
         boundaries = np.insert(boundaries, 0, 2*xvals[0]-boundaries[0])
         # external upper boundary
         boundaries = np.append(boundaries, 2*xvals[-1]-boundaries[-1])
-        primitive = np.cumsum(fourier) * (denergies /
-                                          (rf*de))  # running Riemann sum
+        primitive = np.cumsum(fourier) * (denergies / (rf*de))  # running Riemann sum
         transform = np.interp(boundaries[1:] - parms['Centre'], energies, primitive) - \
             np.interp(boundaries[:-1] - parms['Centre'], energies, primitive)
         return transform * parms['Height']

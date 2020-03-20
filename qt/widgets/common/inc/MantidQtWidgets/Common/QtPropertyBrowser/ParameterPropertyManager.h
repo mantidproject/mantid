@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PARAMETERPROPERTYMANAGER_H
-#define PARAMETERPROPERTYMANAGER_H
+#pragma once
 
 #include "qtpropertymanager.h"
 
@@ -85,5 +84,3 @@ private:
   bool m_hasGlobalOption;
   QSet<QtProperty *> m_globals;
 };
-
-#endif // PARAMETERPROPERTYMANAGER_H

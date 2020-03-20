@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 #include <boost/function.hpp>
 
@@ -30,7 +31,7 @@ Required Properties:
 @author
 @date 6/23/2011
 */
-class DLLExport ScaleX : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ScaleX : public API::Algorithm {
 public:
   /// Default constructor
   ScaleX();

@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTIDWIDGETS_MOCKSCRIPTREPOSITORY_H_
-#define MANTIDWIDGETS_MOCKSCRIPTREPOSITORY_H_
+#pragma once
 
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -85,4 +84,3 @@ private:
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-#endif /*MANTIDWIDGETS_MOCKSCRIPTREPOSITORY_H_ */

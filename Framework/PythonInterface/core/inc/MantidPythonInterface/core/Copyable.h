@@ -5,8 +5,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_COPYABLE_H_
-#define MANTID_PYTHONINTERFACE_COPYABLE_H_
+#pragma once
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/extract.hpp>
@@ -64,4 +63,3 @@ bp::object generic__deepcopy__(const bp::object &copyable, bp::dict &memo) {
 }
 } // namespace PythonInterface
 } // namespace Mantid
-#endif // MANTID_PYTHONINTERFACE_COPYABLE_H_

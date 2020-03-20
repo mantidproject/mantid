@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PARINSTRUMENTTEST_H_
-#define PARINSTRUMENTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -114,5 +113,3 @@ private:
   Detector *det2;
   Detector *det3;
 };
-
-#endif /*INSTRUMENTTEST_H_*/

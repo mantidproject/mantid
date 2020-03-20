@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REBINPARAMSVALIDATORTEST_H_
-#define REBINPARAMSVALIDATORTEST_H_
+#pragma once
 
 #include "MantidKernel/RebinParamsValidator.h"
 #include <boost/make_shared.hpp>
@@ -105,5 +104,3 @@ public:
 private:
   RebinParamsValidator standardValidator;
 };
-
-#endif /*REBINPARAMSVALIDATORTEST_H_*/

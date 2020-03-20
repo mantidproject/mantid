@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_DELTAFUNCTION_H_
-#define MANTID_CURVEFITTING_DELTAFUNCTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 #include <cmath>
 
@@ -24,7 +24,7 @@ Delta function. Makes sence in Convolution only.
 @author Roman Tolchenov, Tessella plc
 @date 02/09/2010
 */
-class DLLExport DeltaFunction : public API::IPeakFunction {
+class MANTID_CURVEFITTING_DLL DeltaFunction : public API::IPeakFunction {
 public:
   /// Constructor
   DeltaFunction();
@@ -65,5 +65,3 @@ protected:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_DELTAFUNCTION_H_*/

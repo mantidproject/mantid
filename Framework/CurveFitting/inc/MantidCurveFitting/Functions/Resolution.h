@@ -4,12 +4,12 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_RESOLUTION_H_
-#define MANTID_CURVEFITTING_RESOLUTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/TabulatedFunction.h"
 
 namespace Mantid {
@@ -24,8 +24,8 @@ TabulatedFunction's attributes.
 @author Roman Tolchenov, Tessella plc
 @date 12/02/2010
 */
-class DLLExport Resolution : public API::ParamFunction,
-                             public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL Resolution : public API::ParamFunction,
+                                           public API::IFunction1D {
 public:
   /// Constructor
   Resolution();
@@ -57,5 +57,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_RESOLUTION_H_*/

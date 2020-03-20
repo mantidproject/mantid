@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __cxxtest_TestRunner_h__
-#define __cxxtest_TestRunner_h__
+#pragma once
 
 //
 // TestRunner is the class that runs all the tests.
@@ -147,6 +146,3 @@ namespace CxxTest
     //
     void initialize();
 }
-
-
-#endif // __cxxtest_TestRunner_h__

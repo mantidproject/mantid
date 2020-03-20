@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDTABLE_H
-#define MANTIDTABLE_H
+#pragma once
 
 #include "../Table.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -75,5 +74,3 @@ private:
   /// Show the table workspace transposed
   bool m_transposed;
 };
-
-#endif /* MANTIDTABLE_H */

@@ -4,12 +4,12 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_FITMW_H_
-#define MANTID_CURVEFITTING_FITMW_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/IMWDomainCreator.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -35,7 +35,7 @@ Declares OutputWorkspace output property.
 @author Roman Tolchenov, Tessella plc
 @date 06/12/2011
 */
-class DLLExport FitMW : public IMWDomainCreator {
+class MANTID_CURVEFITTING_DLL FitMW : public IMWDomainCreator {
 public:
   /// Constructor
   FitMW(Kernel::IPropertyManager *fit, const std::string &workspacePropertyName,
@@ -87,5 +87,3 @@ private:
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_FITMW_H_*/

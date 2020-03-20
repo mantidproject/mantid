@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_INDIRECTDATAVALIDATIONHELPERTEST_H_
-#define MANTID_CUSTOMINTERFACES_INDIRECTDATAVALIDATIONHELPERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -303,5 +302,3 @@ private:
   std::unique_ptr<UserInputValidator> m_uiv;
   std::unique_ptr<MockDataSelector> m_dataSelector;
 };
-
-#endif /* MANTID_CUSTOMINTERFACES_INDIRECTDATAVALIDATIONHELPERTEST_H_ */

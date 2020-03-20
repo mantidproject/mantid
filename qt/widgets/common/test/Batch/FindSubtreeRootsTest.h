@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_FINDSUBTREEROOTS_H
-#define MANTID_MANTIDWIDGETS_FINDSUBTREEROOTS_H
+#pragma once
 
 #include "MantidQtWidgets/Common/Batch/FindSubtreeRoots.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
@@ -242,5 +241,3 @@ public:
     TS_ASSERT(!roots.is_initialized())
   }
 };
-
-#endif // MANTID_MANTIDWIDGETS_FINDSUBTREEROOTS_H

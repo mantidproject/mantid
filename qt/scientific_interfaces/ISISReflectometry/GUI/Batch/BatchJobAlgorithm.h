@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_BATCHJOBALGORITHM_H_
-#define MANTID_CUSTOMINTERFACES_BATCHJOBALGORITHM_H_
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "IBatchJobAlgorithm.h"
@@ -45,5 +44,3 @@ using BatchJobAlgorithm_sptr = boost::shared_ptr<BatchJobAlgorithm>;
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTID_CUSTOMINTERFACES_BATCHJOBALGORITHM_H_

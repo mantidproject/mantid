@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
-#define MANTID_CUSTOMINTERFACES_VALIDATEROW_H_
+#pragma once
 #include "Common/DllConfig.h"
 #include "Common/ValidationResult.h"
 #include "ParseReflectometryStrings.h"
@@ -53,4 +52,3 @@ boost::optional<Row> validateRowFromRunAndTheta(std::string const &run,
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_VALIDATEROW_H_

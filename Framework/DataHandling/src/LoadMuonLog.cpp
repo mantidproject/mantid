@@ -10,9 +10,16 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidNexus/MuonNexusReader.h"
 
+#include <algorithm>
 #include <ctime>
+
+namespace {
+void toLower(std::string &name) {
+  std::transform(name.begin(), name.end(), name.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+}
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -56,7 +63,6 @@ void LoadMuonLog::exec() {
   // on the filename
 
   m_filename = getPropertyValue("Filename");
-
   MuonNexusReader nxload;
   nxload.readLogData(m_filename);
 
@@ -65,47 +71,73 @@ void LoadMuonLog::exec() {
   // Also set the sample name at this point, as part of the sample related log
   // data.
 
-  const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
+  MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
   localWorkspace->mutableSample().setName(nxload.getSampleName());
+
+  std::set<std::string> logNames;
+  auto logs = localWorkspace->mutableRun().getLogData();
+  // need to remove case
+  for (auto log : logs) {
+    std::string name = log->name();
+    toLower(name);
+    logNames.insert(name);
+  }
 
   // Attempt to load the content of each NXlog section into the Sample object
   // Assumes that MuonNexusReader has read all log data
   // Two cases of double or string data allowed
   Progress prog(this, 0.0, 1.0, nxload.numberOfLogs());
   for (int i = 0; i < nxload.numberOfLogs(); i++) {
-    std::string logName = nxload.getLogName(i);
-    auto l_PropertyDouble =
-        std::make_unique<TimeSeriesProperty<double>>(logName);
-    auto l_PropertyString =
-        std::make_unique<TimeSeriesProperty<std::string>>(logName);
-
-    // Read log file into Property which is then stored in Sample object
-    if (!nxload.logTypeNumeric(i)) {
-      std::string logValue;
-      std::time_t logTime;
-      for (int j = 0; j < nxload.getLogLength(i); j++) {
-        nxload.getLogStringValues(i, j, logTime, logValue);
-        l_PropertyString->addValue(logTime, logValue);
-      }
-    } else {
-      double logValue;
-      std::time_t logTime;
-      for (int j = 0; j < nxload.getLogLength(i); j++) {
-        nxload.getLogValues(i, j, logTime, logValue);
-        l_PropertyDouble->addValue(logTime, logValue);
-      }
-    }
-
-    // store Property in Sample object and delete unused object
-    if (nxload.logTypeNumeric(i)) {
-      localWorkspace->mutableRun().addLogData(std::move(l_PropertyDouble));
-    } else {
-      localWorkspace->mutableRun().addLogData(std::move(l_PropertyString));
-    }
+    addLogValueFromIndex(nxload, i, localWorkspace, logNames);
     prog.report();
-  } // end for
-
+  }
   // operation was a success and ended normally
+}
+
+void LoadMuonLog::addLogValueFromIndex(
+    MuonNexusReader &nxload, const int &index,
+    API::MatrixWorkspace_sptr &localWorkspace,
+    std::set<std::string> &logNames) {
+  std::string newLogName = nxload.getLogName(index);
+  // want to keep the original case for the logs
+  std::string logNameLower = nxload.getLogName(index);
+  toLower(logNameLower);
+  // check if log name already exists
+  if (logNames.find(logNameLower) != logNames.end()) {
+    g_log.warning("The log " + newLogName +
+                  " is already in the nexus file. The sample log names are "
+                  "case insensitive.");
+    return;
+  }
+  logNames.insert(newLogName);
+  auto l_PropertyDouble =
+      std::make_unique<TimeSeriesProperty<double>>(newLogName);
+  auto l_PropertyString =
+      std::make_unique<TimeSeriesProperty<std::string>>(newLogName);
+
+  // Read log file into Property which is then stored in Sample object
+  if (!nxload.logTypeNumeric(index)) {
+    std::string logValue;
+    std::time_t logTime;
+    for (int j = 0; j < nxload.getLogLength(index); j++) {
+      nxload.getLogStringValues(index, j, logTime, logValue);
+      l_PropertyString->addValue(logTime, logValue);
+    }
+  } else {
+    double logValue;
+    std::time_t logTime;
+    for (int j = 0; j < nxload.getLogLength(index); j++) {
+      nxload.getLogValues(index, j, logTime, logValue);
+      l_PropertyDouble->addValue(logTime, logValue);
+    }
+  }
+
+  // store Property in Sample object and delete unused object
+  if (nxload.logTypeNumeric(index)) {
+    localWorkspace->mutableRun().addLogData(std::move(l_PropertyDouble));
+  } else {
+    localWorkspace->mutableRun().addLogData(std::move(l_PropertyString));
+  }
 }
 
 /** change each element of the string to lower case

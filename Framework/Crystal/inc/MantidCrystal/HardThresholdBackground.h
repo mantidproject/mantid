@@ -4,12 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_HARDTHRESHOLDBACKGROUND_H_
-#define MANTID_CRYSTAL_HARDTHRESHOLDBACKGROUND_H_
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidCrystal/BackgroundStrategy.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -17,7 +16,7 @@ namespace Crystal {
 /** HardThresholdBackground : Implementation of BackgroundStrategy using a fixed
   background signal value as the threshold.
 */
-class DLLExport HardThresholdBackground : public BackgroundStrategy {
+class MANTID_CRYSTAL_DLL HardThresholdBackground : public BackgroundStrategy {
 public:
   /// Contructor
   HardThresholdBackground(const double thresholdSignal,
@@ -42,5 +41,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_HARDTHRESHOLDBACKGROUND_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_NormaliseVanadiumTEST_H_
-#define MANTID_CRYSTAL_NormaliseVanadiumTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidCrystal/NormaliseVanadium.h"
@@ -168,5 +167,3 @@ public:
 private:
   IAlgorithm_sptr normaliseVanadiumAlg;
 };
-
-#endif /* MANTID_CRYSTAL_NormaliseVanadiumTEST_H_ */

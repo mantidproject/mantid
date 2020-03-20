@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTER_H_
-#define MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/IMuonFitDataSelector.h"
@@ -185,5 +184,3 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_CUSTOMINTERFACES_MUONANALYSISFITDATAPRESENTER_H_ */

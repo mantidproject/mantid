@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef _vtkPeaksSource_h
-#define _vtkPeaksSource_h
+#pragma once
 
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
@@ -70,4 +69,3 @@ private:
   /// Instrument name.
   std::string m_instrument;
 };
-#endif

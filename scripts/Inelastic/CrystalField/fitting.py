@@ -41,7 +41,7 @@ def ionname2Nre(ionname):
     if ionname not in ion_nre_map.keys():
         msg = 'Value %s is not allowed for attribute Ion.\nList of allowed values: %s' % \
               (ionname, ', '.join(list(ion_nre_map.keys())))
-        arbitraryJ = re.match('[SJsj]([0-9\.]+)', ionname)
+        arbitraryJ = re.match(r'[SJsj]([0-9\.]+)', ionname)
         if arbitraryJ and (float(arbitraryJ.group(1)) % 0.5) == 0:
             nre = int(-float(arbitraryJ.group(1)) * 2.)
             if nre < -99:
@@ -61,8 +61,8 @@ def getSymmAllowedParam(sym_str):
     if 'T' in sym_str or 'O' in sym_str:
         return ['B40', 'B60']
     if any([sym_str == val for val in ['C1', 'Ci']]):
-        return sum([cfpstrmaker(i) for i in range(7)] +
-                   [cfpstrmaker(i, 'IB') for i in range(1, 7)],[])
+        return sum([cfpstrmaker(i) for i in range(7)]
+                   + [cfpstrmaker(i, 'IB') for i in range(1, 7)],[])
     retval = cfpstrmaker(0)
     if '6' in sym_str or '3' in sym_str:
         retval += cfpstrmaker(6)
@@ -1091,11 +1091,11 @@ class CrystalField(object):
         return params
 
     def _getFieldTies(self):
-        ties = re.search(',ties=\((.*?)\)', str(self.crystalFieldFunction))
+        ties = re.search(r',ties=\((.*?)\)', str(self.crystalFieldFunction))
         return re.sub(FN_PATTERN, '', ties.group(1)).rstrip(',') if ties else ''
 
     def _getFieldConstraints(self):
-        constraints = re.search('constraints=\((.*?)\)', str(self.crystalFieldFunction))
+        constraints = re.search(r'constraints=\((.*?)\)', str(self.crystalFieldFunction))
         return constraints.group(1) if constraints else ''
 
     def _getPhysProp(self, ppobj, workspace, ws_index):

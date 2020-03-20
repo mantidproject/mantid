@@ -18,7 +18,7 @@ from mantid.simpleapi import *
 
 class WishMasking(systemtesting.MantidSystemTest):
 
-        # Utility function will return the masking corresponding to a workspace index from a cal file.
+    # Utility function will return the masking corresponding to a workspace index from a cal file.
     def get_masking_for_index(self, cal_file, requested_index):
         while True:
             line = cal_file.readline()
@@ -149,7 +149,6 @@ class WishMasking(systemtesting.MantidSystemTest):
             self.assertEqual(merged_mask_boundary_outside,  update_mask_boundary_outside)
 
         finally:
-                        #clean up no matter what.
             merged_cal_file.close()
             update_cal_file.close()
             os.remove(master_cal_file_path)

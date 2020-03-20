@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_ADARAPACKETTEST_H_
-#define MANTID_LIVEDATA_ADARAPACKETTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -288,5 +287,3 @@ private:
     return (((pulseId >> 32) == high) && ((pulseId & 0xFFFFFFFF) == low));
   }
 };
-
-#endif /* MANTID_LIVEDATA_ADARAPACKETTEST_H_ */

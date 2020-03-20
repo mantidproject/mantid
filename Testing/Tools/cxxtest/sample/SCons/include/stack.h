@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef STACK_H
-#define STACK_H
+#pragma once
 
 #ifdef __cplusplus
   extern "C" {
@@ -27,7 +26,4 @@
 
 #ifdef __cplusplus
   }
-#endif
-
-
 #endif

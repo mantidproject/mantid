@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_MDEWFINDPEAKSTEST_H_
-#define MANTID_MDEVENTS_MDEWFINDPEAKSTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -301,5 +300,3 @@ public:
     TS_ASSERT(ws);
   }
 };
-
-#endif /* MANTID_MDEVENTS_MDEWFINDPEAKSTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SLICE_VIEWER_PEAKS_PRESENTER_TEST_H_
-#define SLICE_VIEWER_PEAKS_PRESENTER_TEST_H_
+#pragma once
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -69,7 +68,7 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
     IMDDimension_sptr LDim = createExpectedMDDimension("L");
 
     // Create the mock MD geometry
-    MockMDGeometry *pGeometry = new MockMDGeometry;
+    auto *pGeometry = new MockMDGeometry;
     EXPECT_CALL(*pGeometry, getNumDims()).WillRepeatedly(Return(3));
     EXPECT_CALL(*pGeometry, getDimension(0)).WillRepeatedly(Return(HDim));
     EXPECT_CALL(*pGeometry, getDimension(1)).WillRepeatedly(Return(KDim));
@@ -880,5 +879,3 @@ public:
     TSM_ASSERT_EQUALS("One peaks should remain", 1, peaksWS->getNumberPeaks());
   }
 };
-
-#endif

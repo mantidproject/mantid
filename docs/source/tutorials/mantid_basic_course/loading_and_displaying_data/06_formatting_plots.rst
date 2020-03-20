@@ -30,9 +30,9 @@ Plots Toolbox
    :align: center
    :alt: Plots Window
 
-To show this window you may have to click on the Plots tab higlighted in Red.
+To show this window you may have to click on the Plots tab highlighted in Red.
 
-The Plots Window great tool for organising your plots. It allows you to Show, Rename, Delete, Search for and Export Plots. It become very useful when you produce many plots and are struggling to find the one that you want!
+The Plots Window great tool for organising your plots. It allows you to Show, Rename, Delete, Search for and Export Plots. It becomes very useful when you produce many plots and are struggling to find the one that you want!
 
 .. figure:: /images/1DPlotmarkers.png
    :alt: Plot markers

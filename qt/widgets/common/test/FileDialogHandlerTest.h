@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_FILEDIALOGHANDLERTEST_H_
-#define MANTIDQT_API_FILEDIALOGHANDLERTEST_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include <cxxtest/TestSuite.h>
@@ -96,5 +95,3 @@ public:
     TS_ASSERT_EQUALS(expected, result4);
   }
 };
-
-#endif /* MANTIDQT_API_FILEDIALOGHANDLERTEST_H_ */

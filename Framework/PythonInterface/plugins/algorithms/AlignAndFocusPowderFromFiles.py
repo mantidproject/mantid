@@ -310,7 +310,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         newprop = 'files_to_sum={}'.format(filenames_str)
         return self.__getCacheName('summed_'+wsname, additional_props=[newprop])
 
-    def __processFile(self, filename, file_prog_start, determineCharacterizations, createUnfocused):  # noqa: C902
+    def __processFile(self, filename, file_prog_start, determineCharacterizations, createUnfocused):  # noqa: C902,C901
         # create a unique name for the workspace
         wkspname = '__' + self.__wkspNameFromFile(filename)
         wkspname += '_f%d' % self._filenames.index(filename)  # add file number to be unique

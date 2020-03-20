@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef XYLIMITSDIALOG_H
-#define XYLIMITSDIALOG_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -35,5 +34,3 @@ public:
 private:
   Ui::XYLimitsDialogClass ui;
 };
-
-#endif // XYLIMITSDIALOG_H

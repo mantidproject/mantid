@@ -94,8 +94,8 @@ def EquivMatch(refh, hkl, gam, tol):
     nmatch = 0
     for i in range(len(AllEqv)):
         h1 = AllEqv[i]
-        bet = np.degrees(np.arccos(np.dot(refh, h1) /
-                                   (np.linalg.norm(refh) * np.linalg.norm(h1))))
+        bet = np.degrees(np.arccos(np.dot(refh, h1)
+                                   / (np.linalg.norm(refh) * np.linalg.norm(h1))))
         dif = np.abs(bet - gam)
         if dif <= tol:
             match[i] = 1
@@ -126,10 +126,10 @@ lattice vectors
 
 
 def Jacobsen(h1, Xm_1, h2, Xm_2):
-    alp = np.degrees(np.arccos(np.dot(h1, h2) /
-                               (np.linalg.norm(h1) * np.linalg.norm(h2))))
-    bet = np.degrees(np.arccos(np.dot(Xm_1, Xm_2) /
-                               (np.linalg.norm(Xm_1) * np.linalg.norm(Xm_2))))
+    alp = np.degrees(np.arccos(np.dot(h1, h2)
+                               / (np.linalg.norm(h1) * np.linalg.norm(h2))))
+    bet = np.degrees(np.arccos(np.dot(Xm_1, Xm_2)
+                               / (np.linalg.norm(Xm_1) * np.linalg.norm(Xm_2))))
     if ((alp - bet)**2) > 1:
         print('check your indexing!')
 

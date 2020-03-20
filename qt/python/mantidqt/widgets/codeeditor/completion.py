@@ -174,9 +174,6 @@ def generate_call_tips(definitions, prepend_module_name=None):
         return []
     call_tips = []
     for name, py_object in definitions.items():
-        if PY2:
-            if isinstance(py_object, unicode):
-                continue
         if name.startswith('_'):
             continue
         if prepend_module_name is True and hasattr(py_object, '__module__'):
@@ -196,16 +193,16 @@ def generate_call_tips(definitions, prepend_module_name=None):
         for attr in dir(py_object):
             try:
                 f_attr = getattr(py_object, attr)
+                if attr.startswith('_'):
+                    continue
+                if hasattr(f_attr, 'im_func') or inspect.isfunction(f_attr) or inspect.ismethod(f_attr):
+                    call_tip = name + '.' + attr + get_function_spec(f_attr)
+                else:
+                    call_tip = name + '.' + attr
+                if isinstance(module_name, string_types):
+                    call_tips.append(module_name + '.' + call_tip)
             except Exception:
                 continue
-            if attr.startswith('_'):
-                continue
-            if hasattr(f_attr, 'im_func') or inspect.isfunction(f_attr) or inspect.ismethod(f_attr):
-                call_tip = name + '.' + attr + get_function_spec(f_attr)
-            else:
-                call_tip = name + '.' + attr
-            if isinstance(module_name, string_types):
-                call_tips.append(module_name + '.' + call_tip)
     return call_tips
 
 

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PEAKSTABLECOLUMNSDIALOG_H
-#define PEAKSTABLECOLUMNSDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <set>
@@ -34,5 +33,3 @@ private:
 
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif // PEAKSTABLECOLUMNSDIALOG_H

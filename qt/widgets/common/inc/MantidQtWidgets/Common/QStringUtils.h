@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_QSTRINGUTILS_H
-#define MANTIDQT_API_QSTRINGUTILS_H
+#pragma once
 
 #include <QString>
 #include <string>
@@ -43,5 +42,3 @@ inline QString toQStringInternal(const std::wstring &str) {
 }
 } // namespace API
 } // namespace MantidQt
-
-#endif // MANTIDQT_API_QSTRINGUTILS_H

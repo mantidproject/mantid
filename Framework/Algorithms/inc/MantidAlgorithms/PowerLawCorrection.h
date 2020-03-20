@@ -32,7 +32,7 @@ the input one)</LI>
 @author Robert Dalgliesh ISIS, STFC
 @date 14/10/2009
 */
-class DLLExport PowerLawCorrection : public UnaryOperation {
+class MANTID_ALGORITHMS_DLL PowerLawCorrection : public UnaryOperation {
 public:
   /// Default constructor
   PowerLawCorrection();

@@ -1,5 +1,4 @@
-#ifndef LOADPLNTEST_H_
-#define LOADPLNTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -135,5 +134,3 @@ public:
     TS_ASSERT_DELTA(logpm("SampleRotation"), 13.001, 1.0e-3);
   }
 };
-
-#endif /*LOADPLNTEST_H_*/

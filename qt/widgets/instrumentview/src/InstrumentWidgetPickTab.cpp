@@ -250,7 +250,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_peakAlign->setIcon(QIcon(":/PickTools/selection-peak-plane.png"));
   m_peakAlign->setToolTip("Crystal peak alignment tool");
 
-  QGridLayout *toolBox = new QGridLayout();
+  auto *toolBox = new QGridLayout();
   toolBox->addWidget(m_zoom, 0, 0);
   toolBox->addWidget(m_edit, 0, 1);
   toolBox->addWidget(m_ellipse, 0, 2);
@@ -589,7 +589,7 @@ void InstrumentWidgetPickTab::initSurface() {
           SLOT(updatePlotMultipleDetectors()));
   connect(surface, SIGNAL(shapesRemoved()), this,
           SLOT(updatePlotMultipleDetectors()));
-  Projection3D *p3d = dynamic_cast<Projection3D *>(surface);
+  auto *p3d = dynamic_cast<Projection3D *>(surface);
   if (p3d) {
     connect(p3d, SIGNAL(finishedMove()), this,
             SLOT(updatePlotMultipleDetectors()));

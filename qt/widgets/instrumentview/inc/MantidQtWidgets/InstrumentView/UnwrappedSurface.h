@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef UNWRAPPEDSURFACE_H
-#define UNWRAPPEDSURFACE_H
+#pragma once
 
 #include "InstrumentActor.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -178,5 +177,3 @@ protected:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // UNWRAPPEDSURFACE_H

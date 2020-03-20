@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FITMODELHANDLER_H
-#define FITMODELHANDLER_H
+#pragma once
 
 #include <QVarLengthArray>
 #include <QXmlDefaultHandler>
@@ -46,5 +45,3 @@ private:
   QStringList d_explanations;
   QVarLengthArray<double> d_values;
 };
-
-#endif

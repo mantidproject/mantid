@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REF_MATRIX_WS_IMAGE_VIEW_H
-#define REF_MATRIX_WS_IMAGE_VIEW_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/Algorithm.h"
@@ -45,5 +44,3 @@ private:
 
 } // namespace RefDetectorViewer
 } // namespace MantidQt
-
-#endif // REF_MATRIX_WS_IMAGE_VIEW_H

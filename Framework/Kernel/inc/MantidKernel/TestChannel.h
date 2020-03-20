@@ -31,8 +31,7 @@
 // DEALINGS IN THE SOFTWARE.
 //
 
-#ifndef TESTCHANNEL_H_
-#define TESTCHANNEL_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 
@@ -53,5 +52,3 @@ private:
   MsgList _msgList;
 };
 } // namespace Mantid
-
-#endif // TESTCHANNEL_H_

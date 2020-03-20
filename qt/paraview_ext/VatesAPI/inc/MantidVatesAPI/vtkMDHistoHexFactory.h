@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_VTK_MD_HISTO_HEX_FACTORY_H_
-#define MANTID_VATES_VTK_MD_HISTO_HEX_FACTORY_H_
+#pragma once
 
 /** Concrete implementation of vtkDataSetFactory. Creates a vtkUnStructuredGrid.
  Uses Thresholding technique
@@ -69,5 +68,3 @@ protected:
 };
 } // namespace VATES
 } // namespace Mantid
-
-#endif

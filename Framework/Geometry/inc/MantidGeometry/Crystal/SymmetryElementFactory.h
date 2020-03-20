@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SYMMETRYELEMENTFACTORY_H_
-#define MANTID_GEOMETRY_SYMMETRYELEMENTFACTORY_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/SymmetryElement.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
@@ -265,5 +264,3 @@ EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
                 .subscribeSymmetryElementGenerator<classname>(#classname)),    \
            0));                                                                \
   }
-
-#endif /* MANTID_GEOMETRY_SYMMETRYELEMENTFACTORY_H_ */

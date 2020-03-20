@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_SPLITTERSWORKSPACE_H_
-#define MANTID_DATAOBJECTS_SPLITTERSWORKSPACE_H_
+#pragma once
 
 #include "MantidAPI/ISplittersWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -72,5 +71,3 @@ using SplittersWorkspace_const_sptr =
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_SPLITTERSWORKSPACE_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SMOOTH_NEIGHBOURS_DIALOG_H_
-#define SMOOTH_NEIGHBOURS_DIALOG_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
@@ -42,5 +41,3 @@ private:
   /// Main layout for the dialog
   QVBoxLayout *m_dialogLayout;
 };
-
-#endif

@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_MaskPeaksWorkspace_H_
-#define MANTID_DATAHANDLING_MaskPeaksWorkspace_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
@@ -22,7 +22,7 @@ namespace Crystal {
  @author Vickie Lynch, SNS, ORNL
  @date 02/08/2011
  */
-class DLLExport MaskPeaksWorkspace : public API::Algorithm {
+class MANTID_CRYSTAL_DLL MaskPeaksWorkspace : public API::Algorithm {
 public:
   /// Default constructor
   MaskPeaksWorkspace();
@@ -66,5 +66,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_MaskPeaksWorkspace_H_*/

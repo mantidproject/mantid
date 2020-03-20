@@ -6,6 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init, too-few-public-methods
 from __future__ import (absolute_import, division, print_function)
+
+import warnings
+
 import systemtesting
 import os
 from abc import ABCMeta, abstractmethod
@@ -26,7 +29,7 @@ def _cleanup_files(dirname, filenames):
         try:
             os.remove(path)
         except OSError:
-            pass
+            warnings.warn("Failed to remove file {0}".format(path))
 
 #==============================================================================
 
@@ -181,6 +184,7 @@ class QSeTest(systemtesting.MantidSystemTest):
         return 'irs26176_graphite002_QSe_Workspace_0','ISISIndirectBayes_QSeTest.nxs'
 
     def cleanup(self):
+        AnalysisDataService.clear()
         filenames = ['irs26176_graphite002_QSe_Parameters.nxs', 'irs26176_graphite002_Qse.qse',
                      'irs26176_graphite002_Qse.lpt']
         _cleanup_files(config['defaultsave.directory'], filenames)
@@ -224,6 +228,7 @@ class QLDataTest(systemtesting.MantidSystemTest):
         return 'irs26176_graphite002_QLd_Workspace_0','ISISIndirectBayes_QLDataTest.nxs'
 
     def cleanup(self):
+        AnalysisDataService.clear()
         filenames = ['irs26176_graphite002_QLd.lpt','irs26176_graphite002_QLd.ql1',
                      'irs26176_graphite002_QLd.ql2','irs26176_graphite002_QLd.ql3',
                      'irs26176_graphite002_QLd_Parameters.nxs']
@@ -272,6 +277,7 @@ class QLResNormTest(systemtesting.MantidSystemTest):
         return 'irs26176_graphite002_QLr_Workspaces','ISISIndirectBayes_QLr_ResNorm_Test.nxs'
 
     def cleanup(self):
+        AnalysisDataService.clear()
         filenames = ['irs26176_graphite002_QLd.lpt','irs26176_graphite002_QLd.ql1',
                      'irs26176_graphite002_QLd.ql2','irs26176_graphite002_QLd.ql3',
                      'irs26176_graphite002_QLd_Parameters.nxs']
@@ -294,10 +300,8 @@ class QLWidthTest(systemtesting.MantidSystemTest):
         background = 'Sloping'
         loopOp = False
 
-        spath = sname+'.nxs'    # path name for sample nxs file
-        LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
-        rpath = rname+'.nxs'    # path name for res nxs file
-        LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+        LoadNexusProcessed(Filename=sname + '.nxs', OutputWorkspace=sname)
+        LoadNexusProcessed(Filename=rname + '.nxs', OutputWorkspace=rname)
         BayesQuasi(Program = 'QL',
                    SampleWorkspace=sname,
                    ResolutionWorkspace=rname,
@@ -316,6 +320,7 @@ class QLWidthTest(systemtesting.MantidSystemTest):
         return 'irs26176_graphite002_QLr_Workspace_0','ISISIndirectBayes_QLr_width_Test.nxs'
 
     def cleanup(self):
+        AnalysisDataService.clear()
         filenames = ['irs26176_graphite002_QLd.lpt','irs26176_graphite002_QLd.ql1',
                      'irs26176_graphite002_QLd.ql2','irs26176_graphite002_QLd.ql3',
                      'irs26176_graphite002_QLd_Parameters.nxs']
@@ -366,6 +371,9 @@ class JumpFitFunctionTestBase(with_metaclass(ABCMeta, systemtesting.MantidSystem
 
     def validate(self):
         return self._sample_name + '_Workspace', self.get_reference_files()
+
+    def cleanup(self):
+        AnalysisDataService.clear()
 
 #==============================================================================
 

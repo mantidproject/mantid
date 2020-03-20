@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_CPUTIMER_H_
-#define MANTID_KERNEL_CPUTIMER_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Timer.h"
@@ -43,5 +42,3 @@ MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, CPUTimer &);
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_CPUTIMER_H_ */

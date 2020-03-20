@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_FORTRANMATRIX_H_
-#define MANTID_CURVEFITTING_FORTRANMATRIX_H_
+#pragma once
 
 #include <cstddef>
 #include <stdexcept>
@@ -153,5 +152,3 @@ template <class MatrixClass> int FortranMatrix<MatrixClass>::len2() const {
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_FORTRANMATRIX_H_ */

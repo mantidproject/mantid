@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef AFFINE_MATRIX_PARAMETER_PARSER_TEST_H
-#define AFFINE_MATRIX_PARAMETER_PARSER_TEST_H
+#pragma once
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -124,4 +123,3 @@ public:
                      const std::runtime_error &);
   }
 };
-#endif

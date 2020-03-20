@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDPLOT_FIRST_RUN_SETUP_WINDOW
-#define MANTIDPLOT_FIRST_RUN_SETUP_WINDOW
+#pragma once
 
 #include "ui_FirstTimeSetup.h"
 #include <QDialog>
@@ -46,5 +45,3 @@ private slots:
 private:
   Ui::FirstTimeSetup m_uiForm;
 };
-
-#endif

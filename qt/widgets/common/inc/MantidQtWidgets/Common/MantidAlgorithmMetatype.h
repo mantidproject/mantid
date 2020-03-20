@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDALGORITHMMETATYPE_H
-#define MANTIDALGORITHMMETATYPE_H
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include <QMetaType>
@@ -18,5 +17,3 @@
  */
 
 Q_DECLARE_METATYPE(Mantid::API::IAlgorithm_sptr)
-
-#endif /* MANTIDALGORITHMMETATYPE_H */

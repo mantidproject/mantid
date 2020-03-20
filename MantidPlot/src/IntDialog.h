@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef INTDIALOG_H
-#define INTDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -64,5 +63,3 @@ private:
   DoubleSpinBox *boxEnd;
   DoubleSpinBox *boxTol;
 };
-
-#endif

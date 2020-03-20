@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADDETECTORINFOTEST_H_
-#define LOADDETECTORINFOTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -457,5 +456,3 @@ private:
   std::string m_testfile;
   std::string m_wsName;
 };
-
-#endif /*LOADDETECTORINFOTEST_H_*/

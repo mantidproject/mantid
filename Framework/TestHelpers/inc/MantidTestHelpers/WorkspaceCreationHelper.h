@@ -14,8 +14,7 @@
  *  package higher than DataObjects (e.g. any algorithm), even if via the
  *factory.
  *********************************************************************************/
-#ifndef WORKSPACECREATIONHELPER_H_
-#define WORKSPACECREATIONHELPER_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -444,5 +443,3 @@ Mantid::API::ITableWorkspace_sptr
 createEPPTableWorkspace(const std::vector<EPPTableRow> &rows);
 
 } // namespace WorkspaceCreationHelper
-
-#endif /*WORKSPACECREATIONHELPER_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_RENAMELOGTEST_H_
-#define MANTID_DATAHANDLING_RENAMELOGTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -148,5 +147,3 @@ private:
   std::vector<Types::Core::DateAndTime> m_rawTimes;
   std::vector<double> m_rawValues;
 };
-
-#endif /* MANTID_DATAHANDLING_RENAMELOGTEST_H_ */

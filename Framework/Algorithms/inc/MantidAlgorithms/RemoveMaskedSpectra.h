@@ -7,14 +7,14 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 /** RemoveMaskedSpectra removes all masked spectra.
  */
-class DLLExport RemoveMaskedSpectra : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RemoveMaskedSpectra : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

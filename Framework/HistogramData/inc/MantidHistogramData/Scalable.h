@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_SCALABLE_H_
-#define MANTID_HISTOGRAMDATA_SCALABLE_H_
+#pragma once
 
 #include "MantidHistogramData/DllConfig.h"
 
@@ -68,5 +67,3 @@ inline T operator*(const double lhs, T rhs) {
 } // namespace detail
 } // namespace HistogramData
 } // namespace Mantid
-
-#endif /* MANTID_HISTOGRAMDATA_SCALABLE_H_ */

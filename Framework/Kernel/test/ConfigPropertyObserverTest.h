@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CONFIGPROPERTYOBSERVERTEST_H_
-#define MANTID_CONFIGPROPERTYOBSERVERTEST_H_
+#pragma once
 
 #include "MantidKernel/ConfigPropertyObserver.h"
 #include "MantidKernel/ConfigService.h"
@@ -117,4 +116,3 @@ private:
   std::string m_defaultSaveDirectory;
   std::string m_retainedAlgorithms;
 };
-#endif // MANTID_CONFIGPROPERTYOBSERVERTEST_H_

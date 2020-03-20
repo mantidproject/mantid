@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_GRAMCHARLIERCOMPTONPROFILE_H_
-#define MANTID_CURVEFITTING_GRAMCHARLIERCOMPTONPROFILE_H_
+#pragma once
 
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
@@ -20,7 +19,8 @@ namespace Functions {
   convoluted with an instrument resolution function that is approximated by a
   Voigt function.
 */
-class DLLExport GramCharlierComptonProfile : public ComptonProfile {
+class MANTID_CURVEFITTING_DLL GramCharlierComptonProfile
+    : public ComptonProfile {
 public:
   /// Default constructor required by factory
   GramCharlierComptonProfile();
@@ -85,5 +85,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_GRAMCHARLIERCOMPTONPROFILE_H_ */

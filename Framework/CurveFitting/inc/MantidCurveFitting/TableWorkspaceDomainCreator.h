@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_TABLEWORKSPACEDOMAINCREATOR_H_
-#define MANTID_CURVEFITTING_TABLEWORKSPACEDOMAINCREATOR_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IDomainCreator.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -27,7 +27,8 @@ class TableWorkspace;
 
 namespace CurveFitting {
 
-class DLLExport TableWorkspaceDomainCreator : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL TableWorkspaceDomainCreator
+    : public API::IDomainCreator {
 public:
   // Constructor
   TableWorkspaceDomainCreator(Kernel::IPropertyManager *fit,
@@ -158,5 +159,3 @@ private:
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_TABLEWORKSPACEDOMAINCREATOR_H_*/

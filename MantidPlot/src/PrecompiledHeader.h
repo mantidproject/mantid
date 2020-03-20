@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDPLOT_PRECOMPILEDHEADER_H_
-#define MANTIDPLOT_PRECOMPILEDHEADER_H_
+#pragma once
 
 // Mantid
 #include "MantidAPI/AnalysisDataService.h"
@@ -20,5 +19,3 @@
 #include <set>
 #include <string>
 #include <vector>
-
-#endif // MANTIDPLOT_PRECOMPILEDHEADER_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PYTHONINTERFACE_CPP_GLOBALTESTINITIALIZATION_H
-#define PYTHONINTERFACE_CPP_GLOBALTESTINITIALIZATION_H
+#pragma once
 
 #include "MantidPythonInterface/core/Testing/PythonInterpreterGlobalFixture.h"
 #ifdef _WIN32
@@ -33,5 +32,3 @@ class ImportNumpyCAPI : CxxTest::GlobalFixture {
 //------------------------------------------------------------------------------
 static PythonInterpreterGlobalFixture PYTHON_INTERPRETER;
 static ImportNumpyCAPI IMPORT_NUMPY_C_API_KERNEL;
-
-#endif // PYTHONINTERFACE_CPP_GLOBALTESTINITIALIZATION_H

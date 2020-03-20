@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_XMLINSTANTIATOR_H_
-#define MANTID_KERNEL_XMLINSTANTIATOR_H_
+#pragma once
 
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
@@ -94,5 +93,3 @@ public:
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /*MANTID_KERNEL_XMLINSTANTIATOR_H_*/

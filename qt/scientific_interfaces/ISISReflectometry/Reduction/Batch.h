@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_BATCH_H_
-#define MANTID_CUSTOMINTERFACES_BATCH_H_
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "Experiment.h"
@@ -61,4 +60,3 @@ bool Batch::isInSelection(T const &item,
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_BATCH_H_

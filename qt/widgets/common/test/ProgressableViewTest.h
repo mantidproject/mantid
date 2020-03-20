@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_PROGRESSABLEVIEWTEST_H
-#define MANTID_MANTIDWIDGETS_PROGRESSABLEVIEWTEST_H
+#pragma once
 
 #include "MantidQtWidgets/Common/ProgressableView.h"
 #include <cxxtest/TestSuite.h>
@@ -86,5 +85,3 @@ private:
 
   ProgressBar m_progress;
 };
-
-#endif /*MANTID_MANTIDWIDGETS_PROGRESSABLEVIEWTEST_H */

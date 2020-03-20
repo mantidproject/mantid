@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TEST_IMPLICIT_FUNCTION_PARSERS_H_
-#define TEST_IMPLICIT_FUNCTION_PARSERS_H_
+#pragma once
 
 // Abstract testing base class for function parsers.
 
@@ -70,5 +69,3 @@ protected:
     return normalParser;
   }
 };
-
-#endif

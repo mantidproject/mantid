@@ -27,7 +27,7 @@ namespace API {
  *
  *
  */
-class DLLExport MultiPeriodGroupWorker {
+class MANTID_API_DLL MultiPeriodGroupWorker {
 public:
   /// Convenience typdef for workspace names.
   using VecWSGroupType = std::vector<WorkspaceGroup_sptr>;

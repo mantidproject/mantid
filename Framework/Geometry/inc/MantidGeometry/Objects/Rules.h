@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef Rules_h
-#define Rules_h
+#pragma once
 
 #include <boost/shared_ptr.hpp>
 #include <map>
@@ -440,5 +439,3 @@ public:
 } // NAMESPACE  Geometry
 
 } // NAMESPACE  Mantid
-
-#endif

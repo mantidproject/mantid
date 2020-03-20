@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_SETMDUSINGMASKTEST_H_
-#define MANTID_MDALGORITHMS_SETMDUSINGMASKTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -105,5 +104,3 @@ public:
     do_test("histo_A", "mask_1", "", "34.5", "histo_A", 34.5, 0.);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_SETMDUSINGMASKTEST_H_ */

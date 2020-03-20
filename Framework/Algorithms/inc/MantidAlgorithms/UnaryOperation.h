@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -29,7 +30,7 @@ Required Properties:
 @author Russell Taylor, Tessella plc
 @date 24/03/2009
 */
-class DLLExport UnaryOperation : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL UnaryOperation : public API::DistributedAlgorithm {
 public:
   /// Algorithm's category for identification
   const std::string category() const override { return "Arithmetic"; }

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,7 +17,7 @@ namespace Algorithms {
   @author
   @date 2011-08-22
 */
-class DLLExport EditInstrumentGeometry : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL EditInstrumentGeometry : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

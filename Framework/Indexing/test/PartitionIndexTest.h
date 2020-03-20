@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDEXING_PARTITIONINDEXTEST_H_
-#define MANTID_INDEXING_PARTITIONINDEXTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -27,5 +26,3 @@ public:
         (dynamic_cast<detail::IndexType<PartitionIndex, int> &>(data))));
   }
 };
-
-#endif /* MANTID_INDEXING_PARTITIONINDEXTEST_H_ */

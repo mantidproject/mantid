@@ -17,16 +17,16 @@
  @author Ruth Mikkelson, SNS, ORNL
  @date 04/15/2013
  */
-#ifndef GoniometerAnglesFromPhiRotation_H_
-#define GoniometerAnglesFromPhiRotation_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
-class DLLExport GoniometerAnglesFromPhiRotation : public API::Algorithm {
+class MANTID_CRYSTAL_DLL GoniometerAnglesFromPhiRotation
+    : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override {
@@ -69,5 +69,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* GoniometerAnglesFromPhiRotation_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_SPECIALCOORDINATESYSTEMTEST
-#define MANTID_KERNEL_SPECIALCOORDINATESYSTEMTEST
+#pragma once
 
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include <cxxtest/TestSuite.h>
@@ -54,5 +53,3 @@ public:
     TS_ASSERT_EQUALS(3, hkl);
   }
 };
-
-#endif

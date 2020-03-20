@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_COLORMAPTEST_H
-#define MPLCPP_COLORMAPTEST_H
+#pragma once
 
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidQtWidgets/MplCpp/Colormap.h"
@@ -49,5 +48,3 @@ public:
                      const std::invalid_argument &);
   }
 };
-
-#endif // MPLCPP_COLORMAPTEST_H

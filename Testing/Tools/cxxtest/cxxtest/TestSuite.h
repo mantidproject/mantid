@@ -1,5 +1,4 @@
-#ifndef __cxxtest__TestSuite_h__
-#define __cxxtest__TestSuite_h__
+#pragma once
 
 //
 // class TestSuite is the base class for all test suites.
@@ -586,8 +585,6 @@ namespace CxxTest
 #ifdef __INTEL_COMPILER
   #pragma warning disable 68
 #endif
-
-#endif // __cxxtest__TestSuite_h__
 
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government

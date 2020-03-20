@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid {
@@ -22,7 +23,7 @@ Required Properties:
 <LI> OutputWorkspace - The name of the new group workspace created </LI>
 </UL>
  */
-class DLLExport GroupWorkspaces : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GroupWorkspaces : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "GroupWorkspaces"; }

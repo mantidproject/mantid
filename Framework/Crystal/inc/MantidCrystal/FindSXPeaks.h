@@ -4,14 +4,14 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_FINDSXPEAKS_H_
-#define MANTID_ALGORITHMS_FINDSXPEAKS_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/FindSXPeaksHelper.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
@@ -35,7 +35,7 @@ using peakvector = std::vector<FindSXPeaksHelper::SXPeak>;
   @author L C Chapon, ISIS, Rutherford Appleton Laboratory
   @date 11/08/2009
 */
-class DLLExport FindSXPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL FindSXPeaks : public API::Algorithm {
 public:
   /// Default constructor
   FindSXPeaks();
@@ -112,5 +112,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_FindSXPeaks_H_*/

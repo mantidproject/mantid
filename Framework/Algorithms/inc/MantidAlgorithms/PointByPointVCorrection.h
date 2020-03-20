@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,7 +20,7 @@ namespace Algorithms {
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
     @date 04/03/2009
 */
-class DLLExport PointByPointVCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PointByPointVCorrection : public API::Algorithm {
 public:
   PointByPointVCorrection();
   ~PointByPointVCorrection() override;

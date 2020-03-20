@@ -7,14 +7,15 @@
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
 /** Filters events in an EventWorkspace using values in a SampleLog.
  */
-class DLLExport FilterByLogValue : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL FilterByLogValue
+    : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FilterByLogValue"; };

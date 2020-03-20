@@ -4,12 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SAVEISAWUB_H_
-#define MANTID_CRYSTAL_SAVEISAWUB_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -24,7 +23,7 @@ namespace Crystal {
  *
  */
 
-class DLLExport SaveIsawUB : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SaveIsawUB : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveIsawUB"; };
@@ -56,5 +55,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_LOADISAWUB_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __cxxtest__Win32Gui_h__
-#define __cxxtest__Win32Gui_h__
+#pragma once
 
 //
 // The Win32Gui displays a simple progress bar using the Win32 API.
@@ -533,5 +532,3 @@ namespace CxxTest
         }
     };
 }
-
-#endif // __cxxtest__Win32Gui_h__

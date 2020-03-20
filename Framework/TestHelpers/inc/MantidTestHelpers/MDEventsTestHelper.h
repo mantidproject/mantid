@@ -11,8 +11,7 @@
  *of
  *  DataObjects (e.g. Kernel, Geometry, API).
  *********************************************************************************/
-#ifndef MDEVENTSTEST_HELPER_H
-#define MDEVENTSTEST_HELPER_H
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/BoxController.h"
@@ -510,5 +509,3 @@ void checkAndDeleteFile(std::string filename);
 } // namespace MDEventsTestHelper
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif

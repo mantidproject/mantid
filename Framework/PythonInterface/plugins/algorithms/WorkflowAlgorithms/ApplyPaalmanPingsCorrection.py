@@ -386,5 +386,6 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         ass = factor_workspaces['ass']
         return (sample_workspace / ass) - (container_workspace / acc)
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(ApplyPaalmanPingsCorrection)

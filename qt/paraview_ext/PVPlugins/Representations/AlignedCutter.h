@@ -48,8 +48,7 @@
  * vtkImplicitFunction vtkClipPolyData
  */
 
-#ifndef AlignedCutter_h
-#define AlignedCutter_h
+#pragma once
 
 #include "vtkCutter.h"
 
@@ -77,5 +76,3 @@ private:
   void operator=(const AlignedCutter &) VTK_DELETE_FUNCTION;
 };
 //@}
-
-#endif

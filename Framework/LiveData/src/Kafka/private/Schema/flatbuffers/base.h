@@ -1,5 +1,4 @@
-#ifndef FLATBUFFERS_BASE_H_
-#define FLATBUFFERS_BASE_H_
+#pragma once
 
 // clang-format off
 #if defined(FLATBUFFERS_MEMORY_LEAK_TRACKING) && \
@@ -278,4 +277,3 @@ inline size_t PaddingBytes(size_t buf_size, size_t scalar_size) {
 }
 
 }  // namespace flatbuffers
-#endif  // FLATBUFFERS_BASE_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COLORMAPEDITORPANEL_H
-#define COLORMAPEDITORPANEL_H
+#pragma once
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "ui_ColorMapEditorPanel.h"
@@ -50,5 +49,3 @@ private:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-
-#endif // COLORMAPEDITORPANEL_H

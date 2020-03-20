@@ -8,8 +8,7 @@ This program is released under the GPL with the additional exemption that
 compiling, linking, and/or using OpenSSL is allowed.
 */
 
-#ifndef ICat3Stub_H
-#define ICat3Stub_H
+#pragma once
 
 // -Wsuggest-override generates 2422 warnings in this file and
 // clang-tidy 3.8 segfaults when trying to fix them. At this point,
@@ -11963,7 +11962,3 @@ using _XML = char *;
 #pragma GCC diagnostic pop
 #undef GCC_VERSION
 #endif
-
-#endif
-
-/* End of ICat3Stub.h */

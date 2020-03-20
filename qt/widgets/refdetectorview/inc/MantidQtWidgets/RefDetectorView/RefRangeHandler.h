@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REF_RANGE_HANDLER_H
-#define REF_RANGE_HANDLER_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidQtWidgets/SpectrumViewer/IRangeHandler.h"
@@ -53,5 +52,3 @@ private:
 
 } // namespace RefDetectorViewer
 } // namespace MantidQt
-
-#endif // REF_RANGE_HANDLER_H

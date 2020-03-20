@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INDIRECT_MSDTEMPLATEPRESENTER_H_
-#define INDIRECT_MSDTEMPLATEPRESENTER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "MSDFunctionModel.h"
@@ -84,5 +83,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*INDIRECT_MSDTEMPLATEPRESENTER_H_*/

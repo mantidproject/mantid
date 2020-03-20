@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INDIRECT_CONVFUNCTIONMODEL_H_
-#define MANTIDQT_INDIRECT_CONVFUNCTIONMODEL_H_
+#pragma once
 
 #include "ConvTypes.h"
 #include "DllConfig.h"
@@ -154,5 +153,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQT_INDIRECT_CONVFUNCTIONMODEL_H_ */

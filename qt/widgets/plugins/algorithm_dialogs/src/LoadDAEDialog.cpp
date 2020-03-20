@@ -37,8 +37,8 @@ LoadDAEDialog::LoadDAEDialog(QWidget *parent)
 LoadDAEDialog::~LoadDAEDialog() {}
 
 void LoadDAEDialog::initLayout() {
-  QGridLayout *paramsLayout = new QGridLayout;
-  QLabel *label = new QLabel(tr("DAE Name"));
+  auto *paramsLayout = new QGridLayout;
+  auto *label = new QLabel(tr("DAE Name"));
   lineHost = new QLineEdit;
   label->setBuddy(lineHost);
   paramsLayout->addWidget(label, 0, 0);
@@ -52,26 +52,26 @@ void LoadDAEDialog::initLayout() {
   paramsLayout->addWidget(lineName, 1, 1);
   tie(lineName, "OutputWorkspace", paramsLayout);
 
-  QLabel *minSpLabel = new QLabel("Starting spectrum");
+  auto *minSpLabel = new QLabel("Starting spectrum");
   minSpLineEdit = new QLineEdit;
   paramsLayout->addWidget(minSpLabel, 2, 0);
   paramsLayout->addWidget(minSpLineEdit, 2, 1);
   tie(minSpLineEdit, "SpectrumMin", paramsLayout);
 
-  QLabel *maxSpLabel = new QLabel("Ending spectrum");
+  auto *maxSpLabel = new QLabel("Ending spectrum");
   maxSpLineEdit = new QLineEdit;
   paramsLayout->addWidget(maxSpLabel, 3, 0);
   paramsLayout->addWidget(maxSpLineEdit, 3, 1);
   tie(maxSpLineEdit, "SpectrumMax", paramsLayout);
 
-  QLabel *listSpLabel = new QLabel("Spectrum List");
+  auto *listSpLabel = new QLabel("Spectrum List");
   listSpLineEdit = new QLineEdit;
   paramsLayout->addWidget(listSpLabel, 4, 0);
   paramsLayout->addWidget(listSpLineEdit, 4, 1);
   tie(listSpLineEdit, "SpectrumList", paramsLayout);
 
-  QHBoxLayout *updateLayout = new QHBoxLayout;
-  QLabel *updateLabel = new QLabel("Update every");
+  auto *updateLayout = new QHBoxLayout;
+  auto *updateLabel = new QLabel("Update every");
   updateLineEdit = new QLineEdit;
   QIntValidator *ival = new QIntValidator(1, 99999999, updateLineEdit);
   updateLineEdit->setValidator(ival);
@@ -83,7 +83,7 @@ void LoadDAEDialog::initLayout() {
   paramsLayout->addLayout(updateLayout, 5, 1);
   tie(updateLineEdit, "UpdateRate", updateLayout);
 
-  QVBoxLayout *mainLayout = new QVBoxLayout;
+  auto *mainLayout = new QVBoxLayout;
   mainLayout->addLayout(paramsLayout);
   mainLayout->addLayout(createDefaultButtonLayout("?", "Load", "Cancel"));
 

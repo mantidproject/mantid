@@ -89,8 +89,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                              doc='Factor by which to scale the container runs.')
 
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.OptionalLoad),
-                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and ' +
-                                 '[[DiffractionFocussing]] child algorithms.')
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '
+                                 + '[[DiffractionFocussing]] child algorithms.')
 
         self.declareProperty(FileProperty('InstrumentParFile', '',
                                           action=FileAction.OptionalLoad,

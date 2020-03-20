@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef XINTEGRATIONCONTROL_H_
-#define XINTEGRATIONCONTROL_H_
+#pragma once
 
 #include <QFrame>
 #include <QScrollBar>
@@ -92,5 +91,3 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*XINTEGRATIONCONTROL_H_*/

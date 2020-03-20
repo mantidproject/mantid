@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADMUONNEXUSTEST_H_
-#define LOADMUONNEXUSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -17,5 +16,3 @@ class LoadMuonNexusTest : public CxxTest::TestSuite {
 public:
   void testExec() {}
 };
-
-#endif /*LOADMUONNEXUSTEST_H_*/

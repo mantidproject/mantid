@@ -76,8 +76,8 @@ def _calculate_vanadium_correction(vanadium_path):
         Load(Filename=vanadium_path, OutputWorkspace=VANADIUM_INPUT_WORKSPACE_NAME)
     except Exception as e:
         logger.error("Error when loading vanadium sample data. "
-                     "Could not run Load algorithm with vanadium run number: " +
-                     str(vanadium_path) + ". Error description: " + str(e))
+                     "Could not run Load algorithm with vanadium run number: "
+                     + str(vanadium_path) + ". Error description: " + str(e))
         raise RuntimeError
     EnggVanadiumCorrections(VanadiumWorkspace=VANADIUM_INPUT_WORKSPACE_NAME,
                             OutIntegrationWorkspace=INTEGRATED_WORKSPACE_NAME,
@@ -101,8 +101,7 @@ def _save_correction_files(integration_workspace, integration_path, curves_works
         SaveNexus(InputWorkspace=curves_workspace, Filename=curves_path)
     except RuntimeError as e:  # If the files cannot be saved, continue with the execution of the algorithm anyway.
         logger.error(
-            "Vanadium Correction files could not be saved to the filesystem. Description: " +
-            str(e))
+            "Vanadium Correction files could not be saved to the filesystem. Description: " + str(e))
         return
 
 

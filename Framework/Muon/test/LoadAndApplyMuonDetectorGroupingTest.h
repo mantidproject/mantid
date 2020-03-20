@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MUON_LOADANDAPPLYMUONDETECTORGROUPINGTEST_H_
-#define MANTID_MUON_LOADANDAPPLYMUONDETECTORGROUPINGTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -567,5 +566,3 @@ public:
 
   void test_group_asymmetry_range_applied_correctly() {}
 };
-
-#endif /* MANTID_MUON_LOADANDAPPLYMUONDETECTORGROUPING_H_ */

@@ -28,8 +28,7 @@
  * vtkPVOrthographicSliceView.
  */
 
-#ifndef vtkAlignedGeometrySliceRepresentation_h
-#define vtkAlignedGeometrySliceRepresentation_h
+#pragma once
 
 #include "vtkGeometryRepresentation.h"
 
@@ -79,5 +78,3 @@ private:
   int Mode;
   bool ShowOutline;
 };
-
-#endif

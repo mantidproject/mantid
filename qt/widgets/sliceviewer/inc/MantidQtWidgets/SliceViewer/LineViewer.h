@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LINEVIEWER_H
-#define LINEVIEWER_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/CoordTransform.h"
@@ -184,4 +183,3 @@ private:
 
 } // namespace SliceViewer
 } // namespace MantidQt
-#endif // LINEVIEWER_H

@@ -25,7 +25,7 @@ namespace API {
  @author Sofia Antony, ISIS Rutherford Appleton Laboratory
  @date 23/09/2010
 */
-class DLLExport ICatalog {
+class MANTID_API_DLL ICatalog {
 public:
   /// Virtual destructor
   virtual ~ICatalog() = default;

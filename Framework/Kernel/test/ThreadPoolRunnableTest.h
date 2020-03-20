@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_THREADPOOLRUNNABLETEST_H_
-#define MANTID_KERNEL_THREADPOOLRUNNABLETEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPoolRunnable.h"
@@ -85,5 +84,3 @@ public:
     TS_ASSERT_EQUALS(what, "Test exception from TaskThatThrows.");
   }
 };
-
-#endif /* MANTID_KERNEL_THREADPOOLRUNNABLETEST_H_ */

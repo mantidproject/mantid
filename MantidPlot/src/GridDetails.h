@@ -13,8 +13,7 @@ from the University of Derby
 @date 24/09/2013
 */
 
-#ifndef GRIDDETAILS_H_
-#define GRIDDETAILS_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
 #include <QList>
@@ -56,4 +55,3 @@ private:
   int m_alignment; // 0 = horizontal, 1 = vertical, anything else sets this to
                    // 0;
 };
-#endif /* GRIDDETAILS_H_ */

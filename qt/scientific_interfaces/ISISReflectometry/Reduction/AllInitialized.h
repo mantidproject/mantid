@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_ALLINITIALIZED_H_
-#define MANTID_CUSTOMINTERFACES_ALLINITIALIZED_H_
+#pragma once
 #include <boost/optional.hpp>
 
 namespace MantidQt {
@@ -36,4 +35,3 @@ makeIfAllInitialized(boost::optional<Params> const &... params) {
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_ALLINITIALIZED_H_

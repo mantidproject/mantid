@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef XMLWRITER_H_
-#define XMLWRITER_H_
+#pragma once
 
 #include <string>
 #include <fstream>
@@ -27,5 +26,3 @@ private:
   std::ofstream m_outputFile;
   Component* const m_startPoint;
 };
-
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef METADATA_JSON_MANAGER_TEST
-#define METADATA_JSON_MANAGER_TEST
+#pragma once
 
 #ifdef _MSC_VER
 // Disabling Json warnings regarding non-export of Json::Reader and Json::Writer
@@ -93,4 +92,3 @@ public:
                       container["instrument"].asString());
   }
 };
-#endif

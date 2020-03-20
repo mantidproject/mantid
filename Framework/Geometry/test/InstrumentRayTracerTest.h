@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENTRAYTRACERTEST_H_
-#define INSTRUMENTRAYTRACERTEST_H_
+#pragma once
 
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
@@ -243,5 +242,3 @@ private:
 // PERFORMANCE TEST IS IN DataHandling/test/InstrumentRayTracerTest.h because it
 // requires LoadInstrument
 //------------------------------------------------------------------------------------------------------
-
-#endif // InstrumentRayTracerTEST_H_

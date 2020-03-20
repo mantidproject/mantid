@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef IMPORTWORKSPACEDLG_H
-#define IMPORTWORKSPACEDLG_H
+#pragma once
 
 #include <QDialog>
 
@@ -57,5 +56,3 @@ private:
   QPushButton *okButton;
   QPushButton *cancelButton;
 };
-
-#endif /* IMPORTWORKSPACEDLG_H */

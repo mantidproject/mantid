@@ -120,7 +120,7 @@ CollapsibleStack::CollapsibleStack(QWidget *parent) : QWidget(parent) {
  */
 CollapsiblePanel *CollapsibleStack::addPanel(const QString &caption,
                                              QWidget *widget) {
-  CollapsiblePanel *panel = new CollapsiblePanel(caption, this);
+  auto *panel = new CollapsiblePanel(caption, this);
   panel->setWidget(widget);
   m_layout->addWidget(panel);
   connect(panel, SIGNAL(collapsed()), this, SLOT(updateStretch()));
@@ -131,7 +131,7 @@ CollapsiblePanel *CollapsibleStack::addPanel(const QString &caption,
 bool CollapsibleStack::allCollapsed() const {
   int n = m_layout->count();
   for (int i = 0; i < n; ++i) {
-    CollapsiblePanel *panel =
+    auto *panel =
         dynamic_cast<CollapsiblePanel *>(m_layout->itemAt(i)->widget());
     if (panel && !panel->isCollapsed()) {
       return false;
@@ -145,8 +145,7 @@ void CollapsibleStack::updateStretch() {
   if (i == 0)
     return;
   --i; // point to the last item
-  CollapsiblePanel *panel =
-      dynamic_cast<CollapsiblePanel *>(m_layout->itemAt(i)->widget());
+  auto *panel = dynamic_cast<CollapsiblePanel *>(m_layout->itemAt(i)->widget());
   if (allCollapsed()) { // make sure that the last item is a stretch
     if (panel)          // if it's a panel there is no stretch
     {

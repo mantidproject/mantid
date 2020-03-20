@@ -13,8 +13,7 @@ from the University of Derby
 @date 15/09/2013
 */
 
-#ifndef SCALEDETAILS_H_
-#define SCALEDETAILS_H_
+#pragma once
 
 #include <QList>
 #include <QWidget>
@@ -80,5 +79,3 @@ private:
   void checkstep();
   bool validate();
 };
-
-#endif /* ScaleDetails_H_ */

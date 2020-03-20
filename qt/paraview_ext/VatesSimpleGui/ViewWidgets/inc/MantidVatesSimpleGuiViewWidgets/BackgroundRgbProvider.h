@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BACKGROUNDRGB_PROVIDER_H_
-#define BACKGROUNDRGB_PROVIDER_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
@@ -98,4 +97,3 @@ private:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-#endif

@@ -11,8 +11,7 @@
  *      Author: spu92482
  */
 
-#ifndef MANTIDGEOMETRYTEST_MOCKOBJECTS_H_
-#define MANTIDGEOMETRYTEST_MOCKOBJECTS_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
@@ -136,4 +135,3 @@ public:
 };
 } // namespace
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-#endif /* MANTIDGEOMETRYTEST_MOCKOBJECTS_H_ */

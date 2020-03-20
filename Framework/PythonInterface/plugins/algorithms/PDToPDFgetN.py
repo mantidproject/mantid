@@ -42,8 +42,8 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                              "Event file")
         self.copyProperties('AlignAndFocusPowderFromFiles', 'MaxChunkSize')
         self.declareProperty("FilterBadPulses", 95.,
-                             doc="Filter out events measured while proton " +
-                             "charge is more than 5% below average")
+                             doc="Filter out events measured while proton "
+                                 + "charge is more than 5% below average")
 
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
                                                      direction=Direction.Input,
@@ -79,8 +79,8 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                                                 direction=Direction.Input),
                              "Positive is linear bins, negative is logorithmic")
         self.declareProperty("ResampleX", 0,
-                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. " +
-                             "Negative value means logorithmic binning.")
+                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. "
+                             + "Negative value means logorithmic binning.")
 
     def validateInputs(self):
         issues = {}
@@ -157,8 +157,8 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                                                 WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value,
                                                 **(self._alignArgs))
         else:  # process the input workspace
-            self.log().information("Using input workspace. Ignoring properties 'Filename', " +
-                                   "'OutputWorkspace', 'MaxChunkSize', and 'FilterBadPulses'")
+            self.log().information("Using input workspace. Ignoring properties 'Filename', "
+                                   + "'OutputWorkspace', 'MaxChunkSize', and 'FilterBadPulses'")
 
             # get the correct row of the table
             PDDetermineCharacterizations(InputWorkspace=wksp,

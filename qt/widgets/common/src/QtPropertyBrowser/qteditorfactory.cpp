@@ -378,7 +378,7 @@ void QtSliderFactory::connectPropertyManager(QtIntPropertyManager *manager) {
 QWidget *QtSliderFactory::createEditorForManager(QtIntPropertyManager *manager,
                                                  QtProperty *property,
                                                  QWidget *parent) {
-  QSlider *editor = new QSlider(Qt::Horizontal, parent);
+  auto *editor = new QSlider(Qt::Horizontal, parent);
   d_ptr->initializeEditor(property, editor);
   editor->setSingleStep(manager->singleStep(property));
   editor->setRange(manager->minimum(property), manager->maximum(property));
@@ -516,7 +516,7 @@ void QtScrollBarFactory::connectPropertyManager(QtIntPropertyManager *manager) {
 */
 QWidget *QtScrollBarFactory::createEditorForManager(
     QtIntPropertyManager *manager, QtProperty *property, QWidget *parent) {
-  QScrollBar *editor = new QScrollBar(Qt::Horizontal, parent);
+  auto *editor = new QScrollBar(Qt::Horizontal, parent);
   d_ptr->initializeEditor(property, editor);
   editor->setSingleStep(manager->singleStep(property));
   editor->setRange(manager->minimum(property), manager->maximum(property));
@@ -1367,7 +1367,7 @@ void QtKeySequenceEditorFactory::disconnectPropertyManager(
 
 QtCharEdit::QtCharEdit(QWidget *parent)
     : QWidget(parent), m_lineEdit(new QLineEdit(this)) {
-  QHBoxLayout *layout = new QHBoxLayout(this);
+  auto *layout = new QHBoxLayout(this);
   layout->addWidget(m_lineEdit);
   layout->setMargin(0);
   m_lineEdit->installEventFilter(this);
@@ -1379,7 +1379,7 @@ QtCharEdit::QtCharEdit(QWidget *parent)
 
 bool QtCharEdit::eventFilter(QObject *o, QEvent *e) {
   if (o == m_lineEdit && e->type() == QEvent::ContextMenu) {
-    QContextMenuEvent *c = static_cast<QContextMenuEvent *>(e);
+    auto *c = static_cast<QContextMenuEvent *>(e);
     QMenu *menu = m_lineEdit->createStandardContextMenu();
     QList<QAction *> actions = menu->actions();
     QListIterator<QAction *> itAction(actions);
@@ -1395,7 +1395,7 @@ bool QtCharEdit::eventFilter(QObject *o, QEvent *e) {
     QAction *actionBefore = nullptr;
     if (actions.count() > 0)
       actionBefore = actions[0];
-    QAction *clearAction = new QAction(tr("Clear Char"), menu);
+    auto *clearAction = new QAction(tr("Clear Char"), menu);
     menu->insertAction(actionBefore, clearAction);
     menu->insertSeparator(actionBefore);
     clearAction->setEnabled(!m_value.isNull());
@@ -1897,7 +1897,7 @@ void QtCursorEditorFactory::disconnectPropertyManager(
 QtColorEditWidget::QtColorEditWidget(QWidget *parent)
     : QWidget(parent), m_pixmapLabel(new QLabel), m_label(new QLabel),
       m_button(new QToolButton) {
-  QHBoxLayout *lt = new QHBoxLayout(this);
+  auto *lt = new QHBoxLayout(this);
   setupTreeViewEditorMargin(lt);
   lt->setSpacing(0);
   lt->addWidget(m_pixmapLabel);
@@ -2059,7 +2059,7 @@ void QtColorEditorFactory::disconnectPropertyManager(
 QtFontEditWidget::QtFontEditWidget(QWidget *parent)
     : QWidget(parent), m_pixmapLabel(new QLabel), m_label(new QLabel),
       m_button(new QToolButton) {
-  QHBoxLayout *lt = new QHBoxLayout(this);
+  auto *lt = new QHBoxLayout(this);
   setupTreeViewEditorMargin(lt);
   lt->setSpacing(0);
   lt->addWidget(m_pixmapLabel);

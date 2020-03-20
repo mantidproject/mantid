@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATAOBJECTSTEST_PROPERTYMANAGERHELPER_H_
-#define DATAOBJECTSTEST_PROPERTYMANAGERHELPER_H_
+#pragma once
 
 #include "MantidKernel/PropertyManager.h"
 
@@ -21,5 +20,3 @@ public:
   using PropertyManager::declareProperty;
   using PropertyManager::setProperty;
 };
-
-#endif

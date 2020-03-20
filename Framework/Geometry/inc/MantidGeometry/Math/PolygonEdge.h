@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_POLYGONEDGE_H_
-#define MANTID_GEOMETRY_POLYGONEDGE_H_
+#pragma once
 
 //-----------------------------------------------------------------------------
 // Includes
@@ -84,5 +83,3 @@ MANTID_GEOMETRY_DLL bool edgeAimsAt(const PolygonEdge &a, const PolygonEdge &b,
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_POLYGONEDGE_H_ */

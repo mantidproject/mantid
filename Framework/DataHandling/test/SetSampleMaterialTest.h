@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SetSampleMaterialTEST_H_
-#define SetSampleMaterialTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -284,5 +283,3 @@ public:
     TS_ASSERT_DELTA(material.numberDensity(), 0.23 * (2. + 3.), 1e-12)
   }
 };
-
-#endif /*SetSampleMaterialTEST_H_*/

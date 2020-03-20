@@ -69,8 +69,7 @@
    problem, you can compile with the NVALGRIND symbol defined (gcc
    -DNVALGRIND) so that client requests are not even compiled in.  */
 
-#ifndef __VALGRIND_H
-#define __VALGRIND_H
+#pragma once
 
 /* ------------------------------------------------------------------ */
 /* VERSION NUMBER OF VALGRIND                                         */
@@ -4431,5 +4430,3 @@ static int
 #undef PLAT_arm_linux
 #undef PLAT_s390x_linux
 #undef PLAT_mips32_linux
-
-#endif /* __VALGRIND_H */

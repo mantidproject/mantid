@@ -178,9 +178,9 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
-                             doc='Output Workspace. If background is ' +
-                                 'subtracted, _data and _background ' +
-                                 'workspaces will also be generated')
+                             doc='Output Workspace. If background is '
+                                 + 'subtracted, _data and _background '
+                                 + 'workspaces will also be generated')
 
         #
         # Background for the sample runs
@@ -189,8 +189,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         self.declareProperty('BackgroundRuns', '', 'Background run numbers')
         self.setPropertyGroup('BackgroundRuns', background_title)
         self.declareProperty("BackgroundScale", 1.0,
-                             doc='The background will be scaled by this ' +
-                                 'number before being subtracted.')
+                             doc='The background will be scaled by this ' + 'number before being subtracted.')
         self.setPropertyGroup('BackgroundScale', background_title)
         #
         # Vanadium
@@ -218,8 +217,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
                                                 [90.0, 90.0, 90.0],
                                                 array_length_three,
                                                 direction=Direction.Input),
-                             doc='three item comma-separated ' +
-                                 'list "alpha, beta, gamma"')
+                             doc='three item comma-separated ' + 'list "alpha, beta, gamma"')
         #    Reciprocal vector to be aligned with incoming beam
         self.declareProperty(FloatArrayProperty('VectorU', [1, 0, 0],
                                                 array_length_three,

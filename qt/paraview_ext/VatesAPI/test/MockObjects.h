@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VATESAPI_TEST_MOCKOBJECTS_H
-#define VATESAPI_TEST_MOCKOBJECTS_H
+#pragma once
 
 //#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -460,5 +459,3 @@ GNU_UNUSED_FUNCTION std::string getStringFieldDataValue(vtkDataSet *ds,
 }
 
 } // namespace
-
-#endif

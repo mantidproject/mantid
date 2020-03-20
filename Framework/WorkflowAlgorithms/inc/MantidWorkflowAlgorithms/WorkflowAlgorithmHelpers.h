@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WORKFLOWALGORITHMHELPERS_H_
-#define WORKFLOWALGORITHMHELPERS_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/EmptyValues.h"
@@ -34,5 +33,3 @@ bool getBoolPropOrParam(const std::string &pmProp,
                         Mantid::API::MatrixWorkspace_sptr &ws,
                         const bool overrideValue = false);
 } // namespace WorkflowAlgorithmHelpers
-
-#endif /* WORKFLOWALGORITHMHELPERS_H_ */

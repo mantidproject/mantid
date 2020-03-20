@@ -4,11 +4,9 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_CALCULATECOSTFUNCTION_H_
-#define MANTID_CURVEFITTING_CALCULATECOSTFUNCTION_H_
+#pragma once
 
 #include "MantidCurveFitting/IFittingAlgorithm.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -23,7 +21,7 @@ namespace Algorithms {
 
   Calculate cost function for a function and a data set in a workspace.
 */
-class DLLExport CalculateCostFunction : public IFittingAlgorithm {
+class MANTID_CURVEFITTING_DLL CalculateCostFunction : public IFittingAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -43,5 +41,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_CALCULATECOSTFUNCTION_H_ */

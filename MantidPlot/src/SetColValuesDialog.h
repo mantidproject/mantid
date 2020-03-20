@@ -29,8 +29,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef VALUESDIALOG_H
-#define VALUESDIALOG_H
+#pragma once
 
 #include "Scripted.h"
 #include "ScriptingEnv.h"
@@ -82,5 +81,3 @@ private:
   QSpinBox *start, *end;
   QLabel *colNameLabel;
 };
-
-#endif //

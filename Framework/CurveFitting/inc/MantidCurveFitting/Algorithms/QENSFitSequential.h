@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_QENSFITSEQUENTIAL_H_
-#define MANTID_ALGORITHMS_QENSFITSEQUENTIAL_H_
+#pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/IValidator.h"
 
 #include <set>
@@ -22,7 +22,8 @@ namespace Algorithms {
 /**
   QENSFitSequential - Performs a sequential QENS fit
 */
-class DLLExport QENSFitSequential : public API::DataProcessorAlgorithm {
+class MANTID_CURVEFITTING_DLL QENSFitSequential
+    : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -98,5 +99,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif

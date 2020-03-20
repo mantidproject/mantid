@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COLLAPSIBLEPANEL_H_
-#define COLLAPSIBLEPANEL_H_
+#pragma once
 
 #include <QLabel>
 #include <QWidget>
@@ -70,5 +69,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*COLLAPSIBLEPANEL_H_*/

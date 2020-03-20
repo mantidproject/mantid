@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ROCKINGCURVE_H_
-#define MANTIDQTCUSTOMINTERFACES_ROCKINGCURVE_H_
+#pragma once
 
 //----------------------
 // Includes
@@ -86,5 +85,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_ROCKINGCURVE_H_

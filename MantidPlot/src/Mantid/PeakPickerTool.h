@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PEAK_PICKER_TOOL_H
-#define PEAK_PICKER_TOOL_H
+#pragma once
 
 //---------------------------
 // Includes
@@ -209,5 +208,3 @@ private:
 
   QStringList m_curveNames; // Names of all curves added to graph()
 };
-
-#endif /* PEAK_PICKER_TOOL_H */

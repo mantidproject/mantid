@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_MANTIDQWTWORKSPACEBINDATA_H_
-#define MANTIDQT_API_MANTIDQWTWORKSPACEBINDATA_H_
+#pragma once
 
 #include "MantidQtWidgets/Plotting/Qwt/QwtWorkspaceBinData.h"
 #include <cxxtest/TestSuite.h>
@@ -57,8 +56,7 @@ public:
 
   void test_copy() {
     QwtWorkspaceBinData data1(*ws, 1, false);
-    QwtWorkspaceBinData *data2 =
-        dynamic_cast<QwtWorkspaceBinData *>(data1.copy());
+    auto *data2 = dynamic_cast<QwtWorkspaceBinData *>(data1.copy());
     checkData(*data2, 1.0);
   }
 
@@ -73,5 +71,3 @@ public:
     TS_ASSERT_DELTA(data.e(2), 0.0, 1e-6);
   }
 };
-
-#endif /* MANTIDQT_API_MANTIDQWTWORKSPACEBINDATA_H_ */

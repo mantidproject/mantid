@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADSPETEST_H_
-#define LOADSPETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -90,5 +89,3 @@ public:
 private:
   Mantid::DataHandling::LoadSPE loader;
 };
-
-#endif /*LoadSPETEST_H_*/

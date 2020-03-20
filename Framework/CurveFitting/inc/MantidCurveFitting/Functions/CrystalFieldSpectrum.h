@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_CRYSTALFIELDSPECTRUM_H_
-#define MANTID_CURVEFITTING_CRYSTALFIELDSPECTRUM_H_
+#pragma once
 
 #include "MantidAPI/FunctionGenerator.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -15,7 +15,8 @@ namespace Functions {
 /**
 Calculates crystal field spectrum.
 */
-class DLLExport CrystalFieldSpectrum : public API::FunctionGenerator {
+class MANTID_CURVEFITTING_DLL CrystalFieldSpectrum
+    : public API::FunctionGenerator {
 public:
   CrystalFieldSpectrum();
   std::string name() const override { return "CrystalFieldSpectrum"; }
@@ -35,5 +36,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_CRYSTALFIELDSPECTRUM_H_*/

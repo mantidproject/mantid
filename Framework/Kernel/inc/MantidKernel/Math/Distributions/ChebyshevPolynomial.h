@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_CHEBYSHEVPOLYNOMIAL_H_
-#define MANTID_KERNEL_CHEBYSHEVPOLYNOMIAL_H_
+#pragma once
 
 //-----------------------------------------------------------------------------
 // Includes
@@ -25,5 +24,3 @@ struct MANTID_KERNEL_DLL ChebyshevPolynomial {
 };
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_CHEBYSHEVPOLYNOMIAL_H_ */

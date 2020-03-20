@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELINGTEST_H_
-#define MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELINGTEST_H_
+#pragma once
 
 #include <algorithm>
 #include <boost/scoped_ptr.hpp>
@@ -687,5 +686,3 @@ public:
     TS_ASSERT(does_set_contain(uniqueEntries, size_t(1)));
   }
 };
-
-#endif /* MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELINGTEST_H_ */

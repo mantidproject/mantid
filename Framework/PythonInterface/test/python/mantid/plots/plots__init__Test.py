@@ -316,21 +316,21 @@ class Plots__init__Test(unittest.TestCase):
         self.assertFalse(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
-        self.ax.plot(non_dist_ws, specNum=1)
         auto_dist = (config['graph1d.autodistribution'] == 'On')
+        self.ax.plot(non_dist_ws, specNum=1)
         self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
-    def test_artists_normalization_state_labeled_correctly_for_non_dist_workspace_with_uneven_spectra(self):
+    def test_artists_normalization_state_labeled_correctly_for_non_dist_workspace_and_global_setting_off(self):
         non_dist_ws = CreateWorkspace(DataX=[10, 20, 25, 30],
                                       DataY=[2, 3, 4, 5],
                                       DataE=[1, 2, 1, 2],
                                       NSpec=1,
                                       Distribution=False,
                                       OutputWorkspace='non_dist_workpace')
-        self.ax.plot(non_dist_ws, specNum=1)
         config['graph1d.autodistribution'] = 'Off'
-        self.assertTrue(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
+        self.ax.plot(non_dist_ws, specNum=1)
+        self.assertFalse(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
     def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_dist_workspace(self):
@@ -392,13 +392,13 @@ class Plots__init__Test(unittest.TestCase):
                                          Distribution=False,
                                          OutputWorkspace='non_dist_workpace')
         for plot_func in plot_funcs:
+            auto_dist = (config['graph1d.autodistribution'] == 'On')
             func = getattr(self.ax, plot_func)
             func(non_dist_2d_ws)
-            auto_dist = (config['graph1d.autodistribution'] == 'On')
             self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
-    def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_non_dist_workspace_with_uneven_spectra(self):
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_off(self):
         plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
                       'contour', 'contourf', 'tricontour', 'tricontourf']
         non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 25, 30, 10, 20, 25, 30],
@@ -408,10 +408,10 @@ class Plots__init__Test(unittest.TestCase):
                                          Distribution=False,
                                          OutputWorkspace='non_dist_workpace')
         for plot_func in plot_funcs:
+            config['graph1d.autodistribution'] = 'Off'
             func = getattr(self.ax, plot_func)
             func(non_dist_2d_ws)
-            config['graph1d.autodistribution'] = 'Off'
-            self.assertTrue(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            self.assertFalse(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
     def test_check_axes_distribution_consistency_mixed_normalization(self):
@@ -648,6 +648,21 @@ class Plots__init__Test(unittest.TestCase):
 
         # Check that there are now three filled areas and the new fill colour matches the others.
         self.assertTrue((ax.collections[2].get_facecolor() == [1, 0, 0, 1]).all())
+
+    def test_fills_not_created_if_waterfall_plot_already_has_filled_areas(self):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot
+        ax.set_waterfall(True)
+
+        # Add filled areas twice
+        ax.set_waterfall_fill(True)
+        ax.set_waterfall_fill(True)
+
+        # There should still be only two filled areas (one for each line)
+        self.assertEqual(len(datafunctions.get_waterfall_fills(ax)), 2)
 
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {

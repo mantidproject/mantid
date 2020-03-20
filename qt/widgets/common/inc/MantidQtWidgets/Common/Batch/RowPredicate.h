@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_ROWPREDICATE_H_
-#define MANTIDQTMANTIDWIDGETS_ROWPREDICATE_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include <memory>
@@ -48,4 +47,3 @@ std::unique_ptr<RowPredicate> makeFilterFromLambda(Predicate predicate) {
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_ROWPREDICATE_H_

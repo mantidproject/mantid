@@ -8,8 +8,7 @@ This program is released under the GPL with the additional exemption that
 compiling, linking, and/or using OpenSSL is allowed.
 */
 
-#ifndef ICat4H_H
-#define ICat4H_H
+#pragma once
 #include "ICat4Stub.h"
 
 namespace ICat4 {
@@ -17163,7 +17162,3 @@ soap_copy_std__vectorTemplateOfPointerTons1__entityBaseBean(struct soap *, int,
                                                             size_t);
 
 } // namespace ICat4
-
-#endif
-
-/* End of ICat4H.h */

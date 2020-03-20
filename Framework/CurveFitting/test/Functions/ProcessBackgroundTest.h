@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_PROCESSBACKGROUNDTEST_H_
-#define MANTID_ALGORITHMS_PROCESSBACKGROUNDTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -540,5 +539,3 @@ public:
 private:
   ProcessBackground sbfif;
 };
-
-#endif /* MANTID_ALGORITHMS_PROCESSBACKGROUNDTEST_H_ */

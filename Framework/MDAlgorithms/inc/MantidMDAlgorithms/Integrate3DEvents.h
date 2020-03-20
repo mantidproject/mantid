@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INTEGRATE_3D_EVENTS_H
-#define INTEGRATE_3D_EVENTS_H
+#pragma once
 
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
@@ -211,5 +210,3 @@ private:
 } // namespace MDAlgorithms
 
 } // namespace Mantid
-
-#endif // INTEGRATE_3D_EVENTS_H

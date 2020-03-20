@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FIND_DETECTORSPAR_H_
-#define FIND_DETECTORSPAR_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
@@ -560,4 +559,3 @@ private:
     TSM_ASSERT_EQUALS("azimuthal width wrong ", azw_pattern, bufs[4].str());
   }
 };
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENTTREEMODEL_H
-#define INSTRUMENTTREEMODEL_H
+#pragma once
 
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
@@ -48,5 +47,3 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // INSTRUMENTTREEMODEL_H

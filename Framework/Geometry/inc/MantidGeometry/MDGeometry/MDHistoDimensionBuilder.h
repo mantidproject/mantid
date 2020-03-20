@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_MDHISTODIMENSION_BUILDER_H_
-#define MANTID_GEOMETRY_MDHISTODIMENSION_BUILDER_H_
+#pragma once
 
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/UnitLabel.h"
@@ -88,5 +87,3 @@ private:
 using Vec_MDHistoDimensionBuilder = std::vector<MDHistoDimensionBuilder>;
 } // namespace Geometry
 } // namespace Mantid
-
-#endif

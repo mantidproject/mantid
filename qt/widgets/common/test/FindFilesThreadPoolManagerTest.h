@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTEST_H_
-#define MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTEST_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManagerMockObjects.h"
@@ -33,7 +32,7 @@ public:
 
   void test_find_single_file() {
     // Arrange
-    FakeMWRunFiles *widget = new FakeMWRunFiles();
+    auto *widget = new FakeMWRunFiles();
 
     // The parameters of the search
     FindFilesSearchParameters parameters;
@@ -128,5 +127,3 @@ public:
     TS_ASSERT_EQUALS(results.filenames[0], exp_results.filenames[0])
   }
 };
-
-#endif /* MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTEST */

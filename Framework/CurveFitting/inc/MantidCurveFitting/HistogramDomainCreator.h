@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_HISTOGRAMDOMAINCREATOR_H_
-#define MANTID_CURVEFITTING_HISTOGRAMDOMAINCREATOR_H_
+#pragma once
 
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/IMWDomainCreator.h"
 #include "MantidKernel/System.h"
 
@@ -43,7 +43,7 @@ namespace CurveFitting {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class DLLExport HistogramDomainCreator : public IMWDomainCreator {
+class MANTID_CURVEFITTING_DLL HistogramDomainCreator : public IMWDomainCreator {
 public:
   HistogramDomainCreator(Kernel::IPropertyManager &manager,
                          const std::string &workspacePropertyName);
@@ -60,5 +60,3 @@ public:
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_HISTOGRAMDOMAINCREATOR_H_ */

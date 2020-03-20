@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_WORKFLOWALGORITHMS_ROCKINGCURVE_H_
-#define MANTID_WORKFLOWALGORITHMS_ROCKINGCURVE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -47,5 +46,3 @@ private:
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_WORKFLOWALGORITHMS_ROCKINGCURVE_H_ */

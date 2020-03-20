@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INELASTICDIFFSPHERE_H_
-#define MANTID_INELASTICDIFFSPHERE_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -42,7 +41,7 @@ struct linearJ {
  * @brief Inelastic part of the DiffSphere function. Contains the 98
  * Lorentzians.
  */
-class DLLExport InelasticDiffSphere : public FunctionQDepends {
+class MANTID_CURVEFITTING_DLL InelasticDiffSphere : public FunctionQDepends {
 public:
   InelasticDiffSphere();
 
@@ -102,5 +101,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif // MANTID_INELASTICDIFFSPHERE_H_

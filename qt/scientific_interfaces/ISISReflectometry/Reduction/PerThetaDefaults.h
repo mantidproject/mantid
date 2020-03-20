@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_
-#define MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_
+#pragma once
 #include "Common/DllConfig.h"
 #include "ProcessingInstructions.h"
 #include "RangeInQ.h"
@@ -89,4 +88,3 @@ perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_

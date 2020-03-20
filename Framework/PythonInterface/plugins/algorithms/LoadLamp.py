@@ -70,4 +70,5 @@ class LoadLamp(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace', output_ws)
 
+
 AlgorithmFactory.subscribe(LoadLamp)

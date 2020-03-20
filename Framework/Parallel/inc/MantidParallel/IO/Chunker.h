@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_CHUNKER_H_
-#define MANTID_PARALLEL_CHUNKER_H_
+#pragma once
 
 #include <vector>
 
@@ -50,5 +49,3 @@ private:
 } // namespace IO
 } // namespace Parallel
 } // namespace Mantid
-
-#endif /* MANTID_PARALLEL_CHUNKER_H_ */

@@ -103,10 +103,10 @@ void GraphDisplay::setData(const QVector<double> &xData,
 
     if (m_isLogX) // only set log scale for x if NOT vertical
     {
-      QwtLog10ScaleEngine *log_engine = new QwtLog10ScaleEngine();
+      auto *log_engine = new QwtLog10ScaleEngine();
       m_graphPlot->setAxisScaleEngine(QwtPlot::xBottom, log_engine);
     } else {
-      QwtLinearScaleEngine *linear_engine = new QwtLinearScaleEngine();
+      auto *linear_engine = new QwtLinearScaleEngine();
       m_graphPlot->setAxisScaleEngine(QwtPlot::xBottom, linear_engine);
     }
   }

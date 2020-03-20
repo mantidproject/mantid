@@ -16,8 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef MATRIXMODEL_H
-#define MATRIXMODEL_H
+#pragma once
 
 #include <QAbstractTableModel>
 #include <QLocale>
@@ -135,5 +134,3 @@ protected:
   gsl_permutation *d_inv_perm;
   QSize d_data_block_size;
 };
-
-#endif

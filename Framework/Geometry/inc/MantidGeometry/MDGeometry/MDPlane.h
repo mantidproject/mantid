@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_MDPLANE_H_
-#define MANTID_MDALGORITHMS_MDPLANE_H_
+#pragma once
 
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/System.h"
@@ -195,5 +194,3 @@ protected:
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_MDPLANE_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_IO_EVENT_PARSER_H
-#define MANTID_PARALLEL_IO_EVENT_PARSER_H
+#pragma once
 
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
@@ -247,4 +246,3 @@ template <class TimeOffsetType> void EventParser<TimeOffsetType>::wait() {
 } // namespace IO
 } // namespace Parallel
 } // namespace Mantid
-#endif // MANTID_PARALLEL_IO_EVENT_PARSER_H

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_LEVENBERGMARQUARDTMINIMIZER_H_
-#define MANTID_CURVEFITTING_LEVENBERGMARQUARDTMINIMIZER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -24,7 +23,8 @@ namespace FuncMinimisers {
     @author Anders Markvardsen, ISIS, RAL
     @date 11/12/2009
 */
-class DLLExport LevenbergMarquardtMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL LevenbergMarquardtMinimizer
+    : public API::IFuncMinimizer {
 public:
   /// constructor and destructor
   ~LevenbergMarquardtMinimizer() override;
@@ -68,5 +68,3 @@ private:
 } // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_LEVENBERGMARQUARDTMINIMIZER_H_*/

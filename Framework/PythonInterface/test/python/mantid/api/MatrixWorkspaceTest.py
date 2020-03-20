@@ -510,7 +510,27 @@ class MatrixWorkspaceTest(unittest.TestCase):
         fv = rebin.readF(1)
         self.assertAlmostEqual(fv[0], 4.0)
 
-
+    def test_findY(self):
+        # Check that zero is not present
+        idx = self._test_ws.findY(0.)
+        self.assertEquals(idx[0],-1)
+        self.assertEquals(idx[1],-1)
+        # Check that 5. is the first element
+        idx = self._test_ws.findY(5.)
+        self.assertEquals(idx[0],0)
+        self.assertEquals(idx[1],0)
+        # Check that no other elements are 5
+        idx = self._test_ws.findY(5., (0, 1))
+        self.assertEquals(idx[0],-1)
+        self.assertEquals(idx[1],-1)
+        # Check that 2. is the next element
+        idx = self._test_ws.findY(2.)
+        self.assertEquals(idx[0],0)
+        self.assertEquals(idx[1],1)
+        # Check that 2. is the next element
+        idx = self._test_ws.findY(2., (0, 2))
+        self.assertEquals(idx[0],0)
+        self.assertEquals(idx[1],2)
 
 
 if __name__ == '__main__':

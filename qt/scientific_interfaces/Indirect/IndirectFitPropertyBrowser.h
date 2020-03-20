@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INDIRECTFITPROPERTYBROWSER_H_
-#define INDIRECTFITPROPERTYBROWSER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
@@ -117,5 +116,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*INDIRECTFITPROPERTYBROWSER_H_*/

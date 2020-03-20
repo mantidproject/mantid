@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CURVEFITTING_LEASTSQUARESTEST_H_
-#define CURVEFITTING_LEASTSQUARESTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -343,5 +342,3 @@ public:
     }
   }
 };
-
-#endif /*CURVEFITTING_LEASTSQUARESTEST_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVERTFITFUNCTIONFORMUONTFASYMETRYTEST_H_
-#define CONVERTFITFUNCTIONFORMUONTFASYMETRYTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -461,4 +460,3 @@ public:
 private:
   MatrixWorkspace_sptr input;
 };
-#endif /*ESTIMATEMUONASYMMETRYFROMCOUNTSTEST_H_*/

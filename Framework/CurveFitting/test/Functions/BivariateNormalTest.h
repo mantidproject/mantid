@@ -11,8 +11,7 @@
  *      Author: Ruth Mikkelson
  */
 
-#ifndef BIVARIATENORMALTEST_H_
-#define BIVARIATENORMALTEST_H_
+#pragma once
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Jacobian.h"
@@ -198,4 +197,3 @@ public:
     TS_ASSERT(categories[0] == "Peak");
   }
 };
-#endif /* BIVARIATENORMALTEST_H_ */

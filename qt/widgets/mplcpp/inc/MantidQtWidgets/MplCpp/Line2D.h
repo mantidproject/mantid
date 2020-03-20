@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_LINE2D_H
-#define MPLCPP_LINE2D_H
+#pragma once
 
 #include "MantidQtWidgets/MplCpp/Artist.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
@@ -54,5 +53,3 @@ private:
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt
-
-#endif // MPLCPP_LINE2D_H

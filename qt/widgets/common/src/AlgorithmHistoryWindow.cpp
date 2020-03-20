@@ -80,7 +80,7 @@ AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title, QWidget *w)
   if (m_Datelabel)
     m_Datelabel->setBuddy(m_execDateTimeEdit);
 
-  QFormLayout *formLayout = new QFormLayout;
+  auto *formLayout = new QFormLayout;
   if (formLayout) {
     formLayout->addRow(m_execDurationlabel, m_execDurationEdit);
     formLayout->addRow(m_Datelabel, m_execDateTimeEdit);
@@ -165,7 +165,7 @@ AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title, QWidget *w)
   if (m_frmworkVersionLabel)
     m_frmworkVersionLabel->setBuddy(m_frmwkVersnEdit);
 
-  QFormLayout *formLayout = new QFormLayout();
+  auto *formLayout = new QFormLayout();
   if (formLayout) {
     formLayout->addRow(m_osNameLabel, m_osNameEdit);
     formLayout->addRow(m_osVersionLabel, m_osVersionEdit);
@@ -262,7 +262,7 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
           SLOT(doRoll(int)));
 
   // The tree and the history details layout
-  QHBoxLayout *treeLayout = new QHBoxLayout;
+  auto *treeLayout = new QHBoxLayout;
   treeLayout->addWidget(m_Historytree, 3); // History stretches 1
   treeLayout->addWidget(m_histPropWindow->m_histpropTree,
                         5); // Properties gets more space
@@ -275,7 +275,7 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
     m_envHistGrpBox =
         createEnvHistGrpBox(wsptr->getHistory().getEnvironmentHistory());
 
-  QHBoxLayout *environmentLayout = new QHBoxLayout;
+  auto *environmentLayout = new QHBoxLayout;
   environmentLayout->addWidget(m_execSumGrpBox, 1);
   environmentLayout->addWidget(m_envHistGrpBox, 2);
 
@@ -297,7 +297,7 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
   connect(m_scriptButtonClipboard, SIGNAL(clicked()), this,
           SLOT(copytoClipboard()));
 
-  QHBoxLayout *buttonLayout = new QHBoxLayout;
+  auto *buttonLayout = new QHBoxLayout;
   buttonLayout->addStretch(1); // Align the button to the right
   buttonLayout->addWidget(m_scriptVersionLabel);
   buttonLayout->addWidget(m_scriptComboMode);

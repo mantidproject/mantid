@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_MDTRANSFQ3D_H_
-#define MANTID_MDALGORITHMS_MDTRANSFQ3D_H_
+#pragma once
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -263,5 +262,3 @@ public:
     TS_ASSERT_DELTA(1.0, error, 1e-05)
   }
 };
-
-#endif

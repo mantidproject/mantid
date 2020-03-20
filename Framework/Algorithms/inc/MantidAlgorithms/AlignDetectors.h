@@ -8,8 +8,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -39,7 +39,7 @@ class ConversionFactors;
     @author Russell Taylor, Tessella Support Services plc
     @date 18/08/2008
 */
-class DLLExport AlignDetectors : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AlignDetectors : public API::Algorithm {
 public:
   AlignDetectors();
 

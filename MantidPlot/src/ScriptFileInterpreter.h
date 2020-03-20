@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SCRIPTFILEINTERPRETER_H_
-#define SCRIPTFILEINTERPRETER_H_
+#pragma once
 
 #include "Script.h"
 
@@ -255,5 +254,3 @@ private:
   QMessageBox *m_msgBox;
   ScriptFileInterpreter &m_interpreter;
 };
-
-#endif /* SCRIPTFILEINTERPRETER_H_ */

@@ -604,5 +604,6 @@ class SANSILLReduction(PythonAlgorithm):
                         progress.report()
         self._finalize(ws, process)
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSILLReduction)

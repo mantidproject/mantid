@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_GENERATEGROUPINGPOWDERTEST_H_
-#define MANTID_DATAHANDLING_GENERATEGROUPINGPOWDERTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/GenerateGroupingPowder.h"
@@ -219,5 +218,3 @@ private:
     return filename;
   }
 };
-
-#endif /* MANTID_DATAHANDLING_GENERATEGROUPINGPOWDERTEST_H_ */

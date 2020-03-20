@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDEVENTS_MDWSDESCRIPTION_TEST_H
-#define MDEVENTS_MDWSDESCRIPTION_TEST_H
+#pragma once
 
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Exception.h"
@@ -158,5 +157,3 @@ public:
     ws2D->mutableRun().addProperty(std::string("H"), 10., std::string("Gs"));
   }
 };
-
-#endif

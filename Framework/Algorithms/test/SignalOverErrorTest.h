@@ -8,7 +8,6 @@
 
 #include "MantidAlgorithms/SignalOverError.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>

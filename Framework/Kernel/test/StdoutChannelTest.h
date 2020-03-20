@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_STDOUTCHANNELTEST_H_
-#define MANTID_STDOUTCHANNELTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -72,5 +71,3 @@ public:
     Poco::Logger::root().setChannel(rootChannel);
   }
 };
-
-#endif /*MANTID_STDOUTCHANNELTEST_H_*/

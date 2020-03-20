@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VIS_TOPOLOGY_H_
-#define VIS_TOPOLOGY_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -40,5 +39,3 @@ public:
 };
 } // namespace API
 } // namespace Mantid
-
-#endif

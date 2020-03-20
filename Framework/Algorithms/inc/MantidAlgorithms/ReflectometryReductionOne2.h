@@ -26,7 +26,8 @@ namespace Algorithms {
 /** ReflectometryReductionOne2 : Reflectometry reduction of a single input TOF
  workspace to an IvsQ workspace. Version 2 of the algorithm.
  */
-class DLLExport ReflectometryReductionOne2 : public ReflectometryWorkflowBase2 {
+class MANTID_ALGORITHMS_DLL ReflectometryReductionOne2
+    : public ReflectometryWorkflowBase2 {
 public:
   /// Algorithm's name for identification
   const std::string name() const override {

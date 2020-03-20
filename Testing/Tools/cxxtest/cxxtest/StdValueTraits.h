@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __cxxtest_StdValueTraits_h__
-#define __cxxtest_StdValueTraits_h__
+#pragma once
 
 //
 // This file defines ValueTraits for std:: stuff.
@@ -237,5 +236,3 @@ namespace CxxTest
 }
 
 #endif // CXXTEST_USER_VALUE_TRAITS
-
-#endif // __cxxtest_StdValueTraits_h__

@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef LAYERDIALOG_H
-#define LAYERDIALOG_H
+#pragma once
 
 #include "MultiLayer.h"
 
@@ -55,5 +54,3 @@ private:
   QCheckBox *fitBox;
   QComboBox *alignHorBox, *alignVertBox;
 };
-
-#endif

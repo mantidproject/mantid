@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_FLOATINGPOINTCOMPARISONTEST_H_
-#define MANTID_KERNEL_FLOATINGPOINTCOMPARISONTEST_H_
+#pragma once
 
 #include "MantidKernel/FloatingPointComparison.h"
 #include <cfloat>
@@ -73,5 +72,3 @@ public:
     TS_ASSERT_EQUALS(Mantid::Kernel::gtEquals(-0.00002, -0.00001), false);
   }
 };
-
-#endif // MANTID_KERNEL_FLOATINGPOINTCOMPARISONTEST_H_

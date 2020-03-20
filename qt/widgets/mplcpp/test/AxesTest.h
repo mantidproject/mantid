@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_AXESTEST_H
-#define MPLCPP_AXESTEST_H
+#pragma once
 
 #include "MantidQtWidgets/MplCpp/Axes.h"
 #include <cxxtest/TestSuite.h>
@@ -189,5 +188,3 @@ private:
     return axesModule.attr("Axes")(figure, rect);
   }
 };
-
-#endif // MPLCPP_AXESTEST_H

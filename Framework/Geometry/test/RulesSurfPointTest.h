@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_RULESSURFPOINTTEST__
-#define MANTID_RULESSURFPOINTTEST__
+#pragma once
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -262,5 +261,3 @@ public:
 };
 //---------------------------------End of
 // SurfPoint-------------------------------------
-
-#endif

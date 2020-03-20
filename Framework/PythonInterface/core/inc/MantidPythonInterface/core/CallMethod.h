@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_CALLMETHOD_H_
-#define MANTID_PYTHONINTERFACE_CALLMETHOD_H_
+#pragma once
 
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
@@ -102,5 +101,3 @@ ReturnType callMethod(PyObject *obj, const char *methodName,
 }
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif // MANTID_PYTHONINTERFACE_CALLMETHOD_H_

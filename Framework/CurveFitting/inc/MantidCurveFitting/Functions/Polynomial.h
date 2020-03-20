@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_POLYNOMIAL_H_
-#define MANTID_CURVEFITTING_POLYNOMIAL_H_
+#pragma once
 
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidKernel/System.h"
@@ -17,7 +16,7 @@ namespace Functions {
 
 /** Polynomial : N-th polynomial background function.
  */
-class DLLExport Polynomial : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL Polynomial : public BackgroundFunction {
 public:
   Polynomial();
 
@@ -58,5 +57,3 @@ using Polynomial_sptr = boost::shared_ptr<Polynomial>;
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_POLYNOMIAL_H_ */

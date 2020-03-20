@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDEXING_INDEXSET_H_
-#define MANTID_INDEXING_INDEXSET_H_
+#pragma once
 
 #include <boost/iterator/iterator_facade.hpp>
 
@@ -166,5 +165,3 @@ template <class T> bool IndexSet<T>::isContiguous() const noexcept {
 } // namespace detail
 } // namespace Indexing
 } // namespace Mantid
-
-#endif /* MANTID_INDEXING_INDEXSET_H_ */

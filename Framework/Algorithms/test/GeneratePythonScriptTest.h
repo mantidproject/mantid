@@ -21,9 +21,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-
 #include <Poco/File.h>
 
 #include <fstream>

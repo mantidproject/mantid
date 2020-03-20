@@ -11,8 +11,7 @@
  *      Author: spu92482
  */
 
-#ifndef MOCKOBJECTS_H_
-#define MOCKOBJECTS_H_
+#pragma once
 
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/ICluster.h"
@@ -60,5 +59,3 @@ public:
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MOCKOBJECTS_H_ */

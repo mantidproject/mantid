@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef POLDISOURCESPECTRUMTEST_H
-#define POLDISOURCESPECTRUMTEST_H
+#pragma once
 
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/Interpolation.h"
@@ -105,5 +104,3 @@ private:
         : PoldiSourceSpectrum(poldiInstrument) {}
   };
 };
-
-#endif // POLDISOURCESPECTRUMTEST_H

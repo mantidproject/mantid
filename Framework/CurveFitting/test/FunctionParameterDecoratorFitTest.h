@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FUNCTIONPARAMETERDECORATORFITTEST_H
-#define FUNCTIONPARAMETERDECORATORFITTEST_H
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -100,5 +99,3 @@ public:
     TS_ASSERT_DELTA(fitFunction->getParameter("A0"), 1.5, 1e-15);
   }
 };
-
-#endif // FUNCTIONPARAMETERDECORATORFITTEST_H

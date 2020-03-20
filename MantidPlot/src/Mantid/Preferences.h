@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDPREFERENCES_H
-#define MANTIDPREFERENCES_H
+#pragma once
 
 #include <QList>
 #include <QMap>
@@ -58,5 +57,3 @@ private:
   MantidPreferences();
   MantidPreferences(const MantidPreferences &);
 };
-
-#endif /* MANTIDPREFERENCES_H */

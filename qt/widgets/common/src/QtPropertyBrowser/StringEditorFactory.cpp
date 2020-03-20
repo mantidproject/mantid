@@ -15,7 +15,7 @@ QWidget *StringEditorFactory::createEditorForManager(
 StringEditor::StringEditor(QtProperty *property, QWidget *parent)
     : QLineEdit(parent), m_property(property) {
   connect(this, SIGNAL(editingFinished()), this, SLOT(updateProperty()));
-  QtStringPropertyManager *mgr =
+  auto *mgr =
       dynamic_cast<QtStringPropertyManager *>(property->propertyManager());
   if (mgr) {
     setText(mgr->value(property));
@@ -23,7 +23,7 @@ StringEditor::StringEditor(QtProperty *property, QWidget *parent)
 }
 
 void StringEditor::updateProperty() {
-  QtStringPropertyManager *mgr =
+  auto *mgr =
       dynamic_cast<QtStringPropertyManager *>(m_property->propertyManager());
   if (mgr) {
     mgr->setValue(m_property, this->text());

@@ -9,8 +9,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 #include <utility> // std::pair
 
@@ -26,8 +26,9 @@ namespace Algorithms {
  represent the time channel number.
  This algorithm converts the channel number to time of flight
  */
-class DLLExport ConvertEmptyToTof : public API::Algorithm,
-                                    public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL ConvertEmptyToTof
+    : public API::Algorithm,
+      public API::DeprecatedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

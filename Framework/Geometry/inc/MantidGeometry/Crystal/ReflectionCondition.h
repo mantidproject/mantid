@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_REFLECTIONCONDITION_H_
-#define MANTID_GEOMETRY_REFLECTIONCONDITION_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 
@@ -188,5 +187,3 @@ getReflectionConditionBySymbol(const std::string &symbol);
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_REFLECTIONCONDITION_H_ */

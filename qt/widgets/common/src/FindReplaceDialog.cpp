@@ -34,7 +34,7 @@ FindReplaceDialog::FindReplaceDialog(ScriptEditor *editor)
  * Create the widgets and lay them out
  */
 void FindReplaceDialog::initLayout() {
-  QGroupBox *gb1 = new QGroupBox();
+  auto *gb1 = new QGroupBox();
   m_topLayout = new QGridLayout(gb1);
 
   m_topLayout->addWidget(new QLabel(tr("Find")), 0, 0);
@@ -55,9 +55,9 @@ void FindReplaceDialog::initLayout() {
 
   addReplaceBox();
 
-  QGroupBox *gb2 = new QGroupBox();
-  QGridLayout *bottomLayout = new QGridLayout(gb2);
-  QButtonGroup *find_options = new QButtonGroup(this);
+  auto *gb2 = new QGroupBox();
+  auto *bottomLayout = new QGridLayout(gb2);
+  auto *find_options = new QButtonGroup(this);
   find_options->setExclusive(false);
 
   boxCaseSensitive = new QCheckBox(tr("&Match case"));
@@ -87,7 +87,7 @@ void FindReplaceDialog::initLayout() {
   connect(find_options, SIGNAL(buttonClicked(int)), this,
           SLOT(resetSearchFlags()));
 
-  QVBoxLayout *vb1 = new QVBoxLayout();
+  auto *vb1 = new QVBoxLayout();
   vb1->addWidget(gb1);
   vb1->addWidget(gb2);
 
@@ -106,7 +106,7 @@ void FindReplaceDialog::initLayout() {
   m_vb2->addStretch();
   connect(buttonCancel, SIGNAL(clicked()), this, SLOT(reject()));
 
-  QHBoxLayout *hb = new QHBoxLayout(this);
+  auto *hb = new QHBoxLayout(this);
   hb->addLayout(vb1);
   hb->addLayout(m_vb2);
 }

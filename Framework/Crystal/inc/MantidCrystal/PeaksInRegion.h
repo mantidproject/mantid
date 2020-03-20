@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_PEAKSINREGION_H_
-#define MANTID_CRYSTAL_PEAKSINREGION_H_
+#pragma once
 
 #include "MantidCrystal/PeaksIntersection.h"
 
@@ -15,7 +14,7 @@ namespace Crystal {
 /** PeaksInRegion : Find peaks that are either inside a box region, or that have
   a radius of sufficent size, that they intersect the box.
 */
-class DLLExport PeaksInRegion : public PeaksIntersection {
+class MANTID_CRYSTAL_DLL PeaksInRegion : public PeaksIntersection {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -52,5 +51,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_PEAKSINREGION_H_ */

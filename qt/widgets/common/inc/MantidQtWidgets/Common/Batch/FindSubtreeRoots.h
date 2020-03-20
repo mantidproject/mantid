@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_FINDSUBTREEROOTS_H_
-#define MANTIDQTMANTIDWIDGETS_FINDSUBTREEROOTS_H_
+#pragma once
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/DllOption.h"
@@ -33,4 +32,3 @@ private:
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif

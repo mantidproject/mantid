@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_MULTITHREADED_H_
-#define MANTID_KERNEL_MULTITHREADED_H_
+#pragma once
 
 #include <atomic>
 #include <mutex>
@@ -240,5 +239,3 @@ inline void setMaxCoresToConfig() {
 #define PARALLEL_SECTION
 #define PRAGMA_OMP(expression)
 #endif //_OPENMP
-
-#endif // MANTID_KERNEL_MULTITHREADED_H_

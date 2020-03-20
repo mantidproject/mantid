@@ -40,7 +40,7 @@ class GlobalFitTest(MantidSystemTest):
          name=TeixeiraWaterSQE,Height=1.0,Tau=1.0,DiffCoeff=1.0,Centre=0;
          ties=(f1.Centre=f0.Centre)));
         name=LinearBackground,A0=0,A1=0"""
-        single_model = re.sub('[\s+]', '', single_model)
+        single_model = re.sub(r'[\s+]', '', single_model)
 
         # Include all spectra for the fit
         selected_wi = range(data.getNumberHistograms())

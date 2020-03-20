@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROJECT_SERIALISER_H
-#define PROJECT_SERIALISER_H
+#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -163,5 +162,3 @@ private:
 };
 } // namespace API
 } // namespace MantidQt
-
-#endif // PROJECT_SERIALISER_H

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_BRAGGSCATTERERFACTORY_H_
-#define MANTID_GEOMETRY_BRAGGSCATTERERFACTORY_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
@@ -92,5 +91,3 @@ EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
             .subscribeScatterer<classname>()),                                 \
        0));                                                                    \
   }
-
-#endif /* MANTID_GEOMETRY_BRAGGSCATTERERFACTORY_H_ */

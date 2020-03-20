@@ -38,7 +38,7 @@ namespace Mantid {
 namespace Kernel {
 
 template <>
-DLLExport Mantid::API::IPeaksWorkspace_sptr
+MANTID_API_DLL Mantid::API::IPeaksWorkspace_sptr
 IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_sptr>(
     const std::string &name) const {
   auto *prop =
@@ -55,7 +55,7 @@ IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_sptr>(
 }
 
 template <>
-DLLExport Mantid::API::IPeaksWorkspace_const_sptr
+MANTID_API_DLL Mantid::API::IPeaksWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_const_sptr>(
     const std::string &name) const {
   auto *prop =

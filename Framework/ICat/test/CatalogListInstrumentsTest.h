@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LISTINSTRUMENTS_H_
-#define LISTINSTRUMENTS_H_
+#pragma once
 
 #include "ICatTestHelper.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h" // why this is required to register table workspace.
@@ -50,5 +49,3 @@ public:
 private:
   CatalogListInstruments instrList;
 };
-
-#endif

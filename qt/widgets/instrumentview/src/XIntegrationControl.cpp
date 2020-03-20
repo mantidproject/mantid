@@ -57,7 +57,7 @@ void XIntegrationScrollBar::mouseMoveEvent(QMouseEvent *e) {
  * @param e :: event
  */
 bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
-  QPushButton *slider = dynamic_cast<QPushButton *>(object);
+  auto *slider = dynamic_cast<QPushButton *>(object);
   if (!slider)
     return false;
   if (e->type() == QEvent::Leave) {
@@ -66,7 +66,7 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
     }
     return true;
   } else if (e->type() == QEvent::MouseButtonPress) {
-    QMouseEvent *me = static_cast<QMouseEvent *>(e);
+    auto *me = static_cast<QMouseEvent *>(e);
     m_x = me->x();
     m_width = m_slider->width();
     if (m_x < m_resizeMargin) {
@@ -85,7 +85,7 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
     }
     m_changed = false;
   } else if (e->type() == QEvent::MouseMove) {
-    QMouseEvent *me = static_cast<QMouseEvent *>(e);
+    auto *me = static_cast<QMouseEvent *>(e);
     int x = me->x();
     int w = m_slider->width();
     if (x < m_resizeMargin || x > w - m_resizeMargin) {
@@ -179,7 +179,7 @@ XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
     : QFrame(instrWindow), m_instrWindow(instrWindow), m_totalMinimum(0),
       m_totalMaximum(1), m_minimum(0), m_maximum(1) {
   m_scrollBar = new XIntegrationScrollBar(this);
-  QHBoxLayout *layout = new QHBoxLayout();
+  auto *layout = new QHBoxLayout();
   m_minText = new QLineEdit(this);
   m_minText->setMaximumWidth(100);
   m_minText->setToolTip("Minimum x value");

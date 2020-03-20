@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_SIMPLEXMINIMIZER_H_
-#define MANTID_CURVEFITTING_SIMPLEXMINIMIZER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 #include <gsl/gsl_multimin.h>
 
@@ -23,7 +23,7 @@ namespace FuncMinimisers {
     @author Anders Markvardsen, ISIS, RAL
     @date 8/1/2010
 */
-class DLLExport SimplexMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL SimplexMinimizer : public API::IFuncMinimizer {
 public:
   /// Constructor setting a value for the relative error acceptance
   /// (default=0.01)
@@ -76,5 +76,3 @@ private:
 } // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_SIMPLEXMINIMIZER_H_*/

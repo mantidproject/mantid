@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/V3D.h"
 
@@ -45,7 +46,7 @@ namespace Algorithms {
     @author Michael Reuter
     @date 30/09/2010
 */
-class DLLExport He3TubeEfficiency : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL He3TubeEfficiency : public API::Algorithm {
 public:
   /// Default constructor
   He3TubeEfficiency();

@@ -34,7 +34,7 @@ is applied to the data</LI>
 @author Russell Taylor, Tessella plc
 @date 24/03/2009
 */
-class DLLExport PolynomialCorrection : public UnaryOperation {
+class MANTID_ALGORITHMS_DLL PolynomialCorrection : public UnaryOperation {
 public:
   /// Default constructor
   PolynomialCorrection();

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_PEAKCOLUMNTEST_H_
-#define MANTID_DATAOBJECTS_PEAKCOLUMNTEST_H_
+#pragma once
 
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakColumn.h"
@@ -179,5 +178,3 @@ private:
   Mantid::Geometry::Instrument_sptr m_inst;
   std::vector<Peak> m_peaks;
 };
-
-#endif /* MANTID_DATAOBJECTS_PEAKCOLUMNTEST_H_ */

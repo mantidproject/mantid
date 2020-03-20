@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_MDFRAME_H_
-#define MANTID_GEOMETRY_MDFRAME_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 
@@ -42,5 +41,3 @@ using MDFrame_const_sptr = std::shared_ptr<const MDFrame>;
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_MDFRAME_H_ */

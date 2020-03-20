@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ATOM_H_
-#define ATOM_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/NeutronAtom.h"
@@ -71,5 +70,3 @@ MANTID_KERNEL_DLL const Atom &getAtom(const std::string &symbol,
 
 } // namespace PhysicalConstants
 } // namespace Mantid
-
-#endif /* ATOM_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADINSTRUMENTTESTFROMRAW_H_
-#define LOADINSTRUMENTTESTFROMRAW_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -455,5 +454,3 @@ private:
   std::string inputFile;
   std::string wsName;
 };
-
-#endif /*LOADINSTRUMENTTESTFROMRAW_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef HFIRLOADTEST_H_
-#define HFIRLOADTEST_H_
+#pragma once
 
 #include "MantidWorkflowAlgorithms/HFIRLoad.h"
 #include <cxxtest/TestSuite.h>
@@ -190,5 +189,3 @@ public:
 private:
   std::string filename = "BioSANS_exp61_scan0004_0001.xml";
 };
-
-#endif /*HFIRLOADTEST_H_*/

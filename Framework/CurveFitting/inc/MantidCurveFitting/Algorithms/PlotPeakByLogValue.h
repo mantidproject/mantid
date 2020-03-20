@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_PLOTPEAKBULOGVALUE_H_
-#define MANTID_CURVEFITTING_PLOTPEAKBULOGVALUE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -41,7 +40,7 @@ Required Properties:
 @author Roman Tolchenov, Tessella plc
 @date 01/06/2010
 */
-class DLLExport PlotPeakByLogValue : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL PlotPeakByLogValue : public API::Algorithm {
   /** Structure to identify data for fitting
    */
 
@@ -110,5 +109,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_PLOTPEAKBULOGVALUE_H_*/

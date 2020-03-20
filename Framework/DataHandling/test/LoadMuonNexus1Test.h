@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADMUONNEXUS1TEST_H_
-#define LOADMUONNEXUS1TEST_H_
+#pragma once
 
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
@@ -1047,5 +1046,3 @@ public:
 private:
   LoadMuonNexus1 loader;
 };
-
-#endif /*LOADMUONNEXUS1TEST_H_*/

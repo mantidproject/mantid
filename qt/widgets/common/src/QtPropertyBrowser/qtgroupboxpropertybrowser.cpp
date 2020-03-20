@@ -168,7 +168,7 @@ void QtGroupBoxPropertyBrowserPrivate::propertyInserted(
   WidgetItem *afterItem = m_indexToItem.value(afterIndex);
   WidgetItem *parentItem = m_indexToItem.value(index->parent());
 
-  WidgetItem *newItem = new WidgetItem();
+  auto *newItem = new WidgetItem();
   newItem->parent = parentItem;
 
   QGridLayout *layout = nullptr;

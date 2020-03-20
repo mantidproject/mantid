@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ELASTICISOROTDIFF_H_
-#define MANTID_ELASTICISOROTDIFF_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -25,7 +24,7 @@ namespace Functions {
 /**
  * @brief Elastic part of the DiffSphere function
  */
-class DLLExport ElasticIsoRotDiff : public DeltaFunction {
+class MANTID_CURVEFITTING_DLL ElasticIsoRotDiff : public DeltaFunction {
 public:
   /// Constructor
   ElasticIsoRotDiff();
@@ -45,5 +44,3 @@ public:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif // MANTID_ELASTICISOROTDIFF_H_

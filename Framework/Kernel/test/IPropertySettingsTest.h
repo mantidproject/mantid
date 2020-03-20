@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_IPROPERTYSETTINGSTEST_H_
-#define MANTID_KERNEL_IPROPERTYSETTINGSTEST_H_
+#pragma once
 
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/System.h"
@@ -19,5 +18,3 @@ class IPropertySettingsTest : public CxxTest::TestSuite {
 public:
   void test_Something() {}
 };
-
-#endif /* MANTID_KERNEL_IPROPERTYSETTINGSTEST_H_ */

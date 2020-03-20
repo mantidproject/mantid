@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_CASE_INSENSITIVE_MAP_H
-#define MANTID_KERNEL_CASE_INSENSITIVE_MAP_H
+#pragma once
 
 #include <cstring>
 #include <map>
@@ -33,5 +32,3 @@ using CaseInsensitiveMap =
     std::map<std::string, T, CaseInsensitiveStringComparator>;
 } // namespace Kernel
 } // namespace Mantid
-
-#endif // MANTID_KERNEL_CASE_INSENSITIVE_MAP_H

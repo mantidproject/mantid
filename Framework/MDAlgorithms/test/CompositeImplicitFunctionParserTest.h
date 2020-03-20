@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TEST_COMPOSITE_FUNCTION_PARSER_H_
-#define TEST_COMPOSITE_FUNCTION_PARSER_H_
+#pragma once
 
 #include "FunctionParserTest.h"
 #include <boost/scoped_ptr.hpp>
@@ -132,5 +131,3 @@ public:
                       2, compositeFunction->getNFunctions())
   }
 };
-
-#endif

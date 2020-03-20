@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ABRAGAMTEST_H_
-#define ABRAGAMTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -51,5 +50,3 @@ public:
     TS_ASSERT_DELTA(y[9], 0.0360, 1e-4);
   }
 };
-
-#endif /*ABRAGAMTEST_H_*/

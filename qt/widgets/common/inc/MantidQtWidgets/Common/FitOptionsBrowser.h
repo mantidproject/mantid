@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDWIDGETS_FITOPTIONSBROWSER_H_
-#define MANTIDWIDGETS_FITOPTIONSBROWSER_H_
+#pragma once
 
 #include "DllOption.h"
 
@@ -190,5 +189,3 @@ private:
 } // namespace MantidWidgets
 
 } // namespace MantidQt
-
-#endif /*MANTIDWIDGETS_FITOPTIONSBROWSER_H_*/

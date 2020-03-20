@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDDIMENSIONEXTENTS_H_
-#define MDDIMENSIONEXTENTS_H_
+#pragma once
 
 /*
  * MDDimensionExtents.h
@@ -107,5 +106,3 @@ private:
 } // namespace Geometry
 
 } // namespace Mantid
-
-#endif /* MDDIMENSIONEXTENTS_H_ */

@@ -9,8 +9,7 @@
  *
  *  This header MAY ONLY be included in the MDalgorithms package
  *********************************************************************************/
-#ifndef MDALGORITHMSTESTHELPER_H
-#define MDALGORITHMSTESTHELPER_H
+#pragma once
 
 #include "MantidDataObjects/MDEventFactory.h"
 
@@ -32,5 +31,3 @@ DataObjects::MDEventWorkspace3Lean::sptr makeFileBackedMDEWwithMDFrame(
 } // namespace MDAlgorithmsTestHelper
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif

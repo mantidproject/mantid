@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_COSTFUNCRWP_H_
-#define MANTID_CURVEFITTING_COSTFUNCRWP_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -50,7 +49,7 @@ namespace CostFunctions {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CostFuncRwp : public CostFuncLeastSquares {
+class MANTID_CURVEFITTING_DLL CostFuncRwp : public CostFuncLeastSquares {
 public:
   /// Constructor
   CostFuncRwp();
@@ -80,5 +79,3 @@ private:
 } // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_COSTFUNCRWP_H_*/

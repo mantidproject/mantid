@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_MANTIDWIDGET_PEAKPICKER_H
-#define MANTIDQT_MANTIDWIDGET_PEAKPICKER_H
+#pragma once
 
 #include <QtGlobal>
 
@@ -14,5 +13,3 @@
 #else
 #include "MantidQtWidgets/Plotting/Mpl/PeakPicker.h"
 #endif
-
-#endif // MANTIDQT_MANTIDWIDGET_PEAKPICKER_H

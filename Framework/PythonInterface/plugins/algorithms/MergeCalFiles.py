@@ -33,12 +33,12 @@ class MergeCalFiles(PythonAlgorithm):
         self.declareProperty(FileProperty("OutputFile","", FileAction.Save, ['cal']),
                              doc="The file to contain the results")
 
-        self.declareProperty("MergeOffsets", False, doc="If True, the offsets from file1 will be merged "+
-                             "to the master file. Default: False")
-        self.declareProperty("MergeSelections", False, doc="If True, the selections from file1 will be merged "+
-                             "to the master file. Default: False")
-        self.declareProperty("MergeGroups", False, doc="If True, the Groups from file1 will be merged to "+
-                             "the master file. Default: False")
+        self.declareProperty("MergeOffsets", False, doc="If True, the offsets from file1 will be merged "
+                                                        + "to the master file. Default: False")
+        self.declareProperty("MergeSelections", False, doc="If True, the selections from file1 will be merged "
+                                                           + "to the master file. Default: False")
+        self.declareProperty("MergeGroups", False, doc="If True, the Groups from file1 will be merged to "
+                                                       + "the master file. Default: False")
 
     #pylint: disable=too-many-branches
     def PyExec(self):

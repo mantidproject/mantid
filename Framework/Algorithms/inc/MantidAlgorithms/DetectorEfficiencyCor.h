@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/V3D.h"
@@ -66,7 +67,7 @@ namespace Algorithms {
     @author Steve Williams based on code by T.G.Perring
     @date 6/10/2009
 */
-class DLLExport DetectorEfficiencyCor : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DetectorEfficiencyCor : public API::Algorithm {
 public:
   DetectorEfficiencyCor();
   /// Algorithm's name for identification overriding a virtual method

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_ConvolveWorkspaces_H_
-#define MANTID_CURVEFITTING_ConvolveWorkspaces_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -25,7 +24,7 @@ namespace Algorithms {
 /** Convolution of two workspaces
  */
 
-class DLLExport ConvolveWorkspaces : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL ConvolveWorkspaces : public API::Algorithm {
 public:
   ConvolveWorkspaces() : API::Algorithm() {}
   ~ConvolveWorkspaces() override {}
@@ -54,5 +53,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_ConvolveWorkspaces_H_*/

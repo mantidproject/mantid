@@ -8,8 +8,7 @@
 See the developer documentation for Batch Widget at
 developer.mantidproject.org/BatchWidget/index.html
 */
-#ifndef MANTIDQTMANTIDWIDGETS_QTBASICNAVIGATION_H_
-#define MANTIDQTMANTIDWIDGETS_QTBASICNAVIGATION_H_
+#pragma once
 #include <QModelIndex>
 
 namespace MantidQt {
@@ -31,4 +30,3 @@ bool areOnSameRow(QModelIndex const &a, QModelIndex const &b);
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_QTBASICNAVIGATION_H_

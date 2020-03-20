@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_CHEBYSHEV_H_
-#define MANTID_CURVEFITTING_CHEBYSHEV_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -28,7 +27,7 @@ Uses the Clenshaw algorithm to evaluate the expansion.
 @author Roman Tolchenov, Tessella inc
 @date 14/05/2010
 */
-class DLLExport Chebyshev : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL Chebyshev : public BackgroundFunction {
 public:
   /// Constructor
   Chebyshev();
@@ -60,5 +59,3 @@ using Chebyshev_sptr = boost::shared_ptr<Chebyshev>;
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_CHEBYSHEV_H_*/

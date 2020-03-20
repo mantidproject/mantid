@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_ALGORITHMS_QENSFITUTILITIES_H_
-#define MANTID_ALGORITHMS_QENSFITUTILITIES_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -26,4 +25,3 @@ bool containsMultipleData(const std::vector<MatrixWorkspace_sptr> &workspaces);
 
 } // namespace API
 } // namespace Mantid
-#endif

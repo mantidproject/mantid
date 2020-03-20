@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_TRUSTREGIONMINIMIZER_H_
-#define MANTID_CURVEFITTING_TRUSTREGIONMINIMIZER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -22,7 +21,8 @@ namespace CurveFitting {
 namespace FuncMinimisers {
 /** Trust Region minimizer class using the DTRS method of GALAHAD.
  */
-class DLLExport TrustRegionMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL TrustRegionMinimizer
+    : public API::IFuncMinimizer {
 public:
   /// constructor and destructor
   TrustRegionMinimizer();
@@ -77,5 +77,3 @@ private:
 } // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_TRUSTREGIONMINIMIZER_H_*/

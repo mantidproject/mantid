@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef QT_UTILS_H
-#define QT_UTILS_H
+#pragma once
 
 #include <QLineEdit>
 #include <QTableWidget>
@@ -45,5 +44,3 @@ public:
 
 } // namespace SpectrumView
 } // namespace MantidQt
-
-#endif // QT_UTILS_H

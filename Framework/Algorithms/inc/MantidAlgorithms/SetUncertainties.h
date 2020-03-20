@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,7 +21,7 @@ namespace Algorithms {
 
  @date 10/12/2010
  */
-class DLLExport SetUncertainties : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL SetUncertainties : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override;

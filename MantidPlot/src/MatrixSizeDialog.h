@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MATRIXSIZEDIALOG_H
-#define MATRIXSIZEDIALOG_H
+#pragma once
 
 #include "Matrix.h"
 #include <QDialog>
@@ -53,5 +52,3 @@ private:
   DoubleSpinBox *boxXStart, *boxYStart, *boxXEnd, *boxYEnd;
   Matrix *d_matrix;
 };
-
-#endif // MATRIXSIZEDIALOG_H

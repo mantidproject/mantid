@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMOCKOBJECTS_H
-#define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMOCKOBJECTS_H
+#pragma once
 
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/IProjectSaveView.h"
@@ -62,5 +61,3 @@ public:
 
   std::string getWindowType() override { return "Matrix"; }
 };
-
-#endif

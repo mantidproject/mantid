@@ -8,6 +8,7 @@
 
 #include <string>
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/System.h"
 
@@ -30,7 +31,7 @@ namespace API {
   but it can be
   useful in other places, e.g. tests.
 */
-class DLLExport ScopedWorkspace {
+class MANTID_API_DLL ScopedWorkspace {
 public:
   /// Empty constructor
   ScopedWorkspace();

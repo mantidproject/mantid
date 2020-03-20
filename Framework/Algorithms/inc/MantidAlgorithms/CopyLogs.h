@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 
@@ -26,7 +26,7 @@ namespace Algorithms {
   @author Samuel Jackson, STFC, RAL
   @date 11/10/2013
 */
-class DLLExport CopyLogs : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CopyLogs : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

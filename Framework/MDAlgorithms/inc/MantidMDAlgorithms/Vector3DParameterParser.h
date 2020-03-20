@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VECTOR_VALUE_PARAMETER_PARSER_H_
-#define VECTOR_VALUE_PARAMETER_PARSER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -88,5 +87,3 @@ void Vector3DParameterParser<VectorValueParameterType>::setSuccessorParser(
 }
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_IMD_TRANSFORMATION_H
-#define MANTID_MDALGORITHMS_IMD_TRANSFORMATION_H
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
@@ -225,5 +224,3 @@ using MDTransf_const_sptr = boost::shared_ptr<const MDTransfInterface>;
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif

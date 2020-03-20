@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INELASTICDIFFROTDISCRETECIRCLE_H_
-#define MANTID_INELASTICDIFFROTDISCRETECIRCLE_H_
+#pragma once
 
 // Mantid Coding standards <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -26,7 +25,8 @@ namespace Functions {
 /* Class representing the inelastic portion of DiffRotDiscreteCircle
  * Contains a linear combination of Lorentzians.
  */
-class DLLExport InelasticDiffRotDiscreteCircle : public FunctionQDepends {
+class MANTID_CURVEFITTING_DLL InelasticDiffRotDiscreteCircle
+    : public FunctionQDepends {
 public:
   /// Constructor
   InelasticDiffRotDiscreteCircle();
@@ -53,5 +53,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif // MANTID_INELASTICDIFFROTDISCRETECIRCLE_H_

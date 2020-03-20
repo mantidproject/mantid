@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MATRIX_CURVE_H
-#define MANTID_MATRIX_CURVE_H
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurve.h"
@@ -159,5 +158,3 @@ private:
   /// y units
   Mantid::Kernel::Unit_sptr m_yUnits;
 };
-
-#endif // MANTID_CURVE_H

@@ -61,7 +61,7 @@ if PYQT4:
     try:
         from mantidqtpython import MantidQt
         SCROLL_AVAILABLE = True
-    except ImportError as e:
+    except ImportError:
         SCROLL_AVAILABLE = False
 if six.PY3:
     unicode = str
@@ -283,7 +283,7 @@ class MainWindow(QMainWindow):
         self._baseTitle = 'Title is not initialized'
 
         # Timing and thread 'global'
-        self._startMeringScans = time.clock()
+        self._startMeringScans = time.process_time()
         self._errorMessageEnsemble = ''
 
         # QSettings

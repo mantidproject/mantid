@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_INVALIDDEFAULTSERROR_H
-#define MANTID_ISISREFLECTOMETRY_INVALIDDEFAULTSERROR_H
+#pragma once
 #include "Common/DllConfig.h"
 #include <vector>
 
@@ -31,4 +30,3 @@ MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(InvalidDefaultsError const &lhs,
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_ISISREFLECTOMETRY_INVALIDDEFAULTSERROR_H

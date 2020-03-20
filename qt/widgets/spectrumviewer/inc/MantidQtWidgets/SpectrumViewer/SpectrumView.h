@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SPECTRUM_VIEW_H
-#define SPECTRUM_VIEW_H
+#pragma once
 
 #include <QList>
 #include <QMainWindow>
@@ -126,5 +125,3 @@ signals:
 
 } // namespace SpectrumView
 } // namespace MantidQt
-
-#endif // SPECTRUM_VIEW_H

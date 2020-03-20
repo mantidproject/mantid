@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_IFATABLEGACY_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_IFATABLEGACY_H_
+#pragma once
 
 #include "IndirectDataAnalysisTab.h"
 #include "IndirectFitDataPresenterLegacy.h"
@@ -240,5 +239,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_IFATABLEGACY_H_ */

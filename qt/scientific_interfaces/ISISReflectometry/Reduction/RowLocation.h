@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_ISISREFLECTOMETRY_ROWLOCATION_H
-#define MANTID_ISISREFLECTOMETRY_ROWLOCATION_H
+#pragma once
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
 
@@ -32,4 +31,3 @@ bool containsPath(
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_ISISREFLECTOMETRY_ROWLOCATION_H

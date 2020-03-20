@@ -12,8 +12,7 @@
  * @author Takudzwa Makoni, RAL (UKRI), ISIS
  * @date 16/08/2019
  */
-#ifndef MANTID_DATAHANDLING_SAVENEXUSGEOMETRY_H_
-#define MANTID_DATAHANDLING_SAVENEXUSGEOMETRY_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
@@ -36,5 +35,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_SAVENEXUSGEOMETRY_H_ */

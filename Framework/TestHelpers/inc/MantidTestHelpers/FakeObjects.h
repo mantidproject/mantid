@@ -14,8 +14,7 @@
  *  than API (e.g. any algorithm or concrete workspace), even if via the
  *factory.
  *********************************************************************************/
-#ifndef FAKEOBJECTS_H_
-#define FAKEOBJECTS_H_
+#pragma once
 
 /*
  * FakeObjects.h: Fake Tester objects for APITest
@@ -755,4 +754,3 @@ class VariableBinThrowingTester : public AxeslessWorkspaceTester {
     return 0;
   }
 };
-#endif /* FAKEOBJECTS_H_ */

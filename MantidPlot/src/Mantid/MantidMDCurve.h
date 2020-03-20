@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MD_CURVE_H
-#define MANTID_MD_CURVE_H
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidCurve.h"
@@ -107,5 +106,3 @@ private:
   QString
       m_wsName; ///< Workspace name. If empty the ws isn't in the data service
 };
-
-#endif // MANTID_CURVE_H

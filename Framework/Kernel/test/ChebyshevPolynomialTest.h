@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_CHEBYSHEVPOLYNOMIALTEST_H_
-#define MANTID_KERNEL_CHEBYSHEVPOLYNOMIALTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -38,5 +37,3 @@ public:
 
   // No test for out of range as there is an assert in there..
 };
-
-#endif /* MANTID_KERNEL_CHEBYSHEVPOLYNOMIALTEST_H_ */

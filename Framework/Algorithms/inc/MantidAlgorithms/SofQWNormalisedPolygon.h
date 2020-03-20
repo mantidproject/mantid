@@ -37,7 +37,7 @@ common bins. </LI>
 
 @date 2012/05/04
  */
-class DLLExport SofQWNormalisedPolygon : public Rebin2D {
+class MANTID_ALGORITHMS_DLL SofQWNormalisedPolygon : public Rebin2D {
 public:
   /// Default constructor
   SofQWNormalisedPolygon() = default;

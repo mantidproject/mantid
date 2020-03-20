@@ -4,11 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_CALCULATEUMATRIX_H_
-#define MANTID_CRYSTAL_CALCULATEUMATRIX_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -19,7 +18,7 @@ namespace Crystal {
   @author Andrei Savici, ORNL
   @date 2011-08-05
 */
-class DLLExport CalculateUMatrix : public API::Algorithm {
+class MANTID_CRYSTAL_DLL CalculateUMatrix : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CalculateUMatrix"; };
@@ -44,5 +43,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_CALCULATEUMATRIX_H_ */

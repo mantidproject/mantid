@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef GRAPH3D_H
-#define GRAPH3D_H
+#pragma once
 
 #include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
@@ -496,5 +495,3 @@ private:
   bool d_u_periodic, d_v_periodic;
   double d_ul, d_ur, d_vl, d_vr;
 };
-
-#endif // Plot3D_H

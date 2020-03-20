@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDUI_H
-#define MANTIDUI_H
+#pragma once
 
 //----------------------------------
 // Includes
@@ -699,5 +698,3 @@ public:
   /// Destructor restores original cursor
   virtual ~ScopedOverrideCursor() { QApplication::restoreOverrideCursor(); }
 };
-
-#endif

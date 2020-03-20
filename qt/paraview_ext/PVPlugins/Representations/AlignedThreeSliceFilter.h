@@ -33,8 +33,7 @@
  * - 3: Output of the third internal vtkCutter filter
  */
 
-#ifndef AlignedThreeSliceFilter_h
-#define AlignedThreeSliceFilter_h
+#pragma once
 
 #include "vtkPVClientServerCoreRenderingModule.h" //needed for exports
 #include "vtkThreeSliceFilter.h"
@@ -56,5 +55,3 @@ private:
   AlignedThreeSliceFilter(const AlignedThreeSliceFilter &) VTK_DELETE_FUNCTION;
   void operator=(const AlignedThreeSliceFilter &) VTK_DELETE_FUNCTION;
 };
-
-#endif

@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_VESUVIOCALCULATEGAMMABACKGROUND_H_
-#define MANTID_CURVEFITTING_VESUVIOCALCULATEGAMMABACKGROUND_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDTypes.h"
 
@@ -29,7 +29,8 @@ namespace Algorithms {
 //---------------------------------------------------------------------------
 struct DetectorParams;
 
-class DLLExport VesuvioCalculateGammaBackground : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL VesuvioCalculateGammaBackground
+    : public API::Algorithm {
 public:
   VesuvioCalculateGammaBackground();
   ~VesuvioCalculateGammaBackground() override;
@@ -132,5 +133,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_VESUVIOCALCULATEGAMMABACKGROUND_H_ */

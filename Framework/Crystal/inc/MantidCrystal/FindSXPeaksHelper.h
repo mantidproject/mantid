@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_FINDSXPEAKSHELPER_H_
-#define MANTID_CRYSTAL_FINDSXPEAKSHELPER_H_
+#pragma once
 
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/EmptyValues.h"
@@ -35,7 +35,7 @@ enum class XAxisUnit { TOF, DSPACING };
  * Single Crystal peak representation
  * ------------------------------------------------------------------------------------------
  */
-struct DLLExport SXPeak {
+struct MANTID_CRYSTAL_DLL SXPeak {
 public:
   SXPeak(double t, double phi, double intensity,
          const std::vector<int> &spectral, const size_t wsIndex,
@@ -126,13 +126,14 @@ private:
  * Background strategy
  * ------------------------------------------------------------------------------------------
  */
-struct DLLExport BackgroundStrategy {
+struct MANTID_CRYSTAL_DLL BackgroundStrategy {
   virtual ~BackgroundStrategy() = default;
   virtual bool isBelowBackground(const double intensity,
                                  const HistogramData::HistogramY &y) const = 0;
 };
 
-struct DLLExport AbsoluteBackgroundStrategy : public BackgroundStrategy {
+struct MANTID_CRYSTAL_DLL AbsoluteBackgroundStrategy
+    : public BackgroundStrategy {
   AbsoluteBackgroundStrategy(const double background);
   bool isBelowBackground(const double intensity,
                          const HistogramData::HistogramY &) const override;
@@ -141,7 +142,8 @@ private:
   double m_background = 0.;
 };
 
-struct DLLExport PerSpectrumBackgroundStrategy : public BackgroundStrategy {
+struct MANTID_CRYSTAL_DLL PerSpectrumBackgroundStrategy
+    : public BackgroundStrategy {
   PerSpectrumBackgroundStrategy(const double backgroundMultiplier);
   bool isBelowBackground(const double intensity,
                          const HistogramData::HistogramY &y) const override;
@@ -154,7 +156,7 @@ private:
  * Peak Finding Strategy
  * ------------------------------------------------------------------------------------------
  */
-class DLLExport PeakFindingStrategy {
+class MANTID_CRYSTAL_DLL PeakFindingStrategy {
 public:
   PeakFindingStrategy(const BackgroundStrategy *backgroundStrategy,
                       const API::SpectrumInfo &spectrumInfo,
@@ -184,7 +186,7 @@ protected:
   const XAxisUnit m_units;
 };
 
-class DLLExport StrongestPeaksStrategy : public PeakFindingStrategy {
+class MANTID_CRYSTAL_DLL StrongestPeaksStrategy : public PeakFindingStrategy {
 public:
   StrongestPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
                          const API::SpectrumInfo &spectrumInfo,
@@ -196,7 +198,7 @@ public:
                          Bound high, const int workspaceIndex) const override;
 };
 
-class DLLExport AllPeaksStrategy : public PeakFindingStrategy {
+class MANTID_CRYSTAL_DLL AllPeaksStrategy : public PeakFindingStrategy {
 public:
   AllPeaksStrategy(const BackgroundStrategy *backgroundStrategy,
                    const API::SpectrumInfo &spectrumInfo,
@@ -224,13 +226,13 @@ private:
  * Comparison Strategy
  * ------------------------------------------------------------------------------------------
  */
-class DLLExport CompareStrategy {
+class MANTID_CRYSTAL_DLL CompareStrategy {
 public:
   virtual ~CompareStrategy() = default;
   virtual bool compare(const SXPeak &lhs, const SXPeak &rhs) const = 0;
 };
 
-class DLLExport RelativeCompareStrategy : public CompareStrategy {
+class MANTID_CRYSTAL_DLL RelativeCompareStrategy : public CompareStrategy {
 public:
   RelativeCompareStrategy(const double resolution);
   bool compare(const SXPeak &lhs, const SXPeak &rhs) const override;
@@ -239,7 +241,7 @@ private:
   const double m_resolution;
 };
 
-class DLLExport AbsoluteCompareStrategy : public CompareStrategy {
+class MANTID_CRYSTAL_DLL AbsoluteCompareStrategy : public CompareStrategy {
 public:
   AbsoluteCompareStrategy(const double tofResolution,
                           const double phiResolution,
@@ -258,7 +260,7 @@ private:
  * PeakListReduction Strategy
  * ------------------------------------------------------------------------------------------
  */
-class DLLExport ReducePeakListStrategy {
+class MANTID_CRYSTAL_DLL ReducePeakListStrategy {
 public:
   ReducePeakListStrategy(const CompareStrategy *compareStrategy);
   virtual ~ReducePeakListStrategy() = default;
@@ -270,7 +272,7 @@ protected:
   const CompareStrategy *m_compareStrategy;
 };
 
-class DLLExport SimpleReduceStrategy : public ReducePeakListStrategy {
+class MANTID_CRYSTAL_DLL SimpleReduceStrategy : public ReducePeakListStrategy {
 public:
   SimpleReduceStrategy(const CompareStrategy *compareStrategy);
   std::vector<SXPeak>
@@ -278,7 +280,7 @@ public:
          Mantid::Kernel::ProgressBase &progress) const override;
 };
 
-class DLLExport FindMaxReduceStrategy : public ReducePeakListStrategy {
+class MANTID_CRYSTAL_DLL FindMaxReduceStrategy : public ReducePeakListStrategy {
 public:
   FindMaxReduceStrategy(const CompareStrategy *compareStrategy);
   std::vector<SXPeak>
@@ -296,5 +298,3 @@ private:
 } // namespace FindSXPeaksHelper
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_FINDSXPEAKSHELPER_H_ */

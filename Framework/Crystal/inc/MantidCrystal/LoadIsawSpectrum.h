@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_LoadIsawSpectrum_H_
-#define MANTID_CRYSTAL_LoadIsawSpectrum_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
@@ -17,7 +17,7 @@ namespace Crystal {
 Load incident spectrum and detector efficiency correction file.
  */
 
-class DLLExport LoadIsawSpectrum : public API::Algorithm {
+class MANTID_CRYSTAL_DLL LoadIsawSpectrum : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadIsawSpectrum"; };
@@ -51,5 +51,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_LoadIsawSpectrum_H_ */

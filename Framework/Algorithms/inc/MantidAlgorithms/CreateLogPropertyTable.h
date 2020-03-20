@@ -11,13 +11,14 @@
 //----------------------------------------------------------------------
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 #include <string>
 
 namespace Mantid {
 namespace Algorithms {
 
-class DLLExport CreateLogPropertyTable : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateLogPropertyTable : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CreateLogPropertyTable"; };

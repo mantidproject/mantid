@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FILTERING_UPDATE_PROGRESS_ACTION_TEST
-#define FILTERING_UPDATE_PROGRESS_ACTION_TEST
+#pragma once
 
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include <cxxtest/TestSuite.h>
@@ -55,4 +54,3 @@ public:
         "message", view.Message);
   }
 };
-#endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_SPLINEINTERPOLATION_H_
-#define MANTID_CURVEFITTING_SPLINEINTERPOLATION_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidCurveFitting/Functions/CubicSpline.h"
@@ -28,7 +27,7 @@ namespace Algorithms {
   @author Samuel Jackson, STFC
   @date 25/07/2013
 */
-class DLLExport SplineInterpolation : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL SplineInterpolation : public API::Algorithm {
 public:
   SplineInterpolation();
 
@@ -90,5 +89,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_SPLINEINTERPOLATION_H_ */

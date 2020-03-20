@@ -10,8 +10,7 @@
  *  This file MAY NOT be modified to use anything from a package other than
  *Kernel.
  *********************************************************************************/
-#ifndef MANTID_NEXUSCPP_NEXUSTESTHELPER_H_
-#define MANTID_NEXUSCPP_NEXUSTESTHELPER_H_
+#pragma once
 
 #include <memory>
 #include <string>
@@ -41,5 +40,3 @@ public:
   /// Do you delete when finished?
   bool deleteFile;
 };
-
-#endif /* MANTID_NEXUSCPP_NEXUSTESTHELPER_H_ */

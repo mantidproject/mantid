@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDNEXUSGEOMETRY_TUBEHELPERS_H
-#define MANTIDNEXUSGEOMETRY_TUBEHELPERS_H
+#pragma once
 
 #include "MantidGeometry/IDTypes.h"
 #include "MantidNexusGeometry/TubeBuilder.h"
@@ -33,4 +32,3 @@ notInTubes(const std::vector<detail::TubeBuilder> &tubes,
 } // namespace TubeHelpers
 } // namespace NexusGeometry
 } // namespace Mantid
-#endif // MANTIDNEXUSGEOMETRY_TUBEHELPER_H

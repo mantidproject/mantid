@@ -5,8 +5,7 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTIDWIDGETS_CONVOLUTIONFUNCTIONMODELTEST_H_
-#define MANTIDWIDGETS_CONVOLUTIONFUNCTIONMODELTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -552,5 +551,3 @@ public:
                      "f1.f1.f0.");
   }
 };
-
-#endif // MANTIDWIDGETS_CONVOLUTIONFUNCTIONMODELTEST_H_

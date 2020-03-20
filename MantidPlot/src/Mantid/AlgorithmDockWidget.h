@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALGORITHMDOCKWIDGET_H
-#define ALGORITHMDOCKWIDGET_H
+#pragma once
 
 #include "MantidQtWidgets/Common/AlgorithmSelectorWidget.h"
 #include <QDockWidget>
@@ -42,4 +41,3 @@ protected:
 private:
   MantidUI *m_mantidUI;
 };
-#endif // ALGORITHMDOCKWIDGET_H

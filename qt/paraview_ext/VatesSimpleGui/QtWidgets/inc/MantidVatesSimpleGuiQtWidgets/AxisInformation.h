@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef AXISINFORMATION_H_
-#define AXISINFORMATION_H_
+#pragma once
 
 #include "MantidVatesSimpleGuiQtWidgets/WidgetDllOption.h"
 
@@ -68,5 +67,3 @@ private:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-
-#endif // AXISINFORMATION_H_

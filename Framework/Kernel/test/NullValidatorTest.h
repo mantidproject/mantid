@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NULLVALIDATORTEST_H_
-#define NULLVALIDATORTEST_H_
+#pragma once
 
 #include "MantidKernel/NullValidator.h"
 #include <boost/make_shared.hpp>
@@ -49,5 +48,3 @@ public:
     TS_ASSERT_EQUALS(p.isValid("ta"), "");
   }
 };
-
-#endif /*NULLVALIDATORTEST_H_*/

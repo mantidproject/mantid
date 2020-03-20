@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_CONVERTERS_CONTAINERDTYPE_H_
-#define MANTID_PYTHONINTERFACE_CONVERTERS_CONTAINERDTYPE_H_
+#pragma once
 
 #include <string>
 #include <type_traits>
@@ -41,5 +40,3 @@ std::string dtype(const Container<HeldType> &) {
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /*MANTID_PYTHONINTERFACE_CONVERTERS_CONTAINERDTYPE_H_*/

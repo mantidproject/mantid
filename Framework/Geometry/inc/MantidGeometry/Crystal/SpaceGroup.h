@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SPACEGROUP_H_
-#define MANTID_GEOMETRY_SPACEGROUP_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
@@ -92,5 +91,3 @@ using SpaceGroup_const_sptr = boost::shared_ptr<const SpaceGroup>;
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_SPACEGROUP_H_ */

@@ -8,9 +8,9 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,7 +20,7 @@ namespace Algorithms {
 
   @date 2011-12-22
 */
-class DLLExport ExportTimeSeriesLog : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ExportTimeSeriesLog : public API::Algorithm {
 public:
   const std::string name() const override { return "ExportTimeSeriesLog"; };
 

@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_CLUSTERREGISTER_H_
-#define MANTID_CRYSTAL_CLUSTERREGISTER_H_
+#pragma once
 
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidKernel/System.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
@@ -22,7 +22,7 @@ class ImplClusterRegister;
 /** ClusterRegister : A fly-weight ICluster regeister. Handles the logic of
   merging clusters.
 */
-class DLLExport ClusterRegister {
+class MANTID_CRYSTAL_DLL ClusterRegister {
 public:
   /// Cluster map
   using MapCluster = std::map<size_t, boost::shared_ptr<ICluster>>;
@@ -52,5 +52,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_CLUSTERREGISTER_H_ */

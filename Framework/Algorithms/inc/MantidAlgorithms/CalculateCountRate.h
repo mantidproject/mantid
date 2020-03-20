@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -26,7 +26,7 @@ namespace Algorithms {
   for further event filtering on the basis of these logs, if the log values in
   some parts differ strongly from the average values.
 */
-class DLLExport CalculateCountRate : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateCountRate : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;

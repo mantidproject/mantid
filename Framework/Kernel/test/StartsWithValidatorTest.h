@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef STARTSWITHVALIDATORTEST_H_
-#define STARTSWITHVALIDATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -101,5 +100,3 @@ public:
     TS_ASSERT(boost::dynamic_pointer_cast<StartsWithValidator>(vv));
   }
 };
-
-#endif /*STARTSWITHVALIDATORTEST_H_*/

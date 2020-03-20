@@ -1,5 +1,4 @@
-#ifndef __CXXTEST__GUI_H
-#define __CXXTEST__GUI_H
+#pragma once
 
 //
 // GuiListener is a simple base class for the different GUIs
@@ -176,8 +175,6 @@ namespace CxxTest
         }
     };
 }
-
-#endif //__CXXTEST__GUI_H
 
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government

@@ -8,11 +8,11 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,7 +20,7 @@ namespace Algorithms {
 /** CreateSampleWorkspace : This algorithm is intended for the creation of
   sample workspaces for usage examples and other situations
 */
-class DLLExport CreateSampleWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateSampleWorkspace : public API::Algorithm {
 public:
   CreateSampleWorkspace();
 

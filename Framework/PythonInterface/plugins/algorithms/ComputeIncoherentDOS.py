@@ -174,8 +174,8 @@ class ComputeIncoherentDOS(PythonAlgorithm):
         self.declareProperty(name='Wavenumbers', defaultValue=False,
                              doc='Should the output be in Wavenumbers (cm^-1)?')
         self.declareProperty(name='StatesPerEnergy', defaultValue=False,
-                             doc='Should the output be in states per unit energy rather than mb/sr/fu/energy?\n'+
-                             '(Only for pure elements, need to set the sample material information)')
+                             doc='Should the output be in states per unit energy rather than mb/sr/fu/energy?\n'
+                                 + '(Only for pure elements, need to set the sample material information)')
         self.declareProperty(MatrixWorkspaceProperty(name='OutputWorkspace', defaultValue='', direction=Direction.Output),
                              doc='Output workspace name.')
         self.declareProperty(name='TwoThetaSumRange', defaultValue='Twothetamin, Twothetamax',

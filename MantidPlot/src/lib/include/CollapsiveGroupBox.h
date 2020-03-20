@@ -16,8 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef COLLAPSIVE_GROUP_BOX__H
-#define COLLAPSIVE_GROUP_BOX__H
+#pragma once
 
 #include <QGroupBox>
 
@@ -38,5 +37,3 @@ public slots:
   void setCollapsed(bool collapsed = true);
   void setExpanded(bool expanded = true);
 };
-
-#endif

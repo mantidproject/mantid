@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDCOLORMAPTEST_H
-#define MANTIDCOLORMAPTEST_H
+#pragma once
 
 #include "MantidQtWidgets/MplCpp/MantidColorMap.h"
 
@@ -32,5 +31,3 @@ public:
                      const PythonException &);
   }
 };
-
-#endif // MANTIDCOLORMAPTEST_H

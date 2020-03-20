@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,7 +16,7 @@ namespace Algorithms {
 /** Stitch1DMany : Stitches multiple Matrix Workspaces together into a single
  output.
  */
-class DLLExport Stitch1DMany : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Stitch1DMany : public API::Algorithm {
 public:
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string name() const override { return "Stitch1DMany"; }

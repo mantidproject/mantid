@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef PEN_STYLE_BOX_H
-#define PEN_STYLE_BOX_H
+#pragma once
 
 #include <QComboBox>
 
@@ -43,5 +42,3 @@ private:
   static size_t numberOfPatterns();
   static const Qt::PenStyle patterns[];
 };
-
-#endif

@@ -135,6 +135,12 @@ class ConfigUserTest(TestCase):
     def test_get_raises_error_with_invalid_option_type(self):
         self.assertRaises(TypeError, self.cfg.get, 'section', 1)
 
+    def test_get_raises_error_with_missing_key_when_type_provided(self):
+        self.assertRaises(KeyError, self.cfg.get, 'not_a_key', type=bool)
+
+    def test_get_raises_error_with_existing_kkey_but_wrong_type(self):
+        self.assertRaises(TypeError, self.cfg.get, 'main', 'bool_option', type='QStringList')
+
     def test_get_raises_keyerror_with_no_saved_setting_or_default(self):
         self.assertRaises(KeyError, self.cfg.get, 'main', 'missing-key')
         self.assertRaises(KeyError, self.cfg.get, 'main/missing-key')

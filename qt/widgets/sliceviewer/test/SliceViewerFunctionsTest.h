@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SLICE_VIEWER_SLICE_VIEWER_FUNCTIONS_TEST_H_
-#define SLICE_VIEWER_SLICE_VIEWER_FUNCTIONS_TEST_H_
+#pragma once
 
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -118,7 +117,5 @@ public:
                liesInside);
   }
 };
-
-#endif
 
 // end SLICE_VIEWER_SLICE_VIEWER_FUNCTIONS_TEST_H_

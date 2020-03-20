@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTWIDGETS_LINETRACKINGEXECUTOR_H
-#define MANTIDQTWIDGETS_LINETRACKINGEXECUTOR_H
+#pragma once
 
 #include "MantidPythonInterface/core/WrapPython.h"
 #include "MantidQtWidgets/Common/DllOption.h"
@@ -24,12 +23,10 @@ class EXPORT_OPT_MANTIDQT_COMMON CodeExecution {
 public:
   CodeExecution(ScriptEditor *editor);
   PyObject *execute(const QString &codeStr, const QString &filename, int flags,
-                    PyObject *globals) const;
+                    PyObject *globals, int lineOffset) const;
 
 private:
   ScriptEditor *m_editor{nullptr};
 };
 
 } // namespace MantidQt::Widgets::Common::Python
-
-#endif // MANTIDQTWIDGETS_LINETRACKINGEXECUTOR_H

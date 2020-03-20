@@ -4,11 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_PREDICTPEAKS_H_
-#define MANTID_CRYSTAL_PREDICTPEAKS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DetectorSearcher.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
@@ -30,7 +30,7 @@ namespace Crystal {
  * @author Janik Zikovsky
  * @date 2011-04-29 16:30:52.986094
  */
-class DLLExport PredictPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL PredictPeaks : public API::Algorithm {
 public:
   PredictPeaks();
 
@@ -107,5 +107,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_PREDICTPEAKS_H_ */

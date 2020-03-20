@@ -4,12 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_HASUB_H_
-#define MANTID_CRYSTAL_HASUB_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidCrystal/ClearUB.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -18,7 +17,7 @@ namespace Crystal {
  Returns True if one is found. Returns false if none can be found, or if the
  * workspace type is incompatible.
 */
-class DLLExport HasUB : public ClearUB {
+class MANTID_CRYSTAL_DLL HasUB : public ClearUB {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -39,5 +38,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_HASUB_H_ */

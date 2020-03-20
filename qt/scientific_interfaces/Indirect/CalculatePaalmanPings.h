@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_CALCULATEPAALMANPINGS_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_CALCULATEPAALMANPINGS_H_
+#pragma once
 
 #include "CorrectionsTab.h"
 #include "ui_CalculatePaalmanPings.h"
@@ -84,5 +83,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_CALCULATEPAALMANPINGS_H_ */

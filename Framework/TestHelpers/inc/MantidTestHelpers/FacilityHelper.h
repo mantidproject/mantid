@@ -10,8 +10,7 @@
  *  This file MAY NOT be modified to use anything from a package other than
  *Kernel.
  *********************************************************************************/
-#ifndef TESTHELPERS_FACILITYHELPER_H_
-#define TESTHELPERS_FACILITYHELPER_H_
+#pragma once
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -51,5 +50,3 @@ private:
   std::string defFacilityOnStart;
 };
 } // namespace FacilityHelper
-
-#endif /* TESTHELPERS_FACILITYHELPER_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INDIRECTSETTINGSPRESENTERTEST_H_
-#define MANTIDQT_INDIRECTSETTINGSPRESENTERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -163,5 +162,3 @@ private:
   MockIndirectSettingsModel *m_model;
   std::unique_ptr<IndirectSettingsPresenter> m_presenter;
 };
-
-#endif /* MANTIDQT_INDIRECTSETTINGSPRESENTERTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALGMONITOR_H
-#define ALGMONITOR_H
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -129,5 +128,3 @@ signals:
 private:
   Mantid::API::AlgorithmID m_alg;
 };
-
-#endif /* ALGMONITOR_H */

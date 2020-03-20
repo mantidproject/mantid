@@ -4,13 +4,13 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL_H_
-#define MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -35,7 +35,8 @@ Function parameters:
 @author Anders Markvardsen, ISIS, RAL
 @date 9/11/2009
 */
-class DLLExport BackToBackExponential : public API::IPeakFunction {
+class MANTID_CURVEFITTING_DLL BackToBackExponential
+    : public API::IPeakFunction {
 public:
   /// Default constructor.
   BackToBackExponential() : API::IPeakFunction() {}
@@ -76,5 +77,3 @@ using BackToBackExponential_sptr = boost::shared_ptr<BackToBackExponential>;
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_BACKTOBACKEXPONENTIAL_H_*/

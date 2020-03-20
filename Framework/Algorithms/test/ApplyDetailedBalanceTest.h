@@ -10,7 +10,6 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/ApplyDetailedBalance.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"

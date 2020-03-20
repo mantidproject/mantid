@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DIFFSPHERE_H_
-#define MANTID_DIFFSPHERE_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -25,7 +24,8 @@ namespace Functions {
 @date 11/14/2011
 */
 
-class DLLExport DiffSphere : public API::ImmutableCompositeFunction {
+class MANTID_CURVEFITTING_DLL DiffSphere
+    : public API::ImmutableCompositeFunction {
 
 public:
   /// overwrite IFunction base class methods
@@ -61,5 +61,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_DIFFSPHERE_H_*/

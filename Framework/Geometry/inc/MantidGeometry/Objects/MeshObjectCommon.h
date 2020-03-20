@@ -1,5 +1,4 @@
-#ifndef MANTID_GEOMETRY_MESHOBJECTCOMMON_H_
-#define MANTID_GEOMETRY_MESHOBJECTCOMMON_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -62,5 +61,3 @@ MANTID_GEOMETRY_DLL double getTriangleSolidAngle(const Kernel::V3D &a,
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_MESHOBJECTCOMMON_H_ */

@@ -4,11 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SELECT_CELL_OF_TYPE_H_
-#define MANTID_CRYSTAL_SELECT_CELL_OF_TYPE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -20,7 +19,7 @@ namespace Crystal {
     @author Dennis Mikkelson
     @date   2012-02-09
   */
-class DLLExport SelectCellOfType : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SelectCellOfType : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SelectCellOfType"; };
@@ -52,5 +51,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_SELECT_CELL_OF_TYPE_H */

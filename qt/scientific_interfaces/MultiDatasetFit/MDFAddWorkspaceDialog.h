@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDFADDWORKSPACEDIALOG_H_
-#define MDFADDWORKSPACEDIALOG_H_
+#pragma once
 
 #include "ui_MDFAddWorkspaceDialog.h"
 #include <QDialog>
@@ -44,5 +43,3 @@ private:
 } // namespace MDF
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*MDFADDWORKSPACEDIALOG_H_*/

@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef NOTE_H
-#define NOTE_H
+#pragma once
 
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MdiSubWindow.h"
@@ -72,5 +71,3 @@ public slots:
 private:
   QTextEdit *te;
 };
-
-#endif

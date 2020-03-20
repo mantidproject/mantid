@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MULTIDATASETFIT_H_
-#define MULTIDATASETFIT_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "MantidKernel/Statistics.h"
@@ -149,5 +148,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*MULTIDATASETFITDIALOG_H_*/

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_FAST_EXPONENTIAL_H_
-#define MANTID_KERNEL_FAST_EXPONENTIAL_H_
+#pragma once
 
 namespace Mantid {
 namespace Kernel {
@@ -49,5 +48,3 @@ inline double fast_exp(double y) {
 
 } // Namespace Kernel
 } // Namespace Mantid
-
-#endif /* FAST_EXPOENTIAL_H_ */

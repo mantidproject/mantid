@@ -85,8 +85,7 @@
 **
 ****************************************************************************/
 
-#ifndef QTTREEPROPERTYBROWSER_H
-#define QTTREEPROPERTYBROWSER_H
+#pragma once
 
 #include "qtpropertybrowser.h"
 
@@ -382,6 +381,4 @@ private:
 
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif
-
 #endif

@@ -368,7 +368,7 @@ def parse_single_name(filename):
         return (filepath,number,fext)
 
     fname,fext = os.path.splitext(fname)
-    fnumber = re.findall('\d+', fname)
+    fnumber = re.findall(r'\d+', fname)
     if len(fnumber) == 0:
         number = 0
     else:

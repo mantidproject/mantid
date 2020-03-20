@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SQW_LOADING_PRESENTER_TEST_H_
-#define SQW_LOADING_PRESENTER_TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <vtkSmartPointer.h>
@@ -281,5 +280,3 @@ public:
                Mock::VerifyAndClearExpectations(&mockLoadingProgressAction));
   }
 };
-
-#endif

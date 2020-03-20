@@ -25,7 +25,7 @@ DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent,
                                        bool hasOption, bool isOptionSet)
     : QWidget(parent), m_property(property), m_hasOption(hasOption),
       m_isOptionSet(isOptionSet) {
-  QHBoxLayout *layout = new QHBoxLayout;
+  auto *layout = new QHBoxLayout;
   m_editor = new DoubleEditor(property, this);
   layout->addWidget(m_editor);
   setFocusProxy(m_editor);

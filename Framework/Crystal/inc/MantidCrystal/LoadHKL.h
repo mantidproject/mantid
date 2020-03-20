@@ -4,12 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_LOADHKL_H_
-#define MANTID_CRYSTAL_LOADHKL_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_poly.h>
 
@@ -22,7 +21,7 @@ namespace Crystal {
  * @author Vickie Lynch, SNS
  * @date 2012-01-25
  */
-class DLLExport LoadHKL : public API::Algorithm {
+class MANTID_CRYSTAL_DLL LoadHKL : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadHKL"; };
@@ -50,5 +49,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_LOADHKL_H_ */

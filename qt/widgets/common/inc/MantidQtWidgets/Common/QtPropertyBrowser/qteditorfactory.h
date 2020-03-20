@@ -85,8 +85,7 @@
 **
 ****************************************************************************/
 
-#ifndef QTEDITORFACTORY_H
-#define QTEDITORFACTORY_H
+#pragma once
 
 #include "qtpropertybrowserutils_p.h"
 #include "qtpropertymanager.h"
@@ -530,7 +529,7 @@ public:
 template <class Editor>
 Editor *EditorFactoryPrivate<Editor>::createEditor(QtProperty *property,
                                                    QWidget *parent) {
-  Editor *editor = new Editor(parent);
+  auto *editor = new Editor(parent);
   initializeEditor(property, editor);
   return editor;
 }
@@ -799,6 +798,4 @@ public:
 
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif
-
 #endif

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef STRINGEDITORFACTORY_H
-#define STRINGEDITORFACTORY_H
+#pragma once
 
 #include "qtpropertymanager.h"
 #include <QLineEdit>
@@ -38,5 +37,3 @@ protected slots:
 private:
   QtProperty *m_property;
 };
-
-#endif // STRINGEDITORFACTORY_H

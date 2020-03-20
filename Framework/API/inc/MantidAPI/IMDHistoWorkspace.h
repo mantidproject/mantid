@@ -19,8 +19,8 @@ namespace API {
 
   @date 2011-11-09
 */
-class DLLExport IMDHistoWorkspace : public IMDWorkspace,
-                                    public MultipleExperimentInfos {
+class MANTID_API_DLL IMDHistoWorkspace : public IMDWorkspace,
+                                         public MultipleExperimentInfos {
 public:
   IMDHistoWorkspace() = default;
   IMDHistoWorkspace &operator=(const IMDHistoWorkspace &) = delete;

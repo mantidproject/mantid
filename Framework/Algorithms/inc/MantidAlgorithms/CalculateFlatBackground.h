@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -34,7 +35,8 @@ namespace Algorithms {
     @author Russell Taylor, Tessella plc
     @date 5/02/2009
 */
-class DLLExport CalculateFlatBackground : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL CalculateFlatBackground
+    : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CalculateFlatBackground"; }

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADASCIITEST_H_
-#define LOADASCIITEST_H_
+#pragma once
 
 #include "MantidDataHandling/LoadAscii2.h"
 #include "SaveAscii2Test.h"
@@ -714,5 +713,3 @@ private:
     filename = save.getPropertyValue("Filename");
   }
 };
-
-#endif // LOADASCIITEST_H_

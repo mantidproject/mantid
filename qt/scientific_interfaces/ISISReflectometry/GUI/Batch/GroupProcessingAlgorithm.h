@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_GROUPPROCESSINGALGORITHM_H_
-#define MANTID_CUSTOMINTERFACES_GROUPPROCESSINGALGORITHM_H_
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
@@ -30,5 +29,3 @@ createAlgorithmRuntimeProps(Batch const &model, Group const &group);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTID_CUSTOMINTERFACES_GROUPPROCESSINGALGORITHM_H_

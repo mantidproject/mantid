@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_PARSEREFLECTOMETRYSTRINGSTEST_H_
-#define MANTID_CUSTOMINTERFACES_PARSEREFLECTOMETRYSTRINGSTEST_H_
+#pragma once
 #include "../../../ISISReflectometry/Reduction/ParseReflectometryStrings.h"
 #include <cxxtest/TestSuite.h>
 
@@ -268,4 +267,3 @@ public:
 private:
   enum { VALUE, ERROR };
 };
-#endif // MANTID_CUSTOMINTERFACES_PARSEREFLECTOMETRYSTRINGSTEST_H_

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IFUNCTIONWRAPPER_H
-#define IFUNCTIONWRAPPER_H
+#pragma once
 
 #include <QObject>
 #include <boost/shared_ptr.hpp>
@@ -47,5 +46,3 @@ private:
   boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
   boost::shared_ptr<Mantid::API::IPeakFunction> m_peakFunction;
 };
-
-#endif /* IFUNCTIONWRAPPER_H */

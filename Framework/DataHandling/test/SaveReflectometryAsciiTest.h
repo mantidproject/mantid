@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVEReflectometryAsciiTEST_H_
-#define MANTID_DATAHANDLING_SAVEReflectometryAsciiTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -779,4 +778,3 @@ private:
     return in.peek() != std::ifstream::traits_type::eof();
   }
 };
-#endif /*MANTID_DATAHANDLING_SAVEReflectometryAsciiTEST_H_*/

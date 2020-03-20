@@ -4,12 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_FILTERPEAKS_H_
-#define MANTID_CRYSTAL_FILTERPEAKS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -17,7 +16,7 @@ namespace Crystal {
 /** FilterPeaks : Filter a peaks workspace based on a set number of queries to
   provide a new, filtered peaks workspace.
 */
-class DLLExport FilterPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL FilterPeaks : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -76,5 +75,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_FILTERPEAKS_H_ */

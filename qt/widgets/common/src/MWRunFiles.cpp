@@ -776,8 +776,7 @@ MWRunFiles::getFileExtensionsFromAlgorithm(const QString &algName,
   algorithm->initialize();
   Property *prop = algorithm->getProperty(propName.toStdString());
   FileProperty *fileProp = dynamic_cast<FileProperty *>(prop);
-  MultipleFileProperty *multiFileProp =
-      dynamic_cast<MultipleFileProperty *>(prop);
+  auto *multiFileProp = dynamic_cast<MultipleFileProperty *>(prop);
 
   std::vector<std::string> allowed;
   QString preferredExt;

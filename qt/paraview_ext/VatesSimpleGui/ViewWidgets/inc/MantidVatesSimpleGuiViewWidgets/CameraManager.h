@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CAMERAMANAGER_H_
-#define CAMERAMANAGER_H_
+#pragma once
 
 #include "MantidVatesAPI/ViewFrustum.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
@@ -34,5 +33,3 @@ public:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-
-#endif

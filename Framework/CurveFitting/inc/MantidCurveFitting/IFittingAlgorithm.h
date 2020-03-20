@@ -4,11 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_IFITTINGALGORITHM_H_
-#define MANTID_CURVEFITTING_IFITTINGALGORITHM_H_
+#pragma once
 
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -36,7 +36,8 @@ class CostFuncFitting;
     - exec()
     - initConcrete() to declare more properties
 */
-class DLLExport IFittingAlgorithm : public API::ParallelAlgorithm {
+class MANTID_CURVEFITTING_DLL IFittingAlgorithm
+    : public API::ParallelAlgorithm {
 public:
   const std::string category() const override;
 
@@ -76,5 +77,3 @@ protected:
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_IFITTINGALGORITHM_H_ */

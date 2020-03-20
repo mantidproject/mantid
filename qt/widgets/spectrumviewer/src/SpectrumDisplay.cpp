@@ -174,7 +174,7 @@ void SpectrumDisplay::handleResize() {
   getDisplayRectangle(draw_area);
 
   // Notify the sliders of the resize
-  SliderHandler *sliderHandler = dynamic_cast<SliderHandler *>(m_sliderHandler);
+  auto *sliderHandler = dynamic_cast<SliderHandler *>(m_sliderHandler);
   if (sliderHandler)
     sliderHandler->reConfigureSliders(draw_area, m_dataSource);
 }
@@ -279,10 +279,10 @@ void SpectrumDisplay::updateImage() {
                                m_dataArray->getXMax());
 
   if (is_log_x) {
-    QwtLog10ScaleEngine *log_engine = new QwtLog10ScaleEngine();
+    auto *log_engine = new QwtLog10ScaleEngine();
     m_spectrumPlot->setAxisScaleEngine(QwtPlot::xBottom, log_engine);
   } else {
-    QwtLinearScaleEngine *linear_engine = new QwtLinearScaleEngine();
+    auto *linear_engine = new QwtLinearScaleEngine();
     m_spectrumPlot->setAxisScaleEngine(QwtPlot::xBottom, linear_engine);
   }
 

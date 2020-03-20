@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FIT_H
-#define FIT_H
+#pragma once
 
 #include <QObject>
 
@@ -248,5 +247,3 @@ protected:
   //! Stores the right limits of the research interval for the result parameters
   double *d_param_range_right;
 };
-
-#endif

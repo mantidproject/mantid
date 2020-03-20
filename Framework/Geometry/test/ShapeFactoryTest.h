@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SHAPEFACTORYTEST_H_
-#define SHAPEFACTORYTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -656,5 +655,3 @@ public:
 private:
   std::string inputFile;
 };
-
-#endif /*SHAPEFACTORYTEST_H_*/

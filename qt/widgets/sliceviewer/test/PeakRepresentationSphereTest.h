@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SLICE_VIEWER_PEAK_REPRESENTATION_SPHERE_TEST_H_
-#define SLICE_VIEWER_PEAK_REPRESENTATION_SPHERE_TEST_H_
+#pragma once
 
 #include "MantidQtWidgets/SliceViewer/PeakRepresentationSphere.h"
 #include "MockObjects.h"
@@ -143,7 +142,7 @@ public:
 
   void test_move_position_produces_correct_position() {
     // Arrange
-    MockPeakTransform *pMockTransform = new MockPeakTransform;
+    auto *pMockTransform = new MockPeakTransform;
     EXPECT_CALL(*pMockTransform, transform(_))
         .Times(1)
         .WillOnce(Return(Mantid::Kernel::V3D(0, 0, 0)));
@@ -331,5 +330,3 @@ private:
   VecPeaksRepresentationSphere m_peaks;
   PeakRepresentationViewInformation m_viewInformation;
 };
-
-#endif

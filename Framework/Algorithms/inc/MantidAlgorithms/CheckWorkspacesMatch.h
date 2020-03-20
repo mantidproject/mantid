@@ -12,6 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -56,8 +57,9 @@ namespace Algorithms {
  *
  *
  */
-class DLLExport CheckWorkspacesMatch : public API::Algorithm,
-                                       public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL CheckWorkspacesMatch
+    : public API::Algorithm,
+      public API::DeprecatedAlgorithm {
 public:
   CheckWorkspacesMatch();
 

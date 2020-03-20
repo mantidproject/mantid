@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SNAPTOGRIDDIALOG_H
-#define SNAPTOGRIDDIALOG_H
+#pragma once
 
 #include "DllOption.h"
 #include "ui_SnapToGridDialog.h"
@@ -31,5 +30,3 @@ public:
 private:
   Ui::SnapToGridDialogClass ui;
 };
-
-#endif // SNAPTOGRIDDIALOG_H

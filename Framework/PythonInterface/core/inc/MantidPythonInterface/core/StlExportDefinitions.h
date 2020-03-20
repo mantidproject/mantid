@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_STLEXPORTDEFINITIONS_H_
-#define MANTID_PYTHONINTERFACE_STLEXPORTDEFINITIONS_H_
+#pragma once
 /**
     This file contains the export definitions for various stl containers.
 */
@@ -155,5 +154,3 @@ template <typename ElementType> struct std_set_exporter {
 };
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_STLEXPORTDEFINITIONS_H_ */

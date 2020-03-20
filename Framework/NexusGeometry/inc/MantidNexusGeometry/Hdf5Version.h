@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDHDF5_VERSION_H_
-#define MANTIDHDF5_VERSION_H_
+#pragma once
 
 #include "MantidNexusGeometry/DllConfig.h"
 
@@ -24,5 +23,3 @@ MANTID_NEXUSGEOMETRY_DLL bool checkVariableLengthStringSupport();
 } // namespace Hdf5Version
 } // namespace NexusGeometry
 } // namespace Mantid
-
-#endif // MANTIDHDF5_VERSION_H_

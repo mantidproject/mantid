@@ -24,5 +24,6 @@ class ScriptRepositoryTest(unittest.TestCase):
         display = ScriptRepositoryView()
         self.assertNotEqual(display, None)
 
+
 if __name__ == "__main__":
     unittest.main()

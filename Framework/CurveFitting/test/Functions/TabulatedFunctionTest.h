@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TABULATEDFUNCTIONTEST_H_
-#define TABULATEDFUNCTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -341,5 +340,3 @@ private:
   const std::string m_asciiFileName;
   const std::string m_nexusFileName;
 };
-
-#endif /*TABULATEDFUNCTIONTEST_H_*/

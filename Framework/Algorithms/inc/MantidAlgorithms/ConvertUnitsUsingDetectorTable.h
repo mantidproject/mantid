@@ -8,7 +8,7 @@
 
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
@@ -19,7 +19,7 @@ namespace Algorithms {
   values
   rather than those given by the instrument geometry.
 */
-class DLLExport ConvertUnitsUsingDetectorTable
+class MANTID_ALGORITHMS_DLL ConvertUnitsUsingDetectorTable
     : public ConvertUnits,
       public API::DeprecatedAlgorithm {
 public:

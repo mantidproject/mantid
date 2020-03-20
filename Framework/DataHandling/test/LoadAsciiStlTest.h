@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOAD_ASCIISTL_TEST_H_
-#define LOAD_ASCIISTL_TEST_H_
+#pragma once
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/LoadAsciiStl.h"
@@ -83,5 +82,3 @@ private:
   }
   const ScaleUnits units = ScaleUnits::metres;
 };
-
-#endif /* LOAD_ASCIISTL_TEST_H_ */

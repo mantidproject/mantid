@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -33,7 +34,7 @@ Required Properties:
 @author Anthony Lim
 @date 10/08/2017
 */
-class DLLExport PaddingAndApodization : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PaddingAndApodization : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PaddingAndApodization"; }

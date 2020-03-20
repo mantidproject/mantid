@@ -24,7 +24,7 @@ namespace Algorithms {
     @author Robert Dalgliesh, ISIS, RAL
     @date 12/1/2010
  */
-class DLLExport WeightedMean : public CommutativeBinaryOperation {
+class MANTID_ALGORITHMS_DLL WeightedMean : public CommutativeBinaryOperation {
 public:
   const std::string name() const override { return "WeightedMean"; }
   /// Summary of algorithms purpose

@@ -5,13 +5,15 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from docutils import statemachine
-from docutils.parsers.rst import Directive #pylint: disable=unused-import
+from docutils.parsers.rst import Directive  # pylint: disable=unused-import
 import re
+from mantiddoc import get_logger
 
 ALG_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$')
 FIT_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)$')
 
-#----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
 def algorithm_name_and_version(docname):
     """
     Returns the name and version of an algorithm based on the name of the
@@ -35,7 +37,8 @@ def algorithm_name_and_version(docname):
     if is_alg:
         match = ALG_DOCNAME_RE.match(docname)
         if not match or len(match.groups()) != 2:
-            raise RuntimeError("Document filename '%s.rst' does not match the expected format: AlgorithmName-vX.rst" % docname)
+            raise RuntimeError(
+                "Document filename '%s.rst' does not match the expected format: AlgorithmName-vX.rst" % docname)
 
         grps = match.groups()
         return (str(grps[0]), int(grps[1]))
@@ -44,16 +47,17 @@ def algorithm_name_and_version(docname):
     if is_fit:
         match = FIT_DOCNAME_RE.match(docname)
         if not match or len(match.groups()) != 1:
-            raise RuntimeError("Document filename '%s.rst' does not match the expected format: FitFunctionName.rst" % docname)
+            raise RuntimeError(
+                "Document filename '%s.rst' does not match the expected format: FitFunctionName.rst" % docname)
 
         return (str(match.groups()[0]), None)
 
     # fail now
     raise RuntimeError("Failed to find name from document filename ")
 
-#----------------------------------------------------------------------------------------
-class BaseDirective(Directive):
 
+# ----------------------------------------------------------------------------------------
+class BaseDirective(Directive):
     """
     Contains shared functionality for Mantid custom directives.
     """
@@ -100,13 +104,13 @@ class BaseDirective(Directive):
         Returns:
           str: ReST formatted header with algorithm_name as content.
         """
-        level_dict = {1:"=", 2:"-", 3:"#", 4:"^"}
+        level_dict = {1: "=", 2: "-", 3: "#", 4: "^"}
 
         if pagetitle:
             level = 1
         if level not in level_dict:
             env = self.state.document.settings.env
-            env.app.warn('base.make_header - Did not understand level ' +str(level))
+            env.app.warn('base.make_header - Did not understand level ' + str(level))
             level = 2
 
         line = "\n" + level_dict[level] * (len(name)) + "\n"
@@ -116,7 +120,8 @@ class BaseDirective(Directive):
         else:
             return name + line
 
-#----------------------------------------------------------------------------------------
+
+# ----------------------------------------------------------------------------------------
 
 class AlgorithmBaseDirective(BaseDirective):
     """
@@ -161,7 +166,7 @@ class AlgorithmBaseDirective(BaseDirective):
 
         name, version = self.algorithm_name(), self.algorithm_version()
         msg = ""
-        if version is None: # it is a fit function
+        if version is None:  # it is a fit function
             if name in FunctionFactory.getFunctionNames():
                 return ""
             else:
@@ -174,8 +179,8 @@ class AlgorithmBaseDirective(BaseDirective):
 
         # warn the user
         if len(msg) > 0:
-            env = self.state.document.settings.env
-            env.app.verbose(msg)
+            logger = get_logger(__name__, self.state.document.settings.env.app)
+            logger.verbose(msg)
         return msg
 
     def algorithm_name(self):

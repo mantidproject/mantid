@@ -808,5 +808,6 @@ class PowderILLEfficiency(PythonAlgorithm):
             RenameWorkspace(InputWorkspace=response_ws, OutputWorkspace=self._out_response)
             self.setProperty('OutputResponseWorkspace', self._out_response)
 
+
 #Register the algorithm with Mantid
 AlgorithmFactory.subscribe(PowderILLEfficiency)

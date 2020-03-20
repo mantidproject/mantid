@@ -5,11 +5,11 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef MANTID_CRYSTAL_PREDICTSATELLITEPEAKS_H_
-#define MANTID_CRYSTAL_PREDICTSATELLITEPEAKS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include "MantidKernel/System.h"
@@ -24,7 +24,7 @@ namespace Crystal {
     @date   2019-03-2019
 
 */
-class DLLExport PredictSatellitePeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL PredictSatellitePeaks : public API::Algorithm {
 public:
   PredictSatellitePeaks();
   /// Algorithm's name for identification
@@ -70,5 +70,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_PREDICTSATELLITEPEAKS */

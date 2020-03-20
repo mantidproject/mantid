@@ -4,12 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_PEAKCLUSTERPROJECTION_H_
-#define MANTID_CRYSTAL_PEAKCLUSTERPROJECTION_H_
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
@@ -26,7 +25,7 @@ namespace Crystal {
 /** PeakClusterProjection : Maps peaks onto IMDHistoWorkspaces and returns the
   signal value at the peak center.
 */
-class DLLExport PeakClusterProjection {
+class MANTID_CRYSTAL_DLL PeakClusterProjection {
 public:
   /// Constructor
   PeakClusterProjection(boost::shared_ptr<Mantid::API::IMDWorkspace> &mdWS);
@@ -58,5 +57,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_PEAKCLUSTERPROJECTION_H_ */

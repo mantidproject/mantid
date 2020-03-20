@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_VESUVIORESOLUTIONTEST_H_
-#define MANTID_CURVEFITTING_VESUVIORESOLUTIONTEST_H_
+#pragma once
 
 #include "MantidCurveFitting/Functions/VesuvioResolution.h"
 #include <cxxtest/TestSuite.h>
@@ -88,5 +87,3 @@ private:
     }
   }
 };
-
-#endif /* MANTID_CURVEFITTING_VESUVIORESOLUTIONTEST_H_ */

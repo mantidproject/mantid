@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_REDUCTIONOPTIONSMAP_H_
-#define MANTID_CUSTOMINTERFACES_REDUCTIONOPTIONSMAP_H_
+#pragma once
 #include <map>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -18,4 +17,3 @@ using ReductionOptionsMap = std::map<std::string, std::string>;
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_REDUCTIONOPTIONSMAP_H_

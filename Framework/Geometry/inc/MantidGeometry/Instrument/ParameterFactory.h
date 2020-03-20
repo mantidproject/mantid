@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_PARAMETERFACTORY_H_
-#define MANTID_GEOMETRY_PARAMETERFACTORY_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -76,5 +75,3 @@ void ParameterFactory::subscribe(const std::string &className) {
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /*MANTID_GEOMETRY_PARAMETERFACTORY_H_*/

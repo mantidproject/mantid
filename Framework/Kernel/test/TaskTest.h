@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TASKTEST_H_
-#define TASKTEST_H_
+#pragma once
 
 #include "MantidKernel/Task.h"
 #include "MantidKernel/Timer.h"
@@ -41,5 +40,3 @@ public:
     TS_ASSERT_EQUALS(mut, t.getMutex());
   }
 };
-
-#endif

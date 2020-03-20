@@ -7,14 +7,14 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
 
 /** CalculateZscore : Calculate Zscore for a Matrix Workspace
  */
-class DLLExport CalculateZscore : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CalculateZscore : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CalculateZscore"; }

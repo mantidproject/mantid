@@ -51,7 +51,7 @@ is in (default: the start of each spectrum)</LI>
 this x value (default: the end of each spectrum)</LI>
 </UL>
 */
-class DLLExport MedianDetectorTest : public DetectorDiagnostic {
+class MANTID_ALGORITHMS_DLL MedianDetectorTest : public DetectorDiagnostic {
 public:
   /// Default constructor initialises all values to zero and runs the base class
   /// constructor

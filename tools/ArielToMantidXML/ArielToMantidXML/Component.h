@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COMPONENT_H_
-#define COMPONENT_H_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -58,5 +57,3 @@ private:
   double m_r, m_theta, m_phi;
   //Mantid::Geometry::V3D m_pos;
 };
-
-#endif

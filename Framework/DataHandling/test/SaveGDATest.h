@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVEGDATEST_H_
-#define MANTID_DATAHANDLING_SAVEGDATEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -314,5 +313,3 @@ const std::string SaveGDATest::PARAMS_FILE_TEXT =
     "INS  2PRCF 2   0.000000E+00   0.151242E+03   0.103200E+02   0.000000E+00\n"
     "INS  2PRCF 3   0.000000E+00   0.000000E+00   0.000000E+00\n"
     "0.000000E+00\n";
-
-#endif // MANTID_DATAHANDLING_SAVEGDATEST_H_

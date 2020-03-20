@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_COLLECTIVESTEST_H_
-#define MANTID_PARALLEL_COLLECTIVESTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -86,5 +85,3 @@ public:
 
   void test_all_to_all() { ParallelTestHelpers::runParallel(run_all_to_all); }
 };
-
-#endif /* MANTID_PARALLEL_COLLECTIVESTEST_H_ */

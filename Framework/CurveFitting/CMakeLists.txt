@@ -203,7 +203,6 @@ set(INC_FILES
     inc/MantidCurveFitting/CostFunctions/CostFuncRwp.h
     inc/MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h
     inc/MantidCurveFitting/CostFunctions/CostFuncPoisson.h
-    inc/MantidCurveFitting/DllConfig.h
     inc/MantidCurveFitting/ExcludeRangeFinder.h
     inc/MantidCurveFitting/FitMW.h
     inc/MantidCurveFitting/FortranDefs.h
@@ -523,6 +522,10 @@ target_link_libraries(CurveFitting
 
 # Add the unit tests directory
 add_subdirectory(test)
+
+# Auto-generate exports header
+target_include_directories(CurveFitting PUBLIC ${CMAKE_BINARY_DIR}/Framework/CurveFitting)
+generate_mantid_export_header(CurveFitting FALSE)
 
 # Installation settings
 

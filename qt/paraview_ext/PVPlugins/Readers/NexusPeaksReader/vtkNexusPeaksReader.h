@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef _vtkEventNexusReader_h
-#define _vtkEventNexusReader_h
+#pragma once
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidVatesAPI/vtkPolyDataAlgorithm_Silent.h"
 
@@ -61,4 +60,3 @@ private:
   /// Int representing an enum for q_lab, etc.
   int m_dimensions;
 };
-#endif

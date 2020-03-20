@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDBOX_H_
-#define MDBOX_H_
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/MDBoxBase.h"
@@ -300,5 +299,3 @@ public:
 } // namespace DataObjects
 
 } // namespace Mantid
-
-#endif /* MDBOX_H_ */

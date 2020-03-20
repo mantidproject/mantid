@@ -70,7 +70,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 02/12/2008
 */
-class DLLExport CylinderAbsorption : public AbsorptionCorrection {
+class MANTID_ALGORITHMS_DLL CylinderAbsorption : public AbsorptionCorrection {
 public:
   /// Default constructor
   CylinderAbsorption();

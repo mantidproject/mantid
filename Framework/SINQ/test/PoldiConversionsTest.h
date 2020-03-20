@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef POLDICONVERSIONSTEST_H
-#define POLDICONVERSIONSTEST_H
+#pragma once
 
 #include "MantidSINQ/PoldiUtilities/PoldiConversions.h"
 #include <cxxtest/TestSuite.h>
@@ -61,5 +60,3 @@ public:
                      degree);
   }
 };
-
-#endif // POLDICONVERSIONSTEST_H

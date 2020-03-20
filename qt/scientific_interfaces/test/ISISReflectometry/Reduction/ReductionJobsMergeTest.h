@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_REDUCTIONJOBSMERGETEST_H_
-#define MANTID_CUSTOMINTERFACES_REDUCTIONJOBSMERGETEST_H_
+#pragma once
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "Common/ZipRange.h"
 #include "Reduction/ReductionJobs.h"
@@ -338,4 +337,3 @@ public:
 private:
   double m_thetaTolerance;
 };
-#endif // MANTID_CUSTOMINTERFACES_REDUCTIONJOBSMERGETEST_H_

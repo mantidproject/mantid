@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDQT_API_NON_ORTHOGONAL_H_
-#define MANTID_MANTIDQT_API_NON_ORTHOGONAL_H_
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/Matrix.h"
@@ -65,5 +64,3 @@ getGridLineAnglesInRadian(const std::array<Mantid::coord_t, 9> &skewMatrixCoord,
                           size_t dimX, size_t dimY);
 } // namespace API
 } // namespace MantidQt
-
-#endif

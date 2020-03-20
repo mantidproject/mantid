@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FUNCTIONADAPTERTESTCOMMON_H
-#define FUNCTIONADAPTERTESTCOMMON_H
+#pragma once
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -111,5 +110,3 @@ private:
 };
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif // FUNCTIONADAPTERTESTCOMMON_H

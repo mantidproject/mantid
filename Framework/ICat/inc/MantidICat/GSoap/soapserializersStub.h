@@ -14,8 +14,7 @@ This program is released under the GPL with the additional exemption that
 compiling, linking, and/or using OpenSSL is allowed.
 */
 
-#ifndef soapserializersStub_H
-#define soapserializersStub_H
+#pragma once
 #include "stdsoap2.h"
 #if GSOAP_VERSION != 20815
 #error "GSOAP VERSION MISMATCH IN GENERATED CODE: PLEASE REINSTALL PACKAGE"
@@ -165,7 +164,3 @@ using _XML = char *;
  * Externals                                                                  *
  *                                                                            *
 \******************************************************************************/
-
-#endif
-
-/* End of soapserializersStub.h */

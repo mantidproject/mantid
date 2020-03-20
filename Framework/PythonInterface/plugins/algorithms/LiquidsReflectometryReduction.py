@@ -65,14 +65,14 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the background for the normalization")
         self.declareProperty("LowResDataAxisPixelRangeFlag", True,
-                             doc="If true, the low resolution direction of the data will be cropped according "+
-                             "to the lowResDataAxisPixelRange property")
+                             doc="If true, the low resolution direction of the data will be cropped according "
+                                 + "to the lowResDataAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResDataAxisPixelRange", [115, 210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range to use in the low resolution direction of the data")
         self.declareProperty("LowResNormAxisPixelRangeFlag", True,
-                             doc="If true, the low resolution direction of the normalization run will be cropped "+
-                             "according to the LowResNormAxisPixelRange property")
+                             doc="If true, the low resolution direction of the normalization run will be cropped "
+                                 + "according to the LowResNormAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResNormAxisPixelRange", [115, 210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range to use in the low resolution direction of the normalizaion run")

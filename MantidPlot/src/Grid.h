@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef GRID_H
-#define GRID_H
+#pragma once
 
 #include <qwt_plot.h>
 #include <qwt_plot_grid.h>
@@ -68,5 +67,3 @@ private:
 
   int mrkX, mrkY; // x=0 et y=0 line markers keys
 };
-
-#endif

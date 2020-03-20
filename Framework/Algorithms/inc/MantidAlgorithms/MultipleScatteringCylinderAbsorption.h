@@ -24,7 +24,7 @@ namespace Algorithms {
     @author Dennis Mikkelson
     @date 17/08/2010
  */
-class DLLExport MultipleScatteringCylinderAbsorption
+class MANTID_ALGORITHMS_DLL MultipleScatteringCylinderAbsorption
     : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method

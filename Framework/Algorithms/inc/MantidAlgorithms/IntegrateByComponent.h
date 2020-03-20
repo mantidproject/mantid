@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -15,7 +15,7 @@ namespace Algorithms {
 /** IntegrateByComponent : The algorithm integrates up the instrument hierarchy,
   and each pixel will contain the average value for the component
 */
-class DLLExport IntegrateByComponent : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL IntegrateByComponent : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

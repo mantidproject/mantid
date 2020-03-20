@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DOUBLEEDITORFACTORY_H
-#define DOUBLEEDITORFACTORY_H
+#pragma once
 
 #include "ParameterPropertyManager.h"
 #include "qtpropertymanager.h"
@@ -101,5 +100,3 @@ public:
       : DoubleEditorFactoryBase<ParameterPropertyManager, ParameterEditor>(
             parent) {}
 };
-
-#endif // DOUBLEEDITORFACTORY_H

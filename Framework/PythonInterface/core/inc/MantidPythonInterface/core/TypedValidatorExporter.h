@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_TYPEDVALIDATOREXPORTER_H_
-#define MANTID_PYTHONINTERFACE_TYPEDVALIDATOREXPORTER_H_
+#pragma once
 
 #include "MantidKernel/TypedValidator.h"
 #include <boost/python/class.hpp>
@@ -33,5 +32,3 @@ template <typename Type> struct TypedValidatorExporter {
 #define EXPORT_TYPEDVALIDATOR(Type)
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif // MANTID_PYTHONINTERFACE_TYPEDVALIDATOREXPORTER_H_

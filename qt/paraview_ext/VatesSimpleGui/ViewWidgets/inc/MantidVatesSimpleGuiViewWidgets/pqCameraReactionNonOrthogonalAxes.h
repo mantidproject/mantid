@@ -42,8 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  @date 19/04/2017
 */
 
-#ifndef pqCameraReactionNonOrthogonalAxes_h
-#define pqCameraReactionNonOrthogonalAxes_h
+#pragma once
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "pqReaction.h"
@@ -104,5 +103,3 @@ protected:
 private:
   Mode ReactionMode;
 };
-
-#endif

@@ -11,8 +11,7 @@
  *      Author: janik
  */
 
-#ifndef TIMESPLITTERTEST_H_
-#define TIMESPLITTERTEST_H_
+#pragma once
 
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
@@ -546,5 +545,3 @@ public:
     TS_ASSERT_EQUALS(index2, 2);
   }
 };
-
-#endif /* TIMESPLITTERTEST_H_ */

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,7 +18,7 @@ namespace Algorithms {
   @author Janik Zikovsky
   @date 2011-08-23
 */
-class DLLExport ConvertToEventWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConvertToEventWorkspace : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ConvertToEventWorkspace"; };

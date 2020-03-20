@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PARAVIEWPROGRESSACTION_H_
-#define PARAVIEWPROGRESSACTION_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -44,5 +43,3 @@ private:
 };
 } // namespace VATES
 } // namespace Mantid
-
-#endif /* PARAVIEWPROGRESSACTION_H_ */

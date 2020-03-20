@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDIFITPEAKS1DTEST_H_
-#define MANTID_SINQ_POLDIFITPEAKS1DTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -125,5 +124,3 @@ private:
   std::string m_profileTestFunction;
   IFunction_sptr m_backgroundTestFunction;
 };
-
-#endif /* MANTID_SINQ_POLDIFITPEAKS1DTEST_H_ */

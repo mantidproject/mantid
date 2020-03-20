@@ -4,11 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_GENERALDOMAINCREATOR_H_
-#define MANTID_CURVEFITTING_GENERALDOMAINCREATOR_H_
+#pragma once
 
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -45,7 +45,8 @@ namespace CurveFitting {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class DLLExport GeneralDomainCreator : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL GeneralDomainCreator
+    : public API::IDomainCreator {
 public:
   GeneralDomainCreator(const API::IFunctionGeneral &fun,
                        Kernel::IPropertyManager &manager,
@@ -87,5 +88,3 @@ private:
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_GENERALDOMAINCREATOR_H_ */

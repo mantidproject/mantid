@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADINSTRUMENTTEST_H_
-#define LOADINSTRUMENTTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -948,5 +947,3 @@ public:
 
   void test_SNAP() { doTest("SNAP_Definition.xml", 1); }
 };
-
-#endif /*LOADINSTRUMENTTEST_H_*/

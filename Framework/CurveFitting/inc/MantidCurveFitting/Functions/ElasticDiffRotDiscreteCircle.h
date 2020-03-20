@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ELASTICDIFFROTDISCRETECIRCLE_H_
-#define MANTID_ELASTICDIFFROTDISCRETECIRCLE_H_
+#pragma once
 
 // Mantid Coding standards <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -26,8 +25,9 @@ namespace Functions {
 /* Class representing the elastic portion of DiffRotDiscreteCircle
  * Contains a Delta Dirac.
  */
-class DLLExport ElasticDiffRotDiscreteCircle : public DeltaFunction,
-                                               public FunctionQDepends {
+class MANTID_CURVEFITTING_DLL ElasticDiffRotDiscreteCircle
+    : public DeltaFunction,
+      public FunctionQDepends {
 public:
   /// Constructor
   ElasticDiffRotDiscreteCircle();
@@ -47,5 +47,3 @@ public:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif // MANTID_ELASTICDIFFROTDISCRETECIRCLE_H_

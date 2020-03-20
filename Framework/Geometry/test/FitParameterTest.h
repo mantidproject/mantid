@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FITPARAMETERTEST_H_
-#define FITPARAMETERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <sstream>
@@ -123,5 +122,3 @@ public:
     TS_ASSERT(fitP.getConstraint().compare("3 < name < 8") == 0);
   }
 };
-
-#endif /*FITPARAMETERTEST_H_*/

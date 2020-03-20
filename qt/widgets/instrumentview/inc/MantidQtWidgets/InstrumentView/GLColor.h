@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GLCOLOR_H_
-#define GLCOLOR_H_
+#pragma once
 
 #include <iosfwd>
 
@@ -55,5 +54,3 @@ private:
 std::ostream &operator<<(std::ostream &ostr, const GLColor &c);
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*GLCOLOR_H_*/

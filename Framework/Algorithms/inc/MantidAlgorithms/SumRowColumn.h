@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -45,7 +46,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella plc
     @date 22/06/2009
 */
-class DLLExport SumRowColumn : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SumRowColumn : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SumRowColumn"; }

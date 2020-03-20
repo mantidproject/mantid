@@ -97,7 +97,7 @@ print("Opening Urls...")
 delay = args.open_tab_delay
 
 if delay is None:
-        delay = 1
+    delay = 1
 
 open_urls(all_urls, delay)
 print("All URLs opened")

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_MOCKJOBTREEVIEW_H_
-#define MANTIDQTMANTIDWIDGETS_MOCKJOBTREEVIEW_H_
+#pragma once
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 #include <gmock/gmock.h>
@@ -94,4 +93,3 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_MOCKJOBTREEVIEW_H_

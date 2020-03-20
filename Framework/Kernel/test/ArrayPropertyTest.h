@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ARRAYPROPERTYTEST_H_
-#define ARRAYPROPERTYTEST_H_
+#pragma once
 
 #include "MantidKernel/ArrayProperty.h"
 #include <array>
@@ -426,5 +425,3 @@ private:
   ArrayProperty<double> *dProp;
   ArrayProperty<std::string> *sProp;
 };
-
-#endif /*ARRAYPROPERTYTEST_H_*/

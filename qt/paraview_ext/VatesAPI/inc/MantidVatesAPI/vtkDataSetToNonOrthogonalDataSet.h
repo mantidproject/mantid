@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_VTKDATASETTONONORTHOGONALDATASET_H_
-#define MANTID_VATES_VTKDATASETTONONORTHOGONALDATASET_H_
+#pragma once
 
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Matrix.h"
@@ -80,5 +79,3 @@ private:
 
 } // namespace VATES
 } // namespace Mantid
-
-#endif /* MANTID_VATES_VTKDATASETTONONORTHOGONALDATASET_H_ */

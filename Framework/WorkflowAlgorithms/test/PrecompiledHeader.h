@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_WORKFLOWALGORITHMSTEST_PRECOMPILEDHEADER_H_
-#define MANTID_WORKFLOWALGORITHMSTEST_PRECOMPILEDHEADER_H_
+#pragma once
 
 // cxxtest
 #include <cxxtest/WrappedTestSuite.h>
@@ -14,5 +13,3 @@
 #include <set>
 #include <string>
 #include <vector>
-
-#endif // MANTID_WORKFLOWALGORITHMS

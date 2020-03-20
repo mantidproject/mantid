@@ -4,10 +4,10 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_COMBINEPEAKSWORKSPACES_H_
-#define MANTID_CRYSTAL_COMBINEPEAKSWORKSPACES_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -21,7 +21,7 @@ namespace Crystal {
    given lhs peak if
     the tolerance is too large/the peaks are close together.
 */
-class DLLExport CombinePeaksWorkspaces : public API::Algorithm {
+class MANTID_CRYSTAL_DLL CombinePeaksWorkspaces : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -43,5 +43,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_COMBINEPEAKSWORKSPACES_H_ */

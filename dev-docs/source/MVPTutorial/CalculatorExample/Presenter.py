@@ -47,5 +47,5 @@ class Presenter(object):
         result = self.model.calc(value1, operation, value2)
 
         if self.printToScreen:
-            print result
+            print(result)
         self.view.setResult(result)

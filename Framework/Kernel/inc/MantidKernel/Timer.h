@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_TIMER_H_
-#define MANTID_KERNEL_TIMER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -41,5 +40,3 @@ MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const Timer &);
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* TIMER_H_ */

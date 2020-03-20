@@ -152,8 +152,8 @@ class LoadDNSLegacy(PythonAlgorithm):
         pol = self.get_polarisation(metadata, poltable)
         if not pol:
             pol = ['0', 'undefined']
-            self.log().warning("Failed to determine polarisation for " + filename +
-                               ". Values have been set to undefined.")
+            self.log().warning("Failed to determine polarisation for "
+                               + filename + ". Values have been set to undefined.")
         ndet = 24
         unitX="Wavelength"
         arr = data_array[0:ndet, 1:]

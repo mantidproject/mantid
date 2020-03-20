@@ -183,4 +183,5 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         if float(liveValues['Theta'].value) <= 1e-06:
             raise RuntimeError('Theta must be greater than zero')
 
+
 AlgorithmFactory.subscribe(ReflectometryReductionOneLiveData)

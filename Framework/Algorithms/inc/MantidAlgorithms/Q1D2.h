@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -22,7 +23,7 @@ namespace Algorithms {
     @author Steve Williams ISIS Rutherford Appleton Laboratory
     @date 10/12/2010
 */
-class DLLExport Q1D2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Q1D2 : public API::Algorithm {
 public:
   /// Default constructor
   Q1D2();
