@@ -348,6 +348,26 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
 
         self.view.plot_options.set_plot_y_range.assert_not_called()
 
+    def test_handle_changed_to_tiled_plots_replots_previous_workspaces(self):
+        workspace_list = self.group_workspace_list
+        self.model.plotted_workspaces = workspace_list
+        self.model.plotted_fit_workspaces = []
+        self.presenter.plot_data_and_fit_workspaces = mock.MagicMock()
+
+        self.presenter.handle_plot_tiled_changed(state=2)
+
+        self.presenter.plot_data_and_fit_workspaces.assert_called_with(workspace_list, [])
+
+    def test_handle_changed_tiled_plot_type_replots_previous_workspaces(self):
+        workspace_list = self.group_workspace_list
+        self.model.plotted_workspaces = workspace_list
+        self.model.plotted_fit_workspaces = []
+        self.presenter.plot_data_and_fit_workspaces = mock.MagicMock()
+
+        self.presenter.handle_tiled_by_changed_on_view(1)
+
+        self.presenter.plot_data_and_fit_workspaces.assert_called_with(workspace_list, [])
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

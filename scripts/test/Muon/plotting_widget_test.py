@@ -353,6 +353,44 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
         self.model.replot_workspace.assert_any_call(workspaces[0], self.view.get_axes()[0], errors, mock.ANY)
         self.model.replot_workspace.assert_called_with(workspaces[1], self.view.get_axes()[0], errors, mock.ANY)
 
+    def test_handle_plot_all_data_and_fit_workspaces_calls_add_plot_correctly(self):
+        workspaces = ["fwd", "bwd"]
+        self.presenter.get_workspace_legend_label = mock.MagicMock(return_value='label')
+        self.model.add_workspace_to_plot.assert_not_called()
+
+        self.presenter.plot_data_and_fit_workspaces(workspace_list=workspaces, fit_workspace_list=[])
+
+        self.assertEqual(self.model.add_workspace_to_plot.call_count, len(workspaces))
+        self.model.add_workspace_to_plot.assert_any_call(self.view.get_axes()[0], workspaces[0], [0], errors=True,
+                                                         plot_kwargs=mock.ANY)
+        self.model.add_workspace_to_plot.assert_called_with(self.view.get_axes()[0], workspaces[1], [0], errors=True,
+                                                            plot_kwargs=mock.ANY)
+
+    def test_handle_plot_all_data_and_fit_workspaces_adds_fit_workspaces_correctly(self):
+        fit_workspaces = ['MUSR62260; Group; bottom; Asymmetry; MA; Fitted;']
+        self.context.fitting_context.number_of_fits = 1
+
+        self.presenter.plot_data_and_fit_workspaces(workspace_list=[], fit_workspace_list=fit_workspaces)
+
+        # check fit and diff workspaces plotted
+        self.assertEqual(self.model.add_workspace_to_plot.call_count, 2)
+        self.model.add_workspace_to_plot.assert_any_call(self.view.get_axes()[0],
+                                                         'MUSR62260; Group; bottom; Asymmetry; MA; Fitted;', [1],
+                                                         errors=False, plot_kwargs=mock.ANY)
+        self.model.add_workspace_to_plot.assert_called_with(self.view.get_axes()[0],
+                                                            'MUSR62260; Group; bottom; Asymmetry; MA; Fitted;', [2],
+                                                            errors=False, plot_kwargs=mock.ANY)
+
+    def test_handle_plot_all_data_and_fit_workspaces_does_not_replot_existing_data(self):
+        workspaces = ["fwd", "bwd"]
+        self.model.plotted_workspaces = ["fwd", "bwd"]
+        self.presenter.get_workspace_legend_label = mock.MagicMock(return_value='label')
+        self.model.add_workspace_to_plot.assert_not_called()
+
+        self.presenter.plot_data_and_fit_workspaces(workspace_list=workspaces, fit_workspace_list=[])
+
+        self.model.add_workspace_to_plot.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
