@@ -87,7 +87,6 @@ public:
 
   void test_Assignment_By_SharedPtr() {
     FunctionProperty prop("fun");
-    std::string error;
     auto fun_p = FunctionFactory::Instance().createInitialized(
         createTestFunctionString());
     TS_ASSERT(fun_p);

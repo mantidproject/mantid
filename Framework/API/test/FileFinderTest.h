@@ -215,7 +215,6 @@ public:
   }
 
   void testGetInstrument() {
-    std::string name; // place to put results
     ConfigService::Instance().setFacility("ISIS");
     ConfigService::Instance().setString("default.instrument", "HRPD");
 
