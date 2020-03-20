@@ -765,5 +765,6 @@ class FigureInteraction(object):
         for ax in self.canvas.figure.get_axes():
             images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
             for image in images:
-                datafunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin, image.norm.vmax)
+                if image.norm.vmin is not None and image.norm.vmax is not None:
+                    datafunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin, image.norm.vmax)
         self.canvas.draw_idle()

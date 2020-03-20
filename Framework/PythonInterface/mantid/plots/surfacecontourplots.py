@@ -18,8 +18,6 @@ from mantid.plots.utility import get_single_workspace_log_value
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import pcolormesh
 
-DEFAULT_CONTOUR_LEVELS = [0.2, 0.4, 0.6, 0.8]
-
 
 def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name: str, custom_log_values: List[float],
          workspaces: List[Workspace]) -> None:
@@ -45,10 +43,7 @@ def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name:
             fig = pcolormesh([matrix_ws])
             ax = fig.get_axes()[0]
 
-            array = fig.get_axes()[1].collections[0].get_array()
-            levels = [array.max() * value for value in DEFAULT_CONTOUR_LEVELS]
-
-            ax.contour(matrix_ws, levels=levels, colors='k', linewidths=0.5)
+            ax.contour(matrix_ws, colors='k', linewidths=0.5)
 
             ax.set_ylabel(axis_name)
             ax.set_title("Contour" + title)
