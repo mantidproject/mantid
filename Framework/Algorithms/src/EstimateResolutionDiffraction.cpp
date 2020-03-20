@@ -96,7 +96,6 @@ void EstimateResolutionDiffraction::init() {
                   "Workspaces created showing the various resolution terms");
 }
 
-
 void EstimateResolutionDiffraction::exec() {
   processAlgProperties();
 
@@ -131,7 +130,6 @@ void EstimateResolutionDiffraction::exec() {
   setProperty("PartialResolutionWorkspaces", partialsGroup);
 }
 
-
 void EstimateResolutionDiffraction::processAlgProperties() {
   m_inputWS = getProperty("InputWorkspace");
   m_divergenceWS = getProperty("DivergenceWorkspace");
@@ -165,7 +163,6 @@ double EstimateResolutionDiffraction::getWavelength() {
   return cwltimeseries->timeAverageValue();
 }
 
-
 void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   double centrewavelength = getWavelength();
   g_log.notice() << "Centre wavelength = " << centrewavelength << " Angstrom\n";
@@ -177,7 +174,6 @@ void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   m_centreVelocity = WAVELENGTH_TO_VELOCITY / centrewavelength;
   g_log.notice() << "Centre neutron velocity = " << m_centreVelocity << "\n";
 }
-
 
 void EstimateResolutionDiffraction::estimateDetectorResolution() {
   const auto &spectrumInfo = m_inputWS->spectrumInfo();

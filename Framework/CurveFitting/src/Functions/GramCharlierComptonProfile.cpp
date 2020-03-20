@@ -73,7 +73,6 @@ struct InY {
 ///@endcond
 } // namespace
 
-
 GramCharlierComptonProfile::GramCharlierComptonProfile()
     : ComptonProfile(), m_hermite(), m_yfine(), m_qfine(), m_voigt(),
       m_voigtProfile(), m_userFixedFSE(false) {}
@@ -85,7 +84,6 @@ std::string GramCharlierComptonProfile::name() const {
   return "GramCharlierComptonProfile";
 }
 
-
 void GramCharlierComptonProfile::declareParameters() {
   // Base class ones
   ComptonProfile::declareParameters();
@@ -93,7 +91,6 @@ void GramCharlierComptonProfile::declareParameters() {
   declareParameter(KFSE_NAME, 1.0, "FSE coefficient k");
   // Other parameters depend on the Hermite attribute...
 }
-
 
 void GramCharlierComptonProfile::declareAttributes() {
   // Base class ones
@@ -160,7 +157,6 @@ void GramCharlierComptonProfile::declareGramCharlierParameters() {
     }
   }
 }
-
 
 std::vector<size_t>
 GramCharlierComptonProfile::intensityParameterIndices() const {

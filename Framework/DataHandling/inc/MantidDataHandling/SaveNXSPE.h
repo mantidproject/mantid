@@ -7,10 +7,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 //
- *
- */
+** /
 
-class DLLExport SaveNXSPE : public API::Algorithm {
+    class DLLExport SaveNXSPE : public API::Algorithm {
 public:
   /// Constructor
   SaveNXSPE();

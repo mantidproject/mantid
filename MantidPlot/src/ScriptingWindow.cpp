@@ -319,7 +319,6 @@ void ScriptingWindow::populateHelpMenu() {
   m_helpMenu->addAction(m_showPythonHelp);
 }
 
-
 void ScriptingWindow::updateWindowFlags() {
   Qt::WindowFlags flags = Qt::Window;
   if (m_alwaysOnTop->isChecked()) {
@@ -419,7 +418,6 @@ void ScriptingWindow::executeSelection() {
  * Ask the manager to abort the script execution for the current script.
  */
 void ScriptingWindow::abortCurrent() { m_manager->abortCurrentScript(); }
-
 
 void ScriptingWindow::clearScriptVariables() {
   m_manager->clearScriptVariables();

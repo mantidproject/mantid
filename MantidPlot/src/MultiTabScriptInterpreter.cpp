@@ -304,7 +304,6 @@ void MultiTabScriptInterpreter::evaluate() {
   QMessageBox::information(this, "MantidPlot", "Evaluate is not implemented.");
 }
 
-
 void MultiTabScriptInterpreter::clearScriptVariables() {
   m_current->clearVariables();
 }

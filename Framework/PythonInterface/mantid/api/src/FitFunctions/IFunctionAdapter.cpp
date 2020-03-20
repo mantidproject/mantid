@@ -107,7 +107,6 @@ const std::string IFunctionAdapter::category() const {
   }
 }
 
-
 void IFunctionAdapter::init() { callMethodNoCheck<void>(getSelf(), "init"); }
 
 /**

@@ -176,7 +176,6 @@ FileLoaderRegistryImpl::FileLoaderRegistryImpl()
     : m_names(2, std::multimap<std::string, int>()), m_totalSize(0),
       m_log("FileLoaderRegistry") {}
 
-
 FileLoaderRegistryImpl::~FileLoaderRegistryImpl() = default;
 
 /**

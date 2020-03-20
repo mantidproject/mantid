@@ -15,7 +15,7 @@ namespace Mantid {
 namespace Geometry {
 class BoundingBox;
 /** MeshObjectCommon : Performs functions common to 3D and 2D closed meshes
-*/
+ */
 namespace MeshObjectCommon {
 
 MANTID_GEOMETRY_DLL std::vector<double>

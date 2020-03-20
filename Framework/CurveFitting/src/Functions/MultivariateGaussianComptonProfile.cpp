@@ -25,7 +25,6 @@ const char *MultivariateGaussianComptonProfile::SIGMA_Y_PARAM = "SigmaY";
 const char *MultivariateGaussianComptonProfile::SIGMA_Z_PARAM = "SigmaZ";
 const char *MultivariateGaussianComptonProfile::STEPS_ATTR = "IntegrationSteps";
 
-
 MultivariateGaussianComptonProfile::MultivariateGaussianComptonProfile()
     : ComptonProfile(), m_integrationSteps(256), m_thetaStep(0.0),
       m_phiStep(0.0) {}
@@ -37,7 +36,6 @@ std::string MultivariateGaussianComptonProfile::name() const {
   return "MultivariateGaussianComptonProfile";
 }
 
-
 void MultivariateGaussianComptonProfile::declareParameters() {
   ComptonProfile::declareParameters();
   declareParameter(AMP_PARAM, 1.0, "Gaussian intensity parameter");
@@ -45,7 +43,6 @@ void MultivariateGaussianComptonProfile::declareParameters() {
   declareParameter(SIGMA_Y_PARAM, 1.0, "Sigma Y parameter");
   declareParameter(SIGMA_Z_PARAM, 1.0, "Sigma Z parameter");
 }
-
 
 void MultivariateGaussianComptonProfile::declareAttributes() {
   ComptonProfile::declareAttributes();
@@ -75,7 +72,6 @@ void MultivariateGaussianComptonProfile::setAttribute(const std::string &name,
     m_phiStep = (M_PI / 2.0) / steps;
   }
 }
-
 
 std::vector<size_t>
 MultivariateGaussianComptonProfile::intensityParameterIndices() const {

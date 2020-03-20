@@ -76,7 +76,6 @@ void Tile::removeWidget() {
   m_widget = nullptr;
 }
 
-
 void Tile::paintEvent(QPaintEvent *ev) {
   QPainter painter(this);
   QRect bkGround = this->rect().adjusted(0, 0, -1, -1);

@@ -23,7 +23,6 @@ namespace MantidWidgets {
 QtSignalChannel::QtSignalChannel(const QString &source)
     : QObject(), Poco::Channel(), m_source(source) {}
 
-
 QtSignalChannel::~QtSignalChannel() {}
 
 /**

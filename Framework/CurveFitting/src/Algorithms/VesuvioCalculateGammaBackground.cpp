@@ -500,7 +500,6 @@ void VesuvioCalculateGammaBackground::createOutputWorkspaces() {
   m_correctedWS = WorkspaceFactory::Instance().create(m_inputWS, nhist);
 }
 
-
 void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
   auto inst = m_inputWS->getInstrument();
   auto refFrame = inst->getReferenceFrame();

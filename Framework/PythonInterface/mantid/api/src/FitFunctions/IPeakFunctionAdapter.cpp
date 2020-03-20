@@ -21,11 +21,9 @@ using namespace boost::python;
 IPeakFunctionAdapter::IPeakFunctionAdapter(PyObject *self)
     : IFunctionAdapter(self, "functionLocal", "functionDerivLocal") {}
 
-
 double IPeakFunctionAdapter::centre() const {
   return callMethodNoCheck<double>(getSelf(), "centre");
 }
-
 
 double IPeakFunctionAdapter::height() const {
   return callMethodNoCheck<double>(getSelf(), "height");

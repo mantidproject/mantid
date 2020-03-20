@@ -149,7 +149,6 @@ void LoadLLB::initWorkSpace(NeXus::NXEntry &entry) {
   m_localWorkspace->setYUnitLabel("Counts");
 }
 
-
 void LoadLLB::loadTimeDetails(NeXus::NXEntry &entry) {
 
   m_wavelength = entry.getFloat("nxbeam/incident_wavelength");

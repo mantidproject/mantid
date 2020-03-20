@@ -25,7 +25,6 @@ namespace SliceViewer {
 class ProxyCompositePeaksPresenter;
 class PeaksWorkspaceWidget;
 
-
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeaksViewer : public QWidget,
                                                     public UpdateableOnDemand {
   Q_OBJECT

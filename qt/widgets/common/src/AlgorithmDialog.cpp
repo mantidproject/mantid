@@ -814,7 +814,6 @@ void AlgorithmDialog::removeAlgorithmFromManager() {
   AlgorithmManager::Instance().removeById(m_algorithm->getAlgorithmID());
 }
 
-
 void AlgorithmDialog::enableExitButton() { m_exitButton->setEnabled(true); }
 
 //------------------------------------------------------

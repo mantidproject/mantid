@@ -65,7 +65,6 @@ void LoadDetectorInfo::init() {
                   Direction::Input);
 }
 
-
 void LoadDetectorInfo::exec() {
   cacheInputs();
   std::string filename = getPropertyValue("DataFilename");

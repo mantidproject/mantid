@@ -304,7 +304,6 @@ void ConvertToYSpace::createOutputWorkspace() {
   }
 }
 
-
 void ConvertToYSpace::cacheInstrumentGeometry() {
   auto inst = m_inputWS->getInstrument();
   auto source = inst->getSource();

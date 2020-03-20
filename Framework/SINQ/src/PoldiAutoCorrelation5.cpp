@@ -58,8 +58,6 @@ void PoldiAutoCorrelation5::init() {
       new PoldiAutoCorrelationCore(g_log));
 }
 
-
-
 /** Executes the algorithm. Reading in the file and creating and populating
  *  the output workspace
  *

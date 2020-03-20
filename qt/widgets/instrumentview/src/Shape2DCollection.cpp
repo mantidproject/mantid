@@ -128,7 +128,6 @@ void Shape2DCollection::removeShapes(const QList<Shape2D *> &shapeList) {
   }
 }
 
-
 void Shape2DCollection::setWindow(const RectF &surface,
                                   const QRect &viewport) const {
   m_viewport = viewport;

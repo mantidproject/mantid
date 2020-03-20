@@ -28,7 +28,6 @@ const char *MASS_NAME = "Mass";
 ///@endcond
 } // namespace
 
-
 ComptonProfile::ComptonProfile()
     : API::ParamFunction(), API::IFunction1D(), m_log("ComptonProfile"),
       m_wsIndex(0), m_startX(0.0), m_endX(0.0), m_voigt(),
@@ -148,7 +147,6 @@ void ComptonProfile::cacheYSpaceValues(
                                 k1, v1, detpar);
   }
 }
-
 
 void ComptonProfile::declareParameters() {
   declareParameter(MASS_NAME, 0.0, "Atomic mass (amu)");

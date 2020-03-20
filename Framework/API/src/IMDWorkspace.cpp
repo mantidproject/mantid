@@ -96,7 +96,6 @@ signal_t IMDWorkspace::getSignalWithMaskAtVMD(
 
 //-----------------------------------------------------------------------------------------------
 
-
 const std::string IMDWorkspace::toString() const {
   std::ostringstream os;
   os << id() << "\n"

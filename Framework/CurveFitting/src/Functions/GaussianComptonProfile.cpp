@@ -24,7 +24,6 @@ const char *AMP_PARAM = "Intensity";
 
 const double STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
 
-
 GaussianComptonProfile::GaussianComptonProfile() : ComptonProfile() {}
 
 /**
@@ -34,13 +33,11 @@ std::string GaussianComptonProfile::name() const {
   return "GaussianComptonProfile";
 }
 
-
 void GaussianComptonProfile::declareParameters() {
   ComptonProfile::declareParameters();
   declareParameter(WIDTH_PARAM, 1.0, "Gaussian width parameter");
   declareParameter(AMP_PARAM, 1.0, "Gaussian intensity parameter");
 }
-
 
 std::vector<size_t> GaussianComptonProfile::intensityParameterIndices() const {
   return std::vector<size_t>(1, this->parameterIndex(AMP_PARAM));

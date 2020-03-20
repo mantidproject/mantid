@@ -170,7 +170,6 @@ bool AlgorithmAdapter<BaseAlgorithm>::isRunning() const {
   GNU_DIAG_ON("parentheses-equality")
 }
 
-
 template <typename BaseAlgorithm>
 void AlgorithmAdapter<BaseAlgorithm>::cancel() {
   try {

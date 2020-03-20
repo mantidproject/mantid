@@ -37,7 +37,6 @@ const double STDDEV_TO_FWHM = 0.5 * std::sqrt(std::log(4.0));
 ///@endcond
 } // namespace
 
-
 ComptonPeakProfile::ComptonPeakProfile()
     : API::ParamFunction(), API::IFunction1D(), m_wsIndex(0), m_mass(0.0),
       m_voigtCutOff(5000.), m_gauss(), m_voigt(), m_efixed(0.0),
@@ -140,13 +139,11 @@ void ComptonPeakProfile::setWorkspace(
   m_hwhmLorentz = 0.5 * (yplus - yminus);
 }
 
-
 void ComptonPeakProfile::declareParameters() {
   declareParameter(AMP_PARAM, 1.0, "Intensity parameter");
   declareParameter(POS_PARAM, 1.0, "Peak position parameter");
   declareParameter(WIDTH_PARAM, 1.0, "Width parameter");
 }
-
 
 void ComptonPeakProfile::declareAttributes() {
   declareAttribute(WSINDEX_NAME,

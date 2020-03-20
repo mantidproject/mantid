@@ -11,7 +11,6 @@ namespace Mantid {
 
 namespace API {
 
-
 const std::string IEventWorkspace::toString() const {
   std::ostringstream os;
   os << MatrixWorkspace::toString() << "\n";

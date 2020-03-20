@@ -127,7 +127,6 @@ void MDEventWSWrapper::addMDDataND<0>(float * /*unused*/, uint16_t * /*unused*/,
                               "to 0-dimensional workspace"));
 }
 
-
 template <size_t nd> void MDEventWSWrapper::splitBoxList() {
   auto *const pWs = dynamic_cast<
       DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(

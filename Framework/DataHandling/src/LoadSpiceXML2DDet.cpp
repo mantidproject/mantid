@@ -813,7 +813,6 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceUnknowGeometry(
   return outws;
 }
 
-
 API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(
     const std::string &detvaluestr, bool loadinstrument, double &max_counts) {
   // Split to lines

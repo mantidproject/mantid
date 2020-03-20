@@ -187,7 +187,6 @@ void VesuvioResolution::function1D(double *out, const double *xValues,
   std::copy(outVec.begin(), outVec.end(), out);
 }
 
-
 void VesuvioResolution::declareAttributes() {
   declareAttribute(MASS_NAME, IFunction::Attribute(m_mass));
 }

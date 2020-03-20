@@ -766,7 +766,6 @@ void PeakPickerTool::addPeak() {
   }
 }
 
-
 void PeakPickerTool::addPeakAt(int x, int y) {
   // x - axis is #2, y - is #0
   double c = d_graph->plotWidget()->invTransform(2, x);

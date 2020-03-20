@@ -88,7 +88,6 @@ void MayersSampleCorrection::init() {
                   "An output workspace.");
 }
 
-
 void MayersSampleCorrection::exec() {
   using API::Progress;
   using API::WorkspaceFactory;

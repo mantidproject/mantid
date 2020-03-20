@@ -102,7 +102,6 @@ MessageDisplay::MessageDisplay(const QFont &font, QWidget *parent)
   setupTextArea(font);
 }
 
-
 MessageDisplay::~MessageDisplay() {
   // The Channel class is ref counted and will
   // delete itself when required
