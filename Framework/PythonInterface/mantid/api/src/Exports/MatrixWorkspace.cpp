@@ -301,14 +301,14 @@ boost::python::tuple findY(MatrixWorkspace &self, double value, tuple start) {
  * workspace.
  * @param self :: The MatrixWorkspace whose bin edges are being set.
  * @param ws :: The MatrixWorkspace from which the bin edges are retrieved.
- * @param get_index :: The index from which the bin edges are retrieved.
- * @param set_index :: The index at which the bin edges are being set.
+ * @param getIndex :: The index from which the bin edges are retrieved.
+ * @param setIndex :: The index at which the bin edges are being set.
  */
 void applyBinEdgesFromAnotherWorkspace(MatrixWorkspace &self,
                                        const MatrixWorkspace &ws,
-                                       const size_t &get_index,
-                                       const size_t &set_index) {
-  self.setBinEdges(set_index, ws.binEdges(get_index));
+                                       const size_t getIndex,
+                                       const size_t setIndex) {
+  self.setBinEdges(setIndex, ws.binEdges(getIndex));
 }
 
 /**
@@ -316,14 +316,14 @@ void applyBinEdgesFromAnotherWorkspace(MatrixWorkspace &self,
  * workspace.
  * @param self :: The MatrixWorkspace whose points are being set.
  * @param ws :: The MatrixWorkspace from which the points are retrieved.
- * @param get_index :: The index from which the points are retrieved.
- * @param set_index :: The index at which the points are being set.
+ * @param getIndex :: The index from which the points are retrieved.
+ * @param setIndex :: The index at which the points are being set.
  */
 void applyPointsFromAnotherWorkspace(MatrixWorkspace &self,
                                      const MatrixWorkspace &ws,
-                                     const size_t &get_index,
-                                     const size_t &set_index) {
-  self.setPoints(set_index, ws.points(get_index));
+                                     const size_t getIndex,
+                                     const size_t setIndex) {
+  self.setPoints(setIndex, ws.points(getIndex));
 }
 
 } // namespace
@@ -443,12 +443,12 @@ void export_MatrixWorkspace() {
            "Replaces one of the workspace's axes with the new one provided.")
       .def("applyBinEdgesFromAnotherWorkspace",
            &applyBinEdgesFromAnotherWorkspace,
-           (arg("self"), arg("ws"), arg("get_index"), arg("set_index")),
-           "Sets the bin edges at set_index to be the bin edges of ws at "
-           "get_index.")
+           (arg("self"), arg("ws"), arg("getIndex"), arg("setIndex")),
+           "Sets the bin edges at setIndex to be the bin edges of ws at "
+           "getIndex.")
       .def("applyPointsFromAnotherWorkspace", &applyPointsFromAnotherWorkspace,
-           (arg("self"), arg("ws"), arg("get_index"), arg("set_index")),
-           "Sets the points at set_index to be the points of ws at get_index.")
+           (arg("self"), arg("ws"), arg("getIndex"), arg("setIndex")),
+           "Sets the points at setIndex to be the points of ws at getIndex.")
 
       //--------------------------------------- Read spectrum data
       //-------------------------
