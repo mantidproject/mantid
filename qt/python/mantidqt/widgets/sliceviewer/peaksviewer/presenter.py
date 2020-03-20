@@ -26,6 +26,7 @@ class PeaksViewerPresenter(object):
         OverlayPeaks = 2
         SlicePointChanged = 3
         ClearPeaks = 4
+        PeakSelected = 5
 
     def __init__(self, model, view):
         """
@@ -61,6 +62,8 @@ class PeaksViewerPresenter(object):
         PresenterEvent = PeaksViewerPresenter.Event
         if event == PresenterEvent.SlicePointChanged:
             self._update_peaks()
+        elif event == PresenterEvent.PeakSelected:
+            self._peak_selected()
         elif event == PresenterEvent.OverlayPeaks:
             self._overlay_peaks()
         elif event == PresenterEvent.PeaksListChanged:
@@ -85,6 +88,13 @@ class PeaksViewerPresenter(object):
         self._clear_peaks()
         peak_representations = self.model.compute_peak_representations(self._view.sliceinfo)
         self._view.draw_peaks(peak_representations)
+
+    def _peak_selected(self):
+        """
+        Respond to the selection of a single peak
+        """
+        peak = self.model.peak_representation_at(self._view.selected_index)
+        self._view.snap_to(peak)
 
     def _update_peaks(self):
         """

@@ -29,6 +29,16 @@ class MplPainterTest(unittest.TestCase):
 
         mock_artist.remove.assert_called_once()
 
+    def test_snap_to_sets_xy_limits_so_xy_at_center(self):
+        axes = MagicMock()
+        painter = MplPainter(axes)
+        x, y = 1.5, 2.5
+
+        painter.snap_to(x, y)
+
+        axes.set_xlim.assert_called_once_with(x - MplPainter.SNAP_WIDTH, x + MplPainter.SNAP_WIDTH)
+        axes.set_ylim.assert_called_once_with(y - MplPainter.SNAP_WIDTH, y + MplPainter.SNAP_WIDTH)
+
     def test_scatter_draws_with_only_xy(self):
         axes = MagicMock()
         painter = MplPainter(axes)
