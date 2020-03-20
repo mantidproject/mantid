@@ -132,7 +132,6 @@ void LoadILLIndirect2::exec() {
  */
 void LoadILLIndirect2::setInstrumentName(
     const NeXus::NXEntry &firstEntry, const std::string &instrumentNamePath) {
-
   if (instrumentNamePath.empty()) {
     std::string message("Cannot set the instrument name from the Nexus file!");
     g_log.error(message);
@@ -177,12 +176,10 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
       m_activeSDIndices.insert(i);
     }
   }
-
   m_numberOfSimpleDetectors = m_activeSDIndices.size();
 
   g_log.information() << "Number of activated single detectors is: "
                       << m_numberOfSimpleDetectors << std::endl;
-
   try {
     NXInt mode = entry.openNXInt("acquisition_mode");
     mode.load();
@@ -190,7 +187,6 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
   } catch (...) {
     g_log.information() << "Unable to read acquisition_mode, assuming doppler";
   }
-
   try {
     NXFloat firstTubeAngle = entry.openNXFloat("instrument/PSD/PSD angle 1");
     firstTubeAngle.load();
@@ -239,44 +235,36 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   dataMon.load();
 
   // First, Monitor
-
   // Assign Y
   int *monitor_p = &dataMon(0, 0);
   m_localWorkspace->dataY(0).assign(monitor_p, monitor_p + m_numberOfChannels);
-
   // Assign Error
   MantidVec &E = m_localWorkspace->dataE(0);
   std::transform(monitor_p, monitor_p + m_numberOfChannels, E.begin(),
                  [](const double v) { return std::sqrt(v); });
-
   // Then Tubes
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
   for (int i = 0; i < static_cast<int>(m_numberOfTubes); ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
       const size_t index = i * m_numberOfPixelsPerTube + j + m_numberOfMonitors;
-
       // Assign Y
       int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
       m_localWorkspace->dataY(index).assign(data_p,
                                             data_p + m_numberOfChannels);
-
       // Assign Error
       MantidVec &E = m_localWorkspace->dataE(index);
       std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
                      [](const double v) { return std::sqrt(v); });
     }
   }
-
   // Then add Simple Detector (SD)
   size_t offset =
       m_numberOfTubes * m_numberOfPixelsPerTube + m_numberOfMonitors;
   for (auto &index : m_activeSDIndices) {
-
     // Assign Y, note that index starts from 1
     int *dataSD_p = &dataSD(index - 1, 0, 0);
     m_localWorkspace->dataY(offset).assign(dataSD_p,
                                            dataSD_p + m_numberOfChannels);
-
     // Assign Error
     MantidVec &E = m_localWorkspace->dataE(offset);
     std::transform(dataSD_p, dataSD_p + m_numberOfChannels, E.begin(),
@@ -291,23 +279,16 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
  */
 void LoadILLIndirect2::loadNexusEntriesIntoProperties(
     std::string nexusfilename) {
-
   API::Run &runDetails = m_localWorkspace->mutableRun();
-
-  // Open NeXus file
   NXhandle nxfileID;
   NXstatus stat = NXopen(nexusfilename.c_str(), NXACC_READ, &nxfileID);
-
   if (stat == NX_ERROR) {
     g_log.debug() << "convertNexusToProperties: Error loading "
                   << nexusfilename;
     throw Kernel::Exception::FileError("Unable to open File:", nexusfilename);
   }
   m_loader.addNexusFieldsToWsRun(nxfileID, runDetails);
-
-  // Add also "Facility", as asked
   runDetails.addProperty("Facility", std::string("ILL"));
-
   NXclose(&nxfileID);
 }
 
@@ -315,21 +296,13 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(
  * Run the Child Algorithm LoadInstrument.
  */
 void LoadILLIndirect2::runLoadInstrument() {
-
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-
-  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  try {
-    loadInst->setPropertyValue("Filename", getInstrumentFilePath());
-    loadInst->setPropertyValue("InstrumentName", m_instrumentName);
-    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
-    loadInst->setProperty("RewriteSpectraMap",
-                          Mantid::Kernel::OptionalBool(true));
-    loadInst->execute();
-
-  } catch (std::runtime_error &) {
-    g_log.information("Cannot load the instrument definition.");
-  }
+  loadInst->setPropertyValue("Filename", getInstrumentFilePath());
+  loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+  loadInst->setProperty("RewriteSpectraMap",
+                        Mantid::Kernel::OptionalBool(true));
+  loadInst->execute();
 }
 
 /**
@@ -361,17 +334,13 @@ void LoadILLIndirect2::moveComponent(const std::string &componentName,
       m_localWorkspace->getInstrument();
   Geometry::IComponent_const_sptr component =
       instrument->getComponentByName(componentName);
-
   double r, theta, phi;
   V3D oldPos = component->getPos();
   oldPos.getSpherical(r, theta, phi);
-
   V3D newPos;
   newPos.spherical(r, twoTheta, phi);
-
   g_log.debug() << componentName << " : t = " << theta
                 << " ==> t = " << twoTheta << "\n";
-
   auto &compInfo = m_localWorkspace->mutableComponentInfo();
   const auto componentIndex = compInfo.indexOf(component->getComponentID());
   compInfo.setPosition(componentIndex, newPos);
@@ -383,7 +352,6 @@ void LoadILLIndirect2::moveComponent(const std::string &componentName,
  * @param entry : the nexus entry
  */
 void LoadILLIndirect2::moveSingleDetectors(NeXus::NXEntry &entry) {
-
   std::string prefix("single_tube_");
   int index = 1;
   for (auto i : m_activeSDIndices) {

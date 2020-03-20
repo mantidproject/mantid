@@ -106,6 +106,7 @@ public:
     constexpr double degToRad = M_PI / 180.;
     TS_ASSERT_DELTA(detInfo.twoTheta(65), 25.1 * degToRad, 0.01);
     const std::string idf = output2D->getInstrument()->getFilename();
+    TS_ASSERT_EQUALS(output2D->getInstrument()->getName(), "IN16BF");
     TS_ASSERT(boost::ends_with(idf, "IN16BF_Definition.xml"));
   }
 

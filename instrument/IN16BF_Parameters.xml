@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "IN16B" valid-from = "2014-03-11T00:00:00">
+<parameter-file instrument = "IN16BF" valid-from = "2014-03-11T00:00:00">
 
-<component-link name = "IN16B">
+<component-link name = "IN16BF">
 
 <parameter name="deltaE-mode" type="string">
   <value val="indirect"/>
