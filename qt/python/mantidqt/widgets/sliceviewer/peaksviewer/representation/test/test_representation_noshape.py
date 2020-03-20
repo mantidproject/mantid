@@ -33,6 +33,15 @@ class PeakRepresentationNoShapeTest(unittest.TestCase):
         for name, value in (("alpha", 2), ("x", 2), ("y", 0.1), ("z", 3), ('marker_color', 'b')):
             self.assertRaises(AttributeError, setattr, representation, name, value)
 
+    def test_snap_to_calls_painter_method_with_peak_center(self):
+        x, y = 1.5, 2.5
+        representation = PeakRepresentationNoShape(x, y, 0, 1.0, 'w')
+        mock_painter = MagicMock()
+
+        representation.snap_to(mock_painter)
+
+        mock_painter.assert_called_once_with(x, y)
+
     def test_noshape_representation_draw_creates_scatter_point(self):
         x, y, z, alpha, marker_color = 0.0, 1.0, -1.0, 0.5, 'b'
         no_shape = PeakRepresentationNoShape(x, y, z, alpha, marker_color)
@@ -40,12 +49,8 @@ class PeakRepresentationNoShapeTest(unittest.TestCase):
 
         no_shape.draw(painter)
 
-        painter.scatter.assert_called_once_with(x,
-                                                y,
-                                                alpha=alpha,
-                                                color=marker_color,
-                                                marker=ANY,
-                                                s=ANY)
+        painter.scatter.assert_called_once_with(
+            x, y, alpha=alpha, color=marker_color, marker=ANY, s=ANY)
 
     def test_noshape_create_computes_alpha(self):
         x, y, z = -1, 2, 3

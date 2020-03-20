@@ -30,6 +30,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     """View model for PeaksViewer
     Extends PeaksWorkspace functionality to include color selection
     """
+
     def __init__(self, peaks_ws):
         """
         :param peaks_ws: A pointer to the PeaksWorkspace
@@ -77,6 +78,13 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
                                           self.marker_color))
         self._visible_peaks = info
         return info
+
+    def peak_representation_at(self, index):
+        """Return a reference to the peak at the given index
+        :return: A single Peak from the table at the index
+        :raises: IndexError if the index is out of range
+        """
+        return self._visible_peaks[index]
 
     def take_peak_representations(self):
         """Return the current set of peaks and remove them from the model

@@ -22,17 +22,26 @@ if __name__ == "__main__":
     from mantid.simpleapi import *
     from qtpy.QtWidgets import QApplication
 
-    training_data_dir = '/media/data1/external-data/training-data'
-    SXD23767 = Load(Filename=training_data_dir + '/SXD23767.raw', LoadMonitors='Exclude',SpectrumMax=1000)
-    mdws = ConvertToMD(InputWorkspace=SXD23767, QDimensions="Q3D",
-                       dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
-                       LorentzCorrection='1', MinValues=[-15, -15, -15], MaxValues=[15, 15, 15],
-                       SplitInto='2', SplitThreshold='50', MaxRecursionDepth='14')
-    peaksws = Load(training_data_dir + '/peaks_qLab.nxs')
-    IntegratePeaksMD(InputWorkspace=mdws, PeaksWorkspace=peaksws, PeakRadius=0.5,
-                     OutputWorkspace='peaksws_sphere_nobkgd')
+    SXD23767 = Load(Filename='SXD23767.raw', LoadMonitors='Exclude', SpectrumMax=1000)
+    mdws = ConvertToMD(
+        InputWorkspace=SXD23767,
+        QDimensions="Q3D",
+        dEAnalysisMode="Elastic",
+        QConversionScales="Q in A^-1",
+        LorentzCorrection='1',
+        MinValues=[-15, -15, -15],
+        MaxValues=[15, 15, 15],
+        SplitInto='2',
+        SplitThreshold='50',
+        MaxRecursionDepth='14')
+    peaksws = Load('peaks_qLab.nxs')
+    IntegratePeaksMD(
+        InputWorkspace=mdws,
+        PeaksWorkspace=peaksws,
+        PeakRadius=0.5,
+        OutputWorkspace='peaksws_sphere_nobkgd')
 
     app = QApplication([])
     sv = SliceViewer(mdws)
-    sv.overlay_peaks_workspace()
+    # sv.overlay_peaks_workspace()
     app.exec_()

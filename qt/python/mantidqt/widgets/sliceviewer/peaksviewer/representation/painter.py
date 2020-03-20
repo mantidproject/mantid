@@ -19,6 +19,7 @@ class Painter(with_metaclass(ABCMeta)):
     Interface defined for types capable of drawing
     representations of different shapes
     """
+
     @abstractmethod
     def remove(self, artifact):
         """
@@ -36,11 +37,31 @@ class Painter(with_metaclass(ABCMeta)):
         """
         pass
 
+    @abstractmethod
+    def snap_to(self, x, y):
+        """
+        Set the display such the point (x, y) is at the center
+        :param x: X location of scatter point
+        :param y: Y location of scatter point
+        """
+        pass
+
+    @abstractmethod
+    def update_properties(self, artist, **kwargs):
+        """
+        Update artist properties
+        :param artist: Reference to the Artist
+        :param kwargs: Keywords giving Artist properties to change
+        """
+        pass
+
 
 class MplPainter(Painter):
     """
     Implementation of a PeakPainter that uses matplotlib to draw
     """
+    SNAP_WIDTH = 0.5
+
     def __init__(self, axes):
         """
         :param axes: A matplotlib.axes.Axes instance to draw on
@@ -65,6 +86,20 @@ class MplPainter(Painter):
         See PeakPainter for description of arguments
         """
         return self._axes.scatter(x, y, **kwargs)
+
+    def snap_to(self, x, y):
+        """
+        Set the display such the point (x, y) is at the center
+        :param x: X location of scatter point
+        :param y: Y location of scatter point
+        """
+        snap_width = self.SNAP_WIDTH
+
+        def snap_limits(center):
+            return (center - snap_width, center + snap_width)
+
+        self._axes.set_xlim(*snap_limits(x))
+        self._axes.set_ylim(*snap_limits(y))
 
     def update_properties(self, artist, **kwargs):
         """

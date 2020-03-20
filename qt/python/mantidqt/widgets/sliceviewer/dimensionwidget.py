@@ -142,6 +142,14 @@ class DimensionWidget(QWidget):
             for d in self.dims
         ]
 
+    def set_slicevalue(self, value):
+        """
+        Set the value of the slice point in the slice dimension
+        """
+        for d in self.dims:
+            if d.get_state() == State.NONE:
+                d.set_value(value)
+
 
 class Dimension(QWidget):
     stateChanged = Signal(int)

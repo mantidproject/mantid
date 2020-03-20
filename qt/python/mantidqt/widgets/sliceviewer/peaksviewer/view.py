@@ -35,13 +35,22 @@ class PeaksViewerView(QWidget):
         self._setup_ui()
 
     @property
+    def sliceinfo(self):
+        """Return information regarding the current slice"""
+        return self._sliceinfo_provider.get_sliceinfo()
+
+    @property
     def table_view(self):
         return self._table_view
 
     @property
-    def sliceinfo(self):
-        """Return information regarding the current slice"""
-        return self._sliceinfo_provider.get_sliceinfo()
+    def selected_index(self):
+        # construction ensures we can only have 0 or 1 items selected
+        selected = self.table_view.selectedItems()
+        if not selected:
+            return None
+
+        return self.table_view.row(selected[0])
 
     def clear_peaks(self, peaks):
         """Clear all peaks from display"""
@@ -55,6 +64,14 @@ class PeaksViewerView(QWidget):
         """
         for peak in peaks:
             peak.draw(self._painter)
+
+    def snap_to(self, peak):
+        """
+        Set the peak center as the center of the display
+        :param peak: A list
+        """
+        peak.snap_to(self._painter)
+        self._sliceinfo_provider.set_slicevalue(peak.z)
 
     def update_peaks(self, peaks):
         """
@@ -86,6 +103,7 @@ class PeaksViewerView(QWidget):
         self._group_box.setContentsMargins(0, 0, 0, 0)
         self._table_view = TableWorkspaceDisplayView(parent=self)
         self._table_view.setSelectionBehavior(TableWorkspaceDisplayView.SelectRows)
+        self._table_view.itemSelectionChanged.connect(self._on_row_selection_changed)
 
         group_box_layout = QVBoxLayout()
         group_box_layout.addWidget(self._table_view)
@@ -93,6 +111,13 @@ class PeaksViewerView(QWidget):
         widget_layout = QVBoxLayout()
         widget_layout.addWidget(self._group_box)
         self.setLayout(widget_layout)
+
+    def _on_row_selection_changed(self):
+        """
+        Slot to handle row selection changes. It is assumed only single row
+        selection is allowed
+        """
+        self._presenter.notify(self._presenter.Event.PeakSelected)
 
 
 class PeaksViewerCollectionView(QWidget):

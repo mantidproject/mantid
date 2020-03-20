@@ -85,6 +85,12 @@ class SliceViewer(object):
            None indicates that dimension is being displayed"""
         return self.view.dimensions.get_slicepoint()
 
+    def set_slicevalue(self, value):
+        """Set the value within the slicing dimension
+        :param value: The value of the slice point
+        """
+        self.view.dimensions.set_slicevalue(value)
+
     def dimensions_changed(self):
         """Indicates that the dimensions have changed"""
         self.new_plot()

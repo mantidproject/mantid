@@ -32,6 +32,7 @@ def value_or_error(props, key):
 
 class PeakRepresentation(with_metaclass(ABCMeta)):
     """Describes representation of Peak for display"""
+
     def __init__(self, x, y, z, alpha, marker_color):
         """
         :param x: X position of center in slice plane
@@ -88,8 +89,8 @@ class PeakRepresentation(with_metaclass(ABCMeta)):
     @abstractmethod
     def draw(self, painter):
         """
-        Draw this peak on the given axes
-        :param ax: An Axes object to accept the draw command
+        Draw this peak with the given Painter
+        :param painter: A painter that understands how to draw
         :return: The new Artist/Artists added
         """
         pass
@@ -100,3 +101,10 @@ class PeakRepresentation(with_metaclass(ABCMeta)):
         Remove the painted artist
         """
         pass
+
+    def snap_to(self, painter):
+        """
+        Tell the painter to move to the peak center
+        :param painter: A painter that understands how to draw
+        """
+        painter.snap_to(self.x, self.y)
