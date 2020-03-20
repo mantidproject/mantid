@@ -109,7 +109,7 @@ bool AlgorithmProxy::executeAsyncImpl(const Poco::Void &dummy) {
     throw;
   }
   stopped();
-  return (resultState() == ResultState::Success);
+  return isExecuted();
 }
 
 /// Gets the current execution state

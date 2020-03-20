@@ -723,7 +723,7 @@ bool Algorithm::executeInternal() {
   }
 
   catch (...) {
-    // Execution
+    // Execution failed with an unknown exception object
     setResultState(ResultState::Failed);
     m_runningAsync = false;
 
