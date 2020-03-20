@@ -7,7 +7,6 @@
 #include "MantidLiveData/StartLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ArrayBoundedValidator.h"

@@ -10,7 +10,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidKernel/ConfigService.h"
 
 namespace Mantid {
@@ -75,12 +74,8 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
   IAlgorithm_sptr alg;
   try {
-    Algorithm_sptr unmanagedAlg = AlgorithmFactory::Instance().create(
+    alg = AlgorithmFactory::Instance().create(
         algName, version); // Throws on fail:
-    if (makeProxy)
-      alg = IAlgorithm_sptr(new AlgorithmProxy(unmanagedAlg));
-    else
-      alg = unmanagedAlg;
 
     auto count = removeFinishedAlgorithms();
     g_log.debug()

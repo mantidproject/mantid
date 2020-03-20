@@ -85,9 +85,8 @@ class PythonAlgorithmTest(unittest.TestCase):
             AlgorithmFactory.subscribe(TestPyAlgIsRunningReturnsNonBool)
             AlgorithmFactory.subscribe(CancellableAlg)
 
-    def test_managed_alg_is_descendent_of_AlgorithmProxy(self):
+    def test_managed_alg_is_descendent_of_IAlgorithm(self):
         alg = AlgorithmManager.create("TestPyAlgDefaultAttrs")
-        self.assertTrue(isinstance(alg, AlgorithmProxy))
         self.assertTrue(isinstance(alg, IAlgorithm))
 
     def test_unmanaged_alg_is_descendent_of_PythonAlgorithm(self):
