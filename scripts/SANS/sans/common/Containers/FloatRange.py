@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # TODO convert back to NamedTuple with defined types in Python 3
+
+
 class FloatRange(object):
     start = None  # : float
     end= None  #: float

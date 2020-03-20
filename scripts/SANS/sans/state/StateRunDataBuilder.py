@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+
+
 class StateRunDataBuilder(object):
     def __init__(self, file_information):
         self._file_information = file_information
