@@ -74,8 +74,8 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
   IAlgorithm_sptr alg;
   try {
-    alg = AlgorithmFactory::Instance().create(
-        algName, version); // Throws on fail:
+    alg = AlgorithmFactory::Instance().create(algName,
+                                              version); // Throws on fail:
 
     auto count = removeFinishedAlgorithms();
     g_log.debug()
