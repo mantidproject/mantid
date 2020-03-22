@@ -76,7 +76,7 @@ Linear Absorption Coefficients
 .. math:: \mu_s = \rho_n \frac{1}{N_{atoms}}\sum_{i}s_{i}n_{i} \text{ units of 1/cm}
 .. math:: s = \sigma_{total scattering}
 .. math:: \mu_a = \rho_n \frac{1}{N_{atoms}}\sum_{i}a_{i}n_{i} \text{ units of 1/cm}
-.. math:: a = \sigma_{absorption} (\lambda=1.8)
+.. math:: a = \frac{\lambda}{\lambda_0} \sigma_{absorption} (\lambda_0) \text{where \lambda_0=1.8 :math:`\AA`}
 
 A detailed version of this is found in [2].
 
