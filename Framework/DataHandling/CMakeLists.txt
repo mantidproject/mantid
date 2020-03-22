@@ -132,6 +132,7 @@ set(SRC_FILES
     src/MeshFileIO.cpp
     src/ModifyDetectorDotDatFile.cpp
     src/MoveInstrumentComponent.cpp
+    src/NexusFileLoader.cpp
     src/NexusTester.cpp
     src/ORNLDataArchive.cpp
     src/PDLoadCharacterizations.cpp
@@ -336,6 +337,7 @@ set(INC_FILES
     inc/MantidDataHandling/ModifyDetectorDotDatFile.h
     inc/MantidDataHandling/MoveInstrumentComponent.h
     inc/MantidDataHandling/NXcanSASDefinitions.h
+    inc/MantidDataHandling/NexusFileLoader.h
     inc/MantidDataHandling/NexusTester.h
     inc/MantidDataHandling/ORNLDataArchive.h
     inc/MantidDataHandling/PDLoadCharacterizations.h
