@@ -40,8 +40,8 @@ class SingleCrystalData(AbinsModules.GeneralData):
 
     def extract(self):
         gamma = AbinsModules.AbinsConstants.GAMMA_POINT
-        if (self._data["abins_data"]["k_points_data"]["atomic_displacements"][gamma].shape[0] ==
-                self._data["dw_crystal_data"].shape[0]):
+        if (self._data["abins_data"]["k_points_data"]["atomic_displacements"][gamma].shape[0]
+                == self._data["dw_crystal_data"].shape[0]):
 
             return self._data
         else:

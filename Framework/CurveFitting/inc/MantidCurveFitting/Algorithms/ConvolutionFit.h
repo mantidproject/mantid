@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -16,7 +16,8 @@ namespace Algorithms {
 
 /** ConvolutionFit : Performs a QENS convolution fit
  */
-template <typename Base> class DLLExport ConvolutionFit : public Base {
+template <typename Base>
+class MANTID_CURVEFITTING_DLL ConvolutionFit : public Base {
 public:
   const std::string name() const override;
   int version() const override;

@@ -89,4 +89,5 @@ class GetLiveInstrumentValue(DataProcessorAlgorithm):
         else:
             self.log().notice(self._propertyName + ' not found')
 
+
 AlgorithmFactory.subscribe(GetLiveInstrumentValue)

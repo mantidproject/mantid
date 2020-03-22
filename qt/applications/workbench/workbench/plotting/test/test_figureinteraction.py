@@ -217,9 +217,9 @@ class FigureInteractionTest(unittest.TestCase):
 
         ax = fig.axes[0]
         fig_interactor._toggle_normalization(ax)
-        self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
+        self.assertEqual(r"Counts ($\AA$)$^{-1}$", ax.get_ylabel())
         plot([self.ws1], spectrum_nums=[1], errors=errors, overplot=True, fig=fig)
-        self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
+        self.assertEqual(r"Counts ($\AA$)$^{-1}$", ax.get_ylabel())
 
     def test_normalization_toggle_with_no_autoscale_on_update_no_errors(self):
         self._test_toggle_normalization(errorbars_on=False,

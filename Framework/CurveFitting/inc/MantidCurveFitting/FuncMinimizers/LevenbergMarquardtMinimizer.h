@@ -23,7 +23,8 @@ namespace FuncMinimisers {
     @author Anders Markvardsen, ISIS, RAL
     @date 11/12/2009
 */
-class DLLExport LevenbergMarquardtMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL LevenbergMarquardtMinimizer
+    : public API::IFuncMinimizer {
 public:
   /// constructor and destructor
   ~LevenbergMarquardtMinimizer() override;

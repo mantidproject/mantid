@@ -249,10 +249,7 @@ def MakeTuples(rlist):
         if len(split_title) != 3:
             split_title = re.split("~", idx)
             if len(split_title) != 2:
-                logger.warning(
-                    'cannot transfer ' +
-                    idx +
-                    ' title is not in the right form ')
+                logger.warning('cannot transfer ' + idx + ' title is not in the right form ')
             else:
                 theta = 0
                 split_title.append(theta)  # Append a dummy theta value.

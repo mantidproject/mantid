@@ -24,7 +24,8 @@ namespace Functions {
 @date 11/14/2011
 */
 
-class DLLExport DiffSphere : public API::ImmutableCompositeFunction {
+class MANTID_CURVEFITTING_DLL DiffSphere
+    : public API::ImmutableCompositeFunction {
 
 public:
   /// overwrite IFunction base class methods

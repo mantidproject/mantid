@@ -800,7 +800,7 @@ class SampleGeomCor(ReductionStep):
                 volume = geo.thickness * math.pi
                 volume *= math.pow(geo.width, 2) / 4.0
             else:
-                raise NotImplemented('Shape "' + geo.shape + '" is not in the list of supported shapes')
+                raise NotImplementedError('Shape "' + geo.shape + '" is not in the list of supported shapes')
         # pylint: disable=notimplemented-raised
         except TypeError:
             raise TypeError('Error calculating sample volume with width=' + str(geo.width) + ' height=' + str(

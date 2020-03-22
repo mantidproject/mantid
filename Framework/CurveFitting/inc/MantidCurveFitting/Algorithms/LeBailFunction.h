@@ -9,6 +9,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPowderDiffPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidKernel/System.h"
 
@@ -30,7 +31,7 @@ composite
 And thus
 it is rewritten.
 */
-class DLLExport LeBailFunction {
+class MANTID_CURVEFITTING_DLL LeBailFunction {
 public:
   /// Constructor
   LeBailFunction(std::string peaktype);

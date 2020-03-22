@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -18,8 +18,8 @@ namespace Crystal {
     @author Dennis Mikkelson(adapted from Andrei Savici's CalculateUMatrix)
     @date   2011-08-17
   */
-class DLLExport FindUBUsingMinMaxD : public API::Algorithm,
-                                     public API::DeprecatedAlgorithm {
+class MANTID_CRYSTAL_DLL FindUBUsingMinMaxD : public API::Algorithm,
+                                              public API::DeprecatedAlgorithm {
 public:
   FindUBUsingMinMaxD();
 

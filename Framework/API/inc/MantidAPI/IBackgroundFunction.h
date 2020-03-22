@@ -19,7 +19,7 @@ namespace API {
     @author Anders Markvardsen, ISIS, RAL
     @date 2/11/2009
 */
-class DLLExport IBackgroundFunction : public IFunctionWithLocation {
+class IBackgroundFunction : public IFunctionWithLocation {
 public:
   /// Fits the function
   /// @param X :: a vector of x values

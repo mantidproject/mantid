@@ -652,8 +652,8 @@ class FittingTabModel(object):
 
         grp_pair_values = list(self._grppair_index.values())
         if len(self._grppair_index) > 1:
-            return ((self._grppair_index[grp_or_pair_name] - grp_pair_values[0]) /
-                    (grp_pair_values[-1] - grp_pair_values[0])) * 0.99
+            return ((self._grppair_index[grp_or_pair_name] - grp_pair_values[0])
+                    / (grp_pair_values[-1] - grp_pair_values[0])) * 0.99
         else:
             return 0
 

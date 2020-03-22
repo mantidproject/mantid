@@ -168,16 +168,14 @@ def runs_are_equal(ws1,ws2):
 
     def get_run_num(name_or_ws):
         err = None
-        try:
-            if isinstance(name_or_ws,api.MatrixWorkspace):
-                run_num = name_or_ws.getRunNumber()
-            elif name_or_ws in mtd: # this is also throw Boost.Python.ArgumentError error if mtd not accepts it
-                ws = mtd[name_or_ws]
-                run_num = ws.getRunNumber()
-            else:
-                raise AttributeError
-        except Exception as err:
-            pass
+
+        if isinstance(name_or_ws,api.MatrixWorkspace):
+            run_num = name_or_ws.getRunNumber()
+        elif name_or_ws in mtd: # this is also throw Boost.Python.ArgumentError error if mtd not accepts it
+            ws = mtd[name_or_ws]
+            run_num = ws.getRunNumber()
+        else:
+            raise AttributeError
         if err is not None:
             raise AttributeError("Input parameter is neither workspace nor ws name")
         return run_num

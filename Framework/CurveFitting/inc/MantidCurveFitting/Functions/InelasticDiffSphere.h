@@ -41,7 +41,7 @@ struct linearJ {
  * @brief Inelastic part of the DiffSphere function. Contains the 98
  * Lorentzians.
  */
-class DLLExport InelasticDiffSphere : public FunctionQDepends {
+class MANTID_CURVEFITTING_DLL InelasticDiffSphere : public FunctionQDepends {
 public:
   InelasticDiffSphere();
 

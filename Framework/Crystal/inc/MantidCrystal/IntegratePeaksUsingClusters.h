@@ -8,14 +8,14 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
 
 /** IntegratePeaksUsingClusters : Uses clustering to integrate peaks.
  */
-class DLLExport IntegratePeaksUsingClusters : public API::Algorithm {
+class MANTID_CRYSTAL_DLL IntegratePeaksUsingClusters : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose

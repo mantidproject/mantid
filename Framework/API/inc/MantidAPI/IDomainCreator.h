@@ -36,7 +36,7 @@ data.
 @author Roman Tolchenov, Tessella plc
 @date 22/03/2012
 */
-class DLLExport IDomainCreator {
+class MANTID_API_DLL IDomainCreator {
 public:
   /// Type of domain to create.
   enum DomainType { Simple = 0, Sequential, Parallel };

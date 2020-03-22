@@ -158,5 +158,6 @@ class ISISPowderYamlParserTest(unittest.TestCase):
                                                  "range"):
             yaml_parser.get_run_dictionary(run_number_string="32", file_path=file_path)
 
+
 if __name__ == "__main__":
     unittest.main()

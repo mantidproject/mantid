@@ -238,20 +238,20 @@ class AlignComponents(PythonAlgorithm):
                                        + ','.join(components) + "\""
 
         # This checks that something will actually be refined,
-        if not (self.getProperty("Xposition").value or
-                self.getProperty("Yposition").value or
-                self.getProperty("Zposition").value or
-                self.getProperty("AlphaRotation").value or
-                self.getProperty("BetaRotation").value or
-                self.getProperty("GammaRotation").value):
+        if not (self.getProperty("Xposition").value
+                or self.getProperty("Yposition").value
+                or self.getProperty("Zposition").value
+                or self.getProperty("AlphaRotation").value
+                or self.getProperty("BetaRotation").value
+                or self.getProperty("GammaRotation").value):
             issues["Xposition"] = "You must calibrate at least one parameter."
 
         # Check that a position refinement is selected for sample/source
-        if ((self.getProperty("FitSourcePosition").value or
-             self.getProperty("FitSamplePosition").value) and
-                not (self.getProperty("Xposition").value or
-                     self.getProperty("Yposition").value or
-                     self.getProperty("Zposition").value)):
+        if ((self.getProperty("FitSourcePosition").value
+             or self.getProperty("FitSamplePosition").value)
+                and not (self.getProperty("Xposition").value
+                         or self.getProperty("Yposition").value
+                         or self.getProperty("Zposition").value)):
             issues["Xposition"] = "If fitting source or sample, you must calibrate at least one position parameter."
 
         return issues
@@ -293,8 +293,7 @@ class AlignComponents(PythonAlgorithm):
                 else:
                     comp = api.mtd[wks_name].getInstrument().getSource()
                 componentName = comp.getFullName()
-                logger.notice("Working on " + componentName +
-                              " Starting position is " + str(comp.getPos()))
+                logger.notice("Working on " + componentName + " Starting position is " + str(comp.getPos()))
                 firstIndex = 0
                 lastIndex = len(difc)
                 if self._masking:
@@ -336,8 +335,7 @@ class AlignComponents(PythonAlgorithm):
                                             Z=xmap[2],
                                             RelativePosition=False)
                 comp = api.mtd[wks_name].getInstrument().getComponentByName(componentName)
-                logger.notice("Finished " + componentName +
-                              " Final position is " + str(comp.getPos()))
+                logger.notice("Finished " + componentName + " Final position is " + str(comp.getPos()))
                 self._move = False
 
         # Now fit all the components if any
@@ -363,9 +361,8 @@ class AlignComponents(PythonAlgorithm):
 
             eulerAngles = comp.getRotation().getEulerAngles(self._eulerConvention)
 
-            logger.notice("Working on " + comp.getFullName() +
-                          " Starting position is " + str(comp.getPos()) +
-                          " Starting rotation is " + str(eulerAngles))
+            logger.notice("Working on " + comp.getFullName() + " Starting position is " + str(comp.getPos())
+                          + " Starting rotation is " + str(eulerAngles))
 
             x0List = []
             self._initialPos = [comp.getPos().getX(), comp.getPos().getY(), comp.getPos().getZ(),
@@ -411,9 +408,8 @@ class AlignComponents(PythonAlgorithm):
 
             # Need to grab the component again, as things have changed
             comp = api.mtd[wks_name].getInstrument().getComponentByName(component)
-            logger.notice("Finshed " + comp.getFullName() +
-                          " Final position is " + str(comp.getPos()) +
-                          " Final rotation is " + str(comp.getRotation().getEulerAngles(self._eulerConvention)))
+            logger.notice("Finshed " + comp.getFullName() + " Final position is " + str(comp.getPos())
+                          + " Final rotation is " + str(comp.getRotation().getEulerAngles(self._eulerConvention)))
 
             prog.report()
         logger.notice("Results applied to workspace "+wks_name)
@@ -484,8 +480,8 @@ class AlignComponents(PythonAlgorithm):
         Convert Euler angles to a quaternion
         """
         getV3D = {'X': V3D(1, 0, 0), 'Y': V3D(0, 1, 0), 'Z': V3D(0, 0, 1)}
-        return (Quat(alpha, getV3D[convention[0]]) * Quat(beta, getV3D[convention[1]]) *
-                Quat(gamma, getV3D[convention[2]]))
+        return (Quat(alpha, getV3D[convention[0]]) * Quat(beta, getV3D[convention[1]])
+                * Quat(gamma, getV3D[convention[2]]))
 
     def _eulerToAngleAxis(self, alpha, beta, gamma, convention):
         """

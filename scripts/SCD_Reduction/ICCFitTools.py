@@ -385,8 +385,7 @@ def getBGRemovedIndices(n_events, zBG=1.96, calc_pp_lambda=False, neigh_length_m
             np.ones([neigh_length_m, neigh_length_m,
                      neigh_length_m]) / neigh_length_m**3
         conv_n_events = convolve(n_events, convBox)
-        goodIDX = np.logical_and(hasEventsIDX, conv_n_events >
-                                 pp_lambda+zBG*np.sqrt(pp_lambda/(2*neigh_length_m+1)**3))
+        goodIDX = np.logical_and(hasEventsIDX, conv_n_events > pp_lambda+zBG*np.sqrt(pp_lambda/(2*neigh_length_m+1)**3))
         return goodIDX, pp_lambda
 
     if calc_pp_lambda is False:
@@ -624,8 +623,7 @@ def getTOFWS(box, flightPath, scatteringHalfAngle, tofPeak, peak, qMask, zBG=-1.
     QX, QY, QZ = np.meshgrid(qx, qy, qz, indexing='ij', copy=False)
 
     # Create our TOF distribution from bg corrected data
-    tList = 1.0/np.sqrt(QX[hasEventsIDX]**2 +
-                        QY[hasEventsIDX]**2 + QZ[hasEventsIDX]**2)
+    tList = 1.0/np.sqrt(QX[hasEventsIDX]**2 + QY[hasEventsIDX]**2 + QZ[hasEventsIDX]**2)
     tList = 3176.507 * flightPath * \
         np.sin(scatteringHalfAngle) * tList  # convert to microseconds
 
@@ -773,8 +771,8 @@ def plotFit(filenameFormat, r, tofWS, fICC, runNumber, peakNumber, energy, chiSq
     plt.clf()
     plt.plot(r.readX(0), r.readY(0), 'o', label='Data')
     if bgx0 is not None:
-        plt.plot(tofWS.readX(0), fICC.function1D(tofWS.readX(0)) +
-                 np.polyval(bgx0, tofWS.readX(0)), 'b', label='Initial Guess')
+        plt.plot(tofWS.readX(0), fICC.function1D(tofWS.readX(0))
+                 + np.polyval(bgx0, tofWS.readX(0)), 'b', label='Initial Guess')
     else:
         plt.plot(tofWS.readX(0), fICC.function1D(
             tofWS.readX(0)), 'b', label='Initial Guess')
@@ -824,12 +822,12 @@ def getBoxFracHKL(peak, peaks_ws, MDdata, UBMatrix, peakNumber, dQ, dQPixel=0.00
     nPtsQ = np.round(np.sum(dQ/dQPixel, axis=1)).astype(int)
 
     Box = BinMD(InputWorkspace='MDdata',
-                AlignedDim0='Q_%s_x,' % q_frame +
-                str(Qx-dQ[0, 0])+','+str(Qx+dQ[0, 1])+','+str(nPtsQ[0]),
-                AlignedDim1='Q_%s_y,' % q_frame +
-                str(Qy-dQ[1, 0])+','+str(Qy+dQ[1, 1])+','+str(nPtsQ[1]),
-                AlignedDim2='Q_%s_z,' % q_frame +
-                str(Qz-dQ[2, 0])+','+str(Qz+dQ[2, 1])+','+str(nPtsQ[2]),
+                AlignedDim0='Q_%s_x,' % q_frame
+                            + str(Qx-dQ[0, 0])+','+str(Qx+dQ[0, 1])+','+str(nPtsQ[0]),
+                AlignedDim1='Q_%s_y,' % q_frame
+                            + str(Qy-dQ[1, 0])+','+str(Qy+dQ[1, 1])+','+str(nPtsQ[1]),
+                AlignedDim2='Q_%s_z,' % q_frame
+                            + str(Qz-dQ[2, 0])+','+str(Qz+dQ[2, 1])+','+str(nPtsQ[2]),
                 OutputWorkspace='MDbox')
     return Box
 
@@ -981,8 +979,8 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
                     logger.information("Peak {:d} has 0 events or is HKL=000. Skipping!".format(p))
                     peak.setIntensity(0)
                     peak.setSigmaIntensity(1)
-                    paramLisg.append([i, energy, 0.0, 1.0e10, 1.0e10] +
-                                     [0 for i in range(mtd['fit_parameters'].rowCount())]+[0])
+                    paramLisg.append([i, energy, 0.0, 1.0e10, 1.0e10]
+                                     + [0 for i in range(mtd['fit_parameters'].rowCount())]+[0])
 
                     mtd.remove('MDbox_'+str(run)+'_'+str(i))
                     continue
@@ -1035,8 +1033,8 @@ def integrateSample(run, MDdata, peaks_ws, paramList, UBMatrix, dQ, qMask, padeC
                 if keepFitDict:
                     fitDict[i] = np.array(
                         [r.readX(0), r.readY(0), r.readY(1), r.readY(2)])
-                paramList.append([i, energy, np.sum(icProfile), 0.0, chiSq] +
-                                 [param.row(i)['Value'] for i in range(param.rowCount())]+[pp_lambda])
+                paramList.append([i, energy, np.sum(icProfile), 0.0, chiSq]
+                                 + [param.row(i)['Value'] for i in range(param.rowCount())]+[pp_lambda])
                 mtd.remove('MDbox_'+str(run)+'_'+str(i))
 
             except KeyboardInterrupt:

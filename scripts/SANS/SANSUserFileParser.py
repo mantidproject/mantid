@@ -69,8 +69,8 @@ class BackCommandParser(object):
             self._use_mean = False
         else:
             raise RuntimeError("BackCommandParser: Cannot parse the MEAN/TOF value. "
-                               "Read in " + argument +". "+
-                               "Make sure it is set correctly.")
+                               "Read in " + argument + ". "
+                               + "Make sure it is set correctly.")
 
     def _evaluate_uniform(self, argument):
         '''
@@ -84,8 +84,8 @@ class BackCommandParser(object):
             self._use_time = False
         else:
             raise RuntimeError("BackCommandParser: Cannot parse the TIME/UAMP value. "
-                               "Read in " + argument +". "+
-                               "Make sure it is set correctly.")
+                               "Read in " + argument + ". "
+                               + "Make sure it is set correctly.")
 
     def _evaluate_run(self, argument):
         '''
@@ -95,8 +95,8 @@ class BackCommandParser(object):
         '''
         if not argument.startswith(self._run_key[0]):
             raise RuntimeError("BackCommandParser: Cannot parse the RUN= value. "
-                               "Read in " + argument +". "+
-                               "Make sure it is set correctly.")
+                               "Read in " + argument + ". "
+                               + "Make sure it is set correctly.")
 
         # Remove the Run= part and take the rest as the run parameter. At this point we cannot
         # check if it is a valid run
@@ -117,8 +117,8 @@ class BackCommandParser(object):
             self._mon_number=int(mon_number)
         else:
             raise RuntimeError("BackCommandParser: Cannot parse the MON value. "
-                               "Read in " + argument +". "+
-                               "Make sure it is set correctly.")
+                               "Read in " + argument + ". "
+                               + "Make sure it is set correctly.")
 
     def can_attempt_to_parse(self, arguments):
         '''

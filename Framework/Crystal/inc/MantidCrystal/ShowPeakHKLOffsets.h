@@ -22,11 +22,11 @@ offset and run number and detector number
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
-class DLLExport ShowPeakHKLOffsets : public API::Algorithm {
+class MANTID_CRYSTAL_DLL ShowPeakHKLOffsets : public API::Algorithm {
 public:
   const std::string name() const override { return "ShowPeakHKLOffsets"; };
 

@@ -154,4 +154,5 @@ class LoadAndMerge(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace', mtd[output])
 
+
 AlgorithmFactory.subscribe(LoadAndMerge)

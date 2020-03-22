@@ -11,16 +11,16 @@ from mantid.simpleapi import *
 
 class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
-            return 8000
+        return 8000
 
     def runTest(self):
         LoadMD('HB2C_WANDSCD_data.nxs', OutputWorkspace='ConvertWANDSCDtoQTest_data')
         LoadMD('HB2C_WANDSCD_norm.nxs', OutputWorkspace='ConvertWANDSCDtoQTest_norm')
-        ConvertWANDSCDtoQTest_Q=ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQTest_data',
-                                                  NormalisationWorkspace='ConvertWANDSCDtoQTest_norm')
+        ConvertWANDSCDtoQTest_Q = ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQTest_data',
+                                                    NormalisationWorkspace='ConvertWANDSCDtoQTest_norm')
 
-        ConvertWANDSCDtoQTest_peaks=FindPeaksMD(InputWorkspace=ConvertWANDSCDtoQTest_Q, PeakDistanceThreshold=2,
-                                                CalculateGoniometerForCW=True, Wavelength=1.488)
+        ConvertWANDSCDtoQTest_peaks = FindPeaksMD(InputWorkspace=ConvertWANDSCDtoQTest_Q, PeakDistanceThreshold=2,
+                                                  CalculateGoniometerForCW=True, Wavelength=1.488)
 
         self.assertEqual(ConvertWANDSCDtoQTest_peaks.getNumberPeaks(), 14)
 
@@ -32,8 +32,9 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
         self.assertTrue(np.allclose(peak.getQSampleFrame(), [6.56011, 0.00357258, -2.52058]))
         self.assertDelta(peak.getWavelength(), 1.488, 1e-5)
 
-        SetUB('ConvertWANDSCDtoQTest_data', UB="-2.7315243158024499e-17,1.7706197424726486e-01,-9.2794248657701375e-03,"
-              "1.773049645390071e-01,0.,0.,1.2303228382369809e-17,-9.2794248657701254e-03,-1.7706197424726489e-01")
+        SetUB('ConvertWANDSCDtoQTest_data',
+              UB="-2.7315243158024499e-17,1.7706197424726486e-01,-9.2794248657701375e-03,"
+                 "1.773049645390071e-01,0.,0.,1.2303228382369809e-17,-9.2794248657701254e-03,-1.7706197424726489e-01")
 
         ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQTest_data',
                           NormalisationWorkspace='ConvertWANDSCDtoQTest_norm',
@@ -47,19 +48,19 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
         results = 'ConvertWANDSCDtoQTest_HKL'
         reference = 'ConvertWANDSCDtoQTest_HKL.nxs'
 
-        Load(Filename=reference,OutputWorkspace=reference)
+        Load(Filename=reference, OutputWorkspace=reference)
 
         checker = AlgorithmManager.create("CompareMDWorkspaces")
         checker.setLogging(True)
-        checker.setPropertyValue("Workspace1",results)
-        checker.setPropertyValue("Workspace2",reference)
+        checker.setPropertyValue("Workspace1", results)
+        checker.setPropertyValue("Workspace2", reference)
         checker.setPropertyValue("Tolerance", "1e-7")
 
         checker.execute()
         if checker.getPropertyValue("Equals") != "1":
-            print(" Workspaces do not match, result: ",checker.getPropertyValue("Result"))
+            print(" Workspaces do not match, result: ", checker.getPropertyValue("Result"))
             print(self.__class__.__name__)
-            SaveMD(InputWorkspace=results,Filename=self.__class__.__name__+'-mismatch.nxs')
+            SaveMD(InputWorkspace=results, Filename=self.__class__.__name__ + '-mismatch.nxs')
             return False
 
         return True
@@ -67,7 +68,7 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
 
 class ConvertWANDSCDtoQ_HB3A_Test(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
-            return 8000
+        return 8000
 
     def runTest(self):
         LoadMD('HB3A_data.nxs', OutputWorkspace='ConvertWANDSCDtoQ_HB3ATest_data')
@@ -85,13 +86,13 @@ class ConvertWANDSCDtoQ_HB3A_Test(systemtesting.MantidSystemTest):
                           KeepTemporaryWorkspaces=True,
                           OutputWorkspace='ConvertWANDSCDtoQTest_Q')
 
-        ConvertWANDSCDtoQTest_peaks=FindPeaksMD(InputWorkspace='ConvertWANDSCDtoQTest_Q_data',
-                                                PeakDistanceThreshold=0.25,
-                                                DensityThresholdFactor=20000,
-                                                CalculateGoniometerForCW=True,
-                                                Wavelength=1.008,
-                                                FlipX=True,
-                                                InnerGoniometer=False)
+        ConvertWANDSCDtoQTest_peaks = FindPeaksMD(InputWorkspace='ConvertWANDSCDtoQTest_Q_data',
+                                                  PeakDistanceThreshold=0.25,
+                                                  DensityThresholdFactor=20000,
+                                                  CalculateGoniometerForCW=True,
+                                                  Wavelength=1.008,
+                                                  FlipX=True,
+                                                  InnerGoniometer=False)
 
         IndexPeaks(ConvertWANDSCDtoQTest_peaks)
 
@@ -99,7 +100,7 @@ class ConvertWANDSCDtoQ_HB3A_Test(systemtesting.MantidSystemTest):
 
         peak = ConvertWANDSCDtoQTest_peaks.getPeak(0)
         self.assertDelta(peak.getWavelength(), 1.008, 1e-7)
-        np.testing.assert_allclose(peak.getQSampleFrame(), [-0.425693,1.6994,2.30206], rtol=1e-5)
+        np.testing.assert_allclose(peak.getQSampleFrame(), [-0.425693, 1.6994, 2.30206], rtol=1e-5)
         np.testing.assert_array_equal(peak.getHKL(), [0, 0, 6])
 
         ConvertWANDSCDtoQTest_HKL = ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQ_HB3ATest_data',

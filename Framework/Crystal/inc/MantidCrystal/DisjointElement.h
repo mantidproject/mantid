@@ -6,14 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
 
 /** DisjointElement : Cluster item used in a disjoint-set data structure.
  */
-class DLLExport DisjointElement {
+class MANTID_CRYSTAL_DLL DisjointElement {
 public:
   /// Default constructor
   DisjointElement();

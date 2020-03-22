@@ -62,11 +62,11 @@ foo()
         # approximate correct
         expected_lines = [
             "NameError:.*'_local'.*",
-            '  File ".*test_errorformatter.py", line \d+, in test_standard_exception',
+            r'  File ".*test_errorformatter.py", line \d+, in test_standard_exception',
             '    exec(.*)',
-            '  File "<string>", line \d+, in <module>',
-            '  File "<string>", line \d+, in foo',
-            '  File "<string>", line \d+, in bar',
+            r'  File "<string>", line \d+, in <module>',
+            r'  File "<string>", line \d+, in foo',
+            r'  File "<string>", line \d+, in bar',
         ]
         for produced, expected in zip(error_lines, expected_lines):
             self.assertRegexpMatches(produced, expected)

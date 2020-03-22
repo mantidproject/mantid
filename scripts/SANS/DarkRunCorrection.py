@@ -136,8 +136,8 @@ class DarkRunNormalizationExtractor(object):
         log_entry = "gd_prtn_chrg"
         run = workspace.getRun()
         if not run.hasProperty(log_entry):
-            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry +
-                               "log entry. This is required for calculating the noramlization"
+            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry
+                               + "log entry. This is required for calculating the noramlization"
                                "of the dark run.")
         entry = run.getProperty(log_entry)
         return entry.value
@@ -162,8 +162,8 @@ class DarkRunNormalizationExtractor(object):
         log_entry = "good_frames"
         run = workspace.getRun()
         if not run.hasProperty(log_entry):
-            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry +
-                               "log entry. This is required for calculating the noramlization"
+            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry
+                               + "log entry. This is required for calculating the noramlization"
                                "of the dark run.")
         prop = run.getProperty(log_entry)
         frame_time = self._get_time_for_frame(workspace)

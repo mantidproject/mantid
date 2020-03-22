@@ -10,6 +10,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/IValidator.h"
 
 #include <set>
@@ -21,7 +22,8 @@ namespace Algorithms {
 /**
   QENSFitSequential - Performs a sequential QENS fit
 */
-class DLLExport QENSFitSequential : public API::DataProcessorAlgorithm {
+class MANTID_CURVEFITTING_DLL QENSFitSequential
+    : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

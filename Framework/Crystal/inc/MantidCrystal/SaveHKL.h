@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 
@@ -19,7 +20,7 @@ namespace Crystal {
  * @date 2011-09-28
  */
 
-class DLLExport SaveHKL : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SaveHKL : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveHKL"; }

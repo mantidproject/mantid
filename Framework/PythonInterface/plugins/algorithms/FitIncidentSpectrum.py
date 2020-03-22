@@ -146,10 +146,10 @@ class FitIncidentSpectrum(PythonAlgorithm):
             index = np.arange(len(x))
             fit_prime = np.empty(len(x))
             for pos in index:
-                    dx = (x[1] - x[0])/1000
-                    y1 = spline_fit(x[pos] - dx)
-                    y2 = spline_fit(x[pos] + dx)
-                    fit_prime[pos] = (y2-y1)/dx
+                dx = (x[1] - x[0])/1000
+                y1 = spline_fit(x[pos] - dx)
+                y2 = spline_fit(x[pos] + dx)
+                fit_prime[pos] = (y2-y1)/dx
         return fit, fit_prime
 
     def fit_cubic_spline(self, x_fit, y_fit, x, s=1e15):

@@ -42,8 +42,8 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
         colchoices = ["Value", "FitOrTie", "Min", "Max", "StepSize"]
         self.declareProperty("Column", "Value", mantid.kernel.StringListValidator(colchoices),
-                             "Column name of the cell to have value updated.  Choices include 'FitOrTie', "+
-                             "'Max', 'Min', 'StepSize' and 'Value'")
+                             "Column name of the cell to have value updated.  Choices include 'FitOrTie', "
+                             + "'Max', 'Min', 'StepSize' and 'Value'")
 
         rowprop = mantid.kernel.IntArrayProperty("Rows", [])
         self.declareProperty(rowprop, "List of row numbers of the cell to have value updated")

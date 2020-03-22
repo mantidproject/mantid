@@ -78,10 +78,7 @@ class BinWidthAtX(PythonAlgorithm):
             if lowerBound > upperBound:
                 lowerBound, upperBound = upperBound, lowerBound
             if x <= lowerBound or x > upperBound:
-                raise RuntimeError(
-                    self._PROP_X_VALUE +
-                    ' = {0} out of range for workspace index {1}'
-                    .format(x, wsIndex))
+                raise RuntimeError(self._PROP_X_VALUE + ' = {0} out of range for workspace index {1}'.format(x, wsIndex))
             binIndex = inputWs.yIndexOfX(x, wsIndex)
             dx = xs[binIndex + 1] - xs[binIndex]
             widths[wsIndex] = dx

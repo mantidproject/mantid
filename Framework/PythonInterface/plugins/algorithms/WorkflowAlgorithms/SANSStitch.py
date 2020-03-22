@@ -509,8 +509,7 @@ class QErrorCorrectionForMergedWorkspaces(object):
         counts_rear = count_ws_rear.readY(0)
 
         # We need to make sure that the workspaces match in length
-        if ((len(q_resolution_front) != len(q_resolution_rear)) or
-                (len(counts_front) != len(counts_rear))):
+        if (len(q_resolution_front) != len(q_resolution_rear)) or (len(counts_front) != len(counts_rear)):
             return
 
         # Get everything for the FRONT detector

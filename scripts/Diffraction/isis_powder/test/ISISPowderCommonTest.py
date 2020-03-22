@@ -656,5 +656,6 @@ class ISISPowderMockRunDetails(object):
     def __init__(self, file_ext):
         self.file_extension = file_ext
 
+
 if __name__ == "__main__":
     unittest.main()

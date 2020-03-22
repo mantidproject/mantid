@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/IMWDomainCreator.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -34,7 +35,7 @@ Declares OutputWorkspace output property.
 @author Roman Tolchenov, Tessella plc
 @date 06/12/2011
 */
-class DLLExport FitMW : public IMWDomainCreator {
+class MANTID_CURVEFITTING_DLL FitMW : public IMWDomainCreator {
 public:
   /// Constructor
   FitMW(Kernel::IPropertyManager *fit, const std::string &workspacePropertyName,

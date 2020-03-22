@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -23,8 +24,9 @@ page www.mantidproject.org/IkedaCarpenterPV for documentation for this function.
 @author Anders Markvardsen, ISIS, RAL
 @date 3/11/2009
 */
-class DLLExport IkedaCarpenterPV : virtual public API::IPeakFunction,
-                                   virtual public API::IFunctionMW {
+class MANTID_CURVEFITTING_DLL IkedaCarpenterPV
+    : virtual public API::IPeakFunction,
+      virtual public API::IFunctionMW {
 public:
   /// overwrite IPeakFunction base class methods
   double centre() const override;

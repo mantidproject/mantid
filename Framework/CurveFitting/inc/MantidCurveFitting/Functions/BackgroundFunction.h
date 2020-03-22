@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include <boost/shared_array.hpp>
 
 namespace mu {
@@ -26,7 +27,8 @@ should inherit from this class to enable certain features. E.g. querying
 @author Roman Tolchenov, Tessella plc
 @date 26/04/2010
 */
-class DLLExport BackgroundFunction : public API::IBackgroundFunction {
+class MANTID_CURVEFITTING_DLL BackgroundFunction
+    : public API::IBackgroundFunction {
 public:
   /// Returns the centre of the function, which may be something as simple as
   /// the centre of

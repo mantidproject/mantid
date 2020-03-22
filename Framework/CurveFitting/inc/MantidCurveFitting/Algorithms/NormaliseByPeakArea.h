@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -20,7 +21,7 @@ class HistogramE;
 namespace CurveFitting {
 namespace Algorithms {
 
-class DLLExport NormaliseByPeakArea : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL NormaliseByPeakArea : public API::Algorithm {
 public:
   NormaliseByPeakArea();
 

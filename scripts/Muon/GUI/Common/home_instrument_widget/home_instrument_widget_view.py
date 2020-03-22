@@ -554,7 +554,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
                                             '2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n'
                                             '0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000')
         variable_validator = QtGui.QRegExpValidator(
-            QtCore.QRegExp('^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
+            QtCore.QRegExp(r'^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
         self.rebin_variable_edit.setValidator(variable_validator)
 
         self.rebin_layout = QtWidgets.QHBoxLayout()

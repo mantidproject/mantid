@@ -27,8 +27,8 @@ class SANSWideAngleCorrection(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("SampleData", "", direction = Direction.Input),
-                             "A workspace cropped to the detector to be reduced (the SAME as the input to [[Q1D]]); "+
-                             "used to verify the solid angle. The workspace is not modified, just inspected.")
+                             "A workspace cropped to the detector to be reduced (the SAME as the input to [[Q1D]]); "
+                             + "used to verify the solid angle. The workspace is not modified, just inspected.")
         self.declareProperty(MatrixWorkspaceProperty("TransmissionData","",direction=Direction.Input),
                              "The transmission data calculated, referred to as <math>T_0</math> in equations in discussion section")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace","",direction=Direction.Output),

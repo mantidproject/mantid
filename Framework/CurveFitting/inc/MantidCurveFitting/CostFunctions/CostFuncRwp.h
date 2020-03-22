@@ -49,7 +49,7 @@ namespace CostFunctions {
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CostFuncRwp : public CostFuncLeastSquares {
+class MANTID_CURVEFITTING_DLL CostFuncRwp : public CostFuncLeastSquares {
 public:
   /// Constructor
   CostFuncRwp();

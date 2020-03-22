@@ -68,9 +68,9 @@ namespace Functions {
   * @date 11/4/2011
   *
   */
-class DLLExport BivariateNormal : public API::ParamFunction,
-                                  public API::IFunction1D,
-                                  public API::IFunctionMW {
+class MANTID_CURVEFITTING_DLL BivariateNormal : public API::ParamFunction,
+                                                public API::IFunction1D,
+                                                public API::IFunctionMW {
 public:
   BivariateNormal();
   /// Destructor

@@ -7,6 +7,7 @@
 #pragma once
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/ElasticIsoRotDiff.h"
 #include "MantidCurveFitting/Functions/InelasticIsoRotDiff.h"
 // Mantid headers from other projects
@@ -24,7 +25,8 @@ namespace Functions {
 @date 25/09/2016
 */
 
-class DLLExport IsoRotDiff : public API::ImmutableCompositeFunction {
+class MANTID_CURVEFITTING_DLL IsoRotDiff
+    : public API::ImmutableCompositeFunction {
 
 public:
   /// overwrite IFunction base class methods

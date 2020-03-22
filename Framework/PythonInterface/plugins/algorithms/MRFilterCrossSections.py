@@ -242,5 +242,6 @@ class MRFilterCrossSections(PythonAlgorithm):
                             OutputWorkspace=output_wsg)
         self.setProperty("CrossSectionWorkspaces", output_wsg)
 
+
 # Register
 api.AlgorithmFactory.subscribe(MRFilterCrossSections)

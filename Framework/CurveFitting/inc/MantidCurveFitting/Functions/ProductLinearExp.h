@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -17,8 +18,8 @@ namespace Functions {
 /** ProductLinearExp : Function that evauates the product of an exponential and
   linear function.
 */
-class DLLExport ProductLinearExp : public API::ParamFunction,
-                                   public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL ProductLinearExp : public API::ParamFunction,
+                                                 public API::IFunction1D {
 public:
   ProductLinearExp();
 

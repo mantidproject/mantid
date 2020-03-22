@@ -56,4 +56,6 @@ class CalculateFlux(PythonAlgorithm):
         output_ws = GroupDetectors(InputWorkspace=rebinned, DetectorList=det_list,
                                    OutputWorkspace=self.getPropertyValue('OutputWorkspace'))
         self.setProperty('OutputWorkspace', output_ws)
+
+
 AlgorithmFactory.subscribe(CalculateFlux)

@@ -26,7 +26,8 @@ namespace FuncMinimisers {
 
     @author Roman Tolchenov, Tessella plc
 */
-class DLLExport DampedGaussNewtonMinimizer : public API::IFuncMinimizer {
+class MANTID_CURVEFITTING_DLL DampedGaussNewtonMinimizer
+    : public API::IFuncMinimizer {
 public:
   /// Constructor
   DampedGaussNewtonMinimizer(double relTol = 0.0001);

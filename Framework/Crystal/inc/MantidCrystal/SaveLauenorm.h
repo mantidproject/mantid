@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -21,7 +21,7 @@ namespace Crystal {
  * @date 2014-07-24
  */
 
-class DLLExport SaveLauenorm : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SaveLauenorm : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "SaveLauenorm"; };

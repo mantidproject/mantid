@@ -22,7 +22,8 @@ namespace FuncMinimisers {
     @author Anders Markvardsen, ISIS, RAL
     @date 13/1/2010
 */
-class DLLExport PRConjugateGradientMinimizer : public DerivMinimizer {
+class MANTID_CURVEFITTING_DLL PRConjugateGradientMinimizer
+    : public DerivMinimizer {
 public:
   /// Constructor.
   PRConjugateGradientMinimizer() : DerivMinimizer() {}

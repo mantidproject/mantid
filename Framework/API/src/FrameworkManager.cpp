@@ -22,10 +22,22 @@
 #include <nexus/NeXusFile.hpp>
 
 #include <Poco/ActiveResult.h>
-#include <tbb/task_scheduler_init.h>
 
 #include <clocale>
 #include <cstdarg>
+#include <memory>
+
+// The below can be replaced with global_control when all platforms
+// have 2019U4
+#include "tbb/tbb_stddef.h"
+
+#if TBB_INTERFACE_VERSION_MAJOR < 11
+#include "tbb/task_scheduler_init.h"
+#include <thread>
+#else
+#define TBB_HAS_GLOBAL_CONTROL
+#include "tbb/global_control.h"
+#endif
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -39,6 +51,14 @@
 #ifdef MPI_BUILD
 #include <boost/mpi.hpp>
 #endif
+
+namespace {
+#ifdef TBB_HAS_GLOBAL_CONTROL
+std::unique_ptr<tbb::global_control> m_globalTbbControl;
+#else
+thread_local std::unique_ptr<tbb::task_scheduler_init> m_globalTbbControl;
+#endif
+} // namespace
 
 namespace Mantid {
 using Kernel::ConfigService;
@@ -170,7 +190,17 @@ void FrameworkManagerImpl::setNumOMPThreadsToConfigValue() {
 void FrameworkManagerImpl::setNumOMPThreads(const int nthreads) {
   g_log.debug() << "Setting maximum number of threads to " << nthreads << "\n";
   PARALLEL_SET_NUM_THREADS(nthreads);
-  static tbb::task_scheduler_init m_init{nthreads};
+  if (m_globalTbbControl) {
+    m_globalTbbControl
+        .reset(); // Have to reset to change the number of threads at runtime
+  }
+
+#ifdef TBB_HAS_GLOBAL_CONTROL
+  m_globalTbbControl = std::make_unique<tbb::global_control>(
+      tbb::global_control::max_allowed_parallelism, nthreads);
+#else
+  m_globalTbbControl = std::make_unique<tbb::task_scheduler_init>(nthreads);
+#endif
 }
 
 /**
@@ -195,6 +225,8 @@ void FrameworkManagerImpl::clear() {
 
 void FrameworkManagerImpl::shutdown() {
   Kernel::UsageService::Instance().shutdown();
+  // Ensure we don't run into static init ordering issues with TBB
+  m_globalTbbControl.reset();
   clear();
 }
 

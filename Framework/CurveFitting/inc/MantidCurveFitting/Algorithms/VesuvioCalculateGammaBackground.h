@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDTypes.h"
 
@@ -28,7 +29,8 @@ namespace Algorithms {
 //---------------------------------------------------------------------------
 struct DetectorParams;
 
-class DLLExport VesuvioCalculateGammaBackground : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL VesuvioCalculateGammaBackground
+    : public API::Algorithm {
 public:
   VesuvioCalculateGammaBackground();
   ~VesuvioCalculateGammaBackground() override;

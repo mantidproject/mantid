@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidKernel/System.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
@@ -21,7 +22,7 @@ class ImplClusterRegister;
 /** ClusterRegister : A fly-weight ICluster regeister. Handles the logic of
   merging clusters.
 */
-class DLLExport ClusterRegister {
+class MANTID_CRYSTAL_DLL ClusterRegister {
 public:
   /// Cluster map
   using MapCluster = std::map<size_t, boost::shared_ptr<ICluster>>;

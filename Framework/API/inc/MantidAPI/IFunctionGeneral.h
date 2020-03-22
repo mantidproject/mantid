@@ -23,7 +23,7 @@ namespace API {
     The domain and the values object can have different sizes.
     In particular the domain can be empty.
   */
-class DLLExport IFunctionGeneral : public virtual IFunction {
+class MANTID_API_DLL IFunctionGeneral : public virtual IFunction {
 public:
   void function(const FunctionDomain &domain,
                 FunctionValues &values) const override;

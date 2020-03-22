@@ -358,9 +358,9 @@ class DeltaPDF3D(PythonAlgorithm):
 
         sigma is based on the dat being in a range 0 to 1
         """
-        return (ssignal.gaussian(width[0], sigma*width[0]).reshape((-1,1,1)) *
-                ssignal.gaussian(width[1], sigma*width[1]).reshape((-1,1)) *
-                ssignal.gaussian(width[2], sigma*width[2]))
+        return (ssignal.gaussian(width[0], sigma*width[0]).reshape((-1,1,1))
+                * ssignal.gaussian(width[1], sigma*width[1]).reshape((-1,1))
+                * ssignal.gaussian(width[2], sigma*width[2]))
 
     def _blackman_window(self, width):
         """
@@ -377,9 +377,9 @@ class DeltaPDF3D(PythonAlgorithm):
         alpha = 0 becomes rectangular
         alpha = 1 becomes a Hann window
         """
-        return (ssignal.tukey(width[0], alpha).reshape((-1,1,1)) *
-                ssignal.tukey(width[1], alpha).reshape((-1,1)) *
-                ssignal.tukey(width[2], alpha))
+        return (ssignal.tukey(width[0], alpha).reshape((-1,1,1))
+                * ssignal.tukey(width[1], alpha).reshape((-1,1))
+                * ssignal.tukey(width[2], alpha))
 
     def _kaiser_window(self, width, beta):
         """

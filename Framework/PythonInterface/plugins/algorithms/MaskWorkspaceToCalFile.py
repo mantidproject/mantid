@@ -91,7 +91,7 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
                 for did in detIDs:
                     calFile.write(self.FormatLine(i,did,0.0,group,group))
             except RuntimeError:
-                        #no detector for this spectra
+                # no detector for this spectra
                 pass
         calFile.close()
 

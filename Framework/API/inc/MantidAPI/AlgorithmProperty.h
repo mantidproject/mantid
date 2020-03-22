@@ -33,7 +33,7 @@ API::IAlgorithm interface.
 @author Martyn Gigg, Tessella Plc
 @date 24/03/2011
 */
-class DLLExport AlgorithmProperty
+class MANTID_API_DLL AlgorithmProperty
     : public Kernel::PropertyWithValue<boost::shared_ptr<IAlgorithm>> {
 public:
   /// Typedef the held type

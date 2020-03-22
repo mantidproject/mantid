@@ -12,6 +12,7 @@
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IFunctionWithLocation.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include <cmath>
 
 namespace Mantid {
@@ -25,8 +26,8 @@ namespace Functions {
  @date 18/02/2015
  */
 
-class DLLExport DynamicKuboToyabe : public API::ParamFunction,
-                                    public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL DynamicKuboToyabe : public API::ParamFunction,
+                                                  public API::IFunction1D {
 public:
   /// Constructor
   DynamicKuboToyabe();

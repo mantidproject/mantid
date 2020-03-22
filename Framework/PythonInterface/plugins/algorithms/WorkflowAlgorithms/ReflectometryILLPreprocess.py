@@ -207,23 +207,23 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self.declareProperty(Prop.LOW_BKG_OFFSET,
                              defaultValue=7,
                              validator=nonnegativeInt,
-                             doc='Distance of flat background region towards smaller detector angles from the ' +
-                                 'foreground centre, in pixels.')
+                             doc='Distance of flat background region towards smaller detector angles from the '
+                                 + 'foreground centre, in pixels.')
         self.declareProperty(Prop.LOW_BKG_WIDTH,
                              defaultValue=5,
                              validator=nonnegativeInt,
-                             doc='Width of flat background region towards smaller detector angles from the ' +
-                                 'foreground centre, in pixels.')
+                             doc='Width of flat background region towards smaller detector angles from the '
+                                 + 'foreground centre, in pixels.')
         self.declareProperty(Prop.HIGH_BKG_OFFSET,
                              defaultValue=7,
                              validator=nonnegativeInt,
-                             doc='Distance of flat background region towards larger detector angles from the ' +
-                                 'foreground centre, in pixels.')
+                             doc='Distance of flat background region towards larger detector angles from the '
+                                 + 'foreground centre, in pixels.')
         self.declareProperty(Prop.HIGH_BKG_WIDTH,
                              defaultValue=5,
                              validator=nonnegativeInt,
-                             doc='Width of flat background region towards larger detector angles from the ' +
-                                 'foreground centre, in pixels.')
+                             doc='Width of flat background region towards larger detector angles from the '
+                                 + 'foreground centre, in pixels.')
         self.declareProperty(Prop.START_WS_INDEX,
                              validator=wsIndexRange,
                              defaultValue=0,
@@ -627,5 +627,6 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self._cleanup.cleanup(rebinnedWaterWS)
         self._cleanup.cleanup(ws)
         return calibratedWS
+
 
 AlgorithmFactory.subscribe(ReflectometryILLPreprocess)

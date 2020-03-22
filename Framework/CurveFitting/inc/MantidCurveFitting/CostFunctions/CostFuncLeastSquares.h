@@ -21,7 +21,7 @@ namespace CostFunctions {
     @author Anders Markvardsen, ISIS, RAL
     @date 11/05/2010
 */
-class DLLExport CostFuncLeastSquares : public CostFuncFitting {
+class MANTID_CURVEFITTING_DLL CostFuncLeastSquares : public CostFuncFitting {
 public:
   /// Constructor
   CostFuncLeastSquares();

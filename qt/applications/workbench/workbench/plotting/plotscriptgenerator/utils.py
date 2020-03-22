@@ -75,7 +75,7 @@ def generate_workspace_retrieval_commands(fig):
 
 def clean_variable_name(name):
     """Converts a string into a valid Python variable name"""
-    return re.sub('\W|^(?=\d)', '_', name)
+    return re.sub(r'\W|^(?=\d)', '_', name)
 
 
 def sorted_lines_in(ax, artists):

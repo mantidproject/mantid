@@ -82,5 +82,6 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         self.ws_widget._do_plot_colorfill([self.ws_names[0]])
         mock_plot_colorfill.assert_called_once_with(mock.ANY)
 
+
 if __name__ == '__main__':
     unittest.main()
