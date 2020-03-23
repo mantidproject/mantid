@@ -19,8 +19,8 @@ else:
         app, within_mantid = get_qapplication()
         instrument = config['default.instrument']
         main_view = view.DrillView()
-        #main_model = model.DrillModel(instrument)
-        #main_presenter = presenter.DrillPresenter(main_model, main_view)
+        main_model = model.DrillModel(instrument)
+        main_presenter = presenter.DrillPresenter(main_model, main_view)
         UsageService.registerFeatureUsage(FeatureType.Interface, "Drill", False)
         main_view.show()
         if not within_mantid:

@@ -45,7 +45,7 @@ class DrillEventListener(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def on_copy_rows_requested(self):
+    def on_copy_rows_requested(self, rows):
         pass
 
     @abstractmethod
@@ -57,11 +57,11 @@ class DrillEventListener(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def on_erase_rows(self):
+    def on_erase_rows(self, rows):
         pass
 
     @abstractmethod
-    def on_cut_rows(self):
+    def on_cut_rows(self, rows):
         pass
 
     @abstractmethod
@@ -109,23 +109,41 @@ class DrillView(QMainWindow):
         self.instrumentselector = instrumentselector.InstrumentSelector(self)
         self.instrumentselector.instrumentSelectionChanged.connect(self.choose_instrument)
         self.headerLeft.addWidget(self.instrumentselector, 0, Qt.AlignLeft)
+
         self.datadirs.setIcon(icons.get_icon("mdi.folder"))
         self.datadirs.clicked.connect(self.show_directory_manager)
+
         self.load.setIcon(icons.get_icon("mdi.file-import"))
         self.load.clicked.connect(self.load_rundex)
+
         self.settings.setIcon(icons.get_icon("mdi.settings"))
         self.settings.clicked.connect(self.show_settings)
+
         self.paste.setIcon(icons.get_icon("mdi.content-paste"))
+        self.paste.clicked.connect(self.paste_rows_requested)
+
         self.copy.setIcon(icons.get_icon("mdi.content-copy"))
+        self.copy.clicked.connect(self.copy_rows_requested)
+
         self.cut.setIcon(icons.get_icon("mdi.content-cut"))
+        self.cut.clicked.connect(self.cut_rows_requested)
+
         self.erase.setIcon(icons.get_icon("mdi.eraser"))
+        self.erase.clicked.connect(self.erase_rows)
+
         self.deleterow.setIcon(icons.get_icon("mdi.table-row-remove"))
+        self.deleterow.clicked.connect(self.remove_rows_requested_from_button)
+
         self.addrow.setIcon(icons.get_icon("mdi.table-row-plus-after"))
+
         self.save.setIcon(icons.get_icon("mdi.file-export"))
+
         self.processRows.setIcon(icons.get_icon("mdi.play"))
         self.processRows.clicked.connect(self.process_selected_rows)
+
         self.processAll.setIcon(icons.get_icon("mdi.sigma"))
         self.processAll.clicked.connect(self.process_all)
+
         self.stop.setIcon(icons.get_icon("mdi.stop"))
 
     def add_listener(self, listener):
@@ -202,6 +220,7 @@ class DrillView(QMainWindow):
         self.table_signals.removeRowsRequested.connect(self.remove_rows_requested)
         self.table_signals.copyRowsRequested.connect(self.copy_rows_requested)
         self.table_signals.pasteRowsRequested.connect(self.paste_rows_requested)
+        self.table_signals.cutRowsRequested.connect(self.cut_rows_requested)
 
     def data_changed(self, row_location, column, old_value, new_value):
         row = row_location.rowRelativeToParent()
@@ -222,17 +241,24 @@ class DrillView(QMainWindow):
         rows = [item.rowRelativeToParent() for item in rows]
         self.call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
 
+    def remove_rows_requested_from_button(self):
+        rows = self.get_selected_rows()
+        self.call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
+
     def copy_rows_requested(self):
         UsageService.registerFeatureUsage(FeatureType.Feature, ["Drill", "Copy rows button"], False)
-        self.call_settings_listeners(lambda listener: listener.on_copy_rows_requested())
+        rows = self.get_selected_rows()
+        self.call_settings_listeners(lambda listener: listener.on_copy_rows_requested(rows))
 
     def erase_rows(self):
         UsageService.registerFeatureUsage(FeatureType.Feature, ["Drill", "Erase rows button"], False)
-        self.call_settings_listeners(lambda listener: listener.on_erase_rows())
+        rows = self.get_selected_rows()
+        self.call_settings_listeners(lambda listener: listener.on_erase_rows(rows))
 
-    def cut_rows(self):
+    def cut_rows_requested(self):
         UsageService.registerFeatureUsage(FeatureType.Feature, ["Drill", "Cut rows button"], False)
-        self.call_settings_listeners(lambda listener: listener.on_cut_rows())
+        rows = self.get_selected_rows()
+        self.call_settings_listeners(lambda listener: listener.on_cut_rows(rows))
 
     def paste_rows_requested(self):
         UsageService.registerFeatureUsage(FeatureType.Feature, ["Drill", "Paste rows button"], False)

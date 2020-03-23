@@ -24,17 +24,17 @@ class DrillPresenter(DrillEventListener):
     def on_insert_row(self):
         pass
 
-    def on_erase_rows(self):
-        pass
+    def on_erase_rows(self, rows):
+        print("on_erase_rows: " + str(rows))
 
-    def on_copy_rows_requested(self):
-        pass
+    def on_copy_rows_requested(self, rows):
+        print("on_copy_rows_requested: " + str(rows))
 
-    def on_cut_rows(self):
-        pass
+    def on_cut_rows(self, rows):
+        print("on_cut_rows: " + str(rows))
 
     def on_paste_rows_requested(self):
-        pass
+        print("on_paste_rows_requested")
 
     def on_save_rundex_clicked(self):
         pass
@@ -43,7 +43,7 @@ class DrillPresenter(DrillEventListener):
         pass
 
     def on_rows_removed(self, rows):
-        pass
+        print("on_rows_removed: " + str(rows))
 
     def on_data_changed(self, row, content):
         pass
