@@ -107,6 +107,7 @@ class DrillView(QMainWindow):
         self.settings_listeners = []
         self.setup_header()
         self.set_table(list())
+        self.buffer = list()  # for copy-paste actions
 
     def setup_header(self):
         self.instrumentselector = instrumentselector.InstrumentSelector(self)
@@ -124,19 +125,19 @@ class DrillView(QMainWindow):
         self.settings.clicked.connect(self.show_settings)
 
         self.paste.setIcon(icons.get_icon("mdi.content-paste"))
-        self.paste.clicked.connect(self.paste_rows_requested)
+        self.paste.clicked.connect(self.paste_rows)
 
         self.copy.setIcon(icons.get_icon("mdi.content-copy"))
-        self.copy.clicked.connect(self.copy_rows_requested)
+        self.copy.clicked.connect(self.copy_rows)
 
         self.cut.setIcon(icons.get_icon("mdi.content-cut"))
-        self.cut.clicked.connect(self.cut_rows_requested)
+        self.cut.clicked.connect(self.cut_rows)
 
         self.erase.setIcon(icons.get_icon("mdi.eraser"))
         self.erase.clicked.connect(self.erase_rows)
 
         self.deleterow.setIcon(icons.get_icon("mdi.table-row-remove"))
-        self.deleterow.clicked.connect(self.remove_rows_requested_from_button)
+        self.deleterow.clicked.connect(self.remove_rows_from_button)
 
         self.addrow.setIcon(icons.get_icon("mdi.table-row-plus-after"))
 
@@ -182,8 +183,7 @@ class DrillView(QMainWindow):
             lambda listener: listener.on_process_clicked(contents))
 
     def get_selected_rows(self):
-        row_locations = self.job_tree_view.selectedRowLocations()
-        rows = [x.rowRelativeToParent() for x in row_locations]
+        rows = self.job_tree_view.selectedRowLocations()
         return rows
 
     def get_all_rows(self):
@@ -215,32 +215,54 @@ class DrillView(QMainWindow):
     def edit_at_row_above_requested(self):
         self.job_tree_view.editAtRowAbove()
 
-    def remove_rows_requested(self, rows):
-        rows = [item.rowRelativeToParent() for item in rows]
-        self.call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
+    def remove_rows(self, rows):
+        self.job_tree_view.removeRows(rows)
 
-    def remove_rows_requested_from_button(self):
+    def remove_rows_from_button(self):
         rows = self.get_selected_rows()
-        self.call_settings_listeners(lambda listener: listener.on_rows_removed(rows))
+        self.remove_rows(rows)
 
-    def copy_rows_requested(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["Drill", "Copy rows button"], False)
+    def copy_rows(self):
+        UsageService.registerFeatureUsage(
+                FeatureType.Feature, ["Drill", "Copy rows button"], False)
         rows = self.get_selected_rows()
-        self.call_settings_listeners(lambda listener: listener.on_copy_rows_requested(rows))
+        self.buffer = list()
+        for row in rows:
+            self.buffer.append(self.get_row_contents(row))
 
     def erase_rows(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["Drill", "Erase rows button"], False)
+        UsageService.registerFeatureUsage(
+                FeatureType.Feature, ["Drill", "Erase rows button"], False)
         rows = self.get_selected_rows()
-        self.call_settings_listeners(lambda listener: listener.on_erase_rows(rows))
+        length = len(self.job_tree_view.cellsAt(rows[0]))
+        for row in rows:
+            for cell in range(0, length):
+                self.job_tree_view.setCellAt(row, cell,
+                                             self.job_tree_view.cell_style(""))
 
-    def cut_rows_requested(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["Drill", "Cut rows button"], False)
+    def cut_rows(self):
+        UsageService.registerFeatureUsage(
+                FeatureType.Feature, ["Drill", "Cut rows button"], False)
         rows = self.get_selected_rows()
-        self.call_settings_listeners(lambda listener: listener.on_cut_rows(rows))
+        rows = self.get_selected_rows()
+        self.buffer = list()
+        for row in rows:
+            self.buffer.append(self.get_row_contents(row))
+        self.remove_rows(rows)
 
-    def paste_rows_requested(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["Drill", "Paste rows button"], False)
-        self.call_settings_listeners(lambda listener: listener.on_paste_rows_requested())
+    def paste_rows(self):
+        UsageService.registerFeatureUsage(
+                FeatureType.Feature, ["Drill", "Paste rows button"], False)
+        position = self.get_selected_rows()[-1]
+        indice = position.rowRelativeToParent() + 1
+        for row in self.buffer:
+            position = self.job_tree_view.insertChildRowOf(
+                    position.parent(), position.rowRelativeToParent() + 1)
+            column = 0
+            for txt in row:
+                self.job_tree_view.setCellAt(position, column,
+                                             self.job_tree_view.cell_style(txt))
+                column += 1
 
     def load_rundex(self):
         fname = QFileDialog.getOpenFileName(self, 'Load rundex', '~')
@@ -273,9 +295,8 @@ class DrillView(QMainWindow):
                 self.append_and_edit_at_row_below_requested)
         self.table_signals.editAtRowAboveRequested.connect(
                 self.edit_at_row_above_requested)
-        self.table_signals.removeRowsRequested.connect(
-                self.remove_rows_requested)
-        self.table_signals.copyRowsRequested.connect(self.copy_rows_requested)
-        self.table_signals.pasteRowsRequested.connect(self.paste_rows_requested)
-        self.table_signals.cutRowsRequested.connect(self.cut_rows_requested)
+        self.table_signals.removeRowsRequested.connect(self.remove_rows)
+        self.table_signals.copyRowsRequested.connect(self.copy_rows)
+        self.table_signals.pasteRowsRequested.connect(self.paste_rows)
+        self.table_signals.cutRowsRequested.connect(self.cut_rows)
 
