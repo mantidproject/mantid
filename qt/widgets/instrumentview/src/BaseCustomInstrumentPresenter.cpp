@@ -18,8 +18,8 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 BaseCustomInstrumentPresenter::BaseCustomInstrumentPresenter(
-    IBaseCustomInstrumentView *view, BaseCustomInstrumentModel *model,
-    PlotFitAnalysisPanePresenter *analysisPanePresenter)
+    IBaseCustomInstrumentView *view, IBaseCustomInstrumentModel *model,
+    IPlotFitAnalysisPanePresenter *analysisPanePresenter)
     : m_view(view), m_model(model), m_currentRun(0), m_currentFile(""),
       m_loadRunObserver(nullptr), m_analysisPanePresenter(analysisPanePresenter) {
   m_loadRunObserver = new VoidObserver();

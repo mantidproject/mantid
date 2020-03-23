@@ -14,10 +14,10 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace MantidWidgets {
 
-class PlotFitAnalysisPaneModel {
+class PlotFitAnalysisPaneModel{
 
 public:
-  IFunction_sptr doFit(const std::string &wsName,
+   IFunction_sptr doFit(const std::string &wsName,
                        const std::pair<double, double> &range,
                        const IFunction_sptr func);
 };

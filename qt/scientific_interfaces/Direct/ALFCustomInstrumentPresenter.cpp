@@ -18,7 +18,7 @@ namespace CustomInterfaces {
 
 ALFCustomInstrumentPresenter::ALFCustomInstrumentPresenter(
     IALFCustomInstrumentView *view, ALFCustomInstrumentModel *model,
-    MantidWidgets::PlotFitAnalysisPanePresenter *analysisPane)
+    MantidWidgets::IPlotFitAnalysisPanePresenter *analysisPane)
     : BaseCustomInstrumentPresenter(view, model, analysisPane),
       m_view(view), m_model(model), m_analysisPane(analysisPane),
       m_extractSingleTubeObserver(nullptr), m_averageTubeObserver(nullptr) {

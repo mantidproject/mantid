@@ -22,8 +22,8 @@ class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW BaseCustomInstrumentPresenter
 
 public:
   BaseCustomInstrumentPresenter(IBaseCustomInstrumentView *view,
-                                BaseCustomInstrumentModel *model,
-      PlotFitAnalysisPanePresenter *analysisView);
+                                IBaseCustomInstrumentModel *model,
+                                IPlotFitAnalysisPanePresenter *analysisView);
   ~BaseCustomInstrumentPresenter() { delete m_loadRunObserver; };
 
   typedef std::pair<
@@ -51,11 +51,11 @@ private:
   std::pair<instrumentSetUp, instrumentObserverOptions> setupInstrument();
 
   IBaseCustomInstrumentView *m_view;
-  BaseCustomInstrumentModel *m_model;
+  IBaseCustomInstrumentModel *m_model;
   int m_currentRun;
   std::string m_currentFile;
   VoidObserver *m_loadRunObserver;
-  PlotFitAnalysisPanePresenter *m_analysisPanePresenter;
+  IPlotFitAnalysisPanePresenter *m_analysisPanePresenter;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
