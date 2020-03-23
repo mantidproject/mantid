@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/FindDetectorsPar.h"
@@ -408,7 +409,7 @@ public:
                            // algorithm in this way ensures that function is
                            // executed
 
-    findPar = FrameworkManager::Instance().createAlgorithm("FindDetectorsPar");
+    findPar = AlgorithmManager::Instance().create("FindDetectorsPar");
   }
   ~FindDetectorsParTest() override {
     FrameworkManager::Instance().clearAlgorithms();
@@ -416,7 +417,7 @@ public:
   }
 
 private:
-  IAlgorithm *findPar;
+  IAlgorithm_sptr findPar;
   MatrixWorkspace_sptr inputWS;
   std::vector<Geometry::IDetector_const_sptr> partDetectors;
 

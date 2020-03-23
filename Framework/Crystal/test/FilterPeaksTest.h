@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidCrystal/FilterPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -337,9 +337,9 @@ public:
   FilterPeaksTestPerformance() {
     const std::string outputWorkspace = "TOPAZ_3007.peaks";
 
-    Mantid::API::FrameworkManagerImpl &manager =
-        Mantid::API::FrameworkManager::Instance();
-    auto load = manager.createAlgorithm("LoadIsawPeaks");
+    auto &manager =
+        Mantid::API::AlgorithmManager::Instance();
+    auto load = manager.create("LoadIsawPeaks");
     load->initialize();
     load->setProperty("Filename", "TOPAZ_3007.peaks");
     load->setPropertyValue("OutputWorkspace", outputWorkspace);

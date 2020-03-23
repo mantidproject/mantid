@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/SaveNXTomo.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -29,7 +29,7 @@ public:
     m_inputWS = "saveNXTomo_test";
     m_outputFile = "SaveNXTomoTestFile.nxs";
     m_axisSize = 50;
-    m_saver = FrameworkManager::Instance().createAlgorithm("SaveNXTomo");
+    m_saver = AlgorithmManager::Instance().create("SaveNXTomo");
   }
 
   void testName() { TS_ASSERT_EQUALS(m_saver->name(), "SaveNXTomo"); }
@@ -412,7 +412,7 @@ private:
   }
 
 private:
-  IAlgorithm *m_saver;
+  IAlgorithm_sptr m_saver;
   std::string m_outputFile;
   std::string m_inputWS;
   int m_axisSize;

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Timer.h"
@@ -75,8 +75,7 @@ private:
   */
   MatrixWorkspace_sptr create_workspace_with_no_fitting_functions() {
     const std::string outWSName = "test_ws";
-    IAlgorithm *workspaceAlg =
-        FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto workspaceAlg = AlgorithmManager::Instance().create("CreateWorkspace");
     workspaceAlg->initialize();
     workspaceAlg->setPropertyValue("DataX", "1, 2, 3, 4"); // 4 bins.
     workspaceAlg->setPropertyValue(
@@ -573,8 +572,8 @@ public:
   void setUp() override {
     if (!ws) {
       // Load some data
-      IAlgorithm *loadalg =
-          FrameworkManager::Instance().createAlgorithm("Load");
+      auto loadalg =
+          AlgorithmManager::Instance().create("Load");
       loadalg->setRethrows(true);
       loadalg->initialize();
       loadalg->setPropertyValue("Filename", "POLREF00004699.nxs");
@@ -582,8 +581,8 @@ public:
       loadalg->execute();
 
       // Convert units to wavelength
-      IAlgorithm *unitsalg =
-          FrameworkManager::Instance().createAlgorithm("ConvertUnits");
+      auto unitsalg =
+          AlgorithmManager::Instance().create("ConvertUnits");
       unitsalg->initialize();
       unitsalg->setPropertyValue("InputWorkspace", "testws");
       unitsalg->setPropertyValue("OutputWorkspace", "testws");
@@ -591,8 +590,8 @@ public:
       unitsalg->execute();
 
       // Convert the specturm axis ot signed_theta
-      IAlgorithm *specaxisalg =
-          FrameworkManager::Instance().createAlgorithm("ConvertSpectrumAxis");
+      auto specaxisalg =
+          AlgorithmManager::Instance().create("ConvertSpectrumAxis");
       specaxisalg->initialize();
       specaxisalg->setPropertyValue("InputWorkspace", "testws");
       specaxisalg->setPropertyValue("OutputWorkspace", "testws");

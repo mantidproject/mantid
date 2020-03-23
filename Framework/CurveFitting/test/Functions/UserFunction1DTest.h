@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Functions/UserFunction1D.h"
@@ -24,8 +24,8 @@ public:
   void testLinear() {
     setupWS();
 
-    IAlgorithm *alg =
-        FrameworkManager::Instance().createAlgorithm("UserFunction1D");
+    auto alg =
+        AlgorithmManager::Instance().create("UserFunction1D");
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "UserFunction1DWS");
     alg->setPropertyValue("WorkspaceIndex", "0");
@@ -44,8 +44,7 @@ public:
     TS_ASSERT_DELTA(params->Double(1, 1), 2, 0.01);
     TS_ASSERT_DELTA(params->Double(2, 1), 4, 0.01);
 
-    IAlgorithm *alg1 =
-        FrameworkManager::Instance().createAlgorithm("UserFunction1D");
+    auto alg1 = AlgorithmManager::Instance().create("UserFunction1D");
     alg1->initialize();
     alg1->setPropertyValue("InputWorkspace", "UserFunction1DWS");
     alg1->setPropertyValue("WorkspaceIndex", "1");
@@ -64,11 +63,14 @@ public:
     TS_ASSERT_DELTA(params1->Double(2, 1), 8, 0.01);
 
     // Tidy up
-    FrameworkManager::Instance().deleteWorkspace("UserFunction1DWS");
-    FrameworkManager::Instance().deleteWorkspace("UserFunction1D_Parameters");
-    FrameworkManager::Instance().deleteWorkspace("UserFunction1D_Workspace");
-    FrameworkManager::Instance().deleteWorkspace("UserFunction1D1_Parameters");
-    FrameworkManager::Instance().deleteWorkspace("UserFunction1D1_Workspace");
+    AnalysisDataService::Instance().remove("UserFunction1DWS");
+    AnalysisDataService::Instance().remove(
+        "UserFunction1D_Parameters");
+    AnalysisDataService::Instance().remove("UserFunction1D_Workspace");
+    AnalysisDataService::Instance().remove(
+        "UserFunction1D1_Parameters");
+    AnalysisDataService::Instance().remove(
+        "UserFunction1D1_Workspace");
   }
 
 private:

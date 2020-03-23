@@ -10,7 +10,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/FitPeaks.h"
@@ -40,7 +40,6 @@ public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static FitPeaksTest *createSuite() {
-    API::FrameworkManager::Instance();
     return new FitPeaksTest();
   }
   static void destroySuite(FitPeaksTest *suite) { delete suite; }
@@ -528,8 +527,8 @@ public:
     std::string input_ws_name("PG3_733");
 
     // Start by loading our NXS file
-    IAlgorithm *loader =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("LoadNexus");
+    auto loader =
+        Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
     loader->setPropertyValue("Filename", "PG3_733.nxs");
     loader->setPropertyValue("OutputWorkspace", input_ws_name);
     loader->execute();
@@ -611,8 +610,8 @@ public:
     std::string input_ws_name("PG3_733");
 
     // Start by loading our NXS file
-    IAlgorithm *loader =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("LoadNexus");
+    auto loader =
+        Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
     loader->setPropertyValue("Filename", "PG3_733.nxs");
     loader->setPropertyValue("OutputWorkspace", input_ws_name);
     loader->execute();

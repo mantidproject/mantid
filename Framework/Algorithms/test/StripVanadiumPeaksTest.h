@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/StripVanadiumPeaks.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
@@ -37,8 +37,8 @@ public:
     std::string outputWSName("PG3_733_stripped");
 
     // Start by loading our NXS file
-    IAlgorithm *loader =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("LoadNexus");
+    auto loader =
+        Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
     loader->setPropertyValue("Filename", "PG3_733.nxs");
     loader->setPropertyValue("OutputWorkspace", inputWSName);
     loader->execute();

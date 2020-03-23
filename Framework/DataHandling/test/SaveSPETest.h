@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/SaveSPE.h"
@@ -45,7 +45,7 @@ public:
   SaveSPETest() { // the functioning of SaveSPE is affected by a function call
                   // in the FrameworkManager's constructor, creating the
                   // algorithm in this way ensures that function is executed
-    saver = FrameworkManager::Instance().createAlgorithm("SaveSPE");
+    saver = AlgorithmManager::Instance().create("SaveSPE");
   }
 
   void testName() { TS_ASSERT_EQUALS(saver->name(), "SaveSPE"); }
@@ -203,5 +203,5 @@ private:
   }
 
 private:
-  IAlgorithm *saver;
+  IAlgorithm_sptr saver;
 };

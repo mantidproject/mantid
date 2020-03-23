@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/MaskDetectorsInShape.h"
 #include "MantidGeometry/Instrument.h"
@@ -140,16 +140,15 @@ public:
   MaskDetectorsInShapeTestPerformance() : workspace("SANS2D") {
     // Load the instrument alone so as to isolate the raw file loading time from
     // the instrument loading time
-    IAlgorithm *loader =
-        FrameworkManager::Instance().createAlgorithm("LoadEmptyInstrument");
+    auto loader =
+        AlgorithmManager::Instance().create("LoadEmptyInstrument");
     loader->setPropertyValue("Filename", "SANS2D_Definition.xml");
     loader->setPropertyValue("OutputWorkspace", workspace);
     TS_ASSERT(loader->execute());
   }
 
   void testMaskingLotsOfDetectors() {
-    IAlgorithm *masker =
-        FrameworkManager::Instance().createAlgorithm("MaskDetectorsInShape");
+    auto masker = AlgorithmManager::Instance().create("MaskDetectorsInShape");
     masker->setPropertyValue("Workspace", workspace);
     masker->setPropertyValue(
         "ShapeXML", "<infinite-cylinder id=\"beam_area\"><centre x=\"0\" "

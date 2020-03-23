@@ -12,6 +12,7 @@
 #include "../../Kernel/inc/MantidKernel/MDUnit.h"
 #include "../inc/MantidMDAlgorithms/CutMD.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -165,7 +166,7 @@ public:
         "Dimensions", "3", "Extents", "-10,10,-10,10,-10,10", "Names", "H,K,L",
         "Units", "U,U,U");
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", wsName);
@@ -182,7 +183,7 @@ public:
   void test_slice_to_original() {
     const std::string wsName = "__CutMDTest_slice_to_original";
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", sharedWSName);
@@ -223,7 +224,7 @@ public:
   void test_recalculate_extents_with_3_bin_arguments() {
     const std::string wsName = "__CutMDTest_recalc_extents_with_3_bin_args";
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", sharedWSName);
@@ -252,7 +253,7 @@ public:
   void test_truncate_extents() {
     const std::string wsName = "__CutMDTest_truncate_extents";
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", sharedWSName);
@@ -304,7 +305,7 @@ public:
 
     addNormalization(wsName);
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", wsName);
@@ -364,7 +365,7 @@ public:
 
     addNormalization(wsName);
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", wsName);
@@ -413,7 +414,7 @@ public:
 
     addNormalization(wsName);
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", wsName);
@@ -460,7 +461,7 @@ public:
 
     addNormalization(wsName);
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", wsName);
@@ -544,7 +545,7 @@ public:
 
     addNormalization(wsName);
 
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    auto algCutMD = AlgorithmManager::Instance().create("CutMD");
     algCutMD->initialize();
     algCutMD->setRethrows(true);
     algCutMD->setProperty("InputWorkspace", wsName);

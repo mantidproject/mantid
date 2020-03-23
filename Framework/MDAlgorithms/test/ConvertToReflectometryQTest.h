@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
@@ -78,8 +78,6 @@ public:
     return new ConvertToReflectometryQTest();
   }
   static void destroySuite(ConvertToReflectometryQTest *suite) { delete suite; }
-
-  void setUp() override { Mantid::API::FrameworkManager::Instance(); }
 
   void test_name() {
     ConvertToReflectometryQ alg;
@@ -304,7 +302,7 @@ private:
 public:
   void setUp() override {
     // Load some data
-    IAlgorithm *loadalg = FrameworkManager::Instance().createAlgorithm("Load");
+    auto loadalg = AlgorithmManager::Instance().create("Load");
     loadalg->setRethrows(true);
     loadalg->initialize();
     loadalg->setPropertyValue("Filename", "POLREF00004699.nxs");
@@ -312,8 +310,7 @@ public:
     loadalg->execute();
 
     // Convert units to wavelength
-    IAlgorithm *unitsalg =
-        FrameworkManager::Instance().createAlgorithm("ConvertUnits");
+    auto unitsalg = AlgorithmManager::Instance().create("ConvertUnits");
     unitsalg->initialize();
     unitsalg->setPropertyValue("InputWorkspace", "testws");
     unitsalg->setPropertyValue("OutputWorkspace", "testws");
@@ -321,8 +318,8 @@ public:
     unitsalg->execute();
 
     // Convert the specturm axis ot signed_theta
-    IAlgorithm *specaxisalg =
-        FrameworkManager::Instance().createAlgorithm("ConvertSpectrumAxis");
+    auto specaxisalg =
+        AlgorithmManager::Instance().create("ConvertSpectrumAxis");
     specaxisalg->initialize();
     specaxisalg->setPropertyValue("InputWorkspace", "testws");
     specaxisalg->setPropertyValue("OutputWorkspace", "testws");

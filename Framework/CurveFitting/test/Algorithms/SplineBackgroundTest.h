@@ -8,7 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Algorithms/SplineBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -41,7 +41,7 @@ public:
     const std::string wsName = "SplineBackground_points";
     WorkspaceCreationHelper::storeWS(wsName, ws);
 
-    IAlgorithm *alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
+    auto alg = Mantid::API::AlgorithmManager::Instance().create(
         "SplineBackground");
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", wsName);
@@ -87,7 +87,7 @@ public:
     WorkspaceCreationHelper::storeWS(inputWsName, ws);
 
     SplineBackgroundAlg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
+        Mantid::API::AlgorithmManager::Instance().create(
             "SplineBackground");
     SplineBackgroundAlg->initialize();
     SplineBackgroundAlg->setPropertyValue("InputWorkspace", inputWsName);
@@ -107,7 +107,7 @@ public:
   }
 
 private:
-  IAlgorithm *SplineBackgroundAlg;
+  IAlgorithm_sptr SplineBackgroundAlg;
 
   Mantid::DataObjects::Workspace2D_sptr ws;
   const std::string inputWsName = "SplineBackground_points";

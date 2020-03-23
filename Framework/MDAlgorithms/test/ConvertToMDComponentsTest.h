@@ -7,7 +7,7 @@
 #pragma once
 // tests for different parts of ConvertToMD exec functions
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
@@ -149,7 +149,7 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testWSProcessed");
 
-    auto clVs = Mantid::API::FrameworkManager::Instance().createAlgorithm(
+    auto clVs = AlgorithmManager::Instance().create(
         "CloneWorkspace");
     TS_ASSERT(clVs);
     if (!clVs)
@@ -315,8 +315,6 @@ public:
     ws2D->mutableRun().addProperty("eFixed", 13., "meV", true);
 
     AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
-
-    Mantid::API::FrameworkManager::Instance();
   }
   ~ConvertToMDComponentsTest() override {
     AnalysisDataService::Instance().remove("testWSProcessed");

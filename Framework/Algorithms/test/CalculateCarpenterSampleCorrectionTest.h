@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/CalculateCarpenterSampleCorrection.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -85,7 +85,7 @@ public:
 
     // convert to wavelength
     auto convertUnitsAlg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
+        Mantid::API::AlgorithmManager::Instance().create(
             "ConvertUnits");
     convertUnitsAlg->setPropertyValue("InputWorkspace", "TestInputWS");
     convertUnitsAlg->setPropertyValue("OutputWorkspace", "TestInputWS");
@@ -142,7 +142,7 @@ public:
 
     // Check applying absorption correction
     auto divide =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("Divide");
+        Mantid::API::AlgorithmManager::Instance().create("Divide");
     divide->initialize();
     divide->setPropertyValue("LHSWorkspace", "TestInputWS");
     divide->setPropertyValue("RHSWorkspace", absWksp->getName());
@@ -170,7 +170,7 @@ public:
 
     // Check applying multiple scattering correction
     auto multiply =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("Multiply");
+        Mantid::API::AlgorithmManager::Instance().create("Multiply");
     multiply->initialize();
     multiply->setPropertyValue("LHSWorkspace", "TestInputWS");
     multiply->setPropertyValue("RHSWorkspace", msWksp->getName());
@@ -189,8 +189,7 @@ public:
       TS_ASSERT_DELTA(ms_ws_actual[i], ms_ws_expected[i], 0.00001);
 
     // Check full correction comparison
-    auto minus =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("Minus");
+    auto minus = Mantid::API::AlgorithmManager::Instance().create("Minus");
     minus->initialize();
     minus->setPropertyValue("LHSWorkspace", "TestAbsWS");
     minus->setPropertyValue("RHSWorkspace", "TestMultScatWS");

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/Scale.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -148,8 +148,7 @@ private:
     }
 
     // Act
-    auto algScale =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("Scale");
+    auto algScale = Mantid::API::AlgorithmManager::Instance().create("Scale");
     algScale->initialize();
     algScale->setRethrows(true);
     algScale->setPropertyValue("InputWorkspace", wsName);

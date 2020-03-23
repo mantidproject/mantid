@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -57,12 +57,12 @@ public:
   }
 
   /** Calculate min-max value defaults*/
-  Mantid::API::IAlgorithm *
+  Mantid::API::IAlgorithm_sptr
   calcMinMaxValDefaults(const std::string &QMode, const std::string &QFrame,
                         std::string OtherProperties = std::string("")) {
 
-    Mantid::API::IAlgorithm *childAlg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
+    auto childAlg =
+        AlgorithmManager::Instance().create(
             "ConvertToMDMinMaxLocal");
     if (!childAlg) {
       TSM_ASSERT("Can not create child ChildAlgorithm to found min/max values",
@@ -365,8 +365,8 @@ public:
     pAlg->initialize();
     // initialize (load)Matid algorithm framework -- needed to run this test
     // separately
-    Mantid::API::IAlgorithm *childAlg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
+    auto childAlg =
+        AlgorithmManager::Instance().create(
             "ConvertUnits");
     TSM_ASSERT("Can not initialize Mantid algorithm framework", childAlg);
     if (!childAlg) {

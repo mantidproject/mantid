@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -38,13 +39,12 @@ public:
     EventWorkspace_sptr in_ws = Mantid::DataObjects::MDEventsTestHelper::
         createDiffractionEventWorkspace(10);
     AnalysisDataService::Instance().addOrReplace("testInEW", in_ws);
-    IAlgorithm *alg;
 
-    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace",
-                                            "InputWorkspace=testInEW;"
-                                            "OutputWorkspace=testOutMD;"
-                                            "OutputDimensions=Q (lab frame)",
-                                            1);
+    auto alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
+    alg->setPropertyValue("InputWorkspace", "testInEW");
+    alg->setPropertyValue("OutputWorkspace", "OutputWorkspace");
+    alg->setPropertyValue("OutputDimensions", "Q (lab frame)");
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     MDEventWorkspace3Lean::sptr ws;
@@ -65,31 +65,33 @@ public:
 
     // But you can't add to an existing one of the wrong dimensions type, if you
     // choose Append
-    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace",
-                                            "InputWorkspace=testInEW;"
-                                            "OutputWorkspace=testOutMD;"
-                                            "Append=1;"
-                                            "OutputDimensions=HKL",
-                                            1);
+    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
+    alg->setPropertyValue("InputWorkspace", "testInEW");
+    alg->setPropertyValue("OutputWorkspace", "testOutMD");
+    alg->setPropertyValue("OutputDimensions", "HKL");
+    alg->setPropertyValue("testOutMD", "1");
+    alg->execute();
     TS_ASSERT(!alg->isExecuted());
 
     // If Append is False, then it does work. The workspace gets replaced
-    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace",
-                                            "InputWorkspace=testInEW;"
-                                            "OutputWorkspace=testOutMD;"
-                                            "Append=0;"
-                                            "OutputDimensions=HKL",
-                                            1);
+    alg =
+        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
+    alg->setPropertyValue("InputWorkspace", "testInEW");
+    alg->setPropertyValue("OutputWorkspace", "testOutMD");
+    alg->setPropertyValue("OutputDimensions", "HKL");
+    alg->setPropertyValue("Append", "0");
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     // Let's remove the old workspace and try again - it will work.
     AnalysisDataService::Instance().remove("testOutMD");
-    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace",
-                                            "InputWorkspace=testInEW;"
-                                            "OutputWorkspace=testOutMD;"
-                                            "Append=1;"
-                                            "OutputDimensions=HKL",
-                                            1);
+    alg =
+        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
+    alg->setPropertyValue("InputWorkspace", "testInEW");
+    alg->setPropertyValue("OutputWorkspace", "testOutMD");
+    alg->setPropertyValue("OutputDimensions", "HKL");
+    alg->setPropertyValue("Append", "1");
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(
@@ -108,11 +110,12 @@ public:
     }
 
     AnalysisDataService::Instance().remove("testOutMD");
-    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace",
-                                            "InputWorkspace=testInEW;"
-                                            "OutputWorkspace=testOutMD;"
-                                            "OutputDimensions=Q (sample frame)",
-                                            1);
+    alg =
+        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
+    alg->setPropertyValue("InputWorkspace", "testInEW");
+    alg->setPropertyValue("OutputWorkspace", "testOutMD");
+    alg->setPropertyValue("OutputDimensions", "Q (sample frame)");
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(

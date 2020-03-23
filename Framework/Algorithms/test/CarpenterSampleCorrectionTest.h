@@ -11,7 +11,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/CarpenterSampleCorrection.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/LinearGenerator.h"
@@ -78,7 +78,7 @@ public:
 
     // convert to wavelength
     auto convertUnitsAlg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
+        Mantid::API::AlgorithmManager::Instance().create(
             "ConvertUnits");
     convertUnitsAlg->setPropertyValue("InputWorkspace", "TestInputWS");
     convertUnitsAlg->setPropertyValue("OutputWorkspace", "TestInputWS");

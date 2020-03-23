@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RenameWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -174,8 +174,9 @@ bool RenameWorkspace::processGroups() {
         suffix << i + 1;
         std::string wsName = outputwsName + "_" + suffix.str();
 
-        IAlgorithm *alg = API::FrameworkManager::Instance().createAlgorithm(
+        auto alg = API::AlgorithmManager::Instance().createUnmanaged(
             this->name(), this->version());
+        alg->initialize();
         alg->setPropertyValue("InputWorkspace", names[i]);
         alg->setPropertyValue("OutputWorkspace", wsName);
         alg->setChild(true);

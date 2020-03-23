@@ -10,7 +10,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -45,8 +45,7 @@ public:
     TS_ASSERT_EQUALS(descr, "test fjols description.");
 
     // load in additional parameters
-    auto pLoaderPF =
-        FrameworkManager::Instance().createAlgorithm("LoadParameterFile");
+    auto pLoaderPF = AlgorithmManager::Instance().create("LoadParameterFile");
 
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
     pLoaderPF->setPropertyValue(
@@ -136,8 +135,7 @@ public:
         "</parameter-file>";
 
     // load in additional parameters
-    auto pLoaderPF =
-        FrameworkManager::Instance().createAlgorithm("LoadParameterFile");
+    auto pLoaderPF = AlgorithmManager::Instance().create("LoadParameterFile");
 
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
     pLoaderPF->setPropertyValue("ParameterXML", parameterXML);
@@ -200,8 +198,7 @@ public:
     load_IDF2();
 
     // Run algorithm without file or string properties set
-    auto pLoaderPF =
-        FrameworkManager::Instance().createAlgorithm("LoadParameterFile");
+    auto pLoaderPF = AlgorithmManager::Instance().create("LoadParameterFile");
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
     pLoaderPF->setPropertyValue("Workspace", wsName);
     TS_ASSERT_THROWS_NOTHING(pLoaderPF->execute());
@@ -210,7 +207,7 @@ public:
 
   void load_IDF2() {
     auto pLoadInstrument =
-        FrameworkManager::Instance().createAlgorithm("LoadInstrument");
+        AlgorithmManager::Instance().create("LoadInstrument");
 
     TS_ASSERT_THROWS_NOTHING(pLoadInstrument->initialize());
 

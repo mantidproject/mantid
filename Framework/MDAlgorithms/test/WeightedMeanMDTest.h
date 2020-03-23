@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/WeightedMeanMD.h"
@@ -29,8 +29,7 @@ private:
                                                const std::string &name) {
     // Create and run the algorithm
     AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    IAlgorithm *alg =
-        FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
     alg->initialize();
     alg->setProperty("NSpec", 1);
     alg->setProperty("DataY", s);
@@ -49,8 +48,7 @@ private:
                                                MatrixWorkspace_sptr b,
                                                const std::string &name) {
     AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    IAlgorithm *alg =
-        FrameworkManager::Instance().createAlgorithm("WeightedMean");
+    auto alg = AlgorithmManager::Instance().create("WeightedMean");
     alg->setRethrows(true);
     alg->initialize();
     alg->setProperty("InputWorkspace1", a);
@@ -182,8 +180,7 @@ public:
 
     // Create and run the algorithm
     AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
-    IAlgorithm *alg =
-        FrameworkManager::Instance().createAlgorithm("CreateMDHistoWorkspace");
+    auto alg = AlgorithmManager::Instance().create("CreateMDHistoWorkspace");
     alg->initialize();
     alg->setProperty("Dimensionality", 1);
     alg->setProperty("SignalInput", s);
