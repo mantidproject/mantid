@@ -206,7 +206,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
       if ( USE_SANITIZERS_LOWER STREQUAL "address" )
         # See dev docs on sanitizers for details on why verify_asan_link is false
         # Trying to quote these options causes the quotation to be forwarded
-        set(_ASAN_OPTS "suppressions=${SUPPRESSIONS_DIR}/Address.supp:detect_stack_use_after_return=true:halt_on_error=false:verify_asan_link_order=false")
+        set(_ASAN_OPTS "suppressions=${SUPPRESSIONS_DIR}/Address.supp:detect_stack_use_after_return=true")
         set_property( TEST ${_cxxtest_separate_name} APPEND PROPERTY
           ENVIRONMENT ASAN_OPTIONS=${_ASAN_OPTS} )
 
