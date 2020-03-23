@@ -281,10 +281,6 @@ class DrillView(QMainWindow):
 
         # table widget
         self.job_tree_view = DrillJobTreeView(columns)
-        self.job_tree_view.setVisible(True)
-        sp = self.job_tree_view.sizePolicy()
-        sp.setRetainSizeWhenHidden(True)
-        self.job_tree_view.setSizePolicy(sp)
         self.center.addWidget(self.job_tree_view)
 
         # signals connection
