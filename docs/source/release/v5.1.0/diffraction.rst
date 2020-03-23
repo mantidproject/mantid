@@ -20,6 +20,8 @@ Improvements
 ^^^^^^^^^^^^
 - TOPAS files (`.abc`) have replaced the `.dat` files generated when focusing using the GUI.
 - Focusing with the GUI will now generate a CSV containing the averaged values of all numerical sample logs.
+- The currently loaded calibration is now shown at the bottom of the GUI.
+- The location of the saved output files from the GUI is now shown in the messages log.
 
 Single Crystal Diffraction
 --------------------------
