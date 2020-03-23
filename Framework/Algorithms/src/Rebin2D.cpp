@@ -84,7 +84,7 @@ void Rebin2D::exec() {
         "If it is a spectra axis try running ConvertSpectrumAxis first.");
   }
 
-  const auto &oldXEdges = inputWS->x(0);
+  const auto &oldXEdges = inputWS->binEdges(0);
   const size_t numXBins = inputWS->blocksize();
   const size_t numYBins = inputWS->getNumberHistograms();
   // This will convert plain NumericAxis to bin edges while
