@@ -364,7 +364,6 @@ IFittingAlgorithm::getCostFunctionInitialized() const {
 /// Execute the algorithm.
 void IFittingAlgorithm::exec() {
 
-  // This is to make it work with AlgorithmProxy
   if (!m_domainCreator) {
     setFunction();
     addWorkspaces();

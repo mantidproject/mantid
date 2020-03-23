@@ -27,7 +27,6 @@
 using namespace Mantid::Kernel;
 using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmManager;
-using Mantid::API::AlgorithmProxy;
 using Mantid::API::FrameworkManager;
 using Mantid::API::IWorkspaceProperty;
 

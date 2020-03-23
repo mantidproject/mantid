@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import testhelpers
 
-from mantid.api import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm,
+from mantid.api import (PythonAlgorithm, Algorithm, IAlgorithm,
                         AlgorithmManager, AlgorithmFactory)
 
 ########################### Test classes #####################################

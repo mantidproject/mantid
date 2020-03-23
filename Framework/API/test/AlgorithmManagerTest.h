@@ -188,18 +188,12 @@ public:
     AlgorithmManager::Instance().notificationCenter.addObserver(my_observer);
 
     IAlgorithm_sptr Aptr, Bptr;
-    Aptr = AlgorithmManager::Instance().create("AlgTest", -1, true);
-    Bptr = AlgorithmManager::Instance().create("AlgTest", -1, false);
-
-    m_notificationValue = 0;
-    Poco::ActiveResult<bool> resB = Bptr->executeAsync();
-    resB.wait();
-    TSM_ASSERT_EQUALS("Notification was received.", m_notificationValue, 12345);
+    Aptr = AlgorithmManager::Instance().create("AlgTest", -1);
 
     m_notificationValue = 0;
     Poco::ActiveResult<bool> resA = Aptr->executeAsync();
     resA.wait();
-    TSM_ASSERT_EQUALS("Notification was received (proxy).", m_notificationValue,
+    TSM_ASSERT_EQUALS("Notification was received.", m_notificationValue,
                       12345);
 
     AlgorithmManager::Instance().notificationCenter.removeObserver(my_observer);
@@ -340,7 +334,7 @@ public:
     // Create another 'runs forever' algorithm (without proxy) and another
     // 'normal' one
     auto aRunningAlgorithm =
-        AlgorithmManager::Instance().create("AlgRunsForever", 1, false);
+        AlgorithmManager::Instance().create("AlgRunsForever", 1);
     TS_ASSERT(
         AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty())
     TS_ASSERT_EQUALS(AlgorithmManager::Instance()
@@ -367,7 +361,7 @@ public:
       // Create without proxy so that I can cast it to an Algorithm and get at
       // getCancel()
       algs[i] = boost::dynamic_pointer_cast<Algorithm>(
-          AlgorithmManager::Instance().create("AlgRunsForever", 1, false));
+          AlgorithmManager::Instance().create("AlgRunsForever", 1));
       TS_ASSERT(!algs[i]->getCancel());
     }
 

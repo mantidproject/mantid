@@ -21,8 +21,7 @@ template <class T> class ActiveResult;
 namespace Mantid {
 namespace API {
 
-/** As we have multiple interfaces to the same logical algorithm (Algorithm &
- * AlgorithmProxy)
+/** As we have multiple interfaces to the same logical algorithm
  *  we need a way of uniquely identifying managed algorithms. It can be
  * AlgorithmID.
  */

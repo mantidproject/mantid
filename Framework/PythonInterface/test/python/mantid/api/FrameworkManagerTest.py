@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import testhelpers
-from mantid.api import FrameworkManager, FrameworkManagerImpl, IAlgorithm, AlgorithmProxy
+from mantid.api import FrameworkManager, FrameworkManagerImpl, IAlgorithm
 
 class FrameworkManagerTest(unittest.TestCase):
 

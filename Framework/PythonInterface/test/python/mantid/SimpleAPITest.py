@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import inspect
 import unittest
 
-from mantid.api import (AlgorithmFactory, AlgorithmProxy, IAlgorithm, IEventWorkspace, ITableWorkspace,
+from mantid.api import (AlgorithmFactory, IAlgorithm, IEventWorkspace, ITableWorkspace,
                         PythonAlgorithm, MatrixWorkspace, mtd)
 import mantid.simpleapi as simpleapi
 import numpy
@@ -335,12 +335,12 @@ class SimpleAPITest(unittest.TestCase):
 
     def test_create_algorithm_object_produces_initialized_non_child_alorithm_outside_PyExec(self):
         alg = simpleapi._create_algorithm_object("Rebin")
-        self._is_initialized_test(alg, 1, expected_class=AlgorithmProxy,
+        self._is_initialized_test(alg, 1, expected_class=IAlgorithm,
                                   expected_child=False)
 
     def test_create_algorithm_with_version_produces_initialized_alorithm(self):
         alg = simpleapi._create_algorithm_object("LoadRaw", 3)
-        self._is_initialized_test(alg, 3, expected_class=AlgorithmProxy,
+        self._is_initialized_test(alg, 3, expected_class=IAlgorithm,
                                   expected_child=False)
 
     def test_create_algorithm_produces_child_inside_PyExec(self):

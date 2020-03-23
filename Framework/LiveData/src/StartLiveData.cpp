@@ -220,9 +220,9 @@ void StartLiveData::exec() {
 
   double UpdateEvery = this->getProperty("UpdateEvery");
   if (UpdateEvery > 0) {
-    // Create the MonitorLiveData but DO NOT make a AlgorithmProxy to it
+    // Create the MonitorLiveData
     IAlgorithm_sptr algBase =
-        AlgorithmManager::Instance().create("MonitorLiveData", -1, false);
+        AlgorithmManager::Instance().create("MonitorLiveData", -1);
     auto *monitorAlg = dynamic_cast<MonitorLiveData *>(algBase.get());
 
     if (!monitorAlg)

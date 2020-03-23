@@ -60,17 +60,13 @@ Algorithm_sptr AlgorithmManagerImpl::createUnmanaged(const std::string &algName,
  *
  * @param  algName :: The name of the algorithm required
  * @param  version :: The version of the algorithm required, if not defined most
- *recent version is used -> version =-1
- * @param  makeProxy :: If true (default), create and return AlgorithmProxy of
- *the given algorithm.
- *         DO NOT SET TO FALSE unless you are really sure of what you are doing!
+ * recent version is used -> version =-1
  * @return A pointer to the created algorithm
  * @throw  NotFoundError Thrown if algorithm requested is not registered
  * @throw  std::runtime_error Thrown if properties string is ill-formed
  */
 IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
-                                             const int &version,
-                                             bool makeProxy) {
+                                             const int &version) {
   std::lock_guard<std::mutex> _lock(this->m_managedMutex);
   IAlgorithm_sptr alg;
   try {
