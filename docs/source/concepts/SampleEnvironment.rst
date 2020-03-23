@@ -114,6 +114,7 @@ map to the arguments of a similar name on the :ref:`SetSampleMaterial <algm-SetS
 - ``cohscatterxsec``
 - ``incohscatterxsec``
 - ``absorptionxsec``
+- ``attenuationprofile``
 
 Non-container Components
 ------------------------

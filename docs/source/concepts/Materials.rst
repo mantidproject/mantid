@@ -70,15 +70,30 @@ It can can be generated in one of three ways:
 
 where :math:`\rho_m` is the mass density, :math:`N_A` is the Avogadro constant, and :math:`M_r` the relative molecular mass.
 
-Linear Absorption Coefficients
+Attenuation Coefficients
 ##############################
+
+The attenuation effect is calculated according to the following formula:
+
+.. math:: \exp(-\rho_n(\mu_s+\mu_a)t)
+
+where :math:`\rho_n` is in unit of :math:`\AA^{-3}`, :math:`t` is the material thickness in cm, the two attenuation coefficients representing scattering and absorption (:math:`\mu_s` and :math:`\mu_a` respectively) are calculated as follows:
 
 .. math:: \mu_s = \rho_n \frac{1}{N_{atoms}}\sum_{i}s_{i}n_{i} \text{ units of 1/cm}
 .. math:: s = \sigma_{total scattering}
 .. math:: \mu_a = \rho_n \frac{1}{N_{atoms}}\sum_{i}a_{i}n_{i} \text{ units of 1/cm}
-.. math:: a = \frac{\lambda}{\lambda_0} \sigma_{absorption} (\lambda_0) \text{where \lambda_0=1.8 :math:`\AA`}
+.. math:: a = \frac{\lambda}{\lambda_0} \sigma_{absorption} (\lambda_0) \text{ where } \lambda_0=1.8\AA
 
 A detailed version of this is found in [2].
+
+The sum of the two attenuation coefficients can be replaced by an externally measured profile of attenuation versus wavelength if the scattering effect is wavelength dependent eg if a material is crystalline and shows some Bragg edges in its attenuation profile.
+Mantid supports a space delimited text file format for the externally measured profile containing the following columns:
+
+- wavelength (in :math:`\AA`)
+- attenuation factor (in :math:`mm^{-1}`)
+- error (currently ignored)
+
+Any lines not following this format (eg header rows) are ignored. The file must have a .DAT file extension.
 
 Normalized Laue
 ###############

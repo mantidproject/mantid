@@ -75,6 +75,7 @@ AttenuationProfile::AttenuationProfile(const std::string inputFileName,
 /**
  * Returns the attenuation coefficient for the supplied wavelength
  * @param lambda The wavelength the attenuation coefficient is required for
+ * (Angstroms)
  * @returns Attenuation coefficient ie alpha in I/I0=exp(-alpha*distance)
  */
 double

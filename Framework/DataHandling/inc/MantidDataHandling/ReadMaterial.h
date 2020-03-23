@@ -56,6 +56,7 @@ public:
     /// The total scattering cross section to set, defaults to EMPTY_DBL()
     double scatteringXSection = EMPTY_DBL();
     /// A flag indicating the unit of sampleNumberDensity
+    std::string attenuationProfileFileName = "";
     Kernel::MaterialBuilder::NumberDensityUnit numberDensityUnit =
         Kernel::MaterialBuilder::NumberDensityUnit::Atoms;
   };
@@ -96,7 +97,8 @@ private:
                    const Kernel::MaterialBuilder::NumberDensityUnit rhoUnit,
                    const double zParameter, const double unitCellVolume);
   void setScatteringInfo(double coherentXSection, double incoherentXSection,
-                         double attenuationXSection, double scatteringXSection);
+                         double attenuationXSection, double scatteringXSection,
+                         std::string attenuationProfileFileName);
 
   static bool isEmpty(const double toCheck);
 };
