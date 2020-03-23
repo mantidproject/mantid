@@ -8,8 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/FFTDerivative.h"
@@ -25,8 +25,8 @@ public:
 
     createWS(N, 0, "exp");
 
-    auto fft = Mantid::API::AlgorithmManager::Instance().create(
-        "FFTDerivative");
+    auto fft =
+        Mantid::API::AlgorithmManager::Instance().create("FFTDerivative");
     fft->initialize();
     fft->setPropertyValue("InputWorkspace", "FFTDerivative_WS_exp");
     fft->setPropertyValue("OutputWorkspace", "FFTDerivative_out");
@@ -54,8 +54,8 @@ public:
 
     createWS(N, 0, "exp");
 
-    auto fft = Mantid::API::AlgorithmManager::Instance().create(
-        "FFTDerivative");
+    auto fft =
+        Mantid::API::AlgorithmManager::Instance().create("FFTDerivative");
     fft->initialize();
     fft->setPropertyValue("InputWorkspace", "FFTDerivative_WS_exp");
     fft->setPropertyValue("OutputWorkspace", "FFTDerivative_out");

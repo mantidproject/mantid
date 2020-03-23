@@ -40,7 +40,8 @@ public:
         createDiffractionEventWorkspace(10);
     AnalysisDataService::Instance().addOrReplace("testInEW", in_ws);
 
-    auto alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
+    auto alg =
+        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "OutputWorkspace");
     alg->setPropertyValue("OutputDimensions", "Q (lab frame)");
@@ -65,7 +66,8 @@ public:
 
     // But you can't add to an existing one of the wrong dimensions type, if you
     // choose Append
-    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
+    alg =
+        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "HKL");

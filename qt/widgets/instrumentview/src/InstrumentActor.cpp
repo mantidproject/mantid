@@ -11,8 +11,8 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -267,8 +267,7 @@ void InstrumentActor::invertMaskWorkspace() const {
   Mantid::API::AnalysisDataService::Instance().addOrReplace(
       maskName, getMaskMatrixWorkspace());
   auto invertAlg =
-      AlgorithmManager::Instance().create(
-          "BinaryOperateMasks", -1);
+      AlgorithmManager::Instance().create("BinaryOperateMasks", -1);
   invertAlg->setChild(true);
   invertAlg->setPropertyValue("InputWorkspace1", maskName);
   invertAlg->setPropertyValue("OutputWorkspace", maskName);
@@ -311,9 +310,7 @@ void InstrumentActor::applyMaskWorkspace() {
   if (m_maskWorkspace) {
     // Mask detectors
     try {
-      auto alg =
-          AlgorithmManager::Instance().create(
-              "MaskDetectors", -1);
+      auto alg = AlgorithmManager::Instance().create("MaskDetectors", -1);
       alg->setPropertyValue("Workspace", wsName);
       alg->setProperty("MaskedWorkspace", m_maskWorkspace);
       alg->execute();

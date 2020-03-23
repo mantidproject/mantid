@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/StripVanadiumPeaks2.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/UnitFactory.h"
@@ -41,8 +41,7 @@ public:
     std::string outputWSName("PG3_733_stripped");
 
     // Start by loading our NXS file
-    auto loader =
-        Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
+    auto loader = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
     loader->setPropertyValue("Filename", "PG3_733.nxs");
     loader->setPropertyValue("OutputWorkspace", inputWSName);
     loader->execute();

@@ -8,8 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/MaskDetectorsInShape.h"
 #include "MantidGeometry/Instrument.h"
@@ -140,8 +140,7 @@ public:
   MaskDetectorsInShapeTestPerformance() : workspace("SANS2D") {
     // Load the instrument alone so as to isolate the raw file loading time from
     // the instrument loading time
-    auto loader =
-        AlgorithmManager::Instance().create("LoadEmptyInstrument");
+    auto loader = AlgorithmManager::Instance().create("LoadEmptyInstrument");
     loader->setPropertyValue("Filename", "SANS2D_Definition.xml");
     loader->setPropertyValue("OutputWorkspace", workspace);
     TS_ASSERT(loader->execute());

@@ -149,8 +149,7 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
             "testWSProcessed");
 
-    auto clVs = AlgorithmManager::Instance().create(
-        "CloneWorkspace");
+    auto clVs = AlgorithmManager::Instance().create("CloneWorkspace");
     TS_ASSERT(clVs);
     if (!clVs)
       return;

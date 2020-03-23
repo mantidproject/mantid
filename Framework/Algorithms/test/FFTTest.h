@@ -9,9 +9,9 @@
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -87,8 +87,7 @@ public:
 
     MatrixWorkspace_sptr inputWS = createWS(N, 0);
 
-    auto fft =
-        Mantid::API::AlgorithmManager::Instance().create("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inputWS);
@@ -130,8 +129,7 @@ public:
 
     auto inputWS = createWS(N, 1);
 
-    auto fft =
-        Mantid::API::AlgorithmManager::Instance().create("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inputWS);
@@ -167,8 +165,7 @@ public:
 
     MatrixWorkspace_sptr inWS = createWS(N, 1);
 
-    auto fft =
-        Mantid::API::AlgorithmManager::Instance().create("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inWS);
@@ -210,8 +207,7 @@ public:
 
     const auto inWS = createWS(N, 0);
 
-    auto fft =
-        Mantid::API::AlgorithmManager::Instance().create("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inWS);
@@ -247,8 +243,7 @@ public:
 
     const MatrixWorkspace_sptr inWS = createWS(N, 0);
 
-    auto fft =
-        Mantid::API::AlgorithmManager::Instance().create("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inWS);
@@ -291,8 +286,7 @@ public:
 
     const auto inWS = createWS(N, 1);
 
-    auto fft =
-        Mantid::API::AlgorithmManager::Instance().create("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inWS);
@@ -328,8 +322,7 @@ public:
 
     const MatrixWorkspace_sptr inWS = createWS(N, 1);
 
-    auto fft =
-        Mantid::API::AlgorithmManager::Instance().create("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inWS);
@@ -372,8 +365,7 @@ public:
     const auto realWS = createWS(N, 0);
     const auto imagWS = createWS(N, 0);
 
-    auto fft =
-        Mantid::API::AlgorithmManager::Instance().create("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", realWS);
@@ -422,8 +414,7 @@ public:
     inWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Energy");
 
-    auto fft =
-        Mantid::API::AlgorithmManager::Instance().create("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inWS);
@@ -834,8 +825,7 @@ private:
       Y.emplace_back(sin(omega * x));
       E.emplace_back(0.1);
     }
-    auto create =
-        AlgorithmManager::Instance().create("CreateWorkspace");
+    auto create = AlgorithmManager::Instance().create("CreateWorkspace");
     create->initialize();
     create->setChild(true);
     create->setProperty("DataX", X);
@@ -873,8 +863,7 @@ private:
       Y.emplace_back(y);
       E.emplace_back(0.1);
     }
-    auto create =
-        AlgorithmManager::Instance().create("CreateWorkspace");
+    auto create = AlgorithmManager::Instance().create("CreateWorkspace");
     create->initialize();
     create->setChild(true);
     create->setProperty("DataX", X);
@@ -921,8 +910,7 @@ private:
       E.emplace_back(0.1);
     }
     // create workspace
-    auto create =
-        AlgorithmManager::Instance().create("CreateWorkspace");
+    auto create = AlgorithmManager::Instance().create("CreateWorkspace");
     create->initialize();
     create->setChild(true);
     create->setProperty("DataX", X);
@@ -968,8 +956,7 @@ private:
       Y.emplace_back(y);
     }
     // create workspace
-    auto create =
-        AlgorithmManager::Instance().create("CreateWorkspace");
+    auto create = AlgorithmManager::Instance().create("CreateWorkspace");
     create->initialize();
     create->setChild(true);
     create->setProperty("DataX", X);

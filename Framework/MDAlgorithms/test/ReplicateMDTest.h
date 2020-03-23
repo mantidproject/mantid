@@ -27,8 +27,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
                                          bool transpose = false,
                                          double value = 0.0) {
 
-  auto create =
-      AlgorithmManager::Instance().create("CreateMDHistoWorkspace");
+  auto create = AlgorithmManager::Instance().create("CreateMDHistoWorkspace");
   create->setChild(true);
   create->initialize();
 

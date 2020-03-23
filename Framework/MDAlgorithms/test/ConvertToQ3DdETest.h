@@ -62,8 +62,7 @@ public:
                         std::string OtherProperties = std::string("")) {
 
     auto childAlg =
-        AlgorithmManager::Instance().create(
-            "ConvertToMDMinMaxLocal");
+        AlgorithmManager::Instance().create("ConvertToMDMinMaxLocal");
     if (!childAlg) {
       TSM_ASSERT("Can not create child ChildAlgorithm to found min/max values",
                  false);
@@ -365,9 +364,7 @@ public:
     pAlg->initialize();
     // initialize (load)Matid algorithm framework -- needed to run this test
     // separately
-    auto childAlg =
-        AlgorithmManager::Instance().create(
-            "ConvertUnits");
+    auto childAlg = AlgorithmManager::Instance().create("ConvertUnits");
     TSM_ASSERT("Can not initialize Mantid algorithm framework", childAlg);
     if (!childAlg) {
       throw(std::runtime_error("Can not initalize/Load MantidAlgorithm dll"));

@@ -8,8 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/SphericalAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -24,30 +24,26 @@ class SphericalAbsorptionTest : public CxxTest::TestSuite {
 public:
   void testName() {
     auto atten =
-        Mantid::API::AlgorithmManager::Instance().create(
-            "SphericalAbsorption");
+        Mantid::API::AlgorithmManager::Instance().create("SphericalAbsorption");
     TS_ASSERT_EQUALS(atten->name(), "SphericalAbsorption");
   }
 
   void testVersion() {
     auto atten =
-        Mantid::API::AlgorithmManager::Instance().create(
-            "SphericalAbsorption");
+        Mantid::API::AlgorithmManager::Instance().create("SphericalAbsorption");
     TS_ASSERT_EQUALS(atten->version(), 1);
   }
 
   void testInit() {
     auto atten =
-        Mantid::API::AlgorithmManager::Instance().create(
-            "SphericalAbsorption");
+        Mantid::API::AlgorithmManager::Instance().create("SphericalAbsorption");
     TS_ASSERT_THROWS_NOTHING(atten->initialize());
     TS_ASSERT(atten->isInitialized());
   }
 
   void testExec() {
     auto atten =
-        Mantid::API::AlgorithmManager::Instance().create(
-            "SphericalAbsorption");
+        Mantid::API::AlgorithmManager::Instance().create("SphericalAbsorption");
     if (!atten->isInitialized())
       atten->initialize();
 

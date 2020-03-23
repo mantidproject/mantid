@@ -8,8 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/AnyShapeAbsorption.h"
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidAlgorithms/FlatPlateAbsorption.h"
@@ -17,8 +17,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::API::AnalysisDataService;
 using Mantid::API::AlgorithmManager;
+using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace_sptr;
 
 class AnyShapeAbsorptionTest : public CxxTest::TestSuite {

@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/CalculateCarpenterSampleCorrection.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -85,8 +85,7 @@ public:
 
     // convert to wavelength
     auto convertUnitsAlg =
-        Mantid::API::AlgorithmManager::Instance().create(
-            "ConvertUnits");
+        Mantid::API::AlgorithmManager::Instance().create("ConvertUnits");
     convertUnitsAlg->setPropertyValue("InputWorkspace", "TestInputWS");
     convertUnitsAlg->setPropertyValue("OutputWorkspace", "TestInputWS");
     convertUnitsAlg->setProperty("Target", "Wavelength");
@@ -141,8 +140,7 @@ public:
       TS_ASSERT_DELTA(abs_corr_actual[i], abs_corr_expected[i], 0.00001);
 
     // Check applying absorption correction
-    auto divide =
-        Mantid::API::AlgorithmManager::Instance().create("Divide");
+    auto divide = Mantid::API::AlgorithmManager::Instance().create("Divide");
     divide->initialize();
     divide->setPropertyValue("LHSWorkspace", "TestInputWS");
     divide->setPropertyValue("RHSWorkspace", absWksp->getName());

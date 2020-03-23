@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Algorithms/SplineBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -41,8 +41,8 @@ public:
     const std::string wsName = "SplineBackground_points";
     WorkspaceCreationHelper::storeWS(wsName, ws);
 
-    auto alg = Mantid::API::AlgorithmManager::Instance().create(
-        "SplineBackground");
+    auto alg =
+        Mantid::API::AlgorithmManager::Instance().create("SplineBackground");
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", wsName);
     alg->setPropertyValue("OutputWorkspace", "SplineBackground_out");
@@ -87,8 +87,7 @@ public:
     WorkspaceCreationHelper::storeWS(inputWsName, ws);
 
     SplineBackgroundAlg =
-        Mantid::API::AlgorithmManager::Instance().create(
-            "SplineBackground");
+        Mantid::API::AlgorithmManager::Instance().create("SplineBackground");
     SplineBackgroundAlg->initialize();
     SplineBackgroundAlg->setPropertyValue("InputWorkspace", inputWsName);
     SplineBackgroundAlg->setPropertyValue("OutputWorkspace", outputWsName);

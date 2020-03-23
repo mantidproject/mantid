@@ -337,8 +337,7 @@ public:
   FilterPeaksTestPerformance() {
     const std::string outputWorkspace = "TOPAZ_3007.peaks";
 
-    auto &manager =
-        Mantid::API::AlgorithmManager::Instance();
+    auto &manager = Mantid::API::AlgorithmManager::Instance();
     auto load = manager.create("LoadIsawPeaks");
     load->initialize();
     load->setProperty("Filename", "TOPAZ_3007.peaks");

@@ -9,8 +9,8 @@
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/FFT.h"
@@ -69,8 +69,7 @@ void deleteWorkspacesFromADS() {
 }
 
 void doTestForward(const int N, const double XX, bool performance = false) {
-  auto fft =
-      Mantid::API::AlgorithmManager::Instance().create("RealFFT");
+  auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
   fft->setPropertyValue("InputWorkspace", "RealFFT_WS");
   fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward");

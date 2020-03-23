@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -100,8 +100,7 @@ public:
 
     // 1. Run PDFFT
     auto pdfft =
-        Mantid::API::AlgorithmManager::Instance().create(
-            "PDFFourierTransform");
+        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
 
     pdfft->initialize();
     pdfft->setProperty("InputWorkspace", ws);
@@ -136,8 +135,7 @@ public:
 
     // 1. Run PDFFT
     auto pdfft =
-        Mantid::API::AlgorithmManager::Instance().create(
-            "PDFFourierTransform");
+        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
 
     pdfft->initialize();
     pdfft->setProperty("InputWorkspace", ws);
@@ -174,8 +172,8 @@ public:
     }
 
     // 1. Run PDFFT
-    auto pdfft = Mantid::API::AlgorithmManager::Instance().create(
-            "PDFFourierTransform");
+    auto pdfft =
+        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
 
     pdfft->initialize();
     pdfft->setProperty("InputWorkspace", ws);
@@ -216,8 +214,8 @@ public:
 
   void setUp() override {
     ws = createWS(2000000, 0.1, "inputWS", "MomentumTransfer");
-    pdfft = Mantid::API::AlgorithmManager::Instance().create(
-        "PDFFourierTransform");
+    pdfft =
+        Mantid::API::AlgorithmManager::Instance().create("PDFFourierTransform");
 
     pdfft->setProperty("InputWorkspace", ws);
     pdfft->setProperty("OutputWorkspace", "outputWS");

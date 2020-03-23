@@ -572,8 +572,7 @@ public:
   void setUp() override {
     if (!ws) {
       // Load some data
-      auto loadalg =
-          AlgorithmManager::Instance().create("Load");
+      auto loadalg = AlgorithmManager::Instance().create("Load");
       loadalg->setRethrows(true);
       loadalg->initialize();
       loadalg->setPropertyValue("Filename", "POLREF00004699.nxs");
@@ -581,8 +580,7 @@ public:
       loadalg->execute();
 
       // Convert units to wavelength
-      auto unitsalg =
-          AlgorithmManager::Instance().create("ConvertUnits");
+      auto unitsalg = AlgorithmManager::Instance().create("ConvertUnits");
       unitsalg->initialize();
       unitsalg->setPropertyValue("InputWorkspace", "testws");
       unitsalg->setPropertyValue("OutputWorkspace", "testws");

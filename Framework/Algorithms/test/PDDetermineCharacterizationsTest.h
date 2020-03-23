@@ -44,8 +44,7 @@ public:
     m_logWSName = "_det_char_log";
 
     {
-      auto alg =
-          AlgorithmManager::Instance().create("CreateWorkspace");
+      auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
       alg->setPropertyValue("DataX",
                             "-1.0,-0.8,-0.6,-0.4,-0.2,0.0,0.2,0.4,0.6,0.8,1.0");
       alg->setPropertyValue("DataY",

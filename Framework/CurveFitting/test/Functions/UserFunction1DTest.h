@@ -8,8 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Functions/UserFunction1D.h"
@@ -24,8 +24,7 @@ public:
   void testLinear() {
     setupWS();
 
-    auto alg =
-        AlgorithmManager::Instance().create("UserFunction1D");
+    auto alg = AlgorithmManager::Instance().create("UserFunction1D");
     alg->initialize();
     alg->setPropertyValue("InputWorkspace", "UserFunction1DWS");
     alg->setPropertyValue("WorkspaceIndex", "0");
@@ -64,13 +63,10 @@ public:
 
     // Tidy up
     AnalysisDataService::Instance().remove("UserFunction1DWS");
-    AnalysisDataService::Instance().remove(
-        "UserFunction1D_Parameters");
+    AnalysisDataService::Instance().remove("UserFunction1D_Parameters");
     AnalysisDataService::Instance().remove("UserFunction1D_Workspace");
-    AnalysisDataService::Instance().remove(
-        "UserFunction1D1_Parameters");
-    AnalysisDataService::Instance().remove(
-        "UserFunction1D1_Workspace");
+    AnalysisDataService::Instance().remove("UserFunction1D1_Parameters");
+    AnalysisDataService::Instance().remove("UserFunction1D1_Workspace");
   }
 
 private:

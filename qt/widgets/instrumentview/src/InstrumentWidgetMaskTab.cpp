@@ -691,7 +691,8 @@ InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) const {
           outputWorkspaceName));
 
   if (invertMask) {
-    auto invertAlg = AlgorithmManager::Instance().create("BinaryOperateMasks", -1);
+    auto invertAlg =
+        AlgorithmManager::Instance().create("BinaryOperateMasks", -1);
     invertAlg->setPropertyValue("InputWorkspace1", outputWorkspaceName);
     invertAlg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
     invertAlg->setPropertyValue("OperationType", "NOT");
@@ -743,8 +744,7 @@ void InstrumentWidgetMaskTab::extractDetsToWorkspace() {
   std::string fname = mapFile();
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
-    auto alg = AlgorithmManager::Instance().create(
-            "GroupDetectors");
+    auto alg = AlgorithmManager::Instance().create("GroupDetectors");
     alg->setPropertyValue("InputWorkspace", workspaceName);
     alg->setPropertyValue("MapFile", fname);
     alg->setPropertyValue("OutputWorkspace", workspaceName + "_selection");
@@ -766,9 +766,7 @@ void InstrumentWidgetMaskTab::sumDetsToWorkspace() {
 
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
-    auto alg =
-        AlgorithmManager::Instance().create(
-            "GroupDetectors");
+    auto alg = AlgorithmManager::Instance().create("GroupDetectors");
     alg->setPropertyValue("InputWorkspace", workspaceName);
     alg->setPropertyValue("MapFile", fname);
     alg->setPropertyValue("OutputWorkspace", workspaceName + "_sum");
@@ -969,8 +967,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
   std::cout << "[DB] MaskTableWorkspace is found? = " << overwrite << ". "
             << ".\n";
 
-  auto alg = AlgorithmManager::Instance().create(
-          "ExtractMaskToTable", -1);
+  auto alg = AlgorithmManager::Instance().create("ExtractMaskToTable", -1);
   alg->setProperty("InputWorkspace", inputWS);
   if (overwrite)
     alg->setPropertyValue("MaskTableWorkspace", outputWorkspaceName);
