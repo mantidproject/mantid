@@ -46,10 +46,13 @@ class LegendTabWidgetPresenter:
 
         legend_props = None
         for ax in self.axes:
-            if ax.get_legend():
-                legend_props = LegendProperties.from_legend(ax.get_legend())
+            legend_props = LegendProperties.from_legend(ax.get_legend())
+            if legend_props:
+                break
 
-        assert legend_props, "None of the axes have a legend."
+        # This *should* never raise an error because there's a check before this presenter is created that at least one
+        # axes on the plot has a legend with text. This is here just to be on the safe side.
+        assert legend_props, "None of the axes have a non-empty legend."
 
         self.check_font_in_list(legend_props.entries_font)
         self.check_font_in_list(legend_props.title_font)

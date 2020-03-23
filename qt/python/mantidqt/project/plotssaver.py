@@ -110,9 +110,10 @@ class PlotsSaver(object):
         ax_dict["textFromArtists"] = artist_text_dict
 
         legend_dict = {}
-        if ax.get_legend() and ax.get_legend().get_texts():
+        legend = ax.get_legend()
+        if legend is not None:
             legend_dict["exists"] = True
-            legend_dict.update(LegendProperties.from_legend(ax.get_legend()))
+            legend_dict.update(LegendProperties.from_legend(legend))
         else:
             legend_dict["exists"] = False
         ax_dict["legend"] = legend_dict
