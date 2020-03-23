@@ -61,7 +61,7 @@ Mantid::Kernel::Logger g_log("ScriptingWindow");
  * @param flags :: Window flags passed to the base class
  */
 ScriptingWindow::ScriptingWindow(ScriptingEnv *env, bool capturePrint,
-                                 QWidget *parent, const Qt::WindowFlags &flags)
+                                 QWidget *parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags), m_acceptClose(false) {
   Q_UNUSED(capturePrint);
   setObjectName("MantidScriptWindow");

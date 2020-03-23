@@ -147,7 +147,7 @@ double XMLInstrumentParameter::createParamValue(
     }
     // Looking for string: "position n", where n is an integer and is a 1-based
     // index
-    else if (m_extractSingleValueAs.compare("position") == 0 &&
+    else if (m_extractSingleValueAs.find("position") == 0 &&
              m_extractSingleValueAs.size() >= 10) {
       std::stringstream extractPosition(m_extractSingleValueAs);
       std::string dummy;

@@ -40,8 +40,7 @@ class ScriptingWindow : public QMainWindow {
 public:
   /// Constructor
   ScriptingWindow(ScriptingEnv *env, bool capturePrint = true,
-                  QWidget *parent = nullptr,
-                  const Qt::WindowFlags &flags = nullptr);
+                  QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
   /// Destructor
   ~ScriptingWindow() override;
   /// Override the closeEvent

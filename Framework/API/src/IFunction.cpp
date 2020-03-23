@@ -662,7 +662,6 @@ private:
 /// @param attr :: The attribute to copy from.
 IFunction::Attribute &IFunction::Attribute::operator=(const Attribute &attr) {
   m_data = attr.m_data;
-  m_quoteValue = attr.m_quoteValue;
   return *this;
 }
 
