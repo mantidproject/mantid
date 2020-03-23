@@ -130,7 +130,7 @@ void AlgorithmObserver::startingHandle(IAlgorithm_sptr alg) { UNUSED_ARG(alg) }
 
 /** Handler of the start notifications. Must be overriden in inherited classes.
 The default handler is provided (doing nothing).
-@param alg :: Pointer to the algorithm sending the notification. 
+@param alg :: Pointer to the algorithm sending the notification.
 */
 void AlgorithmObserver::startHandle(const IAlgorithm *alg) { UNUSED_ARG(alg) }
 
@@ -142,7 +142,7 @@ void AlgorithmObserver::finishHandle(const IAlgorithm *alg) { UNUSED_ARG(alg) }
 
 /** Handler of the error notifications. Must be overriden in inherited classes.
 The default handler is provided (doing nothing).
-@param alg :: Pointer to the algorithm sending the notification. 
+@param alg :: Pointer to the algorithm sending the notification.
 @param what :: The error message
 */
 void AlgorithmObserver::errorHandle(const IAlgorithm *alg,

@@ -193,8 +193,7 @@ public:
     m_notificationValue = 0;
     Poco::ActiveResult<bool> resA = Aptr->executeAsync();
     resA.wait();
-    TSM_ASSERT_EQUALS("Notification was received.", m_notificationValue,
-                      12345);
+    TSM_ASSERT_EQUALS("Notification was received.", m_notificationValue, 12345);
 
     AlgorithmManager::Instance().notificationCenter.removeObserver(my_observer);
   }
