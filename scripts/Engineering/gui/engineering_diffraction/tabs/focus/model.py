@@ -178,8 +178,8 @@ class FocusModel(object):
     @staticmethod
     def _output_sample_logs(instrument, run_number, workspace, rb_num):
         def write_to_file():
-            with open(output_path, "w", newline="") as f:
-                writer = csv.writer(f, ["Sample Log", "Avg Value"])
+            with open(output_path, "w", newline="") as logfile:
+                writer = csv.writer(logfile, ["Sample Log", "Avg Value"])
                 for log in output_dict:
                     writer.writerow([log, output_dict[log]])
 
