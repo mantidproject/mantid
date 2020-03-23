@@ -244,7 +244,7 @@ void LoadSampleEnvironment::exec() {
     params.incoherentXSection = getProperty("IncoherentXSection");
     params.attenuationXSection = getProperty("AttenuationXSection");
     params.scatteringXSection = getProperty("ScatteringXSection");
-    params.attenuationProfileFileName = getProperty("AttenuationProfile");
+    params.attenuationProfileFileName = getPropertyValue("AttenuationProfile");
     const std::string numberDensityUnit = getProperty("NumberDensityUnit");
     if (numberDensityUnit == "Atoms") {
       params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;
