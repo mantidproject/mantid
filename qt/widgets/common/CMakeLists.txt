@@ -1036,8 +1036,7 @@ mtd_add_qt_tests(
   LINK_LIBS
     ${TARGET_LIBRARIES}
     DataObjects
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
+    gmock
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )
@@ -1078,7 +1077,6 @@ mtd_add_qt_tests(
     ../../../Framework/TestHelpers/inc
     ../../../Framework/DataObjects/inc
     ../../../Framework/Crystal/inc
-    ${GMOCK_INCLUDE_DIR}
   TEST_HELPER_SRCS
     ../../../Framework/TestHelpers/src/TearDownWorld.cpp
     ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
@@ -1090,8 +1088,7 @@ mtd_add_qt_tests(
     ${Boost_LIBRARIES}
     PythonInterfaceCore
     DataObjects
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
+    gmock
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )

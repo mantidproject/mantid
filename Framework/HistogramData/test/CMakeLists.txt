@@ -1,8 +1,6 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR}
                       ../../TestHelpers/inc)
 
   cxxtest_add_test(HistogramDataTest ${TEST_FILES} ${GMOCK_TEST_FILES})
@@ -13,8 +11,8 @@ if(CXXTEST_FOUND)
                         ${TCMALLOC_LIBRARIES_LINKTIME}
                         HistogramData
                         ${Boost_LIBRARIES}
-                        ${GMOCK_LIBRARIES}
-                        ${GTEST_LIBRARIES})
+                        gmock
+)
 
   add_dependencies(FrameworkTests HistogramDataTest)
   # Add to the 'FrameworkTests' group in VS
