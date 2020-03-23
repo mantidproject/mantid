@@ -95,13 +95,12 @@ class DrillJobTreeView(JobTreeView):
 
 class DrillView(QMainWindow):
 
-    settings_listeners = []
-    job_tree_view = None
-
     def __init__(self):
         super(DrillView, self).__init__()
         self.here = os.path.dirname(os.path.realpath(__file__))
         uic.loadUi(os.path.join(self.here, 'main.ui'), self)
+        self.job_tree_view = None
+        self.settings_listeners = []
         self.setup_header()
         self.choose_instrument(config['default.instrument'])
 
