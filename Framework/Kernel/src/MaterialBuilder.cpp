@@ -217,7 +217,9 @@ MaterialBuilder &MaterialBuilder::setAbsorptionXSection(double xsec) {
  */
 MaterialBuilder &
 MaterialBuilder::setAttenuationProfileFilename(std::string filename) {
-  m_attenuationProfileFileName = filename;
+  if (!filename.empty()) {
+    m_attenuationProfileFileName = filename;
+  }
   return *this;
 }
 
