@@ -15,7 +15,9 @@ Concepts
 Algorithms
 ----------
 
-- Add specialization to :ref:`SetUncertainties <algm-SetUncertainties>` for the case where InputWorkspace == OutputWorkspace.
+- Add specialization to :ref:`SetUncertainties <algm-SetUncertainties>` for the
+   case where InputWorkspace == OutputWorkspace. Where possible, avoid the
+   cost of cloning the inputWorkspace.
 
 Data Objects
 ------------

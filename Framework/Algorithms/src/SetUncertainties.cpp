@@ -133,6 +133,11 @@ void SetUncertainties::exec() {
   const int64_t numHists =
       static_cast<int64_t>(inputWorkspace->getNumberHistograms());
   if (inputEventWorkspace) {
+    if(inputWorkspace == outputWorkspace && errorType == SQRT) {
+      // Uncertainty is already square root of the y value
+      return;
+    }
+    // Copy the histogram representation over to a Workspace2D
     outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWorkspace, *outputWorkspace))
     for (int64_t i = 0; i < numHists; ++i) {
