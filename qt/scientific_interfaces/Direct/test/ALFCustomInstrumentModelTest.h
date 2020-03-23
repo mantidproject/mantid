@@ -35,8 +35,8 @@ class ALFModelTest : public ALFCustomInstrumentModel{
 public:
     ALFModelTest():m_loadCount(0),m_transformCount(0){};
     ~ALFModelTest(){};
-    void loadAlg(const std::string &name) override{(void) name;m_loadCount+=1;};
-    void transformData() override {m_transformCount+=1;};
+  void loadAlg(const std::string &name) override final {(void) name;m_loadCount+=1;};
+    void transformData() override final {m_transformCount+=1;};
     int getLoadCount(){return m_loadCount;};
     int getTransformCount(){return m_transformCount;};
 private:
