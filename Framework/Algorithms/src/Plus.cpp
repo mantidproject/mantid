@@ -36,14 +36,14 @@ void Plus::performBinaryOperation(const HistogramData::Histogram &lhs,
                                   HistogramData::HistogramE &EOut) {
   using std::placeholders::_1;
   std::transform(lhs.y().begin(), lhs.y().end(), YOut.begin(),
-                 [rhsY](const double &l) { return l + rhsY; });
+                 [rhsY](double l) { return l + rhsY; });
   // Only do E if non-zero, otherwise just copy
 
   if (rhsE != 0.) {
     double rhsE2 = rhsE * rhsE;
     std::transform(
         lhs.e().begin(), lhs.e().end(), EOut.begin(),
-        [rhsE2](const double &l) { return std::sqrt(l * l + rhsE2); });
+        [rhsE2](double l) { return std::sqrt(l * l + rhsE2); });
   } else
     EOut = lhs.e();
 }
