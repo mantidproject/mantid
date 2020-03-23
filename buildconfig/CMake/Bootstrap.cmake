@@ -113,6 +113,7 @@ if(MSVC)
         "The location of the pythonw executable. This suppresses the new terminal window on startup"
         FORCE
   )
+
   set(THIRD_PARTY_BIN
       "${THIRD_PARTY_DIR}/bin;${THIRD_PARTY_DIR}/lib/qt4/bin;${THIRD_PARTY_DIR}/lib/qt5/bin;${MSVC_PYTHON_EXECUTABLE_DIR}"
   )
