@@ -36,8 +36,7 @@ public:
 
 
 class DLLExport ALFCustomInstrumentModel
-    : public virtual IALFCustomInstrumentModel, public
-          MantidWidgets::BaseCustomInstrumentModel {
+    : public virtual IALFCustomInstrumentModel{
 
 public:
   ALFCustomInstrumentModel();
@@ -56,8 +55,23 @@ public:
   std::string WSName() override;
   Mantid::API::CompositeFunction_sptr getDefaultFunction() override;
 
+
+  void loadEmptyInstrument() override { m_base->loadEmptyInstrument(); };
+  void setCurrentRun(int &run) override { m_base->setCurrentRun(run); };
+  int getCurrentRun() override { return m_base->getCurrentRun(); };
+  void rename() override { m_base->rename(); };
+  void remove() override { m_base->remove(); };
+  std::string dataFileName() override { return m_base->dataFileName(); };
+  int currentRun() override {return m_base->currentRun(); };
+  bool isErrorCode(const int run) override { return m_base->isErrorCode(run); };
+  const std::string getInstrument() override { return m_base->getInstrument(); };
+  const std::string getTmpName() override { return m_base->getTmpName(); };
+  const std::string getWSName() override { return m_base->getWSName(); };
+
+
 private:
   int m_numberOfTubesInAverage;
+  MantidWidgets::BaseCustomInstrumentModel *m_base;
 };
 
 } // namespace CustomInterfaces
