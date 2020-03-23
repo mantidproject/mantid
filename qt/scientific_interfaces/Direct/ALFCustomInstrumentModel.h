@@ -42,8 +42,8 @@ public:
   ALFCustomInstrumentModel();
   virtual ~ALFCustomInstrumentModel(){};
   // virtual so we can patch them later
-  void loadAlg(const std::string &name) override;
-  void transformData() override;
+  virtual void loadAlg(const std::string &name) override;
+  virtual void transformData() override;
   std::pair<int, std::string> loadData(const std::string &name) override final;
   std::map<std::string, bool> isDataValid() override;
   void storeSingleTube(const std::string &name) override;
