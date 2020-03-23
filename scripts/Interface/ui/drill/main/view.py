@@ -68,6 +68,10 @@ class DrillEventListener(with_metaclass(ABCMeta, object)):
     def on_data_changed(self, row, content):
         pass
 
+    @abstractmethod
+    def on_instrument_changed(self, instrument):
+        pass
+
 
 class DrillJobTreeView(JobTreeView):
 
@@ -102,11 +106,12 @@ class DrillView(QMainWindow):
         self.job_tree_view = None
         self.settings_listeners = []
         self.setup_header()
-        self.choose_instrument(config['default.instrument'])
+        self.set_table(list())
 
     def setup_header(self):
         self.instrumentselector = instrumentselector.InstrumentSelector(self)
-        self.instrumentselector.instrumentSelectionChanged.connect(self.choose_instrument)
+        self.instrumentselector.instrumentSelectionChanged.connect(
+                self.change_instrument_requested)
         self.headerLeft.addWidget(self.instrumentselector, 0, Qt.AlignLeft)
 
         self.datadirs.setIcon(icons.get_icon("mdi.folder"))
@@ -195,32 +200,6 @@ class DrillView(QMainWindow):
         uic.loadUi(os.path.join(self.here, self.technique + '_settings.ui'), settings)
         settings.show()
 
-    def setup_center(self):
-        if self.job_tree_view:
-            self.job_tree_view.setParent(None)
-
-        if (self.technique == None):
-            self.job_tree_view = DrillJobTreeView(list())
-            self.job_tree_view.setVisible(False)
-        else:
-            self.job_tree_view = DrillJobTreeView(
-                    RundexSettings.COLUMNS[self.technique])
-            self.job_tree_view.setVisible(True)
-        sp = self.job_tree_view.sizePolicy()
-        sp.setRetainSizeWhenHidden(True)
-        self.job_tree_view.setSizePolicy(sp)
-
-        self.center.addWidget(self.job_tree_view)
-        self.table_signals = JobTreeViewSignalAdapter(self.job_tree_view, self)
-        self.table_signals.cellTextChanged.connect(self.data_changed)
-        self.table_signals.rowInserted.connect(self.row_inserted)
-        self.table_signals.appendAndEditAtRowBelowRequested.connect(self.append_and_edit_at_row_below_requested)
-        self.table_signals.editAtRowAboveRequested.connect(self.edit_at_row_above_requested)
-        self.table_signals.removeRowsRequested.connect(self.remove_rows_requested)
-        self.table_signals.copyRowsRequested.connect(self.copy_rows_requested)
-        self.table_signals.pasteRowsRequested.connect(self.paste_rows_requested)
-        self.table_signals.cutRowsRequested.connect(self.cut_rows_requested)
-
     def data_changed(self, row_location, column, old_value, new_value):
         row = row_location.rowRelativeToParent()
         self.call_settings_listeners(
@@ -266,17 +245,37 @@ class DrillView(QMainWindow):
     def load_rundex(self):
         fname = QFileDialog.getOpenFileName(self, 'Load rundex', '~')
 
-    def choose_instrument(self, instrument):
-        if (instrument in RundexSettings.TECHNIQUE_MAP):
-            config['default.instrument'] = instrument
-            self.instrument = instrument
-            self.technique = RundexSettings.get_technique(self.instrument)
-        else:
-            logger.error('Instrument {0} is not supported yet.'
-                         .format(instrument))
-            self.instrument = None
-            self.technique = None
-        self.setup_center()
+    def change_instrument_requested(self, instrument):
+        self.call_settings_listeners(
+                lambda listener: listener.on_instrument_changed(instrument)
+                )
 
     def show_directory_manager(self):
         manageuserdirectories.ManageUserDirectories(self).exec_()
+
+    def set_table(self, columns):
+        if self.job_tree_view:
+            self.job_tree_view.setParent(None)
+
+        # table widget
+        self.job_tree_view = DrillJobTreeView(columns)
+        self.job_tree_view.setVisible(True)
+        sp = self.job_tree_view.sizePolicy()
+        sp.setRetainSizeWhenHidden(True)
+        self.job_tree_view.setSizePolicy(sp)
+        self.center.addWidget(self.job_tree_view)
+
+        # signals connection
+        self.table_signals = JobTreeViewSignalAdapter(self.job_tree_view, self)
+        self.table_signals.cellTextChanged.connect(self.data_changed)
+        self.table_signals.rowInserted.connect(self.row_inserted)
+        self.table_signals.appendAndEditAtRowBelowRequested.connect(
+                self.append_and_edit_at_row_below_requested)
+        self.table_signals.editAtRowAboveRequested.connect(
+                self.edit_at_row_above_requested)
+        self.table_signals.removeRowsRequested.connect(
+                self.remove_rows_requested)
+        self.table_signals.copyRowsRequested.connect(self.copy_rows_requested)
+        self.table_signals.pasteRowsRequested.connect(self.paste_rows_requested)
+        self.table_signals.cutRowsRequested.connect(self.cut_rows_requested)
+

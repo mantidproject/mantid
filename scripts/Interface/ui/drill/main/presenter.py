@@ -14,6 +14,7 @@ class DrillPresenter(DrillEventListener):
         self.model = model
         self.view = view
         self.view.add_listener(self)
+        self.update_view_from_model()
 
     def on_load_rundex_clicked(self):
         pass
@@ -50,3 +51,11 @@ class DrillPresenter(DrillEventListener):
 
     def on_process_clicked(self, contents):
         self.model.process_on_thread(contents)
+
+    def on_instrument_changed(self, instrument):
+        self.model.set_instrument(instrument)
+        self.update_view_from_model()
+
+    def update_view_from_model(self):
+        self.view.set_table(self.model.get_columns())
+

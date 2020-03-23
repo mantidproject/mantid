@@ -8,7 +8,7 @@ from qtpy.QtCore import QRunnable, Slot, QThreadPool
 import threading
 from .specifications import RundexSettings
 import mantid.simpleapi as sapi
-
+from mantid.kernel import config, logger
 
 class DrillWorker(QRunnable):
 
@@ -29,11 +29,8 @@ class DrillModel(object):
     threadpool = None
     algorithm = None
 
-    def __init__(self, instrument):
-        self.instrument = instrument
-        self.technique = RundexSettings.get_technique(instrument)
-        self.columns = RundexSettings.COLUMNS[self.technique]
-        self.algorithm = RundexSettings.ALGORITHMS[self.technique]
+    def __init__(self):
+        self.set_instrument(config['default.instrument'])
 
     def convolute(self, values):
         values = values[:-1]
@@ -61,4 +58,22 @@ class DrillModel(object):
     def process_on_thread(self, contents):
         t = threading.Thread(target=self.process, args=(contents,))
         t.start()
+
+    def set_instrument(self, instrument):
+        if (instrument in RundexSettings.TECHNIQUE_MAP):
+            config['default.instrument'] = instrument
+            self.instrument = instrument
+            self.technique = RundexSettings.get_technique(self.instrument)
+            self.columns = RundexSettings.COLUMNS[self.technique]
+            self.algorithm = RundexSettings.ALGORITHMS[self.technique]
+        else:
+            logger.error('Instrument {0} is not supported yet.'
+                    .format(instrument))
+            self.instrument = None
+            self.technique = None
+            self.columns = None
+            self.algorithm = None
+
+    def get_columns(self):
+        return self.columns if self.columns is not None else list()
 
