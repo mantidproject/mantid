@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -42,9 +42,9 @@ public:
                      const bool /*markSaved*/) override{};
   void clearFileBacked(bool /* loadData*/) override{/**does nothing*/};
   void setFileBacked() override{};
-  void saveAt(API::IBoxControllerIO *const /* */,
+  void saveAt(API::IBoxControllerIO *const,
               uint64_t /*position*/) const override{/*Not saveable */};
-  void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/,
+  void loadAndAddFrom(API::IBoxControllerIO *const, uint64_t /*position*/,
                       size_t /* Size */) override{};
   void reserveMemoryForLoad(uint64_t /* Size */) override{};
   // regardless of what is actually instantiated, base tester would call itself
