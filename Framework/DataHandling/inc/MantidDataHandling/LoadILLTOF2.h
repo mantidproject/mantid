@@ -9,6 +9,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {

@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidKernel/FileDescriptor.h"
 
 #include <unordered_map>
 

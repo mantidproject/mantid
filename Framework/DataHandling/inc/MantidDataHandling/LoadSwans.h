@@ -10,6 +10,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/FileDescriptor.h"
 #include <map>
 
 namespace Mantid {

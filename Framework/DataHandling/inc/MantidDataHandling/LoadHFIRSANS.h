@@ -10,6 +10,8 @@
 #include "MantidDataHandling/XmlHandler.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FileDescriptor.h"
+
 #include <map>
 #include <string>
 #include <utility>

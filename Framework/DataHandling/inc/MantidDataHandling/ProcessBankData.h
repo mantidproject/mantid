@@ -8,6 +8,7 @@
 
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/Timer.h"
 

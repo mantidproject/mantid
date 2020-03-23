@@ -9,6 +9,8 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/FileDescriptor.h"
+
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Node.h>
 

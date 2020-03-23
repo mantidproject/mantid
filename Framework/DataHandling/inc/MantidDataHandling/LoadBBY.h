@@ -14,6 +14,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {

@@ -9,6 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
 
 #include "MantidAPI/WorkspaceGroup_fwd.h"

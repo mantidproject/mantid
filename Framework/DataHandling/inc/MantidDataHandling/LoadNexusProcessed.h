@@ -13,6 +13,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidHistogramData/BinEdges.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidNexus/NexusClasses.h"
 #include <map>

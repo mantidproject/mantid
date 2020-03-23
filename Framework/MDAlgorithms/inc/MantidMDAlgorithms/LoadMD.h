@@ -10,7 +10,9 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
+
 #include <boost/optional.hpp>
 #include <boost/scoped_ptr.hpp>
 
