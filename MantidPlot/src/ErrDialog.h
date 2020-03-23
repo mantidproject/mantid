@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef ERRDIALOG_H
-#define ERRDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <QList>
@@ -95,5 +94,3 @@ signals:
   void options(const QString &curveName, const QString &errColumnName,
                int direction);
 };
-
-#endif // ERRDIALOG_H

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAKSPRESENTER_H_
-#define MANTID_SLICEVIEWER_PEAKSPRESENTER_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
@@ -91,5 +90,3 @@ using PeaksPresenter_sptr = boost::shared_ptr<PeaksPresenter>;
 using PeaksPresenter_const_sptr = boost::shared_ptr<const PeaksPresenter>;
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif /* MANTID_SLICEVIEWER_PEAKSPRESENTER_H_ */

@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
@@ -34,13 +34,13 @@ class ConjoinSpectra(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty("InputWorkspaces","", validator=StringMandatoryValidator(),
-                             doc="Comma seperated list of workspaces to use, group workspaces "+
-                             "will automatically include all members.")
+                             doc="Comma seperated list of workspaces to use, group workspaces "
+                                 + "will automatically include all members.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
                              doc="Name the workspace that will contain the result")
         self.declareProperty("WorkspaceIndex", 0, doc="The workspace index of the spectra in each workspace to extract. Default: 0")
-        self.declareProperty("LabelUsing", "", doc="The name of a log value used to label the resulting spectra. "+
-                             "Default: The source workspace name")
+        self.declareProperty("LabelUsing", "", doc="The name of a log value used to label the resulting spectra. "
+                                                   + "Default: The source workspace name")
         labelValueOptions =  ["Mean","Median","Maximum","Minimum","First Value"]
         self.declareProperty("LabelValue", "Mean", validator=StringListValidator(labelValueOptions),
                              doc="How to derive the value from a time series property")

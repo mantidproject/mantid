@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -36,7 +36,7 @@ data.
 @author Roman Tolchenov, Tessella plc
 @date 22/03/2012
 */
-class DLLExport IDomainCreator {
+class MANTID_API_DLL IDomainCreator {
 public:
   /// Type of domain to create.
   enum DomainType { Simple = 0, Sequential, Parallel };

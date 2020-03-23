@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -89,12 +89,12 @@ boost::optional<T> checkForOptionalInstrumentDefault(
  * Specializations for std::string
  */
 template <>
-DLLExport std::string checkForMandatoryInstrumentDefault(
+MANTID_API_DLL std::string checkForMandatoryInstrumentDefault(
     Mantid::API::Algorithm *const alg, std::string propName,
     Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name);
 
 template <>
-DLLExport boost::optional<std::string> checkForOptionalInstrumentDefault(
+MANTID_API_DLL boost::optional<std::string> checkForOptionalInstrumentDefault(
     Mantid::API::Algorithm *const alg, std::string propName,
     Mantid::Geometry::Instrument_const_sptr instrument, std::string idf_name);
 } // namespace API

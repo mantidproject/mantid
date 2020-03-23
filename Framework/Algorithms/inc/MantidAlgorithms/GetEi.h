@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -33,7 +34,7 @@ namespace Algorithms {
   National Laboratory
     @date 27/07/2009
 */
-class DLLExport GetEi : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GetEi : public API::Algorithm {
 public:
   GetEi();
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDUI_H
-#define MANTIDUI_H
+#pragma once
 
 //----------------------------------
 // Includes
@@ -377,7 +376,7 @@ public:
   MantidMatrix *getMantidMatrix(const QString &wsName);
 
   void setIsRunning(bool running);
-  bool createScriptInputDialog(const QString &alg_name,
+  bool createScriptInputDialog(const Mantid::API::IAlgorithm_sptr &alg,
                                const QString &preset_values,
                                const QString &optional_msg,
                                const QStringList &enabled,
@@ -699,5 +698,3 @@ public:
   /// Destructor restores original cursor
   virtual ~ScopedOverrideCursor() { QApplication::restoreOverrideCursor(); }
 };
-
-#endif

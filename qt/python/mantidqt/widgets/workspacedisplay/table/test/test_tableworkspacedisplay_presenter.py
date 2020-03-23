@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -278,23 +278,22 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
     @with_mock_presenter(add_selection_model=True)
     def test_action_set_as_y_err(self, ws, view, twd):
         view.mock_selection_model.selectedColumns = Mock(return_value=[MockQModelIndex(1, 1)])
-        twd.action_set_as_y_err(2, "0")
+        twd.action_set_as_y_err(2)
         self.assertEqual(1, len(twd.model.marked_columns.as_y_err))
         err_col = twd.model.marked_columns.as_y_err[0]
         self.assertEqual(1, err_col.column)
         self.assertEqual(2, err_col.related_y_column)
-        self.assertEqual("0", err_col.label_index)
 
     @with_mock_presenter(add_selection_model=True)
     def test_action_set_as_y_err_too_many_selected(self, ws, view, twd):
-        twd.action_set_as_y_err(2, "0")
+        twd.action_set_as_y_err(2)
         view.show_warning.assert_called_once_with(TableWorkspaceDisplay.TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE)
 
     @with_mock_presenter(add_selection_model=True)
     def test_action_set_as_y_err_failed_to_create_ErrorColumn(self, ws, view, twd):
         view.mock_selection_model.selectedColumns = Mock(return_value=[MockQModelIndex(1, 1)])
         # this will fail as we're trying to set an YErr column for itself -> (try to set col 1 to be YERR for col 1)
-        twd.action_set_as_y_err(1, "0")
+        twd.action_set_as_y_err(1)
         view.show_warning.assert_called_once_with(ErrorColumn.CANNOT_SET_Y_TO_BE_OWN_YERR_MESSAGE)
 
     @patch('mantidqt.widgets.workspacedisplay.table.model.SortTableWorkspace')
@@ -560,7 +559,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, col_as_x)]
         twd.action_set_as_x()
         view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, col_as_y_err)]
-        twd.action_set_as_y_err(col_as_y, '0')
+        twd.action_set_as_y_err(col_as_y)
         view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, col_as_y)]
         if append_yerr_to_selection:
             view.mock_selection_model.selectedColumns.return_value.append(MockQModelIndex(1, col_as_y_err))
@@ -640,9 +639,9 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         twd.action_set_as_x()
 
         view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, col_as_y1_err)]
-        twd.action_set_as_y_err(col_as_y1, '0')
+        twd.action_set_as_y_err(col_as_y1)
         view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, col_as_y2_err)]
-        twd.action_set_as_y_err(col_as_y2, '1')
+        twd.action_set_as_y_err(col_as_y2)
 
         view.mock_selection_model.selectedColumns.return_value = [MockQModelIndex(1, col_as_y1),
                                                                   MockQModelIndex(1, col_as_y2)]

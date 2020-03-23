@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/PropertyWidget.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -214,7 +214,7 @@ PropertyWidget::PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent,
     this->lower();
   }
 
-  QWidget *infoWidget = new QWidget();
+  auto *infoWidget = new QWidget();
   infoWidget->setLayout(new QHBoxLayout(this));
   infoWidget->layout()->setSpacing(1);
   infoWidget->layout()->setContentsMargins(0, 0, 0, 0);
@@ -392,7 +392,7 @@ void PropertyWidget::addReplaceWSButton() {
   if (m_replaceWSButton)
     return;
 
-  IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(m_prop);
+  auto *wsProp = dynamic_cast<IWorkspaceProperty *>(m_prop);
   if (wsProp && (m_prop->direction() == Direction::Output)) {
     m_replaceWSButton =
         new QPushButton(QIcon(":/data_replace.png"), "", m_parent);

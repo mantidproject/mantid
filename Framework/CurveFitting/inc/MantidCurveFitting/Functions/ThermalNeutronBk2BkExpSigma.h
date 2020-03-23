@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPSIGMA_H_
-#define MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPSIGMA_H_
+#pragma once
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -19,8 +19,9 @@ namespace Functions {
   Exponential function from
   Thermal Neutron Function's Sig0, Sig1, Sig2, Width and etc.
 */
-class DLLExport ThermalNeutronBk2BkExpSigma : virtual public API::IFunction1D,
-                                              public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL ThermalNeutronBk2BkExpSigma
+    : virtual public API::IFunction1D,
+      public API::ParamFunction {
 public:
   /// Override
   void function1D(double *out, const double *xValues,
@@ -55,5 +56,3 @@ using ThermalNeutronBk2BkExpSigma_sptr =
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPSIGMA_H_ */

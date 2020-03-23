@@ -1,19 +1,19 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/GeneratePythonScript.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
 
-/** RecordPythonScript : TODO: DESCRIPTION
+/** RecordPythonScript :
 
   An Algorithm to generate a Python script file to reproduce the history of a
   workspace.
@@ -24,8 +24,9 @@ namespace Algorithms {
   <li>InputWorkspace - the workspace name who's history is to be saved.</li>
   </ul>
 */
-class DLLExport RecordPythonScript : public Algorithms::GeneratePythonScript,
-                                     public API::AlgorithmObserver {
+class MANTID_ALGORITHMS_DLL RecordPythonScript
+    : public Algorithms::GeneratePythonScript,
+      public API::AlgorithmObserver {
 public:
   RecordPythonScript();
   /// Algorithm's name for identification

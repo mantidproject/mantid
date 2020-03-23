@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
@@ -21,8 +21,8 @@ def get_run_dictionary(run_number_string, file_path):
     run_key = _find_dictionary_key(dict_to_search=config_file, run_number=run_number_string)
 
     if not run_key:
-        raise ValueError("Run number " + str(run_number_string) +
-                         " not recognised in cycle mapping file at " + str(file_path))
+        raise ValueError("Run number " + str(run_number_string)
+                         + " not recognised in cycle mapping file at " + str(file_path))
 
     return config_file[run_key]
 

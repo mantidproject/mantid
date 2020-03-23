@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
@@ -207,9 +207,9 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                          '$/entry0/instrument/Doppler/velocity_profile$ == 1)'
 
         # force sort x-axis, if interpolation is requested
-        if ((self._back_option == 'Interpolate' and self._background_files) or
-                (self._calib_option == 'Interpolate' and self._calibration_files) or
-                (self._back_calib_option == 'Interpolate' and self._background_calib_files)) \
+        if ((self._back_option == 'Interpolate' and self._background_files)
+            or (self._calib_option == 'Interpolate' and self._calibration_files)
+            or (self._back_calib_option == 'Interpolate' and self._background_calib_files)) \
                 and not self._sortX:
             self.log().warning('Interpolation option requested, X-axis will be sorted.')
             self._sortX = True

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -25,7 +25,7 @@ namespace API {
  @author Sofia Antony, ISIS Rutherford Appleton Laboratory
  @date 23/09/2010
 */
-class DLLExport ICatalog {
+class MANTID_API_DLL ICatalog {
 public:
   /// Virtual destructor
   virtual ~ICatalog() = default;

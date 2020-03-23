@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/DeltaEMode.h"
@@ -63,7 +64,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella plc
     @date 04/02/2010
 */
-class DLLExport AbsorptionCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AbsorptionCorrection : public API::Algorithm {
 public:
   /// (Empty) Constructor
   AbsorptionCorrection();

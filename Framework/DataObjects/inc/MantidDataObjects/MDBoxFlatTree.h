@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDBOX_FLAT_TREE_H_
-#define MDBOX_FLAT_TREE_H_
+#pragma once
 
 #include "MantidAPI/BoxController.h"
 #include "MantidDataObjects/MDBox.h"
@@ -142,4 +141,3 @@ void saveMatrix(::NeXus::File *const file, std::string name,
                 Kernel::Matrix<T> &m, ::NeXus::NXnumtype type, std::string tag);
 } // namespace DataObjects
 } // namespace Mantid
-#endif

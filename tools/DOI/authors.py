@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from itertools import ifilterfalse
@@ -310,9 +310,9 @@ def _clean_up_author_list(author_list):
     untranslated = set(ifilterfalse(_translations.keys().__contains__, result))
     if untranslated:
         raise Exception(
-            'No translation exists for the following Git author(s): \n' +
-            '\n'.join(untranslated) + '\n' +
-            'Please edit the translations table accordingly.')
+            'No translation exists for the following Git author(s): \n'
+            + '\n'.join(untranslated) + '\n'
+            + 'Please edit the translations table accordingly.')
 
     # Translate all remaining names.
     result = [_translations[a] for a in result]

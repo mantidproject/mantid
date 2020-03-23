@@ -93,10 +93,12 @@ endif()
 include(CommonSetup)
 
 # Find OpenGL
-find_package(OpenGL REQUIRED)
-# FindOpenGL does not (as of CMake 2.6.4) take notice of the REQUIRED
-if(NOT OPENGL_FOUND)
-  message(FATAL_ERROR "OpenGL was not found.")
+if(ENABLE_OPENGL)
+  find_package(OpenGL REQUIRED)
+  # FindOpenGL does not (as of CMake 2.6.4) take notice of the REQUIRED
+  if(NOT OPENGL_FOUND)
+    message(FATAL_ERROR "OpenGL was not found.")
+  endif()
 endif()
 
 find_package(TBB REQUIRED)

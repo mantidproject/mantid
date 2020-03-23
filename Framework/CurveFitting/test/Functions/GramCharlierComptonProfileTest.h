@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_GRAMCHARLIERCOMPTONPROFILETEST_H_
-#define MANTID_CURVEFITTING_GRAMCHARLIERCOMPTONPROFILETEST_H_
+#pragma once
 
 #include "MantidCurveFitting/Functions/GramCharlierComptonProfile.h"
 #include <cxxtest/TestSuite.h>
@@ -165,5 +164,3 @@ private:
     }
   }
 };
-
-#endif /* MANTID_CURVEFITTING_GRAMCHARLIERCOMPTONPROFILETEST_H_ */

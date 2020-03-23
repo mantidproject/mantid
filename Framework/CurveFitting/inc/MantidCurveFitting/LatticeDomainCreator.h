@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_LATTICEDOMAINCREATOR_H_
-#define MANTID_CURVEFITTING_LATTICEDOMAINCREATOR_H_
+#pragma once
 
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -24,7 +24,8 @@ namespace CurveFitting {
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 15/04/2015
 */
-class DLLExport LatticeDomainCreator : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL LatticeDomainCreator
+    : public API::IDomainCreator {
 public:
   LatticeDomainCreator(Kernel::IPropertyManager *manager,
                        const std::string &workspacePropertyName,
@@ -61,5 +62,3 @@ protected:
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_LATTICEDOMAINCREATOR_H_ */

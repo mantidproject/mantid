@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include <Poco/Path.h>
 #include <QDesktopWidget>
 #include <QFileDialog>
@@ -576,7 +575,7 @@ void MantidEV::selectWorkspace_slot() {
     std::string axisCORELLI =
         m_uiForm.axisCORELLI_cmbx->currentText().toStdString();
 
-    RunLoadAndConvertToMD *runner = new RunLoadAndConvertToMD(
+    auto *runner = new RunLoadAndConvertToMD(
         worker, file_name, ev_ws_name, md_ws_name, modQ, minQ, maxQ,
         m_uiForm.LorentzCorrection_ckbx->isChecked(),
         m_uiForm.loadDataGroupBox->isChecked(), load_det_cal, det_cal_file,
@@ -722,7 +721,7 @@ void MantidEV::findPeaks_slot() {
         m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
     std::string file_name =
         m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
-    RunFindPeaks *runner = new RunFindPeaks(
+    auto *runner = new RunFindPeaks(
         worker, ev_ws_name, md_ws_name, peaks_ws_name, max_abc, num_to_find,
         min_intensity, minQPeaks, maxQPeaks, file_name);
 
@@ -903,7 +902,7 @@ void MantidEV::findUB_slot() {
     if (!getPositiveDouble(m_uiForm.max_pred_dspacing_ledt, max_pred_dspacing))
       return;
 
-    RunPredictPeaks *runner =
+    auto *runner =
         new RunPredictPeaks(worker, peaks_ws_name, min_pred_wl, max_pred_wl,
                             min_pred_dspacing, max_pred_dspacing);
 
@@ -1137,7 +1136,7 @@ void MantidEV::integratePeaks_slot() {
     if (!getDouble(m_uiForm.AdaptiveQMult_ledt, adaptiveQMult))
       return;
 
-    RunSphereIntegrate *runner = new RunSphereIntegrate(
+    auto *runner = new RunSphereIntegrate(
         worker, peaks_ws_name, event_ws_name, peak_radius, inner_radius,
         outer_radius, integrate_edge, use_cylinder_integration, cylinder_length,
         cylinder_percent_bkg, cylinder_profile_fit, adaptive_background,
@@ -1155,7 +1154,7 @@ void MantidEV::integratePeaks_slot() {
     if (!getPositiveDouble(m_uiForm.NBadEdgePixels_ledt, n_bad_edge_pix))
       return;
 
-    RunFitIntegrate *runner =
+    auto *runner =
         new RunFitIntegrate(worker, peaks_ws_name, event_ws_name, rebin_params,
                             (size_t)n_bad_edge_pix, use_ikeda_carpenter);
 
@@ -1183,7 +1182,7 @@ void MantidEV::integratePeaks_slot() {
         return;
     }
 
-    RunEllipsoidIntegrate *runner = new RunEllipsoidIntegrate(
+    auto *runner = new RunEllipsoidIntegrate(
         worker, peaks_ws_name, event_ws_name, region_radius, specify_size,
         peak_size, inner_size, outer_size);
 

@@ -1,12 +1,10 @@
-
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_COPYABLE_H_
-#define MANTID_PYTHONINTERFACE_COPYABLE_H_
+#pragma once
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/extract.hpp>
@@ -64,4 +62,3 @@ bp::object generic__deepcopy__(const bp::object &copyable, bp::dict &memo) {
 }
 } // namespace PythonInterface
 } // namespace Mantid
-#endif // MANTID_PYTHONINTERFACE_COPYABLE_H_

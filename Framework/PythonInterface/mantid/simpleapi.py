@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 This module defines a function-style API for running Mantid
@@ -166,6 +166,16 @@ def _create_generic_signature_legacy(algm_object):
     return "\b%s" % arg_str, "\b\bVersion=%d" % algm_object.version()
 
 
+def _show_dialog_fn_deprecation_warning(name):
+    """Raise a deprecation warning for a *Dialog being used.
+    """
+    import warnings
+    help_msg = "{} has been deprecated. " \
+               "All Dialog functions will be removed in a future release.".format(name)
+    warnings.warn(help_msg, UserWarning)
+    logger.warning(help_msg)
+
+
 def Load(*args, **kwargs):
     """
     Load is a more flexible algorithm than other Mantid algorithms.
@@ -261,6 +271,8 @@ def LoadDialog(*args, **kwargs):
       - Disable :: A CSV list of properties to disable in the dialog
       - Message :: An optional message string
     """
+    _show_dialog_fn_deprecation_warning("LoadDialog")
+
     arguments = {}
     filename = None
     wkspace = None
@@ -1315,7 +1327,7 @@ def set_properties_dialog(algm_object, *args, **kwargs):
 
     # finally run the configured dialog
     import mantidplot
-    dialog_accepted = mantidplot.createScriptInputDialog(algm_object.name(), presets, message,
+    dialog_accepted = mantidplot.createScriptInputDialog(algm_object, presets, message,
                                                          enabled_list, disabled_list)
     if not dialog_accepted:
         raise RuntimeError('Algorithm input cancelled')
@@ -1333,6 +1345,8 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
     """
 
     def algorithm_wrapper(*args, **kwargs):
+        _show_dialog_fn_deprecation_warning("{}Dialog".format(algorithm))
+
         _version = version
         if "Version" in kwargs:
             _version = kwargs["Version"]

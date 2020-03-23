@@ -33,7 +33,7 @@ As a quick introduction, the main window contains these Toolboxes:
 - :orange:`Algorithms Toolbox`: Find an algorithm to manipulate your data.
 - :purple:`Plots Toolbox`: Click on the Plots button in the bottom-left to reveal this toolbox. When you plot a graph in Workbench, it can be tracked here.
 - :green:`Script Editor`: Run Python scripts here to control Mantid. Much more functionality with scripts, but beyond the scope of this basic course.
-- :red:`Messages Box`: Any output text, from an algorithm or script.:red:` Errors are Displayed here in red`.
+- :red:`Messages Box`: Any output text, from an algorithm or script. :red:`Errors are displayed here in red`.
 
 **Note** to find out what Mantid version you are using, look at the first message in the :red:`Messages Box`. You can see I'm using Mantid 4.2.0.
 
@@ -42,7 +42,7 @@ Quick Intro to Workspaces and Bins
 
 A workspace is data stored within Mantid. It will appear in the Workspaces Toolbox.
 When you load a data file, it will create a Workspace. Likewise you can save a Workspace to a file. 
-Many of the features of Mantid change Workspaces into other Workspaces. There are even differenet types of Workspaces in Mantid, which hold data in different formats. 
+Many of the features of Mantid change Workspaces into other Workspaces. There are even different types of Workspaces in Mantid, which hold data in different formats. 
 
 A usual Workspace consists of a number of spectra, each cut into blocks called bins (more about spectra later). Mantid sums the number of counts in each bin and the line we plot connects the top of these bins.
 

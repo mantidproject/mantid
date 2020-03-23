@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_MANTID_AXES_H
-#define MPLCPP_MANTID_AXES_H
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/MplCpp/Axes.h"
@@ -47,13 +46,11 @@ public:
 
   /// @name Artist removal/replacement
   ///@{
-  void removeWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &ws);
-  void replaceWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &newWS);
+  bool removeWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &ws);
+  bool replaceWorkspaceArtists(const Mantid::API::MatrixWorkspace_sptr &newWS);
   ///@}
 };
 
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt
-
-#endif // MPLCPP_AXES_H

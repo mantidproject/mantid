@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENT_GEOMETRY_ABSTRACTION_TEST_H_
-#define INSTRUMENT_GEOMETRY_ABSTRACTION_TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -87,5 +86,3 @@ private:
   boost::shared_ptr<const Geometry::IObject> shape =
       boost::make_shared<const Geometry::CSGObject>();
 };
-
-#endif // INSTRUMENT_GEOMETRY_ABSTRACTION_TEST_H_

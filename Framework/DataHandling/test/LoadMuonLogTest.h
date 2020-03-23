@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADMUONLOGTEST_H_
-#define LOADMUONLOGTEST_H_
+#pragma once
 
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
@@ -99,4 +98,3 @@ private:
   std::string outputSpace;
   std::string inputSpace;
 };
-#endif /*LOADMUONLOGTEST_H_*/

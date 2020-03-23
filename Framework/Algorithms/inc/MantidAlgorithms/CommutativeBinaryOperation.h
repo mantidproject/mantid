@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -21,7 +21,8 @@ It inherits from the BinaryOperation class.
 @author Nick Draper
 @date 23/01/2008
 */
-class DLLExport CommutativeBinaryOperation : public BinaryOperation {
+class MANTID_ALGORITHMS_DLL CommutativeBinaryOperation
+    : public BinaryOperation {
 public:
 protected:
   // Overridden BinaryOperation method

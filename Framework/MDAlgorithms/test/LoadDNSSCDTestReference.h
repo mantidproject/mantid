@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADDNSSCDTESTREFERENCE_H
-#define LOADDNSSCDTESTREFERENCE_H
+#pragma once
 
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 // clang-format makes the reference data unreadable, therefore
@@ -297,4 +296,3 @@ const std::vector<Mantid::coord_t> test_TOFWSDataRotateEPP_ref = {
     0, 0, 0, 4, -0.337444295843f, -0.337444295843f, 0.656425678595f, 4.40020288306f};
 
 // clang-format on
-#endif // LOADDNSSCDTESTREFERENCE_H

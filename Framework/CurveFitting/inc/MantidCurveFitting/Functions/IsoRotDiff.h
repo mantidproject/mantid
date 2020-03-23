@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISOROTDIFF_H_
-#define MANTID_ISOROTDIFF_H_
+#pragma once
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/ElasticIsoRotDiff.h"
 #include "MantidCurveFitting/Functions/InelasticIsoRotDiff.h"
 // Mantid headers from other projects
@@ -25,7 +25,8 @@ namespace Functions {
 @date 25/09/2016
 */
 
-class DLLExport IsoRotDiff : public API::ImmutableCompositeFunction {
+class MANTID_CURVEFITTING_DLL IsoRotDiff
+    : public API::ImmutableCompositeFunction {
 
 public:
   /// overwrite IFunction base class methods
@@ -61,5 +62,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_ISOROTDIFF_H_*/

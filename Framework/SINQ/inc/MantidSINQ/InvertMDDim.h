@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
  * This Algorithms inverts the dimensions of a MD data set. The
@@ -13,8 +13,7 @@
  *
  *
  */
-#ifndef INVERTMDDIM_H_
-#define INVERTMDDIM_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
@@ -55,5 +54,3 @@ private:
   unsigned int calcInvertedIndex(Mantid::API::IMDHistoWorkspace_sptr ws,
                                  int *dim);
 };
-
-#endif /*INVERTMDDIM_H_*/

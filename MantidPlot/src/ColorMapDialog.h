@@ -25,8 +25,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef COLORMAPDIALOG_H
-#define COLORMAPDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -49,5 +48,3 @@ private:
   ColorMapEditor *editor;
   Matrix *d_matrix;
 };
-
-#endif

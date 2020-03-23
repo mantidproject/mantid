@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -158,7 +158,7 @@ def open_in_window(widget_or_name, script, attach_debugger=True, pause=0,
     :param in_workbench: Set to True if the script will be run inside the workbench application.
     """
     if attach_debugger:
-        raw_input('Please attach the Debugger now if required. Press any key to continue')
+        input('Please attach the Debugger now if required. Press any key to continue')
     app = get_application()
     if widget_or_name is not None:
         widget_name = 'Widget to test'

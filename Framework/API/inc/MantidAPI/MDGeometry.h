@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
@@ -33,7 +34,7 @@ class Workspace;
   @author Janik Zikovsky
   @date 2011-09-06
 */
-class DLLExport MDGeometry {
+class MANTID_API_DLL MDGeometry {
 public:
   MDGeometry();
   MDGeometry(const MDGeometry &other);

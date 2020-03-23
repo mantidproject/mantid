@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -326,20 +326,6 @@ public:
     TS_ASSERT(foundAlg);
 
     mgr.setMaxAlgorithms(5);
-  }
-
-  void test_newestInstanceOf() {
-    auto &am = AlgorithmManager::Instance();
-    am.clear();
-    auto first = am.create("AlgTest");
-    TS_ASSERT_EQUALS(am.newestInstanceOf("AlgTest"), first);
-    auto second = am.create("AlgTest");
-    TS_ASSERT_EQUALS(am.newestInstanceOf("AlgTest"), second);
-    TS_ASSERT(!am.newestInstanceOf("AlgTestSecond"));
-    // Create a different algorithm
-    am.create("AlgTestSecond");
-    // Make sure we still get back the latest instance of other algorithm
-    TS_ASSERT_EQUALS(am.newestInstanceOf("AlgTest"), second);
   }
 
   void test_runningInstancesOf() {

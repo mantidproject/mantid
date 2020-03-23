@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/PropertyWidgetFactory.h"
 #include "MantidAPI/FileProperty.h"
@@ -43,9 +43,8 @@ PropertyWidget *
 PropertyWidgetFactory::createWidget(Mantid::Kernel::Property *prop,
                                     QWidget *parent, QGridLayout *layout,
                                     int row) {
-  Mantid::API::FileProperty *fileType =
-      dynamic_cast<Mantid::API::FileProperty *>(prop);
-  Mantid::API::MultipleFileProperty *multipleFileType =
+  auto *fileType = dynamic_cast<Mantid::API::FileProperty *>(prop);
+  auto *multipleFileType =
       dynamic_cast<Mantid::API::MultipleFileProperty *>(prop);
   PropertyWithValue<bool> *boolProp =
       dynamic_cast<PropertyWithValue<bool> *>(prop);

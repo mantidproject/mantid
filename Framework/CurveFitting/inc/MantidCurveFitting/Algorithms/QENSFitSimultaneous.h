@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_QENSFITSIMULTANEOUS_H_
-#define MANTID_ALGORITHMS_QENSFITSIMULTANEOUS_H_
+#pragma once
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/IFittingAlgorithm.h"
 #include "MantidKernel/IValidator.h"
 
@@ -20,7 +20,7 @@ namespace Algorithms {
 /**
   QENSFitSimultaneous - Algorithm for performing a simultaneous QENS fit
 */
-class DLLExport QENSFitSimultaneous : public IFittingAlgorithm {
+class MANTID_CURVEFITTING_DLL QENSFitSimultaneous : public IFittingAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -77,5 +77,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif

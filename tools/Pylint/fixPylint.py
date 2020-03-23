@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,anomalous-backslash-in-string
 from __future__ import (absolute_import, division, print_function)
@@ -26,7 +26,7 @@ def fixParens(fname,errorlist,errlines):
     for i,error in zip(errlines,errorlist):
         if error.find('(superfluous-parens)')!=-1:
             kwd=error.split("'")[1]
-            pattern=re.compile(kwd+'(?P<spaces>\ *)\((?P<file_content>.*)\)')
+            pattern=re.compile(kwd+r'(?P<spaces>\ *)\((?P<file_content>.*)\)')
             match=pattern.search(file_content[i])
             d=match.groupdict()
             newcontent[i]=file_content[i].replace(kwd+d['spaces']+'('+d['file_content']+')',kwd+' '+d['file_content'])
@@ -72,8 +72,8 @@ def addIgnoreStatement(fname,errorlist):
 
 def generate_choices():
     ch=['simple','parentheses','add_ignores']
-    ch_help=['simple - fixes the following warning: bad-indentation, missing-final-newline, '+
-             'mixed_indentation, trailing-whitespace, unnecesary-semicolon',
+    ch_help=['simple - fixes the following warning: bad-indentation, missing-final-newline, '
+             + 'mixed_indentation, trailing-whitespace, unnecesary-semicolon',
              'parentheses - fixes superfluous-parens warning',
              'add_ignores - adds ignore statemets at the beginning of each file to ignore invalid-name, no-init, too-many-lines']
     chhelp="The possible choices supported are:\n\t"+'\n\t'.join(ch_help)
@@ -84,8 +84,8 @@ if __name__=='__main__':
     choices,choices_help=generate_choices()
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
                                      epilog=choices_help,
-                                     description='Fix some pylint warnings. It is STRONGLY RECOMMENDED to '+
-                                     'rerun the pylintcheck between fixes')
+                                     description='Fix some pylint warnings. It is STRONGLY RECOMMENDED to '
+                                                 + 'rerun the pylintcheck between fixes')
     parser.add_argument('-fix','--fix', default='simple',
                         choices=choices,
                         help='Select things to fix (default: simple). \nSee the choices options below.')

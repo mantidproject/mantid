@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/V3D.h"
 
@@ -45,7 +46,7 @@ namespace Algorithms {
     @author Michael Reuter
     @date 30/09/2010
 */
-class DLLExport He3TubeEfficiency : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL He3TubeEfficiency : public API::Algorithm {
 public:
   /// Default constructor
   He3TubeEfficiency();

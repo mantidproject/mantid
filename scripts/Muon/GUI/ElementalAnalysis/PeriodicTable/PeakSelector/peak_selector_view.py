@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
 from qtpy import QtWidgets, QtCore
@@ -90,7 +90,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
             electrons = peak_data["Electrons"]
             electron_data = {}
             for xpos, int in electrons.items():
-                name = '$e^-\quad$  {}'.format(xpos)
+                name = r'$e^-\quad$  {}'.format(xpos)
                 electron_data[name] = float(xpos)
             self.electron_checkboxes = self._create_checkbox_list("Electrons",
                                                                   electron_data,

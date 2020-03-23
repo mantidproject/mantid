@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FindFilesWorker.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -146,9 +146,8 @@ FindFilesWorker::getFilesFromAlgorithm() {
   Property *prop = algorithm->getProperty(propName);
   std::string valueForProperty = prop->value();
 
-  FileProperty *fileProp = dynamic_cast<FileProperty *>(prop);
-  MultipleFileProperty *multiFileProp =
-      dynamic_cast<MultipleFileProperty *>(prop);
+  auto *fileProp = dynamic_cast<FileProperty *>(prop);
+  auto *multiFileProp = dynamic_cast<MultipleFileProperty *>(prop);
 
   if (fileProp) {
     filenames.emplace_back(fileProp->value());

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODEL_H_
-#define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODEL_H_
+#pragma once
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
@@ -154,5 +153,3 @@ using QTwoLevelTreeModel_sptr = boost::shared_ptr<QTwoLevelTreeModel>;
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODEL_H_ */

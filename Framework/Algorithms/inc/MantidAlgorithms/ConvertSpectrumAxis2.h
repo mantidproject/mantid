@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
 
 namespace Mantid {
@@ -32,7 +33,7 @@ namespace Algorithms {
    converted. </LI>
     </UL>
 */
-class DLLExport ConvertSpectrumAxis2 : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ConvertSpectrumAxis2 : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "ConvertSpectrumAxis"; }

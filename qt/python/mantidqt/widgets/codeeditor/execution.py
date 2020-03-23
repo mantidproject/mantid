@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
@@ -100,12 +100,13 @@ class PythonCodeExecution(QObject):
         if self._task is not None:
             self._task.abort()
 
-    def execute_async(self, code_str, filename=None, blocking=False):
+    def execute_async(self, code_str, line_offset, filename=None, blocking=False):
         """
         Execute the given code string on a separate thread. This function
         returns as soon as the new thread starts
 
         :param code_str: A string containing code to execute
+        :param line_offset: See PythonCodeExecution.execute()
         :param filename: See PythonCodeExecution.execute()
         :param blocking: If True the call will block until the task is finished
         :returns: The created async task, only returns task if the blocking is False
@@ -113,24 +114,25 @@ class PythonCodeExecution(QObject):
         # Stack is chopped on error to avoid the  AsyncTask.run->self.execute calls appearing
         # as these are not useful for the user in this context
         if not blocking:
-            task = AsyncTask(self.execute, args=(code_str, filename),
+            task = AsyncTask(self.execute, args=(code_str, filename, line_offset),
                              success_cb=self._on_success, error_cb=self._on_error)
             task.start()
             self._task = task
             return task
         else:
-            self._task = BlockingAsyncTaskWithCallback(self.execute, args=(code_str, filename),
+            self._task = BlockingAsyncTaskWithCallback(self.execute, args=(code_str, filename, line_offset),
                                                        success_cb=self._on_success, error_cb=self._on_error,
                                                        blocking_cb=QApplication.processEvents)
             return self._task.start()
 
-    def execute(self, code_str, filename=None):
+    def execute(self, code_str, filename=None, line_offset=0):
         """Execute the given code on the calling thread
         within the provided context.
 
         :param code_str: A string containing code to execute
         :param filename: An optional identifier specifying the file source of the code. If None then '<string>'
         is used
+        :param line_offset: The number of lines offset into the script that the code_str starts at
         :raises: Any error that the code generates
         """
         if not filename:
@@ -140,7 +142,7 @@ class PythonCodeExecution(QObject):
         flags = get_future_import_compiler_flags(code_str)
         with AddedToSysPath([os.path.dirname(filename)]):
             executor = CodeExecution(self._editor)
-            executor.execute(code_str, filename, flags, self.globals_ns)
+            executor.execute(code_str, filename, flags, self.globals_ns, line_offset)
 
     def reset_context(self):
         # create new context for execution

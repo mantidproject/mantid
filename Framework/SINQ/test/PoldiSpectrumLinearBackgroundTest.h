@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUNDTEST_H_
-#define MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUNDTEST_H_
+#pragma once
 
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
 
@@ -146,5 +145,3 @@ public:
 private:
   std::vector<double> m_xValues;
 };
-
-#endif /* MANTID_SINQ_POLDISPECTRUMLINEARBACKGROUNDTEST_H_ */

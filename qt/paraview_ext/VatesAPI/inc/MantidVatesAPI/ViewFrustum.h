@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARAVIEW_VIEWFRUSTUM
-#define MANTID_PARAVIEW_VIEWFRUSTUM
+#pragma once
 
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
@@ -167,4 +166,3 @@ using ViewFrustum_const_sptr =
     boost::shared_ptr<const Mantid::VATES::ViewFrustum>;
 } // namespace VATES
 } // namespace Mantid
-#endif

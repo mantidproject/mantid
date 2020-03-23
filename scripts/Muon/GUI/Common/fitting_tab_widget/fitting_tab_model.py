@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
 
@@ -652,8 +652,8 @@ class FittingTabModel(object):
 
         grp_pair_values = list(self._grppair_index.values())
         if len(self._grppair_index) > 1:
-            return ((self._grppair_index[grp_or_pair_name] - grp_pair_values[0]) /
-                    (grp_pair_values[-1] - grp_pair_values[0])) * 0.99
+            return ((self._grppair_index[grp_or_pair_name] - grp_pair_values[0])
+                    / (grp_pair_values[-1] - grp_pair_values[0])) * 0.99
         else:
             return 0
 

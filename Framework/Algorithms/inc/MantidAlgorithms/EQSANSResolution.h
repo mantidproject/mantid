@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -38,7 +38,8 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport EQSANSResolution : public Algorithms::TOFSANSResolution {
+class MANTID_ALGORITHMS_DLL EQSANSResolution
+    : public Algorithms::TOFSANSResolution {
 public:
   /// Algorithm's name
   const std::string name() const override { return "EQSANSResolution"; }

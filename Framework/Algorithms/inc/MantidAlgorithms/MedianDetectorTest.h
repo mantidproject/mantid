@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -51,7 +51,7 @@ is in (default: the start of each spectrum)</LI>
 this x value (default: the end of each spectrum)</LI>
 </UL>
 */
-class DLLExport MedianDetectorTest : public DetectorDiagnostic {
+class MANTID_ALGORITHMS_DLL MedianDetectorTest : public DetectorDiagnostic {
 public:
   /// Default constructor initialises all values to zero and runs the base class
   /// constructor

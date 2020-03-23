@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -19,8 +19,8 @@ namespace API {
 
   @date 2011-11-09
 */
-class DLLExport IMDHistoWorkspace : public IMDWorkspace,
-                                    public MultipleExperimentInfos {
+class MANTID_API_DLL IMDHistoWorkspace : public IMDWorkspace,
+                                         public MultipleExperimentInfos {
 public:
   IMDHistoWorkspace() = default;
   IMDHistoWorkspace &operator=(const IMDHistoWorkspace &) = delete;

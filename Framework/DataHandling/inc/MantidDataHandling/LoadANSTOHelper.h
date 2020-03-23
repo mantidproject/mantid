@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATAHANDING_ANSTO_H_
-#define DATAHANDING_ANSTO_H_
+#pragma once
 
 //---------------------------------------------------
 // Includes
@@ -266,5 +265,3 @@ public:
 } // namespace ANSTO
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif // DATAHANDING_ANSTO_H_

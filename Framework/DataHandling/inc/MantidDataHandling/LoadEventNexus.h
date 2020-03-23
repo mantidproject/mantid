@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADEVENTNEXUS_H_
-#define MANTID_DATAHANDLING_LOADEVENTNEXUS_H_
+#pragma once
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -803,5 +802,3 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename,
 }
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_LOADEVENTNEXUS_H_*/

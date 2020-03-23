@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
@@ -39,8 +39,8 @@ class PDToGUDRUN(DataProcessorAlgorithm):
         self.declareProperty("MaxChunkSize", 0.0,
                              "Specify maximum Gbytes of file to read in one chunk.  Default is whole file.")
         self.declareProperty("FilterBadPulses", 95.,
-                             doc="Filter out events measured while proton " +
-                             "charge is more than 5% below average")
+                             doc="Filter out events measured while proton "
+                                 + "charge is more than 5% below average")
 
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
                                                      direction=Direction.Input,
@@ -83,8 +83,8 @@ class PDToGUDRUN(DataProcessorAlgorithm):
                                                 direction=Direction.Input),
                              "Positive is linear bins, negative is logorithmic")
         self.declareProperty("ResampleX", 0,
-                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. " +
-                             "Negative value means logorithmic binning.")
+                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. "
+                             + "Negative value means logorithmic binning.")
         self.declareProperty('SetUncertainties', '',
                              StringListValidator(['', 'zero', 'sqrt', 'sqrtOrOne', 'oneIfZero']),
                              doc='Recalculate uncertainties. Empty string is do nothing.')
@@ -144,8 +144,8 @@ class PDToGUDRUN(DataProcessorAlgorithm):
             if wksp.getNumberEvents() <= 0: # checked InputWorkspace during validateInputs
                 raise RuntimeError("Workspace contains no events")
         else:
-            self.log().information("Using input workspace. Ignoring properties 'Filename', " +
-                                   "'OutputWorkspace', 'MaxChunkSize', and 'FilterBadPulses'")
+            self.log().information("Using input workspace. Ignoring properties 'Filename', "
+                                   + "'OutputWorkspace', 'MaxChunkSize', and 'FilterBadPulses'")
 
         charac = ""
         if mtd.doesExist("characterizations"):

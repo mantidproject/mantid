@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include <set>
 
@@ -35,7 +36,7 @@ namespace Algorithms {
     @author Nick Draper, Tessella Support Services plc
     @date 22/01/2009
  */
-class DLLExport SumSpectra : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL SumSpectra : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "SumSpectra"; }

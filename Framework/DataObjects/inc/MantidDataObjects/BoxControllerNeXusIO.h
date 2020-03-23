@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_BOXCONTROLLER_NEXUSS_IO_H
-#define MANTID_DATAOBJECTS_BOXCONTROLLER_NEXUSS_IO_H
+#pragma once
 
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IBoxControllerIO.h"
@@ -149,4 +148,3 @@ private:
 };
 } // namespace DataObjects
 } // namespace Mantid
-#endif

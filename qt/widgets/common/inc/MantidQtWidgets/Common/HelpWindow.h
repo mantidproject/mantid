@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef HELPWINDOW_H
-#define HELPWINDOW_H
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QString>
@@ -41,4 +40,3 @@ public:
 };
 } // namespace API
 } // namespace MantidQt
-#endif // HELPWINDOW_H

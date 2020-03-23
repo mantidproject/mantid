@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_CLONEMDEVENTWORKSPACETEST_H_
-#define MANTID_MDEVENTS_CLONEMDEVENTWORKSPACETEST_H_
+#pragma once
 
 #include "LoadMDTest.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -207,5 +206,3 @@ public:
     do_test_MDHisto(ws1);
   }
 };
-
-#endif /* MANTID_MDEVENTS_CLONEMDEVENTWORKSPACETEST_H_ */

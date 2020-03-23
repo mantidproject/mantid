@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
@@ -155,8 +155,8 @@ class PointCharge(object):
         elif isinstance(structure, list):
             if (len(structure) == 4 and all([isinstance(x, (int, float)) for x in structure])):
                 structure = [structure]
-            if (all([isinstance(x, list) and (len(x) == 4) and
-               all([isinstance(y, (int, float)) for y in x]) for x in structure])):
+            if (all([isinstance(x, list) and (len(x) == 4)
+                     and all([isinstance(y, (int, float)) for y in x]) for x in structure])):
                 self._ligands = structure
             else:
                 raise ValueError('Incorrect ligands direct input. Must be a 4-element list or a list '

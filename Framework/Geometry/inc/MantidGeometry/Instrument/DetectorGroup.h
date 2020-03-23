@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_DETECTORGROUP_H_
-#define MANTID_GEOMETRY_DETECTORGROUP_H_
+#pragma once
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Component.h"
@@ -254,5 +253,3 @@ using DetectorGroup_const_sptr = boost::shared_ptr<const DetectorGroup>;
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /*MANTID_GEOMETRY_DETECTORGROUP_H_*/

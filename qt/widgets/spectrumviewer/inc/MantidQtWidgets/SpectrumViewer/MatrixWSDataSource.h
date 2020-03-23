@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MATRIX_WS_DATA_SOURCE_H
-#define MATRIX_WS_DATA_SOURCE_H
+#pragma once
 
 #include <cstddef>
 
@@ -95,5 +94,3 @@ using MatrixWSDataSource_const_sptr =
 
 } // namespace SpectrumView
 } // namespace MantidQt
-
-#endif // MATRIX_WS_DATA_SOURCE_H

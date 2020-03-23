@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MD_CONVERT2_Q_NDANY_TEST_H_
-#define MANTID_MD_CONVERT2_Q_NDANY_TEST_H_
+#pragma once
 
 #include "MantidAPI/BoxController.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -840,5 +839,3 @@ public:
     setUpConvAlg(convertAlgIndexed, "Indexed", inWsSampleName);
   }
 };
-
-#endif /* MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SANSAddFiles.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -166,7 +166,7 @@ void SANSAddFiles::setToolTips() {
  *  @return a pointer to the inserted widget
  */
 QListWidgetItem *SANSAddFiles::insertListFront(const QString &text) {
-  QListWidgetItem *newItem = new QListWidgetItem(text);
+  auto *newItem = new QListWidgetItem(text);
   newItem->setFlags(newItem->flags() | Qt::ItemIsEditable);
   m_SANSForm->toAdd_List->insertItem(0, newItem);
   return newItem;

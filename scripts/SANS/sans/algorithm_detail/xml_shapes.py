@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from math import (pi, cos, sin)
@@ -70,14 +70,14 @@ def finite_cylinder(centre, radius, height, axis, shape_id='shape'):
 
 def add_cylinder(xml, radius, xcentre, ycentre, shape_id='shape'):
     """Mask the inside of an infinite cylinder on the input workspace."""
-    add_xml_shape(xml, infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], shape_id=shape_id) +
-                  '<algebra val="' + str(shape_id) + '"/>')
+    add_xml_shape(xml, infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], shape_id=shape_id)
+                  + '<algebra val="' + str(shape_id) + '"/>')
 
 
 def add_outside_cylinder(xml, radius, xcentre=0.0, ycentre=0.0, shape_id='shape'):
     """Mask out the outside of a cylinder or specified radius """
-    add_xml_shape(xml, infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], shape_id=shape_id) +
-                  '<algebra val="#' + str(shape_id + '"/>'))
+    add_xml_shape(xml, infinite_cylinder([xcentre, ycentre, 0.0], radius, [0, 0, 1], shape_id=shape_id)
+                  + '<algebra val="#' + str(shape_id + '"/>'))
 
 
 def create_phi_mask(shape_id, centre, phi_min, phi_max, use_mirror=True):

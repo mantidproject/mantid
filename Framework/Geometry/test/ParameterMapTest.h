@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PARAMETERMAPTEST_H_
-#define PARAMETERMAPTEST_H_
+#pragma once
 
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
@@ -818,5 +817,3 @@ private:
   Mantid::Geometry::ParameterMap m_pmap;
   Mantid::Geometry::IDetector *m_leaf;
 };
-
-#endif /* PARAMETERMAPTEST_H_ */

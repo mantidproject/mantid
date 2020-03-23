@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_SPLINESMOOTHING_H_
-#define MANTID_CURVEFITTING_SPLINESMOOTHING_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -24,7 +23,7 @@ namespace Algorithms {
   @author Samuel Jackson, STFC
   @date 24/07/2013
 */
-class DLLExport SplineSmoothing : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL SplineSmoothing : public API::Algorithm {
 public:
   SplineSmoothing();
 
@@ -110,5 +109,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_SPLINESMOOTHING_H_ */

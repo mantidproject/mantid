@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
  * This algorithm takes a MDHistoWorkspace and allows to select a slab out of
@@ -12,8 +12,7 @@
  *
  *
  */
-#ifndef SLICEMDHISTO_H_
-#define SLICEMDHISTO_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
@@ -57,5 +56,3 @@ private:
   void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
                     Mantid::API::IMDHistoWorkspace_sptr outws);
 };
-
-#endif /*SLICEMDHISTO_H_*/

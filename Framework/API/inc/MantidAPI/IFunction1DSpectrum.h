@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -23,7 +23,7 @@ namespace API {
       @author Michael Wedel, Paul Scherrer Institut - SINQ
       @date 03/06/2014
   */
-class DLLExport IFunction1DSpectrum : public virtual IFunction {
+class MANTID_API_DLL IFunction1DSpectrum : public virtual IFunction {
 public:
   void function(const FunctionDomain &domain,
                 FunctionValues &values) const override;

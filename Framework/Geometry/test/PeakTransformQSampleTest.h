@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDGEOMETRY_PEAKTRANSFORMQSAMPLE_TEST_H_
-#define MANTIDGEOMETRY_PEAKTRANSFORMQSAMPLE_TEST_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/PeakTransformQSample.h"
 #include "MockObjects.h"
@@ -231,6 +230,3 @@ public:
     TS_ASSERT_EQUALS(Mantid::Kernel::QSample, transform.getCoordinateSystem())
   }
 };
-#endif
-
-// end MANTIDAPI_PEAKTRANSFORMQSAMPLE_TEST_H_

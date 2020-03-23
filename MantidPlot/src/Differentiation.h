@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef DIFFERENTIATION_H
-#define DIFFERENTIATION_H
+#pragma once
 
 #include "Filter.h"
 
@@ -47,4 +46,3 @@ private:
   void init();
   void output() override;
 };
-#endif

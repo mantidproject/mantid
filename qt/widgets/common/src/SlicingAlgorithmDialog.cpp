@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/SlicingAlgorithmDialog.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -150,7 +150,7 @@ void SlicingAlgorithmDialog::cleanLayoutOfDimensions(QLayout *layout) {
     QWidget *pWidget = pLayoutItem->widget();
     if (pWidget != nullptr) {
       // The label text contains the property name.
-      QLabel *propertyLabel =
+      auto *propertyLabel =
           dynamic_cast<QLabel *>(pWidget->layout()->itemAt(0)->widget());
       untie(propertyLabel->text());
       pWidget->setHidden(true);
@@ -326,10 +326,10 @@ void SlicingAlgorithmDialog::makeDimensionInputs(
       // Configure the default input.
       const QString dimensionInfo = format(dim);
 
-      QLineEdit *txtDimension = new QLineEdit(dimensionInfo);
+      auto *txtDimension = new QLineEdit(dimensionInfo);
 
       // Create a widget to contain the dimension components.
-      QHBoxLayout *layout = new QHBoxLayout;
+      auto *layout = new QHBoxLayout;
       QWidget *w = new QWidget;
       w->setLayout(layout);
 
@@ -482,7 +482,7 @@ void SlicingAlgorithmDialog::resestAlignedDimProperty(size_t index,
     return;
   }
 
-  QLineEdit *edit = dynamic_cast<QLineEdit *>(widget);
+  auto *edit = dynamic_cast<QLineEdit *>(widget);
 
   if (!edit) {
     return;

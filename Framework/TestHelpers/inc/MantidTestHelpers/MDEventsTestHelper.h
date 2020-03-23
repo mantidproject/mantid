@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -11,8 +11,7 @@
  *of
  *  DataObjects (e.g. Kernel, Geometry, API).
  *********************************************************************************/
-#ifndef MDEVENTSTEST_HELPER_H
-#define MDEVENTSTEST_HELPER_H
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/BoxController.h"
@@ -510,5 +509,3 @@ void checkAndDeleteFile(std::string filename);
 } // namespace MDEventsTestHelper
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif

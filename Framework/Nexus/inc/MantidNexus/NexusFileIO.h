@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NEXUSFILEIO_H
-#define NEXUSFILEIO_H
+#pragma once
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
@@ -417,5 +416,3 @@ using NexusFileIO_sptr = boost::shared_ptr<NexusFileIO>;
 
 } // namespace NeXus
 } // namespace Mantid
-
-#endif /* NEXUSFILEIO_H */

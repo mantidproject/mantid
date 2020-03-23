@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_GAUSSIAN_H_
-#define MANTID_CURVEFITTING_GAUSSIAN_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include <cmath>
 
 namespace Mantid {
@@ -33,7 +33,7 @@ Gauassian parameters:
 @author Anders Markvardsen, ISIS, RAL
 @date 19/10/2009
 */
-class DLLExport Gaussian : public API::IPeakFunction {
+class MANTID_CURVEFITTING_DLL Gaussian : public API::IPeakFunction {
 public:
   Gaussian();
   /// overwrite IPeakFunction base class methods
@@ -78,5 +78,3 @@ protected:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_GAUSSIAN_H_*/

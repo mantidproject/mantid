@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_TOPYLIST_H_
-#define MANTID_PYTHONINTERFACE_TOPYLIST_H_
+#pragma once
 
 #include <boost/python/list.hpp>
 #include <vector>
@@ -38,5 +37,3 @@ template <typename ElementType> struct ToPyList {
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_TOPYLIST_H_ */

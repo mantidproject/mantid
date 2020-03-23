@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
@@ -122,7 +122,7 @@ void MantidTreeWidget::mouseMoveEvent(QMouseEvent *e) {
   // Start dragging - Qt docs say not to delete the QDrag object
   // manually
   QDrag *drag = new QDrag(this);
-  QMimeData *mimeData = new QMimeData;
+  auto *mimeData = new QMimeData;
   drag->setMimeData(mimeData);
   mimeData->setObjectName("MantidWorkspace");
   mimeData->setText(wsNames.join("\n"));

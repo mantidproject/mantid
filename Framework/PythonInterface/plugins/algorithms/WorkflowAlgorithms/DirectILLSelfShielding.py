@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from __future__ import (absolute_import, division, print_function)
@@ -94,8 +93,7 @@ class DirectILLSelfShielding(DataProcessorAlgorithm):
                                  common.SUBALG_LOGGING_OFF,
                                  common.SUBALG_LOGGING_ON]),
                              direction=Direction.Input,
-                             doc='Enable or disable subalgorithms to ' +
-                                 'print in the logs.')
+                             doc='Enable or disable subalgorithms to print in the logs.')
         self.declareProperty(name=common.PROP_SIMULATION_INSTRUMENT,
                              defaultValue=common.SIMULATION_INSTRUMEN_SPARSE,
                              validator=StringListValidator([

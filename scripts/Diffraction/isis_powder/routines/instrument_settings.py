@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
@@ -139,8 +139,8 @@ class InstrumentSettings(object):
             if previous_value is not None and previous_value != param_val:
 
                 # Print warning of what we value we are replacing for which parameter
-                warnings.warn("Replacing parameter: '" + str(param_map.ext_name) + "' which was previously set to: '" +
-                              str(getattr(self, attribute_name)) + "' with new value: '" + str(param_val) + "'")
+                warnings.warn("Replacing parameter: '" + str(param_map.ext_name) + "' which was previously set to: '"
+                              + str(getattr(self, attribute_name)) + "' with new value: '" + str(param_val) + "'")
 
         # Finally set the new attribute value
         setattr(self, attribute_name, param_val)

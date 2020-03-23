@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -12,6 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Run.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -30,7 +31,7 @@ namespace Algorithms {
     to the sample during the experiment. This algorithm allows one named log
     to be entered.
 */
-class DLLExport AddSampleLog : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL AddSampleLog : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "AddSampleLog"; }

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MantidWSIndexDialog.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -1338,7 +1338,7 @@ QValidator::State IntervalListValidator::validate(QString &input,
 MantidWSIndexWidget::QLineEditWithErrorMark::QLineEditWithErrorMark(
     QWidget *parent)
     : QWidget(parent) {
-  QGridLayout *layout = new QGridLayout();
+  auto *layout = new QGridLayout();
   _lineEdit = new QLineEdit();
   m_validLbl = new QLabel("*"); // make it red
   QPalette pal = m_validLbl->palette();

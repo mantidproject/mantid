@@ -1,22 +1,21 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_INTEGRATEPEAKSUSINGCLUSTERS_H_
-#define MANTID_CRYSTAL_INTEGRATEPEAKSUSINGCLUSTERS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
 
 /** IntegratePeaksUsingClusters : Uses clustering to integrate peaks.
  */
-class DLLExport IntegratePeaksUsingClusters : public API::Algorithm {
+class MANTID_CRYSTAL_DLL IntegratePeaksUsingClusters : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -39,5 +38,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_INTEGRATEPEAKSUSINGCLUSTERS_H_ */

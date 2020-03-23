@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
 
@@ -224,10 +224,10 @@ class MuonContext(object):
         self.ads_observer.observeRename(True)
 
     def _do_rebin(self):
-        return (self.gui_context['RebinType'] == 'Fixed' and
-                'RebinFixed' in self.gui_context and self.gui_context['RebinFixed']) or \
-               (self.gui_context['RebinType'] == 'Variable' and
-                'RebinVariable' in self.gui_context and self.gui_context['RebinVariable'])
+        return (self.gui_context['RebinType'] == 'Fixed'
+                and 'RebinFixed' in self.gui_context and self.gui_context['RebinFixed']) or \
+               (self.gui_context['RebinType'] == 'Variable'
+                and 'RebinVariable' in self.gui_context and self.gui_context['RebinVariable'])
 
     def get_workspace_names_for_FFT_analysis(self, use_raw=True):
         workspace_options = self.get_names_of_workspaces_to_fit(

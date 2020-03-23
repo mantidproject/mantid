@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __CXXTEST__DUMMYGUI_H
-#define __CXXTEST__DUMMYGUI_H
+#pragma once
 
 //
 // The DummyGui is a "GUI" that prints messages to cout
@@ -47,5 +46,3 @@ namespace CxxTest
         }
     };
 }
-
-#endif //__CXXTEST__DUMMYGUI_H

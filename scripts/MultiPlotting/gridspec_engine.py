@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from matplotlib.gridspec import GridSpec
@@ -30,8 +36,7 @@ class gridspecEngine(object):
         if number <= 0:
             return
         if self._max_plot is not None and number > self._max_plot:
-                print(
-                    "Number of plot has exceeded the maximum number of " + str(self._max_plot))
-                return
+            print("Number of plot has exceeded the maximum number of " + str(self._max_plot))
+            return
         current_grid = self.grid(number)
         return GridSpec(current_grid[0], current_grid[1])

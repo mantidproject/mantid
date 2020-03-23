@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -26,7 +26,8 @@ namespace Algorithms {
 /** ReflectometryReductionOne2 : Reflectometry reduction of a single input TOF
  workspace to an IvsQ workspace. Version 2 of the algorithm.
  */
-class DLLExport ReflectometryReductionOne2 : public ReflectometryWorkflowBase2 {
+class MANTID_ALGORITHMS_DLL ReflectometryReductionOne2
+    : public ReflectometryWorkflowBase2 {
 public:
   /// Algorithm's name for identification
   const std::string name() const override {

@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SORTDIALOG_H
-#define SORTDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -57,5 +56,3 @@ private:
   QComboBox *boxOrder;
   QComboBox *columnsList;
 };
-
-#endif

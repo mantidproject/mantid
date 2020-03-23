@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------
 // Includes
@@ -71,12 +71,12 @@ SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString &suggFname,
   setWindowTitle("Save Workspaces");
 
   // the form is split into 3 lines of controls in horizontal layouts
-  QHBoxLayout *lineOne = new QHBoxLayout;
+  auto *lineOne = new QHBoxLayout;
   setupLine1(lineOne);
-  QHBoxLayout *lineTwo = new QHBoxLayout;
+  auto *lineTwo = new QHBoxLayout;
   setupLine2(lineTwo, defSavs);
 
-  QVBoxLayout *dialogLayout = new QVBoxLayout;
+  auto *dialogLayout = new QVBoxLayout;
   dialogLayout->addLayout(lineOne);
   dialogLayout->addLayout(lineTwo);
 
@@ -92,9 +92,9 @@ void SaveWorkspaces::initLayout() {}
  *  @param lineOne :: the layout on to which the controls will be placed
  */
 void SaveWorkspaces::setupLine1(QHBoxLayout *const lineOne) {
-  QLabel *fNameLabel = new QLabel("Filename:");
+  auto *fNameLabel = new QLabel("Filename:");
   m_fNameEdit = new QLineEdit();
-  QPushButton *fNameButton = new QPushButton("Browse");
+  auto *fNameButton = new QPushButton("Browse");
   connect(fNameButton, SIGNAL(clicked()), this, SLOT(saveFileBrowse()));
 
   lineOne->addWidget(fNameLabel);
@@ -128,14 +128,14 @@ void SaveWorkspaces::setupLine2(
   connect(m_workspaces, SIGNAL(currentRowChanged(int)), this,
           SLOT(setFileName(int)));
 
-  QPushButton *save = new QPushButton("Save");
+  auto *save = new QPushButton("Save");
   connect(save, SIGNAL(clicked()), this, SLOT(saveSel()));
-  QPushButton *cancel = new QPushButton("Cancel");
+  auto *cancel = new QPushButton("Cancel");
   connect(cancel, SIGNAL(clicked()), this, SLOT(close()));
 
-  QCheckBox *saveRKH = new QCheckBox("RKH (1D/2D)");
-  QCheckBox *saveNXcanSAS = new QCheckBox("NXcanSAS (1D/2D)");
-  QCheckBox *saveCan = new QCheckBox("CanSAS (1D)");
+  auto *saveRKH = new QCheckBox("RKH (1D/2D)");
+  auto *saveNXcanSAS = new QCheckBox("NXcanSAS (1D/2D)");
+  auto *saveCan = new QCheckBox("CanSAS (1D)");
 
   // link the save option tick boxes to their save algorithm
   m_savFormats.insert(saveRKH, "SaveRKH");
@@ -147,17 +147,17 @@ void SaveWorkspaces::setupLine2(
 
   // place controls into the layout, which places them on the form and takes
   // care of deleting them
-  QVBoxLayout *ly_saveConts = new QVBoxLayout;
+  auto *ly_saveConts = new QVBoxLayout;
   ly_saveConts->addWidget(save);
   ly_saveConts->addWidget(cancel);
   ly_saveConts->addWidget(m_append);
   ly_saveConts->addStretch();
 
-  QVBoxLayout *ly_saveFormats = new QVBoxLayout;
+  auto *ly_saveFormats = new QVBoxLayout;
   ly_saveFormats->addWidget(saveRKH);
   ly_saveFormats->addWidget(saveNXcanSAS);
   ly_saveFormats->addWidget(saveCan);
-  QGroupBox *gb_saveForms = new QGroupBox(tr("Save Formats"));
+  auto *gb_saveForms = new QGroupBox(tr("Save Formats"));
   gb_saveForms->setLayout(ly_saveFormats);
   ly_saveConts->addWidget(gb_saveForms);
 

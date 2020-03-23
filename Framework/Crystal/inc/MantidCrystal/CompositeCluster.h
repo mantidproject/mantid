@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_COMPOSITECLUSTER_H_
-#define MANTID_CRYSTAL_COMPOSITECLUSTER_H_
+#pragma once
 
+#include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/ICluster.h"
 #include "MantidKernel/System.h"
 #include <boost/optional.hpp>
@@ -17,7 +17,7 @@ namespace Crystal {
 
 /** CompositeCluster : Cluster made by by merging other IClusters.
  */
-class DLLExport CompositeCluster : public ICluster {
+class MANTID_CRYSTAL_DLL CompositeCluster : public ICluster {
 public:
   CompositeCluster() = default;
   CompositeCluster(const CompositeCluster &) = delete;
@@ -72,5 +72,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_COMPOSITECLUSTER_H_ */

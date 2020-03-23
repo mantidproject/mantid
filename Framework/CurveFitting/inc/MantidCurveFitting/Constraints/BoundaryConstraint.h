@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_BOUNDARYCONSTRAINT_H_
-#define MANTID_CURVEFITTING_BOUNDARYCONSTRAINT_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IConstraint.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -26,7 +26,7 @@ upper or lower (or both) boundaries on a single parameter.
 @author Anders Markvardsen, ISIS, RAL
 @date 13/11/2009
 */
-class DLLExport BoundaryConstraint : public API::IConstraint {
+class MANTID_CURVEFITTING_DLL BoundaryConstraint : public API::IConstraint {
 public:
   /// Default constructor
   BoundaryConstraint();
@@ -123,5 +123,3 @@ private:
 } // namespace Constraints
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_BOUNDARYCONSTRAINT_H_*/

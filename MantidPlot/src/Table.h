@@ -29,8 +29,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef TABLE_H
-#define TABLE_H
+#pragma once
 
 #include <QTableWidget>
 #include <QVarLengthArray>
@@ -452,5 +451,3 @@ private:
   //! Internal function to change the column header
   void setColumnHeader(int index, const QString &label);
 };
-
-#endif

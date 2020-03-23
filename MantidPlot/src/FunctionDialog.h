@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FUNCTIONDIALOG_H
-#define FUNCTIONDIALOG_H
+#pragma once
 
 #include "Graph.h"
 
@@ -100,5 +99,3 @@ private:
   Graph *graph;
   int curveID;
 };
-
-#endif // FUNCTIONDIALOG_H

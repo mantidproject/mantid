@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=W0633,R0913,too-many-branches
 from __future__ import (absolute_import, division, print_function)
@@ -767,9 +767,9 @@ def convert_hkl_to_integer(index_h, index_k, index_l, magnetic_tolerance=0.2):
     index_k_r = round_miller_index(index_k, magnetic_tolerance)
     index_l_r = round_miller_index(index_l, magnetic_tolerance)
 
-    round_error = math.sqrt((index_h - index_h_r) ** 2 +
-                            (index_k - index_k_r) ** 2 +
-                            (index_l - index_l_r) ** 2)
+    round_error = math.sqrt((index_h - index_h_r) ** 2
+                            + (index_k - index_k_r) ** 2
+                            + (index_l - index_l_r) ** 2)
 
     return (index_h_r, index_k_r, index_l_r), round_error
 

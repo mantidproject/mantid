@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef AUTOSCALERANGEGENERATOR_H
-#define AUTOSCALERANGEGENERATOR_H
+#pragma once
 
 /**
     Generates information for the color scale, e.g. minimum level, maximum
@@ -85,4 +84,3 @@ private:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-#endif

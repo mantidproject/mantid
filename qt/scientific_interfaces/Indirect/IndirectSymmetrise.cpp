@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSymmetrise.h"
 #include "IndirectDataValidationHelper.h"
@@ -46,7 +46,7 @@ IndirectSymmetrise::IndirectSymmetrise(IndirectDataReduction *idrUI,
   m_uiForm.propertiesPreview->addWidget(m_propTrees["SymmPVPropTree"]);
 
   // Editor Factories
-  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
+  auto *doubleEditorFactory = new DoubleEditorFactory();
   m_propTrees["SymmPropTree"]->setFactoryForManager(m_dblManager,
                                                     doubleEditorFactory);
 

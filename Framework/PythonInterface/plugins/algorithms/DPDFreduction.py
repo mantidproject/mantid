@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
@@ -198,8 +198,8 @@ class DPDFreduction(api.PythonAlgorithm):
             ws_ec_data = sapi.mtd[wn_ec_data]
             ec_Ei = ws_ec_data.getRun()['EnergyRequest'].getStatistics().mean
             if abs(Ei - ec_Ei) > Ei_std:
-                raise RuntimeError('Empty can runs were obtained at a significant' +
-                                   ' different incident energy than the sample runs')
+                raise RuntimeError('Empty can runs were obtained at a significant'
+                                   + ' different incident energy than the sample runs')
 
         # Obtain energy range. If user did not supply a triad
         # [Estart, Ewidth, Eend] but only Ewidth, then estimate
@@ -254,8 +254,7 @@ class DPDFreduction(api.PythonAlgorithm):
                 # is the result on an event where the initial energy was
                 # Ei and the final energy was Ei+dE.
                 dE = self._ebins[1]
-                self._qbins.append(numpy.sqrt((Ei + dE) / ENERGY_TO_WAVEVECTOR) -
-                                   numpy.sqrt(Ei / ENERGY_TO_WAVEVECTOR))
+                self._qbins.append(numpy.sqrt((Ei + dE) / ENERGY_TO_WAVEVECTOR) - numpy.sqrt(Ei / ENERGY_TO_WAVEVECTOR))
             mins, maxs = sapi.ConvertToMDMinMaxLocal(wn_reduced, Qdimensions='|Q|',
                                                      dEAnalysisMode='Direct')
             self._qbins.insert(0, mins[0])  # prepend minimum Q

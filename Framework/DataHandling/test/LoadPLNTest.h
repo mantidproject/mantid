@@ -1,5 +1,10 @@
-#ifndef LOADPLNTEST_H_
-#define LOADPLNTEST_H_
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -135,5 +140,3 @@ public:
     TS_ASSERT_DELTA(logpm("SampleRotation"), 13.001, 1.0e-3);
   }
 };
-
-#endif /*LOADPLNTEST_H_*/

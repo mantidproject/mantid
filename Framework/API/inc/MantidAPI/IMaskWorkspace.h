@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 
 #include <boost/shared_ptr.hpp>
@@ -18,7 +19,7 @@ namespace API {
 
 /** This class provides an interface to a MaskWorkspace.
  */
-class DLLExport IMaskWorkspace {
+class MANTID_API_DLL IMaskWorkspace {
 public:
   IMaskWorkspace() = default;
   IMaskWorkspace &operator=(const IMaskWorkspace &) = delete;

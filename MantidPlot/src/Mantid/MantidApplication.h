@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDAPPLICATION_H_
-#define MANTIDAPPLICATION_H_
+#pragma once
 
 //============================================================
 // Inheriting class to make sure we catch any top level errors
@@ -24,5 +23,3 @@ public slots:
   void errorHandling(bool continueWork, int sharing, QString name,
                      QString email, QString textbox);
 };
-
-#endif // MANTIDAPPLICATION_H_

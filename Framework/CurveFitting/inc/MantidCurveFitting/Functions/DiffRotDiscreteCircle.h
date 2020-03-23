@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DIFFROTDISCRETECIRCLE_H_
-#define MANTID_DIFFROTDISCRETECIRCLE_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -31,7 +30,8 @@ namespace Functions {
  * jump to neighboring sites. This is the most common type of discrete
  * rotational diffusion in a circle.
  */
-class DLLExport DiffRotDiscreteCircle : public API::ImmutableCompositeFunction {
+class MANTID_CURVEFITTING_DLL DiffRotDiscreteCircle
+    : public API::ImmutableCompositeFunction {
 public:
   std::string name() const override { return "DiffRotDiscreteCircle"; }
 
@@ -61,5 +61,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_DIFFROTDISCRETECIRCLE_H_*/

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_BSPLINE_H_
-#define MANTID_CURVEFITTING_BSPLINE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -26,7 +25,7 @@ A wrapper around GSL functions implementing a B-spline.
 This function can also calculate derivatives up to order 2 as a by product of
 the spline.
 */
-class DLLExport BSpline : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL BSpline : public BackgroundFunction {
 
 public:
   /// Constructor
@@ -65,5 +64,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_BSPLINE_H_*/

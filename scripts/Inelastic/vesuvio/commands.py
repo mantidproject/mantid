@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-arguments,invalid-name,too-many-locals,too-many-branches
 """
@@ -1009,9 +1009,8 @@ def _parse_hydrogen_constraint(constraint):
     symbol = constraint.pop("symbol", None)
 
     if symbol is None:
-        raise RuntimeError("Invalid hydrogen constraint: " +
-                           str(constraint) +
-                           " - No symbol provided")
+        raise RuntimeError("Invalid hydrogen constraint: "
+                           + str(constraint) + " - No symbol provided")
     return {symbol: constraint}
 
 

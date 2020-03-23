@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -28,7 +29,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 25/07/2008
 */
-class DLLExport UnwrapMonitor : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL UnwrapMonitor : public API::Algorithm {
 public:
   UnwrapMonitor();
   ~UnwrapMonitor() override {}

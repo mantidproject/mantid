@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -47,7 +47,8 @@ namespace Algorithms {
    @author Steve D Williams, ISIS Facility Rutherford Appleton Laboratory
    @date 07/07/2009
 */
-class DLLExport FindDetectorsOutsideLimits : public DetectorDiagnostic {
+class MANTID_ALGORITHMS_DLL FindDetectorsOutsideLimits
+    : public DetectorDiagnostic {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override {

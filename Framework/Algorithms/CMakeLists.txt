@@ -1081,6 +1081,10 @@ target_link_libraries(Algorithms
 # Add the unit tests directory
 add_subdirectory(test)
 
+# Auto-generate exports header
+target_include_directories(Algorithms PUBLIC ${CMAKE_BINARY_DIR}/Framework/Algorithms)
+generate_mantid_export_header(Algorithms FALSE)
+
 # Installation settings
 
 mtd_install_targets(TARGETS

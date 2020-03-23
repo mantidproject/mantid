@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
 from __future__ import (absolute_import, division, print_function)
@@ -50,8 +50,8 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
         self.declareProperty(IEventWorkspaceProperty("InputWorkspace", "",
                                                      direction=Direction.Input,
                                                      validator=allowed_units),
-                             doc="Input workspace. It has to be an event workspace"+
-                                 " with units of energy transfer or momentum")
+                             doc="Input workspace. It has to be an event workspace"
+                                 + " with units of energy transfer or momentum")
         self.declareProperty(name="XMin", defaultValue=Property.EMPTY_DBL,
                              direction=Direction.Input,
                              validator=FloatMandatoryValidator(),
@@ -100,18 +100,19 @@ class CropWorkspaceForMDNorm(PythonAlgorithm):
             try:
                 min_values = numpy.maximum(min_values, run_obj.getProperty('MDNorm_low').value).tolist()
             except ValueError:
-                raise RuntimeError("Could not compare old and new values for 'MDNorm_low' log. "+
-                                   "Make sure the length of the old data is equal to the number of spectra")
+                raise RuntimeError("Could not compare old and new values for 'MDNorm_low' log. "
+                                   + "Make sure the length of the old data is equal to the number of spectra")
         run_obj.addProperty('MDNorm_low', min_values, True)
         if run_obj.hasProperty('MDNorm_high'):
             try:
                 max_values = numpy.minimum(max_values, run_obj.getProperty('MDNorm_high').value).tolist()
             except ValueError:
-                raise RuntimeError("Could not compare old and new values for 'MDNorm_high' log. "+
-                                   "Make sure the length of the old data is equal to the number of spectra")
+                raise RuntimeError("Could not compare old and new values for 'MDNorm_high' log. "
+                                   + "Make sure the length of the old data is equal to the number of spectra")
         run_obj.addProperty('MDNorm_high', [xmax]*num_spectra, True)
         run_obj.addProperty('MDNorm_spectra_index', numpy.arange(num_spectra, dtype=float).tolist(), True)
         self.setProperty('OutputWorkspace', out_ws)
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(CropWorkspaceForMDNorm)

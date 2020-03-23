@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -2037,6 +2037,32 @@ public:
     TS_ASSERT_EQUALS(testWS->YUnitLabel(false, true), "");
     TS_ASSERT_EQUALS(testWS->YUnitLabel(true, false), "");
     TS_ASSERT_EQUALS(testWS->YUnitLabel(true, true), "");
+  }
+
+  void test_findY() {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->initialize(2, 2, 2);
+    ws->mutableY(0) = 1.;
+    ws->mutableY(1) = 2.;
+    auto idx = ws->findY(0., {0, 0});
+    TS_ASSERT_EQUALS(idx.first, -1);
+    TS_ASSERT_EQUALS(idx.second, -1);
+    idx = ws->findY(1., {0, 0});
+    TS_ASSERT_EQUALS(idx.first, 0);
+    TS_ASSERT_EQUALS(idx.second, 0);
+    idx = ws->findY(1., {0, 1});
+    TS_ASSERT_EQUALS(idx.first, 0);
+    TS_ASSERT_EQUALS(idx.second, 1);
+    idx = ws->findY(2., {1, 0});
+    TS_ASSERT_EQUALS(idx.first, 1);
+    TS_ASSERT_EQUALS(idx.second, 0);
+    idx = ws->findY(2., {1, 1});
+    TS_ASSERT_EQUALS(idx.first, 1);
+    TS_ASSERT_EQUALS(idx.second, 1);
+    ws->mutableY(1) = NAN;
+    idx = ws->findY(NAN, {0, 0});
+    TS_ASSERT_EQUALS(idx.first, 1);
+    TS_ASSERT_EQUALS(idx.second, 0);
   }
 
 private:

@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef PLOTCURVE_H
-#define PLOTCURVE_H
+#pragma once
 
 #include "Table.h"
 #include <qwt_plot_curve.h>
@@ -279,4 +278,3 @@ protected:
   //! y coordinate offset
   double d_label_y_offset;
 };
-#endif

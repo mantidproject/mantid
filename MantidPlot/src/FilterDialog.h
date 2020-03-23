@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FILTERDIALOG_H
-#define FILTERDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -62,5 +61,3 @@ private:
   QLineEdit *boxEnd;
   ColorBox *boxColor;
 };
-
-#endif

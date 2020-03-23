@@ -28,8 +28,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef IMAGEEXPORTDIALOG_H
-#define IMAGEEXPORTDIALOG_H
+#pragma once
 
 #include "ExtensibleFileDialog.h"
 
@@ -104,5 +103,3 @@ protected slots:
   //! Update which options are visible and enabled based on the output format.
   void updateAdvancedOptions(const QString &filter);
 };
-
-#endif

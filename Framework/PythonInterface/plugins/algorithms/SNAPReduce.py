@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,no-init,too-many-lines
 from __future__ import (absolute_import, division, print_function)
@@ -563,8 +563,8 @@ class SNAPReduce(DataProcessorAlgorithm):
                 outputWksp = normalizedWS
 
                 if norm == "Extracted from Data" and Process_Mode == "Production":
-                        DeleteWorkspace(Workspace=redWS)
-                        DeleteWorkspace(Workspace=normalizationWS)
+                    DeleteWorkspace(Workspace=redWS)
+                    DeleteWorkspace(Workspace=normalizationWS)
 
             # Save requested formats - function checks that saving is requested
             self._save(runnumber, basename, outputWksp)

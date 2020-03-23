@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -203,18 +203,6 @@ void AlgorithmManagerImpl::notifyAlgorithmStarting(AlgorithmID id) {
   if (!alg)
     return;
   notificationCenter.postNotification(new AlgorithmStartingNotification(alg));
-}
-
-/// Returns the most recently created instance of the named algorithm (or null
-/// if not found)
-IAlgorithm_sptr
-AlgorithmManagerImpl::newestInstanceOf(const std::string &algorithmName) const {
-  for (auto it = m_managed_algs.rbegin(); it != m_managed_algs.rend(); ++it) {
-    if ((*it)->name() == algorithmName)
-      return *it;
-  }
-
-  return IAlgorithm_sptr();
 }
 
 /// Returns all running (& managed) occurances of the named algorithm, oldest

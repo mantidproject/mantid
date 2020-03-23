@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -14,8 +14,7 @@
  *  package higher than DataObjects (e.g. any algorithm), even if via the
  *factory.
  *********************************************************************************/
-#ifndef WORKSPACECREATIONHELPER_H_
-#define WORKSPACECREATIONHELPER_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -444,5 +443,3 @@ Mantid::API::ITableWorkspace_sptr
 createEPPTableWorkspace(const std::vector<EPPTableRow> &rows);
 
 } // namespace WorkspaceCreationHelper
-
-#endif /*WORKSPACECREATIONHELPER_H_*/

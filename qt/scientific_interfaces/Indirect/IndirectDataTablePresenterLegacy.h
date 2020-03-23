@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDATATABLEPRESENTERLEGACY_H_
-#define MANTIDQTCUSTOMINTERFACES_INDIRECTDATATABLEPRESENTERLEGACY_H_
+#pragma once
 
 #include "IndirectFittingModelLegacy.h"
 
@@ -127,5 +126,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACES_INDIRECTDATATABLEPRESENTERLEGACY_H_ */

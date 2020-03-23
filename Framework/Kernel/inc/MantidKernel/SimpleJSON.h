@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*******************************************************************
   A cross-platform JSON parser that uses nothing more than C++ and
@@ -17,8 +17,7 @@
   RGM - 23 July 2012
   ******************************************************************/
 
-#ifndef SIMPLEJSON_H
-#define SIMPLEJSON_H
+#pragma once
 
 #include <istream>
 #include <map>
@@ -121,5 +120,3 @@ class DLLExport JSONParseException : public JSONException {
 public:
   JSONParseException(const std::string &msg) : JSONException(msg) {}
 };
-
-#endif

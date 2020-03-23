@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 
 #include <boost/optional.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -25,7 +25,8 @@ namespace Algorithms {
  containing common implementation functionality usable
  *  by concrete reflectometry workflow algorithms.
  */
-class DLLExport ReflectometryWorkflowBase : public API::DataProcessorAlgorithm {
+class MANTID_ALGORITHMS_DLL ReflectometryWorkflowBase
+    : public API::DataProcessorAlgorithm {
 public:
   // Class typedefs
   using MinMax = boost::tuple<double, double>;

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_WORKSPACEPROPERTYMACRO_H_
-#define MANTID_PYTHONINTERFACE_WORKSPACEPROPERTYMACRO_H_
+#pragma once
 
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidPythonInterface/core/PropertyWithValueExporter.h"
@@ -141,5 +140,3 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
 };
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_WORKSPACEPROPERTYMACRO_H_ */

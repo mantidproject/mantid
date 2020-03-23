@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package.
 from __future__ import (absolute_import, division, print_function)
@@ -191,7 +191,7 @@ class TableWorkspaceDisplayView(QTableWidget):
                 # label_index here holds the index in the LABEL (multiple Y columns have labels Y0, Y1, YN...)
                 # this is NOT the same as the column relative to the WHOLE table
                 set_as_y_err.triggered.connect(
-                    partial(self.presenter.action_set_as_y_err, related_y_column, label_index))
+                    partial(self.presenter.action_set_as_y_err, related_y_column))
                 menu_set_as_y_err.addAction(set_as_y_err)
             menu_main.addMenu(menu_set_as_y_err)
 

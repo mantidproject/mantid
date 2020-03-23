@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDWIDGETS_EDITLOCALPARAMETERDIALOG_H_
-#define MANTIDWIDGETS_EDITLOCALPARAMETERDIALOG_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/LogValueFinder.h"
@@ -87,5 +86,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*MANTIDWIDGETS_EDITLOCALPARAMETERDIALOG_H_*/

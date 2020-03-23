@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
 
@@ -69,8 +69,7 @@ class PrimStretchedExpFT(IFunction1D):
         boundaries = np.insert(boundaries, 0, 2*xvals[0]-boundaries[0])
         # external upper boundary
         boundaries = np.append(boundaries, 2*xvals[-1]-boundaries[-1])
-        primitive = np.cumsum(fourier) * (denergies /
-                                          (rf*de))  # running Riemann sum
+        primitive = np.cumsum(fourier) * (denergies / (rf*de))  # running Riemann sum
         transform = np.interp(boundaries[1:] - parms['Centre'], energies, primitive) - \
             np.interp(boundaries[:-1] - parms['Centre'], energies, primitive)
         return transform * parms['Height']

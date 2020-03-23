@@ -1,10 +1,10 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-# -*- coding: utf8 -*-
+
 
 from __future__ import (absolute_import, division, print_function)
 
@@ -554,7 +554,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
                                             '2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n'
                                             '0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000')
         variable_validator = QtGui.QRegExpValidator(
-            QtCore.QRegExp('^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
+            QtCore.QRegExp(r'^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
         self.rebin_variable_edit.setValidator(variable_validator)
 
         self.rebin_layout = QtWidgets.QHBoxLayout()

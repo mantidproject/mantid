@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
@@ -143,15 +143,9 @@ class MSDFit(DataProcessorAlgorithm):
 
         delete_alg = self.createChildAlgorithm(
             "DeleteWorkspace", enableLogging=False)
-        delete_alg.setProperty(
-            "Workspace",
-            self._output_msd_ws +
-            '_NormalisedCovarianceMatrices')
+        delete_alg.setProperty("Workspace", self._output_msd_ws + '_NormalisedCovarianceMatrices')
         delete_alg.execute()
-        delete_alg.setProperty(
-            "Workspace",
-            self._output_msd_ws +
-            '_Parameters')
+        delete_alg.setProperty("Workspace", self._output_msd_ws + '_Parameters')
         delete_alg.execute()
         rename_alg = self.createChildAlgorithm(
             "RenameWorkspace", enableLogging=False)
@@ -179,16 +173,8 @@ class MSDFit(DataProcessorAlgorithm):
 
         append_alg = self.createChildAlgorithm(
             "AppendSpectra", enableLogging=False)
-        append_alg.setProperty(
-            "InputWorkspace1",
-            self._output_msd_ws +
-            '_' +
-            params_list[0])
-        append_alg.setProperty(
-            "InputWorkspace2",
-            self._output_msd_ws +
-            '_' +
-            params_list[1])
+        append_alg.setProperty("InputWorkspace1", self._output_msd_ws + '_' + params_list[0])
+        append_alg.setProperty("InputWorkspace2", self._output_msd_ws + '_' + params_list[1])
         append_alg.setProperty("ValidateInputs", False)
         append_alg.setProperty("OutputWorkspace", self._output_msd_ws)
         append_alg.execute()
@@ -197,11 +183,7 @@ class MSDFit(DataProcessorAlgorithm):
             append_alg.getProperty("OutputWorkspace").value)
         if len(params_list) > 2:
             append_alg.setProperty("InputWorkspace1", self._output_msd_ws)
-            append_alg.setProperty(
-                "InputWorkspace2",
-                self._output_msd_ws +
-                '_' +
-                params_list[2])
+            append_alg.setProperty("InputWorkspace2", self._output_msd_ws + '_' + params_list[2])
             append_alg.setProperty("ValidateInputs", False)
             append_alg.setProperty("OutputWorkspace", self._output_msd_ws)
             append_alg.execute()
@@ -233,10 +215,7 @@ class MSDFit(DataProcessorAlgorithm):
         # Rename fit workspace group
         original_fit_ws_name = self._output_msd_ws + '_Workspaces'
         if original_fit_ws_name != self._output_fit_ws:
-            rename_alg.setProperty(
-                "InputWorkspace",
-                self._output_msd_ws +
-                '_Workspaces')
+            rename_alg.setProperty("InputWorkspace", self._output_msd_ws + '_Workspaces')
             rename_alg.setProperty("OutputWorkspace", self._output_fit_ws)
             rename_alg.execute()
 

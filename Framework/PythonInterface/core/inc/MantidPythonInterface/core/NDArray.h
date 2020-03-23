@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PYTHONINTERFACE_CORE_NDARRAY_H_
-#define PYTHONINTERFACE_CORE_NDARRAY_H_
+#pragma once
 #include "MantidPythonInterface/core/DllConfig.h"
 
 #include <boost/python/object.hpp>
@@ -64,5 +63,3 @@ struct MANTID_PYTHONINTERFACE_CORE_DLL
 } // end namespace converter
 } // end namespace python
 } // end namespace boost
-
-#endif // PYTHONINTERFACE_CORE_NDARRAY_H_

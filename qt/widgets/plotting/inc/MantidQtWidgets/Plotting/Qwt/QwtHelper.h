@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_QWTHELPER_H_
-#define MANTID_API_QWTHELPER_H_
+#pragma once
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -46,5 +45,3 @@ EXPORT_OPT_MANTIDQT_PLOTTING boost::shared_ptr<QwtData> emptyCurveData();
 } // namespace QwtHelper
 } // namespace API
 } // namespace MantidQt
-
-#endif /* MANTID_API_QWTHELPER_H_ */

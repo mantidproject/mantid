@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TYPES_DATE_AND_TIME_H
-#define MANTID_TYPES_DATE_AND_TIME_H
+#pragma once
 
 #include "MantidTypes/DllConfig.h"
 #ifndef Q_MOC_RUN
@@ -152,14 +151,10 @@ inline DateAndTime::DateAndTime() : _nanoseconds(0) {}
 /** Construct a date from nanoseconds.
  * @param total_nanoseconds :: nanoseconds since Jan 1, 1990 (our epoch).
  */
-inline DateAndTime::DateAndTime(const int64_t total_nanoseconds) {
+inline DateAndTime::DateAndTime(const int64_t total_nanoseconds)
+    : _nanoseconds{
+          std::clamp(total_nanoseconds, MIN_NANOSECONDS, MAX_NANOSECONDS)} {
   // Make sure that you cannot construct a date that is beyond the limits...
-  if (total_nanoseconds > MAX_NANOSECONDS)
-    _nanoseconds = MAX_NANOSECONDS;
-  else if (total_nanoseconds < MIN_NANOSECONDS)
-    _nanoseconds = MIN_NANOSECONDS;
-  else
-    _nanoseconds = total_nanoseconds;
 }
 
 /** + operator to add time.
@@ -198,5 +193,3 @@ inline int64_t DateAndTime::nanosecondsFromSeconds(double sec) {
 } // namespace Core
 } // namespace Types
 } // namespace Mantid
-
-#endif // MANTID_TYPES_DATE_AND_TIME_H

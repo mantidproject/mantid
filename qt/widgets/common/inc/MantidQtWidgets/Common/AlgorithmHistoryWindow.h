@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALGORITHMHISTORYWINDOW_H
-#define ALGORITHMHISTORYWINDOW_H
+#pragma once
 
 #include "DllOption.h"
 
@@ -217,5 +216,3 @@ private:
 
   std::vector<Mantid::Kernel::PropertyHistory_sptr> m_Histprop;
 };
-
-#endif // ALGORITHMHISTORYWINDOW_H

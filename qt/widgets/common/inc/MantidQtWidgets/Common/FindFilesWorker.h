@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_FINDFILESWORKER_H_
-#define MANTIDQTMANTIDWIDGETS_FINDFILESWORKER_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 
@@ -98,5 +97,3 @@ private:
 // Add to Qt's meta type system. This allows the type
 // to be passed between signals & slots
 Q_DECLARE_METATYPE(MantidQt::API::FindFilesSearchResults)
-
-#endif // MANTIDQTMANTIDWIDGETS_FINDFILESWORKER_H_

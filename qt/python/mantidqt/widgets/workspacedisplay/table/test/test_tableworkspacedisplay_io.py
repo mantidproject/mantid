@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -17,7 +17,7 @@ from mantidqt.widgets.workspacedisplay.table import StatusBarView
 
 
 TABLEWORKSPACEDISPLAY_DICT = {"markedColumns": {"as_y": [2], "as_x": [1],
-                                                "as_y_err": [{"column": 3, "relatedY": 2, "labelIndex": 0}]},
+                                                "as_y_err": [{"column": 3, "relatedY": 2}]},
                               "workspace": "ws", "windowName": "ws"}
 
 
@@ -52,9 +52,6 @@ class TableWorkspaceDisplayDecoderTest(unittest.TestCase):
         self.assertEqual(
             TABLEWORKSPACEDISPLAY_DICT["markedColumns"]["as_y_err"][0]["relatedY"],
             view.presenter.model.marked_columns.as_y_err[0].related_y_column)
-        self.assertEqual(
-            TABLEWORKSPACEDISPLAY_DICT["markedColumns"]["as_y_err"][0]["labelIndex"],
-            view.presenter.model.marked_columns.as_y_err[0].label_index)
         self.assertEqual(1, len(view.presenter.model.marked_columns.as_y_err))
 
 

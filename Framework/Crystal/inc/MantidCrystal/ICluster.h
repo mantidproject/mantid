@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_ICLUSTER_H_
-#define MANTID_CRYSTAL_ICLUSTER_H_
+#pragma once
 
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -22,7 +22,7 @@ namespace Crystal {
 /** ICluster : Abstract cluster. Identifies neighbour elements in an image that
  are connected.
  */
-class DLLExport ICluster {
+class MANTID_CRYSTAL_DLL ICluster {
 public:
   using ClusterIntegratedValues = boost::tuple<double, double>;
 
@@ -64,5 +64,3 @@ public:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_ICLUSTER_H_ */

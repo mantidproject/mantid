@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SMOOTHDIALOG_H
-#define SMOOTHDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -60,5 +59,3 @@ private:
   QSpinBox *boxPointsLeft, *boxPointsRight, *boxOrder;
   ColorBox *boxColor;
 };
-
-#endif

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -30,7 +30,7 @@ namespace Algorithms {
   @author Martyn Gigg, Tessella plc
   @date 2011-01-10
 */
-class DLLExport CreatePSDBleedMask : public DetectorDiagnostic {
+class MANTID_ALGORITHMS_DLL CreatePSDBleedMask : public DetectorDiagnostic {
 public:
   /// Default constructor
   CreatePSDBleedMask();

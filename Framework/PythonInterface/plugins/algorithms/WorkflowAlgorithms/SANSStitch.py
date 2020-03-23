@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
 
@@ -509,8 +509,7 @@ class QErrorCorrectionForMergedWorkspaces(object):
         counts_rear = count_ws_rear.readY(0)
 
         # We need to make sure that the workspaces match in length
-        if ((len(q_resolution_front) != len(q_resolution_rear)) or
-                (len(counts_front) != len(counts_rear))):
+        if (len(q_resolution_front) != len(q_resolution_rear)) or (len(counts_front) != len(counts_rear)):
             return
 
         # Get everything for the FRONT detector

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDIPEAKTEST_H
-#define MANTID_SINQ_POLDIPEAKTEST_H
+#pragma once
 
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
@@ -186,5 +185,3 @@ public:
     TS_ASSERT_EQUALS(peak->hkl(), clone->hkl());
   }
 };
-
-#endif // MANTID_SINQ_POLDIPEAKTEST_H

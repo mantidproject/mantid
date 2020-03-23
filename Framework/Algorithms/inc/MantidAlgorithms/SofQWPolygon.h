@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 //----------------------------------------------------------------------
@@ -38,7 +38,7 @@ common bins. </LI>
 @author Martyn Giggg
 @date 2011-07-15
  */
-class DLLExport SofQWPolygon : public Rebin2D {
+class MANTID_ALGORITHMS_DLL SofQWPolygon : public Rebin2D {
 public:
   /// Default constructor
   SofQWPolygon();

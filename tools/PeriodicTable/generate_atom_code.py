@@ -2,8 +2,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
@@ -15,7 +15,7 @@ try:
     if not periodictable.__version__.startswith("1.3."):
         print("*****Require periodictable 1.3.*")
         sys.exit(-1)
-except ImportError as e:
+except ImportError:
     print("*****To use this you must 'easy_install periodictable'")
     sys.exit(-1)
 

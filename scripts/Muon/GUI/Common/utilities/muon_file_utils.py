@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
@@ -91,10 +91,10 @@ def remove_duplicated_files_from_list(file_list):
     Example
 
     input :
-        ["C:\dir1\file1.nxs","C:\dir1\file2.nxs","C:\dir1\dir2\file1.nxs"]
+        ["C:\\dir1\\file1.nxs", "C:\\dir1\\file2.nxs", "C:\\dir1\\dir2\\file1.nxs"]
 
     output :
-        ["C:\dir1\file1.nxs","C:\dir1\file2.nxs"]
+        [r"C:\\dir1\\file1.nxs", r"C:\\dir1\\file2.nxs"]
     """
     files = [os.path.basename(full_path) for full_path in file_list]
     unique_files = [file_list[n] for n, file_name in enumerate(files) if file_name not in files[:n]]
@@ -107,7 +107,7 @@ def parse_user_input_to_files(input_text, extensions=allowed_extensions):
 
     Example
 
-    input_text = "C:\dir1\dir2\file1.nxs;C:\dir1\file2.nxs"
+    input_text = r"C:\\dir1\\dir2\\file1.nxs;C:\\dir1\\file2.nxs"
 
     output :
         ["file1.nxs", "file2.nxs"]

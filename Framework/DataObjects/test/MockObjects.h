@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MOCKOBJECTS_H_
-#define MOCKOBJECTS_H_
+#pragma once
 
 #include "MantidDataObjects/PeakShapeFactory.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
@@ -44,5 +43,3 @@ public:
 } // namespace Mantid
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-#endif /* MOCKOBJECTS_H_ */

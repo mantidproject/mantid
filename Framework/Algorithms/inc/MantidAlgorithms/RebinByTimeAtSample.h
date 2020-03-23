@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/RebinByTimeBase.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -16,7 +16,7 @@ namespace Algorithms {
 /** RebinByTimeAtSample : Rebins an event workspace to a histogram workspace
  with time at sample along the x-axis.
  */
-class DLLExport RebinByTimeAtSample : public RebinByTimeBase {
+class MANTID_ALGORITHMS_DLL RebinByTimeAtSample : public RebinByTimeBase {
 public:
   const std::string name() const override;
   int version() const override;

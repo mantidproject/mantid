@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAK_BOUNDING_BOX_H_
-#define MANTID_SLICEVIEWER_PEAK_BOUNDING_BOX_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
@@ -111,5 +110,3 @@ public:
 };
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif /* MANTID_SLICEVIEWER_PEAK_BOUNDING_BOX_H_ */

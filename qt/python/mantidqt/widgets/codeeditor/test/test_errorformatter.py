@@ -1,10 +1,10 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+
 #
 #  This file is part of the mantidqt package
 from __future__ import (absolute_import, unicode_literals)
@@ -62,11 +62,11 @@ foo()
         # approximate correct
         expected_lines = [
             "NameError:.*'_local'.*",
-            '  File ".*test_errorformatter.py", line \d+, in test_standard_exception',
+            r'  File ".*test_errorformatter.py", line \d+, in test_standard_exception',
             '    exec(.*)',
-            '  File "<string>", line \d+, in <module>',
-            '  File "<string>", line \d+, in foo',
-            '  File "<string>", line \d+, in bar',
+            r'  File "<string>", line \d+, in <module>',
+            r'  File "<string>", line \d+, in foo',
+            r'  File "<string>", line \d+, in bar',
         ]
         for produced, expected in zip(error_lines, expected_lines):
             self.assertRegexpMatches(produced, expected)

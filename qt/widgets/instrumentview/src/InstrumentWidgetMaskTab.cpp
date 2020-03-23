@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -135,7 +135,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_free_draw->setToolTip("Draw an arbitrary shape (Shift+Alt+A)");
   m_free_draw->setShortcut(QKeySequence("Shift+Alt+A"));
 
-  QHBoxLayout *toolBox = new QHBoxLayout();
+  auto *toolBox = new QHBoxLayout();
   toolBox->addWidget(m_move);
   toolBox->addWidget(m_pointer);
   toolBox->addWidget(m_ellipse);
@@ -155,7 +155,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   connect(m_ring_rectangle, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_free_draw, SIGNAL(clicked()), this, SLOT(setActivity()));
   m_move->setChecked(true);
-  QFrame *toolGroup = new QFrame();
+  auto *toolGroup = new QFrame();
   toolGroup->setLayout(toolBox);
 
   layout->addWidget(toolGroup);
@@ -168,12 +168,12 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   connect(m_masking_on, SIGNAL(clicked()), this, SLOT(toggleMaskGroup()));
   connect(m_grouping_on, SIGNAL(clicked()), this, SLOT(toggleMaskGroup()));
   connect(m_roi_on, SIGNAL(clicked()), this, SLOT(toggleMaskGroup()));
-  QHBoxLayout *radioLayout = new QHBoxLayout();
+  auto *radioLayout = new QHBoxLayout();
   radioLayout->addWidget(m_masking_on);
   radioLayout->addWidget(m_roi_on);
   radioLayout->addWidget(m_grouping_on);
   radioLayout->setMargin(0);
-  QGroupBox *radioGroup = new QGroupBox();
+  auto *radioGroup = new QGroupBox();
   radioGroup->setStyleSheet("border: none;");
   radioGroup->setLayout(radioLayout);
 
@@ -325,8 +325,8 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   connect(m_saveROI, SIGNAL(hovered(QAction *)), this,
           SLOT(showSaveMenuTooltip(QAction *)));
 
-  QGroupBox *box = new QGroupBox("View");
-  QGridLayout *buttons = new QGridLayout();
+  auto *box = new QGroupBox("View");
+  auto *buttons = new QGridLayout();
   buttons->addWidget(m_applyToView, 0, 0, 1, 2);
   buttons->addWidget(m_saveShapesToTable, 1, 0, 1, 2);
   buttons->addWidget(m_saveButton, 2, 0);

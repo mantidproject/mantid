@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidUI.h"
 #include "AlgorithmDockWidget.h"
@@ -2363,13 +2363,11 @@ MantidMatrix *MantidUI::getMantidMatrix(const QString &wsName) {
   return m;
 }
 
-bool MantidUI::createScriptInputDialog(const QString &alg_name,
+bool MantidUI::createScriptInputDialog(const IAlgorithm_sptr &alg,
                                        const QString &preset_values,
                                        const QString &optional_msg,
                                        const QStringList &enabled,
                                        const QStringList &disabled) {
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().newestInstanceOf(alg_name.toStdString());
   if (!alg) {
     return false;
   }

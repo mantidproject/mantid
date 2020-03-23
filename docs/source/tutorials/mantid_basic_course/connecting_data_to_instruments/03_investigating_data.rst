@@ -136,7 +136,7 @@ Sum selected detectors
 ----------------------
 
 The mini-plot automatically sums the counts in the detectors covered by
-the shapes and plots them vs time of flight.
+the shapes and plots this vs time of flight.
 
 
 .. |PickTabToolButtons.png| image:: /images/PickTabToolButtons.png

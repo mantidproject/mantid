@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Qwt/QwtRasterDataMDNonOrthogonal.h"
 #include "MantidQtWidgets/Common/NonOrthogonal.h"
@@ -91,7 +91,7 @@ void QwtRasterDataMDNonOrthogonal::setSliceParams(
 //-------------------------------------------------------------------------
 /** Perform a copy of this data object */
 QwtRasterDataMDNonOrthogonal *QwtRasterDataMDNonOrthogonal::copy() const {
-  QwtRasterDataMDNonOrthogonal *out = new QwtRasterDataMDNonOrthogonal();
+  auto *out = new QwtRasterDataMDNonOrthogonal();
   this->copyFrom(*this, *out);
   return out;
 }

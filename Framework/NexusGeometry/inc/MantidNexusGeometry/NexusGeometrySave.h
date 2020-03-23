@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 /*
  * NexusGeometrySave::saveInstrument :
  * Save methods to save geometry and metadata from memory
@@ -14,8 +13,7 @@
  * @date 07/08/2019
  */
 
-#ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
-#define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidNexusGeometry/AbstractLogger.h"
@@ -67,5 +65,3 @@ MANTID_NEXUSGEOMETRY_DLL void saveInstrument(
 } // namespace NexusGeometrySave
 } // namespace NexusGeometry
 } // namespace Mantid
-
-#endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVE_H_ */

@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include <boost/optional.hpp>
 
 namespace Mantid {
@@ -17,7 +17,8 @@ namespace Algorithms {
 /** CalculateSlits
  */
 
-class DLLExport CalculateSlits : public API::DataProcessorAlgorithm {
+class MANTID_ALGORITHMS_DLL CalculateSlits
+    : public API::DataProcessorAlgorithm {
 public:
   CalculateSlits();
   ~CalculateSlits() override;

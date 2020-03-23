@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef EXPORTDIALOG_H
-#define EXPORTDIALOG_H
+#pragma once
 
 #include <QDialog>
 class QPushButton;
@@ -86,5 +85,3 @@ protected slots:
   //! Display help
   void help();
 };
-
-#endif // ExportDialog_H

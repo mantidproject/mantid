@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : MatrixDialog.h
@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MATRIXDIALOG_H
-#define MATRIXDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -54,5 +53,3 @@ private:
   QSpinBox *boxColWidth, *boxPrecision;
   QComboBox *boxFormat, *boxNumericDisplay;
 };
-
-#endif // MATRIXDIALOG_H

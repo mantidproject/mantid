@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import re
@@ -625,7 +625,7 @@ class PhysicalProperties(object):
         # Handles special case of first argument being a unit type
         if len(args) > 0:
             try:
-                if self._checkmagunits(args[0], 'bad') is not 'bad':
+                if self._checkmagunits(args[0], 'bad') != 'bad':
                     kwargs['Unit'] = args.pop(0)
             except AttributeError:
                 pass

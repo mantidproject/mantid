@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -116,9 +116,6 @@ void export_AlgorithmManager() {
            "Return the algorithm instance identified by the given id.")
       .def("removeById", &removeById, (arg("self"), arg("id_holder")),
            "Remove an algorithm from the managed list")
-      .def("newestInstanceOf", &AlgorithmManagerImpl::newestInstanceOf,
-           (arg("self"), arg("algorithm_name")),
-           "Returns the newest created instance of the named algorithm")
       .def("runningInstancesOf", &runningInstancesOf,
            (arg("self"), arg("algorithm_name")),
            "Returns a list of managed algorithm instances that are "

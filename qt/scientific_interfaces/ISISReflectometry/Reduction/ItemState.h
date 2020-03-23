@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef MANTID_CUSTOMINTERFACES_STATE_H_
-#define MANTID_CUSTOMINTERFACES_STATE_H_
+#pragma once
 #include "Common/DllConfig.h"
 #include <boost/optional.hpp>
 #include <string>
@@ -56,4 +54,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACE_STATE_H_

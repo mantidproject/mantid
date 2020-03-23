@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TESTMESHOBJECT__
-#define MANTID_TESTMESHOBJECT__
+#pragma once
 
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Objects/MeshObject.h"
@@ -1184,5 +1183,3 @@ private:
   V3D translation;
   Kernel::Matrix<double> rotation;
 };
-
-#endif // MANTID_TESTMESHOBJECT__

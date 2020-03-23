@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 from __future__ import (absolute_import, division, print_function)
 
 from os import path
@@ -96,8 +95,8 @@ class FocusModel(object):
             return EnggFocus(**kwargs)
         except RuntimeError as e:
             logger.error(
-                "Error in focusing, Could not run the EnggFocus algorithm successfully for bank " +
-                str(bank) + ". Error Description: " + str(e))
+                "Error in focusing, Could not run the EnggFocus algorithm successfully for bank "
+                + str(bank) + ". Error Description: " + str(e))
             raise RuntimeError()
 
     @staticmethod
