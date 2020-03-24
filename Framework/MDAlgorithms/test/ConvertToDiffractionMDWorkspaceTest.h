@@ -40,8 +40,8 @@ public:
         createDiffractionEventWorkspace(10);
     AnalysisDataService::Instance().addOrReplace("testInEW", in_ws);
 
-    auto alg =
-        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",1);
+    auto alg = AlgorithmManager::Instance().create(
+        "ConvertToDiffractionMDWorkspace", 1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "Q (lab frame)");
@@ -66,8 +66,8 @@ public:
 
     // But you can't add to an existing one of the wrong dimensions type, if you
     // choose Append
-    alg =
-        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",1);
+    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",
+                                              1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "HKL");
@@ -76,8 +76,8 @@ public:
     TS_ASSERT(!alg->isExecuted());
 
     // If Append is False, then it does work. The workspace gets replaced
-    alg =
-        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",1);
+    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",
+                                              1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "HKL");
@@ -87,8 +87,8 @@ public:
 
     // Let's remove the old workspace and try again - it will work.
     AnalysisDataService::Instance().remove("testOutMD");
-    alg =
-        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",1);
+    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",
+                                              1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "HKL");
@@ -112,8 +112,8 @@ public:
     }
 
     AnalysisDataService::Instance().remove("testOutMD");
-    alg =
-        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",1);
+    alg = AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",
+                                              1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "Q (sample frame)");
