@@ -17,8 +17,6 @@ namespace Mantid {
 namespace NeXus {
 namespace NeXusIOHelper {
 
-namespace {
-
 /// Macro to run a function depending on the type of data in the Nexus file
 #define RUN_NEXUSIOHELPER_FUNCTION(type, func_name, ...)                       \
   switch (type) {                                                              \
@@ -46,17 +44,11 @@ namespace {
     throw std::runtime_error("Unknown type in Nexus file");                    \
   }
 
-std::pair<::NeXus::Info, bool> checkIfOpenAndGetInfo(::NeXus::File &file,
-                                                     std::string entry) {
-  std::pair<::NeXus::Info, bool> info_and_close;
-  info_and_close.second = false;
-  if (!file.isDataSetOpen()) {
-    file.openData(entry);
-    info_and_close.second = true;
-  }
-  info_and_close.first = file.getInfo();
-  return info_and_close;
-}
+/// Get information about a file and entry
+MANTID_NEXUS_DLL std::pair<::NeXus::Info, bool>
+checkIfOpenAndGetInfo(::NeXus::File &file, std::string entry);
+/// Read starting time from the file
+MANTID_NEXUS_DLL const std::string readStartTimeOffset(::NeXus::File &file);
 
 /// Use the getData function to read the buffer into vector and close file if
 /// needed
@@ -154,8 +146,6 @@ T readNexusAnyVariable(::NeXus::File &file, bool close_file) {
   }
 }
 
-} // end of anonymous namespace
-
 /** Opens the data group if needed, finds the data type, computes the data size,
  * and calls readNexusAnyVector via the RUN_NEXUSIOHELPER_FUNCTION macro.
  */
@@ -188,7 +178,6 @@ T readNexusValue(::NeXus::File &file, std::string entry = "") {
                              file, info_and_close.second);
 }
 
-MANTID_NEXUS_DLL const std::string readStartTimeOffset(::NeXus::File &file);
 } // namespace NeXusIOHelper
 } // namespace NeXus
 } // namespace Mantid

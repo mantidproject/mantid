@@ -10,6 +10,19 @@ Mantid::Kernel::Logger g_log("NeXusIOHelper");
 namespace Mantid {
 namespace NeXus {
 namespace NeXusIOHelper {
+
+std::pair<::NeXus::Info, bool> checkIfOpenAndGetInfo(::NeXus::File &file,
+                                                     std::string entry) {
+  std::pair<::NeXus::Info, bool> info_and_close;
+  info_and_close.second = false;
+  if (!file.isDataSetOpen()) {
+    file.openData(entry);
+    info_and_close.second = true;
+  }
+  info_and_close.first = file.getInfo();
+  return info_and_close;
+}
+
 const std::string readStartTimeOffset(::NeXus::File &file) {
   std::string startTime;
   // Read the offset (time zero)
