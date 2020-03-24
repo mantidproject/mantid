@@ -31,3 +31,6 @@ from .atomsdata import AtomsData
 from .abinsdata import AbinsData
 from .powderdata import PowderData
 from .sdata import SData
+
+# VASP loader (unify with others after rebase)
+from .LoadVASP import LoadVASP

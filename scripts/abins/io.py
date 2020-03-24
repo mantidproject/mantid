@@ -48,7 +48,11 @@ class IO(object):
         else:
             raise ValueError("Invalid name of the group. String was expected.")
 
-        core_name = filename[0:filename.rfind(".")]
+        if filename.split('.')[-1] in AbinsModules.AbinsConstants.AB_INITIO_FILE_EXTENSIONS:
+            core_name = filename[0:filename.rfind(".")]  # e.g. NaCl.phonon -> NaCl (core_name) -> NaCl.hdf5
+        else:
+            core_name = filename  # e.g. OUTCAR -> OUTCAR (core_name) -> OUTCAR.hdf5
+
         save_dir_path = ConfigService.getString("defaultsave.directory")
         self._hdf_filename = os.path.join(save_dir_path, core_name + ".hdf5")  # name of hdf file
 

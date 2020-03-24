@@ -58,13 +58,13 @@ class Abins(PythonAlgorithm):
         self.declareProperty(name="AbInitioProgram",
                              direction=Direction.Input,
                              defaultValue="CASTEP",
-                             validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "GAUSSIAN"]),
+                             validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "GAUSSIAN", "VASP"]),
                              doc="An ab initio program which was used for vibrational or phonon calculation.")
 
         self.declareProperty(FileProperty("VibrationalOrPhononFile", "",
                                           action=FileAction.Load,
                                           direction=Direction.Input,
-                                          extensions=["phonon", "out", "outmol", "log", "LOG"]),
+                                          extensions=AbinsModules.AbinsConstants.AB_INITIO_FILE_EXTENSIONS),
                              doc="File with the data from a vibrational or phonon calculation.")
 
         self.declareProperty(FileProperty("ExperimentalFile", "",
@@ -128,7 +128,8 @@ class Abins(PythonAlgorithm):
         input_file_validators = {"CASTEP": self._validate_castep_input_file,
                                  "CRYSTAL": self._validate_crystal_input_file,
                                  "DMOL3": self._validate_dmol3_input_file,
-                                 "GAUSSIAN": self._validate_gaussian_input_file}
+                                 "GAUSSIAN": self._validate_gaussian_input_file,
+                                 "VASP": self._validate_vasp_input_file}
 
         issues = dict()
 
@@ -827,6 +828,28 @@ class Abins(PythonAlgorithm):
         logger.information("Validate CRYSTAL file with vibrational or phonon data.")
         return self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
                                                        expected_file_extension=".out")
+
+    def _validate_vasp_input_file(self, filename_full_path=None):
+        logger.information("Validate VASP file with vibrational or phonon data.")
+        # if found_filename_ext.lower() != expected_file_extension:
+        #     comment = "{}Output from ab initio program {} is expected." \
+        #               " The expected extension of file is .{}. Found: {}.{}".format(
+        #                   msg_err, ab_initio_program, expected_file_extension, found_filename_ext, msg_rename)
+        #     return dict(Invalid=True, Comment=comment)
+        # else:
+        #     return dict(Invalid=False, Comment="")
+
+
+        if 'OUTCAR' in os.path.basename(filename_full_path):
+            return dict(Invalid=False, Comment="")
+        else:
+            output = self._validate_ab_initio_file_extension(filename_full_path=filename_full_path,
+                                                             expected_file_extension=".xml")
+            if output["Invalid"]:
+                output["Comment"] = ("Invalid filename {}. Expected OUTCAR, *.OUTCAR or"
+                                     " *.xml for VASP calculation output. Please rename your file and try again. "
+                                     .format(filename_full_path))
+        return output
 
     def _validate_castep_input_file(self, filename_full_path=None):
         """

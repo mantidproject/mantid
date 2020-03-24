@@ -31,7 +31,8 @@ class AbinsData(abins.GeneralData):
         """
         # This should live closer to the Loaders but for now it is the only place the dict is used.
         ab_initio_loaders = {"CASTEP": abins.input.CASTEPLoader, "CRYSTAL": abins.input.CRYSTALLoader,
-                             "DMOL3": abins.input.DMOL3Loader, "GAUSSIAN": abins.input.GAUSSIANLoader}
+                             "DMOL3": abins.input.DMOL3Loader, "GAUSSIAN": abins.input.GAUSSIANLoader,
+                             "VASP": abins.LoadVASP}
 
         if ab_initio_program.upper() not in ab_initio_loaders:
             raise ValueError("No loader available for {}: unknown program. "

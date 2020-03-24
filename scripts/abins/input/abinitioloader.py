@@ -39,12 +39,14 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
         This method reads vibrational or phonon data produced by an ab initio program.
         This method should do the following:
 
-          1) Open file with vibrational or phonon data (CASTEP: foo.phonon). Name of a file should be stored in
-          self._input_filename. There must be no spaces in the name
-          of a file. Extension of a file (part of a name after '.') is arbitrary.
+          1) Open file with vibrational or phonon data (CASTEP: foo.phonon). Name of a file is
+             accessed via self._clerk.get_input_filename(). There must be no spaces in the name of a
+             file. Extension of a file (part of a name after '.') is arbitrary.
 
           2) Method should read from an ab initio file information about frequencies, atomic displacements,
           k-point vectors, weights of k-points and ions.
+
+             As a side-effect, self._num_k and self._num_atom should be set
 
           3) Method should reconstruct data for symmetry equivalent k-points
              (protected method _recover_symmetry_points).
@@ -57,7 +59,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
 
           5) Method should calculate hash of a file with vibrational or phonon data (protected method _calculateHash).
 
-          6) Method should store vibrational or phonon data in an hdf file (inherited method save()). The name of an hdf file is
+          6) Method should store vibrational or phonon data in an hdf file (using inherited method save_ab_initio_data()). The name of an hdf file is
           foo.hdf5 (CASTEP: foo.phonon -> foo.hdf5). In order to save the data to hdf file the following fields
           should be set:
 
@@ -78,6 +80,7 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
                                           the moment only Gamma point calculations are supported**
 
                         "atomic_displacements" - atomic displacements for all atoms and all k-points in one numpy array
+                                                 indexed: (kpt, atom, mode, direction)
 
                         "unit_cell"      -   numpy array with unit cell vectors in Angstroms
 
