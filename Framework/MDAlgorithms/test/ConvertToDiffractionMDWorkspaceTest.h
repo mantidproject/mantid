@@ -40,11 +40,10 @@ public:
         createDiffractionEventWorkspace(10);
     AnalysisDataService::Instance().addOrReplace("testInEW", in_ws);
 
-    FrameworkManager::Instance();
     auto alg =
-        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
+        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
-    alg->setPropertyValue("OutputWorkspace", "OutputWorkspace");
+    alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "Q (lab frame)");
     alg->execute();
     TS_ASSERT(alg->isExecuted());
@@ -68,17 +67,17 @@ public:
     // But you can't add to an existing one of the wrong dimensions type, if you
     // choose Append
     alg =
-        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
+        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "HKL");
-    alg->setPropertyValue("testOutMD", "1");
+    alg->setPropertyValue("Append", "1");
     alg->execute();
     TS_ASSERT(!alg->isExecuted());
 
     // If Append is False, then it does work. The workspace gets replaced
     alg =
-        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
+        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "HKL");
@@ -89,7 +88,7 @@ public:
     // Let's remove the old workspace and try again - it will work.
     AnalysisDataService::Instance().remove("testOutMD");
     alg =
-        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
+        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "HKL");
@@ -114,7 +113,7 @@ public:
 
     AnalysisDataService::Instance().remove("testOutMD");
     alg =
-        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
+        AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace",1);
     alg->setPropertyValue("InputWorkspace", "testInEW");
     alg->setPropertyValue("OutputWorkspace", "testOutMD");
     alg->setPropertyValue("OutputDimensions", "Q (sample frame)");
@@ -137,6 +136,27 @@ public:
     }
   }
 
+  void test_MINITOPAZ() { do_test_MINITOPAZ(TOF, 100, 400); }
+
+  void test_MINITOPAZ_Weighted() { do_test_MINITOPAZ(WEIGHTED, 100, 400); }
+
+  void test_MINITOPAZ_addToExistingWorkspace() {
+    do_test_MINITOPAZ(TOF, 100, 400, 2);
+  }
+
+  void test_MINITOPAZ_OneEventPerBin_fromEventWorkspace() {
+    do_test_MINITOPAZ(TOF, 100, 400, 1, true, false);
+  }
+
+  void test_MINITOPAZ_OneEventPerBin_fromWorkspace2D() {
+    do_test_MINITOPAZ(TOF, 100, 400, 1, true, true);
+  }
+
+  void test_MINITOPAZ_fromWorkspace2D() {
+    do_test_MINITOPAZ(TOF, 100, 400, 1, false, true);
+  }
+
+private:
   void do_test_MINITOPAZ(EventType type, int numEventsPer, int numPixels,
                          size_t numTimesToAdd = 1, bool OneEventPerBin = false,
                          bool MakeWorkspace2D = false) {
@@ -210,26 +230,6 @@ public:
     }
 
     AnalysisDataService::Instance().remove("test_md3");
-  }
-
-  void test_MINITOPAZ() { do_test_MINITOPAZ(TOF, 100, 400); }
-
-  void test_MINITOPAZ_Weighted() { do_test_MINITOPAZ(WEIGHTED, 100, 400); }
-
-  void test_MINITOPAZ_addToExistingWorkspace() {
-    do_test_MINITOPAZ(TOF, 100, 400, 2);
-  }
-
-  void test_MINITOPAZ_OneEventPerBin_fromEventWorkspace() {
-    do_test_MINITOPAZ(TOF, 100, 400, 1, true, false);
-  }
-
-  void test_MINITOPAZ_OneEventPerBin_fromWorkspace2D() {
-    do_test_MINITOPAZ(TOF, 100, 400, 1, true, true);
-  }
-
-  void test_MINITOPAZ_fromWorkspace2D() {
-    do_test_MINITOPAZ(TOF, 100, 400, 1, false, true);
   }
 };
 
