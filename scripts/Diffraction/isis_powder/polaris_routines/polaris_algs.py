@@ -9,6 +9,7 @@ import numpy as np
 import math
 
 import mantid.simpleapi as mantid
+from mantid.api import WorkspaceGroup
 from six import string_types
 
 from isis_powder.routines import absorb_corrections, common
@@ -125,6 +126,18 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
             pdf_output = mantid.Rebin(InputWorkspace=pdf_output, Params=output_binning)
         except RuntimeError:
             return pdf_output
+    # Rename output ws
+    if 'merged_ws' in locals():
+        mantid.RenameWorkspace(InputWorkspace=merged_ws, OutputWorkspace=run_number + '_merged_Q')
+    mantid.RenameWorkspace(InputWorkspace=focused_ws, OutputWorkspace=run_number+'_focused_Q')
+    if isinstance(focused_ws, WorkspaceGroup):
+        for i in range(len(focused_ws)):
+            print(focused_ws[i])
+            mantid.RenameWorkspace(InputWorkspace=focused_ws[i], OutputWorkspace=run_number+'_focused_Q_'+str(i+1))
+    mantid.RenameWorkspace(InputWorkspace=pdf_output, OutputWorkspace=run_number+'_pdf_R')
+    if isinstance(pdf_output, WorkspaceGroup):
+        for i in range(len(pdf_output)):
+            mantid.RenameWorkspace(InputWorkspace=pdf_output[i], OutputWorkspace=run_number+'_pdf_R_'+str(i+1))
     return pdf_output
 
 
