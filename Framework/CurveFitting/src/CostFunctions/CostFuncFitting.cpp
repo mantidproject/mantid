@@ -136,7 +136,7 @@ void CostFuncFitting::calActiveCovarianceMatrix(GSLMatrix &covar,
   m_function->functionDeriv(*m_domain, J);
 
   // let the GSL to compute the covariance matrix
-  gsl_multifit_covar(J.getJ(), epsrel, covar.gsl());
+  gsl_multifit_covar(j, epsrel, covar.gsl());
 }
 
 /** Calculates covariance matrix

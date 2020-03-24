@@ -630,7 +630,6 @@ public:
   }
 
   void test_Accessing_Single_Value_From_Times_Series_A_Large_Number_Of_Times() {
-    double value(0.0);
     for (size_t i = 0; i < 20000; ++i) {
       m_testRun.getPropertyAsSingleValue(m_propName);
     }
