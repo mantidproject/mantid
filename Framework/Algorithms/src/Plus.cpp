@@ -41,9 +41,8 @@ void Plus::performBinaryOperation(const HistogramData::Histogram &lhs,
 
   if (rhsE != 0.) {
     double rhsE2 = rhsE * rhsE;
-    std::transform(
-        lhs.e().begin(), lhs.e().end(), EOut.begin(),
-        [rhsE2](double l) { return std::sqrt(l * l + rhsE2); });
+    std::transform(lhs.e().begin(), lhs.e().end(), EOut.begin(),
+                   [rhsE2](double l) { return std::sqrt(l * l + rhsE2); });
   } else
     EOut = lhs.e();
 }
