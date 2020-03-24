@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/VesuvioCalculateGammaBackground.h"
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
@@ -500,8 +500,6 @@ void VesuvioCalculateGammaBackground::createOutputWorkspaces() {
   m_correctedWS = WorkspaceFactory::Instance().create(m_inputWS, nhist);
 }
 
-/**
- */
 void VesuvioCalculateGammaBackground::cacheInstrumentGeometry() {
   auto inst = m_inputWS->getInstrument();
   auto refFrame = inst->getReferenceFrame();

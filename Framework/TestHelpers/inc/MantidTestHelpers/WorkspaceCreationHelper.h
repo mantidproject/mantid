@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -168,6 +168,13 @@ Mantid::API::WorkspaceGroup_sptr createWorkspaceGroup(int nEntries, int nHist,
  */
 Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceBinned(size_t nhist, size_t numVals, double x0 = 0.0,
+                        double deltax = 1.0);
+
+/** Create a 2D workspace with this many point-histograms and bins.
+ * Filled with Y = 2.0 and E = M_SQRT2
+ */
+Mantid::DataObjects::Workspace2D_sptr
+create2DWorkspacePoints(size_t nhist, size_t numVals, double x0 = 0.0,
                         double deltax = 1.0);
 
 /** Create a 2D workspace with this many histograms and bins. The bins are

@@ -2,18 +2,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import argparse
 import datetime
 import os
 import pprint
 import re
 
-import six
 
 ######################################################################################################################
 # Script level variables
@@ -87,9 +84,9 @@ def get_copyright(year, comment_prefix="//"):
     return """{0} Mantid Repository : https://github.com/mantidproject/mantid
 {0}
 {0} Copyright &copy; {1} ISIS Rutherford Appleton Laboratory UKRI,
-{0}     NScD Oak Ridge National Laboratory, European Spallation Source
-{0}     & Institut Laue - Langevin
-{0} SPDX - License - Identifier: GPL - 3.0 +""".format(comment_prefix, year)
+{0}   NScD Oak Ridge National Laboratory, European Spallation Source,
+{0}   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+{0} SPDX - License - Identifier: GPL - 3.0 +""".format(comment_prefix,year)
 
 
 def process_file_tree(path):
@@ -145,8 +142,8 @@ def process_file(filename):
 
     # load file text
     file_text = ""
-    with open(filename, "r") as myfile:
-        file_text = myfile.read()
+    with open (filename, "r", encoding="utf-8") as myfile:
+        file_text=myfile.read()
 
     # find old style statement - remove and replace
     match_old = regex_old_style.search(file_text)
@@ -190,8 +187,8 @@ def process_file(filename):
     file_text = add_copyright_statement(copyright_statement, file_text)
 
     if not dry_run:
-        # save file text
-        with open(filename, "w") as myfile:
+        #save file text
+        with open (filename, "w", encoding="utf-8") as myfile:
             myfile.write(file_text)
 
 
@@ -253,11 +250,11 @@ process_file_tree(root_path)
 
 # Reporting
 if not args.noreport:
-    # write out reporting files
-    for reporting_filename, reporting_dict in six.iteritems(reporting_dictionaries):
-        with open(reporting_filename, "w") as reporting_file:
-            for key, value in six.iteritems(reporting_dict):
-                reporting_file.write("{0}\t{1}{2}".format(key, value, os.linesep))
+    #write out reporting files
+    for reporting_filename, reporting_dict in reporting_dictionaries.items():
+        with open(reporting_filename,"w") as reporting_file:
+            for key, value in reporting_dict.items():
+                reporting_file.write("{0}\t{1}{2}".format(key,value,os.linesep))
 
 # Final comments
 print()

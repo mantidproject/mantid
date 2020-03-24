@@ -491,7 +491,7 @@ target_include_directories(Kernel SYSTEM
                            PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS}
                                   ${JSONCPP_INCLUDE_DIR}
                            PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
-                                   ${OPENSSL_INCLUDE_DIR} ${SPAN_INCLUDE_DIR})
+                                   ${OPENSSL_INCLUDE_DIR})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
@@ -519,7 +519,9 @@ target_link_libraries(Kernel
                       ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
                       ${MANTIDLIBS}
-                      ${NETWORK_LIBRARIES})
+                      ${NETWORK_LIBRARIES}
+                      span
+                      )
 if(WIN32)
   target_link_libraries(Kernel LINK_PRIVATE Psapi.lib) # For memory usage
                                                        # queries

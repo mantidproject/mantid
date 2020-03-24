@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -82,8 +82,13 @@ public:
   int version() const override { return (1); }
   const std::string category() const override { return ("Cat1"); }
   const std::string summary() const override { return "Test summary"; }
-  // Override method so we can manipulate whether it appears to be running
-  bool isRunning() const override { return isRunningFlag; }
+  // Override methods so we can manipulate whether it appears to be running
+  ExecutionState executionState() const override {
+    return isRunningFlag ? ExecutionState::Running : ExecutionState::Finished;
+  }
+  ResultState resultState() const override {
+    return isRunningFlag ? ResultState::NotFinished : ResultState::Failed;
+  }
   void setIsRunningTo(bool runningFlag) { isRunningFlag = runningFlag; }
   void cancel() override { isRunningFlag = false; }
 };

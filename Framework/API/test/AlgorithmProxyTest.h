@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -152,6 +152,8 @@ public:
     alg->setProperty("prop2", 17);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Finished, alg->executionState());
+    TS_ASSERT_EQUALS(ResultState::Success, alg->resultState());
     int out = alg->getProperty("out");
     TS_ASSERT_EQUALS(out, 28);
   }
