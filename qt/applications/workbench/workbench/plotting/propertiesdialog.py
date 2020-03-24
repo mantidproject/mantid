@@ -197,8 +197,8 @@ class ColorbarAxisEditor(AxisEditor):
 
         self.images = self.canvas.figure.gca().images
         if len(self.images) == 0:
-            self.images = [col for col in self.canvas.figure.gca().collections if isinstance(col, QuadMesh) or
-                           isinstance(col, Poly3DCollection)]
+            self.images = [col for col in self.canvas.figure.gca().collections if isinstance(col, QuadMesh)
+                           or isinstance(col, Poly3DCollection)]
 
         self.create_model()
 
