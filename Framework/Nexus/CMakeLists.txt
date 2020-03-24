@@ -1,12 +1,13 @@
-set(SRC_FILES src/MuonNexusReader.cpp src/NexusClasses.cpp src/NexusFileIO.cpp)
+set(SRC_FILES src/MuonNexusReader.cpp src/NexusClasses.cpp src/NexusFileIO.cpp src/NexusHDF5Descriptor.cpp)
 
 set(INC_FILES
     inc/MantidNexus/MuonNexusReader.h
     inc/MantidNexus/NexusClasses.h
     inc/MantidNexus/NexusFileIO.h
-    inc/MantidNexus/NexusIOHelper.h)
+    inc/MantidNexus/NexusIOHelper.h
+    inc/MantidNexus/NexusHDF5Descriptor.h)
 
-set(TEST_FILES NexusIOHelperTest.h)
+set(TEST_FILES NexusIOHelperTest.h NexusHDF5DescriptorTest.h)
 
 if(COVERALLS)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
@@ -38,12 +39,16 @@ set_property(TARGET Nexus PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
 
+target_include_directories(Nexus
+                           PRIVATE ${HDF5_INCLUDE_DIRS})
+                                   
 target_link_libraries(Nexus
                       LINK_PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${NEXUS_C_LIBRARIES}
-                      ${NEXUS_LIBRARIES})
+                      ${NEXUS_LIBRARIES}
+                      ${HDF5_LIBRARIES})
 
 # Add the unit tests directory
 add_subdirectory(test)
