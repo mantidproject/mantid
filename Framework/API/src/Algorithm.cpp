@@ -99,7 +99,7 @@ Algorithm::Algorithm()
       m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(nullptr),
       m_notificationCenter(nullptr), m_progressObserver(nullptr),
       m_executionState(ExecutionState::Uninitialized),
-      m_resultState(ResultState::NotFinished), m_isExecuted(false),
+      m_resultState(ResultState::NotFinished),
       m_isChildAlgorithm(false), m_recordHistoryForChild(false),
       m_alwaysStoreInADS(true), m_runningAsync(false), m_rethrow(false),
       m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
