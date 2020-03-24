@@ -1,12 +1,9 @@
 set(SRC_FILES
     src/AppendGeometryToSNSNexus.cpp
-    src/AsciiPointBase.cpp
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
     src/CompressEvents.cpp
     src/CreateChunkingFromInstrument.cpp
-    src/CreatePolarizationEfficiencies.cpp
-    src/CreatePolarizationEfficienciesBase.cpp
     src/CreateSampleShape.cpp
     src/CreateSimulationWorkspace.cpp
     src/DataBlock.cpp
@@ -32,7 +29,6 @@ set(SRC_FILES
     src/ISISJournal.cpp
     src/ISISJournalGetExperimentRuns.cpp
     src/ISISRunLogs.cpp
-    src/JoinISISPolarizationEfficiencies.cpp
     src/Load.cpp
     src/LoadANSTOHelper.cpp
     src/LoadAscii.cpp
@@ -61,17 +57,19 @@ set(SRC_FILES
     src/LoadGSS.cpp
     src/LoadGeometry.cpp
     src/LoadHFIRSANS.cpp
-    src/LoadHelper.cpp
     src/LoadIDFFromNexus.cpp
     src/LoadILLDiffraction.cpp
     src/LoadILLIndirect2.cpp
-    src/LoadILLPolarizationFactors.cpp
-    src/LoadILLReflectometry.cpp
     src/LoadILLSANS.cpp
     src/LoadILLTOF2.cpp
     src/LoadISISNexus2.cpp
+<<<<<<< HEAD
     src/LoadISISNexusHelper.cpp
     src/LoadISISPolarizationEfficiencies.cpp
+||||||| merged common ancestors
+    src/LoadISISPolarizationEfficiencies.cpp
+=======
+>>>>>>> Create reflectometry library
     src/LoadInstrument.cpp
     src/LoadInstrumentFromNexus.cpp
     src/LoadInstrumentFromRaw.cpp
@@ -155,7 +153,6 @@ set(SRC_FILES
     src/SampleEnvironmentFactory.cpp
     src/SampleEnvironmentSpec.cpp
     src/SampleEnvironmentSpecParser.cpp
-    src/SaveANSTOAscii.cpp
     src/SaveAscii.cpp
     src/SaveAscii2.cpp
     src/SaveBankScatteringAngles.cpp
@@ -174,7 +171,6 @@ set(SRC_FILES
     src/SaveGDA.cpp
     src/SaveGSASInstrumentFile.cpp
     src/SaveGSS.cpp
-    src/SaveILLCosmosAscii.cpp
     src/SaveISISNexus.cpp
     src/SaveIsawDetCal.cpp
     src/SaveMask.cpp
@@ -192,9 +188,6 @@ set(SRC_FILES
     src/SavePHX.cpp
     src/SaveParameterFile.cpp
     src/SaveRKH.cpp
-    src/SaveReflCustomAscii.cpp
-    src/SaveReflThreeColumnAscii.cpp
-    src/SaveReflectometryAscii.cpp
     src/SaveRMCProfile.cpp
     src/SaveSESANS.cpp
     src/SaveSPE.cpp
@@ -214,13 +207,10 @@ set(SRC_FILES
 
 set(INC_FILES
     inc/MantidDataHandling/AppendGeometryToSNSNexus.h
-    inc/MantidDataHandling/AsciiPointBase.h
     inc/MantidDataHandling/BankPulseTimes.h
     inc/MantidDataHandling/CheckMantidVersion.h
     inc/MantidDataHandling/CompressEvents.h
     inc/MantidDataHandling/CreateChunkingFromInstrument.h
-    inc/MantidDataHandling/CreatePolarizationEfficiencies.h
-    inc/MantidDataHandling/CreatePolarizationEfficienciesBase.h
     inc/MantidDataHandling/CreateSampleShape.h
     inc/MantidDataHandling/CreateSimulationWorkspace.h
     inc/MantidDataHandling/DataBlock.h
@@ -246,7 +236,6 @@ set(INC_FILES
     inc/MantidDataHandling/ISISJournal.h
     inc/MantidDataHandling/ISISJournalGetExperimentRuns.h
     inc/MantidDataHandling/ISISRunLogs.h
-    inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
     inc/MantidDataHandling/Load.h
     inc/MantidDataHandling/LoadANSTOEventFile.h
     inc/MantidDataHandling/LoadANSTOHelper.h
@@ -276,17 +265,19 @@ set(INC_FILES
     inc/MantidDataHandling/LoadGSS.h
     inc/MantidDataHandling/LoadGeometry.h
     inc/MantidDataHandling/LoadHFIRSANS.h
-    inc/MantidDataHandling/LoadHelper.h
     inc/MantidDataHandling/LoadIDFFromNexus.h
     inc/MantidDataHandling/LoadILLDiffraction.h
     inc/MantidDataHandling/LoadILLIndirect2.h
-    inc/MantidDataHandling/LoadILLPolarizationFactors.h
-    inc/MantidDataHandling/LoadILLReflectometry.h
     inc/MantidDataHandling/LoadILLSANS.h
     inc/MantidDataHandling/LoadILLTOF2.h
     inc/MantidDataHandling/LoadISISNexus2.h
+<<<<<<< HEAD
     inc/MantidDataHandling/LoadISISNexusHelper.h
     inc/MantidDataHandling/LoadISISPolarizationEfficiencies.h
+||||||| merged common ancestors
+    inc/MantidDataHandling/LoadISISPolarizationEfficiencies.h
+=======
+>>>>>>> Create reflectometry library
     inc/MantidDataHandling/LoadInstrument.h
     inc/MantidDataHandling/LoadInstrumentFromNexus.h
     inc/MantidDataHandling/LoadInstrumentFromRaw.h
@@ -367,7 +358,6 @@ set(INC_FILES
     inc/MantidDataHandling/SampleEnvironmentFactory.h
     inc/MantidDataHandling/SampleEnvironmentSpec.h
     inc/MantidDataHandling/SampleEnvironmentSpecParser.h
-    inc/MantidDataHandling/SaveANSTOAscii.h
     inc/MantidDataHandling/SaveAscii.h
     inc/MantidDataHandling/SaveAscii2.h
     inc/MantidDataHandling/SaveBankScatteringAngles.h
@@ -386,7 +376,6 @@ set(INC_FILES
     inc/MantidDataHandling/SaveGDA.h
     inc/MantidDataHandling/SaveGSASInstrumentFile.h
     inc/MantidDataHandling/SaveGSS.h
-    inc/MantidDataHandling/SaveILLCosmosAscii.h
     inc/MantidDataHandling/SaveISISNexus.h
     inc/MantidDataHandling/SaveIsawDetCal.h
     inc/MantidDataHandling/SaveMask.h
@@ -404,9 +393,6 @@ set(INC_FILES
     inc/MantidDataHandling/SavePHX.h
     inc/MantidDataHandling/SaveParameterFile.h
     inc/MantidDataHandling/SaveRKH.h
-    inc/MantidDataHandling/SaveReflCustomAscii.h
-    inc/MantidDataHandling/SaveReflThreeColumnAscii.h
-    inc/MantidDataHandling/SaveReflectometryAscii.h
     inc/MantidDataHandling/SaveRMCProfile.h
     inc/MantidDataHandling/SaveSESANS.h
     inc/MantidDataHandling/SaveSPE.h
@@ -434,7 +420,6 @@ set(TEST_FILES
     CheckMantidVersionTest.h
     CompressEventsTest.h
     CreateChunkingFromInstrumentTest.h
-    CreatePolarizationEfficienciesTest.h
     CreateSampleShapeTest.h
     CreateSimulationWorkspaceTest.h
     DataBlockCompositeTest.h
@@ -459,7 +444,6 @@ set(TEST_FILES
     ISISJournalTest.h
     ISISJournalGetExperimentRunsTest.h
     InstrumentRayTracerTest.h
-    JoinISISPolarizationEfficienciesTest.h
     LoadAscii2Test.h
     LoadAsciiStlTest.h
     LoadAsciiTest.h
@@ -486,13 +470,10 @@ set(TEST_FILES
     LoadIDFFromNexusTest.h
     LoadILLDiffractionTest.h
     LoadILLIndirect2Test.h
-    LoadILLPolarizationFactorsTest.h
-    LoadILLReflectometryTest.h
     LoadILLSANSTest.h
     LoadILLTOF2Test.h
     LoadILLTest.h
     LoadISISNexusTest.h
-    LoadISISPolarizationEfficienciesTest.h
     LoadInstrumentFromNexusTest.h
     LoadInstrumentFromRawTest.h
     LoadInstrumentTest.h
@@ -565,7 +546,6 @@ set(TEST_FILES
     SampleEnvironmentSpecFileFinderTest.h
     SampleEnvironmentSpecParserTest.h
     SampleEnvironmentSpecTest.h
-    SaveANSTOAsciiTest.h
     SaveAscii2Test.h
     SaveAsciiTest.h
     SaveBankScatteringAnglesTest.h
@@ -583,7 +563,6 @@ set(TEST_FILES
     SaveGDATest.h
     SaveGSASInstrumentFileTest.h
     SaveGSSTest.h
-    SaveILLCosmosAsciiTest.h
     SaveIsawDetCalTest.h
     SaveMaskTest.h
     SaveNISTDATTest.h
@@ -600,9 +579,6 @@ set(TEST_FILES
     SavePHXTest.h
     SaveParameterFileTest.h
     SaveRKHTest.h
-    SaveReflCustomAsciiTest.h
-    SaveReflThreeColumnAsciiTest.h
-    SaveReflectometryAsciiTest.h
     SaveRMCProfileTest.h
     SaveSESANSTest.h
     SaveSPETest.h

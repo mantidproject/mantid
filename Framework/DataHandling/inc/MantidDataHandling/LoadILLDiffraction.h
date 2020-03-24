@@ -10,10 +10,10 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/V3D.h"
+#include "MantidNexus/LoadHelper.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -114,7 +114,7 @@ private:
   double m_maxHeight{0.}; ///< maximum absolute height of the D2B tubes
 
   std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info
-  LoadHelper m_loadHelper;                  ///< a helper for metadata
+  Nexus::LoadHelper m_loadHelper;           ///< a helper for metadata
   API::MatrixWorkspace_sptr m_outWorkspace; ///< output workspace
   bool m_useCalibratedData{false}; ///< whether to use the calibrated data in
                                    ///< the nexus (D2B only)

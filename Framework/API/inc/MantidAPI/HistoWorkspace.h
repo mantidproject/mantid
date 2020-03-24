@@ -40,5 +40,10 @@ private:
   HistoWorkspace *doCloneEmpty() const override = 0;
 };
 
+/// shared pointer to the HistoWorkspace class
+using HistoWorkspace_sptr = std::shared_ptr<HistoWorkspace>;
+/// shared pointer to a const HistoWorkspace
+using HistoWorkspace_const_sptr = std::shared_ptr<const HistoWorkspace>;
+
 } // namespace API
 } // namespace Mantid

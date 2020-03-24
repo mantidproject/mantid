@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
+#include "MantidNexus/LoadHelper.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -81,7 +81,7 @@ private:
   void adjustTOF();
   void moveSource();
 
-  LoadHelper m_loader;          ///< Load helper for metadata
+  Nexus::LoadHelper m_loader;   ///< Load helper for metadata
   std::string m_instrumentName; ///< Name of the instrument
   std::vector<std::string>
       m_supportedInstruments;                 ///< List of supported instruments

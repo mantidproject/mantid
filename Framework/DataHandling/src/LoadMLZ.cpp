@@ -12,13 +12,13 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/LoadHelper.h"
 
 #include <algorithm>
 #include <cmath>

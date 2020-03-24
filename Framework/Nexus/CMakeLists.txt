@@ -1,6 +1,11 @@
-set(SRC_FILES src/MuonNexusReader.cpp src/NexusClasses.cpp src/NexusFileIO.cpp)
+set(SRC_FILES
+    src/LoadHelper.cpp
+    src/MuonNexusReader.cpp
+    src/NexusClasses.cpp
+    src/NexusFileIO.cpp)
 
 set(INC_FILES
+    inc/MantidNexus/LoadHelper.h
     inc/MantidNexus/MuonNexusReader.h
     inc/MantidNexus/NexusClasses.h
     inc/MantidNexus/NexusFileIO.h

@@ -10,8 +10,8 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
+#include "MantidNexus/LoadHelper.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -82,7 +82,7 @@ private:
   double m_t1; // time of flight from source to sample
 
   std::vector<std::string> m_supportedInstruments;
-  LoadHelper m_mlzloader;
+  Nexus::LoadHelper m_mlzloader;
 };
 
 } // namespace DataHandling

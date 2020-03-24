@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
+#include "MantidAPI/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDAlgorithms/ConvToMDBase.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 
@@ -28,7 +28,7 @@ namespace MDAlgorithms {
 */
 
 /// Convert to MD Events class itself:
-class DLLExport ConvertToMDParent : public BoxControllerSettingsAlgorithm {
+class DLLExport ConvertToMDParent : public API::BoxControllerSettingsAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override = 0;
