@@ -7,20 +7,21 @@
 #include "MantidDataHandling/BankPulseTimes.h"
 #include "MantidKernel/Logger.h"
 #include "MantidNexus/NexusIOHelper.h"
+#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Types::Core;
-//===============================================================================================
-// BankPulseTimes
-//===============================================================================================
-
-/// The first period
-const unsigned int BankPulseTimes::FirstPeriod = 1;
 
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("BankPulseTimes");
 } // namespace
+
+namespace Mantid::DataHandling {
+
+/// The first period
+const unsigned int BankPulseTimes::FirstPeriod = 1;
+
 //----------------------------------------------------------------------------------------------
 /** Constructor. Loads the pulse times from the bank entry of the file
  *
@@ -107,3 +108,5 @@ bool BankPulseTimes::equals(size_t otherNumPulse, std::string otherStartTime) {
   return ((this->startTime == otherStartTime) &&
           (this->numPulses == otherNumPulse));
 }
+
+} // namespace Mantid::DataHandling

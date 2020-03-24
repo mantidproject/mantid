@@ -9,9 +9,12 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Property.h"
 
-#include <nexus/NeXusFile.hpp>
+// forward declare
+namespace NeXus {
+class File;
+}
 
-using namespace ::NeXus;
+namespace Mantid::DataHandling {
 
 /** This class defines the pulse times for a specific bank.
  * Since some instruments (ARCS, VULCAN) have multiple preprocessors,
@@ -46,3 +49,5 @@ public:
   /// Vector of period numbers corresponding to each pulse
   std::vector<int> periodNumbers;
 };
+
+} // namespace Mantid::DataHandling

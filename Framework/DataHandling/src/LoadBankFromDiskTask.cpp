@@ -19,8 +19,7 @@
 using namespace Mantid::Types::Core;
 using Mantid::Kernel::NexusDescriptor;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 /** Constructor
  *
@@ -525,5 +524,4 @@ int64_t LoadBankFromDiskTask::recalculateDataSize(const int64_t &size) {
   return size;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

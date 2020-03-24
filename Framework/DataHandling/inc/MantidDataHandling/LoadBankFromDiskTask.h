@@ -13,10 +13,9 @@
 
 #include <nexus/NeXusFile.hpp>
 
-class BankPulseTimes;
-
 namespace Mantid {
 namespace DataHandling {
+class BankPulseTimes;
 class DefaultEventLoader;
 
 /** This task does the disk IO from loading the NXS file, and so will be on a
