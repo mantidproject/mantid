@@ -430,7 +430,11 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
                 for log_name in list(usable_logs):
                     if run_object.hasProperty(log_name):
                         if usable_logs[log_name][1]:
-                            value = run_object.getPropertyAsSingleValueWithTimeAveragedMean(log_name)
+                            try:
+                                value = run_object.getPropertyAsSingleValueWithTimeAveragedMean(log_name)
+                            except: # the log doesn't have a numeric value for every workspace so remove it
+                                usable_logs.pop(log_name)
+                                continue
                             # Set the bool to whether the value is the same
                             usable_logs[log_name][1] = value == usable_logs[log_name][0]
                     else:
