@@ -11,8 +11,8 @@
 //---------------------------------------------------
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
+#include "MantidNexus/LoadHelper.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -68,7 +68,7 @@ private:
   size_t m_numberOfChannels;      // time channels - Z
   size_t m_numberOfHistograms;
 
-  LoadHelper m_loader;
+  Nexus::LoadHelper m_loader;
 };
 
 } // namespace DataHandling

@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSwans.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidNexus/LoadHelper.h"
 
 #include <algorithm>
 #include <boost/tokenizer.hpp>
@@ -139,7 +139,7 @@ void LoadSwans::placeDetectorInSpace() {
   g_log.information() << "Moving detector " << componentName << " " << distance
                       << " meters and " << angle << " degrees.\n";
 
-  LoadHelper helper;
+  Nexus::LoadHelper helper;
   constexpr double deg2rad = M_PI / 180.0;
   V3D pos = helper.getComponentPosition(m_ws, componentName);
   double angle_rad = angle * deg2rad;

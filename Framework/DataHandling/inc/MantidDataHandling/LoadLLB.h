@@ -7,10 +7,10 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
+#include "MantidNexus/LoadHelper.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -60,7 +60,7 @@ private:
   double m_wavelength;
   double m_channelWidth;
 
-  LoadHelper m_loader;
+  Nexus::LoadHelper m_loader;
 };
 
 } // namespace DataHandling

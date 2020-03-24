@@ -9,6 +9,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include <string>
+#include <vector>
 
 namespace Mantid {
 namespace API {
@@ -20,6 +21,13 @@ DLLExport ResultType executeBinaryOperation(
     const std::string &algorithmName, const LHSType lhs, const RHSType rhs,
     bool lhsAsOutput = false, bool child = true, const std::string &name = "",
     bool rethrow = false);
+
+using BinaryOperationTable = std::vector<int64_t>;
+using BinaryOperationTable_sptr = std::shared_ptr<BinaryOperationTable>;
+
+BinaryOperationTable_sptr MANTID_API_DLL
+buildBinaryOperationTable(const API::MatrixWorkspace_const_sptr &lhs,
+                          const API::MatrixWorkspace_const_sptr &rhs);
 } // namespace OperatorOverloads
 
 bool MANTID_API_DLL equals(const MatrixWorkspace_sptr &lhs,

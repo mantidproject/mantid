@@ -6,7 +6,6 @@ set(SRC_FILES
     src/BinMD.cpp
     src/BinaryOperationMD.cpp
     src/BooleanBinaryOperationMD.cpp
-    src/BoxControllerSettingsAlgorithm.cpp
     src/CalculateCoverageDGS.cpp
     src/CentroidPeaksMD.cpp
     src/CentroidPeaksMD2.cpp
@@ -32,7 +31,6 @@ set(SRC_FILES
     src/ConvertToMDMinMaxGlobal.cpp
     src/ConvertToMDMinMaxLocal.cpp
     src/ConvertToMDParent.cpp
-    src/ConvertToReflectometryQ.cpp
     src/ConvertHFIRSCDtoMDE.cpp
     src/CreateMD.cpp
     src/CreateMDHistoWorkspace.cpp
@@ -94,9 +92,6 @@ set(SRC_FILES
     src/PreprocessDetectorsToMD.cpp
     src/QueryMDWorkspace.cpp
     src/RecalculateTrajectoriesExtents.cpp
-    src/ReflectometryTransformKiKf.cpp
-    src/ReflectometryTransformP.cpp
-    src/ReflectometryTransformQxQz.cpp
     src/ReplicateMD.cpp
     src/SaveIsawQvector.cpp
     src/SaveMD.cpp
@@ -126,7 +121,6 @@ set(
   inc/MantidMDAlgorithms/BinMD.h
   inc/MantidMDAlgorithms/BinaryOperationMD.h
   inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
-  inc/MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h
   inc/MantidMDAlgorithms/CalculateCoverageDGS.h
   inc/MantidMDAlgorithms/CentroidPeaksMD.h
   inc/MantidMDAlgorithms/CentroidPeaksMD2.h
@@ -149,7 +143,6 @@ set(
   inc/MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h
   inc/MantidMDAlgorithms/ConvertToMDMinMaxLocal.h
   inc/MantidMDAlgorithms/ConvertToMDParent.h
-  inc/MantidMDAlgorithms/ConvertToReflectometryQ.h
   inc/MantidMDAlgorithms/ConvertHFIRSCDtoMDE.h
   inc/MantidMDAlgorithms/CreateMD.h
   inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
@@ -215,9 +208,6 @@ set(
   inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h
   inc/MantidMDAlgorithms/QueryMDWorkspace.h
   inc/MantidMDAlgorithms/RecalculateTrajectoriesExtents.h
-  inc/MantidMDAlgorithms/ReflectometryTransformKiKf.h
-  inc/MantidMDAlgorithms/ReflectometryTransformP.h
-  inc/MantidMDAlgorithms/ReflectometryTransformQxQz.h
   inc/MantidMDAlgorithms/ReplicateMD.h
   inc/MantidMDAlgorithms/SaveIsawQvector.h
   inc/MantidMDAlgorithms/SaveMD.h
@@ -244,7 +234,6 @@ set(TEST_FILES
     AccumulateMDTest.h
     AndMDTest.h
     BooleanBinaryOperationMDTest.h
-    BoxControllerSettingsAlgorithmTest.h
     CalculateCoverageDGSTest.h
     CentroidPeaksMD2Test.h
     CentroidPeaksMDTest.h
@@ -268,7 +257,6 @@ set(TEST_FILES
     ConvertToMDMinMaxLocalTest.h
     ConvertToMDTest.h
     ConvertToQ3DdETest.h
-    ConvertToReflectometryQTest.h
     ConvertHFIRSCDtoMDETest.h
     CreateMDHistoWorkspaceTest.h
     CreateMDTest.h
@@ -327,9 +315,6 @@ set(TEST_FILES
     PreprocessDetectorsToMDTest.h
     QueryMDWorkspaceTest.h
     RecalculateTrajectoriesExtentsTest.h
-    ReflectometryTransformKiKfTest.h
-    ReflectometryTransformPTest.h
-    ReflectometryTransformQxQzTest.h
     ReplicateMDTest.h
     SaveIsawQvectorTest.h
     SaveMD2Test.h

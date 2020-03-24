@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/NexusDescriptor.h"
+#include "MantidNexus/LoadHelper.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -87,7 +87,7 @@ private:
   double m_timeOfFlightDelay = 0;
   std::string m_monitorName;
 
-  LoadHelper m_loader;
+  Nexus::LoadHelper m_loader;
 };
 
 } // namespace DataHandling

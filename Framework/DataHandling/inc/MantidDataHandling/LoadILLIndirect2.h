@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
+#include "MantidNexus/LoadHelper.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -65,7 +65,7 @@ private:
                                        // that were actually active
 
   std::vector<std::string> m_supportedInstruments{"IN16B"};
-  LoadHelper m_loader;
+  Nexus::LoadHelper m_loader;
 };
 
 } // namespace DataHandling

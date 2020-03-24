@@ -28,6 +28,8 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
+using BinaryOperationTable = std::vector<int64_t>;
+using BinaryOperationTable_sptr = std::shared_ptr<BinaryOperationTable>;
 using std::size_t;
 
 namespace Mantid {
@@ -659,7 +661,7 @@ void BinaryOperation::doSingleSpectrum() {
 void BinaryOperation::do2D(bool mismatchedSpectra) {
   BinaryOperationTable_sptr table;
   if (mismatchedSpectra) {
-    table = BinaryOperation::buildBinaryOperationTable(m_lhs, m_rhs);
+    table = OperatorOverloads::buildBinaryOperationTable(m_lhs, m_rhs);
   }
 
   // Propagate any masking first or it could mess up the numbers
@@ -917,126 +919,7 @@ void BinaryOperation::checkRequirements() {
   m_useHistogramForRhsEventWorkspace = false;
 }
 
-/** Build up an BinaryOperationTable for performing a binary operation
- * e.g. lhs = (lhs + rhs)
- * where the spectra in rhs are to go into lhs.
- * This function looks to match the detector IDs in rhs to those in the lhs.
- *
- * @param lhs :: matrix workspace in which the operation is being done.
- * @param rhs :: matrix workspace on the right hand side of the operand
- * @return map from detector ID to workspace index for the RHS workspace.
- *        NULL if there is not a 1:1 mapping from detector ID to workspace index
- *(e.g more than one detector per pixel).
- */
-BinaryOperation::BinaryOperationTable_sptr
-BinaryOperation::buildBinaryOperationTable(
-    const MatrixWorkspace_const_sptr &lhs,
-    const MatrixWorkspace_const_sptr &rhs) {
-  // An addition table is a list of pairs:
-  //  First int = workspace index in the EW being added
-  //  Second int = workspace index to which it will be added in the OUTPUT EW.
-  //  -1 if it should add a new entry at the end.
-  auto table = std::make_shared<BinaryOperationTable>();
-
-  auto rhs_nhist = static_cast<int>(rhs->getNumberHistograms());
-  auto lhs_nhist = static_cast<int>(lhs->getNumberHistograms());
-
-  // Initialize the table; filled with -1 meaning no match
-  table->resize(lhs_nhist, -1);
-
-  const detid2index_map rhs_det_to_wi = rhs->getDetectorIDToWorkspaceIndexMap();
-
-  PARALLEL_FOR_NO_WSP_CHECK()
-  for (int lhsWI = 0; lhsWI < lhs_nhist; lhsWI++) {
-    bool done = false;
-
-    // List of detectors on lhs side
-    const auto &lhsDets = lhs->getSpectrum(lhsWI).getDetectorIDs();
-
-    // ----------------- Matching Workspace Indices and Detector IDs
-    // --------------------------------------
-    // First off, try to match the workspace indices. Most times, this will be
-    // ok right away.
-    int64_t rhsWI = lhsWI;
-    if (rhsWI < rhs_nhist) // don't go out of bounds
-    {
-      // Get the detector IDs at that workspace index.
-      const auto &rhsDets = rhs->getSpectrum(rhsWI).getDetectorIDs();
-
-      // Checks that lhsDets is a subset of rhsDets
-      if (std::includes(rhsDets.begin(), rhsDets.end(), lhsDets.begin(),
-                        lhsDets.end())) {
-        // We found the workspace index right away. No need to keep looking
-        (*table)[lhsWI] = rhsWI;
-        done = true;
-      }
-    }
-
-    // ----------------- Scrambled Detector IDs with one Detector per Spectrum
-    // --------------------------------------
-    if (!done && (lhsDets.size() == 1)) {
-      // Didn't find it. Try to use the RHS map.
-
-      // First, we have to get the (single) detector ID of the LHS
-      auto lhsDets_it = lhsDets.cbegin();
-      detid_t lhs_detector_ID = *lhsDets_it;
-
-      // Now we use the RHS map to find it. This only works if both the lhs and
-      // rhs have 1 detector per pixel
-      auto map_it = rhs_det_to_wi.find(lhs_detector_ID);
-      if (map_it != rhs_det_to_wi.end()) {
-        rhsWI = map_it->second; // This is the workspace index in the RHS that
-                                // matched lhs_detector_ID
-      } else {
-        // Did not find it!
-        rhsWI = -1; // Marker to mean its not in the LHS.
-
-        //            std::ostringstream mess;
-        //            mess << "BinaryOperation: cannot find a RHS spectrum that
-        //            contains the detectors in LHS workspace index " << lhsWI
-        //            << "\n";
-        //            throw std::runtime_error(mess.str());
-      }
-      (*table)[lhsWI] = rhsWI;
-      done = true; // Great, we did it.
-    }
-
-    // ----------------- LHS detectors are subset of RHS, which are Grouped
-    // --------------------------------------
-    if (!done) {
-
-      // Didn't find it? Now we need to iterate through the output workspace to
-      //  match the detector ID.
-      // NOTE: This can be SUPER SLOW!
-      for (rhsWI = 0; rhsWI < static_cast<int64_t>(rhs_nhist); rhsWI++) {
-        const auto &rhsDets = rhs->getSpectrum(rhsWI).getDetectorIDs();
-
-        // Checks that lhsDets is a subset of rhsDets
-        if (std::includes(rhsDets.begin(), rhsDets.end(), lhsDets.begin(),
-                          lhsDets.end())) {
-          // This one is right. Now we can stop looking.
-          (*table)[lhsWI] = rhsWI;
-          done = true;
-          continue;
-        }
-      }
-    }
-
-    // ------- Still nothing ! -----------
-    if (!done) {
-      (*table)[lhsWI] = -1;
-
-      //          std::ostringstream mess;
-      //          mess << "BinaryOperation: cannot find a RHS spectrum that
-      //          contains the detectors in LHS workspace index " << lhsWI <<
-      //          "\n";
-      //          throw std::runtime_error(mess.str());
-    }
-  }
-
-  return table;
-}
-
+auto table = std::make_shared<BinaryOperationTable>();
 Parallel::ExecutionMode BinaryOperation::getParallelExecutionMode(
     const std::map<std::string, Parallel::StorageMode> &storageModes) const {
   if (static_cast<bool>(getProperty("AllowDifferentNumberSpectra")))

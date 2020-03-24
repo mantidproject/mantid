@@ -11,10 +11,12 @@ set(SRC_FILES
     src/AnalysisDataService.cpp
     src/AnalysisDataServiceObserver.cpp
     src/ArchiveSearchFactory.cpp
+    src/AsciiPointBase.cpp
     src/Axis.cpp
     src/BinEdgeAxis.cpp
     src/BoostOptionalToAlgorithmProperty.cpp
     src/BoxController.cpp
+    src/BoxControllerSettingsAlgorithm.cpp
     src/CatalogManager.cpp
     src/CatalogSession.cpp
     src/Citation.cpp
@@ -175,10 +177,12 @@ set(INC_FILES
     inc/MantidAPI/AnalysisDataService.h
     inc/MantidAPI/AnalysisDataServiceObserver.h
     inc/MantidAPI/ArchiveSearchFactory.h
+    inc/MantidAPI/AsciiPointBase.h
     inc/MantidAPI/Axis.h
     inc/MantidAPI/BinEdgeAxis.h
     inc/MantidAPI/BoostOptionalToAlgorithmProperty.h
     inc/MantidAPI/BoxController.h
+    inc/MantidAPI/BoxControllerSettingsAlgorithm.h
     inc/MantidAPI/CatalogFactory.h
     inc/MantidAPI/CatalogManager.h
     inc/MantidAPI/CatalogSession.h
@@ -385,6 +389,7 @@ set(TEST_FILES
     AsynchronousTest.h
     BinEdgeAxisTest.h
     BoxControllerTest.h
+    BoxControllerSettingsAlgorithmTest.h
     CitationTest.h
     CommonBinsValidatorTest.h
     CompositeFunctionTest.h

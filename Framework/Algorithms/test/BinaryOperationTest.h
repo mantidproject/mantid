@@ -13,6 +13,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAlgorithms/BinaryOperation.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -294,7 +295,7 @@ public:
     }
   }
 
-  BinaryOperation::BinaryOperationTable_sptr
+  OperatorOverloads::BinaryOperationTable_sptr
   do_test_buildBinaryOperationTable(std::vector<std::vector<int>> lhs,
                                     std::vector<std::vector<int>> rhs,
                                     bool expect_throw = false) {
@@ -304,15 +305,15 @@ public:
     EventWorkspace_sptr rhsWS =
         WorkspaceCreationHelper::createGroupedEventWorkspace(std::move(rhs), 50,
                                                              1.0);
-    BinaryOperation::BinaryOperationTable_sptr table;
+    OperatorOverloads::BinaryOperationTable_sptr table;
     Mantid::Kernel::Timer timer1;
     if (expect_throw) {
       TS_ASSERT_THROWS(
-          table = BinaryOperation::buildBinaryOperationTable(lhsWS, rhsWS),
+          table = OperatorOverloads::buildBinaryOperationTable(lhsWS, rhsWS),
           const std::runtime_error &);
     } else {
       TS_ASSERT_THROWS_NOTHING(
-          table = BinaryOperation::buildBinaryOperationTable(lhsWS, rhsWS));
+          table = OperatorOverloads::buildBinaryOperationTable(lhsWS, rhsWS));
       // std::cout << timer1.elapsed() << " sec to run
       // buildBinaryOperationTable\n";
       TS_ASSERT(table);

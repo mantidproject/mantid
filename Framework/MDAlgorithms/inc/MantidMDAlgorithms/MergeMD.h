@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/BoxControllerSettingsAlgorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -18,7 +18,7 @@ namespace MDAlgorithms {
 
   @date 2012-01-17
 */
-class DLLExport MergeMD : public BoxControllerSettingsAlgorithm {
+class DLLExport MergeMD : public API::BoxControllerSettingsAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
