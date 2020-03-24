@@ -82,7 +82,7 @@ from mantid.api import FileFinder
 from systemtesting import MantidSystemTest, using_gsl_v1
 
 
-class ISISIndirectInelasticBase(metaclass=ABCMeta):
+class ISISIndirectInelasticBase(MantidSystemTest, metaclass=ABCMeta):
     '''
     A common base class for the ISISIndirectInelastic* base classes.
     '''

@@ -15,7 +15,7 @@ from mantid.simpleapi import *
 from abc import ABCMeta, abstractmethod
 
 
-class ReflectometryISIS(metaclass=ABCMeta):
+class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
     @abstractmethod
     def get_workspace_name(self):

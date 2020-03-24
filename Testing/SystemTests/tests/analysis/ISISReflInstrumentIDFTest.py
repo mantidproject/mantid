@@ -15,7 +15,7 @@ import os
 from abc import ABCMeta, abstractmethod
 
 
-class ISISReflInstrumentIDFTest(metaclass=ABCMeta):
+class ISISReflInstrumentIDFTest(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
     @abstractmethod
     def get_IDF_name(self):

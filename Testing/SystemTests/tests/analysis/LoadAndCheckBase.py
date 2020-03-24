@@ -16,7 +16,7 @@ import mantid.api
 from abc import ABCMeta, abstractmethod
 
 
-class LoadAndCheckBase(metaclass=ABCMeta):
+class LoadAndCheckBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
     __comparison_out_workspace_name = 'a_integrated'
 

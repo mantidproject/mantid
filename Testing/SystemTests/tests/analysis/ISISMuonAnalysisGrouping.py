@@ -12,7 +12,7 @@ from abc import ABCMeta, abstractmethod
 #----------------------------------------------------------------------
 
 
-class ISISMuonAnalysisGrouping(metaclass=ABCMeta):
+class ISISMuonAnalysisGrouping(systemtesting.MantidSystemTest, metaclass=ABCMeta):
     """A base class for the ISIS Muon Analysis tests
 
     The workflow is defined in the runTest() method, simply

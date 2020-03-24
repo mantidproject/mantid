@@ -20,7 +20,7 @@ def create_file_path(base_name):
     return filename
 
 
-class SaveLoadNexusProcessedTestBase(metaclass=ABCMeta):
+class SaveLoadNexusProcessedTestBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
     filename = None
     test_ws_name = 'input_ws'
