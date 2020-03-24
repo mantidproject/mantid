@@ -219,6 +219,11 @@ public:
   bool execute() override final;
   void executeAsChildAlg() override;
   std::map<std::string, std::string> validateInputs() override;
+
+  /// Gets the current execution state
+  ExecutionState executionState() const override;
+  /// Gets the current result State
+  ResultState resultState() const override;
   bool isInitialized() const override;
   bool isExecuted() const override;
   bool isRunning() const override;
@@ -330,8 +335,10 @@ protected:
   friend class AlgorithmProxy;
   void initializeFromProxy(const AlgorithmProxy &);
 
-  void setInitialized();
-  void setExecuted(bool state);
+  void setExecutionState(
+      const ExecutionState state); ///< Sets the current execution state
+  void
+  setResultState(const ResultState state); ///< Sets the result execution state
 
   void store();
 
@@ -454,14 +461,13 @@ private:
   mutable std::unique_ptr<Poco::NObserver<Algorithm, ProgressNotification>>
       m_progressObserver;
 
-  bool m_isInitialized;         ///< Algorithm has been initialized flag
-  bool m_isExecuted;            ///< Algorithm is executed flag
+  std::atomic<ExecutionState> m_executionState; ///< the current execution state
+  std::atomic<ResultState> m_resultState;       ///< the current result State
   bool m_isChildAlgorithm;      ///< Algorithm is a child algorithm
   bool m_recordHistoryForChild; ///< Flag to indicate whether history should be
                                 /// recorded. Applicable to child algs only
   bool m_alwaysStoreInADS; ///< Always store in the ADS, even for child algos
   bool m_runningAsync;     ///< Algorithm is running asynchronously
-  std::atomic<bool> m_running; ///< Algorithm is running
   bool m_rethrow; ///< Algorithm should rethrow exceptions while executing
   bool m_isAlgStartupLoggingEnabled; /// Whether to log alg startup and
                                      /// closedown messages from the base class

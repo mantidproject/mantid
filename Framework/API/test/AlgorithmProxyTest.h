@@ -152,6 +152,8 @@ public:
     alg->setProperty("prop2", 17);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Finished, alg->executionState());
+    TS_ASSERT_EQUALS(ResultState::Success, alg->resultState());
     int out = alg->getProperty("out");
     TS_ASSERT_EQUALS(out, 28);
   }
