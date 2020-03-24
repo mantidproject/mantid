@@ -169,7 +169,7 @@ class DrillView(QMainWindow):
         all = self.get_all_rows()
         contents = []
         for row in all:
-            contents.append(self.get_row_contents(RowLocation([row])))
+            contents.append(self.get_row_contents(row))
         self.call_settings_listeners(
             lambda listener: listener.on_process_clicked(contents))
 
@@ -178,7 +178,7 @@ class DrillView(QMainWindow):
         selected = self.get_selected_rows()
         contents = []
         for row in selected:
-            contents.append(self.get_row_contents(RowLocation([row])))
+            contents.append(self.get_row_contents(row))
         self.call_settings_listeners(
             lambda listener: listener.on_process_clicked(contents))
 
