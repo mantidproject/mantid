@@ -133,7 +133,7 @@ void SetUncertainties::exec() {
   const int64_t numHists =
       static_cast<int64_t>(inputWorkspace->getNumberHistograms());
   if (inputEventWorkspace) {
-    if(inputWorkspace == outputWorkspace && errorType == SQRT) {
+    if(inputWorkspace == outputWorkspace && errorType == SQRT && inputWorkspace->getEventType() == Mantid::API::EventType::TOF) {
       // Uncertainty is already square root of the y value
       return;
     }
