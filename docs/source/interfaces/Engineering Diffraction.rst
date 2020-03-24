@@ -121,7 +121,8 @@ a plot for each bank and cropped focusing generates a plot for the single bank o
 Clicking the focus button will begin the focusing algorithm for the selected run files. The button and plotting checkbox
 will be disabled until the fitting algorithm is complete.
 
-The focused output files are saved in NeXus, GSS, and raw XYE format to:
+The focused output files are saved in NeXus, GSS, and TOPAS format. The process will also output a CSV file containing
+all numerical sample logs. All of these files are saved to:
 
 `<CHOSEN_OUTPUT_DIRECTORY>/Focus/`
 

@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
-from os import path
+import csv
+from os import path, makedirs
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
 
@@ -55,6 +56,7 @@ class FocusModel(object):
                     # Save the output to the file system.
                     self._save_output(instrument, sample_path, name, output_workspace_name, rb_num)
                 output_workspaces.append(workspaces_for_run)
+                self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
         else:
             for sample_path in sample_paths:
                 sample_workspace = path_handling.load_workspace(sample_path)
@@ -64,6 +66,7 @@ class FocusModel(object):
                                 curves_workspace, None, full_calib_workspace, spectrum_numbers)
                 output_workspaces.append([output_workspace_name])
                 self._save_output(instrument, sample_path, "cropped", output_workspace_name, rb_num)
+                self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
         # Plot the output
         if plot_output:
             for ws_names in output_workspaces:
@@ -126,8 +129,8 @@ class FocusModel(object):
                                                  rb_num)
         self._save_focused_output_files_as_gss(instrument, sample_path, bank, sample_workspace,
                                                rb_num)
-        self._save_focused_output_files_as_xye(instrument, sample_path, bank, sample_workspace,
-                                               rb_num)
+        self._save_focused_output_files_as_topas_xye(instrument, sample_path, bank, sample_workspace,
+                                                     rb_num)
 
     def _save_focused_output_files_as_gss(self, instrument, sample_path, bank, sample_workspace,
                                           rb_num):
@@ -153,19 +156,53 @@ class FocusModel(object):
                 self._generate_output_file_name(instrument, sample_path, bank, ".nxs"))
             SaveNexus(InputWorkspace=sample_workspace, Filename=nexus_output_path)
 
-    def _save_focused_output_files_as_xye(self, instrument, sample_path, bank, sample_workspace,
-                                          rb_num):
+    def _save_focused_output_files_as_topas_xye(self, instrument, sample_path, bank,
+                                                sample_workspace, rb_num):
         xye_output_path = path.join(
             path_handling.get_output_path(), "Focus",
-            self._generate_output_file_name(instrument, sample_path, bank, ".dat"))
-        SaveFocusedXYE(InputWorkspace=sample_workspace, Filename=xye_output_path, SplitFiles=False)
+            self._generate_output_file_name(instrument, sample_path, bank, ".abc"))
+        SaveFocusedXYE(InputWorkspace=sample_workspace,
+                       Filename=xye_output_path,
+                       SplitFiles=False,
+                       Format="TOPAS")
         if rb_num:
             xye_output_path = path.join(
                 path_handling.get_output_path(), "User", rb_num, "Focus",
-                self._generate_output_file_name(instrument, sample_path, bank, ".dat"))
+                self._generate_output_file_name(instrument, sample_path, bank, ".abc"))
             SaveFocusedXYE(InputWorkspace=sample_workspace,
                            Filename=xye_output_path,
-                           SplitFiles=False)
+                           SplitFiles=False,
+                           Format="TOPAS")
+
+    @staticmethod
+    def _output_sample_logs(instrument, run_number, workspace, rb_num):
+        def write_to_file():
+            with open(output_path, "w", newline="") as logfile:
+                writer = csv.writer(logfile, ["Sample Log", "Avg Value"])
+                for log in output_dict:
+                    writer.writerow([log, output_dict[log]])
+
+        output_dict = {}
+        sample_run = workspace.getRun()
+        log_names = sample_run.keys()
+        # Collect numerical sample logs.
+        for name in log_names:
+            try:
+                output_dict[name] = sample_run.getPropertyAsSingleValue(name)
+            except ValueError:
+                logger.information(f"Could not convert {name} to a numerical value. It will not be included in the "
+                                   f"sample logs output file.")
+        focus_dir = path.join(path_handling.get_output_path(), "Focus")
+        if not path.exists(focus_dir):
+            makedirs(focus_dir)
+        output_path = path.join(focus_dir, (instrument + "_" + run_number + "_sample_logs.csv"))
+        write_to_file()
+        if rb_num:
+            focus_user_dir = path.join(path_handling.get_output_path(), "User", rb_num, "Focus")
+            if not path.exists(focus_user_dir):
+                makedirs(focus_user_dir)
+            output_path = path.join(focus_user_dir, (instrument + "_" + run_number + "_sample_logs.csv"))
+            write_to_file()
 
     @staticmethod
     def _generate_output_file_name(instrument, sample_path, bank, suffix):
