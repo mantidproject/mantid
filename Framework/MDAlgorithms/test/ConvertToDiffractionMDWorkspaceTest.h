@@ -40,6 +40,7 @@ public:
         createDiffractionEventWorkspace(10);
     AnalysisDataService::Instance().addOrReplace("testInEW", in_ws);
 
+    FrameworkManager::Instance();
     auto alg =
         AlgorithmManager::Instance().create("ConvertToDiffractionMDWorkspace");
     alg->setPropertyValue("InputWorkspace", "testInEW");

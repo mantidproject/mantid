@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidQtWidgets/Common/ConvolutionFunctionModel.h"
@@ -19,6 +20,11 @@ using namespace Mantid::API;
 class ConvolutionFunctionModelTest : public CxxTest::TestSuite {
 
 public:
+  void setUp() {
+    // Needs other algorithms and functions to be registered
+    FrameworkManager::Instance();
+  }
+
   void test_empty() {
     ConvolutionFunctionModel model;
     TS_ASSERT(!model.getFitFunction());

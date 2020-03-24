@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Timer.h"
@@ -48,6 +49,8 @@ without exception producing an output workspace..
 MatrixWorkspace_sptr
 do_test_doesnt_throw_on_execution(MatrixWorkspace_sptr inputWS,
                                   bool parallel = true) {
+  // Needs other algorithms and functions to be registered
+  FrameworkManager::Instance();
   NormaliseByDetector alg(parallel);
   alg.setRethrows(true);
   alg.initialize();

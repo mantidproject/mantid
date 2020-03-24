@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -41,6 +42,11 @@ public:
   // This means the constructor isn't called when running other tests
   static FitPeaksTest *createSuite() { return new FitPeaksTest(); }
   static void destroySuite(FitPeaksTest *suite) { delete suite; }
+
+  void setUp() {
+    // Needs other algorithms and functions to be registered
+    FrameworkManager::Instance();
+  }
 
   void test_Init() {
     // Initialize FitPeak
