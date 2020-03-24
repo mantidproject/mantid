@@ -13,6 +13,8 @@ namespace Mantid::DataHandling {
                             const double endProgress,
                             const bool enableLogging,
                             const int &version) {}
-  void setFileInfo(std::shared_ptr<Mantid::Nexus::HDF5Descriptor> fileInfo)
-	 {}
+  void
+  setFileInfo(std::shared_ptr<Mantid::Nexus::NexusHDF5Descriptor> fileInfo) {
+    m_fileinfo = std::move(fileInfo);
+  }
 }

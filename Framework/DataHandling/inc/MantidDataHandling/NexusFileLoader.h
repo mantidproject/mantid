@@ -7,13 +7,14 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
-#include "MantidNexus/HDF5Descriptor.h"
 #include "MantidKernel/System.h"
+#include "MantidNexus/NexusHDF5Descriptor.h"
 
 namespace Mantid {
 namespace API {
 
-class DLLExport NexusFileLoader : public IFileLoader<Mantid::Nexus::HDF5Descriptor> {
+class DLLExport NexusFileLoader
+    : public IFileLoader<Mantid::Nexus::NexusHDF5Descriptor> {
 public:
   void exec() override;
   void createChildAlgorithm(const std::string &name,
@@ -21,9 +22,11 @@ public:
                             const double endProgress = -1.,
                             const bool enableLogging = true,
                             const int &version = -1) override;
-  void setFileInfo(std::shared_ptr<Mantid::Nexus::HDF5Descriptor> fileInfo);
+  void
+  setFileInfo(std::shared_ptr<Mantid::Nexus::NexusHDF5Descriptor> fileInfo);
+
 private:
-  std::shared_ptr<Mantid::Nexus::HDF5Descriptor> m_fileInfo;
+  std::shared_ptr<Mantid::Nexus::NexusHDF5Descriptor> m_fileInfo;
 };
 } // namespace API
 } // namespace Mantid
