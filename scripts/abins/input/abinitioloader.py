@@ -1,22 +1,25 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+
 # SPDX - License - Identifier: GPL - 3.0 +
+from abc import ABCMeta, abstractmethod
+
 from mantid.kernel import logger
 from mantid.kernel import Atom
 import abins
 from abins.constants import MASS_EPS
 
 
-class GeneralAbInitioProgramName(type):
+# Make it easier to inspect program classes by cleaning up result from str()
+class NamedAbstractClass(ABCMeta):
     def __str__(self):
         return self.__name__
 
 
-# noinspection PyMethodMayBeStatic
-class AbInitioLoader(object, metaclass=GeneralAbInitioProgramName):
+class AbInitioLoader(metaclass=NamedAbstractClass):
     """
     A general class which groups all methods which should be inherited or implemented by an ab initio program used
     in INS analysis.
@@ -29,6 +32,7 @@ class AbInitioLoader(object, metaclass=GeneralAbInitioProgramName):
         self._clerk = abins.IO(input_filename=input_ab_initio_filename,
                                group_name=abins.parameters.hdf_groups['ab_initio_data'])
 
+    @abstractmethod
     def read_vibrational_or_phonon_data(self):
         """
         This method is different for different ab initio programs. It has to be overridden by inheriting class.
@@ -114,7 +118,7 @@ class AbInitioLoader(object, metaclass=GeneralAbInitioProgramName):
         :returns: Method should return an object of type AbinsData.
 
         """
-        return None
+        ...
 
     def load_formatted_data(self):
         """
@@ -136,16 +140,7 @@ class AbInitioLoader(object, metaclass=GeneralAbInitioProgramName):
 
         return self._rearrange_data(data=loaded_data)
 
-    # Protected methods which should be reused by classes which read ab initio phonon data
-    def _recover_symmetry_points(self, data=None):
-        """
-        This method reconstructs symmetry equivalent k-points.
-        :param data: dictionary with the data for only symmetry inequivalent k-points. This methods
-        adds to this dictionary phonon data for symmetry equivalent k-points.
-        """
-
-        pass
-
+    # Internal method for use by child classes which read ab initio phonon data
     def _rearrange_data(self, data=None):
         """
         This method rearranges data read from input ab initio file.
@@ -204,7 +199,8 @@ class AbInitioLoader(object, metaclass=GeneralAbInitioProgramName):
 
         return ab_initio_data
 
-    def check_isotopes_substitution(self, atoms=None, masses=None, approximate=False):
+    @staticmethod
+    def check_isotopes_substitution(atoms=None, masses=None, approximate=False):
         """
         Updates atomic mass in case of isotopes.
         :param atoms: dictionary with atoms to check
