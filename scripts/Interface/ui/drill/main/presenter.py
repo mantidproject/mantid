@@ -16,41 +16,21 @@ class DrillPresenter(DrillEventListener):
         self.view.add_listener(self)
         self.update_view_from_model()
 
-    def on_load_rundex_clicked(self):
-        pass
+    def on_add_rows(self, position, content):
+        print("on_add_rows: " + str(position) + str(content))
 
-    def on_load_settings_clicked(self):
-        pass
+    def on_delete_rows(self, rows):
+        print("on_delete_rows: " + str(rows))
 
-    def on_insert_row(self):
-        pass
+    def on_data_changed(self, row, column, content):
+        print("on_data_changed: " + str(row) + str(column) + str(content))
 
-    def on_erase_rows(self, rows):
-        print("on_erase_rows: " + str(rows))
+    def on_process(self, rows):
+        print("on_process: " + str(rows))
+        #self.model.process_on_thread(contents)
 
-    def on_copy_rows_requested(self, rows):
-        print("on_copy_rows_requested: " + str(rows))
-
-    def on_cut_rows(self, rows):
-        print("on_cut_rows: " + str(rows))
-
-    def on_paste_rows_requested(self):
-        print("on_paste_rows_requested")
-
-    def on_save_rundex_clicked(self):
-        pass
-
-    def on_row_inserted(self):
-        pass
-
-    def on_rows_removed(self, rows):
-        print("on_rows_removed: " + str(rows))
-
-    def on_data_changed(self, row, content):
-        pass
-
-    def on_process_clicked(self, contents):
-        self.model.process_on_thread(contents)
+    def on_process_all(self):
+        print("on_process_all")
 
     def on_instrument_changed(self, instrument):
         self.model.set_instrument(instrument)

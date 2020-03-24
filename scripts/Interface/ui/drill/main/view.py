@@ -25,51 +25,31 @@ class DrillEventListener(with_metaclass(ABCMeta, object)):
     """
 
     @abstractmethod
-    def on_load_rundex_clicked(self):
+    def on_add_rows(self, position, content):
         pass
 
     @abstractmethod
-    def on_save_rundex_clicked(self):
+    def on_delete_rows(self, rows):
         pass
 
     @abstractmethod
-    def on_process_clicked(self, contents):
+    def on_data_changed(self, row, column, content):
         pass
 
     @abstractmethod
-    def on_row_inserted(self):
+    def on_process(self, rows):
         pass
 
     @abstractmethod
-    def on_rows_removed(self, rows):
-        pass
-
-    @abstractmethod
-    def on_copy_rows_requested(self, rows):
-        pass
-
-    @abstractmethod
-    def on_paste_rows_requested(self):
-        pass
-
-    @abstractmethod
-    def on_insert_row(self):
-        pass
-
-    @abstractmethod
-    def on_erase_rows(self, rows):
-        pass
-
-    @abstractmethod
-    def on_cut_rows(self, rows):
-        pass
-
-    @abstractmethod
-    def on_data_changed(self, row, content):
+    def on_process(self, rows):
         pass
 
     @abstractmethod
     def on_instrument_changed(self, instrument):
+        pass
+
+    @abstractmethod
+    def update_view_from_model(self):
         pass
 
 
@@ -166,21 +146,17 @@ class DrillView(QMainWindow):
 
     def process_all(self):
         UsageService.registerFeatureUsage(FeatureType.Feature, ["Drill", "Process all button clicked"], False)
-        all = self.get_all_rows()
-        contents = []
-        for row in all:
-            contents.append(self.get_row_contents(row))
         self.call_settings_listeners(
-            lambda listener: listener.on_process_clicked(contents))
+                lambda listener: listener.on_process_all()
+                )
 
     def process_selected_rows(self):
         UsageService.registerFeatureUsage(FeatureType.Feature, ["Drill", "Process rows button clicked"], False)
-        selected = self.get_selected_rows()
-        contents = []
-        for row in selected:
-            contents.append(self.get_row_contents(row))
+        rows = self.get_selected_rows()
         self.call_settings_listeners(
-            lambda listener: listener.on_process_clicked(contents))
+                lambda listener: listener.on_process(
+                    [row.rowRelativeToParent() for row in rows])
+                )
 
     def get_selected_rows(self):
         rows = self.job_tree_view.selectedRowLocations()
@@ -203,7 +179,8 @@ class DrillView(QMainWindow):
     def data_changed(self, row_location, column, old_value, new_value):
         row = row_location.rowRelativeToParent()
         self.call_settings_listeners(
-            lambda listener: listener.on_data_changed(row, self.get_row_contents(row_location)))
+            lambda listener: listener.on_data_changed(row, column, new_value)
+            )
 
     def row_inserted(self, row_location):
         if row_location.depth() > 1:
@@ -217,6 +194,10 @@ class DrillView(QMainWindow):
 
     def remove_rows(self, rows):
         self.job_tree_view.removeRows(rows)
+        self.call_settings_listeners(
+                lambda listener: listener.on_delete_rows(
+                    [row.rowRelativeToParent() for row in rows])
+                )
 
     def remove_rows_from_button(self):
         rows = self.get_selected_rows()
@@ -239,11 +220,14 @@ class DrillView(QMainWindow):
             for cell in range(0, length):
                 self.job_tree_view.setCellAt(row, cell,
                                              self.job_tree_view.cell_style(""))
+        self.call_settings_listeners(
+                lambda listener: listener.on_delete_rows(
+                    [row.rowRelativeToParent() for row in rows])
+                )
 
     def cut_rows(self):
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Cut rows button"], False)
-        rows = self.get_selected_rows()
         rows = self.get_selected_rows()
         self.buffer = list()
         for row in rows:
@@ -263,6 +247,9 @@ class DrillView(QMainWindow):
                 self.job_tree_view.setCellAt(position, column,
                                              self.job_tree_view.cell_style(txt))
                 column += 1
+        self.call_settings_listeners(
+                lambda listener: listener.on_add_rows(indice, self.buffer)
+                )
 
     def load_rundex(self):
         fname = QFileDialog.getOpenFileName(self, 'Load rundex', '~')
