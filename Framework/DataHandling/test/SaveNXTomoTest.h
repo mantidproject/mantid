@@ -33,8 +33,9 @@ public:
 
   void testMetaData() {
     auto saver = AlgorithmManager::Instance().create("SaveNXTomo");
-    TS_ASSERT_EQUALS(saver->name(), "SaveNXTomo");  
-    TS_ASSERT_EQUALS(saver->version(), 1); }
+    TS_ASSERT_EQUALS(saver->name(), "SaveNXTomo");
+    TS_ASSERT_EQUALS(saver->version(), 1);
+  }
 
   void testWriteGroupCreating() {
     // Test creating a new file from a WS Group
@@ -46,8 +47,7 @@ public:
     auto saver = AlgorithmManager::Instance().create("SaveNXTomo");
     TS_ASSERT_THROWS_NOTHING(
         saver->setPropertyValue("InputWorkspaces", input->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        saver->setPropertyValue("Filename", m_outputFile));
+    TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("Filename", m_outputFile));
     m_outputFile = saver->getPropertyValue("Filename"); // get absolute path
 
     // Set to overwrite to ensure creation not append
@@ -81,8 +81,7 @@ public:
     auto saver = AlgorithmManager::Instance().create("SaveNXTomo");
     TS_ASSERT_THROWS_NOTHING(
         saver->setPropertyValue("InputWorkspaces", input->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        saver->setPropertyValue("Filename", m_outputFile));
+    TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("Filename", m_outputFile));
     m_outputFile = saver->getPropertyValue("Filename"); // get absolute path
 
     // Set to overwrite to ensure creation not append
@@ -122,7 +121,6 @@ public:
       AnalysisDataService::Instance().add(
           m_inputWS + boost::lexical_cast<std::string>(numberOfPriorWS), input);
 
-      
       auto saver = AlgorithmManager::Instance().create("SaveNXTomo");
       TS_ASSERT_THROWS_NOTHING(
           saver->setPropertyValue("InputWorkspaces", input->getName()));
@@ -222,8 +220,7 @@ private:
     auto saver = AlgorithmManager::Instance().create("SaveNXTomo");
     TS_ASSERT_THROWS_NOTHING(
         saver->setProperty<Workspace_sptr>("InputWorkspaces", input));
-    TS_ASSERT_THROWS_NOTHING(
-        saver->setPropertyValue("Filename", m_outputFile));
+    TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("Filename", m_outputFile));
     m_outputFile = saver->getPropertyValue("Filename"); // get absolute path
 
     // Set to overwrite to ensure creation not append

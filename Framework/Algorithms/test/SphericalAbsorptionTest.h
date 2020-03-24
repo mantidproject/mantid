@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/SphericalAbsorption.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -43,7 +43,7 @@ public:
   }
 
   void testExec() {
-    //register all the algorithms
+    // register all the algorithms
     FrameworkManager::Instance();
     auto atten =
         Mantid::API::AlgorithmManager::Instance().create("SphericalAbsorption");
