@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
 #include "MantidNexus/NexusClasses.h"
 

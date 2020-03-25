@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IEventWorkspace_fwd.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/System.h"
 #include <string>
 #include <vector>

@@ -10,6 +10,7 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/V3D.h"
 #include "MantidNexus/NexusClasses.h"
 

@@ -11,6 +11,7 @@
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <fstream>
