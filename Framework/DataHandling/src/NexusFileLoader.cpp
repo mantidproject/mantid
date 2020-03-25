@@ -17,7 +17,7 @@ namespace Mantid::DataHandling {
     return nullptr;
   }
   void NexusFileLoader::setFileInfo(
-      std::shared_ptr<Mantid::NeXus::NexusHDF5Descriptor> fileInfo) {
+      std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo) {
     m_fileInfo = std::move(fileInfo);
   }
 }

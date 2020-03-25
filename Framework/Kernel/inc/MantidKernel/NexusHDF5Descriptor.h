@@ -12,8 +12,7 @@
 #include <set>
 #include <string>
 
-namespace Mantid {
-namespace NeXus {
+namespace Mantid::Kernel {
 
 class DLLExport NexusHDF5Descriptor {
 
@@ -71,5 +70,4 @@ private:
   std::map<std::string, std::set<std::string>> m_allEntries;
 };
 
-} // namespace NeXus
-} // namespace Mantid
+} // namespace Mantid::Kernel
