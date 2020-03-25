@@ -17,7 +17,7 @@ from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerModel
 from mantidqt.widgets.sliceviewer.peaksviewer.presenter\
     import PeaksViewerPresenter, TableWorkspaceDataPresenter
 from mantidqt.widgets.sliceviewer.peaksviewer.representation\
-import PeakRepresentationNoShape
+    import PeakRepresentation
 
 
 def create_test_model(name):
@@ -63,11 +63,11 @@ class PeaksViewerPresenterTest(unittest.TestCase):
         mock_view = MagicMock()
         name = 'ws1'
         mock_model = create_mock_model(name)
-        peak = PeakRepresentationNoShape(1.5, 2.5, 10.5, 0.7, 'r')
+        peak = create_autospec(PeakRepresentation)  #1.5, 2.5, 10.5, 0.7, 'r')
         mock_model.peak_representation_at.return_value = peak
         presenter = PeaksViewerPresenter(mock_model, mock_view)
 
-        presenter.notify(PeaksViewerPresenter.Event.PeakSelected)
+        presenter.notify(PeaksViewerPresenter.Event.PeakSelectionChanged)
 
         mock_view.snap_to.assert_called_once_with(peak)
 

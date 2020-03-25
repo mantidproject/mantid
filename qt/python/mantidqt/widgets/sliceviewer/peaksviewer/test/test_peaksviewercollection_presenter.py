@@ -12,7 +12,7 @@ import unittest
 
 # 3rdparty imports
 from mantid.dataobjects import PeaksWorkspace
-from mantid.py3compat.mock import call, create_autospec, patch, ANY, MagicMock
+from mantid.py3compat.mock import call, create_autospec, patch, MagicMock
 from mantidqt.widgets.sliceviewer.peaksviewer \
     import PeaksViewerPresenter, PeaksViewerCollectionPresenter, PeaksViewerModel
 

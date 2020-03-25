@@ -35,13 +35,22 @@ if __name__ == "__main__":
         SplitThreshold='50',
         MaxRecursionDepth='14')
     peaksws = Load('peaks_qLab.nxs')
+    # while peaksws.getNumberPeaks() > 1:
+    #     DeleteTableRows(peaksws, Rows=peaksws.getNumberPeaks() - 1)
     IntegratePeaksMD(
         InputWorkspace=mdws,
         PeaksWorkspace=peaksws,
         PeakRadius=0.5,
         OutputWorkspace='peaksws_sphere_nobkgd')
 
+    # import ptvsd
+
+    # # Allow other computers to attach to ptvsd at this IP address and port.
+    # ptvsd.enable_attach(address=('130.246.50.124', 3000), redirect_output=True)
+
+    # # Pause the program until a remote debugger is attached
+    # ptvsd.wait_for_attach()
+
     app = QApplication([])
     sv = SliceViewer(mdws)
-    # sv.overlay_peaks_workspace()
     app.exec_()

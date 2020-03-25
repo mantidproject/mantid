@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 
 # third party imports
-from mantid.kernel import V3D
 from mantid.py3compat.mock import MagicMock
 
 
@@ -50,19 +49,12 @@ class PeakRepresentationMixin(object):
 
         representation.snap_to(mock_painter)
 
-        mock_painter.snap_to.assert_called_once_with(self.x, self.y)
-
-    def create_test_object(self):
-        self.x, self.y, self.z, self.slicepoint, \
-            self.slicewidth, self.shape, self.fg_color = 0.0, 1.0, -1.0, -1.05, 10.0, None, 'b'
-        self.expected_alpha = 0.5333
-
-        return self.REPR_CLS.create(self.x, self.y, self.z, self.slicepoint, self.slicewidth,
-                                    self.shape, self.fg_color)
+        mock_painter.snap_to.assert_called_once_with(representation.x, representation.y,
+                                                     representation.snap_width())
 
     def verify_expected_attributes(self, representation):
         self.assertEqual(self.x, representation.x)
         self.assertEqual(self.y, representation.y)
         self.assertEqual(self.z, representation.z)
-        self.assertAlmostEqual(self.expected_alpha, representation.alpha, places=4)
+        self.assertEqual(self.alpha, representation.alpha)
         self.assertEqual(self.fg_color, representation.fg_color)

@@ -7,6 +7,6 @@
 #  This file is part of the mantid workbench.
 from __future__ import (absolute_import, division, unicode_literals)
 
-from .model import PeaksViewerModel
-from .presenter import PeaksViewerPresenter, PeaksViewerCollectionPresenter
-from .view import PeaksViewerCollectionView
+from .model import PeaksViewerModel  # noqa: F401
+from .presenter import PeaksViewerPresenter, PeaksViewerCollectionPresenter  # noqa: F401
+from .view import PeaksViewerCollectionView  # noqa: F401

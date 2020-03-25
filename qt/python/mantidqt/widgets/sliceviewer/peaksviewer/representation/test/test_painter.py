@@ -20,14 +20,15 @@ from mantidqt.widgets.sliceviewer.peaksviewer.representation.painter import MplP
 class MplPainterTest(unittest.TestCase):
 
     # --------------- success tests -----------------
-    def test_remove_calls_remove_on_artist(self):
+    def test_remove_calls_remove_on_artists(self):
         axes = MagicMock()
         painter = MplPainter(axes)
-        mock_artist = MagicMock()
+        mock_artist1, mock_artist2 = MagicMock(), MagicMock()
 
-        painter.remove(mock_artist)
+        painter.remove([mock_artist1, mock_artist2])
 
-        mock_artist.remove.assert_called_once()
+        mock_artist1.remove.assert_called_once()
+        mock_artist2.remove.assert_called_once()
 
     def test_snap_to_sets_xy_limits_so_xy_at_center(self):
         axes = MagicMock()
@@ -39,14 +40,25 @@ class MplPainterTest(unittest.TestCase):
         axes.set_xlim.assert_called_once_with(x - MplPainter.SNAP_WIDTH, x + MplPainter.SNAP_WIDTH)
         axes.set_ylim.assert_called_once_with(y - MplPainter.SNAP_WIDTH, y + MplPainter.SNAP_WIDTH)
 
+    def test_circle_draws_circle_patch(self):
+        axes = MagicMock()
+        painter = MplPainter(axes)
+        x, y, radius = 1, 2, 0.8
+
+        artist = painter.circle(x, y, radius)
+
+        axes.add_patch.assert_called_once()
+        self.assertTrue(artist is not None)
+
     def test_scatter_draws_with_only_xy(self):
         axes = MagicMock()
         painter = MplPainter(axes)
         x, y = 1, 2
 
-        painter.scatter(x, y)
+        artist = painter.scatter(x, y)
 
         axes.scatter.assert_called_once_with(x, y)
+        self.assertTrue(artist is not None)
 
     def test_scatter_passes_kwargs_to_mpl(self):
         axes = MagicMock()
@@ -57,14 +69,15 @@ class MplPainterTest(unittest.TestCase):
 
         axes.scatter.assert_called_once_with(x, y, alpha=1)
 
-    def test_update_properties_passes_keywords_to_set(self):
+    def test_update_properties_passes_keywords_to_set_for_each_artist(self):
         axes = MagicMock()
         painter = MplPainter(axes)
-        artist = MagicMock()
+        artist1, artist2 = MagicMock(), MagicMock()
 
-        painter.update_properties(artist, alpha=1)
+        painter.update_properties([artist1, artist2], alpha=1)
 
-        artist.set.assert_called_once_with(alpha=1)
+        artist1.set.assert_called_once_with(alpha=1)
+        artist2.set.assert_called_once_with(alpha=1)
 
     # --------------- failure tests -----------------
     def test_construction_raises_error_if_given_non_axes_instance(self):

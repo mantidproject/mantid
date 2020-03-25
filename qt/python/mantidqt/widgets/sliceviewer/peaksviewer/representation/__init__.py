@@ -8,14 +8,16 @@
 from __future__ import (absolute_import, division, unicode_literals)
 
 # local imports
-from .noshape import PeakRepresentationNoShape
+from .base import compute_alpha
+from .noshape import NonIntegratedPeakRepresentation
+from .spherical import SphericallyIntergratedPeakRepresentation
 
 # map shape names to representation classes
 # the strings need to match whatever Peak.getPeakShape.shapeName returns
-_PEAK_REPRESENTATIONS = {
-    "none": PeakRepresentationNoShape,
-    "spherical": PeakRepresentationNoShape,
-    "ellipsoid": PeakRepresentationNoShape
+PEAK_REPRESENTATION_FACTORY = {
+    "none": NonIntegratedPeakRepresentation,
+    "spherical": SphericallyIntergratedPeakRepresentation,
+    "ellipsoid": NonIntegratedPeakRepresentation
 }
 
 
@@ -33,5 +35,5 @@ def create_peakrepresentation(x, y, z, slicepoint, slicedim_width, peak_shape, m
     :returns: A PeakRepresentation object describing the Peak aspects
               important for display
     """
-    cls = _PEAK_REPRESENTATIONS[peak_shape.shapeName().lower()]
-    return cls.create(x, y, z, slicepoint, slicedim_width, peak_shape, marker_color)
+    return PEAK_REPRESENTATION_FACTORY[peak_shape.shapeName().lower()].create(
+        x, y, z, compute_alpha(z, slicepoint, slicedim_width), peak_shape, marker_color)
