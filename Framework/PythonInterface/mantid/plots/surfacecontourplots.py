@@ -24,7 +24,8 @@ def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name:
     if len(workspaces) > 0:
         matrix_ws = _create_workspace_for_group_plot(plot_type, workspaces, plot_index, log_name, custom_log_values)
 
-        title = f" plot for {[ws.name() for ws in workspaces]}, index {plot_index}"
+        workspace_names = [ws.name() for ws in workspaces]
+        title = f" plot for {', '.join(workspace_names)}, index {plot_index}"
 
         if plot_type == SpectraSelection.Surface:
             fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
