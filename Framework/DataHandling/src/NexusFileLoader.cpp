@@ -8,7 +8,6 @@
 
 namespace Mantid::DataHandling {
 void NexusFileLoader::exec() { execLoader(); }
-void NexusFileLoader::execLoader() {}
 boost::shared_ptr<Mantid::API::Algorithm> NexusFileLoader::createChildAlgorithm(
     const std::string &name, const double startProgress,
     const double endProgress, const bool enableLogging, const int &version) {
@@ -23,9 +22,9 @@ boost::shared_ptr<Mantid::API::Algorithm> NexusFileLoader::createChildAlgorithm(
     nfl->setFileInfo(m_fileInfo);
   }
   return child;
-  }
-  void NexusFileLoader::setFileInfo(
-      std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo) {
-    m_fileInfo = std::move(fileInfo);
-  }
 }
+void NexusFileLoader::setFileInfo(
+    std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo) {
+  m_fileInfo = std::move(fileInfo);
+}
+} // namespace Mantid::DataHandling
