@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
 
 #include <Poco/File.h>
 
@@ -104,7 +105,7 @@ const boost::shared_ptr<IAlgorithm>
 FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const {
   using Kernel::FileDescriptor;
   using Kernel::NexusDescriptor;
-
+  using Kernel::NexusHDF5Descriptor;
   m_log.debug() << "Trying to find loader for '" << filename << "'\n";
 
   IAlgorithm_sptr bestLoader;
@@ -112,8 +113,14 @@ FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const {
     m_log.debug()
         << filename
         << " looks like a Nexus file. Checking registered Nexus loaders\n";
-    bestLoader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(
-        filename, m_names[Nexus], m_log);
+    bestLoader =
+        searchForLoader<NexusHDF5Descriptor, IFileLoader<NexusHDF5Descriptor>>(
+            filename, m_names[Nexus], m_log);
+    if (!bestLoader) {
+      bestLoader =
+          searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(
+              filename, m_names[Nexus], m_log);
+    }
   } else {
     m_log.debug() << "Checking registered non-HDF loaders\n";
     bestLoader = searchForLoader<FileDescriptor, IFileLoader<FileDescriptor>>(
