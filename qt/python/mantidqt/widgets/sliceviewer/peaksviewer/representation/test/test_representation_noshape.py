@@ -17,30 +17,12 @@ from mantid.py3compat.mock import ANY, MagicMock
 # local imports
 from mantidqt.widgets.sliceviewer.peaksviewer.representation \
     import PeakRepresentationNoShape
+from mantidqt.widgets.sliceviewer.peaksviewer.representation.test.representation_test_mixin \
+    import PeakRepresentationMixin
 
 
-class PeakRepresentationNoShapeTest(unittest.TestCase):
-    def test_constructor_stores_expected_attributes(self):
-        x, y, z, alpha, marker_color = 0.0, 1.0, -1.0, 0.5, 'b'
-
-        representation = PeakRepresentationNoShape(x, y, z, alpha, marker_color)
-
-        self._verify_expected_attributes(representation, V3D(x, y, z), alpha, marker_color)
-
-    def test_representation_attributes_read_only(self):
-        representation = PeakRepresentationNoShape(0, 0, 0, 1.0, 'w')
-
-        for name, value in (("alpha", 2), ("x", 2), ("y", 0.1), ("z", 3), ('marker_color', 'b')):
-            self.assertRaises(AttributeError, setattr, representation, name, value)
-
-    def test_snap_to_calls_painter_method_with_peak_center(self):
-        x, y = 1.5, 2.5
-        representation = PeakRepresentationNoShape(x, y, 0, 1.0, 'w')
-        mock_painter = MagicMock()
-
-        representation.snap_to(mock_painter)
-
-        mock_painter.assert_called_once_with(x, y)
+class PeakRepresentationNoShapeTest(unittest.TestCase, PeakRepresentationMixin):
+    REPR_CLS = PeakRepresentationNoShape
 
     def test_noshape_representation_draw_creates_scatter_point(self):
         x, y, z, alpha, marker_color = 0.0, 1.0, -1.0, 0.5, 'b'
@@ -63,14 +45,6 @@ class PeakRepresentationNoShapeTest(unittest.TestCase):
                                                           marker_color)
 
         self.assertAlmostEqual(0.4444, representation.alpha, places=4)
-
-    # private
-    def _verify_expected_attributes(self, representation, center, alpha, marker_color):
-        self.assertEqual(center.X(), representation.x)
-        self.assertEqual(center.Y(), representation.y)
-        self.assertEqual(center.Z(), representation.z)
-        self.assertAlmostEqual(alpha, representation.alpha, places=4)
-        self.assertEqual(marker_color, representation.marker_color)
 
 
 if __name__ == "__main__":

@@ -33,25 +33,25 @@ def value_or_error(props, key):
 class PeakRepresentation(with_metaclass(ABCMeta)):
     """Describes representation of Peak for display"""
 
-    def __init__(self, x, y, z, alpha, marker_color):
+    def __init__(self, x, y, z, alpha, fg_color):
         """
         :param x: X position of center in slice plane
         :param y: Y position of center in slice plane
         :param z: Z position of center out of slice plane
         :param alpha: A float between 0.0, 1.0 defining the transparency
-        :param marker_color: A str code defining the color of the peak marker
+        :param fg_color: A str code defining the color of the peak marker
         """
         self._alpha = alpha
         self._x, self._y, self._z = x, y, z
-        self._marker_color = marker_color
+        self._fg_color = fg_color
 
     @property
     def alpha(self):
         return self._alpha
 
     @property
-    def marker_color(self):
-        return self._marker_color
+    def fg_color(self):
+        return self._fg_color
 
     @property
     def x(self):

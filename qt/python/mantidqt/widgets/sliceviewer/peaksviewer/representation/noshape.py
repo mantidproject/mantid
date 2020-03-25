@@ -24,22 +24,22 @@ class PeakRepresentationNoShape(PeakRepresentation):
     _painted = None
 
     @classmethod
-    def create(cls, x, y, z, slicepoint, slicedim_width, _, marker_color):
+    def create(cls, x, y, z, slicepoint, slicedim_width, _, fg_color):
         """
         Create an instance of PeakRepresentationSphere from the given set of attributes
         :param center: A V3D giving the center of the Peak
         :param slicepoint: float giving current slice point
         :param slicedim_width: 2-tuple giving (min/max) values of the slicing dimension
         :param _: A PeakShape object describing the shape properties (unused)
-        :param marker_color: A string indicating the color of the marker
+        :param fg_color: A string indicating the color of the marker
         :return: A new instance of this class
         """
-        return PeakRepresentationNoShape(x=x,
-                                         y=y,
-                                         z=z,
-                                         alpha=PeakRepresentation.compute_alpha(
-                                             z, slicepoint, slicedim_width),
-                                         marker_color=marker_color)
+        return PeakRepresentationNoShape(
+            x=x,
+            y=y,
+            z=z,
+            alpha=PeakRepresentation.compute_alpha(z, slicepoint, slicedim_width),
+            fg_color=fg_color)
 
     def draw(self, painter):
         """
@@ -48,12 +48,13 @@ class PeakRepresentationNoShape(PeakRepresentation):
         :return: The objects added
         """
         if self.alpha > 0.0:
-            self._painted = painter.scatter(self.x,
-                                            self.y,
-                                            alpha=self.alpha,
-                                            color=self.marker_color,
-                                            marker=self.MARKER,
-                                            s=self.MARKER_SIZE_PTS_SQ)
+            self._painted = painter.scatter(
+                self.x,
+                self.y,
+                alpha=self.alpha,
+                color=self.fg_color,
+                marker=self.MARKER,
+                s=self.MARKER_SIZE_PTS_SQ)
         else:
             self._painted = None
 
