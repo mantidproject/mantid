@@ -43,7 +43,7 @@ public:
   static FitPeaksTest *createSuite() { return new FitPeaksTest(); }
   static void destroySuite(FitPeaksTest *suite) { delete suite; }
 
-  void setUp() {
+  void setUp() override {
     // Needs other algorithms and functions to be registered
     FrameworkManager::Instance();
   }

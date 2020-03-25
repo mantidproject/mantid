@@ -20,7 +20,7 @@ using namespace Mantid::API;
 class ConvolutionFunctionModelTest : public CxxTest::TestSuite {
 
 public:
-  void setUp() {
+  void setUp() override {
     // Needs other algorithms and functions to be registered
     FrameworkManager::Instance();
   }
