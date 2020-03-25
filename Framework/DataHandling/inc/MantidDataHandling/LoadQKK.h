@@ -10,6 +10,7 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/NexusDescriptor.h"
 
 namespace Mantid {
 namespace DataHandling {

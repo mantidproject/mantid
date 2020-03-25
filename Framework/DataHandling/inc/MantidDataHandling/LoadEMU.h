@@ -16,6 +16,8 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/FileDescriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {

@@ -10,7 +10,7 @@
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/BinaryStreamReader.h"
-
+#include "MantidKernel/FileDescriptor.h"
 #include <fstream>
 
 namespace Mantid {

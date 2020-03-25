@@ -11,6 +11,8 @@
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/FileDescriptor.h"
+
 #include <climits>
 #include <list>
 #include <memory>

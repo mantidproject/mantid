@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidKernel/NexusDescriptor.h"
 
 namespace H5 {
 class Group;
