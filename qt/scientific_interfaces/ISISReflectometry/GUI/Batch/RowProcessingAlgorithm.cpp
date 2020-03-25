@@ -84,19 +84,17 @@ void updateTransmissionStitchProperties(
 void updateBackgroundSubtractionProperties(
     AlgorithmRuntimeProps &properties,
     BackgroundSubtraction const &subtraction) {
-  AlgorithmProperties::update("SubtractBackground", subtraction.subtractBackground(), properties);
+  AlgorithmProperties::update("SubtractBackground",
+                              subtraction.subtractBackground(), properties);
   AlgorithmProperties::update(
       "BackgroundCalculationMethod",
       backgroundSubtractionTypeToString(subtraction.subtractionType()),
       properties);
-
-  if (subtraction.subtractionType() == BackgroundSubtractionType::Polynomial) {
-    AlgorithmProperties::update("DegreeOfPolynomial",
-                                subtraction.degreeOfPolynomial(), properties);
-    AlgorithmProperties::update(
-        "CostFunction", costFunctionTypeToString(subtraction.costFunction()),
-        properties);
-  }
+  AlgorithmProperties::update("DegreeOfPolynomial",
+                              subtraction.degreeOfPolynomial(), properties);
+  AlgorithmProperties::update(
+      "CostFunction", costFunctionTypeToString(subtraction.costFunction()),
+      properties);
 }
 
 void updatePolarizationCorrectionProperties(

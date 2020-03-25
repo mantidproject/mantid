@@ -33,6 +33,18 @@
 
   <!-- Corrections -->
 
+  <parameter name="BackgroundCalculationMethod" type="string">
+      <value val="Polynomial"/>
+  </parameter>
+
+  <parameter name="DegreeOfPolynomial">
+      <value val="2"/>
+  </parameter>
+
+  <parameter name="CostFunction" type="string">
+      <value val="Unweighted least squares"/>
+  </parameter>
+
   <parameter name="PolarizationAnalysis" type="string">
       <value val="ParameterFile"/>
   </parameter>

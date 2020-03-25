@@ -39,6 +39,10 @@ public:
     TS_ASSERT_EQUALS(result["SummationType"], "SumInQ");
     TS_ASSERT_EQUALS(result["IncludePartialBins"], "1");
     TS_ASSERT_EQUALS(result["Debug"], "1");
+    TS_ASSERT_EQUALS(result["SubtractBackground"], "1");
+    TS_ASSERT_EQUALS(result["BackgroundCalculationMethod"], "Polynomial");
+    TS_ASSERT_EQUALS(result["DegreeOfPolynomial"], "3");
+    TS_ASSERT_EQUALS(result["CostFunction"], "Unweighted least squares");
     TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "1");
     TS_ASSERT_EQUALS(result["FloodCorrection"], "Workspace");
     TS_ASSERT_EQUALS(result["FloodWorkspace"], "test_workspace");
@@ -57,6 +61,10 @@ public:
     TS_ASSERT_EQUALS(result["SummationType"], "SumInQ");
     TS_ASSERT_EQUALS(result["IncludePartialBins"], "1");
     TS_ASSERT_EQUALS(result["Debug"], "1");
+    TS_ASSERT_EQUALS(result["SubtractBackground"], "1");
+    TS_ASSERT_EQUALS(result["BackgroundCalculationMethod"], "Polynomial");
+    TS_ASSERT_EQUALS(result["DegreeOfPolynomial"], "3");
+    TS_ASSERT_EQUALS(result["CostFunction"], "Unweighted least squares");
     TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "1");
     TS_ASSERT_EQUALS(result["FloodCorrection"], "Workspace");
     TS_ASSERT_EQUALS(result["FloodWorkspace"], "test_workspace");
@@ -216,6 +224,25 @@ public:
         2.3, ReductionOptionsMap{{"WavelengthMin", "3.3"}});
     auto result = createAlgorithmRuntimeProps(model, row);
     TS_ASSERT_EQUALS(result["WavelengthMin"], "3.3");
+  }
+
+  void testOptionsCellOverridesSubtractBackgroundAndStillPicksUpSettings() {
+    auto experiment = Experiment(
+        AnalysisMode::MultiDetector, ReductionType::NonFlatSample,
+        SummationType::SumInQ, true, true,
+        BackgroundSubtraction(false, BackgroundSubtractionType::AveragePixelFit,
+                              3, CostFunctionType::UnweightedLeastSquares),
+        makePolarizationCorrections(), makeFloodCorrections(),
+        makeTransmissionStitchOptions(), makeStitchOptions(),
+        makePerThetaDefaultsWithTwoAnglesAndWildcard());
+    auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
+    auto row = makeRowWithOptionsCellFilled(
+        2.3, ReductionOptionsMap{{"SubtractBackground", "1"}});
+    auto result = createAlgorithmRuntimeProps(model, row);
+    TS_ASSERT_EQUALS(result["SubtractBackground"], "1");
+    TS_ASSERT_EQUALS(result["BackgroundCalculationMethod"], "AveragePixelFit");
+    TS_ASSERT_EQUALS(result["DegreeOfPolynomial"], "3");
+    TS_ASSERT_EQUALS(result["CostFunction"], "Unweighted least squares");
   }
 
 private:

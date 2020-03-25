@@ -120,6 +120,31 @@ public:
     getDefaultsFromParamsFileThrows("TransmissionRunRange_Invalid");
   }
 
+  void testDefaultSubtractionOptions() {
+    auto result = getDefaults();
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().subtractBackground(),
+                     false);
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().subtractionType(),
+                     BackgroundSubtractionType::PerDetectorAverage);
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().degreeOfPolynomial(), 0);
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().costFunction(),
+                     CostFunctionType::LeastSquares);
+  }
+
+  void testValidSubtractionOptionsFromParamsFile() {
+    auto result = getDefaultsFromParamsFile("Experiment");
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().subtractBackground(), true);
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().subtractionType(),
+                     BackgroundSubtractionType::Polynomial);
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().degreeOfPolynomial(), 2);
+    TS_ASSERT_EQUALS(result.backgroundSubtraction().costFunction(),
+                     CostFunctionType::UnweightedLeastSquares);
+  }
+
+  void testInvalidSubtractionOptionsFromParamsFile() {
+    getDefaultsFromParamsFileThrows("Subtraction_Invalid");
+  }
+
   void testDefaultCorrectionOptions() {
     auto result = getDefaults();
     TS_ASSERT_EQUALS(result.polarizationCorrections().correctionType(),

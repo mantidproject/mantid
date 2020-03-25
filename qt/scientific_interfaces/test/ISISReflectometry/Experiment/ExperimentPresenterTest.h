@@ -161,6 +161,68 @@ public:
     verifyAndClear();
   }
 
+  void testSetBackgroundSubtractionUpdatesModel() {
+    auto presenter = makePresenter();
+    expectSubtractBackground();
+    presenter.notifySettingsChanged();
+    assertBackgroundSubtractionOptionsSet(presenter);
+    verifyAndClear();
+  }
+
+  void
+  testBackgroundSubtractionMethodIsEnabledWhenSubtractBackgroundIsChecked() {
+    auto presenter = makePresenter();
+    expectSubtractBackground(true);
+    EXPECT_CALL(m_view, enableBackgroundSubtractionMethod()).Times(1);
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testPolynomialInputsEnabledWhenSubtractingPolynomialBackground() {
+    auto presenter = makePresenter();
+    expectSubtractBackground(true, "Polynomial");
+    EXPECT_CALL(m_view, enablePolynomialDegree()).Times(1);
+    EXPECT_CALL(m_view, enableCostFunction()).Times(1);
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testPolynomialInputsDisabledWhenSubtractingPerDetectorAverage() {
+    auto presenter = makePresenter();
+    expectSubtractBackground(true, "PerDetectorAverage");
+    EXPECT_CALL(m_view, disablePolynomialDegree()).Times(1);
+    EXPECT_CALL(m_view, disableCostFunction()).Times(1);
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testPolynomialInputsDisabledWhenSubtractingAveragePixelFit() {
+    auto presenter = makePresenter();
+    expectSubtractBackground(true, "AveragePixelFit");
+    EXPECT_CALL(m_view, disablePolynomialDegree()).Times(1);
+    EXPECT_CALL(m_view, disableCostFunction()).Times(1);
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testBackgroundSubtractionInputsDisabledWhenOptionTurnedOff() {
+    auto presenter = makePresenter();
+    expectSubtractBackground(false);
+    EXPECT_CALL(m_view, disableBackgroundSubtractionMethod()).Times(1);
+    EXPECT_CALL(m_view, disablePolynomialDegree()).Times(1);
+    EXPECT_CALL(m_view, disableCostFunction()).Times(1);
+    presenter.notifySettingsChanged();
+    verifyAndClear();
+  }
+
+  void testTogglePolarizationCorrectionOptionUpdatesModel() {
+    auto presenter = makePresenter();
+    expectPolarizationAnalysisOn();
+    presenter.notifySettingsChanged();
+    assertPolarizationAnalysisOn(presenter);
+    verifyAndClear();
+  }
+
   void testSetFloodCorrectionsUpdatesModel() {
     auto presenter = makePresenter();
     FloodCorrections floodCorr(FloodCorrectionType::Workspace,
@@ -616,8 +678,7 @@ public:
     auto model = makeModelWithCorrections(
         PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
         FloodCorrections(FloodCorrectionType::ParameterFile),
-        BackgroundSubtraction(true, BackgroundSubtractionType::Polynomial, 3,
-                              CostFunctionType::UnweightedLeastSquares));
+        makeBackgroundSubtraction());
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setPolarizationCorrectionOption(true)).Times(1);
@@ -634,16 +695,13 @@ public:
     auto model = makeModelWithCorrections(
         PolarizationCorrections(PolarizationCorrectionType::ParameterFile),
         FloodCorrections(FloodCorrectionType::ParameterFile),
-        BackgroundSubtraction(true, BackgroundSubtractionType::Polynomial, 3,
-                              CostFunctionType::UnweightedLeastSquares));
+        makeBackgroundSubtraction());
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
-    TS_ASSERT_EQUALS(
-        presenter.experiment().polarizationCorrections().correctionType(),
-        PolarizationCorrectionType::ParameterFile);
-    TS_ASSERT_EQUALS(presenter.experiment().floodCorrections().correctionType(),
-                     FloodCorrectionType::ParameterFile);
+    assertBackgroundSubtractionOptionsSet(presenter);
+    assertPolarizationAnalysisOn(presenter);
+    assertFloodCorrectionUsesParameterFile(presenter);
     verifyAndClear();
   }
 
@@ -784,6 +842,65 @@ private:
         .WillOnce(Return(std::string("SumInQ")));
     EXPECT_CALL(m_view, getReductionType())
         .WillOnce(Return(std::string("DivergentBeam")));
+  }
+
+  void expectSubtractBackground(
+      bool subtractBackground = true,
+      std::string const &subtractionType = std::string("Polynomial"),
+      int degreeOfPolynomial = 3,
+      std::string const &costFunction =
+          std::string("Unweighted least squares")) {
+    EXPECT_CALL(m_view, getSubtractBackground())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(subtractBackground));
+    EXPECT_CALL(m_view, getBackgroundSubtractionMethod())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(subtractionType));
+    EXPECT_CALL(m_view, getPolynomialDegree())
+        .Times(1)
+        .WillRepeatedly(Return(degreeOfPolynomial));
+    EXPECT_CALL(m_view, getCostFunction())
+        .Times(1)
+        .WillRepeatedly(Return(costFunction));
+  }
+
+  void assertBackgroundSubtractionOptionsSet(
+      ExperimentPresenter const &presenter, bool subtractBackground = true,
+      BackgroundSubtractionType subtractionType =
+          BackgroundSubtractionType::Polynomial,
+      int degreeOfPolynomial = 3,
+      CostFunctionType costFunction =
+          CostFunctionType::UnweightedLeastSquares) {
+    TS_ASSERT_EQUALS(
+        presenter.experiment().backgroundSubtraction().subtractBackground(),
+        subtractBackground);
+    TS_ASSERT_EQUALS(
+        presenter.experiment().backgroundSubtraction().subtractionType(),
+        subtractionType);
+    TS_ASSERT_EQUALS(
+        presenter.experiment().backgroundSubtraction().degreeOfPolynomial(),
+        degreeOfPolynomial);
+    TS_ASSERT_EQUALS(
+        presenter.experiment().backgroundSubtraction().costFunction(),
+        costFunction);
+  }
+
+  void expectPolarizationAnalysisOn() {
+    EXPECT_CALL(m_view, getPolarizationCorrectionOption())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+  }
+
+  void assertPolarizationAnalysisOn(ExperimentPresenter const &presenter) {
+    TS_ASSERT_EQUALS(
+        presenter.experiment().polarizationCorrections().correctionType(),
+        PolarizationCorrectionType::ParameterFile);
+  }
+
+  void
+  assertFloodCorrectionUsesParameterFile(ExperimentPresenter const &presenter) {
+    TS_ASSERT_EQUALS(presenter.experiment().floodCorrections().correctionType(),
+                     FloodCorrectionType::ParameterFile);
   }
 
   std::unique_ptr<MockExperimentOptionDefaults>

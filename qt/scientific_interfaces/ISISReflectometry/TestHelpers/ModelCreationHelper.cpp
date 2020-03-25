@@ -350,7 +350,7 @@ std::map<std::string, std::string> makeEmptyStitchOptions() {
 }
 
 BackgroundSubtraction makeBackgroundSubtraction() {
-  return BackgroundSubtraction(true, BackgroundSubtractionType::Polynomial, 2,
+  return BackgroundSubtraction(true, BackgroundSubtractionType::Polynomial, 3,
                                CostFunctionType::UnweightedLeastSquares);
 }
 
