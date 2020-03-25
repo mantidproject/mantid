@@ -147,6 +147,11 @@ class BlockingAsyncTaskWithCallback(AsyncTask):
         """Cancel an asynchronous execution"""
         # Implementation is based on
         # https://stackoverflow.com/questions/5019436/python-how-to-terminate-a-blocking-thread
+        from mantid.api import IAlgorithm
+        alg = IAlgorithm._algorithmInThread(ctypes.c_long(self.task.ident))
+        if alg is not None:
+            alg.cancel()
+
         ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.task.ident),
                                                    ctypes.py_object(KeyboardInterrupt))
         time.sleep(0.1)
