@@ -34,30 +34,29 @@ if(NOT ${USE_SANITIZERS_LOWER} MATCHES "off")
 
         add_compile_options(-fno-omit-frame-pointer -fno-optimize-sibling-calls)
     endif()
-
-    # Allow all instrumented code to continue beyond the first error
-    add_compile_options(-fsanitize-recover=all)
-
-    # Address
-    add_compile_options(
-        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"address">:-fsanitize=address>)
-    add_link_options(
-        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"address">:-fsanitize=address>)
-
-    # Thread
-    add_compile_options(
-        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"thread">:-fsanitize=thread>)
-    add_link_options(
-        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"thread">:-fsanitize=thread>)
-
-    # Undefined
-    # RTTI information is not exported for some classes causing the
-    # linker to fail whilst adding vptr instrumentation
-    add_compile_options(
-        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"undefined">:-fsanitize=undefined>
-        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"undefined">:-fno-sanitize=vptr>)
-
-    add_link_options(
-        $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"undefined">:-fsanitize=undefined>)
-
 endif()
+
+# Allow all instrumented code to continue beyond the first error
+add_compile_options($<$<NOT:$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"off">>:-fsanitize-recover=all>)
+
+# Address
+add_compile_options(
+    $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"address">:-fsanitize=address>)
+add_link_options(
+    $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"address">:-fsanitize=address>)
+
+# Thread
+add_compile_options(
+    $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"thread">:-fsanitize=thread>)
+add_link_options(
+    $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"thread">:-fsanitize=thread>)
+
+# Undefined
+# RTTI information is not exported for some classes causing the
+# linker to fail whilst adding vptr instrumentation
+add_compile_options(
+    $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"undefined">:-fsanitize=undefined>
+    $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"undefined">:-fno-sanitize=vptr>)
+
+add_link_options(
+    $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"undefined">:-fsanitize=undefined>)

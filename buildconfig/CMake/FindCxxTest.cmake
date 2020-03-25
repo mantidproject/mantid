@@ -212,7 +212,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
 
         set( _LSAN_OPTS "suppressions=${SUPPRESSIONS_DIR}/Leak.supp" )
           set_property( TEST ${_cxxtest_separate_name} APPEND PROPERTY
-          ENVIRONMENT LSAN_OPTIONS= ${_LSAN_OPTS} )
+          ENVIRONMENT LSAN_OPTIONS=${_LSAN_OPTS} )
 
       endif()
 
