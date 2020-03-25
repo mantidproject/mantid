@@ -318,7 +318,7 @@ class StateGuiModelTest(unittest.TestCase):
 
         q_1d_rebin_string = state_gui_model.q_1d_rebin_string
         self.assertEqual(type(q_1d_rebin_string), bytes)
-        self.assertEqual(q_1d_rebin_string, "test")
+        self.assertEqual(q_1d_rebin_string, b"test")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity
