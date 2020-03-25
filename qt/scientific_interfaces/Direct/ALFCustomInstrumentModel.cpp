@@ -170,7 +170,7 @@ bool ALFCustomInstrumentModel::hasTubeBeenExtracted(const std::string &name) {
   return AnalysisDataService::Instance().doesExist(EXTRACTEDWS + name);
 }
 
-bool ALFCustomInstrumentModel::extractTubeConditon(
+bool ALFCustomInstrumentModel::extractTubeCondition(
     std::map<std::string, bool> tabBools) {
   try {
 
@@ -182,7 +182,7 @@ bool ALFCustomInstrumentModel::extractTubeConditon(
   }
 }
 
-bool ALFCustomInstrumentModel::averageTubeConditon(
+bool ALFCustomInstrumentModel::averageTubeCondition(
     std::map<std::string, bool> tabBools) {
   try {
 

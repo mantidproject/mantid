@@ -31,12 +31,13 @@ namespace{
   const std::string notALFFile = "ZOOM00006113.nxs";
 }
 
-class ALFModelTest : public ALFCustomInstrumentModel{
+class partALFModelTest : public ALFCustomInstrumentModel{
 public:
-    ALFModelTest():m_loadCount(0),m_transformCount(0){};
-    ~ALFModelTest(){};
-  void loadAlg(const std::string &name) override final {(void) name;m_loadCount+=1;};
-    void transformData() override final {m_transformCount+=1;};
+    partALFModelTest():m_loadCount(0),m_transformCount(0){};
+    virtual ~partALFModelTest(){};
+    void loadAlg(const std::string &name) override final {(void) name;m_loadCount+=1;};
+    MOCK_METHOD0(transformData, void());
+    //void transformData() override final {m_transformCount+=1;};
     int getLoadCount(){return m_loadCount;};
     int getTransformCount(){return m_transformCount;};
 private:
@@ -78,7 +79,7 @@ public:
   static void destroySuite(ALFCustomInstrumentModelTest *suite) { delete suite; }
 
   void setUp() override {
-  m_model = new ALFModelTest();
+  m_model = new partALFModelTest();
   }
 
   void tearDown() override {
@@ -238,24 +239,24 @@ public:
 
   void test_extractTubeCondition(){
    std::map<std::string, bool> conditions = { {"plotStored", true}, {"hasCurve",true},{"isTube", true}};
-   TS_ASSERT(m_model->extractTubeConditon(conditions));
+   TS_ASSERT(m_model->extractTubeCondition(conditions));
   }
   void test_extractTubeConditionNotTube(){
    std::map<std::string, bool> conditions = { {"plotStored", true}, {"hasCurve",true},{"isTube", false}};
-   TS_ASSERT(!m_model->extractTubeConditon(conditions));
+   TS_ASSERT(!m_model->extractTubeCondition(conditions));
   }
 
  void test_extractTubeConditionNoPlot(){
     std::map<std::string, bool> conditions = { {"plotStored", false}, {"hasCurve",true},{"isTube", true}};
-   TS_ASSERT(m_model->extractTubeConditon(conditions));
+   TS_ASSERT(m_model->extractTubeCondition(conditions));
  } 
  void test_extractTubeConditionNoCurve(){
    std::map<std::string, bool> conditions = { {"plotStored", true}, {"hasCurve",false},{"isTube", true}};
-   TS_ASSERT(m_model->extractTubeConditon(conditions));
+   TS_ASSERT(m_model->extractTubeCondition(conditions));
 } 
  void test_extractTubeConditionNoPlotOrCurve(){
   std::map<std::string, bool> conditions = { {"plotStored", false}, {"hasCurve",false},{"isTube", true}};
-   TS_ASSERT(!m_model->extractTubeConditon(conditions));
+   TS_ASSERT(!m_model->extractTubeCondition(conditions));
   }
 
  void test_averageTubeCondition(){
@@ -265,7 +266,7 @@ public:
     m_model->setCurrentRun(run);
     m_model->extractSingleTube();
 
-    TS_ASSERT(m_model->averageTubeConditon(conditions));
+    TS_ASSERT(m_model->averageTubeCondition(conditions));
     AnalysisDataService::Instance().remove("extractedTubes_ALF6113");
 }
  void test_averageTubeConditionNotTube(){
@@ -275,7 +276,7 @@ public:
     m_model->setCurrentRun(run);
     m_model->extractSingleTube();
 
-    TS_ASSERT(!m_model->averageTubeConditon(conditions));
+    TS_ASSERT(!m_model->averageTubeCondition(conditions));
     AnalysisDataService::Instance().remove("extractedTubes_ALF6113");
 }
 
@@ -286,7 +287,7 @@ public:
     m_model->setCurrentRun(run);
     m_model->extractSingleTube();
 
-    TS_ASSERT(!m_model->averageTubeConditon(conditions));
+    TS_ASSERT(!m_model->averageTubeCondition(conditions));
     AnalysisDataService::Instance().remove("extractedTubes_ALF6113");
  }
  
@@ -297,7 +298,7 @@ public:
     auto data = mockData("extractedTubes_ALF6113","ALF",run,false);
     m_model->setCurrentRun(run);
 
-    TS_ASSERT(!m_model->averageTubeConditon(conditions));
+    TS_ASSERT(!m_model->averageTubeCondition(conditions));
 }
 
  void test_averageTubeConditionNoWSToAverage(){
@@ -309,7 +310,7 @@ public:
 
     // the extraced ws will not exist but average will be 1
     AnalysisDataService::Instance().remove("extractedTubes_ALF6113");
-    TS_ASSERT(!m_model->averageTubeConditon(conditions));
+    TS_ASSERT(!m_model->averageTubeCondition(conditions));
 }
  
  void test_defaultFunction(){
@@ -322,7 +323,7 @@ public:
 }
 
 private:
-  ALFModelTest *m_model;
+  partALFModelTest *m_model;
 };
 
 #endif /* MANTIDQT_ALFCUSTOMINSTRUMENTMODELTEST_H_ */

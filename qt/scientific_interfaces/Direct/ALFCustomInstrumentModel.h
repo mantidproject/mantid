@@ -27,16 +27,16 @@ public:
   virtual void storeSingleTube(const std::string &name)=0;
   virtual void averageTube()=0;
   virtual bool hasTubeBeenExtracted(const std::string &name)=0;
-  virtual bool extractTubeConditon(std::map<std::string, bool> tabBools) = 0;
-  virtual bool averageTubeConditon(std::map<std::string, bool> tabBools) = 0;
-  virtual void extractSingleTube() = 0;
-  virtual std::string WSName() = 0;
-  virtual Mantid::API::CompositeFunction_sptr getDefaultFunction() = 0;
+  virtual bool extractTubeCondition(std::map<std::string, bool> tabBools)=0;
+  virtual bool averageTubeCondition(std::map<std::string, bool> tabBools)=0;
+  virtual void extractSingleTube()=0;
+  virtual std::string WSName()=0;
+  virtual Mantid::API::CompositeFunction_sptr getDefaultFunction()=0;
 };
 
 
 class DLLExport ALFCustomInstrumentModel
-    : public virtual IALFCustomInstrumentModel{
+    : public IALFCustomInstrumentModel{
 
 public:
   ALFCustomInstrumentModel();
@@ -49,8 +49,8 @@ public:
   void storeSingleTube(const std::string &name) override;
   void averageTube() override;
   bool hasTubeBeenExtracted(const std::string &name) override;
-  bool extractTubeConditon(std::map<std::string, bool> tabBools) override;
-  bool averageTubeConditon(std::map<std::string, bool> tabBools) override;
+  bool extractTubeCondition(std::map<std::string, bool> tabBools) override;
+  bool averageTubeCondition(std::map<std::string, bool> tabBools) override;
   void extractSingleTube() override;
   std::string WSName() override;
   Mantid::API::CompositeFunction_sptr getDefaultFunction() override;

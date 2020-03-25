@@ -35,38 +35,37 @@ using namespace testing;
 using Mantid::Geometry::Instrument;
 using namespace MantidQt::MantidWidgets;
 
-class ALFModelTest : public ALFCustomInstrumentModel{
-public:
-    ALFModelTest():m_loadCount(0),m_transformCount(0){};
-    ~ALFModelTest(){};
-    void loadAlg(const std::string &name) override{(void) name;m_loadCount+=1;};
-    void transformData() override {m_transformCount+=1;};
-    MOCK_METHOD0(extractSingleTube, void());
-    MOCK_METHOD0(averageTube, void());
-
-    int getLoadCount(){return m_loadCount;};
-    int getTransformCount(){return m_transformCount;};
-private:
-    int m_loadCount;
-    int m_transformCount;
-};
-
 
 //// need to add mock objects..
-//class ALFModelTest : public ALFCustomInstrumentModel{
-//public:
-//    ALFModelTest(){};
-//    ~ALFModelTest(){};
-//    MOCK_METHOD1(loadAlg, void(const std::string &name));
-//    MOCK_METHOD0(TransgormData, void());
-//    MOCK_METHOD1(loadData, 
-//    MOCK_METHOD1
-//    MOCK_METHOD1
-//    MOCK_METHOD1
-//    MOCK_METHOD1
-//    MOCK_METHOD0(extractSingleTube, void());
-//    MOCK_METHOD0(averageTube, void());
-//};
+class FullALFModelTest : public IALFCustomInstrumentModel{
+public:
+    FullALFModelTest(){};
+    ~FullALFModelTest(){};
+    MOCK_METHOD1(loadAlg, void(const std::string &name));
+    MOCK_METHOD0(transformData, void());
+    MOCK_METHOD0(isDataValid, std::map<std::string, bool>());
+    MOCK_METHOD1(storeSingleTube, void(const std::string &name));
+    MOCK_METHOD0(averageTube,void());
+    MOCK_METHOD1(hasTubeBeenExtracted, bool(const std::string &name));
+    MOCK_METHOD1(extractTubeCondition, bool(std::map<std::string, bool> tabBools));
+    MOCK_METHOD1(averageTubeCondition, bool(std::map<std::string, bool> tabBools));
+    MOCK_METHOD0(extractSingleTube, void());
+    MOCK_METHOD0(WSName, std::string());
+    MOCK_METHOD0(getDefaultFunction, Mantid::API::CompositeFunction_sptr());
+
+    MOCK_METHOD0(loadEmptyInstrument, void());
+    MOCK_METHOD1(loadData, std::pair<int, std::string>(const std::string &name));
+    MOCK_METHOD1(setCurrentRun, void(int &run));
+    MOCK_METHOD0(getCurrentRun, int());
+    MOCK_METHOD0(rename, void());
+    MOCK_METHOD0(remove, void());
+    MOCK_METHOD0(dataFileName, std::string());
+    MOCK_METHOD0(currentRun, int());
+    MOCK_METHOD1(isErrorCode, bool(const int run));
+    MOCK_METHOD0(getInstrument, const std::string());
+    MOCK_METHOD0(getTmpName, const std::string());
+    MOCK_METHOD0(getWSName, const std::string());
+};
 //
 //class ALFViewTest : public IALFCustomInstrumentView, public IBaseCustomInstrumentView{
 class ALFViewTest : public IALFCustomInstrumentView{//, public IBaseCustomInstrumentView{
@@ -133,7 +132,7 @@ public:
   void setUp() override {
     //m_workspace = createWorkspace(4, 3);
     //m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
-  m_model = new NiceMock<ALFModelTest>();
+  m_model = new NiceMock<FullALFModelTest>();
   m_view = new NiceMock<ALFViewTest>("ALF");
   m_paneView = new NiceMock<paneViewTest>();
   m_paneModel = new NiceMock<paneModelTest>();
@@ -171,7 +170,7 @@ public:
 private:
   //MatrixWorkspace_sptr m_workspace;
   //std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  NiceMock<ALFModelTest> *m_model;
+  NiceMock<FullALFModelTest> *m_model;
   NiceMock<ALFViewTest> *m_view;
   NiceMock<paneViewTest> *m_paneView;
   NiceMock<paneModelTest> *m_paneModel;
