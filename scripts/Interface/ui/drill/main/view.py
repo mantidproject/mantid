@@ -41,7 +41,7 @@ class DrillEventListener(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def on_process(self, rows):
+    def on_process_all(self):
         pass
 
     @abstractmethod
@@ -201,12 +201,16 @@ class DrillView(QMainWindow):
 
     def remove_rows_from_button(self):
         rows = self.get_selected_rows()
+        if not rows:
+            return
         self.remove_rows(rows)
 
     def copy_rows(self):
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Copy rows button"], False)
         rows = self.get_selected_rows()
+        if not rows:
+            return
         self.buffer = list()
         for row in rows:
             self.buffer.append(self.get_row_contents(row))
@@ -215,6 +219,8 @@ class DrillView(QMainWindow):
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Erase rows button"], False)
         rows = self.get_selected_rows()
+        if not rows:
+            return
         length = len(self.job_tree_view.cellsAt(rows[0]))
         for row in rows:
             for cell in range(0, length):
@@ -229,6 +235,8 @@ class DrillView(QMainWindow):
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Cut rows button"], False)
         rows = self.get_selected_rows()
+        if not rows:
+            return
         self.buffer = list()
         for row in rows:
             self.buffer.append(self.get_row_contents(row))
@@ -237,19 +245,26 @@ class DrillView(QMainWindow):
     def paste_rows(self):
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Paste rows button"], False)
-        position = self.get_selected_rows()[-1]
+        selected = self.get_selected_rows()
+        if not selected:
+            return
+        position = selected[-1]
         indice = position.rowRelativeToParent() + 1
         for row in self.buffer:
             position = self.job_tree_view.insertChildRowOf(
                     position.parent(), position.rowRelativeToParent() + 1)
             column = 0
+            empty = True
             for txt in row:
+                if txt:
+                    empty = False
                 self.job_tree_view.setCellAt(position, column,
                                              self.job_tree_view.cell_style(txt))
                 column += 1
-        self.call_settings_listeners(
-                lambda listener: listener.on_add_rows(indice, self.buffer)
-                )
+        if not empty:
+            self.call_settings_listeners(
+                    lambda listener: listener.on_add_rows(indice, self.buffer)
+                    )
 
     def load_rundex(self):
         fname = QFileDialog.getOpenFileName(self, 'Load rundex', '~')
@@ -282,4 +297,7 @@ class DrillView(QMainWindow):
         self.table_signals.copyRowsRequested.connect(self.copy_rows)
         self.table_signals.pasteRowsRequested.connect(self.paste_rows)
         self.table_signals.cutRowsRequested.connect(self.cut_rows)
+
+    def set_technique(self, technique):
+        self.technique = technique
 
