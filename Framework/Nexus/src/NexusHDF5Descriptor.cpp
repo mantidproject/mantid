@@ -28,15 +28,12 @@ namespace {
  */
 herr_t readStringAttribute(hid_t attr, char **data) {
   herr_t iRet = 0;
-  hid_t atype = -1;
-  hid_t space;
-  int ndims;
-  hsize_t thedims[H5S_MAX_RANK], sdim;
+  hsize_t thedims[H5S_MAX_RANK];
 
-  atype = H5Aget_type(attr);
-  sdim = H5Tget_size(atype);
-  space = H5Aget_space(attr);
-  ndims = H5Sget_simple_extent_dims(space, thedims, NULL);
+  hid_t atype = H5Aget_type(attr);
+  hsize_t sdim = H5Tget_size(atype);
+  hid_t space = H5Aget_space(attr);
+  int ndims = H5Sget_simple_extent_dims(space, thedims, NULL);
 
   if (ndims == 0) {
     if (H5Tis_variable_str(atype)) {
