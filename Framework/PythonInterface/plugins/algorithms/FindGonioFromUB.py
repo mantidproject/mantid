@@ -42,21 +42,21 @@ class FindGonioFromUB(DataProcessorAlgorithm):
                 'reference (typically, but not necessarily, omega = phi = 0) and a consistent UB will be made '
                 'for each of the subsequent runs.')
         self.declareProperty(
-            name="chi",
+            name="Chi",
             defaultValue=45.0,
             direction=Direction.Input,
             validator=FloatBoundedValidator(
                 lower=0.0, upper=90.0),
             doc="Angle of the goniometer axis from +ve Z (vertical up).")
         self.declareProperty(
-            name="chiTol",
+            name="ChiTol",
             defaultValue=5.0,
             validator=FloatBoundedValidator(
                 lower=0.0, upper=45.0),
             direction=Direction.Input,
             doc="Tolerance of chi angle to test for consistency.")
         self.declareProperty(
-            name="phiTol",
+            name="PhiTol",
             defaultValue=15.0,
             validator=FloatBoundedValidator(
                 lower=0.0, upper=45.0),
@@ -64,14 +64,14 @@ class FindGonioFromUB(DataProcessorAlgorithm):
             doc="Tolerance of phi angle to test for consistency (due to uncertainty on the gonio axis at omega=0"
                 "this tol might need to be quite large).")
         self.declareProperty(
-            name="phiHand",
+            name="PhiHand",
             defaultValue=1,
             validator=IntListValidator([-1, 1]),
             direction=Direction.Input,
             doc="Handedness for the phi angles (rotation around goniometer axis) in the"
                 " log file (1 for ccw/RH, -1 for cw/LH)")
         self.declareProperty(
-            name="dOmega",
+            name="DOmega",
             defaultValue=0.0,
             direction=Direction.Input,
             validator=FloatBoundedValidator(
@@ -79,7 +79,7 @@ class FindGonioFromUB(DataProcessorAlgorithm):
             doc="omega rotation between component of goniometer axis in XY-plane from +ve Y-axis"
                 "(perpendicular to ki)")
         self.declareProperty(
-            name="omegaHand",
+            name="OmegaHand",
             defaultValue=1,
             validator=IntListValidator([-1, 1]),
             direction=Direction.Input,
@@ -107,12 +107,12 @@ class FindGonioFromUB(DataProcessorAlgorithm):
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=3)
         # Get input
         ubFiles = self.getProperty('UBfiles').value
-        chiRef = self.getProperty('chi').value
-        chiTol = self.getProperty('chiTol').value
-        phiTol = self.getProperty('phiTol').value
-        phiHand = self.getProperty('phiHand').value
-        dOmega = self.getProperty('dOmega').value
-        omegaHand = self.getProperty('omegaHand').value
+        chiRef = self.getProperty('Chi').value
+        chiTol = self.getProperty('ChiTol').value
+        phiTol = self.getProperty('PhiTol').value
+        phiHand = self.getProperty('PhiHand').value
+        dOmega = self.getProperty('DOmega').value
+        omegaHand = self.getProperty('OmegaHand').value
         # rotation matrices work in right-handed coordinate system so the handedness
 
         # self.log().information(msg)
