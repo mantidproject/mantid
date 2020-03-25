@@ -8,55 +8,13 @@
 from __future__ import absolute_import, division, unicode_literals
 
 # std imports
-from abc import ABCMeta, abstractmethod
 
 # 3rdparty imports
-from six import with_metaclass
+from matplotlib.path import Path
+from matplotlib.patches import PathPatch, Wedge
 
 
-class Painter(with_metaclass(ABCMeta)):
-    """
-    Interface defined for types capable of drawing
-    representations of different shapes
-    """
-
-    @abstractmethod
-    def remove(self, artifact):
-        """
-        Remove the painted artist from the drawn destination
-        """
-        pass
-
-    @abstractmethod
-    def scatter(self, x, y, **kwargs):
-        """
-        Draw a scatter point at the given location
-        :param x: X location of scatter point
-        :param y: Y location of scatter point
-        :param kwargs: Additional properties to control the display
-        """
-        pass
-
-    @abstractmethod
-    def snap_to(self, x, y):
-        """
-        Set the display such the point (x, y) is at the center
-        :param x: X location of scatter point
-        :param y: Y location of scatter point
-        """
-        pass
-
-    @abstractmethod
-    def update_properties(self, artist, **kwargs):
-        """
-        Update artist properties
-        :param artist: Reference to the Artist
-        :param kwargs: Keywords giving Artist properties to change
-        """
-        pass
-
-
-class MplPainter(Painter):
+class MplPainter(object):
     """
     Implementation of a PeakPainter that uses matplotlib to draw
     """
@@ -73,7 +31,7 @@ class MplPainter(Painter):
     def remove(self, artist):
         """
         Remove the painted artifact from the drawn destination
-        :param artist: The Artist drawn on the axes
+        :param artists: The Artists drawn on the axes
         """
         try:
             artist.remove()
@@ -81,22 +39,37 @@ class MplPainter(Painter):
             # May have already been removed by a figure/axes clear
             pass
 
-    def scatter(self, x, y, **kwargs):
-        """Draw a scatter point at the given location
-        See PeakPainter for description of arguments
+    def circle(self, x, y, radius, **kwargs):
+        """Draw a circle on the Axes
+        :param x: X coordinate of the center
+        :param y: Y coordinate of the center
+        :param radius: Radius of the circle
+        :param kwargs: Additional matplotlib properties to pass to the call
         """
-        return self._axes.scatter(x, y, **kwargs)
+        return self._axes.add_patch(Wedge((x, y), radius, theta1=0.0, theta2=360., **kwargs))
 
-    def snap_to(self, x, y):
+    def cross(self, x, y, half_width, **kwargs):
+        """Draw a cross at the given location
+        :param x: X coordinate of the center
+        :param y: Y coordinate of the center
+        :param half_width: Half-width of cross
+        :param kwargs: Additional matplotlib properties to pass to the call
         """
-        Set the display such the point (x, y) is at the center
+        verts = ((x - half_width, y + half_width), (x + half_width, y - half_width),
+                 (x + half_width, y + half_width), (x - half_width, y - half_width))
+        codes = (Path.MOVETO, Path.LINETO, Path.MOVETO, Path.LINETO)
+        return self._axes.add_patch(PathPatch(Path(verts, codes), **kwargs))
+
+    def snap_to(self, x, y, width):
+        """
+        Set the display such the point (x, y) is at the center with width
         :param x: X location of scatter point
         :param y: Y location of scatter point
+        :param width: The width/height of the view
         """
-        snap_width = self.SNAP_WIDTH
 
         def snap_limits(center):
-            return (center - snap_width, center + snap_width)
+            return (center - width, center + width)
 
         self._axes.set_xlim(*snap_limits(x))
         self._axes.set_ylim(*snap_limits(y))
@@ -104,7 +77,7 @@ class MplPainter(Painter):
     def update_properties(self, artist, **kwargs):
         """
         Update artist properties
-        :param artist: Reference to the Artist
+        :param artist: Reference to a list of the Artist
         :param kwargs: Keywords giving Artist properties to change
         """
         artist.set(**kwargs)

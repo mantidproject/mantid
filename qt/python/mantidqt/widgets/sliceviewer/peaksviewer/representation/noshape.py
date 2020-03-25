@@ -12,86 +12,51 @@ from __future__ import absolute_import, division, unicode_literals
 # 3rdparty imports
 
 # local imports
-from .base import PeakRepresentation
+from .base import PeakDrawable, PeakRepresentation
 
 
-class PeakRepresentationNoShape(PeakRepresentation):
+class PeakDrawableNoShape(PeakDrawable):
     """Describes representation of Peak with no shape for display"""
-    MARKER = 'x'
-    MARKER_SIZE_PTS_SQ = 150
+    SNAP_WIDTH = 0.5
 
-    # reference to the painted object
-    _painted = None
-
-    @classmethod
-    def create(cls, x, y, z, slicepoint, slicedim_width, _, fg_color):
+    def __init__(self, half_width):
         """
-        Create an instance of PeakRepresentationSphere from the given set of attributes
-        :param center: A V3D giving the center of the Peak
-        :param slicepoint: float giving current slice point
-        :param slicedim_width: 2-tuple giving (min/max) values of the slicing dimension
-        :param _: A PeakShape object describing the shape properties (unused)
-        :param fg_color: A string indicating the color of the marker
-        :return: A new instance of this class
+        :param half_width: Width from center to the edge of cross
         """
-        return PeakRepresentationNoShape(
-            x=x,
-            y=y,
-            z=z,
-            alpha=PeakRepresentation.compute_alpha(z, slicepoint, slicedim_width),
-            fg_color=fg_color)
+        super().__init__()
+        self._half_width = half_width
 
-    def draw(self, painter):
+    @property
+    def snap_width(self):
+        """Return the width of the view when a peak is zoomed to"""
+        return self.SNAP_WIDTH
+
+    def draw_impl(self, painter, peak):
         """
         Override base method and draws a single peak center marker
         :param painter: A Painter object to accept the draw command
-        :return: The objects added
+        :param peak: A reference to the PeakRepresentation object
+        :return: The object added
         """
-        if self.alpha > 0.0:
-            self._painted = painter.scatter(
-                self.x,
-                self.y,
-                alpha=self.alpha,
-                color=self.fg_color,
-                marker=self.MARKER,
-                s=self.MARKER_SIZE_PTS_SQ)
-        else:
-            self._painted = None
+        return painter.cross(
+            peak.x, peak.y, self._half_width, alpha=peak.alpha, color=peak.fg_color)
 
-    def remove(self, painter):
-        """Override base.
-        :param painter: A Painter object to interact with the draw destination
-        """
-        if self._painted is not None:
-            painter.remove(self._painted)
 
-    def repaint(self, painter):
-        """Override base
-        :param painter: A painter to update drawn properties
-        """
-        # 4 "transitions" possible:
-        #  - visible->visible
-        #  - visible->invisible
-        #  - invisible->invisible
-        #  - invisible->isible
-        painted = self._painted
-        if self.alpha > 0.0:
-            # Peak should now be visible
-            if painted is not None:
-                painter.update_properties(painted, alpha=self.alpha)
-            else:
-                # it was not drawn previously
-                self.draw(painter)
-        else:
-            # peak becomes invisible
-            if painted is not None:
-                painter.remove(painted)
-                self._painted = None
+class NonIntegratedPeakRepresentation(PeakRepresentation):
+    """Create a collection of PeakDrawable objects for a non-integrated Peak"""
+    CROSS_HALF_WIDTH = 0.1
 
-    def update_alpha(self, slicepoint, slicedim_width):
-        """Update transparency value based on slicepoint
-        :param painter: A Painter object to interact with the draw destination
-        :param slicepoint: float giving current slice point
-        :param slicedim_width: 2-tuple giving (min/max) values of the slicing dimension
+    @classmethod
+    def create(cls, x, y, z, alpha, peak_shape, fg_color):
         """
-        self._alpha = PeakRepresentation.compute_alpha(self.z, slicepoint, slicedim_width)
+        Create an instance of NonIntegratedPeakRepresentation from the given set of attributes
+        :param x: Position of peak in X dimension
+        :param y: Position of peak in Y dimension
+        :param z: Position of peak in Z dimension
+        :param alpha: Initial alpha value
+        :param shape: A PeakShape object describing the shape properties (unused)
+        :param fg_color: A string indicating the color of the marker
+        :return: A new instance of this class
+        """
+        return cls(
+            x, y, z, alpha, fg_color, drawables=(PeakDrawableNoShape(cls.CROSS_HALF_WIDTH), ))

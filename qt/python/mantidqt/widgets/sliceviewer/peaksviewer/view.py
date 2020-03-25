@@ -117,7 +117,7 @@ class PeaksViewerView(QWidget):
         Slot to handle row selection changes. It is assumed only single row
         selection is allowed
         """
-        self._presenter.notify(self._presenter.Event.PeakSelected)
+        self._presenter.notify(self._presenter.Event.PeakSelectionChanged)
 
 
 class PeaksViewerCollectionView(QWidget):

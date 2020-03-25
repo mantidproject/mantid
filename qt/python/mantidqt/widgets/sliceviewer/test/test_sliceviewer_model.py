@@ -7,8 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
-from mantid.api import AnalysisDataService, IPeaksWorkspace
-from mantid.simpleapi import CreateMDHistoWorkspace, CreateWorkspace, CreateMDWorkspace, CreatePeaksWorkspace, \
+from mantid.simpleapi import CreateMDHistoWorkspace, CreateWorkspace, CreateMDWorkspace, \
     FakeMDEventData
 from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE
 from numpy.testing import assert_equal, assert_allclose
@@ -17,30 +16,38 @@ import unittest
 
 
 class SliceViewerModelTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(self):
-        self.ws_MD_3D = CreateMDHistoWorkspace(Dimensionality=3,
-                                               Extents='-3,3,-10,10,-1,1',
-                                               SignalInput=range(100),
-                                               ErrorInput=range(100),
-                                               NumberOfBins='5,5,4',
-                                               Names='Dim1,Dim2,Dim3',
-                                               Units='MomentumTransfer,EnergyTransfer,Angstrom',
-                                               OutputWorkspace='ws_MD_3D')
-        self.ws_MDE_3D = CreateMDWorkspace(Dimensions='3', Extents='-3,3,-4,4,-5,5', Names='h,k,l',
-                                           Units='rlu,rlu,rlu', SplitInto='4', OutputWorkspace='ws_MDE_3D')
-        FakeMDEventData('ws_MDE_3D', PeakParams='100000,0,0,0,0.1', RandomSeed='63759', RandomizeSignal='1')
-        FakeMDEventData('ws_MDE_3D', PeakParams='40000,1,0,0,0.1', RandomSeed='63759', RandomizeSignal='1')
-        self.ws2d_histo = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30],
-                                          DataY=[2, 3, 4, 5],
-                                          DataE=[1, 2, 3, 4],
-                                          NSpec=2,
-                                          Distribution=True,
-                                          UnitX='Wavelength',
-                                          VerticalAxisUnit='DeltaE',
-                                          VerticalAxisValues=[4, 6, 8],
-                                          OutputWorkspace='ws2d_histo')
+        self.ws_MD_3D = CreateMDHistoWorkspace(
+            Dimensionality=3,
+            Extents='-3,3,-10,10,-1,1',
+            SignalInput=range(100),
+            ErrorInput=range(100),
+            NumberOfBins='5,5,4',
+            Names='Dim1,Dim2,Dim3',
+            Units='MomentumTransfer,EnergyTransfer,Angstrom',
+            OutputWorkspace='ws_MD_3D')
+        self.ws_MDE_3D = CreateMDWorkspace(
+            Dimensions='3',
+            Extents='-3,3,-4,4,-5,5',
+            Names='h,k,l',
+            Units='rlu,rlu,rlu',
+            SplitInto='4',
+            OutputWorkspace='ws_MDE_3D')
+        FakeMDEventData(
+            'ws_MDE_3D', PeakParams='100000,0,0,0,0.1', RandomSeed='63759', RandomizeSignal='1')
+        FakeMDEventData(
+            'ws_MDE_3D', PeakParams='40000,1,0,0,0.1', RandomSeed='63759', RandomizeSignal='1')
+        self.ws2d_histo = CreateWorkspace(
+            DataX=[10, 20, 30, 10, 20, 30],
+            DataY=[2, 3, 4, 5],
+            DataE=[1, 2, 3, 4],
+            NSpec=2,
+            Distribution=True,
+            UnitX='Wavelength',
+            VerticalAxisUnit='DeltaE',
+            VerticalAxisValues=[4, 6, 8],
+            OutputWorkspace='ws2d_histo')
 
     def test_model_MDH(self):
         model = SliceViewerModel(self.ws_MD_3D)
@@ -102,9 +109,8 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['type'], 'MDE')
 
         mdh = model.get_ws((None, 0, None), (3, 0.001, 3))
-        assert_allclose(mdh.getSignalArray().squeeze(), [[0, 0, 0],
-                                                         [0, 692.237618, 0],
-                                                         [0, 118.362777, 0]])
+        assert_allclose(mdh.getSignalArray().squeeze(),
+                        [[0, 0, 0], [0, 692.237618, 0], [0, 118.362777, 0]])
 
         d0 = mdh.getDimension(0)
         d1 = mdh.getDimension(1)
@@ -122,13 +128,13 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(d2.getMinimum(), -5)
         self.assertEqual(d2.getMaximum(), 5)
 
-        assert_allclose(model.get_data((None, 0, None), (3, 0.001, 3)), [[0, 0, 0],
-                                                                         [0, 692.237618, 0],
-                                                                         [0, 118.362777, 0]])
+        assert_allclose(
+            model.get_data((None, 0, None), (3, 0.001, 3)),
+            [[0, 0, 0], [0, 692.237618, 0], [0, 118.362777, 0]])
 
-        assert_allclose(model.get_data((None, 0, None), (3, 0.001, 3), transpose=True), [[0, 0, 0],
-                                                                                         [0, 692.237618, 118.362777],
-                                                                                         [0, 0, 0]])
+        assert_allclose(
+            model.get_data((None, 0, None), (3, 0.001, 3), transpose=True),
+            [[0, 0, 0], [0, 692.237618, 118.362777], [0, 0, 0]])
 
     def test_model_matrix(self):
         model = SliceViewerModel(self.ws2d_histo)
@@ -158,12 +164,13 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(dim_info['type'], 'MATRIX')
 
     def test_matrix_workspace_can_be_normalized_if_not_a_distribution(self):
-        ws2d = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30],
-                               DataY=[2, 3, 4, 5],
-                               DataE=[1, 2, 3, 4],
-                               NSpec=2,
-                               Distribution=False,
-                               OutputWorkspace='ws2d')
+        ws2d = CreateWorkspace(
+            DataX=[10, 20, 30, 10, 20, 30],
+            DataY=[2, 3, 4, 5],
+            DataE=[1, 2, 3, 4],
+            NSpec=2,
+            Distribution=False,
+            OutputWorkspace='ws2d')
         model = SliceViewerModel(ws2d)
         self.assertTrue(model.can_normalize_workspace())
 
