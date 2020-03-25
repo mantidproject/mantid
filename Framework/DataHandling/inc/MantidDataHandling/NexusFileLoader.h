@@ -22,6 +22,7 @@ public:
       const int &version = -1) override;
   virtual void
   setFileInfo(std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo);
+
 private:
   std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> m_fileInfo;
 };
