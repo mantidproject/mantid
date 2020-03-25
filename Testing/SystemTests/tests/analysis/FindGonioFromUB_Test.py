@@ -11,6 +11,7 @@ import unittest
 from mantid.simpleapi import *
 import numpy as np
 
+
 class FindGonioFromUB_Test(unittest.TestCase):
 
     def runTest(self):

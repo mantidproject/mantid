@@ -5,18 +5,13 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import config
-from mantid.api import (DataProcessorAlgorithm, mtd, AlgorithmFactory, Progress,
-                        WorkspaceProperty, FileAction, FileProperty, FileFinder, MultipleFileProperty,
-                        PropertyMode, ITableWorkspaceProperty, ADSValidator)
-from mantid.simpleapi import (CalculateUMatrix, PredictPeaks, FilterPeaks,
-                              DeleteWorkspace, CreatePeaksWorkspace, CreateEmptyTableWorkspace,
-                              CreateSampleWorkspace, LoadLog, LoadNexusLogs)
-from mantid.kernel import (Direction,
-                           FloatBoundedValidator, IntBoundedValidator, IntListValidator,
-                           StringMandatoryValidator, StringListValidator, V3D, StringArrayProperty)
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, Progress,
+                        FileFinder, MultipleFileProperty, ITableWorkspaceProperty)
+from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace, LoadLog, LoadNexusLogs)
+from mantid.kernel import (Direction, FloatBoundedValidator, IntListValidator,
+                           StringMandatoryValidator, V3D)
 import numpy as np
-import os
-import shutil
+from os import path
 import warnings
 
 
@@ -41,8 +36,7 @@ class FindGonioFromUB(DataProcessorAlgorithm):
     def PyInit(self):
         # Input
         self.declareProperty(
-            MultipleFileProperty('UBfiles',
-                         extensions=".mat"),
+            MultipleFileProperty('UBfiles', extensions=".mat"),
             doc='Files with exported UB (from SaveISawUB). The filename must have .mat extension and only contain '
                 'the run number as would be supplied to Load (e.g. WISH00043350.mat). The first UB will be the '
                 'reference (typically, but not necessarily, omega = phi = 0) and a consistent UB will be made '
@@ -134,7 +128,7 @@ class FindGonioFromUB(DataProcessorAlgorithm):
             # get rotation angles from logs (handedness given in input)
             # these rotation matrices are defined in right-handed coordinate system (i.e. omegaHand = 1 etc.)
             tmpWS = CreateSampleWorkspace(StoreInADS=False)
-            _, fname = os.path.split(ubFiles[irun])
+            _, fname = path.split(ubFiles[irun])
             dataPath = FileFinder.findRuns(fname.split('.mat')[0])[0]
             if dataPath[-4:] == ".raw":
                 # assume log is kept separately in a .log file with same path
@@ -191,8 +185,8 @@ class FindGonioFromUB(DataProcessorAlgorithm):
 
             if abs(chi - chiRef) <= chiTol and abs(phi - dPhiRef[irun]) <= phiTol:
                 # save the consistent UB to the ubPath
-                _, nameUB = os.path.split(ubFiles[irun])
-                newUBPath = os.path.join(saveDir, nameUB[:-4] + '_consistent' + nameUB[-4:])
+                _, nameUB = path.split(ubFiles[irun])
+                newUBPath = path.join(saveDir, nameUB[:-4] + '_consistent' + nameUB[-4:])
                 self.writeConsistentUB(ubFiles[irun], newUBPath, matUB[irun])
                 # populate row of table
                 phi2print = phiHand * (phi + phiRef[0])
@@ -247,9 +241,9 @@ class FindGonioFromUB(DataProcessorAlgorithm):
         :param u: unit vector for axis of rotation
         :return: R: rotation matrix
         """
-        get_W = lambda u: np.array([[0, -u[2], u[1]], [u[2], 0, -u[0]], [-u[1], u[0], 0]])
-        return np.eye(3, 3) + np.sin(theta * np.pi / 180) * get_W(u) + (1 - np.cos(theta * np.pi / 180)) * (
-                get_W(u) @ get_W(u))
+        w = np.array([[0, -u[2], u[1]], [u[2], 0, -u[0]], [-u[1], u[0], 0]])
+        return np.eye(3, 3) + np.sin(theta * np.pi / 180) * w + (1 - np.cos(theta * np.pi / 180)) * (
+                w @ w)
 
     def getGonioAngles(self, aUB, zeroUB, omega):
         """
@@ -294,6 +288,7 @@ class FindGonioFromUB(DataProcessorAlgorithm):
         # write lines to new file (with a newline at end)
         with open(newUBPath, 'w+') as fid:
             fid.writelines('\n'.join(lines + ['']))
+
 
 # register algorithm with mantid
 AlgorithmFactory.subscribe(FindGonioFromUB)
