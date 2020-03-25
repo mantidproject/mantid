@@ -16,12 +16,14 @@ class DLLExport NexusFileLoader
     : public API::IFileLoader<Mantid::Kernel::NexusHDF5Descriptor> {
 public:
   void exec() override;
+  virtual void execLoader();
   boost::shared_ptr<Algorithm> createChildAlgorithm(
       const std::string &name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging = true,
       const int &version = -1) override;
-  void
+  virtual void
   setFileInfo(std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo);
+
 private:
   std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> m_fileInfo;
 };
