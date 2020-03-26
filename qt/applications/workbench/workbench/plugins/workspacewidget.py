@@ -92,8 +92,10 @@ class WorkspaceWidget(PluginWidget):
             if not compatible:
                 QMessageBox.warning(self, "", error_msg)
                 return
-
-        plot_from_names(names, errors, overplot)
+        try:
+            plot_from_names(names, errors, overplot)
+        except RuntimeError as re:
+            logger.error(str(re))
 
     def _do_plot_bin(self, names, errors, overplot):
         """
