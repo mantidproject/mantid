@@ -23,3 +23,6 @@ leak:libpython
 leak:umath
 leak:multiarray
 leak:_ctypes
+leak:/usr/bin/python3.*
+leak:boost::python::objects::function_object
+leak:boost::python::objects::function_handle_impl

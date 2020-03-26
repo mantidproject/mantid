@@ -18,6 +18,14 @@ if(NOT ${USE_SANITIZERS_LOWER} MATCHES "off")
         message(FATAL_ERROR "GCC 7 and below do not support sanitizers")
     endif()
 
+    if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU"
+        OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+    # Append path of libAsan to ${ASAN_SO_PATH}
+    execute_process(COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libasan.so
+                    OUTPUT_VARIABLE ASAN_SO_PATH
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
+
     # Check and warn if we are not in a mode without debug symbols
     string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type_lower)
     if("${build_type_lower}" MATCHES "release" OR "${build_type_lower}" MATCHES "minsizerel" )
@@ -39,11 +47,17 @@ endif()
 # Allow all instrumented code to continue beyond the first error
 add_compile_options($<$<NOT:$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"off">>:-fsanitize-recover=all>)
 
+set( _SUPPRESSIONS_DIR "${CMAKE_SOURCE_DIR}/tools/Sanitizer" )
+
 # Address
 add_compile_options(
     $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"address">:-fsanitize=address>)
 add_link_options(
     $<$<STREQUAL:$<LOWER_CASE:"${USE_SANITIZER}">,"address">:-fsanitize=address>)
+if (${USE_SANITIZERS_LOWER} STREQUAL "address")
+    set(ASAN_ENV "suppressions=${_SUPPRESSIONS_DIR}/Address.supp:detect_stack_use_after_return=true")
+    set(LSAN_ENV "suppressions=${_SUPPRESSIONS_DIR}/Leak.supp")
+endif()
 
 # Thread
 add_compile_options(

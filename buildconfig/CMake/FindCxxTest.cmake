@@ -202,20 +202,9 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
         endif ()
       endif ()
 
-      set( SUPPRESSIONS_DIR "${CMAKE_SOURCE_DIR}/tools/Sanitizer" )
-      if ( USE_SANITIZERS_LOWER STREQUAL "address" )
-        # See dev docs on sanitizers for details on why verify_asan_link is false
-        # Trying to quote these options causes the quotation to be forwarded
-        set(_ASAN_OPTS "suppressions=${SUPPRESSIONS_DIR}/Address.supp:detect_stack_use_after_return=true")
-        set_property( TEST ${_cxxtest_separate_name} APPEND PROPERTY
-          ENVIRONMENT ASAN_OPTIONS=${_ASAN_OPTS} )
-
-        set( _LSAN_OPTS "suppressions=${SUPPRESSIONS_DIR}/Leak.supp" )
-          set_property( TEST ${_cxxtest_separate_name} APPEND PROPERTY
-          ENVIRONMENT LSAN_OPTIONS=${_LSAN_OPTS} )
-
-      endif()
-
+      set_property( TEST ${_cxxtest_separate_name} APPEND PROPERTY
+        ENVIRONMENT ASAN_OPTIONS=${ASAN_ENV} 
+                    LSAN_OPTIONS=${LSAN_ENV} )
 
     endforeach ( part ${ARGN} )
 endmacro(CXXTEST_ADD_TEST)

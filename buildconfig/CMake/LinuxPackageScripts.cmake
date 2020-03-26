@@ -165,13 +165,17 @@ if ( TCMALLOC_FOUND )
 endif ()
 
 # definitions to preload tcmalloc but not if we are using address sanitizer as this confuses things
-if ( WITH_ASAN )
+if (NOT ${USE_SANITIZERS_LOWER} MATCHES "off" )
   set ( TCMALLOC_DEFINITIONS
 "
-LOCAL_PRELOAD=\${LD_PRELOAD}
+LOCAL_PRELOAD=\"${ASAN_SO_PATH} \${LD_PRELOAD}\"
 TCM_RELEASE=\${TCMALLOC_RELEASE_RATE}
-TCM_REPORT=\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}"
-)
+TCM_REPORT=\${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}")
+
+  set ( SAN_SCRIPTING_ENV
+  "ASAN_OPTIONS=${ASAN_ENV} LSAN_OPTIONS=${LSAN_ENV}"
+  )
+
 else ()
   # Do not indent the string below as it messes up the formatting in the final script
   set ( TCMALLOC_DEFINITIONS
