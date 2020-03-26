@@ -116,6 +116,13 @@ map to the arguments of a similar name on the :ref:`SetSampleMaterial <algm-SetS
 - ``absorptionxsec``
 - ``attenuationprofile``
 
+Mantid will search for the filename supplied in the attenuationprofile attribute in the
+following places (in order):
+
+- If a full path is supplied in the filename attribute then it will be used
+- Mantid will then check in the same directory as the environment definition file
+- Mantid will then check in the data search directories
+
 Non-container Components
 ------------------------
 

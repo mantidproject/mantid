@@ -34,8 +34,8 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
                                      "no ChemicalFormula or AtomicNumber is "
                                      "given.";
     }
-    if ((isEmpty(params.attenuationXSection) &&
-         (params.attenuationProfileFileName.empty()))) {
+    if (isEmpty(params.attenuationXSection) &&
+        params.attenuationProfileFileName.empty()) {
       result["AttenuationXSection"] = "The cross section must be specified "
                                       "when no ChemicalFormula or AtomicNumber "
                                       "is given.";

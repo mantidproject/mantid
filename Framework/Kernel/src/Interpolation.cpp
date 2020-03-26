@@ -123,7 +123,7 @@ void Interpolation::addPoint(const double &xx, const double &yy) {
   std::vector<DataXY>::const_iterator it;
 
   if (N == 0) {
-    std::pair<double, double> newpair(xx, yy);
+    DataXY newpair(xx, yy);
     m_data.emplace_back(newpair);
     return;
   }

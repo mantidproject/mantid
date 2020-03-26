@@ -55,8 +55,9 @@ public:
     double attenuationXSection = EMPTY_DBL();
     /// The total scattering cross section to set, defaults to EMPTY_DBL()
     double scatteringXSection = EMPTY_DBL();
-    /// A flag indicating the unit of sampleNumberDensity
+    /// The name or path of a file containing an attenuation profile
     std::string attenuationProfileFileName = "";
+    /// A flag indicating the unit of sampleNumberDensity
     Kernel::MaterialBuilder::NumberDensityUnit numberDensityUnit =
         Kernel::MaterialBuilder::NumberDensityUnit::Atoms;
   };

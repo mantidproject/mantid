@@ -77,6 +77,8 @@ public:
   /// Virtual destructor.
   virtual ~Material() = default;
 
+  /// Allow an explicit attenuation profile to be loaded onto the material
+  /// that overrides the standard linear absorption coefficient
   void setAttenuationProfile(AttenuationProfile attenuationOverride);
 
   /// Returns the name of the material
@@ -101,7 +103,7 @@ public:
   double
   absorbXSection(const double lambda =
                      PhysicalConstants::NeutronAtom::ReferenceLambda) const;
-  /// Compute the attenuation at a given wavelegnth over the given distance
+  /// Compute the attenuation at a given wavelength over the given distance
   double attenuation(const double distance,
                      const double lambda =
                          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
