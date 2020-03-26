@@ -58,6 +58,20 @@ private:
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr inWS;
 
+  // find the eigenvectors and eigenvalues that diagonalise the covariance
+  // matrix that defines an ellipsoid.
+  template <typename MDE, size_t nd>
+  void findEllipsoid(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws,
+                     const Mantid::API::CoordTransform &getRadiusSq,
+                     const Mantid::Kernel::V3D &pos, const coord_t &radiusSquared,
+                     const bool &qAxisBool, const double &bgDensity,
+                     std::vector<Mantid::Kernel::V3D> &eigenvects,
+                     std::vector<double> &eigenvals);
+
+  // get matrix to transform from Qlab to plane perp to Q
+  void getPinv(const Mantid::Kernel::V3D &q,
+               Mantid::Kernel::Matrix<double> &Pinv);
+
   /// Calculate if this Q is on a detector
   void calculateE1(const Geometry::DetectorInfo &detectorInfo);
   double detectorQ(Mantid::Kernel::V3D QLabFrame, double r);

@@ -28,19 +28,26 @@ namespace DataObjects {
  *dimensions that are considered when
  *        calculating distance.
  * @param outD :: # of output dimensions
+ * @param directions :: eigenvectors of an ellipsoid (if used)
+ * @param abcRadii :: radii of ellipsoid along each eigenvector (if used)
  * @return
  */
-CoordTransformDistance::CoordTransformDistance(const size_t inD,
-                                               const coord_t *center,
-                                               const bool *dimensionsUsed,
-                                               const size_t outD)
+CoordTransformDistance::CoordTransformDistance(
+    const size_t inD, const coord_t *center, const bool *dimensionsUsed,
+    const size_t outD, const std::vector<Kernel::V3D> eigenvects,
+    const std::vector<double> eigenvals)
     : CoordTransform(inD, outD) {
-  // Create and copy the arrays.
-  m_center = new coord_t[inD];
-  m_dimensionsUsed = new bool[inD];
+
+  m_maxEigenval = 0.0;
   for (size_t d = 0; d < inD; d++) {
-    m_center[d] = center[d];
-    m_dimensionsUsed[d] = dimensionsUsed[d];
+    m_center.push_back(center[d]);
+    m_dimensionsUsed.push_back(dimensionsUsed[d]);
+    if (inD == 3 & eigenvals.size() == 3 & eigenvects.size() == 3) {
+      // coord transform for ellipsoid specified (only in 3D)
+      m_eigenvals.push_back(eigenvals[d]);
+      m_eigenvects.push_back(eigenvects[d]);
+      m_maxEigenval = std::max(m_maxEigenval, eigenvals[d]);
+    }
   }
 }
 
@@ -48,17 +55,9 @@ CoordTransformDistance::CoordTransformDistance(const size_t inD,
 /** Virtual cloner
  * @return a copy of this object  */
 CoordTransform *CoordTransformDistance::clone() const {
-  auto out = new CoordTransformDistance(inD, m_center, m_dimensionsUsed);
-  return out;
+  return new CoordTransformDistance(*this);
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CoordTransformDistance::~CoordTransformDistance() {
-  delete[] m_center;
-  delete[] m_dimensionsUsed;
-}
 
 //----------------------------------------------------------------------------------------------
 /** Apply the coordinate transformation.
@@ -74,10 +73,24 @@ void CoordTransformDistance::apply(const coord_t *inputVector,
                                    coord_t *outVector) const {
   if (outD == 1) {
     coord_t distanceSquared = 0;
-    for (size_t d = 0; d < inD; d++) {
-      if (m_dimensionsUsed[d]) {
-        coord_t dist = inputVector[d] - m_center[d];
-        distanceSquared += (dist * dist);
+    if (m_eigenvals.size() == 3) {
+      // ellipsoid transfrom with ratio of axes given by standard deviation 
+      // i.e. sqrt(eigenvals)
+      // convert 3D coords to V3D for vector algebra
+      V3D inV3D =
+          V3D(inputVector[0] - m_center[0], inputVector[1] - m_center[1],
+              inputVector[2] - m_center[2]);
+      for (size_t d = 0; d < inD; d++) {
+        coord_t dist = m_eigenvects[d].scalar_prod(inV3D);
+        distanceSquared += (dist * dist) * m_maxEigenval/m_eigenvals[d];
+      }
+    } else {
+      // nd spherical transform
+      for (size_t d = 0; d < inD; d++) {
+        if (m_dimensionsUsed[d]) {
+          coord_t dist = inputVector[d] - m_center[d];
+          distanceSquared += (dist * dist);
+        }
       }
     }
     /// Return the only output dimension
