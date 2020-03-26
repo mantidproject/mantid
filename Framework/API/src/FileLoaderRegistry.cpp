@@ -113,10 +113,11 @@ FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const {
     m_log.debug()
         << filename
         << " looks like a Nexus file. Checking registered Nexus loaders\n";
-    bestLoader =
-        searchForLoader<NexusHDF5Descriptor, IFileLoader<NexusHDF5Descriptor>>(
-            filename, m_names[Nexus], m_log);
-    if (!bestLoader) {
+    try {
+      bestLoader = searchForLoader<NexusHDF5Descriptor,
+                                   IFileLoader<NexusHDF5Descriptor>>(
+          filename, m_names[Nexus], m_log);
+    } catch (const std::invalid_argument &) {
       bestLoader =
           searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(
               filename, m_names[Nexus], m_log);
