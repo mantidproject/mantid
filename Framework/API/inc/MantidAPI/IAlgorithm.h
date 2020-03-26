@@ -122,7 +122,7 @@ public:
 
   /// Check whether the algorithm is initialized properly
   virtual bool isInitialized() const = 0;
-  /// Check whether the algorithm has already been executed
+  /// Check whether the algorithm has been executed sucessfully
   virtual bool isExecuted() const = 0;
 
   /// Raises the cancel flag. interuption_point() method if called inside exec()
