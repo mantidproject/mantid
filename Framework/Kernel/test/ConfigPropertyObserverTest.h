@@ -92,7 +92,7 @@ public:
                          });
     auto callCountB = 0;
     auto observerB =
-        makeMockObserver("defaultsave.directory",
+        makeMockObserver("projectRecovery.secondsBetween",
                          [&callCountB](const std::string &newValue,
                                        const std::string &prevValue) -> void {
                            UNUSED_ARG(newValue);
@@ -101,7 +101,7 @@ public:
                          });
 
     ConfigService::Instance().setString("datasearch.directories", "/dev/null");
-    ConfigService::Instance().setString("defaultsave.directory", "/dev/null");
+    ConfigService::Instance().setString("projectRecovery.secondsBetween", "600");
 
     TS_ASSERT_EQUALS(1, callCountA);
     TS_ASSERT_EQUALS(1, callCountB);
