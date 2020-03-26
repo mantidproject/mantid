@@ -101,7 +101,8 @@ public:
                          });
 
     ConfigService::Instance().setString("datasearch.directories", "/dev/null");
-    ConfigService::Instance().setString("projectRecovery.secondsBetween", "600");
+    ConfigService::Instance().setString("projectRecovery.secondsBetween",
+                                        "600");
 
     TS_ASSERT_EQUALS(1, callCountA);
     TS_ASSERT_EQUALS(1, callCountB);
