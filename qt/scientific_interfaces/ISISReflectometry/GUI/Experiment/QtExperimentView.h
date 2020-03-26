@@ -141,6 +141,8 @@ private:
   template <typename Widget>
   void registerSettingWidget(Widget &widget, std::string const &propertyName,
                              const Mantid::API::IAlgorithm_sptr &alg);
+  template <typename Widget>
+  void registerSettingWidget(Widget &widget, std::string const &tooltip);
   void connectSettingsChange(QLineEdit &edit);
   void connectSettingsChange(QComboBox &edit);
   void connectSettingsChange(QCheckBox &edit);
