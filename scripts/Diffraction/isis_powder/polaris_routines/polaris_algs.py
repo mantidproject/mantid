@@ -132,7 +132,6 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     mantid.RenameWorkspace(InputWorkspace='focused_ws', OutputWorkspace=run_number+'_focused_Q')
     if isinstance(focused_ws, WorkspaceGroup):
         for i in range(len(focused_ws)):
-            print(focused_ws[i])
             mantid.RenameWorkspace(InputWorkspace=focused_ws[i], OutputWorkspace=run_number+'_focused_Q_'+str(i+1))
     mantid.RenameWorkspace(InputWorkspace='pdf_output', OutputWorkspace=run_number+'_pdf_R')
     if isinstance(pdf_output, WorkspaceGroup):
