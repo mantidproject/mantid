@@ -116,6 +116,12 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_rectangle->setToolTip("Draw a rectangle (Ctrl+Alt+R)");
   m_rectangle->setShortcut(QKeySequence("Ctrl+Alt+R"));
 
+  m_pixel = new QPushButton();
+  m_pixel->setCheckable(true);
+  m_pixel->setAutoExclusive(true);
+  m_pixel->setIcon(QIcon(":/PickTools/selection-pointer.png"));
+  m_pixel->setToolTip("Mask a pixel");		  
+
   m_ring_ellipse = new QPushButton();
   m_ring_ellipse->setCheckable(true);
   m_ring_ellipse->setAutoExclusive(true);
@@ -145,6 +151,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_ring_ellipse);
   toolBox->addWidget(m_ring_rectangle);
   toolBox->addWidget(m_free_draw);
+  toolBox->addWidget(m_pixel);
   toolBox->addStretch();
   toolBox->setSpacing(2);
   toolBox->setMargin(0);
@@ -156,6 +163,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   connect(m_ring_ellipse, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_ring_rectangle, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_free_draw, SIGNAL(clicked()), this, SLOT(setActivity()));
+  connect(m_pixel, SIGNAL(clicked()), this, SLOT(setActivity()));
   m_move->setChecked(true);
   auto *toolGroup = new QFrame();
   toolGroup->setLayout(toolBox);
@@ -351,6 +359,8 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
  * Initialize the tab when new projection surface is created.
  */
 void InstrumentWidgetMaskTab::initSurface() {
+  connect(m_instrWidget->getSurface().get(), SIGNAL(singlePixelPicked(size_t)), this,
+          SLOT(singlePixelPicked(size_t)));
   connect(m_instrWidget->getSurface().get(), SIGNAL(shapeCreated()), this,
           SLOT(shapeCreated()));
   connect(m_instrWidget->getSurface().get(), SIGNAL(shapeSelected()), this,
@@ -407,6 +417,9 @@ void InstrumentWidgetMaskTab::selectTool(Activity tool) {
     break;
   case DrawFree:
     m_free_draw->setChecked(true);
+    break;
+  case Pixel:
+    m_pixel->setChecked(true);
     break;
   default:
     throw std::invalid_argument("Invalid tool type.");
@@ -467,7 +480,11 @@ void InstrumentWidgetMaskTab::setActivity() {
     m_instrWidget->getSurface()->setInteractionMode(
         ProjectionSurface::DrawFreeMode);
     m_activeTool->setText("Tool: Free draw. " + whatIsBeingSelected);
-  }
+   } else if (m_pixel->isChecked()) {
+    m_activity = Pixel;
+
+    m_activeTool->setText("Tool: Pixel selection. " + whatIsBeingSelected);
+   }
   m_instrWidget->updateInfoText();
 }
 
