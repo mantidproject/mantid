@@ -719,7 +719,6 @@ private:
     return rebin->getProperty("OutputWorkspace");
   }
 
-
   MatrixWorkspace_sptr doFFT(MatrixWorkspace_sptr inputWS, const bool complex,
                              const bool phaseShift) {
     auto fft = AlgorithmManager::Instance().create("FFT");
@@ -792,7 +791,6 @@ private:
     AnalysisDataService::Instance().add("FFT_WS_" + name, ws);
     return ws;
   }
-
 
   MatrixWorkspace_sptr offsetWorkspace(MatrixWorkspace_sptr workspace) {
     auto scaleX = AlgorithmManager::Instance().create("ScaleX");
