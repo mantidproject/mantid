@@ -59,6 +59,8 @@ public:
     return m_spectrumInfo->hasUniqueDetector(m_index);
   }
 
+  bool hasDetectors() const { return m_spectrumInfo->hasDetectors(m_index); }
+
   const Mantid::SpectrumDefinition &spectrumDefinition() const {
     return m_spectrumInfo->spectrumDefinition(m_index);
   }
