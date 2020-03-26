@@ -45,7 +45,7 @@ protected:
   void setPropManagerPropName(const std::string &propName);
   void mapPropertyName(const std::string &nameInProp,
                        const std::string &nameInPropManager);
-  void copyProperty(API::Algorithm_sptr alg, const std::string &name);
+  void copyProperty(const API::Algorithm_sptr &alg, const std::string &name);
   virtual ITableWorkspace_sptr determineChunk(const std::string &filename);
   virtual MatrixWorkspace_sptr loadChunk(const size_t rowIndex);
   Workspace_sptr load(const std::string &inputData,

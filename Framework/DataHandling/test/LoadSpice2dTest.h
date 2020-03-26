@@ -222,7 +222,8 @@ public:
     TS_ASSERT_DELTA(ws2d->x(192 + nmon)[0], 4.5, tolerance);
   }
 
-  void assertDetectorDistances(Mantid::DataObjects::Workspace2D_sptr ws2d) {
+  void
+  assertDetectorDistances(const Mantid::DataObjects::Workspace2D_sptr &ws2d) {
     Mantid::Kernel::Property *prop =
         ws2d->run().getProperty("sample-detector-distance");
     Mantid::Kernel::PropertyWithValue<double> *sdd =

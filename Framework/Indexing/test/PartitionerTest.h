@@ -8,6 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <utility>
+
 #include "MantidIndexing/Partitioner.h"
 
 using namespace Mantid;
@@ -23,7 +25,8 @@ public:
   PartitionerHelper(int numberOfPartitions, const PartitionIndex partition,
                     const MonitorStrategy monitorStrategy,
                     std::vector<GlobalSpectrumIndex> monitors)
-      : Partitioner(numberOfPartitions, partition, monitorStrategy, monitors) {}
+      : Partitioner(numberOfPartitions, partition, monitorStrategy,
+                    std::move(monitors)) {}
 
 private:
   PartitionIndex doIndexOf(const GlobalSpectrumIndex) const override {

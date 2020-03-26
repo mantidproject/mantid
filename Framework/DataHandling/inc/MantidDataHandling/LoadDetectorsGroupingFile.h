@@ -107,7 +107,7 @@ class DLLExport LoadGroupXMLFile {
 public:
   LoadGroupXMLFile();
 
-  void loadXMLFile(std::string xmlfilename);
+  void loadXMLFile(const std::string &xmlfilename);
   void setDefaultStartingGroupID(int startgroupid) {
     m_startGroupID = startgroupid;
   }
@@ -167,7 +167,7 @@ private:
   void parseXML();
   /// Get attribute value from an XML node
   static std::string getAttributeValueByName(Poco::XML::Node *pNode,
-                                             std::string attributename,
+                                             const std::string &attributename,
                                              bool &found);
 };
 

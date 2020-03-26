@@ -117,8 +117,8 @@ map<string, string> ResampleX::validateInputs() {
  *everything
  * went according to plan.
  */
-string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
-                        vector<double> &xmaxs) {
+string determineXMinMax(const MatrixWorkspace_sptr &inputWS,
+                        vector<double> &xmins, vector<double> &xmaxs) {
   const size_t numSpectra = inputWS->getNumberHistograms();
 
   // pad out the ranges by copying the first value to the rest that are needed

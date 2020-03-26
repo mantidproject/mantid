@@ -46,7 +46,7 @@ public:
    * The elastic peak is obtained on the fly from the sample data.
    */
   MatrixWorkspace_sptr
-  loadDataFile(const std::string dataFile, const size_t numberOfHistograms,
+  loadDataFile(const std::string &dataFile, const size_t numberOfHistograms,
                const size_t numberOfMonitors, const size_t numberOfChannels,
                const double tofDelay, const double tofChannelWidth) {
     LoadILLTOF2 loader;

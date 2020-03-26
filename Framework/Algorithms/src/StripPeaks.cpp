@@ -107,7 +107,8 @@ void StripPeaks::exec() {
  *  @param WS :: The workspace to search
  *  @return list of found peaks
  */
-API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS) {
+API::ITableWorkspace_sptr
+StripPeaks::findPeaks(const API::MatrixWorkspace_sptr &WS) {
   g_log.debug("Calling FindPeaks as a Child Algorithm");
 
   // Read from properties
@@ -172,8 +173,8 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS) {
  *  @return A workspace containing the peak-subtracted data
  */
 API::MatrixWorkspace_sptr
-StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
-                        API::ITableWorkspace_sptr peakslist) {
+StripPeaks::removePeaks(const API::MatrixWorkspace_const_sptr &input,
+                        const API::ITableWorkspace_sptr &peakslist) {
   g_log.debug("Subtracting peaks");
   // Create an output workspace - same size as input one
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(input);

@@ -27,7 +27,8 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidHelpWindow
 public:
   static bool helpWindowExists() { return g_helpWindow != nullptr; }
 
-  MantidHelpWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
+  MantidHelpWindow(QWidget *parent = nullptr,
+                   const Qt::WindowFlags &flags = nullptr);
   ~MantidHelpWindow() override;
 
   void showPage(const std::string &url = std::string()) override;
@@ -68,7 +69,7 @@ private:
 public slots:
   /// Perform any clean up on main window shutdown
   void shutdown() override;
-  void warning(QString msg);
+  void warning(const QString &msg);
 };
 
 } // namespace MantidWidgets

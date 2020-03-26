@@ -113,8 +113,8 @@ void PoldiAutoCorrelation5::exec() {
 }
 
 void PoldiAutoCorrelation5::logConfigurationInformation(
-    boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector,
-    PoldiAbstractChopper_sptr chopper) {
+    const boost::shared_ptr<PoldiDeadWireDecorator> &cleanDetector,
+    const PoldiAbstractChopper_sptr &chopper) {
   if (cleanDetector && chopper) {
     g_log.information()
         << "____________________________________________________ \n";

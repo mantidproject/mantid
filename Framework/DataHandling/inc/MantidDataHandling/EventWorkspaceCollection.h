@@ -59,7 +59,7 @@ public:
   void setThickness(const float flag);
   void setHeight(const float flag);
   void setWidth(const float flag);
-  void setSpectrumNumbersFromUniqueSpectra(const std::set<int> uniqueSpectra);
+  void setSpectrumNumbersFromUniqueSpectra(const std::set<int> &uniqueSpectra);
   void setSpectrumNumberForAllPeriods(const size_t spectrumNumber,
                                       const specnum_t specid);
   void setDetectorIdsForAllPeriods(const size_t spectrumNumber,
@@ -88,8 +88,9 @@ public:
   void
   setMonitorWorkspace(const boost::shared_ptr<API::MatrixWorkspace> &monitorWS);
   void updateSpectraUsing(const API::SpectrumDetectorMapping &map);
-  void setTitle(std::string title);
-  void applyFilter(boost::function<void(API::MatrixWorkspace_sptr)> func);
+  void setTitle(const std::string &title);
+  void
+  applyFilter(const boost::function<void(API::MatrixWorkspace_sptr)> &func);
   virtual bool threadSafe() const;
 };
 

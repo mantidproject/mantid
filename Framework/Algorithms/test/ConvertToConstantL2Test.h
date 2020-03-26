@@ -58,7 +58,7 @@ public:
     do_test_move(inputWS);
   }
 
-  void do_test_move(MatrixWorkspace_sptr inputWS) {
+  void do_test_move(const MatrixWorkspace_sptr &inputWS) {
     // BEFORE - check the L2 values differ
     const auto &spectrumInfoInput = inputWS->spectrumInfo();
     for (size_t i = 0; i < inputWS->getNumberHistograms(); i++) {
@@ -169,7 +169,7 @@ private:
     return inputWS;
   }
 
-  void addSampleLogs(MatrixWorkspace_sptr inputWS) {
+  void addSampleLogs(const MatrixWorkspace_sptr &inputWS) {
     inputWS->mutableRun().addProperty(
         "wavelength", boost::lexical_cast<std::string>(m_wavelength));
 

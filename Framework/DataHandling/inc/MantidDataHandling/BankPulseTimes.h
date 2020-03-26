@@ -32,7 +32,7 @@ public:
   ~BankPulseTimes();
 
   /// Equals
-  bool equals(size_t otherNumPulse, std::string otherStartTime);
+  bool equals(size_t otherNumPulse, const std::string &otherStartTime);
 
   /// String describing the start time
   std::string startTime;

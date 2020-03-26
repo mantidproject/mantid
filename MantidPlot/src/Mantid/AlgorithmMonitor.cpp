@@ -58,7 +58,7 @@ AlgorithmMonitor::~AlgorithmMonitor() {
  *
  * @param alg :: algorithm to monitor.
  */
-void AlgorithmMonitor::add(Mantid::API::IAlgorithm_sptr alg) {
+void AlgorithmMonitor::add(const Mantid::API::IAlgorithm_sptr &alg) {
   lock();
   alg->addObserver(m_finishedObserver);
   alg->addObserver(m_errorObserver);

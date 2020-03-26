@@ -33,7 +33,7 @@ public:
   bool operator==(const DataBlockComposite &other) const;
 
   // DataBlockComposite only mehtods
-  void addDataBlock(DataBlock dataBlock);
+  void addDataBlock(const DataBlock &dataBlock);
   std::vector<DataBlock> getDataBlocks();
   DataBlockComposite operator+(const DataBlockComposite &other);
   void removeSpectra(DataBlockComposite &toRemove);

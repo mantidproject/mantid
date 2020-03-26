@@ -349,9 +349,9 @@ void Integration::exec() {
 /**
  * Uses rebin to reduce event workspaces to a single bin histogram
  */
-API::MatrixWorkspace_sptr
-Integration::rangeFilterEventWorkspace(API::MatrixWorkspace_sptr workspace,
-                                       double minRange, double maxRange) {
+API::MatrixWorkspace_sptr Integration::rangeFilterEventWorkspace(
+    const API::MatrixWorkspace_sptr &workspace, double minRange,
+    double maxRange) {
   bool childLog = g_log.is(Logger::Priority::PRIO_DEBUG);
   auto childAlg = createChildAlgorithm("Rebin", 0, 0.5, childLog);
   childAlg->setProperty("InputWorkspace", workspace);

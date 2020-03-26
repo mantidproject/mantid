@@ -111,7 +111,7 @@ bool SaveDiffFittingAscii::processGroups() {
 }
 
 void SaveDiffFittingAscii::processAll(
-    const std::vector<API::ITableWorkspace_sptr> input_ws) {
+    const std::vector<API::ITableWorkspace_sptr> &input_ws) {
 
   const std::string filename = getProperty("Filename");
   const std::string outMode = getProperty("OutMode");
@@ -208,7 +208,7 @@ void SaveDiffFittingAscii::writeHeader(
   }
 }
 
-void SaveDiffFittingAscii::writeData(const API::ITableWorkspace_sptr workspace,
+void SaveDiffFittingAscii::writeData(const API::ITableWorkspace_sptr &workspace,
                                      std::ofstream &file,
                                      const size_t columnSize) {
 

@@ -47,13 +47,13 @@ public:
   getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
   bool
-  validItemAtPath(const MantidWidgets::Batch::RowLocation rowLocation) const;
+  validItemAtPath(const MantidWidgets::Batch::RowLocation &rowLocation) const;
   Group const &
-  getGroupFromPath(const MantidWidgets::Batch::RowLocation path) const;
+  getGroupFromPath(const MantidWidgets::Batch::RowLocation &path) const;
   boost::optional<Row> const &
-  getRowFromPath(const MantidWidgets::Batch::RowLocation path) const;
+  getRowFromPath(const MantidWidgets::Batch::RowLocation &path) const;
   Item const &
-  getItemFromPath(const MantidWidgets::Batch::RowLocation path) const;
+  getItemFromPath(const MantidWidgets::Batch::RowLocation &path) const;
 
 private:
   std::vector<Group> m_groups;

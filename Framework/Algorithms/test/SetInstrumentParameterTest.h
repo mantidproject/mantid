@@ -173,10 +173,10 @@ public:
   }
 
   MatrixWorkspace_sptr
-  ExecuteAlgorithm(MatrixWorkspace_sptr testWS, std::string cmptName,
-                   std::string detList, std::string paramName,
-                   std::string paramValue, std::string paramType = "",
-                   bool fails = false) {
+  ExecuteAlgorithm(MatrixWorkspace_sptr testWS, const std::string &cmptName,
+                   const std::string &detList, const std::string &paramName,
+                   const std::string &paramValue,
+                   const std::string &paramType = "", bool fails = false) {
     // add the workspace to the ADS
     AnalysisDataService::Instance().addOrReplace(
         "SetInstrumentParameter_Temporary", testWS);

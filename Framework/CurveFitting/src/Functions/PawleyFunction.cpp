@@ -405,7 +405,8 @@ double PawleyFunction::getTransformedCenter(double d) const {
   return d;
 }
 
-void PawleyFunction::setPeakPositions(std::string centreName, double zeroShift,
+void PawleyFunction::setPeakPositions(const std::string &centreName,
+                                      double zeroShift,
                                       const UnitCell &cell) const {
   for (size_t i = 0; i < m_hkls.size(); ++i) {
     double centre = getTransformedCenter(cell.d(m_hkls[i]));

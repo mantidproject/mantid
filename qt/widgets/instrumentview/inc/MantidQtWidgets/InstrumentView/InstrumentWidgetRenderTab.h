@@ -71,7 +71,7 @@ public slots:
   void changeColorMap(const QString &filename = "");
   void setSurfaceType(int /*index*/);
   void flipUnwrappedView(bool /*on*/);
-  void saveImage(QString filename = "");
+  void saveImage(const QString &filename = "");
 
 private slots:
 

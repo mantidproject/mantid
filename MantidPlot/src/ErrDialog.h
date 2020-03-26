@@ -52,7 +52,7 @@ public:
    * @param parent :: parent widget
    * @param fl :: window flags
    */
-  ErrDialog(ApplicationWindow *parent, Qt::WFlags fl = nullptr);
+  ErrDialog(ApplicationWindow *parent, const Qt::WFlags &fl = nullptr);
 
 private:
   QLabel *textLabel1;
@@ -82,7 +82,7 @@ public slots:
   //! Supply the dialog with a curves list
   void setCurveNames(const QStringList &names);
   //! Supply the dialog with a tables list
-  void setSrcTables(QList<MdiSubWindow *> tables);
+  void setSrcTables(const QList<MdiSubWindow *> &tables);
   //! Select a table
   void selectSrcTable(int tabnr);
 

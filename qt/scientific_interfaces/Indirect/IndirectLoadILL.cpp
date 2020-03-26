@@ -47,7 +47,7 @@ std::string constructPrefix(std::string const &runName,
   return constructPrefix(runName, analyser, reflection);
 }
 
-std::string getWorkspacePrefix(MatrixWorkspace_const_sptr workspace,
+std::string getWorkspacePrefix(const MatrixWorkspace_const_sptr &workspace,
                                std::string const &facility) {
   auto const instrument = workspace->getInstrument();
   auto const runName =

@@ -195,7 +195,7 @@ IntegratePeaksMDHKL::normalize(int h, int k, int l, double box, int gridPts,
 }
 
 void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
-                                        MDHistoWorkspace_sptr out,
+                                        const MDHistoWorkspace_sptr &out,
                                         double &intensity,
                                         double &errorSquared) {
   std::vector<int> gridPts;

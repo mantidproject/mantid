@@ -53,11 +53,11 @@ private:
 
   /// Process a tube
   bool performBleedTest(const std::vector<int> &tubeIndices,
-                        API::MatrixWorkspace_const_sptr inputWS, double maxRate,
-                        int numIgnoredPixels);
+                        const API::MatrixWorkspace_const_sptr &inputWS,
+                        double maxRate, int numIgnoredPixels);
   /// Mask a tube with the given workspace indices
   void maskTube(const std::vector<int> &tubeIndices,
-                API::MatrixWorkspace_sptr workspace);
+                const API::MatrixWorkspace_sptr &workspace);
 };
 
 } // namespace Algorithms

@@ -457,7 +457,7 @@ void MSDFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
 }
 
 void MSDFunctionModel::applyParameterFunction(
-    std::function<void(ParamID)> paramFun) const {
+    const std::function<void(ParamID)> &paramFun) const {
   if (m_fitType == QString::fromStdString(Gauss)) {
     paramFun(ParamID::GAUSSIAN_HEIGHT);
     paramFun(ParamID::GAUSSIAN_MSD);

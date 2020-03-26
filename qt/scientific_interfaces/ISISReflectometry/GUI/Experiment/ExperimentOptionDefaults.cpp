@@ -5,6 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ExperimentOptionDefaults.h"
+
+#include <utility>
+
 #include "Common/OptionDefaults.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "PerThetaDefaultsTableValidator.h"
@@ -24,7 +27,7 @@ std::string stringValueOrEmpty(boost::optional<double> value) {
 
 Experiment
 getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
-  auto defaults = OptionDefaults(instrument);
+  auto defaults = OptionDefaults(std::move(instrument));
 
   auto analysisMode = analysisModeFromString(defaults.getStringOrDefault(
       "AnalysisMode", "AnalysisMode", "PointDetectorAnalysis"));

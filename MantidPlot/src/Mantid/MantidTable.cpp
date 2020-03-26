@@ -34,7 +34,7 @@ using namespace MantidQt::API;
  * @return the MantidTable created
  */
 MantidTable::MantidTable(ScriptingEnv *env,
-                         Mantid::API::ITableWorkspace_sptr ws,
+                         const Mantid::API::ITableWorkspace_sptr &ws,
                          const QString &label, ApplicationWindow *parent,
                          bool transpose)
     : Table(env,

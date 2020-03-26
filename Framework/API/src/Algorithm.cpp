@@ -38,6 +38,7 @@
 #include <json/json.h>
 
 #include <map>
+#include <utility>
 
 // Index property handling template definitions
 #include "MantidAPI/Algorithm.tcc"
@@ -844,7 +845,7 @@ Algorithm_sptr Algorithm::createChildAlgorithm(const std::string &name,
  * Can also be used manually for algorithms created otherwise. This allows
  * running algorithms that are not declared into the factory as child
  * algorithms. */
-void Algorithm::setupAsChildAlgorithm(Algorithm_sptr alg,
+void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg,
                                       const double startProgress,
                                       const double endProgress,
                                       const bool enableLogging) {
@@ -1061,7 +1062,7 @@ void Algorithm::linkHistoryWithLastChild() {
 void Algorithm::trackAlgorithmHistory(
     boost::shared_ptr<AlgorithmHistory> parentHist) {
   enableHistoryRecordingForChild(true);
-  m_parentHistory = parentHist;
+  m_parentHistory = std::move(parentHist);
 }
 
 /** Check if we are tracking history for this algorithm
@@ -1553,6 +1554,7 @@ void Algorithm::copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum) {
   const auto &props = this->getProperties();
   for (const auto &prop : props) {
     if (prop) {
+
       auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       // Copy the property using the string
       if (!wsProp)

@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Common/QStringUtils.h"
 #include <QLayout>
 #include <iosfwd>
+#include <utility>
 
 namespace MantidQt {
 using API::toQStringInternal;
@@ -179,7 +180,7 @@ void DimensionSliceWidget::setMinMax(double min, double max) {
 /** Set the dimension to display */
 void DimensionSliceWidget::setDimension(
     int index, Mantid::Geometry::IMDDimension_const_sptr dim) {
-  m_dim = dim;
+  m_dim = std::move(dim);
   m_dimIndex = index;
   // set the limits of the slider to be the bin centres and not
   // the edges of the bins

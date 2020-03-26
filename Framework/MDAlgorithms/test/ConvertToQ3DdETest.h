@@ -59,7 +59,7 @@ public:
   /** Calculate min-max value defaults*/
   Mantid::API::IAlgorithm_sptr
   calcMinMaxValDefaults(const std::string &QMode, const std::string &QFrame,
-                        std::string OtherProperties = std::string("")) {
+                        const std::string &OtherProperties = std::string("")) {
 
     auto childAlg =
         AlgorithmManager::Instance().create("ConvertToMDMinMaxLocal");

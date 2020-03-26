@@ -45,11 +45,11 @@ makeAnyEventIdToBankMap(const std::string &filename,
 }
 
 /// Load events from given banks into event lists using MPI.
-void load(const Communicator &comm, const std::string &filename,
-          const std::string &groupName,
-          const std::vector<std::string> &bankNames,
-          const std::vector<int32_t> &bankOffsets,
-          std::vector<std::vector<Types::Event::TofEvent> *> eventLists) {
+void load(
+    const Communicator &comm, const std::string &filename,
+    const std::string &groupName, const std::vector<std::string> &bankNames,
+    const std::vector<int32_t> &bankOffsets,
+    const std::vector<std::vector<Types::Event::TofEvent> *> &eventLists) {
   H5::H5File file(filename, H5F_ACC_RDONLY);
   H5::Group group = file.openGroup(groupName);
   load(readDataType(group, bankNames, "event_time_offset"), comm, group,
@@ -60,7 +60,7 @@ void load(const Communicator &comm, const std::string &filename,
 void load(const std::string &filename, const std::string &groupname,
           const std::vector<std::string> &bankNames,
           const std::vector<int32_t> &bankOffsets,
-          std::vector<std::vector<Types::Event::TofEvent> *> eventLists,
+          const std::vector<std::vector<Types::Event::TofEvent> *> &eventLists,
           bool precalcEvents) {
   auto concurencyNumber = PARALLEL_GET_MAX_THREADS;
   auto numThreads = std::max<int>(concurencyNumber / 2, 1);

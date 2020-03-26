@@ -25,7 +25,7 @@ Mantid::Kernel::Logger g_log("LoadOff");
 }
 class DLLExport LoadOff : public MeshFileIO {
 public:
-  LoadOff(std::string filename, ScaleUnits scaleType);
+  LoadOff(const std::string &filename, ScaleUnits scaleType);
   std::unique_ptr<Geometry::MeshObject> readOFFshape();
 
 private:

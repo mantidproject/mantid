@@ -1029,7 +1029,6 @@ public:
     TS_ASSERT(alg2.isInitialized());
 
     // create mock data to test against
-    const std::string wsName = "ExpDecayMockData";
     const int histogramNumber = 1;
     const int timechannels = 20;
     Workspace_sptr ws = WorkspaceFactory::Instance().create(

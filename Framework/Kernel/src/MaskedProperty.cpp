@@ -22,7 +22,7 @@ namespace Kernel {
  */
 template <typename TYPE>
 MaskedProperty<TYPE>::MaskedProperty(const std::string &name, TYPE defaultvalue,
-                                     IValidator_sptr validator,
+                                     const IValidator_sptr &validator,
                                      const unsigned int direction)
     : Kernel::PropertyWithValue<TYPE>(name, defaultvalue, validator, direction),
       m_maskedValue("") {

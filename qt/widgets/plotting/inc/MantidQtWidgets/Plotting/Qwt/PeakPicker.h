@@ -28,8 +28,8 @@ class EXPORT_OPT_MANTIDQT_PLOTTING PeakPicker : public QwtPlotPicker,
 
 public:
   /// Constructor
-  PeakPicker(QwtPlot *plot, QColor color);
-  PeakPicker(PreviewPlot *plot, QColor color);
+  PeakPicker(QwtPlot *plot, const QColor &color);
+  PeakPicker(PreviewPlot *plot, const QColor &color);
 
   /// Correct QwtPlotItem type info
   int rtti() const override { return QwtPlotItem::Rtti_PlotMarker; }

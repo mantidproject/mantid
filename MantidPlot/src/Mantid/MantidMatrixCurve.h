@@ -145,7 +145,7 @@ private:
   /// Make the curve name
   QString createCurveName(
       const QString &prefix,
-      const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
+      const boost::shared_ptr<const Mantid::API::MatrixWorkspace> &ws);
 
   QString
       m_wsName; ///< Workspace name. If empty the ws isn't in the data service

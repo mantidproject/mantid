@@ -4,10 +4,12 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
+#include <utility>
+
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -21,7 +23,7 @@ namespace MDAlgorithms {
  * @param mode: the energy transfer mode
  */
 void DisplayNormalizationSetter::
-operator()(Mantid::API::IMDWorkspace_sptr mdWorkspace,
+operator()(const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
            const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace,
            bool isQ, const Mantid::Kernel::DeltaEMode::Type &mode) {
   if (boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(
@@ -42,7 +44,7 @@ operator()(Mantid::API::IMDWorkspace_sptr mdWorkspace,
  * @param mode: the energy transfer mode
  */
 void DisplayNormalizationSetter::setNormalizationMDEvent(
-    Mantid::API::IMDWorkspace_sptr mdWorkspace,
+    const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
     const Mantid::API::MatrixWorkspace_sptr &underlyingWorkspace, bool isQ,
     const Mantid::Kernel::DeltaEMode::Type &mode) {
 
@@ -73,7 +75,7 @@ void DisplayNormalizationSetter::setNormalizationMDEvent(
         Mantid::API::MDNormalization::NumEventsNormalization;
   }
 
-  applyNormalizationMDEvent(mdWorkspace, displayNormalization,
+  applyNormalizationMDEvent(std::move(mdWorkspace), displayNormalization,
                             displayNormalizationHisto);
 }
 
@@ -86,7 +88,7 @@ void DisplayNormalizationSetter::setNormalizationMDEvent(
  * MDHisto workspaces
  */
 void DisplayNormalizationSetter::applyNormalizationMDEvent(
-    Mantid::API::IMDWorkspace_sptr mdWorkspace,
+    const Mantid::API::IMDWorkspace_sptr &mdWorkspace,
     Mantid::API::MDNormalization displayNormalization,
     Mantid::API::MDNormalization displayNormalizationHisto) {
   auto ws =

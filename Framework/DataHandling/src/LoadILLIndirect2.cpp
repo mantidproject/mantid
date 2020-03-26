@@ -271,7 +271,7 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
  * @param nexusfilename
  */
 void LoadILLIndirect2::loadNexusEntriesIntoProperties(
-    std::string nexusfilename) {
+    const std::string &nexusfilename) {
 
   API::Run &runDetails = m_localWorkspace->mutableRun();
 

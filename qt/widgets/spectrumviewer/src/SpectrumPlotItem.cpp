@@ -35,7 +35,7 @@ SpectrumPlotItem::~SpectrumPlotItem() {}
  *                            must have the same number of entries as the
  *                            positive color table.
  */
-void SpectrumPlotItem::setData(DataArray_const_sptr dataArray,
+void SpectrumPlotItem::setData(const DataArray_const_sptr &dataArray,
                                std::vector<QRgb> *positiveColorTable,
                                std::vector<QRgb> *negativeColorTable) {
   if (m_bufferID == 0) {

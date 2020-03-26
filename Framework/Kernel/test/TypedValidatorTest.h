@@ -69,7 +69,7 @@ public:
 private:
   template <typename HeldType>
   void checkIsValidReturnsEmptyString(
-      const Mantid::Kernel::IValidator_sptr valueChecker,
+      const Mantid::Kernel::IValidator_sptr &valueChecker,
       const HeldType &value) {
     std::string error;
     TS_ASSERT_THROWS_NOTHING(error = valueChecker->isValid(value));

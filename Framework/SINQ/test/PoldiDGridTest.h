@@ -14,6 +14,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 
 #include <stdexcept>
+#include <utility>
 
 using ::testing::Return;
 using namespace Mantid::Poldi;
@@ -28,7 +29,8 @@ class TestablePoldiDGrid : public PoldiDGrid {
           boost::shared_ptr<PoldiAbstractChopper>(),
       double deltaT = 0.0,
       std::pair<double, double> wavelengthRange = std::pair<double, double>())
-      : PoldiDGrid(detector, chopper, deltaT, wavelengthRange) {}
+      : PoldiDGrid(std::move(detector), std::move(chopper), deltaT,
+                   wavelengthRange) {}
 };
 
 class PoldiDGridTest : public CxxTest::TestSuite {

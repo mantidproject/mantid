@@ -747,7 +747,7 @@ double SaveHKL::spectrumCalc(double TOF, int iSpec,
 
   return spect;
 }
-void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
+void SaveHKL::sizeBanks(const std::string &bankName, int &nCols, int &nRows) {
   if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =

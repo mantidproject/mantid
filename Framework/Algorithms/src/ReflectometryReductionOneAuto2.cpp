@@ -172,7 +172,7 @@ ReflectometryReductionOneAuto2::validateInputs() {
 }
 
 std::string ReflectometryReductionOneAuto2::getRunNumberForWorkspaceGroup(
-    WorkspaceGroup_const_sptr group) {
+    const WorkspaceGroup_const_sptr &group) {
   // Return the run number for the first child workspace
   if (!group)
     throw std::runtime_error("Invalid workspace group type");
@@ -495,8 +495,8 @@ void ReflectometryReductionOneAuto2::exec() {
  * @param inputWS :: the input workspace
  * @return :: the names of the detectors of interest
  */
-std::vector<std::string>
-ReflectometryReductionOneAuto2::getDetectorNames(MatrixWorkspace_sptr inputWS) {
+std::vector<std::string> ReflectometryReductionOneAuto2::getDetectorNames(
+    const MatrixWorkspace_sptr &inputWS) {
 
   std::vector<std::string> wsIndices;
   boost::split(wsIndices, m_processingInstructionsWorkspaceIndex,
@@ -572,8 +572,8 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::correctDetectorPositions(
  * @param inputWS :: the input workspace
  * @return :: the angle of the detector (only the first detector is considered)
  */
-double
-ReflectometryReductionOneAuto2::calculateTheta(MatrixWorkspace_sptr inputWS) {
+double ReflectometryReductionOneAuto2::calculateTheta(
+    const MatrixWorkspace_sptr &inputWS) {
 
   const auto detectorsOfInterest = getDetectorNames(inputWS);
 
@@ -600,7 +600,7 @@ ReflectometryReductionOneAuto2::calculateTheta(MatrixWorkspace_sptr inputWS) {
  * @param instrument :: The instrument attached to the workspace
  */
 void ReflectometryReductionOneAuto2::populateAlgorithmicCorrectionProperties(
-    IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
+    const IAlgorithm_sptr &alg, const Instrument_const_sptr &instrument) {
 
   // With algorithmic corrections, monitors should not be integrated, see below
 
@@ -664,7 +664,7 @@ void ReflectometryReductionOneAuto2::populateAlgorithmicCorrectionProperties(
 }
 
 auto ReflectometryReductionOneAuto2::getRebinParams(
-    MatrixWorkspace_sptr inputWS, const double theta) -> RebinParams {
+    const MatrixWorkspace_sptr &inputWS, const double theta) -> RebinParams {
   bool qMinIsDefault = true, qMaxIsDefault = true;
   auto const qMin = getPropertyOrDefault("MomentumTransferMin",
                                          inputWS->x(0).front(), qMinIsDefault);
@@ -681,7 +681,7 @@ auto ReflectometryReductionOneAuto2::getRebinParams(
  * @return :: the rebin step in Q, or none if it could not be found
  */
 boost::optional<double>
-ReflectometryReductionOneAuto2::getQStep(MatrixWorkspace_sptr inputWS,
+ReflectometryReductionOneAuto2::getQStep(const MatrixWorkspace_sptr &inputWS,
                                          const double theta) {
   Property *qStepProp = getProperty("MomentumTransferStep");
   double qstep;
@@ -718,9 +718,8 @@ ReflectometryReductionOneAuto2::getQStep(MatrixWorkspace_sptr inputWS,
  * and max)
  * @return :: the output workspace
  */
-MatrixWorkspace_sptr
-ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
-                                              RebinParams const &params) {
+MatrixWorkspace_sptr ReflectometryReductionOneAuto2::rebinAndScale(
+    const MatrixWorkspace_sptr &inputWS, RebinParams const &params) {
   // Rebin
   IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
   algRebin->initialize();
@@ -747,7 +746,7 @@ ReflectometryReductionOneAuto2::rebinAndScale(MatrixWorkspace_sptr inputWS,
 }
 
 MatrixWorkspace_sptr
-ReflectometryReductionOneAuto2::cropQ(MatrixWorkspace_sptr inputWS,
+ReflectometryReductionOneAuto2::cropQ(const MatrixWorkspace_sptr &inputWS,
                                       RebinParams const &params) {
   IAlgorithm_sptr algCrop = createChildAlgorithm("CropWorkspace");
   algCrop->initialize();

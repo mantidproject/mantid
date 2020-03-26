@@ -16,6 +16,7 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
 #include <boost/make_shared.hpp>
+#include <utility>
 
 using namespace Poco::XML;
 
@@ -27,7 +28,7 @@ namespace API {
  * @param instrument :: [input] Instrument
  */
 GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument)
-    : m_instrument(instrument) {}
+    : m_instrument(std::move(instrument)) {}
 
 /** Constructor with field direction
  * @param instrument :: [input] Instrument
@@ -35,7 +36,8 @@ GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument)
  */
 GroupingLoader::GroupingLoader(Geometry::Instrument_const_sptr instrument,
                                const std::string &mainFieldDirection)
-    : m_instrument(instrument), m_mainFieldDirection(mainFieldDirection) {}
+    : m_instrument(std::move(instrument)),
+      m_mainFieldDirection(mainFieldDirection) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -248,7 +250,7 @@ boost::shared_ptr<Grouping> GroupingLoader::getDummyGrouping() {
  * Construct a Grouping from a table
  * @param table :: [input] Table to construct from
  */
-Grouping::Grouping(ITableWorkspace_sptr table) {
+Grouping::Grouping(const ITableWorkspace_sptr &table) {
   for (size_t row = 0; row < table->rowCount(); ++row) {
     std::vector<int> detectors = table->cell<std::vector<int>>(row, 0);
 

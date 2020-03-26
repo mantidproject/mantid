@@ -5,6 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <cmath>
+#include <utility>
+
 #include <vector>
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -565,7 +567,7 @@ void PlotAsymmetryByLogValue::parseRunNames(std::string &firstFN,
 void PlotAsymmetryByLogValue::applyDeadtimeCorr(Workspace_sptr &loadedWs,
                                                 Workspace_sptr deadTimes) {
   ScopedWorkspace ws(loadedWs);
-  ScopedWorkspace dt(deadTimes);
+  ScopedWorkspace dt(std::move(deadTimes));
 
   IAlgorithm_sptr applyCorr =
       AlgorithmManager::Instance().createUnmanaged("ApplyDeadTimeCorr");
@@ -610,7 +612,7 @@ void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs,
 
   // Could be groups of workspaces, so need to work with ADS
   ScopedWorkspace inWS(loadedWs);
-  ScopedWorkspace grWS(grouping);
+  ScopedWorkspace grWS(std::move(grouping));
   ScopedWorkspace outWS;
 
   IAlgorithm_sptr alg =
@@ -628,7 +630,7 @@ void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs,
  *   @param loadedWs :: [input] Workspace to apply analysis to
  *   @param index :: [input] Vector index where results will be stored
  */
-void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
+void PlotAsymmetryByLogValue::doAnalysis(const Workspace_sptr &loadedWs,
                                          size_t index) {
 
   // Check if workspace is a workspace group
@@ -698,7 +700,7 @@ void PlotAsymmetryByLogValue::doAnalysis(Workspace_sptr loadedWs,
  *   @param Y :: Reference to a variable receiving the value of asymmetry
  *   @param E :: Reference to a variable receiving the value of the error
  */
-void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws,
+void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws,
                                                double &Y, double &E) {
 
   // Output workspace
@@ -746,9 +748,9 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws,
  *   @param Y :: Reference to a variable receiving the value of asymmetry
  *   @param E :: Reference to a variable receiving the value of the error
  */
-void PlotAsymmetryByLogValue::calcIntAsymmetry(MatrixWorkspace_sptr ws_red,
-                                               MatrixWorkspace_sptr ws_green,
-                                               double &Y, double &E) {
+void PlotAsymmetryByLogValue::calcIntAsymmetry(
+    const MatrixWorkspace_sptr &ws_red, const MatrixWorkspace_sptr &ws_green,
+    double &Y, double &E) {
   if (!m_int) { //  "Differential asymmetry"
     HistogramBuilder builder;
     builder.setX(ws_red->x(0).size());

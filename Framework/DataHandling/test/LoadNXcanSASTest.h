@@ -8,6 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <utility>
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -266,7 +268,7 @@ public:
   }
 
 private:
-  void removeWorkspaceFromADS(const std::string toRemove) {
+  void removeWorkspaceFromADS(const std::string &toRemove) {
     if (AnalysisDataService::Instance().doesExist(toRemove)) {
       AnalysisDataService::Instance().remove(toRemove);
     }
@@ -296,10 +298,11 @@ private:
     return ws;
   }
 
-  void save_file_no_issues(MatrixWorkspace_sptr workspace,
-                           NXcanSASTestParameters &parameters,
-                           MatrixWorkspace_sptr transmission = nullptr,
-                           MatrixWorkspace_sptr transmissionCan = nullptr) {
+  void
+  save_file_no_issues(const MatrixWorkspace_sptr &workspace,
+                      NXcanSASTestParameters &parameters,
+                      const MatrixWorkspace_sptr &transmission = nullptr,
+                      const MatrixWorkspace_sptr &transmissionCan = nullptr) {
     auto saveAlg = AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
     saveAlg->initialize();
     saveAlg->setProperty("Filename", parameters.filename);
@@ -342,7 +345,8 @@ private:
     }
   }
 
-  void do_assert_units(MatrixWorkspace_sptr wsIn, MatrixWorkspace_sptr wsOut) {
+  void do_assert_units(const MatrixWorkspace_sptr &wsIn,
+                       const MatrixWorkspace_sptr &wsOut) {
     // Ensure that units of axis 0 are matching
     auto unit0In = wsIn->getAxis(0)->unit()->label().ascii();
     auto unit0Out = wsOut->getAxis(0)->unit()->label().ascii();
@@ -361,8 +365,8 @@ private:
     TSM_ASSERT_EQUALS("Should have the same y unit", unitYIn, unitYOut);
   }
 
-  void do_assert_axis1_values_are_the_same(MatrixWorkspace_sptr wsIn,
-                                           MatrixWorkspace_sptr wsOut) {
+  void do_assert_axis1_values_are_the_same(const MatrixWorkspace_sptr &wsIn,
+                                           const MatrixWorkspace_sptr &wsOut) {
     if (!wsOut->getAxis(1)->isNumeric()) {
       return;
     }
@@ -391,8 +395,8 @@ private:
     }
   }
 
-  void do_assert_sample_logs(MatrixWorkspace_sptr wsIn,
-                             MatrixWorkspace_sptr wsOut) {
+  void do_assert_sample_logs(const MatrixWorkspace_sptr &wsIn,
+                             const MatrixWorkspace_sptr &wsOut) {
     auto &runIn = wsIn->mutableRun();
     auto &runOut = wsOut->mutableRun();
 
@@ -413,16 +417,17 @@ private:
     }
   }
 
-  void do_assert_instrument(MatrixWorkspace_sptr wsIn,
-                            MatrixWorkspace_sptr wsOut) {
-    auto idfIn = getIDFfromWorkspace(wsIn);
-    auto idfOut = getIDFfromWorkspace(wsOut);
+  void do_assert_instrument(const MatrixWorkspace_sptr &wsIn,
+                            const MatrixWorkspace_sptr &wsOut) {
+    auto idfIn = getIDFfromWorkspace(std::move(wsIn));
+    auto idfOut = getIDFfromWorkspace(std::move(wsOut));
     TSM_ASSERT_EQUALS("Should have the same instrument", idfIn, idfOut);
   }
 
-  void do_assert_transmission(MatrixWorkspace_sptr mainWorkspace,
-                              MatrixWorkspace_sptr transIn,
-                              NXcanSASTestTransmissionParameters parameters) {
+  void
+  do_assert_transmission(const MatrixWorkspace_sptr &mainWorkspace,
+                         const MatrixWorkspace_sptr &transIn,
+                         const NXcanSASTestTransmissionParameters &parameters) {
     if (!parameters.usesTransmission || !transIn) {
       return;
     }
@@ -435,32 +440,34 @@ private:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(transName);
 
     // Ensure that both have the same Y data
-    auto readDataY = [](MatrixWorkspace_sptr ws, size_t index) {
+    auto readDataY = [](const MatrixWorkspace_sptr &ws, size_t index) {
       return ws->y(index);
     };
     do_assert_data(transIn, transOut, readDataY);
 
     // Ensure that both have the same E data
-    auto readDataE = [](MatrixWorkspace_sptr ws, size_t index) {
+    auto readDataE = [](const MatrixWorkspace_sptr &ws, size_t index) {
       return ws->e(index);
     };
     do_assert_data(transIn, transOut, readDataE);
 
     // Ensure that both have the same X data
-    auto readDataX = [](MatrixWorkspace_sptr ws, size_t index) {
+    auto readDataX = [](const MatrixWorkspace_sptr &ws, size_t index) {
       return ws->x(index);
     };
     do_assert_data(transIn, transOut, readDataX);
   }
 
-  void do_assert_load(MatrixWorkspace_sptr wsIn, MatrixWorkspace_sptr wsOut,
-                      NXcanSASTestParameters &parameters,
-                      MatrixWorkspace_sptr transmission = nullptr,
-                      MatrixWorkspace_sptr transmissionCan = nullptr,
-                      NXcanSASTestTransmissionParameters sampleParameters =
-                          NXcanSASTestTransmissionParameters(),
-                      NXcanSASTestTransmissionParameters canParameters =
-                          NXcanSASTestTransmissionParameters()) {
+  void
+  do_assert_load(const MatrixWorkspace_sptr &wsIn,
+                 const MatrixWorkspace_sptr &wsOut,
+                 NXcanSASTestParameters &parameters,
+                 const MatrixWorkspace_sptr &transmission = nullptr,
+                 const MatrixWorkspace_sptr &transmissionCan = nullptr,
+                 const NXcanSASTestTransmissionParameters &sampleParameters =
+                     NXcanSASTestTransmissionParameters(),
+                 const NXcanSASTestTransmissionParameters &canParameters =
+                     NXcanSASTestTransmissionParameters()) {
     // Ensure that both have the same units
     do_assert_units(wsIn, wsOut);
 
@@ -468,26 +475,26 @@ private:
     TSM_ASSERT("Should be a point workspace", !wsOut->isHistogramData());
 
     // Ensure that both have the same Y data
-    auto readDataY = [](MatrixWorkspace_sptr ws, size_t index) {
+    auto readDataY = [](const MatrixWorkspace_sptr &ws, size_t index) {
       return ws->y(index);
     };
     do_assert_data(wsIn, wsOut, readDataY);
 
     // Ensure that both have the same E data
-    auto readDataE = [](MatrixWorkspace_sptr ws, size_t index) {
+    auto readDataE = [](const MatrixWorkspace_sptr &ws, size_t index) {
       return ws->e(index);
     };
     do_assert_data(wsIn, wsOut, readDataE);
 
     // Ensure that both have the same X data
-    auto readDataX = [](MatrixWorkspace_sptr ws, size_t index) {
+    auto readDataX = [](const MatrixWorkspace_sptr &ws, size_t index) {
       return ws->x(index);
     };
     do_assert_data(wsIn, wsOut, readDataX);
 
     // If applicable, ensure that both have the same Xdev data
     if (parameters.hasDx) {
-      auto readDataDX = [](MatrixWorkspace_sptr ws, size_t index) {
+      auto readDataDX = [](const MatrixWorkspace_sptr &ws, size_t index) {
         return ws->dataDx(index);
       };
       do_assert_data(wsIn, wsOut, readDataDX);
@@ -503,8 +510,10 @@ private:
     do_assert_instrument(wsIn, wsOut);
 
     // Test transmission workspaces
-    do_assert_transmission(wsOut, transmission, sampleParameters);
-    do_assert_transmission(wsOut, transmissionCan, canParameters);
+    do_assert_transmission(wsOut, std::move(transmission),
+                           std::move(sampleParameters));
+    do_assert_transmission(wsOut, std::move(transmissionCan),
+                           std::move(canParameters));
   }
 };
 
@@ -537,7 +546,7 @@ private:
   NXcanSASTestParameters parameters1D;
   NXcanSASTestParameters parameters2D;
 
-  void save_no_assert(MatrixWorkspace_sptr ws,
+  void save_no_assert(const MatrixWorkspace_sptr &ws,
                       NXcanSASTestParameters &parameters) {
     auto saveAlg = AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
     saveAlg->initialize();

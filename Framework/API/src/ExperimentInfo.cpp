@@ -711,7 +711,7 @@ double ExperimentInfo::getEFixed(const detid_t detID) const {
  * @return The current efixed value
  */
 double ExperimentInfo::getEFixed(
-    const boost::shared_ptr<const Geometry::IDetector> detector) const {
+    const boost::shared_ptr<const Geometry::IDetector> &detector) const {
   populateIfNotLoaded();
   Kernel::DeltaEMode::Type emode = getEMode();
   if (emode == Kernel::DeltaEMode::Direct) {
@@ -944,8 +944,10 @@ std::vector<std::string> ExperimentInfo::getResourceFilenames(
   std::vector<std::string> pathNames;
   if (!matchingFiles.empty()) {
     pathNames.reserve(matchingFiles.size());
-    for (auto &elem : matchingFiles)
-      pathNames.emplace_back(std::move(elem.second));
+
+    std::transform(matchingFiles.begin(), matchingFiles.end(),
+                   std::back_inserter(pathNames),
+                   [](const auto &elem) { return elem.second; });
   } else {
     pathNames.emplace_back(std::move(mostRecentFile));
   }

@@ -29,7 +29,7 @@
 #include <QGroupBox>
 #include <QSpinBox>
 
-LineDialog::LineDialog(ArrowMarker *line, QWidget *parent, Qt::WFlags fl)
+LineDialog::LineDialog(ArrowMarker *line, QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl) {
   unitBox = nullptr;
 

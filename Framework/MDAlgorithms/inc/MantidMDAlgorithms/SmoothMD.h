@@ -37,13 +37,13 @@ public:
   std::map<std::string, std::string> validateInputs() override;
 
   boost::shared_ptr<Mantid::API::IMDHistoWorkspace> hatSmooth(
-      boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> toSmooth,
+      const boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> &toSmooth,
       const std::vector<double> &widthVector,
       boost::optional<boost::shared_ptr<const Mantid::API::IMDHistoWorkspace>>
           weightingWS);
 
   boost::shared_ptr<Mantid::API::IMDHistoWorkspace> gaussianSmooth(
-      boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> toSmooth,
+      const boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> &toSmooth,
       const std::vector<double> &widthVector,
       boost::optional<boost::shared_ptr<const Mantid::API::IMDHistoWorkspace>>
           weightingWS);

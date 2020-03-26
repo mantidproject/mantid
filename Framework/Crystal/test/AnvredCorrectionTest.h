@@ -69,7 +69,7 @@ EventWorkspace_sptr createDiffractionEventWorkspace(int numBanks = 1,
   return retVal;
 }
 
-void do_test_events(MatrixWorkspace_sptr workspace, bool ev,
+void do_test_events(const MatrixWorkspace_sptr &workspace, bool ev,
                     bool performance = false) {
 
   workspace->getAxis(0)->setUnit("Wavelength");

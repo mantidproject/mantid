@@ -41,7 +41,7 @@ public:
   /// Clones this and the children into a new Validator
   IValidator_sptr clone() const override;
   /// Adds a validator to the group of validators to check
-  void add(IValidator_sptr child);
+  void add(const IValidator_sptr &child);
   /// Add a validator based on a template type. Useful for validators that need
   /// no arguments
   template <typename T> void add() { this->add(boost::make_shared<T>()); }

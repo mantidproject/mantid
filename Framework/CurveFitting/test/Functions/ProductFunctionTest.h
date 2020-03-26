@@ -116,8 +116,7 @@ public:
     linear->setParameter(0, 0.1);
     linear->setParameter(1, 0.2);
 
-    size_t iFun = 100000;
-    iFun = prodF.addFunction(linear);
+    size_t iFun = prodF.addFunction(linear);
     TS_ASSERT_EQUALS(iFun, 0);
     iFun = prodF.addFunction(gauss1);
     TS_ASSERT_EQUALS(iFun, 1);

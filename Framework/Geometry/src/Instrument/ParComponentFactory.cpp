@@ -58,7 +58,7 @@ ParComponentFactory::createInstrument(boost::shared_ptr<const Instrument> base,
  * @returns A pointer to a parameterized component
  */
 IComponent_sptr
-ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
+ParComponentFactory::create(const boost::shared_ptr<const IComponent> &base,
                             const ParameterMap *map) {
   boost::shared_ptr<const IDetector> det_sptr =
       boost::dynamic_pointer_cast<const IDetector>(base);

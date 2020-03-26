@@ -34,8 +34,8 @@ MantidAxes::MantidAxes(Python::Object pyObj) : Axes{std::move(pyObj)} {}
  */
 Line2D
 MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                 const size_t wkspIndex, const QString lineColour,
-                 const QString label,
+                 const size_t wkspIndex, const QString &lineColour,
+                 const QString &label,
                  const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
   GlobalInterpreterLock lock;
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
@@ -61,7 +61,7 @@ MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace,
  */
 ErrorbarContainer MantidAxes::errorbar(
     const Mantid::API::MatrixWorkspace_sptr &workspace, const size_t wkspIndex,
-    const QString lineColour, const QString label,
+    const QString &lineColour, const QString &label,
     const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
   GlobalInterpreterLock lock;
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));

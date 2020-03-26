@@ -80,11 +80,11 @@ private:
   /// Main function to calculate all detectors' offsets
   void calculateDetectorsOffsets();
 
-  void
-  importFitWindowTableWorkspace(DataObjects::TableWorkspace_sptr windowtablews);
+  void importFitWindowTableWorkspace(
+      const DataObjects::TableWorkspace_sptr &windowtablews);
 
   /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
-  int fitSpectra(const int64_t wi, API::MatrixWorkspace_sptr inputW,
+  int fitSpectra(const int64_t wi, const API::MatrixWorkspace_sptr &inputW,
                  const std::vector<double> &peakPositions,
                  const std::vector<double> &fitWindows, size_t &nparams,
                  double &minD, double &maxD, std::vector<double> &peakPosToFit,
@@ -94,7 +94,7 @@ private:
 
   /// Add peak fitting and offset calculation information to information table
   /// workspaces per spectrum
-  void addInfoToReportWS(int wi, FitPeakOffsetResult offsetresult,
+  void addInfoToReportWS(int wi, const FitPeakOffsetResult &offsetresult,
                          const std::vector<double> &tofitpeakpositions,
                          const std::vector<double> &fittedpeakpositions);
 

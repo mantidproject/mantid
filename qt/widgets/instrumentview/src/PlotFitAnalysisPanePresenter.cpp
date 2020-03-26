@@ -9,6 +9,7 @@
 #include <exception>
 #include <functional>
 #include <tuple>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -42,7 +43,7 @@ void PlotFitAnalysisPanePresenter::doFit() {
 
 void PlotFitAnalysisPanePresenter::addFunction(
     Mantid::API::IFunction_sptr func) {
-  m_view->addFunction(func);
+  m_view->addFunction(std::move(func));
 }
 
 void PlotFitAnalysisPanePresenter::addSpectrum(const std::string &wsName) {

@@ -354,9 +354,9 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           evlist.mutableX() -= t0_direct;
 
           MantidVec tofs = evlist.getTofs();
-          for (double &tof : tofs) {
-            tof -= t0_direct;
-          }
+
+          std::transform(tofs.begin(), tofs.end(), tofs.begin(),
+                         [&t0_direct](double tof) { return tof - t0_direct; });
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
         } // end of else if(emode=="Direct")

@@ -37,7 +37,7 @@ protected:
       const std::vector<Mantid::API::ITableWorkspace_sptr> &tables) const;
   /// Remove error columns for fixed parameters from a results table
   void removeFixedParameterErrors(
-      const Mantid::API::ITableWorkspace_sptr table) const;
+      const Mantid::API::ITableWorkspace_sptr &table) const;
 
 private:
   /// Get map of label to workspaces

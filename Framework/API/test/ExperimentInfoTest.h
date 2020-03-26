@@ -880,14 +880,14 @@ private:
   }
 
   Instrument_sptr
-  addInstrumentWithIndirectEmodeParameter(ExperimentInfo_sptr exptInfo) {
+  addInstrumentWithIndirectEmodeParameter(const ExperimentInfo_sptr &exptInfo) {
     Instrument_sptr inst = addInstrument(exptInfo);
     exptInfo->instrumentParameters().addString(inst.get(), "deltaE-mode",
                                                "indirect");
     return inst;
   }
 
-  Instrument_sptr addInstrument(ExperimentInfo_sptr exptInfo) {
+  Instrument_sptr addInstrument(const ExperimentInfo_sptr &exptInfo) {
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(1);
     exptInfo->setInstrument(inst);

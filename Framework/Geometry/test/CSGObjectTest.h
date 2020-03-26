@@ -416,7 +416,7 @@ public:
     TS_ASSERT_EQUALS(index, expectedResults.size());
   }
 
-  void checkTrackIntercept(IObject_sptr obj, Track &track,
+  void checkTrackIntercept(const IObject_sptr &obj, Track &track,
                            const std::vector<Link> &expectedResults) {
     int unitCount = obj->interceptSurface(track);
     TS_ASSERT_EQUALS(unitCount, expectedResults.size());

@@ -18,7 +18,7 @@ namespace {
 
 // This helper sets the signal values to the linear index to have some
 // variety
-void resetSignalsToLinearIndexValue(IMDHistoWorkspace_sptr ws) {
+void resetSignalsToLinearIndexValue(const IMDHistoWorkspace_sptr &ws) {
   auto numberOfIndices = static_cast<size_t>(ws->getNPoints());
   for (size_t i = 0; i < numberOfIndices; ++i) {
     auto &signal = ws->signalAt(i);

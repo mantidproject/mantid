@@ -27,7 +27,7 @@ class MANTID_KERNEL_DLL IndexSet {
 public:
   IndexSet(size_t fullRange);
   IndexSet(int64_t min, int64_t max, size_t fullRange);
-  IndexSet(const std::vector<size_t> indices, size_t fullRange);
+  IndexSet(const std::vector<size_t> &indices, size_t fullRange);
 
   /// Returns the size of the set.
   size_t size() const { return m_size; }

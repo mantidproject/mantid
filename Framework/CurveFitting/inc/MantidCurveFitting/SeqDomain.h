@@ -38,7 +38,7 @@ public:
   virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
                                   API::FunctionValues_sptr &values) const;
   /// Add new domain creator
-  void addCreator(API::IDomainCreator_sptr creator);
+  void addCreator(const API::IDomainCreator_sptr &creator);
   /// Calculate the value of an additive cost function
   virtual void
   additiveCostFunctionVal(const CostFunctions::CostFuncFitting &costFunction);

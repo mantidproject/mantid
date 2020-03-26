@@ -33,7 +33,7 @@ namespace {
 template <typename MDE, size_t nd>
 void prepareUpdate(MDBoxFlatTree &BoxFlatStruct, BoxController *bc,
                    typename MDEventWorkspace<MDE, nd>::sptr ws,
-                   std::string filename) {
+                   const std::string &filename) {
   // remove all boxes from the DiskBuffer. DB will calculate boxes positions
   // on HDD.
   bc->getFileIO()->flushCache();
@@ -236,7 +236,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  *
  * @param ws :: MDHistoWorkspace to save
  */
-void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
+void SaveMD::doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) {
   std::string filename = getPropertyValue("Filename");
 
   // Erase the file if it exists

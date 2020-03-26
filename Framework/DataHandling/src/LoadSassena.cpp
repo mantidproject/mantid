@@ -20,6 +20,8 @@
 
 #include <hdf5_hl.h>
 
+#include <utility>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -47,9 +49,9 @@ int LoadSassena::confidence(Kernel::NexusDescriptor &descriptor) const {
  * @param ws pointer to workspace to be added and registered
  * @param description
  */
-void LoadSassena::registerWorkspace(API::WorkspaceGroup_sptr gws,
-                                    const std::string wsName,
-                                    DataObjects::Workspace2D_sptr ws,
+void LoadSassena::registerWorkspace(const API::WorkspaceGroup_sptr &gws,
+                                    const std::string &wsName,
+                                    const DataObjects::Workspace2D_sptr &ws,
                                     const std::string &description) {
   UNUSED_ARG(description);
   API::AnalysisDataService::Instance().add(wsName, ws);
@@ -63,7 +65,7 @@ void LoadSassena::registerWorkspace(API::WorkspaceGroup_sptr gws,
  * @param dims storing dimensionality
  */
 
-herr_t LoadSassena::dataSetInfo(const hid_t &h5file, const std::string setName,
+herr_t LoadSassena::dataSetInfo(const hid_t &h5file, const std::string &setName,
                                 hsize_t *dims) const {
   H5T_class_t class_id;
   size_t type_size;
@@ -82,7 +84,7 @@ herr_t LoadSassena::dataSetInfo(const hid_t &h5file, const std::string setName,
  * @param buf storing dataset
  */
 herr_t LoadSassena::dataSetDouble(const hid_t &h5file,
-                                  const std::string setName,
+                                  const std::string &setName,
                                   std::vector<double> &buf) {
   herr_t errorcode =
       H5LTread_dataset_double(h5file, setName.c_str(), buf.data());
@@ -110,7 +112,8 @@ bool compare(const mypair &left, const mypair &right) {
  * increasing order of momemtum transfer
  */
 HistogramData::Points
-LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
+LoadSassena::loadQvectors(const hid_t &h5file,
+                          const API::WorkspaceGroup_sptr &gws,
                           std::vector<int> &sorting_indexes) {
 
   // store the modulus of the vector
@@ -169,7 +172,8 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
       "MomentumTransfer"); // Set the Units
 
   this->registerWorkspace(
-      gws, wsName, ws, "X-axis: origin of Q-vectors; Y-axis: tip of Q-vectors");
+      std::move(gws), wsName, ws,
+      "X-axis: origin of Q-vectors; Y-axis: tip of Q-vectors");
   return HistogramData::Points(std::move(qvmod));
 }
 
@@ -184,8 +188,9 @@ LoadSassena::loadQvectors(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
  * @param sorting_indexes permutation of qvmod indexes to render it in
  * increasing order of momemtum transfer
  */
-void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-                         const std::string setName,
+void LoadSassena::loadFQ(const hid_t &h5file,
+                         const API::WorkspaceGroup_sptr &gws,
+                         const std::string &setName,
                          const HistogramData::Points &qvmod,
                          const std::vector<int> &sorting_indexes) {
 
@@ -221,7 +226,7 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
       Kernel::UnitFactory::Instance().create("MomentumTransfer");
 
   this->registerWorkspace(
-      gws, wsName, ws,
+      std::move(gws), wsName, ws,
       "X-axis: Q-vector modulus; Y-axis: intermediate structure factor");
 }
 
@@ -238,8 +243,9 @@ void LoadSassena::loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
  * @param sorting_indexes permutation of qvmod indexes to render it in
  * increasing order of momemtum transfer
  */
-void LoadSassena::loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-                          const std::string setName,
+void LoadSassena::loadFQT(const hid_t &h5file,
+                          const API::WorkspaceGroup_sptr &gws,
+                          const std::string &setName,
                           const HistogramData::Points &qvmod,
                           const std::vector<int> &sorting_indexes) {
 

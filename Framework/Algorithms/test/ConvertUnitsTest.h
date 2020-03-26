@@ -713,7 +713,7 @@ public:
    * sorting flips the direction
    */
   void do_testExecEvent_RemainsSorted(EventSortType sortType,
-                                      std::string targetUnit) {
+                                      const std::string &targetUnit) {
     EventWorkspace_sptr ws =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
                                                                         false);

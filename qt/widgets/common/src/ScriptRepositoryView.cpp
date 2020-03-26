@@ -360,7 +360,7 @@ void ScriptRepositoryView::RepoDelegate::paint(
   QApplication::style()->drawControl(QStyle::CE_PushButton, &button, painter);
 }
 
-QIcon ScriptRepositoryView::RepoDelegate::getIcon(QString state) const {
+QIcon ScriptRepositoryView::RepoDelegate::getIcon(const QString &state) const {
   QIcon icon;
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   if (state == RepoModel::remoteOnlySt())
@@ -646,7 +646,7 @@ bool ScriptRepositoryView::RemoveEntryDelegate::editorEvent(
  *
  * @param link :: the folder link to open.
  */
-void ScriptRepositoryView::openFolderLink(QString link) {
+void ScriptRepositoryView::openFolderLink(const QString &link) {
   const std::string error_msg =
       "Unable to open \"" + link.toStdString() + "\".  Reason: ";
 

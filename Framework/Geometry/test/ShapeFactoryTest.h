@@ -636,7 +636,7 @@ public:
     TS_ASSERT(!shape_sptr->isValid(V3D(0.0, 0.0, 1)));
   }
 
-  boost::shared_ptr<CSGObject> getObject(std::string xmlShape) {
+  boost::shared_ptr<CSGObject> getObject(const std::string &xmlShape) {
     std::string shapeXML = "<type name=\"userShape\"> " + xmlShape + " </type>";
 
     // Set up the DOM parser and parse xml string

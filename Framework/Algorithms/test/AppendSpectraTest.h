@@ -431,9 +431,9 @@ private:
   }
   /** Creates a 2D workspace with 5 histograms
    */
-  void createWorkspaceWithAxisAndLabel(const std::string outputName,
+  void createWorkspaceWithAxisAndLabel(const std::string &outputName,
                                        const std::string &axisType,
-                                       const std::string axisValue) {
+                                       const std::string &axisValue) {
     int nspec = 5;
     std::vector<std::string> YVals;
     std::vector<double> dataX;

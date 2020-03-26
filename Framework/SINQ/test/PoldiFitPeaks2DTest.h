@@ -481,8 +481,8 @@ private:
   PoldiInstrumentAdapter_sptr m_instrument;
   PoldiTimeTransformer_sptr m_timeTransformer;
 
-  void compareIntensities(PoldiPeakCollection_sptr first,
-                          PoldiPeakCollection_sptr second,
+  void compareIntensities(const PoldiPeakCollection_sptr &first,
+                          const PoldiPeakCollection_sptr &second,
                           double relativePrecision) {
     for (size_t i = 0; i < first->peakCount(); ++i) {
       PoldiPeak_sptr peak = first->peak(i);

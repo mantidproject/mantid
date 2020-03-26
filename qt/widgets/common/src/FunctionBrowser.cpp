@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("Function Browser");
@@ -81,7 +82,7 @@ void FunctionBrowser::setFunction(const QString &funStr) {
  * @param fun :: A function
  */
 void FunctionBrowser::setFunction(IFunction_sptr fun) {
-  m_presenter->setFunction(fun);
+  m_presenter->setFunction(std::move(fun));
 }
 
 /**
@@ -199,8 +200,8 @@ void FunctionBrowser::setCurrentDataset(int i) {
 
 /// Remove local parameter values for a number of datasets.
 /// @param indices :: A list of indices of datasets to remove.
-void FunctionBrowser::removeDatasets(QList<int> indices) {
-  m_presenter->removeDatasets(indices);
+void FunctionBrowser::removeDatasets(const QList<int> &indices) {
+  m_presenter->removeDatasets(std::move(indices));
 }
 
 /// Add some datasets to those already set.

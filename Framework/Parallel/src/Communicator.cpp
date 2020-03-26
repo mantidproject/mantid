@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidParallel/Communicator.h"
 
 #ifdef MPI_EXPERIMENTAL
@@ -24,7 +26,7 @@ Communicator::Communicator(const boost::mpi::communicator &comm)
 
 Communicator::Communicator(boost::shared_ptr<detail::ThreadingBackend> backend,
                            const int rank)
-    : m_backend(backend), m_rank(rank) {}
+    : m_backend(std::move(backend)), m_rank(rank) {}
 
 int Communicator::rank() const {
   if (m_backend)

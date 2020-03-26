@@ -576,7 +576,7 @@ bool CatalogSearch::validateDates() {
   return ret;
 }
 
-void CatalogSearch::correctedToolTip(std::string text, QLabel *label) {
+void CatalogSearch::correctedToolTip(const std::string &text, QLabel *label) {
 #ifdef Q_OS_WIN
   label->setToolTip(QString::fromStdString("<span style=\"color: black;\">" +
                                            text + "</span>"));
@@ -1121,7 +1121,7 @@ void CatalogSearch::updateDataFileLabels(QTableWidgetItem *item) {
  * @return A set containing all file extensions.
  */
 std::unordered_set<std::string>
-CatalogSearch::getDataFileExtensions(Mantid::API::Column_sptr column) {
+CatalogSearch::getDataFileExtensions(const Mantid::API::Column_sptr &column) {
   std::unordered_set<std::string> extensions;
 
   // For every filename in the column...

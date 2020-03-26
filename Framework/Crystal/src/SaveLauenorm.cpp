@@ -499,7 +499,8 @@ void SaveLauenorm::exec() {
   out.flush();
   out.close();
 }
-void SaveLauenorm::sizeBanks(std::string bankName, int &nCols, int &nRows) {
+void SaveLauenorm::sizeBanks(const std::string &bankName, int &nCols,
+                             int &nRows) {
   if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =

@@ -50,7 +50,7 @@ public:
   }
 
   MDHistoDimensionBuilder();
-  void setName(std::string name);
+  void setName(const std::string &name);
   void setId(std::string id);
   void setUnits(const Kernel::UnitLabel &units);
   void setMin(double min);

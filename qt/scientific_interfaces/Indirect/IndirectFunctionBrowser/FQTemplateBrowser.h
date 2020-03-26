@@ -59,10 +59,11 @@ public:
   int getCurrentDataset() override;
   void updateDataType(DataType) override;
   void spectrumChanged(int) override;
-  void addParameter(QString parameterName, QString parameterDescription);
-  void setParameterValue(QString parameterName, double parameterValue,
+  void addParameter(const QString &parameterName,
+                    const QString &parameterDescription);
+  void setParameterValue(const QString &parameterName, double parameterValue,
                          double parameterError);
-  void setDataType(QStringList allowedFunctionsList);
+  void setDataType(const QStringList &allowedFunctionsList);
   void setEnumValue(int enumIndex);
 
 signals:

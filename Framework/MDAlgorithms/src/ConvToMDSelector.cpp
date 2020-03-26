@@ -33,7 +33,7 @@ initiated)
 *@returns shared pointer to new solver, which corresponds to the workspace
 */
 boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
-    API::MatrixWorkspace_sptr inputWS,
+    const API::MatrixWorkspace_sptr &inputWS,
     boost::shared_ptr<ConvToMDBase> &currentSolver) const {
   // identify what kind of workspace we expect to process
   wsType inputWSType = Undefined;

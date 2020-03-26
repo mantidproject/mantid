@@ -51,7 +51,7 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  IMDHistoWorkspace_sptr doExecute(IMDHistoWorkspace_sptr inWS,
+  IMDHistoWorkspace_sptr doExecute(const IMDHistoWorkspace_sptr &inWS,
                                    const std::string &condition,
                                    const double &referenceValue) {
     const std::string outWSName = "OutWS";

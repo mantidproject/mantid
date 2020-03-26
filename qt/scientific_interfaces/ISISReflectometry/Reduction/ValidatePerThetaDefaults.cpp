@@ -28,7 +28,7 @@ public:
     return boost::none;
   }
 
-  boost::optional<T> operator()(std::vector<int> errorColumns) const {
+  boost::optional<T> operator()(const std::vector<int> &errorColumns) const {
     std::transform(errorColumns.cbegin(), errorColumns.cend(),
                    std::back_inserter(m_invalidParams),
                    [this](int column) -> int { return m_baseColumn + column; });

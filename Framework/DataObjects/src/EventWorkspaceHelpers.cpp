@@ -20,8 +20,8 @@ namespace DataObjects {
  * @param inputMatrixW :: input event workspace
  * @return a MatrixWorkspace_sptr
  */
-MatrixWorkspace_sptr
-EventWorkspaceHelpers::convertEventTo2D(MatrixWorkspace_sptr inputMatrixW) {
+MatrixWorkspace_sptr EventWorkspaceHelpers::convertEventTo2D(
+    const MatrixWorkspace_sptr &inputMatrixW) {
   EventWorkspace_sptr inputW =
       boost::dynamic_pointer_cast<EventWorkspace>(inputMatrixW);
   if (!inputW)

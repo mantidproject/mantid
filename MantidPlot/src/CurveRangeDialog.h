@@ -30,7 +30,7 @@ class CurveRangeDialog : public QDialog {
   Q_OBJECT
 
 public:
-  CurveRangeDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  CurveRangeDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
 public slots:
   void setCurveToModify(Graph *g, int curve);

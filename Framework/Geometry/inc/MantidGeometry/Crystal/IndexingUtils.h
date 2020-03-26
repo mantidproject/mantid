@@ -238,8 +238,8 @@ public:
   /// Choose the direction in a list of directions, that is most nearly
   /// perpendicular to planes with the specified spacing in reciprocal space.
   static int SelectDirection(Kernel::V3D &best_direction,
-                             const std::vector<Kernel::V3D> q_vectors,
-                             const std::vector<Kernel::V3D> direction_list,
+                             const std::vector<Kernel::V3D> &q_vectors,
+                             const std::vector<Kernel::V3D> &direction_list,
                              double plane_spacing, double required_tolerance);
 
   /// Get the lattice parameters for the specified orientation matrix

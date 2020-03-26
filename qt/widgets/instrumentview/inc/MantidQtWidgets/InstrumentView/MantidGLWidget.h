@@ -30,7 +30,7 @@ public:
   void setSurface(boost::shared_ptr<ProjectionSurface> surface);
   boost::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
 
-  void setBackgroundColor(QColor /*input*/);
+  void setBackgroundColor(const QColor & /*input*/);
   QColor currentBackgroundColor() const;
   void saveToFile(const QString &filename);
   // int getLightingState() const {return m_lightingState;}

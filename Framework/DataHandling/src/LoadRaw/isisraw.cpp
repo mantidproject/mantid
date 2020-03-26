@@ -715,10 +715,10 @@ int ISISRAW::ioRAW(FILE *file, LOG_STRUCT *s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, LOG_LINE *s, int len, bool from_file) {
   char padding[5];
   memset(padding, ' ', sizeof(padding));
-  int i, nbytes_rounded;
+  int i;
   for (i = 0; i < len; i++) {
     ioRAW(file, &(s[i].len), 1, from_file);
-    nbytes_rounded = 4 * (1 + (s[i].len - 1) / 4);
+    int nbytes_rounded = 4 * (1 + (s[i].len - 1) / 4);
     ioRAW(file, &(s[i].data), s[i].len, from_file);
     ioRAW(file, padding, nbytes_rounded - s[i].len, from_file);
   }
@@ -731,12 +731,11 @@ int ISISRAW::ioRAW(FILE *file, char *s, int len, bool from_file) {
     return 0;
   }
 
-  size_t n;
   if (from_file) {
-    n = fread(s, sizeof(char), len, file);
+    size_t n = fread(s, sizeof(char), len, file);
     return static_cast<int>(n - len);
   } else {
-    n = fwrite(s, sizeof(char), len, file);
+    fwrite(s, sizeof(char), len, file);
   }
 
   return 0;
@@ -748,12 +747,11 @@ int ISISRAW::ioRAW(FILE *file, int *s, int len, bool from_file) {
     return 0;
   }
 
-  size_t n;
   if (from_file) {
-    n = fread(s, sizeof(int), len, file);
+    size_t n = fread(s, sizeof(int), len, file);
     return static_cast<int>(n - len);
   } else {
-    n = fwrite(s, sizeof(int), len, file);
+    fwrite(s, sizeof(int), len, file);
   }
 
   return 0;
@@ -765,12 +763,11 @@ int ISISRAW::ioRAW(FILE *file, uint32_t *s, int len, bool from_file) {
     return 0;
   }
 
-  size_t n;
   if (from_file) {
-    n = fread(s, sizeof(uint32_t), len, file);
+    size_t n = fread(s, sizeof(uint32_t), len, file);
     return static_cast<int>(n - len);
   } else {
-    n = fwrite(s, sizeof(uint32_t), len, file);
+    fwrite(s, sizeof(uint32_t), len, file);
   }
   return 0;
 }
@@ -782,14 +779,13 @@ int ISISRAW::ioRAW(FILE *file, float *s, int len, bool from_file) {
     return 0;
   }
 
-  size_t n;
   if (from_file) {
-    n = fread(s, sizeof(float), len, file);
+    size_t n = fread(s, sizeof(float), len, file);
     vaxf_to_local(s, &len, &errcode);
     return static_cast<int>(n - len);
   } else {
     local_to_vaxf(s, &len, &errcode);
-    n = fwrite(s, sizeof(float), len, file);
+    fwrite(s, sizeof(float), len, file);
     vaxf_to_local(s, &len, &errcode);
   }
   return 0;
@@ -942,6 +938,7 @@ int ISISRAW::vmstime(char *timbuf, int len, time_t time_value) {
    * get time in VMS format 01-JAN-1970 00:00:00
    */
   size_t i, n;
+  // cppcheck-suppress redundantAssignment
   struct tm *tmstruct = nullptr;
 #ifdef MS_VISUAL_STUDIO
   errno_t err = localtime_s(tmstruct, &time_value);

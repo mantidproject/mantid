@@ -45,7 +45,7 @@ private:
    * @param outWSName :: output workspace name used if running CreateWorkspace
    */
   void createUniformWorkspace(double xstart, double deltax, double value1,
-                              double value2, std::string outWSName,
+                              double value2, const std::string &outWSName,
                               bool runAlg = false) {
 
     const int nbins = 10;
@@ -108,7 +108,8 @@ private:
    * @param inputWSNames :: input workspaces names
    * @param outputWSName :: output workspace name
    */
-  void doGroupWorkspaces(std::string inputWSNames, std::string outWSName) {
+  void doGroupWorkspaces(const std::string &inputWSNames,
+                         const std::string &outWSName) {
     GroupWorkspaces gw;
     gw.initialize();
     gw.setProperty("InputWorkspaces", inputWSNames);
@@ -123,7 +124,7 @@ private:
    * @param inputWS :: the input workspace
    * @return vector of names of algorithm histories
    */
-  std::vector<std::string> getHistory(MatrixWorkspace_sptr inputWS) {
+  std::vector<std::string> getHistory(const MatrixWorkspace_sptr &inputWS) {
     std::vector<std::string> histNames;
     auto histories = inputWS->history().getAlgorithmHistories();
     for (auto &hist : histories) {

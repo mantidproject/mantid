@@ -15,7 +15,7 @@ namespace MantidWidgets {
 IFunction_sptr
 PlotFitAnalysisPaneModel::doFit(const std::string &wsName,
                                 const std::pair<double, double> &range,
-                                IFunction_sptr func) {
+                                const IFunction_sptr &func) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
   alg->initialize();

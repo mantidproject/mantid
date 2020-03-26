@@ -139,7 +139,7 @@ void DataComparison::addData() {
  *
  * @param ws Pointer to workspace to add.
  */
-void DataComparison::addDataItem(Workspace_const_sptr ws) {
+void DataComparison::addDataItem(const Workspace_const_sptr &ws) {
   // Check that the workspace is the correct type
   MatrixWorkspace_const_sptr matrixWs =
       boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
@@ -212,7 +212,7 @@ void DataComparison::addDataItem(Workspace_const_sptr ws) {
  *
  * @param ws Pointer to the workspace
  */
-bool DataComparison::containsWorkspace(MatrixWorkspace_const_sptr ws) {
+bool DataComparison::containsWorkspace(const MatrixWorkspace_const_sptr &ws) {
   QString testWsName = QString::fromStdString(ws->getName());
 
   int numRows = m_uiForm.twCurrentData->rowCount();

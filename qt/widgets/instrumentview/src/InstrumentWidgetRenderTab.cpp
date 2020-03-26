@@ -35,6 +35,7 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
 #include <limits>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -610,8 +611,8 @@ void InstrumentWidgetRenderTab::flipUnwrappedView(bool on) {
  * for finding the file
  * @param filename Optional full path of the saved image
  */
-void InstrumentWidgetRenderTab::saveImage(QString filename) {
-  m_instrWidget->saveImage(filename);
+void InstrumentWidgetRenderTab::saveImage(const QString &filename) {
+  m_instrWidget->saveImage(std::move(filename));
 }
 
 /**

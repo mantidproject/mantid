@@ -287,7 +287,7 @@ public:
       const std::string &name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging = true,
       const int &version = -1);
-  void setupAsChildAlgorithm(boost::shared_ptr<Algorithm> algorithm,
+  void setupAsChildAlgorithm(const boost::shared_ptr<Algorithm> &algorithm,
                              const double startProgress = -1.,
                              const double endProgress = -1.,
                              const bool enableLogging = true);

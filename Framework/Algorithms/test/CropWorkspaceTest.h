@@ -103,7 +103,7 @@ public:
     TS_ASSERT(!crop.isExecuted());
   }
 
-  void makeFakeEventWorkspace(std::string wsName) {
+  void makeFakeEventWorkspace(const std::string &wsName) {
     // Make an event workspace with 2 events in each bin.
     EventWorkspace_sptr test_in =
         WorkspaceCreationHelper::createEventWorkspace(36, 50, 50, 0.0, 2., 2);

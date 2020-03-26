@@ -22,7 +22,7 @@ size_t FunctionDomainGeneral::size() const {
 size_t FunctionDomainGeneral::columnCount() const { return m_columns.size(); }
 
 /// Add a new column. All columns must have the same size.
-void FunctionDomainGeneral::addColumn(boost::shared_ptr<Column> column) {
+void FunctionDomainGeneral::addColumn(const boost::shared_ptr<Column> &column) {
   if (!column) {
     throw std::runtime_error(
         "Cannot add null column to FunctionDomainGeneral.");

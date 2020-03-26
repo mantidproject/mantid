@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <utility>
+
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
@@ -38,8 +40,8 @@ public:
    */
   MDHistoDimension(std::string name, std::string ID, const MDFrame &frame,
                    coord_t min, coord_t max, size_t numBins)
-      : m_name(name), m_dimensionId(ID), m_frame(frame.clone()), m_min(min),
-        m_max(max), m_numBins(numBins),
+      : m_name(std::move(name)), m_dimensionId(std::move(ID)),
+        m_frame(frame.clone()), m_min(min), m_max(max), m_numBins(numBins),
         m_binWidth((max - min) / static_cast<coord_t>(numBins)) {
     if (max < min) {
       throw std::invalid_argument("Error making MDHistoDimension. Cannot have "

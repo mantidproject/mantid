@@ -644,7 +644,7 @@ void Stitch1D::exec() {
 /** Put special values back.
  * @param ws : MatrixWorkspace to resinsert special values into.
  */
-void Stitch1D::reinsertSpecialValues(MatrixWorkspace_sptr ws) {
+void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws) {
   auto histogramCount = static_cast<int>(ws->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < histogramCount; ++i) {

@@ -40,9 +40,9 @@ private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
   void setBrowserWorkspace() override{};
-  void setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws,
+  void setDefaultResolution(const Mantid::API::MatrixWorkspace_const_sptr &ws,
                             const QPair<double, double> &range);
-  void setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws);
+  void setDefaultSampleLog(const Mantid::API::MatrixWorkspace_const_sptr &ws);
 
   void checkForELTWorkspace();
 

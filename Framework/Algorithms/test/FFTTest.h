@@ -707,7 +707,7 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr doRebin(MatrixWorkspace_sptr inputWS,
+  MatrixWorkspace_sptr doRebin(const MatrixWorkspace_sptr &inputWS,
                                const std::string &params) {
     auto rebin = AlgorithmManager::Instance().create("Rebin");
     rebin->initialize();
@@ -718,6 +718,7 @@ private:
     rebin->execute();
     return rebin->getProperty("OutputWorkspace");
   }
+
 
   MatrixWorkspace_sptr doFFT(MatrixWorkspace_sptr inputWS, const bool complex,
                              const bool phaseShift) {
@@ -737,7 +738,7 @@ private:
     return fft->getProperty("OutputWorkspace");
   }
 
-  void doPhaseTest(MatrixWorkspace_sptr inputWS, bool complex) {
+  void doPhaseTest(const MatrixWorkspace_sptr &inputWS, bool complex) {
     // Offset the input workspace
     const auto offsetWS = offsetWorkspace(inputWS);
 
@@ -791,6 +792,7 @@ private:
     AnalysisDataService::Instance().add("FFT_WS_" + name, ws);
     return ws;
   }
+
 
   MatrixWorkspace_sptr offsetWorkspace(MatrixWorkspace_sptr workspace) {
     auto scaleX = AlgorithmManager::Instance().create("ScaleX");
@@ -922,7 +924,7 @@ private:
     return create->getProperty("OutputWorkspace");
   }
 
-  MatrixWorkspace_sptr doCrop(MatrixWorkspace_sptr inputWS, double lower,
+  MatrixWorkspace_sptr doCrop(const MatrixWorkspace_sptr &inputWS, double lower,
                               double higher) {
     auto crop = AlgorithmManager::Instance().create("CropWorkspace");
     crop->initialize();

@@ -21,7 +21,7 @@ public:
   // Holds a reference to the matplotlib artist object
   explicit Artist(Common::Python::Object obj);
 
-  void set(Common::Python::Dict kwargs);
+  void set(const Common::Python::Dict &kwargs);
   void remove();
 };
 

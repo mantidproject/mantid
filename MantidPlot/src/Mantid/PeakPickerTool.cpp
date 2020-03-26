@@ -316,8 +316,8 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event) {
   return QwtPlotPicker::eventFilter(obj, event);
 }
 
-void PeakPickerTool::windowStateChanged(Qt::WindowStates,
-                                        Qt::WindowStates newState) {
+void PeakPickerTool::windowStateChanged(const Qt::WindowStates &,
+                                        const Qt::WindowStates &newState) {
   (void)newState;
 }
 

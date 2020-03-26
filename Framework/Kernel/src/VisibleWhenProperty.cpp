@@ -16,9 +16,9 @@ namespace Kernel {
  * @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value
  * (as string) to check for
  */
-VisibleWhenProperty::VisibleWhenProperty(std::string otherPropName,
+VisibleWhenProperty::VisibleWhenProperty(const std::string &otherPropName,
                                          ePropertyCriterion when,
-                                         std::string value)
+                                         const std::string &value)
     : EnabledWhenProperty(otherPropName, when, value) {}
 
 /** Multiple conditions constructor - takes two  VisibleWhenProperty

@@ -94,9 +94,9 @@ private:
   handleReplaceEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
 
   bool checkEligibility(const QString &name,
-                        Mantid::API::Workspace_sptr object) const;
+                        const Mantid::API::Workspace_sptr &object) const;
   bool hasValidSuffix(const QString &name) const;
-  bool hasValidNumberOfBins(Mantid::API::Workspace_sptr object) const;
+  bool hasValidNumberOfBins(const Mantid::API::Workspace_sptr &object) const;
 
 protected:
   // Method for handling drop events

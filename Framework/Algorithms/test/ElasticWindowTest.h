@@ -201,7 +201,7 @@ private:
    *
    * @param ws Workspace to test
    */
-  void verifyQworkspace(MatrixWorkspace_sptr ws) {
+  void verifyQworkspace(const MatrixWorkspace_sptr &ws) {
     std::string unitID = ws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unitID, "MomentumTransfer");
   }
@@ -211,7 +211,7 @@ private:
    *
    * @param ws Workspace to test
    */
-  void verifyQ2workspace(MatrixWorkspace_sptr ws) {
+  void verifyQ2workspace(const MatrixWorkspace_sptr &ws) {
     std::string unitID = ws->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unitID, "QSquared");
   }

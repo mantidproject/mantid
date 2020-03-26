@@ -76,7 +76,7 @@ std::vector<V3D> ReflectionGenerator::getHKLs(double dMin, double dMax) const {
 /// filter. If the pointer is null, it's ignored.
 std::vector<Kernel::V3D> ReflectionGenerator::getHKLs(
     double dMin, double dMax,
-    HKLFilter_const_sptr reflectionConditionFilter) const {
+    const HKLFilter_const_sptr &reflectionConditionFilter) const {
   HKLGenerator generator(m_crystalStructure.cell(), dMin);
 
   HKLFilter_const_sptr filter = getDRangeFilter(dMin, dMax);
@@ -103,7 +103,7 @@ std::vector<V3D> ReflectionGenerator::getUniqueHKLs(double dMin,
 /// d-limits using the specified reflection condition filter.
 std::vector<V3D> ReflectionGenerator::getUniqueHKLs(
     double dMin, double dMax,
-    HKLFilter_const_sptr reflectionConditionFilter) const {
+    const HKLFilter_const_sptr &reflectionConditionFilter) const {
   HKLGenerator generator(m_crystalStructure.cell(), dMin);
 
   HKLFilter_const_sptr filter = getDRangeFilter(dMin, dMax);

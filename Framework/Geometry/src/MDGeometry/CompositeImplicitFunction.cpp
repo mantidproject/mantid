@@ -23,7 +23,7 @@ namespace Mantid {
 namespace Geometry {
 
 bool CompositeImplicitFunction::addFunction(
-    Mantid::Geometry::MDImplicitFunction_sptr constituentFunction) {
+    const Mantid::Geometry::MDImplicitFunction_sptr &constituentFunction) {
   bool bSuccess = false;
   if (constituentFunction.get() != nullptr) {
     this->m_Functions.emplace_back(constituentFunction);

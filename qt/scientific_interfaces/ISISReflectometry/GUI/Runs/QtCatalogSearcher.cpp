@@ -21,7 +21,8 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 namespace { // unnamed
-void removeResultsWithoutFilenameExtension(ITableWorkspace_sptr results) {
+void removeResultsWithoutFilenameExtension(
+    const ITableWorkspace_sptr &results) {
   std::set<size_t> toRemove;
   for (size_t i = 0; i < results->rowCount(); ++i) {
     std::string &run = results->String(i, 0);

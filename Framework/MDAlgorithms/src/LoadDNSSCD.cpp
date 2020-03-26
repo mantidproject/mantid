@@ -240,7 +240,7 @@ void LoadDNSSCD::init() {
 /** Read Huber angles from a given table workspace.
  */
 
-void LoadDNSSCD::loadHuber(ITableWorkspace_sptr tws) {
+void LoadDNSSCD::loadHuber(const ITableWorkspace_sptr &tws) {
   ColumnVector<double> huber = tws->getVector("Huber(degrees)");
   // set huber[0] for each run in m_data
   for (auto &ds : m_data) {
@@ -789,7 +789,7 @@ void LoadDNSSCD::fillOutputWorkspaceRaw(double wavelength) {
   setProperty("NormalizationWorkspace", normWS);
 }
 
-void LoadDNSSCD::read_data(const std::string fname,
+void LoadDNSSCD::read_data(const std::string &fname,
                            std::map<std::string, std::string> &str_metadata,
                            std::map<std::string, double> &num_metadata) {
   std::ifstream file(fname);

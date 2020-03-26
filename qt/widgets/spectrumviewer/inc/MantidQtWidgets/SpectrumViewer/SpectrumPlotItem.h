@@ -37,7 +37,7 @@ public:
   ~SpectrumPlotItem() override;
 
   /// Specify the data to be plotted and the color table to use
-  void setData(DataArray_const_sptr dataArray,
+  void setData(const DataArray_const_sptr &dataArray,
                std::vector<QRgb> *positiveColorTable,
                std::vector<QRgb> *negativeColorTable);
 

@@ -22,8 +22,8 @@ Determines whether the provided column has the same name and type as expected.
 @return true if all expectations are met.
 */
 bool MementoTableWorkspace::expectedColumn(
-    Mantid::API::Column_const_sptr expected,
-    Mantid::API::Column_const_sptr candidate) {
+    const Mantid::API::Column_const_sptr &expected,
+    const Mantid::API::Column_const_sptr &candidate) {
   if (expected->name() != candidate->name()) {
     return false;
   } else if (expected->type() != candidate->type()) {

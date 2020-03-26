@@ -228,7 +228,7 @@ void CalculateMuonAsymmetry::exec() {
  * @return normalization constants
  */
 void CalculateMuonAsymmetry::addNormalizedFits(
-    size_t numberOfFits, const std::vector<double> norms) {
+    size_t numberOfFits, const std::vector<double> &norms) {
   for (size_t j = 0; j < numberOfFits; j++) {
     API::Workspace_sptr fitWorkspace = getProperty("OutputWorkspace");
     API::MatrixWorkspace_sptr fitWorkspaceActual;
@@ -279,7 +279,7 @@ void CalculateMuonAsymmetry::addNormalizedFits(
  * @return normalization constants
  */
 std::vector<double> CalculateMuonAsymmetry::getNormConstants(
-    const std::vector<std::string> wsNames) {
+    const std::vector<std::string> &wsNames) {
   std::vector<double> norms;
   double startX = getProperty("StartX");
   double endX = getProperty("EndX");

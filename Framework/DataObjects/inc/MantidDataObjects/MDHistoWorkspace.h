@@ -91,7 +91,8 @@ public:
                        const Mantid::Kernel::VMD &end,
                        Mantid::API::MDNormalization normalize) const override;
 
-  void checkWorkspaceSize(const MDHistoWorkspace &other, std::string operation);
+  void checkWorkspaceSize(const MDHistoWorkspace &other,
+                          const std::string &operation);
 
   // --------------------------------------------------------------------------------------------
   MDHistoWorkspace &operator+=(const MDHistoWorkspace &b);

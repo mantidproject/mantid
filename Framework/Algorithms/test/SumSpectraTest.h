@@ -277,8 +277,8 @@ public:
                      const std::runtime_error &);
   }
 
-  void dotestExecEvent(std::string inName, std::string outName,
-                       std::string indices_list) {
+  void dotestExecEvent(const std::string &inName, const std::string &outName,
+                       const std::string &indices_list) {
     int numPixels = 100;
     int numBins = 20;
     int numEvents = 20;
@@ -568,7 +568,6 @@ public:
     testSig = std::sqrt(testSig);
     // Set the properties
     alg2.setProperty("InputWorkspace", tws);
-    const std::string outputSpace2 = "SumSpectraOut2";
     alg2.setPropertyValue("OutputWorkspace", outName);
     alg2.setProperty("IncludeMonitors", false);
     alg2.setProperty("WeightedSum", true);

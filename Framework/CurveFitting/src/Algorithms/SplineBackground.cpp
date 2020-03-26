@@ -247,7 +247,7 @@ void SplineBackground::freeBSplinePointers() {
  * @return:: A shared pointer to the output workspace
  */
 MatrixWorkspace_sptr
-SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr ws,
+SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr &ws,
                                    const size_t spec) {
   const auto &xInputVals = ws->x(spec);
   const auto &yInputVals = ws->y(spec);

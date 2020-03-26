@@ -257,7 +257,7 @@ private:
     return std::sqrt(ki * ki + kf * kf - 2. * ki * kf * std::cos(twoTheta));
   }
 
-  static void setEFixed(Mantid::API::MatrixWorkspace_sptr ws,
+  static void setEFixed(const Mantid::API::MatrixWorkspace_sptr &ws,
                         const std::string &component, const double eFixed) {
     using namespace Mantid;
     auto alg = API::AlgorithmManager::Instance().createUnmanaged(

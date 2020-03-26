@@ -13,6 +13,8 @@
 
 #ifndef Q_MOC_RUN
 #include <boost/function.hpp>
+#include <utility>
+
 #endif
 
 namespace Mantid {
@@ -61,7 +63,7 @@ public:
    * @param cost :: computational cost
    */
   FunctionTask(std::function<void()> func, double cost = 1.0)
-      : Task(cost), m_voidFunc(func) {}
+      : Task(cost), m_voidFunc(std::move(func)) {}
 
   //---------------------------------------------------------------------------------------------
   /** Main method that performs the work for the task. */

@@ -35,7 +35,7 @@ public:
                       &binders) override;
 
   void addObserver(std::tuple<std::string, Observer *> &listener) override;
-  void addSpectrum(std::string wsName);
+  void addSpectrum(const std::string &wsName);
   void setupAnalysisPane(MantidWidgets::PlotFitAnalysisPaneView *analysis);
 
 public slots:

@@ -49,7 +49,8 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Runs SortHKL on workspace
-  void doSortHKL(Mantid::API::Workspace_sptr ws, std::string runName);
+  void doSortHKL(const Mantid::API::Workspace_sptr &ws,
+                 const std::string &runName);
 
   DataObjects::PeaksWorkspace_sptr ws;
 };

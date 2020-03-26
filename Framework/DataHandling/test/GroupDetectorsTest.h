@@ -52,7 +52,7 @@ public:
       space2D->getSpectrum(j).setDetectorID(j);
     }
     Instrument_sptr instr(new Instrument);
-    for (detid_t i = 0; i < 5; i++) {
+    for (detid_t i = 0; i < 5; ++i) {
       Detector *d = new Detector("det", i, nullptr);
       instr->add(d);
       instr->markAsDetector(d);

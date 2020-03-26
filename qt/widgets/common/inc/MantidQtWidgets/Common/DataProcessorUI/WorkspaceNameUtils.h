@@ -31,11 +31,11 @@ QString preprocessingListToString(const QStringList &values,
                                   const QString &separator);
 // Returns the name of the reduced workspace for a given row
 QString DLLExport getReducedWorkspaceName(
-    const RowData_sptr data, const WhiteList &whitelist,
+    const RowData_sptr &data, const WhiteList &whitelist,
     const std::map<QString, PreprocessingAlgorithm> &preprocessor);
 // Consolidate global options with row values
 OptionsMap DLLExport getCanonicalOptions(
-    const RowData_sptr data, const OptionsMap &globalOptions,
+    const RowData_sptr &data, const OptionsMap &globalOptions,
     const WhiteList &whitelist, const bool allowInsertions,
     const std::vector<QString> &outputProperties = std::vector<QString>(),
     const std::vector<QString> &prefixes = std::vector<QString>());

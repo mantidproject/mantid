@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
+#include <utility>
+
 #include <vector>
 
 const std::vector<std::string> g_analysisTypes = {"Counts", "Asymmetry"};
@@ -44,7 +46,7 @@ Mantid::Muon::PlotType getPlotType(const std::string &plotType) {
  * single period otherwise leave it alone.
  */
 Mantid::API::WorkspaceGroup_sptr
-convertInputWStoWSGroup(Mantid::API::Workspace_sptr inputWS) {
+convertInputWStoWSGroup(const Mantid::API::Workspace_sptr &inputWS) {
 
   // Cast input WS to a WorkspaceGroup
   auto muonWS = boost::make_shared<Mantid::API::WorkspaceGroup>();
@@ -317,7 +319,8 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
  * Creates workspace, processing the data using the MuonProcess algorithm.
  */
 Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
-    Workspace_sptr inputWS, bool noRebin, Muon::AnalysisOptions options) {
+    const Workspace_sptr &inputWS, bool noRebin,
+    Muon::AnalysisOptions options) {
 
   IAlgorithm_sptr alg = Algorithm::createChildAlgorithm("MuonProcess");
 
@@ -325,7 +328,7 @@ Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
     options.rebinArgs = "";
   }
 
-  setMuonProcessPeriodProperties(*alg, inputWS, options);
+  setMuonProcessPeriodProperties(*alg, std::move(inputWS), options);
   setMuonProcessAlgorithmProperties(*alg, options);
   alg->setPropertyValue("OutputWorkspace", "__NotUsed__");
   alg->execute();
@@ -350,7 +353,7 @@ bool ApplyMuonDetectorGrouping::renameAndMoveUnNormWorkspace(
  * to the given options. For use with MuonProcess.
  */
 void ApplyMuonDetectorGrouping::setMuonProcessPeriodProperties(
-    IAlgorithm &alg, Workspace_sptr inputWS,
+    IAlgorithm &alg, const Workspace_sptr &inputWS,
     const Muon::AnalysisOptions &options) const {
 
   auto inputGroup = boost::make_shared<WorkspaceGroup>();

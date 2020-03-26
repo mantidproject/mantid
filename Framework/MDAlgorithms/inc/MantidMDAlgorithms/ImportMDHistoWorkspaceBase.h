@@ -37,8 +37,8 @@ protected:
 private:
   // Product of the bins across all dimensions.
   size_t m_bin_product = 0;
-  Mantid::Geometry::MDFrame_uptr createMDFrame(std::string frame,
-                                               std::string unit);
+  Mantid::Geometry::MDFrame_uptr createMDFrame(const std::string &frame,
+                                               const std::string &unit);
   bool checkIfFrameValid(const std::string &frame,
                          const std::vector<std::string> &targetFrames);
 };

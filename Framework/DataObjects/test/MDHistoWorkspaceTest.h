@@ -37,7 +37,7 @@ class MDHistoWorkspaceTest : public CxxTest::TestSuite {
 private:
   /// Helper function to return the number of masked bins in a workspace. TODO:
   /// move helper into test helpers
-  size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws) {
+  size_t getNumberMasked(const Mantid::API::IMDWorkspace_sptr &ws) {
     auto it = ws->createIterator(nullptr);
     size_t numberMasked = 0;
     size_t counter = 0;
@@ -93,7 +93,7 @@ public:
   }
 
   /** Check that a workspace has the right signal/error*/
-  void checkWorkspace(MDHistoWorkspace_sptr ws, double expectedSignal,
+  void checkWorkspace(const MDHistoWorkspace_sptr &ws, double expectedSignal,
                       double expectedErrorSquared,
                       double expectedNumEvents = 1.0) {
     for (size_t i = 0; i < ws->getNPoints(); i++) {

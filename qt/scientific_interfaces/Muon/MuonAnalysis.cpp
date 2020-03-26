@@ -60,6 +60,7 @@
 #include <QVariant>
 
 #include <fstream>
+#include <utility>
 
 // Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
@@ -604,7 +605,7 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
   options.timeLimits.second = finishTime();
   options.rebinArgs = isRaw ? "" : rebinParams(loadedWS);
   options.plotType = plotType;
-  options.wsName = wsName;
+  options.wsName = std::move(wsName);
   const auto *table =
       itemType == ItemType::Group ? m_uiForm.groupTable : m_uiForm.pairTable;
   options.groupPairName = table->item(tableRow, 0)->text().toStdString();
@@ -1180,8 +1181,8 @@ void MuonAnalysis::handleInputFileChanges() {
  * @param loadResult :: Various loaded parameters as returned by load()
  * @return Used grouping for populating grouping table
  */
-boost::shared_ptr<GroupResult>
-MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
+boost::shared_ptr<GroupResult> MuonAnalysis::getGrouping(
+    const boost::shared_ptr<LoadResult> &loadResult) const {
   auto result = boost::make_shared<GroupResult>();
 
   boost::shared_ptr<Mantid::API::Grouping> groupingToUse;
@@ -2220,13 +2221,13 @@ double MuonAnalysis::timeZero() {
  * size
  * @return Params string to pass to rebin
  */
-std::string MuonAnalysis::rebinParams(Workspace_sptr wsForRebin) {
+std::string MuonAnalysis::rebinParams(const Workspace_sptr &wsForRebin) {
   MuonAnalysisOptionTab::RebinType rebinType = m_optionTab->getRebinType();
 
   if (rebinType == MuonAnalysisOptionTab::NoRebin) {
     return "";
   } else if (rebinType == MuonAnalysisOptionTab::FixedRebin) {
-    MatrixWorkspace_sptr ws = firstPeriod(wsForRebin);
+    MatrixWorkspace_sptr ws = firstPeriod(std::move(wsForRebin));
     double binSize = ws->x(0)[1] - ws->x(0)[0];
 
     double stepSize = m_optionTab->getRebinStep();
@@ -2749,7 +2750,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
 
   m_currentTab = newTab;
 }
-void MuonAnalysis::updateNormalization(QString name) {
+void MuonAnalysis::updateNormalization(const QString &name) {
   m_uiForm.fitBrowser->setNormalization(name.toStdString());
 }
 

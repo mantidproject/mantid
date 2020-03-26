@@ -25,7 +25,7 @@ public:
    * @param parent :: parent widget
    * @param fl :: window flags
    */
-  MantidMatrixDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  MantidMatrixDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
   void setMatrix(MantidMatrix *m);
 
 private slots:

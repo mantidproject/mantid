@@ -445,7 +445,7 @@ is ignored in any other case
 together and used to describe selected transformation.
 */
 bool ConvertToMD::buildTargetWSDescription(
-    API::IMDEventWorkspace_sptr spws, const std::string &QModReq,
+    const API::IMDEventWorkspace_sptr &spws, const std::string &QModReq,
     const std::string &dEModReq, const std::vector<std::string> &otherDimNames,
     std::vector<double> &dimMin, std::vector<double> &dimMax,
     const std::string &QFrame, const std::string &convertTo_,
@@ -604,7 +604,8 @@ ConvertToMD::createNewMDWorkspace(const MDWSDescription &targWSDescr,
  * the first level.
  * @param bc A pointer to the box controller.
  */
-void ConvertToMD::setupTopLevelSplitting(Mantid::API::BoxController_sptr bc) {
+void ConvertToMD::setupTopLevelSplitting(
+    const Mantid::API::BoxController_sptr &bc) {
   const size_t topLevelSplitSetting = 50;
   const size_t dimCutoff = 4;
 
@@ -625,7 +626,8 @@ void ConvertToMD::setupTopLevelSplitting(Mantid::API::BoxController_sptr bc) {
  *
  *@returns true if one needs to create new workspace and false otherwise
  */
-bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws) {
+bool ConvertToMD::doWeNeedNewTargetWorkspace(
+    const API::IMDEventWorkspace_sptr &spws) {
 
   bool createNewWs(false);
   if (!spws) {
@@ -762,7 +764,8 @@ void ConvertToMD::findMinMax(
  * @param outputWS :: Workspace on which to set the file back end
  */
 void ConvertToMD::setupFileBackend(
-    std::string filebackPath, Mantid::API::IMDEventWorkspace_sptr outputWS) {
+    const std::string &filebackPath,
+    const Mantid::API::IMDEventWorkspace_sptr &outputWS) {
   using DataObjects::BoxControllerNeXusIO;
   auto savemd = this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
   savemd->setProperty("InputWorkspace", outputWS);

@@ -27,16 +27,17 @@
 
 #include <algorithm>
 #include <cmath>
+#include <utility>
 
 namespace {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::MantidVec;
 
-std::size_t numberOfFunctions(IFunction_sptr function,
+std::size_t numberOfFunctions(const IFunction_sptr &function,
                               const std::string &functionName);
 
-std::size_t numberOfFunctions(CompositeFunction_sptr composite,
+std::size_t numberOfFunctions(const CompositeFunction_sptr &composite,
                               const std::string &functionName) {
   std::size_t count = 0;
   for (auto i = 0u; i < composite->nFunctions(); ++i)
@@ -44,7 +45,7 @@ std::size_t numberOfFunctions(CompositeFunction_sptr composite,
   return count;
 }
 
-std::size_t numberOfFunctions(IFunction_sptr function,
+std::size_t numberOfFunctions(const IFunction_sptr &function,
                               const std::string &functionName) {
   const auto composite =
       boost::dynamic_pointer_cast<CompositeFunction>(function);
@@ -53,9 +54,10 @@ std::size_t numberOfFunctions(IFunction_sptr function,
   return function->name() == functionName ? 1 : 0;
 }
 
-bool containsFunction(IFunction_sptr function, const std::string &functionName);
+bool containsFunction(const IFunction_sptr &function,
+                      const std::string &functionName);
 
-bool containsFunction(CompositeFunction_sptr composite,
+bool containsFunction(const CompositeFunction_sptr &composite,
                       const std::string &functionName) {
   for (auto i = 0u; i < composite->nFunctions(); ++i) {
     if (containsFunction(composite->getFunction(i), functionName))
@@ -64,7 +66,7 @@ bool containsFunction(CompositeFunction_sptr composite,
   return false;
 }
 
-bool containsFunction(IFunction_sptr function,
+bool containsFunction(const IFunction_sptr &function,
                       const std::string &functionName) {
   const auto composite =
       boost::dynamic_pointer_cast<CompositeFunction>(function);
@@ -125,7 +127,7 @@ std::vector<T, Ts...> squareRootVector(const std::vector<T, Ts...> &vec) {
 
 IFunction_sptr extractFirstBackground(IFunction_sptr function);
 
-IFunction_sptr extractFirstBackground(CompositeFunction_sptr composite) {
+IFunction_sptr extractFirstBackground(const CompositeFunction_sptr &composite) {
   for (auto i = 0u; i < composite->nFunctions(); ++i) {
     auto background = extractFirstBackground(composite->getFunction(i));
     if (background)
@@ -145,7 +147,7 @@ IFunction_sptr extractFirstBackground(IFunction_sptr function) {
 }
 
 std::string extractBackgroundType(IFunction_sptr function) {
-  auto background = extractFirstBackground(function);
+  auto background = extractFirstBackground(std::move(function));
   if (!background)
     return "None";
 
@@ -164,7 +166,7 @@ std::string extractBackgroundType(IFunction_sptr function) {
 
 std::vector<std::size_t>
 searchForFitParameters(const std::string &suffix,
-                       ITableWorkspace_sptr tableWorkspace) {
+                       const ITableWorkspace_sptr &tableWorkspace) {
   auto indices = std::vector<std::size_t>();
 
   for (auto i = 0u; i < tableWorkspace->columnCount(); ++i) {

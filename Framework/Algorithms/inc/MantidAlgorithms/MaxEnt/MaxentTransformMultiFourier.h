@@ -36,7 +36,7 @@ public:
   // Deleted default constructor
   MaxentTransformMultiFourier() = delete;
   // Constructor
-  MaxentTransformMultiFourier(MaxentSpaceComplex_sptr dataSpace,
+  MaxentTransformMultiFourier(const MaxentSpaceComplex_sptr &dataSpace,
                               MaxentSpace_sptr imageSpace, size_t numSpec);
   // Transfoms form image space to data space
   std::vector<double> imageToData(const std::vector<double> &image) override;

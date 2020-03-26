@@ -15,6 +15,7 @@
 
 #include <sstream>
 #include <string>
+#include <utility>
 
 namespace MantidQt {
 namespace RefDetectorViewer {
@@ -89,7 +90,7 @@ RefImageView::RefImageView(SpectrumView::SpectrumDataSource_sptr dataSource,
   m_imageDisplay->updateImage();
   iv_connections->peakBackTofRangeUpdate();
 
-  m_imageDisplay->setDataSource(dataSource);
+  m_imageDisplay->setDataSource(std::move(dataSource));
 }
 
 RefImageView::~RefImageView() {

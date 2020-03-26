@@ -131,7 +131,7 @@ void ExportTimeSeriesLog::exec() {
  * @param cal_first_deriv :: flag to calcualte the first derivative
  */
 void ExportTimeSeriesLog::exportLog(const std::string &logname,
-                                    const std::string timeunit,
+                                    const std::string &timeunit,
                                     const double &starttime,
                                     const double &stoptime,
                                     const bool exportepoch, bool outputeventws,

@@ -65,6 +65,7 @@
 
 #include <numeric>
 #include <stdexcept>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -893,7 +894,8 @@ void InstrumentWidget::executeAlgorithm(const QString & /*unused*/,
   // emit execMantidAlgorithm(alg_name, param_list, this);
 }
 
-void InstrumentWidget::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
+void InstrumentWidget::executeAlgorithm(
+    const Mantid::API::IAlgorithm_sptr &alg) {
   try {
     alg->executeAsync();
   } catch (Poco::NoThreadAvailableException &) {
@@ -1184,8 +1186,8 @@ void InstrumentWidget::updateInstrumentDetectors() {
 }
 
 void InstrumentWidget::deletePeaksWorkspace(
-    Mantid::API::IPeaksWorkspace_sptr pws) {
-  this->getSurface()->deletePeaksWorkspace(pws);
+    const Mantid::API::IPeaksWorkspace_sptr &pws) {
+  this->getSurface()->deletePeaksWorkspace(std::move(pws));
   updateInstrumentView();
 }
 
@@ -1336,7 +1338,7 @@ bool InstrumentWidget::hasWorkspace(const std::string &wsName) const {
 }
 
 void InstrumentWidget::handleWorkspaceReplacement(
-    const std::string &wsName, const boost::shared_ptr<Workspace> workspace) {
+    const std::string &wsName, const boost::shared_ptr<Workspace> &workspace) {
   if (!hasWorkspace(wsName) || !m_instrumentActor) {
     return;
   }
@@ -1400,10 +1402,10 @@ void InstrumentWidget::clearADSHandle() {
  * Overlay a peaks workspace on the surface projection
  * @param ws :: peaks workspace to overlay
  */
-void InstrumentWidget::overlayPeaksWorkspace(IPeaksWorkspace_sptr ws) {
+void InstrumentWidget::overlayPeaksWorkspace(const IPeaksWorkspace_sptr &ws) {
   auto surface = getUnwrappedSurface();
   if (surface) {
-    surface->setPeaksWorkspace(ws);
+    surface->setPeaksWorkspace(std::move(ws));
     updateInstrumentView();
   }
 }
@@ -1412,7 +1414,7 @@ void InstrumentWidget::overlayPeaksWorkspace(IPeaksWorkspace_sptr ws) {
  * Overlay a mask workspace on the surface projection
  * @param ws :: mask workspace to overlay
  */
-void InstrumentWidget::overlayMaskedWorkspace(IMaskWorkspace_sptr ws) {
+void InstrumentWidget::overlayMaskedWorkspace(const IMaskWorkspace_sptr &ws) {
   auto &actor = getInstrumentActor();
   actor.setMaskMatrixWorkspace(
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
@@ -1425,7 +1427,7 @@ void InstrumentWidget::overlayMaskedWorkspace(IMaskWorkspace_sptr ws) {
  * Overlay a table workspace containing shape parameters
  * @param ws :: a workspace of shape parameters to create
  */
-void InstrumentWidget::overlayShapesWorkspace(ITableWorkspace_sptr ws) {
+void InstrumentWidget::overlayShapesWorkspace(const ITableWorkspace_sptr &ws) {
   auto surface = getUnwrappedSurface();
   if (surface) {
     surface->loadShapesFromTableWorkspace(ws);

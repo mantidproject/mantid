@@ -43,7 +43,7 @@ class CutMDTest : public CxxTest::TestSuite {
 private:
   IMDWorkspace_sptr m_inWS;
 
-  void addNormalization(std::string wsName) {
+  void addNormalization(const std::string &wsName) {
     auto ws = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
     auto eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
     auto histoWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(ws);

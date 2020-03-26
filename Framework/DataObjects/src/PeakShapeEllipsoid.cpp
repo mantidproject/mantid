@@ -8,6 +8,8 @@
 #include "MantidKernel/cow_ptr.h"
 #include <json/json.h>
 
+#include <utility>
+
 namespace Mantid {
 namespace DataObjects {
 
@@ -18,7 +20,7 @@ PeakShapeEllipsoid::PeakShapeEllipsoid(
     const std::vector<double> &abcRadiiBackgroundOuter,
     Kernel::SpecialCoordinateSystem frame, std::string algorithmName,
     int algorithmVersion)
-    : PeakShapeBase(frame, algorithmName, algorithmVersion),
+    : PeakShapeBase(frame, std::move(algorithmName), algorithmVersion),
       m_directions(directions), m_abc_radii(abcRadii),
       m_abc_radiiBackgroundInner(abcRadiiBackgroundInner),
       m_abc_radiiBackgroundOuter(abcRadiiBackgroundOuter) {

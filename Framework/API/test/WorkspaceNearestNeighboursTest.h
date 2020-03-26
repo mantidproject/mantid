@@ -59,7 +59,7 @@ private:
       : public Mantid::API::WorkspaceNearestNeighbours {
   public:
     ExposedNearestNeighbours(const SpectrumInfo &spectrumInfo,
-                             const std::vector<specnum_t> spectrumNumbers,
+                             const std::vector<specnum_t> &spectrumNumbers,
                              bool ignoreMasked = false)
         : WorkspaceNearestNeighbours(8, spectrumInfo, spectrumNumbers,
                                      ignoreMasked) {}

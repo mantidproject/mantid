@@ -24,6 +24,7 @@
 #include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <sstream>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -395,7 +396,7 @@ GetEi2::extractSpectrum(size_t ws_index, const double start, const double end) {
  * @returns The width of the peak at half height
  */
 double GetEi2::calculatePeakWidthAtHalfHeight(
-    API::MatrixWorkspace_sptr data_ws, const double prominence,
+    const API::MatrixWorkspace_sptr &data_ws, const double prominence,
     std::vector<double> &peak_x, std::vector<double> &peak_y,
     std::vector<double> &peak_e) const {
   // Use WS->points() to create a temporary vector of bin_centre values to work
@@ -622,11 +623,11 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
  * considered a "real" peak
  *  @return The calculated first moment
  */
-double GetEi2::calculateFirstMoment(API::MatrixWorkspace_sptr monitor_ws,
+double GetEi2::calculateFirstMoment(const API::MatrixWorkspace_sptr &monitor_ws,
                                     const double prominence) {
   std::vector<double> peak_x, peak_y, peak_e;
-  calculatePeakWidthAtHalfHeight(monitor_ws, prominence, peak_x, peak_y,
-                                 peak_e);
+  calculatePeakWidthAtHalfHeight(std::move(monitor_ws), prominence, peak_x,
+                                 peak_y, peak_e);
 
   // Area
   double area(0.0), dummy(0.0);
@@ -649,9 +650,9 @@ double GetEi2::calculateFirstMoment(API::MatrixWorkspace_sptr monitor_ws,
  * @param end :: The maximum value for the new bin range
  * @returns The rebinned workspace
 */
-API::MatrixWorkspace_sptr GetEi2::rebin(API::MatrixWorkspace_sptr monitor_ws,
-                                        const double first, const double width,
-                                        const double end) {
+API::MatrixWorkspace_sptr
+GetEi2::rebin(const API::MatrixWorkspace_sptr &monitor_ws, const double first,
+              const double width, const double end) {
   IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty("InputWorkspace", monitor_ws);
   std::ostringstream binParams;

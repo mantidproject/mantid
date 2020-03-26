@@ -30,7 +30,7 @@ struct ParameterValue {
 
 struct ResultLocationNew {
   ResultLocationNew() = default;
-  ResultLocationNew(Mantid::API::WorkspaceGroup_sptr group,
+  ResultLocationNew(const Mantid::API::WorkspaceGroup_sptr &group,
                     WorkspaceGroupIndex i)
       : result(group), index(i) {}
   boost::weak_ptr<Mantid::API::WorkspaceGroup> result;
@@ -51,15 +51,15 @@ using FitDataIterator =
 */
 class MANTIDQT_INDIRECT_DLL IndirectFitOutput {
 public:
-  IndirectFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  IndirectFitOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
                     Mantid::API::ITableWorkspace_sptr parameterTable,
-                    Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+                    const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
                     const FitDataIterator &fitDataBegin,
                     const FitDataIterator &fitDataEnd);
 
-  IndirectFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  IndirectFitOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
                     Mantid::API::ITableWorkspace_sptr parameterTable,
-                    Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+                    const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
                     IndirectFitData const *fitData, WorkspaceIndex spectrum);
 
   bool isSpectrumFit(IndirectFitData const *fitData,
@@ -85,33 +85,31 @@ public:
       const std::unordered_map<std::string, std::string> &parameterNameChanges,
       IndirectFitData const *fitData, WorkspaceIndex spectrum);
 
-  void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  void addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+                 const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
                  const FitDataIterator &fitDataBegin,
                  const FitDataIterator &fitDataEnd);
-  void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  void addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+                 const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
                  IndirectFitData const *fitData, WorkspaceIndex spectrum);
 
   void removeOutput(IndirectFitData const *fitData);
 
 private:
-  void updateFitResults(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  void updateFitResults(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
                         const FitDataIterator &fitDataBegin,
                         const FitDataIterator &fitDataEnd);
   void updateParameters(Mantid::API::ITableWorkspace_sptr parameterTable,
                         const FitDataIterator &fitDataBegin,
                         const FitDataIterator &fitDataEnd);
-  void
-  updateFitResultsFromUnstructured(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                                   const FitDataIterator &fitDataBegin,
-                                   const FitDataIterator &fitDataEnd);
-  void
-  updateFitResultsFromStructured(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                                 const FitDataIterator &fitDataBegin,
-                                 const FitDataIterator &fitDataEnd);
+  void updateFitResultsFromUnstructured(
+      const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+      const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd);
+  void updateFitResultsFromStructured(
+      const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+      const FitDataIterator &fitDataBegin, const FitDataIterator &fitDataEnd);
 
   boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultGroup;
   boost::weak_ptr<Mantid::API::WorkspaceGroup> m_resultWorkspace;

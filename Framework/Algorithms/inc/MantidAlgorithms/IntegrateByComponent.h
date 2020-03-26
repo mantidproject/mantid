@@ -34,11 +34,11 @@ private:
   void exec() override;
 
   /// method to check which spectra should be averaged
-  std::vector<std::vector<size_t>> makeMap(API::MatrixWorkspace_sptr countsWS,
-                                           int parents);
+  std::vector<std::vector<size_t>>
+  makeMap(const API::MatrixWorkspace_sptr &countsWS, int parents);
   /// method to create the map with all spectra
   std::vector<std::vector<size_t>>
-  makeInstrumentMap(API::MatrixWorkspace_sptr countsWS);
+  makeInstrumentMap(const API::MatrixWorkspace_sptr &countsWS);
 };
 
 } // namespace Algorithms

@@ -883,7 +883,7 @@ MantidTreeWidgetItem *WorkspaceTreeWidget::addTreeEntry(
  * Check if a workspace should be selected after dock update.
  * @param name :: Name of a workspace to check.
  */
-bool WorkspaceTreeWidget::shouldBeSelected(QString name) const {
+bool WorkspaceTreeWidget::shouldBeSelected(const QString &name) const {
   QMutexLocker lock(&m_mutex);
   QStringList renamed = m_renameMap.keys(name);
   if (!renamed.isEmpty()) {
@@ -1114,7 +1114,7 @@ bool WorkspaceTreeWidget::hasUBMatrix(const std::string &wsName) {
  * ALGO_NAME
  * @param menuEntryName Text to be shown in menu
  */
-void WorkspaceTreeWidget::addSaveMenuOption(QString algorithmString,
+void WorkspaceTreeWidget::addSaveMenuOption(const QString &algorithmString,
                                             QString menuEntryName) {
   // Default to algo string if no entry name given
   if (menuEntryName.isEmpty())

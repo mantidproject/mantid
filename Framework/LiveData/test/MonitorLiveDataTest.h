@@ -61,10 +61,10 @@ public:
 
   /** Create but don't start a MonitorLiveData thread */
   boost::shared_ptr<MonitorLiveData>
-  makeAlgo(std::string output, std::string accumWS = "",
-           std::string AccumulationMethod = "Replace",
-           std::string RunTransitionBehavior = "Restart",
-           std::string UpdateEvery = "1") {
+  makeAlgo(const std::string &output, const std::string &accumWS = "",
+           const std::string &AccumulationMethod = "Replace",
+           const std::string &RunTransitionBehavior = "Restart",
+           const std::string &UpdateEvery = "1") {
     auto alg = boost::dynamic_pointer_cast<MonitorLiveData>(
         AlgorithmManager::Instance().create("MonitorLiveData", -1));
     alg->setPropertyValue("Instrument", "TestDataListener");
@@ -167,7 +167,7 @@ public:
   /** Executes the given algorithm asynchronously, until you reach the given
    * chunk number.
    * @return false if test failed*/
-  bool runAlgoUntilChunk(boost::shared_ptr<MonitorLiveData> alg1,
+  bool runAlgoUntilChunk(const boost::shared_ptr<MonitorLiveData> &alg1,
                          size_t stopAtChunk) {
     Poco::ActiveResult<bool> res1 = alg1->executeAsync();
     Poco::Thread::sleep(50);

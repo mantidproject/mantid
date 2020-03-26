@@ -39,7 +39,7 @@ private:
   /*
    * Helper method to run the algorithm and return the output workspace.
    */
-  IPeaksWorkspace_sptr runAlgorithm(PeaksWorkspace_sptr inWS,
+  IPeaksWorkspace_sptr runAlgorithm(const PeaksWorkspace_sptr &inWS,
                                     const std::string &filterVariable,
                                     const double filterValue,
                                     const std::string &filterOperator) {

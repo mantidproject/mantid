@@ -15,7 +15,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-LoadOff::LoadOff(std::string filename, ScaleUnits scaleType)
+LoadOff::LoadOff(const std::string &filename, ScaleUnits scaleType)
     : MeshFileIO(scaleType) {
   m_file = std::ifstream(filename.c_str());
   if (!m_file) {

@@ -179,7 +179,7 @@ public:
   // Get Geometry Handler
   boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Set Geometry Handler
-  void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
+  void setGeometryHandler(const boost::shared_ptr<GeometryHandler> &h);
 
   /// set vtkGeometryCache writer
   void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);

@@ -60,10 +60,11 @@ void setUpBinaryOperationMDTestHelper() {
 }
 
 /// Run a binary algorithm.
-MDHistoWorkspace_sptr doTest(std::string algoName, std::string lhs,
-                             std::string rhs, std::string outName,
-                             bool succeeds, std::string otherProp,
-                             std::string otherPropValue) {
+MDHistoWorkspace_sptr doTest(const std::string &algoName,
+                             const std::string &lhs, const std::string &rhs,
+                             const std::string &outName, bool succeeds,
+                             const std::string &otherProp,
+                             const std::string &otherPropValue) {
   setUpBinaryOperationMDTestHelper();
 
   auto alg = AlgorithmManager::Instance().create(algoName);
@@ -95,10 +96,11 @@ MDHistoWorkspace_sptr doTest(std::string algoName, std::string lhs,
 
 namespace UnaryOperationMDTestHelper {
 
-MDHistoWorkspace_sptr doTest(std::string algoName, std::string inName,
-                             std::string outName, bool succeeds,
-                             std::string otherProp,
-                             std::string otherPropValue) {
+MDHistoWorkspace_sptr doTest(const std::string &algoName,
+                             const std::string &inName,
+                             const std::string &outName, bool succeeds,
+                             const std::string &otherProp,
+                             const std::string &otherPropValue) {
   MDHistoWorkspace_sptr histo =
       MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0);
   IMDEventWorkspace_sptr event =

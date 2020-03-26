@@ -42,8 +42,8 @@ getIntersectionRegion(const std::vector<double> &xAxis,
 
 /// Compute sqrt of errors and put back in bin width division if necessary
 MANTID_DATAOBJECTS_DLL void
-normaliseOutput(API::MatrixWorkspace_sptr outputWS,
-                API::MatrixWorkspace_const_sptr inputWS,
+normaliseOutput(const API::MatrixWorkspace_sptr &outputWS,
+                const API::MatrixWorkspace_const_sptr &inputWS,
                 API::Progress *progress = nullptr);
 
 /// Rebin the input quadrilateral to to output grid

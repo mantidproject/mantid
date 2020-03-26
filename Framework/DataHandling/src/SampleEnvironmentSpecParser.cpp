@@ -258,7 +258,7 @@ SampleEnvironmentSpecParser::parseContainer(Element *element) const {
  * @param targetVariable Value read from element attribute
  */
 void SampleEnvironmentSpecParser::LoadOptionalDoubleFromXML(
-    Poco::XML::Element *componentElement, std::string attributeName,
+    Poco::XML::Element *componentElement, const std::string &attributeName,
     double &targetVariable) const {
 
   auto attributeText = componentElement->getAttribute(attributeName);
@@ -279,7 +279,7 @@ void SampleEnvironmentSpecParser::LoadOptionalDoubleFromXML(
  * @return vector containing translations
  */
 std::vector<double> SampleEnvironmentSpecParser::parseTranslationVector(
-    std::string translationVectorStr) const {
+    const std::string &translationVectorStr) const {
 
   std::vector<double> translationVector;
 

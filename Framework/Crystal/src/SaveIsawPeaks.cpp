@@ -318,7 +318,6 @@ void SaveIsawPeaks::exec() {
     const int run = runBankMap.first;
     const auto &bankMap = runBankMap.second;
 
-    bankMap_t::iterator bankMap_it;
     for (const auto &bankIDs : bankMap) {
       // Start of a new bank.
       const int bank = bankIDs.first;
@@ -461,7 +460,7 @@ void SaveIsawPeaks::exec() {
   out.close();
 }
 
-bool SaveIsawPeaks::bankMasked(IComponent_const_sptr parent,
+bool SaveIsawPeaks::bankMasked(const IComponent_const_sptr &parent,
                                const Geometry::DetectorInfo &detectorInfo) {
   std::vector<Geometry::IComponent_const_sptr> children;
   auto asmb =
@@ -494,7 +493,7 @@ bool SaveIsawPeaks::bankMasked(IComponent_const_sptr parent,
   return true;
 }
 
-V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row) {
+V3D SaveIsawPeaks::findPixelPos(const std::string &bankName, int col, int row) {
   auto parent = inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
     const auto RDet =
@@ -524,8 +523,8 @@ V3D SaveIsawPeaks::findPixelPos(std::string bankName, int col, int row) {
     return first->getPos();
   }
 }
-void SaveIsawPeaks::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
-                              double &xsize, double &ysize) {
+void SaveIsawPeaks::sizeBanks(const std::string &bankName, int &NCOLS,
+                              int &NROWS, double &xsize, double &ysize) {
   if (bankName == "None")
     return;
   const auto parent = inst->getComponentByName(bankName);

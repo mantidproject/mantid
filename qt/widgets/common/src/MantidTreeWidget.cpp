@@ -37,7 +37,7 @@ MantidTreeWidget::MantidTreeWidget(MantidDisplayBase *mui, QWidget *parent)
   setSortOrder(Qt::AscendingOrder);
   setAcceptDrops(true);
 
-  m_doubleClickAction = [&](QString wsName) {
+  m_doubleClickAction = [&](const QString &wsName) {
     m_mantidUI->importWorkspace(wsName, false);
   };
 }

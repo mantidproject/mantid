@@ -16,7 +16,7 @@ CompositeCatalog::CompositeCatalog() : m_catalogs() {}
  * Add a catalog to the catalog container.
  * @param catalog :: The catalog to add to the container.
  */
-void CompositeCatalog::add(const ICatalog_sptr catalog) {
+void CompositeCatalog::add(const ICatalog_sptr &catalog) {
   m_catalogs.emplace_back(catalog);
 }
 

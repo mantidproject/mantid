@@ -47,7 +47,7 @@ void update(std::string const &property, boost::optional<double> const &value,
 void updateFromMap(AlgorithmRuntimeProps &properties,
                    std::map<std::string, std::string> const &parameterMap);
 
-std::string getOutputWorkspace(Mantid::API::IAlgorithm_sptr algorithm,
+std::string getOutputWorkspace(const Mantid::API::IAlgorithm_sptr &algorithm,
                                std::string const &property);
 
 template <typename VALUE_TYPE>
