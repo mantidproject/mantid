@@ -22,6 +22,7 @@ from mantidqt.utils.qt import load_ui
 # Constants
 RANGE_SPECIFIER = '-'
 PLACEHOLDER_FORMAT = 'valid range: {}' + RANGE_SPECIFIER + '{}'
+PLACEHOLDER_FORMAT_SINGLE_INPUT = 'valid range: {}'
 RED_ASTERISK = None
 
 
@@ -69,12 +70,12 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
         # attributes
         self._workspaces = workspaces
-        self.spec_min, self.spec_max = None, None
         self.wi_min, self.wi_max = None, None
         self.selection = None
         self._ui = None
         self._show_colorfill_button = show_colorfill_btn
         self._overplot = overplot
+        self._plottable_spectra = None
 
         self._init_ui()
         self._set_placeholder_text()
@@ -99,7 +100,6 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self.accept()
 
     # ------------------- Private -------------------------
-
     def _check_number_of_plots(self, selection):
         index_length = len(selection.wksp_indices) if selection.wksp_indices else len(selection.spectra)
         number_of_lines_to_plot = len(selection.workspaces) * index_length
@@ -147,9 +147,24 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         plottable = sorted(plottable)
         if len(plottable) == 0:
             raise Exception('Error: Workspaces have no common spectra.')
-        spec_min, spec_max = min(plottable), max(plottable)
-        self._ui.specNums.setPlaceholderText(PLACEHOLDER_FORMAT.format(spec_min, spec_max))
-        self.spec_min, self.spec_max = spec_min, spec_max
+        #store the plottable list for use later
+        self._plottable_spectra = plottable
+        self._ui.specNums.setPlaceholderText(PLACEHOLDER_FORMAT_SINGLE_INPUT.format(self._list_to_ranges(plottable)))
+
+    def _list_to_ranges(self, input):
+        ranges = []
+        first = last = None  # first and last number of current consecutive range
+        for item in sorted(input):
+            if first is None:
+                first = last = item  # bootstrap
+            elif item == last + 1:  # consecutive
+                last = item  # extend the range
+            else:  # not consecutive
+                ranges.append("{0}{1}{2}".format(first, RANGE_SPECIFIER, last) if last > first else "{0}".format(first))
+                first = last = item
+        # the last range ended by iteration end
+        ranges.append("{0}{1}{2}".format(first, RANGE_SPECIFIER, last) if last > first else "{0}".format(first))
+        return ','.join(ranges)
 
     def _setup_connections(self):
         ui = self._ui
@@ -214,7 +229,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self.selection = selection
 
     def _parse_spec_nums(self):
-        spec_nums = parse_selection_str(self._ui.specNums.text(), self.spec_min, self.spec_max)
+        spec_nums = parse_selection_str(self._ui.specNums.text(), allowed_values = self._plottable_spectra)
         if spec_nums:
             selection = SpectraSelection(self._workspaces)
             selection.spectra = spec_nums
@@ -227,13 +242,14 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         return self.selection is not None
 
 
-def parse_selection_str(txt, min_val, max_val):
+def parse_selection_str(txt, min_val = None, max_val = None, allowed_values = None):
     """Parse an input string containing plot index selection.
 
     :param txt: A single line of text containing a comma-separated list of values or range of values, i.e.
     3-4,5,6,8,10-11
     :param min_val: The minimum allowed value
     :param max_val: The maximum allowed value
+    :param allowed_values: The list of allowed values, if this is provided then max and min will be ignored
     :returns A list containing each value in the range or None if the string is invalid
     """
 
@@ -249,7 +265,10 @@ def parse_selection_str(txt, min_val, max_val):
         return True
 
     def is_in_range(val):
-        return min_val <= val <= max_val
+        if allowed_values is not None:
+            return (val in allowed_values)
+        else:
+            return min_val <= val <= max_val
 
     # split up any commas
     comma_separated = txt.split(',')
