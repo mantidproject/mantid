@@ -285,7 +285,7 @@ class MantidAxes(Axes):
         Remove the artists reference by this workspace (if any) and return True
         if the axes is then empty
         :param workspace: A Workspace object
-        :return: True if the axes is empty, false if artists remain or this workspace is not associated here
+        :return: True is an artist was removed False if one was not
         """
         try:
             # pop to ensure we don't hold onto an artist reference
@@ -296,7 +296,7 @@ class MantidAxes(Axes):
         for workspace_artist in artist_info:
             workspace_artist.remove(self)
 
-        return self.is_empty(self)
+        return True
 
     def remove_artists_if(self, unary_predicate):
         """
