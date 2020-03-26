@@ -211,58 +211,6 @@ public:
     AlgorithmManager::Instance().notificationCenter.removeObserver(my_observer);
   }
 
-  /** Keep one algorithm running, run another to completion etc. */
-  void testDroppingCompletedOnes_whenAnAlgorithmIsStillRunning() {
-    AlgorithmManager::Instance().clear();
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 0);
-
-    // Create one algorithm that appears never to stop
-    IAlgorithm_sptr first =
-        AlgorithmManager::Instance().create("AlgRunsForever");
-
-    IAlgorithm_sptr second = AlgorithmManager::Instance().create("AlgTest");
-
-    // Another long-running algo
-    IAlgorithm_sptr third =
-        AlgorithmManager::Instance().create("AlgRunsForever");
-
-    for (size_t i = 3; i < 5; i++)
-      AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-
-    // The first three created are in the list
-    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(
-                  first->getAlgorithmID()) == first);
-    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(
-                  second->getAlgorithmID()) == second);
-    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(
-                  third->getAlgorithmID()) == third);
-
-    // Add one more, drops the SECOND oldest one
-    AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-
-    TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
-               AlgorithmManager::Instance().getAlgorithm(
-                   first->getAlgorithmID()) == first);
-    TSM_ASSERT(
-        "The second oldest was popped, so trying to get it should return null",
-        !AlgorithmManager::Instance().getAlgorithm(second->getAlgorithmID()));
-
-    // One more time
-    AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-
-    // The right ones are at the front
-    TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
-               AlgorithmManager::Instance().getAlgorithm(
-                   first->getAlgorithmID()) == first);
-    TSM_ASSERT("The third algorithm (is still running) so it is still there",
-               AlgorithmManager::Instance().getAlgorithm(
-                   third->getAlgorithmID()) == third);
-    AlgorithmManager::Instance().cancelAll();
-  }
-
   void testThreadSafety() {
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < 5000; i++) {

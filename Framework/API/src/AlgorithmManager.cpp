@@ -199,15 +199,22 @@ void AlgorithmManagerImpl::cancelAll() {
 /// this does not lock the mutex as the locking is already assumed to be in
 /// place
 size_t AlgorithmManagerImpl::removeFinishedAlgorithms() {
-  size_t sizeBefore = m_managed_algs.size();
-
-  m_managed_algs.erase(std::remove_if(
-      m_managed_algs.begin(), m_managed_algs.end(), [](const auto &algorithm) {
+  std::vector<IAlgorithm_const_sptr> theCompletedInstances;
+  std::copy_if(
+      m_managed_algs.cbegin(), m_managed_algs.cend(),
+      std::back_inserter(theCompletedInstances), [](const auto &algorithm) {
         return (algorithm->executionState() == ExecutionState::Finished);
-      }));
-  size_t sizeAfter = m_managed_algs.size();
-
-  return sizeBefore - sizeAfter;
+      });
+  for (auto completedAlg : theCompletedInstances) {
+    auto itend = m_managed_algs.end();
+    for (auto it = m_managed_algs.begin(); it != itend; ++it) {
+      if ((**it).getAlgorithmID() == completedAlg->getAlgorithmID()) {
+        m_managed_algs.erase(it);
+        break;
+      }
+    }
+  }
+  return theCompletedInstances.size();
 }
 
 void AlgorithmManagerImpl::shutdown() { clear(); }
