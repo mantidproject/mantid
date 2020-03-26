@@ -9,6 +9,7 @@ Improvements
 ############
 
 - Tile plots are now reloaded correctly by project recovery.
+- Fixed an issue where some scripts were running slower if a  plot was open at the same time.
 
 
 Bugfixes
