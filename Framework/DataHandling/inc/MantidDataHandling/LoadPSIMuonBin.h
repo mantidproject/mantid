@@ -10,6 +10,7 @@
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BinaryStreamReader.h"
+#include "MantidKernel/FileDescriptor.h"
 #include <cstdint>
 
 /** LoadPSIMuonBin : Loads a bin file from the PSI facility for muon

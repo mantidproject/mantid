@@ -105,12 +105,6 @@ public:
   }
   static void destroySuite(AlgorithmManagerTest *suite) { delete suite; }
 
-  AlgorithmManagerTest() {
-    // A test fails unless algorithms.retained is big enough
-    Mantid::Kernel::ConfigService::Instance().setString("algorithms.retained",
-                                                        "5");
-  }
-
   void testVersionFail() {
     const size_t nalgs = AlgorithmFactory::Instance().getKeys().size();
     TS_ASSERT_THROWS(AlgorithmFactory::Instance().subscribe<AlgTestFail>(),
@@ -198,97 +192,6 @@ public:
     AlgorithmManager::Instance().notificationCenter.removeObserver(my_observer);
   }
 
-  /** Keep the right number of algorithms in the list.
-   *  This also tests setMaxAlgorithms().
-   */
-  void testDroppingOldOnes() {
-    AlgorithmManager::Instance().setMaxAlgorithms(5);
-    AlgorithmManager::Instance().clear();
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 0);
-
-    IAlgorithm_sptr first = AlgorithmManager::Instance().create("AlgTest");
-    // Fill up the list
-    for (size_t i = 1; i < 5; i++)
-      AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-
-    // The first one is still in the list
-    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(
-                  first->getAlgorithmID()) == first);
-
-    // Add one more, drops the oldest one
-    AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-    TS_ASSERT(
-        !AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()));
-  }
-
-  /** Keep one algorithm running, drop the second-oldest one etc. */
-  void testDroppingOldOnes_whenAnAlgorithmIsStillRunning() {
-    AlgorithmManager::Instance().clear();
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 0);
-
-    // Create one algorithm that appears never to stop
-    IAlgorithm_sptr first =
-        AlgorithmManager::Instance().create("AlgRunsForever");
-
-    IAlgorithm_sptr second = AlgorithmManager::Instance().create("AlgTest");
-
-    // Another long-running algo
-    IAlgorithm_sptr third =
-        AlgorithmManager::Instance().create("AlgRunsForever");
-
-    for (size_t i = 3; i < 5; i++)
-      AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-
-    // The first three created are in the list
-    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(
-                  first->getAlgorithmID()) == first);
-    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(
-                  second->getAlgorithmID()) == second);
-    TS_ASSERT(AlgorithmManager::Instance().getAlgorithm(
-                  third->getAlgorithmID()) == third);
-
-    // Add one more, drops the SECOND oldest one
-    AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-
-    TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
-               AlgorithmManager::Instance().getAlgorithm(
-                   first->getAlgorithmID()) == first);
-    TSM_ASSERT(
-        "The second oldest was popped, so trying to get it should return null",
-        !AlgorithmManager::Instance().getAlgorithm(second->getAlgorithmID()));
-
-    // One more time
-    AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-
-    // The right ones are at the front
-    TSM_ASSERT("The oldest algorithm (is still running) so it is still there",
-               AlgorithmManager::Instance().getAlgorithm(
-                   first->getAlgorithmID()) == first);
-    TSM_ASSERT("The third algorithm (is still running) so it is still there",
-               AlgorithmManager::Instance().getAlgorithm(
-                   third->getAlgorithmID()) == third);
-    AlgorithmManager::Instance().cancelAll();
-  }
-
-  void testDroppingOldOnes_extremeCase() {
-    /** Extreme case where your queue fills up and all algos are running */
-    AlgorithmManager::Instance().clear();
-    for (size_t i = 0; i < 5; i++) {
-      AlgorithmManager::Instance().create("AlgRunsForever");
-    }
-
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 5);
-    // Create another that takes it past the normal max size (of 5)
-    AlgorithmManager::Instance().create("AlgTest");
-    TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 6);
-    AlgorithmManager::Instance().cancelAll();
-  }
-
   void testThreadSafety() {
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < 5000; i++) {
@@ -298,7 +201,6 @@ public:
 
   void testRemovingByIdRemovesCorrectObject() {
     auto &mgr = AlgorithmManager::Instance();
-    mgr.setMaxAlgorithms(10);
     const size_t initialManagerSize = mgr.size();
     // 2 different ids for same named algorithm
     auto alg1 = mgr.create("AlgTest");
@@ -310,8 +212,6 @@ public:
     // the right one?
     auto foundAlg = mgr.getAlgorithm(alg2->getAlgorithmID());
     TS_ASSERT(foundAlg);
-
-    mgr.setMaxAlgorithms(5);
   }
 
   void test_runningInstancesOf() {

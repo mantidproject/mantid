@@ -15,6 +15,7 @@
 #include "MantidDataHandling/DataBlockComposite.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
 

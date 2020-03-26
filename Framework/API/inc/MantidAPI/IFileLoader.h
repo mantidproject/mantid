@@ -7,8 +7,6 @@
 #pragma once
 
 #include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidKernel/FileDescriptor.h"
-#include "MantidKernel/NexusDescriptor.h"
 
 namespace Mantid {
 namespace API {

@@ -10,6 +10,7 @@
 #include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
 namespace Crystal {

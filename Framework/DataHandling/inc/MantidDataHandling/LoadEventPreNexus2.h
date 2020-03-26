@@ -10,6 +10,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/BinaryFile.h"
+#include "MantidKernel/FileDescriptor.h"
 #include <fstream>
 #include <string>
 #include <vector>

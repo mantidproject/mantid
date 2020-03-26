@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
