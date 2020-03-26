@@ -88,7 +88,6 @@ private:
   void addNewBatch(IBatchView *batchView);
   void initNewBatch(IBatchPresenter *batchPresenter,
                     std::string const &instrument);
-  void changeInstrument(std::string const &instrumentName);
   void updateInstrument(const std::string &instrumentName);
   void setDefaultInstrument(const std::string &newInstrument);
 
