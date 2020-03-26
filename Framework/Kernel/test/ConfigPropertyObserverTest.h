@@ -41,8 +41,6 @@ public:
         ConfigService::Instance().getString("datasearch.directories");
     m_defaultSaveDirectory =
         ConfigService::Instance().getString("defaultsave.directory");
-    m_retainedAlgorithms =
-        ConfigService::Instance().getString("algorithms.retained");
   }
 
   void tearDown() override {
@@ -50,8 +48,6 @@ public:
                                         m_searchDirectories);
     ConfigService::Instance().setString("defaultsave.directory",
                                         m_defaultSaveDirectory);
-    ConfigService::Instance().setString("algorithms.retained",
-                                        m_retainedAlgorithms);
   }
 
   void testRecievesCallbackForSearchDirectoryChange() {
@@ -96,7 +92,7 @@ public:
                          });
     auto callCountB = 0;
     auto observerB =
-        makeMockObserver("algorithms.retained",
+        makeMockObserver("defaultsave.directory",
                          [&callCountB](const std::string &newValue,
                                        const std::string &prevValue) -> void {
                            UNUSED_ARG(newValue);
@@ -105,7 +101,7 @@ public:
                          });
 
     ConfigService::Instance().setString("datasearch.directories", "/dev/null");
-    ConfigService::Instance().setString("algorithms.retained", "40");
+    ConfigService::Instance().setString("defaultsave.directory", "/dev/null");
 
     TS_ASSERT_EQUALS(1, callCountA);
     TS_ASSERT_EQUALS(1, callCountB);

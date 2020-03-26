@@ -48,7 +48,6 @@ public:
                                                const int &version = -1) const;
 
   std::size_t size() const;
-  void setMaxAlgorithms(int n);
 
   IAlgorithm_sptr getAlgorithm(AlgorithmID id) const;
   void removeById(AlgorithmID id);
@@ -81,8 +80,6 @@ private:
   /// Removes any finished algorithms from the list of managed algorithms
   size_t removeFinishedAlgorithms();
 
-  /// The maximum size of the algorithm store
-  int m_max_no_algs;
   /// The list of managed algorithms
   std::deque<IAlgorithm_sptr>
       m_managed_algs; ///<  pointers to managed algorithms [policy???]

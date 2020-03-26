@@ -15,14 +15,14 @@ import unittest
 class SimpleShapeMonteCarloAbsorptionTest(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        __red_ws = Load('irs26176_graphite002_red.nxs')
-        __red_ws = ConvertUnits(
-            InputWorkspace=__red_ws,
+        red_ws = Load('irs26176_graphite002_red.nxs')
+        red_ws = ConvertUnits(
+            InputWorkspace=red_ws,
             Target='Wavelength',
             EMode='Indirect',
             EFixed=1.845)
 
-        self._red_ws = __red_ws
+        self._red_ws = red_ws
 
         self._arguments = {'ChemicalFormula': 'H2-O',
                            'DensityType': 'Mass Density',
