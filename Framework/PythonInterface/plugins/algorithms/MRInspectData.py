@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=bare-except,no-init,invalid-name,dangerous-default-value
 from __future__ import (absolute_import, division, print_function)
@@ -602,6 +602,7 @@ def chi2(data, model):
     err = np.fabs(data.ravel())
     err[err<=0] = 1
     return np.sum((data.ravel() - model.ravel())**2 / err) / len(data.ravel())
+
 
 # Register
 AlgorithmFactory.subscribe(MRInspectData)

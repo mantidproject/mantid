@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MdSettings.h"
 #include "MantidQtWidgets/Common/MdConstants.h"
@@ -78,10 +78,10 @@ QColor MdSettings::getUserSettingBackgroundColor() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QColor backgroundColor = settings
-                               .value(m_lblUserSettingBackgroundColor,
-                                      m_mdConstants.getDefaultBackgroundColor())
-                               .value<QColor>();
+  auto backgroundColor = settings
+                             .value(m_lblUserSettingBackgroundColor,
+                                    m_mdConstants.getDefaultBackgroundColor())
+                             .value<QColor>();
   settings.endGroup();
 
   return backgroundColor;
@@ -99,10 +99,10 @@ QColor MdSettings::getLastSessionBackgroundColor() {
   QSettings settings;
 
   settings.beginGroup(m_vsiGroup);
-  QColor backgroundColor = settings
-                               .value(m_lblLastSessionBackgroundColor,
-                                      m_mdConstants.getDefaultBackgroundColor())
-                               .value<QColor>();
+  auto backgroundColor = settings
+                             .value(m_lblLastSessionBackgroundColor,
+                                    m_mdConstants.getDefaultBackgroundColor())
+                             .value<QColor>();
   settings.endGroup();
 
   return backgroundColor;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Algorithm.h"
@@ -1929,6 +1929,35 @@ MantidImage_sptr MatrixWorkspace::getImage(
   }
 
   return image;
+}
+
+std::pair<int64_t, int64_t>
+MatrixWorkspace::findY(double value,
+                       const std::pair<int64_t, int64_t> &idx) const {
+  std::pair<int64_t, int64_t> out(-1, -1);
+  const int64_t numHists = static_cast<int64_t>(this->getNumberHistograms());
+  if (std::isnan(value)) {
+    for (int64_t i = idx.first; i < numHists; ++i) {
+      const auto &Y = this->y(i);
+      // cppcheck-suppress syntaxError
+      if (auto it = std::find_if(std::next(Y.begin(), idx.second), Y.end(),
+                                 [](double v) { return std::isnan(v); });
+          it != Y.end()) {
+        out = {i, std::distance(Y.begin(), it)};
+        break;
+      }
+    }
+  } else {
+    for (int64_t i = idx.first; i < numHists; ++i) {
+      const auto &Y = this->y(i);
+      if (auto it = std::find(std::next(Y.begin(), idx.second), Y.end(), value);
+          it != Y.end()) {
+        out = {i, std::distance(Y.begin(), it)};
+        break;
+      }
+    }
+  }
+  return out;
 }
 
 /**

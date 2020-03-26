@@ -1,14 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
 from abc import (ABCMeta, abstractmethod)
 
 from six import with_metaclass
+
+from mantid.kernel import Logger
 
 from sans.algorithm_detail.mask_functions import SpectraBlock
 from sans.algorithm_detail.xml_shapes import (add_cylinder, add_outside_cylinder, create_phi_mask, create_line_mask)
@@ -260,17 +262,31 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
         for horizontal, vertical in zip(block_cross_horizontal, block_cross_vertical):
             total_spectra.extend(spectra_block.get_block(horizontal, vertical, 1, 1))
 
+    if not total_spectra:
+        return workspace
+
     # Perform the masking
-    if total_spectra:
-        mask_name = "MaskSpectra"
-        mask_options = {"InputWorkspace": workspace,
-                        "InputWorkspaceIndexType": "SpectrumNumber",
-                        "OutputWorkspace": "__dummy"}
-        mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
-        mask_alg.setProperty("InputWorkspaceIndexSet", list(set(total_spectra)))
-        mask_alg.setProperty("OutputWorkspace", workspace)
-        mask_alg.execute()
-        workspace = mask_alg.getProperty("OutputWorkspace").value
+    ws_spectra_list = workspace.getSpectrumNumbers()
+    # Any gaps in the spectra list we skip over attempting to mask
+    filtered_mask_spectra = [spec for spec in total_spectra if spec in ws_spectra_list]
+
+    if len(filtered_mask_spectra) != len(total_spectra):
+        log = Logger("SANS - Mask Workspace")
+        log.warning("Skipped masking some spectrum numbers that do not exist in the workspace. Re-run"
+                    " with logging set to information for more details")
+        log.information("The following spectrum numbers do not exist in the ws (cropped to component):")
+        for i in list(set(total_spectra) - set(filtered_mask_spectra)):
+            log.information(str(i))
+
+    mask_name = "MaskSpectra"
+    mask_options = {"InputWorkspace": workspace,
+                    "InputWorkspaceIndexType": "SpectrumNumber",
+                    "OutputWorkspace": "__dummy"}
+    mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
+    mask_alg.setProperty("InputWorkspaceIndexSet", list(set(filtered_mask_spectra)))
+    mask_alg.setProperty("OutputWorkspace", workspace)
+    mask_alg.execute()
+    workspace = mask_alg.getProperty("OutputWorkspace").value
     return workspace
 
 

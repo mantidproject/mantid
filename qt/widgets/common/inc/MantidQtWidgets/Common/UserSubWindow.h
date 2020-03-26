@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_USERSUBWINDOW_H_
-#define MANTIDQT_API_USERSUBWINDOW_H_
+#pragma once
 
 /* Used to register classes into the factory. Creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator
@@ -151,5 +150,3 @@ private:
 };
 } // namespace API
 } // namespace MantidQt
-
-#endif // MANTIDQT_API_USERSUBWINDOW_H_

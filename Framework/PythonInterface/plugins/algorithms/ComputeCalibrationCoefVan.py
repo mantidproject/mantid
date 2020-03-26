@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
@@ -40,8 +40,7 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
 
     def summary(self):
         """Return summary."""
-        return ("Calculate coefficients for detector efficiency correction " +
-                "using the Vanadium data.")
+        return ("Calculate coefficients for detector efficiency correction " + "using the Vanadium data.")
 
     def PyInit(self):
         """Declare properties."""
@@ -52,19 +51,17 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                              "Input Vanadium workspace")
         self.declareProperty(ITableWorkspaceProperty("EPPTable", "",
                              direction=Direction.Input),
-                             ("Input EPP table. May be produced by FindEPP " +
-                              "algorithm."))
+                             ("Input EPP table. May be produced by FindEPP " + "algorithm."))
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
                              direction=Direction.Output),
-                             ("Name the workspace that will contain the " +
-                              "calibration coefficients"))
+                             ("Name the workspace that will contain the " + "calibration coefficients"))
         self.declareProperty("Temperature",
                              defaultValue=Property.EMPTY_DBL,
                              validator=FloatBoundedValidator(lower=0.0),
                              direction=Direction.Input,
-                             doc=("Temperature during the experiment (in " +
-                                  "Kelvins) if temperature is not given in the sample logs " +
-                                  "or needs to be overriden."))
+                             doc=("Temperature during the experiment (in "
+                                  + "Kelvins) if temperature is not given in the sample logs "
+                                  + "or needs to be overriden."))
         self.declareProperty("EnableDWF", True, "Enable or disable the Debye-Waller correction.")
 
     def validateInputs(self):
@@ -74,20 +71,17 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         run = inws.getRun()
 
         if not run.hasProperty('wavelength'):
-            issues['VanadiumWorkspace'] = ("Input workspace must have " +
-                                           "wavelength sample log.")
+            issues['VanadiumWorkspace'] = ("Input workspace must have " + "wavelength sample log.")
         else:
             try:
                 float(run.getProperty('wavelength').value)
             except ValueError:
-                issues['VanadiumWorkspace'] = ("Invalid value for " +
-                                               "wavelength sample log. " +
-                                               "Wavelength must be a number.")
+                issues['VanadiumWorkspace'] = ("Invalid value for " + "wavelength sample log. "
+                                               + "Wavelength must be a number.")
 
         table = self.getProperty("EPPTable").value
         if table.rowCount() != inws.getNumberHistograms():
-            issues['EPPTable'] = ("Number of rows in the table must match " +
-                                  "to the input workspace dimension.")
+            issues['EPPTable'] = ("Number of rows in the table must match " + "to the input workspace dimension.")
         # table must have 'PeakCentre' and 'Sigma' columns
         if 'PeakCentre' not in table.getColumnNames():
             issues['EPPTable'] = "EPP Table must have the PeakCentre column."
@@ -108,10 +102,9 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
             temperatureLogName = instrument.getStringParameter(LOG_ENTRY)[0]
         run = self.vanaws.getRun()
         if not run.hasProperty(temperatureLogName):
-            self.log().warning("No Temperature given and the 'temperature' " +
-                               "sample log is not present in " +
-                               self.vanaws.name() +
-                               ". T = {}K is assumed for Debye-Waller factor.".format(self.defaultT))
+            self.log().warning("No Temperature given and the 'temperature' " + "sample log is not present in "
+                               + self.vanaws.name()
+                               + ". T = {}K is assumed for Debye-Waller factor.".format(self.defaultT))
             return self.defaultT
         try:
             temperature = run.getProperty(temperatureLogName)
@@ -121,9 +114,9 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
                 temperature = float(temperature.value)
             return temperature
         except ValueError as err:
-            self.log().warning("Error of getting temperature from the " +
-                               "sample log " + err + ". T = {}K is assumed ".format(self.defaultT) +
-                               "for Debye-Waller factor.")
+            self.log().warning("Error of getting temperature from the "
+                               + "sample log " + err + ". T = {}K is assumed ".format(self.defaultT)
+                               + "for Debye-Waller factor.")
             return self.defaultT
 
     def PyExec(self):

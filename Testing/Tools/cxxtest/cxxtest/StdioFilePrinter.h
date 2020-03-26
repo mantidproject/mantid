@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __cxxtest__StdioFilePrinter_h__
-#define __cxxtest__StdioFilePrinter_h__
+#pragma once
 
 //
 // The StdioFilePrinter is a simple TestListener that
@@ -43,5 +42,3 @@ namespace CxxTest
         };
     };
 }
-
-#endif // __cxxtest__StdioFilePrinter_h__

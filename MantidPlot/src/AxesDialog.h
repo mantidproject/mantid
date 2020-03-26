@@ -27,8 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 // Heavily edited and refactored to fix bugs by Keith Brown
-#ifndef AXESDIALOG_H
-#define AXESDIALOG_H
+#pragma once
 
 #include "AxisDetails.h"
 #include "GridDetails.h"
@@ -126,5 +125,3 @@ private:
   QList<GridDetails *> m_Grid_list;
   bool m_generalModified;
 };
-
-#endif

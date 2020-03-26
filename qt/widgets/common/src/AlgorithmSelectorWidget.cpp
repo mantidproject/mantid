@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AlgorithmSelectorWidget.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -33,7 +33,7 @@ AlgorithmSelectorWidget::AlgorithmSelectorWidget(QWidget *parent)
       m_updateObserver(*this,
                        &AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate),
       m_updateInProgress(false) {
-  QHBoxLayout *buttonLayout = new QHBoxLayout();
+  auto *buttonLayout = new QHBoxLayout();
 
   m_tree = new AlgorithmTreeWidget(this);
   m_tree->setHeaderLabel("Algorithms");
@@ -249,7 +249,7 @@ void AlgorithmTreeWidget::mouseMoveEvent(QMouseEvent *e) {
 
   // Start dragging
   QDrag *drag = new QDrag(this);
-  QMimeData *mimeData = new QMimeData;
+  auto *mimeData = new QMimeData;
 
   mimeData->setText("Algorithm");
   drag->setMimeData(mimeData);

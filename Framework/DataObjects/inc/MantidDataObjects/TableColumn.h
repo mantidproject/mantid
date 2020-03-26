@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_TABLECOLUMN_H_
-#define MANTID_DATAOBJECTS_TABLECOLUMN_H_
+#pragma once
 
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/shared_ptr.hpp>
@@ -583,5 +582,3 @@ public:
            .subscribe<Mantid::DataObjects::TableColumn<DataType>>(#TypeName),  \
        0));                                                                    \
   }
-
-#endif /*MANTID_DATAOBJECTS_TABLECOLUMN_H_*/

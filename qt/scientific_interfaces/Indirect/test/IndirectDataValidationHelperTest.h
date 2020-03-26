@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_INDIRECTDATAVALIDATIONHELPERTEST_H_
-#define MANTID_CUSTOMINTERFACES_INDIRECTDATAVALIDATIONHELPERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -303,5 +302,3 @@ private:
   std::unique_ptr<UserInputValidator> m_uiv;
   std::unique_ptr<MockDataSelector> m_dataSelector;
 };
-
-#endif /* MANTID_CUSTOMINTERFACES_INDIRECTDATAVALIDATIONHELPERTEST_H_ */

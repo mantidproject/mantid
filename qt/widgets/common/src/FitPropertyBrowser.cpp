@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
@@ -301,7 +301,7 @@ void FitPropertyBrowser::initLayout(QWidget *w) { initBasicLayout(w); }
  * @return push botton for the fit menu
  */
 QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
-  QPushButton *btnFit = new QPushButton("Fit");
+  auto *btnFit = new QPushButton("Fit");
   m_tip = new QLabel("", w);
 
   m_fitMapper = new QSignalMapper(this);
@@ -390,11 +390,11 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   connect(m_vectorSizeManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(vectorSizeChanged(QtProperty *)));
 
-  QVBoxLayout *layout = new QVBoxLayout(w);
+  auto *layout = new QVBoxLayout(w);
   layout->setObjectName("vlayout");
-  QGridLayout *buttonsLayout = new QGridLayout();
+  auto *buttonsLayout = new QGridLayout();
 
-  QPushButton *btnDisplay = new QPushButton("Display");
+  auto *btnDisplay = new QPushButton("Display");
   btnDisplay->setObjectName("button_Display");
   QMenu *displayMenu = new QMenu(this);
   displayMenu->setObjectName("menu_Display");
@@ -424,7 +424,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   displayMenu->addAction(m_displayActionQuality);
   btnDisplay->setMenu(displayMenu);
 
-  QPushButton *btnSetup = new QPushButton("Setup");
+  auto *btnSetup = new QPushButton("Setup");
   btnSetup->setObjectName("button_Setup");
   QMenu *setupMenu = new QMenu(this);
   setupMenu->setObjectName("menu_Setup");
@@ -1063,7 +1063,7 @@ void FitPropertyBrowser::deleteFunction() {
   removeFunction(h);
 }
 
-//***********************************************************************************//
+//
 
 // Get the default function name
 std::string FitPropertyBrowser::defaultFunctionType() const {
@@ -1143,7 +1143,7 @@ void FitPropertyBrowser::setWorkspaceName(const QString &wsName) {
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
     }
     if (mws) {
-      size_t wi = static_cast<size_t>(workspaceIndex());
+      auto wi = static_cast<size_t>(workspaceIndex());
       if (wi < mws->getNumberHistograms() && !mws->x(wi).empty()) {
         setStartX(mws->x(wi).front());
         setEndX(mws->x(wi).back());
@@ -2560,7 +2560,7 @@ QtProperty *FitPropertyBrowser::addStringProperty(const QString &name) const {
  */
 void FitPropertyBrowser::setStringPropertyValue(QtProperty *prop,
                                                 const QString &value) const {
-  QtStringPropertyManager *manager =
+  auto *manager =
       dynamic_cast<QtStringPropertyManager *>(prop->propertyManager());
   if (manager) {
     manager->setValue(prop, value);
@@ -2568,7 +2568,7 @@ void FitPropertyBrowser::setStringPropertyValue(QtProperty *prop,
 }
 
 QString FitPropertyBrowser::getStringPropertyValue(QtProperty *prop) const {
-  QtStringPropertyManager *manager =
+  auto *manager =
       dynamic_cast<QtStringPropertyManager *>(prop->propertyManager());
   if (manager)
     return manager->value(prop);
@@ -2861,7 +2861,7 @@ void FitPropertyBrowser::removeLogValue() {
 }
 
 void FitPropertyBrowser::sequentialFit() {
-  SequentialFitDialog *dlg = new SequentialFitDialog(this, m_mantidui);
+  auto *dlg = new SequentialFitDialog(this, m_mantidui);
   std::string wsName = workspaceName();
   if (!wsName.empty() &&
       dlg->addWorkspaces(QStringList(QString::fromStdString(wsName)))) {
@@ -3015,7 +3015,7 @@ QStringList FitPropertyBrowser::getWorkspaceNames() { return m_workspaceNames; }
  * Call MultifitSetupDialog to populate MultiBG function.
  */
 void FitPropertyBrowser::setupMultifit() {
-  MultifitSetupDialog *dlg = new MultifitSetupDialog(this);
+  auto *dlg = new MultifitSetupDialog(this);
   dlg->exec();
   QStringList ties = dlg->getParameterTies();
 

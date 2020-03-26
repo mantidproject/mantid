@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, division, print_function
 
@@ -72,5 +72,5 @@ class TubeCalibFitParams(object):
         return self.automatic
 
     def __str__(self):
-        return ('peaks'+str(self.peaks)+'height'+str(self.height)+'width'+str(self.width)+'margin'+
-                str(self.margin)+'outedge'+str(self.outEdge)+'inedge'+str(self.inEdge)+'edgegrad'+str(self.edgeGrad))
+        return ('peaks'+str(self.peaks)+'height'+str(self.height)+'width'+str(self.width)+'margin'
+                + str(self.margin)+'outedge'+str(self.outEdge)+'inedge'+str(self.inEdge)+'edgegrad'+str(self.edgeGrad))

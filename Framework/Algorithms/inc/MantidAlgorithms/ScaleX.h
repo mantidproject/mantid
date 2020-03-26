@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 #include <boost/function.hpp>
 
@@ -30,7 +31,7 @@ Required Properties:
 @author
 @date 6/23/2011
 */
-class DLLExport ScaleX : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ScaleX : public API::Algorithm {
 public:
   /// Default constructor
   ScaleX();

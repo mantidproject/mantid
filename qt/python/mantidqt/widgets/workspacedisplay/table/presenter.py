@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of mantidqt package.
 from __future__ import absolute_import, division, print_function
@@ -237,7 +237,7 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
     def action_set_as_y(self):
         self._action_set_as(self.model.marked_columns.add_y, 2)
 
-    def action_set_as_y_err(self, related_y_column, label_index):
+    def action_set_as_y_err(self, related_y_column):
         """
 
         :param related_y_column: The real index of the column for which the error is being marked
@@ -250,13 +250,18 @@ class TableWorkspaceDisplay(ObservingPresenter, DataCopier):
             return
 
         try:
-            err_column = ErrorColumn(selected_column, related_y_column, label_index)
+            err_column = ErrorColumn(selected_column, related_y_column)
         except ValueError as e:
             self.view.show_warning(str(e))
             return
 
-        self.model.marked_columns.add_y_err(err_column)
-        self.model.set_column_type(selected_column, 5)
+        removed_items = self.model.marked_columns.add_y_err(err_column)
+        # if a column other than the one the user has just picked as a y err column has been affected,
+        # reset it's type to None
+        for col in removed_items:
+            if col != selected_column:
+                self.model.set_column_type(int(col),0)
+        self.model.set_column_type(selected_column, 5, related_y_column)
         self.update_column_headers()
 
     def action_set_as_none(self):

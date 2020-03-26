@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_COUNTREFLECTIONS_H_
-#define MANTID_CRYSTAL_COUNTREFLECTIONS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/PeakStatisticsTools.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
@@ -22,7 +22,7 @@ namespace Crystal {
   based on point group symmetry and do not depend on intensities. For those
   statistics look at SortHKL.
 */
-class DLLExport CountReflections : public API::Algorithm {
+class MANTID_CRYSTAL_DLL CountReflections : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -44,5 +44,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_COUNTREFLECTIONS_H_ */

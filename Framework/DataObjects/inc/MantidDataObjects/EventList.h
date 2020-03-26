@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_EVENTLIST_H_
-#define MANTID_DATAOBJECTS_EVENTLIST_H_ 1
+#pragma once
 
 #include "MantidAPI/IEventList.h"
 #include "MantidDataObjects/Events.h"
@@ -566,4 +565,3 @@ DLLExport void getEventsFrom(const EventList &el,
 
 } // namespace DataObjects
 } // namespace Mantid
-#endif /// MANTID_DATAOBJECTS_EVENTLIST_H_

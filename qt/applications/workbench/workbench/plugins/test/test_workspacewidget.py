@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
 #
@@ -81,6 +81,7 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
     def test_plot_with_plot_colorfill(self,mock_plot_colorfill):
         self.ws_widget._do_plot_colorfill([self.ws_names[0]])
         mock_plot_colorfill.assert_called_once_with(mock.ANY)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_HISTOGRAMMATH_H_
-#define MANTID_HISTOGRAMDATA_HISTOGRAMMATH_H_
+#pragma once
 
 #include "MantidHistogramData/DllConfig.h"
 
@@ -48,5 +47,3 @@ MANTID_HISTOGRAMDATA_DLL Histogram operator/(Histogram histogram,
 
 } // namespace HistogramData
 } // namespace Mantid
-
-#endif /* MANTID_HISTOGRAMDATA_HISTOGRAMMATH_H_ */

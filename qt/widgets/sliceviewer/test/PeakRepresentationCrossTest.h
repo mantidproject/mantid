@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
-#define SLICE_VIEWER_PEAK_REPRESENTATION_CROSS_TEST_H_
+#pragma once
 
 #include "MantidQtWidgets/SliceViewer/PeakRepresentationCross.h"
 #include "MockObjects.h"
@@ -42,7 +41,7 @@ public:
     PeakRepresentationCross peak(origin, maxZ, minZ);
 
     /* Provide a mocked transform */
-    MockPeakTransform *mockTransform = new MockPeakTransform;
+    auto *mockTransform = new MockPeakTransform;
     EXPECT_CALL(*mockTransform, transform(_))
         .Times(1)
         .WillOnce(Return(Mantid::Kernel::V3D(0, 0, 0)));
@@ -279,5 +278,3 @@ public:
     }
   }
 };
-
-#endif

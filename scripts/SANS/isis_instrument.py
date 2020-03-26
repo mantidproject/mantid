@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
 from __future__ import (absolute_import, division, print_function)
@@ -1226,8 +1226,8 @@ class SANS2D(ISISInstrument):
         # - frontDet.side_corr*math.sin(RotRadians) into zshift.
         # (Note we may yet need to introduce further corrections for parallax errors in the detectors, which may be wavelength dependent!)
         xshift = (REAR_DET_X + rearDet.x_corr - frontDet.x_corr - FRONT_DET_X - frontDet.side_corr * (
-            1 - math.cos(RotRadians)) + (self.FRONT_DET_RADIUS + frontDet.radius_corr) *
-                  math.sin(RotRadians)) / 1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
+            1 - math.cos(RotRadians)) + (self.FRONT_DET_RADIUS + frontDet.radius_corr)
+                  * math.sin(RotRadians)) / 1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
         yshift = (frontDet.y_corr / 1000. - ybeam)
         # Note don't understand the comment below (9/1/12 these are comments from the original python code,
         # you may remove them if you like!)
@@ -1431,8 +1431,7 @@ class SANS2D(ISISInstrument):
         for i in range(0, len(existing_values)):
             if math.fabs(existing_values[i] - new_values[i]) > 5e-04:
                 sanslog.warning('values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' + str(
-                    existing_values[i]) +
-                                ', can value is ' + str(new_values[i]))
+                    existing_values[i]) + ', can value is ' + str(new_values[i]))
                 errors += 1
 
                 self.append_marked(corr_names[i])
@@ -1654,8 +1653,7 @@ class LARMOR(ISISInstrument):
         for i in range(0, len(existing_values)):
             if math.fabs(existing_values[i] - new_values[i]) > 5e-04:
                 sanslog.warning('values differ between sample and can runs: Sample ' + corr_names[i] + ' = ' + str(
-                    existing_values[i]) +
-                                ', can value is ' + str(new_values[i]))
+                    existing_values[i]) + ', can value is ' + str(new_values[i]))
                 errors += 1
 
                 self.append_marked(corr_names[i])

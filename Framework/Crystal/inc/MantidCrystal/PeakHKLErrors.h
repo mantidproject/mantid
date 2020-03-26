@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * PeakHKLErrors.h
@@ -11,13 +11,13 @@
  *      Author: ruth
  */
 
-#ifndef PEAKHKLERRORS_H_
-#define PEAKHKLERRORS_H_
+#pragma once
 #include "MantidKernel/System.h"
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
@@ -31,8 +31,8 @@ namespace Crystal {
   @author Ruth Mikkelson, SNS,ORNL
   @date 01/26/2013
  */
-class DLLExport PeakHKLErrors : public API::ParamFunction,
-                                public API::IFunction1D {
+class MANTID_CRYSTAL_DLL PeakHKLErrors : public API::ParamFunction,
+                                         public API::IFunction1D {
 public:
   PeakHKLErrors();
 
@@ -161,5 +161,3 @@ private:
 };
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* PEAKHKLERRORS_H_ */

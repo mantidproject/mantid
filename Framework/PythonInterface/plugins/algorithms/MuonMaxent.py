@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
@@ -361,13 +361,8 @@ class MuonMaxent(PythonAlgorithm):
         OuterIter = self.getProperty("OuterIterations").value
         InnerIter = self.getProperty("InnerIterations").value
         # progress
-        prog = Progress(
-            self,
-            start=0.0,
-            end=1.0,
-            nreports=OuterIter *
-            InnerIter)
-        #
+        prog = Progress(self, start=0.0, end=1.0, nreports=OuterIter * InnerIter)
+
         tlast = self.getProperty("LastGoodTime").value
         ilast = min(
             rg0 + int(math.floor((tlast - ws.readX(0)[rg0]) / RUNDATA_res)),
@@ -463,13 +458,7 @@ class MuonMaxent(PythonAlgorithm):
             OuterIter, InnerIter, mylog, prog, phaseconvWS, TZERO_fine, deadDetectors)
         #
         fperchan = 1. / (RUNDATA_res * float(POINTS_npts) * 2.)
-        fchan = np.linspace(
-            0.0,
-            MAXPAGE_n *
-            fperchan /
-            135.5e-4,
-            MAXPAGE_n,
-            endpoint=False)
+        fchan = np.linspace(0.0, MAXPAGE_n * fperchan / 135.5e-4, MAXPAGE_n, endpoint=False)
         # write results! Frequency spectra
         outSpec = WorkspaceFactory.create(ws,NVectors=1,XLength=MAXPAGE_n,YLength=MAXPAGE_n)
         outSpec.dataX(0)[:] = fchan
@@ -542,4 +531,6 @@ class MuonMaxent(PythonAlgorithm):
         # final converged Factor
         self.setProperty("Factor", FAC_factor)
         # final chisquared?
+
+
 AlgorithmFactory.subscribe(MuonMaxent)

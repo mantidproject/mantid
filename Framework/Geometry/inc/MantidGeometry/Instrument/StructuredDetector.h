@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef STRUCTUREDDETECTOR_H
-#define STRUCTUREDDETECTOR_H
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IObjComponent.h"
@@ -182,4 +181,3 @@ using StructuredDetector_const_sptr =
     boost::shared_ptr<const StructuredDetector>;
 } // namespace Geometry
 } // namespace Mantid
-#endif // STRUCTUREDDETECTOR_H

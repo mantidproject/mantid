@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS_H_
-#define MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -43,7 +42,7 @@ namespace Algorithms {
   instrument
   parameters. Its output will be used by RefinePowderInstrumentParameters().
 */
-class DLLExport FitPowderDiffPeaks : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL FitPowderDiffPeaks : public API::Algorithm {
 public:
   FitPowderDiffPeaks();
 
@@ -435,5 +434,3 @@ std::string getFunctionInfo(API::IFunction_sptr function);
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_FITPOWDERDIFFPEAKS_H_ */

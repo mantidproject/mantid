@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROPERTYWITHVALUETEST_H_
-#define PROPERTYWITHVALUETEST_H_
+#pragma once
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DataItem.h"
@@ -776,5 +775,3 @@ private:
   PropertyWithValue<int64_t> *lProp;
   PropertyWithValue<OptionalBool> *bProp;
 };
-
-#endif /*PROPERTYWITHVALUETEST_H_*/

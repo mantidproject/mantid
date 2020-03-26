@@ -1,10 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+# Mantid Repository : https://github.com/mantidproject/mantid
 # pylint: disable=no-init
 from __future__ import (absolute_import, division, print_function)
 
@@ -239,10 +239,10 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty('RunNumbers', '', 'Sample run numbers')
         self.declareProperty('DoIndividual', False, 'Do each run individually')
         self.declareProperty('ExcludeTimeSegment', '',
-                             'Exclude a contigous time segment; ' +
-                             'Examples: "71546:0-60" filter run 71546 from ' +
-                             'start to 60 seconds, "71546:300-600", ' +
-                             '"71546:120-end" from 120s to the end of the run')
+                             'Exclude a contigous time segment; '
+                             + 'Examples: "71546:0-60" filter run 71546 from '
+                             + 'start to 60 seconds, "71546:300-600", '
+                             + '"71546:120-end" from 120s to the end of the run')
         help_doc = """Only retain events occurring within a time segment.
 Examples: 71546:0-3600 only retains events from the first hour of run 71546.
 71546:3600-7200 retain only the second hour. 71546:7200-end retain events after
@@ -273,8 +273,8 @@ the first two hours"""
         self.setPropertyGroup('FluxNormalizationType',
                               title_flux_normalization)
 
-        self.declareProperty('NormalizeToFirst', False, 'Normalize spectra ' +
-                             'to intensity of spectrum with lowest Q?')
+        self.declareProperty('NormalizeToFirst', False, 'Normalize spectra '
+                             + 'to intensity of spectrum with lowest Q?')
         #
         # Properties affected by the reflection selected
         #
@@ -422,8 +422,7 @@ the first two hours"""
         norm_runs = self.getProperty('NormRunNumbers').value
         if self._doNorm and bool(norm_runs):
             self._normalizationType = self.getProperty('NormalizationType').value
-            self.log().information('Divide by Vanadium with normalization' +
-                                   self._normalizationType)
+            self.log().information('Divide by Vanadium with normalization' + self._normalizationType)
 
             # Following steps common to all types of Vanadium normalization
 

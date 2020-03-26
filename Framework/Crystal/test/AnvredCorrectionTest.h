@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_AnvredCorrectionTEST_H_
-#define MANTID_CRYSTAL_AnvredCorrectionTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidCrystal/AnvredCorrection.h"
@@ -156,5 +155,3 @@ private:
   const bool performance = true;
   EventWorkspace_sptr workspace;
 };
-
-#endif /* MANTID_CRYSTAL_AnvredCorrectionTEST_H_ */

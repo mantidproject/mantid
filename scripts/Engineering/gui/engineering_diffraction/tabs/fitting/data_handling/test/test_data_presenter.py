@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 import unittest
 
 from mantid.py3compat import mock
@@ -146,7 +145,7 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         self.assertEqual({"new": "ws1", "name2": "ws2"}, model_dict)
         self.assertTrue("new" in self.presenter.row_numbers)
-        self.assertFalse("name1" is self.presenter.row_numbers)
+        self.assertFalse("name1" == self.presenter.row_numbers)
         self.assertEqual(1, self.presenter.all_plots_removed_notifier.notify_subscribers.call_count)
 
     def test_rename_workspace_not_tracked(self):

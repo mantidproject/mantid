@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-instance-attributes
 
@@ -624,12 +624,12 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     def _sample_cross_section_calc(self, sam_material, waves, theta, alpha, stha, salpha, sst, ssr):
         # Sample cross section (value for each of the wavelengths and for E = Efixed)
-        sample_x_section = (sam_material.totalScatterXSection() +
-                            sam_material.absorbXSection() * waves / self.TABULATED_WAVELENGTH) * self._sample_density
+        sample_x_section = (sam_material.totalScatterXSection()
+                            + sam_material.absorbXSection() * waves / self.TABULATED_WAVELENGTH) * self._sample_density
 
         if self._efixed > 0:
-            sample_x_section_efixed = (sam_material.totalScatterXSection() +
-                                       sam_material.absorbXSection() * np.sqrt(self.TABULATED_ENERGY / self._efixed)) * self._sample_density
+            sample_x_section_efixed = (sam_material.totalScatterXSection()  + sam_material.absorbXSection()
+                                       * np.sqrt(self.TABULATED_ENERGY / self._efixed)) * self._sample_density
         elif self._emode == 'Elastic':
             sample_x_section_efixed = 0
 
@@ -658,12 +658,12 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         if self._has_can_front_in or self._has_can_back_in:
             # Calculate can cross section (value for each of the wavelengths and for E = Efixed)
-            can_x_section = (can_material.totalScatterXSection() +
-                             can_material.absorbXSection() * wavelengths / self.TABULATED_WAVELENGTH) * self._can_density
+            can_x_section = (can_material.totalScatterXSection()
+                             + can_material.absorbXSection() * wavelengths / self.TABULATED_WAVELENGTH) * self._can_density
 
             if self._efixed > 0:
-                can_x_section_efixed = (can_material.totalScatterXSection() +
-                                        can_material.absorbXSection() * np.sqrt(self.TABULATED_ENERGY / self._efixed)) * self._can_density
+                can_x_section_efixed = (can_material.totalScatterXSection()
+                                        + can_material.absorbXSection() * np.sqrt(self.TABULATED_ENERGY / self._efixed)) * self._can_density
             elif self._emode == 'Elastic':
                 can_x_section_efixed = 0
 
@@ -711,8 +711,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             acc = (self._can_front_thickness * acc1 * np.exp(-kf_c2) + self._can_back_thickness * acc2 * np.exp(-ki_c1)) \
                   / (self._can_front_thickness + self._can_back_thickness)
             if self._has_sample_in:
-                acsc = (self._can_front_thickness * acc1 * np.exp(-kf_s - kf_c2) +
-                        self._can_back_thickness * acc2 * np.exp(-ki_c1 - ki_s)) / \
+                acsc = (self._can_front_thickness * acc1 * np.exp(-kf_s - kf_c2)
+                        + self._can_back_thickness * acc2 * np.exp(-ki_c1 - ki_s)) / \
                        (self._can_front_thickness + self._can_back_thickness)
             else:
                 acsc = acc

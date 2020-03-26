@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * EventWorkspaceTest.h
@@ -11,8 +11,7 @@
  *      Author: Janik Zikovsky
  */
 
-#ifndef EVENTWORKSPACETEST_H_
-#define EVENTWORKSPACETEST_H_
+#pragma once
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -844,5 +843,3 @@ public:
     static_cast<void>(new (memory) EventList());
   }
 };
-
-#endif /* EVENTWORKSPACETEST_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,7 +10,7 @@
 #include "MantidAPI/IEventWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -19,7 +19,7 @@ namespace Algorithms {
 /** RebinByTimeBase : Algorithm base class for algorithms performing rebinning
  by an absolute time axis.
  */
-class DLLExport RebinByTimeBase : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RebinByTimeBase : public API::Algorithm {
 public:
 private:
   /// Initialization method

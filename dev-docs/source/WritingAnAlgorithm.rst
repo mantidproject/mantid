@@ -39,8 +39,7 @@ boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorit
 
 .. code-block:: cpp
 
-    #ifndef MYALG_H_
-    #define MYALG_H_
+    #pragma once
     
     #include "MantidAPI/Algorithm.h"
     
@@ -64,8 +63,6 @@ boilerplate C++ code (changing each occurrence of 'MyAlg' to your chosen algorit
       /// Execution code
       void exec();
     };
- 
-    #endif /*MYALG_H_*/
 
 **Source file (MyAlg.cpp)**:
 

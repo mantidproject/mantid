@@ -14,6 +14,10 @@ Powder Diffraction
 
 Engineering Diffraction
 -----------------------
+Improvements
+^^^^^^^^^^^^
+- TOPAS files (`.abc`) have replaced the `.dat` files generated when focusing using the GUI.
+- Focusing with the GUI will now generate a CSV containing the averaged values of all numerical sample logs.
 
 Single Crystal Diffraction
 --------------------------

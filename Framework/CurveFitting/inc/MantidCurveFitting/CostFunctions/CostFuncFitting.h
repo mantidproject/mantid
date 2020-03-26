@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_COSTFUNCFITTING_H_
-#define MANTID_CURVEFITTING_COSTFUNCFITTING_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/GSLVector.h"
 
@@ -26,7 +26,7 @@ namespace CostFunctions {
     @author Roman Tolchenov, Tessella plc
     @date 10/04/2012
 */
-class DLLExport CostFuncFitting : public API::ICostFunction {
+class MANTID_CURVEFITTING_DLL CostFuncFitting : public API::ICostFunction {
 public:
   CostFuncFitting();
   /// Number of parameters
@@ -142,5 +142,3 @@ protected:
 } // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_COSTFUNCFITTING_H_*/

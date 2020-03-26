@@ -25,8 +25,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef COLORMAPEDITOR_H
-#define COLORMAPEDITOR_H
+#pragma once
 
 #include <QLocale>
 #include <QWidget>
@@ -94,5 +93,3 @@ private:
   //! Precision used to display level values
   int d_precision;
 };
-
-#endif

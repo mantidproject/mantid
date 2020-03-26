@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Minus.h"
 #include "MantidKernel/VectorHelper.h"
@@ -22,7 +22,7 @@ void Minus::performBinaryOperation(const HistogramData::Histogram &lhs,
                                    HistogramData::HistogramY &YOut,
                                    HistogramData::HistogramE &EOut) {
   std::transform(lhs.y().begin(), lhs.y().end(), rhs.y().begin(), YOut.begin(),
-                 std::minus<double>());
+                 std::minus<>());
   std::transform(lhs.e().begin(), lhs.e().end(), rhs.e().begin(), EOut.begin(),
                  VectorHelper::SumGaussError<double>());
 }
@@ -33,12 +33,13 @@ void Minus::performBinaryOperation(const HistogramData::Histogram &lhs,
                                    HistogramData::HistogramE &EOut) {
   using std::placeholders::_1;
   std::transform(lhs.y().begin(), lhs.y().end(), YOut.begin(),
-                 std::bind(std::minus<double>(), _1, rhsY));
+                 [rhsY](double l) { return l - rhsY; });
   // Only do E if non-zero, otherwise just copy
-  if (rhsE != 0)
+  if (rhsE != 0) {
+    double rhsE2 = rhsE * rhsE;
     std::transform(lhs.e().begin(), lhs.e().end(), EOut.begin(),
-                   std::bind(VectorHelper::SumGaussError<double>(), _1, rhsE));
-  else
+                   [rhsE2](double l) { return std::sqrt(l * l + rhsE2); });
+  } else
     EOut = lhs.e();
 }
 

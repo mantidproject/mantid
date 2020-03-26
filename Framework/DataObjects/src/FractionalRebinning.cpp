@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/FractionalRebinning.h"
 
@@ -608,7 +608,7 @@ void rebinToFractionalOutput(const Quadrilateral &inputQ,
                              RebinnedOutput &outputWS,
                              const std::vector<double> &verticalAxis,
                              const RebinnedOutput_const_sptr &inputRB) {
-  const auto &inX = inputWS->x(i);
+  const auto &inX = inputWS->binEdges(i);
   const auto &inY = inputWS->y(i);
   const auto &inE = inputWS->e(i);
   double signal = inY[j];

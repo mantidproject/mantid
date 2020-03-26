@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import absolute_import, print_function
 
@@ -10,7 +10,6 @@ from qtpy import QtWidgets
 from copy import deepcopy
 import matplotlib as mpl
 from six import iteritems
-import sys
 
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
@@ -46,9 +45,6 @@ offset = 0.9
 def is_string(value):
     if isinstance(value, str):
         return True
-    elif sys.version_info[:2] < (3, 0):
-        if isinstance(value, unicode):
-            return True
 
     return False
 

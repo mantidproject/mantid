@@ -2,14 +2,22 @@
 MantidWorkbench Changes
 =======================
 
+
 .. contents:: Table of Contents
    :local:
 
+.. figure:: ../../images/ArtWaterfallN1.png
+   :align: right
+
+   *Waterfall Plots new to Workbench*
+
 New
 ###
-- Waterfall Plots
+
+- *Waterfall Plots* with options for spacing and filling curves.
+- Workbench has many more options in the :ref:`settings menu <01_save_settings>`, including setting defaults for plotting and fitting!
 - Mantid Workbench can now load all of the workspaces from projects saved from Mantidplot.  Graphs and interface values are not imported from the project.
-- Added a compatibility implementation of plotSpectrum and plotBin for python scripts in Workbench, all of the previous arguments are supported with the exception of distributionwhich will be ignored. For example the following commands are supported.
+- Added a compatibility implementation of plotSpectrum and plotBin for python scripts in Workbench, all of the previous arguments are supported with the exception of distribution, which will be ignored. For example the following commands are supported.
 
 .. code-block:: python
 
@@ -26,11 +34,11 @@ New
 	plotBin(ws ,1,error_bars=True)
 
 	#Multi line plots
-	plotSpectrum([ws ,ws2],1)
-	plotBin([ws ,ws2],1)
+	plotSpectrum([ws,ws2],1)
+	plotBin([ws,ws2],1)
 	plotSpectrum([ws ,ws2],[1,2,3])
 	plotBin([ws ,ws2],[1,2,3])
-	plotSpectrum(["ws ","ws2"],[1,2,3])
+	plotSpectrum(["ws","ws2"],[1,2,3])
 
 	#plotting with spectra numbers
 	plotSpectrum(ws,spectrum_nums=2,error_bars=True)
@@ -38,81 +46,126 @@ New
 	plotSpectrum([ws,ws2],spectrum_nums=list(range(2,10)))
 
 	# add a curve to an existing plot
-	plot1 = plotSpectrum(ws ,1,error_bars=True)
-	plot1 = plotSpectrum(ws ,error_bars=True,window=plot1)
+	plot1 = plotSpectrum(ws,1,error_bars=True)
+	plot1 = plotSpectrum(ws,1,error_bars=True,window=plot1)
 
 	# clear an existing plot use that window to plot
-	plot2 = plotSpectrum(ws ,1,error_bars=True)
+	plot2 = plotSpectrum(ws,1,error_bars=True)
 	plot2 = plotSpectrum(ws2,1,error_bars=True,window=plot2, clearWindow = True)
 
 	# plot as points not lines
-	plotSpectrum(ws ,1,error_bars=True,type=1)
-	plotBin(ws ,1,type=1)
+	plotSpectrum(ws,1,error_bars=True,type=1)
+	plotBin(ws,1,type=1)
 
 	# plot as waterfall graphs
 	plotSpectrum(["ws","ws2"],[1,2,3],waterfall=True)
 
-
-Improvements
-############
 
 .. figure:: ../../images/Notification_error.png
    :class: screenshot
    :width: 600px
    :align: right
 
-- If you have ever found it hard to spot when errors appear in the Messages window, and perhaps miss them if there are lots of graphs on the screen, then you will like this.  We have added system notifications when Mantid enounters an error, and directs you to look at the Messages window for details.  You can enable or disable these notifications from the File->Settings window.
+   *Error Notification Service*
+
+Improvements
+############
+
+**General**
+
+- The way scripts are parsed and executed has been vastly improved, solving issues related to the progress arrow, blank lines after a colon and tabs in strings.
+- Progress reporting for scripts has been vastly improved and now reports at the line level.
+- Toggle Whitespace in the editor now shows line endings as well as spaces and tabs
+
+- It is easy to miss errors in the Messages box (e.g. many plots on the screen). Now there is an *Error Notification service* when Mantid encounters an error, directing you to look at the Messages box for details. This can be dis/enabled in File > Settings > General > "Use notifications for important events".
 
 .. figure:: ../../images/Notifications_settings.png
    :class: screenshot
    :width: 500px
    :align: left
 
-- You can now save Table Workspaces to Ascii using the `SaveAscii <algm-SaveAscii>` algorithm, and the Ascii Save option on the workspaces toolbox.
+   *Toggle Error Notification*
+
+- Most changes in the settings dialog now take place immediately, no longer needing a restart, such as changing default instrument, hiding categories of algorithms and interfaces, or choosing whether to see invisible workspaces.
+
+**Fitting**
+
 - Fit functions can now be put into nested categories and into multiple categories.
-- Normalization options have been added to 2d plots and sliceviewer.
-- An exclude property has been added to the fit property browser
-- The images tab in figure options no longer forces the max value to be greater than the min value.
-- The algorithm progress details dialog now fills immediately with all running algorithms rather than waiting for a progress update for the algorithm to appear.
-- All the relevant settings from manitdplot have been added to workbench
-- Double clicking on a workspace that only has a single bin of data (for example from a constant wavelength source) will now plot that bin, also for single bin workspaces a plot bin option has been added to the right click plot menu of the workspace.
-- Default values for algorithm properties now appear as placeholder (greyed-out) text on custm algorithm dialogs.
-- The context menu for WorkspaceGroups now contains plotting options so you can plot all of the workspaces in the group.
-- Most changes in the settings dialog now take place immediately, no longer needing a restart, such as hiding algorithm categories, interfaces or choosing wether to see invisible workspaces.
-- A warning now appears if you attempt to plot more than ten spectra.
-- We have limited the maximum rate of algorithm progress updates to the progress bar to 1000/second.  This has resulted in a workbench completing certain intensive python scripts 4 times faster.
-- Algorithm dialogs will now use the selected workspace as the InputWorkspace when running an algorithm from the algorithms toolbox, as MantidPlot did.
-- Toggle Whitespace in the editor now shows line endings as well as spaces and tabs
-- The Save menu action in the workspaces toolbox to save using version 1 of the SaveAscii algorithm has been removed as no one was using it and it only added confusion. The option to save using the most recent version of SaveASCII is still available.
+- Now able to exclude regions of data from a fit, within the fit property browser.
 - You can now search for functions when doing fits.
 - A help button has been added to the fitting add function dialog.
-- The progress reporting for scripts has been vastly improved and now reports at the line level.
-- Warnings from the Python ``warnings`` module are now show as warnings and not errors in the log display.
+
+**Plotting**
+
+- Figure options>Images tab no longer requires Max > Min value. If Min > Max, they will be swapped!
+- A warning now appears if you attempt to plot more than ten spectra.
+- Normalization options have been added to 2d plots and sliceviewer.
+- Double clicking on a workspace that only has a single bin of data (for example from a constant wavelength source) will now plot that bin, also for single bin workspaces a plot bin option has been added to the right click plot menu of the workspace.
+- The context menu for WorkspaceGroups now contains plotting options so you can plot all of the workspaces in the group.
+
+.. figure:: ../../images/SaveButton.png
+   :align: right
+
+   *Save drop-down menu*
+
+**Algorithms**
+
+- Table Workspaces can be saved to Ascii using the :ref:`SaveAscii <algm-SaveAscii>` algorithm, and the *Save > Ascii drop-down* option above the Workspaces Toolbox.
+- The *Save drop-down* menu in the workspaces toolbox no longer has the old SaveAscii (version 1) as no one was using it and it only added confusion. The most recent version of SaveASCII is still available.
+- The algorithm progress details dialog now fills immediately with all running algorithms rather than waiting for a progress update for the algorithm to appear.
+- Algorithm dialogs will now use the selected workspace as the InputWorkspace when running an algorithm from the algorithms toolbox.
+
+.. figure:: ../../images/LiveDataCancel.png
+   :align: right
+
+   *Live Data Details - easier to cancel*
+
+- We have limited the maximum rate of algorithm progress updates to the progress bar to 1000/second.  This has resulted in a workbench completing certain intensive python scripts 4 times faster.
+- Default values for algorithm properties now appear as greyed-out text on custom algorithm dialogs.
+- *Live data sessions* can be more easily cancelled, now that MonitorLiveData appears promptly in the *algorithm details* window.
+
 
 Bugfixes
 ########
-- Fixed an issue with Workspace History where unrolling consecutive workflow algorithms would result in only one of the algorithms being unrolled.
-- Workbench now saves python files properly on windows and does not double up on line feed characters.
-- Fixed a couple of errors in the python scripts generated from plots for newer versions of Matplotlib.
-- Colorbar scale no longer vanish on colorfill plots with a logarithmic scale
-- Figure options no longer causes a crash when using 2d plots created from a script.
-- You can now execute algorithms with multiple versions by double clicking on them in the algorithm toolbox, this will now execute them rather than opening the tree to show previous versions.  You can still click on the arrow to see and execute previous versions.
-- Running an algorithm that reduces the number of spectra on an active plot (eg SumSpectra) no longer causes an error
-- Fix crash when loading a script with syntax errors
-- The Show Instruments right click menu option is now disabled for workspaces that have had their spectrum axis converted to another axis using :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`.  Once this axis has been converetd the workspace loses it's link between the data values and the detectors they were recorded on so we cannot display it in the instrument view.
-- MonitorLiveData now appears promptly in the algorithm details window, allowing live data sessions to be cancelled.
+
+**General**
+
+- Scripts with syntax errors can now be opened.
+- Scripts are saved properly on windows (no longer double line spaced).
+- Scripts generated from plots now work for newer versions of Matplotlib.
+- The Show Instrument right click menu option is now disabled for workspaces that have had their spectrum axis converted to another axis using :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis>`. Once this axis has been converted the workspace loses its link between the data values and the detectors they were recorded on so we cannot display it in the instrument view.
+- Fixed a bug on the instrument viewer where changing projection and back to Full 3D would display the wrong point of view.
+- Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters.
+- Warnings from the Python ``warnings`` module are now show as warnings and not errors in the log display.
+- Colorbar scale on Instrument view shows labelled ticks when the range is within an order of magnitude, in the SymmetricLog10 setting.
+
+**Plotting**
+
+- Overplots will be normalized by bin width if they are overplotting a curve from a distribution workspace.
+- Colorbar scale shows helpful minor ticks and no longer vanishes on colorfill plots with a logarithmic scale.
+- Axes limits of a plot no longer automatically rescale when errorbars are on/off.
+- Figure options no longer causes a crash for 2d plots created from a script.
+- Running an algorithm that reduces the number of spectra on an active plot (eg SumSpectra) no longer causes an error.
 - Figure options on bin plots open without throwing an error.
-- The help button in fitting now finds the relevant page.
-- Fixed an issue with changing normalisation on single spectra plots done from a script
-- Fixed an issue where fitting a distribution workspace was normalised twice.
-- Fixed an issue where adding a Bk2BkExpConvPV function to the fit browser caused a crash
-- Overplots will be normalized by bin width if they are overplotting a curve from a workspace which is a distribution.
-- Several bugs in the way Python scripts were parsed and executed, including blank lines after a colon and tabs in strings, have been fixed.
-- Axes limits of a plot no longer automatically rescale when errorbars are on/off 
-- Axes editor menu now reads the grid visibility of the plot (i.e. the grid checkbox will always show the current grid visibility when an axis is double clicked)
-- Fixed a crash in the TOFConverter interface when leaving input fields blank or using invalid characters. 
-- Fixed bug that caused an error if a MDHistoWorkspace was plotted and a user attempted to open a context menu.
+- Right-click menu on the plot of an MDHistoWorkspace can be opened without an error.
+- Fixed an uncaught exception when plotting logs on single spectrum workspaces.
+- Fixed an issue with changing normalisation on single spectra plots done from a script.
+- Axes editor menu now reads the state of the grids on the plot.
 - Fixed a bug which caused graphic scaling issues when the double-click menu was used to set an axis as log-scaled.
-- Fixed a bug where the colorbar in the instrument view would sometimes have no markers if the scale was set to SymmetricLog10.
+- The mechanism to keep plots on top of the main Workbench window has been changed because some window managers would not release focus to their script editor rendering it useless.
+  This has the effect on some Linux environments of removing the ability to minimize the figure. The control within the Plots toolbox still allows visibility to be toggled on/off if required.
+- There is now appropriate protection around setting the colorbar scale to logarithmic while the min and/or max value is negative.
+- Toggling error bars on a line with markers no longer causes an unhandled exception.
+
+**Fitting**
+
+- Fitting a distribution workspace is normalised correctly.
+- The help button in fitting now finds the page for the relevant function.
+- Fixed an issue where adding a Bk2BkExpConvPV function to the fit browser caused a crash
+
+**Algorithms**
+
+- In the Algorithm Toolbox, double-clicking on an algorithm always executes the algorithm. In the case, where previous versions of an algorithm are still available, this would show the other versions. You can still click on the triangle to see and execute previous versions.
+- Unrolling consecutive workflow algorithms in Workspace History correctly includes every algorithm.
 
 :ref:`Release 5.0.0 <v5.0.0>`

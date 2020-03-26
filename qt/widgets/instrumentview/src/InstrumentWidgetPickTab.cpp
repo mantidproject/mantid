@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -250,7 +250,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_peakAlign->setIcon(QIcon(":/PickTools/selection-peak-plane.png"));
   m_peakAlign->setToolTip("Crystal peak alignment tool");
 
-  QGridLayout *toolBox = new QGridLayout();
+  auto *toolBox = new QGridLayout();
   toolBox->addWidget(m_zoom, 0, 0);
   toolBox->addWidget(m_edit, 0, 1);
   toolBox->addWidget(m_ellipse, 0, 2);
@@ -589,7 +589,7 @@ void InstrumentWidgetPickTab::initSurface() {
           SLOT(updatePlotMultipleDetectors()));
   connect(surface, SIGNAL(shapesRemoved()), this,
           SLOT(updatePlotMultipleDetectors()));
-  Projection3D *p3d = dynamic_cast<Projection3D *>(surface);
+  auto *p3d = dynamic_cast<Projection3D *>(surface);
   if (p3d) {
     connect(p3d, SIGNAL(finishedMove()), this,
             SLOT(updatePlotMultipleDetectors()));

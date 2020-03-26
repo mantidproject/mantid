@@ -1,5 +1,4 @@
-#ifndef __cxxtest__XmlPrinter_h__
-#define __cxxtest__XmlPrinter_h__
+#pragma once
 
 //
 // The XmlPrinter is a simple TestListener that
@@ -54,8 +53,6 @@ namespace CxxTest
         };
     };
 }
-
-#endif // __cxxtest__XmlPrinter_h__
 
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government

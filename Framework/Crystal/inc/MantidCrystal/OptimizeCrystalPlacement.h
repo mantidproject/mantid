@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * OptimizeCrystalPlacement.h
@@ -11,11 +11,10 @@
  *      Author: ruth
  */
 
-#ifndef OPTIMIZECRYSTALPLACEMENT_H_
-#define OPTIMIZECRYSTALPLACEMENT_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -31,7 +30,7 @@ orientation .
 @author Ruth Mikkelson, SNS,ORNL
 @date 01/26/2013
 */
-class DLLExport OptimizeCrystalPlacement : public API::Algorithm {
+class MANTID_CRYSTAL_DLL OptimizeCrystalPlacement : public API::Algorithm {
 public:
   const std::string name() const override {
     return "OptimizeCrystalPlacement";
@@ -55,5 +54,3 @@ private:
 };
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* OPTIMIZECRYSTALPLACEMENT_H_ */

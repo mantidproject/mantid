@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -24,13 +24,17 @@ MPL_BACKEND = 'module://workbench.plotting.backend_workbench'
 
 # Our style defaults
 DEFAULT_RCPARAMS = {
-    'figure.facecolor':  'w',
+    'figure.facecolor': 'w',
     'figure.max_open_warning': 200
 }
 
 
 def initialize_matplotlib():
-    """Configures our defaults"""
+    """
+    Configure our defaults for matplotlib.
+    :param figure_window_parent: An QWidget that will become the parent of any figure window. Can be None
+    :param figure_window_flags: A Qt.WindowFlags enumeration defining the window flags for a figure window
+    """
     # Replace vanilla Gcf with our custom manager
     setattr(_pylab_helpers, 'Gcf', GlobalFigureManager)
     # Set our defaults

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef I_MD_DIMENSION_H
-#define I_MD_DIMENSION_H
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
@@ -112,4 +111,3 @@ using VecIMDDimension_const_sptr = std::vector<IMDDimension_const_sptr>;
 using VecIMDDimension_sptr = std::vector<IMDDimension_sptr>;
 } // namespace Geometry
 } // namespace Mantid
-#endif

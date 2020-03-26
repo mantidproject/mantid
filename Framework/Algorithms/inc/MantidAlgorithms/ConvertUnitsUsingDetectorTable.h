@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAlgorithms/ConvertUnits.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
@@ -19,7 +19,7 @@ namespace Algorithms {
   values
   rather than those given by the instrument geometry.
 */
-class DLLExport ConvertUnitsUsingDetectorTable
+class MANTID_ALGORITHMS_DLL ConvertUnitsUsingDetectorTable
     : public ConvertUnits,
       public API::DeprecatedAlgorithm {
 public:

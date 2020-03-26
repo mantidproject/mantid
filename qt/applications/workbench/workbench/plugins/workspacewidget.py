@@ -1,9 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-#    This file is part of the mantid workbench.
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 #
@@ -231,7 +230,7 @@ class WorkspaceWidget(PluginWidget):
             TableWorkspaceDisplay.supports(ws)
             self._do_show_data([name])
         except ValueError:
-            if ws.blocksize() == 1:
+            if hasattr(ws, 'blocksize') and ws.blocksize() == 1:
                 #this is just single bin data, it makes more sense to plot the bin
                 plot_kwargs = {"axis": MantidAxType.BIN}
                 plot([ws],errors=False, overplot=False, wksp_indices=[0], plot_kwargs=plot_kwargs)

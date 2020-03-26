@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/V3D.h"
 
@@ -28,7 +29,7 @@ enum ProjectionUnit {
   INV_ANG // inverse angstroms
 };
 
-class DLLExport Projection {
+class MANTID_API_DLL Projection {
 public:
   /// Default constructor builds identity projection
   Projection();

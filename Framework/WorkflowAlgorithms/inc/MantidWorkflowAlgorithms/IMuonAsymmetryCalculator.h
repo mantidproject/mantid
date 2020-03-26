@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_WORKFLOWALGORITHMS_IMUONASYMMETRYCALCULATOR_H_
-#define MANTID_WORKFLOWALGORITHMS_IMUONASYMMETRYCALCULATOR_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -54,5 +53,3 @@ protected:
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_WORKFLOWALGORITHMS_IMUONASYMMETRYCALCULATOR_H_ */

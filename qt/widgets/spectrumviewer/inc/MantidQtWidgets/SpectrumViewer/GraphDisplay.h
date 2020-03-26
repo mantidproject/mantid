@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GRAPH_DISPLAY_H
-#define GRAPH_DISPLAY_H
+#pragma once
 
 #include <QTableWidget>
 #include <qwt_plot.h>
@@ -83,5 +82,3 @@ private:
 
 } // namespace SpectrumView
 } // namespace MantidQt
-
-#endif // GRAPH_DISPLAY_H

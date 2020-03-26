@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -29,6 +29,7 @@
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/suite/indexing/map_indexing_suite.hpp>
+#include <boost/python/tuple.hpp>
 
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
@@ -287,6 +288,13 @@ object getSignalAtCoord(MatrixWorkspace &self, const NDArray &npCoords,
   return object(handle<>(npSignalArray));
 }
 
+boost::python::tuple findY(MatrixWorkspace &self, double value, tuple start) {
+  int64_t first = extract<int64_t>(start[0]);
+  int64_t second = extract<int64_t>(start[1]);
+  auto idx = self.findY(value, std::make_pair(first, second));
+  return make_tuple(idx.first, idx.second);
+}
+
 } // namespace
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
@@ -365,7 +373,11 @@ void export_MatrixWorkspace() {
            ":class:`~mantid.api.MatrixWorkspace.hasMaskedBins` MUST be called "
            "first to check if any bins are "
            "masked, otherwise an exception will be thrown")
-
+      .def("findY", &findY,
+           (arg("self"), arg("value"), arg("start") = make_tuple(0, 0)),
+           "Find first index in Y equal to value. Start may be specified to "
+           "begin at a specifc index. Returns tuple with the "
+           "histogram and bin indices.")
       // Deprecated
       .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
            "Returns size of the Y data array (deprecated, use "

@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument_fwd.h"
 
 using namespace Mantid::API;
@@ -19,7 +20,7 @@ namespace Algorithms {
 /** ReflectometryWorkflowBase2 : base class containing common implementation
  functionality usable by concrete reflectometry workflow algorithms. Version 2.
  */
-class DLLExport ReflectometryWorkflowBase2
+class MANTID_ALGORITHMS_DLL ReflectometryWorkflowBase2
     : public API::DataProcessorAlgorithm {
 protected:
   /// Initialize reduction-type properties

@@ -1,13 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
 
-from qtpy import QtWidgets, QtCore
+from qtpy import QtWidgets, QtCore, QT_VERSION
+from distutils.version import LooseVersion
 
 from mantid.kernel import ConfigServiceImpl
 
@@ -25,7 +26,6 @@ from Muon.GUI.Common.home_tab.home_tab_widget import HomeTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_widget import SeqFittingTabWidget
-
 from Muon.GUI.MuonAnalysis.load_widget.load_widget import LoadWidget
 from Muon.GUI.Common.phase_table_widget.phase_table_widget import PhaseTabWidget
 from Muon.GUI.Common.results_tab_widget.results_tab_widget import ResultsTabWidget
@@ -88,8 +88,12 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
                                                               plotting_widget=self.dockable_plot_widget.view)
         self.dockable_plot_widget_window.setMinimumWidth(575)
 
-        # # add dock widget to main Muon analysis window
+        # Add dock widget to main Muon analysis window
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockable_plot_widget_window)
+        # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
+        # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
+        if QT_VERSION >= LooseVersion("5.6"):
+            self.resizeDocks({self.dockable_plot_widget_window}, {40}, QtCore.Qt.Horizontal)
 
         # set up other widgets
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)

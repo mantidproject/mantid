@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # ICConvoluted.py
 #
@@ -71,9 +71,9 @@ class IkedaCarpenterConvoluted(IFunction1D):
         KConv = self.getParamValue(6)
 
         # A/2 Scale factor has been removed to make A and Scale independent
-        f_int = Scale*((1-R)*np.power((A*(t-T0)), 2) *
-                       np.exp(-A*(t-T0))+2*R*A**2*B/np.power((A-B), 3) *
-                       (np.exp(-B*(t-T0))-np.exp(-A*(t-T0))*(1+(A-B)*(t-T0)+0.5*np.power((A-B), 2)*np.power((t-T0), 2))))
+        f_int = Scale*((1-R) * np.power((A*(t-T0)), 2)
+                       * np.exp(-A*(t-T0))+2*R*A**2*B/np.power((A-B), 3)
+                       * (np.exp(-B*(t-T0))-np.exp(-A*(t-T0))*(1+(A-B)*(t-T0)+0.5*np.power((A-B), 2)*np.power((t-T0), 2))))
         f_int[t < T0] = 0
 
         mid_point_hat = len(f_int)//2

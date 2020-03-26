@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -13,7 +13,7 @@ namespace Algorithms {
 
 /** Comment : Adds a note into the history record of a workspace
  */
-class DLLExport Comment : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL Comment : public API::DistributedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

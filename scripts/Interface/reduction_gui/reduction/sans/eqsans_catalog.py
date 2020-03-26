@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
@@ -64,7 +64,7 @@ class EQSANSDataSet(DataSet):
             EQSANS_([0-9]+).nxs
         """
         file_path = file_path.strip()
-        r_re = re.search("EQSANS_([0-9]+)(_event|\.nxs)", file_path)
+        r_re = re.search(r"EQSANS_([0-9]+)(_event|\.nxs)", file_path)
         if r_re is not None:
             return r_re.group(1)
         else:
@@ -74,7 +74,6 @@ class EQSANSDataSet(DataSet):
                 return file_path
             except:
                 return None
-        return None
 
     @classmethod
     def read_properties(cls, ws, run, cursor):

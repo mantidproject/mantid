@@ -1,16 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 
-#ifndef MANTID_DATAHANDLING_MESHFILEIO_H_
-#define MANTID_DATAHANDLING_MESHFILEIO_H_
+#pragma once
 namespace {
 Mantid::Kernel::Logger g_log("MeshFileIO");
 }
@@ -93,4 +92,3 @@ inline ScaleUnits getScaleType(const std::string &scaleProperty) {
 
 } // namespace DataHandling
 } // namespace Mantid
-#endif /*MANTID_DATAHANDLING_MESHFILEIO_H_*/

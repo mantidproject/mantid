@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 // To be compatible with MSVC++ Express Edition that does not have TR1 headers
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include <map>
 
 namespace Mantid {
@@ -40,7 +41,7 @@ namespace Algorithms {
     @author Vickie Lynch, SNS, ORNL
     @date 12/01/2010
 */
-class DLLExport CreateDummyCalFile : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateDummyCalFile : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "CreateDummyCalFile"; }

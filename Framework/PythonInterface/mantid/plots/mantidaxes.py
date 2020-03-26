@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 from __future__ import absolute_import
@@ -1024,7 +1024,7 @@ class MantidAxes(Axes):
         else:
             if bool(x_offset) or bool(y_offset) or fill:
                 raise RuntimeError("You have set waterfall to false but have given a non-zero value for the offset or "
-                                "set fill to true.")
+                                   "set fill to true.")
 
             if not self.is_waterfall():
                 # Nothing needs to be changed.

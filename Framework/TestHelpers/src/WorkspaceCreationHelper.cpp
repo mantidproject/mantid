@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -317,6 +317,17 @@ WorkspaceGroup_sptr createWorkspaceGroup(int nEntries, int nHist, int nBins,
 Workspace2D_sptr create2DWorkspaceBinned(size_t nhist, size_t numVals,
                                          double x0, double deltax) {
   BinEdges x(numVals + 1, LinearGenerator(x0, deltax));
+  Counts y(numVals, 2);
+  CountStandardDeviations e(numVals, M_SQRT2);
+  return create<Workspace2D>(nhist, Histogram(x, y, e));
+}
+
+/** Create a 2D workspace with this many point-histograms and bins.
+ * Filled with Y = 2.0 and E = M_SQRT2w
+ */
+Workspace2D_sptr create2DWorkspacePoints(size_t nhist, size_t numVals,
+                                         double x0, double deltax) {
+  Points x(numVals, LinearGenerator(x0, deltax));
   Counts y(numVals, 2);
   CountStandardDeviations e(numVals, M_SQRT2);
   return create<Workspace2D>(nhist, Histogram(x, y, e));

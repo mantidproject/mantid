@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 
 namespace Mantid {
@@ -30,7 +31,7 @@ namespace Algorithms {
     @author Michael Whitty, STFC ISIS
     @date 13/12/2010
 */
-class DLLExport SpatialGrouping : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SpatialGrouping : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "SpatialGrouping"; }

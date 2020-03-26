@@ -22,8 +22,7 @@
 //		Initial release
 //----------------------------------------------------------------------
 
-#ifndef ANN_KD_SPLIT_H
-#define ANN_KD_SPLIT_H
+#pragma once
 
 #include "kd_tree.h" // kd-tree definitions
 
@@ -81,5 +80,3 @@ void sl_fair_split(          // sliding fair-split kd-splitter
     int &cut_dim,            // cutting dimension (returned)
     ANNcoord &cut_val,       // cutting value (returned)
     int &n_lo);              // num of points on low side (returned)
-
-#endif

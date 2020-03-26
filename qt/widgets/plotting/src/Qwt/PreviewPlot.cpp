@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------
 // Includes
@@ -78,7 +78,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
             SLOT(handleViewToolSelect()));
 
   // Create the reset plot view option
-  QAction *resetPlotAction = new QAction("Reset Plot", m_contextMenu);
+  auto *resetPlotAction = new QAction("Reset Plot", m_contextMenu);
   connect(resetPlotAction, SIGNAL(triggered()), this, SLOT(resetView()));
   m_contextMenu->addAction(resetPlotAction);
 
@@ -312,7 +312,7 @@ void PreviewPlot::addSpectrum(const QString &curveName,
   addCurve(m_curves[curveName], ws, wsIndex, curveColour, curveName);
 
   // Create the curve label
-  QLabel *label = new QLabel(curveName);
+  auto *label = new QLabel(curveName);
   label->setVisible(false);
   QPalette palette = label->palette();
   palette.setColor(label->foregroundRole(), curveColour);
@@ -824,7 +824,7 @@ QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName,
                                                 QActionGroup *group,
                                                 QStringList items,
                                                 QString defaultItem) {
-  QMenu *menu = new QMenu(m_contextMenu);
+  auto *menu = new QMenu(m_contextMenu);
 
   for (auto &item : items) {
     QAction *action = new QAction(item, menu);
@@ -838,7 +838,7 @@ QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName,
     action->setChecked(item == defaultItem);
   }
 
-  QAction *menuAction = new QAction(menuName, menu);
+  auto *menuAction = new QAction(menuName, menu);
   menuAction->setMenu(menu);
 
   // sets the name of the Y Axis menu so it can be accessed in the future

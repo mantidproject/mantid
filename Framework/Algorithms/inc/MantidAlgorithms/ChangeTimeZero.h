@@ -1,22 +1,22 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace Algorithms {
 
-class DLLExport ChangeTimeZero : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ChangeTimeZero : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ChangeTimeZero"; };

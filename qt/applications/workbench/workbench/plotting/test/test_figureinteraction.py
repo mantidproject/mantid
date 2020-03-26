@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -217,9 +217,9 @@ class FigureInteractionTest(unittest.TestCase):
 
         ax = fig.axes[0]
         fig_interactor._toggle_normalization(ax)
-        self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
+        self.assertEqual(r"Counts ($\AA$)$^{-1}$", ax.get_ylabel())
         plot([self.ws1], spectrum_nums=[1], errors=errors, overplot=True, fig=fig)
-        self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
+        self.assertEqual(r"Counts ($\AA$)$^{-1}$", ax.get_ylabel())
 
     def test_normalization_toggle_with_no_autoscale_on_update_no_errors(self):
         self._test_toggle_normalization(errorbars_on=False,
@@ -295,6 +295,35 @@ class FigureInteractionTest(unittest.TestCase):
             any(FigureInteraction.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
         self.assertTrue(
             any(FigureInteraction.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
+
+    def test_context_menu_includes_plot_type_if_plot_has_multiple_lines(self):
+        fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.ax.plot([0, 1], [0, 1])
+        self.ax.plot([0, 1], [0, 1])
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        self.interactor._add_plot_type_option_menu(main_menu, self.ax)
+
+        added_menu = main_menu.children()[1]
+        self.assertEqual(added_menu.children()[0].text(), "Plot Type")
+
+    def test_context_menu_does_not_include_plot_type_if_plot_has_one_line(self):
+        fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.ax.errorbar([0, 1], [0, 1], capsize=1)
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        self.interactor._add_plot_type_option_menu(main_menu, self.ax)
+
+        # Number of children should remain unchanged
+        self.assertEqual(1, len(main_menu.children()))
 
     def test_scripted_plot_show_and_hide_all(self):
         self.ax.plot([0, 15000], [0, 15000], label='MyLabel')

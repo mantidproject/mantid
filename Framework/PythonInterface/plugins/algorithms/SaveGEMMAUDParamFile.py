@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
@@ -67,8 +67,8 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
                              doc="Template for the .maud file")
 
         self.declareProperty(IntArrayProperty(name=self.PROP_GROUPING_SCHEME),
-                             doc="An array of bank IDs, where the value at element i is the ID of the bank in " +
-                                 self.PROP_GSAS_PARAM_FILE + " to associate spectrum i with")
+                             doc="An array of bank IDs, where the value at element i is the ID of the bank in "
+                                 + self.PROP_GSAS_PARAM_FILE + " to associate spectrum i with")
 
         self.declareProperty(FileProperty(name=self.PROP_OUTPUT_FILE,
                                           action=FileAction.Save,

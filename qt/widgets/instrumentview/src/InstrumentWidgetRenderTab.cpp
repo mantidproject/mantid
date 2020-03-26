@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
@@ -63,7 +63,7 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
 
   setupColorMapWidget();
 
-  QHBoxLayout *unwrappedControlsLayout = new QHBoxLayout;
+  auto *unwrappedControlsLayout = new QHBoxLayout;
   setupUnwrappedControls(unwrappedControlsLayout);
 
   m_autoscaling = new QCheckBox("Autoscaling", this);
@@ -289,7 +289,7 @@ void InstrumentWidgetRenderTab::setupGridBankMenu(QVBoxLayout *parentLayout) {
           SLOT(setVisibleLayer(int)));
   connect(m_layerSlide, SIGNAL(valueChanged(int)), m_layerDisplay,
           SLOT(setNum(int)));
-  QHBoxLayout *voxelControlsLayout = new QHBoxLayout();
+  auto *voxelControlsLayout = new QHBoxLayout();
   voxelControlsLayout->addWidget(m_layerCheck);
   voxelControlsLayout->addWidget(m_layerSlide);
   voxelControlsLayout->addWidget(m_layerDisplay);
@@ -305,7 +305,7 @@ void InstrumentWidgetRenderTab::setupGridBankMenu(QVBoxLayout *parentLayout) {
  */
 QFrame *InstrumentWidgetRenderTab::setupAxisFrame() {
   m_resetViewFrame = new QFrame();
-  QHBoxLayout *axisViewLayout = new QHBoxLayout();
+  auto *axisViewLayout = new QHBoxLayout();
   axisViewLayout->addWidget(new QLabel("Axis View:"));
 
   mAxisCombo = new QComboBox();
@@ -672,7 +672,7 @@ QMenu *InstrumentWidgetRenderTab::createPeaksMenu() {
   m_precisionActionGroup = new QActionGroup(this);
   QSignalMapper *signalMapper = new QSignalMapper(this);
   for (int i = 1; i < 10; ++i) {
-    QAction *prec = new QAction(QString::number(i), setPrecision);
+    auto *prec = new QAction(QString::number(i), setPrecision);
     prec->setCheckable(true);
     setPrecision->addAction(prec);
     connect(prec, SIGNAL(triggered()), signalMapper, SLOT(map()));

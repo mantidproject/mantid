@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef UNCERTAINVALUEIOTEST_H
-#define UNCERTAINVALUEIOTEST_H
+#pragma once
 
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
@@ -69,4 +68,3 @@ public:
     TS_ASSERT_EQUALS(convertedValue.error(), uncertainValue.error());
   }
 };
-#endif // UNCERTAINVALUEIOTEST_H

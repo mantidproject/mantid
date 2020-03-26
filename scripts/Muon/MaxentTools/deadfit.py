@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from Muon.MaxentTools.zft import ZFT
@@ -36,12 +35,7 @@ def DEADFIT(
     DETECT_c = scale - DETECT_d
     DETECT_d = scale
     corr = datt**2 * tau[np.newaxis, :]
-    datum = np.where(
-        sigma <= 1.E3,
-        datt +
-        corr -
-        np.outer(DETECT_e, DETECT_d),
-        datum)
+    datum = np.where(sigma <= 1.E3, datt + corr - np.outer(DETECT_e, DETECT_d), datum)
 
     mylog.debug("amplitudes of exponentials:" + str(DETECT_d))
     mylog.debug("changes this cycle:" + str(DETECT_c))

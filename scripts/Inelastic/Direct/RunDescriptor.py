@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=too-many-lines
 #pylint: disable=invalid-name
@@ -504,7 +504,7 @@ class RunDescriptor(PropDescriptor):
                 self._fext = fext
             else: # nothing to do, there is workspace, which corresponds to this run number
                 # and it may be already loaded (may be not).  Just nullify run list
-                                 # in case of previous workspace name came from a list.
+                # in case of previous workspace name came from a list.
                 self._run_list = None
                 if self._ws_name not in mtd:
                     # Change existing file path and file extension if alternatives are provided
@@ -1357,7 +1357,7 @@ class RunDescriptor(PropDescriptor):
 # Hell knows how to redefine these warnings or if they are valid or not
 #pylint: disable=W0141
 #pylint: disable=W0110
-            self._ws_cname = part_ind + ''.join(re.findall('\D+', name))
+            self._ws_cname = part_ind + ''.join(re.findall(r'\D+', name))
         else:
 #pylint: disable=attribute-defined-outside-init
             self._ws_cname = part_ind + name

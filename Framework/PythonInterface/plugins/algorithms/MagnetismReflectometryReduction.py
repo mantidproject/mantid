@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init, invalid-name, bare-except
 """
@@ -74,14 +74,14 @@ class MagnetismReflectometryReduction(PythonAlgorithm):
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the background for the normalization")
         self.declareProperty("CutLowResDataAxis", True,
-                             doc="If true, the low resolution direction of the data will be cropped according "+
-                             "to the lowResDataAxisPixelRange property")
+                             doc="If true, the low resolution direction of the data will be cropped according "
+                                 + "to the lowResDataAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResDataAxisPixelRange", [115, 210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range to use in the low resolution direction of the data")
         self.declareProperty("CutLowResNormAxis", True,
-                             doc="If true, the low resolution direction of the normalization run will be cropped "+
-                             "according to the LowResNormAxisPixelRange property")
+                             doc="If true, the low resolution direction of the normalization run will be cropped "
+                                 + "according to the LowResNormAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResNormAxisPixelRange", [115, 210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range to use in the low resolution direction of the normalizaion run")

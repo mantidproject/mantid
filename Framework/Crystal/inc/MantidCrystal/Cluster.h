@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_CLUSTER_H_
-#define MANTID_CRYSTAL_CLUSTER_H_
+#pragma once
 
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/ICluster.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
@@ -19,7 +19,7 @@ namespace Crystal {
 
 /** Cluster : Image cluster used by connected component labeling
  */
-class DLLExport Cluster : public ICluster {
+class MANTID_CRYSTAL_DLL Cluster : public ICluster {
 
 public:
   /// Constructor
@@ -76,5 +76,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_CLUSTER_H_ */

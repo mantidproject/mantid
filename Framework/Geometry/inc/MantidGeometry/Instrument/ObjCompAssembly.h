@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef OBJCOMPONENT_ASSEMBLY_
-#define OBJCOMPONENT_ASSEMBLY_
+#pragma once
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
@@ -108,5 +107,3 @@ MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
 
 } // Namespace Geometry
 } // Namespace Mantid
-
-#endif /*OBJCOMPONENT_ASSEMBLY_*/

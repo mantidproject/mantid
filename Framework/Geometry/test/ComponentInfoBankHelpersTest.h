@@ -1,5 +1,10 @@
-#ifndef MANTID_GEOMETRY_COMPONENTINFOBANKHELPERSTEST_H_
-#define MANTID_GEOMETRY_COMPONENTINFOBANKHELPERSTEST_H_
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -320,5 +325,3 @@ public:
       TS_ASSERT(!isAncestorOf(compInfo, source, i));
   }
 };
-
-#endif /* MANTID_GEOMETRY_COMPONENTINFOBANKHELPERSTEST_H_ */

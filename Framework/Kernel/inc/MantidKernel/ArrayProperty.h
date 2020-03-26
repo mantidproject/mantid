@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_ARRAYPROPERTY_H_
-#define MANTID_KERNEL_ARRAYPROPERTY_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "MantidKernel/IValidator.h"
@@ -66,5 +65,3 @@ MANTID_KERNEL_DLL void ArrayProperty<int>::visualStudioC4661Workaround();
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /*MANTID_KERNEL_ARRAYPROPERTY_H_*/

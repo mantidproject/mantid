@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SLIDER_HANDLER_H
-#define SLIDER_HANDLER_H
+#pragma once
 
 #include "MantidQtWidgets/SpectrumViewer/ISliderHandler.h"
 #include <QRect>
@@ -64,5 +63,3 @@ private:
 
 } // namespace SpectrumView
 } // namespace MantidQt
-
-#endif // SLIDER_HANDLER_H

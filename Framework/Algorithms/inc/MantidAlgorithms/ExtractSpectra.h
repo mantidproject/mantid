@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,7 +16,7 @@ namespace Algorithms {
 /** Extracts specified spectra from a workspace and places them in a new
   workspace.
 */
-class DLLExport ExtractSpectra : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL ExtractSpectra : public API::DistributedAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;

@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,redefined-builtin
 from __future__ import (absolute_import, division, print_function)
@@ -42,8 +42,8 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
         colchoices = ["Value", "FitOrTie", "Min", "Max", "StepSize"]
         self.declareProperty("Column", "Value", mantid.kernel.StringListValidator(colchoices),
-                             "Column name of the cell to have value updated.  Choices include 'FitOrTie', "+
-                             "'Max', 'Min', 'StepSize' and 'Value'")
+                             "Column name of the cell to have value updated.  Choices include 'FitOrTie', "
+                             + "'Max', 'Min', 'StepSize' and 'Value'")
 
         rowprop = mantid.kernel.IntArrayProperty("Rows", [])
         self.declareProperty(rowprop, "List of row numbers of the cell to have value updated")

@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from __future__ import (absolute_import, division, print_function)
@@ -136,8 +136,8 @@ class DarkRunNormalizationExtractor(object):
         log_entry = "gd_prtn_chrg"
         run = workspace.getRun()
         if not run.hasProperty(log_entry):
-            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry +
-                               "log entry. This is required for calculating the noramlization"
+            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry
+                               + "log entry. This is required for calculating the noramlization"
                                "of the dark run.")
         entry = run.getProperty(log_entry)
         return entry.value
@@ -162,8 +162,8 @@ class DarkRunNormalizationExtractor(object):
         log_entry = "good_frames"
         run = workspace.getRun()
         if not run.hasProperty(log_entry):
-            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry +
-                               "log entry. This is required for calculating the noramlization"
+            raise RuntimeError("DarkRunCorrection: The workspace does not have a " + log_entry
+                               + "log entry. This is required for calculating the noramlization"
                                "of the dark run.")
         prop = run.getProperty(log_entry)
         frame_time = self._get_time_for_frame(workspace)

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_PROPERTYMANAGERFACTORY_H
-#define MANTID_PYTHONINTERFACE_PROPERTYMANAGERFACTORY_H
+#pragma once
 
 #include <boost/python/dict.hpp>
 #include <boost/shared_ptr.hpp>
@@ -23,5 +22,3 @@ createPropertyManager(const boost::python::dict &mapping);
 } // namespace Registry
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif // MANTID_PYTHONINTERFACE_PROPERTYMANAGERFACTORY_H

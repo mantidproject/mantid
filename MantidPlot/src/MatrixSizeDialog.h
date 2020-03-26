@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2004 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : MatrixSizeDialog.h
@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MATRIXSIZEDIALOG_H
-#define MATRIXSIZEDIALOG_H
+#pragma once
 
 #include "Matrix.h"
 #include <QDialog>
@@ -53,5 +52,3 @@ private:
   DoubleSpinBox *boxXStart, *boxYStart, *boxXEnd, *boxYEnd;
   Matrix *d_matrix;
 };
-
-#endif // MATRIXSIZEDIALOG_H

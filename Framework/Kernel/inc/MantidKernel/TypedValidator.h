@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_TYPEDVALIDATOR_H_
-#define MANTID_KERNEL_TYPEDVALIDATOR_H_
+#pragma once
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -148,5 +147,3 @@ const std::type_info &TypedValidator<boost::shared_ptr<T>>::m_dataitemTypeID =
 } // namespace Kernel
 /// @endcond
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_TYPEDVALIDATOR_H_ */

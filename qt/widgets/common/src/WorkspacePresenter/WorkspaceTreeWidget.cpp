@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 #include "MantidGeometry/Instrument.h"
@@ -106,7 +106,7 @@ void WorkspaceTreeWidget::setupWidgetLayout() {
   m_tree = new MantidTreeWidget(m_mantidDisplayModel, this);
   m_tree->setHeaderLabel("Workspaces");
 
-  FlowLayout *buttonLayout = new FlowLayout();
+  auto *buttonLayout = new FlowLayout();
   m_loadButton = new QPushButton("Load");
   m_saveButton = new QPushButton("Save");
   m_deleteButton = new QPushButton("Delete");
@@ -128,7 +128,7 @@ void WorkspaceTreeWidget::setupWidgetLayout() {
   m_workspaceFilter->setPlaceholderText("Filter Workspaces");
   m_workspaceFilter->setToolTip("Type here to filter the workspaces");
 
-  QVBoxLayout *layout = new QVBoxLayout();
+  auto *layout = new QVBoxLayout();
   layout->setSpacing(0);
   layout->setMargin(0);
   layout->addLayout(buttonLayout);
@@ -240,8 +240,7 @@ void WorkspaceTreeWidget::showCriticalUserMessage(
 
 void WorkspaceTreeWidget::onLoadAccept() {
   QObject *sender = QObject::sender();
-  MantidQt::API::AlgorithmDialog *dlg =
-      reinterpret_cast<MantidQt::API::AlgorithmDialog *>(sender);
+  auto *dlg = reinterpret_cast<MantidQt::API::AlgorithmDialog *>(sender);
   if (!dlg)
     return; // should never happen
 
@@ -867,8 +866,7 @@ MantidTreeWidgetItem *WorkspaceTreeWidget::addTreeEntry(
   // A a child ID item so that it becomes expandable. Using the correct ID is
   // needed when plotting from non-expanded groups.
   const std::string wsID = item.second->id();
-  MantidTreeWidgetItem *idNode =
-      new MantidTreeWidgetItem(QStringList(wsID.c_str()), m_tree);
+  auto *idNode = new MantidTreeWidgetItem(QStringList(wsID.c_str()), m_tree);
   idNode->setFlags(Qt::NoItemFlags);
   node->addChild(idNode);
   setItemIcon(node, wsID);
@@ -1424,7 +1422,7 @@ void WorkspaceTreeWidget::saveToProgram() {
 
         // Get the file extention based on the workspace
         Property *prop = alg->getProperty("Filename");
-        FileProperty *fileProp = dynamic_cast<FileProperty *>(prop);
+        auto *fileProp = dynamic_cast<FileProperty *>(prop);
         std::string ext;
         if (fileProp) {
           ext = fileProp->getDefaultExt();

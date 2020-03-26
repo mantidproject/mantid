@@ -209,7 +209,7 @@ using MantidQt::Widgets::Common::Python::CodeExecution;
 
 public:
   CodeExecution(ScriptEditor*);
-  SIP_PYOBJECT execute(const QString &, const QString &, int, SIP_PYOBJECT);
+  SIP_PYOBJECT execute(const QString &, const QString &, int, SIP_PYOBJECT, int);
 private:
   CodeExecution(const CodeExecution&);
 };

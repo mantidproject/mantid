@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/SerialAlgorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -26,7 +26,7 @@ namespace Algorithms {
   @author Peter G Parker, ISIS, RAL
   @date 2011-09-13
 */
-class DLLExport GeneratePythonScript : public API::SerialAlgorithm {
+class MANTID_ALGORITHMS_DLL GeneratePythonScript : public API::SerialAlgorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "GeneratePythonScript"; };

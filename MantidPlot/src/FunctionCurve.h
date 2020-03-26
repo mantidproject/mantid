@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FUNCTIONCURVE_H
-#define FUNCTIONCURVE_H
+#pragma once
 
 #include "PlotCurve.h"
 
@@ -108,5 +107,3 @@ private:
   /// Equal null where the curve is not plotting an IFunction
   const Mantid::API::IFunction *m_identifier;
 };
-
-#endif

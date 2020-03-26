@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
  * This algorithm flattens a MDHistoWorkspace to a Workspace2D. Mantid has far
@@ -13,8 +13,7 @@
  *
  *
  */
-#ifndef MDHISTOTOWORKSPACE2D_H_
-#define MDHISTOTOWORKSPACE2D_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
@@ -62,5 +61,3 @@ private:
   void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inWS,
                     Mantid::DataObjects::Workspace2D_sptr outWS);
 };
-
-#endif /*MDHISTOTOWORKSPACE2D_H_*/

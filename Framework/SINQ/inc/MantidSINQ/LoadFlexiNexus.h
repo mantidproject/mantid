@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
  * This is a flexible NeXus file loader. It takes as input a filename
@@ -24,8 +24,7 @@
  *
  */
 
-#ifndef FLEXINEXUSLOADER_H_
-#define FLEXINEXUSLOADER_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidSINQ/DllConfig.h"
@@ -88,5 +87,3 @@ private:
   int calculateCAddress(int *pos, int *dim, int rank);
   int calculateF77Address(int *pos, int rank);
 };
-
-#endif /*FLEXINEXUSLOADER_H_*/

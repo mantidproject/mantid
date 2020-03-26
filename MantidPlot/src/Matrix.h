@@ -30,8 +30,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MATRIX_H
-#define MATRIX_H
+#pragma once
 
 #include <QHeaderView>
 #include <QMessageBox>
@@ -380,5 +379,3 @@ protected:
   //! Pointer to a data buffer used for matrix operations.
   double *d_workspace;
 };
-
-#endif

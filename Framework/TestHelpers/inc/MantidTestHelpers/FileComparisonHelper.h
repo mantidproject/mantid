@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FILECOMPARISONHELPER_H_
-#define FILECOMPARISONHELPER_H_
+#pragma once
 
 #include <iosfwd>
 #include <iterator>
@@ -48,5 +47,3 @@ bool areFileStreamsEqual(std::ifstream &referenceFileStream,
 bool isEqualToReferenceFile(const std::string &referenceFileName,
                             const std::string &outFileFullPath);
 } // Namespace FileComparisonHelper
-
-#endif // FILECOMPARISONHELPER_H_

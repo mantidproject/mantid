@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 #include <boost/optional.hpp>
 
 namespace Mantid {
@@ -17,7 +17,7 @@ namespace Algorithms {
 /** CreateTransmissionWorkspaceAuto : Creates a transmission run workspace in
 Wavelength from input TOF workspaces.
 */
-class DLLExport CreateTransmissionWorkspaceAuto
+class MANTID_ALGORITHMS_DLL CreateTransmissionWorkspaceAuto
     : public API::DataProcessorAlgorithm {
 public:
   //----------------------------------------------------------------------------------------------

@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -24,7 +25,7 @@ namespace Algorithms {
     <LI> Qvalues - The Q-values extracted from the input workspace </LI>
     </UL>
 */
-class DLLExport GetQsInQENSData : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GetQsInQENSData : public API::Algorithm {
 public:
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string category() const override { return "Inelastic\\Indirect"; }

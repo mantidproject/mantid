@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_IJOBTREEVIEW_H_
-#define MANTIDQTMANTIDWIDGETS_IJOBTREEVIEW_H_
+#pragma once
 #include "MantidQtWidgets/Common/Batch/Cell.h"
 #include "MantidQtWidgets/Common/Batch/Row.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
@@ -105,4 +104,3 @@ public:
 } // namespace Batch
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTMANTIDWIDGETS_IJOBTREEVIEW_H_

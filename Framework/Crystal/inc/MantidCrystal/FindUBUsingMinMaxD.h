@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_FIND_UB_USING_MIN_MAX_D_H_
-#define MANTID_CRYSTAL_FIND_UB_USING_MIN_MAX_D_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -19,8 +18,8 @@ namespace Crystal {
     @author Dennis Mikkelson(adapted from Andrei Savici's CalculateUMatrix)
     @date   2011-08-17
   */
-class DLLExport FindUBUsingMinMaxD : public API::Algorithm,
-                                     public API::DeprecatedAlgorithm {
+class MANTID_CRYSTAL_DLL FindUBUsingMinMaxD : public API::Algorithm,
+                                              public API::DeprecatedAlgorithm {
 public:
   FindUBUsingMinMaxD();
 
@@ -53,5 +52,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_FIND_UB_USING_MIN_MAX_D_H_ */

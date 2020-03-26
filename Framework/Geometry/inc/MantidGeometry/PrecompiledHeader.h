@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_PRECOMPILEDHEADER_H_
-#define MANTID_GEOMETRY_PRECOMPILEDHEADER_H_
+#pragma once
 
 // Mantid
 #include "MantidKernel/DateAndTime.h"
@@ -36,5 +35,3 @@
 // Poco
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
-
-#endif // MANTID_GEOMETRY_PRECOMPILEDHEADER_H

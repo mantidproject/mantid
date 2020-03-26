@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -14,8 +14,7 @@
  *  than API (e.g. any algorithm or concrete workspace), even if via the
  *factory.
  *********************************************************************************/
-#ifndef FAKEOBJECTS_H_
-#define FAKEOBJECTS_H_
+#pragma once
 
 /*
  * FakeObjects.h: Fake Tester objects for APITest
@@ -755,4 +754,3 @@ class VariableBinThrowingTester : public AxeslessWorkspaceTester {
     return 0;
   }
 };
-#endif /* FAKEOBJECTS_H_ */

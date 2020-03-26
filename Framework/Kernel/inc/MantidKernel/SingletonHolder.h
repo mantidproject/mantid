@@ -1,5 +1,4 @@
-#ifndef MANTID_KERNEL_SINGLETON_HOLDER_H
-#define MANTID_KERNEL_SINGLETON_HOLDER_H
+#pragma once
 
 ////////////////////////////////////////////////////////////////////////////////
 // The Loki Library
@@ -111,5 +110,3 @@ __declspec(noinline)
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif // SINGLETON_HOLDER_H

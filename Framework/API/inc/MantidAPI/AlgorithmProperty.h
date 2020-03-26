@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -33,7 +33,7 @@ API::IAlgorithm interface.
 @author Martyn Gigg, Tessella Plc
 @date 24/03/2011
 */
-class DLLExport AlgorithmProperty
+class MANTID_API_DLL AlgorithmProperty
     : public Kernel::PropertyWithValue<boost::shared_ptr<IAlgorithm>> {
 public:
   /// Typedef the held type

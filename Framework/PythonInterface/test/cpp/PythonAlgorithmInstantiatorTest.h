@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PYTHONOBJECTINSTANTIATORTEST_H_
-#define PYTHONOBJECTINSTANTIATORTEST_H_
+#pragma once
 
 #include "MantidAPI/IAlgorithm.h"
 
@@ -74,5 +73,3 @@ private:
   /// Instantiator instance
   std::unique_ptr<PythonAlgorithmInstantiator> m_creator;
 };
-
-#endif /* PYTHONOBJECTINSTANTIATORTEST_H_ */

@@ -1,16 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
  *
  *  This header MAY ONLY be included from a test in the MDAlgorithms package.
  *********************************************************************************/
-#ifndef MANTID_MDALGORITHMS_BINARYOPERATIONMDTESTHELPER_H_
-#define MANTID_MDALGORITHMS_BINARYOPERATIONMDTESTHELPER_H_
+#pragma once
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
 
@@ -31,5 +30,3 @@ doTest(std::string algoName, std::string inName, std::string outName,
        std::string otherPropValue = "");
 
 } // namespace UnaryOperationMDTestHelper
-
-#endif

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LINEVIEWER_H
-#define LINEVIEWER_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/CoordTransform.h"
@@ -184,4 +183,3 @@ private:
 
 } // namespace SliceViewer
 } // namespace MantidQt
-#endif // LINEVIEWER_H

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ADSValidator.h"
@@ -99,9 +99,9 @@ Algorithm::Algorithm()
       m_log("Algorithm"), g_log(m_log), m_groupSize(0), m_executeAsync(nullptr),
       m_notificationCenter(nullptr), m_progressObserver(nullptr),
       m_executionState(ExecutionState::Uninitialized),
-      m_resultState(ResultState::NotFinished), m_isExecuted(false),
-      m_isChildAlgorithm(false), m_recordHistoryForChild(false),
-      m_alwaysStoreInADS(true), m_runningAsync(false), m_rethrow(false),
+      m_resultState(ResultState::NotFinished), m_isChildAlgorithm(false),
+      m_recordHistoryForChild(false), m_alwaysStoreInADS(true),
+      m_runningAsync(false), m_rethrow(false),
       m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
       m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
       m_groupsHaveSimilarNames(false), m_inputWorkspaceHistories(),
@@ -723,7 +723,7 @@ bool Algorithm::executeInternal() {
   }
 
   catch (...) {
-    // Execution
+    // Execution failed with an unknown exception object
     setResultState(ResultState::Failed);
     m_runningAsync = false;
 

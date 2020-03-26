@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_MUONANALYSISRESULTTABLECREATORTEST_H_
-#define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISRESULTTABLECREATORTEST_H_
+#pragma once
 
 #include "../Muon/MuonAnalysisResultTableCreator.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -404,7 +403,7 @@ private:
 
   /// Create parameter table output from a fit
   ITableWorkspace_sptr getParamTable(int runNumber, bool makeGlobals = false) {
-    const double base = static_cast<double>(runNumber - m_firstRun);
+    const auto base = static_cast<double>(runNumber - m_firstRun);
     auto table = WorkspaceFactory::Instance().createTable();
     // Create columns
     table->addColumn("str", "Name");
@@ -576,5 +575,3 @@ private:
   LogValuesMap m_logValues;
   int m_firstStart_sec, m_startDiff_sec, m_firstRun;
 };
-
-#endif /* MANTIDQT_CUSTOMINTERFACES_MUONANALYSISRESULTTABLECREATORTEST_H_ */

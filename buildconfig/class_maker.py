@@ -2,8 +2,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Utility for generating a class file, header, and test file """
 from __future__ import (absolute_import, division, print_function, unicode_literals)
@@ -30,7 +30,6 @@ def write_header(subproject, classname, filename, args):
     f = open(filename, 'w')
 
     subproject_upper = subproject.upper()
-    guard = "MANTID_{}_{}_H_".format(subproject_upper, classname.upper())
 
     # Create an Algorithm header; will not use it if not an algo
     algorithm_header = """
@@ -56,11 +55,10 @@ private:
     s = r"""// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; {year} ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef {guard}
-#define {guard}
+#pragma once
 
 #include "Mantid{subproject}/DllConfig.h"
 {alg_include}
@@ -75,11 +73,8 @@ public:{algorithm_header}}};
 
 }} // namespace {subproject}
 }} // namespace Mantid
-
-#endif /* {guard} */""".format(guard=guard, subproject=subproject,
-       alg_include=alg_include, classname=classname,
-       year=get_year(), subproject_upper=subproject_upper,
-       alg_class_declare=alg_class_declare, algorithm_header=algorithm_header)
+""".format(subproject=subproject, alg_include=alg_include, classname=classname, year=get_year(),
+           subproject_upper=subproject_upper, alg_class_declare=alg_class_declare, algorithm_header=algorithm_header)
 
     f.write(s)
     f.close()
@@ -146,8 +141,8 @@ void {algname}::exec() {{
     s = """// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; {year} ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "Mantid{subproject}/{subfolder}{classname}.h"
@@ -158,8 +153,8 @@ namespace {subproject} {{
 }} // namespace {subproject}
 }} // namespace Mantid
 """.format(
-        year=get_year(), subproject=subproject, subfolder=args.subfolder, classname=classname, algorithm_top=algorithm_top,
-        algorithm_source=algorithm_source)
+        year=get_year(), subproject=subproject, subfolder=args.subfolder, classname=classname,
+        algorithm_top=algorithm_top, algorithm_source=algorithm_source)
     f.write(s)
     f.close()
 
@@ -171,7 +166,6 @@ def write_test(subproject, classname, filename, args):
     print("Writing test file to", filename)
     f = open(filename, 'w')
 
-    guard = "MANTID_{}_{}TEST_H_".format(subproject.upper(), classname.upper())
     algorithm_test = """
   void test_Init()
   {{
@@ -210,11 +204,10 @@ def write_test(subproject, classname, filename, args):
     s = """// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; {year} ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef {guard}
-#define {guard}
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -237,11 +230,8 @@ public:
 
 
 }};
-
-
-#endif /* {guard} */""".format(year=get_year(),
-          guard=guard, subproject=subproject, subfolder=args.subfolder, classname=classname,
-          algorithm_test=algorithm_test)
+""".format(year=get_year(), subproject=subproject, subfolder=args.subfolder, classname=classname,
+           algorithm_test=algorithm_test)
     f.write(s)
     f.close()
 

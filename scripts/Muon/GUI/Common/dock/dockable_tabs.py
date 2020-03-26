@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, unicode_literals)
 
@@ -179,7 +179,7 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
         """
         # Remove the tab if it is attached
         attached = False
-        for index in xrange(self.count()):
+        for index in range(self.count()):
             if str(name) == str(self.tabText(index)):
                 self.removeTab(index)
                 attached = True

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * SINQHMListener.h
@@ -15,8 +15,7 @@
  *
  */
 
-#ifndef SINQHMLISTENER_H_
-#define SINQHMLISTENER_H_
+#pragma once
 
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidAPI/LiveListener.h"
@@ -63,5 +62,3 @@ private:
 
   ILiveListener::RunStatus oldStatus;
 };
-
-#endif /* SINQHMLISTENER_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SetSampleMaterialTEST_H_
-#define SetSampleMaterialTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -284,5 +283,3 @@ public:
     TS_ASSERT_DELTA(material.numberDensity(), 0.23 * (2. + 3.), 1e-12)
   }
 };
-
-#endif /*SetSampleMaterialTEST_H_*/

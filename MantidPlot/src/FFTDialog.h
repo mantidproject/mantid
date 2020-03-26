@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FFTDIALOG_H
-#define FFTDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -72,5 +71,3 @@ private:
   QLineEdit *boxSampling;
   QCheckBox *boxNormalize, *boxOrder;
 };
-
-#endif

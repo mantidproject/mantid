@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 ###########################################################################################
@@ -153,8 +153,8 @@ baseUrl = "http://www.mantidproject.org/"
 if args.s is not None:
     baseUrl = args.s
 if args.i is None:
-    urlList = getTestablePages(baseUrl +
-                               "api.php?action=query&list=categorymembers&format=json&cmlimit=500&cmtitle=Category:Tested%20Examples")
+    urlList = getTestablePages(baseUrl
+                               + "api.php?action=query&list=categorymembers&format=json&cmlimit=500&cmtitle=Category:Tested%20Examples")
 else:
     urlList.append(args.i)
 

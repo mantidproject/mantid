@@ -28,8 +28,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MULTIPEAKFIT_H
-#define MULTIPEAKFIT_H
+#pragma once
 
 #include "Fit.h"
 
@@ -133,4 +132,3 @@ private:
   void init();
   void calculateFitCurveData(double *X, double *Y) override;
 };
-#endif

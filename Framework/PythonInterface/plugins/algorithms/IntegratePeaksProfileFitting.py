@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 """
@@ -308,29 +308,29 @@ class IntegratePeaksProfileFitting(PythonAlgorithm):
                 peak.setSigmaIntensity(sigma)
 
                 if generateStrongPeakParams and ~needsForcedProfile[peakNumber]:
-                        qPeak = peak.getQLabFrame()
-                        theta = np.arctan2(qPeak[2], np.hypot(qPeak[0],qPeak[1])) #2theta
-                        try:
-                            p = mtd['__fitSigX0_Parameters'].column(1)[:-1]
-                            tol = 0.2 #We should have a good idea now - only allow 20% variation
-                        except:
-                            p = peaks_ws.getInstrument().getStringParameter("sigSC0Params")
-                            p = np.array(str(p).strip('[]\'').split(),dtype=float)
-                            tol = 5.0 #High tolerance since we don't know what the answer will be
-                        predSigX = BVGFT.coshPeakWidthModel(theta, p[0],p[1],p[2],p[3])
+                    qPeak = peak.getQLabFrame()
+                    theta = np.arctan2(qPeak[2], np.hypot(qPeak[0],qPeak[1])) #2theta
+                    try:
+                        p = mtd['__fitSigX0_Parameters'].column(1)[:-1]
+                        tol = 0.2 #We should have a good idea now - only allow 20% variation
+                    except:
+                        p = peaks_ws.getInstrument().getStringParameter("sigSC0Params")
+                        p = np.array(str(p).strip('[]\'').split(),dtype=float)
+                        tol = 5.0 #High tolerance since we don't know what the answer will be
+                    predSigX = BVGFT.coshPeakWidthModel(theta, p[0],p[1],p[2],p[3])
 
-                        if np.abs((params['SigX'] - predSigX)/1./predSigX) < tol:
-                            strongPeakParams[fitNumber, 0] = np.arctan2(qPeak[1], qPeak[0]) # phi
-                            strongPeakParams[fitNumber, 1] = np.arctan2(qPeak[2], np.hypot(qPeak[0],qPeak[1])) #theta
-                            strongPeakParams[fitNumber, 2] = params['scale3d']
-                            strongPeakParams[fitNumber, 3] = params['MuTH']
-                            strongPeakParams[fitNumber, 4] = params['MuPH']
-                            strongPeakParams[fitNumber, 5] = params['SigX']
-                            strongPeakParams[fitNumber, 6] = params['SigY']
-                            strongPeakParams[fitNumber, 7] = params['SigP']
-                            strongPeakParams[fitNumber, 8] = peakNumber
-                            strongPeakParams_ws.addRow(strongPeakParams[fitNumber])
-                            sigX0Params, sigY0, sigP0Params = self.getBVGInitialGuesses(peaks_ws, strongPeakParams_ws)
+                    if np.abs((params['SigX'] - predSigX)/1./predSigX) < tol:
+                        strongPeakParams[fitNumber, 0] = np.arctan2(qPeak[1], qPeak[0]) # phi
+                        strongPeakParams[fitNumber, 1] = np.arctan2(qPeak[2], np.hypot(qPeak[0],qPeak[1])) #theta
+                        strongPeakParams[fitNumber, 2] = params['scale3d']
+                        strongPeakParams[fitNumber, 3] = params['MuTH']
+                        strongPeakParams[fitNumber, 4] = params['MuPH']
+                        strongPeakParams[fitNumber, 5] = params['SigX']
+                        strongPeakParams[fitNumber, 6] = params['SigY']
+                        strongPeakParams[fitNumber, 7] = params['SigP']
+                        strongPeakParams[fitNumber, 8] = peakNumber
+                        strongPeakParams_ws.addRow(strongPeakParams[fitNumber])
+                        sigX0Params, sigY0, sigP0Params = self.getBVGInitialGuesses(peaks_ws, strongPeakParams_ws)
 
             except KeyboardInterrupt:
                 np.warnings.filterwarnings('default') # Re-enable on exit

@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
@@ -28,8 +28,8 @@ def _does_single_unbound_key_exist(keys):
             if not seen_unbounded_key:
                 seen_unbounded_key = key_string
             else:
-                raise ValueError("Seen multiple unbounded keys in mapping file: " + key_string + " and " +
-                                 seen_unbounded_key)
+                raise ValueError("Seen multiple unbounded keys in mapping file: " + key_string + " and "
+                                 + seen_unbounded_key)
     return True if seen_unbounded_key else False
 
 
@@ -48,9 +48,9 @@ def _is_unbound_key_sane(keys):
 
     if unbounded_lower_value < largest_seen_bound_value:
         # We have a bounded value in an unbounded range
-        raise ValueError("Found a run range in calibration mapping overlaps an unbounded run range." +
-                         "\nThe value " + str(largest_seen_bound_value) + " was found and is greater than " +
-                         str(unbounded_lower_value))
+        raise ValueError("Found a run range in calibration mapping overlaps an unbounded run range."
+                         + "\nThe value " + str(largest_seen_bound_value) + " was found and is greater than "
+                         + str(unbounded_lower_value))
 
 
 def _is_run_range_key_unbounded(key):

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDGRIDBOX_H_
-#define MDGRIDBOX_H_
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/MDBox.h"
@@ -78,12 +77,12 @@ public:
   }
   /**Save the box at specific disk position using the class, respoinsible for
    * the file IO. */
-  void saveAt(API::IBoxControllerIO *const /* */,
+  void saveAt(API::IBoxControllerIO *const,
               uint64_t /*position*/) const override { /*Not saveable */
   }
   /**Load the box data of specified size from the disk location provided using
    * the class, respoinsible for the file IO. */
-  void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/,
+  void loadAndAddFrom(API::IBoxControllerIO *const, uint64_t /*position*/,
                       size_t /* Size */) override { /*Not directly loadable */
   }
   void reserveMemoryForLoad(
@@ -272,5 +271,3 @@ private:
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MDGRIDBOX_H_ */

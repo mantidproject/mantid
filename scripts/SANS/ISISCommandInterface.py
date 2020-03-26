@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, redefined-builtin, protected-access, too-many-arguments
 """
@@ -1209,9 +1209,9 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     # If we have 0 iterations then we should return here. At this point the
     # Left/Right/Up/Down workspaces have been already created by the SeekCentre function.
     if MaxIter <= 0:
-        zero_iterations_msg = ("You have selected 0 iterations. The beam centre " +
-                               "will be positioned at (" + str(xstart*coord1_scale_factor) +
-                               ", " + str(ystart*coord2_scale_factor) + ")")
+        zero_iterations_msg = ("You have selected 0 iterations. The beam centre "
+                               + "will be positioned at (" + str(xstart*coord1_scale_factor)
+                               + ", " + str(ystart*coord2_scale_factor) + ")")
         beam_center_logger.report(zero_iterations_msg)
         return xstart, ystart
 
@@ -1249,8 +1249,8 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
             centre_positioner.set_new_increment_coord1()
         if resCoord2 > resCoord2_old:
             centre_positioner.set_new_increment_coord2()
-        if (centre_positioner.is_increment_coord1_smaller_than_tolerance() and
-                centre_positioner.is_increment_coord2_smaller_than_tolerance()):
+        if (centre_positioner.is_increment_coord1_smaller_than_tolerance()
+                and centre_positioner.is_increment_coord2_smaller_than_tolerance()):
             # this is the success criteria, we've close enough to the center
             beam_center_logger.report("Converged - check if stuck in local minimum!")
             break
@@ -1345,15 +1345,15 @@ def check_time_shifts_for_added_event_files(number_of_files, time_shifts=''):
         try:
             float(time_shift_element)
         except ValueError:
-            message = ('Error: Elements of the time shift list cannot be ' +
-                       'converted to a numeric value, e.g ' + time_shift_element)
+            message = ('Error: Elements of the time shift list cannot be '
+                       + 'converted to a numeric value, e.g ' + time_shift_element)
             print(message)
             return message
 
     if number_of_files - 1 != len(time_shift_container):
-        message = ('Error: Expected N-1 time shifts for N files, but read ' +
-                   str(len(time_shift_container)) + ' time shifts for ' +
-                   str(number_of_files) + ' files.')
+        message = ('Error: Expected N-1 time shifts for N files, but read '
+                   + str(len(time_shift_container)) + ' time shifts for '
+                   + str(number_of_files) + ' files.')
         print(message)
         return message
 
@@ -1863,8 +1863,8 @@ def MatchIDFInReducerAndWorkspace(file_name):
     # Get the idf from the reducer
     idf_path_reducer = get_current_idf_path_in_reducer()
 
-    is_matched = ((idf_path_reducer == idf_path_workspace) and
-                  su.are_two_files_identical(idf_path_reducer, idf_path_reducer))
+    is_matched = ((idf_path_reducer == idf_path_workspace)
+                  and su.are_two_files_identical(idf_path_reducer, idf_path_reducer))
 
     return is_matched
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * InterfaceManagerTest.h
@@ -11,8 +11,7 @@
  *      Author: spu92482
  */
 
-#ifndef INTERFACEMANAGERTEST_H_
-#define INTERFACEMANAGERTEST_H_
+#pragma once
 
 #include "MantidKernel/Exception.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
@@ -28,5 +27,3 @@ public:
     TS_ASSERT_DIFFERS(&objA, &objB);
   }
 };
-
-#endif /* INTERFACEMANAGERTEST_H_ */

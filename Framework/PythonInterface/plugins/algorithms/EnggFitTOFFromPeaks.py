@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
@@ -90,8 +90,8 @@ class EnggFitTOFFromPeaks(PythonAlgorithm):
 
         num_peaks = fitted_peaks_table.rowCount()
         if num_peaks < 3:
-            raise ValueError('Cannot fit a quadratic function with less than three peaks. Got a table of ' +
-                             'peaks with ' + str(num_peaks) + ' peaks')
+            raise ValueError('Cannot fit a quadratic function with less than three peaks. Got a table of '
+                             + 'peaks with ' + str(num_peaks) + ' peaks')
 
         convert_tbl_alg = self.createChildAlgorithm('ConvertTableToMatrixWorkspace')
         convert_tbl_alg.setProperty('InputWorkspace', fitted_peaks_table)

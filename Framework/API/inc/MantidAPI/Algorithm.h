@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -463,7 +463,6 @@ private:
 
   std::atomic<ExecutionState> m_executionState; ///< the current execution state
   std::atomic<ResultState> m_resultState;       ///< the current result State
-  bool m_isExecuted;                            ///< Algorithm is executed flag
   bool m_isChildAlgorithm;      ///< Algorithm is a child algorithm
   bool m_recordHistoryForChild; ///< Flag to indicate whether history should be
                                 /// recorded. Applicable to child algs only

@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FINDDIALOG_H
-#define FINDDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <QLabel>
@@ -71,5 +70,3 @@ protected slots:
 
   void accept() override;
 };
-
-#endif // exportDialog_H

@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef MANTID_CUSTOMINTERFACES_RUNSTABLE_H_
-#define MANTID_CUSTOMINTERFACES_RUNSTABLE_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "ReductionJobs.h"
@@ -68,4 +66,3 @@ bool RunsTable::isInSelection(
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_RUNSTABLE_H_

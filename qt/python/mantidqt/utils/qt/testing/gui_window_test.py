@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -22,8 +22,8 @@ from qtpy.QtTest import QTest
 
 
 def on_ubuntu_or_darwin():
-    return ('Ubuntu' in platform.platform() and sys.version[0] == '2' or
-            sys.platform == 'darwin' and PYQT_VERSION[0] == '4')
+    return ('Ubuntu' in platform.platform() and sys.version[0] == '2'
+            or sys.platform == 'darwin' and PYQT_VERSION[0] == '4')
 
 
 def not_on_windows():

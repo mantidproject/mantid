@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -13,8 +13,7 @@
  *  I.e. It can only be used by plugin/algorithm-level packages (e.g.
  *DataHandling)
  *********************************************************************************/
-#ifndef SANSINSTRUMENTCREATIONHELPER_H_
-#define SANSINSTRUMENTCREATIONHELPER_H_
+#pragma once
 
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -52,5 +51,3 @@ public:
   runLoadMappingTable(Mantid::DataObjects::Workspace2D_sptr workspace,
                       int nxbins, int nybins);
 };
-
-#endif // SANSINSTRUMENTCREATIONHELPER_H_

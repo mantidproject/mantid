@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,too-few-public-methods
 from __future__ import (absolute_import, division, print_function)
@@ -11,7 +11,6 @@ from mantid.api import FrameworkManager
 import os
 import glob
 import tempfile
-from re import sub
 
 temp_dir = tempfile.gettempdir()
 EXPECTED_EXT = '.expected'
@@ -117,7 +116,7 @@ class LoadAndSaveLotsOfInstruments(object):
             except ValueError as e:
                 print("FAILED TO LOAD AND SAVE '%s' WITH ERROR:" % filename)
                 print(e)
-                failed.append(sub("\%s" % direc, '', filename))
+                failed.append(filename)
             finally:
                 # Clear everything for the next test
                 FrameworkManager.Instance().clear()

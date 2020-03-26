@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
@@ -52,8 +52,7 @@ class FitGaussian(PythonAlgorithm):
 
         # index must be in <0,nhist)
         if index >= nhist:
-            self._error("Index " + str(index) +
-                        " is out of range for the workspace " + workspace.name())
+            self._error("Index " + str(index) + " is out of range for the workspace " + workspace.name())
 
         x_values = np.array(workspace.readX(index))
         y_values = np.array(workspace.readY(index))
@@ -74,8 +73,8 @@ class FitGaussian(PythonAlgorithm):
         nentries = len(indices)
 
         if nentries < 3:
-            self._warning("Spectrum " + str(index) + " in workspace " + workspace.name() +
-                          " has a too narrow peak. Cannot guess sigma. Check your data.")
+            self._warning("Spectrum " + str(index) + " in workspace " + workspace.name()
+                          + " has a too narrow peak. Cannot guess sigma. Check your data.")
             return
 
         minIndex = indices[0,0]
@@ -98,8 +97,8 @@ class FitGaussian(PythonAlgorithm):
             StartX=startX, EndX=endX)
 
         if not 'success' == fit_output.OutputStatus:
-            self._warning("For detector " + str(index) + " in workspace " + workspace.name() +
-                          "fit was not successful. Input guess parameters were " + str(fitFun))
+            self._warning("For detector " + str(index) + " in workspace " + workspace.name()
+                          + "fit was not successful. Input guess parameters were " + str(fitFun))
             return
 
         fitParams = fit_output.OutputParameters.column(1)

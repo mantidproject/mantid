@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * StripVanadiumPeaks.h
@@ -18,6 +18,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -40,7 +41,7 @@ namespace Algorithms {
     @author Janik Zikovsky, SNS
     @date 2010-09-10
 */
-class DLLExport StripVanadiumPeaks : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL StripVanadiumPeaks : public API::Algorithm {
 public:
   /// (Empty) Constructor
   StripVanadiumPeaks();

@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -45,13 +45,13 @@ class MarkedColumnsTest(unittest.TestCase):
         Test adding YErr columns that do not overlap in any way
         """
         mc = MarkedColumns()
-        ec = ErrorColumn(2, 4, 0)
+        ec = ErrorColumn(2, 4)
         mc.add_y_err(ec)
         self.assertEqual(1, len(mc.as_y_err))
-        ec = ErrorColumn(3, 5, 0)
+        ec = ErrorColumn(3, 5)
         mc.add_y_err(ec)
         self.assertEqual(2, len(mc.as_y_err))
-        ec = ErrorColumn(1, 6, 0)
+        ec = ErrorColumn(1, 6)
         mc.add_y_err(ec)
         self.assertEqual(3, len(mc.as_y_err))
 
@@ -75,14 +75,14 @@ class MarkedColumnsTest(unittest.TestCase):
 
     def test_add_y_err_duplicate_column(self):
         mc = MarkedColumns()
-        ec = ErrorColumn(2, 4, 0)
+        ec = ErrorColumn(2, 4)
 
         mc.add_y_err(ec)
         self.assertEqual(1, len(mc.as_y_err))
         mc.add_y_err(ec)
         self.assertEqual(1, len(mc.as_y_err))
 
-        ec2 = ErrorColumn(3, 5, 0)
+        ec2 = ErrorColumn(3, 5)
         mc.add_y_err(ec2)
         self.assertEqual(2, len(mc.as_y_err))
         mc.add_y_err(ec2)
@@ -123,7 +123,7 @@ class MarkedColumnsTest(unittest.TestCase):
         -> The new YErr must replace the old one
         """
         mc = MarkedColumns()
-        ec = ErrorColumn(column=2, related_y_column=4, label_index=0)
+        ec = ErrorColumn(column=2, related_y_column=4)
         mc.add_y_err(ec)
         self.assertEqual(1, len(mc.as_y_err))
         self.assertEqual(2, mc.as_y_err[0].column)
@@ -131,7 +131,7 @@ class MarkedColumnsTest(unittest.TestCase):
 
         # different source column but contains error for the same column
         # adding this one should replace the first one
-        ec2 = ErrorColumn(column=2, related_y_column=5, label_index=0)
+        ec2 = ErrorColumn(column=2, related_y_column=5)
         mc.add_y_err(ec2)
         self.assertEqual(1, len(mc.as_y_err))
         self.assertEqual(2, mc.as_y_err[0].column)
@@ -143,7 +143,7 @@ class MarkedColumnsTest(unittest.TestCase):
         -> The new YErr must replace the old one
         """
         mc = MarkedColumns()
-        ec = ErrorColumn(column=2, related_y_column=4, label_index=0)
+        ec = ErrorColumn(column=2, related_y_column=4)
         mc.add_y_err(ec)
         self.assertEqual(1, len(mc.as_y_err))
         self.assertEqual(2, mc.as_y_err[0].column)
@@ -151,7 +151,7 @@ class MarkedColumnsTest(unittest.TestCase):
 
         # different source column but contains error for the same column
         # adding this one should replace the first one
-        ec2 = ErrorColumn(column=3, related_y_column=4, label_index=0)
+        ec2 = ErrorColumn(column=3, related_y_column=4)
         mc.add_y_err(ec2)
         self.assertEqual(1, len(mc.as_y_err))
         self.assertEqual(3, mc.as_y_err[0].column)
@@ -164,7 +164,7 @@ class MarkedColumnsTest(unittest.TestCase):
         """
         mc = MarkedColumns()
         mc.add_y(4)
-        ec = ErrorColumn(column=2, related_y_column=4, label_index=0)
+        ec = ErrorColumn(column=2, related_y_column=4)
         mc.add_y_err(ec)
 
         # check that we have both a Y col and an associated YErr
@@ -177,6 +177,11 @@ class MarkedColumnsTest(unittest.TestCase):
         self.assertEqual(0, len(mc.as_y))
         self.assertEqual(0, len(mc.as_y_err))
 
+        # check setting the column back to Y does not automatically reinstate the error column
+        mc.add_y(4)
+        self.assertEqual(1, len(mc.as_y))
+        self.assertEqual(0, len(mc.as_y_err))
+
     def test_changing_y_to_none_removes_associated_yerr_columns(self):
         """
         Test to check if a first column is marked as Y, a second column YErr is associated with it, but then
@@ -184,7 +189,7 @@ class MarkedColumnsTest(unittest.TestCase):
         """
         mc = MarkedColumns()
         mc.add_y(4)
-        ec = ErrorColumn(column=2, related_y_column=4, label_index=0)
+        ec = ErrorColumn(column=2, related_y_column=4)
         mc.add_y_err(ec)
 
         # check that we have both a Y col and an associated YErr
@@ -197,11 +202,16 @@ class MarkedColumnsTest(unittest.TestCase):
         self.assertEqual(0, len(mc.as_y))
         self.assertEqual(0, len(mc.as_y_err))
 
+        # check adding the Y column back in does not automatically reinstate the error column
+        mc.add_y(4)
+        self.assertEqual(1, len(mc.as_y))
+        self.assertEqual(0, len(mc.as_y_err))
+
     def test_remove_column(self):
         mc = MarkedColumns()
         mc.add_y(4)
         mc.add_x(3)
-        ec = ErrorColumn(column=2, related_y_column=6, label_index=0)
+        ec = ErrorColumn(column=2, related_y_column=6)
         mc.add_y_err(ec)
 
         self.assertEqual(1, len(mc.as_x))
@@ -249,12 +259,12 @@ class MarkedColumnsTest(unittest.TestCase):
         mc.add_y(2)
 
         # change one of the columns to YErr
-        mc.add_y_err(ErrorColumn(1, 0, 0))
+        mc.add_y_err(ErrorColumn(1, 0))
         expected = [(0, '[Y0]'), (2, '[Y1]'), (1, '[Y0_YErr]')]
         self.assertEqual(expected, mc.build_labels())
 
         # change the last Y column to YErr
-        mc.add_y_err(ErrorColumn(2, 0, 0))
+        mc.add_y_err(ErrorColumn(2, 0))
         expected = [(0, '[Y0]'), (2, '[Y0_YErr]')]
         self.assertEqual(expected, mc.build_labels())
 
@@ -265,13 +275,13 @@ class MarkedColumnsTest(unittest.TestCase):
         mc.add_y(2)
 
         # change one of the columns to YErr
-        mc.add_y_err(ErrorColumn(0, 1, 1))
+        mc.add_y_err(ErrorColumn(0, 1))
         # note: the first column is being set -> this decreases the label index of all columns to its right by 1
         expected = [(1, '[Y0]'), (2, '[Y1]'), (0, '[Y0_YErr]')]
         self.assertEqual(expected, mc.build_labels())
 
         # change the last Y column to YErr
-        mc.add_y_err(ErrorColumn(2, 1, 0))
+        mc.add_y_err(ErrorColumn(2, 1))
         expected = [(1, '[Y0]'), (2, '[Y0_YErr]')]
         self.assertEqual(expected, mc.build_labels())
 
@@ -282,7 +292,7 @@ class MarkedColumnsTest(unittest.TestCase):
         mc.add_y(2)
         mc.add_y(3)
 
-        mc.add_y_err(ErrorColumn(1, 0, 0))
+        mc.add_y_err(ErrorColumn(1, 0))
         expected = [(0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]'), (1, '[Y0_YErr]')]
         self.assertEqual(expected, mc.build_labels())
 
@@ -291,7 +301,16 @@ class MarkedColumnsTest(unittest.TestCase):
         self.assertEqual(expected, mc.build_labels())
 
         expected = [(1, '[X0]'), (2, '[Y0]'), (3, '[Y1]'), (0, '[Y1_YErr]')]
-        mc.add_y_err(ErrorColumn(0, 3, 2))
+        mc.add_y_err(ErrorColumn(0, 3))
+        self.assertEqual(expected, mc.build_labels())
+
+    def test_build_labels_y_with_only_some_having_yerr(self):
+        mc = MarkedColumns()
+        mc.add_y(0)
+        mc.add_y(1)
+        mc.add_y_err(ErrorColumn(2,1))
+
+        expected = [(0, '[Y0]'), (1, '[Y1]'), (2, '[Y1_YErr]')]
         self.assertEqual(expected, mc.build_labels())
 
     def test_fail_to_add_yerr_for_x(self):
@@ -301,7 +320,7 @@ class MarkedColumnsTest(unittest.TestCase):
         mc.add_y(2)
         mc.add_y(3)
 
-        mc.add_y_err(ErrorColumn(1, 0, 0))
+        mc.add_y_err(ErrorColumn(1, 0))
         expected = [(0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]'), (1, '[Y0_YErr]')]
         self.assertEqual(expected, mc.build_labels())
 
@@ -309,7 +328,7 @@ class MarkedColumnsTest(unittest.TestCase):
         mc.add_x(1)
         self.assertEqual(expected, mc.build_labels())
 
-        self.assertRaises(ValueError, lambda: mc.add_y_err(ErrorColumn(0, 1, 2)))
+        self.assertRaises(ValueError, lambda: mc.add_y_err(ErrorColumn(0, 1)))
 
     def test_fail_to_add_yerr_for_another_yerr(self):
         mc = MarkedColumns()
@@ -318,11 +337,11 @@ class MarkedColumnsTest(unittest.TestCase):
         mc.add_y(2)
         mc.add_y(3)
 
-        mc.add_y_err(ErrorColumn(1, 0, 0))
+        mc.add_y_err(ErrorColumn(1, 0))
         expected = [(0, '[Y0]'), (2, '[Y1]'), (3, '[Y2]'), (1, '[Y0_YErr]')]
         self.assertEqual(expected, mc.build_labels())
 
-        self.assertRaises(ValueError, lambda: mc.add_y_err(ErrorColumn(0, 1, 2)))
+        self.assertRaises(ValueError, lambda: mc.add_y_err(ErrorColumn(0, 1)))
 
     def test_find_yerr(self):
         mc = MarkedColumns()
@@ -331,13 +350,13 @@ class MarkedColumnsTest(unittest.TestCase):
         mc.add_y(2)
         mc.add_y(3)
 
-        mc.add_y_err(ErrorColumn(4, 1, 1))
+        mc.add_y_err(ErrorColumn(4, 1))
         expected = {1: 4}
         self.assertEqual(expected, mc.find_yerr([1]))
         # Replace the Y column, which has an associated YErr. This should remove the YErr as well
-        mc.add_y_err(ErrorColumn(1, 3, 1))
+        mc.add_y_err(ErrorColumn(1, 3))
         expected = {3: 1}
         self.assertEqual(expected, mc.find_yerr([0, 1, 2, 3]))
-        mc.add_y_err(ErrorColumn(4, 2, 1))
+        mc.add_y_err(ErrorColumn(4, 2))
         expected = {2: 4, 3: 1}
         self.assertEqual(expected, mc.find_yerr([0, 1, 2, 3]))

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_LEBAILFIT_H_
-#define MANTID_CURVEFITTING_LEBAILFIT_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -60,7 +59,7 @@ struct Parameter {
   int movedirection;
 };
 
-class DLLExport LeBailFit : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL LeBailFit : public API::Algorithm {
 public:
   /// Enumerate
   enum FunctionMode { CALCULATION, FIT, BACKGROUNDPROCESS, MONTECARLO };
@@ -314,5 +313,3 @@ void writeRfactorsToFile(std::vector<double> vecX,
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_LEBAILFIT_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PYSEQUENCETOVECTORCONVERTERTEST_H_
-#define PYSEQUENCETOVECTORCONVERTERTEST_H_
+#pragma once
 
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include <boost/python/dict.hpp>
@@ -67,5 +66,3 @@ public:
     return testlist;
   }
 };
-
-#endif /* PYSEQUENCETOVECTORCONVERTERTEST_H_ */

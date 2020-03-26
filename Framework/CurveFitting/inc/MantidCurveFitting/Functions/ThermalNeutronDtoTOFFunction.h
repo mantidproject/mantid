@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_THERMALNEUTRONDTOTOFFUNCTION_H_
-#define MANTID_CURVEFITTING_THERMALNEUTRONDTOTOFFUNCTION_H_
+#pragma once
 
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 
@@ -24,8 +24,9 @@ namespace Functions {
 
 /** ThermalNeutronDtoTOFFunction : TODO: DESCRIPTION
  */
-class DLLExport ThermalNeutronDtoTOFFunction : virtual public API::IFunction1D,
-                                               public API::ParamFunction {
+class MANTID_CURVEFITTING_DLL ThermalNeutronDtoTOFFunction
+    : virtual public API::IFunction1D,
+      public API::ParamFunction {
 public:
   /// Override
   void function1D(double *out, const double *xValues,
@@ -84,5 +85,3 @@ inline double calThermalNeutronTOF(double dh, double dtt1, double dtt1t,
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_THERMALNEUTRONDTOTOFFUNCTION_H_ */

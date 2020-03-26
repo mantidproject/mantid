@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SETCRYSTALLOCATIONTEST_H_
-#define SETCRYSTALLOCATIONTEST_H_
+#pragma once
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidCrystal/LoadIsawUB.h"
@@ -108,5 +107,3 @@ public:
     TS_ASSERT_DELTA(sampPos3.Z(), 0.0, 1.e-3);
   }
 };
-
-#endif /* SETCRYSTALLOCATIONTEST_H_ */

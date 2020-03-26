@@ -1,13 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAlgorithms/TimeAtSampleStrategy.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <boost/shared_ptr.hpp>
 
@@ -21,7 +20,7 @@ namespace Algorithms {
 
 /** TimeAtSampleStrategyElastic : Time at sample stragegy for elastic scattering
  */
-class DLLExport TimeAtSampleStrategyElastic
+class MANTID_ALGORITHMS_DLL TimeAtSampleStrategyElastic
     : public Mantid::Algorithms::TimeAtSampleStrategy {
 public:
   TimeAtSampleStrategyElastic(

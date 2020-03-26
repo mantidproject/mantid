@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/Exception.h"
@@ -29,7 +30,7 @@ namespace API {
  * @author Janik Zikovsky
  * @date Feb 21, 2011
  */
-class DLLExport BoxController {
+class MANTID_API_DLL BoxController {
 public:
   //-----------------------------------------------------------------------------------
   /** Constructor

@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef RENAMEDIALOG_H
-#define RENAMEDIALOG_H
+#pragma once
 
 #include <qdialog.h>
 #include <qvariant.h>
@@ -71,5 +70,3 @@ signals:
 private:
   MdiSubWindow *window;
 };
-
-#endif // EXPORTDIALOG_H

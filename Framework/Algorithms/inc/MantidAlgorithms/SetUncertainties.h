@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,7 +21,7 @@ namespace Algorithms {
 
  @date 10/12/2010
  */
-class DLLExport SetUncertainties : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL SetUncertainties : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name
   const std::string name() const override;

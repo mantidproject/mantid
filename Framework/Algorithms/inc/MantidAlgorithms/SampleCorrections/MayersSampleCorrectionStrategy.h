@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
-#include "MantidKernel/System.h"
 #include <memory>
 #include <utility>
 #include <vector>
@@ -24,7 +24,7 @@ namespace Algorithms {
   https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574 for an array of
   tof, signal & error values
 */
-class DLLExport MayersSampleCorrectionStrategy {
+class MANTID_ALGORITHMS_DLL MayersSampleCorrectionStrategy {
 public:
   /**
    * Stores parameters for a single calculation for a given angle

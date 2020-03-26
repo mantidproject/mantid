@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -792,6 +792,11 @@ def start_workbench(app, command_line_options):
     # The ordering here is very delicate. Test thoroughly when
     # changing anything!
     main_window = MainWindow()
+
+    # Set the mainwindow as the parent for additional QMainWindow instances
+    from workbench.config import set_additional_windows_parent
+    set_additional_windows_parent(main_window)
+
     # decorates the excepthook callback with the reference to the main window
     # this is used in case the user wants to terminate the workbench from the error window shown
     sys.excepthook = partial(exception_logger, main_window)

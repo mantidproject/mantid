@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Qwt/QwtRasterDataMD.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -39,7 +39,7 @@ QwtRasterDataMD::~QwtRasterDataMD() { delete[] m_slicePoint; }
 //-------------------------------------------------------------------------
 /** Perform a copy of this data object */
 QwtRasterDataMD *QwtRasterDataMD::copy() const {
-  QwtRasterDataMD *out = new QwtRasterDataMD();
+  auto *out = new QwtRasterDataMD();
   this->copyFrom(*this, *out);
   return out;
 }
@@ -62,7 +62,7 @@ double QwtRasterDataMD::value(double x, double y) const {
     return 0;
 
   // Generate the vector of coordinates, filling in X and Y
-  coord_t *lookPoint = new coord_t[m_nd];
+  auto *lookPoint = new coord_t[m_nd];
   for (size_t d = 0; d < m_nd; d++) {
     if (d == m_dimX)
       lookPoint[d] = static_cast<coord_t>(x);

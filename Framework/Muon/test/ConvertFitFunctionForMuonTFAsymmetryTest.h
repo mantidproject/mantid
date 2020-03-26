@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVERTFITFUNCTIONFORMUONTFASYMETRYTEST_H_
-#define CONVERTFITFUNCTIONFORMUONTFASYMETRYTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -461,4 +460,3 @@ public:
 private:
   MatrixWorkspace_sptr input;
 };
-#endif /*ESTIMATEMUONASYMMETRYFROMCOUNTSTEST_H_*/

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -13,8 +13,7 @@
  *a
  *  package higher than Geometry (e.g. API, DataObjects, ...)
  *********************************************************************************/
-#ifndef COMPONENTCREATIONHELPER_H_
-#define COMPONENTCREATIONHELPER_H_
+#pragma once
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -258,5 +257,3 @@ createInstrumentWithPSDTubes(const size_t nTubes = 3,
                              const size_t nPixelsPerTube = 50,
                              const bool mirrorTubes = false);
 } // namespace ComponentCreationHelper
-
-#endif // COMPONENTCREATIONHELPERS_H_

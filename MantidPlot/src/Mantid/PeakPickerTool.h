@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PEAK_PICKER_TOOL_H
-#define PEAK_PICKER_TOOL_H
+#pragma once
 
 //---------------------------
 // Includes
@@ -209,5 +208,3 @@ private:
 
   QStringList m_curveNames; // Names of all curves added to graph()
 };
-
-#endif /* PEAK_PICKER_TOOL_H */

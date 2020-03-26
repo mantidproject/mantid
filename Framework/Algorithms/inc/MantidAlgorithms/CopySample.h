@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Sample.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -29,7 +29,7 @@ will copy to all samples. The following information can be copied:
   @author Andrei Savici, ORNL
   @date 2011-08-11
 */
-class DLLExport CopySample : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CopySample : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CopySample"; };

@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, arguments-differ, unused-variable
 """
@@ -800,7 +800,7 @@ class SampleGeomCor(ReductionStep):
                 volume = geo.thickness * math.pi
                 volume *= math.pow(geo.width, 2) / 4.0
             else:
-                raise NotImplemented('Shape "' + geo.shape + '" is not in the list of supported shapes')
+                raise NotImplementedError('Shape "' + geo.shape + '" is not in the list of supported shapes')
         # pylint: disable=notimplemented-raised
         except TypeError:
             raise TypeError('Error calculating sample volume with width=' + str(geo.width) + ' height=' + str(

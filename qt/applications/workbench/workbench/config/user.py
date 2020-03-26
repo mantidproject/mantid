@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -79,21 +79,32 @@ class UserConfig(object):
     def filename(self):
         return self.qsettings.fileName()
 
-    def get(self, option, second=None):
+    def get(self, option, second=None, type=None):
         """Return a value for an option. If two arguments are given the first
         is the group/section and the second is the option within it.
         ``config.get('main', 'window/size')`` is equivalent to
         ``config.get('main/window/size')`` If no option is found then
         a KeyError is raised
         """
-        option = self._check_section_option_is_valid(option, second)
-        value = self.qsettings.value(option)
 
-        # qsettings appears to return None if the option isn't found
-        if value is None:
+        def raise_keyerror(key):
             raise KeyError('Unknown config item requested: "{}"'.format(option))
+
+        full_option = self._check_section_option_is_valid(option, second)
+        if type is None:
+            # return whatever the QSettings object returns
+            value = self.qsettings.value(full_option)
+            if value is None:
+                raise_keyerror(full_option)
+            else:
+                return value
         else:
-            return value
+            # PyQt QSettings with the type parameter tries to always return the type even if no value exists
+            # We still want a KeyError if it does not exist
+            if self.has(option, second):
+                return self.qsettings.value(full_option, type=type)
+            else:
+                raise_keyerror(option)
 
     def has(self, option, second=None):
         """Return a True if the key exists in the
@@ -150,9 +161,10 @@ class UserConfig(object):
             if not is_text_string(option):
                 raise TypeError('Found invalid type ({}) for option ({}) must be a string'.format(type(option), option))
             return option
-        else: # fist argument is actually the section/group
+        else:  # fist argument is actually the section/group
             if not is_text_string(option):
-                raise TypeError('Found invalid type ({}) for section ({}) must be a string'.format(type(option), option))
+                raise TypeError(
+                    'Found invalid type ({}) for section ({}) must be a string'.format(type(option), option))
             if not is_text_string(second):
                 raise TypeError('Found invalid type ({}) for option ({}) must be a string'.format(type(second), second))
             return joinsettings(option, second)

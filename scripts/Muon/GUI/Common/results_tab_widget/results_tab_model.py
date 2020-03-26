@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 from __future__ import (absolute_import, division, unicode_literals)
@@ -218,9 +218,7 @@ class ResultsTabModel(object):
                 missing_msg.append("  Fit '{}' is missing the logs {}".format(
                     fit.parameters.parameter_workspace_name, missing))
         if missing_msg:
-            raise RuntimeError(
-                "The logs for each selected fit do not match:\n" +
-                "\n".join(missing_msg))
+            raise RuntimeError("The logs for each selected fit do not match:\n" + "\n".join(missing_msg))
 
     def _raise_if_result_selection_is_invalid(self, results_selection):
         """

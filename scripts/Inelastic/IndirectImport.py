@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 Temporary solutions to the messy problem of importing F2Py libraries into
@@ -83,9 +83,9 @@ def is_supported_f2py_platform():
     @returns True if we are currently on a platform that supports the F2Py
     libraries, else False.
     """
-    if (_os_env().startswith("Windows") and
-            _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI and
-            "python_d" not in sys.executable):
+    if (_os_env().startswith("Windows")
+            and _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI
+            and "python_d" not in sys.executable):
         return True
     return False
 

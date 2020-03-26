@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef CONVOLUTION_H
-#define CONVOLUTION_H
+#pragma once
 
 #include "Filter.h"
 
@@ -71,5 +70,3 @@ public:
 private:
   void output() override;
 };
-
-#endif

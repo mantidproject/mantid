@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
@@ -67,45 +67,45 @@ class KpointsData(AbinsModules.GeneralData):
 
         # unit_cell
         unit_cell = items["unit_cell"]
-        if not (isinstance(unit_cell, np.ndarray) and
-                unit_cell.shape == (dim, dim) and
-                unit_cell.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
+        if not (isinstance(unit_cell, np.ndarray)
+                and unit_cell.shape == (dim, dim)
+                and unit_cell.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
 
             raise ValueError("Invalid values of unit cell vectors.")
 
         #  "weights"
         weights = items["weights"]
 
-        if not (isinstance(weights, np.ndarray) and
-           weights.shape == (self._num_k,) and
-           weights.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID and
-           np.allclose(weights, weights[weights >= 0])):
+        if not (isinstance(weights, np.ndarray)
+                and weights.shape == (self._num_k,)
+                and weights.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID
+                and np.allclose(weights, weights[weights >= 0])):
 
             raise ValueError("Invalid value of weights.")
 
         #  "k_vectors"
         k_vectors = items["k_vectors"]
 
-        if not (isinstance(k_vectors, np.ndarray) and
-           k_vectors.shape == (self._num_k, dim) and
-           k_vectors.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
+        if not (isinstance(k_vectors, np.ndarray)
+                and k_vectors.shape == (self._num_k, dim)
+                and k_vectors.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
 
             raise ValueError("Invalid value of k_vectors.")
 
         #  "frequencies"
         frequencies = items["frequencies"]
         num_freq = frequencies.shape[1]
-        if not (isinstance(frequencies, np.ndarray) and
-                frequencies.shape == (self._num_k, num_freq) and
-                frequencies.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
+        if not (isinstance(frequencies, np.ndarray)
+                and frequencies.shape == (self._num_k, num_freq)
+                and frequencies.dtype.num == AbinsModules.AbinsConstants.FLOAT_ID):
             raise ValueError("Invalid value of frequencies.")
 
         # "atomic_displacements"
         atomic_displacements = items["atomic_displacements"]
         if not (isinstance(
-                atomic_displacements, np.ndarray) and
-                atomic_displacements.shape == (self._num_k, self._num_atoms, num_freq, dim) and
-                atomic_displacements.dtype.num == AbinsModules.AbinsConstants.COMPLEX_ID):
+                atomic_displacements, np.ndarray)
+                and atomic_displacements.shape == (self._num_k, self._num_atoms, num_freq, dim)
+                and atomic_displacements.dtype.num == AbinsModules.AbinsConstants.COMPLEX_ID):
 
             raise ValueError("Invalid value of atomic_displacements.")
 

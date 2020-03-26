@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef BOXCURVE_H
-#define BOXCURVE_H
+#pragma once
 
 #include "PlotCurve.h"
 #include <qwt_plot.h>
@@ -114,5 +113,3 @@ private:
   QwtArray<double> d_y;
   double d_x;
 };
-
-#endif

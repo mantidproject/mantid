@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, too-many-branches, invalid-name, super-on-old-class, protected-access,
 # pylint: disable=too-few-public-methods,too-few-public-methods, too-many-arguments, too-many-instance-attributes
@@ -203,8 +203,8 @@ class LoadRun(object):
                 try:
                     LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
                 except ValueError as details:
-                    sanslog.warning('The file does not contain monitors. \n' +
-                                    'The normalization might behave differently than you expect.\n'
+                    sanslog.warning('The file does not contain monitors. \n'
+                                    + 'The normalization might behave differently than you expect.\n'
                                     ' Further details: ' + str(details) + '\n')
             else:
                 if monitor_ws_name in mtd:
@@ -758,9 +758,8 @@ class Mask_ISIS(ReductionStep):
                     bankLow = self._whichBank(instName, low)
                     bankUpp = self._whichBank(instName, upp)
                     if bankLow != bankUpp:
-                        _issueWarning('The spectra in Mask command: ' + details +
-                                      ' belong to two different banks. Default to use bank ' +
-                                      bankLow)
+                        _issueWarning('The spectra in Mask command: ' + details
+                                      + ' belong to two different banks. Default to use bank ' + bankLow)
                     bank = bankLow
                 else:
                     bank = self._whichBank(instName, int(argToMask.lstrip('S')))
@@ -782,12 +781,13 @@ class Mask_ISIS(ReductionStep):
             elif len(typeSplit) == 2:
                 # Commands such as MASK/REAR Hn, where typeSplit[0] then equal 'REAR'
                 if 'S' in typeSplit[1].upper():
-                    _issueWarning('MASK command of type ' + details +
-                                  ' deprecated. Please use instead MASK Ssp1[>Ssp2]')
+                    _issueWarning('MASK command of type ' + details
+                                  + ' deprecated. Please use instead MASK Ssp1[>Ssp2]')
                 if typeSplit[0].upper() != 'REAR' and instName == 'LOQ':
-                    _issueWarning('MASK command of type ' + details +
-                                  ' can, until otherwise requested, only be used for the REAR (default) Main detector of LOQ. ' +
-                                  'Default to the Main detector of LOQ for this mask command')
+                    _issueWarning('MASK command of type ' + details
+                                  + ' can, until otherwise requested, only be used for the REAR (default)'
+                                  ' Main detector of LOQ. '
+                                  + 'Default to the Main detector of LOQ for this mask command')
                     self.add_mask_string(mask_string=typeSplit[1], detect='rear')
                 else:
                     self.add_mask_string(mask_string=typeSplit[1], detect=typeSplit[0])
@@ -804,8 +804,8 @@ class Mask_ISIS(ReductionStep):
                     self.arm_x = 0.0
                     self.arm_y = 0.0
                 else:
-                    _issueWarning('Unrecognized line masking command "' + details +
-                                  '" syntax is MASK/LINE width angle or MASK/LINE width angle x y')
+                    _issueWarning('Unrecognized line masking command "' + details
+                                  + '" syntax is MASK/LINE width angle or MASK/LINE width angle x y')
             else:
                 _issueWarning('Unrecognized masking option "' + details + '"')
         elif len(parts) == 3:
@@ -824,9 +824,9 @@ class Mask_ISIS(ReductionStep):
                     elif detname.upper() == 'REAR':
                         self.time_mask_r += ';' + bin_range
                     else:
-                        _issueWarning('Detector \'' + detname +
-                                      '\' not found in currently selected instrument ' +
-                                      self.instrument.name() + '. Skipping line.')
+                        _issueWarning('Detector \'' + detname
+                                      + '\' not found in currently selected instrument '
+                                      + self.instrument.name() + '. Skipping line.')
                 else:
                     _issueWarning('Unrecognized masking line "' + details + '"')
         else:
@@ -838,9 +838,9 @@ class Mask_ISIS(ReductionStep):
         elif detect.upper() == 'REAR':
             self.spec_mask_r += ',' + mask_string
         else:
-            _issueWarning('Detector \'' + detect +
-                          '\' not found in currently selected instrument ' +
-                          self.instrument.name() + '. Skipping line.')
+            _issueWarning('Detector \'' + detect
+                          + '\' not found in currently selected instrument '
+                          + self.instrument.name() + '. Skipping line.')
 
     def _ConvertToSpecList(self, maskstring, detector):
         '''
@@ -1954,8 +1954,8 @@ class NormalizeToMonitor(ReductionStep):
         This method sets default prompt peak values in case the user has not provided some. Currently
         we only use default values for LOQ.
         """
-        if (reducer.transmission_calculator.removePromptPeakMin is None and
-           reducer.transmission_calculator.removePromptPeakMax is None):
+        if (reducer.transmission_calculator.removePromptPeakMin is None
+                and reducer.transmission_calculator.removePromptPeakMax is None):
             if reducer.instrument.name() == "LOQ":
                 reducer.transmission_calculator.removePromptPeakMin = 19000.0  # Units of micro-seconds
                 reducer.transmission_calculator.removePromptPeakMax = 20500.0  # Units of micro-seconds
@@ -2714,8 +2714,8 @@ class ConvertToQISIS(ReductionStep):
         if (not self._grav_extra_length_set) or override:
             self._grav_extra_length = extra_length
         else:
-            msg = ("User file can't override previous extra length setting for" +
-                   " gravity correction; extra length remains " + str(self._grav_extra_length))
+            msg = ("User file can't override previous extra length setting for"
+                   + " gravity correction; extra length remains " + str(self._grav_extra_length))
             print(msg)
             sanslog.warning(msg)
 
@@ -2988,8 +2988,8 @@ class ConvertToQISIS(ReductionStep):
                 "The specified moderator file is not valid. Please make sure that that it exists in your search directory.")
 
         # If A1 is set, then A2 should be set and vice versa
-        if ((self.get_q_resolution_a1() is None and self.get_q_resolution_a2() is not None) or
-                (self.get_q_resolution_a2() is None and self.get_q_resolution_a1() is not None)):
+        if ((self.get_q_resolution_a1() is None and self.get_q_resolution_a2() is not None)
+                or (self.get_q_resolution_a2() is None and self.get_q_resolution_a1() is not None)):
             raise RuntimeError("Both, A1 and A2, need to be specified.")
 
     def _set_up_q_resolution_parameters(self):

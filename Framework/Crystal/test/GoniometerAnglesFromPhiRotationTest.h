@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * GoniometerAnglesFromPhiRotation.h
@@ -11,8 +11,7 @@
  *      Author: ruth
  */
 
-#ifndef GoniometerAnglesFromPhiRotationTest_H_
-#define GoniometerAnglesFromPhiRotationTest_H_
+#pragma once
 
 #include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
 
@@ -89,5 +88,3 @@ public:
     TS_ASSERT_DELTA((double)Gonr.getProperty("Omega2"), -3.0035, .5);
   }
 };
-
-#endif /* GoniometerAnglesFromPhiRotationTest_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------
 // Includes
@@ -58,7 +58,7 @@ DiagResults::DiagResults(QWidget *parent)
     row = addRow(col1, col2);
   }
   row++;
-  QPushButton *close = new QPushButton("Close");
+  auto *close = new QPushButton("Close");
   m_Grid->addWidget(close, row, 1);
   connect(close, SIGNAL(clicked()), this, SLOT(close()));
 

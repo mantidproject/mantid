@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 
@@ -13,8 +13,8 @@ def enum_has_required_attr(enum_cls):
     try:
         enum_cls.enum_friendly_name
     except AttributeError:
-        raise RuntimeError("'enum_friendly_name' was not set. Please contact development team.\nEnum name: " +
-                           str(enum_cls))
+        raise RuntimeError("'enum_friendly_name' was not set. Please contact development team.\nEnum name: "
+                           + str(enum_cls))
 
 
 class ParamMapEntry(object):

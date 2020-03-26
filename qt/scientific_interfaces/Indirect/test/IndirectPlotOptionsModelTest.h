@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INDIRECTPLOTOPTIONSMODELTEST_H_
-#define MANTIDQT_INDIRECTPLOTOPTIONSMODELTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -393,5 +392,3 @@ private:
   std::unique_ptr<IndirectPlotOptionsModel> m_model;
   MockIndirectPlotter *m_plotter;
 };
-
-#endif /* MANTIDQT_INDIRECTPLOTOPTIONSMODELTEST_H_ */

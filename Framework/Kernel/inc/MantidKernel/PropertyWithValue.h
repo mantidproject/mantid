@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_PROPERTYWITHVALUE_H_
-#define MANTID_KERNEL_PROPERTYWITHVALUE_H_
+#pragma once
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
@@ -134,5 +133,3 @@ Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /*MANTID_KERNEL_PROPERTYWITHVALUE_H_*/

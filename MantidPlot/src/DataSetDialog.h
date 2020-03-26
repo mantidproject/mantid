@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef DATASETDIALOG_H
-#define DATASETDIALOG_H
+#pragma once
 
 #include "ApplicationWindow.h"
 #include <QDialog>
@@ -72,5 +71,3 @@ private:
   QGroupBox *groupBox1;
   QComboBox *boxName;
 };
-
-#endif

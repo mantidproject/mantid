@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataProcessorUI/QDataProcessorWidget.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/DataProcessorMainPresenter.h"
@@ -131,7 +131,7 @@ void QDataProcessorWidget::createTable() {
   ui.setupUi(this);
 
   // Allow rows and columns to be reordered
-  QHeaderView *header = new QHeaderView(Qt::Horizontal);
+  auto *header = new QHeaderView(Qt::Horizontal);
   header->setStretchLastSection(true);
   header->setStyleSheet("QHeaderView {font-size:11pt;}");
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
