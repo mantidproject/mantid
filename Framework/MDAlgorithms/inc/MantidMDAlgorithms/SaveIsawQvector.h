@@ -32,7 +32,7 @@ private:
 
   MDWSDescription m_targWSDescr;
 
-  void initTargetWSDescr(DataObjects::EventWorkspace_sptr wksp);
+  void initTargetWSDescr(const DataObjects::EventWorkspace_sptr &wksp);
 };
 
 } // namespace MDAlgorithms

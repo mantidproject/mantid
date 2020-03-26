@@ -50,7 +50,7 @@ public:
 class WorkspaceGroupTest : public CxxTest::TestSuite {
 private:
   /// Helper method to add an 'nperiods' log value to each workspace in a group.
-  void add_periods_logs(WorkspaceGroup_sptr ws, int nperiods = -1) {
+  void add_periods_logs(const WorkspaceGroup_sptr &ws, int nperiods = -1) {
     for (size_t i = 0; i < ws->size(); ++i) {
       MatrixWorkspace_sptr currentWS =
           boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));

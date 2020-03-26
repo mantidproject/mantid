@@ -8,6 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <utility>
+
 #include "MantidDataHandling/CheckMantidVersion.h"
 
 using Mantid::DataHandling::CheckMantidVersion;
@@ -21,8 +23,8 @@ class MockedCheckMantidVersion : public CheckMantidVersion {
 public:
   MockedCheckMantidVersion(std::string currentVersion,
                            std::string gitHubVersion)
-      : CheckMantidVersion(), CurrentVersion(currentVersion),
-        GitHubVersion(gitHubVersion) {}
+      : CheckMantidVersion(), CurrentVersion(std::move(currentVersion)),
+        GitHubVersion(std::move(gitHubVersion)) {}
 
   std::string CurrentVersion;
   std::string GitHubVersion;
@@ -117,8 +119,7 @@ public:
 
     std::string currentVersion =
         alg.PropertyManagerOwner::getProperty("CurrentVersion");
-    std::string mostRecentVersion =
-        alg.PropertyManagerOwner::getProperty("MostRecentVersion");
+    alg.PropertyManagerOwner::getProperty("MostRecentVersion");
     bool isNewVersionAvailable =
         alg.PropertyManagerOwner::getProperty("IsNewVersionAvailable");
 

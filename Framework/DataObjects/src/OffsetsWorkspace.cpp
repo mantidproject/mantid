@@ -4,9 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataObjects/OffsetsWorkspace.h"
+#include <utility>
+
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/System.h"
 
@@ -21,8 +23,8 @@ DECLARE_WORKSPACE(OffsetsWorkspace)
  * @param inst :: input instrument that is the base for this workspace
  * @return created OffsetsWorkspace
  */
-OffsetsWorkspace::OffsetsWorkspace(Geometry::Instrument_const_sptr inst)
-    : SpecialWorkspace2D(inst) {}
+OffsetsWorkspace::OffsetsWorkspace(const Geometry::Instrument_const_sptr &inst)
+    : SpecialWorkspace2D(std::move(inst)) {}
 
 } // namespace DataObjects
 } // namespace Mantid

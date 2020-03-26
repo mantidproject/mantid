@@ -88,7 +88,7 @@ void GetQsInQENSData::exec() {
  * @return          The extracted Q-values as a vector.
  */
 MantidVec GetQsInQENSData::extractQValues(
-    const Mantid::API::MatrixWorkspace_sptr workspace) {
+    const Mantid::API::MatrixWorkspace_sptr &workspace) {
   size_t numSpectra = workspace->getNumberHistograms();
   Axis *qAxis;
 

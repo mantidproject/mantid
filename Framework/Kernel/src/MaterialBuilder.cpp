@@ -19,7 +19,7 @@ using PhysicalConstants::NeutronAtom;
 namespace Kernel {
 
 namespace {
-inline bool isEmpty(const boost::optional<double> value) {
+inline bool isEmpty(const boost::optional<double> &value) {
   return !value || value == Mantid::EMPTY_DBL();
 }
 } // namespace

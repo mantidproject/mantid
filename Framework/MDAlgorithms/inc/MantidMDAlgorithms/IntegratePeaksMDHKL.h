@@ -60,8 +60,8 @@ private:
   DataObjects::MDHistoWorkspace_sptr
   cropHisto(int h, int k, int l, double box, const API::IMDWorkspace_sptr &ws);
   void integratePeak(const int neighborPts,
-                     DataObjects::MDHistoWorkspace_sptr out, double &intensity,
-                     double &errorSquared);
+                     const DataObjects::MDHistoWorkspace_sptr &out,
+                     double &intensity, double &errorSquared);
 };
 
 } // namespace MDAlgorithms

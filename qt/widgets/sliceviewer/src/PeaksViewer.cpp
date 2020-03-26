@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/SliceViewer/ProxyCompositePeaksPresenter.h"
 #include <QBoxLayout>
 #include <QLayoutItem>
+#include <utility>
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -49,7 +50,7 @@ void removeLayout(QWidget *widget) {
  * @param presenter : Proxy through which all information can be fetched.
  */
 void PeaksViewer::setPresenter(
-    boost::shared_ptr<ProxyCompositePeaksPresenter> presenter) {
+    const boost::shared_ptr<ProxyCompositePeaksPresenter> &presenter) {
   m_presenter = presenter;
   m_presenter->registerView(this);
 
@@ -317,7 +318,7 @@ std::string PeaksViewer::saveToProject() const {
  * @return the state of the presented peaks workspace as a project file string
  */
 std::string PeaksViewer::savePresentedWorkspace(
-    Mantid::API::IPeaksWorkspace_const_sptr ws) const {
+    const Mantid::API::IPeaksWorkspace_const_sptr &ws) const {
   API::TSVSerialiser tsv;
   tsv.writeLine("Name") << ws->getName();
   tsv.writeLine("ShowBackground") << m_presenter->getShowBackground(ws);
@@ -345,7 +346,7 @@ std::string PeaksViewer::savePresentedWorkspace(
  */
 void PeaksViewer::onPeakColorChanged(
     Mantid::API::IPeaksWorkspace_const_sptr peaksWS, PeakViewColor newColor) {
-  m_presenter->setForegroundColor(peaksWS, newColor);
+  m_presenter->setForegroundColor(std::move(peaksWS), std::move(newColor));
 }
 
 /**
@@ -355,7 +356,7 @@ void PeaksViewer::onPeakColorChanged(
  */
 void PeaksViewer::onBackgroundColorChanged(
     Mantid::API::IPeaksWorkspace_const_sptr peaksWS, PeakViewColor newColor) {
-  m_presenter->setBackgroundColor(peaksWS, newColor);
+  m_presenter->setBackgroundColor(std::move(peaksWS), std::move(newColor));
 }
 
 /**
@@ -365,7 +366,7 @@ void PeaksViewer::onBackgroundColorChanged(
  */
 void PeaksViewer::onBackgroundRadiusShown(
     Mantid::API::IPeaksWorkspace_const_sptr peaksWS, bool show) {
-  m_presenter->setBackgroundRadiusShown(peaksWS, show);
+  m_presenter->setBackgroundRadiusShown(std::move(peaksWS), show);
 }
 
 /**
@@ -373,8 +374,8 @@ void PeaksViewer::onBackgroundRadiusShown(
  * @param peaksWS : Workspace to remove
  */
 void PeaksViewer::onRemoveWorkspace(
-    Mantid::API::IPeaksWorkspace_const_sptr peaksWS) {
-  this->removePeaksWorkspace(peaksWS);
+    const Mantid::API::IPeaksWorkspace_const_sptr &peaksWS) {
+  this->removePeaksWorkspace(std::move(peaksWS));
 }
 
 /**
@@ -384,7 +385,7 @@ void PeaksViewer::onRemoveWorkspace(
  */
 void PeaksViewer::onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
                                bool hide) {
-  m_presenter->hideInPlot(peaksWS, hide);
+  m_presenter->hideInPlot(std::move(peaksWS), hide);
 }
 
 /**
@@ -394,7 +395,7 @@ void PeaksViewer::onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
  */
 void PeaksViewer::onZoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
                                int peakIndex) {
-  m_presenter->zoomToPeak(peaksWS, peakIndex);
+  m_presenter->zoomToPeak(std::move(peaksWS), peakIndex);
 }
 
 /**
@@ -476,7 +477,7 @@ void PeaksViewer::updatePeaksWorkspace(
 }
 
 bool PeaksViewer::removePeaksWorkspace(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toRemove) {
+    const boost::shared_ptr<const Mantid::API::IPeaksWorkspace> &toRemove) {
   bool somethingToRemove = false;
   if (m_presenter) {
 

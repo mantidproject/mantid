@@ -24,7 +24,7 @@ namespace MplCpp {
  */
 class MANTID_MPLCPP_DLL Cycler : public Common::Python::InstanceHolder {
 public:
-  Cycler(Common::Python::Object obj);
+  Cycler(const Common::Python::Object &obj);
 
   /// Return the next value in the sequence
   Common::Python::Dict operator()() const;

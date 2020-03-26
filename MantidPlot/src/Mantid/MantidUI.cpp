@@ -1716,7 +1716,7 @@ void MantidUI::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
  * This creates an algorithm dialog (the default property entry thingie).
  */
 MantidQt::API::AlgorithmDialog *
-MantidUI::createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg) {
+MantidUI::createAlgorithmDialog(const Mantid::API::IAlgorithm_sptr &alg) {
   QHash<QString, QString> presets;
   QStringList enabled;
 
@@ -1759,7 +1759,7 @@ MantidUI::createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg) {
  * @param algorithm :: A pointer to the algorithm instance
  */
 QString MantidUI::findInputWorkspaceProperty(
-    Mantid::API::IAlgorithm_sptr algorithm) const {
+    const Mantid::API::IAlgorithm_sptr &algorithm) const {
   // Iterate through the properties and find the first input one
   std::vector<Mantid::Kernel::Property *> props = algorithm->getProperties();
   std::vector<Mantid::Kernel::Property *>::const_iterator pend = props.end();
@@ -2974,7 +2974,7 @@ MultiLayer *MantidUI::createGraphFromTable(Table *t, int type) {
 */
 void MantidUI::setUpBinGraph(
     MultiLayer *ml, const QString &Name,
-    Mantid::API::MatrixWorkspace_const_sptr workspace) {
+    const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
   Graph *g = ml->activeGraph();
   g->setTitle(tr("Workspace ") + Name);
   QString xtitle;
@@ -3742,7 +3742,8 @@ MultiLayer *MantidUI::plotSubplots(const QStringList &wsNames,
 }
 
 Table *MantidUI::createTableFromBins(
-    const QString &wsName, Mantid::API::MatrixWorkspace_const_sptr workspace,
+    const QString &wsName,
+    const Mantid::API::MatrixWorkspace_const_sptr &workspace,
     const QList<int> &bins, bool errs, int fromRow, int toRow) {
   if (bins.empty())
     return nullptr;

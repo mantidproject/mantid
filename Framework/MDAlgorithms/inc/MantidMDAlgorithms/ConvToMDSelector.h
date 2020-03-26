@@ -33,7 +33,7 @@ public:
   /// function which selects the convertor depending on workspace type and
   /// (possibly, in a future) some workspace properties
   boost::shared_ptr<ConvToMDBase>
-  convSelector(API::MatrixWorkspace_sptr inputWS,
+  convSelector(const API::MatrixWorkspace_sptr &inputWS,
                boost::shared_ptr<ConvToMDBase> &currentSolver) const;
 
 private:

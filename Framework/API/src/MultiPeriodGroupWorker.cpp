@@ -36,7 +36,7 @@ MultiPeriodGroupWorker::MultiPeriodGroupWorker(
  * @param vecWorkspaceGroups: Vector of non-multi period workspace groups.
  */
 void MultiPeriodGroupWorker::tryAddInputWorkspaceToInputGroups(
-    Workspace_sptr ws,
+    const Workspace_sptr &ws,
     MultiPeriodGroupWorker::VecWSGroupType &vecMultiPeriodWorkspaceGroups,
     MultiPeriodGroupWorker::VecWSGroupType &vecWorkspaceGroups) const {
   WorkspaceGroup_sptr inputGroup =

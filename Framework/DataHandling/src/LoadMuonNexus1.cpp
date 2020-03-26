@@ -448,9 +448,8 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
  * @param inst :: Pointer to instrument (to use if IDF needed)
  * @returns :: Grouping table - or tables, if per period
  */
-Workspace_sptr
-LoadMuonNexus1::loadDetectorGrouping(NXRoot &root,
-                                     Geometry::Instrument_const_sptr inst) {
+Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
+    NXRoot &root, const Geometry::Instrument_const_sptr &inst) {
   NXEntry dataEntry = root.openEntry("run/histogram_data_1");
 
   NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
@@ -660,9 +659,10 @@ LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
  *  @param localWorkspace :: A pointer to the workspace in which the data will
  * be stored
  */
-void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
-                              MuonNexusReader &nxload, const int64_t lengthIn,
-                              DataObjects::Workspace2D_sptr localWorkspace) {
+void LoadMuonNexus1::loadData(
+    size_t hist, specnum_t &i, specnum_t specNo, MuonNexusReader &nxload,
+    const int64_t lengthIn,
+    const DataObjects::Workspace2D_sptr &localWorkspace) {
   // Read in a spectrum
   // Put it into a vector, discarding the 1st entry, which is rubbish
   // But note that the last (overflow) bin is kept
@@ -689,7 +689,7 @@ void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo,
  * @param localWorkspace :: The workspace details to use
  */
 void LoadMuonNexus1::loadRunDetails(
-    DataObjects::Workspace2D_sptr localWorkspace) {
+    const DataObjects::Workspace2D_sptr &localWorkspace) {
   API::Run &runDetails = localWorkspace->mutableRun();
 
   runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
@@ -737,7 +737,8 @@ void LoadMuonNexus1::loadRunDetails(
 }
 
 /// Run the LoadLog Child Algorithm
-void LoadMuonNexus1::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace) {
+void LoadMuonNexus1::runLoadLog(
+    const DataObjects::Workspace2D_sptr &localWorkspace) {
   IAlgorithm_sptr loadLog = createChildAlgorithm("LoadMuonLog");
   // Pass through the same input filename
   loadLog->setPropertyValue("Filename", m_filename);
@@ -791,8 +792,8 @@ void LoadMuonNexus1::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace) {
  * @param localWorkspace A workspace to add the log to.
  * @param period A period for this workspace.
  */
-void LoadMuonNexus1::addPeriodLog(DataObjects::Workspace2D_sptr localWorkspace,
-                                  int64_t period) {
+void LoadMuonNexus1::addPeriodLog(
+    const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period) {
   auto &run = localWorkspace->mutableRun();
   ISISRunLogs runLogs(run);
   if (period == 0) {
@@ -803,8 +804,9 @@ void LoadMuonNexus1::addPeriodLog(DataObjects::Workspace2D_sptr localWorkspace,
   }
 }
 
-void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
-                                   int64_t period, int nperiods) {
+void LoadMuonNexus1::addGoodFrames(
+    const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period,
+    int nperiods) {
 
   // Get handle to nexus file
   ::NeXus::File handle(m_filename, NXACC_READ);

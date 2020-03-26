@@ -43,7 +43,7 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Create the (blank) MDEW */
-  static void createMDEW(std::string CoordinatesToUse) {
+  static void createMDEW(const std::string &CoordinatesToUse) {
     // ---- Start with empty MDEW ----
     std::string frames;
     if (CoordinatesToUse == "Q (lab frame)") {
@@ -98,9 +98,10 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the CentroidPeaksMD2 with the given peak radius param */
-  void doRun(V3D startPos, double PeakRadius, double binCount,
-             V3D expectedResult, std::string message,
-             std::string OutputWorkspace = "CentroidPeaksMD2Test_Peaks") {
+  void
+  doRun(V3D startPos, double PeakRadius, double binCount, V3D expectedResult,
+        const std::string &message,
+        const std::string &OutputWorkspace = "CentroidPeaksMD2Test_Peaks") {
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(5);

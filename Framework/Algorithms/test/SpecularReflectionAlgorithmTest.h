@@ -68,7 +68,8 @@ protected:
   }
 
   VerticalHorizontalOffsetType determine_vertical_and_horizontal_offsets(
-      MatrixWorkspace_sptr ws, std::string detectorName = "point-detector") {
+      const MatrixWorkspace_sptr &ws,
+      const std::string &detectorName = "point-detector") {
     auto instrument = ws->getInstrument();
     const V3D pointDetector =
         instrument->getComponentByName(detectorName)->getPos();

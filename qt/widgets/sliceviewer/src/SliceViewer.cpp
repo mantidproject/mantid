@@ -750,7 +750,7 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
  *
  * @param ws :: IMDWorkspace to show.
  */
-void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
+void SliceViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   struct ScopedFlag {
     explicit ScopedFlag(bool &b) : m_flag(b) { m_flag = true; }
     ~ScopedFlag() { m_flag = false; }
@@ -913,7 +913,7 @@ Mantid::API::IMDWorkspace_sptr SliceViewer::getWorkspace() { return m_ws; }
  *
  * @param filename :: file to open; empty to ask via a dialog box.
  */
-void SliceViewer::loadColorMap(QString filename) {
+void SliceViewer::loadColorMap(const QString &filename) {
   QString fileselection;
   if (filename.isEmpty()) {
     fileselection = MantidColorMap::chooseColorMap(m_currentColorMapFile, this);

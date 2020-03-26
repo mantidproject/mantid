@@ -228,7 +228,7 @@ public:
    * @return
    */
   static EventWorkspace_sptr
-  do_testExec_EventWorkspaces(std::string filename_root, EventType type,
+  do_testExec_EventWorkspaces(const std::string &filename_root, EventType type,
                               std::string &outputFile, bool makeDifferentTypes,
                               bool clearfiles, bool PreserveEvents = true,
                               bool CompressNexus = false) {

@@ -68,7 +68,7 @@ void MaskBinsFromTable::exec() {
 /** Call MaskBins
  * @param dataws :: MatrixWorkspace to mask bins for
  */
-void MaskBinsFromTable::maskBins(API::MatrixWorkspace_sptr dataws) {
+void MaskBinsFromTable::maskBins(const API::MatrixWorkspace_sptr &dataws) {
   bool firstloop = true;
   API::MatrixWorkspace_sptr outputws;
 
@@ -134,7 +134,8 @@ void MaskBinsFromTable::maskBins(API::MatrixWorkspace_sptr dataws) {
  * @param dataws :: MatrixWorkspace to mask
  */
 void MaskBinsFromTable::processMaskBinWorkspace(
-    TableWorkspace_sptr masktblws, API::MatrixWorkspace_sptr dataws) {
+    const TableWorkspace_sptr &masktblws,
+    const API::MatrixWorkspace_sptr &dataws) {
   // Check input
   if (!masktblws)
     throw std::invalid_argument("Input workspace is not a table workspace.");
@@ -213,8 +214,8 @@ void MaskBinsFromTable::processMaskBinWorkspace(
  * @return :: list of spectra/workspace index IDs in string format
  */
 std::string
-MaskBinsFromTable::convertToSpectraList(API::MatrixWorkspace_sptr dataws,
-                                        std::string detidliststr) {
+MaskBinsFromTable::convertToSpectraList(const API::MatrixWorkspace_sptr &dataws,
+                                        const std::string &detidliststr) {
   // Use array property to get a list of detectors
   vector<int> detidvec;
   ArrayProperty<int> parser("detids", detidliststr);

@@ -70,19 +70,19 @@ private:
   void exec() override;
 
   /// Sum all detectors, excluding monitors and masked detectors
-  void sumUnmaskedDetectors(API::MatrixWorkspace_sptr rebinnedWS, double &sum,
-                            double &error, int &nPixels);
+  void sumUnmaskedDetectors(const API::MatrixWorkspace_sptr &rebinnedWS,
+                            double &sum, double &error, int &nPixels);
 
   /// Normalize all detectors to get the relative efficiency
-  void normalizeDetectors(API::MatrixWorkspace_sptr rebinnedWS,
-                          API::MatrixWorkspace_sptr outputWS, double sum,
+  void normalizeDetectors(const API::MatrixWorkspace_sptr &rebinnedWS,
+                          const API::MatrixWorkspace_sptr &outputWS, double sum,
                           double error, int nPixels, double min_eff,
                           double max_eff);
 
   void maskComponent(API::MatrixWorkspace &ws,
                      const std::string &componentName);
-  void maskEdges(API::MatrixWorkspace_sptr ws, int high, int low, int left,
-                 int right, const std::string &componentName);
+  void maskEdges(const API::MatrixWorkspace_sptr &ws, int high, int low,
+                 int left, int right, const std::string &componentName);
 };
 
 } // namespace Algorithms

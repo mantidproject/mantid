@@ -102,7 +102,7 @@ void MonIDPropChanger::applyChanges(const IPropertyManager *algo,
 // read the monitors list from the workspace and try to do it once for any
 // particular ws;
 bool MonIDPropChanger::monitorIdReader(
-    MatrixWorkspace_const_sptr inputWS) const {
+    const MatrixWorkspace_const_sptr &inputWS) const {
   // no workspace
   if (!inputWS)
     return false;

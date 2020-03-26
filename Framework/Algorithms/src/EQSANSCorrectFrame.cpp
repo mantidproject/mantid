@@ -95,11 +95,11 @@ void EQSANSCorrectFrame::exec() {
       double newTOF = tof + m_framesOffsetTime;
       // TOF values smaller than that of the fastest neutrons have been
       // 'folded' by the data acquisition system. They must be shifted
-      double minTOF = m_minTOF * pathToPixelFactor;
-      if (newTOF < minTOF)
+      double scaledMinTOF = m_minTOF * pathToPixelFactor;
+      if (newTOF < scaledMinTOF)
         newTOF += m_frameWidth;
       // Events from the skipped pulse are delayed by one pulse period
-      if (m_isFrameSkipping && newTOF > minTOF + m_pulsePeriod)
+      if (m_isFrameSkipping && newTOF > scaledMinTOF + m_pulsePeriod)
         newTOF += m_pulsePeriod;
       return newTOF;
     }

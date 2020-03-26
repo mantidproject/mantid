@@ -770,8 +770,8 @@ private:
   }
 
   boost::shared_ptr<Fit>
-  setupBasicFitPropertiesAlgorithm(API::IFunction_sptr fun,
-                                   API::Workspace_sptr ws,
+  setupBasicFitPropertiesAlgorithm(const API::IFunction_sptr &fun,
+                                   const API::Workspace_sptr &ws,
                                    bool createOutput = true) {
     auto fit = boost::make_shared<Fit>();
     fit->initialize();

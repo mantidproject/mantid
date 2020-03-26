@@ -47,8 +47,8 @@ public:
 
   /// alternative (lower level) create where the specific type of
   /// manager and base URL are directly given
-  IRemoteJobManager_sptr create(const std::string baseURL,
-                                const std::string jobManagerType) const;
+  IRemoteJobManager_sptr create(const std::string &baseURL,
+                                const std::string &jobManagerType) const;
 
 private:
   /// So that the singleton can be created (cons/destructor are private)

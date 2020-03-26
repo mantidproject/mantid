@@ -838,7 +838,7 @@ void FitOptionsBrowser::displayProperty(const QString &propertyName,
 /**
  * Adds the property with the given name to a blacklist of properties to hide
  */
-bool FitOptionsBrowser::addPropertyToBlacklist(QString name) {
+bool FitOptionsBrowser::addPropertyToBlacklist(const QString &name) {
   if (!m_propertyNameMap.contains(name)) {
     return false;
   }

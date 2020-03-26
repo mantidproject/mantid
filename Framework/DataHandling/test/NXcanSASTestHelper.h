@@ -92,20 +92,23 @@ struct NXcanSASTestTransmissionParameters {
   bool usesTransmission;
 };
 
-std::string concatenateStringVector(std::vector<std::string> stringVector);
+std::string
+concatenateStringVector(const std::vector<std::string> &stringVector);
 
-std::string getIDFfromWorkspace(Mantid::API::MatrixWorkspace_sptr workspace);
+std::string
+getIDFfromWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace);
 
 void setXValuesOn1DWorkspaceWithPointData(
-    Mantid::API::MatrixWorkspace_sptr workspace, double xmin, double xmax);
+    const Mantid::API::MatrixWorkspace_sptr &workspace, double xmin,
+    double xmax);
 
-void add_sample_log(Mantid::API::MatrixWorkspace_sptr workspace,
+void add_sample_log(const Mantid::API::MatrixWorkspace_sptr &workspace,
                     const std::string &logName, const std::string &logValue);
 
-void set_logs(Mantid::API::MatrixWorkspace_sptr workspace,
+void set_logs(const Mantid::API::MatrixWorkspace_sptr &workspace,
               const std::string &runNumber, const std::string &userFile);
 
-void set_instrument(Mantid::API::MatrixWorkspace_sptr workspace,
+void set_instrument(const Mantid::API::MatrixWorkspace_sptr &workspace,
                     const std::string &instrumentName);
 
 Mantid::API::MatrixWorkspace_sptr
@@ -117,7 +120,7 @@ getTransmissionWorkspace(NXcanSASTestTransmissionParameters &parameters);
 Mantid::API::MatrixWorkspace_sptr
 provide2DWorkspace(NXcanSASTestParameters &parameters);
 
-void set2DValues(Mantid::API::MatrixWorkspace_sptr ws);
+void set2DValues(const Mantid::API::MatrixWorkspace_sptr &ws);
 
-void removeFile(std::string filename);
+void removeFile(const std::string &filename);
 } // namespace NXcanSASTestHelper

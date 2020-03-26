@@ -47,7 +47,7 @@ class FunctionDialog : public QDialog {
 
 public:
   FunctionDialog(ApplicationWindow *app, Graph *g = nullptr,
-                 Qt::WFlags fl = nullptr);
+                 const Qt::WFlags &fl = nullptr);
 
 protected:
   QComboBox *boxXFunction;

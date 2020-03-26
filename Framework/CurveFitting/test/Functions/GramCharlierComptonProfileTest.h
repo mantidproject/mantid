@@ -152,12 +152,12 @@ private:
 
   void checkDefaultParametersExist(const Mantid::API::IFunction &profile) {
     static const size_t nparams(3);
-    const char *expectedParams[nparams] = {"Mass", "Width", "FSECoeff"};
 
     auto currentNames = profile.getParameterNames();
     const size_t nnames = currentNames.size();
     TS_ASSERT_LESS_THAN_EQUALS(nparams, nnames);
     if (nnames <= nparams) {
+      const char *expectedParams[nparams] = {"Mass", "Width", "FSECoeff"};
       for (size_t i = 0; i < nnames; ++i) {
         TS_ASSERT_EQUALS(expectedParams[i], currentNames[i]);
       }

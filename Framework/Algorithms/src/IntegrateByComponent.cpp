@@ -158,8 +158,8 @@ void IntegrateByComponent::exec() {
  * @return  vector of vectors, containing each spectrum that belongs to each
  * group
  */
-std::vector<std::vector<size_t>>
-IntegrateByComponent::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
+std::vector<std::vector<size_t>> IntegrateByComponent::makeInstrumentMap(
+    const API::MatrixWorkspace_sptr &countsWS) {
   std::vector<std::vector<size_t>> mymap;
   std::vector<size_t> single;
 
@@ -178,7 +178,8 @@ IntegrateByComponent::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
  * group
  */
 std::vector<std::vector<size_t>>
-IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
+IntegrateByComponent::makeMap(const API::MatrixWorkspace_sptr &countsWS,
+                              int parents) {
   std::unordered_multimap<Mantid::Geometry::ComponentID, size_t> mymap;
 
   if (parents == 0) // this should not happen in this file, but if one reuses

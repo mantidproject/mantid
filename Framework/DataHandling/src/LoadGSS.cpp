@@ -488,7 +488,7 @@ double LoadGSS::convertToDouble(std::string inputstring) {
 /** Create the instrument geometry with Instrument
  */
 void LoadGSS::createInstrumentGeometry(
-    MatrixWorkspace_sptr workspace, const std::string &instrumentname,
+    const MatrixWorkspace_sptr &workspace, const std::string &instrumentname,
     const double &primaryflightpath, const std::vector<int> &detectorids,
     const std::vector<double> &totalflightpaths,
     const std::vector<double> &twothetas) {

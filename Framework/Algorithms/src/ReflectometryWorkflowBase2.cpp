@@ -4,12 +4,14 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
+#include <utility>
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidAlgorithms/ReflectometryWorkflowBase2.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -40,16 +42,15 @@ int convertStringNumToInt(const std::string &string) {
 }
 
 std::string convertToWorkspaceIndex(const std::string &spectrumNumber,
-                                    MatrixWorkspace_const_sptr ws) {
+                                    const MatrixWorkspace_const_sptr &ws) {
   auto specNum = convertStringNumToInt(spectrumNumber);
   std::string wsIdx = std::to_string(
       ws->getIndexFromSpectrumNumber(static_cast<Mantid::specnum_t>(specNum)));
   return wsIdx;
 }
 
-std::string
-convertProcessingInstructionsToWorkspaceIndices(const std::string &instructions,
-                                                MatrixWorkspace_const_sptr ws) {
+std::string convertProcessingInstructionsToWorkspaceIndices(
+    const std::string &instructions, const MatrixWorkspace_const_sptr &ws) {
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
@@ -79,7 +80,7 @@ convertProcessingInstructionsToWorkspaceIndices(const std::string &instructions,
  */
 std::vector<size_t>
 getProcessingInstructionsAsIndices(std::string const &instructions,
-                                   MatrixWorkspace_sptr workspace) {
+                                   const MatrixWorkspace_sptr &workspace) {
   auto instructionsInWSIndex =
       convertProcessingInstructionsToWorkspaceIndices(instructions, workspace);
   auto groups =
@@ -517,8 +518,8 @@ ReflectometryWorkflowBase2::validateWavelengthRanges() const {
  * @param inputWS :: the workspace to convert
  * @return :: the workspace in wavelength
  */
-MatrixWorkspace_sptr
-ReflectometryWorkflowBase2::convertToWavelength(MatrixWorkspace_sptr inputWS) {
+MatrixWorkspace_sptr ReflectometryWorkflowBase2::convertToWavelength(
+    const MatrixWorkspace_sptr &inputWS) {
 
   auto convertUnitsAlg = createChildAlgorithm("ConvertUnits");
   convertUnitsAlg->initialize();
@@ -541,8 +542,8 @@ ReflectometryWorkflowBase2::convertToWavelength(MatrixWorkspace_sptr inputWS) {
  * @return :: the cropped workspace
  */
 MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
-    MatrixWorkspace_sptr inputWS, const bool useArgs, const double argMin,
-    const double argMax) {
+    const MatrixWorkspace_sptr &inputWS, const bool useArgs,
+    const double argMin, const double argMax) {
 
   double wavelengthMin = 0.0;
   double wavelengthMax = 0.0;
@@ -584,7 +585,7 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::cropWavelength(
 MatrixWorkspace_sptr
 ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
                                            const bool convert, const bool sum) {
-  auto detectorWS = inputWS;
+  auto detectorWS = std::move(inputWS);
 
   if (sum) {
     // Use GroupDetectors to extract and sum the detectors of interest
@@ -635,7 +636,7 @@ ReflectometryWorkflowBase2::makeDetectorWS(MatrixWorkspace_sptr inputWS,
  * @return :: the monitor workspace in wavelength
  */
 MatrixWorkspace_sptr
-ReflectometryWorkflowBase2::makeMonitorWS(MatrixWorkspace_sptr inputWS,
+ReflectometryWorkflowBase2::makeMonitorWS(const MatrixWorkspace_sptr &inputWS,
                                           const bool integratedMonitors) {
 
   // Extract the monitor workspace
@@ -697,7 +698,8 @@ ReflectometryWorkflowBase2::makeMonitorWS(MatrixWorkspace_sptr inputWS,
  * @return :: the rebinned detector workspace
  */
 MatrixWorkspace_sptr ReflectometryWorkflowBase2::rebinDetectorsToMonitors(
-    MatrixWorkspace_sptr detectorWS, MatrixWorkspace_sptr monitorWS) {
+    const MatrixWorkspace_sptr &detectorWS,
+    const MatrixWorkspace_sptr &monitorWS) {
 
   auto rebin = createChildAlgorithm("RebinToWorkspace");
   rebin->initialize();
@@ -715,7 +717,7 @@ MatrixWorkspace_sptr ReflectometryWorkflowBase2::rebinDetectorsToMonitors(
  * @param instrument :: the instrument attached to the workspace
  */
 void ReflectometryWorkflowBase2::populateMonitorProperties(
-    IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
+    const IAlgorithm_sptr &alg, const Instrument_const_sptr &instrument) {
 
   const auto startOverlap = checkForOptionalInstrumentDefault<double>(
       this, "StartOverlap", instrument, "TransRunStartOverlap");
@@ -769,7 +771,8 @@ void ReflectometryWorkflowBase2::populateMonitorProperties(
  * @return :: processing instructions as a string
  */
 std::string ReflectometryWorkflowBase2::findProcessingInstructions(
-    Instrument_const_sptr instrument, MatrixWorkspace_sptr inputWS) const {
+    const Instrument_const_sptr &instrument,
+    const MatrixWorkspace_sptr &inputWS) const {
 
   const std::string analysisMode = getProperty("AnalysisMode");
 
@@ -815,7 +818,7 @@ std::string ReflectometryWorkflowBase2::findProcessingInstructions(
  * @return Boolean, whether or not any transmission runs were found
  */
 bool ReflectometryWorkflowBase2::populateTransmissionProperties(
-    IAlgorithm_sptr alg) const {
+    const IAlgorithm_sptr &alg) const {
 
   bool transRunsExist = false;
 
@@ -845,9 +848,8 @@ bool ReflectometryWorkflowBase2::populateTransmissionProperties(
  * @return :: the value of theta found from the logs
  * @throw :: NotFoundError if the log value was not found
  */
-double
-ReflectometryWorkflowBase2::getThetaFromLogs(MatrixWorkspace_sptr inputWs,
-                                             const std::string &logName) {
+double ReflectometryWorkflowBase2::getThetaFromLogs(
+    const MatrixWorkspace_sptr &inputWs, const std::string &logName) {
   double theta = -1.;
   const Mantid::API::Run &run = inputWs->run();
   Property *logData = run.getLogData(logName);
@@ -884,7 +886,7 @@ ReflectometryWorkflowBase2::getRunNumber(MatrixWorkspace const &ws) const {
 std::string
 ReflectometryWorkflowBase2::convertProcessingInstructionsToSpectrumNumbers(
     const std::string &instructions,
-    Mantid::API::MatrixWorkspace_const_sptr ws) const {
+    const Mantid::API::MatrixWorkspace_const_sptr &ws) const {
   std::string converted = "";
   std::string currentNumber = "";
   std::string ignoreThese = "-,:+";
@@ -905,7 +907,7 @@ ReflectometryWorkflowBase2::convertProcessingInstructionsToSpectrumNumbers(
 }
 std::string ReflectometryWorkflowBase2::convertToSpectrumNumber(
     const std::string &workspaceIndex,
-    Mantid::API::MatrixWorkspace_const_sptr ws) const {
+    const Mantid::API::MatrixWorkspace_const_sptr &ws) const {
   auto wsIndx = convertStringNumToInt(workspaceIndex);
   std::string specId = std::to_string(
       static_cast<int32_t>(ws->indexInfo().spectrumNumber(wsIndx)));
@@ -913,7 +915,8 @@ std::string ReflectometryWorkflowBase2::convertToSpectrumNumber(
 }
 
 void ReflectometryWorkflowBase2::convertProcessingInstructions(
-    Instrument_const_sptr instrument, MatrixWorkspace_sptr inputWS) {
+    const Instrument_const_sptr &instrument,
+    const MatrixWorkspace_sptr &inputWS) {
   m_processingInstructions = getPropertyValue("ProcessingInstructions");
   if (!getPointerToProperty("ProcessingInstructions")->isDefault()) {
     m_processingInstructionsWorkspaceIndex =
@@ -921,14 +924,14 @@ void ReflectometryWorkflowBase2::convertProcessingInstructions(
             m_processingInstructions, inputWS);
   } else {
     m_processingInstructionsWorkspaceIndex =
-        findProcessingInstructions(instrument, inputWS);
+        findProcessingInstructions(std::move(instrument), inputWS);
     m_processingInstructions = convertProcessingInstructionsToSpectrumNumbers(
         m_processingInstructionsWorkspaceIndex, inputWS);
   }
 }
 
 void ReflectometryWorkflowBase2::convertProcessingInstructions(
-    MatrixWorkspace_sptr inputWS) {
+    const MatrixWorkspace_sptr &inputWS) {
   m_processingInstructions = getPropertyValue("ProcessingInstructions");
   m_processingInstructionsWorkspaceIndex =
       convertProcessingInstructionsToWorkspaceIndices(m_processingInstructions,
@@ -938,7 +941,7 @@ void ReflectometryWorkflowBase2::convertProcessingInstructions(
 // Create an on-the-fly property to set an output workspace from a child
 // algorithm, if the child has that output value set
 void ReflectometryWorkflowBase2::setWorkspacePropertyFromChild(
-    Algorithm_sptr alg, std::string const &propertyName) {
+    const Algorithm_sptr &alg, std::string const &propertyName) {
   if (alg->isDefault(propertyName))
     return;
 

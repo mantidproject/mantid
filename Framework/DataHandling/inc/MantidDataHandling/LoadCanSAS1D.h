@@ -76,18 +76,19 @@ protected:
              const std::string &name) const;
   /// Appends the new data workspace creating a workspace group if there was
   /// existing data
-  void appendDataToOutput(API::MatrixWorkspace_sptr newWork,
+  void appendDataToOutput(const API::MatrixWorkspace_sptr &newWork,
                           const std::string &newWorkName,
-                          API::WorkspaceGroup_sptr container);
+                          const API::WorkspaceGroup_sptr &container);
   /// Run LoadInstrument Child Algorithm
   void runLoadInstrument(const std::string &inst_name,
-                         API::MatrixWorkspace_sptr localWorkspace);
+                         const API::MatrixWorkspace_sptr &localWorkspace);
   /// Loads data into the run log
   void createLogs(const Poco::XML::Element *const sasEntry,
-                  API::MatrixWorkspace_sptr wSpace) const;
+                  const API::MatrixWorkspace_sptr &wSpace) const;
   /// Loads the information about hhe sample
-  void createSampleInformation(const Poco::XML::Element *const sasEntry,
-                               Mantid::API::MatrixWorkspace_sptr wSpace) const;
+  void createSampleInformation(
+      const Poco::XML::Element *const sasEntry,
+      const Mantid::API::MatrixWorkspace_sptr &wSpace) const;
 };
 } // namespace DataHandling
 } // namespace Mantid

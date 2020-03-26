@@ -29,7 +29,7 @@ using namespace Mantid::Kernel::Strings;
  * them.
  * @param workspace workspace possibly containing Q values.
  */
-std::vector<double> extractQValues(const MatrixWorkspace_sptr workspace,
+std::vector<double> extractQValues(const MatrixWorkspace_sptr &workspace,
                                    const Spectra &spectra) {
   std::vector<double> qs;
   // Check if the vertical axis has units of momentum transfer, then extract Q
@@ -143,7 +143,7 @@ tryPassFormatArgument(boost::basic_format<char> &formatString,
   }
 }
 
-std::pair<double, double> getBinRange(MatrixWorkspace_sptr workspace) {
+std::pair<double, double> getBinRange(const MatrixWorkspace_sptr &workspace) {
   return std::make_pair(workspace->x(0).front(), workspace->x(0).back());
 }
 
@@ -296,7 +296,7 @@ void Spectra::checkContinuous() {
   }
 }
 
-IndirectFitData::IndirectFitData(MatrixWorkspace_sptr workspace,
+IndirectFitData::IndirectFitData(const MatrixWorkspace_sptr &workspace,
                                  const Spectra &spectra)
     : m_workspace(workspace), m_spectra(Spectra("")) {
   setSpectra(spectra);

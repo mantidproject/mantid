@@ -39,7 +39,7 @@ private:
   ChargeAndTime runSliceEvent(const QString &code2run);
   void checkPythonOutput(const QString &result);
   ChargeAndTime values2ChargeAndTime(const QString &input);
-  void raiseWarning(QString title, QString message);
+  void raiseWarning(const QString &title, const QString &message);
 
 protected:
   void showEvent(QShowEvent * /*unused*/) override;

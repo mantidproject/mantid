@@ -305,9 +305,9 @@ private:
   void configureAbsCommon(Mantid::Algorithms::CylinderAbsorption &alg,
                           MatrixWorkspace_sptr &inputWS,
                           const std::string &outputWSname,
-                          std::string numberOfSlices = "2",
-                          std::string numberOfAnnuli = "2",
-                          std::string cylinderAxis = "0,1,0") {
+                          const std::string &numberOfSlices = "2",
+                          const std::string &numberOfAnnuli = "2",
+                          const std::string &cylinderAxis = "0,1,0") {
     if (!alg.isInitialized())
       alg.initialize();
 

@@ -194,7 +194,7 @@ void SaveIsawQvector::exec() {
  *
  * @param wksp The workspace to get information from.
  */
-void SaveIsawQvector::initTargetWSDescr(EventWorkspace_sptr wksp) {
+void SaveIsawQvector::initTargetWSDescr(const EventWorkspace_sptr &wksp) {
   m_targWSDescr.setMinMax(std::vector<double>(3, -2000.),
                           std::vector<double>(3, 2000.));
   m_targWSDescr.buildFromMatrixWS(wksp, Q3D, ELASTIC);

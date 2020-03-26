@@ -197,8 +197,9 @@ uint64_t MergeMDFiles::loadEventsFromSubBoxes(API::IMDNode *TargetBox) {
  * @param outputFile :: the name of the output file where file-based workspace
  *should be saved
  */
-void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
-                                   const std::string &outputFile) {
+void MergeMDFiles::doExecByCloning(
+    const Mantid::API::IMDEventWorkspace_sptr &ws,
+    const std::string &outputFile) {
   m_OutIWS = ws;
   m_MDEventType = ws->getEventTypeName();
 

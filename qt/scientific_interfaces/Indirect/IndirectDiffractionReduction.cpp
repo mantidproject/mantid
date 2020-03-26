@@ -354,8 +354,8 @@ IAlgorithm_sptr IndirectDiffractionReduction::convertUnitsAlgorithm(
  * @param instName Name of the instrument
  * @param mode Mode instrument is operating in (diffspec/diffonly)
  */
-void IndirectDiffractionReduction::runGenericReduction(QString instName,
-                                                       QString mode) {
+void IndirectDiffractionReduction::runGenericReduction(const QString &instName,
+                                                       const QString &mode) {
 
   QString rebinStart = "";
   QString rebinWidth = "";

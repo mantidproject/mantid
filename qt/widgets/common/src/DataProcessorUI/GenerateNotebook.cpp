@@ -51,9 +51,9 @@ the corresponding hinting line edit in the view
 @returns ipython notebook string
 */
 GenerateNotebook::GenerateNotebook(
-    QString name, QString instrument, WhiteList whitelist,
+    const QString &name, const QString &instrument, WhiteList whitelist,
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
-    ProcessingAlgorithm processor,
+    const ProcessingAlgorithm &processor,
     boost::optional<PostprocessingStep> postprocessingStep,
     ColumnOptionsMap preprocessingOptionsMap)
     : m_wsName(std::move(name)), m_instrument(std::move(instrument)),
@@ -391,7 +391,7 @@ void addProperties(QStringList &algProperties, const Map &optionsMap) {
  second item are the names of the output workspaces.
 */
 QString
-reduceRowString(const RowData_sptr data, const QString &instrument,
+reduceRowString(const RowData_sptr &data, const QString &instrument,
                 const WhiteList &whitelist,
                 const std::map<QString, PreprocessingAlgorithm> &preprocessMap,
                 const ProcessingAlgorithm &processor,

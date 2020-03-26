@@ -128,7 +128,7 @@ void IkedaCarpenterPV::init() {
   this->lowerConstraint0("X0");
 }
 
-void IkedaCarpenterPV::lowerConstraint0(std::string paramName) {
+void IkedaCarpenterPV::lowerConstraint0(const std::string &paramName) {
   auto mixingConstraint =
       std::make_unique<BoundaryConstraint>(this, paramName, 0.0, true);
   mixingConstraint->setPenaltyFactor(1e9);

@@ -62,16 +62,17 @@ protected:
       MantidVec::const_iterator baseDataStart,
       MantidVec::const_iterator originalDataStart) const;
 
-  UncertainValue
-  getBackgroundWithSigma(std::list<MantidVec::const_iterator> peakPositions,
-                         const MantidVec &correlationCounts) const;
-  MantidVec getBackground(std::list<MantidVec::const_iterator> peakPositions,
-                          const MantidVec &correlationCounts) const;
+  UncertainValue getBackgroundWithSigma(
+      const std::list<MantidVec::const_iterator> &peakPositions,
+      const MantidVec &correlationCounts) const;
+  MantidVec
+  getBackground(const std::list<MantidVec::const_iterator> &peakPositions,
+                const MantidVec &correlationCounts) const;
   bool distanceToPeaksGreaterThanMinimum(
       std::list<MantidVec::const_iterator> peakPositions,
       MantidVec::const_iterator point) const;
   size_t getNumberOfBackgroundPoints(
-      std::list<MantidVec::const_iterator> peakPositions,
+      const std::list<MantidVec::const_iterator> &peakPositions,
       const MantidVec &correlationCounts) const;
 
   double getMedianFromSortedVector(MantidVec::const_iterator begin,
@@ -95,8 +96,9 @@ protected:
                          MantidVec::const_iterator peakPosition,
                          const MantidVec &xData) const;
 
-  void setErrorsOnWorkspace(DataObjects::Workspace2D_sptr correlationWorkspace,
-                            double error) const;
+  void setErrorsOnWorkspace(
+      const DataObjects::Workspace2D_sptr &correlationWorkspace,
+      double error) const;
 
   void setMinimumDistance(int newMinimumDistance);
   void setMinimumPeakHeight(double newMinimumPeakHeight);
@@ -104,7 +106,7 @@ protected:
 
   static bool vectorElementGreaterThan(MantidVec::const_iterator first,
                                        MantidVec::const_iterator second);
-  bool isLessThanMinimum(PoldiPeak_sptr peak);
+  bool isLessThanMinimum(const PoldiPeak_sptr &peak);
 
   int m_minimumDistance;
   int m_doubleMinimumDistance;

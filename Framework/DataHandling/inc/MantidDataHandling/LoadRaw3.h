@@ -67,18 +67,18 @@ private:
   /// creates output workspace, monitors excluded from this workspace
   void excludeMonitors(FILE *file, const int &period,
                        const std::vector<specnum_t> &monitorList,
-                       DataObjects::Workspace2D_sptr ws_sptr);
+                       const DataObjects::Workspace2D_sptr &ws_sptr);
 
   /// creates output workspace whcih includes monitors
   void includeMonitors(FILE *file, const int64_t &period,
-                       DataObjects::Workspace2D_sptr ws_sptr);
+                       const DataObjects::Workspace2D_sptr &ws_sptr);
 
   /// creates two output workspaces none normal workspace and separate one for
   /// monitors
   void separateMonitors(FILE *file, const int64_t &period,
                         const std::vector<specnum_t> &monitorList,
-                        DataObjects::Workspace2D_sptr ws_sptr,
-                        DataObjects::Workspace2D_sptr mws_sptr);
+                        const DataObjects::Workspace2D_sptr &ws_sptr,
+                        const DataObjects::Workspace2D_sptr &mws_sptr);
 
   /// skip all spectra in a period
   void skipPeriod(FILE *file, const int64_t &period);

@@ -134,7 +134,7 @@ public:
   }
 
 private:
-  void executeAlgorithm(Mantid::API::MatrixWorkspace_sptr testWS,
+  void executeAlgorithm(const Mantid::API::MatrixWorkspace_sptr &testWS,
                         const std::string &logName, const std::string &logTime,
                         const double logValue, const LogType type = Double,
                         const UpdateType update = Update) {
@@ -157,7 +157,7 @@ private:
   }
 
   template <typename T>
-  void checkLogWithEntryExists(Mantid::API::MatrixWorkspace_sptr testWS,
+  void checkLogWithEntryExists(const Mantid::API::MatrixWorkspace_sptr &testWS,
                                const std::string &logName,
                                const std::string &logTime, const T logValue,
                                const size_t position) {

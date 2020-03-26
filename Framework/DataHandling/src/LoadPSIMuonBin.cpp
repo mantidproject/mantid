@@ -234,8 +234,8 @@ void LoadPSIMuonBin::makeDeadTimeTable(const size_t &numSpec) {
   setProperty("DeadTimeTable", deadTimeTable);
 }
 
-std::string LoadPSIMuonBin::getFormattedDateTime(std::string date,
-                                                 std::string time) {
+std::string LoadPSIMuonBin::getFormattedDateTime(const std::string &date,
+                                                 const std::string &time) {
   std::string year;
   if (date.size() == 11) {
     year = date.substr(7, 4);

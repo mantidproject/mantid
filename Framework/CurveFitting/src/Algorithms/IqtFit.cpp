@@ -17,7 +17,7 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger g_log("IqtFit");
 
-MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr workspace,
+MatrixWorkspace_sptr cropWorkspace(const MatrixWorkspace_sptr &workspace,
                                    double startX, double endX) {
   auto cropper = AlgorithmManager::Instance().create("CropWorkspace");
   cropper->setLogging(false);
@@ -30,7 +30,7 @@ MatrixWorkspace_sptr cropWorkspace(MatrixWorkspace_sptr workspace,
   return cropper->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr convertToHistogram(MatrixWorkspace_sptr workspace) {
+MatrixWorkspace_sptr convertToHistogram(const MatrixWorkspace_sptr &workspace) {
   auto converter = AlgorithmManager::Instance().create("ConvertToHistogram");
   converter->setLogging(false);
   converter->setAlwaysStoreInADS(false);
@@ -43,8 +43,8 @@ MatrixWorkspace_sptr convertToHistogram(MatrixWorkspace_sptr workspace) {
 struct HistogramConverter {
   explicit HistogramConverter() : m_converted() {}
 
-  MatrixWorkspace_sptr operator()(MatrixWorkspace_sptr workspace, double startX,
-                                  double endX) const {
+  MatrixWorkspace_sptr operator()(const MatrixWorkspace_sptr &workspace,
+                                  double startX, double endX) const {
     auto it = m_converted.find(workspace.get());
     if (it != m_converted.end())
       return it->second;

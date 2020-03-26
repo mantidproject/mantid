@@ -58,9 +58,8 @@ public:
     TS_ASSERT_DELTA(offsetsWS->dataY(0)[0], -0.6162, 0.0001);
   }
 
-  void doTestVulcan(std::string dspaceFile, std::string fileType) {
-    std::string outputFile = "./VULCAN_dspacemaptocal_test.cal";
-
+  void doTestVulcan(const std::string &dspaceFile,
+                    const std::string &fileType) {
     LoadDspacemap testerDSP;
     TS_ASSERT_THROWS_NOTHING(testerDSP.initialize());
     TS_ASSERT_THROWS_NOTHING(testerDSP.isInitialized());

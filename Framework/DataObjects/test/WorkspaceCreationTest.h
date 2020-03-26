@@ -78,7 +78,7 @@ void run_create_partitioned_parent(const Parallel::Communicator &comm) {
 
 void run_create_partitioned_with_instrument(
     const Parallel::Communicator &comm,
-    boost::shared_ptr<Geometry::Instrument> instrument) {
+    const boost::shared_ptr<Geometry::Instrument> &instrument) {
   IndexInfo indices(4, Parallel::StorageMode::Distributed, comm);
   // should a nullptr spectrum definitions vector indicate building default
   // defs?

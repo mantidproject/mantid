@@ -33,7 +33,7 @@ const FunctionDomain &JointDomain::getDomain(size_t i) const {
  * Add a new domain.
  * @param domain :: A shared pointer to a domain.
  */
-void JointDomain::addDomain(FunctionDomain_sptr domain) {
+void JointDomain::addDomain(const FunctionDomain_sptr &domain) {
   m_domains.emplace_back(domain);
 }
 

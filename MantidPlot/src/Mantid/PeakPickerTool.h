@@ -81,7 +81,8 @@ public:
   bool isInitialized() const { return m_init; }
 
 public slots:
-  void windowStateChanged(Qt::WindowStates oldState, Qt::WindowStates newState);
+  void windowStateChanged(const Qt::WindowStates &oldState,
+                          const Qt::WindowStates &newState);
 
 signals:
   void peakChanged();

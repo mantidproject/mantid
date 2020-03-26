@@ -52,7 +52,7 @@ private:
   void exec() override;
 
   /// Compute TOF offset
-  double getTofOffset(API::MatrixWorkspace_const_sptr inputWS,
+  double getTofOffset(const API::MatrixWorkspace_const_sptr &inputWS,
                       bool frame_skipping, double source_to_monitor);
 };
 

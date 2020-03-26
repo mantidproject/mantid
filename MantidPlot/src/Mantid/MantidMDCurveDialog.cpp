@@ -12,7 +12,7 @@ using Mantid::API::AnalysisDataService;
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDWorkspace_sptr;
 
-MantidMDCurveDialog::MantidMDCurveDialog(QWidget *parent, QString wsName)
+MantidMDCurveDialog::MantidMDCurveDialog(QWidget *parent, const QString &wsName)
     : QDialog(parent), m_wsName(wsName) {
   ui.setupUi(this);
   m_lineOptions = new LinePlotOptions(this);

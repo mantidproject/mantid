@@ -144,9 +144,9 @@ void InterpolatingRebin::exec() {
  * the histograms must corrospond with the number of x-values in XValues_new
  */
 void InterpolatingRebin::outputYandEValues(
-    API::MatrixWorkspace_const_sptr inputW,
+    const API::MatrixWorkspace_const_sptr &inputW,
     const HistogramData::BinEdges &XValues_new,
-    API::MatrixWorkspace_sptr outputW) {
+    const API::MatrixWorkspace_sptr &outputW) {
   g_log.debug()
       << "Preparing to calculate y-values using splines and estimate errors\n";
 

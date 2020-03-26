@@ -339,7 +339,8 @@ bool ProjectRecovery::checkForRecovery() const noexcept {
   }
 }
 
-bool ProjectRecovery::clearAllCheckpoints(Poco::Path path) const noexcept {
+bool ProjectRecovery::clearAllCheckpoints(const Poco::Path &path) const
+    noexcept {
   try {
     Poco::File(path).remove(true);
     return true;

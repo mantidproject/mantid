@@ -29,7 +29,7 @@ public:
   bool isValid() const override;
   std::string toXMLString() const override;
   AffineMatrixParameter *clone() const override;
-  void setMatrix(const AffineMatrixType newMatrix);
+  void setMatrix(const AffineMatrixType &newMatrix);
   AffineMatrixParameter(size_t outD, size_t inD);
   AffineMatrixParameter(const AffineMatrixParameter &);
   AffineMatrixParameter &operator=(const AffineMatrixParameter &other);

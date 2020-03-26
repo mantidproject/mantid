@@ -33,7 +33,7 @@ using Mantid::Types::Core::DateAndTime;
 
 class LoadMuonNexus2Test : public CxxTest::TestSuite {
 public:
-  void check_spectra_and_detectors(MatrixWorkspace_sptr output) {
+  void check_spectra_and_detectors(const MatrixWorkspace_sptr &output) {
 
     //----------------------------------------------------------------------
     // Tests to check that spectra-detector mapping is done correctly

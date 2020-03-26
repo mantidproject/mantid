@@ -57,8 +57,8 @@ private:
 
   template <typename MDE, size_t nd>
   void finish(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
-  Mantid::Geometry::MDFrame_uptr createMDFrame(std::string frame,
-                                               std::string unit);
+  Mantid::Geometry::MDFrame_uptr createMDFrame(const std::string &frame,
+                                               const std::string &unit);
   bool checkIfFrameValid(const std::string &frame,
                          const std::vector<std::string> &targetFrames);
 };

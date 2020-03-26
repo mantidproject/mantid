@@ -52,7 +52,7 @@ Mantid::API::MatrixWorkspace_sptr do_load_v1(const std::string &filename) {
 }
 
 namespace test_utility {
-template <typename T> void save(const std::string filename, T &ws) {
+template <typename T> void save(const std::string &filename, T &ws) {
   SaveNexusESS alg;
   alg.setChild(true);
   alg.setRethrows(true);

@@ -311,8 +311,9 @@ void GroupDetectors2::execEvent() {
  *  @param workspace :: the user selected input workspace
  *  @param unUsedSpec :: spectra indexes that are not members of any group
  */
-void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
-                                std::vector<int64_t> &unUsedSpec) {
+void GroupDetectors2::getGroups(
+    const API::MatrixWorkspace_const_sptr &workspace,
+    std::vector<int64_t> &unUsedSpec) {
   // this is the map that we are going to fill
   m_GroupWsInds.clear();
 
@@ -454,9 +455,9 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
  * a group (so far)
  *  @throw FileError if there's any problem with the file or its format
  */
-void GroupDetectors2::processFile(const std::string &fname,
-                                  API::MatrixWorkspace_const_sptr workspace,
-                                  std::vector<int64_t> &unUsedSpec) {
+void GroupDetectors2::processFile(
+    const std::string &fname, const API::MatrixWorkspace_const_sptr &workspace,
+    std::vector<int64_t> &unUsedSpec) {
   // tring to open the file the user told us exists, skip down 20 lines to find
   // out what happens if we can read from it
   g_log.debug() << "Opening input file ... " << fname;
@@ -545,9 +546,9 @@ void GroupDetectors2::processFile(const std::string &fname,
  * a group (so far)
  *  @throw FileError if there's any problem with the file or its format
  */
-void GroupDetectors2::processXMLFile(const std::string &fname,
-                                     API::MatrixWorkspace_const_sptr workspace,
-                                     std::vector<int64_t> &unUsedSpec) {
+void GroupDetectors2::processXMLFile(
+    const std::string &fname, const API::MatrixWorkspace_const_sptr &workspace,
+    std::vector<int64_t> &unUsedSpec) {
   // 1. Get maps for spectrum No and detector ID
   spec2index_map specs2index;
   const SpectraAxis *axis =
@@ -589,9 +590,7 @@ void GroupDetectors2::processXMLFile(const std::string &fname,
       if (ind != detIdToWiMap.end()) {
         size_t wsid = ind->second;
         wsindexes.emplace_back(wsid);
-        if (unUsedSpec[wsid] != (USED)) {
-          unUsedSpec[wsid] = (USED);
-        }
+        unUsedSpec[wsid] = (USED);
       } else {
         g_log.error() << "Detector with ID " << detid
                       << " is not found in instrument \n";
@@ -615,9 +614,7 @@ void GroupDetectors2::processXMLFile(const std::string &fname,
       if (ind != specs2index.end()) {
         size_t wsid = ind->second;
         wsindexes.emplace_back(wsid);
-        if (unUsedSpec[wsid] != (USED)) {
-          unUsedSpec[wsid] = (USED);
-        }
+        unUsedSpec[wsid] = (USED);
       } else {
         g_log.error() << "Spectrum with ID " << specNum
                       << " is not found in instrument \n";
@@ -634,8 +631,8 @@ void GroupDetectors2::processXMLFile(const std::string &fname,
  * in a group (so far)
  */
 void GroupDetectors2::processGroupingWorkspace(
-    GroupingWorkspace_const_sptr groupWS,
-    API::MatrixWorkspace_const_sptr workspace,
+    const GroupingWorkspace_const_sptr &groupWS,
+    const API::MatrixWorkspace_const_sptr &workspace,
     std::vector<int64_t> &unUsedSpec) {
   detid2index_map detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap();
 
@@ -662,9 +659,7 @@ void GroupDetectors2::processGroupingWorkspace(
             detIdToWiMap[detectorIDs[spectrumDefinition.first]];
         targetWSIndexSet.insert(targetWSIndex);
         // mark as used
-        if (unUsedSpec[targetWSIndex] != (USED)) {
-          unUsedSpec[targetWSIndex] = (USED);
-        }
+        unUsedSpec[targetWSIndex] = (USED);
       }
     }
   }
@@ -688,7 +683,8 @@ void GroupDetectors2::processGroupingWorkspace(
  * a group (so far)
  */
 void GroupDetectors2::processMatrixWorkspace(
-    MatrixWorkspace_const_sptr groupWS, MatrixWorkspace_const_sptr workspace,
+    const MatrixWorkspace_const_sptr &groupWS,
+    const MatrixWorkspace_const_sptr &workspace,
     std::vector<int64_t> &unUsedSpec) {
   detid2index_map detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap();
 
@@ -700,7 +696,6 @@ void GroupDetectors2::processMatrixWorkspace(
   for (size_t i = 0; i < spectrumInfo.size(); ++i) {
     // read spectra from groupingws
     size_t groupid = i;
-
     if (group2WSIndexSetmap.find(groupid) == group2WSIndexSetmap.end()) {
       // not found - create an empty set
       group2WSIndexSetmap.emplace(groupid, std::set<size_t>());
@@ -716,9 +711,7 @@ void GroupDetectors2::processMatrixWorkspace(
             detIdToWiMap[detectorIDs[spectrumDefinition.first]];
         targetWSIndexSet.insert(targetWSIndex);
         // mark as used
-        if (unUsedSpec[targetWSIndex] != (USED)) {
-          unUsedSpec[targetWSIndex] = (USED);
-        }
+        unUsedSpec[targetWSIndex] = (USED);
       }
     }
   }
@@ -939,11 +932,12 @@ double GroupDetectors2::fileReadProg(
  * indexing after grouping
  *  @return number of new grouped spectra
  */
-size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
-                                   API::MatrixWorkspace_sptr outputWS,
-                                   const double prog4Copy, const bool keepAll,
-                                   const std::set<int64_t> &unGroupedSet,
-                                   Indexing::IndexInfo &indexInfo) {
+size_t
+GroupDetectors2::formGroups(const API::MatrixWorkspace_const_sptr &inputWS,
+                            const API::MatrixWorkspace_sptr &outputWS,
+                            const double prog4Copy, const bool keepAll,
+                            const std::set<int64_t> &unGroupedSet,
+                            Indexing::IndexInfo &indexInfo) {
   const std::string behaviourChoice = getProperty("Behaviour");
   const auto behaviour =
       behaviourChoice == "Sum" ? Behaviour::SUM : Behaviour::AVERAGE;
@@ -1062,10 +1056,9 @@ size_t GroupDetectors2::formGroups(API::MatrixWorkspace_const_sptr inputWS,
  * a single spectra
  *  @return number of new grouped spectra
  */
-size_t
-GroupDetectors2::formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
-                                 DataObjects::EventWorkspace_sptr outputWS,
-                                 const double prog4Copy) {
+size_t GroupDetectors2::formGroupsEvent(
+    const DataObjects::EventWorkspace_const_sptr &inputWS,
+    const DataObjects::EventWorkspace_sptr &outputWS, const double prog4Copy) {
   if (inputWS->detectorInfo().isScanning())
     throw std::runtime_error("GroupDetectors does not currently support "
                              "EventWorkspaces with detector scans.");

@@ -30,7 +30,7 @@ public:
   DetectorGroup();
   DetectorGroup(const std::vector<IDetector_const_sptr> &dets);
 
-  void addDetector(IDetector_const_sptr det);
+  void addDetector(const IDetector_const_sptr &det);
 
   // IDetector methods
   IDetector *cloneParameterized(const ParameterMap *) const override {

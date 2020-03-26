@@ -39,23 +39,24 @@ private:
   void exec() override;
   /// Create the output workspace
   Mantid::API::MatrixWorkspace_sptr
-  createOutputWS(Mantid::API::MatrixWorkspace_sptr input, double startProgress,
-                 double stopProgress);
+  createOutputWS(const Mantid::API::MatrixWorkspace_sptr &input,
+                 double startProgress, double stopProgress);
   /// Get the time shift
-  double getTimeShift(API::MatrixWorkspace_sptr ws) const;
+  double getTimeShift(const API::MatrixWorkspace_sptr &ws) const;
   /// Shift the time of the logs
-  void shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws, double timeShift,
-                       double startProgress, double stopProgress);
+  void shiftTimeOfLogs(const Mantid::API::MatrixWorkspace_sptr &ws,
+                       double timeShift, double startProgress,
+                       double stopProgress);
   /// Get the date and time of the first good frame of a workspace
   Mantid::Types::Core::DateAndTime
-  getStartTimeFromWorkspace(Mantid::API::MatrixWorkspace_sptr ws) const;
+  getStartTimeFromWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) const;
   /// Can the string be transformed to double
-  bool checkForDouble(std::string val) const;
+  bool checkForDouble(const std::string &val) const;
   /// Can the string be transformed to a DateTime
   bool checkForDateTime(const std::string &val) const;
 
   /// Time shift the log of a double series property
-  void shiftTimeInLogForTimeSeries(Mantid::API::MatrixWorkspace_sptr ws,
+  void shiftTimeInLogForTimeSeries(const Mantid::API::MatrixWorkspace_sptr &ws,
                                    Mantid::Kernel::Property *prop,
                                    double timeShift) const;
   /// Time shift the log of a string property
@@ -63,7 +64,7 @@ private:
       Mantid::Kernel::PropertyWithValue<std::string> *logEntry,
       double timeShift) const;
   // Shift the time of the neutrons
-  void shiftTimeOfNeutrons(Mantid::API::MatrixWorkspace_sptr ws,
+  void shiftTimeOfNeutrons(const Mantid::API::MatrixWorkspace_sptr &ws,
                            double timeShift, double startProgress,
                            double stopProgress);
 

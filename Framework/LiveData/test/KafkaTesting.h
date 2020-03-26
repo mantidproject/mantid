@@ -220,7 +220,7 @@ void fakeReceiveASampleEnvMessage(std::string *buffer) {
 void fakeReceiveARunStartMessage(std::string *buffer, int32_t runNumber,
                                  const std::string &startTime,
                                  const std::string &instName, int32_t nPeriods,
-                                 std::string nexusStructure = "") {
+                                 const std::string &nexusStructure = "") {
   // Convert date to time_t
   auto mantidTime = Mantid::Types::Core::DateAndTime(startTime);
   auto startTimestamp =

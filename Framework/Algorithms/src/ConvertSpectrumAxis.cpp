@@ -186,7 +186,7 @@ void ConvertSpectrumAxis::exec() {
 
 double
 ConvertSpectrumAxis::getEfixed(const Mantid::Geometry::IDetector &detector,
-                               MatrixWorkspace_const_sptr inputWS,
+                               const MatrixWorkspace_const_sptr &inputWS,
                                int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");

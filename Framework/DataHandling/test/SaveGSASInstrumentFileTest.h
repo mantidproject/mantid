@@ -186,7 +186,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Load table workspace containing instrument parameters
    */
-  void loadProfileTable(string wsname) {
+  void loadProfileTable(const string &wsname) {
     // The data befow is from Bank1 in pg60_2011B.irf
 
     auto tablews = boost::make_shared<TableWorkspace>();
@@ -266,7 +266,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate a 3 bank .irf file
    */
-  void generate3BankIrfFile(string filename) {
+  void generate3BankIrfFile(const string &filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
 
@@ -457,7 +457,8 @@ public:
   }
 
   // Compare 2 files
-  bool compare2Files(std::string filename1, std::string filename2) {
+  bool compare2Files(const std::string &filename1,
+                     const std::string &filename2) {
     ifstream file1(filename1.c_str(), std::ifstream::in);
     ifstream file2(filename2.c_str(), std::ifstream::in);
 
@@ -496,7 +497,6 @@ public:
 
     while (!file2.eof()) {
       getline(file2, str);
-      c2++;
     }
 
     // Reset file stream pointer

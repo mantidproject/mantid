@@ -565,7 +565,7 @@ void IqtFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
 }
 
 void IqtFunctionModel::applyParameterFunction(
-    std::function<void(ParamID)> paramFun) const {
+    const std::function<void(ParamID)> &paramFun) const {
   if (m_numberOfExponentials > 0) {
     paramFun(ParamID::EXP1_HEIGHT);
     paramFun(ParamID::EXP1_LIFETIME);

@@ -32,7 +32,7 @@ public:
   IndexProperty(const std::string &name,
                 const IWorkspaceProperty &workspaceProp,
                 const IndexTypeProperty &indexTypeProp,
-                Kernel::IValidator_sptr validator =
+                const Kernel::IValidator_sptr &validator =
                     Kernel::IValidator_sptr(new Kernel::NullValidator));
 
   IndexProperty *clone() const override;

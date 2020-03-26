@@ -58,10 +58,10 @@ private:
                       double coeff1, double coeff2, double coeff3, bool doAbs,
                       bool doMS);
 
-  API::MatrixWorkspace_sptr multiply(const API::MatrixWorkspace_sptr lhsWS,
-                                     const API::MatrixWorkspace_sptr rhsWS);
-  API::MatrixWorkspace_sptr minus(const API::MatrixWorkspace_sptr lhsWS,
-                                  const API::MatrixWorkspace_sptr rhsWS);
+  API::MatrixWorkspace_sptr multiply(const API::MatrixWorkspace_sptr &lhsWS,
+                                     const API::MatrixWorkspace_sptr &rhsWS);
+  API::MatrixWorkspace_sptr minus(const API::MatrixWorkspace_sptr &lhsWS,
+                                  const API::MatrixWorkspace_sptr &rhsWS);
 };
 
 } // namespace Algorithms

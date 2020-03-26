@@ -59,8 +59,8 @@ protected:
   void exec() override;
 
   void logConfigurationInformation(
-      boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector,
-      PoldiAbstractChopper_sptr chopper);
+      const boost::shared_ptr<PoldiDeadWireDecorator> &cleanDetector,
+      const PoldiAbstractChopper_sptr &chopper);
 
 private:
   /// Overwrites Algorithm method.

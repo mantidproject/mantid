@@ -15,6 +15,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
+#include <utility>
 
 using Mantid::Algorithms::SpecularReflectionPositionCorrect;
 using namespace Mantid::API;
@@ -181,9 +182,9 @@ public:
                      sampleToDetectorBeamOffset, 1e-6);
   }
 
-  void
-  do_test_correct_point_detector_position(std::string detectorFindProperty = "",
-                                          std::string stringValue = "") {
+  void do_test_correct_point_detector_position(
+      const std::string &detectorFindProperty = "",
+      const std::string &stringValue = "") {
     MatrixWorkspace_sptr toConvert = pointDetectorWS;
 
     const double thetaInDegrees = 10.0; // Desired theta in degrees.
@@ -240,8 +241,8 @@ public:
   }
 
   double do_test_correct_line_detector_position(
-      std::vector<int> specNumbers, double thetaInDegrees,
-      std::string detectorName = "lineardetector",
+      const std::vector<int> &specNumbers, double thetaInDegrees,
+      const std::string &detectorName = "lineardetector",
       bool strictSpectrumCheck = true) {
     auto toConvert = this->linearDetectorWS;
 
@@ -258,7 +259,7 @@ public:
 
     VerticalHorizontalOffsetType offsetTupleCorrected =
         determine_vertical_and_horizontal_offsets(
-            corrected, detectorName); // Positions after correction
+            corrected, std::move(detectorName)); // Positions after correction
     const double sampleToDetectorVerticalOffsetCorrected =
         offsetTupleCorrected.get<0>();
 

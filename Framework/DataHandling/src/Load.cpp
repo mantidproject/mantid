@@ -54,7 +54,8 @@ bool isSingleFile(const std::vector<std::vector<std::string>> &fileNames) {
  * @returns a string containing a suggested ws name based on the given file
  *names.
  */
-std::string generateWsNameFromFileNames(std::vector<std::string> filenames) {
+std::string
+generateWsNameFromFileNames(const std::vector<std::string> &filenames) {
   std::string wsName;
 
   for (auto &filename : filenames) {
@@ -678,7 +679,8 @@ API::Workspace_sptr Load::loadFileToWs(const std::string &fileName,
  *
  * @returns a pointer to the result (the first workspace).
  */
-API::Workspace_sptr Load::plusWs(Workspace_sptr ws1, Workspace_sptr ws2) {
+API::Workspace_sptr Load::plusWs(Workspace_sptr ws1,
+                                 const Workspace_sptr &ws2) {
   WorkspaceGroup_sptr group1 = boost::dynamic_pointer_cast<WorkspaceGroup>(ws1);
   WorkspaceGroup_sptr group2 = boost::dynamic_pointer_cast<WorkspaceGroup>(ws2);
 

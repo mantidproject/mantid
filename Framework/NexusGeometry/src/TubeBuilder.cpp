@@ -17,7 +17,7 @@ namespace NexusGeometry {
 namespace detail {
 
 TubeBuilder::TubeBuilder(const Mantid::Geometry::IObject &pixelShape,
-                         Eigen::Vector3d firstDetectorPosition,
+                         const Eigen::Vector3d &firstDetectorPosition,
                          int firstDetectorId)
     : m_pixelHeight(pixelShape.getGeometryHandler()->shapeInfo().height()),
       m_pixelRadius(pixelShape.getGeometryHandler()->shapeInfo().radius()) {

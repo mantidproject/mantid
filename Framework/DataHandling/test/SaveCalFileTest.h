@@ -51,9 +51,6 @@ public:
     maskWS->getSpectrum(0).clearData();
     maskWS->mutableSpectrumInfo().setMasked(0, true);
 
-    // Name of the output workspace.
-    std::string outWSName("SaveCalFileTest_OutputWS");
-
     SaveCalFile alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

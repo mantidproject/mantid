@@ -178,7 +178,8 @@ void FunctionModel::setParameterFixed(const QString &parName, bool fixed) {
                          fixed);
 }
 
-void FunctionModel::setParameterTie(const QString &parName, QString tie) {
+void FunctionModel::setParameterTie(const QString &parName,
+                                    const QString &tie) {
   setLocalParameterTie(parName, static_cast<int>(m_currentDomainIndex), tie);
 }
 

@@ -19,6 +19,7 @@
 
 #include <ostream>
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace RemoteJobManagers {
@@ -169,22 +170,22 @@ void MantidWebServiceAPIHelper::clearSessionCookies() { g_cookies.clear(); }
 
 // Wrappers for a lot of the boilerplate code needed to perform an HTTPS GET or
 // POST
-void MantidWebServiceAPIHelper::initGetRequest(Poco::Net::HTTPRequest &req,
-                                               std::string extraPath,
-                                               std::string queryString) const {
-  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_GET, extraPath,
-                         queryString);
+void MantidWebServiceAPIHelper::initGetRequest(
+    Poco::Net::HTTPRequest &req, const std::string &extraPath,
+    const std::string &queryString) const {
+  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_GET,
+                         std::move(extraPath), std::move(queryString));
 }
 
-void MantidWebServiceAPIHelper::initPostRequest(Poco::Net::HTTPRequest &req,
-                                                std::string extraPath) const {
-  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_POST, extraPath);
+void MantidWebServiceAPIHelper::initPostRequest(
+    Poco::Net::HTTPRequest &req, const std::string &extraPath) const {
+  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_POST,
+                         std::move(extraPath));
 }
 
-void MantidWebServiceAPIHelper::initHTTPRequest(Poco::Net::HTTPRequest &req,
-                                                const std::string &method,
-                                                std::string extraPath,
-                                                std::string queryString) const {
+void MantidWebServiceAPIHelper::initHTTPRequest(
+    Poco::Net::HTTPRequest &req, const std::string &method,
+    const std::string &extraPath, const std::string &queryString) const {
   // Set up the session object
   m_session.reset();
 

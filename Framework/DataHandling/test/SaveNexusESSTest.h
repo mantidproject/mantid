@@ -33,7 +33,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
 namespace {
-template <typename T> void do_execute(const std::string filename, T &ws) {
+template <typename T> void do_execute(const std::string &filename, T &ws) {
   SaveNexusESS alg;
   alg.setChild(true);
   alg.setRethrows(true);

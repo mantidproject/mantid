@@ -242,13 +242,14 @@ void updateEventProperties(AlgorithmRuntimeProps &properties,
   boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
 }
 
-boost::optional<double> getDouble(IAlgorithm_sptr algorithm,
+boost::optional<double> getDouble(const IAlgorithm_sptr &algorithm,
                                   std::string const &property) {
   double result = algorithm->getProperty(property);
   return result;
 }
 
-void updateRowFromOutputProperties(IAlgorithm_sptr algorithm, Item &item) {
+void updateRowFromOutputProperties(const IAlgorithm_sptr &algorithm,
+                                   Item &item) {
   auto &row = dynamic_cast<Row &>(item);
 
   auto const iVsLam = AlgorithmProperties::getOutputWorkspace(

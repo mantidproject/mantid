@@ -30,12 +30,12 @@ public:
   void test_initialized_object_has_expected_parameters() {
     auto profile = createFunction();
     static const size_t nparams(1);
-    const char *expectedParams[nparams] = {"Mass"};
 
     TS_ASSERT_EQUALS(nparams, profile->nParams());
 
     // Test names as they are used in scripts
     if (profile->nParams() > 0) {
+      const char *expectedParams[nparams] = {"Mass"};
       std::unordered_set<std::string> expectedParamStr(
           expectedParams, expectedParams + nparams);
       std::vector<std::string> actualNames = profile->getParameterNames();

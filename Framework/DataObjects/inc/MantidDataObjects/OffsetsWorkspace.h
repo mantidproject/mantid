@@ -24,7 +24,7 @@ namespace DataObjects {
 class DLLExport OffsetsWorkspace : public SpecialWorkspace2D {
 public:
   OffsetsWorkspace() = default;
-  OffsetsWorkspace(Geometry::Instrument_const_sptr inst);
+  OffsetsWorkspace(const Geometry::Instrument_const_sptr &inst);
 
   /// Returns a clone of the workspace
   std::unique_ptr<OffsetsWorkspace> clone() const {

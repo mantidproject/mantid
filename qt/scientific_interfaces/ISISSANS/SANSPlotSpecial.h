@@ -100,7 +100,7 @@ private:
   void createTransforms();
   QwtPlotCurve *
   plotMiniplot(QwtPlotCurve *curve,
-               boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace,
+               const boost::shared_ptr<Mantid::API::MatrixWorkspace> &workspace,
                size_t workspaceIndex = 0);
 
   void deriveGuinierSpheres();

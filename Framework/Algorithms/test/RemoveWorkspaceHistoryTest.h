@@ -64,7 +64,7 @@ private:
     }
   };
 
-  void createWorkspace(std::string wsName) {
+  void createWorkspace(const std::string &wsName) {
     // create a fake workspace for testing
     boost::shared_ptr<WorkspaceTester> input =
         boost::make_shared<WorkspaceTester>();

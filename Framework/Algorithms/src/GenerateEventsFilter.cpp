@@ -18,6 +18,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/math/special_functions/round.hpp>
+#include <utility>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -455,10 +456,9 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
     int64_t curtime_ns = m_startTime.totalNanoseconds();
     int wsindex = 0;
     while (curtime_ns < m_stopTime.totalNanoseconds()) {
-      int64_t deltatime_ns;
       for (size_t id = 0; id < numtimeintervals; ++id) {
         // get next time interval value
-        deltatime_ns = vec_dtimens[id];
+        int64_t deltatime_ns = vec_dtimens[id];
         // Calculate next.time
         int64_t nexttime_ns = curtime_ns + deltatime_ns;
         bool breaklater = false;
@@ -500,7 +500,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
 /** Generate filters by log values.
  * @param logname :: name of the log to filter with
  */
-void GenerateEventsFilter::setFilterByLogValue(std::string logname) {
+void GenerateEventsFilter::setFilterByLogValue(const std::string &logname) {
   // Obtain reference of sample log to filter with
   m_dblLog = dynamic_cast<TimeSeriesProperty<double> *>(
       m_dataWS->run().getProperty(logname));
@@ -830,7 +830,6 @@ void GenerateEventsFilter::makeFilterBySingleValue(
 
   // Initialize control parameters
   bool lastGood = false;
-  bool isGood = false;
   time_duration tol = DateAndTime::durationFromSeconds(TimeTolerance);
   int numgood = 0;
   DateAndTime lastTime, currT;
@@ -843,8 +842,8 @@ void GenerateEventsFilter::makeFilterBySingleValue(
     currT = m_dblLog->nthTime(i);
 
     // A good value?
-    isGood = identifyLogEntry(i, currT, lastGood, min, max, startTime, stopTime,
-                              filterIncrease, filterDecrease);
+    bool isGood = identifyLogEntry(i, currT, lastGood, min, max, startTime,
+                                   stopTime, filterIncrease, filterDecrease);
     if (isGood)
       numgood++;
 
@@ -962,7 +961,7 @@ bool GenerateEventsFilter::identifyLogEntry(
  * @param stopTime :: Stop time.
  */
 void GenerateEventsFilter::makeMultipleFiltersByValues(
-    map<size_t, int> indexwsindexmap, vector<double> logvalueranges,
+    map<size_t, int> indexwsindexmap, const vector<double> &logvalueranges,
     bool centre, bool filterIncrease, bool filterDecrease,
     DateAndTime startTime, DateAndTime stopTime) {
   g_log.notice("Starting method 'makeMultipleFiltersByValues'. ");
@@ -994,8 +993,9 @@ void GenerateEventsFilter::makeMultipleFiltersByValues(
   auto iend = static_cast<int>(logsize - 1);
 
   makeMultipleFiltersByValuesPartialLog(
-      istart, iend, m_vecSplitterTime, m_vecSplitterGroup, indexwsindexmap,
-      logvalueranges, tol, filterIncrease, filterDecrease, startTime, stopTime);
+      istart, iend, m_vecSplitterTime, m_vecSplitterGroup,
+      std::move(indexwsindexmap), logvalueranges, tol, filterIncrease,
+      filterDecrease, startTime, stopTime);
 
   progress(1.0);
 }
@@ -1018,9 +1018,9 @@ void GenerateEventsFilter::makeMultipleFiltersByValues(
  * @param stopTime :: Stop time.
  */
 void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
-    map<size_t, int> indexwsindexmap, vector<double> logvalueranges,
-    bool centre, bool filterIncrease, bool filterDecrease,
-    DateAndTime startTime, DateAndTime stopTime) {
+    const map<size_t, int> &indexwsindexmap,
+    const vector<double> &logvalueranges, bool centre, bool filterIncrease,
+    bool filterDecrease, DateAndTime startTime, DateAndTime stopTime) {
   // Return if the log is empty.
   int logsize = m_dblLog->size();
   if (logsize == 0) {
@@ -1178,7 +1178,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(
 void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
     int istart, int iend, std::vector<Types::Core::DateAndTime> &vecSplitTime,
     std::vector<int> &vecSplitGroup, map<size_t, int> indexwsindexmap,
-    const vector<double> &logvalueranges, time_duration tol,
+    const vector<double> &logvalueranges, const time_duration &tol,
     bool filterIncrease, bool filterDecrease, DateAndTime startTime,
     DateAndTime stopTime) {
   // Check
@@ -1217,7 +1217,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
     double currValue = m_dblLog->nthValue(i);
 
     // Filter out by time and direction (optional)
-    bool intime = true;
     if (currTime < startTime) {
       // case i.  Too early, do nothing
       createsplitter = false;
@@ -1252,130 +1251,127 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
     prevDirection = direction;
 
     // Examine log value for filter
-    if (intime) {
-      // Determine whether direction is fine
-      bool correctdir = true;
-      if (filterIncrease && filterDecrease) {
-        // Both direction is fine
+    // Determine whether direction is fine
+    bool correctdir = true;
+    if (filterIncrease && filterDecrease) {
+      // Both direction is fine
+      correctdir = true;
+    } else {
+      // Filter out one direction
+      if (filterIncrease && direction > 0)
         correctdir = true;
-      } else {
-        // Filter out one direction
-        if (filterIncrease && direction > 0)
-          correctdir = true;
-        else if (filterDecrease && direction < 0)
-          correctdir = true;
-        else if (direction == 0)
-          throw runtime_error("Direction is not determined.");
-        else
-          correctdir = false;
-      } // END-IF-ELSE: Direction
+      else if (filterDecrease && direction < 0)
+        correctdir = true;
+      else if (direction == 0)
+        throw runtime_error("Direction is not determined.");
+      else
+        correctdir = false;
+    } // END-IF-ELSE: Direction
 
-      // Treat the log entry based on: changing direction (+ time range)
-      if (correctdir) {
-        // Check this value whether it falls into any range
-        size_t index = searchValue(logvalueranges, currValue);
+    // Treat the log entry based on: changing direction (+ time range)
+    if (correctdir) {
+      // Check this value whether it falls into any range
+      size_t index = searchValue(logvalueranges, currValue);
 
-        bool valueWithinMinMax = true;
-        if (index > logvalueranges.size()) {
-          // Out of range
-          valueWithinMinMax = false;
-        }
+      bool valueWithinMinMax = true;
+      if (index > logvalueranges.size()) {
+        // Out of range
+        valueWithinMinMax = false;
+      }
 
-        if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
-          stringstream dbss;
-          dbss << "[DBx257] Examine Log Index " << i
-               << ", Value = " << currValue << ", Data Range Index = " << index
-               << "; "
-               << "Group Index = " << indexwsindexmap[index / 2]
-               << " (log value range vector size = " << logvalueranges.size()
-               << "): ";
-          if (index == 0)
-            dbss << logvalueranges[index] << ", " << logvalueranges[index + 1];
-          else if (index == logvalueranges.size())
-            dbss << logvalueranges[index - 1] << ", " << logvalueranges[index];
-          else if (valueWithinMinMax)
-            dbss << logvalueranges[index - 1] << ", " << logvalueranges[index]
-                 << ", " << logvalueranges[index + 1];
-          g_log.debug(dbss.str());
-        }
+      if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
+        stringstream dbss;
+        dbss << "[DBx257] Examine Log Index " << i << ", Value = " << currValue
+             << ", Data Range Index = " << index << "; "
+             << "Group Index = " << indexwsindexmap[index / 2]
+             << " (log value range vector size = " << logvalueranges.size()
+             << "): ";
+        if (index == 0)
+          dbss << logvalueranges[index] << ", " << logvalueranges[index + 1];
+        else if (index == logvalueranges.size())
+          dbss << logvalueranges[index - 1] << ", " << logvalueranges[index];
+        else if (valueWithinMinMax)
+          dbss << logvalueranges[index - 1] << ", " << logvalueranges[index]
+               << ", " << logvalueranges[index + 1];
+        g_log.debug(dbss.str());
+      }
 
-        if (valueWithinMinMax) {
-          if (index % 2 == 0) {
-            // [Situation] Falls in the interval
-            currindex = indexwsindexmap[index / 2];
+      if (valueWithinMinMax) {
+        if (index % 2 == 0) {
+          // [Situation] Falls in the interval
+          currindex = indexwsindexmap[index / 2];
 
-            if (currindex != lastindex && start.totalNanoseconds() == 0) {
-              // Group index is different from last and start is not set up: new
-              // a region!
-              newsplitter = true;
-            } else if (currindex != lastindex && start.totalNanoseconds() > 0) {
-              // Group index is different from last and start is set up:  close
-              // a region and new a region
+          if (currindex != lastindex && start.totalNanoseconds() == 0) {
+            // Group index is different from last and start is not set up: new
+            // a region!
+            newsplitter = true;
+          } else if (currindex != lastindex && start.totalNanoseconds() > 0) {
+            // Group index is different from last and start is set up:  close
+            // a region and new a region
+            stop = currTime;
+            createsplitter = true;
+            newsplitter = true;
+          } else if (currindex == lastindex && start.totalNanoseconds() > 0) {
+            // Still of the group index
+            if (i == iend) {
+              // Last entry in this section of log.  Need to flag to close the
+              // pair
               stop = currTime;
               createsplitter = true;
-              newsplitter = true;
-            } else if (currindex == lastindex && start.totalNanoseconds() > 0) {
-              // Still of the group index
-              if (i == iend) {
-                // Last entry in this section of log.  Need to flag to close the
-                // pair
-                stop = currTime;
-                createsplitter = true;
-                newsplitter = false;
-              } else {
-                // Do nothing
-                ;
-              }
+              newsplitter = false;
             } else {
-              // An impossible situation
-              std::stringstream errmsg;
-              double lastvalue = m_dblLog->nthValue(i - 1);
-              errmsg << "Impossible to have currindex == lastindex == "
-                     << currindex
-                     << ", while start is not init.  Log Index = " << i
-                     << "\t value = " << currValue << "\t, Index = " << index
-                     << " in range " << logvalueranges[index] << ", "
-                     << logvalueranges[index + 1]
-                     << "; Last value = " << lastvalue;
-              throw std::runtime_error(errmsg.str());
+              // Do nothing
+              ;
             }
-          } // [In-bound: Inside interval]
-          else {
-            // [Situation] Fall between interval (which is not likley happen)
-            currindex = -1;
-            g_log.warning()
-                << "Not likely to happen! Current value = " << currValue
-                << " is  within value range but its index = " << index
-                << " has no map to group index. "
-                << "\n";
-            if (start.totalNanoseconds() > 0) {
-              // Close the interval pair if it has been started.
-              stop = currTime;
-              createsplitter = true;
-            }
-          } // [In-bound: Between interval]
-        } else {
-          // Out of a range: check whether there is a splitter started
+          } else {
+            // An impossible situation
+            std::stringstream errmsg;
+            double lastvalue = m_dblLog->nthValue(i - 1);
+            errmsg << "Impossible to have currindex == lastindex == "
+                   << currindex
+                   << ", while start is not init.  Log Index = " << i
+                   << "\t value = " << currValue << "\t, Index = " << index
+                   << " in range " << logvalueranges[index] << ", "
+                   << logvalueranges[index + 1]
+                   << "; Last value = " << lastvalue;
+            throw std::runtime_error(errmsg.str());
+          }
+        } // [In-bound: Inside interval]
+        else {
+          // [Situation] Fall between interval (which is not likley happen)
           currindex = -1;
+          g_log.warning() << "Not likely to happen! Current value = "
+                          << currValue
+                          << " is  within value range but its index = " << index
+                          << " has no map to group index. "
+                          << "\n";
           if (start.totalNanoseconds() > 0) {
-            // End situation
+            // Close the interval pair if it has been started.
             stop = currTime;
             createsplitter = true;
           }
-        } // [Out-bound]
-
-      } // [CORRECT DIRECTION]
-      else {
-        // Log Index i falls out b/c out of wrong direction
+        } // [In-bound: Between interval]
+      } else {
+        // Out of a range: check whether there is a splitter started
         currindex = -1;
-
-        // Condition to generate a Splitter (close parenthesis)
-        if (!correctdir && start.totalNanoseconds() > 0) {
+        if (start.totalNanoseconds() > 0) {
+          // End situation
           stop = currTime;
           createsplitter = true;
         }
+      } // [Out-bound]
+
+    } // [CORRECT DIRECTION]
+    else {
+      // Log Index i falls out b/c out of wrong direction
+      currindex = -1;
+
+      // Condition to generate a Splitter (close parenthesis)
+      if (!correctdir && start.totalNanoseconds() > 0) {
+        stop = currTime;
+        createsplitter = true;
       }
-    } // ENDIF (log entry in specified time)
+    }
 
     // d) Create Splitter
     if (createsplitter) {
@@ -1662,7 +1658,7 @@ int GenerateEventsFilter::determineChangingDirection(int startindex) {
  */
 void GenerateEventsFilter::addNewTimeFilterSplitter(
     Types::Core::DateAndTime starttime, Types::Core::DateAndTime stoptime,
-    int wsindex, string info) {
+    int wsindex, const string &info) {
   if (m_forFastLog) {
     // For MatrixWorkspace splitter
     // Start of splitter

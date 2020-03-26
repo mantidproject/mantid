@@ -50,7 +50,7 @@ using namespace Mantid::Kernel;
  */
 SampleLogDialogBase::SampleLogDialogBase(const QString &wsname,
                                          QWidget *parentContainer,
-                                         Qt::WFlags flags,
+                                         const Qt::WFlags &flags,
                                          size_t experimentInfoIndex)
     : QDialog(parentContainer, flags), m_tree(new QTreeWidget()),
       m_parentContainer(parentContainer), m_wsname(wsname.toStdString()),

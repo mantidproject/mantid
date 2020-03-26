@@ -13,6 +13,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <utility>
+
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -41,22 +43,23 @@ class setUpADSWithWorkspace {
 public:
   std::string const inputWSName = "inputData";
 
-  setUpADSWithWorkspace(Workspace_sptr ws) {
+  setUpADSWithWorkspace(const Workspace_sptr &ws) {
     AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
   };
   ~setUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
 };
 
 // Set up algorithm with none of the optional properties
-IAlgorithm_sptr setUpAlgorithmWithNoOptionalProperties(Workspace_sptr ws) {
-  setUpADSWithWorkspace setup(ws);
+IAlgorithm_sptr
+setUpAlgorithmWithNoOptionalProperties(const Workspace_sptr &ws) {
+  setUpADSWithWorkspace setup(std::move(ws));
   IAlgorithm_sptr alg =
       algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
   return alg;
 }
 
 // Set up algorithm with TimeOffset applied
-IAlgorithm_sptr setUpAlgorithmWithTimeOffset(MatrixWorkspace_sptr ws,
+IAlgorithm_sptr setUpAlgorithmWithTimeOffset(const MatrixWorkspace_sptr &ws,
                                              const double &offset) {
   setUpADSWithWorkspace setup(ws);
   IAlgorithm_sptr alg =
@@ -67,8 +70,8 @@ IAlgorithm_sptr setUpAlgorithmWithTimeOffset(MatrixWorkspace_sptr ws,
 
 // Set up algorithm with DeadTimeTable applied
 IAlgorithm_sptr
-setUpAlgorithmWithDeadTimeTable(MatrixWorkspace_sptr ws,
-                                ITableWorkspace_sptr deadTimes) {
+setUpAlgorithmWithDeadTimeTable(const MatrixWorkspace_sptr &ws,
+                                const ITableWorkspace_sptr &deadTimes) {
   setUpADSWithWorkspace setup(ws);
   IAlgorithm_sptr alg =
       algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
@@ -77,7 +80,7 @@ setUpAlgorithmWithDeadTimeTable(MatrixWorkspace_sptr ws,
 }
 
 // Set up algorithm with TimeMin applied
-IAlgorithm_sptr setUpAlgorithmWithTimeMin(MatrixWorkspace_sptr ws,
+IAlgorithm_sptr setUpAlgorithmWithTimeMin(const MatrixWorkspace_sptr &ws,
                                           const double &timeMin) {
   setUpADSWithWorkspace setup(ws);
   IAlgorithm_sptr alg =
@@ -87,7 +90,7 @@ IAlgorithm_sptr setUpAlgorithmWithTimeMin(MatrixWorkspace_sptr ws,
 }
 
 // Set up algorithm with TimeMax applied
-IAlgorithm_sptr setUpAlgorithmWithTimeMax(MatrixWorkspace_sptr ws,
+IAlgorithm_sptr setUpAlgorithmWithTimeMax(const MatrixWorkspace_sptr &ws,
                                           const double &timeMax) {
   setUpADSWithWorkspace setup(ws);
   IAlgorithm_sptr alg =
@@ -98,8 +101,8 @@ IAlgorithm_sptr setUpAlgorithmWithTimeMax(MatrixWorkspace_sptr ws,
 
 // Get the workspace at a particular index from the output workspace
 // group produced by the PreProcess alg
-MatrixWorkspace_sptr getOutputWorkspace(IAlgorithm_sptr muonPreProcessAlg,
-                                        const int &index) {
+MatrixWorkspace_sptr
+getOutputWorkspace(const IAlgorithm_sptr &muonPreProcessAlg, const int &index) {
   WorkspaceGroup_sptr outputWS;
   outputWS = muonPreProcessAlg->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr wsOut =

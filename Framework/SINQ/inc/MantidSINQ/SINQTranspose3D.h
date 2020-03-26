@@ -54,11 +54,11 @@ private:
   /// Execution code
   void exec() override;
 
-  void doYXZ(Mantid::API::IMDHistoWorkspace_sptr inws);
-  void doXZY(Mantid::API::IMDHistoWorkspace_sptr inws);
-  void doTRICS(Mantid::API::IMDHistoWorkspace_sptr inws);
-  void doAMOR(Mantid::API::IMDHistoWorkspace_sptr inws);
+  void doYXZ(const Mantid::API::IMDHistoWorkspace_sptr &inws);
+  void doXZY(const Mantid::API::IMDHistoWorkspace_sptr &inws);
+  void doTRICS(const Mantid::API::IMDHistoWorkspace_sptr &inws);
+  void doAMOR(const Mantid::API::IMDHistoWorkspace_sptr &inws);
 
-  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
-                    Mantid::API::IMDHistoWorkspace_sptr outws);
+  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
+                    const Mantid::API::IMDHistoWorkspace_sptr &outws);
 };

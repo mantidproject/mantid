@@ -66,8 +66,8 @@ const std::string
  * @return the slit gap, in meters
  */
 double ReflectometryBeamStatistics::slitSeparation(
-    Geometry::Instrument_const_sptr instrument, const std::string &slit1Name,
-    const std::string &slit2Name) {
+    const Geometry::Instrument_const_sptr &instrument,
+    const std::string &slit1Name, const std::string &slit2Name) {
   auto slit1 = instrument->getComponentByName(slit1Name);
   auto slit2 = instrument->getComponentByName(slit2Name);
   return (slit1->getPos() - slit2->getPos()).norm();

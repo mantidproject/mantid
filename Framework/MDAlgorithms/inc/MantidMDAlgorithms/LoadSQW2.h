@@ -63,7 +63,7 @@ private:
   Geometry::IMDDimension_sptr createEnDimension(float umin, float umax,
                                                 size_t nbins);
   void setupBoxController();
-  void setupFileBackend(std::string filebackPath);
+  void setupFileBackend(const std::string &filebackPath);
   void readPixelDataIntoWorkspace();
   void splitAllBoxes();
   void warnIfMemoryInsufficient(int64_t npixtot);

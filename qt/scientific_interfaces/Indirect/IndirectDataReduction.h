@@ -69,7 +69,7 @@ signals:
 
 private slots:
   /// Shows/hides tabs based on facility
-  void filterUiForFacility(QString facility);
+  void filterUiForFacility(const QString &facility);
 
   /// Exports the current tab algorithms as a Python script
   void exportTabPython();
@@ -89,9 +89,9 @@ private:
 
   void loadInstrumentDetails();
 
-  QString
-  getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp,
-                             std::string param);
+  QString getInstrumentParameterFrom(
+      const Mantid::Geometry::IComponent_const_sptr &comp,
+      const std::string &param);
 
   void readSettings();
   void saveSettings();

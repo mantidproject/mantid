@@ -180,8 +180,7 @@ public:
     linear->setParameter(0, 0.1);
     linear->setParameter(1, 0.2);
 
-    size_t iFun = 10000;
-    iFun = conv.addFunction(linear);
+    size_t iFun = conv.addFunction(linear);
     TS_ASSERT_EQUALS(iFun, 0);
     iFun = conv.addFunction(gauss1);
     TS_ASSERT_EQUALS(iFun, 1);

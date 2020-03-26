@@ -399,7 +399,7 @@ void GetDetOffsetsMultiPeaks::processProperties() {
  *  @throw Exception::RuntimeError If ... ...
  */
 void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(
-    TableWorkspace_sptr windowtablews) {
+    const TableWorkspace_sptr &windowtablews) {
   // Check number of columns matches number of peaks
   size_t numcols = windowtablews->columnCount();
   size_t numpeaks = m_peakPositions.size();
@@ -721,7 +721,7 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
 
   // Set up GSL minimzer
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-  gsl_multimin_fminimizer *s = nullptr;
+
   gsl_vector *ss, *x;
   gsl_multimin_function minex_func;
 
@@ -729,7 +729,6 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
   size_t nopt = 1;
   size_t iter = 0;
   int status = 0;
-  double size;
 
   /* Starting point */
   x = gsl_vector_alloc(nopt);
@@ -744,7 +743,7 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
   minex_func.f = &gsl_costFunction;
   minex_func.params = &params;
 
-  s = gsl_multimin_fminimizer_alloc(T, nopt);
+  gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc(T, nopt);
   gsl_multimin_fminimizer_set(s, &minex_func, x, ss);
 
   do {
@@ -753,7 +752,7 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
     if (status)
       break;
 
-    size = gsl_multimin_fminimizer_size(s);
+    double size = gsl_multimin_fminimizer_size(s);
     status = gsl_multimin_test_size(size, 1e-4);
 
   } while (status == GSL_CONTINUE && iter < 50);
@@ -831,7 +830,7 @@ void deletePeaks(std::vector<size_t> &banned, std::vector<double> &peakPosToFit,
  * @return The number of peaks in range
  */
 int GetDetOffsetsMultiPeaks::fitSpectra(
-    const int64_t wi, MatrixWorkspace_sptr inputW,
+    const int64_t wi, const MatrixWorkspace_sptr &inputW,
     const std::vector<double> &peakPositions,
     const std::vector<double> &fitWindows, size_t &nparams, double &minD,
     double &maxD, std::vector<double> &peakPosToFit,
@@ -1178,7 +1177,7 @@ void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
  * (thread-safe)
  */
 void GetDetOffsetsMultiPeaks::addInfoToReportWS(
-    int wi, FitPeakOffsetResult offsetresult,
+    int wi, const FitPeakOffsetResult &offsetresult,
     const std::vector<double> &tofitpeakpositions,
     const std::vector<double> &fittedpeakpositions) {
   // Offset calculation status

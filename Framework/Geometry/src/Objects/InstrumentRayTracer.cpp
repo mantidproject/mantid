@@ -15,6 +15,7 @@
 #include "MantidKernel/V3D.h"
 #include <deque>
 #include <iterator>
+#include <utility>
 
 namespace Mantid {
 namespace Geometry {
@@ -33,7 +34,7 @@ using Kernel::V3D;
  * have a defined source.
  */
 InstrumentRayTracer::InstrumentRayTracer(Instrument_const_sptr instrument)
-    : m_instrument(instrument) {
+    : m_instrument(std::move(instrument)) {
   if (!m_instrument) {
     std::ostringstream lexer;
     lexer << "Cannot create a InstrumentRayTracer, invalid instrument given. "

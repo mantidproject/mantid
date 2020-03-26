@@ -369,8 +369,8 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
  * @param workspace :: the workspace to check x-axis units on
  * @return enum of type XAxisUnit with the value of TOF or DSPACING
  */
-XAxisUnit
-FindSXPeaks::getWorkspaceXAxisUnit(MatrixWorkspace_const_sptr workspace) const {
+XAxisUnit FindSXPeaks::getWorkspaceXAxisUnit(
+    const MatrixWorkspace_const_sptr &workspace) const {
   const auto xAxis = workspace->getAxis(0);
   const auto unitID = xAxis->unit()->unitID();
 

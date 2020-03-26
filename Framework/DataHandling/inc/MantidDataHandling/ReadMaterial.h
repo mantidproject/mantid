@@ -88,7 +88,7 @@ private:
    */
   Kernel::MaterialBuilder builder;
 
-  void setMaterial(const std::string chemicalSymbol, const int atomicNumber,
+  void setMaterial(const std::string &chemicalSymbol, const int atomicNumber,
                    const int massNumber);
 
   void

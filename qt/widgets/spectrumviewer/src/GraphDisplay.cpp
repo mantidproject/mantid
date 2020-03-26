@@ -13,6 +13,8 @@
 #include <QString>
 #include <QVector>
 #include <boost/algorithm/clamp.hpp>
+#include <utility>
+
 #include <qwt_scale_engine.h>
 
 namespace MantidQt {
@@ -56,7 +58,7 @@ GraphDisplay::~GraphDisplay() { clearCurves(); }
  *                   the table.
  */
 void GraphDisplay::setDataSource(SpectrumDataSource_sptr dataSource) {
-  m_dataSource = dataSource;
+  m_dataSource = std::move(dataSource);
 }
 
 /**

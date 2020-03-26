@@ -14,6 +14,7 @@
 
 #include <QMessageBox>
 #include <QMetaType>
+#include <utility>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -105,17 +106,17 @@ void QtBatchView::onBatchComplete(bool error) {
 void QtBatchView::onBatchCancelled() { m_notifyee->notifyBatchCancelled(); }
 
 void QtBatchView::onAlgorithmStarted(API::IConfiguredAlgorithm_sptr algorithm) {
-  m_notifyee->notifyAlgorithmStarted(algorithm);
+  m_notifyee->notifyAlgorithmStarted(std::move(algorithm));
 }
 
 void QtBatchView::onAlgorithmComplete(
     API::IConfiguredAlgorithm_sptr algorithm) {
-  m_notifyee->notifyAlgorithmComplete(algorithm);
+  m_notifyee->notifyAlgorithmComplete(std::move(algorithm));
 }
 
 void QtBatchView::onAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm,
-                                   std::string message) {
-  m_notifyee->notifyAlgorithmError(algorithm, message);
+                                   const std::string &message) {
+  m_notifyee->notifyAlgorithmError(std::move(algorithm), message);
 }
 
 std::unique_ptr<QtRunsView> QtBatchView::createRunsTab() {

@@ -61,7 +61,8 @@ private:
   void exec() override;
   /// Getting Efixed
   double getEfixed(const Mantid::Geometry::IDetector &detector,
-                   API::MatrixWorkspace_const_sptr inputWS, int emode) const;
+                   const API::MatrixWorkspace_const_sptr &inputWS,
+                   int emode) const;
 };
 
 } // namespace Algorithms

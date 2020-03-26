@@ -206,8 +206,8 @@ private:
   void createSpectraMapping(
       const std::string &nxsfile, const bool monitorsOnly,
       const std::vector<std::string> &bankNames = std::vector<std::string>());
-  void deleteBanks(EventWorkspaceCollection_sptr workspace,
-                   std::vector<std::string> bankNames);
+  void deleteBanks(const EventWorkspaceCollection_sptr &workspace,
+                   const std::vector<std::string> &bankNames);
   bool hasEventMonitors();
   void runLoadMonitors();
   /// Set the filters on TOF.
@@ -223,7 +223,7 @@ private:
   void setTopEntryName();
 
   /// to open the nexus file with specific exception handling/message
-  void safeOpenFile(const std::string fname);
+  void safeOpenFile(const std::string &fname);
 
   /// Was the instrument loaded?
   bool m_instrument_loaded_correctly;

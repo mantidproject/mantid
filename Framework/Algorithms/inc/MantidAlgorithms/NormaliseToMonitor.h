@@ -166,7 +166,7 @@ private:
   mutable bool is_enabled;
   // auxiliary function to obtain list of monitor's ID-s (allowed_values) from a
   // workspace;
-  bool monitorIdReader(API::MatrixWorkspace_const_sptr inputWS) const;
+  bool monitorIdReader(const API::MatrixWorkspace_const_sptr &inputWS) const;
 };
 
 } // namespace Algorithms

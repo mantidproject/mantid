@@ -17,6 +17,7 @@
 #include <Poco/URI.h>
 
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace Kernel {
@@ -182,21 +183,22 @@ std::istream &RemoteJobManager::httpPost(const std::string &path,
 // Wrappers for a lot of the boilerplate code needed to perform an HTTPS GET or
 // POST
 void RemoteJobManager::initGetRequest(Poco::Net::HTTPRequest &req,
-                                      std::string extraPath,
-                                      std::string queryString) {
-  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_GET, extraPath,
-                         queryString);
+                                      const std::string &extraPath,
+                                      const std::string &queryString) {
+  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_GET,
+                         std::move(extraPath), std::move(queryString));
 }
 
 void RemoteJobManager::initPostRequest(Poco::Net::HTTPRequest &req,
-                                       std::string extraPath) {
-  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_POST, extraPath);
+                                       const std::string &extraPath) {
+  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_POST,
+                         std::move(extraPath));
 }
 
 void RemoteJobManager::initHTTPRequest(Poco::Net::HTTPRequest &req,
                                        const std::string &method,
-                                       std::string extraPath,
-                                       std::string queryString) {
+                                       const std::string &extraPath,
+                                       const std::string &queryString) {
   // Set up the session object
   if (m_session) {
 

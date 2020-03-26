@@ -201,7 +201,7 @@ void CreatePSDBleedMask::exec() {
  */
 bool CreatePSDBleedMask::performBleedTest(
     const std::vector<int> &tubeIndices,
-    API::MatrixWorkspace_const_sptr inputWS, double maxRate,
+    const API::MatrixWorkspace_const_sptr &inputWS, double maxRate,
     int numIgnoredPixels) {
 
   // Require ordered pixels so that we can define the centre.
@@ -263,7 +263,7 @@ bool CreatePSDBleedMask::performBleedTest(
  * @param workspace :: The workspace to accumulate the masking
  */
 void CreatePSDBleedMask::maskTube(const std::vector<int> &tubeIndices,
-                                  API::MatrixWorkspace_sptr workspace) {
+                                  const API::MatrixWorkspace_sptr &workspace) {
   const double deadValue(1.0); // delete the data
   for (auto tubeIndice : tubeIndices) {
     workspace->mutableY(tubeIndice)[0] = deadValue;

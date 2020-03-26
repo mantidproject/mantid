@@ -21,6 +21,7 @@
 #include <QtCore>
 
 #include <algorithm>
+#include <utility>
 
 using namespace Mantid::API;
 
@@ -37,7 +38,7 @@ WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
 }
 
 void updateParameters(
-    IFunction_sptr function,
+    const IFunction_sptr &function,
     std::unordered_map<std::string, ParameterValueLegacy> const &parameters) {
   for (auto i = 0u; i < function->nParams(); ++i) {
     auto const value = parameters.find(function->parameterName(i));
@@ -50,7 +51,8 @@ void updateParameters(
 }
 
 void updateAttributes(
-    IFunction_sptr function, std::vector<std::string> const &attributeNames,
+    const IFunction_sptr &function,
+    std::vector<std::string> const &attributeNames,
     std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
   for (const auto &attributeName : attributeNames) {
     auto const value = attributes.find(attributeName);
@@ -807,17 +809,19 @@ void IndirectFitAnalysisTabLegacy::updateAttributeValues() {
  * @param attributeNames  The attributes to update
  */
 void IndirectFitAnalysisTabLegacy::updateAttributeValues(
-    IFunction_sptr function, std::vector<std::string> const &attributeNames) {
+    const IFunction_sptr &function,
+    std::vector<std::string> const &attributeNames) {
   auto const attributes = getAttributes(function, attributeNames);
   if (!attributes.empty())
     updateAttributeValues(function, attributeNames, attributes);
 }
 
 void IndirectFitAnalysisTabLegacy::updateAttributeValues(
-    IFunction_sptr fitFunction, std::vector<std::string> const &attributeNames,
+    const IFunction_sptr &fitFunction,
+    std::vector<std::string> const &attributeNames,
     std::unordered_map<std::string, IFunction::Attribute> const &attributes) {
   try {
-    updateAttributes(fitFunction, attributeNames, attributes);
+    updateAttributes(std::move(fitFunction), attributeNames, attributes);
     updateFitBrowserAttributeValues();
   } catch (const std::runtime_error &) {
     showMessageBox("An unexpected error occured:\n The setting of attribute "
@@ -1067,7 +1071,7 @@ void IndirectFitAnalysisTabLegacy::setEditResultVisible(bool visible) {
 }
 
 void IndirectFitAnalysisTabLegacy::setAlgorithmProperties(
-    IAlgorithm_sptr fitAlgorithm) const {
+    const IAlgorithm_sptr &fitAlgorithm) const {
   fitAlgorithm->setProperty("Minimizer", m_fitPropertyBrowser->minimizer(true));
   fitAlgorithm->setProperty("MaxIterations",
                             m_fitPropertyBrowser->maxIterations());
@@ -1094,14 +1098,14 @@ void IndirectFitAnalysisTabLegacy::runFitAlgorithm(
     IAlgorithm_sptr fitAlgorithm) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(updateFitOutput(bool)));
-  setupFit(fitAlgorithm);
+  setupFit(std::move(fitAlgorithm));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
 void IndirectFitAnalysisTabLegacy::runSingleFit(IAlgorithm_sptr fitAlgorithm) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(updateSingleFitOutput(bool)));
-  setupFit(fitAlgorithm);
+  setupFit(std::move(fitAlgorithm));
   m_batchAlgoRunner->executeBatchAsync();
 }
 

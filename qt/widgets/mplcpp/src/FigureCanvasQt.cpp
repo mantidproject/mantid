@@ -30,7 +30,7 @@ const char *DEFAULT_FACECOLOR = "w";
  * @param fig An existing matplotlib Figure instance
  * @return A new FigureCanvasQT object
  */
-Python::Object createPyCanvasFromFigure(Figure fig) {
+Python::Object createPyCanvasFromFigure(const Figure &fig) {
   GlobalInterpreterLock lock;
   return backendModule().attr("FigureCanvasQTAgg")(fig.pyobj());
 }
@@ -41,7 +41,8 @@ Python::Object createPyCanvasFromFigure(Figure fig) {
  * @param projection A string denoting the projection to use
  * @return A new FigureCanvasQT object
  */
-Python::Object createPyCanvas(const int subplotspec, const QString projection) {
+Python::Object createPyCanvas(const int subplotspec,
+                              const QString &projection) {
   Figure fig{true};
   fig.setFaceColor(DEFAULT_FACECOLOR);
 
@@ -73,7 +74,7 @@ QWidget *initLayout(FigureCanvasQt *cppCanvas) {
  * @param projection A string denoting the projection to use on the canvas
  * @param parent The owning parent widget
  */
-FigureCanvasQt::FigureCanvasQt(const int subplotspec, const QString projection,
+FigureCanvasQt::FigureCanvasQt(const int subplotspec, const QString &projection,
                                QWidget *parent)
     : QWidget(parent),
       InstanceHolder(createPyCanvas(subplotspec, projection), "draw"),

@@ -325,7 +325,7 @@ public:
     TS_ASSERT_DELTA(theta, 147.55, 0.001)
   }
 
-  void do_test_D2B_single_file(std::string dataType) {
+  void do_test_D2B_single_file(const std::string &dataType) {
     // Test a D2B detector scan file with 25 detector positions
 
     const int NUMBER_OF_TUBES = 128;

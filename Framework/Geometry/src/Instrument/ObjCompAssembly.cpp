@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <ostream>
 #include <stdexcept>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("ObjCompAssembly");
@@ -408,12 +409,12 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   // find the 'moments of inertia' of the assembly
   double Ixx = 0, Iyy = 0, Izz = 0, Ixy = 0, Ixz = 0, Iyz = 0;
   V3D Cmass; // 'center of mass' of the assembly
-  for (const_comp_it it = group.begin(); it != group.end(); it++) {
+  for (const_comp_it it = group.begin(); it != group.end(); ++it) {
     V3D p = (**it).getRelativePos();
     Cmass += p;
   }
   Cmass /= nelements();
-  for (const_comp_it it = group.begin(); it != group.end(); it++) {
+  for (const_comp_it it = group.begin(); it != group.end(); ++it) {
     V3D p = (**it).getRelativePos();
     double x = p.X() - Cmass.X(), x2 = x * x;
     double y = p.Y() - Cmass.Y(), y2 = y * y;
@@ -475,7 +476,7 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
   // positive displacements are positive numbers and negative ones are negative
   double hxn = 0, hyn = 0, hzn = 0;
   double hxp = 0, hyp = 0, hzp = 0;
-  for (const_comp_it it = group.begin(); it != group.end(); it++) {
+  for (const_comp_it it = group.begin(); it != group.end(); ++it) {
     // displacement vector of a detector
     V3D p = (**it).getRelativePos() - Cmass;
     // its projection on the vx axis
@@ -609,7 +610,7 @@ boost::shared_ptr<IObject> ObjCompAssembly::createOutline() {
  * @param obj :: The outline shape created previously fith createOutline()
  */
 void ObjCompAssembly::setOutline(boost::shared_ptr<const IObject> obj) {
-  m_shape = obj;
+  m_shape = std::move(obj);
 }
 
 /** Print information about elements in the assembly to a stream

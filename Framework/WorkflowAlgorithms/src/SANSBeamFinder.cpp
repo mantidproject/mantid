@@ -246,8 +246,8 @@ void SANSBeamFinder::exec() {
  * 2016/05/06 : this only works for RectangularDetector
  *
  */
-void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
-                               int low, int left, int right,
+void SANSBeamFinder::maskEdges(const MatrixWorkspace_sptr &beamCenterWS,
+                               int high, int low, int left, int right,
                                const std::string &componentName) {
 
   auto instrument = beamCenterWS->getInstrument();

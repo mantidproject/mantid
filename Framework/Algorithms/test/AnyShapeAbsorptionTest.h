@@ -257,7 +257,6 @@ public:
     constexpr double WL_DELTA = (2.9 - WL_MIN) / static_cast<double>(NUM_VALS);
 
     // create the input workspace
-    const std::string IN_WS{"AbsorptionCorrection_Input"};
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(
         1, NUM_VALS, WL_MIN, WL_DELTA);
     auto testInst =

@@ -8,6 +8,7 @@
 #include "MantidAPI/IFunction.h"
 
 #include <boost/make_shared.hpp>
+#include <utility>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -27,7 +28,7 @@ SimpleChebfun::SimpleChebfun(size_t n, ChebfunFunctionType fun, double start,
                              double end)
     : m_badFit(false) {
   m_base = boost::make_shared<ChebfunBase>(n, start, end);
-  m_P = m_base->fit(fun);
+  m_P = m_base->fit(std::move(fun));
 }
 
 SimpleChebfun::SimpleChebfun(size_t n, const API::IFunction &fun, double start,
@@ -49,8 +50,8 @@ SimpleChebfun::SimpleChebfun(size_t n, const API::IFunction &fun, double start,
 /// @param accuracy :: The accuracy of the approximation.
 /// @param badSize :: If automatic approxiamtion fails the base will have this
 /// size.
-SimpleChebfun::SimpleChebfun(ChebfunFunctionType fun, double start, double end,
-                             double accuracy, size_t badSize)
+SimpleChebfun::SimpleChebfun(const ChebfunFunctionType &fun, double start,
+                             double end, double accuracy, size_t badSize)
     : m_badFit(false) {
   m_base = ChebfunBase::bestFitAnyTolerance<ChebfunFunctionType>(
       start, end, fun, m_P, m_A, accuracy);
@@ -84,7 +85,7 @@ SimpleChebfun::SimpleChebfun(const std::vector<double> &x,
 }
 
 /// Construct an empty SimpleChebfun with shared base.
-SimpleChebfun::SimpleChebfun(ChebfunBase_sptr base) : m_badFit(false) {
+SimpleChebfun::SimpleChebfun(const ChebfunBase_sptr &base) : m_badFit(false) {
   assert(base);
   m_base = base;
   m_P.resize(base->size());
@@ -169,7 +170,7 @@ double SimpleChebfun::integrate() const { return m_base->integrate(m_P); }
 
 /// Add a C++ function to the function
 /// @param fun :: A function to add.
-SimpleChebfun &SimpleChebfun::operator+=(ChebfunFunctionType fun) {
+SimpleChebfun &SimpleChebfun::operator+=(const ChebfunFunctionType &fun) {
   auto &x = xPoints();
   for (size_t i = 0; i < x.size(); ++i) {
     m_P[i] += fun(x[i]);

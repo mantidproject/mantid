@@ -131,8 +131,8 @@ WorkspaceGroup_sptr CarpenterSampleCorrection::calculateCorrection(
 }
 
 MatrixWorkspace_sptr
-CarpenterSampleCorrection::minus(const MatrixWorkspace_sptr lhsWS,
-                                 const MatrixWorkspace_sptr rhsWS) {
+CarpenterSampleCorrection::minus(const MatrixWorkspace_sptr &lhsWS,
+                                 const MatrixWorkspace_sptr &rhsWS) {
   auto minus = this->createChildAlgorithm("Minus", 0.5, 0.75);
   minus->setProperty("LHSWorkspace", lhsWS);
   minus->setProperty("RHSWorkspace", rhsWS);
@@ -142,8 +142,8 @@ CarpenterSampleCorrection::minus(const MatrixWorkspace_sptr lhsWS,
 }
 
 MatrixWorkspace_sptr
-CarpenterSampleCorrection::multiply(const MatrixWorkspace_sptr lhsWS,
-                                    const MatrixWorkspace_sptr rhsWS) {
+CarpenterSampleCorrection::multiply(const MatrixWorkspace_sptr &lhsWS,
+                                    const MatrixWorkspace_sptr &rhsWS) {
   auto multiply = this->createChildAlgorithm("Multiply", 0.75, 1.0);
   multiply->setProperty("LHSWorkspace", lhsWS);
   multiply->setProperty("RHSWorkspace", rhsWS);

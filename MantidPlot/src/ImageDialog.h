@@ -39,7 +39,7 @@ class ImageDialog : public QDialog {
   Q_OBJECT
 
 public:
-  ImageDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  ImageDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
   void setOrigin(const QPoint &o);
   void setSize(const QSize &size);

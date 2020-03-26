@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
+#include <utility>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -60,7 +61,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
       m_peakShape(boost::make_shared<NoShape>()) {
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   this->setInstrument(m_inst);
-  this->setQLabFrame(QLabFrame, detectorDistance);
+  this->setQLabFrame(QLabFrame, std::move(detectorDistance));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -90,7 +91,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst,
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
   this->setInstrument(m_inst);
-  this->setQSampleFrame(QSampleFrame, detectorDistance);
+  this->setQSampleFrame(QSampleFrame, std::move(detectorDistance));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -779,7 +780,7 @@ void Peak::setL(double m_L) { this->m_L = m_L; }
 /** Set the BankName of this peak
  * @param m_bankName :: index to set   */
 void Peak::setBankName(std::string m_bankName) {
-  this->m_bankName = m_bankName;
+  this->m_bankName = std::move(m_bankName);
 }
 
 /** Set all three H,K,L indices of the peak */

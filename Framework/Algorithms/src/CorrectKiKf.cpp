@@ -220,11 +220,10 @@ void CorrectKiKf::execEvent() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*outputWS))
   for (int64_t i = 0; i < numHistograms; ++i) {
     PARALLEL_START_INTERUPT_REGION
-
-    double Efi = 0;
     // Now get the detector object for this histogram to check if monitor
     // or to get Ef for indirect geometry
     if (emodeStr == "Indirect") {
+      double Efi = 0;
       if (efixedProp != EMPTY_DBL()) {
         Efi = efixedProp;
         // If a DetectorGroup is present should provide a value as a property
@@ -279,7 +278,7 @@ void CorrectKiKf::execEvent() {
 template <class T>
 void CorrectKiKf::correctKiKfEventHelper(std::vector<T> &wevector,
                                          double efixed,
-                                         const std::string emodeStr) {
+                                         const std::string &emodeStr) {
   double Ei, Ef;
   float kioverkf;
   typename std::vector<T>::iterator it;

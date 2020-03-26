@@ -676,7 +676,7 @@ bool MuonAnalysisResultTableTab::logNameLessThan(const QString &logName1,
  */
 void MuonAnalysisResultTableTab::populateFittings(
     const QStringList &names,
-    std::function<Workspace_sptr(const QString &)> wsFromName) {
+    const std::function<Workspace_sptr(const QString &)> &wsFromName) {
   // Add number of rows for the amount of fittings.
   m_uiForm.fittingResultsTable->setRowCount(names.size());
 

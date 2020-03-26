@@ -25,8 +25,8 @@ namespace WorkflowAlgorithms {
  * from summed periods
  */
 IMuonAsymmetryCalculator::IMuonAsymmetryCalculator(
-    const WorkspaceGroup_sptr inputWS, const std::vector<int> summedPeriods,
-    const std::vector<int> subtractedPeriods)
+    const WorkspaceGroup_sptr &inputWS, const std::vector<int> &summedPeriods,
+    const std::vector<int> &subtractedPeriods)
     : m_inputWS(inputWS), m_summedPeriods(summedPeriods),
       m_subtractedPeriods(subtractedPeriods) {}
 

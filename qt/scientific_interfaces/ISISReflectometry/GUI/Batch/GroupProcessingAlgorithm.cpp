@@ -5,6 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "GroupProcessingAlgorithm.h"
+
+#include <utility>
+
 #include "../../Reduction/Batch.h"
 #include "../../Reduction/Group.h"
 #include "AlgorithmProperties.h"
@@ -58,9 +61,10 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties,
   AlgorithmProperties::update("OutputWorkspace", outputName, properties);
 }
 
-void updateGroupFromOutputProperties(IAlgorithm_sptr algorithm, Item &group) {
-  auto const stitched =
-      AlgorithmProperties::getOutputWorkspace(algorithm, "OutputWorkspace");
+void updateGroupFromOutputProperties(const IAlgorithm_sptr &algorithm,
+                                     Item &group) {
+  auto const stitched = AlgorithmProperties::getOutputWorkspace(
+      std::move(algorithm), "OutputWorkspace");
   group.setOutputNames(std::vector<std::string>{stitched});
 }
 

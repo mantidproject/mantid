@@ -617,7 +617,7 @@ private:
     }
   }
 
-  void check_lambda_workspace(MatrixWorkspace_sptr ws) {
+  void check_lambda_workspace(const MatrixWorkspace_sptr &ws) {
     TS_ASSERT(ws);
     if (!ws)
       return;

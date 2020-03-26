@@ -35,7 +35,7 @@ class DLLExport RowData {
 public:
   // Constructors
   explicit RowData(const int columnCount);
-  explicit RowData(QStringList data);
+  explicit RowData(const QStringList &data);
   explicit RowData(const std::vector<std::string> &data);
   explicit RowData(const RowData &src);
 
@@ -112,7 +112,7 @@ public:
   bool reductionFailed() const;
 
   /// Get the reduced workspace name, optionally adding a prefix
-  QString reducedName(const QString prefix = QString()) const;
+  QString reducedName(const QString &prefix = QString()) const;
   /// Set the reduced workspace name
   void setReducedName(const QString &name) { m_reducedName = name; }
   bool hasOutputWorkspaceWithNameAndPrefix(const QString &workspaceName,

@@ -704,7 +704,7 @@ QString MultiDatasetFit::getLocalParameterTie(const QString &parName,
 /// @param i :: Index of the dataset (spectrum).
 /// @param tie :: A tie string to set.
 void MultiDatasetFit::setLocalParameterTie(const QString &parName, int i,
-                                           QString tie) {
+                                           const QString &tie) {
   m_functionBrowser->setLocalParameterTie(parName, i, tie);
 }
 

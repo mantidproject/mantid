@@ -22,6 +22,7 @@
 
 #include "boost/shared_ptr.hpp"
 #include <stdexcept>
+#include <utility>
 
 using namespace Mantid::Algorithms;
 using Mantid::Kernel::V3D;
@@ -82,8 +83,8 @@ createTestInstrument(const Mantid::detid_t id,
  * Set the instrument parameters
  */
 void setInstrumentParametersForTOFSANS(
-    const Mantid::API::MatrixWorkspace_sptr ws, std::string methodType = "",
-    double collimationLengthCorrection = 20,
+    const Mantid::API::MatrixWorkspace_sptr &ws,
+    const std::string &methodType = "", double collimationLengthCorrection = 20,
     double collimationLengthIncrement = 2, double guideCutoff = 130,
     double numberOfGuides = 5) {
   auto &pmap = ws->instrumentParameters();
@@ -117,8 +118,8 @@ void setInstrumentParametersForTOFSANS(
 /*
  * Add a timer series sample log
  */
-void addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
-                  std::string sampleLogName, double value,
+void addSampleLog(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                  const std::string &sampleLogName, double value,
                   unsigned int length) {
   auto timeSeries =
       new Mantid::Kernel::TimeSeriesProperty<double>(sampleLogName);
@@ -135,7 +136,7 @@ void addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
  */
 Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
     const size_t nhist, const double x0, const double x1, const double dx,
-    std::string methodType = "", bool isModerator = false,
+    const std::string &methodType = "", bool isModerator = false,
     double collimationLengthCorrection = 20,
     double collimationLengthIncrement = 2, double guideCutoff = 130,
     double numberOfGuides = 5, V3D sourcePosition = V3D(0.0, 0.0, -25.0),
@@ -163,8 +164,8 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspace(
 
   // Set the instrument parameters
   setInstrumentParametersForTOFSANS(
-      ws2d, methodType, collimationLengthCorrection, collimationLengthIncrement,
-      guideCutoff, numberOfGuides);
+      ws2d, std::move(methodType), collimationLengthCorrection,
+      collimationLengthIncrement, guideCutoff, numberOfGuides);
 
   // Add sample log details
   if (!guideLogDetails.empty()) {

@@ -33,7 +33,7 @@ public:
   bool isParameterFixed(const QString &parName) const;
   QString getParameterTie(const QString &parName) const;
   void setParameterFixed(const QString &parName, bool fixed);
-  void setParameterTie(const QString &parName, QString tie);
+  void setParameterTie(const QString &parName, const QString &tie);
   QStringList getParameterNames() const override;
   IFunction_sptr getSingleFunction(int index) const override;
   IFunction_sptr getCurrentFunction() const override;

@@ -25,7 +25,7 @@ MantidTreeWidgetItem::MantidTreeWidgetItem(MantidTreeWidget *parent)
 /**Constructor.
  * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
  */
-MantidTreeWidgetItem::MantidTreeWidgetItem(QStringList list,
+MantidTreeWidgetItem::MantidTreeWidgetItem(const QStringList &list,
                                            MantidTreeWidget *parent)
     : QTreeWidgetItem(list), m_parent(parent), m_sortPos(0) {}
 

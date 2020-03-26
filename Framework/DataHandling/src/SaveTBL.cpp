@@ -44,7 +44,7 @@ void SaveTBL::init() {
  * Finds the stitch groups that need to be on the same line
  * @param ws : a pointer to a tableworkspace
  */
-void SaveTBL::findGroups(ITableWorkspace_sptr ws) {
+void SaveTBL::findGroups(const ITableWorkspace_sptr &ws) {
   size_t rowCount = ws->rowCount();
   for (size_t i = 0; i < rowCount; ++i) {
     TableRow row = ws->getRow(i);

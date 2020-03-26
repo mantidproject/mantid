@@ -223,7 +223,7 @@ public:
   }
 
 private:
-  void _check_table(ITableWorkspace_sptr ws, size_t nSpectra) {
+  void _check_table(const ITableWorkspace_sptr &ws, size_t nSpectra) {
     TS_ASSERT_EQUALS(ws->rowCount(), nSpectra);
     TS_ASSERT_EQUALS(ws->columnCount(), 9);
     TS_ASSERT_EQUALS(ws->getColumnNames(), m_columnNames);

@@ -126,7 +126,8 @@ namespace {
 Mantid::Kernel::Logger g_log("Graph");
 } // namespace
 
-Graph::Graph(int x, int y, int width, int height, QWidget *parent, Qt::WFlags f)
+Graph::Graph(int x, int y, int width, int height, QWidget *parent,
+             const Qt::WFlags &f)
     : QWidget(parent, f) {
   setWindowFlags(f);
   n_curves = 0;
@@ -1183,7 +1184,7 @@ void Graph::setScale(QwtPlot::Axis axis, ScaleTransformation::Type scaleType) {
  *  @param axis :: the scale to change either QwtPlot::xBottom or QwtPlot::yLeft
  *  @param logOrLin :: either "log" or "linear"
  */
-void Graph::setScale(QwtPlot::Axis axis, QString logOrLin) {
+void Graph::setScale(QwtPlot::Axis axis, const QString &logOrLin) {
   if (logOrLin == "log") {
     setScale(axis, ScaleTransformation::Log10);
   } else if (logOrLin == "linear") {
@@ -2842,7 +2843,7 @@ PlotCurve *Graph::insertCurve(Table *w, const QString &xColName,
   return c;
 }
 
-PlotCurve *Graph::insertCurve(QString workspaceName, int index, bool err,
+PlotCurve *Graph::insertCurve(const QString &workspaceName, int index, bool err,
                               GraphOptions::CurveType style,
                               bool distribution) {
   return (new MantidMatrixCurve(workspaceName, this, index,
@@ -4954,7 +4955,7 @@ void Graph::setCurveLineColor(int curveIndex, int colorIndex) {
   }
 }
 
-void Graph::setCurveLineColor(int curveIndex, QColor qColor) {
+void Graph::setCurveLineColor(int curveIndex, const QColor &qColor) {
   QwtPlotCurve *c = curve(curveIndex);
   if (c) {
     QPen pen = c->pen();

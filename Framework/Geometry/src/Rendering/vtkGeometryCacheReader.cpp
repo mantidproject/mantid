@@ -13,6 +13,8 @@
 #include <Poco/Exception.h>
 #include <Poco/SAX/InputSource.h>
 
+#include <utility>
+
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
@@ -33,7 +35,7 @@ Kernel::Logger g_log("vtkGeometryCacheReader");
  * Constructor
  */
 vtkGeometryCacheReader::vtkGeometryCacheReader(std::string filename) {
-  mFileName = filename;
+  mFileName = std::move(filename);
   mDoc = nullptr;
   Init();
 }
@@ -104,7 +106,7 @@ void vtkGeometryCacheReader::readCacheForObject(IObject *obj) {
  * Get the Element by using the object name
  */
 Poco::XML::Element *
-vtkGeometryCacheReader::getElementByObjectName(std::string name) {
+vtkGeometryCacheReader::getElementByObjectName(const std::string &name) {
   Element *pRoot = mDoc->documentElement();
   if (pRoot == nullptr || pRoot->nodeName() != "VTKFile")
     return nullptr;

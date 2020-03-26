@@ -44,7 +44,7 @@ private:
   void exec() override;
 
   DataObjects::PeaksWorkspace_sptr ws;
-  void sizeBanks(std::string bankName, int &nCols, int &nRows);
+  void sizeBanks(const std::string &bankName, int &nCols, int &nRows);
 
   const std::vector<std::string> m_typeList{
       "TRICLINIC", "MONOCLINIC",   "ORTHORHOMBIC", "TETRAGONAL",

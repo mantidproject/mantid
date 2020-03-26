@@ -119,7 +119,7 @@ MDTransfNoQ::getNMatrixDimensions(Kernel::DeltaEMode::Type mode,
 }
 // internal helper function which extract one or two axis from input matrix
 // workspace;
-void MDTransfNoQ::getAxes(API::MatrixWorkspace_const_sptr inWS,
+void MDTransfNoQ::getAxes(const API::MatrixWorkspace_const_sptr &inWS,
                           API::NumericAxis *&pXAxis,
                           API::NumericAxis *&pYAxis) {
   // get the X axis of input workspace, it has to be there; if not axis throws

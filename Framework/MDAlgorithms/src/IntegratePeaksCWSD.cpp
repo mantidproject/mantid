@@ -368,7 +368,7 @@ void IntegratePeaksCWSD::simplePeakIntegration(
  * @param maskws
  */
 std::vector<detid_t> IntegratePeaksCWSD::processMaskWorkspace(
-    DataObjects::MaskWorkspace_const_sptr maskws) {
+    const DataObjects::MaskWorkspace_const_sptr &maskws) {
   std::vector<detid_t> vecMaskedDetID;
 
   // Add the detector IDs of all masked detector to a vector
@@ -452,9 +452,8 @@ DataObjects::PeaksWorkspace_sptr IntegratePeaksCWSD::createOutputs() {
  * @param mdws :: source MDEventWorkspace where the run numbers come from
  * @return
  */
-DataObjects::PeaksWorkspace_sptr
-IntegratePeaksCWSD::createPeakworkspace(Kernel::V3D peakCenter,
-                                        API::IMDEventWorkspace_sptr mdws) {
+DataObjects::PeaksWorkspace_sptr IntegratePeaksCWSD::createPeakworkspace(
+    Kernel::V3D peakCenter, const API::IMDEventWorkspace_sptr &mdws) {
   g_log.notice("Create peak workspace for output ... ...");
   // new peak workspace
   DataObjects::PeaksWorkspace_sptr peakws =

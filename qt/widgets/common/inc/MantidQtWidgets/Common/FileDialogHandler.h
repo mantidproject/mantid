@@ -37,7 +37,7 @@ namespace FileDialogHandler {
 DLLExport QString
 getSaveFileName(QWidget *parent = nullptr,
                 const Mantid::Kernel::Property *baseProp = nullptr,
-                QFileDialog::Options options = nullptr);
+                const QFileDialog::Options &options = nullptr);
 
 /**
  * For file dialogs. This will add the selected extension if an extension

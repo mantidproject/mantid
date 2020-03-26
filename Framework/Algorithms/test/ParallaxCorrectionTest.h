@@ -27,7 +27,7 @@ using Mantid::Geometry::DetectorInfo;
 using Mantid::Kernel::V3D;
 
 namespace {
-bool compare(MatrixWorkspace_sptr w1, MatrixWorkspace_sptr w2) {
+bool compare(const MatrixWorkspace_sptr &w1, const MatrixWorkspace_sptr &w2) {
   CompareWorkspaces comparator;
   comparator.initialize();
   comparator.setChild(true);

@@ -64,6 +64,7 @@
 #include <QMessageBox>
 #include <QSignalMapper>
 #include <QTableWidgetItem>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("MuonFitPropertyBrowser");
@@ -514,7 +515,7 @@ void MuonFitPropertyBrowser::setNormalization() {
  * @param name :: the ws name to get normalization for
  * @returns the normalization
  */
-void MuonFitPropertyBrowser::setNormalization(const std::string name) {
+void MuonFitPropertyBrowser::setNormalization(const std::string &name) {
   m_normalizationValue.clear();
   QString label;
   auto norms = readMultipleNormalization();
@@ -891,7 +892,7 @@ bool MuonFitPropertyBrowser::isWorkspaceValid(Workspace_sptr ws) const {
   return dynamic_cast<MatrixWorkspace *>(ws.get()) != nullptr;
 }
 
-void MuonFitPropertyBrowser::setFitWorkspaces(const std::string input) {
+void MuonFitPropertyBrowser::setFitWorkspaces(const std::string &input) {
   // Copy experiment info to output workspace
   if (AnalysisDataService::Instance().doesExist(outputName() + "_Workspace")) {
     // Input workspace should be a MatrixWorkspace according to isWorkspaceValid
@@ -1027,7 +1028,7 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(
  * @param baseName :: [input] The common name of the workspaces of interest
  */
 void MuonFitPropertyBrowser::finishAfterTFSimultaneousFit(
-    const Mantid::API::IAlgorithm *alg, const std::string baseName) const {
+    const Mantid::API::IAlgorithm *alg, const std::string &baseName) const {
   AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   try {
     std::vector<std::string> wsList =
@@ -1827,7 +1828,7 @@ void MuonFitPropertyBrowser::combineBtnPressed() {
  * selects the relevant group/pair
  * @param name :: string of the ws
  */
-void MuonFitPropertyBrowser::setSingleFitLabel(std::string name) {
+void MuonFitPropertyBrowser::setSingleFitLabel(const std::string &name) {
   clearChosenGroups();
   clearChosenPeriods();
   std::vector<std::string> splitName;
@@ -1898,7 +1899,7 @@ void MuonFitPropertyBrowser::setAllGroupsOrPairs(const bool isItGroup) {
 }
 void MuonFitPropertyBrowser::setGroupNames(
     std::vector<std::string> groupNames) {
-  m_groupsList = groupNames;
+  m_groupsList = std::move(groupNames);
 }
 void MuonFitPropertyBrowser::setTFAsymm(bool state) {
   m_boolManager->setValue(m_TFAsymmMode, state);

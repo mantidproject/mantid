@@ -200,12 +200,13 @@ generateOffsetVectors(const std::vector<double> &hOffsets,
   std::vector<MNPOffset> offsets;
   for (double hOffset : hOffsets) {
     for (double kOffset : kOffsets) {
-      for (double lOffset : lOffsets) {
-        // mnp = 0, 0, 0 as
-        // it's not quite clear how to interpret them as mnp indices
-        offsets.emplace_back(
-            std::make_tuple(0, 0, 0, V3D(hOffset, kOffset, lOffset)));
-      }
+      std::transform(
+          lOffsets.begin(), lOffsets.end(), std::back_inserter(offsets),
+          [&hOffset, &kOffset](double lOffset) {
+            // it's not quite clear how to interpret them as mnp
+            // indices so set to 0, 0, 0
+            return std::make_tuple(0, 0, 0, V3D(hOffset, kOffset, lOffset));
+          });
     }
   }
   return offsets;

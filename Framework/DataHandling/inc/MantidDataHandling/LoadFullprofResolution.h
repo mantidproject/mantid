@@ -51,48 +51,48 @@ public:
                                  std::map<std::string, size_t> &parammap);
 
   /// Put parameters into a matrix workspace
-  static void putParametersIntoWorkspace(const API::Column_const_sptr,
-                                         API::MatrixWorkspace_sptr ws,
+  static void putParametersIntoWorkspace(const API::Column_const_sptr &,
+                                         const API::MatrixWorkspace_sptr &ws,
                                          int nProf,
                                          std::string &parameterXMLString);
 
   /// Add an Ikeda-Carpenter PV ALFBE parameter
-  static void addALFBEParameter(const API::Column_const_sptr,
+  static void addALFBEParameter(const API::Column_const_sptr &,
                                 Poco::XML::Document *mDoc,
                                 Poco::XML::Element *parent,
                                 const std::string &paramName);
 
   /// Add set of Ikeda-Carpenter PV Sigma parameters
-  static void addSigmaParameters(const API::Column_const_sptr,
+  static void addSigmaParameters(const API::Column_const_sptr &,
                                  Poco::XML::Document *mDoc,
                                  Poco::XML::Element *parent);
 
   /// Add set of Ikeda-Carpenter PV Gamma parameters
-  static void addGammaParameters(const API::Column_const_sptr,
+  static void addGammaParameters(const API::Column_const_sptr &,
                                  Poco::XML::Document *mDoc,
                                  Poco::XML::Element *parent);
 
   /// Add set of BackToBackExponential S parameters
-  static void addBBX_S_Parameters(const API::Column_const_sptr,
+  static void addBBX_S_Parameters(const API::Column_const_sptr &,
                                   Poco::XML::Document *mDoc,
                                   Poco::XML::Element *parent);
 
   /// Add set of BackToBackExponential A parameters
-  static void addBBX_A_Parameters(const API::Column_const_sptr,
+  static void addBBX_A_Parameters(const API::Column_const_sptr &,
                                   Poco::XML::Document *mDoc,
                                   Poco::XML::Element *parent);
 
   /// Add set of BackToBackExponential B parameters
-  static void addBBX_B_Parameters(const API::Column_const_sptr,
+  static void addBBX_B_Parameters(const API::Column_const_sptr &,
                                   Poco::XML::Document *mDoc,
                                   Poco::XML::Element *parent);
 
   /// Get value for XML eq attribute for parameter
-  static std::string getXMLEqValue(const API::Column_const_sptr,
+  static std::string getXMLEqValue(const API::Column_const_sptr &,
                                    const std::string &name);
 
   /// Get value for XML eq attribute for squared parameter
-  static std::string getXMLSquaredEqValue(const API::Column_const_sptr column,
+  static std::string getXMLSquaredEqValue(const API::Column_const_sptr &column,
                                           const std::string &name);
 
   // Translate a parameter name from as it appears in the table workspace to its
@@ -114,7 +114,7 @@ private:
   void exec() override;
 
   /// Load file to a vector of strings
-  void loadFile(std::string filename, std::vector<std::string> &lines);
+  void loadFile(const std::string &filename, std::vector<std::string> &lines);
 
   /// Get the NPROF number
   int getProfNumber(const std::vector<std::string> &lines);

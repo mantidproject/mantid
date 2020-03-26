@@ -36,7 +36,7 @@ class TestablePoldiPeakCollection : public PoldiPeakCollection {
 
   TestablePoldiPeakCollection() : PoldiPeakCollection() {}
 
-  TestablePoldiPeakCollection(TableWorkspace_sptr workspace)
+  TestablePoldiPeakCollection(const TableWorkspace_sptr &workspace)
       : PoldiPeakCollection(workspace) {}
 };
 
