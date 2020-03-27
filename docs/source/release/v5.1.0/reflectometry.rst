@@ -15,6 +15,7 @@ ISIS Reflectometry Interface
 Bug fixes
 ---------
 
-- Save/Load settings: A bug has been fixed where loaded settings were not fully restored if the instrument changed.
+- Save/Load settings: A bug has been fixed where Experiment/Instrument settings were not being restored if the instrument changes on load.
+- New Batch loses settings: A bug has been fixed where creating a new Batch would result in the Experiment/Instrument settings of all batches being reset to their defaults.
 
 :ref:`Release 5.1.0 <v5.1.0>`

@@ -125,9 +125,10 @@ void MainWindowPresenter::notifyAnyBatchReductionPaused() {
 }
 
 void MainWindowPresenter::notifyChangeInstrumentRequested(
-    std::string const &instrumentName) {
-  // Re-load instrument with the new name
-  updateInstrument(instrumentName);
+    std::string const &newInstrumentName) {
+  // Re-load instrument with the new name, if it has changed
+  if (newInstrumentName != instrumentName())
+    updateInstrument(newInstrumentName);
 }
 
 void MainWindowPresenter::notifyUpdateInstrumentRequested() {
