@@ -164,7 +164,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                 first = last = item
         # the last range ended by iteration end
         ranges.append("{0}{1}{2}".format(first, RANGE_SPECIFIER, last) if last > first else "{0}".format(first))
-        return ','.join(ranges)
+        return ', '.join(ranges)
 
     def _setup_connections(self):
         ui = self._ui
@@ -229,7 +229,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self.selection = selection
 
     def _parse_spec_nums(self):
-        spec_nums = parse_selection_str(self._ui.specNums.text(), allowed_values = self._plottable_spectra)
+        spec_nums = parse_selection_str(self._ui.specNums.text(), allowed_values=self._plottable_spectra)
         if spec_nums:
             selection = SpectraSelection(self._workspaces)
             selection.spectra = spec_nums
@@ -242,7 +242,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         return self.selection is not None
 
 
-def parse_selection_str(txt, min_val = None, max_val = None, allowed_values = None):
+def parse_selection_str(txt, min_val=None, max_val=None, allowed_values=None):
     """Parse an input string containing plot index selection.
 
     :param txt: A single line of text containing a comma-separated list of values or range of values, i.e.
@@ -266,7 +266,7 @@ def parse_selection_str(txt, min_val = None, max_val = None, allowed_values = No
 
     def is_in_range(val):
         if allowed_values is not None:
-            return (val in allowed_values)
+            return val in allowed_values
         else:
             return min_val <= val <= max_val
 
