@@ -38,6 +38,8 @@ class SpectraSelectionDialogTest(unittest.TestCase):
                                                                                XLength=1, YLength=1)
         SpectraSelectionDialog._check_number_of_plots = mock.Mock(return_value=True)
 
+        spectraselectordialog.RED_ASTERISK = None
+
     def test_initial_dialog_setup(self):
         workspaces = [self._multi_spec_ws]
         dlg = SpectraSelectionDialog(workspaces)
@@ -159,7 +161,6 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         table = WorkspaceFactory.Instance().createTable()
         workspaces = [self._single_spec_ws, table]
         ssd = SpectraSelectionDialog(workspaces)
-        spectraselectordialog.RED_ASTERISK = None
         self.assertEqual(ssd._workspaces, [self._single_spec_ws])
 
     def test_get_spectra_selection_removes_wrong_workspace_types_from_list(self):
@@ -196,6 +197,8 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         workspaces = [self._single_spec_ws]
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
         ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentText("Custom")
+
+        self._mock_get_icon.assert_called_once_with('mdi.asterisk', 'red', 0.6)
         self.assertTrue(ssd._ui.advanced_options_widget.ui.custom_log_line_edit.isEnabled())
 
     def test_log_value_combo_box_contains_custom_option(self):
