@@ -27,6 +27,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
@@ -78,6 +79,7 @@ private:
 
 namespace Mantid {
 namespace Algorithms {
+class MCInteractionVolume;
 
 DECLARE_ALGORITHM(MonteCarloAbsorption)
 
@@ -102,7 +104,7 @@ void MonteCarloAbsorption::init() {
                                                         Direction::Output),
                   "The name to use for the output workspace.");
 
-  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto positiveInt = boost::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
                   "The number of wavelength points for which a simulation is "
@@ -120,7 +122,7 @@ void MonteCarloAbsorption::init() {
                   "instrument with a sparse grid of "
                   "detectors interpolating the "
                   "results to the real instrument.");
-  auto threeOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto threeOrMore = boost::make_shared<BoundedValidator<int>>();
   threeOrMore->setLower(3);
   declareProperty(
       "NumberOfDetectorRows", DEFAULT_LATITUDINAL_DETS, threeOrMore,
@@ -129,7 +131,7 @@ void MonteCarloAbsorption::init() {
       "NumberOfDetectorRows",
       std::make_unique<EnabledWhenProperty>(
           "SparseInstrument", ePropertyCriterion::IS_NOT_DEFAULT));
-  auto twoOrMore = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto twoOrMore = boost::make_shared<BoundedValidator<int>>();
   twoOrMore->setLower(2);
   declareProperty("NumberOfDetectorColumns", DEFAULT_LONGITUDINAL_DETS,
                   twoOrMore,
@@ -156,6 +158,15 @@ void MonteCarloAbsorption::init() {
                       std::make_unique<EnabledWhenProperty>(
                           "ResimulateTracksForDifferentWavelengths",
                           ePropertyCriterion::IS_NOT_DEFAULT));
+  auto scatteringOptionValidator = boost::make_shared<StringListValidator>();
+  scatteringOptionValidator->addAllowedValue("SampleAndEnvironment");
+  scatteringOptionValidator->addAllowedValue("SampleOnly");
+  scatteringOptionValidator->addAllowedValue("EnvironmentOnly");
+  declareProperty(
+      "SimulateScatteringPointIn", "SampleAndEnvironment",
+      "Simulate the scattering point in the vicinity of the sample or its "
+      "environment or both (default).",
+      scatteringOptionValidator);
 }
 
 /**
@@ -171,10 +182,19 @@ void MonteCarloAbsorption::exec() {
   interpolateOpt.set(getPropertyValue("Interpolation"));
   const bool useSparseInstrument = getProperty("SparseInstrument");
   const int maxScatterPtAttempts = getProperty("MaxScatterPtAttempts");
+  auto simulatePointsIn =
+      MCInteractionVolume::ScatteringPointVicinity::SAMPLEANDENVIRONMENT;
+  const auto pointsInProperty = getPropertyValue("SimulateScatteringPointIn");
+  if (pointsInProperty == "SampleOnly") {
+    simulatePointsIn = MCInteractionVolume::ScatteringPointVicinity::SAMPLEONLY;
+  } else if (pointsInProperty == "EnvironmentOnly") {
+    simulatePointsIn =
+        MCInteractionVolume::ScatteringPointVicinity::ENVIRONMENTONLY;
+  }
   auto outputWS =
       doSimulation(*inputWS, static_cast<size_t>(nevents), resimulateTracks,
                    seed, interpolateOpt, useSparseInstrument,
-                   static_cast<size_t>(maxScatterPtAttempts));
+                   static_cast<size_t>(maxScatterPtAttempts), simulatePointsIn);
   setProperty("OutputWorkspace", std::move(outputWS));
 }
 
@@ -217,7 +237,8 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
     const MatrixWorkspace &inputWS, const size_t nevents,
     const bool resimulateTracksForDiffWavelengths, const int seed,
     const InterpolationOption &interpolateOpt, const bool useSparseInstrument,
-    const size_t maxScatterPtAttempts) {
+    const size_t maxScatterPtAttempts,
+    const MCInteractionVolume::ScatteringPointVicinity pointsIn) {
   auto outputWS = createOutputWorkspace(inputWS);
   const auto inputNbins = static_cast<int>(inputWS.blocksize());
 
@@ -261,9 +282,10 @@ MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(
   const std::string reportMsg = "Computing corrections";
 
   // Configure strategy
-  MCAbsorptionStrategy strategy(
-      *beamProfile, inputWS.sample(), efixed.emode(), nevents, nlambda,
-      maxScatterPtAttempts, useSparseInstrument, interpolateOpt, false, g_log);
+  MCAbsorptionStrategy strategy(*beamProfile, inputWS.sample(), efixed.emode(),
+                                nevents, nlambda, maxScatterPtAttempts,
+                                useSparseInstrument, interpolateOpt, false,
+                                g_log, pointsIn);
 
   const auto &spectrumInfo = simulationWS.spectrumInfo();
 

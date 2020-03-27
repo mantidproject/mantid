@@ -25,6 +25,7 @@ class Logger;
 } // namespace Kernel
 namespace Algorithms {
 class IBeamProfile;
+class MonteCarloAbsorption;
 
 /**
   Implements the algorithm for calculating the correction factor for
@@ -37,14 +38,14 @@ class IBeamProfile;
 */
 class MANTID_ALGORITHMS_DLL MCAbsorptionStrategy {
 public:
-  MCAbsorptionStrategy(const IBeamProfile &beamProfile,
-                       const API::Sample &sample,
-                       Kernel::DeltaEMode::Type EMode, const size_t nevents,
-                       const int nlambda, const size_t maxScatterPtAttempts,
-                       const bool useSparseInstrument,
-                       const InterpolationOption &interpolateOpt,
-                       const bool regenerateTracksForEachLambda,
-                       Kernel::Logger &logger);
+  MCAbsorptionStrategy(
+      const IBeamProfile &beamProfile, const API::Sample &sample,
+      Kernel::DeltaEMode::Type EMode, const size_t nevents, const int nlambda,
+      const size_t maxScatterPtAttempts, const bool useSparseInstrument,
+      const InterpolationOption &interpolateOpt,
+      const bool regenerateTracksForEachLambda, Kernel::Logger &logger,
+      const MCInteractionVolume::ScatteringPointVicinity pointsIn =
+          MCInteractionVolume::ScatteringPointVicinity::SAMPLEANDENVIRONMENT);
   void calculate(Kernel::PseudoRandomNumberGenerator &rng,
                  const Kernel::V3D &finalPos,
                  const Mantid::HistogramData::Points &lambdas,

@@ -40,10 +40,12 @@ MCAbsorptionStrategy::MCAbsorptionStrategy(
     DeltaEMode::Type EMode, const size_t nevents, const int nlambda,
     const size_t maxScatterPtAttempts, const bool useSparseInstrument,
     const InterpolationOption &interpolateOpt,
-    const bool regenerateTracksForEachLambda, Kernel::Logger &logger)
+    const bool regenerateTracksForEachLambda, Kernel::Logger &logger,
+    const MCInteractionVolume::ScatteringPointVicinity pointsIn)
     : m_beamProfile(beamProfile),
-      m_scatterVol(MCInteractionVolume(
-          sample, beamProfile.defineActiveRegion(sample), logger)),
+      m_scatterVol(MCInteractionVolume(sample,
+                                       beamProfile.defineActiveRegion(sample),
+                                       logger, maxScatterPtAttempts, pointsIn)),
       m_nevents(nevents), m_maxScatterAttempts(maxScatterPtAttempts),
       m_error(1.0 / std::sqrt(m_nevents)), m_EMode(EMode), m_nlambda(nlambda),
       m_useSparseInstrument(useSparseInstrument),
