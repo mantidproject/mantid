@@ -360,7 +360,7 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
         ui.logs_valid.setIcon(red_asterisk())
         ui.logs_valid.hide()
 
-        ui.log_value_combo_box.currentTextChanged.connect(self._log_value_changed)
+        ui.log_value_combo_box.currentIndexChanged.connect(self._log_value_changed)
         ui.error_bars_check_box.clicked.connect(self._toggle_errors)
         ui.custom_log_line_edit.textEdited.connect(self._validate_custom_logs)
         ui.plot_axis_label_line_edit.textEdited.connect(self._axis_name_changed)
@@ -370,10 +370,12 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
         self._populate_log_combo_box()
         ui.plot_axis_label_line_edit.setText(ui.log_value_combo_box.currentText())
 
-    def _log_value_changed(self, text: str) -> None:
+    def _log_value_changed(self) -> None:
         # Don't need to do anything while the combo box is being populated.
         if not self._parent._ui:
             return
+
+        text = self.ui.log_value_combo_box.currentText()
 
         self.ui.custom_log_line_edit.setEnabled(text == CUSTOM)
         self.ui.custom_log_line_edit.clear()
