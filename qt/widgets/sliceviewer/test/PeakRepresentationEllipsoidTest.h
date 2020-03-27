@@ -10,6 +10,8 @@
 #include "MockObjects.h"
 #include <cxxtest/TestSuite.h>
 
+#include <utility>
+
 using namespace MantidQt::SliceViewer;
 using namespace testing;
 
@@ -34,12 +36,12 @@ public:
       const Mantid::Kernel::V3D &origin, const std::vector<double> &peakRadius,
       const std::vector<double> &backgroundInnerRadius,
       const std::vector<double> &backgroundOuterRadius,
-      const std::vector<Mantid::Kernel::V3D> directions,
+      const std::vector<Mantid::Kernel::V3D> &directions,
       std::shared_ptr<Mantid::SliceViewer::EllipsoidPlaneSliceCalculator>
           calculator)
       : PeakRepresentationEllipsoid(origin, peakRadius, backgroundInnerRadius,
                                     backgroundOuterRadius, directions,
-                                    calculator)
+                                    std::move(calculator))
 
   {}
   std::shared_ptr<PeakPrimitives> getDrawingInformationWrapper(

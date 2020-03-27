@@ -19,6 +19,7 @@
 #include <QSplitterHandle>
 #endif
 #include <QSplitter>
+#include <utility>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -30,7 +31,7 @@ class SplitterHandleLegacy : public QSplitterHandle {
 public:
   SplitterHandleLegacy(QIcon icon, Qt::Orientation orientation,
                        QSplitter *parent = nullptr)
-      : QSplitterHandle(orientation, parent), m_icon(icon) {}
+      : QSplitterHandle(orientation, parent), m_icon(std::move(icon)) {}
 
   void paintEvent(QPaintEvent *e) override {
     QSplitterHandle::paintEvent(e);
@@ -47,7 +48,7 @@ private:
 class SplitterLegacy : public QSplitter {
 public:
   SplitterLegacy(QIcon icon, QWidget *parent = nullptr)
-      : QSplitter(parent), m_icon(icon) {}
+      : QSplitter(parent), m_icon(std::move(icon)) {}
 
   QSplitterHandle *createHandle() override {
     return new SplitterHandleLegacy(m_icon, Qt::Vertical, this);

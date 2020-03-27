@@ -55,7 +55,7 @@ class Graph3D : public MdiSubWindow {
 
 public:
   Graph3D(const QString &label, QWidget *parent, const char *name = nullptr,
-          Qt::WFlags f = nullptr);
+          const Qt::WFlags &f = nullptr);
   ~Graph3D() override;
 
   void initPlot();
@@ -317,7 +317,7 @@ public slots:
 
   QString colorMap() { return color_map; };
   void setDataColorMap(const QString &fileName);
-  bool openColorMap(Qwt3D::ColorVector &cv, QString fname);
+  bool openColorMap(Qwt3D::ColorVector &cv, const QString &fname);
 
   void setMeshColor(const QColor &);
   void setAxesColor(const QColor &);

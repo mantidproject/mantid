@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 
 #include "MantidAPI/FrameworkManager.h"
@@ -226,7 +228,7 @@ void memoryCheck(size_t nPoints) {
  * @param nThreads : Optional argument of number of threads to use.
  */
 ConnectedComponentLabeling::ConnectedComponentLabeling(
-    const size_t &startId, const boost::optional<int> nThreads)
+    const size_t &startId, const boost::optional<int> &nThreads)
     : m_startId(startId), m_nThreads(nThreads) {
   if (m_nThreads.is_initialized() && m_nThreads.get() < 0) {
     throw std::invalid_argument(
@@ -278,7 +280,7 @@ int ConnectedComponentLabeling::getNThreads() const {
  * @return : Map of label ids to clusters.
  */
 ClusterMap ConnectedComponentLabeling::calculateDisjointTree(
-    IMDHistoWorkspace_sptr ws, BackgroundStrategy *const baseStrategy,
+    const IMDHistoWorkspace_sptr &ws, BackgroundStrategy *const baseStrategy,
     Progress &progress) const {
   std::map<size_t, boost::shared_ptr<ICluster>> clusterMap;
   VecElements neighbourElements(ws->getNPoints());
@@ -407,7 +409,8 @@ boost::shared_ptr<Mantid::API::IMDHistoWorkspace>
 ConnectedComponentLabeling::execute(IMDHistoWorkspace_sptr ws,
                                     BackgroundStrategy *const strategy,
                                     Progress &progress) const {
-  ClusterTuple result = executeAndFetchClusters(ws, strategy, progress);
+  ClusterTuple result =
+      executeAndFetchClusters(std::move(ws), strategy, progress);
   IMDHistoWorkspace_sptr outWS =
       result.get<0>(); // Get the workspace, but discard cluster objects.
   return outWS;

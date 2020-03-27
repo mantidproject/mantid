@@ -500,7 +500,7 @@ std::vector<double> ConvertEmptyToTof::makeTofAxis(int epp, double epTof,
 }
 
 void ConvertEmptyToTof::setTofInWS(const std::vector<double> &tofAxis,
-                                   API::MatrixWorkspace_sptr outputWS) {
+                                   const API::MatrixWorkspace_sptr &outputWS) {
 
   const size_t numberOfSpectra = m_inputWS->getNumberHistograms();
 

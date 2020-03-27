@@ -27,7 +27,7 @@ public:
 
   ExperimentInfo_const_sptr getExperimentInfo(const uint16_t runIndex) const;
 
-  uint16_t addExperimentInfo(ExperimentInfo_sptr ei);
+  uint16_t addExperimentInfo(const ExperimentInfo_sptr &ei);
 
   void setExperimentInfo(const uint16_t runIndex, ExperimentInfo_sptr ei);
 

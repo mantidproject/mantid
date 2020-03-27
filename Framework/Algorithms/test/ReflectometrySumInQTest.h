@@ -29,7 +29,7 @@ public:
   static void destroySuite(ReflectometrySumInQTest *suite) { delete suite; }
 
   static Mantid::API::MatrixWorkspace_sptr
-  convertToWavelength(Mantid::API::MatrixWorkspace_sptr ws) {
+  convertToWavelength(const Mantid::API::MatrixWorkspace_sptr &ws) {
     using namespace Mantid;
     auto toWavelength =
         API::AlgorithmManager::Instance().createUnmanaged("ConvertUnits");
@@ -44,7 +44,7 @@ public:
   }
 
   static Mantid::API::MatrixWorkspace_sptr
-  detectorsOnly(Mantid::API::MatrixWorkspace_sptr ws) {
+  detectorsOnly(const Mantid::API::MatrixWorkspace_sptr &ws) {
     using namespace Mantid;
     auto &specturmInfo = ws->spectrumInfo();
     std::vector<size_t> detectorIndices;

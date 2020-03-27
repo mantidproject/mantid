@@ -576,7 +576,8 @@ private:
       return false;
   }
 
-  void setTestReferenceFrame(Mantid::API::MatrixWorkspace_sptr workspace) {
+  void
+  setTestReferenceFrame(const Mantid::API::MatrixWorkspace_sptr &workspace) {
     using Mantid::Geometry::Instrument;
     using Mantid::Geometry::ReferenceFrame;
     // Use Z=up,Y=across,X=beam so we test it listens to the reference frame

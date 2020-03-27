@@ -80,12 +80,13 @@ public:
   /// Checks the number of histograms in a workspace
   bool checkWorkspaceNumberOfHistograms(QString const &workspaceName,
                                         std::size_t const &validSize);
-  bool checkWorkspaceNumberOfHistograms(Mantid::API::MatrixWorkspace_sptr,
-                                        std::size_t const &validSize);
+  bool
+  checkWorkspaceNumberOfHistograms(const Mantid::API::MatrixWorkspace_sptr &,
+                                   std::size_t const &validSize);
   /// Checks the number of bins in a workspace
   bool checkWorkspaceNumberOfBins(QString const &workspaceName,
                                   std::size_t const &validSize);
-  bool checkWorkspaceNumberOfBins(Mantid::API::MatrixWorkspace_sptr,
+  bool checkWorkspaceNumberOfBins(const Mantid::API::MatrixWorkspace_sptr &,
                                   std::size_t const &validSize);
   /// Checks that a workspace group contains valid matrix workspace's
   bool checkWorkspaceGroupIsValid(QString const &groupName,

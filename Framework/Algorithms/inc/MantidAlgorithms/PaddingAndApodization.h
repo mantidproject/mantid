@@ -53,7 +53,7 @@ private:
   void init() override;
   void exec() override;
   using fptr = double (*)(const double, const double);
-  fptr getApodizationFunction(const std::string method);
+  fptr getApodizationFunction(const std::string &method);
   HistogramData::Histogram
   applyApodizationFunction(const HistogramData::Histogram &histogram,
                            const double decayConstant, fptr function);

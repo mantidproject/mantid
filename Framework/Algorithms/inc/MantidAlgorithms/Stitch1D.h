@@ -84,7 +84,7 @@ private:
   /// Mask out everything but the data in the ranges, but do it inplace.
   void maskInPlace(int a1, int a2, Mantid::API::MatrixWorkspace_sptr &source);
   /// Add back in any special values
-  void reinsertSpecialValues(Mantid::API::MatrixWorkspace_sptr ws);
+  void reinsertSpecialValues(const Mantid::API::MatrixWorkspace_sptr &ws);
   /// Range tolerance
   static const double range_tolerance;
   /// Scaling factors

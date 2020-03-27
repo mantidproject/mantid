@@ -118,7 +118,7 @@ public:
     TS_ASSERT_EQUALS(dataStore.size(), storeSizeAtStart);
   }
 
-  void createAndStoreWorkspace(std::string name, int ylength = 10) {
+  void createAndStoreWorkspace(const std::string &name, int ylength = 10) {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 

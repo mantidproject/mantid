@@ -143,8 +143,8 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
 }
 
 void SaveDetectorsGrouping::printToXML(
-    std::map<int, std::vector<detid_t>> groupdetidrangemap,
-    std::string xmlfilename) {
+    const std::map<int, std::vector<detid_t>> &groupdetidrangemap,
+    const std::string &xmlfilename) {
 
   // 1. Get Instrument information
   const auto &instrument = mGroupWS->getInstrument();

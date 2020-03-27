@@ -302,9 +302,9 @@ void SumEventsByLogValue::filterEventList(
  *  @param minVal          The minimum value of the log
  *  @param maxVal          The maximum value of the log
  */
-void SumEventsByLogValue::addMonitorCounts(ITableWorkspace_sptr outputWorkspace,
-                                           const TimeSeriesProperty<int> *log,
-                                           const int minVal, const int maxVal) {
+void SumEventsByLogValue::addMonitorCounts(
+    const ITableWorkspace_sptr &outputWorkspace,
+    const TimeSeriesProperty<int> *log, const int minVal, const int maxVal) {
   DataObjects::EventWorkspace_const_sptr monitorWorkspace =
       getProperty("MonitorWorkspace");
   // If no monitor workspace was given, there's nothing to do

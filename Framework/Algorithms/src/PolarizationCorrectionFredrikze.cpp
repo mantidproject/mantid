@@ -206,7 +206,7 @@ void PolarizationCorrectionFredrikze::init() {
 }
 
 WorkspaceGroup_sptr
-PolarizationCorrectionFredrikze::execPA(WorkspaceGroup_sptr inWS) {
+PolarizationCorrectionFredrikze::execPA(const WorkspaceGroup_sptr &inWS) {
 
   size_t itemIndex = 0;
   MatrixWorkspace_sptr Ipp =
@@ -276,7 +276,7 @@ PolarizationCorrectionFredrikze::execPA(WorkspaceGroup_sptr inWS) {
 }
 
 WorkspaceGroup_sptr
-PolarizationCorrectionFredrikze::execPNR(WorkspaceGroup_sptr inWS) {
+PolarizationCorrectionFredrikze::execPNR(const WorkspaceGroup_sptr &inWS) {
   size_t itemIndex = 0;
   MatrixWorkspace_sptr Ip =
       boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));

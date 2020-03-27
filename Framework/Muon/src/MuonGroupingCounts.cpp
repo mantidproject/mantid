@@ -25,11 +25,11 @@ using namespace Mantid::HistogramData;
 namespace {
 
 bool checkPeriodInWorkspaceGroup(const int &period,
-                                 WorkspaceGroup_sptr workspace) {
+                                 const WorkspaceGroup_sptr &workspace) {
   return period <= workspace->getNumberOfEntries();
 }
 
-MatrixWorkspace_sptr groupDetectors(MatrixWorkspace_sptr workspace,
+MatrixWorkspace_sptr groupDetectors(const MatrixWorkspace_sptr &workspace,
                                     const std::vector<int> &detectorIDs) {
 
   auto outputWS = WorkspaceFactory::Instance().create(workspace, 1);
@@ -199,7 +199,8 @@ void MuonGroupingCounts::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-void MuonGroupingCounts::setGroupingSampleLogs(MatrixWorkspace_sptr workspace) {
+void MuonGroupingCounts::setGroupingSampleLogs(
+    const MatrixWorkspace_sptr &workspace) {
   MuonAlgorithmHelper::addSampleLog(workspace, "analysis_group_name",
                                     getPropertyValue("GroupName"));
   MuonAlgorithmHelper::addSampleLog(workspace, "analysis_group",

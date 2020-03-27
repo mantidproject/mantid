@@ -38,6 +38,7 @@
 #include <deque>
 #include <random>
 #include <stack>
+#include <utility>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -1593,6 +1594,7 @@ double CSGObject::singleShotMonteCarloVolume(const int shotSize,
     const auto threadCount = PARALLEL_NUMBER_OF_THREADS;
     const auto currentThreadNum = PARALLEL_THREAD_NUMBER;
     size_t blocksize = shotSize / threadCount;
+    // cppcheck-suppress knownConditionTrueFalse
     if (currentThreadNum == threadCount - 1) {
       // Last thread may have to do threadCount extra iterations in
       // the worst case.
@@ -2113,7 +2115,8 @@ int CSGObject::searchForObject(Kernel::V3D &point) const {
  * Set the geometry handler for Object
  * @param[in] h is pointer to the geometry handler.
  */
-void CSGObject::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
+void CSGObject::setGeometryHandler(
+    const boost::shared_ptr<GeometryHandler> &h) {
   if (h)
     m_handler = h;
 }
@@ -2145,7 +2148,7 @@ void CSGObject::initDraw() const {
  */
 void CSGObject::setVtkGeometryCacheWriter(
     boost::shared_ptr<vtkGeometryCacheWriter> writer) {
-  vtkCacheWriter = writer;
+  vtkCacheWriter = std::move(writer);
   updateGeometryHandler();
 }
 
@@ -2154,7 +2157,7 @@ void CSGObject::setVtkGeometryCacheWriter(
  */
 void CSGObject::setVtkGeometryCacheReader(
     boost::shared_ptr<vtkGeometryCacheReader> reader) {
-  vtkCacheReader = reader;
+  vtkCacheReader = std::move(reader);
   updateGeometryHandler();
 }
 

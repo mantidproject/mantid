@@ -53,7 +53,7 @@ private:
   // Execution code
   void exec() override;
 
-  void readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
+  void readHistogram(FILE *speFile, const API::MatrixWorkspace_sptr &workspace,
                      size_t index);
   void reportFormatError(const std::string &what);
 

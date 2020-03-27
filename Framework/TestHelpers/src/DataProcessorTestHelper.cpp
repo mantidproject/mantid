@@ -14,7 +14,7 @@ namespace DataProcessorTestHelper {
 /* Add a property value from a list to the given row data with an optional
  * prefix
  */
-void addPropertyValue(RowData_sptr rowData,
+void addPropertyValue(const RowData_sptr &rowData,
                       const std::vector<std::string> &list, const size_t index,
                       const std::string &property, const std::string &prefix) {
   if (index >= list.size() || list[index].empty())
@@ -28,7 +28,7 @@ void addPropertyValue(RowData_sptr rowData,
 
 /* Add a property value to the given row data
  */
-void addPropertyValue(RowData_sptr rowData, const std::string &property,
+void addPropertyValue(const RowData_sptr &rowData, const std::string &property,
                       const std::string &value) {
   // Set the value and preprocessed value to the given value
   rowData->setOptionValue(property, value);

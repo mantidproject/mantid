@@ -12,6 +12,8 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+- Polaris.create_total_scattering_pdf output workspaces now have the run number in the names.
+
 Engineering Diffraction
 -----------------------
 Improvements

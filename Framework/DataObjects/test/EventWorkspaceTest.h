@@ -421,7 +421,7 @@ public:
                       const std::range_error &);
   }
 
-  void do_test_binning(EventWorkspace_sptr ws, const BinEdges &axis,
+  void do_test_binning(const EventWorkspace_sptr &ws, const BinEdges &axis,
                        size_t expected_occupancy_per_bin) {
     MantidVec Y(NUMBINS - 1);
     MantidVec E(NUMBINS - 1);

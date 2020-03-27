@@ -22,7 +22,7 @@ namespace API {
 class MANTID_API_DLL FunctionDomainMD : public FunctionDomain {
 public:
   /// Constructor.
-  FunctionDomainMD(IMDWorkspace_const_sptr ws, size_t start = 0,
+  FunctionDomainMD(const IMDWorkspace_const_sptr &ws, size_t start = 0,
                    size_t length = 0);
   /// Destructor.
   ~FunctionDomainMD() override;

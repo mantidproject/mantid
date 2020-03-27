@@ -45,7 +45,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
       m_showDetectors(new QAction("Show Detectors", this)) {
 
   // Replace the double click action on the MantidTreeWidget
-  m_tree->m_doubleClickAction = [&](QString wsName) {
+  m_tree->m_doubleClickAction = [&](const QString &wsName) {
     emit workspaceDoubleClicked(wsName);
   };
 

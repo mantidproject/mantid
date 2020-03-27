@@ -425,46 +425,6 @@ API::MatrixWorkspace_sptr generateArgSiPeak220() {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Import data from a column data file
- */
-void importDataFromColumnFile(std::string filename, std::string wsname) {
-  DataHandling::LoadAscii2 load;
-  load.initialize();
-
-  load.setProperty("FileName", filename);
-  load.setProperty("OutputWorkspace", wsname);
-  load.setProperty("Separator", "Automatic");
-  load.setProperty("Unit", "TOF");
-
-  load.execute();
-  if (!load.isExecuted()) {
-    stringstream errss;
-    errss << "Data file " << filename << " cannot be opened. ";
-    std::cout << errss.str() << '\n';
-    throw std::runtime_error(errss.str());
-  }
-
-  MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve(wsname));
-  if (!ws) {
-    stringstream errss;
-    errss << "LoadAscii failed to generate workspace";
-    std::cout << errss.str() << '\n';
-    throw std::runtime_error(errss.str());
-  }
-
-  // Set error
-  const MantidVec &vecY = ws->readY(0);
-  MantidVec &vecE = ws->dataE(0);
-  size_t numpts = vecY.size();
-  for (size_t i = 0; i < numpts; ++i) {
-    vecE[i] = std::max(1.0, sqrt(vecY[i]));
-  }
-
-  return;
-}
-
-//----------------------------------------------------------------------------------------------
 /** Create data workspace without background
  */
 API::MatrixWorkspace_sptr createInputDataWorkspace(int option) {
@@ -499,17 +459,9 @@ API::MatrixWorkspace_sptr createInputDataWorkspace(int option) {
       break;
     }
 
-  } else if (option == 4) {
+  } else {
     // Load from column file
     throw runtime_error("Using .dat file is not allowed for committing. ");
-    string datafilename("PG3_4862_Bank7.dat");
-    string wsname("Data");
-    importDataFromColumnFile(datafilename, wsname);
-    dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(wsname));
-  } else {
-    // not supported
-    throw std::invalid_argument("Logic error. ");
   }
 
   return dataws;
@@ -1295,7 +1247,7 @@ public:
    * Parse parameter table workspace to 2 map
    */
   void
-  parseParameterTableWorkspace(DataObjects::TableWorkspace_sptr paramws,
+  parseParameterTableWorkspace(const DataObjects::TableWorkspace_sptr &paramws,
                                std::map<std::string, double> &paramvalues,
                                std::map<std::string, char> &paramfitstatus) {
 

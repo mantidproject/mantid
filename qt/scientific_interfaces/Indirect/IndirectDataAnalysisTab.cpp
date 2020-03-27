@@ -15,6 +15,7 @@
 
 #include <QSettings>
 #include <QString>
+#include <utility>
 
 using namespace Mantid::API;
 
@@ -92,7 +93,7 @@ MatrixWorkspace_sptr IndirectDataAnalysisTab::inputWorkspace() const {
  */
 void IndirectDataAnalysisTab::setInputWorkspace(
     MatrixWorkspace_sptr inputWorkspace) {
-  m_inputWorkspace = inputWorkspace;
+  m_inputWorkspace = std::move(inputWorkspace);
 }
 
 /**
@@ -113,7 +114,7 @@ MatrixWorkspace_sptr IndirectDataAnalysisTab::previewPlotWorkspace() {
  * @param previewPlotWorkspace The workspace to set.
  */
 void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
-    MatrixWorkspace_sptr previewPlotWorkspace) {
+    const MatrixWorkspace_sptr &previewPlotWorkspace) {
   m_previewPlotWorkspace = previewPlotWorkspace;
 }
 
@@ -262,7 +263,7 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param diffPreviewPlot   The difference preview plot.
  */
 void IndirectDataAnalysisTab::updatePlot(
-    WorkspaceGroup_sptr outputWS, size_t index,
+    const WorkspaceGroup_sptr &outputWS, size_t index,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   // Check whether the specified index is within the bounds of the
@@ -318,7 +319,7 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param diffPreviewPlot   The difference preview plot.
  */
 void IndirectDataAnalysisTab::updatePlot(
-    WorkspaceGroup_sptr outputWS,
+    const WorkspaceGroup_sptr &outputWS,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   if (outputWS && selectedSpectrum() >= minimumSpectrum() &&
@@ -339,7 +340,7 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param diffPreviewPlot   The difference preview plot.
  */
 void IndirectDataAnalysisTab::updatePlot(
-    MatrixWorkspace_sptr outputWS,
+    const MatrixWorkspace_sptr &outputWS,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   fitPreviewPlot->clear();

@@ -47,7 +47,7 @@ private:
   /// Execution code
   void exec() override;
 
-  void exportEvents(API::IMDEventWorkspace_sptr mdws,
+  void exportEvents(const API::IMDEventWorkspace_sptr &mdws,
                     std::vector<Kernel::V3D> &vec_event_qsample,
                     std::vector<signal_t> &vec_event_signal,
                     std::vector<detid_t> &vec_event_det);
@@ -74,7 +74,7 @@ private:
 
   void getUBMatrix();
 
-  void getRange(const std::vector<Kernel::V3D> vec_hkl,
+  void getRange(const std::vector<Kernel::V3D> &vec_hkl,
                 std::vector<double> &extentMins,
                 std::vector<double> &extentMaxs);
 

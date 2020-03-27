@@ -7,6 +7,7 @@
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidAPI/CompositeCatalog.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
@@ -105,9 +106,10 @@ void CatalogManagerImpl::destroyCatalog(const std::string &sessionID) {
 std::vector<CatalogSession_sptr> CatalogManagerImpl::getActiveSessions() {
   std::vector<CatalogSession_sptr> sessions;
   sessions.reserve(m_activeCatalogs.size());
-  for (const auto &activeCatalog : m_activeCatalogs) {
-    sessions.emplace_back(activeCatalog.first);
-  }
+
+  std::transform(m_activeCatalogs.begin(), m_activeCatalogs.end(),
+                 std::back_inserter(sessions),
+                 [](const auto &activeCatalog) { return activeCatalog.first; });
   return sessions;
 }
 

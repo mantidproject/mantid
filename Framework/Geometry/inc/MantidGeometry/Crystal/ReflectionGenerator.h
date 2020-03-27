@@ -105,12 +105,12 @@ public:
   std::vector<Kernel::V3D> getHKLs(double dMin, double dMax) const;
   std::vector<Kernel::V3D>
   getHKLs(double dMin, double dMax,
-          HKLFilter_const_sptr reflectionConditionFilter) const;
+          const HKLFilter_const_sptr &reflectionConditionFilter) const;
 
   std::vector<Kernel::V3D> getUniqueHKLs(double dMin, double dMax) const;
   std::vector<Kernel::V3D>
   getUniqueHKLs(double dMin, double dMax,
-                HKLFilter_const_sptr reflectionConditionFilter) const;
+                const HKLFilter_const_sptr &reflectionConditionFilter) const;
 
   std::vector<double> getDValues(const std::vector<Kernel::V3D> &hkls) const;
   std::vector<double> getFsSquared(const std::vector<Kernel::V3D> &hkls) const;

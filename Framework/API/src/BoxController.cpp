@@ -296,8 +296,9 @@ void BoxController::clearFileBacked() {
  *@param fileName  -- if newFileIO comes without opened file, this is the file
  *name to open for the file based IO operations
  */
-void BoxController::setFileBacked(boost::shared_ptr<IBoxControllerIO> newFileIO,
-                                  const std::string &fileName) {
+void BoxController::setFileBacked(
+    const boost::shared_ptr<IBoxControllerIO> &newFileIO,
+    const std::string &fileName) {
   if (!newFileIO->isOpened())
     newFileIO->openFile(fileName, "w");
 

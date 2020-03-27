@@ -903,7 +903,8 @@ private:
   }
 
   void runTestForInvalidPerAngleOptions(OptionsTable const &optionsTable,
-                                        std::vector<int> rows, int column) {
+                                        const std::vector<int> &rows,
+                                        int column) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
     for (auto row : rows)

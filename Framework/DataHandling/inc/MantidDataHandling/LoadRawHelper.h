@@ -53,7 +53,7 @@ public:
   /// Opens Raw File
   FILE *openRawFile(const std::string &fileName);
   /// Read in run parameters Public so that LoadRaw2 can use it
-  void loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
+  void loadRunParameters(const API::MatrixWorkspace_sptr &localWorkspace,
                          ISISRAW *const = nullptr) const;
 
   /// Returns a confidence value that this algorithm can load a file
@@ -77,14 +77,15 @@ public:
                          API::WorkspaceGroup_sptr &mongrp_sptr,
                          const int64_t mwsSpecs, const int64_t nwsSpecs,
                          const int64_t numberOfPeriods, const int64_t lengthIn,
-                         std::string title, API::Algorithm *const pAlg);
+                         const std::string &title, API::Algorithm *const pAlg);
   /// creates  shared pointer to group workspace
   static API::WorkspaceGroup_sptr createGroupWorkspace();
 
   /// creates shared pointer to workspace from parent workspace
   static DataObjects::Workspace2D_sptr
-  createWorkspace(DataObjects::Workspace2D_sptr ws_sptr, int64_t nVectors = -1,
-                  int64_t xLengthIn = -1, int64_t yLengthIn = -1);
+  createWorkspace(const DataObjects::Workspace2D_sptr &ws_sptr,
+                  int64_t nVectors = -1, int64_t xLengthIn = -1,
+                  int64_t yLengthIn = -1);
 
   /// overloaded method to create shared pointer to workspace
   static DataObjects::Workspace2D_sptr
@@ -94,14 +95,14 @@ public:
   /// sets the workspace property
   static void setWorkspaceProperty(const std::string &propertyName,
                                    const std::string &title,
-                                   API::WorkspaceGroup_sptr grpws_sptr,
-                                   DataObjects::Workspace2D_sptr ws_sptr,
+                                   const API::WorkspaceGroup_sptr &grpws_sptr,
+                                   const DataObjects::Workspace2D_sptr &ws_sptr,
                                    int64_t numberOfPeriods, bool bMonitor,
                                    API::Algorithm *const pAlg);
 
   /// overloaded method to set the workspace property
-  static void setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,
-                                   API::WorkspaceGroup_sptr grpws_sptr,
+  static void setWorkspaceProperty(const DataObjects::Workspace2D_sptr &ws_sptr,
+                                   const API::WorkspaceGroup_sptr &grpws_sptr,
                                    const int64_t period, bool bmonitors,
                                    API::Algorithm *const pAlg);
 
@@ -138,20 +139,20 @@ protected:
   getTimeChannels(const int64_t &regimes, const int64_t &lengthIn);
   /// loadinstrument Child Algorithm
   void runLoadInstrument(const std::string &fileName,
-                         DataObjects::Workspace2D_sptr, double, double);
+                         const DataObjects::Workspace2D_sptr &, double, double);
   /// loadinstrumentfromraw algorithm
   void runLoadInstrumentFromRaw(const std::string &fileName,
-                                DataObjects::Workspace2D_sptr);
+                                const DataObjects::Workspace2D_sptr &);
   /// loadinstrumentfromraw Child Algorithm
   void runLoadMappingTable(const std::string &fileName,
-                           DataObjects::Workspace2D_sptr);
+                           const DataObjects::Workspace2D_sptr &);
   /// load log algorithm
-  void runLoadLog(const std::string &fileName, DataObjects::Workspace2D_sptr,
-                  double, double);
+  void runLoadLog(const std::string &fileName,
+                  const DataObjects::Workspace2D_sptr &, double, double);
 
   /// Create the period specific logs
   void createPeriodLogs(int64_t period,
-                        DataObjects::Workspace2D_sptr local_workspace);
+                        const DataObjects::Workspace2D_sptr &local_workspace);
 
   /// gets the monitor spectrum list from the workspace
   std::vector<specnum_t>
@@ -159,7 +160,7 @@ protected:
 
   /// This method sets the raw file data to workspace vectors
   void setWorkspaceData(
-      DataObjects::Workspace2D_sptr newWorkspace,
+      const DataObjects::Workspace2D_sptr &newWorkspace,
       const std::vector<boost::shared_ptr<HistogramData::HistogramX>>
           &timeChannelsVec,
       int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
@@ -191,9 +192,10 @@ protected:
                                specnum_t &normalwsSpecs,
                                specnum_t &monitorwsSpecs);
   /// load the spectra
-  void loadSpectra(FILE *file, const int &period, const int &total_specs,
-                   DataObjects::Workspace2D_sptr ws_sptr,
-                   std::vector<boost::shared_ptr<HistogramData::HistogramX>>);
+  void loadSpectra(
+      FILE *file, const int &period, const int &total_specs,
+      const DataObjects::Workspace2D_sptr &ws_sptr,
+      const std::vector<boost::shared_ptr<HistogramData::HistogramX>> &);
 
   /// Has the spectrum_list property been set?
   bool m_list;

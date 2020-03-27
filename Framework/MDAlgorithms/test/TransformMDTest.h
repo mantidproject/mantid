@@ -95,7 +95,7 @@ public:
   }
 
   //--------------------------------------------------------------------------------------------
-  void do_test_histo(MDHistoWorkspace_sptr ws1, bool inPlace = false) {
+  void do_test_histo(const MDHistoWorkspace_sptr &ws1, bool inPlace = false) {
     // Name of the output workspace.
     std::string outWSName("TransformMDTest_OutputWS");
     std::string inWSName("TransformMDTest_ws");

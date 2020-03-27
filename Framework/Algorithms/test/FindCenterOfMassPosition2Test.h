@@ -58,7 +58,7 @@ public:
         // Set tube extrema to special values
         if (iy == 0 || iy == SANSInstrumentCreationHelper::nBins - 1)
           Y[0] =
-              iy % 2 ? std::nan("") : std::numeric_limits<double>::infinity();
+              (iy % 2) ? std::nan("") : std::numeric_limits<double>::infinity();
         E[0] = 1;
       }
     }

@@ -70,7 +70,7 @@ private:
   std::map<int, double> getMeasureTime();
 
   std::vector<detid_t>
-  processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws);
+  processMaskWorkspace(const DataObjects::MaskWorkspace_const_sptr &maskws);
 
   void getPeakInformation();
 
@@ -82,7 +82,8 @@ private:
   void normalizePeaksIntensities();
 
   DataObjects::PeaksWorkspace_sptr
-  createPeakworkspace(Kernel::V3D peakCenter, API::IMDEventWorkspace_sptr mdws);
+  createPeakworkspace(Kernel::V3D peakCenter,
+                      const API::IMDEventWorkspace_sptr &mdws);
 
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr m_inputWS;

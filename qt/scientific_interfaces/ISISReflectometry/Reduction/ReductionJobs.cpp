@@ -288,7 +288,7 @@ ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
 }
 
 Group const &ReductionJobs::getGroupFromPath(
-    const MantidWidgets::Batch::RowLocation rowLocation) const {
+    const MantidWidgets::Batch::RowLocation &rowLocation) const {
   if (isGroupLocation(rowLocation)) {
     return groups()[groupOf(rowLocation)];
   } else {
@@ -297,7 +297,7 @@ Group const &ReductionJobs::getGroupFromPath(
 }
 
 boost::optional<Row> const &ReductionJobs::getRowFromPath(
-    const MantidWidgets::Batch::RowLocation rowLocation) const {
+    const MantidWidgets::Batch::RowLocation &rowLocation) const {
   if (isRowLocation(rowLocation)) {
     return groups()[groupOf(rowLocation)].rows()[rowOf(rowLocation)];
   } else {
@@ -306,7 +306,7 @@ boost::optional<Row> const &ReductionJobs::getRowFromPath(
 }
 
 bool ReductionJobs::validItemAtPath(
-    const MantidWidgets::Batch::RowLocation rowLocation) const {
+    const MantidWidgets::Batch::RowLocation &rowLocation) const {
   if (isGroupLocation(rowLocation))
     return true;
 
@@ -314,7 +314,7 @@ bool ReductionJobs::validItemAtPath(
 }
 
 Item const &ReductionJobs::getItemFromPath(
-    const MantidWidgets::Batch::RowLocation rowLocation) const {
+    const MantidWidgets::Batch::RowLocation &rowLocation) const {
   if (isGroupLocation(rowLocation)) {
     return getGroupFromPath(rowLocation);
   } else {

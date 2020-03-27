@@ -27,7 +27,7 @@ public:
 
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void checkLoader(std::string filename, std::string resultLoader) {
+  void checkLoader(const std::string &filename, std::string resultLoader) {
     Load alg;
     alg.setChild(true);
     alg.initialize();

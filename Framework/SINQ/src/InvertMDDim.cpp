@@ -62,9 +62,9 @@ void InvertMDDim::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-void InvertMDDim::recurseDim(IMDHistoWorkspace_sptr inWS,
-                             IMDHistoWorkspace_sptr outWS, int currentDim,
-                             int *idx, int rank) {
+void InvertMDDim::recurseDim(const IMDHistoWorkspace_sptr &inWS,
+                             const IMDHistoWorkspace_sptr &outWS,
+                             int currentDim, int *idx, int rank) {
   boost::shared_ptr<const IMDDimension> dimi = inWS->getDimension(currentDim);
   if (currentDim == rank - 1) {
     for (int i = 0; i < static_cast<int>(dimi->getNBins()); i++) {
@@ -82,8 +82,9 @@ void InvertMDDim::recurseDim(IMDHistoWorkspace_sptr inWS,
   }
 }
 
-void InvertMDDim::copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
-                               Mantid::API::IMDHistoWorkspace_sptr outws) {
+void InvertMDDim::copyMetaData(
+    const Mantid::API::IMDHistoWorkspace_sptr &inws,
+    const Mantid::API::IMDHistoWorkspace_sptr &outws) {
   outws->setTitle(inws->getTitle());
   ExperimentInfo_sptr info;
 
@@ -97,7 +98,8 @@ void InvertMDDim::copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
  * IMDHistoWorkspace.
  * I.e. a proper address calculation from an index array.
  */
-unsigned int InvertMDDim::calcIndex(IMDHistoWorkspace_sptr ws, int dim[]) {
+unsigned int InvertMDDim::calcIndex(const IMDHistoWorkspace_sptr &ws,
+                                    int dim[]) {
   size_t idx = 0;
   switch (ws->getNumDims()) {
   case 2:
@@ -115,7 +117,7 @@ unsigned int InvertMDDim::calcIndex(IMDHistoWorkspace_sptr ws, int dim[]) {
   return static_cast<unsigned int>(idx);
 }
 
-unsigned int InvertMDDim::calcInvertedIndex(IMDHistoWorkspace_sptr ws,
+unsigned int InvertMDDim::calcInvertedIndex(const IMDHistoWorkspace_sptr &ws,
                                             int dim[]) {
   size_t idx = 0;
   switch (ws->getNumDims()) {

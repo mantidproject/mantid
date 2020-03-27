@@ -62,13 +62,14 @@ private:
   void getIntArray(const std::string &par, std::vector<int> &arr,
                    const size_t dim);
   void getData(int period, int index, int count,
-               boost::shared_ptr<API::MatrixWorkspace> workspace,
+               const boost::shared_ptr<API::MatrixWorkspace> &workspace,
                size_t workspaceIndex);
   void calculateIndicesForReading(std::vector<int> &index,
                                   std::vector<int> &count);
   void loadSpectraMap();
-  void runLoadInstrument(boost::shared_ptr<API::MatrixWorkspace> localWorkspace,
-                         const std::string &iName);
+  void runLoadInstrument(
+      const boost::shared_ptr<API::MatrixWorkspace> &localWorkspace,
+      const std::string &iName);
   void loadTimeRegimes();
   int getTimeRegimeToLoad() const;
   bool isPeriodIgnored(int period) const;

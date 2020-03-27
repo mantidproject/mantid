@@ -15,6 +15,7 @@
 #include "MantidLiveData/Exception.h"
 
 #include <boost/algorithm/string.hpp>
+#include <utility>
 
 #include <Poco/Thread.h>
 
@@ -204,7 +205,7 @@ LoadLiveData::runProcessing(Mantid::API::Workspace_sptr inputWS,
 Mantid::API::Workspace_sptr
 LoadLiveData::processChunk(Mantid::API::Workspace_sptr chunkWS) {
   try {
-    return runProcessing(chunkWS, false);
+    return runProcessing(std::move(chunkWS), false);
   } catch (...) {
     g_log.error("While processing chunk:");
     throw;
@@ -232,7 +233,7 @@ void LoadLiveData::runPostProcessing() {
  *
  * @param chunkWS :: processed live data chunk workspace
  */
-void LoadLiveData::addChunk(Mantid::API::Workspace_sptr chunkWS) {
+void LoadLiveData::addChunk(const Mantid::API::Workspace_sptr &chunkWS) {
   // Acquire locks on the workspaces we use
   WriteLock _lock1(*m_accumWS);
   ReadLock _lock2(*chunkWS);
@@ -273,8 +274,8 @@ void LoadLiveData::addChunk(Mantid::API::Workspace_sptr chunkWS) {
  * @param accumWS :: accumulation matrix workspace
  * @param chunkWS :: processed live data chunk matrix workspace
  */
-void LoadLiveData::addMatrixWSChunk(Workspace_sptr accumWS,
-                                    Workspace_sptr chunkWS) {
+void LoadLiveData::addMatrixWSChunk(const Workspace_sptr &accumWS,
+                                    const Workspace_sptr &chunkWS) {
   // Handle the addition of the internal monitor workspace, if present
   auto accumMW = boost::dynamic_pointer_cast<MatrixWorkspace>(accumWS);
   auto chunkMW = boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
@@ -342,7 +343,7 @@ void LoadLiveData::replaceChunk(Mantid::API::Workspace_sptr chunkWS) {
   auto instrumentWS = m_accumWS;
   // When the algorithm exits the chunk workspace will be renamed
   // and overwrite the old one
-  m_accumWS = chunkWS;
+  m_accumWS = std::move(chunkWS);
   // Put the original instrument back. Otherwise geometry changes will not be
   // persistent
   copyInstrument(instrumentWS.get(), m_accumWS.get());
@@ -358,7 +359,7 @@ void LoadLiveData::replaceChunk(Mantid::API::Workspace_sptr chunkWS) {
  *
  * @param chunkWS :: processed live data chunk workspace
  */
-void LoadLiveData::appendChunk(Mantid::API::Workspace_sptr chunkWS) {
+void LoadLiveData::appendChunk(const Mantid::API::Workspace_sptr &chunkWS) {
   // ISIS multi-period data come in workspace groups
   WorkspaceGroup_sptr chunk_gws =
       boost::dynamic_pointer_cast<WorkspaceGroup>(chunkWS);
@@ -400,8 +401,9 @@ void LoadLiveData::appendChunk(Mantid::API::Workspace_sptr chunkWS) {
  * @param accumWS :: accumulation matrix workspace
  * @param chunkWS :: processed live data chunk matrix workspace
  */
-Workspace_sptr LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
-                                                 Workspace_sptr chunkWS) {
+Workspace_sptr
+LoadLiveData::appendMatrixWSChunk(Workspace_sptr accumWS,
+                                  const Workspace_sptr &chunkWS) {
   IAlgorithm_sptr alg;
   ReadLock _lock1(*accumWS);
   ReadLock _lock2(*chunkWS);

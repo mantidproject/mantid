@@ -328,8 +328,9 @@ public:
     return AnalysisDataService::Instance().retrieveWS<T>(name);
   }
 
-  MatrixWorkspace_sptr getMatrixWorkspace(WorkspaceGroup_const_sptr group,
-                                          std::size_t index) {
+  MatrixWorkspace_sptr
+  getMatrixWorkspace(const WorkspaceGroup_const_sptr &group,
+                     std::size_t index) {
     return boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(index));
   }
 

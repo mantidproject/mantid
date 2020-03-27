@@ -199,7 +199,7 @@ LoadResult MuonAnalysisDataLoader::loadFiles(const QStringList &files) const {
  * @returns :: name of instrument (empty if failed to get it)
  */
 std::string MuonAnalysisDataLoader::getInstrumentName(
-    const Workspace_sptr workspace) const {
+    const Workspace_sptr &workspace) const {
   if (workspace) {
     const auto period = MuonAnalysisHelper::firstPeriod(workspace);
     if (period) {
@@ -339,7 +339,7 @@ Workspace_sptr MuonAnalysisDataLoader::loadDeadTimesFromFile(
  * @returns :: Workspace containing analysed data
  */
 Workspace_sptr MuonAnalysisDataLoader::createAnalysisWorkspace(
-    const Workspace_sptr inputWS, const AnalysisOptions &options) const {
+    const Workspace_sptr &inputWS, const AnalysisOptions &options) const {
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged("MuonProcess");
 
@@ -381,7 +381,7 @@ Workspace_sptr MuonAnalysisDataLoader::createAnalysisWorkspace(
  * @param options :: [input] Options to get properties from
  */
 void MuonAnalysisDataLoader::setProcessAlgorithmProperties(
-    IAlgorithm_sptr alg, const AnalysisOptions &options) const {
+    const IAlgorithm_sptr &alg, const AnalysisOptions &options) const {
   alg->setProperty("Mode", "Analyse");
   alg->setProperty("TimeZero", options.timeZero);             // user input
   alg->setProperty("LoadedTimeZero", options.loadedTimeZero); // from file

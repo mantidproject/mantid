@@ -122,7 +122,7 @@ class PeakOverlay : public Shape2DCollection,
   Q_OBJECT
 public:
   PeakOverlay(UnwrappedSurface *surface,
-              boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
+              const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
   ~PeakOverlay() override {}
   /// Override the drawing method
   void draw(QPainter &painter) const override;
@@ -146,7 +146,7 @@ public:
   void setShowLabelsFlag(bool yes) { m_showLabels = yes; }
   void setShowRelativeIntensityFlag(bool yes);
   static PeakMarker2D::Style getDefaultStyle(int index);
-  void setPeakVisibility(double xmin, double xmax, QString units);
+  void setPeakVisibility(double xmin, double xmax, const QString &units);
 
 signals:
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr /*_t1*/);

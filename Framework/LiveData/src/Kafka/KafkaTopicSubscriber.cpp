@@ -13,6 +13,7 @@
 #include <iostream>
 #include <sstream>
 #include <thread>
+#include <utility>
 
 using RdKafka::Conf;
 using RdKafka::KafkaConsumer;
@@ -77,8 +78,8 @@ const std::string KafkaTopicSubscriber::MONITOR_TOPIC_SUFFIX = "_monitors";
 KafkaTopicSubscriber::KafkaTopicSubscriber(std::string broker,
                                            std::vector<std::string> topics,
                                            SubscribeAtOption subscribeOption)
-    : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(broker),
-      m_topicNames(topics), m_subscribeOption(subscribeOption) {}
+    : IKafkaStreamSubscriber(), m_consumer(), m_brokerAddr(std::move(broker)),
+      m_topicNames(std::move(topics)), m_subscribeOption(subscribeOption) {}
 
 /// Destructor
 KafkaTopicSubscriber::~KafkaTopicSubscriber() {

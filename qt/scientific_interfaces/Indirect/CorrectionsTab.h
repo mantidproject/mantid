@@ -84,12 +84,12 @@ public:
 
 protected:
   /// Check the binning between two workspaces match
-  bool
-  checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left,
-                               Mantid::API::MatrixWorkspace_const_sptr right);
+  bool checkWorkspaceBinningMatches(
+      const Mantid::API::MatrixWorkspace_const_sptr &left,
+      const Mantid::API::MatrixWorkspace_const_sptr &right);
   /// Adds a unit conversion step to the algorithm queue
   boost::optional<std::string>
-  addConvertUnitsStep(Mantid::API::MatrixWorkspace_sptr ws,
+  addConvertUnitsStep(const Mantid::API::MatrixWorkspace_sptr &ws,
                       const std::string &unitID,
                       const std::string &suffix = "UNIT",
                       std::string eMode = "", double eFixed = 0.0);

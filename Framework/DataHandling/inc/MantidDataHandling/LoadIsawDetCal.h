@@ -66,15 +66,15 @@ private:
 
   /// Set the center of the supplied detector name
   void center(const double x, const double y, const double z,
-              const std::string &detname, API::Workspace_sptr ws,
+              const std::string &detname, const API::Workspace_sptr &ws,
               Geometry::ComponentInfo &componentInfo);
 
-  Geometry::Instrument_sptr getCheckInst(API::Workspace_sptr ws);
+  Geometry::Instrument_sptr getCheckInst(const API::Workspace_sptr &ws);
   std::vector<std::string> getFilenames();
 
   void doRotation(Kernel::V3D rX, Kernel::V3D rY,
                   Geometry::ComponentInfo &componentInfo,
-                  boost::shared_ptr<const Geometry::IComponent> comp,
+                  const boost::shared_ptr<const Geometry::IComponent> &comp,
                   bool doWishCorrection = false);
   void applyScalings(
       API::Workspace_sptr &ws,

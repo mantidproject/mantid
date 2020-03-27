@@ -84,7 +84,8 @@ private:
     return gaussian;
   }
 
-  double getGaussianAnalyticalInfiniteIntegral(IPeakFunction_sptr gaussian) {
+  double
+  getGaussianAnalyticalInfiniteIntegral(const IPeakFunction_sptr &gaussian) {
     return gaussian->height() * gaussian->fwhm() / (2.0 * sqrt(M_LN2)) *
            sqrt(M_PI);
   }

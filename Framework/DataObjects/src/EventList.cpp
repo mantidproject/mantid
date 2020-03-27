@@ -2555,7 +2555,7 @@ void EventList::convertTof(std::function<double(double)> func,
  */
 template <class T>
 void EventList::convertTofHelper(std::vector<T> &events,
-                                 std::function<double(double)> func) {
+                                 const std::function<double(double)> &func) {
   // iterate through all events
   for (auto &ev : events)
     ev.m_tof = func(ev.m_tof);

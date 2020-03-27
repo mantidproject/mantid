@@ -54,9 +54,10 @@ public:
    * \param extended flag: show/hide the advanced options on start-up
    * \param flags window flags
    */
-  ExtensibleFileDialog(QWidget *parent = nullptr, bool extended = true,
-                       Qt::WFlags flags = Qt::WindowCloseButtonHint |
-                                          Qt::WindowType::WindowTitleHint);
+  ExtensibleFileDialog(
+      QWidget *parent = nullptr, bool extended = true,
+      const Qt::WFlags &flags = Qt::WindowCloseButtonHint |
+                                Qt::WindowType::WindowTitleHint);
   //! Set the extension widget to be displayed when the user presses the toggle
   // button.
   void setExtensionWidget(QWidget *extension);

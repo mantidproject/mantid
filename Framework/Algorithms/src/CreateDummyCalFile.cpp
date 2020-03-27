@@ -110,9 +110,6 @@ void CreateDummyCalFile::exec() {
 
   std::string filename = getProperty("CalFilename");
 
-  // Plan to overwrite file, so do not check if it exists
-  const bool overwrite = false;
-
   int number = 0;
   Progress prog(this, 0.0, 0.8, assemblies.size());
   while (!assemblies.empty()) // Travel the tree from the instrument point
@@ -128,12 +125,7 @@ void CreateDummyCalFile::exec() {
             currentIComp);
         if (currentDet.get()) // Is detector
         {
-          if (overwrite) // Map will contains udet as the key
-            instrcalib[currentDet->getID()] =
-                std::make_pair(number++, top_group);
-          else // Map will contains the entry number as the key
-            instrcalib[number++] =
-                std::make_pair(currentDet->getID(), top_group);
+          instrcalib[number++] = std::make_pair(currentDet->getID(), top_group);
         } else // Is an assembly, push in the queue
         {
           currentchild =
@@ -151,6 +143,8 @@ void CreateDummyCalFile::exec() {
     prog.report();
   }
   // Write the results in a file
+  // Plan to overwrite file, so do not check if it exists
+  const bool overwrite = false;
   saveGroupingFile(filename, overwrite);
   progress(0.2);
 }

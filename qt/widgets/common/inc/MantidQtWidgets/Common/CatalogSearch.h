@@ -100,7 +100,7 @@ private:
   /// Obtain all file extensions from the provided column (dataFileResults ->
   /// File name).
   std::unordered_set<std::string>
-  getDataFileExtensions(Mantid::API::Column_sptr column);
+  getDataFileExtensions(const Mantid::API::Column_sptr &column);
   /// Add the list of file extensions to the "Filter type..." drop-down.
   void populateDataFileType(const std::unordered_set<std::string> &extensions);
   /// Disable the download button if user can access the files locally from the
@@ -197,7 +197,7 @@ private:
   /// The current page the user is on in the results window. Used for paging.
   int m_currentPageNumber;
   // Ensure tooltip uses visible color on current OS
-  void correctedToolTip(std::string toolTip, QLabel *label);
+  void correctedToolTip(const std::string &toolTip, QLabel *label);
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

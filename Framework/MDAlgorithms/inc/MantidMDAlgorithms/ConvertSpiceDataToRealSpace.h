@@ -59,8 +59,8 @@ private:
 
   /// Parse data table workspace to a vector of matrix workspaces
   std::vector<API::MatrixWorkspace_sptr> convertToMatrixWorkspace(
-      DataObjects::TableWorkspace_sptr tablews,
-      API::MatrixWorkspace_const_sptr parentws,
+      const DataObjects::TableWorkspace_sptr &tablews,
+      const API::MatrixWorkspace_const_sptr &parentws,
       Types::Core::DateAndTime runstart,
       std::map<std::string, std::vector<double>> &logvecmap,
       std::vector<Types::Core::DateAndTime> &vectimes);
@@ -71,43 +71,42 @@ private:
 
   /// Create an MDWorkspace for monitor counts
   API::IMDEventWorkspace_sptr createMonitorMDWorkspace(
-      const std::vector<API::MatrixWorkspace_sptr> vec_ws2d,
+      const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d,
       const std::vector<double> &vecmonitor);
 
   /// Read parameter information from table workspace
-  void readTableInfo(DataObjects::TableWorkspace_const_sptr tablews,
+  void readTableInfo(const DataObjects::TableWorkspace_const_sptr &tablews,
                      size_t &ipt, size_t &irotangle, size_t &itime,
                      std::vector<std::pair<size_t, size_t>> &anodelist,
                      std::map<std::string, size_t> &samplenameindexmap);
 
   /// Return sample logs
-  void parseSampleLogs(DataObjects::TableWorkspace_sptr tablews,
+  void parseSampleLogs(const DataObjects::TableWorkspace_sptr &tablews,
                        const std::map<std::string, size_t> &indexlist,
                        std::map<std::string, std::vector<double>> &logvecmap);
 
   /// Load one run (one pt.) to a matrix workspace
-  API::MatrixWorkspace_sptr
-  loadRunToMatrixWS(DataObjects::TableWorkspace_sptr tablews, size_t irow,
-                    API::MatrixWorkspace_const_sptr parentws,
-                    Types::Core::DateAndTime runstart, size_t ipt,
-                    size_t irotangle, size_t itime,
-                    const std::vector<std::pair<size_t, size_t>> anodelist,
-                    double &duration);
+  API::MatrixWorkspace_sptr loadRunToMatrixWS(
+      const DataObjects::TableWorkspace_sptr &tablews, size_t irow,
+      const API::MatrixWorkspace_const_sptr &parentws,
+      Types::Core::DateAndTime runstart, size_t ipt, size_t irotangle,
+      size_t itime, const std::vector<std::pair<size_t, size_t>> &anodelist,
+      double &duration);
 
   /// Append Experiment Info
   void
-  addExperimentInfos(API::IMDEventWorkspace_sptr mdws,
-                     const std::vector<API::MatrixWorkspace_sptr> vec_ws2d);
+  addExperimentInfos(const API::IMDEventWorkspace_sptr &mdws,
+                     const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d);
 
   /// Append sample logs to MD workspace
   void
-  appendSampleLogs(API::IMDEventWorkspace_sptr mdws,
+  appendSampleLogs(const API::IMDEventWorkspace_sptr &mdws,
                    const std::map<std::string, std::vector<double>> &logvecmap,
                    const std::vector<Types::Core::DateAndTime> &vectimes);
 
   /// Parse detector efficiency table workspace to map
-  std::map<detid_t, double>
-  parseDetectorEfficiencyTable(DataObjects::TableWorkspace_sptr detefftablews);
+  std::map<detid_t, double> parseDetectorEfficiencyTable(
+      const DataObjects::TableWorkspace_sptr &detefftablews);
 
   /// Apply the detector's efficiency correction to
   void

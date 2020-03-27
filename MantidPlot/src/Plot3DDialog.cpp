@@ -46,7 +46,7 @@
 
 using Mantid::Kernel::ConfigService;
 
-Plot3DDialog::Plot3DDialog(QWidget *parent, Qt::WFlags fl)
+Plot3DDialog::Plot3DDialog(QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl) {
   setObjectName("Plot3DDialog");
   setWindowTitle(tr("MantidPlot - Surface Plot Options"));

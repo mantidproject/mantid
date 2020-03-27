@@ -353,10 +353,13 @@ void LoadNXSPE::exec() {
 
 boost::shared_ptr<Geometry::CSGObject>
 LoadNXSPE::createCuboid(double dx, double dy, double dz) {
+  UNUSED_ARG(dx)
+  UNUSED_ARG(dy)
+  UNUSED_ARG(dz)
 
-  dx = 0.5 * std::fabs(dx);
-  dy = 0.5 * std::fabs(dy);
-  dz = 0.5 * std::fabs(dz);
+  // dx = 0.5 * std::fabs(dx);
+  // dy = 0.5 * std::fabs(dy);
+  // dz = 0.5 * std::fabs(dz);
   /*
    std::stringstream planeName;
 

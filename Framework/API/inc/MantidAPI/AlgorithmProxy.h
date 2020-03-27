@@ -50,7 +50,7 @@ http://proj-gaudi.web.cern.ch/proj-gaudi/)
 class MANTID_API_DLL AlgorithmProxy : public IAlgorithm,
                                       public Kernel::PropertyManagerOwner {
 public:
-  AlgorithmProxy(Algorithm_sptr alg);
+  AlgorithmProxy(const Algorithm_sptr &alg);
   AlgorithmProxy(const AlgorithmProxy &) = delete;
   AlgorithmProxy &operator=(const AlgorithmProxy &) = delete;
   ~AlgorithmProxy() override;

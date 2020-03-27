@@ -105,7 +105,7 @@ public:
   }
   static void destroySuite(DownloadInstrumentTest *suite) { delete suite; }
 
-  void createDirectory(Poco::Path path) {
+  void createDirectory(const Poco::Path &path) {
     Poco::File file(path);
     if (file.createDirectory()) {
       m_directoriesToRemove.emplace_back(file);
@@ -190,9 +190,6 @@ public:
   }
 
   int runDownloadInstrument() {
-    // Name of the output workspace.
-    std::string outWSName("DownloadInstrumentTest_OutputWS");
-
     MockedDownloadInstrument alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

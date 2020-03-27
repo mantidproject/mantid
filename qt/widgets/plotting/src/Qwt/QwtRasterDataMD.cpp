@@ -10,6 +10,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <cmath>
+#include <utility>
 
 namespace MantidQt {
 namespace API {
@@ -199,7 +200,7 @@ Mantid::API::IMDWorkspace_const_sptr QwtRasterDataMD::getWorkspace() const {
  * @param ws :: IMDWorkspace to show
  */
 void QwtRasterDataMD::setOverlayWorkspace(
-    Mantid::API::IMDWorkspace_const_sptr ws) {
+    const Mantid::API::IMDWorkspace_const_sptr &ws) {
   if (!ws) {
     m_overlayWS.reset();
     return;
@@ -229,8 +230,8 @@ void QwtRasterDataMD::setSliceParams(
                              "vector/number of dimensions size.");
   m_dimX = dimX;
   m_dimY = dimY;
-  m_X = X;
-  m_Y = Y;
+  m_X = std::move(X);
+  m_Y = std::move(Y);
   if (!m_X || !m_Y)
     throw std::runtime_error("QwtRasterDataMD::setSliceParams(): one of the "
                              "input dimensions is NULL");

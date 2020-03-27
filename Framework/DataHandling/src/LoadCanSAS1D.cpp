@@ -297,9 +297,9 @@ void LoadCanSAS1D::check(const Poco::XML::Element *const toCheck,
  * @param[out] container the data will be added to this group
  * @throw ExistsError if a workspace with this name had already been added
  */
-void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork,
-                                      const std::string &newWorkName,
-                                      API::WorkspaceGroup_sptr container) {
+void LoadCanSAS1D::appendDataToOutput(
+    const API::MatrixWorkspace_sptr &newWork, const std::string &newWorkName,
+    const API::WorkspaceGroup_sptr &container) {
   // the name of the property, like the workspace name must be different for
   // each workspace. Add "_run" at the end to stop problems with names like
   // "outputworkspace"
@@ -317,8 +317,9 @@ void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork,
  * @param inst_name :: The name written in the Nexus file
  * @param localWorkspace :: The workspace to insert the instrument into
  */
-void LoadCanSAS1D::runLoadInstrument(const std::string &inst_name,
-                                     API::MatrixWorkspace_sptr localWorkspace) {
+void LoadCanSAS1D::runLoadInstrument(
+    const std::string &inst_name,
+    const API::MatrixWorkspace_sptr &localWorkspace) {
 
   API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
@@ -342,7 +343,7 @@ void LoadCanSAS1D::runLoadInstrument(const std::string &inst_name,
  *  @param[in] wSpace the log will be created in this workspace
  */
 void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
-                              API::MatrixWorkspace_sptr wSpace) const {
+                              const API::MatrixWorkspace_sptr &wSpace) const {
   API::Run &run = wSpace->mutableRun();
   Element *runText = sasEntry->getChildElement("Run");
   check(runText, "Run");
@@ -369,7 +370,7 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
 
 void LoadCanSAS1D::createSampleInformation(
     const Poco::XML::Element *const sasEntry,
-    Mantid::API::MatrixWorkspace_sptr wSpace) const {
+    const Mantid::API::MatrixWorkspace_sptr &wSpace) const {
   auto &sample = wSpace->mutableSample();
 
   // Get the thickness information

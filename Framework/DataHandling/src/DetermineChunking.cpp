@@ -292,7 +292,7 @@ void DetermineChunking::exec() {
 }
 
 /// set the name of the top level NXentry m_top_entry_name
-std::string DetermineChunking::setTopEntryName(std::string filename) {
+std::string DetermineChunking::setTopEntryName(const std::string &filename) {
   std::string top_entry_name;
   using string_map_t = std::map<std::string, std::string>;
   try {

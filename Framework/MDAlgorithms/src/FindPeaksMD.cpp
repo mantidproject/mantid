@@ -586,7 +586,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  * @param ws :: MDHistoWorkspace
  */
 void FindPeaksMD::findPeaksHisto(
-    Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
+    const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) {
   size_t nd = ws->getNumDims();
   if (nd < 3)
     throw std::invalid_argument("Workspace must have at least 3 dimensions.");

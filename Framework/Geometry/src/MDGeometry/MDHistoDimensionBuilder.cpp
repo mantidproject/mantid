@@ -4,8 +4,10 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
+#include <utility>
+
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
@@ -21,7 +23,7 @@ MDHistoDimensionBuilder::MDHistoDimensionBuilder()
 Setter for the dimension name
 @param name : friendly name of dimension
 */
-void MDHistoDimensionBuilder::setName(std::string name) {
+void MDHistoDimensionBuilder::setName(const std::string &name) {
   // String any spaces
   m_name = Kernel::Strings::strip(name);
 }
@@ -30,7 +32,7 @@ void MDHistoDimensionBuilder::setName(std::string name) {
 Setter for the dimension id
 @param id : id of the dimension
 */
-void MDHistoDimensionBuilder::setId(std::string id) { m_id = id; }
+void MDHistoDimensionBuilder::setId(std::string id) { m_id = std::move(id); }
 
 /*
 Setter for the dimension units
@@ -69,7 +71,7 @@ void MDHistoDimensionBuilder::setNumBins(size_t nbins) { m_nbins = nbins; }
  * @param frameName: the frame name
  */
 void MDHistoDimensionBuilder::setFrameName(std::string frameName) {
-  m_frameName = frameName;
+  m_frameName = std::move(frameName);
 }
 
 /*

@@ -80,9 +80,9 @@ void SaveCalFile::exec() {
  *(selected) if not specified.
  */
 void SaveCalFile::saveCalFile(const std::string &calFileName,
-                              GroupingWorkspace_sptr groupWS,
-                              OffsetsWorkspace_sptr offsetsWS,
-                              MaskWorkspace_sptr maskWS) {
+                              const GroupingWorkspace_sptr &groupWS,
+                              const OffsetsWorkspace_sptr &offsetsWS,
+                              const MaskWorkspace_sptr &maskWS) {
   Instrument_const_sptr inst;
 
   bool doGroup = false;

@@ -468,7 +468,8 @@ public:
   }
 
 private:
-  double fitBSpline(boost::shared_ptr<IFunction> bsp, std::string func) {
+  double fitBSpline(const boost::shared_ptr<IFunction> &bsp,
+                    const std::string &func) {
     const double startx = bsp->getAttribute("StartX").asDouble();
     const double endx = bsp->getAttribute("EndX").asDouble();
 

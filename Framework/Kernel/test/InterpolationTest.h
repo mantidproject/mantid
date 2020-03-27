@@ -227,8 +227,8 @@ public:
   }
 
 private:
-  Interpolation getInitializedInterpolation(std::string xUnit,
-                                            std::string yUnit) {
+  Interpolation getInitializedInterpolation(const std::string &xUnit,
+                                            const std::string &yUnit) {
     Interpolation interpolation;
 
     // take values from constructor
@@ -286,7 +286,7 @@ private:
    * It takes a string argument to make it more obvious where the problem is.
    */
   void checkValue(const Interpolation &interpolation, double x, double y,
-                  std::string testedRange) {
+                  const std::string &testedRange) {
     std::ostringstream errorString;
     errorString << "Interpolation error " << testedRange;
 

@@ -114,14 +114,14 @@ void StepScan::exec() {
  * pointer.
  */
 DataObjects::EventWorkspace_sptr
-StepScan::getMonitorWorkspace(API::MatrixWorkspace_sptr inputWS) {
+StepScan::getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWS) {
   // See if there's a monitor workspace inside the input one
   return boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
       inputWS->monitorWorkspace());
 }
 
 DataObjects::EventWorkspace_sptr
-StepScan::cloneInputWorkspace(API::Workspace_sptr inputWS) {
+StepScan::cloneInputWorkspace(const API::Workspace_sptr &inputWS) {
   IAlgorithm_sptr clone = createChildAlgorithm("CloneWorkspace");
   clone->setProperty("InputWorkspace", inputWS);
   clone->executeAsChildAlg();
@@ -134,8 +134,8 @@ StepScan::cloneInputWorkspace(API::Workspace_sptr inputWS) {
  *  @param inputWS The input workspace
  *  @param maskWS  A masking workspace
  */
-void StepScan::runMaskDetectors(MatrixWorkspace_sptr inputWS,
-                                MatrixWorkspace_sptr maskWS) {
+void StepScan::runMaskDetectors(const MatrixWorkspace_sptr &inputWS,
+                                const MatrixWorkspace_sptr &maskWS) {
   IAlgorithm_sptr maskingAlg = createChildAlgorithm("MaskDetectors");
   maskingAlg->setProperty<MatrixWorkspace_sptr>("Workspace", inputWS);
   maskingAlg->setProperty<MatrixWorkspace_sptr>("MaskedWorkspace", maskWS);
@@ -147,7 +147,7 @@ void StepScan::runMaskDetectors(MatrixWorkspace_sptr inputWS,
  *  @param xmin    The minimum value of the filter
  *  @param xmax    The maximum value of the filter
  */
-void StepScan::runFilterByXValue(MatrixWorkspace_sptr inputWS,
+void StepScan::runFilterByXValue(const MatrixWorkspace_sptr &inputWS,
                                  const double xmin, const double xmax) {
   std::string rangeUnit = getProperty("RangeUnit");
   // Run ConvertUnits on the input workspace if xmin/max were given in a

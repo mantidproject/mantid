@@ -2854,8 +2854,8 @@ std::vector<V3D> IndexingUtils::MakeCircleDirections(int n_steps,
                            specified.
  */
 int IndexingUtils::SelectDirection(V3D &best_direction,
-                                   const std::vector<V3D> q_vectors,
-                                   const std::vector<V3D> direction_list,
+                                   const std::vector<V3D> &q_vectors,
+                                   const std::vector<V3D> &direction_list,
                                    double plane_spacing,
                                    double required_tolerance) {
   if (q_vectors.empty()) {

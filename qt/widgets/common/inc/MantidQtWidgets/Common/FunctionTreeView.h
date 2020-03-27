@@ -137,24 +137,26 @@ protected:
   /// Remove and delete property
   void removeProperty(QtProperty *prop);
   /// Set a function
-  void setFunction(QtProperty *prop, Mantid::API::IFunction_sptr fun);
+  void setFunction(QtProperty *prop, const Mantid::API::IFunction_sptr &fun);
   /// Add a function
-  bool addFunction(QtProperty *prop, Mantid::API::IFunction_sptr fun);
+  bool addFunction(QtProperty *prop, const Mantid::API::IFunction_sptr &fun);
   /// Add a function property
-  AProperty addFunctionProperty(QtProperty *parent, QString funName);
+  AProperty addFunctionProperty(QtProperty *parent, const QString &funName);
   /// Add a parameter property
-  AProperty addParameterProperty(QtProperty *parent, QString paramName,
-                                 QString paramDesc, double paramValue);
+  AProperty addParameterProperty(QtProperty *parent, const QString &paramName,
+                                 const QString &paramDesc, double paramValue);
   /// Add a attribute property
-  AProperty addAttributeProperty(QtProperty *parent, QString attName,
+  AProperty addAttributeProperty(QtProperty *parent, const QString &attName,
                                  const Mantid::API::IFunction::Attribute &att);
   /// Add attribute and parameter properties to a function property
-  void addAttributeAndParameterProperties(QtProperty *prop,
-                                          Mantid::API::IFunction_sptr fun);
+  void
+  addAttributeAndParameterProperties(QtProperty *prop,
+                                     const Mantid::API::IFunction_sptr &fun);
   /// Add property showing function's index in the composite function
   AProperty addIndexProperty(QtProperty *prop);
   /// Update function index properties
-  void updateFunctionIndices(QtProperty *prop = nullptr, QString index = "");
+  void updateFunctionIndices(QtProperty *prop = nullptr,
+                             const QString &index = "");
   /// Get property of the overall function
   AProperty getFunctionProperty() const;
   /// Check if property is a function group
@@ -194,7 +196,7 @@ protected:
   QtProperty *getTieProperty(QtProperty *prop) const;
 
   /// Add a tie property
-  void addTieProperty(QtProperty *prop, QString tie);
+  void addTieProperty(QtProperty *prop, const QString &tie);
   /// Check if a parameter property has a tie
   bool hasTie(QtProperty *prop) const;
   /// Check if a property is a tie
@@ -204,7 +206,7 @@ protected:
 
   /// Add a constraint property
   QList<AProperty> addConstraintProperties(QtProperty *prop,
-                                           QString constraint);
+                                           const QString &constraint);
   /// Check if a property is a constraint
   bool isConstraint(QtProperty *prop) const;
   /// Check if a parameter property has a constraint

@@ -30,7 +30,7 @@ namespace {
 std::vector<std::string>
 createPBinStringVector(std::vector<Mantid::coord_t> minVector,
                        std::vector<Mantid::coord_t> maxVector,
-                       IMDHistoWorkspace_sptr inputWs) {
+                       const IMDHistoWorkspace_sptr &inputWs) {
   size_t numDims = inputWs->getNumDims();
   std::vector<std::string> pBinStrVector;
   for (size_t iter = 0; iter < numDims; iter++) {
@@ -65,7 +65,7 @@ DECLARE_ALGORITHM(CompactMD)
  */
 
 void CompactMD::findFirstNonZeroMinMaxExtents(
-    IMDHistoWorkspace_sptr inputWs, std::vector<Mantid::coord_t> &minVec,
+    const IMDHistoWorkspace_sptr &inputWs, std::vector<Mantid::coord_t> &minVec,
     std::vector<Mantid::coord_t> &maxVec) {
   auto ws_iter = inputWs->createIterator();
   do {

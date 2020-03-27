@@ -150,7 +150,7 @@ double ParamFunction::getParameter(const std::string &name) const {
  */
 bool ParamFunction::hasParameter(const std::string &name) const {
   return std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name) !=
-         m_parameterNames.end();
+         m_parameterNames.cend();
 }
 
 /**

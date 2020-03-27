@@ -187,7 +187,7 @@ private:
   }
 
   /// Runs test of execution on the given workspace
-  void runExecutionTest(const MatrixWorkspace_sptr workspace) {
+  void runExecutionTest(const MatrixWorkspace_sptr &workspace) {
     auto calc = AlgorithmManager::Instance().create("CalMuonDetectorPhases");
     calc->initialize();
     calc->setChild(true);

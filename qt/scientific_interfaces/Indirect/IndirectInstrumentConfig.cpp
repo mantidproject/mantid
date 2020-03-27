@@ -300,7 +300,8 @@ void IndirectInstrumentConfig::updateInstrumentConfigurations(
  * @param ws Instrument workspace
  * @return If the workspace contained valid analysers
  */
-bool IndirectInstrumentConfig::updateAnalysersList(MatrixWorkspace_sptr ws) {
+bool IndirectInstrumentConfig::updateAnalysersList(
+    const MatrixWorkspace_sptr &ws) {
   if (!ws)
     return false;
 

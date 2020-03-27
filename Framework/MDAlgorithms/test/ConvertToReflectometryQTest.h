@@ -42,7 +42,7 @@ private:
   Makes the tests much more readable like this.
   */
   boost::shared_ptr<ConvertToReflectometryQ>
-  make_standard_algorithm(const std::string outputdimensions = "Q (lab frame)",
+  make_standard_algorithm(const std::string &outputdimensions = "Q (lab frame)",
                           bool outputAsMD = true) {
     MatrixWorkspace_sptr in_ws =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);

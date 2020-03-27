@@ -129,7 +129,7 @@ private:
   void createPeriodLogs(int64_t period,
                         DataObjects::Workspace2D_sptr &local_workspace);
   // Validate multi-period logs
-  void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
+  void validateMultiPeriodLogs(const Mantid::API::MatrixWorkspace_sptr &);
 
   // build the list of spectra numbers to load and include in the spectra list
   void buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList,

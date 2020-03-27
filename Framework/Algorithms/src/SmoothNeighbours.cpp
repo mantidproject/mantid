@@ -685,7 +685,7 @@ void SmoothNeighbours::setupNewInstrument(MatrixWorkspace &outws) const {
 //--------------------------------------------------------------------------------------------
 /** Spread the average over all the pixels
  */
-void SmoothNeighbours::spreadPixels(MatrixWorkspace_sptr outws) {
+void SmoothNeighbours::spreadPixels(const MatrixWorkspace_sptr &outws) {
   // Get some stuff from the input workspace
   const size_t numberOfSpectra = inWS->getNumberHistograms();
 

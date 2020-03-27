@@ -76,5 +76,7 @@ void export_SpectrumInfo() {
       .def("getSpectrumDefinition", &SpectrumInfo::spectrumDefinition,
            return_value_policy<return_by_value>(), (arg("self"), arg("index")),
            "Returns the SpectrumDefinition of the spectrum with the given "
-           "index.");
+           "index.")
+      .def("detectorCount", &SpectrumInfo::detectorCount, arg("self"),
+           "Returns the total number of detectors used across spectrum info.");
 }

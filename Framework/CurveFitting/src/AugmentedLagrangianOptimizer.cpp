@@ -137,7 +137,7 @@ void AugmentedLagrangianOptimizer::minimize(std::vector<double> &xv) const {
   assert(numParameters() == xv.size());
 
   double ICM(HUGE_VAL), minf_penalty(HUGE_VAL), rho(0.0);
-  double fcur(0.0), minf(HUGE_VAL), penalty(0.0);
+  double minf(HUGE_VAL), penalty(0.0);
   std::vector<double> xcur(xv), lambda(numEqualityConstraints(), 0),
       mu(numInequalityConstraints());
   int minfIsFeasible = 0;
@@ -149,7 +149,7 @@ void AugmentedLagrangianOptimizer::minimize(std::vector<double> &xv) const {
 
   if (numEqualityConstraints() > 0 || numInequalityConstraints() > 0) {
     double con2 = 0;
-    fcur = m_userfunc(numParameters(), xcur.data());
+    double fcur = m_userfunc(numParameters(), xcur.data());
     int feasible = 1;
     for (size_t i = 0; i < numEqualityConstraints(); ++i) {
       double hi = evaluateConstraint(m_eq, i, numParameters(), xcur.data());
@@ -177,7 +177,7 @@ void AugmentedLagrangianOptimizer::minimize(std::vector<double> &xv) const {
 
     unconstrainedOptimization(lambda, mu, rho, xcur);
 
-    fcur = m_userfunc(numParameters(), xcur.data());
+    double fcur = m_userfunc(numParameters(), xcur.data());
     ICM = 0.0;
     penalty = 0.0;
     int feasible = 1;

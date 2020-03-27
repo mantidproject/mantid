@@ -175,7 +175,7 @@ const std::string SmoothMD::summary() const {
  * @return Smoothed MDHistoWorkspace
  */
 IMDHistoWorkspace_sptr
-SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
+SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
                     const WidthVector &widthVector,
                     OptionalIMDHistoWorkspace_const_sptr weightingWS) {
 
@@ -278,7 +278,7 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
  * @return Smoothed MDHistoWorkspace
  */
 IMDHistoWorkspace_sptr
-SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
+SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
                          const WidthVector &widthVector,
                          OptionalIMDHistoWorkspace_const_sptr weightingWS) {
 

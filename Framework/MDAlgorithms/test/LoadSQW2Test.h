@@ -20,6 +20,7 @@
 #include <Poco/TemporaryFile.h>
 
 #include <array>
+#include <utility>
 
 using Mantid::API::ExperimentInfo;
 using Mantid::API::IAlgorithm;
@@ -159,7 +160,8 @@ private:
     SizeTList nbins;
   };
 
-  IMDEventWorkspace_sptr runAlgorithm(std::string filename, Arguments args) {
+  IMDEventWorkspace_sptr runAlgorithm(const std::string &filename,
+                                      const Arguments &args) {
     auto algm = createAlgorithm();
     algm->setProperty("Filename", filename);
     algm->setProperty("MetadataOnly", args.metadataOnly);
@@ -180,9 +182,9 @@ private:
   }
 
   void checkGeometryAsExpected(const IMDEventWorkspace &outputWS,
-                               std::string outputFrame, DataType dtype) {
+                               const std::string &outputFrame, DataType dtype) {
     TS_ASSERT_EQUALS(4, outputWS.getNumDims());
-    auto expectedDim = getExpectedDimProperties(outputFrame, dtype);
+    auto expectedDim = getExpectedDimProperties(std::move(outputFrame), dtype);
     for (size_t i = 0; i < 4; ++i) {
       auto dim = outputWS.getDimension(i);
       TS_ASSERT_EQUALS(expectedDim.ids[i], dim->getDimensionId());
@@ -196,7 +198,7 @@ private:
   }
 
   GNU_DIAG_OFF("missing-braces")
-  DimensionProperties getExpectedDimProperties(std::string outputFrame,
+  DimensionProperties getExpectedDimProperties(const std::string &outputFrame,
                                                DataType dtype) {
     DimensionProperties expected;
     expected.ids = {"qx", "qy", "qz", "en"};
@@ -297,8 +299,8 @@ private:
     TS_ASSERT_DELTA(0.0, vVec[2], 1e-04);
   }
 
-  void checkDataAsExpected(const IMDEventWorkspace &outputWS, Arguments args,
-                           DataType dtype) {
+  void checkDataAsExpected(const IMDEventWorkspace &outputWS,
+                           const Arguments &args, DataType dtype) {
     if (args.metadataOnly) {
       TS_ASSERT_EQUALS(0, outputWS.getNEvents());
     } else {
@@ -353,7 +355,7 @@ private:
   }
 
   void checkOutputFile(const IMDEventWorkspace &outputWS,
-                       std::string outputFilename) {
+                       const std::string &outputFilename) {
     TS_ASSERT(outputWS.isFileBacked());
     Poco::File fileback(outputFilename);
     TS_ASSERT(fileback.getSize() > 0);

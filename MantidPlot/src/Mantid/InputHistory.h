@@ -38,7 +38,7 @@ class InputHistoryImpl {
 public:
   InputHistoryImpl(const InputHistoryImpl &) = delete;
   InputHistoryImpl &operator=(const InputHistoryImpl &) = delete;
-  void updateAlgorithm(Mantid::API::IAlgorithm_sptr alg);
+  void updateAlgorithm(const Mantid::API::IAlgorithm_sptr &alg);
   /// The name:value map of non-default properties with which algorithm algName
   /// was called last time.
   QMap<QString, QString> algorithmProperties(const QString &algName);

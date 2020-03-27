@@ -376,8 +376,8 @@ void DetectorDiagnostic::exec() {
  * @param inputWS : the workspace to mask
  * @param maskWS : the workspace containing the masking information
  */
-void DetectorDiagnostic::applyMask(API::MatrixWorkspace_sptr inputWS,
-                                   API::MatrixWorkspace_sptr maskWS) {
+void DetectorDiagnostic::applyMask(const API::MatrixWorkspace_sptr &inputWS,
+                                   const API::MatrixWorkspace_sptr &maskWS) {
   IAlgorithm_sptr maskAlg =
       createChildAlgorithm("MaskDetectors"); // should set progress bar
   maskAlg->setProperty("Workspace", inputWS);
@@ -394,7 +394,7 @@ void DetectorDiagnostic::applyMask(API::MatrixWorkspace_sptr inputWS,
  * @return : the resulting mask from the checks
  */
 API::MatrixWorkspace_sptr
-DetectorDiagnostic::doDetVanTest(API::MatrixWorkspace_sptr inputWS,
+DetectorDiagnostic::doDetVanTest(const API::MatrixWorkspace_sptr &inputWS,
                                  int &nFails) {
   MatrixWorkspace_sptr localMask;
 
@@ -483,7 +483,7 @@ DetectorDiagnostic::DetectorDiagnostic()
  * @returns A workspace containing the integrated counts
  */
 MatrixWorkspace_sptr DetectorDiagnostic::integrateSpectra(
-    MatrixWorkspace_sptr inputWS, const int indexMin, const int indexMax,
+    const MatrixWorkspace_sptr &inputWS, const int indexMin, const int indexMax,
     const double lower, const double upper, const bool outputWorkspace2D) {
   g_log.debug() << "Integrating input spectra.\n";
   // If the input spectra only has one bin, assume it has been integrated
@@ -525,8 +525,8 @@ MatrixWorkspace_sptr DetectorDiagnostic::integrateSpectra(
  * @param inputWS The workspace to initialize from. The instrument is copied
  *from this.
  */
-DataObjects::MaskWorkspace_sptr
-DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS) {
+DataObjects::MaskWorkspace_sptr DetectorDiagnostic::generateEmptyMask(
+    const API::MatrixWorkspace_const_sptr &inputWS) {
   // Create a new workspace for the results, copy from the input to ensure that
   // we copy over the instrument and current masking
   auto maskWS =
@@ -547,7 +547,7 @@ DetectorDiagnostic::makeInstrumentMap(const API::MatrixWorkspace &countsWS) {
  *
  */
 std::vector<std::vector<size_t>>
-DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS) {
+DetectorDiagnostic::makeMap(const API::MatrixWorkspace_sptr &countsWS) {
   std::multimap<Mantid::Geometry::ComponentID, size_t> mymap;
 
   Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();

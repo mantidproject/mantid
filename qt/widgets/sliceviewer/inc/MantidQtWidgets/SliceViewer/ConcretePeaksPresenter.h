@@ -36,9 +36,9 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER ConcretePeaksPresenter
 public:
   ConcretePeaksPresenter(
       PeakOverlayViewFactory_sptr viewFactory,
-      Mantid::API::IPeaksWorkspace_sptr peaksWS,
-      boost::shared_ptr<Mantid::API::MDGeometry> mdWS,
-      Mantid::Geometry::PeakTransformFactory_sptr transformFactory);
+      const Mantid::API::IPeaksWorkspace_sptr &peaksWS,
+      const boost::shared_ptr<Mantid::API::MDGeometry> &mdWS,
+      const Mantid::Geometry::PeakTransformFactory_sptr &transformFactory);
   void reInitialize(Mantid::API::IPeaksWorkspace_sptr peaksWS) override;
   ~ConcretePeaksPresenter() override;
   void setNonOrthogonal(bool nonOrthogonalEnabled) override;
@@ -107,7 +107,7 @@ private:
   void produceViews();
   /// Check workspace compatibilities.
   void checkWorkspaceCompatibilities(
-      boost::shared_ptr<Mantid::API::MDGeometry> mdWS);
+      const boost::shared_ptr<Mantid::API::MDGeometry> &mdWS);
   /// Find peaks interacting with the slice and update the view.
   void doFindPeaksInRegion();
   /// make owner update.

@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h"
 
 namespace Mantid {
@@ -14,12 +16,12 @@ using namespace Geometry;
 PoldiDetectorDecorator::PoldiDetectorDecorator(
     boost::shared_ptr<PoldiAbstractDetector> decoratedDetector)
     : PoldiAbstractDetector(), m_decoratedDetector() {
-  setDecoratedDetector(decoratedDetector);
+  setDecoratedDetector(std::move(decoratedDetector));
 }
 
 void PoldiDetectorDecorator::setDecoratedDetector(
     boost::shared_ptr<PoldiAbstractDetector> detector) {
-  m_decoratedDetector = detector;
+  m_decoratedDetector = std::move(detector);
 
   detectorSetHook();
 }

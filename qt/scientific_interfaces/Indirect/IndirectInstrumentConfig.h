@@ -96,7 +96,7 @@ signals:
 
 private slots:
   /// Updates the list of analysers when an instrument is selected
-  bool updateAnalysersList(Mantid::API::MatrixWorkspace_sptr ws);
+  bool updateAnalysersList(const Mantid::API::MatrixWorkspace_sptr &ws);
   /// Updates the list of reflections when an analyser is selected
   void updateReflectionsList(int index);
   /// Filters out any disabled instruments

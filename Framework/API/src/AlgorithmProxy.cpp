@@ -21,7 +21,7 @@ namespace Mantid {
 namespace API {
 
 /// Constructor
-AlgorithmProxy::AlgorithmProxy(Algorithm_sptr alg)
+AlgorithmProxy::AlgorithmProxy(const Algorithm_sptr &alg)
     : PropertyManagerOwner(),
       m_executeAsync(new Poco::ActiveMethod<bool, Poco::Void, AlgorithmProxy>(
           this, &AlgorithmProxy::executeAsyncImpl)),

@@ -9,6 +9,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <utility>
+
 #include "MantidAPI/IDomainCreator.h"
 
 namespace Mantid {
@@ -64,7 +66,7 @@ public:
   size_t getDomainSize() const override;
   /// Set the workspace
   void setWorkspace(boost::shared_ptr<API::IMDWorkspace> IMDWorkspace) {
-    m_IMDWorkspace = IMDWorkspace;
+    m_IMDWorkspace = std::move(IMDWorkspace);
   }
   /// Set the range
   void setRange(size_t startIndex, size_t count);
@@ -83,8 +85,8 @@ protected:
                              const std::string &outputWorkspacePropertyName);
   /// Create histo output workspace
   boost::shared_ptr<API::Workspace> createHistoOutputWorkspace(
-      const std::string &baseName, API::IFunction_sptr function,
-      boost::shared_ptr<const API::IMDHistoWorkspace> inputWorkspace,
+      const std::string &baseName, const API::IFunction_sptr &function,
+      const boost::shared_ptr<const API::IMDHistoWorkspace> &inputWorkspace,
       const std::string &outputWorkspacePropertyName);
 
   /// Store workspace property name

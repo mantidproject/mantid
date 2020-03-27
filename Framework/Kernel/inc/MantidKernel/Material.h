@@ -56,7 +56,8 @@ public:
 
   using ChemicalFormula = std::vector<FormulaUnit>;
 
-  static ChemicalFormula parseChemicalFormula(const std::string chemicalSymbol);
+  static ChemicalFormula
+  parseChemicalFormula(const std::string &chemicalSymbol);
 
   /// Default constructor. Required for other parts of the code to
   /// function correctly. The material is considered "empty"

@@ -55,10 +55,10 @@ private:
   boost::shared_ptr<Geometry::MeshObject>
   loadMeshFromSTL(Poco::XML::Element *stlfile) const;
   void LoadOptionalDoubleFromXML(Poco::XML::Element *componentElement,
-                                 std::string elementName,
+                                 const std::string &elementName,
                                  double &targetVariable) const;
   std::vector<double>
-  parseTranslationVector(std::string translationVectorStr) const;
+  parseTranslationVector(const std::string &translationVectorStr) const;
   // Members
   MaterialsIndex m_materials;
   std::string m_filepath;

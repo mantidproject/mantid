@@ -17,6 +17,7 @@
 
 #include <QAction>
 #include <QPalette>
+#include <utility>
 
 #include <qwt_array.h>
 #include <qwt_data.h>
@@ -240,7 +241,7 @@ std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) const {
  * @param ws Pointer to workspace
  */
 QPair<double, double>
-PreviewPlot::getCurveRange(const Mantid::API::MatrixWorkspace_sptr ws) {
+PreviewPlot::getCurveRange(const Mantid::API::MatrixWorkspace_sptr &ws) {
   QStringList curveNames = getCurvesForWorkspace(ws);
 
   if (curveNames.size() == 0)
@@ -365,7 +366,7 @@ void PreviewPlot::addSpectrum(const QString &curveName, const QString &wsName,
  *
  * @param ws Pointer to workspace
  */
-void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws) {
+void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr &ws) {
   if (!ws) {
     g_log.error("Cannot remove curve for null workspace");
     return;
@@ -658,9 +659,9 @@ void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf) {
  *
  * @param ws the workspace that is being removed.
  */
-void PreviewPlot::removeWorkspace(MatrixWorkspace_sptr ws) {
+void PreviewPlot::removeWorkspace(const MatrixWorkspace_sptr &ws) {
   // Remove the workspace on the main GUI thread
-  removeSpectrum(ws);
+  removeSpectrum(std::move(ws));
   emit needToReplot();
 }
 
@@ -820,10 +821,10 @@ void PreviewPlot::removeCurve(QwtPlotItem *curve) {
  * @param defaultItem Default item name
  * @return List of Actions added
  */
-QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName,
+QList<QAction *> PreviewPlot::addOptionsToMenus(const QString &menuName,
                                                 QActionGroup *group,
-                                                QStringList items,
-                                                QString defaultItem) {
+                                                const QStringList &items,
+                                                const QString &defaultItem) {
   auto *menu = new QMenu(m_contextMenu);
 
   for (auto &item : items) {
@@ -880,7 +881,7 @@ QString PreviewPlot::getAxisType(int axisID) {
  * @param ws Pointer to workspace
  * @return List of curve names
  */
-QStringList PreviewPlot::getCurvesForWorkspace(const MatrixWorkspace_sptr ws) {
+QStringList PreviewPlot::getCurvesForWorkspace(const MatrixWorkspace_sptr &ws) {
   QStringList curveNames;
 
   for (auto it = m_curves.begin(); it != m_curves.end(); ++it) {

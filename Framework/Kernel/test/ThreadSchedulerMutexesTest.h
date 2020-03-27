@@ -9,6 +9,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <boost/make_shared.hpp>
+#include <utility>
+
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/ThreadSchedulerMutexes.h"
@@ -24,7 +26,7 @@ public:
   class TaskWithMutex : public Task {
   public:
     TaskWithMutex(boost::shared_ptr<std::mutex> mutex, double cost) {
-      m_mutex = mutex;
+      m_mutex = std::move(mutex);
       m_cost = cost;
     }
 

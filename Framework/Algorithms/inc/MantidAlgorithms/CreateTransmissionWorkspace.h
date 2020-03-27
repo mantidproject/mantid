@@ -35,7 +35,7 @@ private:
       const OptionalMinMax &wavelengthMonitorBackgroundInterval,
       const OptionalMinMax &wavelengthMonitorIntegrationInterval,
       const OptionalInteger &i0MonitorIndex,
-      API::MatrixWorkspace_sptr firstTransmissionRun,
+      const API::MatrixWorkspace_sptr &firstTransmissionRun,
       OptionalMatrixWorkspace_sptr secondTransmissionRun,
       const OptionalDouble &stitchingStart,
       const OptionalDouble &stitchingDelta, const OptionalDouble &stitchingEnd,

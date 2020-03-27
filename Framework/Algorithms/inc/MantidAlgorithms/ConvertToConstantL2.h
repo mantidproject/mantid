@@ -51,8 +51,8 @@ private:
   void init() override;
   void exec() override;
   void initWorkspaces();
-  double getRunProperty(std::string);
-  double getInstrumentProperty(std::string);
+  double getRunProperty(const std::string &);
+  double getInstrumentProperty(const std::string &);
   double calculateTOF(double);
 
   /// The user selected (input) workspace

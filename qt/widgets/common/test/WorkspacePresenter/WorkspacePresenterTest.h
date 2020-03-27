@@ -657,7 +657,7 @@ private:
   boost::shared_ptr<NiceMock<MockWorkspaceDockView>> mockView;
   WorkspacePresenterVN_sptr presenter;
 
-  void createGroup(std::string groupName) {
+  void createGroup(const std::string &groupName) {
     auto group =
         WorkspaceCreationHelper::createWorkspaceGroup(0, 10, 10, groupName);
     auto wksp1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
@@ -669,7 +669,7 @@ private:
     AnalysisDataService::Instance().addToGroup(groupName, "wksp2");
   }
 
-  void removeGroup(std::string groupName) {
+  void removeGroup(const std::string &groupName) {
     AnalysisDataService::Instance().deepRemoveGroup(groupName);
   }
 };

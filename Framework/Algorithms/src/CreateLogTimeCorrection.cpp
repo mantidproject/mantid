@@ -149,7 +149,7 @@ TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable(
 /** Write correction map to a text file
  */
 void CreateLogTimeCorrection::writeCorrectionToFile(
-    const string filename, const Geometry::DetectorInfo &detectorInfo,
+    const string &filename, const Geometry::DetectorInfo &detectorInfo,
     const std::vector<double> &corrections) const {
   ofstream ofile;
   ofile.open(filename.c_str());

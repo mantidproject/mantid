@@ -21,9 +21,9 @@ namespace WorkflowAlgorithms {
  * @param groupIndex :: [input] Workspace index of the group to analyse
  */
 MuonGroupCountsCalculator::MuonGroupCountsCalculator(
-    const Mantid::API::WorkspaceGroup_sptr inputWS,
-    const std::vector<int> summedPeriods,
-    const std::vector<int> subtractedPeriods, const int groupIndex)
+    const Mantid::API::WorkspaceGroup_sptr &inputWS,
+    const std::vector<int> &summedPeriods,
+    const std::vector<int> &subtractedPeriods, const int groupIndex)
     : MuonGroupCalculator(inputWS, summedPeriods, subtractedPeriods,
                           groupIndex) {}
 

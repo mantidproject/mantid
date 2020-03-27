@@ -54,12 +54,12 @@ public:
 
 private:
   bool
-  validate(Mantid::API::MatrixWorkspace_const_sptr workspace,
+  validate(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
            boost::optional<std::string> const &workspaceIndices = boost::none,
            boost::optional<MantidAxis> const &axisType = boost::none) const;
-  bool validateSpectra(Mantid::API::MatrixWorkspace_const_sptr workspace,
+  bool validateSpectra(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
                        std::string const &workspaceIndices) const;
-  bool validateBins(Mantid::API::MatrixWorkspace_const_sptr workspace,
+  bool validateBins(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
                     std::string const &binIndices) const;
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)

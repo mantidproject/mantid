@@ -39,6 +39,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 #include <unordered_set>
+#include <utility>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -95,8 +96,8 @@ InstrumentDefinitionParser::InstrumentDefinitionParser(
  * @param xmlText :: XML contents of IDF
  */
 InstrumentDefinitionParser::InstrumentDefinitionParser(
-    const IDFObject_const_sptr xmlFile,
-    const IDFObject_const_sptr expectedCacheFile, const std::string &instName,
+    const IDFObject_const_sptr &xmlFile,
+    const IDFObject_const_sptr &expectedCacheFile, const std::string &instName,
     const std::string &xmlText)
     : m_xmlFile(boost::make_shared<NullIDFObject>()),
       m_cacheFile(boost::make_shared<NullIDFObject>()), m_pDoc(nullptr),
@@ -414,7 +415,7 @@ void InstrumentDefinitionParser::checkComponentContainsLocationElement(
  * @param filename :: Name of the IDF, for exception message
  */
 void InstrumentDefinitionParser::checkIdListExistsAndDefinesEnoughIDs(
-    IdList idList, Element *pElem, const std::string &filename) const {
+    const IdList &idList, Element *pElem, const std::string &filename) const {
   if (idList.counted != static_cast<int>(idList.vec.size())) {
     std::stringstream ss1, ss2;
     ss1 << idList.vec.size();
@@ -1990,7 +1991,7 @@ void InstrumentDefinitionParser::populateIdList(Poco::XML::Element *pE,
  *  @throw InstrumentDefinitionError Thrown if type not defined in XML
  *definition
  */
-bool InstrumentDefinitionParser::isAssembly(std::string type) const {
+bool InstrumentDefinitionParser::isAssembly(const std::string &type) const {
   const std::string filename = m_xmlFile->getFileFullPathStr();
   auto it = isTypeAssembly.find(type);
 
@@ -2580,7 +2581,8 @@ void InstrumentDefinitionParser::setComponentLinks(
 Apply the cache.
 @param cacheToApply : Cache file object to use the the geometries.
 */
-void InstrumentDefinitionParser::applyCache(IDFObject_const_sptr cacheToApply) {
+void InstrumentDefinitionParser::applyCache(
+    const IDFObject_const_sptr &cacheToApply) {
   const std::string cacheFullPath = cacheToApply->getFileFullPathStr();
   g_log.information("Loading geometry cache from " + cacheFullPath);
   // create a vtk reader
@@ -2605,14 +2607,14 @@ Write the cache file from the IDF file and apply it.
 InstrumentDefinitionParser::CachingOption
 InstrumentDefinitionParser::writeAndApplyCache(
     IDFObject_const_sptr firstChoiceCache, IDFObject_const_sptr fallBackCache) {
-  IDFObject_const_sptr usedCache = firstChoiceCache;
+  IDFObject_const_sptr usedCache = std::move(firstChoiceCache);
   auto cachingOption = WroteGeomCache;
 
   g_log.notice("Geometry cache is not available");
   try {
     Poco::File dir = usedCache->getParentDirectory();
     if (dir.path().empty() || !dir.exists() || !dir.canWrite()) {
-      usedCache = fallBackCache;
+      usedCache = std::move(fallBackCache);
       cachingOption = WroteCacheTemp;
       g_log.information()
           << "Geometrycache directory is read only, writing cache "

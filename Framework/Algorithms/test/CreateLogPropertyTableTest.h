@@ -110,7 +110,7 @@ public:
 
 private:
   void createSampleWorkspace(
-      std::string wsName = "__CreateLogPropertyTable__TestWorkspace",
+      const std::string &wsName = "__CreateLogPropertyTable__TestWorkspace",
       int runNumber = 12345, int64_t runStart = 3000000000) {
     using namespace WorkspaceCreationHelper;
 

@@ -248,7 +248,8 @@ void StepScan::loadFileComplete(bool error) {
 namespace {
 class ScopedStatusText {
 public:
-  ScopedStatusText(QLabel *label, QString labelText) : status_label(label) {
+  ScopedStatusText(QLabel *label, const QString &labelText)
+      : status_label(label) {
     status_label->setText("<i><font color='darkblue'>" + labelText +
                           "</font></i>");
   }
@@ -549,7 +550,7 @@ void StepScan::runStepScanAlg() {
   generateCurve(m_uiForm.plotVariable->currentText());
 }
 
-bool StepScan::runStepScanAlgLive(std::string stepScanProperties) {
+bool StepScan::runStepScanAlgLive(const std::string &stepScanProperties) {
   // First stop the currently running live algorithm
   IAlgorithm_const_sptr oldMonitorLiveData =
       m_uiForm.mWRunFiles->stopLiveAlgorithm();

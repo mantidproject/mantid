@@ -30,6 +30,8 @@ GNU_DIAG_ON("conversion")
 #include <chrono>
 #include <json/json.h>
 #include <numeric>
+#include <utility>
+
 #include <tbb/parallel_sort.h>
 
 using namespace Mantid::Types;
@@ -120,8 +122,9 @@ KafkaEventStreamDecoder::KafkaEventStreamDecoder(
     const std::string &runInfoTopic, const std::string &spDetTopic,
     const std::string &sampleEnvTopic, const std::string &chopperTopic,
     const std::string &monitorTopic, const std::size_t bufferThreshold)
-    : IKafkaStreamDecoder(broker, eventTopic, runInfoTopic, spDetTopic,
-                          sampleEnvTopic, chopperTopic, monitorTopic),
+    : IKafkaStreamDecoder(std::move(broker), eventTopic, runInfoTopic,
+                          spDetTopic, sampleEnvTopic, chopperTopic,
+                          monitorTopic),
       m_intermediateBufferFlushThreshold(bufferThreshold) {
 #ifndef _OPENMP
   g_log.warning() << "Multithreading is not available on your system. This "

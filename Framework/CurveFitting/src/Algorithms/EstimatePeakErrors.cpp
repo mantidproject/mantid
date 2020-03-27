@@ -91,7 +91,7 @@ GSLMatrix makeJacobian(IPeakFunction &peak, double &centre, double &height,
 /// @param covariance :: The covariance matrix for the parameters of the peak.
 /// @param prefix :: A prefix for the parameter names.
 void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
-                         const GSLMatrix covariance,
+                         const GSLMatrix &covariance,
                          const std::string &prefix) {
   double centre, height, fwhm, intensity;
   GSLMatrix J = makeJacobian(peak, centre, height, fwhm, intensity);

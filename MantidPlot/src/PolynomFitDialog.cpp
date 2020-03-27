@@ -38,7 +38,7 @@
 #include <QMessageBox>
 #include <QSpinBox>
 
-PolynomFitDialog::PolynomFitDialog(QWidget *parent, Qt::WFlags fl)
+PolynomFitDialog::PolynomFitDialog(QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl), graph(nullptr) {
   setObjectName("PolynomFitDialog");
   setWindowTitle(tr("MantidPlot - Polynomial Fit Options"));

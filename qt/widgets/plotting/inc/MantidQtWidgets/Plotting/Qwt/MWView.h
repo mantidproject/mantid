@@ -58,8 +58,8 @@ class EXPORT_OPT_MANTIDQT_PLOTTING MWView
 public:
   MWView(QWidget *parent = nullptr);
   ~MWView() override;
-  void loadColorMap(QString filename = QString());
-  void setWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+  void loadColorMap(const QString &filename = QString());
+  void setWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws);
   void updateDisplay();
   SafeQwtPlot *getPlot2D();
 

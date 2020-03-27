@@ -38,6 +38,7 @@
 
 #include <limits>
 #include <numeric>
+#include <utility>
 
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::Geometry;
@@ -140,7 +141,8 @@ InstrumentActor::~InstrumentActor() { saveSettings(); }
  * value is ignored.
  */
 void InstrumentActor::setUpWorkspace(
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace,
+    const boost::shared_ptr<const Mantid::API::MatrixWorkspace>
+        &sharedWorkspace,
     double scaleMin, double scaleMax) {
   m_WkspBinMinValue = DBL_MAX;
   m_WkspBinMaxValue = -DBL_MAX;
@@ -257,7 +259,7 @@ MatrixWorkspace_sptr InstrumentActor::getMaskMatrixWorkspace() const {
  */
 void InstrumentActor::setMaskMatrixWorkspace(
     MatrixWorkspace_sptr wsMask) const {
-  m_maskWorkspace = wsMask;
+  m_maskWorkspace = std::move(wsMask);
 }
 
 void InstrumentActor::invertMaskWorkspace() const {

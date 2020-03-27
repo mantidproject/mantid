@@ -22,7 +22,7 @@ namespace {
 QString
 replacePerWithNegativeIndice(const std::string &label,
                              const bool &plotAsDistribution,
-                             const Mantid::Kernel::UnitLabel xLabel = "") {
+                             const Mantid::Kernel::UnitLabel &xLabel = "") {
   std::vector<std::string> splitVec;
   QString negativeOnePower = toQStringInternal(L"\u207b\u00b9");
   QString newLabel;

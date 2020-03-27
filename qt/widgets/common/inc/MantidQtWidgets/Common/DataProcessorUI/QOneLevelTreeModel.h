@@ -31,7 +31,7 @@ the same number of columns as the number of items in the WhiteList.
 class EXPORT_OPT_MANTIDQT_COMMON QOneLevelTreeModel : public AbstractTreeModel {
   Q_OBJECT
 public:
-  QOneLevelTreeModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
+  QOneLevelTreeModel(const Mantid::API::ITableWorkspace_sptr &tableWorkspace,
                      const WhiteList &whitelist);
   ~QOneLevelTreeModel() override;
 

@@ -89,8 +89,8 @@ void ProjectMD::exec() {
   // assign the workspace
   setProperty("OutputWorkspace", outWS);
 }
-void ProjectMD::copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
-                             Mantid::API::IMDHistoWorkspace_sptr outws) {
+void ProjectMD::copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
+                             const Mantid::API::IMDHistoWorkspace_sptr &outws) {
   outws->setTitle(inws->getTitle());
   ExperimentInfo_sptr info;
 
@@ -109,7 +109,7 @@ void ProjectMD::copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
  *      The documentation actually suggest F77, the code too?
  *  This isolates this from the storage order concern.
  */
-unsigned int ProjectMD::calcIndex(IMDHistoWorkspace_sptr ws, int dim[]) {
+unsigned int ProjectMD::calcIndex(const IMDHistoWorkspace_sptr &ws, int dim[]) {
   size_t idx = 0;
   switch (ws->getNumDims()) {
   case 1:
@@ -130,7 +130,7 @@ unsigned int ProjectMD::calcIndex(IMDHistoWorkspace_sptr ws, int dim[]) {
   return static_cast<unsigned int>(idx);
 }
 
-double ProjectMD::getValue(IMDHistoWorkspace_sptr ws, int dim[]) {
+double ProjectMD::getValue(const IMDHistoWorkspace_sptr &ws, int dim[]) {
   unsigned int idx = calcIndex(ws, dim);
   double val = ws->signalAt(idx);
   // double *a = ws->getSignalArray();
@@ -139,7 +139,8 @@ double ProjectMD::getValue(IMDHistoWorkspace_sptr ws, int dim[]) {
   // " << dim[1] << "," <<dim[2] <<'\n';
   return val;
 }
-void ProjectMD::putValue(IMDHistoWorkspace_sptr ws, int dim[], double value) {
+void ProjectMD::putValue(const IMDHistoWorkspace_sptr &ws, int dim[],
+                         double value) {
   unsigned int idx = calcIndex(ws, dim);
   // std::cout << "Result index " << idx << " value " << value << " dim= " <<
   // dim[0] << ", " << dim[1] <<", " << dim[2] <<'\n';
@@ -147,8 +148,8 @@ void ProjectMD::putValue(IMDHistoWorkspace_sptr ws, int dim[], double value) {
   ws->setErrorSquaredAt(idx, value);
 }
 
-void ProjectMD::sumData(IMDHistoWorkspace_sptr inWS,
-                        IMDHistoWorkspace_sptr outWS, int *sourceDim,
+void ProjectMD::sumData(const IMDHistoWorkspace_sptr &inWS,
+                        const IMDHistoWorkspace_sptr &outWS, int *sourceDim,
                         int *targetDim, int targetDimCount, int dimNo,
                         int start, int end, int currentDim) {
   boost::shared_ptr<const IMDDimension> dimi;

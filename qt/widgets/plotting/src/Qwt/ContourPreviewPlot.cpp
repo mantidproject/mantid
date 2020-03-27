@@ -31,7 +31,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ContourPreviewPlot");
 
 MatrixWorkspace_sptr
-convertToMatrixWorkspace(boost::shared_ptr<Workspace> const workspace) {
+convertToMatrixWorkspace(boost::shared_ptr<Workspace> const &workspace) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
@@ -79,7 +79,7 @@ MatrixWorkspace_sptr ContourPreviewPlot::getActiveWorkspace() const {
 /**
  * Initialize objects after loading the workspace
  */
-void ContourPreviewPlot::setWorkspace(MatrixWorkspace_sptr const workspace) {
+void ContourPreviewPlot::setWorkspace(MatrixWorkspace_sptr const &workspace) {
   m_workspace = workspace;
   this->checkRangeLimits();
   m_data->setWorkspace(workspace);

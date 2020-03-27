@@ -80,8 +80,9 @@ bool from_string(T &t, const std::string &s,
  * @param wavelength: wavelength value [Angstrom]
  * @param dwavelength: error on the wavelength [Angstrom]
  */
-void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
-                 double error, double wavelength, double dwavelength) {
+void store_value(const DataObjects::Workspace2D_sptr &ws, int specID,
+                 double value, double error, double wavelength,
+                 double dwavelength) {
   auto &X = ws->mutableX(specID);
   auto &Y = ws->mutableY(specID);
   auto &E = ws->mutableE(specID);
@@ -659,7 +660,7 @@ void LoadSpice2D::detectorTranslation(
  */
 void LoadSpice2D::runLoadInstrument(
     const std::string &inst_name,
-    DataObjects::Workspace2D_sptr localWorkspace) {
+    const DataObjects::Workspace2D_sptr &localWorkspace) {
 
   API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 

@@ -275,7 +275,7 @@ private:
     return outputWS;
   }
 
-  void checkData(const Mantid::API::MatrixWorkspace_sptr outputWS,
+  void checkData(const Mantid::API::MatrixWorkspace_sptr &outputWS,
                  const bool threeColumn) {
     if (threeColumn) {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);

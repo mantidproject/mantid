@@ -58,7 +58,7 @@ public:
   void replaceHandle(const std::string &workspaceName,
                      const Workspace_sptr &workspace) override;
   DataForParameterEstimationCollection
-  getDataForParameterEstimation(EstimationDataSelector selector) const;
+  getDataForParameterEstimation(const EstimationDataSelector &selector) const;
 
 public slots:
   void updateSpectraInTable(TableDatasetIndex dataIndex);

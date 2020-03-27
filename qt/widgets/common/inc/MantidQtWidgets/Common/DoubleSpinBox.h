@@ -62,7 +62,7 @@ public:
     setDecimals(prec);
   };
 
-  void addSpecialTextMapping(QString text, double value);
+  void addSpecialTextMapping(const QString &text, double value);
 
   QString textFromValue(double value) const;
   QValidator::State validate(QString &input, int &pos) const override;

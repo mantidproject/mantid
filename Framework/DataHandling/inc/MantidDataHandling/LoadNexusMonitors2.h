@@ -82,8 +82,8 @@ private:
   void fixUDets(::NeXus::File &file);
 
   /// Load the logs
-  void runLoadLogs(const std::string filename,
-                   API::MatrixWorkspace_sptr localWorkspace);
+  void runLoadLogs(const std::string &filename,
+                   const API::MatrixWorkspace_sptr &localWorkspace);
 
   /// is it possible to open the file?
   bool canOpenAsNeXus(const std::string &fname);

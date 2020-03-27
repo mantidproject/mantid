@@ -26,6 +26,7 @@
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <limits>
+#include <utility>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -122,7 +123,7 @@ void CrystalFieldFunction::function(const FunctionDomain &domain,
 /// Set the source function
 /// @param source :: New source function.
 void CrystalFieldFunction::setSource(IFunction_sptr source) const {
-  m_source = source;
+  m_source = std::move(source);
 }
 
 size_t CrystalFieldFunction::getNumberDomains() const {

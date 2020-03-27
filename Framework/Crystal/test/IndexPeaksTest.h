@@ -112,7 +112,7 @@ PeaksWorkspace_sptr createTestPeaksWorkspaceWithSatellites(
 }
 
 std::unique_ptr<IndexPeaks>
-indexPeaks(PeaksWorkspace_sptr peaksWS,
+indexPeaks(const PeaksWorkspace_sptr &peaksWS,
            const std::unordered_map<std::string, std::string> &arguments) {
   auto alg = std::make_unique<IndexPeaks>();
   alg->setChild(true);

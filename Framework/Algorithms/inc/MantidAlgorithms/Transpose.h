@@ -56,9 +56,10 @@ private:
   void exec() override;
   /// Create the output workspace
   API::MatrixWorkspace_sptr
-  createOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace);
+  createOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWorkspace);
   /// Return the vertical axis on the workspace, throwing if it is not valid
-  API::Axis *getVerticalAxis(API::MatrixWorkspace_const_sptr workspace) const;
+  API::Axis *
+  getVerticalAxis(const API::MatrixWorkspace_const_sptr &workspace) const;
 };
 
 } // namespace Algorithms

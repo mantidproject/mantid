@@ -27,8 +27,8 @@ SliderHandler::SliderHandler(Ui_SpectrumViewer *svUI)
  *                    be drawn
  * @param dataSource  SpectrumDataSource that provides the data to be drawn
  */
-void SliderHandler::reConfigureSliders(QRect drawArea,
-                                       SpectrumDataSource_sptr dataSource) {
+void SliderHandler::reConfigureSliders(
+    QRect drawArea, const SpectrumDataSource_sptr &dataSource) {
   QScrollBar *vScroll = m_svUI->imageVerticalScrollBar;
 
   int oldVValue = vScroll->value();

@@ -60,7 +60,7 @@ public:
 
 protected:
   /// Constructor
-  AbstractAlgorithmInputHistory(QString settingsGroup);
+  AbstractAlgorithmInputHistory(const QString &settingsGroup);
 
 private:
   /// Load any values that are available from persistent storage

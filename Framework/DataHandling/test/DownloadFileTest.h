@@ -73,8 +73,8 @@ public:
     exec_alg(url, tmpFile.path(), "http://" + url);
   }
 
-  void exec_alg(std::string address, std::string filename,
-                std::string newAddress = "") {
+  void exec_alg(const std::string &address, const std::string &filename,
+                const std::string &newAddress = "") {
     MockedDownloadFile alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

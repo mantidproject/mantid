@@ -9,6 +9,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <stdexcept>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/Divide.h"
@@ -601,6 +602,10 @@ public:
     mess << "LHS: grouping=" << lhs_grouping << ", 2D=" << lhs2D;
     mess << "; RHS: grouping=" << rhs_grouping << ", 2D=" << rhs2D;
     message = mess.str();
+
+    if (lhs_grouping == 0 || rhs_grouping == 0){
+      throw std::runtime_error("Attempted div by zero in test");
+    }
 
     int numpix = 12;
     std::vector< std::vector<int> > lhs(numpix/lhs_grouping), rhs(numpix/rhs_grouping);

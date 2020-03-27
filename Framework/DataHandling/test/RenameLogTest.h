@@ -124,8 +124,8 @@ private:
     return testWS;
   }
 
-  void verifyLog(API::MatrixWorkspace_sptr resultWS,
-                 const std::string logName) {
+  void verifyLog(const API::MatrixWorkspace_sptr &resultWS,
+                 const std::string &logName) {
     Kernel::TimeSeriesProperty<double> *rp;
     TS_ASSERT_THROWS_NOTHING(
         rp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(

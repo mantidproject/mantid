@@ -116,7 +116,7 @@ workspace.
 @throws runtime_error if the requested dimension is unknown either by id, or by
 name in the workspace.
 */
-size_t tryFetchDimensionIndex(Mantid::API::IMDWorkspace_sptr ws,
+size_t tryFetchDimensionIndex(const Mantid::API::IMDWorkspace_sptr &ws,
                               const std::string &candidateNameOrId) {
   size_t dimWorkspaceIndex;
   try {

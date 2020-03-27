@@ -120,7 +120,7 @@ void EQSANSLoad::init() {
 /// Returns the value of a run property from a given workspace
 /// @param inputWS :: input workspace
 /// @param pname :: name of the property to retrieve
-double getRunPropertyDbl(MatrixWorkspace_sptr inputWS,
+double getRunPropertyDbl(const MatrixWorkspace_sptr &inputWS,
                          const std::string &pname) {
   Mantid::Kernel::Property *prop = inputWS->run().getProperty(pname);
   auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);

@@ -75,8 +75,8 @@ private:
                     API::Run &ans) const override;
 
   // Overridden event-specific operation
-  bool checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                              const API::MatrixWorkspace_const_sptr rhs) const;
+  bool checkUnitCompatibility(const API::MatrixWorkspace_const_sptr &lhs,
+                              const API::MatrixWorkspace_const_sptr &rhs) const;
 };
 
 } // namespace Algorithms

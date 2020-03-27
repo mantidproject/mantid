@@ -41,7 +41,6 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1);
     dummyWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
-    const std::string inputWS = "testInput";
 
     Mantid::Algorithms::DetectorEfficiencyCor corrector;
     TS_ASSERT_THROWS_NOTHING(corrector.initialize());

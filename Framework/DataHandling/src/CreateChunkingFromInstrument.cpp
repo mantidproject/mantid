@@ -216,7 +216,7 @@ bool startsWith(const string &str, const string &prefix) {
  * @return The correct parent name. This is an empty string if the name
  * isn't found.
  */
-string parentName(IComponent_const_sptr comp, const string &prefix) {
+string parentName(const IComponent_const_sptr &comp, const string &prefix) {
   // handle the special case of the component has the name
   if (startsWith(comp->getName(), prefix))
     return comp->getName();
@@ -242,7 +242,8 @@ string parentName(IComponent_const_sptr comp, const string &prefix) {
  * @return The correct parent name. This is an empty string if the name
  * isn't found.
  */
-string parentName(IComponent_const_sptr comp, const vector<string> &names) {
+string parentName(const IComponent_const_sptr &comp,
+                  const vector<string> &names) {
   // handle the special case of the component has the name
   for (const auto &name : names)
     if (name == comp->getName())

@@ -763,6 +763,7 @@ private:
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
               "Removed1");
       for (size_t j = 0; j < spectraCount; ++j) {
+        // cppcheck-suppress unreadVariable
         const double expected =
             (movingAverageSpecialY(j) + (static_cast<double>(windowWidth) - 1) *
                                             movingAverageStandardY(j)) /
@@ -839,7 +840,8 @@ private:
   }
 
   void compareSubtractedAndBackgroundWorkspaces(
-      MatrixWorkspace_sptr originalWS, const std::string &subtractedWSName,
+      const MatrixWorkspace_sptr &originalWS,
+      const std::string &subtractedWSName,
       const std::string &backgroundWSName) {
     const std::string minusWSName("minused");
     MatrixWorkspace_sptr backgroundWS =

@@ -52,7 +52,7 @@ public:
   ~ContourPreviewPlot() override;
 
   Mantid::API::MatrixWorkspace_sptr getActiveWorkspace() const;
-  void setWorkspace(Mantid::API::MatrixWorkspace_sptr const workspace);
+  void setWorkspace(Mantid::API::MatrixWorkspace_sptr const &workspace);
   SafeQwtPlot *getPlot2D();
 
   void setPlotVisible(bool const &visible);

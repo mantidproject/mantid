@@ -63,7 +63,7 @@ private:
   double convertToDouble(std::string inputstring);
 
   /// Create an instrument geometry.
-  void createInstrumentGeometry(API::MatrixWorkspace_sptr workspace,
+  void createInstrumentGeometry(const API::MatrixWorkspace_sptr &workspace,
                                 const std::string &instrumentname,
                                 const double &primaryflightpath,
                                 const std::vector<int> &detectorids,

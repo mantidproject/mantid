@@ -316,7 +316,8 @@ void IndirectDataReduction::loadInstrumentDetails() {
  * @return Value as QString
  */
 QString IndirectDataReduction::getInstrumentParameterFrom(
-    Mantid::Geometry::IComponent_const_sptr comp, std::string param) {
+    const Mantid::Geometry::IComponent_const_sptr &comp,
+    const std::string &param) {
   QString value;
 
   if (!comp->hasParameter(param)) {
@@ -445,7 +446,7 @@ void IndirectDataReduction::saveSettings() {
  *
  * @param facility Name of facility
  */
-void IndirectDataReduction::filterUiForFacility(QString facility) {
+void IndirectDataReduction::filterUiForFacility(const QString &facility) {
   g_log.information() << "Facility selected: " << facility.toStdString()
                       << '\n';
   QStringList enabledTabs;

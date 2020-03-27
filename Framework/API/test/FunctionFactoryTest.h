@@ -476,7 +476,7 @@ public:
       TS_ASSERT(second);
 
       // test each individual function
-      auto testFunc = [](CompositeFunction_sptr f) {
+      auto testFunc = [](const CompositeFunction_sptr &f) {
         if (f) {
           TS_ASSERT_EQUALS(f->nFunctions(), 2);
           TS_ASSERT_EQUALS(f->getFunction(0)->name(),

@@ -216,11 +216,11 @@ IndirectDataTablePresenter::getSpectra(TableRowIndex start,
   while (start < end) {
     WorkspaceIndex minimum = getWorkspaceIndex(start);
     WorkspaceIndex maximum = minimum;
-    start++;
+    ++start;
     while (start < end &&
            getWorkspaceIndex(start) == maximum + WorkspaceIndex{1}) {
       ++maximum;
-      start++;
+      ++start;
     }
     spectraPairs.emplace_back(minimum, maximum);
   }

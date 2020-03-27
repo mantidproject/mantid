@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QTimer>
+#include <utility>
 
 namespace {
 using MantidQt::CustomInterfaces::IDA::DiscontinuousSpectra;
@@ -264,17 +265,18 @@ void IndirectFitPlotPresenterLegacy::plotLines() {
 }
 
 void IndirectFitPlotPresenterLegacy::plotInput(MatrixWorkspace_sptr workspace) {
-  plotInput(workspace, m_model->getActiveSpectrum());
+  plotInput(std::move(workspace), m_model->getActiveSpectrum());
   if (auto doGuess = m_view->isPlotGuessChecked())
     plotGuess(doGuess);
 }
 
 void IndirectFitPlotPresenterLegacy::plotInput(MatrixWorkspace_sptr workspace,
                                                std::size_t spectrum) {
-  m_view->plotInTopPreview("Sample", workspace, spectrum, Qt::black);
+  m_view->plotInTopPreview("Sample", std::move(workspace), spectrum, Qt::black);
 }
 
-void IndirectFitPlotPresenterLegacy::plotFit(MatrixWorkspace_sptr workspace) {
+void IndirectFitPlotPresenterLegacy::plotFit(
+    const MatrixWorkspace_sptr &workspace) {
   plotInput(workspace, 0);
   if (auto doGuess = m_view->isPlotGuessChecked())
     plotGuess(doGuess);
@@ -284,12 +286,13 @@ void IndirectFitPlotPresenterLegacy::plotFit(MatrixWorkspace_sptr workspace) {
 
 void IndirectFitPlotPresenterLegacy::plotFit(MatrixWorkspace_sptr workspace,
                                              std::size_t spectrum) {
-  m_view->plotInTopPreview("Fit", workspace, spectrum, Qt::red);
+  m_view->plotInTopPreview("Fit", std::move(workspace), spectrum, Qt::red);
 }
 
 void IndirectFitPlotPresenterLegacy::plotDifference(
     MatrixWorkspace_sptr workspace, std::size_t spectrum) {
-  m_view->plotInBottomPreview("Difference", workspace, spectrum, Qt::blue);
+  m_view->plotInBottomPreview("Difference", std::move(workspace), spectrum,
+                              Qt::blue);
 }
 
 void IndirectFitPlotPresenterLegacy::updatePlotRange(
@@ -346,11 +349,11 @@ void IndirectFitPlotPresenterLegacy::plotGuess(bool doPlotGuess) {
 
 void IndirectFitPlotPresenterLegacy::plotGuess(
     Mantid::API::MatrixWorkspace_sptr workspace) {
-  m_view->plotInTopPreview("Guess", workspace, 0, Qt::green);
+  m_view->plotInTopPreview("Guess", std::move(workspace), 0, Qt::green);
 }
 
 void IndirectFitPlotPresenterLegacy::plotGuessInSeparateWindow(
-    Mantid::API::MatrixWorkspace_sptr workspace) {
+    const Mantid::API::MatrixWorkspace_sptr &workspace) {
   m_plotExternalGuessRunner.addCallback(
       [this, workspace]() { m_model->appendGuessToInput(workspace); });
 }

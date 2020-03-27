@@ -480,7 +480,7 @@ std::string SaveFullprofResolution::toProf9IrfString() {
 /** Check wether a profile parameter map has the parameter
  */
 bool SaveFullprofResolution::has_key(std::map<std::string, double> profmap,
-                                     std::string key) {
+                                     const std::string &key) {
   map<string, double>::iterator fiter;
   fiter = profmap.find(key);
   bool exist = true;

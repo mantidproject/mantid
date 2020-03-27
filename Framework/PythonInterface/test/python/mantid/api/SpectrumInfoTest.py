@@ -40,6 +40,13 @@ class SpectrumInfoTest(unittest.TestCase):
         info = self._ws.spectrumInfo()
         self.assertEqual(info.size(), 3)
 
+    def test_detectorCount(self):
+        """ Check total detector count """
+        info = self._ws.spectrumInfo()
+        # One detector cleared. So not counted.
+        self.assertEqual(info.detectorCount(), 2)
+
+
     def test_isMonitor(self):
         """ Check if a monitor is present. """
         info = self._ws.spectrumInfo()

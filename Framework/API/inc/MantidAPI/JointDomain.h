@@ -31,7 +31,7 @@ public:
   size_t getNParts() const override;
   /// Return i-th domain
   const FunctionDomain &getDomain(size_t i) const override;
-  void addDomain(FunctionDomain_sptr domain);
+  void addDomain(const FunctionDomain_sptr &domain);
 
 protected:
   /// Vector with member domains.

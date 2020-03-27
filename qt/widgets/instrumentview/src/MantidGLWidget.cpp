@@ -23,6 +23,7 @@
 #include <map>
 #include <string>
 #include <typeinfo>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -57,7 +58,7 @@ MantidGLWidget::MantidGLWidget(QWidget *parent)
 MantidGLWidget::~MantidGLWidget() {}
 
 void MantidGLWidget::setSurface(boost::shared_ptr<ProjectionSurface> surface) {
-  m_surface = surface;
+  m_surface = std::move(surface);
   connect(m_surface.get(), SIGNAL(redrawRequired()), this, SLOT(repaint()),
           Qt::QueuedConnection);
   m_firstFrame = true;
@@ -227,7 +228,7 @@ void MantidGLWidget::keyReleaseEvent(QKeyEvent *event) {
 /**
  * This method set the background color.
  */
-void MantidGLWidget::setBackgroundColor(QColor input) {
+void MantidGLWidget::setBackgroundColor(const QColor &input) {
   makeCurrent();
   glClearColor(GLclampf(input.red() / 255.0), GLclampf(input.green() / 255.0),
                GLclampf(input.blue() / 255.0), 1.0);

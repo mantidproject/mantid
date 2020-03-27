@@ -118,7 +118,7 @@ void EQSANSTofStructure::exec() {
 }
 
 void EQSANSTofStructure::execEvent(
-    Mantid::DataObjects::EventWorkspace_sptr inputWS, double threshold,
+    const Mantid::DataObjects::EventWorkspace_sptr &inputWS, double threshold,
     double frame_offset, double tof_frame_width, double tmp_frame_width,
     bool frame_skipping) {
   const size_t numHists = inputWS->getNumberHistograms();
@@ -190,8 +190,9 @@ void EQSANSTofStructure::execEvent(
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
-                                        bool frame_skipping) {
+double
+EQSANSTofStructure::getTofOffset(const EventWorkspace_const_sptr &inputWS,
+                                 bool frame_skipping) {
   //# Storage for chopper information read from the logs
   double chopper_set_phase[4] = {0, 0, 0, 0};
   double chopper_speed[4] = {0, 0, 0, 0};

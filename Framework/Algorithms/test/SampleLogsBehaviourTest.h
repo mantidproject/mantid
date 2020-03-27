@@ -221,7 +221,7 @@ public:
     return ws;
   }
 
-  void testLogUnits(MatrixWorkspace_sptr ws) {
+  void testLogUnits(const MatrixWorkspace_sptr &ws) {
     // All units must not have changed:
     TS_ASSERT_EQUALS(ws->getLog("A")->units(), "A_unit")
     TS_ASSERT_EQUALS(ws->getLog("B")->units(), "B_unit")

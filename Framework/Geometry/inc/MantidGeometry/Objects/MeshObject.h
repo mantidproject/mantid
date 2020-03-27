@@ -51,7 +51,7 @@ public:
   /// Constructor
   MeshObject(const std::vector<uint32_t> &faces,
              const std::vector<Kernel::V3D> &vertices,
-             const Kernel::Material material);
+             const Kernel::Material &material);
   /// Constructor
   MeshObject(std::vector<uint32_t> &&faces, std::vector<Kernel::V3D> &&vertices,
              const Kernel::Material &&material);
@@ -126,7 +126,7 @@ public:
   // Get Geometry Handler
   boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Set Geometry Handler
-  void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
+  void setGeometryHandler(const boost::shared_ptr<GeometryHandler> &h);
 
   detail::ShapeInfo::GeometryShape shape() const override;
   const detail::ShapeInfo &shapeInfo() const override;

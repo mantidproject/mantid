@@ -108,7 +108,7 @@ std::vector<T> vectorFromString(const std::string &listString) {
 */
 class MANTIDQT_INDIRECT_DLL IndirectFitData {
 public:
-  IndirectFitData(Mantid::API::MatrixWorkspace_sptr workspace,
+  IndirectFitData(const Mantid::API::MatrixWorkspace_sptr &workspace,
                   const Spectra &spectra);
 
   std::string displayName(const std::string &formatString,

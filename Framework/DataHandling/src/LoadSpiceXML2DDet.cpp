@@ -283,7 +283,8 @@ void LoadSpiceXML2DDet::processInputs() {
  * @param outws :: workspace to have sample logs to set up
  * @return
  */
-bool LoadSpiceXML2DDet::setupSampleLogs(API::MatrixWorkspace_sptr outws) {
+bool LoadSpiceXML2DDet::setupSampleLogs(
+    const API::MatrixWorkspace_sptr &outws) {
   // With given spice scan table, 2-theta is read from there.
   if (m_hasScanTable) {
     ITableWorkspace_sptr spicetablews = getProperty("SpiceTableWorkspace");
@@ -938,8 +939,8 @@ API::MatrixWorkspace_sptr LoadSpiceXML2DDet::xmlParseDetectorNode(
  * @param ptnumber
  */
 void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
-    MatrixWorkspace_sptr matrixws, ITableWorkspace_sptr spicetablews,
-    int ptnumber) {
+    const MatrixWorkspace_sptr &matrixws,
+    const ITableWorkspace_sptr &spicetablews, int ptnumber) {
   size_t numrows = spicetablews->rowCount();
   std::vector<std::string> colnames = spicetablews->getColumnNames();
   // FIXME - Shouldn't give a better value?
@@ -978,7 +979,7 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
  * @param wavelength
  * @return
  */
-bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
+bool LoadSpiceXML2DDet::getHB3AWavelength(const MatrixWorkspace_sptr &dataws,
                                           double &wavelength) {
   bool haswavelength(false);
   wavelength = -1.;
@@ -1043,7 +1044,7 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
  * @param dataws
  * @param wavelength
  */
-void LoadSpiceXML2DDet::setXtoLabQ(API::MatrixWorkspace_sptr dataws,
+void LoadSpiceXML2DDet::setXtoLabQ(const API::MatrixWorkspace_sptr &dataws,
                                    const double &wavelength) {
 
   size_t numspec = dataws->getNumberHistograms();
@@ -1075,9 +1076,7 @@ void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws,
   loadinst->setProperty("RewriteSpectraMap",
                         Mantid::Kernel::OptionalBool(true));
   loadinst->execute();
-  if (loadinst->isExecuted())
-    matrixws = loadinst->getProperty("Workspace");
-  else
+  if (!loadinst->isExecuted())
     g_log.error("Unable to load instrument to output workspace");
 }
 

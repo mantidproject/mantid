@@ -173,22 +173,23 @@ private:
   Table emptyTable() { return Table(); }
   Cells emptyRow() { return Cells(); }
 
-  std::vector<InvalidDefaultsError> expectedErrors(std::vector<int> rows,
-                                                   std::vector<int> columns) {
+  std::vector<InvalidDefaultsError>
+  expectedErrors(const std::vector<int> &rows,
+                 const std::vector<int> &columns) {
     std::vector<InvalidDefaultsError> errors;
     for (auto row : rows)
       errors.emplace_back(InvalidDefaultsError(row, columns));
     return errors;
   }
 
-  std::vector<PerThetaDefaults> runTestValid(Table table) {
+  std::vector<PerThetaDefaults> runTestValid(const Table &table) {
     PerThetaDefaultsTableValidator validator;
     auto result = validator(table, TOLERANCE);
     TS_ASSERT(result.isValid());
     return result.assertValid();
   }
 
-  void runTestInvalidThetas(Table table,
+  void runTestInvalidThetas(const Table &table,
                             ThetaValuesValidationError thetaValuesError,
                             std::vector<InvalidDefaultsError> expectedErrors) {
     PerThetaDefaultsTableValidator validator;
@@ -200,7 +201,7 @@ private:
     TS_ASSERT_EQUALS(validationError.errors(), expectedErrors);
   }
 
-  void runTestInvalidCells(Table table,
+  void runTestInvalidCells(const Table &table,
                            std::vector<InvalidDefaultsError> expectedErrors) {
     PerThetaDefaultsTableValidator validator;
     auto result = validator(table, TOLERANCE);

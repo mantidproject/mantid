@@ -72,7 +72,7 @@ public:
   /// Create a simple input file.
   MDFileObject(
       const FileContentsBuilder &builder = FileContentsBuilder(),
-      std::string filename = "test_import_md_event_workspace_file.txt") {
+      const std::string &filename = "test_import_md_event_workspace_file.txt") {
     Poco::Path path(
         Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
     path.append(filename);

@@ -92,7 +92,7 @@ void MDFramesToSpecialCoordinateSystem::checkQCompatibility(
  * @returns true if the MDFrame is of UnknownFrame type.
  */
 bool MDFramesToSpecialCoordinateSystem::isUnknownFrame(
-    Mantid::Geometry::IMDDimension_const_sptr dimension) const {
+    const Mantid::Geometry::IMDDimension_const_sptr &dimension) const {
   Mantid::Geometry::MDFrame_uptr replica(dimension->getMDFrame().clone());
   auto isUnknown = false;
   if (dynamic_cast<Mantid::Geometry::UnknownFrame *>(replica.get())) {

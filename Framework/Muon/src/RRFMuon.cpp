@@ -109,7 +109,8 @@ void RRFMuon::exec() {
  *  @param uin :: [input] input workspace units
  *  @param uuser :: [input] units selected by user
  */
-double RRFMuon::unitConversionFactor(std::string uin, std::string uuser) {
+double RRFMuon::unitConversionFactor(const std::string &uin,
+                                     const std::string &uuser) {
 
   if ((uin == "microsecond")) {
 

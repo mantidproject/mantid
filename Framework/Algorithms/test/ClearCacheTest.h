@@ -49,7 +49,7 @@ public:
     createDirectory(GeomPath);
   }
 
-  void createDirectory(Poco::Path path) {
+  void createDirectory(const Poco::Path &path) {
     Poco::File file(path);
     if (file.createDirectory()) {
       m_directoriesToRemove.emplace_back(file);

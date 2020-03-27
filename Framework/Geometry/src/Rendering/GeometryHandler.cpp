@@ -19,7 +19,7 @@ namespace Geometry {
 
 GeometryHandler::GeometryHandler(IObjComponent *comp) : m_objComp(comp) {}
 
-GeometryHandler::GeometryHandler(boost::shared_ptr<CSGObject> obj)
+GeometryHandler::GeometryHandler(const boost::shared_ptr<CSGObject> &obj)
     : m_triangulator(new detail::GeometryTriangulator(obj.get())),
       m_csgObj(obj.get()) {}
 
