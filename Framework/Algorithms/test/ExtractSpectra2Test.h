@@ -50,7 +50,7 @@ std::shared_ptr<Workspace2D> createWorkspace() {
   ws->setHistogram(2, Points{2.0}, Counts{1.0});
   ws->setHistogram(3, Points{3.0}, Counts{1.0});
   ws->setHistogram(4, Points{4.0}, Counts{1.0});
-  return std::move(ws);
+  return ws;
 }
 } // namespace
 

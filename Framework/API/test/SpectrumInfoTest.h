@@ -597,7 +597,7 @@ private:
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i)
       if (i % 2 == 0)
         detectorInfo.setMasked(i, true);
-    return std::move(ws);
+    return ws;
   }
 
   WorkspaceTester makeDefaultWorkspace() {

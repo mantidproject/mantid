@@ -103,7 +103,7 @@ private:
     alg->setChild(true);
     alg->setRethrows(true);
     alg->initialize();
-    return std::move(alg);
+    return alg;
   }
 
   Mantid::Kernel::PropertyManager_sptr createRectangularBeamProps() {

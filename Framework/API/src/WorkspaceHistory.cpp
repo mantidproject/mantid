@@ -148,8 +148,8 @@ WorkspaceHistory::getAlgorithmHistory(const size_t index) const {
  * @returns A pointer to an AlgorithmHistory object
  * @throws std::out_of_range error if the index is invalid
  */
-AlgorithmHistory_const_sptr
-    WorkspaceHistory::operator[](const size_t index) const {
+AlgorithmHistory_const_sptr WorkspaceHistory::
+operator[](const size_t index) const {
   return getAlgorithmHistory(index);
 }
 

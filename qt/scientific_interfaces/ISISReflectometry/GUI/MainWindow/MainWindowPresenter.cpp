@@ -68,8 +68,8 @@ MainWindowPresenter::~MainWindowPresenter() = default;
 
 MainWindowPresenter::MainWindowPresenter(MainWindowPresenter &&) = default;
 
-MainWindowPresenter &
-MainWindowPresenter::operator=(MainWindowPresenter &&) = default;
+MainWindowPresenter &MainWindowPresenter::
+operator=(MainWindowPresenter &&) = default;
 
 void MainWindowPresenter::notifyNewBatchRequested() {
   auto *newBatchView = m_view->newBatch();

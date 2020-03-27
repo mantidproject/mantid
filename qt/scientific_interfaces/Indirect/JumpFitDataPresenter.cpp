@@ -249,7 +249,7 @@ JumpFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
           this,
           SLOT(dialogParameterTypeUpdated(JumpFitAddWorkspaceDialog *,
                                           const std::string &)));
-  return std::move(dialog);
+  return dialog;
 }
 
 void JumpFitDataPresenter::setMultiInputResolutionFBSuffixes(
