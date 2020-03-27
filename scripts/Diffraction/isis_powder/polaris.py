@@ -65,6 +65,7 @@ class Polaris(AbstractInst):
                                                   cal_file_name=cal_file_name,
                                                   sample_details=self._sample_details,
                                                   delta_r=self._inst_settings.delta_r,
+                                                  delta_q=self._inst_settings.delta_q,
                                                   pdf_type=self._inst_settings.pdf_type,
                                                   freq_params=self._inst_settings.freq_params)
         return pdf_output
