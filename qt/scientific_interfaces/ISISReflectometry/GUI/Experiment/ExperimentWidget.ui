@@ -75,7 +75,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Output Stitch Params</string>
+        <string>Output Stitch Properties</string>
        </property>
       </widget>
      </item>
