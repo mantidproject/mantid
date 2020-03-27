@@ -126,9 +126,15 @@ void MainWindowPresenter::notifyAnyBatchReductionPaused() {
 
 void MainWindowPresenter::notifyChangeInstrumentRequested(
     std::string const &newInstrumentName) {
-  // Re-load instrument with the new name, if it has changed
-  if (newInstrumentName != instrumentName())
-    updateInstrument(newInstrumentName);
+  auto const hasChanged = (newInstrumentName != instrumentName());
+  // Re-load instrument regardless of whether it has changed, e.g. if we are
+  // creating a new batch the instrument may not have changed but we still want
+  // the most up to date settings
+  updateInstrument(newInstrumentName);
+  // However, only perform updates if the instrument has changed, otherwise we
+  // may trigger overriding of user-specified settings
+  if (hasChanged)
+    onInstrumentChanged();
 }
 
 void MainWindowPresenter::notifyUpdateInstrumentRequested() {
@@ -246,14 +252,6 @@ void MainWindowPresenter::updateInstrument(const std::string &instrumentName) {
   loadAlg->execute();
   MatrixWorkspace_sptr instWorkspace = loadAlg->getProperty("OutputWorkspace");
   m_instrument = instWorkspace->getInstrument();
-
-  // Notify child presenters
-  for (auto &batchPresenter : m_batchPresenters)
-    batchPresenter->notifyInstrumentChanged(instrumentName);
-
-  // Notify the slit calculator
-  m_slitCalculator->setCurrentInstrumentName(instrumentName);
-  m_slitCalculator->processInstrumentHasBeenChanged();
 }
 
 void MainWindowPresenter::setDefaultInstrument(
@@ -272,6 +270,16 @@ void MainWindowPresenter::setDefaultInstrument(
     config.setString("default.instrument", requiredInstrument);
     g_log.notice() << "Instrument changed to " << requiredInstrument;
   }
+}
+
+void MainWindowPresenter::onInstrumentChanged() {
+  // Notify child presenters
+  for (auto &batchPresenter : m_batchPresenters)
+    batchPresenter->notifyInstrumentChanged(instrumentName());
+
+  // Notify the slit calculator
+  m_slitCalculator->setCurrentInstrumentName(instrumentName());
+  m_slitCalculator->processInstrumentHasBeenChanged();
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

@@ -42,8 +42,8 @@ void ExperimentPresenter::notifySettingsChanged() {
 
 void ExperimentPresenter::notifyRestoreDefaultsRequested() {
   // Trigger a reload of the instrument to get up-to-date settings.
-  // After the instrument is updated, the defaults will be restored.
   m_mainPresenter->notifyUpdateInstrumentRequested();
+  restoreDefaults();
 }
 
 void ExperimentPresenter::notifySummationTypeChanged() {

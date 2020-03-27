@@ -90,6 +90,7 @@ private:
                     std::string const &instrument);
   void updateInstrument(const std::string &instrumentName);
   void setDefaultInstrument(const std::string &newInstrument);
+  void onInstrumentChanged();
 
   void disableSaveAndLoadBatch();
   void enableSaveAndLoadBatch();

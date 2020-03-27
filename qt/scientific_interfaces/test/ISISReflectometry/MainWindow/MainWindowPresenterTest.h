@@ -252,6 +252,7 @@ public:
 
   void testChangeInstrumentRequestedUpdatesInstrumentInChildPresenters() {
     auto presenter = makePresenter();
+    setupInstrument(presenter, "INTER");
     auto const instrument = std::string("POLREF");
     EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
         .Times(1);
@@ -261,13 +262,24 @@ public:
     verifyAndClear();
   }
 
-  void testUpdateInstrumentUpdatesInstrumentInChildPresenters() {
+  void testChangeInstrumentRequestedDoesNotUpdateInstrumentIfNotChanged() {
     auto presenter = makePresenter();
     auto const instrument = setupInstrument(presenter, "POLREF");
     EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
-        .Times(1);
+        .Times(0);
     EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
-        .Times(1);
+        .Times(0);
+    presenter.notifyChangeInstrumentRequested(instrument);
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentDoesNotUpdateInstrumentInChildPresenters() {
+    auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "POLREF");
+    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
+        .Times(0);
+    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
+        .Times(0);
     presenter.notifyUpdateInstrumentRequested();
     verifyAndClear();
   }
