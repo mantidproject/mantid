@@ -17,7 +17,7 @@ regex_git_log_entry = re.compile(
     re.DOTALL)
 regex_git_log_splitter = re.compile(
     r"commit\s[0-9a-f]{40}")
-regex_name_email_address = re.compile("(.*?)<(\S+)>")
+regex_name_email_address = re.compile(r"(.*?)<(\S+)>")
 
 organisations = ['STFC', 'ORNL', 'ESS', 'ILL', 'PSI', 'ANSTO', 'KITWARE', 'JUELICH', 'OTHERS', 'CSNS']
 
@@ -185,9 +185,11 @@ aliases = {'Anthony':'Anthony Lim',
            'VickieLynch':'Vickie Lynch'
            }
 
+
 def generate_commit_data():
     print('Generating git commit data...')
     os.system("git --no-pager log --shortstat > " + temp_filename)
+
 
 def parse_commit_data():
     print("Reading the file")
@@ -207,13 +209,13 @@ def parse_commit_data():
 
     #find the matches
     print("searching for regex matches")
-    start = 0
     with open('commits-report.csv', mode='w', newline='') as output_file:
         commit_writer = csv.writer(output_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         commit_writer.writerow(["Author", "Email", "Facility", "Date_time", "Year", "Quarter", "Month", "Week", "Commits",
                                 "Files Changed", "Insertions", "Deletions", "Net Lines Changed"])
         for commit_text in commit_entries:
             parse_log_entry(commit_text,commit_writer)
+
 
 def parse_log_entry(commit_text,commit_writer):
     if commit_text =="":
