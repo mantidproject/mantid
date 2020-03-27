@@ -385,9 +385,9 @@ class FittingContext(object):
     def find_fit_for_input_workspace_list(
             self, input_workspace_list):
         """
-        Find the fits in the list whose input workspace matches
-        :param input_workspace_name: The name of the input_workspace
-        :return: A list of matching fits
+        Find the fit in the list whose input workspace matches the input workspace list
+        :param  input_workspace_list: A list of input workspaces
+        :return: A matching fit
         """
         for fit in self.fit_list:
             if fit.input_workspaces == input_workspace_list:

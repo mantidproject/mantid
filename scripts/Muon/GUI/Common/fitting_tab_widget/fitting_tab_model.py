@@ -48,6 +48,10 @@ class FittingTabModel(object):
         else:
             self._function_name = ''
 
+    @property
+    def stored_fit_functions(self):
+        return list(self.ws_fit_function_map.values())
+
     def get_function_name(self, function):
         if function is None:
             return ''
@@ -463,9 +467,9 @@ class FittingTabModel(object):
         return equiv_workspace_list
 
     def update_ws_fit_function_parameters(self, workspace, params):
-        workspace_hash = self.create_equivalent_workspace_name(workspace)
+        eq_workspace_name = self.create_equivalent_workspace_name(workspace)
         try:
-            fit_function = self.ws_fit_function_map[workspace_hash]
+            fit_function = self.ws_fit_function_map[eq_workspace_name]
         except KeyError:
             return
         self.set_fit_function_parameter_values(fit_function, params)
@@ -520,9 +524,9 @@ class FittingTabModel(object):
         return freq
 
     def get_ws_fit_function(self, workspaces):
-        workspace_hash = self.create_equivalent_workspace_name(workspaces)
+        equiv_workspace_name = self.create_equivalent_workspace_name(workspaces)
         try:
-            return self.ws_fit_function_map[workspace_hash]
+            return self.ws_fit_function_map[equiv_workspace_name]
         except KeyError:
             pass
 

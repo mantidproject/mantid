@@ -667,7 +667,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             selected_axes = [self._view.get_axes()[index] for index in indices]
             return selected_axes
         else:
-            return []  # no subplots are avaiable
+            return []  # no subplots are available
 
     def _set_axis_limits(self, autoscale):
         if autoscale:  # autoscale the axes

@@ -1,80 +1,121 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=C0103,R0904
-# N(DAV)TableWidget
 from __future__ import (absolute_import, division, print_function)
-from qtpy import QtWidgets
-from qtpy.QtCore import Qt, Signal
+from qtpy.QtCore import Qt
+from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableView import SequentialTableView
+from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableModel import (SequentialTableModel, FIT_STATUS_COLUMN)
+from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FitQualityDelegate, FIT_STATUSES
+from collections import namedtuple
+
+WorkspaceInfo = namedtuple('Workspace', 'runs groups')
 
 
-class TableParameterWidget(QtWidgets.QTableWidgetItem):
-    def __init__(self, parameter_value):
-        parameter_text = self.convert_parameter_to_string(parameter_value)
-        super(TableParameterWidget, self).__init__(parameter_text)
-
-    def convert_parameter_to_string(self, parameter_value):
-        parameter = "{:.6g}".format(parameter_value)
-        return parameter
-
-    def setValue(self, parameter_value):
-        parameter_text = self.convert_parameter_to_string(parameter_value)
-        self.setText(parameter_text)
-
-
-class SequentialTableWidget(QtWidgets.QTableWidget):
-
-    keyUpDownPressed = Signal()
-    keyEnterPressed = Signal()
+class SequentialTableWidget(object):
 
     def __init__(self, parent):
-        super(SequentialTableWidget, self).__init__(parent)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
-        self.setFocusPolicy(Qt.StrongFocus)
-        self.itemChanged.connect(self.item_changed)
+        self._view = SequentialTableView(parent)
+        self._model = SequentialTableModel()
+        self._view.setModel(self._model)
+        self._view.setItemDelegateForColumn(FIT_STATUS_COLUMN, FitQualityDelegate(self._view))
+        self._view.resizeColumnsToContents()
+        self._view.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
-    # Only accept the key press event if we are not blocking signals e.g due to a fit
-    def keyPressEvent(self, event):
-        if not self.signalsBlocked():
-            super(SequentialTableWidget, self).keyPressEvent(event)
+    @property
+    def widget(self):
+        return self._view
 
-    def keyReleaseEvent(self, event):
-        if self.signalsBlocked():
-            event.ignore()
+    def block_signals(self, state):
+        self._view.blockSignals(state)
 
-        if event.isAutoRepeat():  # Ignore somebody holding down keys
-            return
-        if event.key() in (Qt.Key_Up, Qt.Key_Down):
-            self.keyUpDownPressed.emit()
-        elif event.key() == Qt.Key_Return:
-            self.keyEnterPressed.emit()
+    def get_number_of_fits(self):
+        return self._model.number_of_fits
+
+    def set_parameters_and_values(self, parameters, values=None):
+        self.block_signals(True)
+        self._model.set_fit_parameters_and_values(parameters, values)
+        self.block_signals(False)
+        self._view.resizeColumnsToContents()
+
+    def set_parameter_values_for_row(self, row, parameters):
+        self.block_signals(True)
+        self._model.set_fit_parameter_values_for_row(row, parameters)
+        self.block_signals(False)
+        self._view.resizeColumnsToContents()
+
+    def set_fit_quality(self, row, quality, chi_squared):
+        self.block_signals(True)
+        quality = self.get_shortened_fit_status(quality)
+        self._model.set_fit_quality(row, quality, chi_squared)
+        self.block_signals(False)
+
+    def set_fit_workspaces(self, runs, group_and_pairs):
+        self.block_signals(True)
+        self._model.set_fit_workspaces(runs, group_and_pairs)
+        self.block_signals(False)
 
     def set_selection_to_last_row(self):
-        self.setCurrentIndex(self.model().index(self.model().rowCount() - 1, 0))
-        self.cellClicked.emit(self.model().rowCount() - 1, 0)
+        self._view.set_selection_to_last_row()
 
-    def set_slot_key_up_down_pressed(self, slot):
-        self.keyUpDownPressed.connect(slot)
+    def reset_fit_quality(self):
+        self._model.reset_fit_quality()
 
-    def set_slot_key_enter_pressed(self, slot):
-        self.keyEnterPressed.connect(slot)
+    def clear_fit_parameters(self):
+        self._model.clear_fit_parameters()
 
-    def item_changed(self, item):
-        text = item.text()
-        if self.test_text_is_value(text):
-            item.setText(text)
-        else:
-            item.setText(str(0))
+    def clear_fit_workspaces(self):
+        self._model.clear_fit_workspaces()
+
+    def clear_fit_selection(self):
+        self._view.clearSelection()
+
+    def get_selected_rows(self):
+        rowSelectionModels = self._view.selectionModel().selectedRows()
+        rows = []
+        for model in rowSelectionModels:
+            rows += [model.row()]
+        return rows
+
+    def get_workspace_info_from_row(self, row):
+        if row > self._model.rowCount():
+            return WorkspaceInfo([], [])
+
+        run_numbers = self.get_runs_from_row(row)
+        group_and_pairs = self.get_groups_and_pairs_from_row(row)
+        return WorkspaceInfo(run_numbers, group_and_pairs)
+
+    def get_runs_from_row(self, row):
+        return self._model.get_run_information(row)
+
+    def get_groups_and_pairs_from_row(self, row):
+        return self._model.get_group_information(row)
+
+    def get_fit_quality_from_row(self, row):
+        return self._model.get_fit_quality(row)
+
+    def get_fit_parameter_values_from_row(self, row):
+        return self._model.get_fit_parameters(row)
+
+    def setup_slot_for_row_selection_changed(self, slot):
+        self._view.clicked.connect(slot)
+
+    def set_slot_for_parameter_changed(self, slot):
+        self._model.parameterChanged.connect(slot)
+
+    def set_slot_for_key_up_down_pressed(self, slot):
+        self._view.keyUpDownPressed.connect(slot)
 
     @staticmethod
-    def test_text_is_value(text):
-        try:
-            float(text)
-            return True
-        except ValueError:
-            return False
+    def get_shortened_fit_status(fit_status):
+        accepted_statuses = list(FIT_STATUSES.keys())
+        if "Failed" in fit_status:
+            return accepted_statuses[3]
+        elif "Changes" in fit_status:
+            return accepted_statuses[2]
+        elif "success" in fit_status:
+            return accepted_statuses[1]
+        else:
+            return accepted_statuses[0]
