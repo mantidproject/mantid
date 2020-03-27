@@ -92,9 +92,12 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         # managed via a workspace.
         # See https://github.com/mantidproject/mantid/issues/25135.
         empty_axes = []
+        redraw = False
         for ax in all_axes:
             if isinstance(ax, MantidAxes):
-                ax.remove_workspace_artists(workspace)
+                to_redraw = ax.remove_workspace_artists(workspace)
+            else:
+                to_redraw = False
             # We check for axes type below as a pseudo check for an axes being
             # a colorbar. Creating a colorfill plot creates 2 axes: one linked
             # to a workspace, the other a colorbar. Deleting the workspace
@@ -104,10 +107,11 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
             # Axes object being closed.
             if type(ax) is not Axes:
                 empty_axes.append(MantidAxes.is_empty(ax))
+            redraw = redraw | to_redraw
 
         if all(empty_axes):
             self.window.emit_close()
-        else:
+        elif redraw:
             self.canvas.draw()
 
     @_catch_exceptions
