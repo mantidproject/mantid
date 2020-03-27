@@ -14,7 +14,7 @@ import numpy as np
 import AbinsModules
 from AbinsModules.AbinsData import AbinsData
 from AbinsModules.AbinsConstants import COMPLEX_TYPE, FLOAT_TYPE, HZ2INV_CM, VASP_FREQ_TO_THZ
-from mantid.kernel import Atom
+
 
 class LoadVASP(AbinsModules.GeneralAbInitioProgram):
     """
@@ -42,7 +42,6 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
             self._num_atoms = len(data['atoms'])
             self._num_k = 1
 
-
         elif 'OUTCAR' in input_filename:
             data = self._read_outcar(input_filename)
             self._num_atoms = len(data['atoms'])
@@ -54,7 +53,7 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
 
         self.save_ab_initio_data(data=data)
         return self._rearrange_data(data=data)
-        
+
     @classmethod
     def _read_outcar(cls, filename) -> Dict[str, Any]:
         # Vibration calculations within Vasp only calculate the Hessian
@@ -70,7 +69,7 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
             # Lattice vectors are found first, with block formatted e.g.
             #
             #  Lattice vectors:
-             
+
             # A1 = (  17.7648860000,   0.0000000000,   0.0000000000)
             # A2 = (   0.0000000000,  18.0379140000,   0.0000000000)
             # A3 = (   0.0000000000,   0.0000000000,  18.3144580000)
@@ -89,7 +88,6 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
                     raise ValueError("Something went wrong while reading lattice vectors from OUTCAR")
                 unit_cell[i, :] = list(map(float, match.groups()))
             file_data['unit_cell'] = unit_cell
-
 
             # getting element symbols from an OUTCAR is a bit cumbersome as
             # VASP tracks this in groups rather than per-atom
@@ -112,7 +110,7 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
             ion_count_symbols = [re.match(r'^\s+VRHFIN =(\w+):', line.decode("utf-8")).groups()[0]
                                  for line in symbol_lines]
             symbols = list(chain(*[[symbol] * ion_count
-                                       for symbol, ion_count in zip(ion_count_symbols, ion_counts)]))
+                                   for symbol, ion_count in zip(ion_count_symbols, ion_counts)]))
 
             eig_header = 'Eigenvectors and eigenvalues of the dynamical matrix'
             parser.find_first(file_obj=fd, msg=eig_header)
@@ -142,12 +140,11 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
                                  "the number element symbols determined from 'ions per type' line. "
                                  "Something must have gone wrong while reading these.")
             for i, (position, symbol, mass) in enumerate(zip(positions, symbols, masses)):
-                    ion_data = {"symbol": symbol,
-                                "coord": np.array(position),
-                                "sort": i,  # identifier for symmetry-equivalent sites; mark all as unique
-                                "mass": mass}
-                    file_data["atoms"].update({f"atom_{i}": ion_data})
-
+                ion_data = {"symbol": symbol,
+                            "coord": np.array(position),
+                            "sort": i,  # identifier for symmetry-equivalent sites; mark all as unique
+                            "mass": mass}
+                file_data["atoms"].update({f"atom_{i}": ion_data})
 
             n_atoms = len(positions)
             n_frequencies = n_atoms * 3
@@ -159,7 +156,7 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
             # output format.
             eigenvectors = np.zeros((1, n_frequencies, n_atoms, 3), dtype=COMPLEX_TYPE)
             eigenvectors[0, 0, :, :] = [row[-3:] for row in first_eigenvector_data]
-        
+
             for i in range(1, n_frequencies):
                 eigenvalue_line = parser.find_first(file_obj=fd, regex=eig_pattern)
                 file_data['frequencies'][0, i] = cls._line_to_eigenvalue(eigenvalue_line)
@@ -170,7 +167,7 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
                 eigenvector_data = [list(map(float, fd.readline().decode("utf-8").split()[-3:]))
                                     for _ in range(n_atoms)]
                 eigenvectors[0, i, :, :] = eigenvector_data
-            
+
             # Re-arrange eigenvectors to (kpt, atom, mode, direction) indices for Abins
             file_data['atomic_displacements'] = np.swapaxes(eigenvectors, 1, 2)
 
@@ -182,7 +179,7 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
 
         Typical line resembles:
 
-        23 f/i=   25.989078 THz   163.294191 2PiTHz  866.902290 cm-1   107.482224 meV        
+        23 f/i=   25.989078 THz   163.294191 2PiTHz  866.902290 cm-1   107.482224 meV
 
         the f/i indicates that the mode is imaginary, this is
         represented by returning the negative number -866.902290
@@ -192,7 +189,6 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
         # Keep the value reported in cm-1
         imaginary_factor = -1 if 'f/i' in line else 1
         return float(line.split()[-4]) * imaginary_factor
-
 
     @staticmethod
     def _read_vasprun(filename: str,
@@ -237,26 +233,25 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
             raise AssertionError("Positions in XML 'finalpos' don't look like an Nx3 array.")
 
         atom_info = _find_or_error(root, 'atominfo')
-        n_atoms = float(_find_or_error(atom_info, 'atoms').text)
-        
+
         # Get list of atoms by type e.g. [1, 1, 2, 2, 2, 2, 2, 2] for C2H6
         atom_types = [int(rc.findall('c')[1].text)
                       for rc in _find_or_error(_find_or_error(atom_info, 'array', name='atoms'),'set').findall('rc')]
 
         # Get symbols and masses corresponding to these types, and construct full lists of atom properties
         atom_data = [rc.findall('c')
-                    for rc in _find_or_error(_find_or_error(atom_info, 'array', name='atomtypes'), 'set').findall('rc')]
+                     for rc in _find_or_error(_find_or_error(atom_info, 'array', name='atomtypes'), 'set').findall('rc')]
         type_symbols = [data_row[1].text.strip() for data_row in atom_data]
         type_masses = [float(data_row[2].text) for data_row in atom_data]
         symbols = [type_symbols[i - 1] for i in atom_types]
         masses = [type_masses[i - 1] for i in atom_types]
 
         for i, (position, symbol, mass) in enumerate(zip(positions, symbols, masses)):
-                ion_data = {"symbol": symbol,
-                            "coord": np.array(position),
-                            "sort": i,  # identifier for symmetry-equivalent sites; mark all as unique
-                            "mass": mass}
-                file_data["atoms"].update({f"atom_{i}": ion_data})
+            ion_data = {"symbol": symbol,
+                        "coord": np.array(position),
+                        "sort": i,  # identifier for symmetry-equivalent sites; mark all as unique
+                        "mass": mass}
+            file_data["atoms"].update({f"atom_{i}": ion_data})
 
         calculation = _find_or_error(root, 'calculation')
         dynmat = _find_or_error(calculation, 'dynmat')
