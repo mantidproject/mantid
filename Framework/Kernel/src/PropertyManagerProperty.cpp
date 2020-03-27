@@ -46,6 +46,11 @@ PropertyManagerProperty::PropertyManagerProperty(const std::string &name,
     m_defaultAsStr = defaultValue->asString(true);
 }
 
+PropertyManagerProperty::PropertyManagerProperty(
+    const PropertyManagerProperty &other)
+    : BaseClass(other), m_dataServiceKey(other.m_dataServiceKey),
+      m_defaultAsStr(other.m_defaultAsStr) {}
+
 /**
  * @return The value of the property represented as a string
  */

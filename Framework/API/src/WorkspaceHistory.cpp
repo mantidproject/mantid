@@ -61,18 +61,6 @@ struct AlgorithmHistoryComparator {
 /// Default Constructor
 WorkspaceHistory::WorkspaceHistory() : m_environment() {}
 
-/// Destructor
-WorkspaceHistory::~WorkspaceHistory() = default;
-
-/**
-  Standard Copy Constructor
-  @param A :: WorkspaceHistory Item to copy
- */
-WorkspaceHistory::WorkspaceHistory(const WorkspaceHistory &A)
-    : m_environment(A.m_environment) {
-  m_algorithms = A.m_algorithms;
-}
-
 /// Returns a const reference to the algorithmHistory
 const Mantid::API::AlgorithmHistories &
 WorkspaceHistory::getAlgorithmHistories() const {
@@ -160,8 +148,8 @@ WorkspaceHistory::getAlgorithmHistory(const size_t index) const {
  * @returns A pointer to an AlgorithmHistory object
  * @throws std::out_of_range error if the index is invalid
  */
-AlgorithmHistory_const_sptr WorkspaceHistory::
-operator[](const size_t index) const {
+AlgorithmHistory_const_sptr
+    WorkspaceHistory::operator[](const size_t index) const {
   return getAlgorithmHistory(index);
 }
 

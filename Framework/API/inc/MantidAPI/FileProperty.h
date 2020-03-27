@@ -73,6 +73,8 @@ public:
                unsigned int action, std::initializer_list<std::string> exts,
                unsigned int direction = Kernel::Direction::Input);
 
+  FileProperty(const FileProperty &);
+
   /// 'Virtual copy constructor
   FileProperty *clone() const override { return new FileProperty(*this); }
 

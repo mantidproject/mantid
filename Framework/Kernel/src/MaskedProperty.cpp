@@ -8,6 +8,7 @@
 #include "MantidKernel/PropertyHistory.h"
 
 // PropertyWithValue implementation
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/PropertyWithValue.tcc"
 
 namespace Mantid {
@@ -43,6 +44,10 @@ MaskedProperty<TYPE>::MaskedProperty(const std::string &name,
       m_maskedValue("") {
   this->setRemember(false);
 }
+
+template <typename T>
+MaskedProperty<T>::MaskedProperty(const MaskedProperty &other)
+    : Kernel::PropertyWithValue<T>(other), m_maskedValue(other.m_maskedValue) {}
 
 /**
  * Virtual copy

@@ -1536,7 +1536,7 @@ public:
       this->fake_uniform_time_data();
       el.switchTo(static_cast<EventType>(this_type));
       // Do convert
-      TS_ASSERT_THROWS(this->el.addPulsetimes(offsets), std::runtime_error);
+      TS_ASSERT_THROWS(this->el.addPulsetimes(offsets), std::runtime_error &);
     }
   }
 

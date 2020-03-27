@@ -9,6 +9,7 @@
 //-----------------------------------------------------------------------------
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <json/value.h>
 
@@ -34,6 +35,10 @@ AlgorithmProperty::AlgorithmProperty(const std::string &propName,
     : Kernel::PropertyWithValue<HeldType>(propName, HeldType(),
                                           std::move(validator), direction),
       m_algmStr() {}
+
+AlgorithmProperty::AlgorithmProperty(const AlgorithmProperty &other)
+    : Kernel::PropertyWithValue<boost::shared_ptr<IAlgorithm>>(other),
+      m_algmStr(other.m_algmStr) {}
 
 /**
  * Return the algorithm as string

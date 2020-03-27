@@ -107,6 +107,15 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
                                            const std::vector<std::string> &exts)
     : MultipleFileProperty(name, FileProperty::Load, exts) {}
 
+MultipleFileProperty::MultipleFileProperty(const MultipleFileProperty &other)
+    : Kernel::PropertyWithValue<std::vector<std::vector<std::string>>>(other),
+      m_multiFileLoadingEnabled(other.m_multiFileLoadingEnabled),
+      m_exts(other.m_exts), m_parser(other.m_parser),
+      m_defaultExt(other.m_defaultExt), m_action(other.m_action),
+      m_oldPropValue(other.m_oldPropValue),
+      m_oldFoundValue(other.m_oldFoundValue),
+      m_allowEmptyTokens(other.m_allowEmptyTokens) {}
+
 /**
  * Check if this property is optional
  * @returns True if the property is optinal, false otherwise

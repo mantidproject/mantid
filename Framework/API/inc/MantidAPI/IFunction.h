@@ -241,8 +241,10 @@ public:
     /// Create vector attribute
     explicit Attribute(const std::vector<double> &v)
         : m_data(v), m_quoteValue(false) {}
+
+    Attribute(const Attribute &o) : m_data(o.m_data), m_quoteValue(false) {}
     /// Copy assignment
-    Attribute &operator=(const Attribute &attr);
+    Attribute &operator=(const Attribute attr);
 
     /// Apply an attribute visitor
     template <typename T> T apply(AttributeVisitor<T> &v) {
@@ -295,7 +297,7 @@ public:
     mutable boost::variant<std::string, int, double, bool, std::vector<double>>
         m_data;
     /// Flag indicating if the string value should be returned quoted
-    bool m_quoteValue;
+    bool m_quoteValue = false;
   };
 
   //---------------------------------------------------------//

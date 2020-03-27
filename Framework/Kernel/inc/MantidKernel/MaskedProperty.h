@@ -35,6 +35,9 @@ public:
   /// Constructor with a validator without validation
   MaskedProperty(const std::string &name, const TYPE &defaultvalue,
                  const unsigned int direction);
+
+  MaskedProperty(const MaskedProperty &);
+
   /// "virtual" copy constructor
   MaskedProperty *clone() const override;
 

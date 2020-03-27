@@ -34,6 +34,7 @@ public:
                 const IndexTypeProperty &indexTypeProp,
                 const Kernel::IValidator_sptr &validator =
                     Kernel::IValidator_sptr(new Kernel::NullValidator));
+  IndexProperty(const IndexProperty &);
 
   IndexProperty *clone() const override;
 

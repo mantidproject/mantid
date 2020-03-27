@@ -23,6 +23,12 @@ IndexProperty::IndexProperty(const std::string &name,
       m_workspaceProp(workspaceProp), m_indexTypeProp(indexTypeProp),
       m_indices(0), m_indicesExtracted(false) {}
 
+IndexProperty::IndexProperty(const IndexProperty &other)
+    : Kernel::ArrayProperty<int64_t>(other),
+      m_workspaceProp(other.m_workspaceProp),
+      m_indexTypeProp(other.m_indexTypeProp), m_indices(other.m_indices),
+      m_validString(other.m_validString) {}
+
 IndexProperty *IndexProperty::clone() const { return new IndexProperty(*this); }
 
 bool IndexProperty::isDefault() const { return m_value.empty(); }

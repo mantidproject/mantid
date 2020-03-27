@@ -36,8 +36,6 @@ public:
   FixedLengthVector(std::initializer_list<double> init) : m_data(init) {
     Validator<T>::checkValidity(m_data);
   }
-  FixedLengthVector(const FixedLengthVector &) = default;
-  FixedLengthVector(FixedLengthVector &&) = default;
   FixedLengthVector(const std::vector<double> &other) : m_data(other) {}
   FixedLengthVector(std::vector<double> &&other) : m_data(std::move(other)) {}
   template <class InputIt>
@@ -58,26 +56,12 @@ public:
     m_data.assign(count, value);
   }
 
-  FixedLengthVector &operator=(const FixedLengthVector &rhs) {
-    checkAssignmentSize(rhs);
-    m_data = rhs.m_data;
-    return *this;
-  }
-  FixedLengthVector &operator=(FixedLengthVector &&rhs) {
-    checkAssignmentSize(rhs);
-    m_data = std::move(rhs.m_data);
-    return *this;
-  }
   FixedLengthVector &operator=(const std::vector<double> &rhs) {
     checkAssignmentSize(rhs);
     m_data = rhs;
     return *this;
   }
-  FixedLengthVector &operator=(std::vector<double> &&rhs) {
-    checkAssignmentSize(rhs);
-    m_data = std::move(rhs);
-    return *this;
-  }
+
   FixedLengthVector &operator=(std::initializer_list<double> ilist) {
     checkAssignmentSize(ilist);
     Validator<T>::checkValidity(ilist);

@@ -10,6 +10,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DirectoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
 
 #include <Poco/File.h>
@@ -202,6 +203,12 @@ FileProperty::FileProperty(const std::string &name,
                            unsigned int direction)
     : FileProperty(name, default_value, action, std::vector<std::string>(exts),
                    direction) {}
+
+FileProperty::FileProperty(const FileProperty &other)
+    : Kernel::PropertyWithValue<std::string>(other), m_action(other.m_action),
+      m_defaultExt(other.m_defaultExt), m_runFileProp(other.m_runFileProp),
+      m_oldLoadPropValue(other.m_oldLoadPropValue),
+      m_oldLoadFoundFile(other.m_oldLoadFoundFile) {}
 
 /**
  * Check if this is a load property

@@ -92,9 +92,6 @@ protected:
   Axis(const Axis &) = default;
 
 private:
-  /// Private, undefined copy assignment operator
-  const Axis &operator=(const Axis &) = delete;
-
   /// The user-defined title for this axis
   std::string m_title;
   /// The unit for this axis

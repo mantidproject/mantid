@@ -123,6 +123,8 @@ public:
       const std::string &name,
       const std::vector<std::string> &exts = std::vector<std::string>());
 
+  MultipleFileProperty(const MultipleFileProperty &);
+
   MultipleFileProperty *clone() const override {
     return new MultipleFileProperty(*this);
   }
@@ -139,8 +141,8 @@ public:
   std::string getDefaultExt() const { return m_defaultExt; }
 
   // Unhide the PropertyWithValue assignment operator
-  using Kernel::PropertyWithValue<std::vector<std::vector<std::string>>>::
-  operator=;
+  using Kernel::PropertyWithValue<
+      std::vector<std::vector<std::string>>>::operator=;
 
 private:
   /// Returns a string depending on whether an empty value is valid
