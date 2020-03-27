@@ -7,12 +7,13 @@
 
 from itertools import chain
 import re
-from typing import Dict, Any
+from typing import Any, Dict, Optional
+from xml.etree import ElementTree
 
 import numpy as np
 import AbinsModules
 from AbinsModules.AbinsData import AbinsData
-from AbinsModules.AbinsConstants import COMPLEX_TYPE, FLOAT_TYPE
+from AbinsModules.AbinsConstants import COMPLEX_TYPE, FLOAT_TYPE, HZ2INV_CM, VASP_FREQ_TO_THZ
 from mantid.kernel import Atom
 
 class LoadVASP(AbinsModules.GeneralAbInitioProgram):
@@ -25,7 +26,7 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
 
     """
 
-    def __init__(self, input_ab_initio_filename):
+    def __init__(self, input_ab_initio_filename) -> None:
         """
 
         :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
@@ -58,12 +59,6 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
     def _read_outcar(cls, filename) -> Dict[str, Any]:
         # Vibration calculations within Vasp only calculate the Hessian
         # within the calculation cell: i.e. they only include Gamma-point
-
-        # file_data.update({"frequencies": np.asarray(frequencies),
-        #                   "weights": np.asarray(weights),
-        #                   "k_vectors": np.asarray(k_vectors),
-        #                   "atomic_displacements": disp
-        #                   })
 
         file_data = {'k_vectors': np.array([[0, 0, 0]], dtype=FLOAT_TYPE),
                      'weights': np.array([1.], dtype=FLOAT_TYPE),
@@ -203,4 +198,83 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
     def _read_vasprun(filename: str,
                       diagonalize: bool = False,
                       apply_sum_rule: bool = False) -> Dict[str, Any]:
-        raise NotImplementedError("vasprun.xml file import is not ready yet")
+
+        file_data = {'k_vectors': np.array([[0, 0, 0]], dtype=FLOAT_TYPE),
+                     'weights': np.array([1.], dtype=FLOAT_TYPE),
+                     'atoms': {}}
+
+        root = ElementTree.parse(filename).getroot()
+
+        def _find_or_error(etree: ElementTree,
+                           tag: str,
+                           name: Optional[str] = None,
+                           message: Optional[str] = None) -> ElementTree:
+            for element in etree.findall(tag):
+                if name is None:
+                    return element
+                elif name == element.get('name'):
+                    return element
+            else:
+                if message is None:
+                    raise ValueError("Could not find {tag}{name} in {parent} section of VASP XML file.".format(
+                        tag=tag, name=(f' (name={name})' if name else ''), parent=etree.tag))
+                else:
+                    raise ValueError(message)
+
+        structure_block = _find_or_error(root, 'structure', name='finalpos')
+        varray = _find_or_error(_find_or_error(structure_block, 'crystal'),
+                                'varray', name='basis')
+
+        lattice_vectors = [list(map(float, v.text.split())) for v in varray.findall('v')]
+        file_data['unit_cell'] = np.asarray(lattice_vectors, dtype=FLOAT_TYPE)
+        if file_data['unit_cell'].shape != (3, 3):
+            raise AssertionError("Lattice vectors in XML 'finalpos' don't look like a 3x3 matrix")
+
+        varray = _find_or_error(structure_block, 'varray', name='positions')
+        positions = np.asarray([list(map(float, v.text.split())) for v in varray.findall('v')],
+                               dtype=FLOAT_TYPE)
+        if len(positions.shape) != 2 or positions.shape[1] != 3:
+            raise AssertionError("Positions in XML 'finalpos' don't look like an Nx3 array.")
+
+        atom_info = _find_or_error(root, 'atominfo')
+        n_atoms = float(_find_or_error(atom_info, 'atoms').text)
+        
+        # Get list of atoms by type e.g. [1, 1, 2, 2, 2, 2, 2, 2] for C2H6
+        atom_types = [int(rc.findall('c')[1].text)
+                      for rc in _find_or_error(_find_or_error(atom_info, 'array', name='atoms'),'set').findall('rc')]
+
+        # Get symbols and masses corresponding to these types, and construct full lists of atom properties
+        atom_data = [rc.findall('c')
+                    for rc in _find_or_error(_find_or_error(atom_info, 'array', name='atomtypes'), 'set').findall('rc')]
+        type_symbols = [data_row[1].text.strip() for data_row in atom_data]
+        type_masses = [float(data_row[2].text) for data_row in atom_data]
+        symbols = [type_symbols[i - 1] for i in atom_types]
+        masses = [type_masses[i - 1] for i in atom_types]
+
+        for i, (position, symbol, mass) in enumerate(zip(positions, symbols, masses)):
+                ion_data = {"symbol": symbol,
+                            "coord": np.array(position),
+                            "sort": i,  # identifier for symmetry-equivalent sites; mark all as unique
+                            "mass": mass}
+                file_data["atoms"].update({f"atom_{i}": ion_data})
+
+        calculation = _find_or_error(root, 'calculation')
+        dynmat = _find_or_error(calculation, 'dynmat')
+        # vasprun.xml reports raw eigenvectors in atomic units: convert to frequencies in cm-1
+        eigenvalues = _find_or_error(dynmat, 'v', name='eigenvalues').text.split()
+        frequencies = np.sqrt(-np.asarray(list(map(float, eigenvalues)),
+                                          dtype=complex)) * VASP_FREQ_TO_THZ * 1e12 * HZ2INV_CM
+        # store imaginary frequencies as -ve
+        file_data['frequencies'] = np.asarray([frequencies.real + frequencies.imag], dtype=FLOAT_TYPE)
+
+        eigenvectors_block = _find_or_error(dynmat, 'varray', name='eigenvectors')
+        # Read data in (mode, atoms * 3) format
+        eigenvectors = [list(map(float, row.text.split())) for row in eigenvectors_block.findall('v')]
+        # Rearrange XYZ components onto a new axis to get (mode, atom, direction) indices
+        eigenvectors = [np.array(row).reshape(-1,3) for row in eigenvectors]
+
+        # Wrap in an outer list (1 k-point) then rearrange: (kpt, mode, atom, direction) -> (kpt, atom, mode, direction)
+        file_data['atomic_displacements'] = np.swapaxes(np.asarray([eigenvectors], dtype=COMPLEX_TYPE),
+                                                        1, 2)
+
+        return file_data

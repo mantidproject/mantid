@@ -99,6 +99,10 @@ KG2AMU_DECOMPOSITION = math.frexp(KG2AMU)
 # here we divide by 100 because we need relation between hertz and inverse cm
 HZ2INV_CM = constants.codata.value("hertz-inverse meter relationship") / 100  # Hz [s^1] = 3.33564095198152e-11 [cm^-1]
 HZ2INV_CM_DECOMPOSITION = math.frexp(HZ2INV_CM)
+
+# Conversion factor from VASP internal units
+VASP_FREQ_TO_THZ = 15.633302
+
 #
 # u = H_BAR [J s ]/ ( 2 m [kg] omega [s^-1]) = CONSTANT / ( m [amu] nu [cm^-1])
 #
