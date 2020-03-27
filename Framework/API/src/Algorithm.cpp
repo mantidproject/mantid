@@ -142,7 +142,7 @@ bool Algorithm::isInitialized() const {
   return (m_executionState != ExecutionState::Uninitialized);
 }
 
-/// Has the Algorithm already been executed
+/// Has the Algorithm already been executed successfully
 bool Algorithm::isExecuted() const {
   return ((executionState() == ExecutionState::Finished) &&
           (resultState() == ResultState::Success));
