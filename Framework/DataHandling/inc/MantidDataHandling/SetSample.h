@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/PropertyManager_fwd.h"
 
 namespace Mantid {
@@ -39,8 +40,12 @@ private:
   void exec() override final;
 
   const Geometry::SampleEnvironment *
-  setSampleEnvironment(API::ExperimentInfo &experiment,
-                       const Kernel::PropertyManager_const_sptr &args);
+  setSampleEnvironmentFromFile(API::ExperimentInfo &experiment,
+                               const Kernel::PropertyManager_const_sptr &args);
+  const Geometry::SampleEnvironment *setSampleEnvironmentFromXML(
+      API::ExperimentInfo &experiment,
+      const Kernel::PropertyManager_const_sptr &canGeometryArgs,
+      const Kernel::PropertyManager_const_sptr &canMaterialArgs);
   void setSampleShape(API::ExperimentInfo &experiment,
                       const Kernel::PropertyManager_const_sptr &args,
                       const Geometry::SampleEnvironment *sampleEnv);
@@ -57,6 +62,16 @@ private:
   void runChildAlgorithm(const std::string &name,
                          API::Workspace_sptr &workspace,
                          const Kernel::PropertyManager &args);
+  void validateGeometry(std::map<std::string, std::string> &errors,
+                        const Kernel::PropertyManager &args,
+                        const std::string &flavour);
+  void assertNonNegative(std::map<std::string, std::string> &errors,
+                         const Kernel::PropertyManager &args,
+                         const std::string &flavour,
+                         const std::vector<const std::string *> &keys);
+  void setContainerMaterial(
+      ReadMaterial::MaterialParameters &materialParams,
+      const Kernel::PropertyManager_const_sptr &canMaterialArgs);
 };
 
 } // namespace DataHandling
