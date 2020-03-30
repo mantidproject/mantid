@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy.QtCore import QRunnable, Slot, QThreadPool
 import threading
+import json
 from .specifications import RundexSettings
 import mantid.simpleapi as sapi
 from mantid.kernel import config, logger
@@ -66,6 +67,7 @@ class DrillModel(object):
         t.start()
 
     def set_instrument(self, instrument):
+        self.data = list()
         if (instrument in RundexSettings.TECHNIQUE_MAP):
             config['default.instrument'] = instrument
             self.instrument = instrument
@@ -94,4 +96,24 @@ class DrillModel(object):
 
     def change_data(self, row, column, contents):
         self.data[row][column] = contents
+
+    def set_rundex_data(self, filename):
+        with open(filename) as json_file:
+            json_data = json.load(json_file)
+
+        self.data = list()
+        self.instrument = json_data["Instrument"]
+        self.technique = RundexSettings.get_technique(self.instrument)
+        self.columns = RundexSettings.COLUMNS[self.technique]
+        for sample in range(len(json_data["Samples"])):
+            self.data.append(list())
+            for item in self.columns:
+                if item in json_data["Samples"][sample]:
+                    self.data[sample].append(
+                            str(json_data["Samples"][sample][item]))
+                else:
+                    self.data[sample].append("")
+
+    def get_rows_contents(self):
+        return self.data
 

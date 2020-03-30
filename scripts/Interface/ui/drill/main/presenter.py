@@ -32,7 +32,12 @@ class DrillPresenter(DrillEventListener):
         self.model.set_instrument(instrument)
         self.update_view_from_model()
 
+    def on_rundex_loaded(self, filename):
+        self.model.set_rundex_data(filename)
+        self.update_view_from_model()
+
     def update_view_from_model(self):
-        self.view.set_table(self.model.get_columns())
+        self.view.set_table(self.model.get_columns(),
+                            self.model.get_rows_contents())
         self.view.set_technique(self.model.get_technique())
 

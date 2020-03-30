@@ -44,6 +44,10 @@ class DrillEventListener(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
+    def on_rundex_loaded(self, rundex):
+        pass
+
+    @abstractmethod
     def update_view_from_model(self):
         pass
 
@@ -276,7 +280,12 @@ class DrillView(QMainWindow):
                 )
 
     def load_rundex(self):
-        fname = QFileDialog.getOpenFileName(self, 'Load rundex', '~')
+        filename = QFileDialog.getOpenFileName(self, 'Load rundex')
+        if not filename[0]:
+            return
+        self.call_settings_listeners(
+                lambda listener: listener.on_rundex_loaded(filename[0])
+                )
 
     def keyPressEvent(self, event):
         if (event.key() == Qt.Key_C
@@ -299,11 +308,26 @@ class DrillView(QMainWindow):
     def show_directory_manager(self):
         manageuserdirectories.ManageUserDirectories(self).exec_()
 
-    def set_table(self, columns):
+    ###########################################################################
+    # for model calls                                                         #
+    ###########################################################################
+
+    def set_table(self, columns, rows_contents):
         self.table.clear()
+        self.table.setRowCount(0)
         self.table.setColumnCount(len(columns))
         self.table.setHorizontalHeaderLabels(columns)
-        if columns:
+        if rows_contents:
+            self.table.setRowCount(len(rows_contents))
+            self.table.cellChanged.disconnect()
+            for row in range(len(rows_contents)):
+                self.set_row_contents(row, rows_contents[row])
+
+            self.table.cellChanged.connect(
+                    lambda row, column : self.data_changed(row, column)
+                    )
+        elif columns:
+            # if model is empty but the instrument is supported, add an empty row
             self.add_row_after()
 
     def set_technique(self, technique):
