@@ -206,7 +206,7 @@ Material MaterialXMLParser::parse(std::istream &istr) const {
  * @return A new Material object
  */
 Material MaterialXMLParser::parse(Poco::XML::Element *element,
-                                  std::string XMLFilePath) const {
+                                  const std::string &XMLFilePath) const {
   using namespace Poco::XML;
   using NamedNodeMapPtr = AutoPtr<NamedNodeMap>;
   NamedNodeMapPtr attrs = element->attributes();

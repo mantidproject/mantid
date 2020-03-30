@@ -15,8 +15,8 @@ namespace Kernel {
 
 class MANTID_KERNEL_DLL AttenuationProfile {
 public:
-  AttenuationProfile(const std::string inputFileName,
-                     const std::string searchPath);
+  AttenuationProfile(const std::string &inputFileName,
+                     const std::string &searchPath);
   double getAttenuationCoefficient(const double lambda) const;
 
 private:

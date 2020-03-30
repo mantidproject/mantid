@@ -20,8 +20,8 @@ namespace Kernel {
  * profile data. Filename can be a full path or just file name
  * @param searchPath :: Path to search for the input file
  */
-AttenuationProfile::AttenuationProfile(const std::string inputFileName,
-                                       const std::string searchPath) {
+AttenuationProfile::AttenuationProfile(const std::string &inputFileName,
+                                       const std::string &searchPath) {
   Poco::Path suppliedFileName(inputFileName);
   Poco::Path inputFilePath;
   std::string fileExt = suppliedFileName.getExtension();

@@ -182,7 +182,7 @@ void Material::calculateTotalScatterXSection() {
 }
 
 void Material::setAttenuationProfile(AttenuationProfile attenuationOverride) {
-  m_attenuationOverride = attenuationOverride;
+  m_attenuationOverride = std::move(attenuationOverride);
 }
 
 /**

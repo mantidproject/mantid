@@ -228,7 +228,7 @@ MaterialBuilder::setAttenuationProfileFilename(std::string filename) {
  * @param path Path to search
  */
 void MaterialBuilder::setAttenuationSearchPath(std::string path) {
-  m_attenuationFileSearchPath = path;
+  m_attenuationFileSearchPath = std::move(path);
 }
 
 /**
