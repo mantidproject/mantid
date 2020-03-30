@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """  The presenter associated with the masking table view. """
 
-from __future__ import (absolute_import, division, print_function)
-
 from collections import namedtuple
 import copy
 

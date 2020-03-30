@@ -6,14 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from __future__ import (absolute_import, unicode_literals)
-
 import unittest
 
 from matplotlib.pyplot import figure
 
 from mantid.plots import MantidAxes # noqa
-from mantid.py3compat.mock import Mock
+from unittest.mock import Mock
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
 
 

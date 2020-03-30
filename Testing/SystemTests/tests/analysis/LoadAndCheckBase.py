@@ -9,16 +9,14 @@
 These system tests are to verify the behaviour of the ISIS reflectometry reduction scripts
 """
 
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 from mantid.simpleapi import *
 import mantid.api
 
 from abc import ABCMeta, abstractmethod
-from six import with_metaclass
 
 
-class LoadAndCheckBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class LoadAndCheckBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
     __comparison_out_workspace_name = 'a_integrated'
 

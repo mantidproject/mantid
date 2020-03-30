@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
-from __future__ import absolute_import
-
 # std imports
 import math
 import numpy as np
@@ -20,7 +18,6 @@ from matplotlib.legend import Legend
 from mantid.api import AnalysisDataService, MatrixWorkspace
 from mantid.kernel import ConfigService
 from mantid.plots import datafunctions, MantidAxes
-from mantid.py3compat import is_text_string, string_types
 
 # -----------------------------------------------------------------------------
 # Constants
@@ -43,6 +40,8 @@ MARKER_MAP = {'square': 's', 'plus (filled)': 'P', 'point': '.', 'tickdown': 3,
 # -----------------------------------------------------------------------------
 # Decorators
 # -----------------------------------------------------------------------------
+
+
 def manage_workspace_names(func):
     """
     A decorator to go around plotting functions.
@@ -75,7 +74,7 @@ def figure_title(workspaces, fig_num):
     def wsname(w):
         return w.name() if hasattr(w, 'name') else w
 
-    if is_text_string(workspaces) or not isinstance(workspaces, collections.Sequence):
+    if isinstance(workspaces, str) or not isinstance(workspaces, collections.Sequence):
         # assume a single workspace
         first = workspaces
     else:
@@ -83,6 +82,7 @@ def figure_title(workspaces, fig_num):
         first = workspaces[0]
 
     return wsname(first) + '-' + str(fig_num)
+
 
 @manage_workspace_names
 def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
@@ -352,7 +352,7 @@ def _validate_workspace_names(workspaces):
     :return: A list of workspaces
     """
     try:
-        raise_if_not_sequence(workspaces, 'workspaces', string_types)
+        raise_if_not_sequence(workspaces, 'workspaces', str)
     except ValueError:
         return workspaces
     else:
@@ -370,5 +370,3 @@ def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs):
     if set_title:
         title = workspaces[0].name()
         ax.set_title(title)
-
-

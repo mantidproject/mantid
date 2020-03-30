@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-public-methods
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from testhelpers import assertRaisesNothing
 from testhelpers.tempfile_wrapper import TemporaryFileHelper

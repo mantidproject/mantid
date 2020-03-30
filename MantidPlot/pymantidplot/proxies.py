@@ -9,10 +9,6 @@ Module containing classes that act as proxies to the various MantidPlot gui obje
 accessible from python. They listen for the QObject 'destroyed' signal and set the wrapped
 reference to None, thus ensuring that further attempts at access do not cause a crash.
 """
-from __future__ import (absolute_import, division,
-                        print_function)
-from six.moves import range
-
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, pyqtSlot
 try:
@@ -25,6 +21,7 @@ import mantidqtpython
 #-----------------------------------------------------------------------------
 #--------------------------- MultiThreaded Access ----------------------------
 #-----------------------------------------------------------------------------
+
 
 class CrossThreadCall(QtCore.QObject):
     """
@@ -94,6 +91,7 @@ class CrossThreadCall(QtCore.QObject):
             argtype = int
         return argtype
 
+
 def threadsafe_call(callable, *args, **kwargs):
     """
         Calls the given function with the given arguments
@@ -103,6 +101,7 @@ def threadsafe_call(callable, *args, **kwargs):
     """
     caller = CrossThreadCall(callable)
     return caller.dispatch(*args, **kwargs)
+
 
 def new_proxy(classType, callable, *args, **kwargs):
     """
@@ -123,6 +122,7 @@ def new_proxy(classType, callable, *args, **kwargs):
 #-----------------------------------------------------------------------------
 #--------------------------- Proxy Objects -----------------------------------
 #-----------------------------------------------------------------------------
+
 
 class QtProxyObject(QtCore.QObject):
     """Generic Proxy object for wrapping Qt C++ QObjects.
@@ -212,6 +212,8 @@ class QtProxyObject(QtCore.QObject):
         self.__obj = obj
 
 #-----------------------------------------------------------------------------
+
+
 class MDIWindow(QtProxyObject):
     """Proxy for the _qti.MDIWindow object.
     Also used for subclasses that do not need any methods intercepted (e.g. Table, Note, Matrix)
@@ -223,6 +225,8 @@ class MDIWindow(QtProxyObject):
         return new_proxy(Folder, self._getHeldObject().folder)
 
 #-----------------------------------------------------------------------------
+
+
 class Graph(MDIWindow):
     """Proxy for the _qti.Graph object.
     """
@@ -440,6 +444,8 @@ class Graph3D(QtProxyObject):
         threadsafe_call(self._getHeldObject().setMatrix, matrix._getHeldObject())
 
 #-----------------------------------------------------------------------------
+
+
 class Spectrogram(QtProxyObject):
     """Proxy for the _qti.Spectrogram object.
     """
@@ -451,6 +457,8 @@ class Spectrogram(QtProxyObject):
         return new_proxy(QtProxyObject, self._getHeldObject().matrix)
 
 #-----------------------------------------------------------------------------
+
+
 class Folder(QtProxyObject):
     """Proxy for the _qti.Folder object.
     """
@@ -546,6 +554,8 @@ class Folder(QtProxyObject):
         return new_proxy(Folder, self._getHeldObject().rootFolder)
 
 #-----------------------------------------------------------------------------
+
+
 class MantidMatrix(MDIWindow):
     """Proxy for the _qti.MantidMatrix object.
     """
@@ -575,6 +585,8 @@ class MantidMatrix(MDIWindow):
         return new_proxy(Graph, self._getHeldObject().plotGraph2D, type)
 
 #-----------------------------------------------------------------------------
+
+
 class InstrumentView(MDIWindow):
     """Proxy for the instrument window
     """
@@ -755,6 +767,8 @@ class SliceViewerWindowProxy(QtProxyObject):
         return liner
 
 #-----------------------------------------------------------------------------
+
+
 def getWorkspaceNames(source):
     """Takes a "source", which could be a WorkspaceGroup, or a list
     of workspaces, or a list of names, and converts
@@ -802,6 +816,8 @@ def getWorkspaceNames(source):
     return ws_names
 
 #-----------------------------------------------------------------------------
+
+
 class ProxyCompositePeaksPresenter(QtProxyObject):
     def __init__(self, toproxy):
         QtProxyObject.__init__(self,toproxy)
@@ -820,6 +836,8 @@ class ProxyCompositePeaksPresenter(QtProxyObject):
         return new_proxy(QtProxyObject, self._getHeldObject().getPeaksPresenter, to_present)
 
 #-----------------------------------------------------------------------------
+
+
 class SliceViewerProxy(QtProxyObject):
     """Proxy for a C++ SliceViewer widget.
     """
@@ -921,25 +939,31 @@ class TiledWindowProxy(QtProxyObject):
         """
         threadsafe_call(self._getHeldObject().clear)
 
+
 def showHelpPage(page_name=None):
     """Show a page in the help system"""
     window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showHelpPage, page_name)
+
 
 def showWikiPage(page_name=None):
     """Show a wiki page through the help system"""
     window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showWikiPage, page_name)
 
+
 def showAlgorithmHelp(algorithm=None, version=-1):
     """Show an algorithm help page"""
     window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showAlgorithmHelp, algorithm, version)
+
 
 def showConceptHelp(name=None):
     """Show a concept help page"""
     window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showConceptHelp, name)
 
+
 def showFitFunctionHelp(name=None):
     """Show a fit function help page"""
     window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showFitFunctionHelp, name)
+
 
 def showCustomInterfaceHelp(name=None):
     """Show a custom interface help page"""

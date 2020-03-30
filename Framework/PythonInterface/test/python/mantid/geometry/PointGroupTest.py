@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,too-many-public-methods
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.geometry import PointGroup, PointGroupFactory
 from mantid.kernel import V3D

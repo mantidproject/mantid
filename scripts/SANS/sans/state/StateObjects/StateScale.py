@@ -6,10 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Defines the state of the geometry and unit scaling."""
 
-from __future__ import (absolute_import, division, print_function)
 import copy
-
-from six import with_metaclass
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import SampleShape, SANSFacility
@@ -21,7 +18,7 @@ from sans.common.enums import SampleShape, SANSFacility
 from sans.state.automatic_setters import automatic_setters
 
 
-class StateScale(with_metaclass(JsonSerializable)):
+class StateScale(metaclass=JsonSerializable):
 
     def __init__(self):
         super(StateScale, self).__init__()

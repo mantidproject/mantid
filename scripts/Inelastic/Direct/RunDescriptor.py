@@ -9,8 +9,6 @@
 #pylint: disable=attribute-defined-outside-init
 """ File contains Descriptors used describe run for direct inelastic reduction """
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-from six import string_types
 from mantid.simpleapi import *
 from mantid.kernel import funcinspect
 from Direct.PropertiesDescriptors import *
@@ -54,7 +52,7 @@ class RunList(object):
             local_fext=[]
 
         for item in runs_to_add:
-            if isinstance(item, string_types):
+            if isinstance(item, str):
                 file_path,run_num,fext = prop_helpers.parse_run_file_name(item)
                 runs.append(run_num)
                 if not fnames_given:
@@ -452,7 +450,7 @@ class RunDescriptor(PropDescriptor):
                 self._set_ws_as_source(value)
             return
 
-        if isinstance(value, string_types): # it may be run number as string or it may be a workspace name
+        if isinstance(value, str): # it may be run number as string or it may be a workspace name
             if value in mtd: # workspace name
                 ws = mtd[value]
                 self.__set__(instance,ws)
@@ -993,7 +991,7 @@ class RunDescriptor(PropDescriptor):
 
     def set_file_ext(self,val):
         """Set non-default file extension """
-        if isinstance(val, string_types):
+        if isinstance(val, str):
             if val[0] != '.':
                 value = '.' + val
             else:
@@ -1152,7 +1150,7 @@ class RunDescriptor(PropDescriptor):
                 ws_calibration = prop_helpers.get_default_parameter(loaded_ws.getInstrument(),'det_cal_file')
                 if ws_calibration is None:
                     ws_calibration = calibration
-                if isinstance(ws_calibration, string_types) and ws_calibration.lower() == 'none':
+                if isinstance(ws_calibration, str) and ws_calibration.lower() == 'none':
                     ws_calibration = calibration
                 if ws_calibration :
                     test_name = ws_calibration
@@ -1168,7 +1166,7 @@ class RunDescriptor(PropDescriptor):
                 else:
                     return
 
-        if isinstance(ws_calibration, string_types) : # It can be only a file (got it from calibration property)
+        if isinstance(ws_calibration, str) : # It can be only a file (got it from calibration property)
             RunDescriptor._logger('load_data: Moving detectors to positions specified in cal file {0}'.format(ws_calibration),'debug')
             # Pull in pressures, thicknesses & update from cal file
             LoadDetectorInfo(Workspace=loaded_ws, DataFilename=ws_calibration, RelocateDets=True)
@@ -1670,7 +1668,7 @@ def build_run_file_name(run_num,inst,file_path='',fext=''):
     """Build the full name of a runfile from all possible components"""
     if fext is None:
         fext = ''
-    if isinstance(run_num, string_types):
+    if isinstance(run_num, str):
         run_num_str = run_num
     else:
 #pylint: disable=protected-access

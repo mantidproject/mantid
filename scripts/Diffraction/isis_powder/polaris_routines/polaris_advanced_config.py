@@ -7,8 +7,6 @@
 # Note all changes in this file require a restart of Mantid
 # additionally any long term changes should be sent back to the development team so any changes can be merged
 # into future versions of Mantid.
-from __future__ import (absolute_import, unicode_literals)
-
 import copy
 
 from isis_powder.routines.common import ADVANCED_CONFIG as COMMON_ADVANCED_CONFIG

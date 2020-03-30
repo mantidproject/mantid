@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # Dialog for message
-from __future__ import (absolute_import, division, print_function)
-from six.moves import range
 from qtpy.QtWidgets import (QDialog)  # noqa
 from mantid.kernel import Logger
 try:

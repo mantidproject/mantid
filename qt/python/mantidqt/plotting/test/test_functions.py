@@ -7,8 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import absolute_import
-
 # std imports
 from unittest import TestCase, main
 
@@ -26,7 +24,7 @@ from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.simpleapi import CreateWorkspace
 from mantid.kernel import config
 from mantid.plots import MantidAxes
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
                                          manage_workspace_names, plot, plot_from_names,

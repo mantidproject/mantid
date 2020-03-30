@@ -7,10 +7,9 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QSlider, QDoubleSpinBox, QSpinBox
 from qtpy.QtCore import Qt, Signal
-from mantid.py3compat.enum import Enum
+from enum import Enum
 
 
 class State(Enum):

@@ -8,11 +8,8 @@
 
 """State describing the normalization to the incident monitor for SANS reduction."""
 
-from __future__ import (absolute_import, division, print_function)
 import json
 import copy
-
-from six import with_metaclass
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import (RebinType, RangeStepType, SANSInstrument)
@@ -22,7 +19,7 @@ from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_an
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
-class StateNormalizeToMonitor(with_metaclass(JsonSerializable)):
+class StateNormalizeToMonitor(metaclass=JsonSerializable):
     def __init__(self):
         super(StateNormalizeToMonitor, self).__init__()
         self.prompt_peak_correction_min = None  # : Float (Optional)

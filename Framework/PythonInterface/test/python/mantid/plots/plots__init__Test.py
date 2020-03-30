@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import matplotlib
 
 matplotlib.use('AGG')  # noqa
@@ -20,7 +18,7 @@ from mantid.plots import datafunctions
 from mantid.plots.legend import convert_color_to_hex
 from mantid.plots.utility import MantidAxType
 from mantid.plots.axesfunctions import get_colorplot_extents
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace,
                               RemoveSpectra, AnalysisDataService as ADS)
 from mantidqt.plotting.markers import SingleMarker

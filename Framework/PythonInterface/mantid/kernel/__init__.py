@@ -11,8 +11,6 @@ kernel
 Defines Python objects that wrap the C++ Kernel namespace.
 
 """
-from __future__ import absolute_import
-
 ###############################################################################
 # Make modules available in this namespace
 ###############################################################################

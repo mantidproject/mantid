@@ -4,9 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
-import six
 import unittest
 import numpy as np
 import logging
@@ -34,11 +31,10 @@ class AbinsSDataTest(unittest.TestCase):
         s_data.set({'frequencies': np.linspace(105, 145, 5),
                     'atom_1': {'s': {'order_1': np.array([0., 0.001, 1., 1., 0., 0.,])}}})
 
-        if six.PY3: # assertLogs is available from Python 3.4 and up
-            with self.assertRaises(AssertionError):
-                with self.assertLogs(logger=self.logger, level='WARNING'):
-                    s_data.check_thresholds(logger=self.logger)
-
-            AbinsParameters.sampling['s_absolute_threshold'] = 0.5
+        with self.assertRaises(AssertionError):
             with self.assertLogs(logger=self.logger, level='WARNING'):
                 s_data.check_thresholds(logger=self.logger)
+
+        AbinsParameters.sampling['s_absolute_threshold'] = 0.5
+        with self.assertLogs(logger=self.logger, level='WARNING'):
+            s_data.check_thresholds(logger=self.logger)

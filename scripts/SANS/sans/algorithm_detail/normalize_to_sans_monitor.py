@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """ SANSNormalizeToMonitor algorithm calculates the normalization to the monitor."""
 
-from __future__ import (absolute_import, division, print_function)
-
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
 

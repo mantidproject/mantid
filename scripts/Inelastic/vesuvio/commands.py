@@ -9,8 +9,6 @@
 Defines functions and classes to start the processing of Vesuvio data.
 The main entry point that most users should care about is fit_tof().
 """
-from __future__ import (absolute_import, division, print_function)
-
 import re
 import numpy as np
 from functools import reduce

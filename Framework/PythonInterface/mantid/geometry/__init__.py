@@ -11,8 +11,6 @@ mantid.geometry
 Defines Python objects that wrap the C++ Geometry namespace.
 
 """
-from __future__ import absolute_import
-
 ###############################################################################
 # Load the C++ library
 ###############################################################################

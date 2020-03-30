@@ -9,8 +9,6 @@ This module is a wrapper around a set of instrument parameters (to be read from 
 and methods which then call either Chop.py or MulpyRep.py to do the resolution calculations.
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six import string_types
 import numpy as np
 import yaml
 import warnings
@@ -670,7 +668,7 @@ class Instrument(object):
     __known_instruments = ['let', 'maps', 'mari', 'merlin']
 
     def __init__(self, instrument, chopper=None, freq=None):
-        if isinstance(instrument, string_types):
+        if isinstance(instrument, str):
             # check if it is a file or instrument name we want
             if instrument.lower() in self.__known_instruments:
                 import os.path

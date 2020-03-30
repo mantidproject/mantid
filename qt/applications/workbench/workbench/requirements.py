@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """Defines methods to check requirements for the application
 """
-from __future__ import absolute_import
-
 from distutils.version import LooseVersion
 
 

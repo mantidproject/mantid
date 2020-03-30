@@ -13,7 +13,6 @@
 This module provides functionality common to classes StretchedExpFT and PrimStretchedExpFT
 """
 
-from __future__ import (absolute_import, division, print_function)
 import copy
 from scipy.fftpack import fft, fftfreq
 from scipy.special import gamma

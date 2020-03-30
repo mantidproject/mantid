@@ -14,7 +14,6 @@
     Most of this code is a copy-paste from SANSReduction.py, organized to be used with
     ReductionStep objects. The guts needs refactoring.
 """
-from __future__ import (absolute_import, division, print_function)
 import os
 import re
 import math

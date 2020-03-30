@@ -12,8 +12,6 @@ Contains a class to calculate the possible reps, resolution and flux for a direc
 spectrometer. Python implementation by D J Voneshen based on the original Matlab program of R I Bewley.
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six import string_types
 import numpy as np
 import copy
 
@@ -224,8 +222,8 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
     for i in range(len(dist)):
         # loop over each chopper
         # checks whether this chopper should have an independently set phase / delay
-        islt = int(phase[i]) if (ph_ind[i] and isinstance(phase[i], string_types)) else 0
-        if ph_ind[i] and not isinstance(phase[i], string_types):
+        islt = int(phase[i]) if (ph_ind[i] and isinstance(phase[i], str)) else 0
+        if ph_ind[i] and not isinstance(phase[i], str):
             # effective chopper velocity (if 2 disks effective velocity is double)
             chopVel = 2*np.pi*radius[i] * numDisk[i] * freq[i]
             # full opening time

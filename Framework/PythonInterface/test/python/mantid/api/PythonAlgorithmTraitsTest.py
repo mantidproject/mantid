@@ -7,8 +7,6 @@
 """Defines tests for the traits within Python algorithms
 such as name, version etc.
 """
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import testhelpers
 
@@ -17,12 +15,14 @@ from mantid.api import (PythonAlgorithm, AlgorithmProxy, Algorithm, IAlgorithm,
 
 ########################### Test classes #####################################
 
+
 class TestPyAlgDefaultAttrs(PythonAlgorithm):
     def PyInit(self):
         pass
 
     def PyExec(self):
         pass
+
 
 class TestPyAlgOverriddenAttrs(PythonAlgorithm):
 
@@ -44,6 +44,7 @@ class TestPyAlgOverriddenAttrs(PythonAlgorithm):
     def PyExec(self):
         pass
 
+
 class TestPyAlgIsRunningReturnsNonBool(PythonAlgorithm):
 
     def isRunning(self):
@@ -54,6 +55,7 @@ class TestPyAlgIsRunningReturnsNonBool(PythonAlgorithm):
 
     def PyExec(self):
         pass
+
 
 class CancellableAlg(PythonAlgorithm):
 
@@ -72,6 +74,7 @@ class CancellableAlg(PythonAlgorithm):
         self.is_running = False
 
 ###############################################################################
+
 
 class PythonAlgorithmTest(unittest.TestCase):
 

@@ -7,8 +7,6 @@
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import absolute_import
-
 # system imports
 import types
 
@@ -26,7 +24,7 @@ except ImportError:
     from IPython.qt.inprocess import QtInProcessKernelManager
 
 # local imports
-from mantid.py3compat import getfullargspec
+from inspect import getfullargspec
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 
 

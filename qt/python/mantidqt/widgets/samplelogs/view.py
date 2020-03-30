@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import (QTableView, QHBoxLayout, QVBoxLayout,
                             QAbstractItemView, QFormLayout, QLineEdit,
                             QHeaderView, QLabel, QCheckBox, QMenu,

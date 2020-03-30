@@ -9,7 +9,7 @@ import numpy as np
 
 from mantid.simpleapi import CreateEmptyTableWorkspace, CreateWorkspace, DeleteWorkspace, FindPeaksAutomatic
 from mantid.api import mtd
-from mantid.py3compat import mock
+from unittest import mock
 
 import plugins.algorithms.WorkflowAlgorithms.FindPeaksAutomatic as _FindPeaksAutomatic
 

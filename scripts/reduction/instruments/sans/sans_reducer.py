@@ -9,7 +9,6 @@
     a predefined set of reduction steps to be followed. The actual ReductionStep objects
     executed for each of those steps can be modified.
 """
-from __future__ import (absolute_import, division, print_function)
 from reduction import Reducer
 from reduction import ReductionStep
 from reduction import validate_step

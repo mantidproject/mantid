@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+
 
 # system imports
 import unittest
@@ -24,7 +23,7 @@ from testhelpers import assert_almost_equal
 
 # local package imports
 from mantid.plots import MantidAxes
-from mantid.py3compat.mock import MagicMock, PropertyMock, call, patch
+from unittest.mock import MagicMock, PropertyMock, call, patch
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.plotting.figuretype import FigureType
 from mantidqt.plotting.functions import plot, pcolormesh_from_names

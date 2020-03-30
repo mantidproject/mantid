@@ -4,9 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import numpy as np
-import six
 import AbinsModules
 
 
@@ -43,12 +41,12 @@ class KpointsData(AbinsModules.GeneralData):
         """
         super(KpointsData, self).__init__()
 
-        if isinstance(num_k, six.integer_types) and num_k > 0:
+        if isinstance(num_k, int) and num_k > 0:
             self._num_k = num_k
         else:
             raise ValueError("Invalid number of k-points.")
 
-        if isinstance(num_atoms, six.integer_types) and num_atoms > 0:
+        if isinstance(num_atoms, int) and num_atoms > 0:
             self._num_atoms = num_atoms  # number of displacements for one k-point
         else:
             raise ValueError("Invalid number of atoms.")
