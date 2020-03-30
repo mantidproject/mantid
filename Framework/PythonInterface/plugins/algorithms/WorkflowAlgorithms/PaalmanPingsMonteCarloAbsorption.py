@@ -45,6 +45,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
     _container_chemical_formula = None
     _container_density = None
     _container_density_type = None
+    _container_radius = None
     _container_inner_radius = None
     _container_outer_radius = None
     _container_thickness = None
@@ -64,8 +65,8 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         return ["MonteCarloAbsorption"]
 
     def summary(self):
-        return "Calculates absorption corrections in Paalman & Pings formalis for a given sample " \
-               "and its environment using a Monte Carlo simulation."
+        return "Calculates absorption corrections in Paalman & Pings formalism for a given sample " \
+               "and optionally its environment using a Monte Carlo simulation."
 
     def checkGroups(self):
         return False
@@ -248,6 +249,13 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setPropertyGroup('SampleOuterRadius', 'Sample Shape Options')
 
         # ---------------------------Container---------------------------
+        container_flat_plate_condition = VisibleWhenProperty(container_condition, flat_plate_condition,
+                                                             LogicOperator.And)
+        container_cylinder_condition = VisibleWhenProperty(container_condition, cylinder_condition,
+                                                           LogicOperator.And)
+        container_annulus_condition = VisibleWhenProperty(container_condition, annulus_condition,
+                                                          LogicOperator.And)
+
         # Flat Plate
         self.declareProperty(name='ContainerFrontThickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
@@ -256,22 +264,20 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Back thickness of the container environment (cm)')
 
-        container_flat_plate_condition = VisibleWhenProperty(container_condition, flat_plate_condition,
-                                                             LogicOperator.And)
-
         self.setPropertySettings('ContainerFrontThickness', container_flat_plate_condition)
         self.setPropertySettings('ContainerBackThickness', container_flat_plate_condition)
-
         self.setPropertyGroup('ContainerFrontThickness', 'Container Shape Options')
         self.setPropertyGroup('ContainerBackThickness', 'Container Shape Options')
 
-        # Both cylinder and annulus have an annulus container
+        # Cylinder
+        self.declareProperty(name='ContainerRadius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Outer radius of the sample environment (cm)')
 
-        not_flat_plate_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsNotEqualTo, 'FlatPlate')
+        self.setPropertySettings('ContainerRadius', container_cylinder_condition)
+        self.setPropertyGroup('ContainerRadius', 'Container Shape Options')
 
-        container_n_f_p_condition = VisibleWhenProperty(container_condition, not_flat_plate_condition,
-                                                        LogicOperator.And)
-
+        # Annulus
         self.declareProperty(name='ContainerInnerRadius', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Inner radius of the container environment (cm)')
@@ -279,13 +285,13 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Outer radius of the container environment (cm)')
 
-        self.setPropertySettings('ContainerInnerRadius', container_n_f_p_condition)
-        self.setPropertySettings('ContainerOuterRadius', container_n_f_p_condition)
+        self.setPropertySettings('ContainerInnerRadius', container_annulus_condition)
+        self.setPropertySettings('ContainerOuterRadius', container_annulus_condition)
 
         self.setPropertyGroup('ContainerInnerRadius', 'Container Shape Options')
         self.setPropertyGroup('ContainerOuterRadius', 'Container Shape Options')
 
-        # output
+        # Output
         self.declareProperty(WorkspaceGroupProperty(name='CorrectionsWorkspace',
                                                     defaultValue='corrections',
                                                     direction=Direction.Output,
@@ -299,17 +305,11 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         prog = Progress(self, 0, 1, nreports)
 
         sample_wave_ws = self._convert_to_wavelength(self._sample_ws)
-
         self._set_beam(sample_wave_ws)
-
         self._set_sample(sample_wave_ws)
 
-
-
-
-
-        ss_monte_carlo_alg = self.createChildAlgorithm("SimpleShapeMonteCarloAbsorption", enableLogging=True)
-        ss_monte_carlo_alg.setProperty("InputWorkspace", sample_wave_ws)
+        monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True)
+        monte_carlo_alg.setProperty("InputWorkspace", sample_wave_ws)
         self._set_algorithm_properties(ss_monte_carlo_alg, sample_kwargs)
         ss_monte_carlo_alg.execute()
         ass_ws = ss_monte_carlo_alg.getProperty("OutputWorkspace").value
@@ -328,28 +328,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             mtd.addOrReplace(self._ass_ws_name, ass_ws)
 
         if self._container_ws:
-            prog.report('Calculating container absorption factors')
-
-            container_wave_1 = self._convert_to_wavelength(self._container_ws)
-            container_wave_2 = self._clone_ws(container_wave_1)
-
-            container_kwargs = dict()
-            container_kwargs.update(self._general_kwargs)
-            if self._set_can_method == 'Chemical Formula':
-                container_kwargs['ChemicalFormula'] = self._container_chemical_formula
-            else:
-                container_kwargs['CoherentXSection'] = self._container_coherent_cross_section
-                container_kwargs['IncoherentXSection'] = self._container_incoherent_cross_section
-                container_kwargs['AttenuationXSection'] = self._container_attenuation_cross_section
-
-            container_kwargs['DensityType'] = self._container_density_type
-            container_kwargs['Density'] = self._container_density
-            if self._container_density_type == 'Number Density':
-                container_kwargs['NumberDensityUnit'] = self._container_number_density_unit
-
-            container_kwargs['Height'] = self._height
-            container_kwargs['Shape'] = self._shape
-            self._set_algorithm_properties(ss_monte_carlo_alg, container_kwargs)
 
             if self._shape == 'FlatPlate':
                 offset_front = 0.5 * (self._container_front_thickness + self._sample_thickness)
@@ -367,31 +345,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                 ss_monte_carlo_alg.setProperty("Center", offset_back)
                 ss_monte_carlo_alg.execute()
                 acc_2 = ss_monte_carlo_alg.getProperty("OutputWorkspace").value
-
-                acc_ws = self._multiply(acc_1, acc_2)
-
-            elif self._shape == 'Cylinder':
-                ss_monte_carlo_alg.setProperty("InputWorkspace", container_wave_1)
-                ss_monte_carlo_alg.setProperty("InnerRadius", self._container_inner_radius)
-                ss_monte_carlo_alg.setProperty("OuterRadius", self._container_outer_radius)
-                ss_monte_carlo_alg.setProperty("Shape", "Annulus")
-                ss_monte_carlo_alg.execute()
-                acc_ws = ss_monte_carlo_alg.getProperty("OutputWorkspace").value
-
-            elif self._shape == 'Annulus':
-                ss_monte_carlo_alg.setProperty("InputWorkspace", container_wave_1)
-                ss_monte_carlo_alg.setProperty("InnerRadius", self._container_inner_radius)
-                ss_monte_carlo_alg.setProperty("OuterRadius", self._sample_inner_radius)
-                ss_monte_carlo_alg.execute()
-                acc_1 = ss_monte_carlo_alg.getProperty("OutputWorkspace").value
-
-                ss_monte_carlo_alg.setProperty("InputWorkspace", container_wave_2)
-                ss_monte_carlo_alg.setProperty("InnerRadius", self._sample_outer_radius)
-                ss_monte_carlo_alg.setProperty("OuterRadius", self._container_outer_radius)
-                ss_monte_carlo_alg.execute()
-                acc_2 = ss_monte_carlo_alg.getProperty("OutputWorkspace").value
-
-                acc_ws = self._multiply(acc_1, acc_2)
 
             for log_name, log_value in container_kwargs.items():
                 sample_log_names.append("container_" + log_name.lower())
@@ -421,6 +374,9 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
     def _set_sample(self, ws):
 
+        set_sample_alg = self.createChildAlgorithm("SetSample", enableLogging=False)
+        set_sample_alg.setProperty("InputWorkspace", ws)
+
         sample_geometry = dict()
         sample_geometry['Height'] = self._height
 
@@ -441,7 +397,8 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             sample_geometry['InnerRadius'] = self._sample_inner_radius
             sample_geometry['OuterRadius'] = self._sample_outer_radius
             sample_geometry['Center'] = [0.0, 0.0, 0.0]
-            sample_geometry['Axis'] = 1
+
+        set_sample_alg.setProperty("Geometry", sample_geometry)
 
         if not self._sample_material_defined:
             sample_material = dict()
@@ -459,19 +416,27 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             if self._sample_density_type == 'Number Density':
                 sample_material['SampleNumberDensity'] = self._sample_density
                 sample_material['NumberDensityUnit'] = self._sample_number_density_unit
+            set_sample_alg.setProperty("Material", sample_material)
 
         if self._container_ws:
-            can_geometry = dict()
-            can_geometry['Height'] = self._height
-
-            if self._shape == 'FlatPlate':
-                pass
+            container_geometry = dict()
+            container_geometry['Height'] = self._height
 
             if self._shape == 'Cylinder':
-                pass
+                container_geometry['Shape'] = 'HollowCylinder'
+                container_geometry['InnerRadius'] = self._sample_radius
+                container_geometry['OuterRadius'] = self._container_radius
+                container_geometry['Center'] = [0.0, 0.0, 0.0]
+
+            if self._shape == 'FlatPlate':
+                container_geometry['Shape'] = 'CSG'
+                container_geometry['Value'] = self._get_flat_plate_container_xml()
 
             if self._shape == 'Annulus':
-                pass
+                container_geometry['Shape'] = 'CSG'
+                container_geometry['Value'] = self._get_annulus_container_xml()
+
+            set_sample_alg.setProperty("ContainerGeometry", container_geometry)
 
             if not self._container_material_defined:
                 container_material = dict()
@@ -481,12 +446,39 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                     container_material['CoherentXSection'] = self._container_coherent_cross_section
                     container_material['IncoherentXSection'] = self._container_incoherent_cross_section
                     container_material['AttenuationXSection'] = self._container_attenuation_cross_section
-
                 container_material['DensityType'] = self._container_density_type
                 container_material['Density'] = self._container_density
                 if self._container_density_type == 'Number Density':
                     container_material['NumberDensityUnit'] = self._container_number_density_unit
+                set_sample_alg.setProperty("ContainerMaterial", container_material)
 
+        set_sample_alg.execute()
+
+    def _get_flat_plate_container_xml(self):
+        offset_front = 0.5 * (self._container_front_thickness + self._sample_thickness)
+        offset_back = 0.5 * (self._container_back_thickness + self._sample_thickness)
+        flat_wall = """<cuboid id="{0}">
+                        <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
+                        <left-front-top-point  x="0.0025" y="-0.1" z="0.02"  />
+                        <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
+                        <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
+                      </cuboid>"""
+        front = flat_wall.format('front')
+        back = flat_wall.format('back')
+        return inner+outer+"<algebra val='front:back'/>"
+
+    def _get_annulus_container_xml(self):
+
+        annular_wall = """<hollow-cylinder id="{0}">
+                            <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
+                            <axis x="0.0" y="1.0" z="0" />
+                            <inner-radius val="{1}" />
+                            <outer-radius val="{2}" />
+                            <height val="{3}" />
+                          </hollow-cylinder>"""
+        inner = annular_wall.format('inner', self._container_inner_radius, self._sample_inner_radius, self._height)
+        outer = annular_wall.format('outer', self._sample_outer_radius, self._container_outer_radius, self._height)
+        return inner+outer+"<algebra val='inner:outer'/>"
 
     def _setup(self):
 
@@ -495,12 +487,11 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         sample_is_group = isinstance(self._sample_ws, WorkspaceGroup)
         container_is_group = isinstance(self._container_ws, WorkspaceGroup)
 
-        # Currently we cannot support workspace groups because the output of the child
-        # algorithm is a workspace group. This causes a crash in the ADS when this
-        # algorithm attempts to put a workspace group into another workspace group
+        # We cannot support WorkspaceGroups as inputs, since the output of the algorithm itself is a group
+        # and it is currently not possible to override processGroups in python
         if sample_is_group or container_is_group:
-            raise RuntimeError("PaalmanPingsMonteCarloAbsorption does not currently support"
-                               " WorkspaceGroups inputs.")
+            raise RuntimeError("WorkspaceGroup inputs are currently not supported. "
+                               "Please select the workspace items themselves.")
 
         self._beam_height = self.getProperty('BeamHeight').value
         self._beam_width = self.getProperty('BeamWidth').value
@@ -514,7 +505,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self._sample_material_defined = self.getProperty('SampleMaterialAlreadyDefined').value
 
         self._sample_unit = self._sample_ws.getAxis(0).getUnit().unitID()
-        logger.information('Input X-unit is {}'.format(self._sample_unit))
         if self._sample_unit == 'dSpacing':
             self._emode = 'Elastic'
         else:
@@ -558,7 +548,10 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                 self._container_front_thickness = self.getProperty('ContainerFrontThickness').value
                 self._container_back_thickness = self.getProperty('ContainerBackThickness').value
 
-            else:
+            if self._shape == 'Cylinder':
+                self._container_radius = self.getProperty('ContainerRadius').value
+
+            if self._shape == 'Annulus':
                 self._container_inner_radius = self.getProperty('ContainerInnerRadius').value
                 self._container_outer_radius = self.getProperty('ContainerOuterRadius').value
 
@@ -591,13 +584,11 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         if self._container_ws:
             container_unit = self._container_ws.getAxis(0).getUnit().unitID()
             if container_unit != self._sample_unit:
-                raise ValueError('Sample and Container units must have the same units!')
+                issues['ContainerWorkspace'] = 'Sample and Container workspaces must have the same units.'
 
             if self._shape == 'Cylinder':
-                if self._container_inner_radius < self._sample_radius:
-                    issues['ContainerInnerRadius'] = 'Must be greater than or equal to SampleRadius'
-                if self._container_outer_radius <= self._container_inner_radius:
-                    issues['ContainerOuterRadius'] = 'Must be greater than ContainerInnerRadius'
+                if self._container_radius <= self._sample_radius:
+                    issues['ContainerRadius'] = 'Must be greater than SampleRadius'
 
             if self._shape == 'Annulus':
                 if self._container_inner_radius >= self._sample_inner_radius:
@@ -934,4 +925,4 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(CalculateMonteCarloAbsorption)
+AlgorithmFactory.subscribe(PaalmanPingsMonteCarloAbsorption)

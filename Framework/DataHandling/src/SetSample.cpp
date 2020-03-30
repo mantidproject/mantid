@@ -402,10 +402,6 @@ std::map<std::string, std::string> SetSample::validateInputs() {
       validateMaterial(errors, *materialArgs, PropertyNames::MATERIAL);
     }
   }
-  if (bool(canGeomArgs) != bool(canMaterialArgs)) {
-    errors[PropertyNames::CONTAINER_GEOMETRY] =
-        "Either both or none of the geometry and the material must be given.";
-  }
   if (canGeomArgs) {
     assertNonNegative(errors, *canGeomArgs, PropertyNames::CONTAINER_GEOMETRY,
                       positiveValues);
