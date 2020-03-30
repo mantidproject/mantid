@@ -100,7 +100,7 @@ class DrillView(QMainWindow):
         self.processRows.setIcon(icons.get_icon("mdi.play"))
         self.processRows.clicked.connect(self.process_selected_rows)
 
-        self.processAll.setIcon(icons.get_icon("mdi.sigma"))
+        self.processAll.setIcon(icons.get_icon("mdi.fast-forward"))
         self.processAll.clicked.connect(self.process_all_rows)
 
         self.stop.setIcon(icons.get_icon("mdi.stop"))
