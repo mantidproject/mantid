@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -79,7 +79,7 @@ public:
     return group;
   }
 
-  MatrixWorkspace_sptr makeEfficiencies(Workspace_sptr inWS,
+  MatrixWorkspace_sptr makeEfficiencies(const Workspace_sptr &inWS,
                                         const std::string &rho,
                                         const std::string &pp,
                                         const std::string &alpha = "",
@@ -214,7 +214,8 @@ public:
     }
   }
 
-  void setInstrument(Workspace_sptr ws, const std::string &instrument_name) {
+  void setInstrument(const Workspace_sptr &ws,
+                     const std::string &instrument_name) {
     auto alg = AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
     AnalysisDataService::Instance().addOrReplace("dummy", ws);
     alg->initialize();

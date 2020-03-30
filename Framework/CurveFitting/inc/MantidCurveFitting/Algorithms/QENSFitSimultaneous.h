@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -47,27 +47,27 @@ private:
   std::pair<API::ITableWorkspace_sptr, API::Workspace_sptr>
   performFit(const std::vector<API::MatrixWorkspace_sptr> &workspaces,
              const std::string &output);
-  API::WorkspaceGroup_sptr
-  processIndirectFitParameters(API::ITableWorkspace_sptr parameterWorkspace,
-                               const std::vector<std::size_t> &grouping);
-  void copyLogs(API::WorkspaceGroup_sptr resultWorkspace,
+  API::WorkspaceGroup_sptr processIndirectFitParameters(
+      const API::ITableWorkspace_sptr &parameterWorkspace,
+      const std::vector<std::size_t> &grouping);
+  void copyLogs(const API::WorkspaceGroup_sptr &resultWorkspace,
                 const std::vector<API::MatrixWorkspace_sptr> &workspaces);
-  void copyLogs(API::MatrixWorkspace_sptr resultWorkspace,
-                API::WorkspaceGroup_sptr resultGroup);
-  void extractMembers(API::WorkspaceGroup_sptr resultGroupWs,
+  void copyLogs(const API::MatrixWorkspace_sptr &resultWorkspace,
+                const API::WorkspaceGroup_sptr &resultGroup);
+  void extractMembers(const API::WorkspaceGroup_sptr &resultGroupWs,
                       const std::vector<API::MatrixWorkspace_sptr> &workspaces,
                       const std::string &outputWsName);
-  void addAdditionalLogs(API::WorkspaceGroup_sptr group);
-  void addAdditionalLogs(API::Workspace_sptr result);
+  void addAdditionalLogs(const API::WorkspaceGroup_sptr &group);
+  void addAdditionalLogs(const API::Workspace_sptr &result);
 
   API::IAlgorithm_sptr
-  extractMembersAlgorithm(API::WorkspaceGroup_sptr resultGroupWs,
+  extractMembersAlgorithm(const API::WorkspaceGroup_sptr &resultGroupWs,
                           const std::string &outputWsName) const;
 
   std::string getOutputBaseName() const;
   std::vector<std::string> getWorkspaceNames() const;
   std::vector<std::string> getWorkspaceIndices() const;
-  void renameWorkspaces(API::WorkspaceGroup_sptr outputGroup,
+  void renameWorkspaces(const API::WorkspaceGroup_sptr &outputGroup,
                         std::vector<std::string> const &spectra,
                         std::string const &outputBaseName,
                         std::string const &endOfSuffix,

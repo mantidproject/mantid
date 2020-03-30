@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -38,7 +38,7 @@ public:
   static void destroySuite(LoadEmptyInstrumentTest *suite) { delete suite; }
 
   /// Helper that checks that each spectrum has one detector
-  void check_workspace_detectors(MatrixWorkspace_sptr output,
+  void check_workspace_detectors(const MatrixWorkspace_sptr &output,
                                  size_t numberDetectors) {
     TS_ASSERT_EQUALS(output->getNumberHistograms(), numberDetectors);
     for (size_t i = 0; i < output->getNumberHistograms(); i++) {

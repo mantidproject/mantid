@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -65,12 +65,12 @@ private:
   getFitWeights(API::FunctionValues_sptr values) const override;
 
   /// Get weight (1/sigma)
-  double getWeight(API::FunctionValues_sptr values, size_t i,
+  double getWeight(const API::FunctionValues_sptr &values, size_t i,
                    double sqrtW = 1.0) const;
 
   /// Calcualte sqrt(W). Final cost function = sum_i [ (obs_i - cal_i) / (sigma
   /// * sqrt(W))]**2
-  double calSqrtW(API::FunctionValues_sptr values) const;
+  double calSqrtW(const API::FunctionValues_sptr &values) const;
 
   friend class CurveFitting::SeqDomain;
   friend class CurveFitting::ParDomain;

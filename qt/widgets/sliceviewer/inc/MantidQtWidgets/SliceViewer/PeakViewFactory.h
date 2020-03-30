@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -44,7 +44,7 @@ private:
   // Creates a cross-like representation
   PeakRepresentation_sptr createPeakRepresentationCross(
       Mantid::Kernel::V3D position,
-      Mantid::Geometry::PeakTransform_const_sptr transform) const;
+      const Mantid::Geometry::PeakTransform_const_sptr &transform) const;
 
   // Creates a spherical representation
   PeakRepresentation_sptr

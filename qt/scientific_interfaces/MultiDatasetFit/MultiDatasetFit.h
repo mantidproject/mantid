@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -79,7 +79,7 @@ public:
   /// Get the tie for a local parameter.
   QString getLocalParameterTie(const QString &parName, int i) const;
   /// Set a tie for a local parameter.
-  void setLocalParameterTie(const QString &parName, int i, QString tie);
+  void setLocalParameterTie(const QString &parName, int i, const QString &tie);
   /// Log a warning
   static void logWarning(const std::string &msg);
 

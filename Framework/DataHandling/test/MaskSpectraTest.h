@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -47,7 +47,7 @@ void checkWorkspace(const MatrixWorkspace &ws) {
   TS_ASSERT_EQUALS(ws.e(3)[0], 0.0);
 }
 
-MatrixWorkspace_sptr runMaskSpectra(MatrixWorkspace_sptr inputWS) {
+MatrixWorkspace_sptr runMaskSpectra(const MatrixWorkspace_sptr &inputWS) {
   MaskSpectra alg;
   alg.setChild(true);
   alg.initialize();

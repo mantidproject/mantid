@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/QPeaksTableModel.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -14,6 +14,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include <QString>
 #include <boost/lexical_cast.hpp>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -152,7 +153,7 @@ Constructor
 */
 QPeaksTableModel::QPeaksTableModel(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS)
-    : QAbstractTableModel(nullptr), m_peaksWS(peaksWS) {
+    : QAbstractTableModel(nullptr), m_peaksWS(std::move(peaksWS)) {
   m_columnNameMap = {{0, RUNNUMBER},
                      {1, DETID},
                      {2, H},
@@ -264,7 +265,7 @@ void QPeaksTableModel::setPeaksWorkspace(
     boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) {
   beginResetModel();
   emit layoutAboutToBeChanged();
-  m_peaksWS = peaksWS;
+  m_peaksWS = std::move(peaksWS);
   emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
   emit layoutChanged();
   endResetModel();

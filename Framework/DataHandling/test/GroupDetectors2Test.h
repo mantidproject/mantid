@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -560,21 +560,21 @@ public:
     TS_ASSERT_EQUALS(*specDet, 2);
     specDet = output2D1->getSpectrum(2).getDetectorIDs().begin();
     TS_ASSERT_EQUALS(*specDet, 3);
-    specDet++;
+    ++specDet;
     TS_ASSERT_EQUALS(*specDet, 4);
-    specDet++;
+    ++specDet;
     TS_ASSERT_EQUALS(*specDet, 5);
     specDet = output2D1->getSpectrum(3).getDetectorIDs().begin();
     TS_ASSERT_EQUALS(*specDet, 2);
-    specDet++;
+    ++specDet;
     TS_ASSERT_EQUALS(*specDet, 8);
-    specDet++;
+    ++specDet;
     TS_ASSERT_EQUALS(*specDet, 9);
-    specDet++;
+    ++specDet;
     TS_ASSERT_EQUALS(*specDet, 11);
-    specDet++;
+    ++specDet;
     TS_ASSERT_EQUALS(*specDet, 12);
-    specDet++;
+    ++specDet;
     TS_ASSERT_EQUALS(*specDet, 13);
 
     AnalysisDataService::Instance().remove(outputSpace);
@@ -631,6 +631,7 @@ public:
     const auto &y = output->y(0);
     const auto &e = output->e(0);
     for (size_t i = 0; i < y.size(); ++i) {
+      // cppcheck-suppress unreadVariable
       const double expectedSignal = i == 0 ? 2. : (1. + 2.) / 2.;
       TS_ASSERT_EQUALS(y[i], expectedSignal)
       const double expectedError = i == 0 ? 1. : std::sqrt(2.) / 2.;
@@ -659,6 +660,7 @@ public:
     const auto &y = output->y(0);
     const auto &e = output->e(0);
     for (size_t i = 0; i < y.size(); ++i) {
+      // cppcheck-suppress unreadVariable
       const double expectedSignal = i == 0 ? 2. : 1. + 2.;
       TS_ASSERT_EQUALS(y[i], expectedSignal)
       const double expectedError = i == 0 ? 1. : std::sqrt(2.);
@@ -1122,7 +1124,7 @@ private:
     }
 
     Instrument_sptr instr(new Instrument);
-    for (detid_t i = 0; i < NHIST; i++) {
+    for (detid_t i = 0; i < NHIST; ++i) {
       Detector *d = new Detector("det", i, nullptr);
       d->setPos(1. + static_cast<double>(i) * 0.1, 0., 1.);
       instr->add(d);

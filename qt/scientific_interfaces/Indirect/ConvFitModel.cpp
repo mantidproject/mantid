@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitModel.h"
 
@@ -14,6 +14,7 @@
 #include <boost/algorithm/string/join.hpp>
 
 #include <stdexcept>
+#include <utility>
 
 using namespace Mantid::API;
 
@@ -38,7 +39,7 @@ IAlgorithm_sptr loadParameterFileAlgorithm(std::string const &workspaceName,
 }
 
 void readAnalyserFromFile(const std::string &analyser,
-                          MatrixWorkspace_sptr workspace) {
+                          const MatrixWorkspace_sptr &workspace) {
   auto const instrument = workspace->getInstrument();
   auto const idfDirectory = Mantid::Kernel::ConfigService::Instance().getString(
       "instrumentDefinition.directory");
@@ -57,7 +58,7 @@ void readAnalyserFromFile(const std::string &analyser,
 }
 
 Mantid::Geometry::IComponent_const_sptr
-getAnalyser(MatrixWorkspace_sptr workspace) {
+getAnalyser(const MatrixWorkspace_sptr &workspace) {
   auto const instrument = workspace->getInstrument();
   auto const analysers = instrument->getStringParameter("analyser");
 
@@ -79,7 +80,8 @@ getAnalyser(MatrixWorkspace_sptr workspace) {
   return instrument->getComponentByName(analysers[0]);
 }
 
-boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
+boost::optional<double>
+instrumentResolution(const MatrixWorkspace_sptr &workspace) {
   try {
     auto const analyser = getAnalyser(workspace);
     if (analyser && analyser->hasParameter("resolution"))
@@ -101,7 +103,7 @@ boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
   }
 }
 
-MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWS,
+MatrixWorkspace_sptr cloneWorkspace(const MatrixWorkspace_sptr &inputWS,
                                     std::string const &outputName) {
   auto cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
   cloneAlg->setLogging(false);
@@ -112,8 +114,8 @@ MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWS,
   return getADSMatrixWorkspace(outputName);
 }
 
-MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr leftWS,
-                                     MatrixWorkspace_sptr rightWS,
+MatrixWorkspace_sptr appendWorkspace(const MatrixWorkspace_sptr &leftWS,
+                                     const MatrixWorkspace_sptr &rightWS,
                                      int numHistograms,
                                      std::string const &outputName) {
   auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
@@ -144,7 +146,7 @@ void deleteWorkspace(std::string const &workspaceName) {
   deleter->execute();
 }
 
-void extendResolutionWorkspace(MatrixWorkspace_sptr resolution,
+void extendResolutionWorkspace(const MatrixWorkspace_sptr &resolution,
                                std::size_t numberOfHistograms,
                                std::string const &outputName) {
   const auto resolutionNumHist = resolution->getNumberHistograms();
@@ -257,7 +259,7 @@ constructParameterNameChanges(const IFunction &model,
   }
 }
 
-IAlgorithm_sptr addSampleLogAlgorithm(Workspace_sptr workspace,
+IAlgorithm_sptr addSampleLogAlgorithm(const Workspace_sptr &workspace,
                                       const std::string &name,
                                       const std::string &text,
                                       const std::string &type) {
@@ -273,7 +275,8 @@ IAlgorithm_sptr addSampleLogAlgorithm(Workspace_sptr workspace,
 struct AddSampleLogRunner {
   AddSampleLogRunner(Workspace_sptr resultWorkspace,
                      WorkspaceGroup_sptr resultGroup)
-      : m_resultWorkspace(resultWorkspace), m_resultGroup(resultGroup) {}
+      : m_resultWorkspace(std::move(resultWorkspace)),
+        m_resultGroup(std::move(resultGroup)) {}
 
   void operator()(const std::string &name, const std::string &text,
                   const std::string &type) {
@@ -291,15 +294,15 @@ getNames(const MantidQt::CustomInterfaces::IDA::ResolutionCollectionType
              &workspaces) {
   std::vector<std::string> names;
   names.reserve(workspaces.size().value);
-  std::transform(workspaces.begin(), workspaces.end(),
-                 std::back_inserter(names),
-                 [](boost::weak_ptr<Mantid::API::MatrixWorkspace> workspace) {
-                   return workspace.lock()->getName();
-                 });
+  std::transform(
+      workspaces.begin(), workspaces.end(), std::back_inserter(names),
+      [](const boost::weak_ptr<Mantid::API::MatrixWorkspace> &workspace) {
+        return workspace.lock()->getName();
+      });
   return names;
 }
 
-void setResolutionAttribute(CompositeFunction_sptr convolutionModel,
+void setResolutionAttribute(const CompositeFunction_sptr &convolutionModel,
                             const IFunction::Attribute &attr) {
   if (convolutionModel->name() == "Convolution")
     convolutionModel->getFunction(0)->setAttribute("Workspace", attr);
@@ -425,7 +428,7 @@ void ConvFitModel::setResolution(const std::string &name,
     throw std::runtime_error("A valid resolution file needs to be selected.");
 }
 
-void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
+void ConvFitModel::setResolution(const MatrixWorkspace_sptr &resolution,
                                  TableDatasetIndex index) {
   if (m_resolution.size() > index)
     m_resolution[index] = resolution;
@@ -556,7 +559,7 @@ void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
 void ConvFitModel::setParameterNameChanges(
     const IFunction &model, boost::optional<std::size_t> backgroundIndex) {
   m_parameterNameChanges = constructParameterNameChanges(
-      model, backgroundIndex, m_temperature.is_initialized());
+      model, std::move(backgroundIndex), m_temperature.is_initialized());
 }
 
 std::vector<std::pair<std::string, int>>

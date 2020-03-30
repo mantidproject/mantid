@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -36,7 +36,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER SliceViewerWindow
 
 public:
   SliceViewerWindow(const QString &wsName, const QString &label = QString(),
-                    Qt::WindowFlags f = nullptr);
+                    const Qt::WindowFlags &f = nullptr);
   ~SliceViewerWindow() override;
   MantidQt::SliceViewer::SliceViewer *getSlicer();
   MantidQt::SliceViewer::LineViewer *getLiner();
@@ -66,7 +66,7 @@ protected slots:
   void closeWindow();
   void updateWorkspace();
   void slicerWorkspaceChanged();
-  void changedSlicePoint(Mantid::Kernel::VMD /*slice*/);
+  void changedSlicePoint(const Mantid::Kernel::VMD & /*slice*/);
   void lineChanging(QPointF start, QPointF end, double width);
   void lineChanged(QPointF start, QPointF end, double width);
   void changeStartOrEnd(Mantid::Kernel::VMD /*start*/,

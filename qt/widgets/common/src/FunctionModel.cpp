@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionModel.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -178,7 +178,8 @@ void FunctionModel::setParameterFixed(const QString &parName, bool fixed) {
                          fixed);
 }
 
-void FunctionModel::setParameterTie(const QString &parName, QString tie) {
+void FunctionModel::setParameterTie(const QString &parName,
+                                    const QString &tie) {
   setLocalParameterTie(parName, static_cast<int>(m_currentDomainIndex), tie);
 }
 

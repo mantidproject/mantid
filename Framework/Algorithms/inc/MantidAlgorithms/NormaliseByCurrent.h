@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -55,8 +55,9 @@ private:
   void init() override;
   void exec() override;
   // Extract the charge value from the logs.
-  double extractCharge(boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWS,
-                       const bool integratePCharge) const;
+  double
+  extractCharge(const boost::shared_ptr<Mantid::API::MatrixWorkspace> &inputWS,
+                const bool integratePCharge) const;
 };
 
 } // namespace Algorithms

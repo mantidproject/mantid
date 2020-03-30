@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -45,9 +45,10 @@ struct WindowInfo {
 class EXPORT_OPT_MANTIDQT_COMMON ProjectSaveModel {
 public:
   /// Construct a new model instance with vector of window handles
-  ProjectSaveModel(std::vector<MantidQt::API::IProjectSerialisable *> windows,
-                   std::vector<std::string> activePythonInterfaces =
-                       std::vector<std::string>());
+  ProjectSaveModel(
+      const std::vector<MantidQt::API::IProjectSerialisable *> &windows,
+      std::vector<std::string> activePythonInterfaces =
+          std::vector<std::string>());
 
   /// Check if a workspace has any windows attached to it
   bool hasWindows(const std::string &ws) const;
@@ -80,7 +81,7 @@ public:
 private:
   /// Create a workspace info object for this workspace
   WorkspaceInfo
-  makeWorkspaceInfoObject(Mantid::API::Workspace_const_sptr ws) const;
+  makeWorkspaceInfoObject(const Mantid::API::Workspace_const_sptr &ws) const;
 
   WindowInfo
   makeWindowInfoObject(MantidQt::API::IProjectSerialisable *window) const;

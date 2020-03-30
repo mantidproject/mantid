@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyWithValue.h"
 
@@ -42,7 +42,8 @@ namespace Kernel {
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue,
+PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
+                                           TYPE defaultValue,
                                            IValidator_sptr validator,
                                            unsigned int direction)
     : Property(std::move(name), typeid(TYPE), direction), m_value(defaultValue),
@@ -56,7 +57,8 @@ PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue,
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue,
+PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
+                                           TYPE defaultValue,
                                            unsigned int direction)
     : Property(std::move(name), typeid(TYPE), direction), m_value(defaultValue),
       m_initialValue(std::move(defaultValue)),
@@ -77,7 +79,8 @@ PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue,
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue,
+PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name,
+                                           TYPE defaultValue,
                                            const std::string &defaultValueStr,
                                            IValidator_sptr validator,
                                            unsigned int direction)

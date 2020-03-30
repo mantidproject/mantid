@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -1205,7 +1205,8 @@ public:
    */
   void do_check_integrateSphere(MDGridBox<MDLeanEvent<2>, 2> &box, double x,
                                 double y, const double radius,
-                                double numExpected, std::string message) {
+                                double numExpected,
+                                const std::string &message) {
     // The sphere transformation
     bool dimensionsUsed[2] = {true, true};
     coord_t center[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
@@ -1336,7 +1337,8 @@ public:
    */
   void do_check_integrateSphere3d(MDGridBox<MDLeanEvent<3>, 3> &box, double x,
                                   double y, double z, const double radius,
-                                  double numExpected, std::string message) {
+                                  double numExpected,
+                                  const std::string &message) {
     // The sphere transformation
     bool dimensionsUsed[3] = {true, true, true};
     coord_t center[3] = {static_cast<coord_t>(x), static_cast<coord_t>(y),
@@ -1394,7 +1396,7 @@ public:
   void do_check_centroidSphere(MDGridBox<MDLeanEvent<2>, 2> &box, double x,
                                double y, const double radius,
                                double numExpected, double xExpected,
-                               double yExpected, std::string message) {
+                               double yExpected, const std::string &message) {
     // The sphere transformation
     bool dimensionsUsed[2] = {true, true};
     coord_t center[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};

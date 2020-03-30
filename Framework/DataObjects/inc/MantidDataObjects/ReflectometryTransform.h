@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -58,29 +58,30 @@ protected:
   mutable std::vector<double> m_thetaWidths;
 
   boost::shared_ptr<DataObjects::MDEventWorkspace2Lean>
-  createMDWorkspace(Geometry::IMDDimension_sptr, Geometry::IMDDimension_sptr,
-                    API::BoxController_sptr boxController) const;
+  createMDWorkspace(const Geometry::IMDDimension_sptr &,
+                    const Geometry::IMDDimension_sptr &,
+                    const API::BoxController_sptr &boxController) const;
 
 public:
   // Execute the strategy to produce a transformed, output MDWorkspace
   Mantid::API::IMDEventWorkspace_sptr
-  executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs,
-            Mantid::API::BoxController_sptr boxController,
+  executeMD(const Mantid::API::MatrixWorkspace_const_sptr &inputWs,
+            const Mantid::API::BoxController_sptr &boxController,
             Mantid::Geometry::MDFrame_uptr frame) const;
 
   // Execute the strategy to produce a transformed, output group of Matrix (2D)
   // Workspaces
   Mantid::API::MatrixWorkspace_sptr
-  execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
+  execute(const Mantid::API::MatrixWorkspace_const_sptr &inputWs) const;
 
   /// Execuate transformation using normalised polynomial binning
   Mantid::API::MatrixWorkspace_sptr executeNormPoly(
       const Mantid::API::MatrixWorkspace_const_sptr &inputWS,
       boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
-      bool dumpVertexes, std::string outputDimensions) const;
+      bool dumpVertexes, const std::string &outputDimensions) const;
 
-  Mantid::API::IMDHistoWorkspace_sptr
-  executeMDNormPoly(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
+  Mantid::API::IMDHistoWorkspace_sptr executeMDNormPoly(
+      const Mantid::API::MatrixWorkspace_const_sptr &inputWs) const;
   virtual ~ReflectometryTransform() = default;
   ReflectometryTransform(const std::string &d0Label, const std::string &d0ID,
                          double d0Min, double d0Max, const std::string &d1Label,

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -35,12 +35,12 @@ public:
   BoundaryConstraint(const std::string &paramName);
 
   /// Constructor with boundary arguments
-  BoundaryConstraint(API::IFunction *fun, const std::string paramName,
+  BoundaryConstraint(API::IFunction *fun, const std::string &paramName,
                      const double lowerBound, const double upperBound,
                      bool isDefault = false);
 
   /// Constructor with lower boundary argument
-  BoundaryConstraint(API::IFunction *fun, const std::string paramName,
+  BoundaryConstraint(API::IFunction *fun, const std::string &paramName,
                      const double lowerBound, bool isDefault = false);
 
   /// Initialize the constraint from an expression

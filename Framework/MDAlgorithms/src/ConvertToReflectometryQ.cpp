@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertToReflectometryQ.h"
 
@@ -75,7 +75,8 @@ Check that the input workspace is of the correct type.
 @throw: runtime_error if the units do not appear to be correct/compatible with
 the algorithm.
 */
-void checkInputWorkspace(Mantid::API::MatrixWorkspace_const_sptr inputWs) {
+void checkInputWorkspace(
+    const Mantid::API::MatrixWorkspace_const_sptr &inputWs) {
   auto spectraAxis = inputWs->getAxis(1);
   const std::string label = spectraAxis->unit()->label();
   const std::string expectedLabel = "degrees";
@@ -148,7 +149,7 @@ Get the value of theta from the logs
 @return : theta found in the logs
 @throw: runtime_errror if 'stheta' was not found.
 */
-double getThetaFromLogs(MatrixWorkspace_sptr inputWs) {
+double getThetaFromLogs(const MatrixWorkspace_sptr &inputWs) {
 
   double theta = -1.;
   const Mantid::API::Run &run = inputWs->run();

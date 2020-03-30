@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 // tests for different parts of ConvertToMD exec functions
@@ -18,6 +18,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <utility>
+
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -26,23 +28,22 @@ using namespace Mantid::MDAlgorithms;
 
 class Convert2MDComponentsTestHelper : public ConvertToMD {
 public:
-  TableWorkspace_const_sptr
-  preprocessDetectorsPositions(Mantid::API::MatrixWorkspace_const_sptr InWS2D,
-                               const std::string dEModeRequested = "Direct",
-                               bool updateMasks = true) {
+  TableWorkspace_const_sptr preprocessDetectorsPositions(
+      const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
+      const std::string &dEModeRequested = "Direct", bool updateMasks = true) {
     std::string OutWSName(this->getProperty("PreprocDetectorsWS"));
     return ConvertToMD::preprocessDetectorsPositions(InWS2D, dEModeRequested,
                                                      updateMasks, OutWSName);
   }
   void setSourceWS(Mantid::API::MatrixWorkspace_sptr InWS2D) {
-    this->m_InWS2D = InWS2D;
+    this->m_InWS2D = std::move(InWS2D);
     // and create the class, which will deal with the target workspace
     if (!this->m_OutWSWrapper)
       this->m_OutWSWrapper = boost::shared_ptr<MDAlgorithms::MDEventWSWrapper>(
           new MDAlgorithms::MDEventWSWrapper());
   }
   Convert2MDComponentsTestHelper() { ConvertToMD::initialize(); }
-  bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,
+  bool buildTargetWSDescription(const API::IMDEventWorkspace_sptr &spws,
                                 const std::string &Q_mod_req,
                                 const std::string &dEModeRequested,
                                 const std::vector<std::string> &other_dim_names,
@@ -52,8 +53,8 @@ public:
     std::vector<double> dimMin = this->getProperty("MinValues");
     std::vector<double> dimMax = this->getProperty("MaxValues");
     return ConvertToMD::buildTargetWSDescription(
-        spws, Q_mod_req, dEModeRequested, other_dim_names, dimMin, dimMax,
-        QFrame, convert_to_, targWSDescr);
+        std::move(spws), Q_mod_req, dEModeRequested, other_dim_names, dimMin,
+        dimMax, QFrame, convert_to_, targWSDescr);
   }
   void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const {
     ConvertToMD::copyMetaData(mdEventWS);

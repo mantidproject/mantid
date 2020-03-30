@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveIsawDetCal.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -227,7 +227,8 @@ void SaveIsawDetCal::exec() {
   out.close();
 }
 
-V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
+V3D SaveIsawDetCal::findPixelPos(const std::string &bankName, int col,
+                                 int row) {
   boost::shared_ptr<const IComponent> parent =
       inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {
@@ -261,8 +262,8 @@ V3D SaveIsawDetCal::findPixelPos(std::string bankName, int col, int row) {
   }
 }
 
-void SaveIsawDetCal::sizeBanks(std::string bankName, int &NCOLS, int &NROWS,
-                               double &xsize, double &ysize) {
+void SaveIsawDetCal::sizeBanks(const std::string &bankName, int &NCOLS,
+                               int &NROWS, double &xsize, double &ysize) {
   if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =

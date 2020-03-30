@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -236,7 +236,7 @@ protected:
   SpaceGroup_const_sptr getPrototype(const std::string &hmSymbol);
   void subscribe(const AbstractSpaceGroupGenerator_sptr &generator);
   SpaceGroup_const_sptr
-  constructFromPrototype(const SpaceGroup_const_sptr prototype) const;
+  constructFromPrototype(const SpaceGroup_const_sptr &prototype) const;
 
   void fillPointGroupMap();
 

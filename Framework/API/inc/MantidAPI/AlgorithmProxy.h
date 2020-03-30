@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -50,7 +50,7 @@ http://proj-gaudi.web.cern.ch/proj-gaudi/)
 class MANTID_API_DLL AlgorithmProxy : public IAlgorithm,
                                       public Kernel::PropertyManagerOwner {
 public:
-  AlgorithmProxy(Algorithm_sptr alg);
+  AlgorithmProxy(const Algorithm_sptr &alg);
   AlgorithmProxy(const AlgorithmProxy &) = delete;
   AlgorithmProxy &operator=(const AlgorithmProxy &) = delete;
   ~AlgorithmProxy() override;
@@ -88,6 +88,12 @@ public:
     throw std::runtime_error("Not implemented.");
   }
   Poco::ActiveResult<bool> executeAsync() override;
+
+  /// Gets the current execution state
+  ExecutionState executionState() const override;
+  /// Gets the current result State
+  ResultState resultState() const override;
+
   bool isInitialized() const override;
   bool isExecuted() const override;
 
@@ -179,11 +185,13 @@ private:
   const int m_version;         ///< version of the real algorithm
 
   mutable boost::shared_ptr<Algorithm>
-      m_alg;         ///< Shared pointer to a real algorithm. Created on demand
-  bool m_isExecuted; ///< Executed flag
+      m_alg; ///< Shared pointer to a real algorithm. Created on demand
+
+  ExecutionState m_executionState; ///< the current execution state
+  ResultState m_resultState;       ///< the current result State
   bool m_isLoggingEnabled; ///< is the logging of the underlying algorithm
-  /// enabled
-  int m_loggingOffset;               ///< the logging priority offset
+                           /// enabled
+  int m_loggingOffset;     ///< the logging priority offset
   bool m_isAlgStartupLoggingEnabled; /// Whether to log alg startup and
                                      /// closedown messages from the base class
                                      /// (default = true)

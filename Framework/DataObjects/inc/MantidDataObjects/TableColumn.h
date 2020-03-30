@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -556,7 +556,7 @@ public:
   /** Constructor
       @param c :: Shared pointer to a column
     */
-  TableColumn_ptr(boost::shared_ptr<API::Column> c)
+  TableColumn_ptr(const boost::shared_ptr<API::Column> &c)
       : TableColumn_ptr<API::Boolean>(c) {
     if (!this->get()) {
       std::string str = "Data type of column " + c->name() +

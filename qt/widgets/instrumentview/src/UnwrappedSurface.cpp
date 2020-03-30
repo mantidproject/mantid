@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
@@ -226,8 +226,9 @@ void UnwrappedSurface::setColor(size_t index, bool picking) const {
   }
 }
 
-bool hasParent(boost::shared_ptr<const Mantid::Geometry::IComponent> comp,
-               Mantid::Geometry::ComponentID id) {
+bool hasParent(
+    const boost::shared_ptr<const Mantid::Geometry::IComponent> &comp,
+    Mantid::Geometry::ComponentID id) {
   boost::shared_ptr<const Mantid::Geometry::IComponent> parent =
       comp->getParent();
   if (!parent)
@@ -362,7 +363,7 @@ RectF UnwrappedSurface::getSurfaceBounds() const { return m_viewRect; }
  * @param pws :: A shared pointer to the workspace.
  */
 void UnwrappedSurface::setPeaksWorkspace(
-    boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws) {
+    const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
   if (!pws) {
     return;
   }

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -257,7 +257,6 @@ public:
     constexpr double WL_DELTA = (2.9 - WL_MIN) / static_cast<double>(NUM_VALS);
 
     // create the input workspace
-    const std::string IN_WS{"AbsorptionCorrection_Input"};
     auto inputWS = WorkspaceCreationHelper::create2DWorkspaceBinned(
         1, NUM_VALS, WL_MIN, WL_DELTA);
     auto testInst =

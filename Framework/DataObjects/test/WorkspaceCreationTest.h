@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -78,7 +78,7 @@ void run_create_partitioned_parent(const Parallel::Communicator &comm) {
 
 void run_create_partitioned_with_instrument(
     const Parallel::Communicator &comm,
-    boost::shared_ptr<Geometry::Instrument> instrument) {
+    const boost::shared_ptr<Geometry::Instrument> &instrument) {
   IndexInfo indices(4, Parallel::StorageMode::Distributed, comm);
   // should a nullptr spectrum definitions vector indicate building default
   // defs?

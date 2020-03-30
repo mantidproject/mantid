@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 
@@ -33,7 +33,7 @@ initiated)
 *@returns shared pointer to new solver, which corresponds to the workspace
 */
 boost::shared_ptr<ConvToMDBase> ConvToMDSelector::convSelector(
-    API::MatrixWorkspace_sptr inputWS,
+    const API::MatrixWorkspace_sptr &inputWS,
     boost::shared_ptr<ConvToMDBase> &currentSolver) const {
   // identify what kind of workspace we expect to process
   wsType inputWSType = Undefined;

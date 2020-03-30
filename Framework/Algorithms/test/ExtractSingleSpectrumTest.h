@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -88,7 +88,7 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr runAlgorithm(MatrixWorkspace_sptr inputWS,
+  MatrixWorkspace_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS,
                                     const int index) {
     ExtractSingleSpectrum extractor;
     extractor.initialize();
@@ -106,8 +106,8 @@ private:
     return extractor.getProperty("OutputWorkspace");
   }
 
-  void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specnum_t specID,
-                         const detid_t detID) {
+  void do_Spectrum_Tests(const MatrixWorkspace_sptr &outputWS,
+                         const specnum_t specID, const detid_t detID) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     TS_ASSERT_THROWS_NOTHING(outputWS->getSpectrum(0));
     const auto &spectrum = outputWS->getSpectrum(0);

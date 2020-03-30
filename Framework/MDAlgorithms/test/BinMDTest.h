@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -26,6 +26,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cmath>
+#include <utility>
 
 #include <cxxtest/TestSuite.h>
 
@@ -132,8 +133,9 @@ public:
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
 
     execute_bin(functionXML, name1, name2, name3, name4, expected_signal,
-                expected_numBins, IterateEvents, numEventsPerBox, expectBasisX,
-                expectBasisY, expectBasisZ, in_ws);
+                expected_numBins, IterateEvents, numEventsPerBox,
+                std::move(expectBasisX), std::move(expectBasisY),
+                std::move(expectBasisZ), in_ws);
   }
 
   MDHistoWorkspace_sptr
@@ -142,7 +144,7 @@ public:
               const std::string &name4, const double expected_signal,
               const size_t expected_numBins, bool IterateEvents,
               size_t numEventsPerBox, VMD expectBasisX, VMD expectBasisY,
-              VMD expectBasisZ, IMDEventWorkspace_sptr in_ws) {
+              VMD expectBasisZ, const IMDEventWorkspace_sptr &in_ws) {
     BinMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -584,9 +586,9 @@ public:
    * @param origWS :: both should have this as its originalWorkspace
    * @return binned2 shared pointer
    */
-  MDHistoWorkspace_sptr do_compare_histo(std::string binned1Name,
-                                         std::string binned2Name,
-                                         std::string origWS) {
+  MDHistoWorkspace_sptr do_compare_histo(const std::string &binned1Name,
+                                         const std::string &binned2Name,
+                                         const std::string &origWS) {
     MDHistoWorkspace_sptr binned1 =
         AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
             binned1Name);
@@ -1078,7 +1080,7 @@ public:
     return outWSName;
   }
 
-  std::string saveWorkspace(IMDEventWorkspace_sptr in_ws) {
+  std::string saveWorkspace(const IMDEventWorkspace_sptr &in_ws) {
     SaveMD2 saver;
     saver.setChild(true);
     saver.setRethrows(true);
@@ -1128,7 +1130,7 @@ public:
     AnalysisDataService::Instance().remove("BinMDTest_ws");
   }
 
-  void do_test(std::string binParams, bool IterateEvents) {
+  void do_test(const std::string &binParams, bool IterateEvents) {
     BinMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

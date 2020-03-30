@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -41,9 +41,9 @@ private:
   boost::shared_ptr<Mantid::API::MatrixWorkspace>
   getEfficiencyWorkspace(const std::string &label);
   boost::shared_ptr<Mantid::API::WorkspaceGroup>
-  execPA(boost::shared_ptr<Mantid::API::WorkspaceGroup> inWS);
+  execPA(const boost::shared_ptr<Mantid::API::WorkspaceGroup> &inWS);
   boost::shared_ptr<Mantid::API::WorkspaceGroup>
-  execPNR(boost::shared_ptr<Mantid::API::WorkspaceGroup> inWS);
+  execPNR(const boost::shared_ptr<Mantid::API::WorkspaceGroup> &inWS);
   boost::shared_ptr<Mantid::API::MatrixWorkspace>
   add(boost::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
       const double &rhs);

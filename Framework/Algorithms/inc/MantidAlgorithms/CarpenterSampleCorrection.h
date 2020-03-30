@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidAPI/DataProcessorAlgorithm.h"
@@ -58,10 +58,10 @@ private:
                       double coeff1, double coeff2, double coeff3, bool doAbs,
                       bool doMS);
 
-  API::MatrixWorkspace_sptr multiply(const API::MatrixWorkspace_sptr lhsWS,
-                                     const API::MatrixWorkspace_sptr rhsWS);
-  API::MatrixWorkspace_sptr minus(const API::MatrixWorkspace_sptr lhsWS,
-                                  const API::MatrixWorkspace_sptr rhsWS);
+  API::MatrixWorkspace_sptr multiply(const API::MatrixWorkspace_sptr &lhsWS,
+                                     const API::MatrixWorkspace_sptr &rhsWS);
+  API::MatrixWorkspace_sptr minus(const API::MatrixWorkspace_sptr &lhsWS,
+                                  const API::MatrixWorkspace_sptr &rhsWS);
 };
 
 } // namespace Algorithms

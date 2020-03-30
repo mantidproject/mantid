@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/MeshFileIO.h"
 
@@ -88,7 +88,7 @@ Kernel::Matrix<double> MeshFileIO::generateZRotation(double zRotation) {
  */
 boost::shared_ptr<Geometry::MeshObject>
 MeshFileIO::translate(boost::shared_ptr<Geometry::MeshObject> environmentMesh,
-                      const std::vector<double> translationVector) {
+                      const std::vector<double> &translationVector) {
   std::vector<double> checkVector = std::vector<double>(3, 0.0);
   if (translationVector != checkVector) {
     if (translationVector.size() != 3) {

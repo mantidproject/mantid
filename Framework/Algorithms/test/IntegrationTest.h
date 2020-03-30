@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -166,7 +166,7 @@ public:
     assertRangeWithPartialBins(input);
   }
 
-  void doTestEvent(std::string inName, std::string outName,
+  void doTestEvent(const std::string &inName, const std::string &outName,
                    int StartWorkspaceIndex, int EndWorkspaceIndex) {
     int numPixels = 100;
     int numBins = 50;
@@ -229,8 +229,8 @@ public:
     doTestEvent("inWS", "inWS", 10, 29);
   }
 
-  void doTestRebinned(const std::string RangeLower,
-                      const std::string RangeUpper,
+  void doTestRebinned(const std::string &RangeLower,
+                      const std::string &RangeUpper,
                       const int StartWorkspaceIndex,
                       const int EndWorkspaceIndex,
                       const bool IncludePartialBins, const int expectedNumHists,
@@ -290,7 +290,7 @@ public:
     doTestRebinned("-1.5", "1.75", 0, 3, true, 4, truth);
   }
 
-  void makeRealBinBoundariesWorkspace(const std::string inWsName) {
+  void makeRealBinBoundariesWorkspace(const std::string &inWsName) {
     const unsigned int lenX = 11, lenY = 10, lenE = lenY;
 
     Workspace_sptr wsAsWs =
@@ -326,9 +326,9 @@ public:
     AnalysisDataService::Instance().add(inWsName, ws);
   }
 
-  void doTestRealBinBoundaries(const std::string inWsName,
-                               const std::string rangeLower,
-                               const std::string rangeUpper,
+  void doTestRealBinBoundaries(const std::string &inWsName,
+                               const std::string &rangeLower,
+                               const std::string &rangeUpper,
                                const double expectedVal,
                                const bool checkRanges = false,
                                const bool IncPartialBins = false) {
@@ -707,7 +707,7 @@ public:
   }
 
   template <typename F>
-  void wsBoundsTest(std::string workspace, int startIndex, int endIndex,
+  void wsBoundsTest(const std::string &workspace, int startIndex, int endIndex,
                     F boundsAssert) {
     MatrixWorkspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(
@@ -732,8 +732,9 @@ public:
   }
 
   void testStartWsIndexOutOfBounds() {
-    auto boundsAssert = [](MatrixWorkspace_sptr, MatrixWorkspace_sptr output,
-                           int, int endIndex) {
+    auto boundsAssert = [](const MatrixWorkspace_sptr &,
+                           const MatrixWorkspace_sptr &output, int,
+                           int endIndex) {
       TS_ASSERT_EQUALS(output->getNumberHistograms(), endIndex + 1);
     };
 
@@ -741,8 +742,9 @@ public:
   }
 
   void testStartWSIndexGreaterThanEnd() {
-    auto boundsAssert = [](MatrixWorkspace_sptr input,
-                           MatrixWorkspace_sptr output, int startIndex, int) {
+    auto boundsAssert = [](const MatrixWorkspace_sptr &input,
+                           const MatrixWorkspace_sptr &output, int startIndex,
+                           int) {
       TS_ASSERT_EQUALS(output->getNumberHistograms(),
                        input->getNumberHistograms() - startIndex);
     };
@@ -751,8 +753,8 @@ public:
   }
 
   void testStartWSIndexEqualsEnd() {
-    auto boundsAssert = [](MatrixWorkspace_sptr, MatrixWorkspace_sptr output,
-                           int, int) {
+    auto boundsAssert = [](const MatrixWorkspace_sptr &,
+                           const MatrixWorkspace_sptr &output, int, int) {
       TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
     };
 
@@ -780,7 +782,7 @@ public:
   }
 
 private:
-  void assertRangeWithPartialBins(Workspace_sptr input) {
+  void assertRangeWithPartialBins(const Workspace_sptr &input) {
     Integration alg;
     alg.setRethrows(false);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());

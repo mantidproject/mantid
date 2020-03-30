@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -48,11 +48,11 @@ private:
   void init() override;
   void exec() override;
   std::size_t getWkspIndex(const detid2index_map &pixel_to_wi,
-                           Geometry::IComponent_const_sptr comp, const int x,
-                           const int y);
+                           const Geometry::IComponent_const_sptr &comp,
+                           const int x, const int y);
   void getTofRange(double &tofMin, double &tofMax, const double tofPeak,
                    const HistogramData::HistogramX &tof);
-  int findPixelID(std::string bankName, int col, int row);
+  int findPixelID(const std::string &bankName, int col, int row);
 
   /// Read in all the input parameters
   void retrieveProperties();

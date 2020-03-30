@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------------------
 // Includes
@@ -488,7 +488,7 @@ double LoadGSS::convertToDouble(std::string inputstring) {
 /** Create the instrument geometry with Instrument
  */
 void LoadGSS::createInstrumentGeometry(
-    MatrixWorkspace_sptr workspace, const std::string &instrumentname,
+    const MatrixWorkspace_sptr &workspace, const std::string &instrumentname,
     const double &primaryflightpath, const std::vector<int> &detectorids,
     const std::vector<double> &totalflightpaths,
     const std::vector<double> &twothetas) {

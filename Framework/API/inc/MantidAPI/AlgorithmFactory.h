@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -129,9 +129,9 @@ private:
 
   /// Extract the name of an algorithm
   const std::string
-  extractAlgName(const boost::shared_ptr<IAlgorithm> alg) const;
+  extractAlgName(const boost::shared_ptr<IAlgorithm> &alg) const;
   /// Extract the version of an algorithm
-  int extractAlgVersion(const boost::shared_ptr<IAlgorithm> alg) const;
+  int extractAlgVersion(const boost::shared_ptr<IAlgorithm> &alg) const;
 
   /// Create an algorithm object with the specified name
   boost::shared_ptr<Algorithm> createAlgorithm(const std::string &name,

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -50,7 +50,7 @@ void SeqDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
  * Add new domain creator
  * @param creator :: A shared pointer to a new creator.
  */
-void SeqDomain::addCreator(API::IDomainCreator_sptr creator) {
+void SeqDomain::addCreator(const API::IDomainCreator_sptr &creator) {
   m_creators.emplace_back(creator);
   m_domain.emplace_back(API::FunctionDomain_sptr());
   m_values.emplace_back(API::FunctionValues_sptr());

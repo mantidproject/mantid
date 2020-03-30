@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectSymmetrise.h"
 #include "IndirectDataValidationHelper.h"
@@ -620,8 +620,8 @@ void IndirectSymmetrise::setSaveEnabled(bool enabled) {
 
 void IndirectSymmetrise::updateRunButton(bool enabled,
                                          std::string const &enableOutputButtons,
-                                         QString const message,
-                                         QString const tooltip) {
+                                         QString const &message,
+                                         QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);

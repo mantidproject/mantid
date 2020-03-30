@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 #include "MantidGeometry/Instrument.h"
@@ -883,7 +883,7 @@ MantidTreeWidgetItem *WorkspaceTreeWidget::addTreeEntry(
  * Check if a workspace should be selected after dock update.
  * @param name :: Name of a workspace to check.
  */
-bool WorkspaceTreeWidget::shouldBeSelected(QString name) const {
+bool WorkspaceTreeWidget::shouldBeSelected(const QString &name) const {
   QMutexLocker lock(&m_mutex);
   QStringList renamed = m_renameMap.keys(name);
   if (!renamed.isEmpty()) {
@@ -1114,7 +1114,7 @@ bool WorkspaceTreeWidget::hasUBMatrix(const std::string &wsName) {
  * ALGO_NAME
  * @param menuEntryName Text to be shown in menu
  */
-void WorkspaceTreeWidget::addSaveMenuOption(QString algorithmString,
+void WorkspaceTreeWidget::addSaveMenuOption(const QString &algorithmString,
                                             QString menuEntryName) {
   // Default to algo string if no entry name given
   if (menuEntryName.isEmpty())

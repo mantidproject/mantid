@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -72,7 +72,7 @@ private:
                             double &eta) const;
 
   /// constrain all parameters to be non-negative
-  void lowerConstraint0(std::string paramName);
+  void lowerConstraint0(const std::string &paramName);
 };
 
 } // namespace Functions

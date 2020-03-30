@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -31,13 +31,13 @@ public:
   void test_initialized_object_has_expected_attributes() {
     auto profile = createFunction();
     static const size_t nattrs(3);
-    const char *expectedAttrs[nattrs] = {"WorkspaceIndex", "Mass",
-                                         "VoigtEnergyCutOff"};
 
     TS_ASSERT_EQUALS(nattrs, profile->nAttributes());
 
     // Test names as they are used in scripts
     if (profile->nAttributes() > 0) {
+      const char *expectedAttrs[nattrs] = {"WorkspaceIndex", "Mass",
+                                           "VoigtEnergyCutOff"};
       std::unordered_set<std::string> expectedAttrSet(expectedAttrs,
                                                       expectedAttrs + nattrs);
       std::vector<std::string> actualNames = profile->getAttributeNames();

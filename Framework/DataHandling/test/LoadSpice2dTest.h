@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -222,7 +222,8 @@ public:
     TS_ASSERT_DELTA(ws2d->x(192 + nmon)[0], 4.5, tolerance);
   }
 
-  void assertDetectorDistances(Mantid::DataObjects::Workspace2D_sptr ws2d) {
+  void
+  assertDetectorDistances(const Mantid::DataObjects::Workspace2D_sptr &ws2d) {
     Mantid::Kernel::Property *prop =
         ws2d->run().getProperty("sample-detector-distance");
     Mantid::Kernel::PropertyWithValue<double> *sdd =

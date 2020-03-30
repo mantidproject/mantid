@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -53,7 +53,7 @@ public:
     loadFailureTest("invalid_triangle.stl");
   }
 
-  void loadFailureTest(const std::string filename) {
+  void loadFailureTest(const std::string &filename) {
     std::string path = FileFinder::Instance().getFullPath(filename);
     auto Loader = LoadAsciiStl(path, units);
     TS_ASSERT_THROWS_ANYTHING(Loader.readStl());

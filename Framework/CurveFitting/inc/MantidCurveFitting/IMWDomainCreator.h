@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -15,6 +15,7 @@
 
 #include <boost/weak_ptr.hpp>
 #include <list>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -53,7 +54,7 @@ public:
   /// Set the workspace
   /// @param ws :: workspace to set.
   void setWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws) {
-    m_matrixWorkspace = ws;
+    m_matrixWorkspace = std::move(ws);
   }
   /// Set the workspace index
   /// @param wi :: workspace index to set.
@@ -92,7 +93,7 @@ protected:
       const API::IFunction_sptr &function,
       boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
       const boost::shared_ptr<API::FunctionDomain> &domain,
-      boost::shared_ptr<API::FunctionValues> resultValues) const;
+      const boost::shared_ptr<API::FunctionValues> &resultValues) const;
 
   /// Store workspace property name
   std::string m_workspacePropertyName;

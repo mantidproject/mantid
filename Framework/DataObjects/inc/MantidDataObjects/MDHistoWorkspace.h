@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -91,7 +91,8 @@ public:
                        const Mantid::Kernel::VMD &end,
                        Mantid::API::MDNormalization normalize) const override;
 
-  void checkWorkspaceSize(const MDHistoWorkspace &other, std::string operation);
+  void checkWorkspaceSize(const MDHistoWorkspace &other,
+                          const std::string &operation);
 
   // --------------------------------------------------------------------------------------------
   MDHistoWorkspace &operator+=(const MDHistoWorkspace &b);

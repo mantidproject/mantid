@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -90,7 +90,7 @@ protected:
 
   /// Set preview plot workspace
   void setPreviewPlotWorkspace(
-      Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace);
+      const Mantid::API::MatrixWorkspace_sptr &previewPlotWorkspace);
 
   /// Retrieve the selected spectrum
   int selectedSpectrum() const;
@@ -110,11 +110,12 @@ protected:
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlot(Mantid::API::WorkspaceGroup_sptr workspaceGroup, size_t index,
+  void updatePlot(const Mantid::API::WorkspaceGroup_sptr &workspaceGroup,
+                  size_t index,
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlot(Mantid::API::WorkspaceGroup_sptr outputWS,
+  void updatePlot(const Mantid::API::WorkspaceGroup_sptr &outputWS,
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
@@ -122,7 +123,7 @@ protected:
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlot(Mantid::API::MatrixWorkspace_sptr outputWS,
+  void updatePlot(const Mantid::API::MatrixWorkspace_sptr &outputWS,
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 

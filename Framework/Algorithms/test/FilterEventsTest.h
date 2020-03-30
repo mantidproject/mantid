@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -1753,7 +1753,8 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Create the time correction table
    */
-  TableWorkspace_sptr createTimeCorrectionTable(MatrixWorkspace_sptr inpws) {
+  TableWorkspace_sptr
+  createTimeCorrectionTable(const MatrixWorkspace_sptr &inpws) {
     // 1. Generate an empty table
     auto corrtable = boost::make_shared<TableWorkspace>();
     corrtable->addColumn("int", "DetectorID");

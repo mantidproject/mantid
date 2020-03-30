@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * PeakHKLErrors.cpp
@@ -117,7 +117,7 @@ void PeakHKLErrors::setUpOptRuns() {
  */
 void PeakHKLErrors::cLone(
     boost::shared_ptr<Geometry::ParameterMap> &pmap,
-    boost::shared_ptr<const Geometry::IComponent> component,
+    const boost::shared_ptr<const Geometry::IComponent> &component,
     boost::shared_ptr<const Geometry::ParameterMap> &pmapSv) {
   if (!component)
     return;
@@ -187,7 +187,7 @@ void PeakHKLErrors::cLone(
  * NOTE: All the peaks in the PeaksWorkspace must use the same instrument.
  */
 boost::shared_ptr<Geometry::Instrument>
-PeakHKLErrors::getNewInstrument(PeaksWorkspace_sptr Peaks) const {
+PeakHKLErrors::getNewInstrument(const PeaksWorkspace_sptr &Peaks) const {
   Geometry::Instrument_const_sptr instSave = Peaks->getPeak(0).getInstrument();
   auto pmap = boost::make_shared<Geometry::ParameterMap>();
 
@@ -643,8 +643,8 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues,
 }
 
 Peak PeakHKLErrors::createNewPeak(const Geometry::IPeak &peak_old,
-                                  Geometry::Instrument_sptr instrNew, double T0,
-                                  double L0) {
+                                  const Geometry::Instrument_sptr &instrNew,
+                                  double T0, double L0) {
   Geometry::Instrument_const_sptr inst = peak_old.getInstrument();
   if (inst->getComponentID() != instrNew->getComponentID()) {
     g_log.error("All peaks must have the same instrument");

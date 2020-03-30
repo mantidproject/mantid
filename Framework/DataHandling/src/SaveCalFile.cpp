@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveCalFile.h"
 #include "MantidAPI/FileProperty.h"
@@ -80,9 +80,9 @@ void SaveCalFile::exec() {
  *(selected) if not specified.
  */
 void SaveCalFile::saveCalFile(const std::string &calFileName,
-                              GroupingWorkspace_sptr groupWS,
-                              OffsetsWorkspace_sptr offsetsWS,
-                              MaskWorkspace_sptr maskWS) {
+                              const GroupingWorkspace_sptr &groupWS,
+                              const OffsetsWorkspace_sptr &offsetsWS,
+                              const MaskWorkspace_sptr &maskWS) {
   Instrument_const_sptr inst;
 
   bool doGroup = false;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -148,9 +148,10 @@ public:
   /// Remove a function
   void removeFunction(size_t i);
   /// Replace a function
-  void replaceFunction(size_t i, IFunction_sptr f);
+  void replaceFunction(size_t i, const IFunction_sptr &f);
   /// Replace a function
-  void replaceFunctionPtr(const IFunction_sptr f_old, IFunction_sptr f_new);
+  void replaceFunctionPtr(const IFunction_sptr &f_old,
+                          const IFunction_sptr &f_new);
   /// Get the function index
   std::size_t functionIndex(std::size_t i) const;
   /// Returns the index of parameter i as it declared in its function

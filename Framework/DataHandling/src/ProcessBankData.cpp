@@ -1,12 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/ProcessBankData.h"
+#include <utility>
+
 #include "MantidDataHandling/DefaultEventLoader.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/ProcessBankData.h"
 
 using namespace Mantid::DataObjects;
 
@@ -21,14 +23,16 @@ ProcessBankData::ProcessBankData(
     boost::shared_ptr<BankPulseTimes> thisBankPulseTimes, bool have_weight,
     boost::shared_array<float> event_weight, detid_t min_event_id,
     detid_t max_event_id)
-    : Task(), m_loader(m_loader), entry_name(entry_name),
+    : Task(), m_loader(m_loader), entry_name(std::move(entry_name)),
       pixelID_to_wi_vector(m_loader.pixelID_to_wi_vector),
       pixelID_to_wi_offset(m_loader.pixelID_to_wi_offset), prog(prog),
-      event_id(event_id), event_time_of_flight(event_time_of_flight),
-      numEvents(numEvents), startAt(startAt), event_index(event_index),
-      thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
-      event_weight(event_weight), m_min_id(min_event_id),
-      m_max_id(max_event_id) {
+      event_id(std::move(event_id)),
+      event_time_of_flight(std::move(event_time_of_flight)),
+      numEvents(numEvents), startAt(startAt),
+      event_index(std::move(event_index)),
+      thisBankPulseTimes(std::move(thisBankPulseTimes)),
+      have_weight(have_weight), event_weight(std::move(event_weight)),
+      m_min_id(min_event_id), m_max_id(max_event_id) {
   // Cost is approximately proportional to the number of events to process.
   m_cost = static_cast<double>(numEvents);
 }
@@ -88,7 +92,7 @@ void ProcessBankData::run() { // override {
     // Now we pre-allocate (reserve) the vectors of events in each pixel
     // counted
     const size_t numEventLists = outputWS.getNumberHistograms();
-    for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++) {
+    for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
       if (counts[pixID - m_min_id] > 0) {
         size_t wi = getWorkspaceIndexFromPixelID(pixID);
         // Find the the workspace index corresponding to that pixel ID
@@ -220,7 +224,7 @@ void ProcessBankData::run() { // override {
   //------------ Compress Events (or set sort order) ------------------
   // Do it on all the detector IDs we touched
   if (compress) {
-    for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++) {
+    for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
       if (usedDetIds[pixID - m_min_id]) {
         // Find the the workspace index corresponding to that pixel ID
         size_t wi = getWorkspaceIndexFromPixelID(pixID);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/RefDetectorView/RefImageView.h"
 #include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
@@ -15,6 +15,7 @@
 
 #include <sstream>
 #include <string>
+#include <utility>
 
 namespace MantidQt {
 namespace RefDetectorViewer {
@@ -89,7 +90,7 @@ RefImageView::RefImageView(SpectrumView::SpectrumDataSource_sptr dataSource,
   m_imageDisplay->updateImage();
   iv_connections->peakBackTofRangeUpdate();
 
-  m_imageDisplay->setDataSource(dataSource);
+  m_imageDisplay->setDataSource(std::move(dataSource));
 }
 
 RefImageView::~RefImageView() {

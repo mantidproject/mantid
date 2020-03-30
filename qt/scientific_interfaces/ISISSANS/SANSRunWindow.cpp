@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SANSRunWindow.h"
 
@@ -45,6 +45,7 @@
 #include <boost/tuple/tuple.hpp>
 
 #include <cmath>
+#include <utility>
 
 using Mantid::detid_t;
 
@@ -159,7 +160,7 @@ QString convertBoolToPythonBoolString(bool input) {
  * @param input: the python string representation
  * @returns a true or false
  */
-bool convertPythonBoolStringToBool(QString input) {
+bool convertPythonBoolStringToBool(const QString &input) {
   bool value = false;
   if (input ==
       MantidQt::CustomInterfaces::SANSConstants::getPythonTrueKeyword()) {
@@ -173,7 +174,8 @@ bool convertPythonBoolStringToBool(QString input) {
 }
 
 void setTransmissionOnSaveCommand(
-    QString &saveCommand, Mantid::API::MatrixWorkspace_sptr matrix_workspace,
+    QString &saveCommand,
+    const Mantid::API::MatrixWorkspace_sptr &matrix_workspace,
     const QString &detectorSelection) {
   if (matrix_workspace->getInstrument()->getName() == "SANS2D")
     saveCommand += "'front-detector, rear-detector'";
@@ -1461,7 +1463,7 @@ void SANSRunWindow::appendRowToMaskTable(const QString &type,
  * @param lsdb :: The result of the sample-detector bank 2 distance
  */
 void SANSRunWindow::componentLOQDistances(
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
+    const boost::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace,
     double &lms, double &lsda, double &lsdb) {
   Instrument_const_sptr instr = workspace->getInstrument();
   if (!instr)
@@ -1882,7 +1884,7 @@ void SANSRunWindow::setGeometryDetails() {
  * @param wscode :: 0 for sample, 1 for can, others not defined
  */
 void SANSRunWindow::setSANS2DGeometry(
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
+    const boost::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace,
     int wscode) {
   const double unitconv = 1000.;
   const double distance = workspace->spectrumInfo().l1() * unitconv;
@@ -1934,11 +1936,11 @@ void SANSRunWindow::setSANS2DGeometry(
  * @param wscode :: ?????
  */
 void SANSRunWindow::setLOQGeometry(
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,
+    const boost::shared_ptr<const Mantid::API::MatrixWorkspace> &workspace,
     int wscode) {
   double dist_ms(0.0), dist_mdb(0.0), dist_hab(0.0);
   // Sample
-  componentLOQDistances(workspace, dist_ms, dist_mdb, dist_hab);
+  componentLOQDistances(std::move(workspace), dist_ms, dist_mdb, dist_hab);
 
   QHash<QString, QLabel *> &labels = m_loq_detlabels[wscode];
   QLabel *detlabel = labels.value("moderator-sample");
@@ -3687,7 +3689,7 @@ void SANSRunWindow::fillDetectNames(QComboBox *output) {
  *  @throw NotFoundError if a workspace can't be returned
  */
 Mantid::API::MatrixWorkspace_sptr
-SANSRunWindow::getGroupMember(Mantid::API::Workspace_const_sptr in,
+SANSRunWindow::getGroupMember(const Mantid::API::Workspace_const_sptr &in,
                               const int member) const {
   Mantid::API::WorkspaceGroup_const_sptr group =
       boost::dynamic_pointer_cast<const Mantid::API::WorkspaceGroup>(in);
@@ -3820,7 +3822,7 @@ void SANSRunWindow::cleanup() {
  * @param csv_line :: Add a line of csv text to the grid
  * @param separator :: An optional separator, default = ","
  */
-int SANSRunWindow::addBatchLine(QString csv_line, QString separator) {
+int SANSRunWindow::addBatchLine(const QString &csv_line, QString separator) {
   // Try to detect separator if one is not specified
   if (separator.isEmpty()) {
     if (csv_line.contains(",")) {
@@ -4688,7 +4690,7 @@ bool SANSRunWindow::areSettingsValid(States type) {
 void SANSRunWindow::checkWaveLengthAndQValues(bool &isValid, QString &message,
                                               QLineEdit *min, QLineEdit *max,
                                               QComboBox *selection,
-                                              QString type) {
+                                              const QString &type) {
   auto min_value = min->text().simplified().toDouble();
   auto max_value = max->text().simplified().toDouble();
 
@@ -4834,7 +4836,7 @@ void SANSRunWindow::retrieveQResolutionAperture() {
  * @param command: the python command to execute
  * @returns either a length (string) in mm or an empty string
  */
-QString SANSRunWindow::retrieveQResolutionGeometry(QString command) {
+QString SANSRunWindow::retrieveQResolutionGeometry(const QString &command) {
   QString result(runPythonCode(command, false));
   result = result.simplified();
   if (result == m_constants.getPythonEmptyKeyword()) {
@@ -4864,9 +4866,10 @@ void SANSRunWindow::setupQResolutionCircularAperture() {
  * @param h2: the height of the second aperture
  * @param w2: the width of the second aperture
  */
-void SANSRunWindow::setupQResolutionRectangularAperture(QString h1, QString w1,
-                                                        QString h2,
-                                                        QString w2) {
+void SANSRunWindow::setupQResolutionRectangularAperture(const QString &h1,
+                                                        const QString &w1,
+                                                        const QString &h2,
+                                                        const QString &w2) {
   // Set the QResolution Aperture
   setQResolutionApertureType(QResoluationAperture::RECTANGULAR, "H1 [mm]",
                              "H2 [mm]", h1, h2,
@@ -4914,9 +4917,9 @@ void SANSRunWindow::setupQResolutionRectangularAperture() {
  * @param w1W2Disabled: if the w1W2Inputs should be disabled
  */
 void SANSRunWindow::setQResolutionApertureType(
-    QResoluationAperture apertureType, QString a1H1Label, QString a2H2Label,
-    QString a1H1, QString a2H2, QString toolTipA1H1, QString toolTipA2H2,
-    bool w1W2Disabled) {
+    QResoluationAperture apertureType, const QString &a1H1Label,
+    const QString &a2H2Label, const QString &a1H1, const QString &a2H2,
+    const QString &toolTipA1H1, const QString &toolTipA2H2, bool w1W2Disabled) {
   // Set the labels
   m_uiForm.q_resolution_a1_h1_label->setText(a1H1Label);
   m_uiForm.q_resolution_a2_h2_label->setText(a2H2Label);
@@ -5012,7 +5015,7 @@ void SANSRunWindow::writeQResolutionSettingsToPythonScript(
  * @param py_code: the code segment to which we want to append
  */
 void SANSRunWindow::writeQResolutionSettingsToPythonScriptSingleEntry(
-    QString value, QString code_entry, const QString lineEnding,
+    const QString &value, const QString &code_entry, const QString &lineEnding,
     QString &py_code) const {
   if (!value.isEmpty()) {
     py_code += code_entry + value + lineEnding;
@@ -5125,7 +5128,8 @@ SANSRunWindow::retrieveBackgroundCorrectionSetting(bool isTime, bool isMon) {
   std::map<QString, QString> commandMap = {
       {"run_number", ""}, {"is_mean", ""}, {"is_mon", ""}, {"mon_number", ""}};
 
-  auto createPythonScript = [](bool isTime, bool isMon, QString component) {
+  auto createPythonScript = [](bool isTime, bool isMon,
+                               const QString &component) {
     return "i.get_background_correction(is_time = " +
            convertBoolToPythonBoolString(isTime) +
            ", is_mon=" + convertBoolToPythonBoolString(isMon) +
@@ -5185,7 +5189,7 @@ void SANSRunWindow::writeBackgroundCorrectionToPythonScript(
  */
 void SANSRunWindow::addBackgroundCorrectionToPythonScript(
     QString &pythonCode,
-    MantidQt::CustomInterfaces::SANSBackgroundCorrectionSettings setting,
+    const MantidQt::CustomInterfaces::SANSBackgroundCorrectionSettings &setting,
     bool isTimeBased) {
 
   QString newSetting =

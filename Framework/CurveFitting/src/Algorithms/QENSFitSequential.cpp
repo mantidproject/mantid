@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 
@@ -24,6 +24,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <unordered_map>
+#include <utility>
 
 namespace {
 using namespace Mantid::API;
@@ -39,8 +40,9 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(const std::string &workspaceName) {
       workspaceName);
 }
 
-MatrixWorkspace_sptr convertSpectrumAxis(MatrixWorkspace_sptr inputWorkspace,
-                                         const std::string &outputName) {
+MatrixWorkspace_sptr
+convertSpectrumAxis(const MatrixWorkspace_sptr &inputWorkspace,
+                    const std::string &outputName) {
   auto convSpec = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
   convSpec->setLogging(false);
   convSpec->setProperty("InputWorkspace", inputWorkspace);
@@ -53,16 +55,16 @@ MatrixWorkspace_sptr convertSpectrumAxis(MatrixWorkspace_sptr inputWorkspace,
   return getADSMatrixWorkspace(outputName);
 }
 
-MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWorkspace,
+MatrixWorkspace_sptr cloneWorkspace(const MatrixWorkspace_sptr &inputWorkspace,
                                     const std::string &outputName) {
   Workspace_sptr workspace = inputWorkspace->clone();
   AnalysisDataService::Instance().addOrReplace(outputName, workspace);
   return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
-MatrixWorkspace_sptr convertToElasticQ(MatrixWorkspace_sptr inputWorkspace,
-                                       const std::string &outputName,
-                                       bool doThrow) {
+MatrixWorkspace_sptr
+convertToElasticQ(const MatrixWorkspace_sptr &inputWorkspace,
+                  const std::string &outputName, bool doThrow) {
   auto axis = inputWorkspace->getAxis(1);
   if (axis->isSpectra())
     return convertSpectrumAxis(inputWorkspace, outputName);
@@ -80,8 +82,8 @@ struct ElasticQAppender {
   explicit ElasticQAppender(std::vector<MatrixWorkspace_sptr> &elasticInput)
       : m_elasticInput(elasticInput), m_converted() {}
 
-  void operator()(MatrixWorkspace_sptr workspace, const std::string &outputBase,
-                  bool doThrow) {
+  void operator()(const MatrixWorkspace_sptr &workspace,
+                  const std::string &outputBase, bool doThrow) {
     auto it = m_converted.find(workspace.get());
     if (it != m_converted.end())
       m_elasticInput.emplace_back(it->second);
@@ -111,13 +113,13 @@ convertToElasticQ(const std::vector<MatrixWorkspace_sptr> &workspaces,
   return elasticInput;
 }
 
-void extractFunctionNames(CompositeFunction_sptr composite,
+void extractFunctionNames(const CompositeFunction_sptr &composite,
                           std::vector<std::string> &names) {
   for (auto i = 0u; i < composite->nFunctions(); ++i)
     names.emplace_back(composite->getFunction(i)->name());
 }
 
-void extractFunctionNames(IFunction_sptr function,
+void extractFunctionNames(const IFunction_sptr &function,
                           std::vector<std::string> &names) {
   auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
@@ -126,16 +128,16 @@ void extractFunctionNames(IFunction_sptr function,
     names.emplace_back(function->name());
 }
 
-void extractConvolvedNames(IFunction_sptr function,
+void extractConvolvedNames(const IFunction_sptr &function,
                            std::vector<std::string> &names);
 
-void extractConvolvedNames(CompositeFunction_sptr composite,
+void extractConvolvedNames(const CompositeFunction_sptr &composite,
                            std::vector<std::string> &names) {
   for (auto i = 0u; i < composite->nFunctions(); ++i)
     extractConvolvedNames(composite->getFunction(i), names);
 }
 
-void extractConvolvedNames(IFunction_sptr function,
+void extractConvolvedNames(const IFunction_sptr &function,
                            std::vector<std::string> &names) {
   auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite) {
@@ -147,8 +149,8 @@ void extractConvolvedNames(IFunction_sptr function,
   }
 }
 
-std::string constructInputString(MatrixWorkspace_sptr workspace, int specMin,
-                                 int specMax) {
+std::string constructInputString(const MatrixWorkspace_sptr &workspace,
+                                 int specMin, int specMax) {
   std::ostringstream input;
   for (auto i = specMin; i < specMax + 1; ++i)
     input << workspace->getName() << ",i" << std::to_string(i) << ";";
@@ -170,9 +172,10 @@ std::vector<MatrixWorkspace_sptr> extractWorkspaces(const std::string &input) {
 
   std::vector<MatrixWorkspace_sptr> workspaces;
 
-  for (const auto &wsName : workspaceNames) {
-    workspaces.emplace_back(getADSMatrixWorkspace(wsName));
-  }
+  std::transform(workspaceNames.begin(), workspaceNames.end(),
+                 std::back_inserter(workspaces), [](const auto &wsName) {
+                   return getADSMatrixWorkspace(wsName);
+                 });
 
   return workspaces;
 }
@@ -203,14 +206,16 @@ replaceWorkspaces(const std::string &input,
   return newInput.str();
 }
 
-void renameWorkspace(IAlgorithm_sptr renamer, Workspace_sptr workspace,
+void renameWorkspace(const IAlgorithm_sptr &renamer,
+                     const Workspace_sptr &workspace,
                      const std::string &newName) {
   renamer->setProperty("InputWorkspace", workspace);
   renamer->setProperty("OutputWorkspace", newName);
   renamer->executeAsChildAlg();
 }
 
-void deleteTemporaries(IAlgorithm_sptr deleter, const std::string &base) {
+void deleteTemporaries(const IAlgorithm_sptr &deleter,
+                       const std::string &base) {
   auto name = base + std::to_string(1);
   std::size_t i = 2;
 
@@ -233,8 +238,8 @@ bool containsMultipleData(const std::vector<MatrixWorkspace_sptr> &workspaces) {
 }
 
 template <typename F, typename Renamer>
-void renameWorkspacesWith(WorkspaceGroup_sptr groupWorkspace, F const &getName,
-                          Renamer const &renamer) {
+void renameWorkspacesWith(const WorkspaceGroup_sptr &groupWorkspace,
+                          F const &getName, Renamer const &renamer) {
   std::unordered_map<std::string, std::size_t> nameCount;
   for (auto i = 0u; i < groupWorkspace->size(); ++i) {
     const auto name = getName(i);
@@ -251,7 +256,7 @@ void renameWorkspacesWith(WorkspaceGroup_sptr groupWorkspace, F const &getName,
 
 template <typename F>
 void renameWorkspacesInQENSFit(Algorithm *qensFit,
-                               IAlgorithm_sptr renameAlgorithm,
+                               const IAlgorithm_sptr &renameAlgorithm,
                                WorkspaceGroup_sptr outputGroup,
                                std::string const &outputBaseName,
                                std::string const &groupSuffix,
@@ -263,8 +268,8 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit,
     return outputBaseName + "_" + getNameSuffix(i);
   };
 
-  auto renamer = [&](Workspace_sptr workspace, const std::string &name) {
-    renameWorkspace(renameAlgorithm, workspace, name);
+  auto renamer = [&](const Workspace_sptr &workspace, const std::string &name) {
+    renameWorkspace(renameAlgorithm, std::move(workspace), name);
     renamerProg.report("Renamed workspace in group.");
   };
   renameWorkspacesWith(outputGroup, getName, renamer);
@@ -541,9 +546,9 @@ void QENSFitSequential::exec() {
       getPropertyValue("OutputWorkspace"), resultWs);
 
   if (containsMultipleData(workspaces)) {
-    const auto inputString = getPropertyValue("Input");
+    const auto inputStringProp = getPropertyValue("Input");
     renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace",
-                     extractWorkspaceNames(inputString));
+                     extractWorkspaceNames(inputStringProp));
   } else {
     renameWorkspaces(groupWs, spectra, outputBaseName, "_Workspace");
   }
@@ -594,12 +599,14 @@ QENSFitSequential::getAdditionalLogNumbers() const {
   return logs;
 }
 
-void QENSFitSequential::addAdditionalLogs(WorkspaceGroup_sptr resultWorkspace) {
+void QENSFitSequential::addAdditionalLogs(
+    const WorkspaceGroup_sptr &resultWorkspace) {
   for (const auto &workspace : *resultWorkspace)
     addAdditionalLogs(workspace);
 }
 
-void QENSFitSequential::addAdditionalLogs(Workspace_sptr resultWorkspace) {
+void QENSFitSequential::addAdditionalLogs(
+    const Workspace_sptr &resultWorkspace) {
   auto logAdder = createChildAlgorithm("AddSampleLog", -1.0, -1.0, false);
   logAdder->setProperty("Workspace", resultWorkspace);
 
@@ -678,7 +685,7 @@ std::vector<std::size_t> QENSFitSequential::getDatasetGrouping(
 }
 
 WorkspaceGroup_sptr QENSFitSequential::processIndirectFitParameters(
-    ITableWorkspace_sptr parameterWorkspace,
+    const ITableWorkspace_sptr &parameterWorkspace,
     const std::vector<std::size_t> &grouping) {
   std::string const columnX = getProperty("LogName");
   std::string const xAxisUnit = getProperty("ResultXAxisUnit");
@@ -708,8 +715,9 @@ void QENSFitSequential::renameWorkspaces(
         inputWorkspaceNames[i] + "_" + spectra[i] + endOfSuffix;
     return workspaceName;
   };
-  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
-                                   endOfSuffix + "s", getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, std::move(outputGroup),
+                                   outputBaseName, endOfSuffix + "s",
+                                   getNameSuffix);
 }
 
 void QENSFitSequential::renameWorkspaces(
@@ -717,8 +725,9 @@ void QENSFitSequential::renameWorkspaces(
     std::string const &outputBaseName, std::string const &endOfSuffix) {
   auto rename = createChildAlgorithm("RenameWorkspace", -1.0, -1.0, false);
   auto getNameSuffix = [&](std::size_t i) { return spectra[i] + endOfSuffix; };
-  return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName,
-                                   endOfSuffix + "s", getNameSuffix);
+  return renameWorkspacesInQENSFit(this, rename, std::move(outputGroup),
+                                   outputBaseName, endOfSuffix + "s",
+                                   getNameSuffix);
 }
 
 void QENSFitSequential::renameGroupWorkspace(
@@ -793,28 +802,31 @@ std::vector<MatrixWorkspace_sptr> QENSFitSequential::convertInputToElasticQ(
 }
 
 void QENSFitSequential::extractMembers(
-    WorkspaceGroup_sptr resultGroupWs,
+    const WorkspaceGroup_sptr &resultGroupWs,
     const std::vector<API::MatrixWorkspace_sptr> &workspaces,
     const std::string &outputWsName) {
   std::vector<std::string> workspaceNames;
-  std::transform(
-      workspaces.begin(), workspaces.end(), std::back_inserter(workspaceNames),
-      [](API::MatrixWorkspace_sptr workspace) { return workspace->getName(); });
+  std::transform(workspaces.begin(), workspaces.end(),
+                 std::back_inserter(workspaceNames),
+                 [](const API::MatrixWorkspace_sptr &workspace) {
+                   return workspace->getName();
+                 });
 
-  auto extractAlgorithm = extractMembersAlgorithm(resultGroupWs, outputWsName);
+  auto extractAlgorithm =
+      extractMembersAlgorithm(std::move(resultGroupWs), outputWsName);
   extractAlgorithm->setProperty("InputWorkspaces", workspaceNames);
   extractAlgorithm->execute();
 }
 
 void QENSFitSequential::copyLogs(
-    WorkspaceGroup_sptr resultWorkspaces,
+    const WorkspaceGroup_sptr &resultWorkspaces,
     std::vector<MatrixWorkspace_sptr> const &workspaces) {
   for (auto const &resultWorkspace : *resultWorkspaces)
     copyLogs(resultWorkspace, workspaces);
 }
 
 void QENSFitSequential::copyLogs(
-    Workspace_sptr resultWorkspace,
+    const Workspace_sptr &resultWorkspace,
     std::vector<MatrixWorkspace_sptr> const &workspaces) {
   auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
   logCopier->setProperty("OutputWorkspace", resultWorkspace->getName());
@@ -825,14 +837,14 @@ void QENSFitSequential::copyLogs(
   }
 }
 
-void QENSFitSequential::copyLogs(MatrixWorkspace_sptr resultWorkspace,
-                                 WorkspaceGroup_sptr resultGroup) {
+void QENSFitSequential::copyLogs(const MatrixWorkspace_sptr &resultWorkspace,
+                                 const WorkspaceGroup_sptr &resultGroup) {
   for (auto const &workspace : *resultGroup)
     copyLogs(resultWorkspace, workspace);
 }
 
-void QENSFitSequential::copyLogs(MatrixWorkspace_sptr resultWorkspace,
-                                 Workspace_sptr resultGroup) {
+void QENSFitSequential::copyLogs(const MatrixWorkspace_sptr &resultWorkspace,
+                                 const Workspace_sptr &resultGroup) {
   auto logCopier = createChildAlgorithm("CopyLogs", -1.0, -1.0, false);
   logCopier->setProperty("InputWorkspace", resultWorkspace);
   logCopier->setProperty("OutputWorkspace", resultGroup->getName());
@@ -840,7 +852,8 @@ void QENSFitSequential::copyLogs(MatrixWorkspace_sptr resultWorkspace,
 }
 
 IAlgorithm_sptr QENSFitSequential::extractMembersAlgorithm(
-    WorkspaceGroup_sptr resultGroupWs, const std::string &outputWsName) const {
+    const WorkspaceGroup_sptr &resultGroupWs,
+    const std::string &outputWsName) const {
   const bool convolved = getProperty("ConvolveMembers");
   std::vector<std::string> convolvedMembers;
   IFunction_sptr function = getProperty("Function");

@@ -1,10 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitOutputOptionsModel.h"
+
+#include <utility>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -20,11 +22,11 @@ std::string noWorkspaceErrorMessage(std::string const &process) {
   return "The " + process + " of a workspace failed:\n\n No workspace found";
 }
 
-MatrixWorkspace_sptr convertToMatrixWorkspace(Workspace_sptr workspace) {
+MatrixWorkspace_sptr convertToMatrixWorkspace(const Workspace_sptr &workspace) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
-WorkspaceGroup_sptr convertToGroupWorkspace(Workspace_sptr workspace) {
+WorkspaceGroup_sptr convertToGroupWorkspace(const Workspace_sptr &workspace) {
   return boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
 }
 
@@ -50,7 +52,7 @@ std::unordered_map<std::string, std::size_t> extractAxisLabels(Axis *axis) {
 }
 
 std::unordered_map<std::string, std::size_t>
-extractAxisLabels(MatrixWorkspace_const_sptr workspace,
+extractAxisLabels(const MatrixWorkspace_const_sptr &workspace,
                   std::size_t const &axisIndex) {
   auto const axis = workspace->getAxis(axisIndex);
   if (axis->isText())
@@ -67,18 +69,20 @@ std::vector<std::string> extractParameterNames(Axis *axis) {
   return parameters;
 }
 
-std::vector<std::string> extractParameterNames(MatrixWorkspace_sptr workspace) {
+std::vector<std::string>
+extractParameterNames(const MatrixWorkspace_sptr &workspace) {
   auto const axis = workspace->getAxis(1);
   if (axis->isText())
     return extractParameterNames(axis);
   return std::vector<std::string>();
 }
 
-std::vector<std::string> extractParameterNames(Workspace_sptr workspace) {
-  return extractParameterNames(convertToMatrixWorkspace(workspace));
+std::vector<std::string>
+extractParameterNames(const Workspace_sptr &workspace) {
+  return extractParameterNames(convertToMatrixWorkspace(std::move(workspace)));
 }
 
-IAlgorithm_sptr saveNexusProcessedAlgorithm(Workspace_sptr workspace,
+IAlgorithm_sptr saveNexusProcessedAlgorithm(const Workspace_sptr &workspace,
                                             std::string const &filename) {
   auto saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
   saveAlg->setProperty("InputWorkspace", workspace);
@@ -86,23 +90,24 @@ IAlgorithm_sptr saveNexusProcessedAlgorithm(Workspace_sptr workspace,
   return saveAlg;
 }
 
-void saveWorkspace(Workspace_sptr workspace) {
+void saveWorkspace(const Workspace_sptr &workspace) {
   auto const filename = Mantid::Kernel::ConfigService::Instance().getString(
                             "defaultsave.directory") +
                         workspace->getName() + ".nxs";
   saveNexusProcessedAlgorithm(workspace, filename)->execute();
 }
 
-void saveWorkspacesInGroup(WorkspaceGroup_const_sptr group) {
+void saveWorkspacesInGroup(const WorkspaceGroup_const_sptr &group) {
   for (auto const workspace : *group)
     saveWorkspace(workspace);
 }
 
-bool workspaceIsPlottable(MatrixWorkspace_const_sptr workspace) {
+bool workspaceIsPlottable(const MatrixWorkspace_const_sptr &workspace) {
   return workspace->y(0).size() > 1;
 }
 
-bool containsPlottableWorkspace(WorkspaceGroup_const_sptr groupWorkspace) {
+bool containsPlottableWorkspace(
+    const WorkspaceGroup_const_sptr &groupWorkspace) {
   return std::any_of(groupWorkspace->begin(), groupWorkspace->end(),
                      [](auto const &workspace) {
                        return workspaceIsPlottable(
@@ -126,8 +131,8 @@ validateInputs(std::string const &inputWorkspaceName,
   return errors;
 }
 
-IAlgorithm_sptr replaceAlgorithm(MatrixWorkspace_sptr inputWorkspace,
-                                 MatrixWorkspace_sptr singleFitWorkspace,
+IAlgorithm_sptr replaceAlgorithm(const MatrixWorkspace_sptr &inputWorkspace,
+                                 const MatrixWorkspace_sptr &singleFitWorkspace,
                                  std::string const &outputName) {
   auto replaceAlg =
       AlgorithmManager::Instance().create("IndirectReplaceFitResult");
@@ -159,7 +164,7 @@ std::vector<std::string> filterByEndSuffix(std::vector<std::string> &strings,
 }
 
 bool doesGroupContain(std::string const &groupName,
-                      MatrixWorkspace_sptr workspace) {
+                      const MatrixWorkspace_sptr &workspace) {
   auto const adsWorkspace = getADSWorkspace(groupName);
   if (adsWorkspace->isGroup()) {
     auto const group =
@@ -180,7 +185,9 @@ std::string filterByContents(std::vector<std::string> &strings,
 std::string findGroupWorkspaceContaining(MatrixWorkspace_sptr workspace) {
   auto workspaceNames = AnalysisDataService::Instance().getObjectNames();
   auto resultGroups = filterByEndSuffix(workspaceNames, "_Results");
-  return !resultGroups.empty() ? filterByContents(resultGroups, workspace) : "";
+  return !resultGroups.empty()
+             ? filterByContents(resultGroups, std::move(workspace))
+             : "";
 }
 
 } // namespace
@@ -247,7 +254,8 @@ void IndirectFitOutputOptionsModel::plotResult(std::string const &plotType) {
 }
 
 void IndirectFitOutputOptionsModel::plotResult(
-    WorkspaceGroup_const_sptr groupWorkspace, std::string const &plotType) {
+    const WorkspaceGroup_const_sptr &groupWorkspace,
+    std::string const &plotType) {
   if (plotType == "All")
     plotAll(groupWorkspace);
   else
@@ -255,19 +263,19 @@ void IndirectFitOutputOptionsModel::plotResult(
 }
 
 void IndirectFitOutputOptionsModel::plotAll(
-    WorkspaceGroup_const_sptr groupWorkspace) {
+    const WorkspaceGroup_const_sptr &groupWorkspace) {
   for (auto const &workspace : *groupWorkspace)
     plotAll(convertToMatrixWorkspace(workspace));
 }
 
 void IndirectFitOutputOptionsModel::plotAll(
-    MatrixWorkspace_const_sptr workspace) {
+    const MatrixWorkspace_const_sptr &workspace) {
   if (workspaceIsPlottable(workspace))
     plotAllSpectra(workspace);
 }
 
 void IndirectFitOutputOptionsModel::plotAllSpectra(
-    MatrixWorkspace_const_sptr workspace) {
+    const MatrixWorkspace_const_sptr &workspace) {
   for (auto index = 0u; index < workspace->getNumberHistograms(); ++index) {
     auto const plotInfo = std::make_pair(workspace->getName(), index);
     m_spectraToPlot.emplace_back(plotInfo);
@@ -275,19 +283,20 @@ void IndirectFitOutputOptionsModel::plotAllSpectra(
 }
 
 void IndirectFitOutputOptionsModel::plotParameter(
-    WorkspaceGroup_const_sptr groupWorkspace, std::string const &parameter) {
+    const WorkspaceGroup_const_sptr &groupWorkspace,
+    std::string const &parameter) {
   for (auto const &workspace : *groupWorkspace)
     plotParameter(convertToMatrixWorkspace(workspace), parameter);
 }
 
 void IndirectFitOutputOptionsModel::plotParameter(
-    MatrixWorkspace_const_sptr workspace, std::string const &parameter) {
+    const MatrixWorkspace_const_sptr &workspace, std::string const &parameter) {
   if (workspaceIsPlottable(workspace))
     plotParameterSpectrum(workspace, parameter);
 }
 
 void IndirectFitOutputOptionsModel::plotParameterSpectrum(
-    MatrixWorkspace_const_sptr workspace, std::string const &parameter) {
+    const MatrixWorkspace_const_sptr &workspace, std::string const &parameter) {
   auto const parameters = extractAxisLabels(workspace, 1);
   auto const iter = parameters.find(parameter);
   if (iter != parameters.end()) {
@@ -306,7 +315,7 @@ void IndirectFitOutputOptionsModel::plotPDF(std::string const &workspaceName,
 }
 
 void IndirectFitOutputOptionsModel::plotPDF(
-    MatrixWorkspace_const_sptr workspace, std::string const &plotType) {
+    const MatrixWorkspace_const_sptr &workspace, std::string const &plotType) {
   if (plotType == "All")
     plotAll(workspace);
   else
@@ -353,16 +362,17 @@ void IndirectFitOutputOptionsModel::replaceFitResult(
 }
 
 void IndirectFitOutputOptionsModel::replaceFitResult(
-    MatrixWorkspace_sptr inputWorkspace,
-    MatrixWorkspace_sptr singleFitWorkspace, std::string const &outputName) {
-  auto const replaceAlg =
-      replaceAlgorithm(inputWorkspace, singleFitWorkspace, outputName);
+    const MatrixWorkspace_sptr &inputWorkspace,
+    const MatrixWorkspace_sptr &singleFitWorkspace,
+    std::string const &outputName) {
+  auto const replaceAlg = replaceAlgorithm(
+      std::move(inputWorkspace), std::move(singleFitWorkspace), outputName);
   replaceAlg->execute();
   setOutputAsResultWorkspace(replaceAlg);
 }
 
 void IndirectFitOutputOptionsModel::setOutputAsResultWorkspace(
-    IAlgorithm_sptr algorithm) {
+    const IAlgorithm_sptr &algorithm) {
   auto const outputName = algorithm->getPropertyValue("OutputWorkspace");
   auto const output = getADSMatrixWorkspace(outputName);
   setResultWorkspace(findGroupWorkspaceContaining(output));

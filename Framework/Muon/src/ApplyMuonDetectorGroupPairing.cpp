@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/ApplyMuonDetectorGroupPairing.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
+#include <utility>
+
 #include <vector>
 
 const std::vector<std::string> g_analysisTypes = {"Counts", "Asymmetry"};
@@ -340,7 +342,7 @@ const std::string ApplyMuonDetectorGroupPairing::getGroupWorkspaceNamesManually(
  */
 MatrixWorkspace_sptr
 ApplyMuonDetectorGroupPairing::createPairWorkspaceFromGroupWorkspaces(
-    MatrixWorkspace_sptr inputWS1, MatrixWorkspace_sptr inputWS2,
+    const MatrixWorkspace_sptr &inputWS1, const MatrixWorkspace_sptr &inputWS2,
     const double &alpha) {
 
   IAlgorithm_sptr alg = this->createChildAlgorithm("AppendSpectra");
@@ -372,7 +374,7 @@ ApplyMuonDetectorGroupPairing::createPairWorkspaceFromGroupWorkspaces(
  * options.
  */
 MatrixWorkspace_sptr ApplyMuonDetectorGroupPairing::createPairWorkspaceManually(
-    Workspace_sptr inputWS, bool noRebin) {
+    const Workspace_sptr &inputWS, bool noRebin) {
 
   IAlgorithm_sptr alg = this->createChildAlgorithm("MuonProcess");
   if (!this->isLogging())
@@ -427,8 +429,8 @@ Muon::AnalysisOptions ApplyMuonDetectorGroupPairing::getUserInput() {
 // Checks that the detector IDs in grouping are in the workspace
 void ApplyMuonDetectorGroupPairing::checkDetectorIDsInWorkspace(
     API::Grouping &grouping, Workspace_sptr workspace) {
-  bool check =
-      MuonAlgorithmHelper::checkGroupDetectorsInWorkspace(grouping, workspace);
+  bool check = MuonAlgorithmHelper::checkGroupDetectorsInWorkspace(
+      grouping, std::move(workspace));
   if (!check) {
     g_log.error("One or more detector IDs specified in the groups is not "
                 "contained in the InputWorkspace");
@@ -443,7 +445,7 @@ void ApplyMuonDetectorGroupPairing::checkDetectorIDsInWorkspace(
  * to the given options. For use with MuonProcess.
  */
 void ApplyMuonDetectorGroupPairing::setMuonProcessPeriodProperties(
-    IAlgorithm &alg, Workspace_sptr inputWS,
+    IAlgorithm &alg, const Workspace_sptr &inputWS,
     const Muon::AnalysisOptions &options) const {
 
   auto inputGroup = boost::make_shared<WorkspaceGroup>();

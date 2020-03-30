@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtIcons/Icon.h"
 
@@ -31,7 +31,7 @@ MantidQt::Icons::IconicFont &iconFontInstance() {
 // https://stackoverflow.com/questions/4169988/easiest-way-to-parse-json-in-qt-4-7
 // specifically in the answer by user2243820 on April 4th 2013 at 8:10
 
-QHash<QString, QVariant> decodeInner(QScriptValue object) {
+QHash<QString, QVariant> decodeInner(const QScriptValue &object) {
   QHash<QString, QVariant> map;
   QScriptValueIterator it(object);
   while (it.hasNext()) {

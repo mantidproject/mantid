@@ -1,12 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidMDAlgorithms/ConvToMDBase.h"
+#include <utility>
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidMDAlgorithms/ConvToMDBase.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -46,7 +48,7 @@ size_t ConvToMDBase::initialize(
   m_detID = WSD.m_PreprDetTable->getColVector<int>("DetectorID");
 
   // set up output MD workspace wrapper
-  m_OutWSWrapper = inWSWrapper;
+  m_OutWSWrapper = std::move(inWSWrapper);
   // get the index which identify the run the source workspace came from.
   // This index will mark the workspace' events for diffetent worksapces to
   // combine

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -95,7 +95,7 @@ public:
   }
 
   //--------------------------------------------------------------------------------------------
-  void do_test_histo(MDHistoWorkspace_sptr ws1, bool inPlace = false) {
+  void do_test_histo(const MDHistoWorkspace_sptr &ws1, bool inPlace = false) {
     // Name of the output workspace.
     std::string outWSName("TransformMDTest_OutputWS");
     std::string inWSName("TransformMDTest_ws");

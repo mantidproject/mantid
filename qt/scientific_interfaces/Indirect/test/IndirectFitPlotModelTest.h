@@ -1,12 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 #include "IndirectFitPlotModelLegacy.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -121,7 +123,7 @@ IndirectFittingModelLegacy *createModelWithSingleInstrumentWorkspace(
   return model;
 }
 
-IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
+IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
                                   std::string const &functionString) {
   auto alg = boost::make_shared<ConvolutionFitSequential>();
   alg->initialize();
@@ -140,18 +142,19 @@ IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
 }
 
 IAlgorithm_sptr getSetupFitAlgorithm(IndirectFittingModelLegacy *model,
-                                     MatrixWorkspace_sptr workspace,
+                                     const MatrixWorkspace_sptr &workspace,
                                      std::string const &workspaceName) {
   setFittingFunction(model, getFittingFunctionString(workspaceName), true);
-  auto alg =
-      setupFitAlgorithm(workspace, getFittingFunctionString(workspaceName));
+  auto alg = setupFitAlgorithm(std::move(workspace),
+                               getFittingFunctionString(workspaceName));
   return alg;
 }
 
 IAlgorithm_sptr getExecutedFitAlgorithm(IndirectFittingModelLegacy *model,
                                         MatrixWorkspace_sptr workspace,
                                         std::string const &workspaceName) {
-  auto const alg = getSetupFitAlgorithm(model, workspace, workspaceName);
+  auto const alg =
+      getSetupFitAlgorithm(model, std::move(workspace), workspaceName);
   alg->execute();
   return alg;
 }

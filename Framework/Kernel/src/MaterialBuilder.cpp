@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/MaterialBuilder.h"
 #include "MantidKernel/Atom.h"
@@ -19,7 +19,7 @@ using PhysicalConstants::NeutronAtom;
 namespace Kernel {
 
 namespace {
-inline bool isEmpty(const boost::optional<double> value) {
+inline bool isEmpty(const boost::optional<double> &value) {
   return !value || value == Mantid::EMPTY_DBL();
 }
 } // namespace

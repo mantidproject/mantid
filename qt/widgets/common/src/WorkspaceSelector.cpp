@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------
 // Includes
@@ -246,7 +246,7 @@ void WorkspaceSelector::handleReplaceEvent(
 }
 
 bool WorkspaceSelector::checkEligibility(
-    const QString &name, Mantid::API::Workspace_sptr object) const {
+    const QString &name, const Mantid::API::Workspace_sptr &object) const {
   if (m_algorithm && !m_algPropName.isEmpty()) {
     try {
       m_algorithm->setPropertyValue(m_algPropName.toStdString(),
@@ -287,7 +287,7 @@ bool WorkspaceSelector::hasValidSuffix(const QString &name) const {
 }
 
 bool WorkspaceSelector::hasValidNumberOfBins(
-    Mantid::API::Workspace_sptr object) const {
+    const Mantid::API::Workspace_sptr &object) const {
   if (m_binLimits.first != 0 || m_binLimits.second != -1) {
     if (auto const workspace =
             boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object)) {

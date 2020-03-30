@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateTransmissionWorkspace2.h"
 
@@ -183,7 +183,7 @@ void CreateTransmissionWorkspace2::exec() {
  * @return :: the normalized workspace in Wavelength
  */
 MatrixWorkspace_sptr CreateTransmissionWorkspace2::normalizeDetectorsByMonitors(
-    const MatrixWorkspace_sptr IvsTOF) {
+    const MatrixWorkspace_sptr &IvsTOF) {
 
   // Detector workspace
   MatrixWorkspace_sptr detectorWS = makeDetectorWS(IvsTOF);
@@ -249,7 +249,7 @@ CreateTransmissionWorkspace2::getRunNumber(std::string const &propertyName) {
  * @param ws A workspace to store.
  */
 void CreateTransmissionWorkspace2::setOutputTransmissionRun(
-    int which, MatrixWorkspace_sptr ws) {
+    int which, const MatrixWorkspace_sptr &ws) {
   bool const isDebug = getProperty("Debug");
   if (!isDebug)
     return;
@@ -291,7 +291,7 @@ void CreateTransmissionWorkspace2::setOutputTransmissionRun(
  * be found
  */
 void CreateTransmissionWorkspace2::setOutputWorkspace(
-    API::MatrixWorkspace_sptr ws) {
+    const API::MatrixWorkspace_sptr &ws) {
   // If the user provided an output name, just set the value
   if (!isDefault("OutputWorkspace")) {
     setProperty("OutputWorkspace", ws);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -75,7 +75,7 @@ protected:
 
   // Conversion between peaks and functions
   PoldiPeak_sptr
-  getPeakFromPeakFunction(API::IPeakFunction_sptr profileFunction,
+  getPeakFromPeakFunction(const API::IPeakFunction_sptr &profileFunction,
                           const Kernel::V3D &hkl);
 
   // Conversion between peak collections and functions
@@ -83,11 +83,11 @@ protected:
   getFunctionFromPeakCollection(const PoldiPeakCollection_sptr &peakCollection);
 
   Poldi2DFunction_sptr getFunctionIndividualPeaks(
-      std::string profileFunctionName,
+      const std::string &profileFunctionName,
       const PoldiPeakCollection_sptr &peakCollection) const;
 
   Poldi2DFunction_sptr
-  getFunctionPawley(std::string profileFunctionName,
+  getFunctionPawley(const std::string &profileFunctionName,
                     const PoldiPeakCollection_sptr &peakCollection);
 
   std::string getLatticeSystemFromPointGroup(
@@ -131,7 +131,7 @@ protected:
   API::IFunction_sptr
   getFunction(const API::IAlgorithm_sptr &fitAlgorithm) const;
 
-  void addBackgroundTerms(Poldi2DFunction_sptr poldi2DFunction) const;
+  void addBackgroundTerms(const Poldi2DFunction_sptr &poldi2DFunction) const;
 
   boost::shared_ptr<Kernel::DblMatrix> getLocalCovarianceMatrix(
       const boost::shared_ptr<const Kernel::DblMatrix> &covarianceMatrix,

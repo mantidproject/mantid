@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/SINQTranspose3D.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -57,7 +57,7 @@ void SINQTranspose3D::exec() {
   }
 }
 
-void SINQTranspose3D::doYXZ(IMDHistoWorkspace_sptr inWS) {
+void SINQTranspose3D::doYXZ(const IMDHistoWorkspace_sptr &inWS) {
   size_t idxIn, idxOut;
 
   boost::shared_ptr<const IMDDimension> x, y, z;
@@ -92,7 +92,7 @@ void SINQTranspose3D::doYXZ(IMDHistoWorkspace_sptr inWS) {
   setProperty("OutputWorkspace", outWS);
 }
 
-void SINQTranspose3D::doXZY(IMDHistoWorkspace_sptr inWS) {
+void SINQTranspose3D::doXZY(const IMDHistoWorkspace_sptr &inWS) {
   size_t idxIn, idxOut;
   unsigned int xdim, ydim, zdim;
 
@@ -130,7 +130,7 @@ void SINQTranspose3D::doXZY(IMDHistoWorkspace_sptr inWS) {
   // assign the workspace
   setProperty("OutputWorkspace", outWS);
 }
-void SINQTranspose3D::doTRICS(IMDHistoWorkspace_sptr inWS) {
+void SINQTranspose3D::doTRICS(const IMDHistoWorkspace_sptr &inWS) {
   size_t idxIn, idxOut;
   unsigned int xdim, ydim, zdim;
 
@@ -169,7 +169,7 @@ void SINQTranspose3D::doTRICS(IMDHistoWorkspace_sptr inWS) {
   // assign the workspace
   setProperty("OutputWorkspace", outWS);
 }
-void SINQTranspose3D::doAMOR(IMDHistoWorkspace_sptr inWS) {
+void SINQTranspose3D::doAMOR(const IMDHistoWorkspace_sptr &inWS) {
   double val;
   unsigned int xdim, ydim, zdim, idx;
 
@@ -208,8 +208,9 @@ void SINQTranspose3D::doAMOR(IMDHistoWorkspace_sptr inWS) {
   setProperty("OutputWorkspace", outWS);
 }
 
-void SINQTranspose3D::copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
-                                   Mantid::API::IMDHistoWorkspace_sptr outws) {
+void SINQTranspose3D::copyMetaData(
+    const Mantid::API::IMDHistoWorkspace_sptr &inws,
+    const Mantid::API::IMDHistoWorkspace_sptr &outws) {
   outws->setTitle(inws->getTitle());
   ExperimentInfo_sptr info;
 

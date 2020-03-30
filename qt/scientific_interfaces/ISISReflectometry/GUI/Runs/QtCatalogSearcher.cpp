@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtCatalogSearcher.h"
 #include "GUI/Runs/IRunsView.h"
@@ -21,7 +21,8 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 namespace { // unnamed
-void removeResultsWithoutFilenameExtension(ITableWorkspace_sptr results) {
+void removeResultsWithoutFilenameExtension(
+    const ITableWorkspace_sptr &results) {
   std::set<size_t> toRemove;
   for (size_t i = 0; i < results->rowCount(); ++i) {
     std::string &run = results->String(i, 0);

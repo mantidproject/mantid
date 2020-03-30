@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/LoadEMU.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -674,7 +680,7 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
 
   // lambda to simplify loading instrument parameters
   auto instr = m_localWorkspace->getInstrument();
-  auto iparam = [&instr](std::string tag) {
+  auto iparam = [&instr](const std::string &tag) {
     return instr->getNumberParameter(tag)[0];
   };
 
@@ -684,7 +690,7 @@ void LoadEMU<FD>::exec(const std::string &hdfFile,
   //
   double sampleAnalyser = iparam("SampleAnalyser");
   auto endID = static_cast<detid_t>(DETECTOR_TUBES * PIXELS_PER_TUBE);
-  for (detid_t detID = 0; detID < endID; detID++)
+  for (detid_t detID = 0; detID < endID; ++detID)
     updateNeutronicPostions(detID, sampleAnalyser);
 
   // get the detector map from raw input to a physical detector

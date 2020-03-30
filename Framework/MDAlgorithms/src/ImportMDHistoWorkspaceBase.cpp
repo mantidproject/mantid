@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h"
 
@@ -145,8 +145,9 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
  * @param unit: the selected unit
  * @returns a unique pointer to an MDFrame
  */
-MDFrame_uptr ImportMDHistoWorkspaceBase::createMDFrame(std::string frame,
-                                                       std::string unit) {
+MDFrame_uptr
+ImportMDHistoWorkspaceBase::createMDFrame(const std::string &frame,
+                                          const std::string &unit) {
   auto frameFactory = makeMDFrameFactoryChain();
   MDFrameArgument frameArg(frame, unit);
   return frameFactory->create(frameArg);

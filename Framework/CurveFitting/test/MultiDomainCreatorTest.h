@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -302,7 +302,7 @@ public:
   }
 
 private:
-  void doTestOutputSpectrum(MatrixWorkspace_sptr ws, size_t index) {
+  void doTestOutputSpectrum(const MatrixWorkspace_sptr &ws, size_t index) {
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 3);
     auto &data = ws->readY(0);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Qwt/ContourPreviewPlot.h"
 #include "MantidQtWidgets/Plotting/Qwt/MantidColorMap.h"
@@ -31,7 +31,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ContourPreviewPlot");
 
 MatrixWorkspace_sptr
-convertToMatrixWorkspace(boost::shared_ptr<Workspace> const workspace) {
+convertToMatrixWorkspace(boost::shared_ptr<Workspace> const &workspace) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
@@ -79,7 +79,7 @@ MatrixWorkspace_sptr ContourPreviewPlot::getActiveWorkspace() const {
 /**
  * Initialize objects after loading the workspace
  */
-void ContourPreviewPlot::setWorkspace(MatrixWorkspace_sptr const workspace) {
+void ContourPreviewPlot::setWorkspace(MatrixWorkspace_sptr const &workspace) {
   m_workspace = workspace;
   this->checkRangeLimits();
   m_data->setWorkspace(workspace);

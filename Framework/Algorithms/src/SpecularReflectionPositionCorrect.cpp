@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SpecularReflectionPositionCorrect.h"
 
@@ -138,8 +138,8 @@ void SpecularReflectionPositionCorrect::exec() {
  * @param detectorPosition: Actual detector or detector group position.
  */
 void SpecularReflectionPositionCorrect::moveDetectors(
-    API::MatrixWorkspace_sptr toCorrect, IComponent_const_sptr detector,
-    IComponent_const_sptr sample, const double &upOffset,
+    const API::MatrixWorkspace_sptr &toCorrect, IComponent_const_sptr detector,
+    const IComponent_const_sptr &sample, const double &upOffset,
     const double &acrossOffset, const V3D &detectorPosition) {
   auto instrument = toCorrect->getInstrument();
   const V3D samplePosition = sample->getPos();
@@ -203,8 +203,9 @@ void SpecularReflectionPositionCorrect::moveDetectors(
  * @param detector : Pointer to a given detector
  */
 void SpecularReflectionPositionCorrect::correctPosition(
-    API::MatrixWorkspace_sptr toCorrect, const double &twoThetaInDeg,
-    IComponent_const_sptr sample, IComponent_const_sptr detector) {
+    const API::MatrixWorkspace_sptr &toCorrect, const double &twoThetaInDeg,
+    const IComponent_const_sptr &sample,
+    const IComponent_const_sptr &detector) {
 
   auto instrument = toCorrect->getInstrument();
 

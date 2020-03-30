@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -37,6 +37,7 @@
 #include <fstream>
 #include <iterator>
 #include <sstream>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -80,7 +81,7 @@ template <typename T> void pop_front(std::vector<T> &queue) {
 /** Validate the algorithm inputs
  * @return : an error message, or empty string if ok
  */
-std::string validateAlgorithmInputs(IAlgorithm_sptr alg) {
+std::string validateAlgorithmInputs(const IAlgorithm_sptr &alg) {
   std::string error;
   // Get input property errors as a map
   auto errorMap = alg->validateInputs();
@@ -115,8 +116,9 @@ namespace DataProcessor {
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist,
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
-    ProcessingAlgorithm processor, PostprocessingAlgorithm postprocessor,
-    int group, std::map<QString, QString> postprocessMap, QString loader)
+    const ProcessingAlgorithm &processor,
+    const PostprocessingAlgorithm &postprocessor, int group,
+    std::map<QString, QString> postprocessMap, const QString &loader)
     : WorkspaceObserver(), m_view(nullptr), m_progressView(nullptr),
       m_mainPresenter(), m_loader(std::move(loader)), m_reductionPaused(true),
       m_postprocessing(postprocessor.name().isEmpty()
@@ -178,8 +180,8 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
  * (reflectometry).
  */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    WhiteList whitelist, ProcessingAlgorithm processor,
-    PostprocessingAlgorithm postprocessor, int group)
+    WhiteList whitelist, const ProcessingAlgorithm &processor,
+    const PostprocessingAlgorithm &postprocessor, int group)
     : GenericDataProcessorPresenter(
           std::move(whitelist), std::map<QString, PreprocessingAlgorithm>(),
           std::move(processor), std::move(postprocessor), group) {}
@@ -208,7 +210,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
     WhiteList whitelist,
     std::map<QString, PreprocessingAlgorithm> preprocessMap,
-    ProcessingAlgorithm processor, int group)
+    const ProcessingAlgorithm &processor, int group)
     : GenericDataProcessorPresenter(
           std::move(whitelist), std::move(preprocessMap), std::move(processor),
           PostprocessingAlgorithm(), group) {}
@@ -222,7 +224,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
  * (reflectometry)
  */
 GenericDataProcessorPresenter::GenericDataProcessorPresenter(
-    WhiteList whitelist, ProcessingAlgorithm processor, int group)
+    WhiteList whitelist, const ProcessingAlgorithm &processor, int group)
     : GenericDataProcessorPresenter(
           std::move(whitelist), std::map<QString, PreprocessingAlgorithm>(),
           std::move(processor), PostprocessingAlgorithm(), group) {}
@@ -233,7 +235,7 @@ GenericDataProcessorPresenter::GenericDataProcessorPresenter(
 GenericDataProcessorPresenter::~GenericDataProcessorPresenter() {}
 
 namespace {
-std::vector<std::string> toStdStringVector(std::set<QString> in) {
+std::vector<std::string> toStdStringVector(const std::set<QString> &in) {
   auto out = std::vector<std::string>();
   std::transform(
       in.cbegin(), in.cend(), std::back_inserter(out),
@@ -320,7 +322,7 @@ Returns the name of the reduced workspace for a given row
 @returns : The name of the workspace
 */
 QString GenericDataProcessorPresenter::getReducedWorkspaceName(
-    const RowData_sptr data) const {
+    const RowData_sptr &data) const {
   return MantidQt::MantidWidgets::DataProcessor::getReducedWorkspaceName(
       data, m_whitelist, m_preprocessing.m_map);
 }
@@ -356,13 +358,13 @@ void GenericDataProcessorPresenter::setGroupError(const int groupIndex,
   m_manager->setError(error, groupIndex);
 }
 
-void GenericDataProcessorPresenter::setRowIsProcessed(RowData_sptr rowData,
-                                                      const bool isProcessed) {
+void GenericDataProcessorPresenter::setRowIsProcessed(
+    const RowData_sptr &rowData, const bool isProcessed) {
   if (rowData)
     rowData->setProcessed(isProcessed);
 }
 
-void GenericDataProcessorPresenter::setRowError(RowData_sptr rowData,
+void GenericDataProcessorPresenter::setRowError(const RowData_sptr &rowData,
                                                 const std::string &error) {
   if (rowData)
     rowData->setError(error);
@@ -439,7 +441,7 @@ bool GenericDataProcessorPresenter::workspaceIsOutputOfGroup(
 }
 
 bool GenericDataProcessorPresenter::workspaceIsOutputOfRow(
-    RowData_sptr rowData, const std::string &workspaceName) const {
+    const RowData_sptr &rowData, const std::string &workspaceName) const {
   if (!rowData)
     return false;
 
@@ -458,7 +460,8 @@ void GenericDataProcessorPresenter::resetProcessedState(const int groupIndex) {
 
 /** Reset the processed state for a row
  */
-void GenericDataProcessorPresenter::resetProcessedState(RowData_sptr rowData) {
+void GenericDataProcessorPresenter::resetProcessedState(
+    const RowData_sptr &rowData) {
   rowData->reset();
 }
 
@@ -505,7 +508,8 @@ void GenericDataProcessorPresenter::resetProcessedState() {
  * @param rowData [inout] : the data to initialise
  * @return : true if ok, false if there was a problem
  */
-bool GenericDataProcessorPresenter::initRowForProcessing(RowData_sptr rowData) {
+bool GenericDataProcessorPresenter::initRowForProcessing(
+    const RowData_sptr &rowData) {
   // Reset the row to its unprocessed state
   rowData->reset();
 
@@ -575,7 +579,7 @@ bool GenericDataProcessorPresenter::groupNeedsProcessing(
 /** Check whether a row should be processed
  */
 bool GenericDataProcessorPresenter::rowNeedsProcessing(
-    RowData_sptr rowData) const {
+    const RowData_sptr &rowData) const {
   if (m_forceProcessing)
     return true;
 
@@ -591,7 +595,7 @@ bool GenericDataProcessorPresenter::rowNeedsProcessing(
 /** Process a given set of items
  */
 void GenericDataProcessorPresenter::process(TreeData itemsToProcess) {
-  m_itemsToProcess = itemsToProcess;
+  m_itemsToProcess = std::move(itemsToProcess);
 
   // Emit a signal that the process is starting
   m_view->emitProcessClicked();
@@ -707,7 +711,7 @@ void GenericDataProcessorPresenter::startAsyncRowReduceThread(
     RowData_sptr rowData, const int rowIndex, const int groupIndex) {
 
   auto *worker = new GenericDataProcessorPresenterRowReducerWorker(
-      this, rowData, rowIndex, groupIndex);
+      this, std::move(rowData), rowIndex, groupIndex);
 
   connect(worker, SIGNAL(finished(int)), this, SLOT(rowThreadFinished(int)));
   connect(worker, SIGNAL(reductionErrorSignal(QString)), this,
@@ -960,7 +964,8 @@ QString GenericDataProcessorPresenter::getPostprocessedWorkspaceName(
   if (!hasPostprocessing())
     throw std::runtime_error("Attempted to get postprocessing workspace but no "
                              "postprocessing is specified.");
-  return m_postprocessing->getPostprocessedWorkspaceName(groupData, sliceIndex);
+  return m_postprocessing->getPostprocessedWorkspaceName(groupData,
+                                                         std::move(sliceIndex));
 }
 
 /** Loads a run found from disk or AnalysisDataService
@@ -1089,7 +1094,7 @@ GenericDataProcessorPresenter::createProcessingAlgorithm() const {
  * @param data [in] :: the data in the row
  */
 void GenericDataProcessorPresenter::preprocessColumnValue(
-    const QString &columnName, QString &columnValue, RowData_sptr data) {
+    const QString &columnName, QString &columnValue, const RowData_sptr &data) {
   // Check if preprocessing is required for this column
   if (!m_preprocessing.hasPreprocessing(columnName))
     return;
@@ -1099,7 +1104,8 @@ void GenericDataProcessorPresenter::preprocessColumnValue(
   OptionsMap options;
   if (m_preprocessing.hasOptions(columnName)) {
     auto globalOptions = m_preprocessing.m_options.at(columnName);
-    options = getCanonicalOptions(data, globalOptions, m_whitelist, false);
+    options =
+        getCanonicalOptions(std::move(data), globalOptions, m_whitelist, false);
   }
 
   // Run the preprocessing algorithm
@@ -1112,7 +1118,8 @@ void GenericDataProcessorPresenter::preprocessColumnValue(
 /** Perform preprocessing on algorithm property values where applicable
  * @param data : the data in the row
  */
-void GenericDataProcessorPresenter::preprocessOptionValues(RowData_sptr data) {
+void GenericDataProcessorPresenter::preprocessOptionValues(
+    const RowData_sptr &data) {
   auto options = data->options();
   // Loop through all columns (excluding the Options and Hidden options
   // columns)
@@ -1137,8 +1144,8 @@ void GenericDataProcessorPresenter::preprocessOptionValues(RowData_sptr data) {
  * @param alg : the executed algorithm
  * @param data : the row data
  */
-void GenericDataProcessorPresenter::updateModelFromResults(IAlgorithm_sptr alg,
-                                                           RowData_sptr data) {
+void GenericDataProcessorPresenter::updateModelFromResults(
+    const IAlgorithm_sptr &alg, const RowData_sptr &data) {
 
   auto newData = data;
 
@@ -1221,7 +1228,7 @@ IAlgorithm_sptr GenericDataProcessorPresenter::createAndRunAlgorithm(
  * correspond to column contents
  * @throws std::runtime_error if reduction fails
  */
-void GenericDataProcessorPresenter::reduceRow(RowData_sptr data) {
+void GenericDataProcessorPresenter::reduceRow(const RowData_sptr &data) {
 
   // Perform any preprocessing on the input properties and cache the results
   // in the row data

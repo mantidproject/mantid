@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -239,7 +239,7 @@ private:
     return AlgorithmHistory(&alg, execTime, 14.0, m_execCount++);
   }
 
-  AlgorithmHistory createFromTestAlg(std::string paramValue) {
+  AlgorithmHistory createFromTestAlg(const std::string &paramValue) {
     Algorithm *testInput = new testalg;
     testInput->initialize();
     testInput->setPropertyValue("arg1_param", paramValue);

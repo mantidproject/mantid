@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -406,7 +406,7 @@ void AlgorithmFactoryImpl::fillHiddenCategories(
  * @returns the name of the algroithm
  */
 const std::string AlgorithmFactoryImpl::extractAlgName(
-    const boost::shared_ptr<IAlgorithm> alg) const {
+    const boost::shared_ptr<IAlgorithm> &alg) const {
   return alg->name();
 }
 
@@ -415,7 +415,7 @@ const std::string AlgorithmFactoryImpl::extractAlgName(
  * @returns the version of the algroithm
  */
 int AlgorithmFactoryImpl::extractAlgVersion(
-    const boost::shared_ptr<IAlgorithm> alg) const {
+    const boost::shared_ptr<IAlgorithm> &alg) const {
   return alg->version();
 }
 

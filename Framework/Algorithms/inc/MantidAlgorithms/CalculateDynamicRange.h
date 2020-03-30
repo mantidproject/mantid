@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -25,8 +25,8 @@ public:
 private:
   void init() override;
   void exec() override;
-  void calculateQMinMax(API::MatrixWorkspace_sptr, const std::vector<size_t> &,
-                        const std::string &);
+  void calculateQMinMax(const API::MatrixWorkspace_sptr &,
+                        const std::vector<size_t> &, const std::string &);
 };
 
 } // namespace Algorithms

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CorelliCrossCorrelate.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -157,8 +157,9 @@ void CorelliCrossCorrelate::exec() {
 
   int offset_int = getProperty("TimingOffset");
   const auto offset = static_cast<int64_t>(offset_int);
-  for (auto &timing : tdc)
-    timing += offset;
+
+  std::transform(tdc.begin(), tdc.end(), tdc.begin(),
+                 [offset](auto timing) { return timing + offset; });
 
   // Determine period from chopper frequency.
   auto motorSpeed = dynamic_cast<TimeSeriesProperty<double> *>(

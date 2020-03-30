@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -158,7 +158,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Check detector parameter
    */
-  void checkDetectorParameters(API::MatrixWorkspace_sptr workspace,
+  void checkDetectorParameters(const API::MatrixWorkspace_sptr &workspace,
                                size_t wsindex, double realr, double realtth,
                                double realphi) {
 
@@ -175,8 +175,8 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Check detector parameter
    */
-  void checkDetectorID(API::MatrixWorkspace_sptr workspace, size_t wsindex,
-                       detid_t detid) {
+  void checkDetectorID(const API::MatrixWorkspace_sptr &workspace,
+                       size_t wsindex, detid_t detid) {
 
     const auto &spectrumInfo = workspace->spectrumInfo();
     TS_ASSERT_EQUALS(spectrumInfo.hasUniqueDetector(wsindex), true);

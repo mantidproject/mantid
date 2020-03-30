@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -40,7 +40,7 @@ class MDEventWorkspaceTest : public CxxTest::TestSuite {
 private:
   /// Helper function to return the number of masked bins in a workspace. TODO:
   /// move helper into test helpers
-  size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws) {
+  size_t getNumberMasked(const Mantid::API::IMDWorkspace_sptr &ws) {
     auto it = ws->createIterator(nullptr);
     size_t numberMasked = 0;
     size_t counter = 0;
@@ -479,7 +479,7 @@ public:
     TS_ASSERT_DELTA(ext[1].getMax(), ymax, 1e-4);
   }
 
-  void addEvent(MDEventWorkspace2Lean::sptr b, double x, double y) {
+  void addEvent(const MDEventWorkspace2Lean::sptr &b, double x, double y) {
     coord_t centers[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
     b->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
   }

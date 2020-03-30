@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -33,7 +33,7 @@ public:
   ~Grouping();
 
   /// Construct a Grouping from a table
-  Grouping(ITableWorkspace_sptr table);
+  Grouping(const ITableWorkspace_sptr &table);
 
   /// Convert to grouping table
   ITableWorkspace_sptr toTable() const;

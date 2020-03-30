@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/LineViewer.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -75,8 +75,8 @@ Mantid::Kernel::Logger g_log("LineViewer");
  * @param width : Default thickness (for non integrated dimensions)
  * @param thicknesses : Thickness vector to write to
  */
-void setThicknessUsingDimensionInfo(IMDWorkspace_sptr ws, size_t dimIndex,
-                                    double width,
+void setThicknessUsingDimensionInfo(const IMDWorkspace_sptr &ws,
+                                    size_t dimIndex, double width,
                                     Mantid::Kernel::VMD &thicknesses) {
   auto currentDim = ws->getDimension(dimIndex);
   if (currentDim->getIsIntegrated()) {
@@ -328,7 +328,7 @@ void LineViewer::readTextboxes() {
  * @param ws :: MatrixWorkspace to integrate
  */
 IAlgorithm_sptr
-LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
+LineViewer::applyMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) {
   // (half-width in the plane)
   const double planeWidth = getPlanarWidth();
 
@@ -409,7 +409,7 @@ LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
  * @return the algorithm to run
  */
 IAlgorithm_sptr
-LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
+LineViewer::applyMDWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   bool adaptive = ui.chkAdaptiveBins->isChecked();
 
   // (half-width in the plane)
@@ -706,7 +706,7 @@ bool LineViewer::getFixedBinWidthMode() const { return m_fixedBinWidthMode; }
 /** Set the workspace being sliced
  *
  * @param ws :: IMDWorkspace */
-void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
+void LineViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   if (!ws)
     throw std::runtime_error("LineViewer::setWorkspace(): Invalid workspace.");
   m_initFreeDimX = -1;
@@ -720,7 +720,7 @@ void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
 /** Set the start point of the line to integrate
  * @param start :: vector for the start point */
-void LineViewer::setStart(Mantid::Kernel::VMD start) {
+void LineViewer::setStart(const Mantid::Kernel::VMD &start) {
   if (m_ws && start.getNumDims() != m_ws->getNumDims())
     throw std::runtime_error("LineViewer::setStart(): Invalid number of "
                              "dimensions in the start vector.");
@@ -730,7 +730,7 @@ void LineViewer::setStart(Mantid::Kernel::VMD start) {
 
 /** Set the end point of the line to integrate
  * @param end :: vector for the end point */
-void LineViewer::setEnd(Mantid::Kernel::VMD end) {
+void LineViewer::setEnd(const Mantid::Kernel::VMD &end) {
   if (m_ws && end.getNumDims() != m_ws->getNumDims())
     throw std::runtime_error("LineViewer::setEnd(): Invalid number of "
                              "dimensions in the end vector.");
@@ -741,7 +741,7 @@ void LineViewer::setEnd(Mantid::Kernel::VMD end) {
 /** Set the width of the line in each dimensions
  * @param width :: vector for the width in each dimension. X dimension stands in
  * for the XY plane width */
-void LineViewer::setThickness(Mantid::Kernel::VMD width) {
+void LineViewer::setThickness(const Mantid::Kernel::VMD &width) {
   if (m_ws && width.getNumDims() != m_ws->getNumDims())
     throw std::runtime_error("LineViewer::setThickness(): Invalid number of "
                              "dimensions in the width vector.");

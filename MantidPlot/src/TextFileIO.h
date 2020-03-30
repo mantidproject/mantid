@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -16,7 +16,7 @@
 class TextFileIO {
 public:
   /// Construct the object with a list of file filters
-  explicit TextFileIO(QStringList fileFilters = QStringList());
+  explicit TextFileIO(const QStringList &fileFilters = QStringList());
 
   /// Save to a file
   bool save(const QString &txt, const QString &filename) const;

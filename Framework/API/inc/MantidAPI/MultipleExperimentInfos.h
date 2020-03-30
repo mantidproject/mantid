@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -27,7 +27,7 @@ public:
 
   ExperimentInfo_const_sptr getExperimentInfo(const uint16_t runIndex) const;
 
-  uint16_t addExperimentInfo(ExperimentInfo_sptr ei);
+  uint16_t addExperimentInfo(const ExperimentInfo_sptr &ei);
 
   void setExperimentInfo(const uint16_t runIndex, ExperimentInfo_sptr ei);
 

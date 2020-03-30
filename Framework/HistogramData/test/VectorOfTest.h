@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -100,7 +100,6 @@ public:
     TS_ASSERT_EQUALS(src.size(), 2);
     TS_ASSERT(src);
     const VectorOfTester dest(std::move(src));
-    TS_ASSERT(!src);
     TS_ASSERT_EQUALS(dest[0], 0.1);
     TS_ASSERT_EQUALS(dest[1], 0.1);
   }
@@ -108,7 +107,6 @@ public:
   void test_move_from_null_constructor() {
     VectorOfTester src{};
     const VectorOfTester dest(std::move(src));
-    TS_ASSERT(!src);
     TS_ASSERT(!dest);
   }
 
@@ -160,7 +158,6 @@ public:
     TS_ASSERT_EQUALS(dest[0], 0.0);
     TS_ASSERT(src);
     dest = std::move(src);
-    TS_ASSERT(!src);
     TS_ASSERT_EQUALS(dest[0], 0.1);
     TS_ASSERT_EQUALS(dest[1], 0.1);
   }
@@ -169,7 +166,6 @@ public:
     VectorOfTester src{};
     VectorOfTester dest(1);
     dest = std::move(src);
-    TS_ASSERT(!src);
     TS_ASSERT(!dest);
   }
 

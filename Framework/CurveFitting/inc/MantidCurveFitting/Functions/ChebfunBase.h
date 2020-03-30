@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -149,7 +149,7 @@ private:
   void calcIntegrationWeights() const;
 
   /// Calculate function values at odd-valued indices of the base x-points
-  std::vector<double> fitOdd(ChebfunFunctionType f,
+  std::vector<double> fitOdd(const ChebfunFunctionType &f,
                              std::vector<double> &p) const;
   /// Calculate function values at odd-valued indices of the base x-points
   std::vector<double> fitOdd(const API::IFunction &f,

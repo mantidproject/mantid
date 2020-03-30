@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -28,7 +28,8 @@ namespace {
 std::string const WORKSPACE_NAME = "WorkspaceName";
 std::string const WORKSPACE_INDICES = "0-2,4";
 
-MatrixWorkspace_sptr convertWorkspace2DToMatrix(Workspace2D_sptr workspace) {
+MatrixWorkspace_sptr
+convertWorkspace2DToMatrix(const Workspace2D_sptr &workspace) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 

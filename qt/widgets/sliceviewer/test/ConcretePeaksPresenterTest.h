@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -22,6 +22,7 @@
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
 #include <string>
+#include <utility>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid::API;
@@ -50,7 +51,7 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
   }
 
   /// Helper method to create a mock MDDimension.
-  IMDDimension_sptr createExpectedMDDimension(const std::string returnLabel) {
+  IMDDimension_sptr createExpectedMDDimension(const std::string &returnLabel) {
     auto *pDim = new NiceMock<MockIMDDimension>;
     IMDDimension_sptr dim(pDim);
     EXPECT_CALL(*pDim, getName()).WillRepeatedly(Return(returnLabel));
@@ -100,12 +101,16 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite {
     }
 
     void withViewFactory(PeakOverlayViewFactory_sptr val) {
-      m_viewFactory = val;
+      m_viewFactory = std::move(val);
     }
-    void withPeaksWorkspace(IPeaksWorkspace_sptr val) { m_peaksWS = val; }
-    void withMDWorkspace(boost::shared_ptr<MDGeometry> val) { m_mdWS = val; }
+    void withPeaksWorkspace(IPeaksWorkspace_sptr val) {
+      m_peaksWS = std::move(val);
+    }
+    void withMDWorkspace(boost::shared_ptr<MDGeometry> val) {
+      m_mdWS = std::move(val);
+    }
     void withTransformFactory(PeakTransformFactory_sptr val) {
-      m_transformFactory = val;
+      m_transformFactory = std::move(val);
     }
 
     ConcretePeaksPresenter_sptr create() {

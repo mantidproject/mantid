@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -109,7 +109,8 @@ private:
   boost::optional<QString> getParameterDescription(ParamID name) const;
   boost::optional<QString> getPrefix(ParamID name) const;
   void setCurrentValues(const QMap<ParamID, double> &);
-  void applyParameterFunction(std::function<void(ParamID)> paramFun) const;
+  void
+  applyParameterFunction(const std::function<void(ParamID)> &paramFun) const;
   boost::optional<ParamID> getParameterId(const QString &parName);
   std::string buildGaussianFunctionString() const;
   std::string buildPetersFunctionString() const;

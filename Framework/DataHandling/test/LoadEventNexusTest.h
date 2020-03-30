@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -106,7 +106,7 @@ load_reference_workspace(const std::string &filename) {
   return boost::dynamic_pointer_cast<const EventWorkspace>(out);
 }
 void run_MPI_load(const Parallel::Communicator &comm,
-                  boost::shared_ptr<std::mutex> mutex,
+                  const boost::shared_ptr<std::mutex> &mutex,
                   const std::string &filename) {
   boost::shared_ptr<const EventWorkspace> reference;
   boost::shared_ptr<const EventWorkspace> eventWS;
@@ -736,7 +736,7 @@ public:
   }
 
   void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount,
-                        std::string BankName = "bank36",
+                        const std::string &BankName = "bank36",
                         bool willFail = false) {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;

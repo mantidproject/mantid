@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,7 +10,7 @@
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/BinaryStreamReader.h"
-
+#include "MantidKernel/FileDescriptor.h"
 #include <fstream>
 
 namespace Mantid {
@@ -63,7 +63,7 @@ private:
   Geometry::IMDDimension_sptr createEnDimension(float umin, float umax,
                                                 size_t nbins);
   void setupBoxController();
-  void setupFileBackend(std::string filebackPath);
+  void setupFileBackend(const std::string &filebackPath);
   void readPixelDataIntoWorkspace();
   void splitAllBoxes();
   void warnIfMemoryInsufficient(int64_t npixtot);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -49,12 +49,13 @@ public:
   }
   /// Function to optimize
   double intensity(double x, double y, double z, double rotx, double roty,
-                   double rotz, std::string detname, std::string inname,
-                   std::string outname, std::string peakOpt,
-                   std::string rb_param, std::string groupWSName);
+                   double rotz, const std::string &detname,
+                   const std::string &inname, const std::string &outname,
+                   const std::string &peakOpt, const std::string &rb_param,
+                   const std::string &groupWSName);
   void movedetector(double x, double y, double z, double rotx, double roty,
-                    double rotz, std::string detname,
-                    Mantid::DataObjects::EventWorkspace_sptr inputW);
+                    double rotz, const std::string &detname,
+                    const Mantid::DataObjects::EventWorkspace_sptr &inputW);
 
 private:
   // Overridden Algorithm methods

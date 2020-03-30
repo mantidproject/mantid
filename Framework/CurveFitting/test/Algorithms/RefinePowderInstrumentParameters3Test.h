@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -117,7 +117,7 @@ TableWorkspace_sptr generateInstrumentProfileTableBank1() {
 //----------------------------------------------------------------------------------------------
 /** Parse Table Workspace to a map of string, double pair
  */
-void parseParameterTableWorkspace(TableWorkspace_sptr paramws,
+void parseParameterTableWorkspace(const TableWorkspace_sptr &paramws,
                                   map<string, double> &paramvalues) {
   for (size_t irow = 0; irow < paramws->rowCount(); ++irow) {
     Mantid::API::TableRow row = paramws->getRow(irow);

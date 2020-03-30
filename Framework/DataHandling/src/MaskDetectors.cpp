@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/MaskDetectors.h"
 
@@ -244,8 +244,8 @@ void MaskDetectors::exec() {
  * @param rangeInfo :: information about the spectrum range to use when masking
  */
 void MaskDetectors::handleMaskByMaskWorkspace(
-    const MaskWorkspace_const_sptr maskWs,
-    const API::MatrixWorkspace_const_sptr WS,
+    const MaskWorkspace_const_sptr &maskWs,
+    const API::MatrixWorkspace_const_sptr &WS,
     std::vector<detid_t> &detectorList, std::vector<size_t> &indexList,
     const RangeInfo &rangeInfo) {
 
@@ -280,8 +280,8 @@ void MaskDetectors::handleMaskByMaskWorkspace(
  * @param rangeInfo :: information about the spectrum range to use when masking
  */
 void MaskDetectors::handleMaskByMatrixWorkspace(
-    const API::MatrixWorkspace_const_sptr maskWs,
-    const API::MatrixWorkspace_const_sptr WS,
+    const API::MatrixWorkspace_const_sptr &maskWs,
+    const API::MatrixWorkspace_const_sptr &WS,
     std::vector<detid_t> &detectorList, std::vector<size_t> &indexList,
     const RangeInfo &rangeInfo) {
 
@@ -395,7 +395,7 @@ void MaskDetectors::extractMaskedWSDetIDs(
  * Peaks exec body
  * @param WS :: The input peaks workspace to be masked
  */
-void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
+void MaskDetectors::execPeaks(const PeaksWorkspace_sptr &WS) {
   std::vector<detid_t> detectorList = getProperty("DetectorList");
   const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
@@ -455,7 +455,7 @@ void MaskDetectors::execPeaks(PeaksWorkspace_sptr WS) {
 void MaskDetectors::fillIndexListFromSpectra(
     std::vector<size_t> &indexList,
     std::vector<Indexing::SpectrumNumber> spectraList,
-    const API::MatrixWorkspace_sptr WS,
+    const API::MatrixWorkspace_sptr &WS,
     const std::tuple<size_t, size_t, bool> &range_info) {
 
   std::vector<size_t> tmp_index;
@@ -494,7 +494,7 @@ void MaskDetectors::fillIndexListFromSpectra(
  *                            Boolean indicating if these ranges are defined
  */
 void MaskDetectors::appendToIndexListFromWS(
-    std::vector<size_t> &indexList, const MatrixWorkspace_const_sptr sourceWS,
+    std::vector<size_t> &indexList, const MatrixWorkspace_const_sptr &sourceWS,
     const std::tuple<size_t, size_t, bool> &range_info) {
 
   std::vector<size_t> tmp_index;
@@ -537,8 +537,8 @@ void MaskDetectors::appendToIndexListFromWS(
  */
 void MaskDetectors::appendToDetectorListFromWS(
     std::vector<detid_t> &detectorList,
-    const MatrixWorkspace_const_sptr inputWs,
-    const MatrixWorkspace_const_sptr maskWs,
+    const MatrixWorkspace_const_sptr &inputWs,
+    const MatrixWorkspace_const_sptr &maskWs,
     const std::tuple<size_t, size_t, bool> &range_info) {
   const auto startIndex = std::get<0>(range_info);
   const auto endIndex = std::get<1>(range_info);
@@ -567,7 +567,7 @@ void MaskDetectors::appendToDetectorListFromWS(
  */
 void MaskDetectors::appendToIndexListFromMaskWS(
     std::vector<size_t> &indexList,
-    const DataObjects::MaskWorkspace_const_sptr maskedWorkspace,
+    const DataObjects::MaskWorkspace_const_sptr &maskedWorkspace,
     const std::tuple<size_t, size_t, bool> &range_info) {
 
   std::vector<size_t> tmp_index;
@@ -610,7 +610,7 @@ void MaskDetectors::appendToIndexListFromMaskWS(
 void MaskDetectors::appendToDetectorListFromComponentList(
     std::vector<detid_t> &detectorList,
     const std::vector<std::string> &componentList,
-    const API::MatrixWorkspace_const_sptr WS) {
+    const API::MatrixWorkspace_const_sptr &WS) {
   const auto instrument = WS->getInstrument();
   if (!instrument) {
     g_log.error()

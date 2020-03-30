@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidAlgorithms/ReflectometryBackgroundSubtraction.h"
 #include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/AnalysisDataService.h"
@@ -51,7 +50,8 @@ const std::string ReflectometryBackgroundSubtraction::summary() const {
  * background
  */
 void ReflectometryBackgroundSubtraction::calculateAverageSpectrumBackground(
-    MatrixWorkspace_sptr inputWS, const std::vector<specnum_t> &spectraList) {
+    const MatrixWorkspace_sptr &inputWS,
+    const std::vector<specnum_t> &spectraList) {
 
   auto alg = this->createChildAlgorithm("GroupDetectors");
   alg->setProperty("InputWorkspace", inputWS);
@@ -157,7 +157,7 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(
  * @param indexList :: the ranges of the background region
  */
 void ReflectometryBackgroundSubtraction::calculatePixelBackground(
-    MatrixWorkspace_sptr inputWS, const std::vector<double> &indexList) {
+    const MatrixWorkspace_sptr &inputWS, const std::vector<double> &indexList) {
 
   const std::vector<int> backgroundRange{static_cast<int>(indexList.front()),
                                          static_cast<int>(indexList.back())};

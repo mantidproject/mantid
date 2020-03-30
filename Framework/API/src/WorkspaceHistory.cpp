@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/Algorithm.h"
@@ -317,7 +317,7 @@ void WorkspaceHistory::loadNexus(::NeXus::File *file) {
  * the workspace history.
  */
 void WorkspaceHistory::loadNestedHistory(::NeXus::File *file,
-                                         AlgorithmHistory_sptr parent) {
+                                         const AlgorithmHistory_sptr &parent) {
   // historyNumbers should be sorted by number
   std::set<int> historyNumbers = findHistoryEntries(file);
   for (auto historyNumber : historyNumbers) {

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -44,7 +44,7 @@ private:
   void exec() override;
 
   DataObjects::PeaksWorkspace_sptr ws;
-  void sizeBanks(std::string bankName, int &nCols, int &nRows);
+  void sizeBanks(const std::string &bankName, int &nCols, int &nRows);
 
   const std::vector<std::string> m_typeList{
       "TRICLINIC", "MONOCLINIC",   "ORTHORHOMBIC", "TETRAGONAL",

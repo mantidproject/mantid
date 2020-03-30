@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -52,7 +52,7 @@ private:
 
   /// Try ot add a workspace to the group of input workspaces.
   void tryAddInputWorkspaceToInputGroups(
-      Workspace_sptr ws, VecWSGroupType &vecMultiPeriodWorkspaceGroups,
+      const Workspace_sptr &ws, VecWSGroupType &vecMultiPeriodWorkspaceGroups,
       VecWSGroupType &vecWorkspaceGroups) const;
 
   /// Copy input workspace properties to spawned algorithm.

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -47,8 +47,8 @@ public:
   InstrumentDefinitionParser(const std::string &filename,
                              const std::string &instName,
                              const std::string &xmlText);
-  InstrumentDefinitionParser(const IDFObject_const_sptr xmlFile,
-                             const IDFObject_const_sptr expectedCacheFile,
+  InstrumentDefinitionParser(const IDFObject_const_sptr &xmlFile,
+                             const IDFObject_const_sptr &expectedCacheFile,
                              const std::string &instName,
                              const std::string &xmlText);
   ~InstrumentDefinitionParser() = default;
@@ -153,7 +153,7 @@ private:
                       const Poco::XML::Element *pCompElem, IdList &idList);
   /// Return true if assembly, false if not assembly and throws exception if
   /// string not in assembly
-  bool isAssembly(std::string) const;
+  bool isAssembly(const std::string &) const;
 
   /// Add XML element to parent assuming the element contains no other component
   /// elements
@@ -263,7 +263,7 @@ private:
       Poco::XML::Element *pRootElem);
 
   /// Check IdList
-  void checkIdListExistsAndDefinesEnoughIDs(IdList idList,
+  void checkIdListExistsAndDefinesEnoughIDs(const IdList &idList,
                                             Poco::XML::Element *pElem,
                                             const std::string &filename) const;
 
@@ -290,7 +290,7 @@ public: // for testing
 
 private:
   /// Reads from a cache file.
-  void applyCache(IDFObject_const_sptr cacheToApply);
+  void applyCache(const IDFObject_const_sptr &cacheToApply);
 
   /// Write out a cache file.
   CachingOption writeAndApplyCache(IDFObject_const_sptr firstChoiceCache,

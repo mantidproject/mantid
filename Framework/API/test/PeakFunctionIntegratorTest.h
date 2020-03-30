@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -84,7 +84,8 @@ private:
     return gaussian;
   }
 
-  double getGaussianAnalyticalInfiniteIntegral(IPeakFunction_sptr gaussian) {
+  double
+  getGaussianAnalyticalInfiniteIntegral(const IPeakFunction_sptr &gaussian) {
     return gaussian->height() * gaussian->fwhm() / (2.0 * sqrt(M_LN2)) *
            sqrt(M_PI);
   }

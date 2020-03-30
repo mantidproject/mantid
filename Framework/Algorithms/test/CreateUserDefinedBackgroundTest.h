@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -330,8 +330,8 @@ private:
   }
 
   /// Compare workspaces
-  bool workspacesEqual(const MatrixWorkspace_sptr lhs,
-                       const MatrixWorkspace_sptr rhs, double tolerance,
+  bool workspacesEqual(const MatrixWorkspace_sptr &lhs,
+                       const MatrixWorkspace_sptr &rhs, double tolerance,
                        bool relativeError = false) {
     auto alg = Mantid::API::AlgorithmFactory::Instance().create(
         "CompareWorkspaces", 1);

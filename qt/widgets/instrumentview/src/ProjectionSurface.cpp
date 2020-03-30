@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/Common/InputController.h"
@@ -33,6 +33,7 @@
 #include <cfloat>
 #include <cmath>
 #include <limits>
+#include <utility>
 
 using Mantid::Kernel::V3D;
 
@@ -689,8 +690,8 @@ void ProjectionSurface::saveShapesToTableWorkspace() {
  * @param ws :: table workspace to load shapes from
  */
 void ProjectionSurface::loadShapesFromTableWorkspace(
-    Mantid::API::ITableWorkspace_const_sptr ws) {
-  m_maskShapes.loadFromTableWorkspace(ws);
+    const Mantid::API::ITableWorkspace_const_sptr &ws) {
+  m_maskShapes.loadFromTableWorkspace(std::move(ws));
 }
 
 /**
@@ -721,7 +722,7 @@ ProjectionSurface::getEditPeaksWorkspace() const {
  * @param ws :: Shared pointer to the deleted peaks workspace.
  */
 void ProjectionSurface::deletePeaksWorkspace(
-    boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws) {
+    const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &ws) {
   const int npeaks = m_peakShapes.size();
   for (int i = 0; i < npeaks; ++i) {
     if (m_peakShapes[i]->getPeaksWorkspace() == ws) {

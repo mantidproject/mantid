@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // Includes
 //----------------------------------------------------------------------
@@ -174,8 +174,6 @@ void TableWorkspaceDomainCreator::declareDatasetProperties(
         "(default the highest value of x)");
     if (m_domainType != Simple &&
         !m_manager->existsProperty(m_maxSizePropertyName)) {
-      auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
-      mustBePositive->setLower(0);
       declareProperty(
           new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
           "The maximum number of values per a simple domain.");
@@ -463,7 +461,7 @@ void TableWorkspaceDomainCreator::addFunctionValuesToWS(
     const API::IFunction_sptr &function,
     boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
     const boost::shared_ptr<API::FunctionDomain> &domain,
-    boost::shared_ptr<API::FunctionValues> resultValues) const {
+    const boost::shared_ptr<API::FunctionValues> &resultValues) const {
   const size_t nData = resultValues->size();
   resultValues->zeroCalculated();
 
@@ -728,7 +726,7 @@ void TableWorkspaceDomainCreator::setParameters() const {
  */
 
 void TableWorkspaceDomainCreator::setXYEColumnNames(
-    API::ITableWorkspace_sptr ws) const {
+    const API::ITableWorkspace_sptr &ws) const {
 
   auto columnNames = ws->getColumnNames();
 
@@ -784,7 +782,7 @@ void TableWorkspaceDomainCreator::setXYEColumnNames(
  * entries.
  */
 void TableWorkspaceDomainCreator::setAndValidateWorkspace(
-    API::Workspace_sptr ws) const {
+    const API::Workspace_sptr &ws) const {
   auto tableWorkspace = boost::dynamic_pointer_cast<API::ITableWorkspace>(ws);
   if (!tableWorkspace) {
     throw std::invalid_argument("InputWorkspace must be a TableWorkspace.");

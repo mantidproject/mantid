@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -76,9 +76,9 @@ protected:
       nullptr; ///< ObjComponent that uses this geometry handler
   CSGObject *m_csgObj = nullptr; ///< Object that uses this geometry handler
 public:
-  GeometryHandler(IObjComponent *comp);              ///< Constructor
-  GeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
-  GeometryHandler(CSGObject *obj);                   ///< Constructor
+  GeometryHandler(IObjComponent *comp);                     ///< Constructor
+  GeometryHandler(const boost::shared_ptr<CSGObject> &obj); ///< Constructor
+  GeometryHandler(CSGObject *obj);                          ///< Constructor
   GeometryHandler(const MeshObject &obj);
   GeometryHandler(const MeshObject2D &obj);
   GeometryHandler(const GeometryHandler &handler);

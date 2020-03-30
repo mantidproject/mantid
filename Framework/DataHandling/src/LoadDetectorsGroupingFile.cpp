@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <sstream>
 
@@ -409,7 +409,7 @@ LoadGroupXMLFile::LoadGroupXMLFile()
       m_pDoc(), m_groupComponentsMap(), m_groupDetectorsMap(),
       m_groupSpectraMap(), m_startGroupID(1), m_groupNamesMap() {}
 
-void LoadGroupXMLFile::loadXMLFile(std::string xmlfilename) {
+void LoadGroupXMLFile::loadXMLFile(const std::string &xmlfilename) {
 
   this->initializeXMLParser(xmlfilename);
   this->parseXML();
@@ -604,9 +604,8 @@ void LoadGroupXMLFile::parseXML() {
 /*
  * Get attribute's value by name from a Node
  */
-std::string LoadGroupXMLFile::getAttributeValueByName(Poco::XML::Node *pNode,
-                                                      std::string attributename,
-                                                      bool &found) {
+std::string LoadGroupXMLFile::getAttributeValueByName(
+    Poco::XML::Node *pNode, const std::string &attributename, bool &found) {
   // 1. Init
   Poco::AutoPtr<Poco::XML::NamedNodeMap> att = pNode->attributes();
   found = false;

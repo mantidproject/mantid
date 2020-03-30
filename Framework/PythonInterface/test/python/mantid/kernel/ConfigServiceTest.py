@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
@@ -65,7 +65,7 @@ class ConfigServiceTest(unittest.TestCase):
         self.assertRaises(RuntimeError, config.getInstrument, "MadeUpInstrument")
 
     def test_service_acts_like_dictionary(self):
-        test_prop = "algorithms.retained"
+        test_prop = "projectRecovery.secondsBetween"
         self.assertTrue(config.hasProperty(test_prop))
         dictcall = config[test_prop]
         fncall = config.getString(test_prop)

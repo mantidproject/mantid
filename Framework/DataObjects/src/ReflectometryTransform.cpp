@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/ReflectometryTransform.h"
 
@@ -31,6 +31,7 @@
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/shared_ptr.hpp>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -125,13 +126,13 @@ ReflectometryTransform::ReflectometryTransform(
  */
 boost::shared_ptr<MDEventWorkspace2Lean>
 ReflectometryTransform::createMDWorkspace(
-    Mantid::Geometry::IMDDimension_sptr a,
-    Mantid::Geometry::IMDDimension_sptr b,
-    BoxController_sptr boxController) const {
+    const Mantid::Geometry::IMDDimension_sptr &a,
+    const Mantid::Geometry::IMDDimension_sptr &b,
+    const BoxController_sptr &boxController) const {
   auto ws = boost::make_shared<MDEventWorkspace2Lean>();
 
-  ws->addDimension(a);
-  ws->addDimension(b);
+  ws->addDimension(std::move(a));
+  ws->addDimension(std::move(b));
 
   BoxController_sptr wsbc = ws->getBoxController(); // Get the box controller
   wsbc->setSplitInto(boxController->getSplitInto(0));
@@ -280,8 +281,8 @@ DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
  * @returns An MDWorkspace based on centre-point rebinning of the inputWS
  */
 Mantid::API::IMDEventWorkspace_sptr ReflectometryTransform::executeMD(
-    Mantid::API::MatrixWorkspace_const_sptr inputWs,
-    BoxController_sptr boxController,
+    const Mantid::API::MatrixWorkspace_const_sptr &inputWs,
+    const BoxController_sptr &boxController,
     Mantid::Geometry::MDFrame_uptr frame) const {
   auto dim0 = boost::make_shared<MDHistoDimension>(
       m_d0Label, m_d0ID, *frame, static_cast<Mantid::coord_t>(m_d0Min),
@@ -290,7 +291,7 @@ Mantid::API::IMDEventWorkspace_sptr ReflectometryTransform::executeMD(
       m_d1Label, m_d1ID, *frame, static_cast<Mantid::coord_t>(m_d1Min),
       static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins);
 
-  auto ws = createMDWorkspace(dim0, dim1, boxController);
+  auto ws = createMDWorkspace(dim0, dim1, std::move(boxController));
 
   auto spectraAxis = inputWs->getAxis(1);
   for (size_t index = 0; index < inputWs->getNumberHistograms(); ++index) {
@@ -324,7 +325,7 @@ Mantid::API::IMDEventWorkspace_sptr ReflectometryTransform::executeMD(
  * @return workspace group containing output matrix workspaces of ki and kf
  */
 Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
-    Mantid::API::MatrixWorkspace_const_sptr inputWs) const {
+    const Mantid::API::MatrixWorkspace_const_sptr &inputWs) const {
   auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
 
   ws->initialize(m_d1NumBins, m_d0NumBins,
@@ -380,7 +381,7 @@ Mantid::API::MatrixWorkspace_sptr ReflectometryTransform::execute(
 }
 
 IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(
-    MatrixWorkspace_const_sptr inputWs) const {
+    const MatrixWorkspace_const_sptr &inputWs) const {
 
   auto input_x_dim = inputWs->getXDimension();
 
@@ -428,7 +429,7 @@ IMDHistoWorkspace_sptr ReflectometryTransform::executeMDNormPoly(
 MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     const MatrixWorkspace_const_sptr &inputWS,
     boost::shared_ptr<Mantid::DataObjects::TableWorkspace> &vertexes,
-    bool dumpVertexes, std::string outputDimensions) const {
+    bool dumpVertexes, const std::string &outputDimensions) const {
   MatrixWorkspace_sptr temp = WorkspaceFactory::Instance().create(
       "RebinnedOutput", m_d1NumBins, m_d0NumBins + 1, m_d0NumBins);
   RebinnedOutput_sptr outWS = boost::static_pointer_cast<RebinnedOutput>(temp);

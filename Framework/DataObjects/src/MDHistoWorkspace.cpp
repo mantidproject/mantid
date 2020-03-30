@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -737,7 +737,7 @@ MDHistoWorkspace::getBinBoundariesOnLine(const VMD &start, const VMD &end,
  * @throw an error if they don't match
  */
 void MDHistoWorkspace::checkWorkspaceSize(const MDHistoWorkspace &other,
-                                          std::string operation) {
+                                          const std::string &operation) {
   if (other.getNumDims() != this->getNumDims())
     throw std::invalid_argument("Cannot perform the " + operation +
                                 " operation on this MDHistoWorkspace. The "

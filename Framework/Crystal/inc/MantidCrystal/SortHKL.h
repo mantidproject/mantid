@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -78,7 +78,8 @@ private:
   DataObjects::PeaksWorkspace_sptr getOutputPeaksWorkspace(
       const DataObjects::PeaksWorkspace_sptr &inputPeaksWorkspace) const;
 
-  void sortOutputPeaksByHKL(API::IPeaksWorkspace_sptr outputPeaksWorkspace);
+  void
+  sortOutputPeaksByHKL(const API::IPeaksWorkspace_sptr &outputPeaksWorkspace);
 
   /// Point Groups possible
   std::vector<Mantid::Geometry::PointGroup_sptr> m_pointGroups;

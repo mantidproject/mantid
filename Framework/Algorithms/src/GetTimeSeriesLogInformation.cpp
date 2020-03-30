@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetTimeSeriesLogInformation.h"
 #include "MantidAPI/Run.h"
@@ -299,7 +299,7 @@ TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable() {
  *
  *  This algorithm should be reconsidered how to work with it.
  */
-void GetTimeSeriesLogInformation::exportErrorLog(MatrixWorkspace_sptr ws,
+void GetTimeSeriesLogInformation::exportErrorLog(const MatrixWorkspace_sptr &ws,
                                                  vector<DateAndTime> abstimevec,
                                                  double dts) {
   std::string outputdir = getProperty("OutputDirectory");

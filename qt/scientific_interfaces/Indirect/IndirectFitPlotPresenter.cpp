@@ -1,14 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotPresenter.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QTimer>
+#include <utility>
 
 namespace {
 using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotView;
@@ -278,17 +279,17 @@ void IndirectFitPlotPresenter::plotLines() {
 }
 
 void IndirectFitPlotPresenter::plotInput(MatrixWorkspace_sptr workspace) {
-  plotInput(workspace, m_model->getActiveSpectrum());
+  plotInput(std::move(workspace), m_model->getActiveSpectrum());
   if (auto doGuess = m_view->isPlotGuessChecked())
     plotGuess(doGuess);
 }
 
 void IndirectFitPlotPresenter::plotInput(MatrixWorkspace_sptr workspace,
                                          WorkspaceIndex spectrum) {
-  m_view->plotInTopPreview("Sample", workspace, spectrum, Qt::black);
+  m_view->plotInTopPreview("Sample", std::move(workspace), spectrum, Qt::black);
 }
 
-void IndirectFitPlotPresenter::plotFit(MatrixWorkspace_sptr workspace) {
+void IndirectFitPlotPresenter::plotFit(const MatrixWorkspace_sptr &workspace) {
   plotInput(workspace, WorkspaceIndex{0});
   if (auto doGuess = m_view->isPlotGuessChecked())
     plotGuess(doGuess);
@@ -298,12 +299,13 @@ void IndirectFitPlotPresenter::plotFit(MatrixWorkspace_sptr workspace) {
 
 void IndirectFitPlotPresenter::plotFit(MatrixWorkspace_sptr workspace,
                                        WorkspaceIndex spectrum) {
-  m_view->plotInTopPreview("Fit", workspace, spectrum, Qt::red);
+  m_view->plotInTopPreview("Fit", std::move(workspace), spectrum, Qt::red);
 }
 
 void IndirectFitPlotPresenter::plotDifference(MatrixWorkspace_sptr workspace,
                                               WorkspaceIndex spectrum) {
-  m_view->plotInBottomPreview("Difference", workspace, spectrum, Qt::blue);
+  m_view->plotInBottomPreview("Difference", std::move(workspace), spectrum,
+                              Qt::blue);
 }
 
 void IndirectFitPlotPresenter::updatePlotRange(
@@ -360,11 +362,12 @@ void IndirectFitPlotPresenter::plotGuess(bool doPlotGuess) {
 
 void IndirectFitPlotPresenter::plotGuess(
     Mantid::API::MatrixWorkspace_sptr workspace) {
-  m_view->plotInTopPreview("Guess", workspace, WorkspaceIndex{0}, Qt::green);
+  m_view->plotInTopPreview("Guess", std::move(workspace), WorkspaceIndex{0},
+                           Qt::green);
 }
 
 void IndirectFitPlotPresenter::plotGuessInSeparateWindow(
-    Mantid::API::MatrixWorkspace_sptr workspace) {
+    const Mantid::API::MatrixWorkspace_sptr &workspace) {
   m_plotExternalGuessRunner.addCallback(
       [this, workspace]() { m_model->appendGuessToInput(workspace); });
 }

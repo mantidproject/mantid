@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -90,7 +90,7 @@ private:
    */
   Kernel::MaterialBuilder builder;
 
-  void setMaterial(const std::string chemicalSymbol, const int atomicNumber,
+  void setMaterial(const std::string &chemicalSymbol, const int atomicNumber,
                    const int massNumber);
 
   void

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -151,23 +151,23 @@ private:
   void execEvent();
 
   /// read in the input parameters and see what findout what will be to grouped
-  void getGroups(API::MatrixWorkspace_const_sptr workspace,
+  void getGroups(const API::MatrixWorkspace_const_sptr &workspace,
                  std::vector<int64_t> &unUsedSpec);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_
   /// _numbers_
   void processFile(const std::string &fname,
-                   API::MatrixWorkspace_const_sptr workspace,
+                   const API::MatrixWorkspace_const_sptr &workspace,
                    std::vector<int64_t> &unUsedSpec);
   /// gets groupings from XML file
   void processXMLFile(const std::string &fname,
-                      API::MatrixWorkspace_const_sptr workspace,
+                      const API::MatrixWorkspace_const_sptr &workspace,
                       std::vector<int64_t> &unUsedSpec);
-  void
-  processGroupingWorkspace(DataObjects::GroupingWorkspace_const_sptr groupWS,
-                           API::MatrixWorkspace_const_sptr workspace,
-                           std::vector<int64_t> &unUsedSpec);
-  void processMatrixWorkspace(API::MatrixWorkspace_const_sptr groupWS,
-                              API::MatrixWorkspace_const_sptr workspace,
+  void processGroupingWorkspace(
+      const DataObjects::GroupingWorkspace_const_sptr &groupWS,
+      const API::MatrixWorkspace_const_sptr &workspace,
+      std::vector<int64_t> &unUsedSpec);
+  void processMatrixWorkspace(const API::MatrixWorkspace_const_sptr &groupWS,
+                              const API::MatrixWorkspace_const_sptr &workspace,
                               std::vector<int64_t> &unUsedSpec);
   /// used while reading the file turns the string into an integer number (if
   /// possible), white space and # comments ignored
@@ -193,14 +193,15 @@ private:
 
   /// Copy the and combine the histograms that the user requested from the input
   /// into the output workspace
-  size_t formGroups(API::MatrixWorkspace_const_sptr inputWS,
-                    API::MatrixWorkspace_sptr outputWS, const double prog4Copy,
-                    const bool keepAll, const std::set<int64_t> &unGroupedSet,
+  size_t formGroups(const API::MatrixWorkspace_const_sptr &inputWS,
+                    const API::MatrixWorkspace_sptr &outputWS,
+                    const double prog4Copy, const bool keepAll,
+                    const std::set<int64_t> &unGroupedSet,
                     Indexing::IndexInfo &indexInfo);
   /// Copy the and combine the event lists that the user requested from the
   /// input into the output workspace
-  size_t formGroupsEvent(DataObjects::EventWorkspace_const_sptr inputWS,
-                         DataObjects::EventWorkspace_sptr outputWS,
+  size_t formGroupsEvent(const DataObjects::EventWorkspace_const_sptr &inputWS,
+                         const DataObjects::EventWorkspace_sptr &outputWS,
                          const double prog4Copy);
 
   /// Copy the ungrouped spectra from the input workspace to the output

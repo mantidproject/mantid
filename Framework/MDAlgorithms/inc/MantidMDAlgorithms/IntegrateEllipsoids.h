@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -52,8 +52,8 @@ private:
   /// Calculate if this Q is on a detector
   void calculateE1(const Geometry::DetectorInfo &detectorInfo);
 
-  void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
-                        std::string property, std::string values);
+  void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+                        const std::string &property, const std::string &values);
 
   /// save for all detector pixels
   std::vector<Kernel::V3D> E1Vec;

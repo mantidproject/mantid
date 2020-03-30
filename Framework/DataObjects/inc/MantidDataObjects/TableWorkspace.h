@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -17,6 +17,21 @@
 #include "MantidKernel/V3D.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include <utility>
 
 namespace Mantid {
 
@@ -321,7 +336,7 @@ private:
     }
   }
 
-  void addColumn(boost::shared_ptr<API::Column> column);
+  void addColumn(const boost::shared_ptr<API::Column> &column);
 
   /** This method finds the row and column index of an integer cell value in a
    * table workspace
@@ -339,7 +354,9 @@ private:
    * @param  col  column number of the value searched
    */
   virtual void find(std::string value, size_t &row, size_t &col) {
-    findValue(value, row, col);
+    findValue(std::move(std::move(std::move(std::move(
+                  std::move(std::move(std::move(std::move(value)))))))),
+              row, col);
   }
   /** This method finds the row and column index of an float value in a table
    * workspace

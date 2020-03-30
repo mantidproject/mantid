@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -84,7 +84,7 @@ protected:
   std::string getUnitCellStringFromLog(const API::LogManager_sptr &tableLog);
 
   std::string getStringValueFromLog(const API::LogManager_sptr &logManager,
-                                    std::string valueName);
+                                    const std::string &valueName);
 
   std::string intensityTypeToString(IntensityType type) const;
   IntensityType intensityTypeFromString(std::string typeString) const;

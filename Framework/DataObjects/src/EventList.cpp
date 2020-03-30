@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/EventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -2555,7 +2555,7 @@ void EventList::convertTof(std::function<double(double)> func,
  */
 template <class T>
 void EventList::convertTofHelper(std::vector<T> &events,
-                                 std::function<double(double)> func) {
+                                 const std::function<double(double)> &func) {
   // iterate through all events
   for (auto &ev : events)
     ev.m_tof = func(ev.m_tof);

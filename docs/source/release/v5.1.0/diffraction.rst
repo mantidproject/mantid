@@ -12,8 +12,14 @@ Diffraction Changes
 Powder Diffraction
 ------------------
 
+- Polaris.create_total_scattering_pdf output workspaces now have the run number in the names.
+
 Engineering Diffraction
 -----------------------
+Improvements
+^^^^^^^^^^^^
+- TOPAS files (`.abc`) have replaced the `.dat` files generated when focusing using the GUI.
+- Focusing with the GUI will now generate a CSV containing the averaged values of all numerical sample logs.
 
 Single Crystal Diffraction
 --------------------------

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -49,8 +49,9 @@ class MANTID_CRYSTAL_DLL ConnectedComponentLabeling {
 
 public:
   /// Constructor
-  ConnectedComponentLabeling(const size_t &startId = 1,
-                             const boost::optional<int> nThreads = boost::none);
+  ConnectedComponentLabeling(
+      const size_t &startId = 1,
+      const boost::optional<int> &nThreads = boost::none);
 
   /// Getter for the start label id
   size_t getStartLabelId() const;
@@ -79,7 +80,7 @@ private:
 
   /// Calculate the disjoint element tree across the image.
   ConnectedComponentMappingTypes::ClusterMap
-  calculateDisjointTree(Mantid::API::IMDHistoWorkspace_sptr ws,
+  calculateDisjointTree(const Mantid::API::IMDHistoWorkspace_sptr &ws,
                         BackgroundStrategy *const baseStrategy,
                         Mantid::API::Progress &progress) const;
 

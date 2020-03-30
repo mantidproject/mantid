@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -162,6 +162,10 @@ def pcolormesh(workspaces, fig=None):
         if subplot_idx < workspaces_len:
             ws = workspaces[subplot_idx]
             pcm = pcolormesh_on_axis(ax, ws)
+            if pcm:  # Colour bar limits are wrong if workspace is ragged. Set them manually.
+                colorbar_min = np.nanmin(pcm.get_array())
+                colorbar_max = np.nanmax(pcm.get_array())
+                pcm.set_clim(colorbar_min, colorbar_max)
             if col_idx < ncols - 1:
                 col_idx += 1
             else:

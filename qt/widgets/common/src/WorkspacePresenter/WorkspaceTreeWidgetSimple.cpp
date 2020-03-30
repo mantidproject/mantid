@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h"
 #include "MantidQtWidgets/Common/MantidTreeModel.h"
@@ -45,7 +45,7 @@ WorkspaceTreeWidgetSimple::WorkspaceTreeWidgetSimple(bool viewOnly,
       m_showDetectors(new QAction("Show Detectors", this)) {
 
   // Replace the double click action on the MantidTreeWidget
-  m_tree->m_doubleClickAction = [&](QString wsName) {
+  m_tree->m_doubleClickAction = [&](const QString &wsName) {
     emit workspaceDoubleClicked(wsName);
   };
 

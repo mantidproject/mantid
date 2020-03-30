@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -717,7 +717,7 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr doRebin(MatrixWorkspace_sptr inputWS,
+  MatrixWorkspace_sptr doRebin(const MatrixWorkspace_sptr &inputWS,
                                const std::string &params) {
     auto rebin = FrameworkManager::Instance().createAlgorithm("Rebin");
     rebin->initialize();
@@ -729,8 +729,8 @@ private:
     return rebin->getProperty("OutputWorkspace");
   }
 
-  MatrixWorkspace_sptr doFFT(MatrixWorkspace_sptr inputWS, const bool complex,
-                             const bool phaseShift) {
+  MatrixWorkspace_sptr doFFT(const MatrixWorkspace_sptr &inputWS,
+                             const bool complex, const bool phaseShift) {
     auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
     fft->initialize();
     fft->setChild(true);
@@ -747,7 +747,7 @@ private:
     return fft->getProperty("OutputWorkspace");
   }
 
-  void doPhaseTest(MatrixWorkspace_sptr inputWS, bool complex) {
+  void doPhaseTest(const MatrixWorkspace_sptr &inputWS, bool complex) {
     // Offset the input workspace
     const auto offsetWS = offsetWorkspace(inputWS);
 
@@ -803,7 +803,7 @@ private:
     return ws;
   }
 
-  MatrixWorkspace_sptr offsetWorkspace(MatrixWorkspace_sptr workspace) {
+  MatrixWorkspace_sptr offsetWorkspace(const MatrixWorkspace_sptr &workspace) {
     auto scaleX = FrameworkManager::Instance().createAlgorithm("ScaleX");
     scaleX->initialize();
     scaleX->setChild(true);
@@ -936,7 +936,7 @@ private:
     return create->getProperty("OutputWorkspace");
   }
 
-  MatrixWorkspace_sptr doCrop(MatrixWorkspace_sptr inputWS, double lower,
+  MatrixWorkspace_sptr doCrop(const MatrixWorkspace_sptr &inputWS, double lower,
                               double higher) {
     auto crop = FrameworkManager::Instance().createAlgorithm("CropWorkspace");
     crop->initialize();

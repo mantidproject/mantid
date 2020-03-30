@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
 #include "MantidAPI/IEventWorkspace.h"
@@ -208,7 +208,7 @@ void SeqDomainSpectrumCreator::setParametersFromPropertyManager() {
 
 /// Sets the MatrixWorkspace the created domain is based on.
 void SeqDomainSpectrumCreator::setMatrixWorkspace(
-    MatrixWorkspace_sptr matrixWorkspace) {
+    const MatrixWorkspace_sptr &matrixWorkspace) {
   if (!matrixWorkspace) {
     throw std::invalid_argument(
         "InputWorkspace must be a valid MatrixWorkspace.");

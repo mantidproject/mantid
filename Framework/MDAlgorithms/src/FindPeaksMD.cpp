@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/FindPeaksMD.h"
 #include "MantidAPI/Run.h"
@@ -586,7 +586,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  * @param ws :: MDHistoWorkspace
  */
 void FindPeaksMD::findPeaksHisto(
-    Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
+    const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) {
   size_t nd = ws->getNumDims();
   if (nd < 3)
     throw std::invalid_argument("Workspace must have at least 3 dimensions.");

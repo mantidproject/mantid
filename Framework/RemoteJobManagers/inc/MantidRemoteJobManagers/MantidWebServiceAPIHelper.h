@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -82,13 +82,13 @@ public:
 private:
   // Wraps up some of the boilerplate code needed to execute HTTP GET and POST
   // requests
-  void initGetRequest(Poco::Net::HTTPRequest &req, std::string extraPath,
-                      std::string queryString) const;
+  void initGetRequest(Poco::Net::HTTPRequest &req, const std::string &extraPath,
+                      const std::string &queryString) const;
   void initPostRequest(Poco::Net::HTTPRequest &req,
-                       std::string extraPath) const;
+                       const std::string &extraPath) const;
   void initHTTPRequest(Poco::Net::HTTPRequest &req, const std::string &method,
-                       std::string extraPath,
-                       std::string queryString = "") const;
+                       const std::string &extraPath,
+                       const std::string &queryString = "") const;
 
   std::string m_displayName;
   std::string

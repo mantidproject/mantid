@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -20,9 +20,9 @@ class DLLExport MaskWorkspace : public SpecialWorkspace2D,
 public:
   MaskWorkspace() = default;
   MaskWorkspace(std::size_t numvectors);
-  MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
+  MaskWorkspace(const Mantid::Geometry::Instrument_const_sptr &instrument,
                 const bool includeMonitors = false);
-  MaskWorkspace(const API::MatrixWorkspace_const_sptr parent);
+  MaskWorkspace(const API::MatrixWorkspace_const_sptr &parent);
 
   /// Returns a clone of the workspace
   std::unique_ptr<MaskWorkspace> clone() const {

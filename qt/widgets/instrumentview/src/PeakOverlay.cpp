@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/PeakOverlay.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -176,8 +176,9 @@ int QualitativeIntensityScale::getIntensityLevel(double intensity) const {
 /**---------------------------------------------------------------------
  * Constructor
  */
-PeakOverlay::PeakOverlay(UnwrappedSurface *surface,
-                         boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws)
+PeakOverlay::PeakOverlay(
+    UnwrappedSurface *surface,
+    const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws)
     : Shape2DCollection(), m_peaksWorkspace(pws), m_surface(surface),
       m_precision(6), m_showRows(true), m_showLabels(true),
       m_peakIntensityScale(std::make_unique<QualitativeIntensityScale>(pws)) {
@@ -416,7 +417,8 @@ PeakMarker2D::Style PeakOverlay::getDefaultStyle(int index) {
  * @param units :: Units of the x - array in the underlying workspace:
  *     "TOF", "dSpacing", or "Wavelength".
  */
-void PeakOverlay::setPeakVisibility(double xmin, double xmax, QString units) {
+void PeakOverlay::setPeakVisibility(double xmin, double xmax,
+                                    const QString &units) {
   enum XUnits { Unknown, TOF, dSpacing, Wavelength };
   XUnits xUnits = Unknown;
   if (units == "TOF")

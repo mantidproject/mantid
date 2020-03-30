@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -33,7 +33,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 
 namespace {
-template <typename T> void do_execute(const std::string filename, T &ws) {
+template <typename T> void do_execute(const std::string &filename, T &ws) {
   SaveNexusESS alg;
   alg.setChild(true);
   alg.setRethrows(true);

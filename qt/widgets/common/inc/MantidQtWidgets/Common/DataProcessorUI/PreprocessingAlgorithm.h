@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -23,12 +23,13 @@ class EXPORT_OPT_MANTIDQT_COMMON PreprocessingAlgorithm
     : public ProcessingAlgorithmBase {
 public:
   // Constructor
-  PreprocessingAlgorithm(QString name, QString prefix = "",
-                         QString separator = "",
-                         std::set<QString> blacklist = std::set<QString>());
+  PreprocessingAlgorithm(
+      const QString &name, const QString &prefix = "",
+      const QString &separator = "",
+      const std::set<QString> &blacklist = std::set<QString>());
   // Delegating constructor
-  PreprocessingAlgorithm(QString name, QString prefix, QString separator,
-                         const QString &blacklist);
+  PreprocessingAlgorithm(const QString &name, const QString &prefix,
+                         const QString &separator, const QString &blacklist);
   // Default constructor
   PreprocessingAlgorithm();
   // Destructor

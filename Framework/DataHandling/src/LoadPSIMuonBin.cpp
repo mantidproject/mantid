@@ -1,8 +1,9 @@
 
+// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//     NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadPSIMuonBin.h"
 #include "MantidAPI/Algorithm.h"
@@ -233,8 +234,8 @@ void LoadPSIMuonBin::makeDeadTimeTable(const size_t &numSpec) {
   setProperty("DeadTimeTable", deadTimeTable);
 }
 
-std::string LoadPSIMuonBin::getFormattedDateTime(std::string date,
-                                                 std::string time) {
+std::string LoadPSIMuonBin::getFormattedDateTime(const std::string &date,
+                                                 const std::string &time) {
   std::string year;
   if (date.size() == 11) {
     year = date.substr(7, 4);

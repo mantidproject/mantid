@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PerformIndexOperations.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -10,6 +10,7 @@
 #include "MantidKernel/Strings.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -31,7 +32,7 @@ public:
     if (!this->isValid()) {
       return toAppend;
     } else {
-      MatrixWorkspace_sptr current = this->execute(inputWS);
+      MatrixWorkspace_sptr current = this->execute(std::move(inputWS));
       Mantid::API::AlgorithmManagerImpl &factory =
           Mantid::API::AlgorithmManager::Instance();
       auto conjoinWorkspaceAlg = factory.create("ConjoinWorkspaces");

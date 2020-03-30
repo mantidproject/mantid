@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -72,7 +72,6 @@ public:
     // specify name of file to save workspace to
     outputFile = "testSaveLoadrawCSP.nxs";
     remove(outputFile.c_str());
-    std::string dataName = "spectra";
     std::string title = "Workspace from Loadraw CSP78173";
     saveNexusP.setPropertyValue("FileName", outputFile);
     outputFile = saveNexusP.getPropertyValue("Filename");

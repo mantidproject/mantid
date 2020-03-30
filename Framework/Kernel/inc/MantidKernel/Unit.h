@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,6 +10,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/UnitLabel.h"
+#include <utility>
+
 #include <vector>
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
@@ -684,13 +686,14 @@ private:
 
 //=================================================================================================
 
-MANTID_KERNEL_DLL double timeConversionValue(std::string input_unit,
-                                             std::string output_unit);
+MANTID_KERNEL_DLL double timeConversionValue(const std::string &input_unit,
+                                             const std::string &output_unit);
 
 template <typename T>
-void timeConversionVector(std::vector<T> &vec, std::string input_unit,
-                          std::string output_unit) {
-  double factor = timeConversionValue(input_unit, output_unit);
+void timeConversionVector(std::vector<T> &vec, const std::string &input_unit,
+                          const std::string &output_unit) {
+  double factor =
+      timeConversionValue(std::move(input_unit), std::move(output_unit));
   if (factor != 1.0)
     std::transform(vec.begin(), vec.end(), vec.begin(),
                    [factor](T x) -> T { return x * static_cast<T>(factor); });

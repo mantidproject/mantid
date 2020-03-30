@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCBaselineModellingModel.h"
 
@@ -14,12 +14,13 @@
 
 #include "Poco/ActiveResult.h"
 #include <QApplication>
+#include <utility>
 
 using namespace Mantid::API;
 
 namespace {
 
-MatrixWorkspace_sptr extractSpectrum(MatrixWorkspace_sptr inputWorkspace,
+MatrixWorkspace_sptr extractSpectrum(const MatrixWorkspace_sptr &inputWorkspace,
                                      const int workspaceIndex) {
   auto extracter = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
   extracter->setChild(true);
@@ -31,8 +32,9 @@ MatrixWorkspace_sptr extractSpectrum(MatrixWorkspace_sptr inputWorkspace,
   return output;
 }
 
-MatrixWorkspace_sptr evaluateFunction(IFunction_const_sptr function,
-                                      MatrixWorkspace_sptr inputWorkspace) {
+MatrixWorkspace_sptr
+evaluateFunction(const IFunction_const_sptr &function,
+                 const MatrixWorkspace_sptr &inputWorkspace) {
   auto fit = AlgorithmManager::Instance().create("Fit");
   fit->setChild(true);
   fit->setProperty("Function", function->asString());
@@ -96,7 +98,7 @@ void ALCBaselineModellingModel::fit(IFunction_const_sptr function,
 }
 
 void ALCBaselineModellingModel::setData(MatrixWorkspace_sptr data) {
-  m_data = data;
+  m_data = std::move(data);
   emit dataChanged();
 }
 
@@ -108,7 +110,7 @@ void ALCBaselineModellingModel::setData(MatrixWorkspace_sptr data) {
  * @param sections :: Section we want to use for fitting
  */
 void ALCBaselineModellingModel::disableUnwantedPoints(
-    MatrixWorkspace_sptr ws,
+    const MatrixWorkspace_sptr &ws,
     const std::vector<IALCBaselineModellingModel::Section> &sections) {
   // Whether point with particular index should be disabled
   const size_t numBins = ws->blocksize();
@@ -146,7 +148,8 @@ void ALCBaselineModellingModel::disableUnwantedPoints(
  * @param sourceWs :: Workspace with original errors
  */
 void ALCBaselineModellingModel::enableDisabledPoints(
-    MatrixWorkspace_sptr destWs, MatrixWorkspace_const_sptr sourceWs) {
+    const MatrixWorkspace_sptr &destWs,
+    const MatrixWorkspace_const_sptr &sourceWs) {
   // Unwanted points were disabled by setting their errors to very high values.
   // We recover here the original errors stored in sourceWs
   destWs->mutableE(0) = sourceWs->e(0);
@@ -156,7 +159,8 @@ void ALCBaselineModellingModel::enableDisabledPoints(
  * Set errors in Diff spectrum after a fit
  * @param data :: [input/output] Workspace containing spectrum to set errors to
  */
-void ALCBaselineModellingModel::setErrorsAfterFit(MatrixWorkspace_sptr data) {
+void ALCBaselineModellingModel::setErrorsAfterFit(
+    const MatrixWorkspace_sptr &data) {
 
   data->mutableE(2) = data->e(0);
 }
@@ -208,13 +212,13 @@ ITableWorkspace_sptr ALCBaselineModellingModel::exportModel() {
 }
 
 void ALCBaselineModellingModel::setCorrectedData(MatrixWorkspace_sptr data) {
-  m_data = data;
+  m_data = std::move(data);
   emit correctedDataChanged();
 }
 
 void ALCBaselineModellingModel::setFittedFunction(
     IFunction_const_sptr function) {
-  m_fittedFunction = function;
+  m_fittedFunction = std::move(function);
   emit fittedFunctionChanged();
 }
 

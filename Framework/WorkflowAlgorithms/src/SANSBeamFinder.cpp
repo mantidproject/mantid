@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/SANSBeamFinder.h"
 #include "MantidAPI/AlgorithmProperty.h"
@@ -246,8 +246,8 @@ void SANSBeamFinder::exec() {
  * 2016/05/06 : this only works for RectangularDetector
  *
  */
-void SANSBeamFinder::maskEdges(MatrixWorkspace_sptr beamCenterWS, int high,
-                               int low, int left, int right,
+void SANSBeamFinder::maskEdges(const MatrixWorkspace_sptr &beamCenterWS,
+                               int high, int low, int left, int right,
                                const std::string &componentName) {
 
   auto instrument = beamCenterWS->getInstrument();

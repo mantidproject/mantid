@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadIsawDetCal.h"
 
@@ -29,6 +29,7 @@
 #include <fstream>
 #include <numeric>
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace DataHandling {
@@ -74,7 +75,7 @@ std::string getBankName(const std::string &bankPart, const int idnum) {
   }
 }
 
-std::string getInstName(API::Workspace_const_sptr wksp) {
+std::string getInstName(const API::Workspace_const_sptr &wksp) {
   MatrixWorkspace_const_sptr matrixWksp =
       boost::dynamic_pointer_cast<const MatrixWorkspace>(wksp);
   if (matrixWksp) {
@@ -352,10 +353,11 @@ void LoadIsawDetCal::exec() {
  * @param componentInfo :: The component info object for the workspace
  */
 void LoadIsawDetCal::center(const double x, const double y, const double z,
-                            const std::string &detname, API::Workspace_sptr ws,
+                            const std::string &detname,
+                            const API::Workspace_sptr &ws,
                             Geometry::ComponentInfo &componentInfo) {
 
-  Instrument_sptr inst = getCheckInst(ws);
+  Instrument_sptr inst = getCheckInst(std::move(ws));
 
   IComponent_const_sptr comp = inst->getComponentByName(detname);
   if (comp == nullptr) {
@@ -378,7 +380,7 @@ void LoadIsawDetCal::center(const double x, const double y, const double z,
  * @throw std::runtime_error if there's any problem with the workspace or it is
  * not possible to get an instrument object from it
  */
-Instrument_sptr LoadIsawDetCal::getCheckInst(API::Workspace_sptr ws) {
+Instrument_sptr LoadIsawDetCal::getCheckInst(const API::Workspace_sptr &ws) {
   MatrixWorkspace_sptr inputW =
       boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
   PeaksWorkspace_sptr inputP = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
@@ -432,7 +434,7 @@ std::vector<std::string> LoadIsawDetCal::getFilenames() {
  * @param doWishCorrection if true apply a special correction for WISH
  */
 void LoadIsawDetCal::doRotation(V3D rX, V3D rY, ComponentInfo &componentInfo,
-                                boost::shared_ptr<const IComponent> comp,
+                                const boost::shared_ptr<const IComponent> &comp,
                                 bool doWishCorrection) {
   // These are the ISAW axes
   rX.normalize();

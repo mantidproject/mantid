@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -30,7 +30,7 @@ struct ParameterValueLegacy {
 
 struct ResultLocation {
   ResultLocation() : result(), index(0) {}
-  ResultLocation(Mantid::API::WorkspaceGroup_sptr group, std::size_t i)
+  ResultLocation(const Mantid::API::WorkspaceGroup_sptr &group, std::size_t i)
       : result(group), index(i) {}
   boost::weak_ptr<Mantid::API::WorkspaceGroup> result;
   std::size_t index;
@@ -51,17 +51,18 @@ using FitDataIteratorLegacy =
 */
 class MANTIDQT_INDIRECT_DLL IndirectFitOutputLegacy {
 public:
-  IndirectFitOutputLegacy(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                          Mantid::API::ITableWorkspace_sptr parameterTable,
-                          Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                          const FitDataIteratorLegacy &fitDataBegin,
-                          const FitDataIteratorLegacy &fitDataEnd);
+  IndirectFitOutputLegacy(
+      const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+      Mantid::API::ITableWorkspace_sptr parameterTable,
+      const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
+      const FitDataIteratorLegacy &fitDataBegin,
+      const FitDataIteratorLegacy &fitDataEnd);
 
-  IndirectFitOutputLegacy(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                          Mantid::API::ITableWorkspace_sptr parameterTable,
-                          Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                          IndirectFitDataLegacy const *fitData,
-                          std::size_t spectrum);
+  IndirectFitOutputLegacy(
+      const Mantid::API::WorkspaceGroup_sptr &resultGroup,
+      Mantid::API::ITableWorkspace_sptr parameterTable,
+      const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
+      IndirectFitDataLegacy const *fitData, std::size_t spectrum);
 
   bool isSpectrumFit(IndirectFitDataLegacy const *fitData,
                      std::size_t spectrum) const;
@@ -88,20 +89,20 @@ public:
       const std::unordered_map<std::string, std::string> &parameterNameChanges,
       IndirectFitDataLegacy const *fitData, std::size_t spectrum);
 
-  void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  void addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+                 const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
                  const FitDataIteratorLegacy &fitDataBegin,
                  const FitDataIteratorLegacy &fitDataEnd);
-  void addOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  void addOutput(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
                  Mantid::API::ITableWorkspace_sptr parameterTable,
-                 Mantid::API::WorkspaceGroup_sptr resultWorkspace,
+                 const Mantid::API::WorkspaceGroup_sptr &resultWorkspace,
                  IndirectFitDataLegacy const *fitData, std::size_t spectrum);
 
   void removeOutput(IndirectFitDataLegacy const *fitData);
 
 private:
-  void updateFitResults(Mantid::API::WorkspaceGroup_sptr resultGroup,
+  void updateFitResults(const Mantid::API::WorkspaceGroup_sptr &resultGroup,
                         const FitDataIteratorLegacy &fitDataBegin,
                         const FitDataIteratorLegacy &fitDataEnd);
   void updateParameters(Mantid::API::ITableWorkspace_sptr parameterTable,

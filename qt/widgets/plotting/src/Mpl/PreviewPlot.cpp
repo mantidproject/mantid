@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Mpl/PreviewPlot.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -19,6 +19,7 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
+#include <utility>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace;
@@ -354,15 +355,15 @@ void PreviewPlot::resetView() {
  * Set the face colour for the canvas
  * @param colour A new colour for the figure facecolor
  */
-void PreviewPlot::setCanvasColour(QColor colour) {
-  m_canvas->gcf().setFaceColor(colour);
+void PreviewPlot::setCanvasColour(const QColor &colour) {
+  m_canvas->gcf().setFaceColor(std::move(colour));
 }
 
 /**
  * @brief PreviewPlot::setLinesWithErrors
  * @param labels A list of line labels where error bars should be shown
  */
-void PreviewPlot::setLinesWithErrors(QStringList labels) {
+void PreviewPlot::setLinesWithErrors(const QStringList &labels) {
   for (const QString &label : labels) {
     m_lines[label] = true;
   }
@@ -685,7 +686,7 @@ void PreviewPlot::setYScaleType(QAction *selected) {
   setScaleType(AxisID::YLeft, selected->text());
 }
 
-void PreviewPlot::setScaleType(AxisID id, QString actionName) {
+void PreviewPlot::setScaleType(AxisID id, const QString &actionName) {
   auto scaleType = actionName.toLower().toLatin1();
   auto axes = m_canvas->gca();
   switch (id) {

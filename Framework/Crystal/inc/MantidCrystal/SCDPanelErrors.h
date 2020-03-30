@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -44,7 +44,8 @@ public:
   /// Move detectors with parameters
   void moveDetector(double x, double y, double z, double rotx, double roty,
                     double rotz, double scalex, double scaley,
-                    std::string detname, API::Workspace_sptr inputW) const;
+                    std::string detname,
+                    const API::Workspace_sptr &inputW) const;
 
 private:
   /// Call the appropriate load function

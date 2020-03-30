@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -15,6 +15,7 @@
 
 #include <gsl/gsl_multifit_nlin.h>
 #include <limits>
+#include <utility>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -81,9 +82,9 @@ size_t CostFuncFitting::nParams() const {
 void CostFuncFitting::setFittingFunction(API::IFunction_sptr function,
                                          API::FunctionDomain_sptr domain,
                                          API::FunctionValues_sptr values) {
-  m_function = function;
-  m_domain = domain;
-  m_values = values;
+  m_function = std::move(function);
+  m_domain = std::move(domain);
+  m_values = std::move(values);
   reset();
 }
 
@@ -127,14 +128,15 @@ void CostFuncFitting::calActiveCovarianceMatrix(GSLMatrix &covar,
   // construct the jacobian
   GSLJacobian J(*m_function, m_values->size());
   size_t na = this->nParams(); // number of active parameters
-  assert(J.getJ()->size2 == na);
+  auto j = J.getJ();
+  assert(j->size2 == na);
   covar.resize(na, na);
 
   // calculate the derivatives
   m_function->functionDeriv(*m_domain, J);
 
   // let the GSL to compute the covariance matrix
-  gsl_multifit_covar(J.getJ(), epsrel, covar.gsl());
+  gsl_multifit_covar(j, epsrel, covar.gsl());
 }
 
 /** Calculates covariance matrix
@@ -418,9 +420,7 @@ double CostFuncFitting::valDerivHessian(bool evalDeriv,
       }
     }
     m_dirtyDeriv = false;
-  }
 
-  if (evalDeriv) {
     if (m_includePenalty) {
       size_t i = 0;
       for (size_t ip = 0; ip < np; ++ip) {

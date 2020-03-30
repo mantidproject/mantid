@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ResNorm.h"
 
@@ -215,12 +215,12 @@ void ResNorm::processLogs() {
   addAdditionalLogs(resultWorkspace);
 }
 
-void ResNorm::addAdditionalLogs(WorkspaceGroup_sptr resultGroup) const {
+void ResNorm::addAdditionalLogs(const WorkspaceGroup_sptr &resultGroup) const {
   for (auto const &workspace : *resultGroup)
     addAdditionalLogs(workspace);
 }
 
-void ResNorm::addAdditionalLogs(Workspace_sptr resultWorkspace) const {
+void ResNorm::addAdditionalLogs(const Workspace_sptr &resultWorkspace) const {
   auto logAdder = AlgorithmManager::Instance().create("AddSampleLog");
   auto const name = resultWorkspace->getName();
 
@@ -265,14 +265,14 @@ double ResNorm::getDoubleManagerProperty(QString const &propName) const {
   return m_dblManager->value(m_properties[propName]);
 }
 
-void ResNorm::copyLogs(MatrixWorkspace_sptr resultWorkspace,
-                       WorkspaceGroup_sptr resultGroup) const {
+void ResNorm::copyLogs(const MatrixWorkspace_sptr &resultWorkspace,
+                       const WorkspaceGroup_sptr &resultGroup) const {
   for (auto const &workspace : *resultGroup)
     copyLogs(resultWorkspace, workspace);
 }
 
-void ResNorm::copyLogs(MatrixWorkspace_sptr resultWorkspace,
-                       Workspace_sptr workspace) const {
+void ResNorm::copyLogs(const MatrixWorkspace_sptr &resultWorkspace,
+                       const Workspace_sptr &workspace) const {
   auto logCopier = AlgorithmManager::Instance().create("CopyLogs");
   logCopier->setProperty("InputWorkspace", resultWorkspace->getName());
   logCopier->setProperty("OutputWorkspace", workspace->getName());

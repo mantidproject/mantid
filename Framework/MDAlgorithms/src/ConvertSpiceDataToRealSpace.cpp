@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h"
 
@@ -209,8 +209,9 @@ void ConvertSpiceDataToRealSpace::exec() {
  */
 std::vector<MatrixWorkspace_sptr>
 ConvertSpiceDataToRealSpace::convertToMatrixWorkspace(
-    DataObjects::TableWorkspace_sptr tablews,
-    API::MatrixWorkspace_const_sptr parentws, Types::Core::DateAndTime runstart,
+    const DataObjects::TableWorkspace_sptr &tablews,
+    const API::MatrixWorkspace_const_sptr &parentws,
+    Types::Core::DateAndTime runstart,
     std::map<std::string, std::vector<double>> &logvecmap,
     std::vector<Types::Core::DateAndTime> &vectimes) {
   // Get table workspace's column information
@@ -249,7 +250,7 @@ ConvertSpiceDataToRealSpace::convertToMatrixWorkspace(
  * @param logvecmap
  */
 void ConvertSpiceDataToRealSpace::parseSampleLogs(
-    DataObjects::TableWorkspace_sptr tablews,
+    const DataObjects::TableWorkspace_sptr &tablews,
     const std::map<std::string, size_t> &indexlist,
     std::map<std::string, std::vector<double>> &logvecmap) {
   size_t numrows = tablews->rowCount();
@@ -287,10 +288,11 @@ void ConvertSpiceDataToRealSpace::parseSampleLogs(
  * @return
  */
 MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
-    DataObjects::TableWorkspace_sptr tablews, size_t irow,
-    MatrixWorkspace_const_sptr parentws, Types::Core::DateAndTime runstart,
-    size_t ipt, size_t irotangle, size_t itime,
-    const std::vector<std::pair<size_t, size_t>> anodelist, double &duration) {
+    const DataObjects::TableWorkspace_sptr &tablews, size_t irow,
+    const MatrixWorkspace_const_sptr &parentws,
+    Types::Core::DateAndTime runstart, size_t ipt, size_t irotangle,
+    size_t itime, const std::vector<std::pair<size_t, size_t>> &anodelist,
+    double &duration) {
   // New workspace from parent workspace
   MatrixWorkspace_sptr tempws =
       WorkspaceFactory::Instance().create(parentws, m_numSpec, 2, 1);
@@ -367,7 +369,7 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
  * @param samplenameindexmap
  */
 void ConvertSpiceDataToRealSpace::readTableInfo(
-    TableWorkspace_const_sptr tablews, size_t &ipt, size_t &irotangle,
+    const TableWorkspace_const_sptr &tablews, size_t &ipt, size_t &irotangle,
     size_t &itime, std::vector<std::pair<size_t, size_t>> &anodelist,
     std::map<std::string, size_t> &samplenameindexmap) {
 
@@ -439,7 +441,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
  * @param vectimes
  */
 void ConvertSpiceDataToRealSpace::appendSampleLogs(
-    IMDEventWorkspace_sptr mdws,
+    const IMDEventWorkspace_sptr &mdws,
     const std::map<std::string, std::vector<double>> &logvecmap,
     const std::vector<Types::Core::DateAndTime> &vectimes) {
   // Check!
@@ -524,8 +526,8 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
  * @param vec_ws2d
  */
 void ConvertSpiceDataToRealSpace::addExperimentInfos(
-    API::IMDEventWorkspace_sptr mdws,
-    const std::vector<API::MatrixWorkspace_sptr> vec_ws2d) {
+    const API::IMDEventWorkspace_sptr &mdws,
+    const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d) {
   // Add N experiment info as there are N measurment points
   for (const auto &ws2d : vec_ws2d) {
     // Create an ExperimentInfo object
@@ -633,7 +635,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
  * @return
  */
 IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
-    const std::vector<MatrixWorkspace_sptr> vec_ws2d,
+    const std::vector<MatrixWorkspace_sptr> &vec_ws2d,
     const std::vector<double> &vecmonitor) {
   // Create a target output workspace.
   IMDEventWorkspace_sptr outWs =
@@ -710,7 +712,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
  */
 std::map<detid_t, double>
 ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
-    DataObjects::TableWorkspace_sptr detefftablews) {
+    const DataObjects::TableWorkspace_sptr &detefftablews) {
   std::map<detid_t, double> deteffmap;
 
   // check table workspace

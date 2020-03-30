@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*WIKI*
  Facade over [[CreateTransmissionWorkspace]]. Pull numeric parameters out of the
@@ -240,7 +240,7 @@ void CreateTransmissionWorkspaceAuto::exec() {
 
 template <typename T>
 boost::optional<T>
-CreateTransmissionWorkspaceAuto::isSet(std::string propName) const {
+CreateTransmissionWorkspaceAuto::isSet(const std::string &propName) const {
   auto algProperty = this->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     return boost::optional<T>();

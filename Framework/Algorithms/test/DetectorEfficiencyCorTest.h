@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -41,7 +41,6 @@ public:
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1);
     dummyWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
-    const std::string inputWS = "testInput";
 
     Mantid::Algorithms::DetectorEfficiencyCor corrector;
     TS_ASSERT_THROWS_NOTHING(corrector.initialize());

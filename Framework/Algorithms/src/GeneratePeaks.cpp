@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GeneratePeaks.h"
 #include "MantidAPI/Column.h"
@@ -429,7 +429,7 @@ void GeneratePeaks::generatePeaks(
     const std::map<specnum_t,
                    std::vector<std::pair<double, API::IFunction_sptr>>>
         &functionmap,
-    API::MatrixWorkspace_sptr dataWS) {
+    const API::MatrixWorkspace_sptr &dataWS) {
   // Calcualte function
   std::map<specnum_t,
            std::vector<std::pair<double, API::IFunction_sptr>>>::const_iterator
@@ -627,7 +627,7 @@ void GeneratePeaks::processTableColumnNames() {
  * Algorithm supports multiple peaks in multiple spectra
  */
 void GeneratePeaks::getSpectraSet(
-    DataObjects::TableWorkspace_const_sptr peakParmsWS) {
+    const DataObjects::TableWorkspace_const_sptr &peakParmsWS) {
   size_t numpeaks = peakParmsWS->rowCount();
   API::Column_const_sptr col = peakParmsWS->getColumn("spectrum");
 
@@ -652,7 +652,7 @@ void GeneratePeaks::getSpectraSet(
 /** Get the IPeakFunction part in the input function
  */
 API::IPeakFunction_sptr
-GeneratePeaks::getPeakFunction(API::IFunction_sptr infunction) {
+GeneratePeaks::getPeakFunction(const API::IFunction_sptr &infunction) {
   // Not a composite function
   API::CompositeFunction_sptr compfunc =
       boost::dynamic_pointer_cast<API::CompositeFunction>(infunction);
@@ -678,8 +678,8 @@ GeneratePeaks::getPeakFunction(API::IFunction_sptr infunction) {
 //----------------------------------------------------------------------------------------------
 /** Find out whether a function has a certain parameter
  */
-bool GeneratePeaks::hasParameter(API::IFunction_sptr function,
-                                 std::string paramname) {
+bool GeneratePeaks::hasParameter(const API::IFunction_sptr &function,
+                                 const std::string &paramname) {
   std::vector<std::string> parnames = function->getParameterNames();
   std::vector<std::string>::iterator piter;
   piter = std::find(parnames.begin(), parnames.end(), paramname);
@@ -793,8 +793,8 @@ GeneratePeaks::createDataWorkspace(std::vector<double> binparameters) {
 
 /** Add function's parameter names after peak function name
  */
-std::vector<std::string>
-GeneratePeaks::addFunctionParameterNames(std::vector<std::string> funcnames) {
+std::vector<std::string> GeneratePeaks::addFunctionParameterNames(
+    const std::vector<std::string> &funcnames) {
   std::vector<std::string> vec_funcparnames;
 
   for (auto &funcname : funcnames) {

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SaveHKL.h"
 #include "MantidAPI/FileProperty.h"
@@ -747,7 +747,7 @@ double SaveHKL::spectrumCalc(double TOF, int iSpec,
 
   return spect;
 }
-void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
+void SaveHKL::sizeBanks(const std::string &bankName, int &nCols, int &nRows) {
   if (bankName == "None")
     return;
   boost::shared_ptr<const IComponent> parent =

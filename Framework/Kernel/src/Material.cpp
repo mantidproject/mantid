@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Atom.h"
@@ -610,7 +610,7 @@ getAtomName(const std::string &text) // TODO change to get number after letters
 } // namespace
 
 Material::ChemicalFormula
-Material::parseChemicalFormula(const std::string chemicalSymbol) {
+Material::parseChemicalFormula(const std::string &chemicalSymbol) {
   Material::ChemicalFormula CF;
 
   tokenizer tokens(chemicalSymbol, " -",

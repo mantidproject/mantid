@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/LoadIsawSpectrum.h"
 #include "MantidAPI/Axis.h"
@@ -56,7 +56,6 @@ void LoadIsawSpectrum::exec() {
   const V3D pos = inst->getSource()->getPos() - samplePos;
   double l1 = pos.norm();
 
-  std::vector<double> spec(11);
   std::string STRING;
   std::ifstream infile;
   std::string spectraFile = getPropertyValue("SpectraFile");

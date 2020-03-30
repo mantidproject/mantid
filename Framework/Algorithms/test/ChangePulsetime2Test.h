@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -22,8 +22,9 @@ using Mantid::Types::Core::DateAndTime;
 
 namespace {
 EventWorkspace_sptr
-execute_change_of_pulse_times(EventWorkspace_sptr in_ws, std::string timeOffset,
-                              std::string workspaceIndexList) {
+execute_change_of_pulse_times(const EventWorkspace_sptr &in_ws,
+                              const std::string &timeOffset,
+                              const std::string &workspaceIndexList) {
   // Create and run the algorithm
   ChangePulsetime2 alg;
   alg.initialize();
@@ -53,8 +54,8 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void do_test(std::string in_ws_name, std::string out_ws_name,
-               std::string WorkspaceIndexList) {
+  void do_test(const std::string &in_ws_name, const std::string &out_ws_name,
+               const std::string &WorkspaceIndexList) {
     ChangePulsetime2 alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

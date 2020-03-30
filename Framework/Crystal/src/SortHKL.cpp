@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SortHKL.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -412,7 +412,8 @@ PeaksWorkspace_sptr SortHKL::getOutputPeaksWorkspace(
 }
 
 /// Sorts the peaks in the workspace by H, K and L.
-void SortHKL::sortOutputPeaksByHKL(IPeaksWorkspace_sptr outputPeaksWorkspace) {
+void SortHKL::sortOutputPeaksByHKL(
+    const IPeaksWorkspace_sptr &outputPeaksWorkspace) {
   // Sort by HKL
   std::vector<std::pair<std::string, bool>> criteria{
       {"H", true}, {"K", true}, {"L", true}};

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -197,8 +197,9 @@ public:
     cleanupWorkspaces(std::vector<std::string>{inputWs});
   }
 
-  bool runConvertAxisByFormula(std::string testName, std::string formula,
-                               std::string axis, std::string &inputWs,
+  bool runConvertAxisByFormula(const std::string &testName,
+                               const std::string &formula,
+                               const std::string &axis, std::string &inputWs,
                                std::string &resultWs) {
     Mantid::Algorithms::ConvertAxisByFormula alg;
     alg.initialize();

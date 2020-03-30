@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SampleEnvironmentSpecParser.h"
 #include "MantidAPI/FileFinder.h"
@@ -259,7 +259,7 @@ SampleEnvironmentSpecParser::parseContainer(Element *element) const {
  * @param targetVariable Value read from element attribute
  */
 void SampleEnvironmentSpecParser::LoadOptionalDoubleFromXML(
-    Poco::XML::Element *componentElement, std::string attributeName,
+    Poco::XML::Element *componentElement, const std::string &attributeName,
     double &targetVariable) const {
 
   auto attributeText = componentElement->getAttribute(attributeName);
@@ -280,7 +280,7 @@ void SampleEnvironmentSpecParser::LoadOptionalDoubleFromXML(
  * @return vector containing translations
  */
 std::vector<double> SampleEnvironmentSpecParser::parseTranslationVector(
-    std::string translationVectorStr) const {
+    const std::string &translationVectorStr) const {
 
   std::vector<double> translationVector;
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -113,7 +113,8 @@ PoldiFitPeaks1D::getPeakProfile(const PoldiPeak_sptr &poldiPeak) const {
 }
 
 void PoldiFitPeaks1D::setValuesFromProfileFunction(
-    PoldiPeak_sptr poldiPeak, const IFunction_sptr &fittedFunction) const {
+    const PoldiPeak_sptr &poldiPeak,
+    const IFunction_sptr &fittedFunction) const {
   CompositeFunction_sptr totalFunction =
       boost::dynamic_pointer_cast<CompositeFunction>(fittedFunction);
 
@@ -134,8 +135,8 @@ void PoldiFitPeaks1D::setValuesFromProfileFunction(
   }
 }
 
-double
-PoldiFitPeaks1D::getFwhmWidthRelation(IPeakFunction_sptr peakFunction) const {
+double PoldiFitPeaks1D::getFwhmWidthRelation(
+    const IPeakFunction_sptr &peakFunction) const {
   return peakFunction->fwhm() / peakFunction->getParameter(2);
 }
 

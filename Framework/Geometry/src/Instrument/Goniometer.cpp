@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ConfigService.h"
@@ -14,6 +14,8 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
+
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -64,7 +66,7 @@ Goniometer::Goniometer() : R(3, 3, true), initFromR(false) {}
 /// Constructor from a rotation matrix
 /// @param rot :: DblMatrix matrix that is going to be the internal rotation
 /// matrix of the goniometer. Cannot push additional axes
-Goniometer::Goniometer(DblMatrix rot) {
+Goniometer::Goniometer(const DblMatrix &rot) {
   DblMatrix ide(3, 3), rtr(3, 3);
   rtr = rot.Tprime() * rot;
   ide.identityMatrix();
@@ -83,7 +85,7 @@ const Kernel::DblMatrix &Goniometer::getR() const { return R; }
 /// @param rot :: DblMatrix matrix that is going to be the internal rotation
 /// matrix of the goniometer.
 void Goniometer::setR(Kernel::DblMatrix rot) {
-  R = rot;
+  R = std::move(rot);
   initFromR = true;
 }
 
@@ -129,7 +131,7 @@ std::string Goniometer::axesInfo() {
   @param sense :: rotation sense (CW or CCW), CCW by default
   @param angUnit :: units for angle of type#AngleUnit, angDegrees by default
 */
-void Goniometer::pushAxis(std::string name, double axisx, double axisy,
+void Goniometer::pushAxis(const std::string &name, double axisx, double axisy,
                           double axisz, double angle, int sense, int angUnit) {
   if (initFromR) {
     throw std::runtime_error(
@@ -160,7 +162,7 @@ void Goniometer::pushAxis(std::string name, double axisx, double axisy,
   @param name :: GoniometerAxis name
   @param value :: value in the units that the axis is set
 */
-void Goniometer::setRotationAngle(std::string name, double value) {
+void Goniometer::setRotationAngle(const std::string &name, double value) {
   bool changed = false;
   std::vector<GoniometerAxis>::iterator it;
   for (it = motors.begin(); it < motors.end(); ++it) {
@@ -255,7 +257,7 @@ const GoniometerAxis &Goniometer::getAxis(size_t axisnumber) const {
 
 /// Get GoniometerAxis object using motor name
 /// @param axisname :: axis name
-const GoniometerAxis &Goniometer::getAxis(std::string axisname) const {
+const GoniometerAxis &Goniometer::getAxis(const std::string &axisname) const {
   for (auto it = motors.begin(); it < motors.end(); ++it) {
     if (axisname == it->name) {
       return (*it);
@@ -288,7 +290,7 @@ void Goniometer::makeUniversalGoniometer() {
  * @param convention :: the convention used to calculate Euler Angles. The
  * UniversalGoniometer is YZY, a triple axis goniometer at HFIR is YZX
  */
-std::vector<double> Goniometer::getEulerAngles(std::string convention) {
+std::vector<double> Goniometer::getEulerAngles(const std::string &convention) {
   return Quat(getR()).getEulerAngles(convention);
 }
 

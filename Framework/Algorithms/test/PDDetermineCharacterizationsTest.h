@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -82,8 +82,8 @@ public:
     }
   }
 
-  void addRow(ITableWorkspace_sptr wksp, const double freq, const double wl,
-              const int bank, const std::string &van,
+  void addRow(const ITableWorkspace_sptr &wksp, const double freq,
+              const double wl, const int bank, const std::string &van,
               const std::string &van_back, const std::string &can,
               const std::string &empty_env, const std::string &empty_inst,
               const std::string &dmin, const std::string &dmax,
@@ -209,8 +209,8 @@ public:
     return expectedInfo;
   }
 
-  void compareResult(PropertyManager_sptr expected,
-                     PropertyManager_sptr observed) {
+  void compareResult(const PropertyManager_sptr &expected,
+                     const PropertyManager_sptr &observed) {
     TS_ASSERT_EQUALS(expected->propertyCount(), observed->propertyCount());
 
     const std::vector<Property *> &expectedProps = expected->getProperties();

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -47,7 +47,7 @@ private:
   DataObjects::EventWorkspace_sptr
       m_inputWS;         ///< Pointer to the input event workspace
   int m_numberOfSpectra; ///< The number of spectra in the workspace
-  void normalizeToBinArea(API::MatrixWorkspace_sptr outWS);
+  void normalizeToBinArea(const API::MatrixWorkspace_sptr &outWS);
 };
 
 double calcD(double wavelength, double sintheta);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidAPI/Axis.h"
@@ -522,7 +522,7 @@ void AnvredCorrection::BuildLamdaWeights() {
 }
 
 void AnvredCorrection::scale_init(const IDetector &det,
-                                  Instrument_const_sptr inst, double &L2,
+                                  const Instrument_const_sptr &inst, double &L2,
                                   double &depth, double &pathlength,
                                   std::string &bankName) {
   bankName = det.getParent()->getParent()->getName();
@@ -542,7 +542,8 @@ void AnvredCorrection::scale_init(const IDetector &det,
 }
 
 void AnvredCorrection::scale_exec(std::string &bankName, double &lambda,
-                                  double &depth, Instrument_const_sptr inst,
+                                  double &depth,
+                                  const Instrument_const_sptr &inst,
                                   double &pathlength, double &value) {
   // correct for the slant path throught the scintillator glass
   double mu = (9.614 * lambda) + 0.266; // mu for GS20 glass

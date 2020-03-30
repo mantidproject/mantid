@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -53,11 +53,11 @@ private:
 
   /// Process a tube
   bool performBleedTest(const std::vector<int> &tubeIndices,
-                        API::MatrixWorkspace_const_sptr inputWS, double maxRate,
-                        int numIgnoredPixels);
+                        const API::MatrixWorkspace_const_sptr &inputWS,
+                        double maxRate, int numIgnoredPixels);
   /// Mask a tube with the given workspace indices
   void maskTube(const std::vector<int> &tubeIndices,
-                API::MatrixWorkspace_sptr workspace);
+                const API::MatrixWorkspace_sptr &workspace);
 };
 
 } // namespace Algorithms

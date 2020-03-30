@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MuonAnalysisHelper.h"
 
@@ -27,6 +27,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/scope_exit.hpp>
 #include <stdexcept>
+#include <utility>
 
 namespace {
 /// Colors for workspace (Black, Red, Green, Blue, Orange, Purple, if there are
@@ -96,7 +97,7 @@ void setDoubleValidator(QLineEdit *field, bool allowEmpty) {
  * only - it is returned.
  * @param ws :: Run workspace
  */
-MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws) {
+MatrixWorkspace_sptr firstPeriod(const Workspace_sptr &ws) {
   if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
     return boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
   } else {
@@ -109,7 +110,7 @@ MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws) {
  * @param ws :: Run wokspace
  * @return Number of periods
  */
-size_t numPeriods(Workspace_sptr ws) {
+size_t numPeriods(const Workspace_sptr &ws) {
   if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
     return group->size();
   } else {
@@ -122,7 +123,7 @@ size_t numPeriods(Workspace_sptr ws) {
  * @param runWs :: Run workspace to retrieve information from
  * @param out :: Stream to print to
  */
-void printRunInfo(MatrixWorkspace_sptr runWs, std::ostringstream &out) {
+void printRunInfo(const MatrixWorkspace_sptr &runWs, std::ostringstream &out) {
   // Remember current out stream format
   std::ios_base::fmtflags outFlags(out.flags());
   std::streamsize outPrecision(out.precision());
@@ -253,7 +254,7 @@ void WidgetAutoSaver::registerWidget(QWidget *widget, const QString &name,
                                      QVariant defaultValue) {
   m_registeredWidgets.push_back(widget);
   m_widgetNames[widget] = name;
-  m_widgetDefaultValues[widget] = defaultValue;
+  m_widgetDefaultValues[widget] = std::move(defaultValue);
   m_widgetGroups[widget] =
       m_settings.group(); // Current group set up using beginGroup and endGroup
 }
@@ -710,7 +711,7 @@ void replaceLogValue(const std::string &wsName, const std::string &logName,
  * @param logName :: [input] Name of log
  * @returns All values found for the given log
  */
-std::vector<std::string> findLogValues(const Workspace_sptr ws,
+std::vector<std::string> findLogValues(const Workspace_sptr &ws,
                                        const std::string &logName) {
   std::vector<std::string> values;
   MatrixWorkspace_sptr matrixWS;
@@ -747,7 +748,7 @@ std::vector<std::string> findLogValues(const Workspace_sptr ws,
  * @returns :: Pair of (smallest, largest) values
  */
 std::pair<std::string, std::string> findLogRange(
-    const Workspace_sptr ws, const std::string &logName,
+    const Workspace_sptr &ws, const std::string &logName,
     bool (*isLessThan)(const std::string &first, const std::string &second)) {
   auto values = findLogValues(ws, logName);
   if (!values.empty()) {
@@ -793,7 +794,8 @@ std::pair<std::string, std::string> findLogRange(
  * @throws std::invalid_argument if the workspaces supplied are null or have
  * different number of periods
  */
-void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
+void appendTimeSeriesLogs(const Workspace_sptr &toAppend,
+                          const Workspace_sptr &resultant,
                           const std::string &logName) {
   // check input
   if (!toAppend || !resultant) {
@@ -802,7 +804,7 @@ void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
   }
 
   // Cast the inputs to MatrixWorkspace (could be a group)
-  auto getWorkspaces = [](const Workspace_sptr ws) {
+  auto getWorkspaces = [](const Workspace_sptr &ws) {
     std::vector<MatrixWorkspace_sptr> workspaces;
     MatrixWorkspace_sptr matrixWS =
         boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
@@ -824,7 +826,7 @@ void appendTimeSeriesLogs(Workspace_sptr toAppend, Workspace_sptr resultant,
   };
 
   // Extract time series log from workspace
-  auto getTSLog = [&logName](const MatrixWorkspace_sptr ws) {
+  auto getTSLog = [&logName](const MatrixWorkspace_sptr &ws) {
     const Mantid::API::Run &run = ws->run();
     TimeSeriesProperty<double> *prop = nullptr;
     if (run.hasProperty(logName)) {
@@ -905,8 +907,8 @@ QString runNumberString(const std::string &workspaceName,
  * @throws std::invalid_argument if loadedWorkspace is null
  */
 bool isReloadGroupingNecessary(
-    const boost::shared_ptr<Mantid::API::Workspace> currentWorkspace,
-    const boost::shared_ptr<Mantid::API::Workspace> loadedWorkspace) {
+    const boost::shared_ptr<Mantid::API::Workspace> &currentWorkspace,
+    const boost::shared_ptr<Mantid::API::Workspace> &loadedWorkspace) {
   if (!loadedWorkspace) {
     throw std::invalid_argument("No loaded workspace to get grouping for!");
   }

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SaveMD2.h"
 #include "MantidAPI/CoordTransform.h"
@@ -88,7 +88,8 @@ void SaveMD2::init() {
  *
  * @param ws :: MDHistoWorkspace to save
  */
-void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
+void SaveMD2::doSaveHisto(
+    const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) {
   std::string filename = getPropertyValue("Filename");
 
   // Erase the file if it exists

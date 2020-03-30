@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -67,8 +67,8 @@ private:
 
   /// Gets the values from the fitted GSL, and creates a clone of input
   /// workspace with new values
-  API::MatrixWorkspace_sptr saveSplineOutput(const API::MatrixWorkspace_sptr ws,
-                                             const size_t spec);
+  API::MatrixWorkspace_sptr
+  saveSplineOutput(const API::MatrixWorkspace_sptr &ws, const size_t spec);
 
   /// Sets up the splines for later fitting
   void setupSpline(double xMin, double xMax, int numBins, int ncoeff);

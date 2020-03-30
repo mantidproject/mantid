@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ApplyAbsorptionCorrections.h"
 #include "IndirectDataValidationHelper.h"
@@ -15,6 +15,7 @@
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QStringList>
+#include <utility>
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
@@ -370,9 +371,9 @@ void ApplyAbsorptionCorrections::run() {
  * @param toMatch Name of the workspace to match
  */
 void ApplyAbsorptionCorrections::addInterpolationStep(
-    MatrixWorkspace_sptr toInterpolate, std::string toMatch) {
+    const MatrixWorkspace_sptr &toInterpolate, std::string toMatch) {
   API::BatchAlgorithmRunner::AlgorithmRuntimeProps interpolationProps;
-  interpolationProps["WorkspaceToMatch"] = toMatch;
+  interpolationProps["WorkspaceToMatch"] = std::move(toMatch);
 
   IAlgorithm_sptr interpolationAlg =
       AlgorithmManager::Instance().create("SplineInterpolation");

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SANSPlotSpecial.h"
 
@@ -474,7 +474,7 @@ void SANSPlotSpecial::setupTable() {
 
 QwtPlotCurve *SANSPlotSpecial::plotMiniplot(
     QwtPlotCurve *curve,
-    boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace,
+    const boost::shared_ptr<Mantid::API::MatrixWorkspace> &workspace,
     size_t workspaceIndex) {
   bool data = (curve == m_dataCurve);
 

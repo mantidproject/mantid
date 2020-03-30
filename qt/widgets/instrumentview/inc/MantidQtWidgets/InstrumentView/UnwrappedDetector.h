@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -34,7 +34,7 @@ This class keeps information used to draw a detector on an unwrapped surface.
 class UnwrappedDetector {
 public:
   UnwrappedDetector();
-  UnwrappedDetector(GLColor color, size_t detIndex);
+  UnwrappedDetector(const GLColor &color, size_t detIndex);
   UnwrappedDetector(const UnwrappedDetector &other);
   UnwrappedDetector &operator=(const UnwrappedDetector &other);
   bool empty() const;

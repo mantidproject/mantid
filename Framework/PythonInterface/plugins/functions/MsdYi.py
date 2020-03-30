@@ -1,17 +1,9 @@
-'''
-@author Spencer Howells, ISIS
-@date December 05, 2013
-
-Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory,
-NScD Oak Ridge National Laboratory & European Spallation Source
-
-pylint: disable=no-init,invalid-name
-
-This file is part of Mantid.
-Mantid Repository : https://github.com/mantidproject/mantid
-File change history is stored at: <https://github.com/mantidproject/mantid>
-Code Documentation is available at: <http://doxygen.mantidproject.org>
-'''
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
 from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -112,7 +112,7 @@ PeaksWorkspace_sptr createTestPeaksWorkspaceWithSatellites(
 }
 
 std::unique_ptr<IndexPeaks>
-indexPeaks(PeaksWorkspace_sptr peaksWS,
+indexPeaks(const PeaksWorkspace_sptr &peaksWS,
            const std::unordered_map<std::string, std::string> &arguments) {
   auto alg = std::make_unique<IndexPeaks>();
   alg->setChild(true);

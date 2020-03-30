@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -59,10 +59,11 @@ void setUpBinaryOperationMDTestHelper() {
 }
 
 /// Run a binary algorithm.
-MDHistoWorkspace_sptr doTest(std::string algoName, std::string lhs,
-                             std::string rhs, std::string outName,
-                             bool succeeds, std::string otherProp,
-                             std::string otherPropValue) {
+MDHistoWorkspace_sptr doTest(const std::string &algoName,
+                             const std::string &lhs, const std::string &rhs,
+                             const std::string &outName, bool succeeds,
+                             const std::string &otherProp,
+                             const std::string &otherPropValue) {
   setUpBinaryOperationMDTestHelper();
 
   IAlgorithm *alg = FrameworkManager::Instance().createAlgorithm(algoName);
@@ -94,10 +95,11 @@ MDHistoWorkspace_sptr doTest(std::string algoName, std::string lhs,
 
 namespace UnaryOperationMDTestHelper {
 
-MDHistoWorkspace_sptr doTest(std::string algoName, std::string inName,
-                             std::string outName, bool succeeds,
-                             std::string otherProp,
-                             std::string otherPropValue) {
+MDHistoWorkspace_sptr doTest(const std::string &algoName,
+                             const std::string &inName,
+                             const std::string &outName, bool succeeds,
+                             const std::string &otherProp,
+                             const std::string &otherPropValue) {
   MDHistoWorkspace_sptr histo =
       MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0);
   IMDEventWorkspace_sptr event =

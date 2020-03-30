@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateEPP.h"
 
@@ -49,7 +49,7 @@ const static std::string STATUS("FitStatus");
  *
  * @param ws The TableWorkspace to add the columns to.
  */
-void addEPPColumns(API::ITableWorkspace_sptr ws) {
+void addEPPColumns(const API::ITableWorkspace_sptr &ws) {
   ws->addColumn("int", ColumnNames::WS_INDEX);
   ws->addColumn("double", ColumnNames::PEAK_CENTRE);
   ws->addColumn("double", ColumnNames::PEAK_CENTRE_ERR);

@@ -1,13 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidGeometry/Instrument/DetectorInfo.h"
+#include <utility>
+
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/EigenConversionHelpers.h"
@@ -27,8 +29,10 @@ DetectorInfo::DetectorInfo(
     boost::shared_ptr<const std::vector<detid_t>> detectorIds,
     boost::shared_ptr<const std::unordered_map<detid_t, size_t>>
         detIdToIndexMap)
-    : m_detectorInfo(std::move(detectorInfo)), m_instrument(instrument),
-      m_detectorIDs(detectorIds), m_detIDToIndex(detIdToIndexMap),
+    : m_detectorInfo(std::move(detectorInfo)),
+      m_instrument(std::move(instrument)),
+      m_detectorIDs(std::move(detectorIds)),
+      m_detIDToIndex(std::move(detIdToIndexMap)),
       m_lastDetector(PARALLEL_GET_MAX_THREADS),
       m_lastIndex(PARALLEL_GET_MAX_THREADS, -1) {
 

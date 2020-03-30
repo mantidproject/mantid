@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/RRFMuon.h"
 #include "MantidAPI/Axis.h"
@@ -109,7 +109,8 @@ void RRFMuon::exec() {
  *  @param uin :: [input] input workspace units
  *  @param uuser :: [input] units selected by user
  */
-double RRFMuon::unitConversionFactor(std::string uin, std::string uuser) {
+double RRFMuon::unitConversionFactor(const std::string &uin,
+                                     const std::string &uuser) {
 
   if ((uin == "microsecond")) {
 

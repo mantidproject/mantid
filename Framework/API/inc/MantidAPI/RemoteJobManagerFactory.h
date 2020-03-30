@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -47,8 +47,8 @@ public:
 
   /// alternative (lower level) create where the specific type of
   /// manager and base URL are directly given
-  IRemoteJobManager_sptr create(const std::string baseURL,
-                                const std::string jobManagerType) const;
+  IRemoteJobManager_sptr create(const std::string &baseURL,
+                                const std::string &jobManagerType) const;
 
 private:
   /// So that the singleton can be created (cons/destructor are private)

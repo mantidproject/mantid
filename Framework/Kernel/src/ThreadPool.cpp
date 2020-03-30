@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -125,7 +125,7 @@ void ThreadPool::start(double waitSec) {
  * @param task :: pointer to a Task object to run.
  * @param start :: start the thread at the same time; default false
  */
-void ThreadPool::schedule(std::shared_ptr<Task> task, bool start) {
+void ThreadPool::schedule(const std::shared_ptr<Task> &task, bool start) {
   if (task) {
     m_scheduler->push(task);
     // Start all the threads if they were not already.

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -27,19 +27,19 @@ namespace Poldi {
 
 class MANTID_SINQ_DLL PoldiSourceSpectrum {
 public:
-  PoldiSourceSpectrum(Kernel::Interpolation spectrum);
-  PoldiSourceSpectrum(Geometry::Instrument_const_sptr poldiInstrument);
+  PoldiSourceSpectrum(const Kernel::Interpolation &spectrum);
+  PoldiSourceSpectrum(const Geometry::Instrument_const_sptr &poldiInstrument);
   double intensity(double wavelength) const;
 
 protected:
-  void
-  setSpectrumFromInstrument(Geometry::Instrument_const_sptr poldiInstrument);
+  void setSpectrumFromInstrument(
+      const Geometry::Instrument_const_sptr &poldiInstrument);
   Geometry::IComponent_const_sptr
-  getSourceComponent(Geometry::Instrument_const_sptr poldiInstrument);
-  Geometry::Parameter_sptr
-  getSpectrumParameter(Geometry::IComponent_const_sptr source,
-                       Geometry::ParameterMap_sptr instrumentParameterMap);
-  void setSpectrum(Geometry::Parameter_sptr spectrumParameter);
+  getSourceComponent(const Geometry::Instrument_const_sptr &poldiInstrument);
+  Geometry::Parameter_sptr getSpectrumParameter(
+      const Geometry::IComponent_const_sptr &source,
+      const Geometry::ParameterMap_sptr &instrumentParameterMap);
+  void setSpectrum(const Geometry::Parameter_sptr &spectrumParameter);
 
   Kernel::Interpolation m_spectrum;
 };

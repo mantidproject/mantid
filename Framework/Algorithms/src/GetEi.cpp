@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetEi.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -163,9 +163,9 @@ void GetEi::exec() {
  * passed to this function second
  *  @throw NotFoundError if no detector is found for the detector ID given
  */
-void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
-                        specnum_t mon1Spec, double &monitor0Dist,
-                        double &monitor1Dist) const {
+void GetEi::getGeometry(const API::MatrixWorkspace_const_sptr &WS,
+                        specnum_t mon0Spec, specnum_t mon1Spec,
+                        double &monitor0Dist, double &monitor1Dist) const {
   const IComponent_const_sptr source = WS->getInstrument()->getSource();
 
   // retrieve a pointer to the first detector and get its distance
@@ -220,7 +220,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specnum_t mon0Spec,
  * in the workspace
  */
 std::vector<size_t> GetEi::getMonitorWsIndexs(
-    API::MatrixWorkspace_const_sptr WS, specnum_t specNum1,
+    const API::MatrixWorkspace_const_sptr &WS, specnum_t specNum1,
     specnum_t specNum2) const { // getting spectra numbers from detector IDs is
                                 // hard because the map works the other way,
   // getting index numbers from spectra numbers has
@@ -285,7 +285,7 @@ double GetEi::timeToFly(double s, double E_KE) const {
  *  @throw out_of_range if the peak runs off the edge of the histogram
  *  @throw runtime_error a Child Algorithm just falls over
  */
-double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS,
+double GetEi::getPeakCentre(const API::MatrixWorkspace_const_sptr &WS,
                             const size_t monitIn, const double peakTime) {
   const auto &timesArray = WS->x(monitIn);
   // we search for the peak only inside some window because there are often more

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -221,8 +221,8 @@ public:
 
 private:
   void do_test_values(const SimpleChebfun &cheb,
-                      std::function<double(double)> fun, double accur1 = 1e-14,
-                      double accur2 = 1e-14) {
+                      const std::function<double(double)> &fun,
+                      double accur1 = 1e-14, double accur2 = 1e-14) {
     TS_ASSERT(cheb.size() > 0);
     TS_ASSERT(cheb.width() > 0.0);
     if (cheb.isGood()) {

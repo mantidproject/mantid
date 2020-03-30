@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegratePeaksMDHKL.h"
 #include "MantidAPI/CommonBinsValidator.h"
@@ -195,7 +195,7 @@ IntegratePeaksMDHKL::normalize(int h, int k, int l, double box, int gridPts,
 }
 
 void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
-                                        MDHistoWorkspace_sptr out,
+                                        const MDHistoWorkspace_sptr &out,
                                         double &intensity,
                                         double &errorSquared) {
   std::vector<int> gridPts;

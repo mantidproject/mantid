@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -87,7 +87,6 @@ public:
 
   void test_Assignment_By_SharedPtr() {
     FunctionProperty prop("fun");
-    std::string error;
     auto fun_p = FunctionFactory::Instance().createInitialized(
         createTestFunctionString());
     TS_ASSERT(fun_p);
@@ -105,7 +104,6 @@ public:
 
   void test_Shared_Pointer() {
     FunctionProperty prop("fun");
-    std::string error;
     boost::shared_ptr<FunctionPropertyTest_Function> fun_p(
         new FunctionPropertyTest_Function);
     TS_ASSERT(fun_p);

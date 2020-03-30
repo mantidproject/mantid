@@ -44,7 +44,7 @@ class TableDialog : public QDialog {
   Q_OBJECT
 
 public:
-  TableDialog(Table *t, Qt::WFlags fl = nullptr);
+  TableDialog(Table *t, const Qt::WFlags &fl = nullptr);
 
 private slots:
   void prevColumn();

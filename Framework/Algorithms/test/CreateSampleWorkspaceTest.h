@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -46,9 +46,10 @@ public:
   }
 
   MatrixWorkspace_sptr createSampleWorkspace(
-      std::string outWSName, std::string wsType = "", std::string function = "",
-      std::string userFunction = "", int numBanks = 2, int bankPixelWidth = 10,
-      int numEvents = 1000, bool isRandom = false, std::string xUnit = "TOF",
+      const std::string &outWSName, const std::string &wsType = "",
+      const std::string &function = "", const std::string &userFunction = "",
+      int numBanks = 2, int bankPixelWidth = 10, int numEvents = 1000,
+      bool isRandom = false, const std::string &xUnit = "TOF",
       double xMin = 0.0, double xMax = 20000.0, double binWidth = 200.0,
       int numScanPoints = 1) {
 

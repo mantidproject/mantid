@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -63,7 +63,8 @@ void addTestTimeSeries(LogManager &run, const std::string &name) {
 }
 } // namespace
 
-void addTimeSeriesEntry(LogManager &runInfo, std::string name, double val) {
+void addTimeSeriesEntry(LogManager &runInfo, const std::string &name,
+                        double val) {
   TimeSeriesProperty<double> *tsp;
   tsp = new TimeSeriesProperty<double>(name);
   tsp->addValue("2011-05-24T00:00:00", val);
@@ -554,8 +555,7 @@ private:
     LogManager runInfo;
     const std::string name = "T_prop";
     runInfo.addProperty<T>(name, value);
-    int result(-1);
-    result = runInfo.getPropertyAsIntegerValue(name);
+    int result = runInfo.getPropertyAsIntegerValue(name);
     TS_ASSERT_THROWS_NOTHING(result = runInfo.getPropertyAsIntegerValue(name));
     TS_ASSERT_EQUALS(value, static_cast<T>(result));
   }
@@ -579,12 +579,11 @@ public:
   }
 
   void test_Accessing_Single_Value_From_Times_Series_A_Large_Number_Of_Times() {
-    double value(0.0);
     for (size_t i = 0; i < 20000; ++i) {
-      value = m_testRun.getPropertyAsSingleValue(m_propName);
+      // This has an observable side-effect of calling, so we don't need
+      // to store its return value
+      m_testRun.getPropertyAsSingleValue(m_propName);
     }
-    // Enure variable is used so that it is not optimised away by the compiler
-    value += 1.0;
   }
 
   LogManager m_testRun;

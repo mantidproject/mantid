@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -98,7 +98,8 @@ private:
   void populateLogsAndValues(const QStringList &fittedWsList);
   void populateFittings(
       const QStringList &names,
-      std::function<Mantid::API::Workspace_sptr(const QString &)> wsFromName);
+      const std::function<Mantid::API::Workspace_sptr(const QString &)>
+          &wsFromName);
 
   /// Creates the results table
   void createTable(bool multipleFits);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -27,6 +27,7 @@
 #include "MantidTestHelpers/FakeObjects.h"
 #include "PropertyManagerHelper.h"
 #include <map>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -291,11 +292,16 @@ public:
 
   void testExecute() {
     ToyAlgorithm myAlg;
+    TS_ASSERT_EQUALS(ExecutionState::Uninitialized, myAlg.executionState());
     TS_ASSERT_THROWS(myAlg.execute(), const std::runtime_error &);
     TS_ASSERT(!myAlg.isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Uninitialized, myAlg.executionState());
     TS_ASSERT_THROWS_NOTHING(myAlg.initialize());
+    TS_ASSERT_EQUALS(ExecutionState::Initialized, myAlg.executionState());
     TS_ASSERT_THROWS_NOTHING(myAlg.execute());
     TS_ASSERT(myAlg.isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Finished, myAlg.executionState());
+    TS_ASSERT_EQUALS(ResultState::Success, myAlg.resultState());
   }
 
   void testSetPropertyValue() {
@@ -332,11 +338,16 @@ public:
     alg.setProperty("PropertyA", 12);
     alg.setProperty("PropertyB", 5);
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
+    // Algoritm never executed as property validation failed
     TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Initialized, alg.executionState());
+    TS_ASSERT_EQUALS(ResultState::NotFinished, alg.resultState());
 
     alg.setProperty("PropertyB", 15);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Finished, alg.executionState());
+    TS_ASSERT_EQUALS(ResultState::Success, alg.resultState());
   }
 
   void test_WorkspaceMethodFunctionsReturnEmptyByDefault() {
@@ -501,8 +512,9 @@ public:
   /** Test of setting read and/or write locks
    * for various combinations of input/output workspaces.
    */
-  void do_test_locking(std::string in1, std::string in2, std::string inout,
-                       std::string out1, std::string out2) {
+  void do_test_locking(const std::string &in1, const std::string &in2,
+                       const std::string &inout, const std::string &out1,
+                       const std::string &out2) {
     for (size_t i = 0; i < 6; i++) {
       boost::shared_ptr<WorkspaceTester> ws =
           boost::make_shared<WorkspaceTester>();
@@ -576,7 +588,8 @@ public:
    *        Make no group if blank, just 1 workspace
    * @return The new WorkspaceGroup object
    */
-  Workspace_sptr makeWorkspaceGroup(std::string group1, std::string contents1) {
+  Workspace_sptr makeWorkspaceGroup(const std::string &group1,
+                                    std::string contents1) {
     auto &ads = AnalysisDataService::Instance();
     if (contents1.empty()) {
       if (group1.empty())
@@ -604,14 +617,14 @@ public:
   }
 
   //------------------------------------------------------------------------
-  WorkspaceGroup_sptr do_test_groups(std::string group1, std::string contents1,
-                                     std::string group2, std::string contents2,
-                                     std::string group3, std::string contents3,
-                                     bool expectFail = false,
-                                     int expectedNumber = 3) {
-    makeWorkspaceGroup(group1, contents1);
-    makeWorkspaceGroup(group2, contents2);
-    makeWorkspaceGroup(group3, contents3);
+  WorkspaceGroup_sptr
+  do_test_groups(const std::string &group1, std::string contents1,
+                 const std::string &group2, std::string contents2,
+                 const std::string &group3, std::string contents3,
+                 bool expectFail = false, int expectedNumber = 3) {
+    makeWorkspaceGroup(group1, std::move(contents1));
+    makeWorkspaceGroup(group2, std::move(contents2));
+    makeWorkspaceGroup(group3, std::move(contents3));
 
     StubbedWorkspaceAlgorithm alg;
     alg.initialize();

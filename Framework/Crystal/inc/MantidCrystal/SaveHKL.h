@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -49,7 +49,7 @@ private:
   double spectrumCalc(double TOF, int iSpec,
                       std::vector<std::vector<double>> time,
                       std::vector<std::vector<double>> spectra, size_t id);
-  void sizeBanks(std::string bankName, int &nCols, int &nRows);
+  void sizeBanks(const std::string &bankName, int &nCols, int &nRows);
 
   DataObjects::PeaksWorkspace_sptr m_ws;
   double m_smu = 0.0; // in 1/cm

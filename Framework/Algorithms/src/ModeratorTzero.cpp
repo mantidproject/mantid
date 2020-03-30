@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ModeratorTzero.h"
 #include "MantidAPI/Axis.h"
@@ -354,9 +354,9 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           evlist.mutableX() -= t0_direct;
 
           MantidVec tofs = evlist.getTofs();
-          for (double &tof : tofs) {
-            tof -= t0_direct;
-          }
+
+          std::transform(tofs.begin(), tofs.end(), tofs.begin(),
+                         [&t0_direct](double tof) { return tof - t0_direct; });
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
         } // end of else if(emode=="Direct")

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -32,7 +32,7 @@ public:
 
   void test_exec_fileBacked() { do_test_exec("MergeMDFilesTest_OutputWS.nxs"); }
 
-  void do_test_exec(std::string OutputFilename) {
+  void do_test_exec(const std::string &OutputFilename) {
     if (OutputFilename != "") {
       if (Poco::File(OutputFilename).exists())
         Poco::File(OutputFilename).remove();

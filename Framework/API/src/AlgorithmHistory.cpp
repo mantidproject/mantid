@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -21,6 +21,7 @@
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -85,7 +86,7 @@ AlgorithmHistory::AlgorithmHistory(const std::string &name, int vers,
                                    std::size_t uexeccount)
     : m_name(name), m_version(vers), m_executionDate(start),
       m_executionDuration(duration), m_execCount(uexeccount),
-      m_childHistories(), m_uuid(uuid) {}
+      m_childHistories(), m_uuid(std::move(uuid)) {}
 
 /**
  *  Set the history properties for an algorithm pointer
@@ -162,7 +163,7 @@ void AlgorithmHistory::addProperty(const std::string &name,
 /** Add a child algorithm history to history
  *  @param childHist :: The child history
  */
-void AlgorithmHistory::addChildHistory(AlgorithmHistory_sptr childHist) {
+void AlgorithmHistory::addChildHistory(const AlgorithmHistory_sptr &childHist) {
   // Don't copy one's own history onto oneself
   if (this == &(*childHist)) {
     return;

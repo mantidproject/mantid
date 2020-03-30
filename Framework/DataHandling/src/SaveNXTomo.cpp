@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveNXTomo.h"
 
@@ -304,7 +304,7 @@ void SaveNXTomo::processAll() {
  * @param workspace the workspace to get data from
  * @param nxFile the nexus file to save data into
  */
-void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
+void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace,
                                       ::NeXus::File &nxFile) {
   try {
     nxFile.openPath("/entry1/tomo_entry/data");
@@ -372,7 +372,7 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr workspace,
 }
 
 void SaveNXTomo::writeImageKeyValue(
-    const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile,
+    const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile,
     int thisFileInd) {
   // Add ImageKey to instrument/image_key if present, use 0 if not
   try {
@@ -401,7 +401,7 @@ void SaveNXTomo::writeImageKeyValue(
   nxFile.closeGroup();
 }
 
-void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
+void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace,
                                 ::NeXus::File &nxFile, int thisFileInd) {
   // Add Log information (minus special values - Rotation, ImageKey, Intensity)
   // Unable to add multidimensional string data, storing strings as
@@ -446,7 +446,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr workspace,
 }
 
 void SaveNXTomo::writeIntensityValue(
-    const DataObjects::Workspace2D_sptr workspace, ::NeXus::File &nxFile,
+    const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile,
     int thisFileInd) {
   // Add Intensity to control if present, use 1 if not
   try {

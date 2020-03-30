@@ -1,14 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // clang-format off
 #pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <stdexcept>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/Divide.h"
@@ -26,10 +27,10 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::IDetector_const_sptr;
 
-/*****************************************************************************************/
+
 /********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
 /********** Source = MultiplyDivideTest.in.h *********************************************/
-/*****************************************************************************************/
+
 
 class @MULTIPLYDIVIDETEST_CLASS@ : public CxxTest::TestSuite
 {
@@ -601,6 +602,10 @@ public:
     mess << "LHS: grouping=" << lhs_grouping << ", 2D=" << lhs2D;
     mess << "; RHS: grouping=" << rhs_grouping << ", 2D=" << rhs2D;
     message = mess.str();
+
+    if (lhs_grouping == 0 || rhs_grouping == 0){
+      throw std::runtime_error("Attempted div by zero in test");
+    }
 
     int numpix = 12;
     std::vector< std::vector<int> > lhs(numpix/lhs_grouping), rhs(numpix/rhs_grouping);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * PeakHKLErrors.h
@@ -67,13 +67,15 @@ public:
    * @return The new peak with the new instrument( adjusted with the
    *parameters) and time adjusted.
    */
-  static DataObjects::Peak createNewPeak(const Geometry::IPeak &peak_old,
-                                         Geometry::Instrument_sptr instrNew,
-                                         double T0, double L0);
+  static DataObjects::Peak
+  createNewPeak(const Geometry::IPeak &peak_old,
+                const Geometry::Instrument_sptr &instrNew, double T0,
+                double L0);
 
-  static void cLone(boost::shared_ptr<Geometry::ParameterMap> &pmap,
-                    boost::shared_ptr<const Geometry::IComponent> component,
-                    boost::shared_ptr<const Geometry::ParameterMap> &pmapSv);
+  static void
+  cLone(boost::shared_ptr<Geometry::ParameterMap> &pmap,
+        const boost::shared_ptr<const Geometry::IComponent> &component,
+        boost::shared_ptr<const Geometry::ParameterMap> &pmapSv);
 
   void getRun2MatMap(DataObjects::PeaksWorkspace_sptr &Peaks,
                      const std::string &OptRuns,
@@ -87,7 +89,7 @@ public:
                                                            char axis);
 
   boost::shared_ptr<Geometry::Instrument>
-  getNewInstrument(DataObjects::PeaksWorkspace_sptr Peaks) const;
+  getNewInstrument(const DataObjects::PeaksWorkspace_sptr &Peaks) const;
 
   std::vector<std::string> getAttributeNames() const override {
     return {"OptRuns", "PeakWorkspaceName"};

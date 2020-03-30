@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -109,9 +109,6 @@ void export_AlgorithmManager() {
                                      "Creates an unmanaged algorithm."))
       .def("size", &AlgorithmManagerImpl::size, arg("self"),
            "Returns the number of managed algorithms")
-      .def("setMaxAlgorithms", &AlgorithmManagerImpl::setMaxAlgorithms,
-           (arg("self"), arg("n")),
-           "Set the maximum number of allowed managed algorithms")
       .def("getAlgorithm", &getAlgorithm, (arg("self"), arg("id_holder")),
            "Return the algorithm instance identified by the given id.")
       .def("removeById", &removeById, (arg("self"), arg("id_holder")),

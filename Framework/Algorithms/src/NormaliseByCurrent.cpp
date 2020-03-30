@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/NormaliseByCurrent.h"
 #include "MantidAPI/Run.h"
@@ -45,7 +45,7 @@ void NormaliseByCurrent::init() {
  * workspace logs or if the values are invalid (0)
  */
 double NormaliseByCurrent::extractCharge(
-    boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWS,
+    const boost::shared_ptr<Mantid::API::MatrixWorkspace> &inputWS,
     const bool integratePCharge) const {
   // Get the good proton charge and check it's valid
   double charge(-1.0);

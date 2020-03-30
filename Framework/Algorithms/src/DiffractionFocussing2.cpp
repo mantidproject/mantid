@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAPI/Axis.h"
@@ -590,11 +590,10 @@ void DiffractionFocussing2::determineRebinParameters() {
 
   nGroups = group2minmax.size(); // Number of unique groups
 
-  double Xmin, Xmax, step;
   const int64_t xPoints = nPoints + 1;
-
   // Iterator over all groups to create the new X vectors
-  for (gpit = group2minmax.begin(); gpit != group2minmax.end(); gpit++) {
+  for (gpit = group2minmax.begin(); gpit != group2minmax.end(); ++gpit) {
+    double Xmin, Xmax, step;
     Xmin = (gpit->second).first;
     Xmax = (gpit->second).second;
 

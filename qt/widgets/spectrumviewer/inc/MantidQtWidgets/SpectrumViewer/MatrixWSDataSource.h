@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -41,7 +41,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource
     : public SpectrumDataSource {
 public:
   /// Construct a DataSource object around the specifed MatrixWorkspace
-  MatrixWSDataSource(Mantid::API::MatrixWorkspace_const_sptr matWs);
+  MatrixWSDataSource(const Mantid::API::MatrixWorkspace_const_sptr &matWs);
 
   ~MatrixWSDataSource() override;
 

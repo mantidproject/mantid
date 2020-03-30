@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/MuonProcess.h"
 
@@ -218,8 +218,9 @@ void MuonProcess::exec() {
  * @param grouping :: Detector grouping table to use
  * @return Grouped workspaces
  */
-WorkspaceGroup_sptr MuonProcess::groupWorkspaces(WorkspaceGroup_sptr wsGroup,
-                                                 TableWorkspace_sptr grouping) {
+WorkspaceGroup_sptr
+MuonProcess::groupWorkspaces(const WorkspaceGroup_sptr &wsGroup,
+                             const TableWorkspace_sptr &grouping) {
   WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
     auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
@@ -242,8 +243,8 @@ WorkspaceGroup_sptr MuonProcess::groupWorkspaces(WorkspaceGroup_sptr wsGroup,
  * @param dt :: Dead time table to use
  * @return Corrected workspace group
  */
-WorkspaceGroup_sptr MuonProcess::applyDTC(WorkspaceGroup_sptr wsGroup,
-                                          TableWorkspace_sptr dt) {
+WorkspaceGroup_sptr MuonProcess::applyDTC(const WorkspaceGroup_sptr &wsGroup,
+                                          const TableWorkspace_sptr &dt) {
   WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
     auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
@@ -273,8 +274,9 @@ WorkspaceGroup_sptr MuonProcess::applyDTC(WorkspaceGroup_sptr wsGroup,
  * offset
  * @return Corrected workspaces
  */
-WorkspaceGroup_sptr MuonProcess::correctWorkspaces(WorkspaceGroup_sptr wsGroup,
-                                                   double loadedTimeZero) {
+WorkspaceGroup_sptr
+MuonProcess::correctWorkspaces(const WorkspaceGroup_sptr &wsGroup,
+                               double loadedTimeZero) {
   WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
   for (int i = 0; i < wsGroup->getNumberOfEntries(); i++) {
     auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));

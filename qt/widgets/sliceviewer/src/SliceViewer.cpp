@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/SliceViewer.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -750,7 +750,7 @@ void SliceViewer::switchQWTRaster(bool useNonOrthogonal) {
  *
  * @param ws :: IMDWorkspace to show.
  */
-void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
+void SliceViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   struct ScopedFlag {
     explicit ScopedFlag(bool &b) : m_flag(b) { m_flag = true; }
     ~ScopedFlag() { m_flag = false; }
@@ -913,7 +913,7 @@ Mantid::API::IMDWorkspace_sptr SliceViewer::getWorkspace() { return m_ws; }
  *
  * @param filename :: file to open; empty to ask via a dialog box.
  */
-void SliceViewer::loadColorMap(QString filename) {
+void SliceViewer::loadColorMap(const QString &filename) {
   QString fileselection;
   if (filename.isEmpty()) {
     fileselection = MantidColorMap::chooseColorMap(m_currentColorMapFile, this);

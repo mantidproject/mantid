@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CompareWorkspaces.h"
 
@@ -262,8 +262,8 @@ bool CompareWorkspaces::processGroups() {
  * @param groupTwo
  */
 void CompareWorkspaces::processGroups(
-    boost::shared_ptr<const API::WorkspaceGroup> groupOne,
-    boost::shared_ptr<const API::WorkspaceGroup> groupTwo) {
+    const boost::shared_ptr<const API::WorkspaceGroup> &groupOne,
+    const boost::shared_ptr<const API::WorkspaceGroup> &groupTwo) {
 
   // Check their sizes
   const auto totalNum = static_cast<size_t>(groupOne->getNumberOfEntries());
@@ -618,8 +618,8 @@ bool CompareWorkspaces::compareEventWorkspaces(
  *  @retval true The data matches
  *  @retval false The data does not matches
  */
-bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
-                                  API::MatrixWorkspace_const_sptr ws2) {
+bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
+                                  const API::MatrixWorkspace_const_sptr &ws2) {
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
   const size_t numBins = ws1->blocksize();
@@ -712,8 +712,8 @@ bool CompareWorkspaces::checkData(API::MatrixWorkspace_const_sptr ws1,
  * @retval true The axes match
  * @retval false The axes do not match
  */
-bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
-                                  API::MatrixWorkspace_const_sptr ws2) {
+bool CompareWorkspaces::checkAxes(const API::MatrixWorkspace_const_sptr &ws1,
+                                  const API::MatrixWorkspace_const_sptr &ws2) {
   const int numAxes = ws1->axes();
 
   if (numAxes != ws2->axes()) {
@@ -790,8 +790,8 @@ bool CompareWorkspaces::checkAxes(API::MatrixWorkspace_const_sptr ws1,
 /// @param ws2 :: the second sp det map
 /// @retval true The maps match
 /// @retval false The maps do not match
-bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
-                                        MatrixWorkspace_const_sptr ws2) {
+bool CompareWorkspaces::checkSpectraMap(const MatrixWorkspace_const_sptr &ws1,
+                                        const MatrixWorkspace_const_sptr &ws2) {
   if (ws1->getNumberHistograms() != ws2->getNumberHistograms()) {
     recordMismatch("Number of spectra mismatch");
     return false;
@@ -832,8 +832,9 @@ bool CompareWorkspaces::checkSpectraMap(MatrixWorkspace_const_sptr ws1,
 /// @param ws2 :: the second workspace
 /// @retval true The instruments match
 /// @retval false The instruments do not match
-bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
-                                        API::MatrixWorkspace_const_sptr ws2) {
+bool CompareWorkspaces::checkInstrument(
+    const API::MatrixWorkspace_const_sptr &ws1,
+    const API::MatrixWorkspace_const_sptr &ws2) {
   // First check the name matches
   if (ws1->getInstrument()->getName() != ws2->getInstrument()->getName()) {
     g_log.debug() << "Instrument names: WS1 = "
@@ -871,8 +872,9 @@ bool CompareWorkspaces::checkInstrument(API::MatrixWorkspace_const_sptr ws1,
 /// @param ws2 :: the second workspace
 /// @retval true The masking matches
 /// @retval false The masking does not match
-bool CompareWorkspaces::checkMasking(API::MatrixWorkspace_const_sptr ws1,
-                                     API::MatrixWorkspace_const_sptr ws2) {
+bool CompareWorkspaces::checkMasking(
+    const API::MatrixWorkspace_const_sptr &ws1,
+    const API::MatrixWorkspace_const_sptr &ws2) {
   const auto numHists = static_cast<int>(ws1->getNumberHistograms());
 
   for (int i = 0; i < numHists; ++i) {
@@ -1111,8 +1113,8 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1,
 
 //------------------------------------------------------------------------------------------------
 void CompareWorkspaces::doTableComparison(
-    API::ITableWorkspace_const_sptr tws1,
-    API::ITableWorkspace_const_sptr tws2) {
+    const API::ITableWorkspace_const_sptr &tws1,
+    const API::ITableWorkspace_const_sptr &tws2) {
   // First the easy things
   const auto numCols = tws1->columnCount();
   if (numCols != tws2->columnCount()) {
@@ -1177,7 +1179,8 @@ void CompareWorkspaces::doTableComparison(
 }
 
 //------------------------------------------------------------------------------------------------
-void CompareWorkspaces::doMDComparison(Workspace_sptr w1, Workspace_sptr w2) {
+void CompareWorkspaces::doMDComparison(const Workspace_sptr &w1,
+                                       const Workspace_sptr &w2) {
   IMDWorkspace_sptr mdws1, mdws2;
   mdws1 = boost::dynamic_pointer_cast<IMDWorkspace>(w1);
   mdws2 = boost::dynamic_pointer_cast<IMDWorkspace>(w2);
@@ -1204,7 +1207,7 @@ void CompareWorkspaces::doMDComparison(Workspace_sptr w1, Workspace_sptr w2) {
  * @param ws1 Name of first workspace being compared
  * @param ws2 Name of second workspace being compared
  */
-void CompareWorkspaces::recordMismatch(std::string msg, std::string ws1,
+void CompareWorkspaces::recordMismatch(const std::string &msg, std::string ws1,
                                        std::string ws2) {
   // Workspace names default to the workspaces currently being compared
   if (ws1.empty()) {

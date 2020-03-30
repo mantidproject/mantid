@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------
 // Includes
@@ -514,7 +514,7 @@ namespace {
  * Helper function to check if a function is an MD one.
  * @param fun :: Function to check
  */
-bool isFunctionMD(Mantid::API::IFunction_sptr fun) {
+bool isFunctionMD(const Mantid::API::IFunction_sptr &fun) {
   auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (!cf)
     return static_cast<bool>(

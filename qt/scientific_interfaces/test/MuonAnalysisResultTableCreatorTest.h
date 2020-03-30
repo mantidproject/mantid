@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -58,7 +58,7 @@ public:
     return MuonAnalysisResultTableCreator::haveSameParameters(tables);
   }
   void removeFixedParameterErrors(
-      const Mantid::API::ITableWorkspace_sptr table) const {
+      const Mantid::API::ITableWorkspace_sptr &table) const {
     MuonAnalysisResultTableCreator::removeFixedParameterErrors(table);
   }
 };
@@ -467,7 +467,7 @@ private:
   }
 
   /// Expected output table
-  ITableWorkspace_sptr getExpectedOutputSingle(const QStringList workspaces) {
+  ITableWorkspace_sptr getExpectedOutputSingle(const QStringList &workspaces) {
     auto table = WorkspaceFactory::Instance().createTable();
     table->addColumn("str", "workspace_Name");
     const std::vector<std::string> titles = {
@@ -548,8 +548,8 @@ private:
     return table;
   }
 
-  bool compareTables(const ITableWorkspace_sptr lhs,
-                     const ITableWorkspace_sptr rhs) {
+  bool compareTables(const ITableWorkspace_sptr &lhs,
+                     const ITableWorkspace_sptr &rhs) {
     auto alg = AlgorithmManager::Instance().create("CompareWorkspaces");
     alg->initialize();
     alg->setChild(true);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -42,7 +42,7 @@ private:
   Makes the tests much more readable like this.
   */
   boost::shared_ptr<ConvertToReflectometryQ>
-  make_standard_algorithm(const std::string outputdimensions = "Q (lab frame)",
+  make_standard_algorithm(const std::string &outputdimensions = "Q (lab frame)",
                           bool outputAsMD = true) {
     MatrixWorkspace_sptr in_ws =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);

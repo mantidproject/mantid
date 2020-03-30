@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -45,7 +45,7 @@ public:
   /// the number of samples
   std::size_t size() const;
   /// Adds a sample to the list
-  void addSample(boost::shared_ptr<Sample> childSample);
+  void addSample(const boost::shared_ptr<Sample> &childSample);
 
   /// Returns the name of the sample
   const std::string &getName() const;

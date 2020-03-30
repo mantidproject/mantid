@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -59,10 +59,11 @@ public:
   int getCurrentDataset() override;
   void updateDataType(DataType) override;
   void spectrumChanged(int) override;
-  void addParameter(QString parameterName, QString parameterDescription);
-  void setParameterValue(QString parameterName, double parameterValue,
+  void addParameter(const QString &parameterName,
+                    const QString &parameterDescription);
+  void setParameterValue(const QString &parameterName, double parameterValue,
                          double parameterError);
-  void setDataType(QStringList allowedFunctionsList);
+  void setDataType(const QStringList &allowedFunctionsList);
   void setEnumValue(int enumIndex);
 
 signals:

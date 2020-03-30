@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * SINQHMListener.cpp
@@ -25,6 +25,7 @@
 #include <Poco/StreamCopier.h>
 
 #include <boost/algorithm/string/trim.hpp>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -165,7 +166,7 @@ void SINQHMListener::loadDimensions() {
   doSpecialDim();
 }
 
-std::istream &SINQHMListener::httpRequest(std::string path) {
+std::istream &SINQHMListener::httpRequest(const std::string &path) {
 
   HTTPRequest req(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
   req.setKeepAlive(true);
@@ -208,7 +209,7 @@ int SINQHMListener::calculateCAddress(coord_t *pos) {
   }
   return result;
 }
-void SINQHMListener::recurseDim(int *data, IMDHistoWorkspace_sptr ws,
+void SINQHMListener::recurseDim(int *data, const IMDHistoWorkspace_sptr &ws,
                                 int currentDim, coord_t *idx) {
   if (currentDim == rank) {
     int Cindex = calculateCAddress(idx);
@@ -226,7 +227,7 @@ void SINQHMListener::recurseDim(int *data, IMDHistoWorkspace_sptr ws,
   }
 }
 
-void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws) {
+void SINQHMListener::readHMData(const IMDHistoWorkspace_sptr &ws) {
   int *data = nullptr, length = 1;
   coord_t *idx;
 
@@ -256,7 +257,7 @@ void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws) {
    * why....
    */
   idx = reinterpret_cast<coord_t *>(malloc(rank * sizeof(coord_t)));
-  recurseDim(data, ws, 0, idx);
+  recurseDim(data, std::move(ws), 0, idx);
 
   free(data);
   free(idx);

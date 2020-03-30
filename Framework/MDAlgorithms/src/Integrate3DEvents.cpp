@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
 #include "MantidDataObjects/NoShape.h"
@@ -18,6 +18,8 @@
 
 extern "C" {
 #include <cstdio>
+#include <utility>
+
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
@@ -447,7 +449,7 @@ bool Integrate3DEvents::correctForDetectorEdges(
  */
 Mantid::Geometry::PeakShape_const_sptr
 Integrate3DEvents::ellipseIntegrateEvents(
-    std::vector<V3D> E1Vec, V3D const &peak_q, bool specify_size,
+    const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
     double peak_radius, double back_inner_radius, double back_outer_radius,
     std::vector<double> &axes_radii, double &inti, double &sigi) {
   inti = 0.0; // default values, in case something
@@ -494,18 +496,18 @@ Integrate3DEvents::ellipseIntegrateEvents(
     return boost::make_shared<NoShape>(); // ellipsoids will be zero.
   }
 
-  return ellipseIntegrateEvents(E1Vec, peak_q, some_events, eigen_vectors,
-                                sigmas, specify_size, peak_radius,
-                                back_inner_radius, back_outer_radius,
-                                axes_radii, inti, sigi);
+  return ellipseIntegrateEvents(std::move(E1Vec), peak_q, some_events,
+                                eigen_vectors, sigmas, specify_size,
+                                peak_radius, back_inner_radius,
+                                back_outer_radius, axes_radii, inti, sigi);
 }
 
 Mantid::Geometry::PeakShape_const_sptr
 Integrate3DEvents::ellipseIntegrateModEvents(
-    std::vector<V3D> E1Vec, V3D const &peak_q, V3D const &hkl, V3D const &mnp,
-    bool specify_size, double peak_radius, double back_inner_radius,
-    double back_outer_radius, std::vector<double> &axes_radii, double &inti,
-    double &sigi) {
+    const std::vector<V3D> &E1Vec, V3D const &peak_q, V3D const &hkl,
+    V3D const &mnp, bool specify_size, double peak_radius,
+    double back_inner_radius, double back_outer_radius,
+    std::vector<double> &axes_radii, double &inti, double &sigi) {
   inti = 0.0; // default values, in case something
   sigi = 0.0; // is wrong with the peak.
 
@@ -555,10 +557,10 @@ Integrate3DEvents::ellipseIntegrateModEvents(
     return boost::make_shared<NoShape>(); // ellipsoids will be zero.
   }
 
-  return ellipseIntegrateEvents(E1Vec, peak_q, some_events, eigen_vectors,
-                                sigmas, specify_size, peak_radius,
-                                back_inner_radius, back_outer_radius,
-                                axes_radii, inti, sigi);
+  return ellipseIntegrateEvents(std::move(E1Vec), peak_q, some_events,
+                                eigen_vectors, sigmas, specify_size,
+                                peak_radius, back_inner_radius,
+                                back_outer_radius, axes_radii, inti, sigi);
 }
 /**
  * Calculate the number of events in an ellipsoid centered at 0,0,0 with
@@ -1107,7 +1109,7 @@ void Integrate3DEvents::addModEvent(
  *
  */
 PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
-    std::vector<V3D> E1Vec, V3D const &peak_q,
+    const std::vector<V3D> &E1Vec, V3D const &peak_q,
     std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const
         &ev_list,
     std::vector<V3D> const &directions, std::vector<double> const &sigmas,
@@ -1212,7 +1214,8 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
  * @param QLabFrame: The Peak center.
  * @param r: Peak radius.
  */
-double Integrate3DEvents::detectorQ(std::vector<V3D> E1Vec, const V3D QLabFrame,
+double Integrate3DEvents::detectorQ(const std::vector<V3D> &E1Vec,
+                                    const V3D QLabFrame,
                                     const std::vector<double> &r) {
   double quot = 1.0;
   for (auto &E1 : E1Vec) {

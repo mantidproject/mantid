@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -11,6 +11,7 @@
 
 #include <boost/make_shared.hpp>
 #include <sstream>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -62,7 +63,8 @@ MultipleExperimentInfos::getExperimentInfo(const uint16_t runIndex) const {
  * @return the runIndex at which it was added
  * @throw std::runtime_error if you reach the limit of 65536 entries.
  */
-uint16_t MultipleExperimentInfos::addExperimentInfo(ExperimentInfo_sptr ei) {
+uint16_t
+MultipleExperimentInfos::addExperimentInfo(const ExperimentInfo_sptr &ei) {
   m_expInfos.emplace_back(ei);
   if (m_expInfos.size() >=
       static_cast<size_t>(std::numeric_limits<uint16_t>::max()))
@@ -82,7 +84,7 @@ void MultipleExperimentInfos::setExperimentInfo(const uint16_t runIndex,
   if (size_t(runIndex) >= m_expInfos.size())
     throw std::invalid_argument(
         "MDEventWorkspace::setExperimentInfo(): runIndex is out of range.");
-  m_expInfos[runIndex] = ei;
+  m_expInfos[runIndex] = std::move(ei);
 }
 
 //-----------------------------------------------------------------------------------------------

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <cfloat>
 #include <sstream>
@@ -10,6 +10,8 @@
 #include <QImage>
 #include <QString>
 #include <QVector>
+#include <utility>
+
 #include <qwt_scale_engine.h>
 
 #include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
@@ -97,7 +99,7 @@ void SpectrumDisplay::setupSpectrumPlotItem() {
  *                    and information for the table.
  */
 void SpectrumDisplay::setDataSource(SpectrumDataSource_sptr dataSource) {
-  m_dataSource = dataSource;
+  m_dataSource = std::move(dataSource);
 
   m_hGraphDisplay->setDataSource(m_dataSource);
   m_vGraphDisplay->setDataSource(m_dataSource);

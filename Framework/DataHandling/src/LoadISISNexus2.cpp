@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -459,7 +459,7 @@ Check for a set of synthetic logs associated with multi-period log data. Raise
 warnings where necessary.
 */
 void LoadISISNexus2::validateMultiPeriodLogs(
-    Mantid::API::MatrixWorkspace_sptr ws) {
+    const Mantid::API::MatrixWorkspace_sptr &ws) {
   const Run &run = ws->run();
   if (!run.hasProperty("current_period")) {
     g_log.warning("Workspace has no current_period log.");

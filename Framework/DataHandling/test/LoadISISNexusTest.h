@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -27,7 +27,7 @@ using namespace Mantid::DataHandling;
 class LoadISISNexusTest : public CxxTest::TestSuite {
 private:
   // Helper method to fetch the log property entry corresponding to period.
-  Property *fetchPeriodLog(MatrixWorkspace_sptr workspace,
+  Property *fetchPeriodLog(const MatrixWorkspace_sptr &workspace,
                            int expectedPeriodNumber) {
     std::stringstream period_number_stream;
     period_number_stream << expectedPeriodNumber;
@@ -38,14 +38,14 @@ private:
 
   // Helper method to fetch the log property entry corresponding to the current
   // period.
-  Property *fetchCurrentPeriodLog(MatrixWorkspace_sptr workspace) {
+  Property *fetchCurrentPeriodLog(const MatrixWorkspace_sptr &workspace) {
     Property *p = workspace->run().getLogData("current_period");
     return p;
   }
 
   // Helper method to check that the log data contains a specific period number
   // entry.
-  void checkPeriodLogData(MatrixWorkspace_sptr workspace,
+  void checkPeriodLogData(const MatrixWorkspace_sptr &workspace,
                           int expectedPeriodNumber) {
     Property *p = nullptr;
     TS_ASSERT_THROWS_NOTHING(

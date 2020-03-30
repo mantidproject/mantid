@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -25,12 +25,12 @@ protected:
   SpecularReflectionAlgorithm() = default;
 
   /// Get the surface sample component
-  Mantid::Geometry::IComponent_const_sptr
-  getSurfaceSampleComponent(Mantid::Geometry::Instrument_const_sptr inst) const;
+  Mantid::Geometry::IComponent_const_sptr getSurfaceSampleComponent(
+      const Mantid::Geometry::Instrument_const_sptr &inst) const;
 
   /// Get the detector component
   Mantid::Geometry::IComponent_const_sptr
-  getDetectorComponent(Mantid::API::MatrixWorkspace_sptr workspace,
+  getDetectorComponent(const Mantid::API::MatrixWorkspace_sptr &workspace,
                        const bool isPointDetector) const;
 
   /// Does the property have a default value.

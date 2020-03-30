@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FindUBUsingIndexedPeaks.h"
 #include "MantidAPI/Sample.h"
@@ -108,9 +108,9 @@ void FindUBUsingIndexedPeaks::exec() {
   {                    // from the full list of peaks, and
     q_vectors.clear(); // save the UB in the sample
     q_vectors.reserve(n_peaks);
-    for (const auto &peak : peaks) {
-      q_vectors.emplace_back(peak.getQSampleFrame());
-    }
+
+    std::transform(peaks.begin(), peaks.end(), std::back_inserter(q_vectors),
+                   [](const auto &peak) { return peak.getQSampleFrame(); });
 
     int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
     int sate_indexed = 0;

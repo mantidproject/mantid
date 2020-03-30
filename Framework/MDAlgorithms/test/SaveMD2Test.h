@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -46,7 +46,7 @@ public:
     do_test_exec(23, "SaveMD2Test_updating.nxs", true, true);
   }
 
-  void do_test_exec(size_t numPerBox, std::string filename,
+  void do_test_exec(size_t numPerBox, const std::string &filename,
                     bool MakeFileBacked = false,
                     bool UpdateFileBackEnd = false) {
 
@@ -103,8 +103,8 @@ public:
   }
 
   /// Add some data and update the back-end
-  void do_test_UpdateFileBackEnd(MDEventWorkspace1Lean::sptr ws,
-                                 std::string filename) {
+  void do_test_UpdateFileBackEnd(const MDEventWorkspace1Lean::sptr &ws,
+                                 const std::string &filename) {
     size_t initial_numEvents = ws->getNPoints();
     TSM_ASSERT_EQUALS("Starting off with 230 events.", initial_numEvents, 230);
 
@@ -335,7 +335,7 @@ public:
   }
 
   /** Run SaveMD with the MDHistoWorkspace */
-  void doTestHisto(MDHistoWorkspace_sptr ws) {
+  void doTestHisto(const MDHistoWorkspace_sptr &ws) {
     std::string filename = "SaveMD2TestHisto.nxs";
 
     SaveMD2 alg;

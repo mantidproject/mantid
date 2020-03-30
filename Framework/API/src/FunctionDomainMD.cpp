@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -21,8 +21,8 @@ namespace API {
  * @param start :: Index of the first iterator in this domain.
  * @param length :: Size of this domain. If 0 use all workspace.
  */
-FunctionDomainMD::FunctionDomainMD(IMDWorkspace_const_sptr ws, size_t start,
-                                   size_t length)
+FunctionDomainMD::FunctionDomainMD(const IMDWorkspace_const_sptr &ws,
+                                   size_t start, size_t length)
     : m_iterator(ws->createIterator()), m_startIndex(start), m_currentIndex(0),
       m_justReset(true), m_workspace(ws) {
   size_t dataSize = m_iterator->getDataSize();

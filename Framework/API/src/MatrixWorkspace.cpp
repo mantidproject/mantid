@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Algorithm.h"
@@ -1237,9 +1237,10 @@ MatrixWorkspace::maskedBinsIndices(const size_t &workspaceIndex) const {
   auto maskedBins = it->second;
   std::vector<size_t> maskedIds;
   maskedIds.reserve(maskedBins.size());
-  for (const auto &mb : maskedBins) {
-    maskedIds.emplace_back(mb.first);
-  }
+
+  std::transform(maskedBins.begin(), maskedBins.end(),
+                 std::back_inserter(maskedIds),
+                 [](const auto &mb) { return mb.first; });
   return maskedIds;
 }
 
@@ -1939,7 +1940,6 @@ MatrixWorkspace::findY(double value,
   if (std::isnan(value)) {
     for (int64_t i = idx.first; i < numHists; ++i) {
       const auto &Y = this->y(i);
-      // cppcheck-suppress syntaxError
       if (auto it = std::find_if(std::next(Y.begin(), idx.second), Y.end(),
                                  [](double v) { return std::isnan(v); });
           it != Y.end()) {

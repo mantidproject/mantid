@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -221,7 +221,6 @@ public:
     vector<double> xmins = alg.getProperty("XMin");
     vector<double> xmaxs = alg.getProperty("XMax");
     int nBins = alg.getProperty("NumberBins");
-    double deltaBin;
 
     // Define tolerance for ASSERT_DELTA
     double tolerance = 1.0e-10;
@@ -230,7 +229,8 @@ public:
     for (int yIndex = 0; yIndex < ylen; ++yIndex) {
 
       // The bin width for the current spectrum
-      deltaBin = (xmaxs[yIndex] - xmins[yIndex]) / static_cast<double>(nBins);
+      double deltaBin =
+          (xmaxs[yIndex] - xmins[yIndex]) / static_cast<double>(nBins);
 
       // Check the axes lengths
       TS_ASSERT_EQUALS(outWS->x(yIndex).size(), nBins + 1);
@@ -344,7 +344,6 @@ public:
     vector<double> xmins = alg.getProperty("XMin");
     vector<double> xmaxs = alg.getProperty("XMax");
     int nBins = alg.getProperty("NumberBins");
-    double deltaBin;
 
     // Define tolerance for ASSERT_DELTA
     double tolerance = 1.0e-10;
@@ -354,7 +353,8 @@ public:
     for (int yIndex = 0; yIndex < ylen; ++yIndex) {
 
       // The bin width for the current spectrum
-      deltaBin = (xmaxs[yIndex] - xmins[yIndex]) / static_cast<double>(nBins);
+      double deltaBin =
+          (xmaxs[yIndex] - xmins[yIndex]) / static_cast<double>(nBins);
 
       // Check the axes lengths
       TS_ASSERT_EQUALS(outWS->x(yIndex).size(), nBins + 1);

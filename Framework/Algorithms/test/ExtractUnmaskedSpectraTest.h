@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -133,7 +133,7 @@ private:
   }
 
   Mantid::API::MatrixWorkspace_sptr
-  createMask(Mantid::API::MatrixWorkspace_sptr inputWS) {
+  createMask(const Mantid::API::MatrixWorkspace_sptr &inputWS) {
     auto maskWS = Mantid::DataObjects::MaskWorkspace_sptr(
         new Mantid::DataObjects::MaskWorkspace(inputWS));
     size_t n = inputWS->getNumberHistograms();
@@ -146,8 +146,8 @@ private:
   }
 
   Mantid::API::MatrixWorkspace_sptr
-  runAlgorithm(Mantid::API::MatrixWorkspace_sptr inputWS,
-               Mantid::API::MatrixWorkspace_sptr maskedWS =
+  runAlgorithm(const Mantid::API::MatrixWorkspace_sptr &inputWS,
+               const Mantid::API::MatrixWorkspace_sptr &maskedWS =
                    Mantid::API::MatrixWorkspace_sptr()) {
     ExtractUnmaskedSpectra alg;
     alg.setChild(true);

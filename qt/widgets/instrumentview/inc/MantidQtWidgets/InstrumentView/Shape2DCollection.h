@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -96,7 +96,8 @@ public:
   /// Save shape collection to a Table workspace
   void saveToTableWorkspace();
   /// Load shape collectio from a Table workspace
-  void loadFromTableWorkspace(Mantid::API::ITableWorkspace_const_sptr ws);
+  void
+  loadFromTableWorkspace(const Mantid::API::ITableWorkspace_const_sptr &ws);
   /// Load settings for the shape 2D collection from a project file
   virtual void loadFromProject(const std::string &lines);
   /// Save settings for the shape 2D collection to a project file

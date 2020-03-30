@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/WienerSmooth.h"
 
@@ -420,7 +420,8 @@ WienerSmooth::getStartEnd(const Mantid::HistogramData::HistogramX &X,
  * @return :: Workspace with the copied spectrum.
  */
 API::MatrixWorkspace_sptr
-WienerSmooth::copyInput(API::MatrixWorkspace_sptr inputWS, size_t wsIndex) {
+WienerSmooth::copyInput(const API::MatrixWorkspace_sptr &inputWS,
+                        size_t wsIndex) {
   auto alg = createChildAlgorithm("ExtractSingleSpectrum");
   alg->initialize();
   alg->setProperty("InputWorkspace", inputWS);

@@ -33,6 +33,8 @@
 #include <qwt_plot.h>
 #include <qwt_symbol.h>
 
+#include <utility>
+
 //! Box curve
 class BoxCurve : public DataCurve {
 public:
@@ -97,7 +99,7 @@ private:
 class QwtSingleArrayData : public QwtData {
 public:
   QwtSingleArrayData(const double x, QwtArray<double> y, size_t) {
-    d_y = y;
+    d_y = std::move(y);
     d_x = x;
   };
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -179,7 +179,7 @@ public:
   // Get Geometry Handler
   boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Set Geometry Handler
-  void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
+  void setGeometryHandler(const boost::shared_ptr<GeometryHandler> &h);
 
   /// set vtkGeometryCache writer
   void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);

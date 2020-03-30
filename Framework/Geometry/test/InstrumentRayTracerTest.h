@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -163,8 +163,9 @@ public:
    * @param expectX :: expected x index, -1 if off
    * @param expectY :: expected y index, -1 if off
    */
-  void doTestRectangularDetector(std::string message, Instrument_sptr inst,
-                                 V3D testDir, int expectX, int expectY) {
+  void doTestRectangularDetector(const std::string &message,
+                                 const Instrument_sptr &inst, V3D testDir,
+                                 int expectX, int expectY) {
     InstrumentRayTracer tracker(inst);
     testDir.normalize();
     tracker.traceFromSample(testDir);

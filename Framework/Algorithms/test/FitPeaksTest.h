@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -411,7 +411,6 @@ public:
     // std::string input_ws_name = loadVulcanHighAngleData();
 
     // Generate peak and background parameters
-    std::vector<string> peakparnames{"Mixing"};
     std::vector<double> peakparvalues{0.5};
 
     // Initialize FitPeak

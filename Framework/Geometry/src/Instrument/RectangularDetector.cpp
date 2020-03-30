@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -22,6 +22,7 @@
 #include <boost/regex.hpp>
 #include <ostream>
 #include <stdexcept>
+#include <utility>
 
 namespace {
 /**
@@ -180,8 +181,8 @@ void RectangularDetector::initialize(boost::shared_ptr<IObject> shape,
                                      int idstepbyrow, int idstep) {
 
   GridDetector::initialize(
-      shape, xpixels, xstart, xstep, ypixels, ystart, ystep, 0, 0, 0, idstart,
-      idfillbyfirst_y ? "yxz" : "xyz", idstepbyrow, idstep);
+      std::move(shape), xpixels, xstart, xstep, ypixels, ystart, ystep, 0, 0, 0,
+      idstart, idfillbyfirst_y ? "yxz" : "xyz", idstepbyrow, idstep);
 }
 
 //------------------------------------------------------------------------------------------------

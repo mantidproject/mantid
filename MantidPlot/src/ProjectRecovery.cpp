@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ProjectRecovery.h"
 
@@ -339,7 +339,8 @@ bool ProjectRecovery::checkForRecovery() const noexcept {
   }
 }
 
-bool ProjectRecovery::clearAllCheckpoints(Poco::Path path) const noexcept {
+bool ProjectRecovery::clearAllCheckpoints(const Poco::Path &path) const
+    noexcept {
   try {
     Poco::File(path).remove(true);
     return true;

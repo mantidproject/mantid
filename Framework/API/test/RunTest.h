@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -427,7 +427,7 @@ public:
     TS_ASSERT_EQUALS(runCopy.getGoniometer().getNumberAxes(), 3);
   }
 
-  void addTimeSeriesEntry(Run &runInfo, std::string name, double val) {
+  void addTimeSeriesEntry(Run &runInfo, const std::string &name, double val) {
     TimeSeriesProperty<double> *tsp;
     tsp = new TimeSeriesProperty<double>(name);
     tsp->addValue("2011-05-24T00:00:00", val);
@@ -630,12 +630,9 @@ public:
   }
 
   void test_Accessing_Single_Value_From_Times_Series_A_Large_Number_Of_Times() {
-    double value(0.0);
     for (size_t i = 0; i < 20000; ++i) {
-      value = m_testRun.getPropertyAsSingleValue(m_propName);
+      m_testRun.getPropertyAsSingleValue(m_propName);
     }
-    // Enure variable is used so that it is not optimised away by the compiler
-    value += 1.0;
   }
 
   Run m_testRun;

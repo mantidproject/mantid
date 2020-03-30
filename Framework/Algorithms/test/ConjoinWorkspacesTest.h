@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -37,7 +37,7 @@ public:
       : ws1Name("ConjoinWorkspacesTest_grp1"),
         ws2Name("ConjoinWorkspacesTest_grp2") {}
 
-  MatrixWorkspace_sptr getWSFromADS(std::string wsName) {
+  MatrixWorkspace_sptr getWSFromADS(const std::string &wsName) {
     auto out = boost::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(wsName));
     TS_ASSERT(out);

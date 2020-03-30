@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -145,7 +145,7 @@ private:
   /// Make the curve name
   QString createCurveName(
       const QString &prefix,
-      const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws);
+      const boost::shared_ptr<const Mantid::API::MatrixWorkspace> &ws);
 
   QString
       m_wsName; ///< Workspace name. If empty the ws isn't in the data service

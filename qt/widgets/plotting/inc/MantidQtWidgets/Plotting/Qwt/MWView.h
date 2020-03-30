@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -58,8 +58,8 @@ class EXPORT_OPT_MANTIDQT_PLOTTING MWView
 public:
   MWView(QWidget *parent = nullptr);
   ~MWView() override;
-  void loadColorMap(QString filename = QString());
-  void setWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+  void loadColorMap(const QString &filename = QString());
+  void setWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws);
   void updateDisplay();
   SafeQwtPlot *getPlot2D();
 

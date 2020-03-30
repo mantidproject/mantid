@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -34,11 +34,11 @@ private:
   void exec() override;
 
   /// method to check which spectra should be averaged
-  std::vector<std::vector<size_t>> makeMap(API::MatrixWorkspace_sptr countsWS,
-                                           int parents);
+  std::vector<std::vector<size_t>>
+  makeMap(const API::MatrixWorkspace_sptr &countsWS, int parents);
   /// method to create the map with all spectra
   std::vector<std::vector<size_t>>
-  makeInstrumentMap(API::MatrixWorkspace_sptr countsWS);
+  makeInstrumentMap(const API::MatrixWorkspace_sptr &countsWS);
 };
 
 } // namespace Algorithms

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -39,7 +39,7 @@ private:
   /*
    * Helper method to run the algorithm and return the output workspace.
    */
-  IPeaksWorkspace_sptr runAlgorithm(PeaksWorkspace_sptr inWS,
+  IPeaksWorkspace_sptr runAlgorithm(const PeaksWorkspace_sptr &inWS,
                                     const std::string &filterVariable,
                                     const double filterValue,
                                     const std::string &filterOperator) {

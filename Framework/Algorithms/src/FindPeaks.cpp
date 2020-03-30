@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidAlgorithms/SmoothData.h"
@@ -1508,8 +1508,8 @@ void FindPeaks::createFunctions() {
  */
 double
 FindPeaks::callFitPeak(const MatrixWorkspace_sptr &dataws, int wsindex,
-                       const API::IPeakFunction_sptr peakfunction,
-                       const API::IBackgroundFunction_sptr backgroundfunction,
+                       const API::IPeakFunction_sptr &peakfunction,
+                       const API::IBackgroundFunction_sptr &backgroundfunction,
                        const std::vector<double> &vec_fitwindow,
                        const std::vector<double> &vec_peakrange,
                        int minGuessFWHM, int maxGuessFWHM, int guessedFWHMStep,

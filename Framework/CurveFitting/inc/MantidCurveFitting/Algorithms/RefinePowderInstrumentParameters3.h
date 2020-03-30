@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -68,11 +68,11 @@ private:
 
   /// Add parameter (to a vector of string/name) for MC random walk
   void addParameterToMCMinimize(std::vector<std::string> &parnamesforMC,
-                                std::string parname,
+                                const std::string &parname,
                                 std::map<std::string, Parameter> parammap);
 
   /// Propose new parameters
-  void proposeNewValues(std::vector<std::string> mcgroup,
+  void proposeNewValues(const std::vector<std::string> &mcgroup,
                         std::map<std::string, Parameter> &curparammap,
                         std::map<std::string, Parameter> &newparammap,
                         double currchisq);
@@ -88,23 +88,23 @@ private:
   // maxnumresults);
 
   /// Implement parameter values, calculate function and its chi square.
-  double calculateFunction(std::map<std::string, Parameter> parammap,
+  double calculateFunction(const std::map<std::string, Parameter> &parammap,
                            std::vector<double> &vecY);
 
   /// Calculate Chi^2 of the a function with all parameters are fixed
-  double calculateFunctionError(API::IFunction_sptr function,
-                                DataObjects::Workspace2D_sptr dataws,
+  double calculateFunctionError(const API::IFunction_sptr &function,
+                                const DataObjects::Workspace2D_sptr &dataws,
                                 int wsindex);
 
   /// Fit function by non MC minimzer(s)
-  double fitFunction(API::IFunction_sptr function,
-                     DataObjects::Workspace2D_sptr dataws, int wsindex,
+  double fitFunction(const API::IFunction_sptr &function,
+                     const DataObjects::Workspace2D_sptr &dataws, int wsindex,
                      bool powerfit);
 
   /// Fit function (single step)
-  bool doFitFunction(API::IFunction_sptr function,
-                     DataObjects::Workspace2D_sptr dataws, int wsindex,
-                     std::string minimizer, int numiters, double &chi2,
+  bool doFitFunction(const API::IFunction_sptr &function,
+                     const DataObjects::Workspace2D_sptr &dataws, int wsindex,
+                     const std::string &minimizer, int numiters, double &chi2,
                      std::string &fitstatus);
 
   /// Process input properties
@@ -114,11 +114,11 @@ private:
   void parseTableWorkspaces();
 
   /// Parse table workspace to a map of Parameters
-  void parseTableWorkspace(DataObjects::TableWorkspace_sptr tablews,
+  void parseTableWorkspace(const DataObjects::TableWorkspace_sptr &tablews,
                            std::map<std::string, Parameter> &parammap);
 
   /// Set parameter values to function from Parameter map
-  void setFunctionParameterValues(API::IFunction_sptr function,
+  void setFunctionParameterValues(const API::IFunction_sptr &function,
                                   std::map<std::string, Parameter> params);
 
   /// Update parameter values to Parameter map from fuction map
@@ -127,13 +127,13 @@ private:
 
   /// Set parameter fitting setup (boundary, fix or unfix) to function from
   /// Parameter map
-  void setFunctionParameterFitSetups(API::IFunction_sptr function,
+  void setFunctionParameterFitSetups(const API::IFunction_sptr &function,
                                      std::map<std::string, Parameter> params);
 
   /// Construct output
   DataObjects::Workspace2D_sptr
-  genOutputWorkspace(API::FunctionDomain1DVector domain,
-                     API::FunctionValues rawvalues);
+  genOutputWorkspace(const API::FunctionDomain1DVector &domain,
+                     const API::FunctionValues &rawvalues);
 
   /// Construct an output TableWorkspace for refined peak profile parameters
   DataObjects::TableWorkspace_sptr
@@ -143,7 +143,7 @@ private:
   /// Add a parameter to parameter map.  If this parametere does exist, then
   /// replace the value of it
   void addOrReplace(std::map<std::string, Parameter> &parameters,
-                    std::string parname, double parvalue);
+                    const std::string &parname, double parvalue);
 
   //--------  Variables ------------------------------------------------------
   /// Data workspace containg peak positions
@@ -189,17 +189,19 @@ void convertToDict(std::vector<std::string> strvec,
                    std::map<std::string, size_t> &lookupdict);
 
 /// Get the index from lookup dictionary (map)
-int getStringIndex(std::map<std::string, size_t> lookupdict, std::string key);
+int getStringIndex(std::map<std::string, size_t> lookupdict,
+                   const std::string &key);
 
 /// Store function parameter values to a map
 void storeFunctionParameterValue(
-    API::IFunction_sptr function,
+    const API::IFunction_sptr &function,
     std::map<std::string, std::pair<double, double>> &parvaluemap);
 
 /// Restore function parameter values to a map
 void restoreFunctionParameterValue(
     std::map<std::string, std::pair<double, double>> parvaluemap,
-    API::IFunction_sptr function, std::map<std::string, Parameter> &parammap);
+    const API::IFunction_sptr &function,
+    std::map<std::string, Parameter> &parammap);
 
 /// Copy parameters from source to target
 void duplicateParameters(std::map<std::string, Parameter> source,

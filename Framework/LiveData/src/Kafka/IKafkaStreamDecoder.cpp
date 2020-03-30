@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.tcc"
 #include "MantidAPI/Run.h"
@@ -20,6 +20,8 @@ GNU_DIAG_OFF("conversion")
 GNU_DIAG_ON("conversion")
 
 #include <json/json.h>
+
+#include <utility>
 
 using namespace Mantid::Types;
 
@@ -54,7 +56,7 @@ IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
                                          const std::string &sampleEnvTopic,
                                          const std::string &chopperTopic,
                                          const std::string &monitorTopic)
-    : m_broker(broker), m_streamTopic(streamTopic),
+    : m_broker(std::move(broker)), m_streamTopic(streamTopic),
       m_runInfoTopic(runInfoTopic), m_spDetTopic(spDetTopic),
       m_sampleEnvTopic(sampleEnvTopic), m_chopperTopic(chopperTopic),
       m_monitorTopic(monitorTopic), m_interrupt(false), m_specToIdx(),
@@ -227,7 +229,7 @@ void IKafkaStreamDecoder::checkIfAllStopOffsetsReached(
     bool &checkOffsets) {
 
   if (std::all_of(reachedEnd.cbegin(), reachedEnd.cend(),
-                  [](std::pair<std::string, std::vector<bool>> kv) {
+                  [](const std::pair<std::string, std::vector<bool>> &kv) {
                     return std::all_of(
                         kv.second.cbegin(), kv.second.cend(),
                         [](bool partitionEnd) { return partitionEnd; });

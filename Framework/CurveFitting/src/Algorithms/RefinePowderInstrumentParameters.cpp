@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters.h"
 
@@ -34,6 +34,7 @@
 
 #include <fstream>
 #include <iomanip>
+#include <utility>
 
 #include <gsl/gsl_sf_erf.h>
 
@@ -383,7 +384,7 @@ void RefinePowderInstrumentParameters::fitInstrumentParameters() {
 
 /** Fit function to data
  */
-bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func,
+bool RefinePowderInstrumentParameters::fitFunction(const IFunction_sptr &func,
                                                    double &gslchi2) {
   API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
   fitalg->initialize();
@@ -417,7 +418,8 @@ bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func,
 /** Calculate function's statistic
  */
 double RefinePowderInstrumentParameters::calculateFunctionStatistic(
-    IFunction_sptr func, MatrixWorkspace_sptr dataws, size_t workspaceindex) {
+    const IFunction_sptr &func, const MatrixWorkspace_sptr &dataws,
+    size_t workspaceindex) {
   // 1. Fix all parameters of the function
   vector<string> funcparameters = func->getParameterNames();
   size_t numparams = funcparameters.size();
@@ -456,14 +458,15 @@ double RefinePowderInstrumentParameters::calculateFunctionStatistic(
 /** Refine instrument parameters by Monte Carlo method
  */
 void RefinePowderInstrumentParameters::refineInstrumentParametersMC(
-    TableWorkspace_sptr parameterWS, bool fit2) {
+    const TableWorkspace_sptr &parameterWS, bool fit2) {
   // 1. Get function's parameter names
   getD2TOFFuncParamNames(m_PeakFunctionParameterNames);
 
   // 2. Parse parameter (table) workspace
   vector<double> stepsizes, lowerbounds, upperbounds;
-  importMonteCarloParametersFromTable(parameterWS, m_PeakFunctionParameterNames,
-                                      stepsizes, lowerbounds, upperbounds);
+  importMonteCarloParametersFromTable(std::move(parameterWS),
+                                      m_PeakFunctionParameterNames, stepsizes,
+                                      lowerbounds, upperbounds);
 
   stringstream dbss;
   for (size_t i = 0; i < m_PeakFunctionParameterNames.size(); ++i) {
@@ -779,7 +782,7 @@ void RefinePowderInstrumentParameters::getD2TOFFuncParamNames(
 /** Calculate the function
  */
 double RefinePowderInstrumentParameters::calculateD2TOFFunction(
-    API::IFunction_sptr func, API::FunctionDomain1DVector domain,
+    const API::IFunction_sptr &func, const API::FunctionDomain1DVector &domain,
     API::FunctionValues &values, const Mantid::HistogramData::HistogramY &rawY,
     const Mantid::HistogramData::HistogramE &rawE) {
   // 1. Check validity
@@ -814,7 +817,7 @@ double RefinePowderInstrumentParameters::calculateD2TOFFunction(
  * m_Peaks are stored in a map.  (HKL) is the key
  */
 void RefinePowderInstrumentParameters::genPeaksFromTable(
-    DataObjects::TableWorkspace_sptr peakparamws) {
+    const DataObjects::TableWorkspace_sptr &peakparamws) {
   // 1. Check and clear input and output
   if (!peakparamws) {
     g_log.error() << "Input tableworkspace for peak parameters is invalid!\n";
@@ -902,7 +905,7 @@ void RefinePowderInstrumentParameters::genPeaksFromTable(
  * the diffrotometer geometry parameters
  */
 void RefinePowderInstrumentParameters::importParametersFromTable(
-    DataObjects::TableWorkspace_sptr parameterWS,
+    const DataObjects::TableWorkspace_sptr &parameterWS,
     std::map<std::string, double> &parameters) {
   // 1. Check column orders
   std::vector<std::string> colnames = parameterWS->getColumnNames();
@@ -945,7 +948,7 @@ void RefinePowderInstrumentParameters::importParametersFromTable(
  * Arguments
  */
 void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
-    TableWorkspace_sptr tablews, vector<string> parameternames,
+    const TableWorkspace_sptr &tablews, const vector<string> &parameternames,
     vector<double> &stepsizes, vector<double> &lowerbounds,
     vector<double> &upperbounds) {
   // 1. Get column information
@@ -1054,7 +1057,8 @@ hkl, double lattice)
 /** Calculate value n for thermal neutron peak profile
  */
 void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(
-    IFunction_sptr m_Function, const HistogramX &xVals, vector<double> &vec_n) {
+    const IFunction_sptr &m_Function, const HistogramX &xVals,
+    vector<double> &vec_n) {
   if (m_Function->name() != "ThermalNeutronDtoTOFFunction") {
     g_log.warning() << "Function (" << m_Function->name()
                     << " is not ThermalNeutronDtoTOFFunction.  And it is not "

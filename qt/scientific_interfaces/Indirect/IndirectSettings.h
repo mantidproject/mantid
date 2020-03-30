@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -51,7 +51,7 @@ private:
   void
   otherUserSubWindowCreated(QList<QPointer<UserSubWindow>> &windows) override;
 
-  void connectIndirectInterface(QPointer<UserSubWindow> window);
+  void connectIndirectInterface(const QPointer<UserSubWindow> &window);
 
   QWidget *getDockedOrFloatingWindow();
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Mpl/ContourPreviewPlot.h"
 #include "MantidKernel/Logger.h"
@@ -104,7 +104,7 @@ void ContourPreviewPlot::setCanvasColour(QColor const &colour) {
  * Sets the workspace for the contour plot
  * @param workspace The workspace to plot on the contour plot.
  */
-void ContourPreviewPlot::setWorkspace(MatrixWorkspace_sptr workspace) {
+void ContourPreviewPlot::setWorkspace(const MatrixWorkspace_sptr &workspace) {
   if (workspace) {
     auto axes = m_canvas->gca<MantidAxes>();
     axes.pcolormesh(workspace);

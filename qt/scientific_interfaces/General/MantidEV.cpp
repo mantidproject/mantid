@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include <Poco/Path.h>
 #include <QDesktopWidget>
 #include <QFileDialog>
@@ -1834,7 +1833,7 @@ void MantidEV::errorMessage(const std::string &message) {
  *
  *  @return true if a double was extacted from the string.
  */
-bool MantidEV::getDouble(std::string str, double &value) {
+bool MantidEV::getDouble(const std::string &str, double &value) {
   std::istringstream strs(str);
   if (strs >> value) {
     return true;
@@ -2261,7 +2260,7 @@ void MantidEV::loadSettings(const std::string &filename) {
  * @param ledt     pointer to the QLineEdit component whose state
  *                 is to be restored.
  */
-void MantidEV::restore(QSettings *state, QString name, QLineEdit *ledt) {
+void MantidEV::restore(QSettings *state, const QString &name, QLineEdit *ledt) {
   // NOTE: If state was not saved yet, we don't want to change the
   // default value, so we only change the text if it's non-empty
   QString sText = state->value(name, "").toString();
@@ -2279,7 +2278,8 @@ void MantidEV::restore(QSettings *state, QString name, QLineEdit *ledt) {
  * @param btn      pointer to the QCheckbox or QRadioButton component
  *                 whose state is to be restored.
  */
-void MantidEV::restore(QSettings *state, QString name, QAbstractButton *btn) {
+void MantidEV::restore(QSettings *state, const QString &name,
+                       QAbstractButton *btn) {
   btn->setChecked(state->value(name, false).toBool());
 }
 
@@ -2291,7 +2291,7 @@ void MantidEV::restore(QSettings *state, QString name, QAbstractButton *btn) {
  * @param cmbx     pointer to the QComboBox component whose state is
  *                 to be restored.
  */
-void MantidEV::restore(QSettings *state, QString name, QComboBox *cmbx) {
+void MantidEV::restore(QSettings *state, const QString &name, QComboBox *cmbx) {
   // NOTE: If state was not saved yet, we don't want to change the
   // default value, so we only change the selected item if the index
   // has been set to a valid value.

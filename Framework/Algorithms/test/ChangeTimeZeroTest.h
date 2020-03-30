@@ -1,13 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ScopedWorkspace.h"
@@ -36,8 +38,8 @@ DateAndTime stringPropertyTime("2010-01-01T00:10:00");
 enum LogType { STANDARD, NOPROTONCHARGE };
 
 template <typename T>
-void addTimeSeriesLogToWorkspace(Mantid::API::MatrixWorkspace_sptr ws,
-                                 std::string id, DateAndTime startTime,
+void addTimeSeriesLogToWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws,
+                                 const std::string &id, DateAndTime startTime,
                                  T defaultValue, int length) {
   auto timeSeries = new TimeSeriesProperty<T>(id);
   timeSeries->setUnits("mm");
@@ -48,15 +50,15 @@ void addTimeSeriesLogToWorkspace(Mantid::API::MatrixWorkspace_sptr ws,
 }
 
 template <typename T>
-void addProperyWithValueToWorkspace(Mantid::API::MatrixWorkspace_sptr ws,
-                                    std::string id, T value) {
+void addProperyWithValueToWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws,
+                                    const std::string &id, T value) {
   auto propWithVal = new PropertyWithValue<T>(id, value);
   propWithVal->setUnits("mm");
   ws->mutableRun().addProperty(propWithVal, true);
 }
 
 // Provide the logs for matrix workspaces
-void provideLogs(LogType logType, Mantid::API::MatrixWorkspace_sptr ws,
+void provideLogs(LogType logType, const Mantid::API::MatrixWorkspace_sptr &ws,
                  DateAndTime startTime, int length) {
   switch (logType) {
   case (STANDARD):
@@ -96,7 +98,7 @@ void provideLogs(LogType logType, Mantid::API::MatrixWorkspace_sptr ws,
 
 // Provides a 2D workspace with a log
 Mantid::API::MatrixWorkspace_sptr provideWorkspace2D(LogType logType,
-                                                     std::string wsName,
+                                                     const std::string &wsName,
                                                      DateAndTime startTime,
                                                      int length) {
   Workspace2D_sptr ws(new Workspace2D);
@@ -140,9 +142,9 @@ provideEventWorkspace(LogType logType, DateAndTime startTime, int length) {
   return provideEventWorkspaceCustom(logType, startTime, length, 100, 100, 100);
 }
 
-MatrixWorkspace_sptr execute_change_time(MatrixWorkspace_sptr in_ws,
+MatrixWorkspace_sptr execute_change_time(const MatrixWorkspace_sptr &in_ws,
                                          double relativeTimeOffset,
-                                         std::string absolutTimeOffset) {
+                                         const std::string &absolutTimeOffset) {
   // Create and run the algorithm
   ChangeTimeZero alg;
   alg.initialize();
@@ -441,8 +443,9 @@ private:
   int m_length;
 
   // act and assert
-  void act_and_assert(double relativeTimeShift, std::string absoluteTimeShift,
-                      MatrixWorkspace_sptr in_ws,
+  void act_and_assert(double relativeTimeShift,
+                      const std::string &absoluteTimeShift,
+                      const MatrixWorkspace_sptr &in_ws,
                       bool inputEqualsOutputWorkspace) {
     // Create a duplicate workspace
     EventWorkspace_sptr duplicate_ws;
@@ -484,8 +487,8 @@ private:
   }
 
   // perform the verification
-  void do_test_shift(MatrixWorkspace_sptr ws, const double timeShift,
-                     MatrixWorkspace_sptr duplicate) const {
+  void do_test_shift(const MatrixWorkspace_sptr &ws, const double timeShift,
+                     const MatrixWorkspace_sptr &duplicate) const {
     // Check the logs
     TS_ASSERT(ws);
 
@@ -501,7 +504,7 @@ private:
 
     // Check the neutrons
     if (auto outWs = boost::dynamic_pointer_cast<EventWorkspace>(ws)) {
-      do_check_workspace(outWs, timeShift, duplicate);
+      do_check_workspace(outWs, timeShift, std::move(duplicate));
     }
   }
 
@@ -536,8 +539,8 @@ private:
   }
   // Check contents of an event workspace. We compare the time stamps to the
   // time stamps of the duplicate workspace
-  void do_check_workspace(EventWorkspace_sptr ws, double timeShift,
-                          MatrixWorkspace_sptr duplicate) const {
+  void do_check_workspace(const EventWorkspace_sptr &ws, double timeShift,
+                          const MatrixWorkspace_sptr &duplicate) const {
     // Get the duplicate input workspace for comparison reasons
     auto duplicateWs = boost::dynamic_pointer_cast<EventWorkspace>(duplicate);
 
@@ -562,7 +565,7 @@ private:
 
   // Create comparison workspace
   EventWorkspace_sptr
-  createComparisonWorkspace(EventWorkspace_sptr inputWorkspace) {
+  createComparisonWorkspace(const EventWorkspace_sptr &inputWorkspace) {
     CloneWorkspace alg;
     alg.setChild(true);
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

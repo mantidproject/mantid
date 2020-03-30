@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Bin2DPowderDiffraction.h"
 #include "MantidAPI/BinEdgeAxis.h"
@@ -365,7 +365,8 @@ size_t Bin2DPowderDiffraction::UnifyXBins(
   return max_size;
 }
 
-void Bin2DPowderDiffraction::normalizeToBinArea(MatrixWorkspace_sptr outWS) {
+void Bin2DPowderDiffraction::normalizeToBinArea(
+    const MatrixWorkspace_sptr &outWS) {
   NumericAxis *verticalAxis = dynamic_cast<NumericAxis *>(outWS->getAxis(1));
   const std::vector<double> &yValues = verticalAxis->getValues();
   auto nhist = outWS->getNumberHistograms();

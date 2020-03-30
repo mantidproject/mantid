@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -468,7 +468,8 @@ public:
   }
 
 private:
-  double fitBSpline(boost::shared_ptr<IFunction> bsp, std::string func) {
+  double fitBSpline(const boost::shared_ptr<IFunction> &bsp,
+                    const std::string &func) {
     const double startx = bsp->getAttribute("StartX").asDouble();
     const double endx = bsp->getAttribute("EndX").asDouble();
 

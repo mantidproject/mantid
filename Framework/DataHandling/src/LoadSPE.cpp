@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSPE.h"
 #include "MantidAPI/Axis.h"
@@ -185,7 +185,8 @@ void LoadSPE::exec() {
  *  @param workspace :: The output workspace
  *  @param index ::     The index of the current spectrum
  */
-void LoadSPE::readHistogram(FILE *speFile, API::MatrixWorkspace_sptr workspace,
+void LoadSPE::readHistogram(FILE *speFile,
+                            const API::MatrixWorkspace_sptr &workspace,
                             size_t index) {
   // First, there should be a comment line
   char comment[100];

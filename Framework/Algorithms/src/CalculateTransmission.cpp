@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateTransmission.h"
 #include "MantidAPI/CommonBinsValidator.h"
@@ -25,6 +25,7 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/lexical_cast.hpp>
+#include <utility>
 
 namespace Mantid {
 namespace Algorithms {
@@ -264,7 +265,7 @@ void CalculateTransmission::exec() {
  *execution
  */
 API::MatrixWorkspace_sptr
-CalculateTransmission::extractSpectra(API::MatrixWorkspace_sptr ws,
+CalculateTransmission::extractSpectra(const API::MatrixWorkspace_sptr &ws,
                                       const std::vector<size_t> &indices) {
   // Compile a comma separated list of indices that we can pass to SumSpectra.
   std::vector<std::string> indexStrings(indices.size());
@@ -301,11 +302,11 @@ CalculateTransmission::extractSpectra(API::MatrixWorkspace_sptr ws,
  * execution
  */
 API::MatrixWorkspace_sptr
-CalculateTransmission::fit(API::MatrixWorkspace_sptr raw,
+CalculateTransmission::fit(const API::MatrixWorkspace_sptr &raw,
                            const std::vector<double> &rebinParams,
-                           const std::string fitMethod) {
+                           const std::string &fitMethod) {
   MatrixWorkspace_sptr output =
-      this->extractSpectra(raw, std::vector<size_t>(1, 0));
+      this->extractSpectra(std::move(raw), std::vector<size_t>(1, 0));
 
   Progress progress(this, m_done, 1.0, 4);
   progress.report("CalculateTransmission: Performing fit");
@@ -403,8 +404,8 @@ CalculateTransmission::fit(API::MatrixWorkspace_sptr raw,
  *  @throw runtime_error if the Linear algorithm fails during execution
  */
 API::MatrixWorkspace_sptr
-CalculateTransmission::fitData(API::MatrixWorkspace_sptr WS, double &grad,
-                               double &offset) {
+CalculateTransmission::fitData(const API::MatrixWorkspace_sptr &WS,
+                               double &grad, double &offset) {
   g_log.information("Fitting the experimental transmission curve");
   double start = m_done;
   IAlgorithm_sptr childAlg = createChildAlgorithm("Fit", start, m_done + 0.9);
@@ -436,7 +437,8 @@ CalculateTransmission::fitData(API::MatrixWorkspace_sptr WS, double &grad,
  * @param[out] coeficients of the polynomial. c[0] + c[1]x + c[2]x^2 + ...
  */
 API::MatrixWorkspace_sptr
-CalculateTransmission::fitPolynomial(API::MatrixWorkspace_sptr WS, int order,
+CalculateTransmission::fitPolynomial(const API::MatrixWorkspace_sptr &WS,
+                                     int order,
                                      std::vector<double> &coeficients) {
   g_log.notice("Fitting the experimental transmission curve fitpolyno");
   double start = m_done;
@@ -473,7 +475,7 @@ CalculateTransmission::fitPolynomial(API::MatrixWorkspace_sptr WS, int order,
  */
 API::MatrixWorkspace_sptr
 CalculateTransmission::rebin(const std::vector<double> &binParams,
-                             API::MatrixWorkspace_sptr ws) {
+                             const API::MatrixWorkspace_sptr &ws) {
   double start = m_done;
   IAlgorithm_sptr childAlg =
       createChildAlgorithm("Rebin", start, m_done += 0.05);
@@ -493,9 +495,9 @@ CalculateTransmission::rebin(const std::vector<double> &binParams,
  * @param directWS :: the input direct workspace
  * @param index    :: the index of the detector to checked
  */
-void CalculateTransmission::logIfNotMonitor(API::MatrixWorkspace_sptr sampleWS,
-                                            API::MatrixWorkspace_sptr directWS,
-                                            size_t index) {
+void CalculateTransmission::logIfNotMonitor(
+    const API::MatrixWorkspace_sptr &sampleWS,
+    const API::MatrixWorkspace_sptr &directWS, size_t index) {
   const std::string message = "The detector at index " + std::to_string(index) +
                               " is not a monitor in the ";
   if (!sampleWS->spectrumInfo().isMonitor(index))

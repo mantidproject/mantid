@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -32,6 +32,10 @@ SpectrumInfo::~SpectrumInfo() = default;
 
 /// Returns the size of the SpectrumInfo, i.e., the number of spectra.
 size_t SpectrumInfo::size() const { return m_spectrumInfo.size(); }
+
+size_t SpectrumInfo::detectorCount() const {
+  return m_spectrumInfo.detectorCount();
+}
 
 /// Returns a const reference to the SpectrumDefinition of the spectrum.
 const SpectrumDefinition &

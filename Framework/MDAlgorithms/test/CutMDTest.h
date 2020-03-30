@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -42,7 +42,7 @@ class CutMDTest : public CxxTest::TestSuite {
 private:
   IMDWorkspace_sptr m_inWS;
 
-  void addNormalization(std::string wsName) {
+  void addNormalization(const std::string &wsName) {
     auto ws = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
     auto eventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
     auto histoWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(ws);

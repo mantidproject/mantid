@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -26,9 +26,10 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void do_test(std::string InputWorkspace, std::string MaskWorkspace,
-               std::string ValueWorkspace, std::string Value,
-               std::string OutputWorkspace, double expectedSignal,
+  void do_test(const std::string &InputWorkspace,
+               const std::string &MaskWorkspace,
+               const std::string &ValueWorkspace, const std::string &Value,
+               const std::string &OutputWorkspace, double expectedSignal,
                double expectedError, bool succeeds = true) {
     MDHistoWorkspace_sptr histo_A =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(2.0, 2, 5, 10.0, 2.0);

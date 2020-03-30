@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -327,7 +327,7 @@ public:
    * BETA, ...
    */
   void
-  importPeakParametersFile(std::string filename,
+  importPeakParametersFile(const std::string &filename,
                            std::vector<std::vector<int>> &hkls,
                            std::vector<std::vector<double>> &peakparameters) {
     // 1. Open file
@@ -441,7 +441,7 @@ public:
    * Input:  a text based file
    * Output: a map for (parameter name, parameter value)
    */
-  void importInstrumentTxtFile(std::string filename,
+  void importInstrumentTxtFile(const std::string &filename,
                                std::map<std::string, double> &parameters,
                                std::map<string, vector<double>> &parametermcs) {
     // 1. Open file
@@ -462,14 +462,14 @@ public:
     while (ins.getline(line, 256)) {
       if (line[0] != '#') {
         std::string parname;
-        double parvalue, parmin, parmax, parstepsize;
-
+        double parvalue;
         std::stringstream ss;
         ss.str(line);
         ss >> parname >> parvalue;
         parameters.emplace(parname, parvalue);
 
         try {
+          double parmin, parmax, parstepsize;
           ss >> parmin >> parmax >> parstepsize;
           vector<double> mcpars;
           mcpars.emplace_back(parmin);
@@ -488,9 +488,9 @@ public:
   }
 
   /// =================  Check Output ================ ///
-  void
-  parseParameterTableWorkspace(Mantid::DataObjects::TableWorkspace_sptr paramws,
-                               std::map<std::string, double> &paramvalues) {
+  void parseParameterTableWorkspace(
+      const Mantid::DataObjects::TableWorkspace_sptr &paramws,
+      std::map<std::string, double> &paramvalues) {
 
     for (size_t irow = 0; irow < paramws->rowCount(); ++irow) {
       Mantid::API::TableRow row = paramws->getRow(irow);

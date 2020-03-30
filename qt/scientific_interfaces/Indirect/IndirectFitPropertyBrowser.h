@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -66,7 +66,7 @@ public:
       TableRowIndex nData, const QStringList &datasetNames,
       const std::vector<double> &qValues,
       const std::vector<std::pair<std::string, int>> &fitResolutions);
-  void updatePlotGuess(MatrixWorkspace_const_sptr sampleWorkspace);
+  void updatePlotGuess(const MatrixWorkspace_const_sptr &sampleWorkspace);
   void setErrorsEnabled(bool enabled);
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);

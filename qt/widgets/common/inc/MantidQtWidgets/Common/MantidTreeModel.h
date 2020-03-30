@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 //----------------------------------
@@ -57,7 +57,7 @@ public:
   QWidget *getParent() override;
 
   MantidQt::API::AlgorithmDialog *
-  createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg);
+  createAlgorithmDialog(const Mantid::API::IAlgorithm_sptr &alg);
 
   // Plotting Methods
   MultiLayer *

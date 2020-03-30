@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/LiveDataAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -17,6 +17,7 @@
 
 #include <boost/algorithm/string/trim.hpp>
 #include <unordered_set>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -260,7 +261,7 @@ ILiveListener_sptr LiveDataAlgorithm::createLiveListener(bool connect) {
  */
 void LiveDataAlgorithm::setLiveListener(
     Mantid::API::ILiveListener_sptr listener) {
-  m_listener = listener;
+  m_listener = std::move(listener);
 }
 
 //----------------------------------------------------------------------------------------------

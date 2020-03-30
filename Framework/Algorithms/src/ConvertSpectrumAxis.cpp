@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertSpectrumAxis.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -186,7 +186,7 @@ void ConvertSpectrumAxis::exec() {
 
 double
 ConvertSpectrumAxis::getEfixed(const Mantid::Geometry::IDetector &detector,
-                               MatrixWorkspace_const_sptr inputWS,
+                               const MatrixWorkspace_const_sptr &inputWS,
                                int emode) const {
   double efixed(0);
   double efixedProp = getProperty("Efixed");

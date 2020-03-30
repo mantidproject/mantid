@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -35,10 +35,10 @@ public:
   };
   std::pair<double, double> getRange();
   Mantid::API::IFunction_sptr getFunction();
-  void addSpectrum(std::string wsName);
-  void addFitSpectrum(std::string wsName);
+  void addSpectrum(const std::string &wsName);
+  void addFitSpectrum(const std::string &wsName);
   void addFunction(Mantid::API::IFunction_sptr func);
-  void updateFunction(Mantid::API::IFunction_sptr func);
+  void updateFunction(const Mantid::API::IFunction_sptr &func);
   void fitWarning(const std::string &message);
 
 public slots:

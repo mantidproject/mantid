@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/EstimateFitParameters.h"
 
@@ -138,9 +138,8 @@ public:
   std::vector<GSLVector> getParams() const {
     std::vector<GSLVector> res;
     res.reserve(m_params.size());
-    for (auto &it : m_params) {
-      res.emplace_back(it.second);
-    }
+    std::transform(m_params.begin(), m_params.end(), std::back_inserter(res),
+                   [](const auto &it) { return it.second; });
     return res;
   }
 };
@@ -383,12 +382,12 @@ void EstimateFitParameters::execConcrete() {
       continue;
     }
     auto constraint = func->getConstraint(i);
-    if (constraint == nullptr) {
+    if (!constraint) {
       func->fix(i);
       continue;
     }
     auto boundary = dynamic_cast<Constraints::BoundaryConstraint *>(constraint);
-    if (boundary == nullptr) {
+    if (!boundary) {
       throw std::runtime_error("Parameter " + func->parameterName(i) +
                                " must have a boundary constraint. ");
     }

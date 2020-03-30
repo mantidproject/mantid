@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidAPI/BoxController.h"
@@ -13,6 +13,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include <Poco/File.h>
+
+#include <utility>
 
 using file_holder_type = std::unique_ptr<::NeXus::File>;
 
@@ -33,7 +35,7 @@ MDBoxFlatTree::MDBoxFlatTree() : m_nDim(-1) {}
  * @param fileName -- the name of the file, where this structure should be
  *written. TODO: It is here for the case of file based workspaces
  */
-void MDBoxFlatTree::initFlatStructure(API::IMDEventWorkspace_sptr pws,
+void MDBoxFlatTree::initFlatStructure(const API::IMDEventWorkspace_sptr &pws,
                                       const std::string &fileName) {
   m_bcXMLDescr = pws->getBoxController()->toXMLString();
   m_FileName = fileName;
@@ -353,8 +355,8 @@ void MDBoxFlatTree::loadBoxStructure(::NeXus::File *hFile, bool onlyEventInfo) {
  *@param ws   -- the shared pointer to the workspace with experiment infos to
  *write.
  */
-void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file,
-                                        API::IMDEventWorkspace_const_sptr ws) {
+void MDBoxFlatTree::saveExperimentInfos(
+    ::NeXus::File *const file, const API::IMDEventWorkspace_const_sptr &ws) {
 
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
@@ -406,7 +408,8 @@ void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file,
  */
 void MDBoxFlatTree::loadExperimentInfos(
     ::NeXus::File *const file, const std::string &filename,
-    boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei, bool lazy) {
+    const boost::shared_ptr<Mantid::API::MultipleExperimentInfos> &mei,
+    bool lazy) {
   // First, find how many experimentX blocks there are
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
@@ -748,7 +751,7 @@ MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
 /**Save workspace generic info like dimension structure, history, title
  * dimensions etc.*/
 void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file,
-                                      API::IMDWorkspace_const_sptr ws) {
+                                      const API::IMDWorkspace_const_sptr &ws) {
   // Write out the coordinate system
   file->writeData("coordinate_system",
                   static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
@@ -794,7 +797,7 @@ void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file,
  * @param ws : workspace to get matrix from
  */
 void MDBoxFlatTree::saveAffineTransformMatricies(
-    ::NeXus::File *const file, API::IMDWorkspace_const_sptr ws) {
+    ::NeXus::File *const file, const API::IMDWorkspace_const_sptr &ws) {
   try {
     saveAffineTransformMatrix(file, ws->getTransformToOriginal(),
                               "transform_to_orig");
@@ -816,12 +819,12 @@ void MDBoxFlatTree::saveAffineTransformMatricies(
  */
 void MDBoxFlatTree::saveAffineTransformMatrix(
     ::NeXus::File *const file, API::CoordTransform const *transform,
-    std::string entry_name) {
+    const std::string &entry_name) {
   if (!transform)
     return;
   Kernel::Matrix<coord_t> matrix = transform->makeAffineMatrix();
   g_log.debug() << "TRFM: " << matrix.str() << '\n';
-  saveMatrix<coord_t>(file, entry_name, matrix, ::NeXus::FLOAT32,
+  saveMatrix<coord_t>(file, std::move(entry_name), matrix, ::NeXus::FLOAT32,
                       transform->id());
 }
 
@@ -834,9 +837,9 @@ void MDBoxFlatTree::saveAffineTransformMatrix(
  * @param tag : id for an affine matrix conversion
  */
 template <typename T>
-void saveMatrix(::NeXus::File *const file, std::string name,
+void saveMatrix(::NeXus::File *const file, const std::string &name,
                 Kernel::Matrix<T> &m, ::NeXus::NXnumtype type,
-                std::string tag) {
+                const std::string &tag) {
   std::vector<T> v = m.getVector();
   // Number of data points
   auto nPoints = static_cast<int>(v.size());

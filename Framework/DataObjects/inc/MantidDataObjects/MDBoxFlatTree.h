@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -47,7 +47,7 @@ public:
   //---------------------------------------------------------------------------------------------------------------------
   /// convert MDWS box structure into flat structure used for saving/loading on
   /// hdd
-  void initFlatStructure(API::IMDEventWorkspace_sptr pws,
+  void initFlatStructure(const API::IMDEventWorkspace_sptr &pws,
                          const std::string &fileName);
 
   uint64_t restoreBoxTree(std::vector<API::IMDNode *> &Boxes,
@@ -118,26 +118,28 @@ public:
   // save each experiment info into its own NeXus group within an existing
   // opened group
   static void saveExperimentInfos(::NeXus::File *const file,
-                                  API::IMDEventWorkspace_const_sptr ws);
+                                  const API::IMDEventWorkspace_const_sptr &ws);
   // load experiment infos, previously saved through the the saveExperimentInfo
   // function
-  static void
-  loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
-                      boost::shared_ptr<API::MultipleExperimentInfos> mei,
-                      bool lazy = false);
+  static void loadExperimentInfos(
+      ::NeXus::File *const file, const std::string &filename,
+      const boost::shared_ptr<API::MultipleExperimentInfos> &mei,
+      bool lazy = false);
 
-  static void saveAffineTransformMatricies(::NeXus::File *const file,
-                                           API::IMDWorkspace_const_sptr ws);
+  static void
+  saveAffineTransformMatricies(::NeXus::File *const file,
+                               const API::IMDWorkspace_const_sptr &ws);
   static void saveAffineTransformMatrix(::NeXus::File *const file,
                                         API::CoordTransform const *transform,
-                                        std::string entry_name);
+                                        const std::string &entry_name);
 
   static void saveWSGenericInfo(::NeXus::File *const file,
-                                API::IMDWorkspace_const_sptr ws);
+                                const API::IMDWorkspace_const_sptr &ws);
 };
 
 template <typename T>
-void saveMatrix(::NeXus::File *const file, std::string name,
-                Kernel::Matrix<T> &m, ::NeXus::NXnumtype type, std::string tag);
+void saveMatrix(::NeXus::File *const file, const std::string &name,
+                Kernel::Matrix<T> &m, ::NeXus::NXnumtype type,
+                const std::string &tag);
 } // namespace DataObjects
 } // namespace Mantid

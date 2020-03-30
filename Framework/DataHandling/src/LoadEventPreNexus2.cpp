@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadEventPreNexus2.h"
 #include "MantidAPI/Axis.h"
@@ -405,7 +405,7 @@ void LoadEventPreNexus2::exec() {
 /** Create and set up output Event Workspace
  */
 void LoadEventPreNexus2::createOutputWorkspace(
-    const std::string event_filename) {
+    const std::string &event_filename) {
   // Create the output workspace
   localWorkspace = EventWorkspace_sptr(new EventWorkspace());
 
@@ -570,7 +570,7 @@ void LoadEventPreNexus2::processImbedLogs() {
  * @param mindex :: index of the log in pulse time ...
  * - mindex:  index of the the series in the list
  */
-void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle,
+void LoadEventPreNexus2::addToWorkspaceLog(const std::string &logtitle,
                                            size_t mindex) {
   // Create TimeSeriesProperty
   auto property = new TimeSeriesProperty<double>(logtitle);
@@ -601,7 +601,8 @@ void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle,
  * geometry
  */
 void LoadEventPreNexus2::runLoadInstrument(
-    const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace) {
+    const std::string &eventfilename,
+    const MatrixWorkspace_sptr &localWorkspace) {
   // start by getting just the filename
   string instrument = Poco::Path(eventfilename).getFileName();
 
@@ -757,7 +758,6 @@ void LoadEventPreNexus2::procEvents(
   partWorkspaces.resize(numThreads);
   buffers.resize(numThreads);
   eventVectors = new EventVector_pt *[numThreads];
-
   // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for if (parallelProcessing) )
     for (int i = 0; i < int(numThreads); i++) {
@@ -780,7 +780,7 @@ void LoadEventPreNexus2::procEvents(
       // value = pointer to the events vector
       eventVectors[i] = new EventVector_pt[detid_max + 1];
       EventVector_pt *theseEventVectors = eventVectors[i];
-      for (detid_t j = 0; j < detid_max + 1; j++) {
+      for (detid_t j = 0; j < detid_max + 1; ++j) {
         size_t wi = pixel_to_wkspindex[j];
         // Save a POINTER to the vector<tofEvent>
         if (wi != static_cast<size_t>(-1))
@@ -1322,7 +1322,6 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
   }
 
   if (num_pulses > 0) {
-    double temp;
     DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(num_pulses);
     for (const auto &pulse : pulses) {
@@ -1336,7 +1335,7 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
       else
         lastPulseDateTime = pulseDateTime;
 
-      temp = pulse.pCurrent;
+      double temp = pulse.pCurrent;
       this->proton_charge.emplace_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");

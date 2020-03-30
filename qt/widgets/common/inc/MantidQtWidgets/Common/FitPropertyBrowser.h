@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -226,7 +226,7 @@ public:
   void setTip(const QString &txt);
 
   /// alter text of Plot Guess
-  void setTextPlotGuess(const QString text);
+  void setTextPlotGuess(const QString &text);
 
   /// Creates the "Ties" property value for the Fit algorithm
   QString getTieString() const;
@@ -466,7 +466,7 @@ protected:
   ///
   void updateDecimals();
   /// Sets the workspace to a function
-  void setWorkspace(boost::shared_ptr<Mantid::API::IFunction> f) const;
+  void setWorkspace(const boost::shared_ptr<Mantid::API::IFunction> &f) const;
   /// Display properties relevant to the selected workspace
   void setWorkspaceProperties();
   /// Adds the workspace index property to the browser.
@@ -486,7 +486,7 @@ protected:
   /// Catches unexpected not found exceptions
   Mantid::API::IFunction_sptr tryCreateFitFunction(const QString &str);
   /// Create CompositeFunction from pointer
-  void createCompositeFunction(const Mantid::API::IFunction_sptr func);
+  void createCompositeFunction(const Mantid::API::IFunction_sptr &func);
 
   /// Property managers:
   QtGroupPropertyManager *m_groupManager;
@@ -593,7 +593,7 @@ private:
   /// Return the nearest allowed workspace index.
   int getAllowedIndex(int currentIndex) const;
 
-  void setCurrentFunction(Mantid::API::IFunction_const_sptr f) const;
+  void setCurrentFunction(const Mantid::API::IFunction_const_sptr &f) const;
 
   /// Sets the new workspace to the current one
   virtual void workspaceChange(const QString &wsName);

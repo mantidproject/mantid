@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -31,7 +31,7 @@ belongs to. By default if a name has the signature of a composite function
 class MANTID_API_DLL FunctionGenerator : public IFunction {
 public:
   /// Constructor
-  FunctionGenerator(IFunction_sptr source);
+  FunctionGenerator(const IFunction_sptr &source);
 
   /// @name Overrides implementing composition of two functions:
   /// m_source and m_target.

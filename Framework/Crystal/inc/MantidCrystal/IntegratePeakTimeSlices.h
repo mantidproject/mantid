@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * IntegratePeakTimeSlices.h
@@ -271,14 +271,14 @@ private:
 
   void SetUpData(API::MatrixWorkspace_sptr &Data,
                  API::MatrixWorkspace_const_sptr const &inpWkSpace,
-                 boost::shared_ptr<Geometry::IComponent> comp,
+                 const boost::shared_ptr<Geometry::IComponent> &comp,
                  const int chanMin, const int chanMax, double CentX,
                  double CentY, Kernel::V3D &CentNghbr,
 
                  double &neighborRadius, // from CentDet
                  double Radius, std::string &spec_idList);
 
-  bool getNeighborPixIDs(boost::shared_ptr<Geometry::IComponent> comp,
+  bool getNeighborPixIDs(const boost::shared_ptr<Geometry::IComponent> &comp,
                          Kernel::V3D &Center, double &Radius, int *&ArryofID);
 
   int CalculateTimeChannelSpan(Geometry::IPeak const &peak, const double dQ,

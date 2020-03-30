@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /* SaveIsawUBTest.h
  *
@@ -90,15 +90,13 @@ public:
     F1.open(File1.c_str());
     F2.open(File2.c_str());
 
-    int line = 1;
     std::string s;
-    double val1, val2;
-    double tolerance;
 
-    if (F1.good() && F2.good())
+    if (F1.good() && F2.good()) {
+      int line = 1;
       for (int row = 0; row < 5; row++) {
         int NNums = 3;
-        tolerance = .0000003;
+        double tolerance = .0000003;
         if (line > 3) {
           NNums = 7;
           tolerance = .0003;
@@ -107,6 +105,7 @@ public:
         for (int N = 0; N < NNums; N++) {
           s = Mantid::Kernel::Strings::getWord(F1, false);
 
+          double val1, val2;
           if (!Mantid::Kernel::Strings::convert<double>(s, val1)) {
             stringstream message;
             message << "Characters on line " << line << " word " << N;
@@ -128,7 +127,7 @@ public:
         Mantid::Kernel::Strings::readToEndOfLine(F2, true);
         line++;
       }
-    else {
+    } else {
       TS_ASSERT(F1.good());
       TS_ASSERT(F2.good());
       remove(File2.c_str());

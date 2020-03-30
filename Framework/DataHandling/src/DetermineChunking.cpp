@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/DetermineChunking.h"
 #include "LoadRaw/isisraw.h"
@@ -292,7 +292,7 @@ void DetermineChunking::exec() {
 }
 
 /// set the name of the top level NXentry m_top_entry_name
-std::string DetermineChunking::setTopEntryName(std::string filename) {
+std::string DetermineChunking::setTopEntryName(const std::string &filename) {
   std::string top_entry_name;
   using string_map_t = std::map<std::string, std::string>;
   try {

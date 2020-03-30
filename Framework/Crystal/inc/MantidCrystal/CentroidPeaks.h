@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -45,7 +45,7 @@ private:
   void exec() override;
   void integrate();
   void integrateEvent();
-  int findPixelID(std::string bankName, int col, int row);
+  int findPixelID(const std::string &bankName, int col, int row);
   void removeEdgePeaks(Mantid::DataObjects::PeaksWorkspace &peakWS);
   void sizeBanks(const std::string &bankName, int &nCols, int &nRows);
   Geometry::Instrument_const_sptr inst;

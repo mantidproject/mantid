@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -58,7 +58,8 @@ public:
 
   using ChemicalFormula = std::vector<FormulaUnit>;
 
-  static ChemicalFormula parseChemicalFormula(const std::string chemicalSymbol);
+  static ChemicalFormula
+  parseChemicalFormula(const std::string &chemicalSymbol);
 
   /// Default constructor. Required for other parts of the code to
   /// function correctly. The material is considered "empty"

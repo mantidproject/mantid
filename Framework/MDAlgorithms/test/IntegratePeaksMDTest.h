@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -48,10 +48,11 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the IntegratePeaksMD with the given peak radius integration param */
-  static void doRun(double PeakRadius, double BackgroundRadius,
-                    std::string OutputWorkspace = "IntegratePeaksMDTest_peaks",
-                    double BackgroundStartRadius = 0.0, bool edge = true,
-                    bool cyl = false, std::string fnct = "NoFit") {
+  static void
+  doRun(double PeakRadius, double BackgroundRadius,
+        const std::string &OutputWorkspace = "IntegratePeaksMDTest_peaks",
+        double BackgroundStartRadius = 0.0, bool edge = true, bool cyl = false,
+        const std::string &fnct = "NoFit") {
     IntegratePeaksMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())

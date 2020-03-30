@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -10,6 +10,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Kernel;
 
@@ -38,9 +39,8 @@ public:
   }
 
   void testConstructorByPtr() {
-
-    auto *resource = new MyType{2};
-    cow_ptr<MyType> cow{resource};
+    auto resource = std::make_unique<MyType>(2);
+    cow_ptr<MyType> cow{resource.release()};
 
     TSM_ASSERT_EQUALS("COW does not hold the expected value", 2, cow->value);
   }

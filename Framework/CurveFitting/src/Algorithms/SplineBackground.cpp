@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -247,7 +247,7 @@ void SplineBackground::freeBSplinePointers() {
  * @return:: A shared pointer to the output workspace
  */
 MatrixWorkspace_sptr
-SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr ws,
+SplineBackground::saveSplineOutput(const API::MatrixWorkspace_sptr &ws,
                                    const size_t spec) {
   const auto &xInputVals = ws->x(spec);
   const auto &yInputVals = ws->y(spec);

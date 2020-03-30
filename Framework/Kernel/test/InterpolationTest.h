@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -257,8 +257,8 @@ public:
   }
 
 private:
-  Interpolation getInitializedInterpolation(std::string xUnit,
-                                            std::string yUnit) {
+  Interpolation getInitializedInterpolation(const std::string &xUnit,
+                                            const std::string &yUnit) {
     Interpolation interpolation;
 
     // take values from constructor
@@ -316,7 +316,7 @@ private:
    * It takes a string argument to make it more obvious where the problem is.
    */
   void checkValue(const Interpolation &interpolation, double x, double y,
-                  std::string testedRange) {
+                  const std::string &testedRange) {
     std::ostringstream errorString;
     errorString << "Interpolation error " << testedRange;
 

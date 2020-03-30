@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidAPI/DllConfig.h"
@@ -42,7 +42,7 @@ getWorkspace(const std::string &name, int period);
 
 /// Create a list of input workspace names
 MANTID_CURVEFITTING_DLL std::vector<InputSpectraToFit>
-makeNames(std::string inputList, int default_wi, int default_spec);
+makeNames(const std::string &inputList, int default_wi, int default_spec);
 
 enum SpecialIndex {
   NOT_SET = -1,

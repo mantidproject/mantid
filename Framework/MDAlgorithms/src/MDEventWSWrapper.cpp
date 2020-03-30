@@ -1,11 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidMDAlgorithms/MDEventWSWrapper.h"
+#include <utility>
+
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidMDAlgorithms/MDEventWSWrapper.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -127,7 +129,6 @@ void MDEventWSWrapper::addMDDataND<0>(float * /*unused*/, uint16_t * /*unused*/,
                               "to 0-dimensional workspace"));
 }
 
-/***/
 template <size_t nd> void MDEventWSWrapper::splitBoxList() {
   auto *const pWs = dynamic_cast<
       DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(
@@ -203,7 +204,7 @@ MDEventWSWrapper::createEmptyMDWS(const MDWSDescription &WSD) {
 /// set up existing workspace pointer as internal pointer for the class to
 /// perform proper MD operations on this workspace
 void MDEventWSWrapper::setMDWS(API::IMDEventWorkspace_sptr spWS) {
-  m_Workspace = spWS;
+  m_Workspace = std::move(spWS);
   m_NDimensions = m_Workspace->getNumDims();
 }
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * EventWorkspaceTest.h
@@ -421,7 +421,7 @@ public:
                       const std::range_error &);
   }
 
-  void do_test_binning(EventWorkspace_sptr ws, const BinEdges &axis,
+  void do_test_binning(const EventWorkspace_sptr &ws, const BinEdges &axis,
                        size_t expected_occupancy_per_bin) {
     MantidVec Y(NUMBINS - 1);
     MantidVec E(NUMBINS - 1);

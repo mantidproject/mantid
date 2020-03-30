@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/IndirectFitPropertyBrowserLegacy.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -211,8 +211,8 @@ IndirectFitPropertyBrowserLegacy::backgroundIndex() const {
  * @param function  The function, whose function index to retrieve.
  * @return          The function index of the specified function in the browser.
  */
-boost::optional<size_t>
-IndirectFitPropertyBrowserLegacy::functionIndex(IFunction_sptr function) const {
+boost::optional<size_t> IndirectFitPropertyBrowserLegacy::functionIndex(
+    const IFunction_sptr &function) const {
   for (size_t i = 0u; i < compositeFunction()->nFunctions(); ++i) {
     if (compositeFunction()->getFunction(i) == function)
       return i;
@@ -344,7 +344,8 @@ void IndirectFitPropertyBrowserLegacy::setParameterValue(
  * @param value         The value to set.
  */
 void IndirectFitPropertyBrowserLegacy::setParameterValue(
-    IFunction_sptr function, const std::string &parameterName, double value) {
+    const IFunction_sptr &function, const std::string &parameterName,
+    double value) {
   if (function->hasParameter(parameterName)) {
     function->setParameter(parameterName, value);
     emit parameterChanged(function.get());
@@ -818,7 +819,7 @@ void IndirectFitPropertyBrowserLegacy::clearAllCustomFunctions() {
  * @param sampleWorkspace :: The workspace loaded as sample
  */
 void IndirectFitPropertyBrowserLegacy::updatePlotGuess(
-    MatrixWorkspace_const_sptr sampleWorkspace) {
+    const MatrixWorkspace_const_sptr &sampleWorkspace) {
   if (sampleWorkspace && compositeFunction()->nFunctions() > 0)
     setPeakToolOn(true);
   else

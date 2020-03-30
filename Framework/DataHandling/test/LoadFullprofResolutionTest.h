@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -747,7 +747,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Parse a TableWorkspace to a map
    */
-  void parseTableWorkspace(TableWorkspace_sptr tablews,
+  void parseTableWorkspace(const TableWorkspace_sptr &tablews,
                            map<string, double> &parammap) {
     parammap.clear();
 
@@ -766,7 +766,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Parse a TableWorkspace's 2nd bank to a map
    */
-  void parseTableWorkspace2(TableWorkspace_sptr tablews,
+  void parseTableWorkspace2(const TableWorkspace_sptr &tablews,
                             map<string, double> &parammap) {
     parammap.clear();
 
@@ -785,7 +785,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate a GEM workspace group with specified number of workspaces.
    */
-  void load_GEM(size_t numberOfWorkspaces, std::string workspaceName) {
+  void load_GEM(size_t numberOfWorkspaces, const std::string &workspaceName) {
     LoadInstrument loaderGEM;
 
     TS_ASSERT_THROWS_NOTHING(loaderGEM.initialize());
@@ -818,7 +818,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate a 1 bank .irf file
    */
-  void generate1BankIrfFile(string filename) {
+  void generate1BankIrfFile(const string &filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
 
@@ -879,7 +879,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate a 2 bank .irf file
    */
-  void generate2BankIrfFile(string filename) {
+  void generate2BankIrfFile(const string &filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
 
@@ -977,7 +977,7 @@ public:
 
   /** Generate a 3 bank .irf file
    */
-  void generate3BankIrfFile(string filename) {
+  void generate3BankIrfFile(const string &filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
 
@@ -1116,7 +1116,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate a 1 bank .irf file for BackToBackExponential fitting function
    */
-  void generate1BankIrfBBXFile(string filename) {
+  void generate1BankIrfBBXFile(const string &filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
 

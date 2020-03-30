@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -87,7 +87,8 @@ private:
                               const double *ysmooth) const;
 
   /// Use an existing fit function to tidy smoothing
-  void performAdditionalFitting(API::MatrixWorkspace_sptr ws, const int row);
+  void performAdditionalFitting(const API::MatrixWorkspace_sptr &ws,
+                                const int row);
 
   /// Converts histogram data to point data later processing
   /// convert a binned workspace to point data. Uses mean of the bins as point

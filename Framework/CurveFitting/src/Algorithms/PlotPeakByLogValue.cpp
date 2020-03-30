@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/StringTokenizer.h"
 #include <algorithm>
@@ -431,7 +431,7 @@ boost::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(
   return fit;
 }
 
-double PlotPeakByLogValue::calculateLogValue(std::string logName,
+double PlotPeakByLogValue::calculateLogValue(const std::string &logName,
                                              const InputSpectraToFit &data) {
   double logValue = 0;
   if (logName.empty() || logName == "axis-1") {
@@ -457,7 +457,7 @@ double PlotPeakByLogValue::calculateLogValue(std::string logName,
   return logValue;
 }
 
-void PlotPeakByLogValue::setWorkspaceIndexAttribute(IFunction_sptr fun,
+void PlotPeakByLogValue::setWorkspaceIndexAttribute(const IFunction_sptr &fun,
                                                     int wsIndex) const {
   const std::string attName = "WorkspaceIndex";
   if (fun->hasAttribute(attName)) {

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
@@ -35,6 +35,7 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 
 #include <limits>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -610,8 +611,8 @@ void InstrumentWidgetRenderTab::flipUnwrappedView(bool on) {
  * for finding the file
  * @param filename Optional full path of the saved image
  */
-void InstrumentWidgetRenderTab::saveImage(QString filename) {
-  m_instrWidget->saveImage(filename);
+void InstrumentWidgetRenderTab::saveImage(const QString &filename) {
+  m_instrWidget->saveImage(std::move(filename));
 }
 
 /**

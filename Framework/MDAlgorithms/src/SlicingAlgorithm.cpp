@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
 #include "MantidAPI/Run.h"
@@ -19,6 +19,7 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/regex.hpp>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -903,7 +904,7 @@ SlicingAlgorithm::getImplicitFunctionForChunk(const size_t *const chunkMin,
  * @returns the unique pointer
  */
 Mantid::Geometry::MDFrame_uptr SlicingAlgorithm::createMDFrameForNonAxisAligned(
-    std::string units, Mantid::Kernel::VMD basisVector) const {
+    const std::string &units, const Mantid::Kernel::VMD &basisVector) const {
   // Get set of basis vectors
   auto oldBasis = getOldBasis(m_inWS->getNumDims());
 
@@ -911,7 +912,8 @@ Mantid::Geometry::MDFrame_uptr SlicingAlgorithm::createMDFrameForNonAxisAligned(
   auto indicesWithProjection = getIndicesWithProjection(basisVector, oldBasis);
 
   // Extract MDFrame
-  return extractMDFrameForNonAxisAligned(indicesWithProjection, units);
+  return extractMDFrameForNonAxisAligned(indicesWithProjection,
+                                         std::move(units));
 }
 
 std::vector<Mantid::Kernel::VMD>
@@ -964,7 +966,7 @@ std::vector<size_t> SlicingAlgorithm::getIndicesWithProjection(
  */
 Mantid::Geometry::MDFrame_uptr
 SlicingAlgorithm::extractMDFrameForNonAxisAligned(
-    std::vector<size_t> indicesWithProjection, std::string units) const {
+    std::vector<size_t> indicesWithProjection, const std::string &units) const {
   if (indicesWithProjection.empty()) {
     g_log.warning() << "Slicing Algorithm: Chosen vector does not "
                        "project on any vector of the old basis.";

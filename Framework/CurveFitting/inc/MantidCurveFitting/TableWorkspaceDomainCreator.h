@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -16,6 +16,7 @@
 
 #include <boost/weak_ptr.hpp>
 #include <list>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -55,7 +56,9 @@ public:
 
   /// Set the workspace
   /// @param ws :: workspace to set.
-  void setWorkspace(API::ITableWorkspace_sptr ws) { m_tableWorkspace = ws; }
+  void setWorkspace(API::ITableWorkspace_sptr ws) {
+    m_tableWorkspace = std::move(ws);
+  }
   /// Set the startX and endX
   /// @param startX :: Start of the domain
   /// @param endX :: End of the domain
@@ -88,7 +91,7 @@ private:
   /// Set all parameters
   void setParameters() const;
   /// Set the names of the X, Y and Error columns
-  void setXYEColumnNames(API::ITableWorkspace_sptr ws) const;
+  void setXYEColumnNames(const API::ITableWorkspace_sptr &ws) const;
   /// Creates the blank output workspace of the correct size
   boost::shared_ptr<API::MatrixWorkspace>
   createEmptyResultWS(const size_t nhistograms, const size_t nyvalues);
@@ -109,9 +112,9 @@ private:
       const API::IFunction_sptr &function,
       boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
       const boost::shared_ptr<API::FunctionDomain> &domain,
-      boost::shared_ptr<API::FunctionValues> resultValues) const;
+      const boost::shared_ptr<API::FunctionValues> &resultValues) const;
   /// Check workspace is in the correct form
-  void setAndValidateWorkspace(API::Workspace_sptr ws) const;
+  void setAndValidateWorkspace(const API::Workspace_sptr &ws) const;
 
   /// Store workspace property name
   std::string m_workspacePropertyName;

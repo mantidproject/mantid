@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/DgsReduction.h"
 
@@ -566,7 +566,7 @@ void DgsReduction::init() {
  * Create a workspace by either loading a file or using an existing
  * workspace.
  */
-Workspace_sptr DgsReduction::loadInputData(const std::string prop,
+Workspace_sptr DgsReduction::loadInputData(const std::string &prop,
                                            const bool mustLoad) {
   g_log.debug() << "MustLoad = " << mustLoad << '\n';
   Workspace_sptr inputWS;
@@ -648,7 +648,7 @@ MatrixWorkspace_sptr DgsReduction::loadHardMask() {
   }
 }
 
-MatrixWorkspace_sptr DgsReduction::loadGroupingFile(const std::string prop) {
+MatrixWorkspace_sptr DgsReduction::loadGroupingFile(const std::string &prop) {
   const std::string propName = prop + "GroupingFile";
   const std::string groupFile = this->getProperty(propName);
   if (groupFile.empty()) {
@@ -672,8 +672,9 @@ MatrixWorkspace_sptr DgsReduction::loadGroupingFile(const std::string prop) {
   }
 }
 
-double DgsReduction::getParameter(std::string algParam, MatrixWorkspace_sptr ws,
-                                  std::string altParam) {
+double DgsReduction::getParameter(const std::string &algParam,
+                                  const MatrixWorkspace_sptr &ws,
+                                  const std::string &altParam) {
   double param = this->getProperty(algParam);
   if (EMPTY_DBL() == param) {
     param = ws->getInstrument()->getNumberParameter(altParam)[0];

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidAPI/Algorithm.h"
@@ -80,8 +80,6 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
     if (canCalculateMassDensity) {
       result["SampleMassDensity"] =
           "Cannot give SampleMassDensity with SampleNumberDensity set";
-      result["SampleMassDensity"] =
-          "Cannot give SampleMassDensity with SampleNumberDensity set";
     }
   }
   return result;
@@ -120,7 +118,7 @@ std::unique_ptr<Kernel::Material> ReadMaterial::buildMaterial() {
   return std::make_unique<Kernel::Material>(builder.build());
 }
 
-void ReadMaterial::setMaterial(const std::string chemicalSymbol,
+void ReadMaterial::setMaterial(const std::string &chemicalSymbol,
                                const int atomicNumber, const int massNumber) {
   if (!chemicalSymbol.empty()) {
     builder.setFormula(chemicalSymbol);

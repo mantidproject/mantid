@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
  * This algorithm takes a MDHistoWorkspace and allows to select a slab out of
@@ -99,8 +99,8 @@ void SliceMDHisto::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-void SliceMDHisto::cutData(Mantid::API::IMDHistoWorkspace_sptr inWS,
-                           Mantid::API::IMDHistoWorkspace_sptr outWS,
+void SliceMDHisto::cutData(const Mantid::API::IMDHistoWorkspace_sptr &inWS,
+                           const Mantid::API::IMDHistoWorkspace_sptr &outWS,
                            Mantid::coord_t *sourceDim,
                            Mantid::coord_t *targetDim, std::vector<int> start,
                            std::vector<int> end, unsigned int dim) {
@@ -130,8 +130,9 @@ void SliceMDHisto::cutData(Mantid::API::IMDHistoWorkspace_sptr inWS,
   }
 }
 
-void SliceMDHisto::copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
-                                Mantid::API::IMDHistoWorkspace_sptr outws) {
+void SliceMDHisto::copyMetaData(
+    const Mantid::API::IMDHistoWorkspace_sptr &inws,
+    const Mantid::API::IMDHistoWorkspace_sptr &outws) {
   outws->setTitle(inws->getTitle());
   ExperimentInfo_sptr info;
 

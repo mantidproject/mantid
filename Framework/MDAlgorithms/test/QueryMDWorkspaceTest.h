@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -30,7 +30,7 @@ public:
 
   QueryMDWorkspaceTest() { FrameworkManager::Instance(); }
 
-  void checkInputs(std::string strNormalisation) {
+  void checkInputs(const std::string &strNormalisation) {
     MDEventWorkspace3Lean::sptr in_ws =
         MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
     QueryMDWorkspace query;

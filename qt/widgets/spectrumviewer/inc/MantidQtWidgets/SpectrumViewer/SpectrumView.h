@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -56,7 +56,7 @@ public:
   SpectrumView(QWidget *parent = nullptr);
 
   ~SpectrumView() override;
-  void renderWorkspace(Mantid::API::MatrixWorkspace_const_sptr wksp);
+  void renderWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &wksp);
   void renderWorkspace(const QString &wsName);
   QList<boost::shared_ptr<SpectrumDisplay>> getSpectrumDisplays() const {
     return m_spectrumDisplay;

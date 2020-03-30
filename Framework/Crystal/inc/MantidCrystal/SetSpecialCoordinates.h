@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -48,13 +48,13 @@ private:
   static const std::string QSampleOption();
   static const std::string HKLOption();
   bool writeCoordinatesToMDEventWorkspace(
-      Mantid::API::Workspace_sptr inWS,
+      const Mantid::API::Workspace_sptr &inWS,
       Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
   bool writeCoordinatesToMDHistoWorkspace(
-      Mantid::API::Workspace_sptr inWS,
+      const Mantid::API::Workspace_sptr &inWS,
       Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
   bool writeCoordinatesToPeaksWorkspace(
-      Mantid::API::Workspace_sptr inWS,
+      const Mantid::API::Workspace_sptr &inWS,
       Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
 };
 

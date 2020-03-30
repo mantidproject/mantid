@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -515,9 +515,9 @@ public:
   /*
    * Create a masking file
    */
-  ScopedFileHelper::ScopedFile genMaskingFile(std::string maskfilename,
+  ScopedFileHelper::ScopedFile genMaskingFile(const std::string &maskfilename,
                                               std::vector<int> detids,
-                                              std::vector<int> banks) {
+                                              const std::vector<int> &banks) {
     std::stringstream ss;
 
     // 1. Header
@@ -551,8 +551,8 @@ public:
    * Create an ISIS format masking file
    */
   ScopedFileHelper::ScopedFile
-  genISISMaskingFile(std::string maskfilename,
-                     std::vector<specnum_t> singlespectra,
+  genISISMaskingFile(const std::string &maskfilename,
+                     const std::vector<specnum_t> &singlespectra,
                      std::vector<specnum_t> pairspectra) {
     std::stringstream ss;
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -19,6 +19,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_array.hpp>
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -468,21 +469,21 @@ void CompositeFunction::removeFunction(size_t i) {
  *  a member of this composite function nothing happens
  * @param f_new :: A pointer to the new function
  */
-void CompositeFunction::replaceFunctionPtr(const IFunction_sptr f_old,
-                                           IFunction_sptr f_new) {
+void CompositeFunction::replaceFunctionPtr(const IFunction_sptr &f_old,
+                                           const IFunction_sptr &f_new) {
   std::vector<IFunction_sptr>::const_iterator it =
       std::find(m_functions.begin(), m_functions.end(), f_old);
   if (it == m_functions.end())
     return;
   std::vector<IFunction_sptr>::difference_type iFun = it - m_functions.begin();
-  replaceFunction(iFun, f_new);
+  replaceFunction(iFun, std::move(f_new));
 }
 
 /** Replace a function with a new one. The old function is deleted.
  * @param i :: The index of the function to replace
  * @param f :: A pointer to the new function
  */
-void CompositeFunction::replaceFunction(size_t i, IFunction_sptr f) {
+void CompositeFunction::replaceFunction(size_t i, const IFunction_sptr &f) {
   if (i >= nFunctions()) {
     throw std::out_of_range("Function index (" + std::to_string(i) +
                             ") out of range (" + std::to_string(nFunctions()) +

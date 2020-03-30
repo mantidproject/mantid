@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
  * This algorithm flattens a MDHistoWorkspace to a Workspace2D. Mantid has far
@@ -85,7 +85,8 @@ void MDHistoToWorkspace2D::exec() {
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));
 }
 
-size_t MDHistoToWorkspace2D::calculateNSpectra(IMDHistoWorkspace_sptr inWS) {
+size_t
+MDHistoToWorkspace2D::calculateNSpectra(const IMDHistoWorkspace_sptr &inWS) {
   size_t nSpectra = 1;
   for (size_t i = 0; i < m_rank - 1; i++) {
     boost::shared_ptr<const IMDDimension> dim = inWS->getDimension(i);
@@ -94,8 +95,8 @@ size_t MDHistoToWorkspace2D::calculateNSpectra(IMDHistoWorkspace_sptr inWS) {
   return nSpectra;
 }
 
-void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS,
-                                       Workspace2D_sptr outWS,
+void MDHistoToWorkspace2D::recurseData(const IMDHistoWorkspace_sptr &inWS,
+                                       const Workspace2D_sptr &outWS,
                                        size_t currentDim, coord_t *pos) {
   boost::shared_ptr<const IMDDimension> dim = inWS->getDimension(currentDim);
   if (currentDim == m_rank - 1) {
@@ -128,7 +129,7 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS,
 }
 
 void MDHistoToWorkspace2D::checkW2D(
-    Mantid::DataObjects::Workspace2D_sptr outWS) {
+    const Mantid::DataObjects::Workspace2D_sptr &outWS) {
   size_t nSpectra = outWS->getNumberHistograms();
   size_t length = outWS->blocksize();
 
@@ -155,8 +156,8 @@ void MDHistoToWorkspace2D::checkW2D(
 }
 
 void MDHistoToWorkspace2D::copyMetaData(
-    Mantid::API::IMDHistoWorkspace_sptr inWS,
-    Mantid::DataObjects::Workspace2D_sptr outWS) {
+    const Mantid::API::IMDHistoWorkspace_sptr &inWS,
+    const Mantid::DataObjects::Workspace2D_sptr &outWS) {
   if (inWS->getNumExperimentInfo() > 0) {
     ExperimentInfo_sptr info = inWS->getExperimentInfo(0);
     outWS->copyExperimentInfoFrom(info.get());

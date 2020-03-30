@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -880,14 +880,14 @@ private:
   }
 
   Instrument_sptr
-  addInstrumentWithIndirectEmodeParameter(ExperimentInfo_sptr exptInfo) {
+  addInstrumentWithIndirectEmodeParameter(const ExperimentInfo_sptr &exptInfo) {
     Instrument_sptr inst = addInstrument(exptInfo);
     exptInfo->instrumentParameters().addString(inst.get(), "deltaE-mode",
                                                "indirect");
     return inst;
   }
 
-  Instrument_sptr addInstrument(ExperimentInfo_sptr exptInfo) {
+  Instrument_sptr addInstrument(const ExperimentInfo_sptr &exptInfo) {
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(1);
     exptInfo->setInstrument(inst);

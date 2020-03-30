@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -488,7 +488,7 @@ public:
   }
 
   /** Run SaveMD v1 with the MDHistoWorkspace */
-  void doTestHistoV1(MDHistoWorkspace_sptr ws) {
+  void doTestHistoV1(const MDHistoWorkspace_sptr &ws) {
     std::string filename = "SaveMDTestHisto.nxs";
 
     SaveMD alg1;
@@ -531,7 +531,7 @@ public:
   }
 
   /** Run SaveMD2 with the MDHistoWorkspace */
-  void doTestHisto(MDHistoWorkspace_sptr ws) {
+  void doTestHisto(const MDHistoWorkspace_sptr &ws) {
     std::string filename = "SaveMD2TestHisto.nxs";
 
     SaveMD2 alg1;
@@ -682,7 +682,7 @@ public:
   }
 
   Mantid::API::IMDWorkspace_sptr
-  testSaveAndLoadWorkspace(Mantid::API::IMDWorkspace_sptr inputWS,
+  testSaveAndLoadWorkspace(const Mantid::API::IMDWorkspace_sptr &inputWS,
                            const char *rootGroup,
                            const bool rmCoordField = false) {
     const std::string fileName = "SaveMDSpecialCoordinatesTest.nxs";

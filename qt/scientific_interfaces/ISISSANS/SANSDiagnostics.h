@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
@@ -80,7 +80,7 @@ private:
   void setToolTips();
   /// execute sumrowcolumn algorithm
   bool executeSumRowColumn(const std::vector<unsigned int> &values,
-                           const QString ipws, const QString &op,
+                           const QString &ipws, const QString &op,
                            const QString &orientation);
   /// load the settings from the registry
   void loadSettings();
@@ -99,7 +99,7 @@ private:
   bool runLoadAlgorithm(const QString &fileName, const QString &specMin = "-1",
                         const QString &specMax = "-1");
   /// returns sumrowcolumn script
-  bool runsumRowColumn(const QString ipwsName, const QString &opwsName,
+  bool runsumRowColumn(const QString &ipwsName, const QString &opwsName,
                        const QString &orientation, const QString &hvMin,
                        const QString &hvMax);
   // get rectangular detector details
@@ -173,10 +173,10 @@ private:
   void HVMinHVMaxStringValues(const int minVal, const int maxVal,
                               QString &hvMin, QString &hvMax);
   /// Create the name for the outputworkspace
-  QString createOutputWorkspaceName(QString originalWorkspaceName,
-                                    QString detectorName,
-                                    QString integrationType, QString min,
-                                    QString max);
+  QString createOutputWorkspaceName(const QString &originalWorkspaceName,
+                                    const QString &detectorName,
+                                    const QString &integrationType,
+                                    const QString &min, const QString &max);
 
 private:
   QString m_dataDir;       ///< default data search directory
