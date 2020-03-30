@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 import unittest
 from qtpy.QtGui import QIcon
-from qtpy.QtWidgets import QDialogButtonBox
+from qtpy.QtWidgets import QDialogButtonBox, QVBoxLayout
 
 from mantid.api import WorkspaceFactory
 from unittest import mock
@@ -39,6 +39,11 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         SpectraSelectionDialog._check_number_of_plots = mock.Mock(return_value=True)
 
         spectraselectordialog.RED_ASTERISK = None
+
+        # replaceWidget doesn't exist in Qt4
+        replace_widget_patcher = mock.patch.object(QVBoxLayout, 'replaceWidget', create=True)
+        replace_widget_patcher.start()
+        self.addCleanup(replace_widget_patcher.stop)
 
     def test_initial_dialog_setup(self):
         workspaces = [self._multi_spec_ws]
@@ -184,19 +189,20 @@ class SpectraSelectionDialogTest(unittest.TestCase):
     def test_error_bars_check_box_is_disabled_for_surface_plots(self):
         workspaces = [self._single_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
-        ssd._ui.plotType.setCurrentText("Surface")
+        ssd._ui.plotType.setCurrentIndex(3)
         self.assertFalse(ssd._ui.advanced_options_widget.ui.error_bars_check_box.isEnabled())
 
     def test_error_bars_check_box_is_disabled_for_contour_plots(self):
         workspaces = [self._single_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
-        ssd._ui.plotType.setCurrentText("Contour")
+        ssd._ui.plotType.setCurrentIndex(4)
         self.assertFalse(ssd._ui.advanced_options_widget.ui.error_bars_check_box.isEnabled())
 
     def test_custom_log_values_line_edit_becomes_enabled_when_log_value_set_to_custom(self):
         workspaces = [self._single_spec_ws]
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
-        ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentText("Custom")
+        custom_index = ssd._ui.advanced_options_widget.ui.log_value_combo_box.count() - 1
+        ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentIndex(custom_index)
 
         self._mock_get_icon.assert_called_once_with('mdi.asterisk', 'red', 0.6)
         self.assertTrue(ssd._ui.advanced_options_widget.ui.custom_log_line_edit.isEnabled())
@@ -214,13 +220,13 @@ class SpectraSelectionDialogTest(unittest.TestCase):
     def test_log_value_combo_box_contains_workspace_index_option_for_surface_plots(self):
         workspaces = [self._single_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
-        ssd._ui.plotType.setCurrentText("Surface")
+        ssd._ui.plotType.setCurrentIndex(3)
         self.assertNotEqual(ssd._ui.advanced_options_widget.ui.log_value_combo_box.findText("Workspace index"), -1)
 
     def test_log_value_combo_box_contains_workspace_index_option_for_contour_plots(self):
         workspaces = [self._single_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
-        ssd._ui.plotType.setCurrentText("Contour")
+        ssd._ui.plotType.setCurrentIndex(4)
         self.assertNotEqual(ssd._ui.advanced_options_widget.ui.log_value_combo_box.findText("Workspace index"), -1)
 
     def test_log_value_combo_box_contains_sample_logs(self):
@@ -237,21 +243,23 @@ class SpectraSelectionDialogTest(unittest.TestCase):
     def test_log_options_are_disabled_for_tiled_plots(self):
         workspaces = [self._single_spec_ws]
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
-        ssd._ui.plotType.setCurrentText("Tiled")
+        ssd._ui.plotType.setCurrentIndex(2)
         self.assertFalse(ssd._ui.advanced_options_widget.ui.log_value_combo_box.isEnabled())
 
     def test_ok_button_disabled_when_log_value_set_to_custom_and_custom_log_values_left_blank(self):
         workspaces = [self._single_spec_ws]
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
         ssd._ui.specNums.setText("1")
-        ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentText("Custom")
+        custom_index = ssd._ui.advanced_options_widget.ui.log_value_combo_box.count() - 1
+        ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentIndex(custom_index)
         self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
 
     def test_ok_button_disabled_when_log_value_set_to_custom_and_custom_log_values_contains_non_floats(self):
         workspaces = [self._single_spec_ws]
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
         ssd._ui.specNums.setText("1")
-        ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentText("Custom")
+        custom_index = ssd._ui.advanced_options_widget.ui.log_value_combo_box.count() - 1
+        ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentIndex(custom_index)
         ssd._ui.advanced_options_widget.ui.custom_log_line_edit.setText("0,1,test")
         self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
 
@@ -259,7 +267,8 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         workspaces = [self._single_spec_ws]
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
         ssd._ui.specNums.setText("1")
-        ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentText("Custom")
+        custom_index = ssd._ui.advanced_options_widget.ui.log_value_combo_box.count() - 1
+        ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentIndex(custom_index)
         ssd._ui.advanced_options_widget.ui.custom_log_line_edit.setText("0,1")
         self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
 
@@ -267,7 +276,8 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         workspaces = [self._single_spec_ws]
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
         ssd._ui.specNums.setText("3")
-        ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentText("Custom")
+        custom_index = ssd._ui.advanced_options_widget.ui.log_value_combo_box.count() - 1
+        ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentIndex(custom_index)
         ssd._ui.advanced_options_widget.ui.custom_log_line_edit.setText("0,0,1")
         self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
 
@@ -275,47 +285,48 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         workspaces = [self._single_spec_ws]
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
         ssd._ui.specNums.setText("3")
-        ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentText("Custom")
+        custom_index = ssd._ui.advanced_options_widget.ui.log_value_combo_box.count() - 1
+        ssd._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentIndex(custom_index)
         ssd._ui.advanced_options_widget.ui.custom_log_line_edit.setText("2,1,3")
         self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
 
     def test_plot_all_button_disabled_when_plot_type_is_surface(self):
         workspaces = [self._single_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
-        ssd._ui.plotType.setCurrentText("Surface")
+        ssd._ui.plotType.setCurrentIndex(3)
         self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.YesToAll).isEnabled())
 
     def test_plot_all_button_disabled_when_plot_type_is_contour(self):
         workspaces = [self._single_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
-        ssd._ui.plotType.setCurrentText("Contour")
+        ssd._ui.plotType.setCurrentIndex(4)
         self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.YesToAll).isEnabled())
 
     def test_ok_button_disabled_when_plot_type_is_surface_and_more_than_one_spectrum_number_entered(self):
         workspaces = [self._multi_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
-        ssd._ui.plotType.setCurrentText("Surface")
+        ssd._ui.plotType.setCurrentIndex(3)
         ssd._ui.specNums.setText("1,2")
         self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
 
     def test_ok_button_disabled_when_plot_type_is_contour_and_more_than_one_spectrum_number_entered(self):
         workspaces = [self._multi_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
-        ssd._ui.plotType.setCurrentText("Contour")
+        ssd._ui.plotType.setCurrentIndex(4)
         ssd._ui.specNums.setText("1,2")
         self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
 
     def test_ok_button_disabled_when_plot_type_is_surface_and_more_than_one_workspace_index_entered(self):
         workspaces = [self._multi_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
-        ssd._ui.plotType.setCurrentText("Surface")
+        ssd._ui.plotType.setCurrentIndex(3)
         ssd._ui.wkspIndices.setText("1,2")
         self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
 
     def test_ok_button_disabled_when_plot_type_is_contour_and_more_than_one_workspace_index_entered(self):
         workspaces = [self._multi_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
-        ssd._ui.plotType.setCurrentText("Contour")
+        ssd._ui.plotType.setCurrentIndex(4)
         ssd._ui.wkspIndices.setText("1,2")
         self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
 
