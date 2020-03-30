@@ -251,8 +251,8 @@ class DrillView(QMainWindow):
             self.erase_row(row)
             for column in range(self.table.columnCount()):
                 self.call_settings_listeners(
-                        lambda listener: listener.on_data_changed(self, row,
-                            column, "")
+                        lambda listener: listener.on_data_changed(row, column,
+                            "")
                         )
 
     def process_selected_rows(self):

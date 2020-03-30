@@ -92,10 +92,6 @@ class DrillModel(object):
     def del_row(self, position):
         del self.data[position]
 
-    def change_data(self, row, column, content):
-        while (row >= len(self.data)):
-            self.data.append([str()] * len(RundexSettings.COLUMNS[self.technique]))
-        while (column >= len(self.data[row])):
-            self.data[row].append("")
-        self.data[row][column] = content
+    def change_data(self, row, column, contents):
+        self.data[row][column] = contents
 

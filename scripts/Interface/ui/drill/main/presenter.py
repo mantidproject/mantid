@@ -22,8 +22,8 @@ class DrillPresenter(DrillEventListener):
     def on_del_row(self, position):
         self.model.del_row(position)
 
-    def on_data_changed(self, row, column, content):
-        self.model.change_data(row, column, content)
+    def on_data_changed(self, row, column, contents):
+        self.model.change_data(row, column, contents)
 
     def on_process(self, rows):
         self.model.process(rows)
