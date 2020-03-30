@@ -398,12 +398,14 @@ std::map<std::string, std::string> SetSample::validateInputs() {
                         positiveValues);
       validateGeometry(errors, *geomArgs, PropertyNames::GEOMETRY);
     }
-    if (bool(canGeomArgs) != bool(canMaterialArgs)) {
-      errors[PropertyNames::CONTAINER_GEOMETRY] =
-          "Either both or none of the geometry and the material must be given.";
+    if (materialArgs) {
+      validateMaterial(errors, *materialArgs, PropertyNames::MATERIAL);
     }
   }
-
+  if (bool(canGeomArgs) != bool(canMaterialArgs)) {
+    errors[PropertyNames::CONTAINER_GEOMETRY] =
+        "Either both or none of the geometry and the material must be given.";
+  }
   if (canGeomArgs) {
     assertNonNegative(errors, *canGeomArgs, PropertyNames::CONTAINER_GEOMETRY,
                       positiveValues);
@@ -577,33 +579,61 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
 
 void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
                             const Kernel::PropertyManager &materialArgs) {
-  materialParams.chemicalSymbol =
-      materialArgs.getPropertyValue("ChemicalFormula");
-  materialParams.atomicNumber = materialArgs.getProperty("AtomicNumber");
-  materialParams.massNumber = materialArgs.getProperty("MassNumber");
-  materialParams.sampleNumberDensity =
-      materialArgs.getProperty("NumberDensity");
-  materialParams.zParameter = materialArgs.getProperty("ZParameter");
-  materialParams.unitCellVolume = materialArgs.getProperty("UnitCellVolume");
-  materialParams.sampleMassDensity = materialArgs.getProperty("MassDensity");
-  materialParams.sampleMass = materialArgs.getProperty("Mass");
-  materialParams.sampleVolume = materialArgs.getProperty("Volume");
-  materialParams.coherentXSection =
-      materialArgs.getProperty("CoherentXSection");
-  materialParams.incoherentXSection =
-      materialArgs.getProperty("IncoherentXSection");
-  materialParams.attenuationXSection =
-      materialArgs.getProperty("AttenuationXSection");
-  materialParams.scatteringXSection =
-      materialArgs.getProperty("ScatteringXSection");
-  const std::string numberDensityUnit =
-      materialArgs.getProperty("NumberDensityUnit");
-  if (numberDensityUnit == "Atoms") {
-    materialParams.numberDensityUnit =
-        MaterialBuilder::NumberDensityUnit::Atoms;
-  } else {
-    materialParams.numberDensityUnit =
-        MaterialBuilder::NumberDensityUnit::FormulaUnits;
+  if (materialArgs.existsProperty("ChemicalFormula")) {
+    materialParams.chemicalSymbol =
+        materialArgs.getPropertyValue("ChemicalFormula");
+  }
+  if (materialArgs.existsProperty("AtomicNumber")) {
+    materialParams.atomicNumber = materialArgs.getProperty("AtomicNumber");
+  }
+  if (materialArgs.existsProperty("MassNumber")) {
+    materialParams.massNumber = materialArgs.getProperty("MassNumber");
+  }
+  if (materialArgs.existsProperty("NumberDensity")) {
+    materialParams.sampleNumberDensity =
+        materialArgs.getProperty("NumberDensity");
+  }
+  if (materialArgs.existsProperty("ZParameter")) {
+    materialParams.zParameter = materialArgs.getProperty("ZParameter");
+  }
+  if (materialArgs.existsProperty("UnitCellVolume")) {
+    materialParams.unitCellVolume = materialArgs.getProperty("UnitCellVolume");
+  }
+  if (materialArgs.existsProperty("MassDensity")) {
+    materialParams.sampleMassDensity = materialArgs.getProperty("MassDensity");
+  }
+  if (materialArgs.existsProperty("Mass")) {
+    materialParams.sampleMass = materialArgs.getProperty("Mass");
+  }
+  if (materialArgs.existsProperty("Volume")) {
+    materialParams.sampleVolume = materialArgs.getProperty("Volume");
+  }
+  if (materialArgs.existsProperty("CoherentXSection")) {
+    materialParams.coherentXSection =
+        materialArgs.getProperty("CoherentXSection");
+  }
+  if (materialArgs.existsProperty("IncoherentXSection")) {
+    materialParams.incoherentXSection =
+        materialArgs.getProperty("IncoherentXSection");
+  }
+  if (materialArgs.existsProperty("AttenuationXSection")) {
+    materialParams.attenuationXSection =
+        materialArgs.getProperty("AttenuationXSection");
+  }
+  if (materialArgs.existsProperty("ScatteringXSection")) {
+    materialParams.scatteringXSection =
+        materialArgs.getProperty("ScatteringXSection");
+  }
+  if (materialArgs.existsProperty("NumberDensityUnit")) {
+    const std::string numberDensityUnit =
+        materialArgs.getProperty("NumberDensityUnit");
+    if (numberDensityUnit == "Atoms") {
+      materialParams.numberDensityUnit =
+          MaterialBuilder::NumberDensityUnit::Atoms;
+    } else {
+      materialParams.numberDensityUnit =
+          MaterialBuilder::NumberDensityUnit::FormulaUnits;
+    }
   }
 }
 
