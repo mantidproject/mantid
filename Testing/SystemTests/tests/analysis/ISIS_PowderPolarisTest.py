@@ -208,7 +208,7 @@ class TotalScatteringPDFRebinTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the rebin test will be done by testing the histogram size in
         # a truncated WS
-        self.assertAlmostEqual(self.pdf_output.dataX(0).size, 200, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataX(0).size, 201, places=3)
 
 
 class TotalScatteringMergedRebinTest(systemtesting.MantidSystemTest):
@@ -226,7 +226,7 @@ class TotalScatteringMergedRebinTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the rebin test will be done by testing the histogram size in
         # a truncated WS
-        self.assertAlmostEqual(self.pdf_output.dataX(0).size, 356, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataX(0).size, 197, places=3)
 
 
 class TotalScatteringPdfTypeTest(systemtesting.MantidSystemTest):
