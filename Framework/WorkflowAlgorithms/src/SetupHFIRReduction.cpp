@@ -904,7 +904,7 @@ void SetupHFIRReduction::exec() {
 }
 
 void SetupHFIRReduction::setupSensitivity(
-    boost::shared_ptr<PropertyManager> reductionManager) {
+    const boost::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
 
   const std::string sensitivityFile = getPropertyValue("SensitivityFile");
@@ -994,7 +994,7 @@ void SetupHFIRReduction::setupSensitivity(
 }
 
 void SetupHFIRReduction::setupBackground(
-    boost::shared_ptr<PropertyManager> reductionManager) {
+    const boost::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Background
   const std::string backgroundFile = getPropertyValue("BackgroundFiles");
@@ -1112,7 +1112,7 @@ void SetupHFIRReduction::setupBackground(
 }
 
 void SetupHFIRReduction::setupTransmission(
-    boost::shared_ptr<PropertyManager> reductionManager) {
+    const boost::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Transmission options
   const bool thetaDependentTrans = getProperty("ThetaDependentTransmission");

@@ -78,7 +78,8 @@ private:
   DataObjects::PeaksWorkspace_sptr getOutputPeaksWorkspace(
       const DataObjects::PeaksWorkspace_sptr &inputPeaksWorkspace) const;
 
-  void sortOutputPeaksByHKL(API::IPeaksWorkspace_sptr outputPeaksWorkspace);
+  void
+  sortOutputPeaksByHKL(const API::IPeaksWorkspace_sptr &outputPeaksWorkspace);
 
   /// Point Groups possible
   std::vector<Mantid::Geometry::PointGroup_sptr> m_pointGroups;

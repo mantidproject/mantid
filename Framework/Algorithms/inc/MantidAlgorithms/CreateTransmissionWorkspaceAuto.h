@@ -36,7 +36,8 @@ private:
   void init() override;
   void exec() override;
 
-  template <typename T> boost::optional<T> isSet(std::string propName) const;
+  template <typename T>
+  boost::optional<T> isSet(const std::string &propName) const;
 };
 
 } // namespace Algorithms

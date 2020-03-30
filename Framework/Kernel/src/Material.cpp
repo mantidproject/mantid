@@ -600,7 +600,7 @@ getAtomName(const std::string &text) // TODO change to get number after letters
 } // namespace
 
 Material::ChemicalFormula
-Material::parseChemicalFormula(const std::string chemicalSymbol) {
+Material::parseChemicalFormula(const std::string &chemicalSymbol) {
   Material::ChemicalFormula CF;
 
   tokenizer tokens(chemicalSymbol, " -",

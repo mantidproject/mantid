@@ -32,7 +32,7 @@ public:
 
   void test_exec_fileBacked() { do_test_exec("MergeMDFilesTest_OutputWS.nxs"); }
 
-  void do_test_exec(std::string OutputFilename) {
+  void do_test_exec(const std::string &OutputFilename) {
     if (OutputFilename != "") {
       if (Poco::File(OutputFilename).exists())
         Poco::File(OutputFilename).remove();

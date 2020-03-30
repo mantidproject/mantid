@@ -84,7 +84,7 @@ static double gsl_costFunction(const gsl_vector *v, void *params) {
 
 void DiffractionEventCalibrateDetectors::movedetector(
     double x, double y, double z, double rotx, double roty, double rotz,
-    std::string detname, EventWorkspace_sptr inputW) {
+    const std::string &detname, const EventWorkspace_sptr &inputW) {
 
   IAlgorithm_sptr alg1 = createChildAlgorithm("MoveInstrumentComponent");
   alg1->setProperty<EventWorkspace_sptr>("Workspace", inputW);
@@ -145,8 +145,9 @@ void DiffractionEventCalibrateDetectors::movedetector(
 
 double DiffractionEventCalibrateDetectors::intensity(
     double x, double y, double z, double rotx, double roty, double rotz,
-    std::string detname, std::string inname, std::string outname,
-    std::string peakOpt, std::string rb_param, std::string groupWSName) {
+    const std::string &detname, const std::string &inname,
+    const std::string &outname, const std::string &peakOpt,
+    const std::string &rb_param, const std::string &groupWSName) {
 
   EventWorkspace_sptr inputW = boost::dynamic_pointer_cast<EventWorkspace>(
       AnalysisDataService::Instance().retrieve(inname));

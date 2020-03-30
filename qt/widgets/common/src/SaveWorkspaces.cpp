@@ -482,7 +482,7 @@ SaveWorkspaces::provideZeroFreeWorkspaces(const QListWidget *workspaces) {
  * workspaces.
  */
 void SaveWorkspaces::removeZeroFreeWorkspaces(
-    QHash<QString, QString> workspaces) {
+    const QHash<QString, QString> &workspaces) {
   auto zeroFreeWorkspaceNames = workspaces.values();
   for (auto &zeroFreeWorkspaceName : zeroFreeWorkspaceNames) {
     emit deleteZeroErrorFreeWorkspace(zeroFreeWorkspaceName);

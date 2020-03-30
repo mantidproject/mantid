@@ -620,8 +620,8 @@ void IndirectSymmetrise::setSaveEnabled(bool enabled) {
 
 void IndirectSymmetrise::updateRunButton(bool enabled,
                                          std::string const &enableOutputButtons,
-                                         QString const message,
-                                         QString const tooltip) {
+                                         QString const &message,
+                                         QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);

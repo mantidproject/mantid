@@ -301,8 +301,8 @@ void PeakIntegration::retrieveProperties() {
   }
 }
 
-int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
-                                   int y0, int idet, double qspan,
+int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name,
+                                   int x0, int y0, int idet, double qspan,
                                    PeaksWorkspace_sptr &Peaks,
                                    const detid2index_map &pixel_to_wi) {
   UNUSED_ARG(ipeak);

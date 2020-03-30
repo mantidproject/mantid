@@ -19,7 +19,7 @@ namespace ISISReflectometry {
 
 class RegexFilter : public MantidQt::MantidWidgets::Batch::RowPredicate {
 public:
-  RegexFilter(boost::regex regex,
+  RegexFilter(const boost::regex &regex,
               MantidQt::MantidWidgets::Batch::IJobTreeView const &view,
               ReductionJobs const &jobs);
   bool rowMeetsCriteria(

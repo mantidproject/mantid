@@ -39,7 +39,8 @@ GNU_DIAG_ON("unused-local-typedef")
  * combination of exts_list and facility_exts.
  */
 std::vector<std::string> runFinderProxy(FileFinderImpl &self,
-                                        std::string hintstr, list exts_list,
+                                        const std::string &hintstr,
+                                        list exts_list,
                                         const bool useExtsOnly) {
   // Convert python list to c++ vector
   std::vector<std::string> exts;

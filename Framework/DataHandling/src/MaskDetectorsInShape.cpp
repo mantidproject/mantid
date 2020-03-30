@@ -53,7 +53,7 @@ void MaskDetectorsInShape::exec() {
 
 /// Run the FindDetectorsInShape Child Algorithm
 std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(
-    API::MatrixWorkspace_sptr workspace, const std::string shapeXML,
+    const API::MatrixWorkspace_sptr &workspace, const std::string &shapeXML,
     const bool includeMonitors) {
   IAlgorithm_sptr alg = createChildAlgorithm("FindDetectorsInShape");
   alg->setPropertyValue("IncludeMonitors", includeMonitors ? "1" : "0");
@@ -76,7 +76,8 @@ std::vector<int> MaskDetectorsInShape::runFindDetectorsInShape(
 }
 
 void MaskDetectorsInShape::runMaskDetectors(
-    API::MatrixWorkspace_sptr workspace, const std::vector<int> &detectorIds) {
+    const API::MatrixWorkspace_sptr &workspace,
+    const std::vector<int> &detectorIds) {
   auto &detectorInfo = workspace->mutableDetectorInfo();
   for (const auto &id : detectorIds)
     detectorInfo.setMasked(detectorInfo.indexOf(id), true);

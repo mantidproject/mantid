@@ -7,8 +7,6 @@
 #  This file is part of the mantid workbench
 #
 #
-from __future__ import absolute_import, unicode_literals
-
 from mantid.kernel import ConfigService
 from workbench.widgets.settings.plots.view import PlotsSettingsView
 from workbench.plotting.style import VALID_LINE_STYLE

@@ -8,7 +8,6 @@
     Legacy class that old LR reduction options.
     This is still in use for backward compatibility.
 """
-from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 

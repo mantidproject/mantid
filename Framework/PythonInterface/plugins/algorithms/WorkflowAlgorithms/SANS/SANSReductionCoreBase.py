@@ -8,8 +8,6 @@
 
 """A base class to share functionality between SANSReductionCore algorithms."""
 
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode, IEventWorkspace)
 from mantid.kernel import (Direction, StringListValidator)
 from sans.algorithm_detail.CreateSANSAdjustmentWorkspaces import CreateSANSAdjustmentWorkspaces

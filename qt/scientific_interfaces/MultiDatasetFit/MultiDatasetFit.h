@@ -79,7 +79,7 @@ public:
   /// Get the tie for a local parameter.
   QString getLocalParameterTie(const QString &parName, int i) const;
   /// Set a tie for a local parameter.
-  void setLocalParameterTie(const QString &parName, int i, QString tie);
+  void setLocalParameterTie(const QString &parName, int i, const QString &tie);
   /// Log a warning
   static void logWarning(const std::string &msg);
 

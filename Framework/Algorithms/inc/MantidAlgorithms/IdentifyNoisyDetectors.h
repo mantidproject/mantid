@@ -49,8 +49,8 @@ private:
   void exec() override; ///< Executes the algorithm.
 
   void getStdDev(API::Progress &progress,
-                 Mantid::API::MatrixWorkspace_sptr valid,
-                 Mantid::API::MatrixWorkspace_sptr values);
+                 const Mantid::API::MatrixWorkspace_sptr &valid,
+                 const Mantid::API::MatrixWorkspace_sptr &values);
 };
 } // namespace Algorithms
 } // namespace Mantid

@@ -47,7 +47,7 @@ class RenameWindowDialog : public QDialog {
   Q_OBJECT
 
 public:
-  RenameWindowDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  RenameWindowDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
 private:
   QPushButton *buttonOk;

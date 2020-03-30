@@ -85,7 +85,7 @@ public:
   }
 
 private:
-  void checkFRCorrection(std::string wsName, double expectedValuePeak1,
+  void checkFRCorrection(const std::string &wsName, double expectedValuePeak1,
                          double expectedValuePeak2) {
     Mantid::MDAlgorithms::BinMD algBin;
     TS_ASSERT_THROWS_NOTHING(algBin.initialize())

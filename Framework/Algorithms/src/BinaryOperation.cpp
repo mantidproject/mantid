@@ -795,7 +795,8 @@ void BinaryOperation::do2D(bool mismatchedSpectra) {
  *  @param out :: The result workspace
  */
 void BinaryOperation::propagateBinMasks(
-    const API::MatrixWorkspace_const_sptr rhs, API::MatrixWorkspace_sptr out) {
+    const API::MatrixWorkspace_const_sptr &rhs,
+    const API::MatrixWorkspace_sptr &out) {
   const int64_t outHists = out->getNumberHistograms();
   const int64_t rhsHists = rhs->getNumberHistograms();
   for (int64_t i = 0; i < outHists; ++i) {
@@ -876,7 +877,7 @@ void BinaryOperation::performEventBinaryOperation(DataObjects::EventList &lhs,
  * @return OperandType describing what type of workspace it will be operated as.
  */
 OperandType
-BinaryOperation::getOperandType(const API::MatrixWorkspace_const_sptr ws) {
+BinaryOperation::getOperandType(const API::MatrixWorkspace_const_sptr &ws) {
   // An event workspace?
   EventWorkspace_const_sptr ews =
       boost::dynamic_pointer_cast<const EventWorkspace>(ws);

@@ -13,6 +13,7 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <limits>
+#include <utility>
 
 namespace {
 QString makeNumber(double d) { return QString::number(d, 'g', 16); }
@@ -35,8 +36,8 @@ namespace MantidWidgets {
  */
 EditLocalParameterDialog::EditLocalParameterDialog(
     QWidget *parent, const QString &parName, const QStringList &wsNames,
-    QList<double> values, QList<bool> fixes, QStringList ties,
-    QStringList constraints)
+    const QList<double> &values, const QList<bool> &fixes,
+    const QStringList &ties, const QStringList &constraints)
     : MantidDialog(parent), m_parName(parName), m_values(values),
       m_fixes(fixes), m_ties(ties), m_constraints(constraints) {
   assert(values.size() == wsNames.size());
@@ -171,14 +172,14 @@ void EditLocalParameterDialog::fixParameter(int index, bool fix) {
 /// @param index :: Index of a paramter to tie.
 /// @param tie :: A tie string.
 void EditLocalParameterDialog::setTie(int index, QString tie) {
-  m_ties[index] = tie;
+  m_ties[index] = std::move(tie);
   m_fixes[index] = false;
   updateRoleColumn(index);
 }
 
 /// Set the same tie to all parameters.
 /// @param tie :: A tie string.
-void EditLocalParameterDialog::setTieAll(QString tie) {
+void EditLocalParameterDialog::setTieAll(const QString &tie) {
   for (int i = 0; i < m_ties.size(); ++i) {
     m_ties[i] = tie;
     m_fixes[i] = false;
@@ -188,11 +189,11 @@ void EditLocalParameterDialog::setTieAll(QString tie) {
 }
 
 void EditLocalParameterDialog::setConstraint(int index, QString constraint) {
-  m_constraints[index] = constraint;
+  m_constraints[index] = std::move(constraint);
   updateRoleColumn(index);
 }
 
-void EditLocalParameterDialog::setConstraintAll(QString constraint) {
+void EditLocalParameterDialog::setConstraintAll(const QString &constraint) {
   for (int i = 0; i < m_constraints.size(); ++i) {
     m_constraints[i] = constraint;
     updateRoleColumn(i);

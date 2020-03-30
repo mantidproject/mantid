@@ -10,7 +10,6 @@
 One test has been removed from the port since it uses the ReductionSingleton.
 """
 
-from __future__ import (absolute_import, division, print_function)
 import mantid  # noqa
 import systemtesting
 import os

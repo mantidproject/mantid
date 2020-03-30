@@ -331,7 +331,7 @@ MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() {
   return MatrixWorkspace_sptr();
 }
 
-void ALCDataLoadingPresenter::setData(MatrixWorkspace_sptr data) {
+void ALCDataLoadingPresenter::setData(const MatrixWorkspace_sptr &data) {
 
   if (data) {
     // Set the data

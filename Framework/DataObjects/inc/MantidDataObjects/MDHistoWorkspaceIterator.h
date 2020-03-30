@@ -38,7 +38,8 @@ using VecMDExtents = std::vector<MDExtentPair>;
 class DLLExport MDHistoWorkspaceIterator : public Mantid::API::IMDIterator {
 public:
   MDHistoWorkspaceIterator(
-      MDHistoWorkspace_const_sptr workspace, SkippingPolicy *skippingPolicy,
+      const MDHistoWorkspace_const_sptr &workspace,
+      SkippingPolicy *skippingPolicy,
       Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
   MDHistoWorkspaceIterator(
@@ -46,7 +47,7 @@ public:
       Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
   MDHistoWorkspaceIterator(
-      MDHistoWorkspace_const_sptr workspace,
+      const MDHistoWorkspace_const_sptr &workspace,
       Mantid::Geometry::MDImplicitFunction *function = nullptr,
       size_t beginPos = 0, size_t endPos = size_t(-1));
   MDHistoWorkspaceIterator(

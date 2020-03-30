@@ -59,7 +59,8 @@ RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
  * to later check the compatibility of the others with the reference
  * @param ref : the reference workspace
  */
-void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
+void RunCombinationHelper::setReferenceProperties(
+    const MatrixWorkspace_sptr &ref) {
   m_numberSpectra = ref->getNumberHistograms();
   m_numberDetectors = ref->detectorInfo().size();
   m_xUnit = ref->getAxis(0)->unit()->unitID();
@@ -82,7 +83,7 @@ void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
  * @return : empty if compatible, error message otherwises
  */
 std::string
-RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
+RunCombinationHelper::checkCompatibility(const MatrixWorkspace_sptr &ws,
                                          bool checkNumberHistograms) {
   std::string errors;
   if (ws->getNumberHistograms() != m_numberSpectra && checkNumberHistograms)

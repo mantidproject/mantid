@@ -13,7 +13,6 @@
       - Keep the same parameters and work as a drop-in replacement for the old algorithm.
       - Reproduce the output of the old algorithm.
 """
-from __future__ import (absolute_import, division, print_function)
 import time
 import math
 import os

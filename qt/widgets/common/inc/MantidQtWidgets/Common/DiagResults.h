@@ -28,8 +28,8 @@ signals:
   void died();
 
 private:
-  void updateRow(int row, QString text);
-  int addRow(QString firstColumn, QString secondColumn);
+  void updateRow(int row, const QString &text);
+  int addRow(const QString &firstColumn, const QString &secondColumn);
   void closeEvent(QCloseEvent *event) override;
 
 private:

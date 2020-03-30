@@ -7,11 +7,10 @@
 """
     Specifically tests the Load function in the simple API
 """
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.simpleapi import Load, LoadDialog
 from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
+
 
 class SimpleAPILoadTest(unittest.TestCase):
 

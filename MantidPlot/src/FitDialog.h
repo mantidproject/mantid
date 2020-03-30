@@ -44,9 +44,10 @@ class FitDialog : public QDialog {
   Q_OBJECT
 
 public:
-  FitDialog(Graph *g, QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  FitDialog(Graph *g, QWidget *parent = nullptr,
+            const Qt::WFlags &fl = nullptr);
 
-  void setSrcTables(QList<MdiSubWindow *> tables);
+  void setSrcTables(const QList<MdiSubWindow *> &tables);
 
 protected:
   void closeEvent(QCloseEvent *e) override;

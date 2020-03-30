@@ -53,7 +53,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addOrdinaryDimension(
  */
 template <typename CheckDimensionPolicy>
 void MDGeometryBuilderXML<CheckDimensionPolicy>::addManyOrdinaryDimensions(
-    VecIMDDimension_sptr manyDims) const {
+    const VecIMDDimension_sptr &manyDims) const {
   for (auto &manyDim : manyDims) {
     addOrdinaryDimension(manyDim);
   }
@@ -106,7 +106,7 @@ void MDGeometryBuilderXML<CheckDimensionPolicy>::applyPolicyChecking(
  */
 template <typename CheckDimensionPolicy>
 bool MDGeometryBuilderXML<CheckDimensionPolicy>::addXDimension(
-    IMDDimension_const_sptr dimension) const {
+    const IMDDimension_const_sptr &dimension) const {
 
   bool bAdded = false;
   if (dimension) {
@@ -126,7 +126,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addXDimension(
  */
 template <typename CheckDimensionPolicy>
 bool MDGeometryBuilderXML<CheckDimensionPolicy>::addYDimension(
-    IMDDimension_const_sptr dimension) const {
+    const IMDDimension_const_sptr &dimension) const {
 
   bool bAdded = false;
   if (dimension) {
@@ -146,7 +146,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addYDimension(
  */
 template <typename CheckDimensionPolicy>
 bool MDGeometryBuilderXML<CheckDimensionPolicy>::addZDimension(
-    IMDDimension_const_sptr dimension) const {
+    const IMDDimension_const_sptr &dimension) const {
   bool bAdded = false;
   if (dimension) {
     applyPolicyChecking(*dimension);
@@ -165,7 +165,7 @@ bool MDGeometryBuilderXML<CheckDimensionPolicy>::addZDimension(
  */
 template <typename CheckDimensionPolicy>
 bool MDGeometryBuilderXML<CheckDimensionPolicy>::addTDimension(
-    IMDDimension_const_sptr dimension) const {
+    const IMDDimension_const_sptr &dimension) const {
 
   bool bAdded = false;
   if (dimension) {

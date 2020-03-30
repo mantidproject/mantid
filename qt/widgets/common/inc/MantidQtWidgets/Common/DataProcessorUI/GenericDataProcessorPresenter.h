@@ -33,6 +33,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include <QObject>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -57,7 +58,7 @@ struct PreprocessingAttributes {
       : m_options(options) {}
   PreprocessingAttributes(const ColumnOptionsMap &options,
                           std::map<QString, PreprocessingAlgorithm> map)
-      : m_options(options), m_map(map) {}
+      : m_options(options), m_map(std::move(map)) {}
   ColumnOptionsMap m_options;
   std::map<QString, PreprocessingAlgorithm> m_map;
 
@@ -91,23 +92,24 @@ public:
   GenericDataProcessorPresenter(
       WhiteList whitelist,
       std::map<QString, PreprocessingAlgorithm> preprocessMap,
-      ProcessingAlgorithm processor, PostprocessingAlgorithm postprocessor,
-      int group,
+      const ProcessingAlgorithm &processor,
+      const PostprocessingAlgorithm &postprocessor, int group,
       std::map<QString, QString> postprocessMap = std::map<QString, QString>(),
-      QString loader = "Load");
+      const QString &loader = "Load");
   // Constructor: no pre-processing, post-processing
   GenericDataProcessorPresenter(WhiteList whitelist,
-                                ProcessingAlgorithm processor,
-                                PostprocessingAlgorithm postprocessor,
+                                const ProcessingAlgorithm &processor,
+                                const PostprocessingAlgorithm &postprocessor,
                                 int group);
   // Constructor: pre-processing, no post-processing
   GenericDataProcessorPresenter(
       WhiteList whitelist,
       std::map<QString, PreprocessingAlgorithm> preprocessMap,
-      ProcessingAlgorithm processor, int group);
+      const ProcessingAlgorithm &processor, int group);
   // Constructor: no pre-processing, no post-processing
   GenericDataProcessorPresenter(WhiteList whitelist,
-                                ProcessingAlgorithm processor, int group);
+                                const ProcessingAlgorithm &processor,
+                                int group);
   // Constructor: only whitelist
   GenericDataProcessorPresenter(WhiteList whitelist, int group);
   // Delegating constructor: pre-processing, no post-processing
@@ -141,7 +143,7 @@ public:
   // Get the whitelist
   WhiteList getWhiteList() const { return m_whitelist; };
   // Get the name of the reduced workspace for a given row
-  QString getReducedWorkspaceName(const RowData_sptr data) const;
+  QString getReducedWorkspaceName(const RowData_sptr &data) const;
 
   ParentItems selectedParents() const override;
   ChildItems selectedChildren() const override;
@@ -195,23 +197,23 @@ protected:
   void postProcessGroup(const GroupData &data);
   // Preprocess the given column value if applicable
   void preprocessColumnValue(const QString &columnName, QString &columnValue,
-                             RowData_sptr data);
+                             const RowData_sptr &data);
   // Preprocess all option values where applicable
-  void preprocessOptionValues(RowData_sptr data);
+  void preprocessOptionValues(const RowData_sptr &data);
   // Update the model with values used from the options and/or the results from
   // the algorithm
-  void updateModelFromResults(Mantid::API::IAlgorithm_sptr alg,
-                              RowData_sptr data);
+  void updateModelFromResults(const Mantid::API::IAlgorithm_sptr &alg,
+                              const RowData_sptr &data);
   // Create and execute the algorithm with the given properties
   Mantid::API::IAlgorithm_sptr createAndRunAlgorithm(const OptionsMap &options);
   // Reduce a row
-  void reduceRow(RowData_sptr data);
+  void reduceRow(const RowData_sptr &data);
   // Finds a run in the AnalysisDataService
   QString findRunInADS(const QString &run, const QString &prefix,
                        bool &runFound);
 
   // Set up data required for processing a row
-  bool initRowForProcessing(RowData_sptr rowData);
+  bool initRowForProcessing(const RowData_sptr &rowData);
   // Process rows
   virtual void process(TreeData itemsToProcess);
   // Plotting
@@ -249,12 +251,12 @@ protected:
   bool promptUser() const { return m_promptUser; }
   void setGroupIsProcessed(const int groupIndex, const bool isProcessed);
   void setGroupError(const int groupIndex, const std::string &error);
-  void setRowIsProcessed(RowData_sptr rowData, const bool isProcessed);
-  void setRowError(RowData_sptr rowData, const std::string &error);
-  bool rowNeedsProcessing(RowData_sptr rowData) const;
+  void setRowIsProcessed(const RowData_sptr &rowData, const bool isProcessed);
+  void setRowError(const RowData_sptr &rowData, const std::string &error);
+  bool rowNeedsProcessing(const RowData_sptr &rowData) const;
   bool groupNeedsProcessing(const int groupIndex) const;
   void resetProcessedState(const int groupIndex);
-  void resetProcessedState(RowData_sptr rowData);
+  void resetProcessedState(const RowData_sptr &rowData);
   void resetProcessedState(const std::string &workspaceName);
   void resetProcessedState();
   void updateWidgetEnabledState(const bool isProcessing) const;
@@ -383,7 +385,7 @@ private:
                       int parentColumn) override;
   int getNumberOfRows() override;
   void clearTable() override;
-  bool workspaceIsOutputOfRow(RowData_sptr rowData,
+  bool workspaceIsOutputOfRow(const RowData_sptr &rowData,
                               const std::string &workspaceName) const;
   bool workspaceIsBeingReduced(const std::string &workspaceName) const;
   void handleWorkspaceRemoved(const std::string &workspaceName,

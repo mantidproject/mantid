@@ -17,6 +17,7 @@
 #include <deque>
 #include <mutex>
 #include <string>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -26,7 +27,7 @@ namespace API {
 class AlgorithmStartingNotification : public Poco::Notification {
 public:
   AlgorithmStartingNotification(IAlgorithm_sptr alg)
-      : Poco::Notification(), m_alg(alg) {}
+      : Poco::Notification(), m_alg(std::move(alg)) {}
   /// Returns the algorithm that is starting
   IAlgorithm_sptr getAlgorithm() const { return m_alg; }
 
@@ -48,7 +49,6 @@ public:
                                                const int &version = -1) const;
 
   std::size_t size() const;
-  void setMaxAlgorithms(int n);
 
   IAlgorithm_sptr getAlgorithm(AlgorithmID id) const;
   void removeById(AlgorithmID id);
@@ -78,8 +78,9 @@ private:
   /// Unimplemented assignment operator
   AlgorithmManagerImpl &operator=(const AlgorithmManagerImpl &);
 
-  /// The maximum size of the algorithm store
-  int m_max_no_algs;
+  /// Removes any finished algorithms from the list of managed algorithms
+  size_t removeFinishedAlgorithms();
+
   /// The list of managed algorithms
   std::deque<IAlgorithm_sptr>
       m_managed_algs; ///<  pointers to managed algorithms [policy???]

@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidMuon/LoadAndApplyMuonDetectorGrouping.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
@@ -198,7 +200,7 @@ LoadAndApplyMuonDetectorGrouping::validateInputs() {
 }
 
 void LoadAndApplyMuonDetectorGrouping::getTimeLimitsFromInputWorkspace(
-    Workspace_sptr inputWS, AnalysisOptions &options) {
+    const Workspace_sptr &inputWS, AnalysisOptions &options) {
   MatrixWorkspace_sptr inputMatrixWS =
       boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS);
   WorkspaceGroup_sptr inputGroupWS =
@@ -268,8 +270,8 @@ void LoadAndApplyMuonDetectorGrouping::exec() {
 // Checks that the detector IDs in grouping are in the workspace
 void LoadAndApplyMuonDetectorGrouping::checkDetectorIDsInWorkspace(
     API::Grouping &grouping, Workspace_sptr workspace) {
-  bool check =
-      MuonAlgorithmHelper::checkGroupDetectorsInWorkspace(grouping, workspace);
+  bool check = MuonAlgorithmHelper::checkGroupDetectorsInWorkspace(
+      grouping, std::move(workspace));
   if (!check) {
     g_log.error("One or more detector IDs specified in the groups is not "
                 "contained in the InputWorkspace");
@@ -288,7 +290,8 @@ WorkspaceGroup_sptr
 LoadAndApplyMuonDetectorGrouping::addGroupedWSWithDefaultName(
     Workspace_sptr workspace) {
   auto &ads = AnalysisDataService::Instance();
-  std::string groupedWSName = MuonAlgorithmHelper::getRunLabel(workspace);
+  std::string groupedWSName =
+      MuonAlgorithmHelper::getRunLabel(std::move(workspace));
 
   WorkspaceGroup_sptr groupedWS;
   if (ads.doesExist(groupedWSName)) {
@@ -388,8 +391,8 @@ void LoadAndApplyMuonDetectorGrouping::CheckValidGroupsAndPairs(
  */
 void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
     const Mantid::Muon::AnalysisOptions &options,
-    Mantid::API::Workspace_sptr ws,
-    Mantid::API::WorkspaceGroup_sptr wsGrouped) {
+    const Mantid::API::Workspace_sptr &ws,
+    const Mantid::API::WorkspaceGroup_sptr &wsGrouped) {
 
   size_t numGroups = options.grouping.groups.size();
   for (auto i = 0u; i < numGroups; ++i) {
@@ -426,8 +429,8 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingToADS(
  */
 void LoadAndApplyMuonDetectorGrouping::addPairingToADS(
     const Mantid::Muon::AnalysisOptions &options,
-    Mantid::API::Workspace_sptr ws,
-    Mantid::API::WorkspaceGroup_sptr wsGrouped) {
+    const Mantid::API::Workspace_sptr &ws,
+    const Mantid::API::WorkspaceGroup_sptr &wsGrouped) {
 
   size_t numPairs = options.grouping.pairs.size();
   for (size_t i = 0; i < numPairs; i++) {

@@ -66,8 +66,8 @@ private:
   std::string checkSizeCompatibility(
       const API::MatrixWorkspace_const_sptr lhs,
       const API::MatrixWorkspace_const_sptr rhs) const override;
-  bool checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,
-                              const API::MatrixWorkspace_const_sptr rhs) const;
+  bool checkUnitCompatibility(const API::MatrixWorkspace_const_sptr &lhs,
+                              const API::MatrixWorkspace_const_sptr &rhs) const;
   bool
   checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,
                      const API::MatrixWorkspace_const_sptr rhs) const override;

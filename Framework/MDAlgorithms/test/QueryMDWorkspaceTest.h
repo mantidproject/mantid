@@ -30,7 +30,7 @@ public:
 
   QueryMDWorkspaceTest() { FrameworkManager::Instance(); }
 
-  void checkInputs(std::string strNormalisation) {
+  void checkInputs(const std::string &strNormalisation) {
     MDEventWorkspace3Lean::sptr in_ws =
         MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
     QueryMDWorkspace query;

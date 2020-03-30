@@ -34,7 +34,7 @@
 #include <QSpinBox>
 #include <QStackedWidget>
 
-SurfaceDialog::SurfaceDialog(QWidget *parent, Qt::WFlags fl)
+SurfaceDialog::SurfaceDialog(QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl) {
   setObjectName("SurfaceDialog");
   setWindowTitle(tr("MantidPlot - Define surface plot"));

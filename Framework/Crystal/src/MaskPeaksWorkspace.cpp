@@ -200,9 +200,10 @@ void MaskPeaksWorkspace::retrieveProperties() {
   }
 }
 
-size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
-                                        Geometry::IComponent_const_sptr comp,
-                                        const int x, const int y) {
+size_t
+MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
+                                 const Geometry::IComponent_const_sptr &comp,
+                                 const int x, const int y) {
   Geometry::RectangularDetector_const_sptr det =
       boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
   if (det) {
@@ -270,7 +271,8 @@ void MaskPeaksWorkspace::getTofRange(double &tofMin, double &tofMax,
     tofMax = tofPeak + m_tofMax;
   }
 }
-int MaskPeaksWorkspace::findPixelID(std::string bankName, int col, int row) {
+int MaskPeaksWorkspace::findPixelID(const std::string &bankName, int col,
+                                    int row) {
   Geometry::Instrument_const_sptr Iptr = m_inputW->getInstrument();
   boost::shared_ptr<const IComponent> parent =
       Iptr->getComponentByName(bankName);

@@ -5,9 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,redefined-builtin
-from __future__ import (absolute_import, division, print_function)
-from six.moves import range
-
 import mantid
 import mantid.api
 import mantid.kernel

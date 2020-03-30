@@ -110,7 +110,7 @@ public:
 
   void storeDouble(const double val);
   void storeInt(const int val);
-  void storeString(const std::string val);
+  void storeString(const std::string &val);
   void storeBool(const bool val);
 
   double readDouble();

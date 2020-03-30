@@ -5,12 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Defines the main State object."""
-from __future__ import (absolute_import, division, print_function)
-
 import copy
 import json
-
-from six import with_metaclass
 
 from sans.common.enums import SANSFacility
 from sans.state.JsonSerializable import JsonSerializable
@@ -24,7 +20,7 @@ from sans.state.automatic_setters import automatic_setters
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class AllStates(with_metaclass(JsonSerializable)):
+class AllStates(metaclass=JsonSerializable):
 
     def __init__(self):
 

@@ -5,13 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-from six import string_types
 from mantid import config
 import os
 import re
-from six.moves import range
-
 """
 Set of functions to assist with processing instrument parameters relevant to reduction.
 """
@@ -167,7 +163,7 @@ def build_properties_dict(param_map,synonims,descr_list=[]) :
         if final_name in descr_list:
             is_descriptor = True
 
-        if isinstance(val, string_types):
+        if isinstance(val, str):
             val = val.strip()
             keys_candidates = val.split(":")
             n_keys = len(keys_candidates)
@@ -227,7 +223,7 @@ def build_subst_dictionary(synonims_list=None) :
         return dict()
     if isinstance(synonims_list, dict) : # all done
         return synonims_list
-    if not isinstance(synonims_list, string_types):
+    if not isinstance(synonims_list, str):
         raise AttributeError("The synonyms field of Reducer object has to be special format string or the dictionary")
         # we are in the right place and going to transform string into
         # dictionary
@@ -378,7 +374,7 @@ def parse_single_name(filename):
 
 def parse_run_file_name(run_string):
     """ Parses run file name to obtain run number, path if possible, and file extension if any present in the string"""
-    if not isinstance(run_string, string_types):
+    if not isinstance(run_string, str):
         raise ValueError("REDUCTION_HELPER:parse_run_file_name -- input has to be a string")
 
     runs = run_string.split(',')

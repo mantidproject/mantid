@@ -142,7 +142,7 @@ public:
     AnalysisDataService::Instance().remove(data->getName());
   }
 
-  MatrixWorkspace_sptr executeAlgorithm(MatrixWorkspace_sptr testInput,
+  MatrixWorkspace_sptr executeAlgorithm(const MatrixWorkspace_sptr &testInput,
                                         const std::string &unit,
                                         const std::string &operation,
                                         bool newWksp = true) {

@@ -134,7 +134,7 @@ public:
   PawleyParameterFunction_sptr getPawleyParameterFunction() const;
 
 protected:
-  void setPeakPositions(std::string centreName, double zeroShift,
+  void setPeakPositions(const std::string &centreName, double zeroShift,
                         const Geometry::UnitCell &cell) const;
 
   size_t calculateFunctionValues(const API::IPeakFunction_sptr &peak,

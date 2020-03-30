@@ -305,7 +305,7 @@ void LoadBBY::exec() {
                eventAssigner);
   }
 
-  auto getParam = [&allParams](std::string tag, double defValue) {
+  auto getParam = [&allParams](const std::string &tag, double defValue) {
     try {
       return std::stod(allParams[tag]);
     } catch (const std::invalid_argument &) {

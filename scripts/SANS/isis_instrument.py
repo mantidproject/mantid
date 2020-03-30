@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
-from __future__ import (absolute_import, division, print_function)
 import math
 import os
 import re
@@ -17,8 +16,6 @@ from mantid.kernel import Logger
 from mantid.kernel import V3D
 import SANSUtility as su
 from math import copysign
-from six import iteritems
-
 sanslog = Logger("SANS")
 
 
@@ -616,7 +613,7 @@ class ISISInstrument(BaseInstrument):
             return self.DETECTORS['high-angle']
 
     def getDetector(self, requested):
-        for _n, detect in iteritems(self.DETECTORS):
+        for _n, detect in self.DETECTORS.items():
             if detect.isAlias(requested):
                 return detect
         sanslog.notice("getDetector: Detector " + requested + "not found")

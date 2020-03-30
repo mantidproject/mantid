@@ -7,7 +7,6 @@
 # pylint: disable=invalid-name
 
 """ Handles calibration of SANS workspaces."""
-from __future__ import (absolute_import, division, print_function)
 from os.path import (basename, splitext, isfile)
 from mantid.api import (AnalysisDataService)
 

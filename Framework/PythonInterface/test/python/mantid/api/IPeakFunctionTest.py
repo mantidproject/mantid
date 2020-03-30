@@ -4,11 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.api import *
 import numpy as np
+
 
 class MyPeak(IPeakFunction):
 
@@ -19,6 +18,7 @@ class MyPeak(IPeakFunction):
 
     def functionLocal(self, xvals):
         return 5*xvals
+
 
 class RectangularFunction(IPeakFunction):
     def init(self):
@@ -54,6 +54,7 @@ class RectangularFunction(IPeakFunction):
         values[nonZero] = height
 
         return values
+
 
 class IPeakFunctionTest(unittest.TestCase):
 

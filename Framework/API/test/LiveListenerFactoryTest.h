@@ -14,6 +14,8 @@
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
+#include <utility>
+
 using namespace Mantid;
 using namespace Mantid::API;
 
@@ -29,7 +31,7 @@ class MockLiveListenerInstantiator
 public:
   MockLiveListenerInstantiator(
       boost::shared_ptr<Mantid::API::ILiveListener> product)
-      : product(product) {}
+      : product(std::move(product)) {}
 
   boost::shared_ptr<Mantid::API::ILiveListener>
   createInstance() const override {

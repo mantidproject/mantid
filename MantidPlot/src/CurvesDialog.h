@@ -45,7 +45,8 @@ class CurvesDialog : public QDialog {
   Q_OBJECT
 
 public:
-  CurvesDialog(ApplicationWindow *app, Graph *g, Qt::WFlags fl = nullptr);
+  CurvesDialog(ApplicationWindow *app, Graph *g,
+               const Qt::WFlags &fl = nullptr);
   ~CurvesDialog() override;
 
 private slots:

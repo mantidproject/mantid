@@ -156,7 +156,7 @@ SpectraInfo extractMappingInfo(NXEntry &mtd_entry, Logger &logger) {
  * @param log : Information logger object
  * @return True only if multiperiod.
  */
-bool isMultiPeriodFile(int nWorkspaceEntries, Workspace_sptr sampleWS,
+bool isMultiPeriodFile(int nWorkspaceEntries, const Workspace_sptr &sampleWS,
                        Logger &log) {
   bool isMultiPeriod = false;
   if (ExperimentInfo_sptr expInfo =
@@ -1736,7 +1736,7 @@ std::map<std::string, std::string> LoadNexusProcessed::validateInputs() {
  * @param data :: reference to the NeXuS data for the axis
  */
 void LoadNexusProcessed::loadNonSpectraAxis(
-    API::MatrixWorkspace_sptr local_workspace, NXData &data) {
+    const API::MatrixWorkspace_sptr &local_workspace, NXData &data) {
   Axis *axis = local_workspace->getAxis(1);
 
   if (axis->isNumeric()) {
@@ -1773,7 +1773,7 @@ void LoadNexusProcessed::loadNonSpectraAxis(
  * @param elem1 :: first element in the vector
  * @param elem2 :: second element in the vecor
  */
-bool UDlesserExecCount(NXClassInfo elem1, NXClassInfo elem2) {
+bool UDlesserExecCount(const NXClassInfo &elem1, const NXClassInfo &elem2) {
   std::string::size_type index1, index2;
   std::string num1, num2;
   // find the number after "_" in algorithm name ( eg:MantidAlogorthm_1)
@@ -1859,7 +1859,7 @@ void LoadNexusProcessed::getWordsInString(const std::string &words4,
  * @param local_workspace :: The workspace to read into
  */
 void LoadNexusProcessed::readBinMasking(
-    NXData &wksp_cls, API::MatrixWorkspace_sptr local_workspace) {
+    NXData &wksp_cls, const API::MatrixWorkspace_sptr &local_workspace) {
   if (wksp_cls.getDataSetInfo("masked_spectra").stat == NX_ERROR) {
     return;
   }
@@ -1897,12 +1897,11 @@ void LoadNexusProcessed::readBinMasking(
  * @param hist :: The workspace index to start reading into
  * @param local_workspace :: A pointer to the workspace
  */
-void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
-                                   NXDataSetTyped<double> &errors,
-                                   NXDataSetTyped<double> &farea, bool hasFArea,
-                                   NXDouble &xErrors, bool hasXErrors,
-                                   int blocksize, int nchannels, int &hist,
-                                   API::MatrixWorkspace_sptr local_workspace) {
+void LoadNexusProcessed::loadBlock(
+    NXDataSetTyped<double> &data, NXDataSetTyped<double> &errors,
+    NXDataSetTyped<double> &farea, bool hasFArea, NXDouble &xErrors,
+    bool hasXErrors, int blocksize, int nchannels, int &hist,
+    const API::MatrixWorkspace_sptr &local_workspace) {
   data.load(blocksize, hist);
   errors.load(blocksize, hist);
   double *data_start = data();
@@ -1979,13 +1978,11 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
  * @param local_workspace :: A pointer to the workspace
  */
 
-void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
-                                   NXDataSetTyped<double> &errors,
-                                   NXDataSetTyped<double> &farea, bool hasFArea,
-                                   NXDouble &xErrors, bool hasXErrors,
-                                   int blocksize, int nchannels, int &hist,
-                                   int &wsIndex,
-                                   API::MatrixWorkspace_sptr local_workspace) {
+void LoadNexusProcessed::loadBlock(
+    NXDataSetTyped<double> &data, NXDataSetTyped<double> &errors,
+    NXDataSetTyped<double> &farea, bool hasFArea, NXDouble &xErrors,
+    bool hasXErrors, int blocksize, int nchannels, int &hist, int &wsIndex,
+    const API::MatrixWorkspace_sptr &local_workspace) {
   data.load(blocksize, hist);
   errors.load(blocksize, hist);
   double *data_start = data();
@@ -2062,13 +2059,11 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
  * @param wsIndex :: The workspace index to save data into
  * @param local_workspace :: A pointer to the workspace
  */
-void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
-                                   NXDataSetTyped<double> &errors,
-                                   NXDataSetTyped<double> &farea, bool hasFArea,
-                                   NXDouble &xErrors, bool hasXErrors,
-                                   NXDouble &xbins, int blocksize,
-                                   int nchannels, int &hist, int &wsIndex,
-                                   API::MatrixWorkspace_sptr local_workspace) {
+void LoadNexusProcessed::loadBlock(
+    NXDataSetTyped<double> &data, NXDataSetTyped<double> &errors,
+    NXDataSetTyped<double> &farea, bool hasFArea, NXDouble &xErrors,
+    bool hasXErrors, NXDouble &xbins, int blocksize, int nchannels, int &hist,
+    int &wsIndex, const API::MatrixWorkspace_sptr &local_workspace) {
   data.load(blocksize, hist);
   double *data_start = data();
   double *data_end = data_start + nchannels;

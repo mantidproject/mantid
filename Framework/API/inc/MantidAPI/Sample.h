@@ -45,7 +45,7 @@ public:
   /// the number of samples
   std::size_t size() const;
   /// Adds a sample to the list
-  void addSample(boost::shared_ptr<Sample> childSample);
+  void addSample(const boost::shared_ptr<Sample> &childSample);
 
   /// Returns the name of the sample
   const std::string &getName() const;

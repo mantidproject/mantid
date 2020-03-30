@@ -27,7 +27,8 @@ bool EXPORT_OPT_MANTIDQT_COMMON isHKLDimensions(
     const Mantid::API::IMDWorkspace &workspace, size_t dimX, size_t dimY);
 
 size_t EXPORT_OPT_MANTIDQT_COMMON getMissingHKLDimensionIndex(
-    Mantid::API::IMDWorkspace_const_sptr workspace, size_t dimX, size_t dimY);
+    const Mantid::API::IMDWorkspace_const_sptr &workspace, size_t dimX,
+    size_t dimY);
 
 void EXPORT_OPT_MANTIDQT_COMMON
 transformFromDoubleToCoordT(const Mantid::Kernel::DblMatrix &skewMatrix,

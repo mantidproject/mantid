@@ -48,9 +48,7 @@ Adding to the cache(ADS) is supported for the TubeCalibration file.
 Reading from the cache is supported for all files. This avoids data reloads if the correct file is already in the
 cache.
 """
-from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
-from six import with_metaclass
 import os
 from mantid.kernel import config
 from mantid.api import (AnalysisDataService)
@@ -689,7 +687,7 @@ def load_isis(data_type, file_information, period, use_cached, calibration_file_
 # ----------------------------------------------------------------------------------------------------------------------
 # Load classes
 # ----------------------------------------------------------------------------------------------------------------------
-class SANSLoadData(with_metaclass(ABCMeta, object)):
+class SANSLoadData(metaclass=ABCMeta):
     """ Base class for all SANSLoad implementations."""
     @abstractmethod
     def do_execute(self, data_info, use_cached, publish_to_ads, progress, parent_alg):
@@ -789,7 +787,7 @@ class SANSLoadDataFactory(object):
 #  Corrections for a loaded transmission workspace
 # -------------------------------------------------
 
-class TransmissionCorrection(with_metaclass(ABCMeta, object)):
+class TransmissionCorrection(metaclass=ABCMeta):
     @abstractmethod
     def correct(self, workspaces, parent_alg):
         pass

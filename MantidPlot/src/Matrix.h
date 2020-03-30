@@ -65,7 +65,7 @@ class Matrix : public MdiSubWindow, public Scripted {
 
 protected:
   Matrix(ScriptingEnv *env, const QString &label, QWidget *parent,
-         const QString &name = QString(), Qt::WFlags f = nullptr);
+         const QString &name = QString(), const Qt::WFlags &f = nullptr);
 
 public:
   /**
@@ -81,10 +81,10 @@ public:
    * @param f :: window flags
    */
   Matrix(ScriptingEnv *env, int r, int c, const QString &label, QWidget *parent,
-         const QString &name = QString(), Qt::WFlags f = nullptr);
+         const QString &name = QString(), const Qt::WFlags &f = nullptr);
   Matrix(ScriptingEnv *env, const QImage &image, const QString &label,
          QWidget *parent, const QString &name = QString(),
-         Qt::WFlags f = nullptr);
+         const Qt::WFlags &f = nullptr);
   ~Matrix() override;
 
   enum Operation {

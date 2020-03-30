@@ -22,6 +22,7 @@
 #include <list>
 #include <numeric>
 #include <queue>
+#include <utility>
 
 #include "boost/math/distributions.hpp"
 
@@ -314,7 +315,7 @@ PoldiPeakSearch::getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
  * @param error :: Error that is set on the workspace.
  */
 void PoldiPeakSearch::setErrorsOnWorkspace(
-    Workspace2D_sptr correlationWorkspace, double error) const {
+    const Workspace2D_sptr &correlationWorkspace, double error) const {
   MantidVec &errors = correlationWorkspace->dataE(0);
 
   std::fill(errors.begin(), errors.end(), error);
@@ -332,7 +333,7 @@ void PoldiPeakSearch::setErrorsOnWorkspace(
  * @return Vector only with counts that belong to the background.
  */
 MantidVec PoldiPeakSearch::getBackground(
-    std::list<MantidVec::const_iterator> peakPositions,
+    const std::list<MantidVec::const_iterator> &peakPositions,
     const MantidVec &correlationCounts) const {
   size_t backgroundPoints =
       getNumberOfBackgroundPoints(peakPositions, correlationCounts);
@@ -366,9 +367,10 @@ MantidVec PoldiPeakSearch::getBackground(
  * @return Background estimation with error.
  */
 UncertainValue PoldiPeakSearch::getBackgroundWithSigma(
-    std::list<MantidVec::const_iterator> peakPositions,
+    const std::list<MantidVec::const_iterator> &peakPositions,
     const MantidVec &correlationCounts) const {
-  MantidVec background = getBackground(peakPositions, correlationCounts);
+  MantidVec background =
+      getBackground(std::move(peakPositions), correlationCounts);
 
   /* Instead of using Mean and Standard deviation, which are appropriate
    * for data originating from a normal distribution (which is not the case
@@ -420,7 +422,7 @@ bool PoldiPeakSearch::distanceToPeaksGreaterThanMinimum(
  * @return Number of background points.
  */
 size_t PoldiPeakSearch::getNumberOfBackgroundPoints(
-    std::list<MantidVec::const_iterator> peakPositions,
+    const std::list<MantidVec::const_iterator> &peakPositions,
     const MantidVec &correlationCounts) const {
   /* subtracting 2, to match original algorithm, where
    * the first and the last point of the spectrum are not
@@ -528,7 +530,7 @@ bool PoldiPeakSearch::vectorElementGreaterThan(
   return *first > *second;
 }
 
-bool PoldiPeakSearch::isLessThanMinimum(PoldiPeak_sptr peak) {
+bool PoldiPeakSearch::isLessThanMinimum(const PoldiPeak_sptr &peak) {
   return peak->intensity().value() <= m_minimumPeakHeight;
 }
 

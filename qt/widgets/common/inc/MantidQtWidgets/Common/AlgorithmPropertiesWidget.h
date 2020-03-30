@@ -46,7 +46,7 @@ public:
   void initLayout();
 
   Mantid::API::IAlgorithm_sptr getAlgorithm();
-  void setAlgorithm(Mantid::API::IAlgorithm_sptr algo);
+  void setAlgorithm(const Mantid::API::IAlgorithm_sptr &algo);
 
   QString getAlgorithmName() const;
   void setAlgorithmName(QString name);

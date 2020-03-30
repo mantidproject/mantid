@@ -70,7 +70,6 @@ public:
     SigmasTester sigmas{1.0, 2.0};
     auto old_ptr = &sigmas[0];
     VarianceVectorOfTester variances(std::move(sigmas));
-    TS_ASSERT(!sigmas);
     TS_ASSERT_EQUALS(&variances[0], old_ptr);
     TS_ASSERT_EQUALS(variances[0], 1.0);
     TS_ASSERT_EQUALS(variances[1], 4.0);
@@ -89,7 +88,6 @@ public:
     auto old_ptr = &sigmas[0];
     VarianceVectorOfTester variances{};
     variances = std::move(sigmas);
-    TS_ASSERT(!sigmas);
     TS_ASSERT_EQUALS(&variances[0], old_ptr);
     TS_ASSERT_EQUALS(variances[0], 1.0);
     TS_ASSERT_EQUALS(variances[1], 4.0);

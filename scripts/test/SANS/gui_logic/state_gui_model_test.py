@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SampleShape, SaveType,
@@ -319,8 +317,8 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.q_1d_rebin_string = b"test"
 
         q_1d_rebin_string = state_gui_model.q_1d_rebin_string
-        self.assertEqual(type(q_1d_rebin_string), str)
-        self.assertEqual(q_1d_rebin_string, "test")
+        self.assertEqual(type(q_1d_rebin_string), bytes)
+        self.assertEqual(q_1d_rebin_string, b"test")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Gravity

@@ -293,7 +293,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
  * @param detID :: Vector of detector numbers
  * @param pos :: V3D of detector positions corresponding to detID
  */
-void SetScalingPSD::getDetPositionsFromRaw(std::string rawfile,
+void SetScalingPSD::getDetPositionsFromRaw(const std::string &rawfile,
                                            std::vector<int> &detID,
                                            std::vector<Kernel::V3D> &pos) {
   (void)rawfile; // Avoid compiler warning

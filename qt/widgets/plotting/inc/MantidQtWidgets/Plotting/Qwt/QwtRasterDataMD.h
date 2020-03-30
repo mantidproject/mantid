@@ -41,7 +41,7 @@ public:
   virtual void setWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
   Mantid::API::IMDWorkspace_const_sptr getWorkspace() const;
 
-  void setOverlayWorkspace(Mantid::API::IMDWorkspace_const_sptr ws);
+  void setOverlayWorkspace(const Mantid::API::IMDWorkspace_const_sptr &ws);
 
   QwtDoubleInterval range() const override;
   void setRange(const QwtDoubleInterval &range);

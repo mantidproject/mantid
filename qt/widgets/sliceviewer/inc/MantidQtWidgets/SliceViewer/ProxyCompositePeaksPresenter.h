@@ -34,11 +34,11 @@ public:
 
   void
   setForegroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                     PeakViewColor /*color*/);
+                     const PeakViewColor & /*color*/);
   /// Change the background representation for the peaks of this workspace
   void
   setBackgroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                     PeakViewColor /*color*/);
+                     const PeakViewColor & /*color*/);
   /// Get the foreground colour corresponding to the workspace
   PeakViewColor getForegroundPeakViewColor(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
@@ -87,8 +87,9 @@ public:
   /// Get optional zoomed peak index.
   int getZoomedPeakIndex() const;
   /// Set the edit mode.
-  void editCommand(EditMode editMode,
-                   boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  void editCommand(
+      EditMode editMode,
+      const boost::weak_ptr<const Mantid::API::IPeaksWorkspace> &target);
   /// Set the peaks size within the current projection
   void setPeakSizeOnProjection(const double fraction);
   /// Set the peaks size into the current projection

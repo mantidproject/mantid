@@ -35,7 +35,7 @@ using SingletonDeleterFn = std::function<void()>;
 
 /// Register the given deleter function to be called
 /// at exit
-MANTID_KERNEL_DLL void deleteOnExit(SingletonDeleterFn func);
+MANTID_KERNEL_DLL void deleteOnExit(const SingletonDeleterFn &func);
 
 /// Manage the lifetime of a class intended to be a singleton
 template <typename T> class SingletonHolder {

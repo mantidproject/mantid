@@ -9,8 +9,6 @@
 @author Spencer Howells, ISIS
 @date December 05, 2013
 '''
-from __future__ import (absolute_import, division, print_function)
-
 import math
 import numpy as np
 

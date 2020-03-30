@@ -208,7 +208,7 @@ void SeqDomainSpectrumCreator::setParametersFromPropertyManager() {
 
 /// Sets the MatrixWorkspace the created domain is based on.
 void SeqDomainSpectrumCreator::setMatrixWorkspace(
-    MatrixWorkspace_sptr matrixWorkspace) {
+    const MatrixWorkspace_sptr &matrixWorkspace) {
   if (!matrixWorkspace) {
     throw std::invalid_argument(
         "InputWorkspace must be a valid MatrixWorkspace.");

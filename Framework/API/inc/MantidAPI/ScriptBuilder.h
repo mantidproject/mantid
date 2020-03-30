@@ -31,7 +31,7 @@ namespace API {
 class MANTID_API_DLL ScriptBuilder {
 public:
   ScriptBuilder(
-      boost::shared_ptr<HistoryView> view,
+      const boost::shared_ptr<HistoryView> &view,
       std::string versionSpecificity = "old", bool appendTimestamp = false,
       std::vector<std::string> ignoreTheseAlgs = {},
       std::vector<std::vector<std::string>> ignoreTheseAlgProperties = {},

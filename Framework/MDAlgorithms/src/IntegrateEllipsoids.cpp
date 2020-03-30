@@ -746,8 +746,8 @@ void IntegrateEllipsoids::calculateE1(
 }
 
 void IntegrateEllipsoids::runMaskDetectors(
-    Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property,
-    std::string values) {
+    const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+    const std::string &property, const std::string &values) {
   IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
   alg->setProperty<Workspace_sptr>("Workspace", peakWS);
   alg->setProperty(property, values);

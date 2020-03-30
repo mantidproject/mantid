@@ -82,7 +82,7 @@ private:
   const std::string m_inputNexusFile{"SaveOpenGenieAsciiInput.nxs"};
 
   std::unique_ptr<SaveOpenGenieAscii>
-  createAlg(MatrixWorkspace_sptr ws, const std::string &tempFilePath) {
+  createAlg(const MatrixWorkspace_sptr &ws, const std::string &tempFilePath) {
     auto alg = std::make_unique<SaveOpenGenieAscii>();
     alg->initialize();
 

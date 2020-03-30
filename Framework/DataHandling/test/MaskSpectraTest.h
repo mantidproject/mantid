@@ -47,7 +47,7 @@ void checkWorkspace(const MatrixWorkspace &ws) {
   TS_ASSERT_EQUALS(ws.e(3)[0], 0.0);
 }
 
-MatrixWorkspace_sptr runMaskSpectra(MatrixWorkspace_sptr inputWS) {
+MatrixWorkspace_sptr runMaskSpectra(const MatrixWorkspace_sptr &inputWS) {
   MaskSpectra alg;
   alg.setChild(true);
   alg.initialize();

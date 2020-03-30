@@ -240,7 +240,7 @@ void CreateTransmissionWorkspaceAuto::exec() {
 
 template <typename T>
 boost::optional<T>
-CreateTransmissionWorkspaceAuto::isSet(std::string propName) const {
+CreateTransmissionWorkspaceAuto::isSet(const std::string &propName) const {
   auto algProperty = this->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     return boost::optional<T>();

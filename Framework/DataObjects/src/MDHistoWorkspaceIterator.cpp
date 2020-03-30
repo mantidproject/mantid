@@ -90,7 +90,7 @@ namespace DataObjects {
  * @param endPos :: end position
  */
 MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(
-    MDHistoWorkspace_const_sptr workspace,
+    const MDHistoWorkspace_const_sptr &workspace,
     Mantid::Geometry::MDImplicitFunction *function, size_t beginPos,
     size_t endPos)
     : m_skippingPolicy(new SkipMaskedBins(this)) {
@@ -123,7 +123,8 @@ MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(
  * @param endPos :: End position
  */
 MDHistoWorkspaceIterator::MDHistoWorkspaceIterator(
-    MDHistoWorkspace_const_sptr workspace, SkippingPolicy *skippingPolicy,
+    const MDHistoWorkspace_const_sptr &workspace,
+    SkippingPolicy *skippingPolicy,
     Mantid::Geometry::MDImplicitFunction *function, size_t beginPos,
     size_t endPos)
     : m_skippingPolicy(skippingPolicy) {

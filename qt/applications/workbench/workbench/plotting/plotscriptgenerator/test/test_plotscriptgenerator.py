@@ -14,7 +14,7 @@ from matplotlib.axes import Axes
 from matplotlib.legend import Legend
 
 from mantid.plots import MantidAxes
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 from mantid.simpleapi import CreateWorkspace
 from workbench.plotting.plotscriptgenerator import generate_script
 

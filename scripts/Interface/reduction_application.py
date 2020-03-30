@@ -8,8 +8,6 @@
 """
     Main window for reduction UIs
 """
-from __future__ import (absolute_import, division, print_function)
-import six
 import sys
 import os
 import traceback
@@ -31,8 +29,7 @@ except ImportError:
     Logger("ReductionGUI").information('Using legacy ui importer')
     from mantidplot import load_ui  # noqa
 
-if six.PY3:
-    unicode = str
+unicode = str
 
 STARTUP_WARNING = ""
 

@@ -284,7 +284,7 @@ std::size_t Sample::size() const { return m_samples.size() + 1; }
  * Adds a sample to the sample collection
  * @param childSample The child sample to be added
  */
-void Sample::addSample(boost::shared_ptr<Sample> childSample) {
+void Sample::addSample(const boost::shared_ptr<Sample> &childSample) {
   m_samples.emplace_back(childSample);
 }
 

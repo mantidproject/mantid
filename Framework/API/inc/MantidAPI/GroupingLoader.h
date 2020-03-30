@@ -33,7 +33,7 @@ public:
   ~Grouping();
 
   /// Construct a Grouping from a table
-  Grouping(ITableWorkspace_sptr table);
+  Grouping(const ITableWorkspace_sptr &table);
 
   /// Convert to grouping table
   ITableWorkspace_sptr toTable() const;

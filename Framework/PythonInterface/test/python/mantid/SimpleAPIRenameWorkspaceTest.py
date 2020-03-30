@@ -7,13 +7,12 @@
 """
     Specifically tests the RenameWorkspace algorithm in the simple API
 """
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import testhelpers
 import platform
 from mantid.api import mtd
 from mantid.simpleapi import CreateSampleWorkspace,RenameWorkspace
+
 
 class SimpleAPIRenameWorkspaceTest(unittest.TestCase):
 

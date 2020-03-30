@@ -269,8 +269,8 @@ boost::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(
  * @param outputWorkspacePropertyName :: The property name
  */
 boost::shared_ptr<API::Workspace> FitMD::createHistoOutputWorkspace(
-    const std::string &baseName, API::IFunction_sptr function,
-    API::IMDHistoWorkspace_const_sptr inputWorkspace,
+    const std::string &baseName, const API::IFunction_sptr &function,
+    const API::IMDHistoWorkspace_const_sptr &inputWorkspace,
     const std::string &outputWorkspacePropertyName) {
   // have to cast const away to be able to pass the workspace to the algorithm
   API::IMDHistoWorkspace_sptr nonConstInputWS =

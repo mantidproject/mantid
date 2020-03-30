@@ -91,7 +91,7 @@ const std::string SampleLogsBehaviour::SUM_DOC =
  * @param parName the parameter names which specify the sample log sames to
  * merge given be the IPF
  */
-SampleLogsBehaviour::SampleLogsBehaviour(MatrixWorkspace_sptr ws,
+SampleLogsBehaviour::SampleLogsBehaviour(const MatrixWorkspace_sptr &ws,
                                          Logger &logger,
                                          const SampleLogNames &logEntries,
                                          const ParameterName &parName)
@@ -416,8 +416,8 @@ bool SampleLogsBehaviour::setNumericValue(const std::string &item,
  * @param addeeWS the workspace being merged
  * @param outWS the workspace the others are merged into
  */
-void SampleLogsBehaviour::mergeSampleLogs(MatrixWorkspace_sptr addeeWS,
-                                          MatrixWorkspace_sptr outWS) {
+void SampleLogsBehaviour::mergeSampleLogs(const MatrixWorkspace_sptr &addeeWS,
+                                          const MatrixWorkspace_sptr &outWS) {
   for (const auto &item : m_logMap) {
     const std::string &logName = item.first.first;
 
@@ -625,7 +625,8 @@ bool SampleLogsBehaviour::stringPropertiesMatch(
  *
  * @param outWS the merged workspace
  */
-void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace_sptr outWS) {
+void SampleLogsBehaviour::setUpdatedSampleLogs(
+    const MatrixWorkspace_sptr &outWS) {
   for (auto &item : m_logMap) {
     std::string propertyToReset = item.first.first;
 
@@ -647,7 +648,7 @@ void SampleLogsBehaviour::setUpdatedSampleLogs(MatrixWorkspace_sptr outWS) {
  * @param addeeWS the workspace being merged
  */
 void SampleLogsBehaviour::removeSampleLogsFromWorkspace(
-    MatrixWorkspace_sptr addeeWS) {
+    const MatrixWorkspace_sptr &addeeWS) {
   for (const auto &prop : m_addeeLogMap) {
     const auto &propName = prop->name();
     addeeWS->mutableRun().removeProperty(propName);
@@ -663,7 +664,7 @@ void SampleLogsBehaviour::removeSampleLogsFromWorkspace(
  * @param addeeWS the workspace being merged
  */
 void SampleLogsBehaviour::readdSampleLogToWorkspace(
-    MatrixWorkspace_sptr addeeWS) {
+    const MatrixWorkspace_sptr &addeeWS) {
   for (const auto &item : m_addeeLogMap) {
     auto property = std::unique_ptr<Kernel::Property>(item->clone());
     addeeWS->mutableRun().addProperty(std::move(property));
@@ -676,7 +677,7 @@ void SampleLogsBehaviour::readdSampleLogToWorkspace(
  *
  * @param ws the merged workspace to reset the sample logs for
  */
-void SampleLogsBehaviour::resetSampleLogs(MatrixWorkspace_sptr ws) {
+void SampleLogsBehaviour::resetSampleLogs(const MatrixWorkspace_sptr &ws) {
   for (auto const &item : m_logMap) {
     std::string const &propertyToReset = item.first.first;
 

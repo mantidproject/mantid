@@ -24,7 +24,7 @@ using namespace MantidQt::MantidWidgets;
  * @param activePythonInterfaces The list of active Python interfaces
  */
 ProjectSaveModel::ProjectSaveModel(
-    std::vector<IProjectSerialisable *> windows,
+    const std::vector<IProjectSerialisable *> &windows,
     std::vector<std::string> activePythonInterfaces)
     : m_activePythonInterfaces(std::move(activePythonInterfaces)) {
   auto workspaces = getWorkspaces();
@@ -204,8 +204,8 @@ std::vector<Workspace_sptr> ProjectSaveModel::getWorkspaces() const {
   return ads.getObjects();
 }
 
-WorkspaceInfo
-ProjectSaveModel::makeWorkspaceInfoObject(Workspace_const_sptr ws) const {
+WorkspaceInfo ProjectSaveModel::makeWorkspaceInfoObject(
+    const Workspace_const_sptr &ws) const {
   WorkspaceIcons icons;
   WorkspaceInfo info;
   info.name = ws->getName();

@@ -22,7 +22,8 @@ class MantidTreeWidget;
 class EXPORT_OPT_MANTIDQT_COMMON MantidTreeWidgetItem : public QTreeWidgetItem {
 public:
   explicit MantidTreeWidgetItem(MantidTreeWidget * /*parent*/);
-  MantidTreeWidgetItem(QStringList /*list*/, MantidTreeWidget * /*parent*/);
+  MantidTreeWidgetItem(const QStringList & /*list*/,
+                       MantidTreeWidget * /*parent*/);
   void disableIfNode(bool);
   void setSortPos(int o) { m_sortPos = o; }
   int getSortPos() const { return m_sortPos; }

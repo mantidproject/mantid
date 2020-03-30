@@ -21,6 +21,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
 #include <boost/shared_ptr.hpp>
+#include <utility>
 
 using namespace Mantid::API;
 
@@ -168,7 +169,8 @@ void SaveNexusProcessed::init() {
  * @param matrixWorkspace :: pointer to a MatrixWorkspace
  */
 void SaveNexusProcessed::getWSIndexList(
-    std::vector<int> &indices, MatrixWorkspace_const_sptr matrixWorkspace) {
+    std::vector<int> &indices,
+    const MatrixWorkspace_const_sptr &matrixWorkspace) {
   const std::vector<int> spec_list = getProperty("WorkspaceIndexList");
   int spec_min = getProperty("WorkspaceIndexMin");
   int spec_max = getProperty("WorkspaceIndexMax");
@@ -217,7 +219,7 @@ void SaveNexusProcessed::getWSIndexList(
 }
 
 void SaveNexusProcessed::doExec(
-    Workspace_sptr inputWorkspace,
+    const Workspace_sptr &inputWorkspace,
     boost::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
     const bool keepFile, optional_size_t entryNumber) {
   // TODO: Remove?
@@ -291,7 +293,8 @@ void SaveNexusProcessed::doExec(
   const bool append_to_file = getProperty("Append");
 
   nexusFile->resetProgress(&prog_init);
-  nexusFile->openNexusWrite(filename, entryNumber, append_to_file || keepFile);
+  nexusFile->openNexusWrite(filename, std::move(entryNumber),
+                            append_to_file || keepFile);
 
   // Equivalent C++ API handle
   ::NeXus::File cppFile(nexusFile->fileID);

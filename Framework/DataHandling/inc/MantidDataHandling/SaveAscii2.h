@@ -71,7 +71,7 @@ private:
   void init() override;
   /// Overwrites Algorithm method
   void exec() override;
-  void writeTableWorkspace(API::ITableWorkspace_const_sptr tws,
+  void writeTableWorkspace(const API::ITableWorkspace_const_sptr &tws,
                            const std::string &filename, bool appendToFile,
                            bool writeHeader, int prec, bool scientific,
                            const std::string &comment);

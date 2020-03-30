@@ -33,7 +33,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtRunsView
       public IRunsView {
   Q_OBJECT
 public:
-  QtRunsView(QWidget *parent, RunsTableViewFactory makeView);
+  QtRunsView(QWidget *parent, const RunsTableViewFactory &makeView);
 
   void subscribe(RunsViewSubscriber *notifyee) override;
   void subscribeTimer(RunsViewTimerSubscriber *notifyee) override;

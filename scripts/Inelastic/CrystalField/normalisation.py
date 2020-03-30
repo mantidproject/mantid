@@ -4,12 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from CrystalField.energies import energies as CFEnergy
 from CrystalField.fitting import ionname2Nre
-from six import iteritems
-from six import string_types
 
 
 def _get_normalisation(nre, bnames):
@@ -177,10 +174,10 @@ def split2range(*args, **kwargs):
         argin[argnames[ia]] = args[ia]
     # Further arguments beyond the first 3 are treated as crystal field parameter names
     for ia in range(3, len(args)):
-        if isinstance(args[ia], string_types) and args[ia].startswith('B'):
+        if isinstance(args[ia], str) and args[ia].startswith('B'):
             argin['Parameters'].append(args[ia])
     # Parses the keyword arguments
-    for key, value in iteritems(kwargs):
+    for key, value in kwargs.items():
         for ia in range(len(argnames)):
             if key == argnames[ia]:
                 argin[key] = value

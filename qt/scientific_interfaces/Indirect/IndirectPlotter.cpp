@@ -18,6 +18,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
+#include <utility>
 
 using namespace MantidQt::Widgets::MplCpp;
 #endif
@@ -178,8 +179,8 @@ workbenchPlot(QStringList const &workspaceNames,
     plotKwargs["capsize"] = ERROR_CAPSIZE;
 
   using MantidQt::Widgets::MplCpp::plot;
-  return plot(workspaceNames, boost::none, indices, figure, plotKwargs,
-              boost::none, boost::none, errorBars);
+  return plot(workspaceNames, boost::none, indices, std::move(figure),
+              plotKwargs, boost::none, boost::none, errorBars);
 }
 #endif
 
@@ -360,7 +361,7 @@ bool IndirectPlotter::validate(
  * @return True if the data is valid
  */
 bool IndirectPlotter::validate(
-    MatrixWorkspace_const_sptr workspace,
+    const MatrixWorkspace_const_sptr &workspace,
     boost::optional<std::string> const &workspaceIndices,
     boost::optional<MantidAxis> const &axisType) const {
   if (workspaceIndices && axisType && axisType.get() == MantidAxis::Spectrum)
@@ -379,7 +380,7 @@ bool IndirectPlotter::validate(
  * @return True if the indices exist
  */
 bool IndirectPlotter::validateSpectra(
-    MatrixWorkspace_const_sptr workspace,
+    const MatrixWorkspace_const_sptr &workspace,
     std::string const &workspaceIndices) const {
   auto const numberOfHistograms = workspace->getNumberHistograms();
   auto const lastIndex =
@@ -395,7 +396,7 @@ bool IndirectPlotter::validateSpectra(
  * '0-2,5,7-10')
  * @return True if the bin indices exist
  */
-bool IndirectPlotter::validateBins(MatrixWorkspace_const_sptr workspace,
+bool IndirectPlotter::validateBins(const MatrixWorkspace_const_sptr &workspace,
                                    std::string const &binIndices) const {
   auto const numberOfBins = workspace->y(0).size();
   auto const lastIndex = std::stoul(splitStringBy(binIndices, ",-").back());

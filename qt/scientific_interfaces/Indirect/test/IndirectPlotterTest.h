@@ -28,7 +28,8 @@ namespace {
 std::string const WORKSPACE_NAME = "WorkspaceName";
 std::string const WORKSPACE_INDICES = "0-2,4";
 
-MatrixWorkspace_sptr convertWorkspace2DToMatrix(Workspace2D_sptr workspace) {
+MatrixWorkspace_sptr
+convertWorkspace2DToMatrix(const Workspace2D_sptr &workspace) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 

@@ -44,9 +44,9 @@ private:
 
   std::map<std::string, std::string> validateInputs() override;
 
-  WorkspaceGroup_sptr createGroupWorkspace(WorkspaceGroup_sptr inputWS);
+  WorkspaceGroup_sptr createGroupWorkspace(const WorkspaceGroup_sptr &inputWS);
 
-  void addGroupingAsymmetrySampleLogs(MatrixWorkspace_sptr workspace);
+  void addGroupingAsymmetrySampleLogs(const MatrixWorkspace_sptr &workspace);
 };
 
 } // namespace Muon

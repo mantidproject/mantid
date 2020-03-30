@@ -24,7 +24,7 @@ std::vector<std::string> getTextAxisLabels() {
 std::vector<double> getNumericAxisLabels() { return {2.2, 3.3, 4.4}; }
 
 void storeWorkspaceInADS(std::string const &workspaceName,
-                         MatrixWorkspace_sptr workspace) {
+                         const MatrixWorkspace_sptr &workspace) {
   SetUpADSWithWorkspace ads(workspaceName, workspace);
 }
 

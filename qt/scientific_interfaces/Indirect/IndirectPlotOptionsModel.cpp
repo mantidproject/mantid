@@ -86,7 +86,7 @@ void insertWorkspaceNames(std::vector<std::string> &allNames,
 }
 
 boost::optional<std::string>
-checkWorkspaceSpectrumSize(MatrixWorkspace_const_sptr workspace) {
+checkWorkspaceSpectrumSize(const MatrixWorkspace_const_sptr &workspace) {
   if (workspace->y(0).size() < 2)
     return "Plot Spectra failed: There is only one data point to plot in " +
            workspace->getName() + ".";
@@ -94,7 +94,7 @@ checkWorkspaceSpectrumSize(MatrixWorkspace_const_sptr workspace) {
 }
 
 boost::optional<std::string>
-checkWorkspaceBinSize(MatrixWorkspace_const_sptr workspace) {
+checkWorkspaceBinSize(const MatrixWorkspace_const_sptr &workspace) {
   if (workspace->getNumberHistograms() < 2)
     return "Plot Bins failed: There is only one data point to plot in " +
            workspace->getName() + ".";
@@ -208,14 +208,14 @@ bool IndirectPlotOptionsModel::validateIndices(
 }
 
 bool IndirectPlotOptionsModel::validateSpectra(
-    MatrixWorkspace_sptr workspace, std::string const &spectra) const {
+    const MatrixWorkspace_sptr &workspace, std::string const &spectra) const {
   auto const numberOfHistograms = workspace->getNumberHistograms();
   auto const lastIndex = std::stoul(splitStringBy(spectra, ",-").back());
   return lastIndex < numberOfHistograms;
 }
 
-bool IndirectPlotOptionsModel::validateBins(MatrixWorkspace_sptr workspace,
-                                            std::string const &bins) const {
+bool IndirectPlotOptionsModel::validateBins(
+    const MatrixWorkspace_sptr &workspace, std::string const &bins) const {
   auto const numberOfBins = workspace->y(0).size();
   auto const lastIndex = std::stoul(splitStringBy(bins, ",-").back());
   return lastIndex < numberOfBins;

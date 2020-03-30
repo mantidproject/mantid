@@ -67,7 +67,7 @@ public:
     file.remove();
   }
 
-  void createFaultFile(std::string prmfilename) {
+  void createFaultFile(const std::string &prmfilename) {
     ofstream ofile;
     ofile.open(prmfilename.c_str(), ios::out);
     ofile << "            "

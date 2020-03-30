@@ -4,9 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from re import findall
-from six import iteritems
 from mantid import AnalysisDataService
 
 
@@ -74,13 +72,13 @@ class FrequencyContext(object):
     def get_frequency_workspace_names(self, run_list, group, pair, phasequad, frequency_type):
         # do MaxEnt first as it only has run number
         names = []
-        for name, maxEnt in iteritems(self._maxEnt_freq):
+        for name, maxEnt in self._maxEnt_freq.items():
             for runs in run_list:
                 for run in runs:
                     if int(run) == int(maxEnt.run):
                         names.append(name)
         # do FFT
-        for name, fft in iteritems(self._FFT_freq):
+        for name, fft in self._FFT_freq.items():
             for runs in run_list:
                 for run in runs:
                     # check Re part

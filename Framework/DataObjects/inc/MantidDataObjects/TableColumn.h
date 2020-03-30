@@ -556,7 +556,7 @@ public:
   /** Constructor
       @param c :: Shared pointer to a column
     */
-  TableColumn_ptr(boost::shared_ptr<API::Column> c)
+  TableColumn_ptr(const boost::shared_ptr<API::Column> &c)
       : TableColumn_ptr<API::Boolean>(c) {
     if (!this->get()) {
       std::string str = "Data type of column " + c->name() +

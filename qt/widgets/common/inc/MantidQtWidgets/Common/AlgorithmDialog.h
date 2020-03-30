@@ -141,7 +141,7 @@ protected:
 
   /// Set properties on this algorithm by pulling values from the tied widgets
   bool setPropertyValues(const QStringList &skipList = QStringList());
-  bool setPropertyValue(const QString pName, bool validateOthers);
+  bool setPropertyValue(const QString &pName, bool validateOthers);
 
   void showValidators();
   //@}
@@ -255,7 +255,7 @@ protected:
   /// GenericDialogDemo.cpp
 public:
   /// Set the algorithm associated with this dialog
-  void setAlgorithm(Mantid::API::IAlgorithm_sptr /*alg*/);
+  void setAlgorithm(const Mantid::API::IAlgorithm_sptr & /*alg*/);
   /// Set a list of suggested values
   void setPresetValues(const QHash<QString, QString> &presetValues);
   /// Set whether this is intended for use from a script or not

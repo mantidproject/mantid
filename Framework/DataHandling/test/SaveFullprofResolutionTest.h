@@ -184,7 +184,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Find out number of lines in a text file
    */
-  int getFileLines(std::string filename) {
+  int getFileLines(const std::string &filename) {
     ifstream infile;
     infile.open(filename.c_str());
 
@@ -206,7 +206,7 @@ public:
   /** Write out a TableWorkspace contain 2 banks' parameters
    * ISIS HRPD Data
    */
-  void create2BankProf9Table(string workspacename) {
+  void create2BankProf9Table(const string &workspacename) {
     TableWorkspace_sptr partablews = boost::make_shared<TableWorkspace>();
     partablews->addColumn("str", "Name");
     partablews->addColumn("double", "Value_1");
@@ -261,7 +261,7 @@ public:
    * 10
    * Source data is from POWGEN's bank 1 calibrated
    */
-  void createProfile10TableWS(std::string wsname) {
+  void createProfile10TableWS(const std::string &wsname) {
     // Create a map of string/double for parameters of profile 10
     std::map<std::string, double> parammap{
         {"BANK", 1.},        {"Alph0", 1.88187},  {"Alph0t", 64.4102},

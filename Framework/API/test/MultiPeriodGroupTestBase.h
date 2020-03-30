@@ -28,7 +28,7 @@ class MultiPeriodGroupTestBase {
 protected:
   // Helper method to add multiperiod logs to make a workspacegroup look like a
   // real multiperiod workspace group.
-  void add_periods_logs(WorkspaceGroup_sptr ws) {
+  void add_periods_logs(const WorkspaceGroup_sptr &ws) {
     int nperiods = static_cast<int>(ws->size());
     for (size_t i = 0; i < ws->size(); ++i) {
       MatrixWorkspace_sptr currentWS =
@@ -45,7 +45,7 @@ protected:
   /// Helper to fabricate a workspace group consisting of equal sized
   /// matrixworkspaces.
   WorkspaceGroup_sptr
-  create_good_multiperiod_workspace_group(const std::string name) {
+  create_good_multiperiod_workspace_group(const std::string &name) {
     MatrixWorkspace_sptr a = MatrixWorkspace_sptr(new WorkspaceTester);
     MatrixWorkspace_sptr b = MatrixWorkspace_sptr(new WorkspaceTester);
 

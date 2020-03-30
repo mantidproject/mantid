@@ -190,7 +190,7 @@ public:
   /** Parse a row in output parameter tableworkspace to a string/double
    * parameter name/value map
    */
-  void getParameterMap(TableWorkspace_sptr tablews, size_t rowindex,
+  void getParameterMap(const TableWorkspace_sptr &tablews, size_t rowindex,
                        map<string, double> &parammap) {
     parammap.clear();
 

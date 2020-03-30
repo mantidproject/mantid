@@ -32,8 +32,8 @@ DECLARE_WORKSPACE(SpecialWorkspace2D)
  * @param includeMonitors :: If false the monitors are not included
  * @return created SpecialWorkspace2D
  */
-SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
-                                       const bool includeMonitors) {
+SpecialWorkspace2D::SpecialWorkspace2D(
+    const Geometry::Instrument_const_sptr &inst, const bool includeMonitors) {
   // Init the Workspace2D with one spectrum per detector, in the same order.
   this->initialize(inst->getNumberDetectors(!includeMonitors), 1, 1);
 
@@ -59,7 +59,8 @@ SpecialWorkspace2D::SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
  * @param parent :: input workspace that is the base for this workspace
  * @return created SpecialWorkspace2D
  */
-SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent) {
+SpecialWorkspace2D::SpecialWorkspace2D(
+    const API::MatrixWorkspace_const_sptr &parent) {
   this->initialize(parent->getNumberHistograms(), 1, 1);
   API::WorkspaceFactory::Instance().initializeFromParent(*parent, *this, false);
   // Make the mapping, which will be used for speed later.
@@ -263,7 +264,7 @@ void SpecialWorkspace2D::binaryOperation(const unsigned int operatortype) {
  *
  */
 void SpecialWorkspace2D::binaryAND(
-    boost::shared_ptr<const SpecialWorkspace2D> ws) {
+    const boost::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
     double y1 = this->dataY(i)[0];
@@ -281,7 +282,7 @@ void SpecialWorkspace2D::binaryAND(
  *
  */
 void SpecialWorkspace2D::binaryOR(
-    boost::shared_ptr<const SpecialWorkspace2D> ws) {
+    const boost::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
     double y1 = this->dataY(i)[0];
@@ -307,7 +308,7 @@ if (y1 < 1.0E-10 && y2 < 1.0E-10){
  *
  */
 void SpecialWorkspace2D::binaryXOR(
-    boost::shared_ptr<const SpecialWorkspace2D> ws) {
+    const boost::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   for (size_t i = 0; i < this->getNumberHistograms(); i++) {
     double y1 = this->dataY(i)[0];
@@ -343,7 +344,7 @@ void SpecialWorkspace2D::binaryNOT() {
  * @ return
  */
 bool SpecialWorkspace2D::isCompatible(
-    boost::shared_ptr<const SpecialWorkspace2D> ws) {
+    const boost::shared_ptr<const SpecialWorkspace2D> &ws) {
 
   // 1. Check number of histogram
   size_t numhist1 = this->getNumberHistograms();

@@ -7,14 +7,12 @@
 #    This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division)
-
 import unittest
 
 import matplotlib as mpl
 mpl.use('Agg')  # noqa
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace,
                               GroupWorkspaces)
 from mantidqt.utils.qt.testing import start_qapplication

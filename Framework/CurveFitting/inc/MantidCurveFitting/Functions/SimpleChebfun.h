@@ -25,7 +25,7 @@ public:
   /// Constructor.
   SimpleChebfun(size_t n, const API::IFunction &fun, double start, double end);
   /// Constructor.
-  SimpleChebfun(ChebfunFunctionType fun, double start, double end,
+  SimpleChebfun(const ChebfunFunctionType &fun, double start, double end,
                 double accuracy = 0.0, size_t badSize = 10);
   /// Constructor.
   SimpleChebfun(const API::IFunction &fun, double start, double end,
@@ -67,11 +67,11 @@ public:
   /// Integrate the function on its interval
   double integrate() const;
   /// Add a C++ function to the function
-  SimpleChebfun &operator+=(ChebfunFunctionType fun);
+  SimpleChebfun &operator+=(const ChebfunFunctionType &fun);
 
 private:
   /// Constructor
-  SimpleChebfun(ChebfunBase_sptr base);
+  SimpleChebfun(const ChebfunBase_sptr &base);
   /// Underlying base that does actual job.
   ChebfunBase_sptr m_base;
   /// Function values at the chebfun x-points.

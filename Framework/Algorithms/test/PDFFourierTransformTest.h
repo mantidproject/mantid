@@ -32,7 +32,7 @@ namespace {
  */
 Mantid::API::MatrixWorkspace_sptr createWS(size_t n, double dx,
                                            const std::string &name,
-                                           const std::string unitlabel,
+                                           const std::string &unitlabel,
                                            const bool withBadValues = false) {
 
   Mantid::API::FrameworkManager::Instance();

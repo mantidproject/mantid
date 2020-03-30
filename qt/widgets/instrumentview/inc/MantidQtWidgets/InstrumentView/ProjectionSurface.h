@@ -235,7 +235,8 @@ public:
   /// Save masks to a table workspace
   void saveShapesToTableWorkspace();
   /// Load masks from a table workspace
-  void loadShapesFromTableWorkspace(Mantid::API::ITableWorkspace_const_sptr ws);
+  void loadShapesFromTableWorkspace(
+      const Mantid::API::ITableWorkspace_const_sptr &ws);
 
   //-----------------------------------
   //    Peaks overlay methods
@@ -244,7 +245,8 @@ public:
   QList<PeakMarker2D *> getMarkersWithID(int detID) const;
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> getEditPeaksWorkspace() const;
   QStringList getPeaksWorkspaceNames() const;
-  void deletePeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
+  void deletePeaksWorkspace(
+      const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &ws);
   void clearPeakOverlays();
   void clearAlignmentPlane();
   void clearComparisonPeaks();

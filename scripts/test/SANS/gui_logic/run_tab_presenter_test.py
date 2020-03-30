@@ -4,13 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from mantid.kernel import PropertyManagerDataService
 from mantid.kernel import config
-from mantid.py3compat import mock
+from unittest import mock
 from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.common.enums import SANSInstrument
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ReductionMode,

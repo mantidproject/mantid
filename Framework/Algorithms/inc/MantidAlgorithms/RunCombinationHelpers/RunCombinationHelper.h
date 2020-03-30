@@ -30,9 +30,9 @@ static const std::string FAIL_BEHAVIOUR = "Fail";
 
 class MANTID_ALGORITHMS_DLL RunCombinationHelper {
 public:
-  std::string checkCompatibility(API::MatrixWorkspace_sptr,
+  std::string checkCompatibility(const API::MatrixWorkspace_sptr &,
                                  bool checkNumberHistograms = false);
-  void setReferenceProperties(API::MatrixWorkspace_sptr);
+  void setReferenceProperties(const API::MatrixWorkspace_sptr &);
   static std::vector<std::string>
   unWrapGroups(const std::vector<std::string> &);
   std::list<API::MatrixWorkspace_sptr>

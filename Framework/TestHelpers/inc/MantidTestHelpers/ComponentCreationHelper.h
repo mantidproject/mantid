@@ -200,7 +200,7 @@ Mantid::Geometry::Instrument_sptr createTestInstrumentCylindrical(
 
 void addRectangularBank(Mantid::Geometry::Instrument &testInstrument,
                         int idStart, int pixels, double pixelSpacing,
-                        std::string bankName,
+                        const std::string &bankName,
                         const Mantid::Kernel::V3D &bankPos,
                         const Mantid::Kernel::Quat &bankRot);
 

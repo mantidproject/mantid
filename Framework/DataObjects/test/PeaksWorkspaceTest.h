@@ -140,9 +140,6 @@ public:
   }
 
   void test_Save_Unmodified_PeaksWorkspace_Nexus() {
-
-    const std::string filename =
-        "test_Save_Unmodified_PeaksWorkspace_Nexus.nxs";
     auto testPWS = createSaveTestPeaksWorkspace();
     NexusTestHelper nexusHelper(true);
     nexusHelper.createFile("testSavePeaksWorkspace.nxs");

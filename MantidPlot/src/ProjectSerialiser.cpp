@@ -220,7 +220,7 @@ bool ProjectSerialiser::save(const QString &projectName, bool compress,
  * 		folder. (Default True)
  * @return True is loading was successful, otherwise false
  */
-bool ProjectSerialiser::load(std::string filepath, const int fileVersion,
+bool ProjectSerialiser::load(const std::string &filepath, const int fileVersion,
                              const bool isTopLevel) {
   // We have to accept std::string to maintain Python compatibility
   auto qfilePath = QString::fromStdString(filepath);

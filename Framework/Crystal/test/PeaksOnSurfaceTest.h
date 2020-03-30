@@ -27,7 +27,7 @@ private:
 Helper function. Creates a peaksworkspace with a single peak
 */
   PeaksWorkspace_sptr
-  createPeaksWorkspace(const std::string coordFrame,
+  createPeaksWorkspace(const std::string &coordFrame,
                        const Mantid::Kernel::V3D &peakPosition) {
     PeaksWorkspace_sptr ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
     auto detectorIds = ws->getInstrument()->getDetectorIDs();

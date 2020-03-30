@@ -22,17 +22,18 @@ namespace Functions {
 
 class RemovePeaks {
 public:
-  void setup(DataObjects::TableWorkspace_sptr peaktablews);
+  void setup(const DataObjects::TableWorkspace_sptr &peaktablews);
 
   DataObjects::Workspace2D_sptr
-  removePeaks(API::MatrixWorkspace_const_sptr dataws, int wsindex,
+  removePeaks(const API::MatrixWorkspace_const_sptr &dataws, int wsindex,
               double numfwhm);
 
 private:
   /// Parse peak centre and FWHM from a table workspace
-  void parsePeakTableWorkspace(DataObjects::TableWorkspace_sptr peaktablews,
-                               std::vector<double> &vec_peakcentre,
-                               std::vector<double> &vec_peakfwhm);
+  void
+  parsePeakTableWorkspace(const DataObjects::TableWorkspace_sptr &peaktablews,
+                          std::vector<double> &vec_peakcentre,
+                          std::vector<double> &vec_peakfwhm);
 
   /// Exclude peak regions
   size_t excludePeaks(std::vector<double> v_inX, std::vector<bool> &v_useX,
@@ -83,15 +84,15 @@ private:
 
   /// Select background points automatically
   DataObjects::Workspace2D_sptr
-  autoBackgroundSelection(DataObjects::Workspace2D_sptr bkgdWS);
+  autoBackgroundSelection(const DataObjects::Workspace2D_sptr &bkgdWS);
 
   /// Create a background function from input properties
   BackgroundFunction_sptr
-  createBackgroundFunction(const std::string backgroundtype);
+  createBackgroundFunction(const std::string &backgroundtype);
 
   /// Filter non-background data points out and create a background workspace
   DataObjects::Workspace2D_sptr
-  filterForBackground(BackgroundFunction_sptr bkgdfunction);
+  filterForBackground(const BackgroundFunction_sptr &bkgdfunction);
 
   DataObjects::Workspace2D_const_sptr m_dataWS;
   DataObjects::Workspace2D_sptr m_outputWS;
@@ -119,7 +120,7 @@ private:
   /// Add a certain region from a reference workspace
   void addRegion();
 
-  void fitBackgroundFunction(std::string bkgdfunctiontype);
+  void fitBackgroundFunction(const std::string &bkgdfunctiontype);
 };
 
 } // namespace Functions

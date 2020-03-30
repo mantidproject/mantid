@@ -36,8 +36,8 @@ namespace {
 // Set algorithm properties to sensible defaults (assuming data with 10 groups)
 // Use when specifying groups manually
 void setPairAlgorithmProperties(ApplyMuonDetectorGroupPairing &alg,
-                                std::string inputWSName,
-                                std::string wsGroupName) {
+                                const std::string &inputWSName,
+                                const std::string &wsGroupName) {
   alg.setProperty("SpecifyGroupsManually", true);
   alg.setProperty("PairName", "test");
   alg.setProperty("Alpha", 1.0);
@@ -58,8 +58,8 @@ void setPairAlgorithmProperties(ApplyMuonDetectorGroupPairing &alg,
 // Set algorithm properties to sensible defaults (assuming data with 10 groups)
 // Use when entering workspaces to pair
 void setPairAlgorithmPropertiesForInputWorkspace(
-    ApplyMuonDetectorGroupPairing &alg, std::string inputWSName,
-    std::string wsGroupName) {
+    ApplyMuonDetectorGroupPairing &alg, const std::string &inputWSName,
+    const std::string &wsGroupName) {
   alg.setProperty("SpecifyGroupsManually", false);
   alg.setProperty("PairName", "test");
   alg.setProperty("Alpha", 1.0);
@@ -72,7 +72,7 @@ void setPairAlgorithmPropertiesForInputWorkspace(
 // algorithm (a MatrixWorkspace and an empty group).
 class setUpADSWithWorkspace {
 public:
-  setUpADSWithWorkspace(Workspace_sptr ws) {
+  setUpADSWithWorkspace(const Workspace_sptr &ws) {
     AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
     wsGroup = boost::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().addOrReplace(groupWSName, wsGroup);

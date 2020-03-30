@@ -9,9 +9,8 @@
 """
 Defines interaction behaviour for plotting.
 """
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
+import numpy as np
 from collections import OrderedDict
 from copy import copy
 from functools import partial
@@ -26,7 +25,6 @@ from matplotlib.collections import Collection
 from mantid.api import AnalysisDataService as ads
 from mantid.plots import datafunctions, MantidAxes
 from mantid.plots.utility import zoom, MantidAxType
-from mantid.py3compat import iteritems
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties
@@ -308,7 +306,7 @@ class FigureInteraction(object):
         axes_menu = QMenu("Axes", menu)
         axes_actions = QActionGroup(axes_menu)
         current_scale_types = (ax.get_xscale(), ax.get_yscale())
-        for label, scale_types in iteritems(AXES_SCALE_MENU_OPTS):
+        for label, scale_types in AXES_SCALE_MENU_OPTS.items():
             action = axes_menu.addAction(label, partial(self._quick_change_axes, scale_types, ax))
             if current_scale_types == scale_types:
                 action.setCheckable(True)
@@ -346,7 +344,7 @@ class FigureInteraction(object):
         axes_menu = QMenu("Color bar", menu)
         axes_actions = QActionGroup(axes_menu)
         images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
-        for label, scale_type in iteritems(COLORBAR_SCALE_MENU_OPTS):
+        for label, scale_type in COLORBAR_SCALE_MENU_OPTS.items():
             action = axes_menu.addAction(label, partial(self._change_colorbar_axes, scale_type))
             if type(images[0].norm) == scale_type:
                 action.setCheckable(True)
@@ -703,6 +701,12 @@ class FigureInteraction(object):
                         ws_artist.replace_data(workspace, arg_set_copy)
         if ax.lines:  # Relim causes issues with colour plots, which have no lines.
             ax.relim()
+
+        if ax.images:  # Colour bar limits are wrong if workspace is ragged. Set them manually.
+            colorbar_min = np.nanmin(ax.images[-1].get_array())
+            colorbar_max = np.nanmax(ax.images[-1].get_array())
+            for image in ax.images:
+                image.set_clim(colorbar_min, colorbar_max)
 
         ax.autoscale()
 

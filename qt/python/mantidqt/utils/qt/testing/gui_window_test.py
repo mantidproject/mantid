@@ -7,7 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import print_function
 import inspect
 import platform
 import sys

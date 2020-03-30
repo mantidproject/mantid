@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MaxEnt/MaxentTransformFourier.h"
 #include <boost/shared_array.hpp>
+#include <utility>
+
 #include <gsl/gsl_fft_complex.h>
 
 namespace Mantid {
@@ -14,7 +16,7 @@ namespace Algorithms {
 /** Constructor */
 MaxentTransformFourier::MaxentTransformFourier(MaxentSpace_sptr dataSpace,
                                                MaxentSpace_sptr imageSpace)
-    : m_dataSpace(dataSpace), m_imageSpace(imageSpace) {}
+    : m_dataSpace(std::move(dataSpace)), m_imageSpace(std::move(imageSpace)) {}
 
 /**
  * Transforms a 1D signal from image space to data space, performing an

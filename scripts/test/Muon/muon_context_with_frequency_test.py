@@ -8,7 +8,7 @@ import unittest
 from mantidqt.utils.qt.testing import start_qapplication
 
 from mantid.api import AnalysisDataService, FileFinder
-from mantid.py3compat import mock
+from unittest import mock
 from mantid import ConfigService
 from mantid.dataobjects import Workspace2D
 from mantid.simpleapi import CreateWorkspace

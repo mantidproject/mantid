@@ -7,15 +7,12 @@
 
 #
 #  This file is part of the mantidqt package
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
 import sys
 import traceback
 import unittest
 
 # third-party imports
-import six
 
 # local imports
 from mantidqt.widgets.codeeditor.errorformatter import ErrorFormatter
@@ -70,24 +67,6 @@ foo()
         ]
         for produced, expected in zip(error_lines, expected_lines):
             self.assertRegexpMatches(produced, expected)
-
-    def test_errors_containing_unicode_produce_expected_value_in_python2(self):
-        if not six.PY2:
-            # everything is already unicode in python > 2
-            return
-        try:
-            exec("é =")
-        except SyntaxError:
-            exc_type, exc_value = sys.exc_info()[:2]
-            formatter = ErrorFormatter()
-            error = formatter.format(exc_type, exc_value, None)
-
-        expected = """  File "<string>", line 1
-    é =
-    ^
-SyntaxError: invalid syntax
-"""
-        self.assertEqual(expected, error)
 
 
 if __name__ == "__main__":

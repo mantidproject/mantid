@@ -330,8 +330,8 @@ private:
   }
 
   /// Compare workspaces
-  bool workspacesEqual(const MatrixWorkspace_sptr lhs,
-                       const MatrixWorkspace_sptr rhs, double tolerance,
+  bool workspacesEqual(const MatrixWorkspace_sptr &lhs,
+                       const MatrixWorkspace_sptr &rhs, double tolerance,
                        bool relativeError = false) {
     auto alg = Mantid::API::AlgorithmFactory::Instance().create(
         "CompareWorkspaces", 1);

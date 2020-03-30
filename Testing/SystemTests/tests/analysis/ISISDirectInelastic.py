@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 from mantid.simpleapi import *
 from mantid.api import Workspace
@@ -14,11 +13,10 @@ import shutil
 
 from abc import ABCMeta, abstractmethod
 from Direct.PropertyManager  import PropertyManager
-from six import with_metaclass
-
-
 #----------------------------------------------------------------------
-class ISISDirectInelasticReduction(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+
+
+class ISISDirectInelasticReduction(metaclass=ABCMeta):
     """A base class for the ISIS direct inelastic tests
 
     The workflow is defined in the runTest() method, simply

@@ -32,7 +32,7 @@ private:
 public:
   explicit WorkspaceIsNotOfType(const std::string &type)
       : m_type(type), m_isMatrixWorkspace(type == "MatrixWorkspace") {}
-  bool operator()(Mantid::API::Workspace_sptr ws) const {
+  bool operator()(const Mantid::API::Workspace_sptr &ws) const {
     if (m_type.empty())
       return false;
     if (m_isMatrixWorkspace) {

@@ -7,7 +7,7 @@
 import unittest
 
 from mantid.kernel import ConfigService, ConfigObserver
-from mantid.py3compat import mock
+from unittest import mock
 
 
 class ConfigObserverTest(unittest.TestCase):

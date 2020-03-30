@@ -131,7 +131,8 @@ protected:
   void setResolutionWSSuffixes(const QStringList &suffices);
   void setResolutionFBSuffixes(const QStringList &suffices);
 
-  void setAlgorithmProperties(Mantid::API::IAlgorithm_sptr fitAlgorithm) const;
+  void setAlgorithmProperties(
+      const Mantid::API::IAlgorithm_sptr &fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   virtual void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
@@ -176,10 +177,10 @@ protected slots:
   void executeFit();
 
   void updateAttributeValues();
-  void updateAttributeValues(Mantid::API::IFunction_sptr function,
+  void updateAttributeValues(const Mantid::API::IFunction_sptr &function,
                              std::vector<std::string> const &attributeNames);
   void updateAttributeValues(
-      Mantid::API::IFunction_sptr function,
+      const Mantid::API::IFunction_sptr &function,
       std::vector<std::string> const &attributeNames,
       std::unordered_map<std::string, Mantid::API::IFunction::Attribute> const
           &attributes);

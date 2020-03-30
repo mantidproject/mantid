@@ -190,7 +190,7 @@ void EQSANSMonitorTOF::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS,
+double EQSANSMonitorTOF::getTofOffset(const MatrixWorkspace_const_sptr &inputWS,
                                       bool frame_skipping,
                                       double source_to_monitor) {
   //# Storage for chopper information read from the logs

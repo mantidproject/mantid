@@ -53,10 +53,11 @@ public:
   getInstrument3Ways(API::Algorithm *alg);
   static bool instrumentIsSpecified(API::Algorithm *alg);
 
-  static void readCalFile(const std::string &calFileName,
-                          Mantid::DataObjects::GroupingWorkspace_sptr groupWS,
-                          Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS,
-                          Mantid::DataObjects::MaskWorkspace_sptr maskWS);
+  static void
+  readCalFile(const std::string &calFileName,
+              const Mantid::DataObjects::GroupingWorkspace_sptr &groupWS,
+              const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS,
+              const Mantid::DataObjects::MaskWorkspace_sptr &maskWS);
 
 protected:
   Parallel::ExecutionMode getParallelExecutionMode(
@@ -70,7 +71,7 @@ private:
   void exec() override;
 
   /// Checks if a detector ID is for a monitor on a given instrument
-  static bool idIsMonitor(Mantid::Geometry::Instrument_const_sptr inst,
+  static bool idIsMonitor(const Mantid::Geometry::Instrument_const_sptr &inst,
                           int detID);
 };
 

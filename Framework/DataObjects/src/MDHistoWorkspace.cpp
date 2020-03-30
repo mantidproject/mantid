@@ -737,7 +737,7 @@ MDHistoWorkspace::getBinBoundariesOnLine(const VMD &start, const VMD &end,
  * @throw an error if they don't match
  */
 void MDHistoWorkspace::checkWorkspaceSize(const MDHistoWorkspace &other,
-                                          std::string operation) {
+                                          const std::string &operation) {
   if (other.getNumDims() != this->getNumDims())
     throw std::invalid_argument("Cannot perform the " + operation +
                                 " operation on this MDHistoWorkspace. The "

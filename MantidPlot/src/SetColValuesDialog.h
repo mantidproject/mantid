@@ -52,7 +52,8 @@ class SetColValuesDialog : public QDialog, public Scripted {
   Q_OBJECT
 
 public:
-  SetColValuesDialog(ScriptingEnv *env, Table *t, Qt::WFlags fl = nullptr);
+  SetColValuesDialog(ScriptingEnv *env, Table *t,
+                     const Qt::WFlags &fl = nullptr);
 
 private slots:
   bool apply();

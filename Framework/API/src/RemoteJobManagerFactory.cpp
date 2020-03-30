@@ -65,8 +65,8 @@ IRemoteJobManager_sptr RemoteJobManagerFactoryImpl::create(
  * the type (for example the type is not recognized).
  */
 Mantid::API::IRemoteJobManager_sptr
-RemoteJobManagerFactoryImpl::create(const std::string baseURL,
-                                    const std::string jobManagerType) const {
+RemoteJobManagerFactoryImpl::create(const std::string &baseURL,
+                                    const std::string &jobManagerType) const {
   Mantid::API::IRemoteJobManager_sptr jm;
 
   // use the inherited/generic create method

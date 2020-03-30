@@ -36,7 +36,7 @@
 #include <QShortcut>
 #include <QToolBar>
 
-CustomActionDialog::CustomActionDialog(QWidget *parent, Qt::WFlags fl)
+CustomActionDialog::CustomActionDialog(QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot") + " - " + tr("Add Custom Action"));
 

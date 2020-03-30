@@ -61,10 +61,10 @@ private:
 
   API::MatrixWorkspace_sptr
   createOutputWorkspace(const API::MatrixWorkspace_sptr &inputWS,
-                        const std::string) const;
-  void deleteWorkspace(API::MatrixWorkspace_sptr workspace);
+                        const std::string &) const;
+  void deleteWorkspace(const API::MatrixWorkspace_sptr &workspace);
   API::MatrixWorkspace_sptr
-  setUncertainties(API::MatrixWorkspace_sptr workspace);
+  setUncertainties(const API::MatrixWorkspace_sptr &workspace);
 };
 
 } // namespace Algorithms

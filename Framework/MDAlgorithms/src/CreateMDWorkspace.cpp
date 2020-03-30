@@ -243,8 +243,8 @@ void CreateMDWorkspace::exec() {
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(out));
 }
 
-MDFrame_uptr CreateMDWorkspace::createMDFrame(std::string frame,
-                                              std::string unit) {
+MDFrame_uptr CreateMDWorkspace::createMDFrame(const std::string &frame,
+                                              const std::string &unit) {
   auto frameFactory = makeMDFrameFactoryChain();
   MDFrameArgument frameArg(frame, unit);
   return frameFactory->create(frameArg);

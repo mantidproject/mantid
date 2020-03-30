@@ -47,21 +47,23 @@ public:
     TS_ASSERT_EQUALS(oldPos, m_ws->detectorInfo().position(0));
   }
 
-  void setParam(std::string cName, std::string pName, std::string value) {
+  void setParam(const std::string &cName, const std::string &pName,
+                const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     paramMap.addString(comp->getComponentID(), pName, value);
   }
 
-  void setParam(std::string cName, std::string pName, double value) {
+  void setParam(const std::string &cName, const std::string &pName,
+                double value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     paramMap.addDouble(comp->getComponentID(), pName, value);
   }
 
-  void checkEmpty(std::string cName, std::string pName) {
+  void checkEmpty(const std::string &cName, const std::string &pName) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);

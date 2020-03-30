@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 from functools import partial
 from qtpy.QtWidgets import QApplication, QMessageBox, QVBoxLayout
 

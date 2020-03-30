@@ -43,23 +43,23 @@ private:
                                      const std::string &wsname);
 
   /// Add a sample log to a workspace
-  void addSampleLog(Mantid::API::MatrixWorkspace_sptr workspace,
+  void addSampleLog(const Mantid::API::MatrixWorkspace_sptr &workspace,
                     const std::string &log_name, double log_number);
 
   /// Set the goniometer values in a workspace
-  void setGoniometer(Mantid::API::MatrixWorkspace_sptr workspace);
+  void setGoniometer(const Mantid::API::MatrixWorkspace_sptr &workspace);
 
   /// Set the UB matrix in a workspace
-  void setUB(Mantid::API::MatrixWorkspace_sptr workspace, double a, double b,
-             double c, double alpha, double beta, double gamma,
+  void setUB(const Mantid::API::MatrixWorkspace_sptr &workspace, double a,
+             double b, double c, double alpha, double beta, double gamma,
              const std::vector<double> &u, const std::vector<double> &v);
 
   /// Convert a workspace to MDWorkspace
   Mantid::API::IMDEventWorkspace_sptr
-  convertToMD(Mantid::API::Workspace_sptr workspace,
+  convertToMD(const Mantid::API::Workspace_sptr &workspace,
               const std::string &analysis_mode, bool in_place,
               const std::string &filebackend_filename, const bool filebackend,
-              Mantid::API::IMDEventWorkspace_sptr out_mdws);
+              const Mantid::API::IMDEventWorkspace_sptr &out_mdws);
 
   /// Merge input workspaces
   Mantid::API::IMDEventWorkspace_sptr
@@ -67,13 +67,13 @@ private:
 
   /// Add logs and convert to MDWorkspace for a single run
   Mantid::API::IMDEventWorkspace_sptr
-  single_run(Mantid::API::MatrixWorkspace_sptr input_workspace,
+  single_run(const Mantid::API::MatrixWorkspace_sptr &input_workspace,
              const std::string &emode, double efix, double psi, double gl,
              double gs, bool in_place, const std::vector<double> &alatt,
              const std::vector<double> &angdeg, const std::vector<double> &u,
              const std::vector<double> &v,
              const std::string &filebackend_filename, const bool filebackend,
-             Mantid::API::IMDEventWorkspace_sptr out_mdws);
+             const Mantid::API::IMDEventWorkspace_sptr &out_mdws);
 
   /// Validate the algorithm's input properties
   std::map<std::string, std::string> validateInputs() override;

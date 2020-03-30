@@ -163,8 +163,8 @@ private:
     return detectorList;
   }
 
-  void doTest(MatrixWorkspace_const_sptr inputWS,
-              MaskWorkspace_const_sptr outputWS) {
+  void doTest(const MatrixWorkspace_const_sptr &inputWS,
+              const MaskWorkspace_const_sptr &outputWS) {
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
     size_t nOutputHists(outputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(nOutputHists, inputWS->getNumberHistograms());

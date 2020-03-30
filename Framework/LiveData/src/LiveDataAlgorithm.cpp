@@ -17,6 +17,7 @@
 
 #include <boost/algorithm/string/trim.hpp>
 #include <unordered_set>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -260,7 +261,7 @@ ILiveListener_sptr LiveDataAlgorithm::createLiveListener(bool connect) {
  */
 void LiveDataAlgorithm::setLiveListener(
     Mantid::API::ILiveListener_sptr listener) {
-  m_listener = listener;
+  m_listener = std::move(listener);
 }
 
 //----------------------------------------------------------------------------------------------

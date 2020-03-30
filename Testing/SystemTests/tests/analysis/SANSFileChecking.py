@@ -10,7 +10,6 @@
 Check that file manipulation works fine
 """
 
-from __future__ import (absolute_import, division, print_function)
 import unittest
 import systemtesting
 from mantid.simpleapi import *

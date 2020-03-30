@@ -10,8 +10,6 @@ This presenter is essentially the brain of the reduction gui. It controls other 
 for presenting and generating the reduction settings.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 import copy
 import os
 import time

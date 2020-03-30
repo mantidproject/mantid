@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,protected-access
-from __future__ import (absolute_import, division, print_function)
-import six
 from qtpy.QtWidgets import (QFrame)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
 import reduction_gui.widgets.util as util
@@ -22,8 +20,7 @@ except ImportError:
     from mantidplot import load_ui
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import ExtractMask
-if six.PY3:
-    unicode = str
+unicode = str
 
 
 class SANSInstrumentWidget(BaseWidget):

@@ -82,7 +82,7 @@ namespace {
  * @param typeID The python identifier of the column type.
  * @param row The row to get the value from.
  */
-PyObject *getValue(Mantid::API::Column_const_sptr column,
+PyObject *getValue(const Mantid::API::Column_const_sptr &column,
                    const std::type_info &typeID, const int row) {
   if (typeID.hash_code() == typeid(Mantid::API::Boolean).hash_code()) {
     bool res = column->cell<Mantid::API::Boolean>(row);
@@ -129,7 +129,7 @@ PyObject *getValue(Mantid::API::Column_const_sptr column,
  * @param row :: The index of the row
  * @param value :: The value to set
  */
-void setValue(const Column_sptr column, const int row, const object &value) {
+void setValue(const Column_sptr &column, const int row, const object &value) {
   const auto &typeID = column->get_type_info();
 
   // Special case: Treat Mantid Boolean as normal bool
@@ -542,7 +542,7 @@ public:
     return data;
   }
 
-  static void setstate(ITableWorkspace &ws, dict state) {
+  static void setstate(ITableWorkspace &ws, const dict &state) {
     readMetaData(ws, state);
     readData(ws, state);
   }

@@ -213,7 +213,7 @@ std::string PeakBoundingBox::toExtentsString() const {
  * @param transform : Transform to use.
  */
 void PeakBoundingBox::transformBox(
-    Mantid::Geometry::PeakTransform_sptr transform) {
+    const Mantid::Geometry::PeakTransform_sptr &transform) {
   using Mantid::Kernel::V3D;
   // Front bottom left
   V3D newBottomLeft =

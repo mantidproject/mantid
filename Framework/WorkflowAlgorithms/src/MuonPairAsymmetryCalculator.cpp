@@ -27,9 +27,9 @@ namespace WorkflowAlgorithms {
  * @param alpha :: [input] Alpha (balance) value of the pair
  */
 MuonPairAsymmetryCalculator::MuonPairAsymmetryCalculator(
-    const API::WorkspaceGroup_sptr inputWS,
-    const std::vector<int> summedPeriods,
-    const std::vector<int> subtractedPeriods, const int firstPairIndex,
+    const API::WorkspaceGroup_sptr &inputWS,
+    const std::vector<int> &summedPeriods,
+    const std::vector<int> &subtractedPeriods, const int firstPairIndex,
     const int secondPairIndex, const double alpha)
     : IMuonAsymmetryCalculator(inputWS, summedPeriods, subtractedPeriods),
       m_alpha(alpha), m_firstPairIndex(firstPairIndex),

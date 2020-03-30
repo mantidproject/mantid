@@ -49,7 +49,7 @@ public:
 
 protected:
   void setParametersFromPropertyManager();
-  void setMatrixWorkspace(API::MatrixWorkspace_sptr matrixWorkspace);
+  void setMatrixWorkspace(const API::MatrixWorkspace_sptr &matrixWorkspace);
 
   bool histogramIsUsable(size_t i) const;
 

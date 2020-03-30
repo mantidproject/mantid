@@ -1145,7 +1145,7 @@ public:
    * SplittingInterval objects
    */
   size_t convertMatrixSplitterToSplitters(
-      API::MatrixWorkspace_const_sptr matrixws,
+      const API::MatrixWorkspace_const_sptr &matrixws,
       std::vector<Kernel::SplittingInterval> &splitters) {
     splitters.clear();
     size_t numsplitters = 0;

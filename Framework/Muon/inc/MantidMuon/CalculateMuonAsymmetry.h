@@ -69,10 +69,10 @@ private:
   void init() override;
   void exec() override;
   // calculate Muon normalisation constant
-  std::vector<double> getNormConstants(std::vector<std::string> wsNames);
+  std::vector<double> getNormConstants(const std::vector<std::string> &wsNames);
   std::map<std::string, std::string> validateInputs() override;
   double getNormValue(API::CompositeFunction_sptr &func);
-  void addNormalizedFits(size_t numberOfFits, const std::vector<double>);
+  void addNormalizedFits(size_t numberOfFits, const std::vector<double> &);
   void normalizeWorkspace(
       const API::MatrixWorkspace_sptr &normalizedWorkspace,
       const API::MatrixWorkspace_const_sptr &unnormalizedWorkspace,

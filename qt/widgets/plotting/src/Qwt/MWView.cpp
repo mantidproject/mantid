@@ -63,7 +63,7 @@ MWView::~MWView() {
  *
  * @param filename :: file to open; empty to ask via a dialog box.
  */
-void MWView::loadColorMap(QString filename) {
+void MWView::loadColorMap(const QString &filename) {
   QString fileselection;
   if (filename.isEmpty()) {
     fileselection = MantidColorMap::chooseColorMap(m_currentColorMapFile, this);
@@ -81,7 +81,7 @@ void MWView::loadColorMap(QString filename) {
 /**
  * @brief Initialize objects after loading the workspace, and observe.
  */
-void MWView::setWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
+void MWView::setWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) {
   m_workspace = ws;
   this->checkRangeLimits();
   m_data->setWorkspace(ws);

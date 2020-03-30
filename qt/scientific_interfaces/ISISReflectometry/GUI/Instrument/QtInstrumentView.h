@@ -77,15 +77,17 @@ private:
 
   /// Initialise the interface
   void initLayout();
-  void registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
-  void registerInstrumentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
-  void setToolTipAsPropertyDocumentation(QWidget &widget,
-                                         std::string const &propertyName,
-                                         Mantid::API::IAlgorithm_sptr alg);
+  void registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
+  void
+  registerInstrumentSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
+  void
+  setToolTipAsPropertyDocumentation(QWidget &widget,
+                                    std::string const &propertyName,
+                                    const Mantid::API::IAlgorithm_sptr &alg);
 
   template <typename Widget>
   void registerSettingWidget(Widget &widget, std::string const &propertyName,
-                             Mantid::API::IAlgorithm_sptr alg);
+                             const Mantid::API::IAlgorithm_sptr &alg);
   void connectSettingsChange(QLineEdit &edit);
   void connectSettingsChange(QComboBox &edit);
   void connectSettingsChange(QCheckBox &edit);

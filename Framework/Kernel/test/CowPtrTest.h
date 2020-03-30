@@ -10,6 +10,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Kernel;
 
@@ -38,9 +39,8 @@ public:
   }
 
   void testConstructorByPtr() {
-
-    auto *resource = new MyType{2};
-    cow_ptr<MyType> cow{resource};
+    auto resource = std::make_unique<MyType>(2);
+    cow_ptr<MyType> cow{resource.release()};
 
     TSM_ASSERT_EQUALS("COW does not hold the expected value", 2, cow->value);
   }

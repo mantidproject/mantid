@@ -483,7 +483,7 @@ MuonAnalysisFitDataPresenter::createWorkspace(const std::string &name,
  * @returns :: parameter string for rebinning
  */
 std::string MuonAnalysisFitDataPresenter::getRebinParams(
-    const Mantid::API::Workspace_sptr ws) const {
+    const Mantid::API::Workspace_sptr &ws) const {
   // First check for workspace group. If it is, use first entry
   if (const auto &group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
     if (group->size() > 0) {

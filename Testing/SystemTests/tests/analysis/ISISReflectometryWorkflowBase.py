@@ -8,7 +8,6 @@
 System Test for ISIS Reflectometry reduction
 Adapted from scripts provided by Max Skoda.
 """
-from __future__ import (print_function)
 from mantid.simpleapi import *
 from mantid import ConfigService
 

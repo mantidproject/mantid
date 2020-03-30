@@ -104,7 +104,7 @@ public:
   /// Serialize as set of comma separated values
   std::string toExtentsString() const;
   /// Transform the box.
-  void transformBox(Mantid::Geometry::PeakTransform_sptr transform);
+  void transformBox(const Mantid::Geometry::PeakTransform_sptr &transform);
   /// Make a new box based on the slice
   PeakBoundingBox makeSliceBox(const double &sliceDelta) const;
 };

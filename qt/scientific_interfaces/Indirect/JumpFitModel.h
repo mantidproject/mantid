@@ -53,7 +53,8 @@ public:
 
 private:
   std::string constructOutputName() const;
-  bool allWorkspacesEqual(Mantid::API::MatrixWorkspace_sptr workspace) const;
+  bool
+  allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
   JumpFitParameters &
   addJumpFitParameters(Mantid::API::MatrixWorkspace *workspace,
                        const std::string &hwhmName);

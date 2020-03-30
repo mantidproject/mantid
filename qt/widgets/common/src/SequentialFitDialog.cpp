@@ -88,7 +88,7 @@ void SequentialFitDialog::addWorkspace() {
   }
 }
 
-bool SequentialFitDialog::addWorkspaces(const QStringList wsNames) {
+bool SequentialFitDialog::addWorkspaces(const QStringList &wsNames) {
   if (wsNames.isEmpty())
     return false;
   int row = ui.tWorkspaces->rowCount();
@@ -191,7 +191,7 @@ void SequentialFitDialog::removeItem() {
   }
 }
 
-bool SequentialFitDialog::validateLogs(const QString wsName) {
+bool SequentialFitDialog::validateLogs(const QString &wsName) {
   Mantid::API::MatrixWorkspace_sptr ws =
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(

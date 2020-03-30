@@ -47,7 +47,7 @@ DECLARE_ALGORITHM(LoadNexusMonitors2)
 
 namespace {
 void loadSampleDataISIScompatibilityInfo(
-    ::NeXus::File &file, Mantid::API::MatrixWorkspace_sptr const WS) {
+    ::NeXus::File &file, Mantid::API::MatrixWorkspace_sptr const &WS) {
   try {
     file.openGroup("isis_vms_compat", "IXvms");
   } catch (::NeXus::Exception &) {
@@ -403,8 +403,9 @@ void LoadNexusMonitors2::fixUDets(::NeXus::File &file) {
   }
 }
 
-void LoadNexusMonitors2::runLoadLogs(const std::string filename,
-                                     API::MatrixWorkspace_sptr localWorkspace) {
+void LoadNexusMonitors2::runLoadLogs(
+    const std::string &filename,
+    const API::MatrixWorkspace_sptr &localWorkspace) {
   // do the actual work
   API::IAlgorithm_sptr loadLogs = createChildAlgorithm("LoadNexusLogs");
 

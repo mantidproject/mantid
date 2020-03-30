@@ -4,12 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, print_function)
-
 import unittest
 from testhelpers import run_algorithm
 from mantid import mtd
 import mantid
+
 
 class MDEventWorkspaceTest(unittest.TestCase):
     """
@@ -35,4 +34,3 @@ class MDEventWorkspaceTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -1177,8 +1177,8 @@ bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(
  * @param workspace :: The workspace to contain the spectra mapping
  * @param bankNames :: Bank names that are in Nexus file
  */
-void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
-                                 std::vector<std::string> bankNames) {
+void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
+                                 const std::vector<std::string> &bankNames) {
   Instrument_sptr inst = boost::const_pointer_cast<Instrument>(
       workspace->getInstrument()->baseInstrument());
   // Build a list of Rectangular Detectors
@@ -1537,7 +1537,7 @@ void LoadEventNexus::loadSampleDataISIScompatibility(
  *
  * @param fname name of the nexus file to open
  */
-void LoadEventNexus::safeOpenFile(const std::string fname) {
+void LoadEventNexus::safeOpenFile(const std::string &fname) {
   try {
     m_file = std::make_unique<::NeXus::File>(m_filename, NXACC_READ);
   } catch (std::runtime_error &e) {

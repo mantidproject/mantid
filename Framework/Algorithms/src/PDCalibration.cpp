@@ -70,7 +70,7 @@ const auto isNonZero = [](const double value) { return value != 0.; };
 /// private inner class
 class PDCalibration::FittedPeaks {
 public:
-  FittedPeaks(API::MatrixWorkspace_const_sptr wksp,
+  FittedPeaks(const API::MatrixWorkspace_const_sptr &wksp,
               const std::size_t wkspIndex) {
     this->wkspIndex = wkspIndex;
 
@@ -108,7 +108,7 @@ public:
 
   void setPositions(const std::vector<double> &peaksInD,
                     const std::vector<double> &peaksInDWindows,
-                    std::function<double(double)> toTof) {
+                    const std::function<double(double)> &toTof) {
     // clear out old values
     inDPos.clear();
     inTofPos.clear();
@@ -307,7 +307,7 @@ std::map<std::string, std::string> PDCalibration::validateInputs() {
 
 namespace {
 
-bool hasDasIDs(API::ITableWorkspace_const_sptr table) {
+bool hasDasIDs(const API::ITableWorkspace_const_sptr &table) {
   const auto columnNames = table->getColumnNames();
   return (std::find(columnNames.begin(), columnNames.end(),
                     std::string("dasid")) != columnNames.end());
@@ -755,14 +755,13 @@ double fitDIFCtZeroDIFA(std::vector<double> &peaks, double &difc, double &t0,
   size_t iter = 0; // number of iterations
   const size_t MAX_ITER = 75 * numParams;
   int status = 0;
-  double size;
   do {
     iter++;
     status = gsl_multimin_fminimizer_iterate(minimizer);
     if (status)
       break;
 
-    size = gsl_multimin_fminimizer_size(minimizer);
+    double size = gsl_multimin_fminimizer_size(minimizer);
     status = gsl_multimin_test_size(size, 1e-4);
 
   } while (status == GSL_CONTINUE && iter < MAX_ITER);
@@ -939,7 +938,7 @@ vector<double> PDCalibration::getTOFminmax(const double difc, const double difa,
 
   return tofminmax;
 }
-MatrixWorkspace_sptr PDCalibration::load(const std::string filename) {
+MatrixWorkspace_sptr PDCalibration::load(const std::string &filename) {
   // TODO this assumes that all files are event-based
   const double maxChunkSize = getProperty("MaxChunkSize");
   const double filterBadPulses = getProperty("FilterBadPulses");
@@ -1186,7 +1185,8 @@ PDCalibration::sortTableWorkspace(API::ITableWorkspace_sptr &table) {
 /// NEW: convert peak positions in dSpacing to peak centers workspace
 std::pair<API::MatrixWorkspace_sptr, API::MatrixWorkspace_sptr>
 PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
-    API::MatrixWorkspace_sptr dataws, const double peakWindowMaxInDSpacing) {
+    const API::MatrixWorkspace_sptr &dataws,
+    const double peakWindowMaxInDSpacing) {
 
   // calculate from peaks in dpsacing to peak fit window in dspacing
   const auto windowsInDSpacing =

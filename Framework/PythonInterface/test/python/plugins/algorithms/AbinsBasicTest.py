@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
 from mantid import logger
 # noinspection PyUnresolvedReferences
@@ -12,6 +11,7 @@ from mantid.simpleapi import mtd, Abins, Scale, CompareWorkspaces, Load, DeleteW
 from AbinsModules import AbinsConstants, AbinsTestHelpers
 import numpy as np
 from numpy.testing import assert_array_almost_equal
+
 
 class AbinsBasicTest(unittest.TestCase):
 

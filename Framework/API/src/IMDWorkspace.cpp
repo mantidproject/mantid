@@ -12,6 +12,7 @@
 #include "MantidKernel/VMD.h"
 
 #include <sstream>
+#include <utility>
 
 using Mantid::Kernel::VMD;
 
@@ -53,7 +54,7 @@ std::string IMDWorkspace::getConvention() const { return m_convention; }
 /** @return the convention
  */
 void IMDWorkspace::setConvention(std::string convention) {
-  m_convention = convention;
+  m_convention = std::move(convention);
 }
 
 //---------------------------------------------------------------------------------------------

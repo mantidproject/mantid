@@ -77,7 +77,8 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::string getFormattedDateTime(std::string date, std::string time);
+  std::string getFormattedDateTime(const std::string &date,
+                                   const std::string &time);
   void assignOutputWorkspaceParticulars(
       DataObjects::Workspace2D_sptr &outputWorkspace);
   void readSingleVariables(Mantid::Kernel::BinaryStreamReader &streamReader);

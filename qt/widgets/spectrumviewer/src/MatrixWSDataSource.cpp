@@ -46,7 +46,7 @@ namespace SpectrumView {
  *
  * @param matWs  Shared pointer to the matrix workspace being "wrapped"
  */
-MatrixWSDataSource::MatrixWSDataSource(MatrixWorkspace_const_sptr matWs)
+MatrixWSDataSource::MatrixWSDataSource(const MatrixWorkspace_const_sptr &matWs)
     : SpectrumDataSource(0.0, 1.0, 0.0, 1.0, 0, 0), m_matWs(matWs),
       m_emodeHandler(nullptr), m_spectrumInfo(m_matWs->spectrumInfo()) {
   m_totalXMin = matWs->getXMin();

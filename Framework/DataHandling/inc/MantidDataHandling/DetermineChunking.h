@@ -57,7 +57,7 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::string setTopEntryName(std::string filename);
+  std::string setTopEntryName(const std::string &filename);
   FileType getFileType(const std::string &filename);
 };
 

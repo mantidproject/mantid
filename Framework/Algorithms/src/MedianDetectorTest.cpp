@@ -238,7 +238,8 @@ API::MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(int firstSpec,
  * @returns The number failed.
  */
 int MedianDetectorTest::maskOutliers(
-    const std::vector<double> medianvec, API::MatrixWorkspace_sptr countsWS,
+    const std::vector<double> &medianvec,
+    const API::MatrixWorkspace_sptr &countsWS,
     std::vector<std::vector<size_t>> indexmap) {
 
   // Fractions of the median
@@ -300,10 +301,10 @@ int MedianDetectorTest::maskOutliers(
  * skipped.
  */
 int MedianDetectorTest::doDetectorTests(
-    const API::MatrixWorkspace_sptr countsWS,
-    const std::vector<double> medianvec,
+    const API::MatrixWorkspace_sptr &countsWS,
+    const std::vector<double> &medianvec,
     std::vector<std::vector<size_t>> indexmap,
-    API::MatrixWorkspace_sptr maskWS) {
+    const API::MatrixWorkspace_sptr &maskWS) {
   g_log.debug("Applying the criteria to find failing detectors");
 
   // A spectra can't fail if the statistics show its value is consistent with

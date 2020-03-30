@@ -11,8 +11,6 @@ api
 Defines Python objects that wrap the C++ API namespace.
 
 """
-from __future__ import absolute_import
-
 ###############################################################################
 # Load the C++ library
 ###############################################################################
@@ -42,4 +40,3 @@ from mantid.api import _adsimports
 # Make aliases accessible in this namespace
 ###############################################################################
 from mantid.api._aliases import *
-

@@ -37,7 +37,7 @@ public:
   ScopedWorkspace();
 
   /// Workspace constructor
-  ScopedWorkspace(Workspace_sptr ws);
+  ScopedWorkspace(const Workspace_sptr &ws);
 
   /// Destructor
   virtual ~ScopedWorkspace();
@@ -61,7 +61,7 @@ public:
   operator bool() const;
 
   /// Make ADS entry to point to the given workspace
-  void set(Workspace_sptr newWS);
+  void set(const Workspace_sptr &newWS);
 
 private:
   /// ADS name of the workspace

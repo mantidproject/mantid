@@ -37,7 +37,7 @@ public:
   explicit DataComparison(QWidget *parent = nullptr);
 
   /// Tests if a workspace is shown in the UI
-  bool containsWorkspace(Mantid::API::MatrixWorkspace_const_sptr ws);
+  bool containsWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &ws);
 
 private slots:
   /// Add selected data to plot
@@ -72,7 +72,7 @@ private:
   /// Initialize the layout
   void initLayout() override;
   /// Adds a workspace to the data table
-  void addDataItem(Mantid::API::Workspace_const_sptr ws);
+  void addDataItem(const Mantid::API::Workspace_const_sptr &ws);
   /// Normalises spectra offsets in table
   void normaliseSpectraOffsets();
   /// Gets an initial curve colour for a new workspace

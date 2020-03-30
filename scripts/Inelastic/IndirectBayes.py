@@ -13,7 +13,6 @@ Input : the Python list is padded to Fortrans length using procedure PadArray
 Output : the Fortran numpy array is sliced to Python length using dataY = yout[:ny]
 """
 
-from __future__ import (absolute_import, division, print_function)
 from IndirectImport import *
 if is_supported_f2py_platform(): # noqa
     QLr     = import_f2py("QLres")

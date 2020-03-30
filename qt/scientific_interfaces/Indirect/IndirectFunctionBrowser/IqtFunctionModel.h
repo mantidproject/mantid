@@ -114,7 +114,8 @@ private:
   boost::optional<QString> getParameterDescription(ParamID name) const;
   boost::optional<QString> getPrefix(ParamID name) const;
   void setCurrentValues(const QMap<ParamID, double> &);
-  void applyParameterFunction(std::function<void(ParamID)> paramFun) const;
+  void
+  applyParameterFunction(const std::function<void(ParamID)> &paramFun) const;
   boost::optional<ParamID> getParameterId(const QString &parName);
   std::string buildExpDecayFunctionString() const;
   std::string buildStretchExpFunctionString() const;

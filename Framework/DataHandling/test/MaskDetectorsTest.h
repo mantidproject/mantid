@@ -649,9 +649,9 @@ public:
 
   void test_MaskWithWorkspaceWithDetectorIDs() {
     auto &ads = AnalysisDataService::Instance();
-    const std::string inputWSName("inputWS"), existingMaskName("existingMask");
     const int numInputSpec(90);
 
+    const std::string inputWSName("inputWS");
     setUpWS(false, inputWSName, false, numInputSpec);
 
     auto inputWS = ads.retrieveWS<MatrixWorkspace>(inputWSName);
@@ -717,7 +717,7 @@ public:
 
   void test_MaskWithWorkspaceWithDetectorIDsAndWsIndexRange() {
     auto &ads = AnalysisDataService::Instance();
-    const std::string inputWSName("inputWS"), existingMaskName("existingMask");
+    const std::string inputWSName("inputWS");
     const int numInputSpec(90);
 
     setUpWS(false, inputWSName, false, numInputSpec);

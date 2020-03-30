@@ -70,12 +70,12 @@ public:
 private:
   /// Create an output workspace
   API::MatrixWorkspace_sptr
-  createOutputWorkspace(API::MatrixWorkspace_const_sptr, const size_t,
+  createOutputWorkspace(const API::MatrixWorkspace_const_sptr &, const size_t,
                         const std::vector<double> &);
 
-  void bootstrap(API::MatrixWorkspace_const_sptr);
-  void calculate(API::MatrixWorkspace_const_sptr);
-  void finalize(API::MatrixWorkspace_const_sptr);
+  void bootstrap(const API::MatrixWorkspace_const_sptr &);
+  void calculate(const API::MatrixWorkspace_const_sptr &);
+  void finalize(const API::MatrixWorkspace_const_sptr &);
 
   std::vector<std::vector<std::vector<double>>> m_intensities;
   std::vector<std::vector<std::vector<double>>> m_errors;

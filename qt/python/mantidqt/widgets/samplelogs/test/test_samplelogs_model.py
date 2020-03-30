@@ -7,8 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.simpleapi import LoadEventNexus, CreateMDWorkspace
 from mantidqt.widgets.samplelogs.model import SampleLogsModel
 

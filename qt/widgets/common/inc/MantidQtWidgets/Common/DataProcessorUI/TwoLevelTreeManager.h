@@ -29,7 +29,7 @@ class EXPORT_OPT_MANTIDQT_COMMON TwoLevelTreeManager : public TreeManager {
 public:
   /// Constructor
   TwoLevelTreeManager(DataProcessorPresenter *presenter,
-                      Mantid::API::ITableWorkspace_sptr table,
+                      const Mantid::API::ITableWorkspace_sptr &table,
                       const WhiteList &whitelist);
   /// Constructor (no table ws given)
   TwoLevelTreeManager(DataProcessorPresenter *presenter,
@@ -122,9 +122,9 @@ private:
   Mantid::API::ITableWorkspace_sptr
   createDefaultWorkspace(const WhiteList &whitelist);
   /// Validate a table workspace
-  void validateModel(Mantid::API::ITableWorkspace_sptr ws,
+  void validateModel(const Mantid::API::ITableWorkspace_sptr &ws,
                      size_t whitelistColumns) const;
-  TreeData constructTreeData(ChildItems rows);
+  TreeData constructTreeData(const ChildItems &rows);
 };
 } // namespace DataProcessor
 } // namespace MantidWidgets
