@@ -65,13 +65,16 @@ private:
   void validateGeometry(std::map<std::string, std::string> &errors,
                         const Kernel::PropertyManager &args,
                         const std::string &flavour);
+  void validateMaterial(std::map<std::string, std::string> &errors,
+                        const Kernel::PropertyManager &args,
+                        const std::string &flavour);
   void assertNonNegative(std::map<std::string, std::string> &errors,
                          const Kernel::PropertyManager &args,
                          const std::string &flavour,
                          const std::vector<const std::string *> &keys);
-  void setContainerMaterial(
+  void setMaterial(
       ReadMaterial::MaterialParameters &materialParams,
-      const Kernel::PropertyManager_const_sptr &canMaterialArgs);
+      const Kernel::PropertyManager &materialArgs);
 };
 
 } // namespace DataHandling

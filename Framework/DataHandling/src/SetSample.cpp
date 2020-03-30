@@ -266,6 +266,14 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors,
       if (!existsAndNotEmptyString(geomArgs, GeometryArgs::VALUE)) {
         errors[flavour] =
             "For " + shape + " shape " + GeometryArgs::VALUE + " is required";
+      } else {
+        // check if the value is a valid shape XML
+        ShapeFactory shapeFactory;
+        auto shape = shapeFactory.createShape(
+            geomArgs.getPropertyValue(GeometryArgs::VALUE));
+        if (!shape || !shape->hasValidShape()) {
+          errors[flavour] = "Invalid XML for CSG shape value";
+        }
       }
     } else {
       // for the predefined 3 shapes height is mandatory
@@ -302,6 +310,21 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors,
     }
   } else {
     errors[flavour] = GeometryArgs::SHAPE + " is required";
+  }
+}
+
+void SetSample::validateMaterial(std::map<std::string, std::string> &errors,
+                                 const Kernel::PropertyManager &args,
+                                 const std::string &flavour) {
+  ReadMaterial::MaterialParameters materialParams;
+  setMaterial(materialParams, args);
+  auto materialErrors = ReadMaterial::validateInputs(materialParams);
+  if (!materialErrors.empty()) {
+    std::stringstream ss;
+    for (const auto &error : materialErrors) {
+      ss << error.first << ":" << error.second << "\n";
+    }
+    errors[flavour] = ss.str();
   }
 }
 
@@ -355,27 +378,29 @@ std::map<std::string, std::string> SetSample::validateInputs() {
       errors[PropertyNames::ENVIRONMENT] =
           "Environment flags require a non-empty 'Name' entry.";
     } else {
-        if (!existsAndNotEmptyString(*environArgs, SEArgs::CONTAINER)) {
-          errors[PropertyNames::ENVIRONMENT] =
-              "Environment flags require a non-empty 'Container' entry.";
-        } else {
-          // If specifying the environment through XML file, we can not strictly
-          // validate the sample settings, since only the overriding properties are
-          // specified. Hence we just make sure that whatever is specified is at
-          // least positive
-          if (geomArgs) {
-            assertNonNegative(errors, *geomArgs, PropertyNames::GEOMETRY,
-                              positiveValues);
-          }
+      if (!existsAndNotEmptyString(*environArgs, SEArgs::CONTAINER)) {
+        errors[PropertyNames::ENVIRONMENT] =
+            "Environment flags require a non-empty 'Container' entry.";
+      } else {
+        // If specifying the environment through XML file, we can not strictly
+        // validate the sample settings, since only the overriding properties
+        // are specified. Hence we just make sure that whatever is specified is
+        // at least positive
+        if (geomArgs) {
+          assertNonNegative(errors, *geomArgs, PropertyNames::GEOMETRY,
+                            positiveValues);
         }
+      }
     }
   } else {
-    // here on top of non-negative check, we need to also make sure that the
-    // required information exists
     if (geomArgs) {
       assertNonNegative(errors, *geomArgs, PropertyNames::GEOMETRY,
                         positiveValues);
       validateGeometry(errors, *geomArgs, PropertyNames::GEOMETRY);
+    }
+    if (bool(canGeomArgs) != bool(canMaterialArgs)) {
+      errors[PropertyNames::CONTAINER_GEOMETRY] =
+          "Either both or none of the geometry and the material must be given.";
     }
   }
 
@@ -386,16 +411,8 @@ std::map<std::string, std::string> SetSample::validateInputs() {
   }
 
   if (canMaterialArgs) {
-    ReadMaterial::MaterialParameters materialParams;
-    setContainerMaterial(materialParams, canMaterialArgs);
-    auto canMaterialErrors = ReadMaterial::validateInputs(materialParams);
-    if (!canMaterialErrors.empty()) {
-      std::stringstream ss;
-      for (const auto &error : canMaterialErrors) {
-        ss << error.first << ":" << error.second << "\n";
-      }
-      errors[PropertyNames::CONTAINER_MATERIAL] = ss.str();
-    }
+    validateMaterial(errors, *canMaterialArgs,
+                     PropertyNames::CONTAINER_MATERIAL);
   }
   return errors;
 }
@@ -543,7 +560,7 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
     if (shape->hasValidShape()) {
       if (canMaterialArgs) {
         ReadMaterial::MaterialParameters materialParams;
-        setContainerMaterial(materialParams, canMaterialArgs);
+        setMaterial(materialParams, *canMaterialArgs);
         ReadMaterial reader;
         reader.setMaterialParameters(materialParams);
         auto canMaterial = reader.buildMaterial();
@@ -558,32 +575,29 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
   return &(exptInfo.sample().getEnvironment());
 }
 
-void SetSample::setContainerMaterial(
-    ReadMaterial::MaterialParameters &materialParams,
-    const Kernel::PropertyManager_const_sptr &canMaterialArgs) {
+void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
+                            const Kernel::PropertyManager &materialArgs) {
   materialParams.chemicalSymbol =
-      canMaterialArgs->getPropertyValue("ChemicalFormula");
-  materialParams.atomicNumber = canMaterialArgs->getProperty("AtomicNumber");
-  materialParams.massNumber = canMaterialArgs->getProperty("MassNumber");
+      materialArgs.getPropertyValue("ChemicalFormula");
+  materialParams.atomicNumber = materialArgs.getProperty("AtomicNumber");
+  materialParams.massNumber = materialArgs.getProperty("MassNumber");
   materialParams.sampleNumberDensity =
-      canMaterialArgs->getProperty("NumberDensity");
-  materialParams.zParameter = canMaterialArgs->getProperty("ZParameter");
-  materialParams.unitCellVolume =
-      canMaterialArgs->getProperty("UnitCellVolume");
-  materialParams.sampleMassDensity =
-      canMaterialArgs->getProperty("MassDensity");
-  materialParams.sampleMass = canMaterialArgs->getProperty("Mass");
-  materialParams.sampleVolume = canMaterialArgs->getProperty("Volume");
+      materialArgs.getProperty("NumberDensity");
+  materialParams.zParameter = materialArgs.getProperty("ZParameter");
+  materialParams.unitCellVolume = materialArgs.getProperty("UnitCellVolume");
+  materialParams.sampleMassDensity = materialArgs.getProperty("MassDensity");
+  materialParams.sampleMass = materialArgs.getProperty("Mass");
+  materialParams.sampleVolume = materialArgs.getProperty("Volume");
   materialParams.coherentXSection =
-      canMaterialArgs->getProperty("CoherentXSection");
+      materialArgs.getProperty("CoherentXSection");
   materialParams.incoherentXSection =
-      canMaterialArgs->getProperty("IncoherentXSection");
+      materialArgs.getProperty("IncoherentXSection");
   materialParams.attenuationXSection =
-      canMaterialArgs->getProperty("AttenuationXSection");
+      materialArgs.getProperty("AttenuationXSection");
   materialParams.scatteringXSection =
-      canMaterialArgs->getProperty("ScatteringXSection");
+      materialArgs.getProperty("ScatteringXSection");
   const std::string numberDensityUnit =
-      canMaterialArgs->getProperty("NumberDensityUnit");
+      materialArgs.getProperty("NumberDensityUnit");
   if (numberDensityUnit == "Atoms") {
     materialParams.numberDensityUnit =
         MaterialBuilder::NumberDensityUnit::Atoms;
