@@ -278,6 +278,19 @@ class DrillView(QMainWindow):
     def load_rundex(self):
         fname = QFileDialog.getOpenFileName(self, 'Load rundex', '~')
 
+    def keyPressEvent(self, event):
+        if (event.key() == Qt.Key_C
+                and event.modifiers() == Qt.ControlModifier):
+            self.copy_selected_rows()
+        elif (event.key() == Qt.Key_X
+                and event.modifiers() == Qt.ControlModifier):
+            self.cut_selected_rows()
+        elif (event.key() == Qt.Key_V
+                and event.modifiers() == Qt.ControlModifier):
+            self.paste_rows()
+        elif (event.key() == Qt.Key_Delete):
+            self.del_selected_rows()
+
     def change_instrument_requested(self, instrument):
         self.call_settings_listeners(
                 lambda listener: listener.on_instrument_changed(instrument)
