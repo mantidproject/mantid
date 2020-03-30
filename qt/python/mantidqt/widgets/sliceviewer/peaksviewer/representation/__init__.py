@@ -13,11 +13,26 @@ from .spherical import SphericallyIntergratedPeakRepresentation
 
 # map shape names to representation classes
 # the strings need to match whatever Peak.getPeakShape.shapeName returns
-PEAK_REPRESENTATION_FACTORY = {
+_PEAK_REPRESENTATION_FACTORY = {
     "none": NonIntegratedPeakRepresentation,
     "spherical": SphericallyIntergratedPeakRepresentation,
-    "ellipsoid": NonIntegratedPeakRepresentation
 }
+
+
+def _get_factory(peak_shape):
+    """
+    :param peak_shape: A PeakShape object
+    :return: A factory object with a create method able to
+             create a representation for the given shape type
+    """
+    shape_name = peak_shape.shapeName()
+    try:
+        return _PEAK_REPRESENTATION_FACTORY[shape_name.lower()]
+    except KeyError:
+        from mantid.kernel import logger
+        logger.warning(
+            f"An {shape_name} shape is not yet supported. Only the peak center will be shown.")
+        return NonIntegratedPeakRepresentation
 
 
 def create_peakrepresentation(x, y, z, slicepoint, slicedim_width, peak_shape, marker_color,
@@ -36,6 +51,5 @@ def create_peakrepresentation(x, y, z, slicepoint, slicedim_width, peak_shape, m
     :returns: A PeakRepresentation object describing the Peak aspects
               important for display
     """
-    factory = PEAK_REPRESENTATION_FACTORY[peak_shape.shapeName().lower()]
-    return factory.create(x, y, z, compute_alpha(z, slicepoint, slicedim_width), peak_shape,
-                          marker_color, bg_color)
+    return _get_factory(peak_shape).create(x, y, z, compute_alpha(z, slicepoint, slicedim_width),
+                                           peak_shape, marker_color, bg_color)
