@@ -38,7 +38,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
 
     def __init__(self, canvas, toolbar_manager, parent=None):
         super(FitPropertyBrowser, self).__init__(parent)
-        self.init()
         self.setFeatures(self.DockWidgetMovable)
         self.canvas = canvas
         # The toolbar state manager to be passed to the peak editing tool

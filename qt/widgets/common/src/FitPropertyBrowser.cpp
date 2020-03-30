@@ -711,7 +711,20 @@ void FitPropertyBrowser::executeSetupManageMenu(const QString &item) {
 }
 
 /// Destructor
-FitPropertyBrowser::~FitPropertyBrowser() { m_compositeFunction.reset(); }
+FitPropertyBrowser::~FitPropertyBrowser() {
+  m_compositeFunction.reset();
+  m_browser->unsetFactoryForManager(m_enumManager);
+  m_browser->unsetFactoryForManager(m_boolManager);
+  m_browser->unsetFactoryForManager(m_intManager);
+  m_browser->unsetFactoryForManager(m_doubleManager);
+  m_browser->unsetFactoryForManager(m_stringManager);
+  m_browser->unsetFactoryForManager(m_filenameManager);
+  m_browser->unsetFactoryForManager(m_formulaManager);
+  m_browser->unsetFactoryForManager(m_columnManager);
+  m_browser->unsetFactoryForManager(m_vectorSizeManager);
+  m_browser->unsetFactoryForManager(m_vectorDoubleManager);
+  m_browser->unsetFactoryForManager(m_parameterManager);
+}
 
 /// Get handler to the root composite function
 PropertyHandler *FitPropertyBrowser::getHandler() const {
