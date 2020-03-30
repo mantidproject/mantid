@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # coding=utf-8
 #  This file is part of the mantidqt package.
-from mantid.dataobjects import PeaksWorkspace, ITableWorkspace
+from mantid.api import IPeaksWorkspace, ITableWorkspace
 from mantid.kernel import V3D
 from mantid.simpleapi import DeleteTableRows, SortPeaksWorkspace, SortTableWorkspace, StatisticsOfTableWorkspace
 from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn

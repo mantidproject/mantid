@@ -5,10 +5,9 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import (absolute_import, division, unicode_literals)
 
-# 3rd party imports
-from mantid.py3compat.enum import Enum
+# std imports
+from enum import Enum
 
 # local imports
 from mantidqt.widgets.workspacedisplay.table.presenter \
@@ -35,7 +34,7 @@ class PeaksViewerPresenter(object):
         :param view: A view object with a subscribe method to register this presenter
                      as a listener for view events
         """
-        super(PeaksViewerPresenter, self).__init__()
+        super().__init__()
         self._model = model
         self._raise_error_if_workspace_incompatible(model.peaks_workspace)
         self._peaks_table_presenter = \

@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import (absolute_import, division, unicode_literals)
 
 # 3rd party imports
 from mantid.api import AnalysisDataService, SpecialCoordinateSystem
@@ -38,7 +37,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         if not hasattr(peaks_ws, 'getNumberPeaks'):
             raise ValueError("Expected a PeaksWorkspace type but found a {}".format(type(peaks_ws)))
 
-        super(PeaksViewerModel, self).__init__(peaks_ws)
+        super().__init__(peaks_ws)
         self._marker_color = DEFAULT_MARKER_COLOR
         self._visible_peaks = []
 
