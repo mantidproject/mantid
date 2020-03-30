@@ -12,7 +12,6 @@
     understand what's happening and how best to fit it in the Reducer design.
 
 """
-from __future__ import (absolute_import, division, print_function)
 from reducer_singleton import Reducer
 import isis_reduction_steps
 import isis_instrument

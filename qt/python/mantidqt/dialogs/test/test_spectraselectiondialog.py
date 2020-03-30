@@ -10,7 +10,7 @@ from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialogButtonBox
 
 from mantid.api import WorkspaceFactory
-from mantid.py3compat import mock
+from unittest import mock
 from mantid.simpleapi import ExtractSpectra
 from mantidqt.dialogs import spectraselectordialog
 from mantidqt.dialogs.spectraselectordialog import parse_selection_str, SpectraSelectionDialog

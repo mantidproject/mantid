@@ -7,7 +7,7 @@
 import unittest
 
 from mantid.api import FunctionFactory, MultiDomainFunction
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy import QtWidgets
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget

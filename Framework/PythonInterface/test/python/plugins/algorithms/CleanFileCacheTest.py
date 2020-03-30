@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,multiple-statements
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.kernel import *
 from mantid.api import *
@@ -15,6 +13,7 @@ from mantid.simpleapi import CreateCacheFilename
 # from testhelpers import run_algorithm
 
 import os, sys, hashlib, tempfile, glob, shutil, time
+
 
 class CleanFileCache(unittest.TestCase):
 
@@ -164,6 +163,7 @@ def createFile(f, daysbefore):
 def computeTime(daysbefore):
     "compute time as float of the time at n=daysbefore days before today"
     return time.time() - daysbefore * 24*60*60
+
 
 def touch(f):
     with open(f, 'w') as stream:

@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 from mantid.simpleapi import *
@@ -68,6 +67,7 @@ class SANSBeamCentrePositionUpdater(unittest.TestCase):
         y_expected = 2.2
         self.assertEqual(x_expected, x_new, "The x value should have been incremented.")
         self.assertEqual(y_expected, y_new, "The y value should have been incremented.")
+
 
 class TestPositionProvider(unittest.TestCase):
     workspace_name = 'dummy_ws'

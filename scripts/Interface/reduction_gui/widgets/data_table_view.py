@@ -7,7 +7,6 @@
 """
 DataTable Widget for data runs.
 """
-from __future__ import (absolute_import, division, print_function)
 from qtpy import QtCore, QtWidgets
 from qtpy.QtCore import Qt
 

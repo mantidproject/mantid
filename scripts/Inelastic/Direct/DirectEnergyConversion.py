@@ -7,7 +7,6 @@
 #pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #pylind: disable=attribute-defined-outside-init
-from __future__ import (absolute_import, division, print_function, unicode_literals)
 from mantid.simpleapi import *
 from mantid.kernel import funcinspect
 from mantid import geometry,api
@@ -18,9 +17,6 @@ import math
 import time
 import numpy as np
 import collections
-from six import iteritems, string_types
-from six.moves import range
-
 import Direct.CommonFunctions  as common
 import Direct.diagnostics      as diagnostics
 from Direct.PropertyManager  import PropertyManager
@@ -1344,7 +1340,7 @@ class DirectEnergyConversion(object):
             self._spectra_masks=None
         elif isinstance(value,api.Workspace):
             self._spectra_masks = value.name()
-        elif isinstance(value, string_types):
+        elif isinstance(value, str):
             if value in mtd:
                 self._spectra_masks = value
             else:
@@ -1519,7 +1515,7 @@ class DirectEnergyConversion(object):
 
         scale_factor = van_multiplier * sample_multiplier / xsection
 
-        for norm_type,val in iteritems(norm_factor):
+        for norm_type,val in norm_factor.items():
             norm_factor[norm_type] = val * scale_factor
 
         # check for NaN

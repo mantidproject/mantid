@@ -4,13 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import testhelpers
 
 from mantid.kernel import StringListValidator, Direction
 from mantid.api import PythonAlgorithm
+
 
 class ListValidatorTest(unittest.TestCase):
 

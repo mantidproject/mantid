@@ -4,15 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import os
 import unittest
 
-import six
-
 import mantid
-from mantid.py3compat import csv_open_type, mock
+from unittest import mock
 from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.gui_logic.models.RowEntries import RowEntries
@@ -225,11 +221,11 @@ class BatchCsvParserTest(unittest.TestCase):
         expected_file_path = "/foo/bar.csv"
         parser = BatchCsvParser()
 
-        patchable = "__builtin__.open" if six.PY2 else "builtins.open"
+        patchable = "builtins.open"
         with mock.patch(patchable, mocked_handle):
             parser.save_batch_file(rows=[], file_path=expected_file_path)
 
-        mocked_handle.assert_called_with(expected_file_path, csv_open_type)
+        mocked_handle.assert_called_with(expected_file_path, "w")
 
     def test_parses_row_to_csv_correctly(self):
         test_row = RowEntries()
@@ -257,7 +253,7 @@ class BatchCsvParserTest(unittest.TestCase):
         mocked_handle = mock.mock_open()
         parser = BatchCsvParser()
 
-        patchable = "__builtin__.open" if six.PY2 else "builtins.open"
+        patchable = "builtins.open"
         with mock.patch(patchable, mocked_handle):
             parser.save_batch_file(rows=[test_row], file_path='')
 

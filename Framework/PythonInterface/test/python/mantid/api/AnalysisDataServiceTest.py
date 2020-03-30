@@ -4,9 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
-import six
 import unittest
 from testhelpers import run_algorithm
 from mantid.api import (AnalysisDataService, AnalysisDataServiceImpl,
@@ -179,7 +176,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         group = mtd['NewGroup']
 
         self.assertEqual(group.size(), 3)
-        six.assertCountEqual(self, group.getNames(), ["ws1", "ws2", "ws3"])
+        self.assertCountEqual(group.getNames(), ["ws1", "ws2", "ws3"])
 
     def test_removeFromGroup_removes_workspace_from_group(self):
         from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
@@ -193,7 +190,7 @@ class AnalysisDataServiceTest(unittest.TestCase):
         group = mtd['NewGroup']
 
         self.assertEqual(group.size(), 2)
-        six.assertCountEqual(self, group.getNames(), ["ws1", "ws2"])
+        self.assertCountEqual(group.getNames(), ["ws1", "ws2"])
 
 
 if __name__ == '__main__':

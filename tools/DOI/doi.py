@@ -62,7 +62,6 @@ USEFUL LINKS:
   http://docs.python.org/2/library/httplib.html#httplib.HTTPS_PORT
 """
 
-from __future__ import (absolute_import, division, print_function)
 import argparse
 import getpass
 import os

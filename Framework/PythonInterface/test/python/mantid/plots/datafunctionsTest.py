@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #
-from __future__ import (absolute_import, division, print_function)
-
 import datetime
 import unittest
 
@@ -17,7 +15,7 @@ import numpy as np
 
 import mantid.api
 import mantid.plots.datafunctions as funcs
-from mantid.py3compat.mock import Mock
+from unittest.mock import Mock
 from mantid.kernel import config
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import (AddSampleLog, AddTimeSeriesLog, ConjoinWorkspaces,

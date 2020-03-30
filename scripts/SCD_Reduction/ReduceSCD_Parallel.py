@@ -40,7 +40,6 @@
 # run or the loaded matirix instead of the default FFT method
 #
 
-from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import threading

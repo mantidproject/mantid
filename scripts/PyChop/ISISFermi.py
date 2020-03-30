@@ -13,7 +13,6 @@ Contains the ISISFermi class which calculates the resolution and flux for ISIS F
 spectrometers (MAPS, MARI, MERLIN) - using the functions in Chop.py and addition lookup tables.
 """
 
-from __future__ import (absolute_import, division, print_function)
 import warnings
 import numpy as np
 from . import Chop

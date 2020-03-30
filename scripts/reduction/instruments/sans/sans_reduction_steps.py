@@ -8,7 +8,6 @@
 """
     Implementation of reduction steps for SANS
 """
-from __future__ import (absolute_import, division, print_function)
 import math
 import pickle
 from reduction import ReductionStep

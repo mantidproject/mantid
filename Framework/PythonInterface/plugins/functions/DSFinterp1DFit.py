@@ -9,7 +9,6 @@
 @author Jose Borreguero, NScD
 @date October 06, 2013
 '''
-from __future__ import (absolute_import, division, print_function)
 import numpy
 import scipy.interpolate
 from mantid.api import IFunction1D, FunctionFactory

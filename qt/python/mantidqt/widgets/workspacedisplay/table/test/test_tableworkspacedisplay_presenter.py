@@ -7,13 +7,11 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from qtpy.QtWidgets import QStatusBar
 
-from mantid.py3compat.mock import Mock, call, patch
+from unittest.mock import Mock, call, patch
 from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
 from mantidqt.utils.testing.mocks.mock_plotlib import MockAx, MockPlotLib
 from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex, MockQSelectionModel

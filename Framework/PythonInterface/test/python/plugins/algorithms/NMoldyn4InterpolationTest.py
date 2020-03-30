@@ -110,9 +110,4 @@ class NMoldyn4InterpolationTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    python_version = version_info
-    if python_version < (2, 7, 0):
-        logger.warning("Not running this test as it requires Python >= 2.7. Version found: {0}".
-                       format(python_version))
-    else:
-        unittest.main()
+    unittest.main()

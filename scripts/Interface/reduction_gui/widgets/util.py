@@ -7,7 +7,6 @@
 """
     Utility functions used be the widgets
 """
-from __future__ import (absolute_import, division, print_function)
 CSS_VALID = """QLineEdit {
                 background-color: white;
             }"""

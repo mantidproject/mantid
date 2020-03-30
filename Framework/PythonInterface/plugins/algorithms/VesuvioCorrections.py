@@ -5,9 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init, too-many-instance-attributes
-from __future__ import (absolute_import, division, print_function)
-from six import iteritems
-
 from mantid.kernel import *
 from mantid.api import *
 from vesuvio.base import VesuvioBase, TableWorkspaceDictionaryFacade
@@ -418,7 +415,7 @@ class VesuvioCorrections(VesuvioBase):
 
         for idx, wsn in enumerate(fit_workspaces):
             tie = ''
-            for param, value in iteritems(fixed_parameters):
+            for param, value in fixed_parameters.items():
                 if param in wsn:
                     tie = 'Scaling=%f,' % value
             function_str = "name=TabulatedFunction,Workspace=%s," % wsn \

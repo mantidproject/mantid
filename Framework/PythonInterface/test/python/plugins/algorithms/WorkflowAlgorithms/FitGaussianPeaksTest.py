@@ -4,14 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import numpy as np
 import unittest
 
 from mantid.simpleapi import CreateEmptyTableWorkspace, CreateWorkspace, DeleteWorkspace, FitGaussianPeaks
 from mantid.api import *
-from mantid.py3compat import mock
+from unittest import mock
 
 import plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks as _FitGaussianPeaks
 

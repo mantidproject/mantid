@@ -10,7 +10,6 @@
 # This module contains utility functions common to the
 # SANS data reduction scripts
 ########################################################
-from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry, FileFinder
 from mantid.kernel import DateAndTime
@@ -18,7 +17,7 @@ import inspect
 import math
 import os
 import re
-from six import types, iteritems, PY3
+import types
 import numpy as np
 import h5py as h5
 
@@ -736,14 +735,9 @@ def check_if_is_event_data(file_name):
         is_event_mode = False
         for value in list(first_entry.values()):
             if "NX_class" in value.attrs:
-                if PY3:
-                    if "NXevent_data" == value.attrs["NX_class"].decode() :
-                        is_event_mode = True
-                        break
-                else:
-                    if "NXevent_data" == value.attrs["NX_class"]:
-                        is_event_mode = True
-                        break
+                if "NXevent_data" == value.attrs["NX_class"].decode() :
+                    is_event_mode = True
+                    break
 
     return is_event_mode
 
@@ -1971,7 +1965,7 @@ def createUnmanagedAlgorithm(name, **kwargs):
     alg = AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     alg.setChild(True)
-    for key, value in iteritems(kwargs):
+    for key, value in kwargs.items():
         alg.setProperty(key, value)
     return alg
 

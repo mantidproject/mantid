@@ -6,14 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """Test the exposed ArrayProperty
 """
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.kernel import (FloatArrayProperty, StringArrayProperty, IntArrayProperty, Direction,
                            NullValidator)
 from mantid.api import PythonAlgorithm
 import numpy as np
 import sys
+
 
 class ArrayPropertyTest(unittest.TestCase):
 

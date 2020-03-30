@@ -55,6 +55,38 @@ public:
     return outWS;
   }
 
+  /**
+   * Create and execute the algorithm in the specified mode.
+   * @param mode The name of the SetError property SetUncertainties
+   * @return The name that the output workspace will be registered as.
+   */
+  API::MatrixWorkspace_sptr runAlgInPlace(const std::string &mode) {
+    // random data mostly works
+    auto inWksp = WorkspaceCreationHelper::create1DWorkspaceRand(30, true);
+    // Ensure first elements of random workspace are zero so test don't
+    // pass randomly
+    auto &E = inWksp->mutableE(0);
+    E[0] = 0.;
+    auto &Y = inWksp->mutableY(0);
+    Y[1] = 0.; // stress sqrtOrOne
+
+    std::string outWSname = "SetUncertainties_" + mode;
+    WorkspaceCreationHelper::storeWS(outWSname, inWksp);
+    SetUncertainties alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    alg.setProperty("InputWorkspace", inWksp);
+    alg.setProperty("SetError", mode);
+    alg.setProperty("OutputWorkspace", outWSname);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    const auto outWS =
+        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+            outWSname);
+    TS_ASSERT(bool(outWS)); // non-null pointer
+    return outWS;
+  }
+
   API::MatrixWorkspace_sptr
   runAlgCustom(const double toSet, const double toReplace,
                const double errorVal, const int precision, const int position) {
@@ -97,8 +129,31 @@ public:
     API::AnalysisDataService::Instance().remove(outWS->getName());
   }
 
+  void test_zero_in_place() {
+    const auto outWS = runAlgInPlace("zero");
+
+    const auto &E = outWS->e(0);
+    for (const auto item : E) {
+      TS_ASSERT_EQUALS(item, 0.);
+    }
+
+    API::AnalysisDataService::Instance().remove(outWS->getName());
+  }
+
   void test_sqrt() {
     const auto outWS = runAlg("sqrt");
+
+    const auto &E = outWS->e(0);
+    const auto &Y = outWS->y(0);
+    for (size_t i = 0; i < E.size(); ++i) {
+      TS_ASSERT_DELTA(Y[i], E[i] * E[i], .001);
+    }
+
+    API::AnalysisDataService::Instance().remove(outWS->getName());
+  }
+
+  void test_sqrt_in_place() {
+    const auto outWS = runAlgInPlace("sqrt");
 
     const auto &E = outWS->e(0);
     const auto &Y = outWS->y(0);
@@ -119,6 +174,16 @@ public:
     API::AnalysisDataService::Instance().remove(outWS->getName());
   }
 
+  void test_oneIfZero_in_place() {
+    const auto outWS = runAlgInPlace("oneIfZero");
+
+    const auto &E = outWS->e(0);
+    for (const auto item : E) {
+      TS_ASSERT(item > 0.);
+    }
+    API::AnalysisDataService::Instance().remove(outWS->getName());
+  }
+
   void test_sqrtOrOne() {
     const auto outWS = runAlg("sqrtOrOne");
 
@@ -131,7 +196,21 @@ public:
         TS_ASSERT_DELTA(Y[i], E[i] * E[i], .001);
       }
     }
+    API::AnalysisDataService::Instance().remove(outWS->getName());
+  }
 
+  void test_sqrtOrOne_in_place() {
+    const auto outWS = runAlgInPlace("sqrtOrOne");
+
+    const auto &E = outWS->e(0);
+    const auto &Y = outWS->y(0);
+    for (size_t i = 0; i < E.size(); ++i) {
+      if (Y[i] == 0.) {
+        TS_ASSERT_EQUALS(E[i], 1.);
+      } else {
+        TS_ASSERT_DELTA(Y[i], E[i] * E[i], .001);
+      }
+    }
     API::AnalysisDataService::Instance().remove(outWS->getName());
   }
 
@@ -200,6 +279,42 @@ public:
       }
     }
     API::AnalysisDataService::Instance().remove(outWS->getName());
+  }
+
+  /**
+   * Create and execute the algorithm in the specified mode.
+   * @param mode The name of the SetError property SetUncertainties
+   * @return The name that the output workspace will be registered as.
+   */
+  void test_EventWorkspacePlace() {
+    // random data mostly works
+    auto inWksp =
+        WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument2(10,
+                                                                         10);
+    std::string outWSname = "SetUncertainties_oneIfZero";
+    WorkspaceCreationHelper::storeWS(outWSname, inWksp);
+    SetUncertainties alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    alg.setProperty("InputWorkspace", inWksp);
+    alg.setProperty("SetError", "oneIfZero");
+    alg.setProperty("OutputWorkspace", outWSname);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    const auto outWS =
+        API::AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace>(
+            outWSname);
+    TS_ASSERT(bool(outWS)); // non-null pointer
+
+    const auto &E = outWS->e(0);
+    const auto &Y = outWS->y(0);
+    for (size_t i = 0; i < E.size(); ++i) {
+      if (Y[i] == 0.) {
+        TS_ASSERT_EQUALS(E[i], 1.);
+      } else {
+        TS_ASSERT_DELTA(Y[i], E[i] * E[i], .001);
+      }
+    }
   }
 };
 

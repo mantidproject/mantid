@@ -4,14 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.simpleapi import CreateWorkspace, set_properties
 from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, AlgorithmManager,
                         DataProcessorAlgorithm, PythonAlgorithm)
 from mantid.kernel import Direction
-from six import iteritems
+
 
 class ChildAlg(PythonAlgorithm):
 
@@ -91,7 +89,7 @@ class AlgorithmHistoryTest(unittest.TestCase):
         alg.initialize()
         alg.setChild(child_algorithm)
         alg.enableHistoryRecordingForChild(record_history)
-        for key, value in iteritems(kwargs):
+        for key, value in kwargs.items():
             alg.setProperty(key, value)
         alg.execute()
         return alg

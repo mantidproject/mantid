@@ -7,8 +7,6 @@
 #  This file is part of the mantid workbench
 #
 #
-from __future__ import absolute_import, unicode_literals
-
 from mantid.api import AlgorithmFactory
 from mantid.kernel import ConfigService
 from workbench.widgets.settings.categories.view import CategoriesSettingsView

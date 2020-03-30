@@ -63,7 +63,6 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
   try {
     alg = AlgorithmFactory::Instance().create(algName,
                                               version); // Throws on fail:
-
     auto count = removeFinishedAlgorithms();
     g_log.debug()
         << count

@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import inspect
 import unittest
 
@@ -13,7 +11,6 @@ from mantid.api import (AlgorithmFactory, IAlgorithm, IEventWorkspace, ITableWor
                         PythonAlgorithm, MatrixWorkspace, mtd)
 import mantid.simpleapi as simpleapi
 import numpy
-import six
 
 
 class SimpleAPITest(unittest.TestCase):
@@ -193,10 +190,10 @@ class SimpleAPITest(unittest.TestCase):
             self.assertEqual(method_parameters[1:],
                              list(simpleapi.rebin.__signature__.parameters))
         else:
-            freefunction_sig = six.get_function_code(simpleapi.rebin).co_varnames
+            freefunction_sig = inspect.getsource(simpleapi.rebin).co_varnames
             expected_method_sig = ['self']
             expected_method_sig.extend(freefunction_sig)
-            self.assertEqual(six.get_function_code(MatrixWorkspace.rebin).co_varnames, tuple(expected_method_sig))
+            self.assertEqual(inspect.getsource(MatrixWorkspace.rebin).co_varnames, tuple(expected_method_sig))
 
     def test_function_attached_as_workpace_method_does_the_same_as_the_free_function(self):
         # Use Rebin as a test

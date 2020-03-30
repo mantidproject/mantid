@@ -10,7 +10,6 @@
 List of common user commands for HFIR SANS
 
 """
-from __future__ import (absolute_import, division, print_function)
 import os.path
 import mantid
 

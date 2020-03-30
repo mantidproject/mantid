@@ -4,13 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.simpleapi import LoadNMoldyn4Ascii1D, config
 from mantid.api import *
 import os
 import math
+
 
 class LoadNMoldyn4Ascii1DTest(unittest.TestCase):
     def setUp(self):

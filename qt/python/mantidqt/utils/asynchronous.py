@@ -7,8 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 # system imports
 import ctypes
 import sys
@@ -16,7 +14,7 @@ import threading
 import time
 from traceback import extract_tb
 
-from mantid.py3compat.enum import Enum
+from enum import Enum
 
 
 class TaskExitCode(Enum):

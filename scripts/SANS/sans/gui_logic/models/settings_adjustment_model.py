@@ -10,8 +10,6 @@ This is one of the two models which is used for the data reduction. It contains 
 are not available in the model associated with the data table.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 from sans.common.enums import SANSInstrument, DataType, FitType, DetectorType
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.user_file.settings_tags import TransId, MonId, FitId, fit_general, monitor_file

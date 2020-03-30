@@ -8,7 +8,6 @@
 """
     Extract or compute the Q values from reduced QENS data
 """
-from __future__ import (absolute_import, division, print_function)
 from systemtesting import MantidSystemTest
 import mantid
 import mantid.simpleapi as sm

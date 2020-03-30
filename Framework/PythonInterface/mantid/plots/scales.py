@@ -8,8 +8,6 @@
 """
 Defines a set of custom axis scales
 """
-from __future__ import (absolute_import, division, unicode_literals)
-
 from mantid.plots.utility import mpl_version_info
 from matplotlib.scale import ScaleBase
 from matplotlib.ticker import (AutoLocator, NullFormatter,
