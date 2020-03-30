@@ -32,7 +32,7 @@ from qtpy.QtWidgets import QComboBox, QGridLayout, QLabel, QHBoxLayout, QVBoxLay
 
 class SliceViewerView(QWidget):
     def __init__(self, presenter, dims_info, can_normalise, parent=None):
-        super(SliceViewerView, self).__init__(parent)
+        super().__init__(parent)
 
         self.presenter = presenter
 

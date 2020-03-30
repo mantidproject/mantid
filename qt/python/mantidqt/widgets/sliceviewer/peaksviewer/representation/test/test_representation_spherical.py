@@ -5,14 +5,11 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import (absolute_import, division, unicode_literals)
 
 # std imports
 import json
 import unittest
-
-# 3rdparty imports
-from mantid.py3compat.mock import MagicMock
+from unittest.mock import MagicMock
 
 # local imports
 from mantidqt.widgets.sliceviewer.peaksviewer.representation \

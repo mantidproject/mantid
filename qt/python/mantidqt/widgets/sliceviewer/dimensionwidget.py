@@ -38,7 +38,7 @@ class DimensionWidget(QWidget):
     """
 
     def __init__(self, dims_info, parent=None):
-        super(DimensionWidget, self).__init__(parent)
+        super().__init__(parent)
 
         self.layout = QVBoxLayout(self)
         self.dims = []
@@ -170,7 +170,7 @@ class Dimension(QWidget):
     """
 
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
-        super(Dimension, self).__init__(parent)
+        super().__init__(parent)
 
         self.minimum = dim_info['minimum']
         self.nbins = dim_info['number_of_bins']
@@ -324,7 +324,7 @@ class DimensionMDE(Dimension):
         self.rebinLabel = QLabel("thick")
         self.rebinLabel.setMinimumWidth(44)
 
-        super(DimensionMDE, self).__init__(dim_info, number, state, parent)
+        super().__init__(dim_info, number, state, parent)
 
         self.spinBins.valueChanged.connect(self.binningChanged)
         self.spinThick.valueChanged.connect(self.valueChanged)
@@ -340,7 +340,7 @@ class DimensionMDE(Dimension):
         return float(self.spinThick.value())
 
     def set_state(self, state):
-        super(DimensionMDE, self).set_state(state)
+        super().set_state(state)
         if self.state == State.X:
             self.spinBins.show()
             self.spinThick.hide()

@@ -24,7 +24,7 @@ class SamplingImage(mimage.AxesImage):
                  resample=False,
                  normalize=mantid.api.MDNormalization.NoNormalization,
                  **kwargs):
-        super(SamplingImage, self).__init__(
+        super().__init__(
             ax,
             cmap=cmap,
             norm=norm,

@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-# third party imports
-from mantid.py3compat.mock import MagicMock
+# stdimports
+from unittest.mock import MagicMock
 
 
 class MissingReprClsAttribute(object):

@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import absolute_import, division, unicode_literals
 
 # std imports
 
@@ -86,7 +85,7 @@ class PeaksWorkspaceSelectorView(QDialog):
         """
         :param parent: An optional parent
         """
-        super(PeaksWorkspaceSelectorView, self).__init__(parent)
+        super().__init__(parent)
         self._presenter = None
         self._setup_ui()
 

@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import (absolute_import, division, unicode_literals)
 
 # 3rd party imports
 from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
@@ -26,7 +25,7 @@ class PeaksViewerView(QWidget):
         :param sliceinfo_provider: An object responsible for providing access to current slice information
         :param parent: An optional parent widget
         """
-        super(PeaksViewerView, self).__init__(parent)
+        super().__init__(parent)
         self._painter = painter
         self._sliceinfo_provider = sliceinfo_provider
         self._group_box = None

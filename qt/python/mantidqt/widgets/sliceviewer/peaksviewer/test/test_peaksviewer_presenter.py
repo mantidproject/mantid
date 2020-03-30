@@ -5,19 +5,18 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import (absolute_import, division, unicode_literals)
 
 # std imports
 import unittest
+from unittest.mock import create_autospec, patch, ANY, MagicMock
 
 # 3rdparty imports
 from mantid.dataobjects import PeaksWorkspace
-from mantid.py3compat.mock import create_autospec, patch, ANY, MagicMock
 from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerModel
 from mantidqt.widgets.sliceviewer.peaksviewer.presenter\
     import PeaksViewerPresenter, TableWorkspaceDataPresenter
 from mantidqt.widgets.sliceviewer.peaksviewer.representation\
-    import PeakRepresentation
+    import NonIntegratedPeakRepresentation
 
 
 def create_test_model(name):
@@ -63,7 +62,7 @@ class PeaksViewerPresenterTest(unittest.TestCase):
         mock_view = MagicMock()
         name = 'ws1'
         mock_model = create_mock_model(name)
-        peak = create_autospec(PeakRepresentation)  #1.5, 2.5, 10.5, 0.7, 'r')
+        peak = create_autospec(NonIntegratedPeakRepresentation)  #1.5, 2.5, 10.5, 0.7, 'r')
         mock_model.peak_representation_at.return_value = peak
         presenter = PeaksViewerPresenter(mock_model, mock_view)
 
