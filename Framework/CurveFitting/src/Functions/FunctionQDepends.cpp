@@ -74,7 +74,10 @@ void FunctionQDepends::setAttribute(const std::string &attName,
         attValue.asInt())}; // ah!, the "joys" of C++ strong typing.
     if (!m_vQ.empty() && wi < m_vQ.size()) {
       Mantid::API::IFunction::setAttribute(attName, attValue);
-      Mantid::API::IFunction::setAttribute("Q", Attribute(m_vQ.at(wi)));
+      auto qAttr = getAttribute("Q");
+      qAttr.setDouble(m_vQ.at(wi));
+      // Can't call setAttributeValue, as it will recurse back into here
+      Mantid::API::IFunction::setAttribute("Q", qAttr);
     }
   }
   // Q can be manually changed by user only if list of Q values is empty
@@ -102,8 +105,8 @@ void FunctionQDepends::setMatrixWorkspace(
   UNUSED_ARG(endX);
   // reset attributes if new workspace is passed
   if (!m_vQ.empty()) {
-    Mantid::API::IFunction::setAttribute("WorkspaceIndex", Attr(EMPTY_INT()));
-    Mantid::API::IFunction::setAttribute("Q", Attr(EMPTY_DBL()));
+    Mantid::API::IFunction::setAttributeValue("WorkspaceIndex", EMPTY_INT());
+    Mantid::API::IFunction::setAttributeValue("Q", EMPTY_DBL());
   }
   // Obtain Q values from the passed workspace, if possible. m_vQ will be
   // cleared if unsuccessful.
@@ -111,7 +114,7 @@ void FunctionQDepends::setMatrixWorkspace(
     m_vQ = this->extractQValues(*workspace);
   }
   if (!m_vQ.empty()) {
-    this->setAttribute("WorkspaceIndex", Attr(static_cast<int>(wi)));
+    this->setAttributeValue("WorkspaceIndex", static_cast<int>(wi));
   }
 }
 

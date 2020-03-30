@@ -658,15 +658,6 @@ private:
 };
 } // namespace
 
-/// @param attr :: The attribute to copy from.
-IFunction::Attribute &IFunction::Attribute::operator=(const Attribute attr) {
-  // This uses copy and swap as the copy constructor does the right
-  // thing of not copying m_quoteValue
-  std::swap(m_data, attr.m_data);
-  m_quoteValue = attr.m_quoteValue;
-  return *this;
-}
-
 std::string IFunction::Attribute::value() const {
   AttValue tmp(m_quoteValue);
   return apply(tmp);

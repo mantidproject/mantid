@@ -242,10 +242,6 @@ public:
     explicit Attribute(const std::vector<double> &v)
         : m_data(v), m_quoteValue(false) {}
 
-    Attribute(const Attribute &o) : m_data(o.m_data), m_quoteValue(false) {}
-    /// Copy assignment
-    Attribute &operator=(const Attribute attr);
-
     /// Apply an attribute visitor
     template <typename T> T apply(AttributeVisitor<T> &v) {
       return boost::apply_visitor(v, m_data);
@@ -289,6 +285,11 @@ public:
     void setBool(const bool &);
     /// Sets new value if attribute is a vector
     void setVector(const std::vector<double> &);
+    template <typename T>
+    // Set value
+    void setValue(const T &v) {
+      m_data = v;
+    }
     /// Set value from a string.
     void fromString(const std::string &str);
 
@@ -503,7 +504,11 @@ public:
   /// Set an attribute value
   template <typename T>
   void setAttributeValue(const std::string &attName, const T &value) {
-    setAttribute(attName, Attribute(value));
+    // Since we can't know T and we would rather not create a universal setter
+    // copy and replace in-place
+    auto attr = getAttribute(attName);
+    attr.setValue(value);
+    setAttribute(attName, attr);
   }
   void setAttributeValue(const std::string &attName, const char *value);
   void setAttributeValue(const std::string &attName, const std::string &value);
