@@ -20,7 +20,8 @@ PEAK_REPRESENTATION_FACTORY = {
 }
 
 
-def create_peakrepresentation(x, y, z, slicepoint, slicedim_width, peak_shape, marker_color):
+def create_peakrepresentation(x, y, z, slicepoint, slicedim_width, peak_shape, marker_color,
+                              bg_color):
     """
     A factory function to create an appropriate PeakRepresentation
     object for a peak.
@@ -31,8 +32,10 @@ def create_peakrepresentation(x, y, z, slicepoint, slicedim_width, peak_shape, m
     :param slicedim_width: Total width of the slicing dimension
     :param peak_shape: A reference to the object describing the PeakShape
     :param marker_color: A str representing the color of the peak shape marker
+    :param bg_color: A str representing the color of the background region if applicable
     :returns: A PeakRepresentation object describing the Peak aspects
               important for display
     """
-    return PEAK_REPRESENTATION_FACTORY[peak_shape.shapeName().lower()].create(
-        x, y, z, compute_alpha(z, slicepoint, slicedim_width), peak_shape, marker_color)
+    factory = PEAK_REPRESENTATION_FACTORY[peak_shape.shapeName().lower()]
+    return factory.create(x, y, z, compute_alpha(z, slicepoint, slicedim_width), peak_shape,
+                          marker_color, bg_color)

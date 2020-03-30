@@ -10,7 +10,7 @@
 
 # 3rdparty imports
 from matplotlib.path import Path
-from matplotlib.patches import PathPatch, Wedge
+from matplotlib.patches import Circle, PathPatch, Wedge
 
 
 class MplPainter(object):
@@ -45,7 +45,7 @@ class MplPainter(object):
         :param radius: Radius of the circle
         :param kwargs: Additional matplotlib properties to pass to the call
         """
-        return self._axes.add_patch(Wedge((x, y), radius, theta1=0.0, theta2=360., **kwargs))
+        return self._axes.add_patch(Circle((x, y), radius, **kwargs))
 
     def cross(self, x, y, half_width, **kwargs):
         """Draw a cross at the given location
@@ -58,6 +58,17 @@ class MplPainter(object):
                  (x + half_width, y + half_width), (x - half_width, y - half_width))
         codes = (Path.MOVETO, Path.LINETO, Path.MOVETO, Path.LINETO)
         return self._axes.add_patch(PathPatch(Path(verts, codes), **kwargs))
+
+    def shell(self, x, y, outer_radius, thick, **kwargs):
+        """Draw a wedge on the Axes
+        :param x: X coordinate of the center
+        :param y: Y coordinate of the center
+        :param outer_radius: Radius of the circle outer edge of the shell
+        :param thick: The thickness of the shell
+        :param kwargs: Additional matplotlib properties to pass to the call
+        """
+        return self._axes.add_patch(
+            Wedge((x, y), outer_radius, theta1=0.0, theta2=360., width=thick, **kwargs))
 
     def snap_to(self, x, y, width):
         """

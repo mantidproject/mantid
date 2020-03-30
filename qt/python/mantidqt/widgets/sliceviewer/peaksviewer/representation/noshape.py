@@ -46,7 +46,7 @@ class NonIntegratedPeakRepresentation(PeakRepresentation):
     CROSS_HALF_WIDTH = 0.1
 
     @classmethod
-    def create(cls, x, y, z, alpha, peak_shape, fg_color):
+    def create(cls, x, y, z, alpha, peak_shape, fg_color, bg_color):
         """
         Create an instance of NonIntegratedPeakRepresentation from the given set of attributes
         :param x: Position of peak in X dimension
@@ -55,6 +55,7 @@ class NonIntegratedPeakRepresentation(PeakRepresentation):
         :param alpha: Initial alpha value
         :param shape: A PeakShape object describing the shape properties (unused)
         :param fg_color: A string indicating the color of the marker
+        :param bg_color: A string indicating the color of optional background region (unused)
         :return: A new instance of this class
         """
         return cls(

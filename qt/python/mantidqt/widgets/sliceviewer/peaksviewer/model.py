@@ -17,6 +17,7 @@ from .representation import create_peakrepresentation
 
 # constants
 DEFAULT_MARKER_COLOR = 'red'
+DEFAULT_BG_COLOR = '0.75'
 # map coordinate system to correct Peak getter
 FRAME_TO_PEAK_CENTER_ATTR = {
     SpecialCoordinateSystem.QLab: 'getQLabFrame',
@@ -39,6 +40,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
 
         super().__init__(peaks_ws)
         self._marker_color = DEFAULT_MARKER_COLOR
+        self._bg_color = DEFAULT_BG_COLOR
         self._visible_peaks = []
 
     @property
@@ -74,7 +76,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
             x, y, z = qframe[diminfo[0]], qframe[diminfo[1]], qframe[diminfo[2]]
             info.append(
                 create_peakrepresentation(x, y, z, slicepoint, slicedim_width, peak.getPeakShape(),
-                                          self.marker_color))
+                                          self.marker_color, self._bg_color))
         self._visible_peaks = info
         return info
 
