@@ -18,7 +18,7 @@ import datetime
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
-from mantid.py3compat import mock
+from unittest import mock
 from workbench.projectrecovery.projectrecovery import ProjectRecovery, SAVING_TIME_KEY, NO_OF_CHECKPOINTS_KEY, \
     RECOVERY_ENABLED_KEY
 

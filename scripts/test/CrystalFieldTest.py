@@ -1504,7 +1504,7 @@ class CrystalFieldFitTest(unittest.TestCase):
     def test_CrystalField_PointCharge_file(self):
         from CrystalField import PointCharge
         import mantid.simpleapi
-        from mantid.py3compat import mock
+        from unittest import mock
 
         # Just check that LoadCIF is called... we'll rely on LoadCIF working properly!
         with mock.patch.object(mantid.simpleapi, 'LoadCIF') as loadcif:

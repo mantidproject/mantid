@@ -20,7 +20,7 @@ from matplotlib import _pylab_helpers
 # register mantid projection
 import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantid.plots.plotfunctions import manage_workspace_names, get_plot_fig
 from mantidqt.plotting.functions import plot_from_names

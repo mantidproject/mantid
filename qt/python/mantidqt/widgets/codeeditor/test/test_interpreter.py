@@ -9,7 +9,7 @@
 #
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 

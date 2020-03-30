@@ -15,7 +15,7 @@ from qtpy.QtCore import Qt
 from qtpy.QtTest import QTest
 
 from mantid.api import AlgorithmFactoryImpl
-from mantid.py3compat.mock import Mock, patch, call
+from unittest.mock import Mock, patch, call
 from mantidqt.utils.qt.testing import (select_item_in_combo_box,
                                        select_item_in_tree, start_qapplication)
 from mantidqt.widgets.algorithmselector.model import AlgorithmSelectorModel

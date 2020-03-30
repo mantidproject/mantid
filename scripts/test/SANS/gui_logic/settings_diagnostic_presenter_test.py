@@ -9,7 +9,7 @@ import os
 import tempfile
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from sans.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
 from sans.state.Serializer import Serializer
 from sans.test_helper.mock_objects import (create_run_tab_presenter_mock, FakeState,

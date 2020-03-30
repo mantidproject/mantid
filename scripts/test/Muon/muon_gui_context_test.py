@@ -8,7 +8,7 @@ import sys
 import unittest
 
 from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.observer_pattern import Observer
 from mantidqt.utils.qt.testing import start_qapplication
 

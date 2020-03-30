@@ -17,7 +17,7 @@ from qtpy.QtWidgets import QMessageBox
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces, RenameWorkspace, UnGroupWorkspace
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.project.project import Project
 from mantidqt.utils.qt.testing import start_qapplication
 

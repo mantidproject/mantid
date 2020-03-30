@@ -8,7 +8,7 @@ import os
 import unittest
 
 import mantid
-from mantid.py3compat import mock
+from unittest import mock
 from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.common.constants import ALL_PERIODS
 from sans.gui_logic.models.RowEntries import RowEntries

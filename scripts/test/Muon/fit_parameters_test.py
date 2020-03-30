@@ -7,7 +7,7 @@
 from collections import OrderedDict
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from Muon.GUI.Common.contexts.fitting_context import FitParameters
 
 

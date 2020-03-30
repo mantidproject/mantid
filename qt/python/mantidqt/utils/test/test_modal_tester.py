@@ -12,7 +12,7 @@
 import unittest
 from qtpy.QtWidgets import QInputDialog
 
-from mantid.py3compat.mock import patch
+from unittest.mock import patch
 from mantidqt.utils.qt.testing import start_qapplication, ModalTester
 
 

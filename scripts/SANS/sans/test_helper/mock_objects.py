@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from functools import (partial)
 
-from mantid.py3compat import mock
+from unittest import mock
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.common.enums import (RangeStepType, OutputMode, SANSFacility, SANSInstrument)
 from sans.state.JsonSerializable import JsonSerializable

@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench
 from unittest import TestCase
 
-from mantid.py3compat.mock import call, Mock
+from unittest.mock import call, Mock
 from mantidqt.utils.testing.mocks.mock_qt import MockQButton, MockQWidget
 from mantidqt.utils.testing.strict_mock import StrictPropertyMock
 from workbench.widgets.settings.presenter import SettingsPresenter

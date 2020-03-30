@@ -10,7 +10,7 @@
 import os
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from workbench.widgets.plotselector.model import PlotSelectorModel
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter
 from workbench.widgets.plotselector.view import PlotSelectorView, Column

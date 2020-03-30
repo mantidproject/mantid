@@ -14,7 +14,7 @@ import tempfile
 import unittest
 
 from mantid.api import AnalysisDataService as ADS
-from mantid.py3compat import mock
+from unittest import mock
 from mantid.simpleapi import CreateSampleWorkspace
 
 from mantidqt.utils.testing.strict_mock import StrictContextManagerMock

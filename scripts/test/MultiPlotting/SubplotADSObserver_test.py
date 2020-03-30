@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from MultiPlotting.subplot.subplot_ADS_observer import SubplotADSObserver
 
 

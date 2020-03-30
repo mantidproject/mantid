@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 import unittest
 
-from mantid.py3compat.mock import Mock, PropertyMock
+from unittest.mock import Mock, PropertyMock
 
 
 class StrictMock(Mock):

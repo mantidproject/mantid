@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 
 from Engineering.gui.engineering_diffraction.settings import settings_model, settings_view, settings_presenter
 

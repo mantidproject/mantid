@@ -10,7 +10,7 @@
 
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.widgets.codeeditor.scriptcompatibility import (mantid_api_import_needed,
                                                              mantid_algorithm_used_without_import)
 

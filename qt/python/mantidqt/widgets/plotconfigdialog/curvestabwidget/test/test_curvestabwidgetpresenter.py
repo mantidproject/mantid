@@ -17,7 +17,7 @@ from numpy import array_equal
 from mantid.simpleapi import CreateWorkspace
 from mantid.plots import datafunctions
 from mantid.plots.utility import MantidAxType
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import (

@@ -11,7 +11,7 @@ import unittest
 from matplotlib.pyplot import figure
 
 from mantid.plots import MantidAxes # noqa
-from mantid.py3compat.mock import Mock
+from unittest.mock import Mock
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
 
 

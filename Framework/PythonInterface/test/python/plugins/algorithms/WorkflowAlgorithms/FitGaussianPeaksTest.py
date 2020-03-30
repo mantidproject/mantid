@@ -9,7 +9,7 @@ import unittest
 
 from mantid.simpleapi import CreateEmptyTableWorkspace, CreateWorkspace, DeleteWorkspace, FitGaussianPeaks
 from mantid.api import *
-from mantid.py3compat import mock
+from unittest import mock
 
 import plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks as _FitGaussianPeaks
 

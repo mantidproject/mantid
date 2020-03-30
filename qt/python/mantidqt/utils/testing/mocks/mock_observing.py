@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from mantid.py3compat.mock import Mock
+from unittest.mock import Mock
 
 from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from mantidqt.widgets.observers.observing_view import ObservingView

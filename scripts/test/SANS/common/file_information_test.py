@@ -7,7 +7,7 @@
 import unittest
 
 from mantid.kernel import DateAndTime
-from mantid.py3compat import mock
+from unittest import mock
 from sans.common.enums import SampleShape
 from sans.common.file_information import (SANSFileInformationFactory, FileType,
                                           SANSInstrument, get_instrument_paths_for_sans_file)

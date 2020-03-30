@@ -16,7 +16,7 @@ import unittest
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace, GroupWorkspaces
-from mantid.py3compat import mock
+from unittest import mock
 from workbench.projectrecovery.projectrecovery import ProjectRecovery
 
 if sys.version_info.major >= 3:

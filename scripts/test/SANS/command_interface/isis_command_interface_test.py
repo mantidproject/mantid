@@ -10,7 +10,7 @@ import unittest
 import uuid
 
 
-from mantid.py3compat import mock
+from unittest import mock
 from sans.command_interface.ISISCommandInterface import MaskFile
 
 

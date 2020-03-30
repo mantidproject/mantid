@@ -13,7 +13,7 @@ import qtpy
 from qtpy import QtCore
 from qtpy.QtCore import Qt
 
-from mantid.py3compat.mock import MagicMock, Mock, call
+from unittest.mock import MagicMock, Mock, call
 from mantidqt.utils.testing.mocks.mock_mantid import AXIS_INDEX_FOR_HORIZONTAL, AXIS_INDEX_FOR_VERTICAL, MockMantidAxis, \
     MockMantidSymbol, MockMantidUnit, MockSpectrum, MockWorkspace
 from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex

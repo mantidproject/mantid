@@ -12,7 +12,7 @@ from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.fitting_context import FittingContext
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
-from mantid.py3compat import mock
+from unittest import mock
 
 
 def setup_context_for_tests(parent_object):

@@ -7,7 +7,7 @@
 import unittest
 
 from mantid import ConfigService
-from mantid.py3compat import mock
+from unittest import mock
 from sans.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
 
 

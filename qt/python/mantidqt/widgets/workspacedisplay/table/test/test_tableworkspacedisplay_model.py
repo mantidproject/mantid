@@ -11,7 +11,7 @@ import functools
 import unittest
 
 from mantid.kernel import V3D
-from mantid.py3compat.mock import Mock
+from unittest.mock import Mock
 from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
 from mantidqt.utils.testing.strict_mock import StrictMock
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceColumnTypeMapping, TableWorkspaceDisplayModel

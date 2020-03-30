@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat.mock import patch
+from unittest.mock import patch
 from Engineering.gui.engineering_diffraction.settings.settings_model import SettingsModel
 
 dir_path = "Engineering.gui.engineering_diffraction.settings."

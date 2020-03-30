@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 
 from Muon.GUI.ElementalAnalysis.Detectors.detectors_presenter import DetectorsPresenter
 

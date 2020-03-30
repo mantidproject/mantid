@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench
 import unittest
 
-from mantid.py3compat.mock import call, Mock, patch, ANY
+from unittest.mock import call, Mock, patch, ANY
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.mocks.mock_qt import MockQWidget
 from mantidqt.utils.testing.strict_mock import StrictMock

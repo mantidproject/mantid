@@ -10,7 +10,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 from mantid.api import AnalysisDataService, WorkspaceFactory, WorkspaceGroup
 from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
-from mantid.py3compat import mock
+from unittest import mock
 
 from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformation, FitParameters
 

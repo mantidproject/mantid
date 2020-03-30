@@ -9,7 +9,7 @@ import tempfile
 import shutil
 from os import path
 
-from mantid.py3compat.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock
 from mantid.simpleapi import CreateSampleWorkspace
 from Engineering.gui.engineering_diffraction.tabs.focus import model
 from Engineering.gui.engineering_diffraction.tabs.common import path_handling

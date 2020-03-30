@@ -8,7 +8,7 @@ import unittest
 
 from mantid.api import AnalysisDataService, FrameworkManager
 from mantid.kernel import (V3D, Quat)
-from mantid.py3compat import mock
+from unittest import mock
 from sans.common.constants import (SANS2D, LOQ, LARMOR)
 from sans.common.enums import (ReductionMode, ReductionDimensionality, OutputParts,
                                SANSInstrument, DetectorType, SANSFacility, DataType)

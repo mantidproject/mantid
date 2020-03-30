@@ -11,7 +11,7 @@ import matplotlib
 matplotlib.use('Agg') # noqa: E402
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.widgets.samplelogs.model import SampleLogsModel
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
 from mantidqt.widgets.samplelogs.view import SampleLogsView

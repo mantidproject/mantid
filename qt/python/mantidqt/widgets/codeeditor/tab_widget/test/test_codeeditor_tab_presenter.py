@@ -8,7 +8,7 @@
 import os
 from unittest import TestCase
 
-from mantid.py3compat.mock import patch
+from unittest.mock import patch
 from mantidqt.utils.testing.mocks.mock_qt import MockQWidget
 from mantidqt.utils.testing.strict_mock import StrictPropertyMock
 from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_presenter import CodeEditorTabPresenter

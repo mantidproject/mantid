@@ -10,7 +10,7 @@
 from qtpy.QtCore import QCoreApplication, QObject
 import unittest
 
-from mantid.py3compat.mock import patch
+from unittest.mock import patch
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.writetosignal import WriteToSignal
 

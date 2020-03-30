@@ -9,7 +9,7 @@ import unittest
 
 from matplotlib.figure import Figure
 from mantid import WorkspaceFactory, plots
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.ElementalAnalysis.Plotting.subPlot_object import subPlot

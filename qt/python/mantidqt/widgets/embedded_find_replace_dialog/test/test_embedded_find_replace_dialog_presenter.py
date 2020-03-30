@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 from unittest import TestCase
 
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from mantidqt.widgets.embedded_find_replace_dialog.presenter import EmbeddedFindReplaceDialog, SearchDirection
 from mantidqt.utils.testing.mocks.mock_codeeditor import MockCodeEditor

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from sans.algorithm_detail.centre_finder_new import centre_finder_new, centre_finder_mass
 from sans.common.enums import (SANSDataType, FindDirectionEnum, DetectorType)
 from sans.test_helper.test_director import TestDirector

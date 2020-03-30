@@ -8,7 +8,7 @@ import unittest
 
 from mantid.kernel import PropertyManagerDataService
 from mantid.kernel import config
-from mantid.py3compat import mock
+from unittest import mock
 from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.common.enums import SANSInstrument
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ReductionMode,

@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat.mock import patch, MagicMock
-from mantid.py3compat import mock
+from unittest.mock import patch, MagicMock
+from unittest import mock
 from Engineering.gui.engineering_diffraction.tabs.calibration import model, view, presenter
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 

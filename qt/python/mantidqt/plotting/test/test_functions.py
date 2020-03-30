@@ -23,7 +23,7 @@ import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import config
 from mantid.plots import MantidAxes
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
                                          manage_workspace_names, plot, plot_from_names,

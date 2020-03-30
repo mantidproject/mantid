@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat.mock import patch
-from mantid.py3compat.mock import MagicMock
+from unittest.mock import patch
+from unittest.mock import MagicMock
 from Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
 
 VANADIUM_NUMBER = "307521"

@@ -18,7 +18,7 @@ from mantidqt.project.plotsloader import PlotsLoader  # noqa
 import mantid.plots.axesfunctions  # noqa
 from mantid.api import AnalysisDataService as ADS  # noqa
 from mantid.dataobjects import Workspace2D  # noqa
-from mantid.py3compat import mock  # noqa
+from unittest import mock  # noqa
 
 
 def pass_func():

@@ -8,7 +8,7 @@
 import unittest
 import sys
 
-from mantid.py3compat.mock import call, patch, MagicMock, Mock
+from unittest.mock import call, patch, MagicMock, Mock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.settings.general.presenter import GeneralSettings

@@ -10,7 +10,7 @@ import unittest
 
 from mantid.api import AnalysisDataService as ADS, AnalysisDataServiceObserver
 from mantid.simpleapi import CreateSampleWorkspace, RenameWorkspace, GroupWorkspaces, UnGroupWorkspace, DeleteWorkspace
-from mantid.py3compat import mock
+from unittest import mock
 
 
 class FakeADSObserver(AnalysisDataServiceObserver):

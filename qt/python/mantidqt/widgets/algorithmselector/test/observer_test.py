@@ -10,7 +10,7 @@
 import unittest
 
 from mantid.api import AlgorithmFactory, PythonAlgorithm
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.widgets.algorithmselector.widget import AlgorithmSelectorWidget
 from mantidqt.widgets.algorithmselector.algorithm_factory_observer import AlgorithmSelectorFactoryObserver
 
