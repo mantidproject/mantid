@@ -42,7 +42,7 @@ class CreatePeakRepresentationTest(unittest.TestCase):
         marker_color = 'w'
         slicepoint, dimwidth = 3.2, 30
         representation = create_peakrepresentation(x, y, z, slicepoint, dimwidth, mock_shape,
-                                                   marker_color)
+                                                   marker_color, None)
         self.assertTrue(isinstance(representation, expected_cls))
         self._verify_expected_attributes(representation, center, 0.4444, marker_color)
         return representation

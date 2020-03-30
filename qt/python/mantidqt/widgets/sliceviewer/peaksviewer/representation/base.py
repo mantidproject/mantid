@@ -177,3 +177,25 @@ class PeakRepresentation(object):
         """
         self._alpha_previous = self._alpha
         self._alpha = compute_alpha(self.z, slicepoint, slicedim_width)
+
+
+class IntegratedPeakRepresentation(PeakRepresentation):
+    """Represents an integrated Peak region"""
+
+    def __init__(self, x, y, z, alpha, fg_color, bg_color, drawables, snap_width):
+        """
+        See PeakRepresentation.__init__ for other parameters
+        :param bg_color: Color of the optional background region
+        :param snap_width: Width of view to encompass all of the shapes
+        """
+        super().__init__(x, y, z, alpha, fg_color, drawables)
+        self._bg_color = bg_color
+        self._snap_width = snap_width
+
+    @property
+    def bg_color(self):
+        return self._bg_color
+
+    def snap_width(self):
+        """Return the width of the view when a peak is zoomed to"""
+        return self._snap_width
