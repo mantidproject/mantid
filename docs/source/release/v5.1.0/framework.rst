@@ -19,6 +19,14 @@ Algorithms
    case where InputWorkspace == OutputWorkspace. Where possible, avoid the
    cost of cloning the inputWorkspace.
 
+Data Handling
+-------------
+
+The material definition has been extended to include an optional filename containing a profile of attenuation factor versus wavelength. This new filename has been added as a parameter to these algorithms:
+- :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+- :ref:`LoadSampleEnvironment <algm-LoadSampleEnvironment>`
+The attenuation profile filename can also be specified in the materials section of the sample environment xml file
+
 Data Objects
 ------------
 

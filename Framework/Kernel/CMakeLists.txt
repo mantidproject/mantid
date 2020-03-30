@@ -5,6 +5,7 @@ set(SRC_FILES
     src/ArrayOrderedPairsValidator.cpp
     src/ArrayProperty.cpp
     src/Atom.cpp
+    src/AttenuationProfile.cpp
     src/BinFinder.cpp
     src/BinaryStreamReader.cpp
     src/BinaryStreamWriter.cpp
@@ -147,6 +148,7 @@ set(INC_FILES
     inc/MantidKernel/ArrayOrderedPairsValidator.h
     inc/MantidKernel/ArrayProperty.h
     inc/MantidKernel/Atom.h
+    inc/MantidKernel/AttenuationProfile.h
     inc/MantidKernel/BinFinder.h
     inc/MantidKernel/BinaryFile.h
     inc/MantidKernel/BinaryStreamReader.h
@@ -318,6 +320,7 @@ set(TEST_FILES
     ArrayOrderedPairsValidatorTest.h
     ArrayPropertyTest.h
     AtomTest.h
+    AttenuationProfileTest.h
     BinFinderTest.h
     BinaryFileTest.h
     BinaryStreamReaderTest.h

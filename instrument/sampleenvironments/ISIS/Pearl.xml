@@ -1,7 +1,7 @@
 <environmentspec>
   <materials>
     <material id="Boron S-dough" formula="(B10)4-C" massdensity="2.52"/>
-	<material id="Sintered Diamond" formula="C0.8 Co0.2" massdensity="3.51"/>
+	<material id="Sintered Diamond" formula="C0.8 Co0.2" massdensity="3.51" attenuationprofile="DIAM_DEBEERS_MU.DAT"/>
 	<material id="TiZr Alloy" formula="Ti0.522 Zr0.478" massdensity="5.23"/>
 	<material id="Steel" formula="Fe" massdensity="8"/>
   </materials>
