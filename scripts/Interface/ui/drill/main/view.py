@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import (QMainWindow, QWidget, QFileDialog, QSizePolicy)
+from qtpy.QtWidgets import (QMainWindow, QFileDialog, QHeaderView, QAbstractItemView, QTableWidgetItem)
 from qtpy.QtGui import QIcon
 from qtpy.QtCore import *
 from qtpy import uic
@@ -13,7 +13,6 @@ from abc import ABCMeta, abstractmethod
 from six import with_metaclass
 
 from mantidqt.widgets import (manageuserdirectories, instrumentselector)
-from mantidqt.widgets.jobtreeview import *
 from mantidqt import icons
 from mantid.kernel import UsageService, FeatureType, config, logger
 from .specifications import RundexSettings
@@ -25,11 +24,11 @@ class DrillEventListener(with_metaclass(ABCMeta, object)):
     """
 
     @abstractmethod
-    def on_add_rows(self, position, content):
+    def on_add_row(self, position):
         pass
 
     @abstractmethod
-    def on_delete_rows(self, rows):
+    def on_del_row(self, row):
         pass
 
     @abstractmethod
@@ -41,10 +40,6 @@ class DrillEventListener(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def on_process_all(self):
-        pass
-
-    @abstractmethod
     def on_instrument_changed(self, instrument):
         pass
 
@@ -53,40 +48,18 @@ class DrillEventListener(with_metaclass(ABCMeta, object)):
         pass
 
 
-class DrillJobTreeView(JobTreeView):
-
-    def __init__(self, columns):
-        JobTreeView.__init__(self, columns, self.cell_style(''))
-        self.setRootIsDecorated(False)
-        self.add_row([''] * len(columns))
-
-    def add_row(self, value):
-        value = [self.cell_style(x) for x in value]
-        self.appendChildRowOf(self.row([]), value)
-
-    def row(self, path):
-        return RowLocation(path)
-
-    def cell_style(self, text):
-        background_color = 'white'
-        border_thickness = 1
-        border_color = 'black'
-        border_opacity = 255
-        is_editable = True
-        return Cell(text, background_color, border_thickness,
-                    border_color, border_opacity, is_editable)
-
-
 class DrillView(QMainWindow):
 
     def __init__(self):
         super(DrillView, self).__init__()
         self.here = os.path.dirname(os.path.realpath(__file__))
+
+        # setup ui
         uic.loadUi(os.path.join(self.here, 'main.ui'), self)
-        self.job_tree_view = None
-        self.settings_listeners = []
         self.setup_header()
-        self.set_table(list())
+        self.setup_table()
+
+        self.settings_listeners = []
         self.buffer = list()  # for copy-paste actions
 
     def setup_header(self):
@@ -108,18 +81,19 @@ class DrillView(QMainWindow):
         self.paste.clicked.connect(self.paste_rows)
 
         self.copy.setIcon(icons.get_icon("mdi.content-copy"))
-        self.copy.clicked.connect(self.copy_rows)
+        self.copy.clicked.connect(self.copy_selected_rows)
 
         self.cut.setIcon(icons.get_icon("mdi.content-cut"))
-        self.cut.clicked.connect(self.cut_rows)
+        self.cut.clicked.connect(self.cut_selected_rows)
 
         self.erase.setIcon(icons.get_icon("mdi.eraser"))
-        self.erase.clicked.connect(self.erase_rows)
+        self.erase.clicked.connect(self.erase_selected_rows)
 
         self.deleterow.setIcon(icons.get_icon("mdi.table-row-remove"))
-        self.deleterow.clicked.connect(self.remove_rows_from_button)
+        self.deleterow.clicked.connect(self.del_selected_rows)
 
         self.addrow.setIcon(icons.get_icon("mdi.table-row-plus-after"))
+        self.addrow.clicked.connect(self.add_row_after)
 
         self.save.setIcon(icons.get_icon("mdi.file-export"))
 
@@ -127,9 +101,18 @@ class DrillView(QMainWindow):
         self.processRows.clicked.connect(self.process_selected_rows)
 
         self.processAll.setIcon(icons.get_icon("mdi.sigma"))
-        self.processAll.clicked.connect(self.process_all)
+        self.processAll.clicked.connect(self.process_all_rows)
 
         self.stop.setIcon(icons.get_icon("mdi.stop"))
+
+    def setup_table(self):
+        table_header = self.table.horizontalHeader()
+        table_header.setSectionResizeMode(QHeaderView.ResizeToContents)
+        table_header.setDefaultAlignment(Qt.AlignLeft)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.cellChanged.connect(
+                lambda row, column : self.data_changed(row, column)
+                )
 
     def add_listener(self, listener):
         if not isinstance(listener, DrillEventListener):
@@ -144,68 +127,76 @@ class DrillView(QMainWindow):
         for listener in self.settings_listeners:
             target(listener)
 
-    def process_all(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["Drill", "Process all button clicked"], False)
-        self.call_settings_listeners(
-                lambda listener: listener.on_process_all()
-                )
 
-    def process_selected_rows(self):
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["Drill", "Process rows button clicked"], False)
-        rows = self.get_selected_rows()
-        self.call_settings_listeners(
-                lambda listener: listener.on_process(
-                    [row.rowRelativeToParent() for row in rows])
-                )
+    ###########################################################################
+    # table interactions                                                      #
+    ###########################################################################
+
+    def add_row(self, position):
+        self.table.insertRow(position)
+
+    def del_row(self, position):
+        self.table.removeRow(position)
+
+    def erase_row(self, position):
+        for column in range(self.table.columnCount()):
+            self.table.takeItem(position, column)
+
+    def erase_rows(self, positions):
+        for position in positions:
+            for column in range(self.table.columnCount()):
+                if self.table.item(position, column) is not None:
+                    self.table.item(position, column).setText("")
 
     def get_selected_rows(self):
-        rows = self.job_tree_view.selectedRowLocations()
+        selected_rows = self.table.selectionModel().selectedRows()
+        rows = [row.row() for row in selected_rows]
         return rows
+
+    def get_last_selected_row(self):
+        rows = self.get_selected_rows()
+        if rows:
+            return rows[-1]
+        else:
+            return -1
 
     def get_all_rows(self):
-        row_locations = self.job_tree_view.allRowLocations()
-        rows = [x.rowRelativeToParent() for x in row_locations]
-        return rows
+        return range(self.table.rowCount() - 1)
 
-    def get_row_contents(self, row_location):
-        cell_data = self.job_tree_view.cellsAt(row_location)
-        return [str(x.contentText()) for x in cell_data]
+    def get_cell_contents(self, row, column):
+        cell = self.table.item(row, column)
+        if cell:
+            return cell.text()
+        else:
+            return ""
+
+    def set_cell_contents(self, row, column, contents):
+        cell = QTableWidgetItem(contents)
+        self.table.setItem(row, column, cell)
+
+    def get_row_contents(self, row):
+        contents = list()
+        for column in range(self.table.columnCount()):
+            contents.append(self.get_cell_contents(row, column))
+        return contents
+
+    def set_row_contents(self, row, contents):
+        column = 0
+        for txt in contents:
+            self.set_cell_contents(row, column, txt)
+            column += 1
+
+
+    ###########################################################################
+    # actions                                                                 #
+    ###########################################################################
 
     def show_settings(self):
         settings = QMainWindow(self)
         uic.loadUi(os.path.join(self.here, self.technique + '_settings.ui'), settings)
         settings.show()
 
-    def data_changed(self, row_location, column, old_value, new_value):
-        row = row_location.rowRelativeToParent()
-        self.call_settings_listeners(
-            lambda listener: listener.on_data_changed(row, column, new_value)
-            )
-
-    def row_inserted(self, row_location):
-        if row_location.depth() > 1:
-            self.job_tree_view.removeRowAt(row_location)
-
-    def append_and_edit_at_row_below_requested(self):
-        self.job_tree_view.appendAndEditAtRowBelow()
-
-    def edit_at_row_above_requested(self):
-        self.job_tree_view.editAtRowAbove()
-
-    def remove_rows(self, rows):
-        self.job_tree_view.removeRows(rows)
-        self.call_settings_listeners(
-                lambda listener: listener.on_delete_rows(
-                    [row.rowRelativeToParent() for row in rows])
-                )
-
-    def remove_rows_from_button(self):
-        rows = self.get_selected_rows()
-        if not rows:
-            return
-        self.remove_rows(rows)
-
-    def copy_rows(self):
+    def copy_selected_rows(self):
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Copy rows button"], False)
         rows = self.get_selected_rows()
@@ -215,23 +206,7 @@ class DrillView(QMainWindow):
         for row in rows:
             self.buffer.append(self.get_row_contents(row))
 
-    def erase_rows(self):
-        UsageService.registerFeatureUsage(
-                FeatureType.Feature, ["Drill", "Erase rows button"], False)
-        rows = self.get_selected_rows()
-        if not rows:
-            return
-        length = len(self.job_tree_view.cellsAt(rows[0]))
-        for row in rows:
-            for cell in range(0, length):
-                self.job_tree_view.setCellAt(row, cell,
-                                             self.job_tree_view.cell_style(""))
-        self.call_settings_listeners(
-                lambda listener: listener.on_delete_rows(
-                    [row.rowRelativeToParent() for row in rows])
-                )
-
-    def cut_rows(self):
+    def cut_selected_rows(self):
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Cut rows button"], False)
         rows = self.get_selected_rows()
@@ -240,31 +215,65 @@ class DrillView(QMainWindow):
         self.buffer = list()
         for row in rows:
             self.buffer.append(self.get_row_contents(row))
-        self.remove_rows(rows)
+        self.del_selected_rows()
 
     def paste_rows(self):
         UsageService.registerFeatureUsage(
                 FeatureType.Feature, ["Drill", "Paste rows button"], False)
-        selected = self.get_selected_rows()
-        if not selected:
-            return
-        position = selected[-1]
-        indice = position.rowRelativeToParent() + 1
-        for row in self.buffer:
-            position = self.job_tree_view.insertChildRowOf(
-                    position.parent(), position.rowRelativeToParent() + 1)
-            column = 0
-            empty = True
-            for txt in row:
-                if txt:
-                    empty = False
-                self.job_tree_view.setCellAt(position, column,
-                                             self.job_tree_view.cell_style(txt))
-                column += 1
-        if not empty:
+        position = self.get_last_selected_row() + 1
+        for row_contents in self.buffer:
+            self.add_row(position)
             self.call_settings_listeners(
-                    lambda listener: listener.on_add_rows(indice, self.buffer)
+                    lambda listener: listener.on_add_row(position)
                     )
+            self.set_row_contents(position, row_contents)
+            position += 1
+
+    def add_row_after(self):
+        position = self.get_last_selected_row() + 1
+        self.add_row(position)
+        self.call_settings_listeners(
+                lambda listener: listener.on_add_row(position)
+                )
+
+    def del_selected_rows(self):
+        rows = self.get_selected_rows()
+        rows = sorted(rows, reverse=True)
+        for row in rows:
+            self.del_row(row)
+            self.call_settings_listeners(
+                    lambda listener: listener.on_del_row(row)
+                    )
+
+    def erase_selected_rows(self):
+        rows = self.get_selected_rows()
+        for row in rows:
+            self.erase_row(row)
+            for column in range(self.table.columnCount()):
+                self.call_settings_listeners(
+                        lambda listener: listener.on_data_changed(self, row,
+                            column, "")
+                        )
+
+    def process_selected_rows(self):
+        rows = self.get_selected_rows()
+        if rows:
+            self.call_settings_listeners(
+                    lambda listener: listener.on_process(rows)
+                    )
+
+    def process_all_rows(self):
+        rows = self.get_all_rows()
+        if rows:
+            self.call_settings_listeners(
+                    lambda listener: listener.on_process(rows)
+                    )
+
+    def data_changed(self, row, column):
+        contents = self.get_cell_contents(row, column)
+        self.call_settings_listeners(
+                lambda listener: listener.on_data_changed(row, column, contents)
+                )
 
     def load_rundex(self):
         fname = QFileDialog.getOpenFileName(self, 'Load rundex', '~')
@@ -278,25 +287,11 @@ class DrillView(QMainWindow):
         manageuserdirectories.ManageUserDirectories(self).exec_()
 
     def set_table(self, columns):
-        if self.job_tree_view:
-            self.job_tree_view.setParent(None)
-
-        # table widget
-        self.job_tree_view = DrillJobTreeView(columns)
-        self.center.addWidget(self.job_tree_view)
-
-        # signals connection
-        self.table_signals = JobTreeViewSignalAdapter(self.job_tree_view, self)
-        self.table_signals.cellTextChanged.connect(self.data_changed)
-        self.table_signals.rowInserted.connect(self.row_inserted)
-        self.table_signals.appendAndEditAtRowBelowRequested.connect(
-                self.append_and_edit_at_row_below_requested)
-        self.table_signals.editAtRowAboveRequested.connect(
-                self.edit_at_row_above_requested)
-        self.table_signals.removeRowsRequested.connect(self.remove_rows)
-        self.table_signals.copyRowsRequested.connect(self.copy_rows)
-        self.table_signals.pasteRowsRequested.connect(self.paste_rows)
-        self.table_signals.cutRowsRequested.connect(self.cut_rows)
+        self.table.clear()
+        self.table.setColumnCount(len(columns))
+        self.table.setHorizontalHeaderLabels(columns)
+        if columns:
+            self.add_row_after()
 
     def set_technique(self, technique):
         self.technique = technique

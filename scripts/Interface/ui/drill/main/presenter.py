@@ -16,20 +16,17 @@ class DrillPresenter(DrillEventListener):
         self.view.add_listener(self)
         self.update_view_from_model()
 
-    def on_add_rows(self, position, content):
-        self.model.add_row(position, content)
+    def on_add_row(self, position):
+        self.model.add_row(position)
 
-    def on_delete_rows(self, positions):
-        self.model.del_row(positions)
+    def on_del_row(self, position):
+        self.model.del_row(position)
 
     def on_data_changed(self, row, column, content):
         self.model.change_data(row, column, content)
 
     def on_process(self, rows):
         self.model.process(rows)
-
-    def on_process_all(self):
-        self.model.process_all()
 
     def on_instrument_changed(self, instrument):
         self.model.set_instrument(instrument)

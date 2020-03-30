@@ -86,14 +86,11 @@ class DrillModel(object):
     def get_technique(self):
         return self.technique
 
-    def add_row(self, position, content):
-        self.data.insert(position, content)
+    def add_row(self, position):
+        self.data.insert(position, [""] * len(RundexSettings.COLUMNS[self.technique]))
 
-    def del_row(self, positions):
-        positions.sort(reverse=True)
-        for position in positions:
-            if (position < len(self.data)):
-                del self.data[position]
+    def del_row(self, position):
+        del self.data[position]
 
     def change_data(self, row, column, content):
         while (row >= len(self.data)):
