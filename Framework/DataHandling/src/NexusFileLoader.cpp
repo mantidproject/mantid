@@ -5,13 +5,14 @@
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/NexusFileLoader.h"
+#include "MantidDataHandling/Load.h"
 
 namespace Mantid::DataHandling {
 void NexusFileLoader::exec() {
   // make sure the descriptor is initialized
   if (!m_fileInfo) {
-    const std::string filename =
-        this->getPropertyValue("Filename"); // TODO be more generic
+    const std::string filePropName = Load::findFilenamePropertyName(this);
+    const std::string filename = this->getPropertyValue(filePropName);
     m_fileInfo =
         std::make_shared<Mantid::Kernel::NexusHDF5Descriptor>(filename);
   }

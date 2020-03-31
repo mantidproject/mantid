@@ -214,26 +214,43 @@ API::IAlgorithm_sptr Load::getFileLoader(const std::string &filePath) {
   return winningLoader;
 }
 
-void Load::findFilenameProperty(const API::IAlgorithm_sptr &loader) {
+std::string Load::findFilenamePropertyName(const IAlgorithm *loader) {
+  std::string propertyName; // default is empty string
+
   // Use the first file property as the main Filename
   const auto &props = loader->getProperties();
   for (auto prop : props) {
-    auto *fp = dynamic_cast<API::MultipleFileProperty *>(prop);
-    auto *fp2 = dynamic_cast<API::FileProperty *>(prop);
-    if (fp) {
-      m_filenamePropName = fp->name();
+    auto *multiprop = dynamic_cast<API::MultipleFileProperty *>(prop);
+    auto *singleprop = dynamic_cast<API::FileProperty *>(prop);
+    if (multiprop) {
+      propertyName = multiprop->name();
       break;
     }
-    if (fp2) {
-      m_filenamePropName = fp2->name();
+    if (singleprop) {
+      propertyName = singleprop->name();
       break;
     }
   }
-  if (m_filenamePropName.empty()) {
+
+  // throw an exception if somehting nothing was found
+  if (propertyName.empty()) {
+    std::stringstream msg;
+    msg << "Cannot find FileProperty on \"" << loader->name() << "\" v"
+        << loader->version() << " algorithm.";
+    throw std::runtime_error(msg.str());
+  }
+
+  return propertyName;
+}
+
+void Load::findFilenameProperty(const API::IAlgorithm_sptr &loader) {
+  try {
+    m_filenamePropName = findFilenamePropertyName(loader.get());
+  } catch (std::runtime_error &) {
+    // unset member variables
     setPropertyValue("LoaderName", "");
     setProperty("LoaderVersion", -1);
-    throw std::runtime_error("Cannot find FileProperty on " + loader->name() +
-                             " algorithm.");
+    throw;
   }
 }
 
