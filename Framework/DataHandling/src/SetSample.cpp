@@ -592,7 +592,8 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromFile(
 /**
  * Set the requested sample environment from shape XML string
  * @param exptInfo A reference to the ExperimentInfo to receive the environment
- * @param args The dictionary of flags for the environment
+ * @param canGeomArgs The dictionary of flags for the environment
+ * @param canMaterialArgs The dictionary of material parameters
  * @return A pointer to the new sample environment
  */
 const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
