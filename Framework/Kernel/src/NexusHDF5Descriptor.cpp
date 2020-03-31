@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidKernel/NexusHDF5Descriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 
 #include <hdf5.h>
 
@@ -176,6 +177,12 @@ void getGroup(hid_t groupID,
 
 } // namespace
 
+
+bool NexusHDF5Descriptor::isReadable(const std::string &filename) {
+  // use existing function to do the work
+  return NexusDescriptor::isReadable(filename, NexusDescriptor::Version::Version5);
+}
+
 NexusHDF5Descriptor::NexusHDF5Descriptor(const std::string &filename)
     : m_filename(filename), m_allEntries(initAllEntries()) {}
 
@@ -196,7 +203,7 @@ NexusHDF5Descriptor::initAllEntries() {
   hid_t fileID = H5Fopen(m_filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
   if (fileID < 0) {
     throw std::invalid_argument(
-        "ERROR: Kernel::HDF5Descriptor couldn't open hdf5 file " + m_filename +
+        "ERROR: Kernel::NexusHDF5Descriptor couldn't open hdf5 file " + m_filename +
         "\n");
   }
 

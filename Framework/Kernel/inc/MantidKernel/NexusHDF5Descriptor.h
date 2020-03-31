@@ -30,6 +30,9 @@ public:
    */
   ~NexusHDF5Descriptor() = default;
 
+  /// Returns true if the file is considered to store data in a hierarchy
+  static bool isReadable(const std::string &filename);
+
   /**
    * Returns a copy of the current file name
    * @return
