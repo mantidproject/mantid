@@ -35,7 +35,7 @@ if __name__ == "__main__":
         SplitThreshold='50',
         MaxRecursionDepth='14')
     peaksws = Load('peaks_qLab.nxs')
-    while peaksws.getNumberPeaks() > 1:
+    while peaksws.getNumberPeaks() > 5:
         DeleteTableRows(peaksws, Rows=peaksws.getNumberPeaks() - 1)
     IntegratePeaksMD(
         InputWorkspace=mdws,
@@ -49,6 +49,14 @@ if __name__ == "__main__":
         BackgroundInnerRadius=1.1,
         BackgroundOuterRadius=1.4,
         OutputWorkspace='peaksws_sphere_withbkgd')
+
+    FindUBUsingFFT(PeaksWorkspace=peaksws, MinD=0.8, MaxD=10)
+    IndexPeaks(PeaksWorkspace=peaksws, Tolerance=0.1)
+    IntegrateEllipsoids(
+        InputWorkspace=SXD23767,
+        PeaksWorkspace='peaksws',
+        RegionRadius=0.5,
+        OutputWorkspace='peaksws_ellipse_no_bkgd')
 
     app = QApplication([])
     sv = SliceViewer(mdws)

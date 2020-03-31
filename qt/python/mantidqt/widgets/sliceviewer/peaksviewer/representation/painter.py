@@ -10,7 +10,7 @@
 
 # 3rdparty imports
 from matplotlib.path import Path
-from matplotlib.patches import Circle, PathPatch, Wedge
+from matplotlib.patches import Circle, Ellipse, PathPatch, Wedge
 
 
 class MplPainter(object):
@@ -58,6 +58,17 @@ class MplPainter(object):
                  (x + half_width, y + half_width), (x - half_width, y - half_width))
         codes = (Path.MOVETO, Path.LINETO, Path.MOVETO, Path.LINETO)
         return self._axes.add_patch(PathPatch(Path(verts, codes), **kwargs))
+
+    def ellipse(self, x, y, width, height, angle=0.0, **kwargs):
+        """Draw an ellipse at the given location
+        :param x: X coordinate of the center
+        :param y: Y coordinate of the center
+        :param width: Size in X dimension
+        :param height: Size in Y dimension
+        :param angle: Angle in degrees w.r.t X axis
+        :param kwargs: Additional matplotlib properties to pass to the call
+        """
+        return self._axes.add_patch(Ellipse((x, y), width, height, angle, **kwargs))
 
     def shell(self, x, y, outer_radius, thick, **kwargs):
         """Draw a wedge on the Axes
