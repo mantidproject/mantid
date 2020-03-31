@@ -106,7 +106,7 @@ class AsyncTaskTest(unittest.TestCase):
 
         self.assertEqual(2, len(recv.task_exc_stack))
         # line number of self.target in asynchronous.py
-        self.assertEqual(68, recv.task_exc_stack[0][1])
+        self.assertEqual(65, recv.task_exc_stack[0][1])
         # line number of raise statement above
         self.assertEqual(93, recv.task_exc_stack[1][1])
 
