@@ -95,7 +95,7 @@ void Rebin::init() {
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "Params", boost::make_shared<RebinParamsValidator>()),
+          "Params", std::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally "
       "this can be followed by a comma and more widths and last boundary "
@@ -161,7 +161,7 @@ void Rebin::exec() {
 
   // Now, determine if the input workspace is actually an EventWorkspace
   EventWorkspace_const_sptr eventInputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
   if (eventInputWS != nullptr) {
     //------- EventWorkspace as input -------------------------------------
@@ -170,8 +170,7 @@ void Rebin::exec() {
       if (!inPlace) {
         outputWS = inputWS->clone();
       }
-      auto eventOutputWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+      auto eventOutputWS = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
       // This only sets the X axis. Actual rebinning will be done upon data
       // access.
       eventOutputWS->setAllX(XValues_new);

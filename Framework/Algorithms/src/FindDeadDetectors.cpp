@@ -30,7 +30,7 @@ void FindDeadDetectors::init() {
       "Each histogram from the input workspace maps to a histogram in this\n"
       "workspace with one value that indicates if there was a dead detector");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
   declareProperty(
       "DeadThreshold", 0.0, mustBePositive,

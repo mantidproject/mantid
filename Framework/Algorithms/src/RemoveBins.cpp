@@ -38,7 +38,7 @@ RemoveBins::RemoveBins()
  *
  */
 void RemoveBins::init() {
-  auto wsValidator = boost::make_shared<HistogramValidator>();
+  auto wsValidator = std::make_shared<HistogramValidator>();
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.");
@@ -46,7 +46,7 @@ void RemoveBins::init() {
                                                         Direction::Output),
                   "The name of the output workspace.");
 
-  auto mustHaveValue = boost::make_shared<MandatoryValidator<double>>();
+  auto mustHaveValue = std::make_shared<MandatoryValidator<double>>();
   declareProperty("XMin", Mantid::EMPTY_DBL(), mustHaveValue,
                   "The lower bound of the region to be removed.");
   declareProperty("XMax", Mantid::EMPTY_DBL(), mustHaveValue,
@@ -63,20 +63,20 @@ void RemoveBins::init() {
   // add a default do nothing value
   units.insert(units.begin(), "AsInput");
   declareProperty("RangeUnit", "AsInput",
-                  boost::make_shared<StringListValidator>(units),
+                  std::make_shared<StringListValidator>(units),
                   "The unit in which XMin/XMax are being given. If not given, "
                   "it will peak the unit from the Input workspace X unit.");
 
   std::vector<std::string> propOptions{"None", "Linear"};
   declareProperty("Interpolation", "None",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Whether mid-axis bins should be interpolated linearly "
                   "(\"Linear\") or set to zero (\"None\"). Note: Used when the "
                   "region to be removed is within a bin. Linear scales the "
                   "value in that bin by the proportion of it that is outside "
                   "the region to be removed and none sets it to zero");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex", EMPTY_INT(), mustBePositive,
                   "If set, will remove data only in the given spectrum of the "
@@ -129,7 +129,7 @@ std::map<std::string, std::string> RemoveBins::validateInputs() {
     Kernel::Unit_const_sptr unit = m_inputWorkspace->getAxis(0)->unit();
     // If m_unitID is empty it means that the workspace must have units, which
     // can be anything
-    if (unit && (!boost::dynamic_pointer_cast<const Kernel::Unit>(unit))) {
+    if (unit && (!std::dynamic_pointer_cast<const Kernel::Unit>(unit))) {
       errorString =
           "The workspace must have units if the RangeUnit is not \"AsInput\"";
     }
@@ -243,7 +243,7 @@ void RemoveBins::crop(const double &start, const double &end) {
   IAlgorithm_sptr childAlg = createChildAlgorithm("CropWorkspace");
   childAlg->setProperty<MatrixWorkspace_sptr>(
       "InputWorkspace",
-      boost::const_pointer_cast<MatrixWorkspace>(m_inputWorkspace));
+      std::const_pointer_cast<MatrixWorkspace>(m_inputWorkspace));
   childAlg->setProperty<double>("XMin", start);
   childAlg->setProperty<double>("XMax", end);
   childAlg->executeAsChildAlg();

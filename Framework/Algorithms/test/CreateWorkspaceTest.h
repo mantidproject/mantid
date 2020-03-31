@@ -95,7 +95,7 @@ public:
     Mantid::API::MatrixWorkspace_const_sptr ws;
 
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "test_CreateWorkspace")));
 
@@ -152,7 +152,7 @@ public:
     Mantid::API::MatrixWorkspace_const_sptr ws;
 
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "test_CreateWorkspace")));
 
@@ -322,7 +322,7 @@ private:
 
     // Get hold of the output workspace
     Mantid::API::MatrixWorkspace_sptr workspace =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 "test_CreateWorkspace"));
     return workspace;

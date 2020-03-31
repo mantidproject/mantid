@@ -91,14 +91,14 @@ void ConvertFitFunctionForMuonTFAsymmetry::init() {
       "Name of the table containing the normalizations for the asymmetries.");
   // list of workspaces
   declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
-                      "WorkspaceList", boost::make_shared<API::ADSValidator>()),
+                      "WorkspaceList", std::make_shared<API::ADSValidator>()),
                   "An ordered list of workspaces (to get the initial values "
                   "for the normalizations).");
 
   std::vector<std::string> allowedModes{"Construct", "Extract"};
-  auto modeVal = boost::make_shared<Kernel::CompositeValidator>();
-  modeVal->add(boost::make_shared<Kernel::StringListValidator>(allowedModes));
-  modeVal->add(boost::make_shared<Kernel::MandatoryValidator<std::string>>());
+  auto modeVal = std::make_shared<Kernel::CompositeValidator>();
+  modeVal->add(std::make_shared<Kernel::StringListValidator>(allowedModes));
+  modeVal->add(std::make_shared<Kernel::MandatoryValidator<std::string>>());
   declareProperty(
       "Mode", "Construct", modeVal,
       "Mode to run in. Construct will convert the"
@@ -207,7 +207,7 @@ void ConvertFitFunctionForMuonTFAsymmetry::setOutput(
   const std::vector<std::string> wsNames = getProperty("WorkspaceList");
   if (wsNames.size() == 1) {
     // if single domain func, strip off multi domain
-    auto TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(function);
+    auto TFFunc = std::dynamic_pointer_cast<CompositeFunction>(function);
     outputFitFunction = TFFunc->getFunction(0);
   }
   setProperty("OutputFunction", outputFitFunction);
@@ -222,12 +222,12 @@ Mantid::API::IFunction_sptr
 ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
     const Mantid::API::IFunction_sptr &original) {
 
-  auto multi = boost::make_shared<MultiDomainFunction>();
+  auto multi = std::make_shared<MultiDomainFunction>();
   IFunction_sptr tmp = original;
 
   size_t numDomains = original->getNumberDomains();
   for (size_t j = 0; j < numDomains; j++) {
-    auto TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(original);
+    auto TFFunc = std::dynamic_pointer_cast<CompositeFunction>(original);
     if (numDomains > 1) {
       // get correct domain
       tmp = TFFunc->getFunction(j);
@@ -263,7 +263,7 @@ ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
     }
   }
 
-  return boost::dynamic_pointer_cast<IFunction>(multi);
+  return std::dynamic_pointer_cast<IFunction>(multi);
 }
 /** Extracts the user's original function f from the normalization function
  * N(1+f)+expDecay
@@ -274,21 +274,19 @@ ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(
 IFunction_sptr ConvertFitFunctionForMuonTFAsymmetry::extractUserFunction(
     const IFunction_sptr &TFFuncIn) {
   // N(1+g) + exp
-  auto TFFunc = boost::dynamic_pointer_cast<CompositeFunction>(TFFuncIn);
+  auto TFFunc = std::dynamic_pointer_cast<CompositeFunction>(TFFuncIn);
   if (TFFunc == nullptr) {
     throw std::runtime_error("Input function is not of the correct form");
   }
   // getFunction(0) -> N(1+g)
 
-  TFFunc =
-      boost::dynamic_pointer_cast<CompositeFunction>(TFFunc->getFunction(0));
+  TFFunc = std::dynamic_pointer_cast<CompositeFunction>(TFFunc->getFunction(0));
   if (TFFunc == nullptr) {
     throw std::runtime_error("Input function is not of the correct form");
   }
   // getFunction(1) -> 1+g
 
-  TFFunc =
-      boost::dynamic_pointer_cast<CompositeFunction>(TFFunc->getFunction(1));
+  TFFunc = std::dynamic_pointer_cast<CompositeFunction>(TFFunc->getFunction(1));
   if (TFFunc == nullptr) {
     throw std::runtime_error("Input function is not of the correct form");
   }
@@ -342,8 +340,8 @@ Mantid::API::IFunction_sptr
 ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
     const Mantid::API::IFunction_sptr &original,
     const std::vector<double> &norms) {
-  auto multi = boost::make_shared<MultiDomainFunction>();
-  auto tmp = boost::dynamic_pointer_cast<MultiDomainFunction>(original);
+  auto multi = std::make_shared<MultiDomainFunction>();
+  auto tmp = std::dynamic_pointer_cast<MultiDomainFunction>(original);
   size_t numDomains = original->getNumberDomains();
   for (size_t j = 0; j < numDomains; j++) {
     IFunction_sptr userFunc;
@@ -355,18 +353,18 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
       userFunc = tmp->getFunction(j);
       multi->setDomainIndex(j, j);
     }
-    auto inBrace = boost::make_shared<CompositeFunction>();
+    auto inBrace = std::make_shared<CompositeFunction>();
     inBrace->addFunction(constant);
     inBrace->addFunction(userFunc);
     auto norm = FunctionFactory::Instance().createInitialized(
         "name = FlatBackground, A0 "
         "=" +
         std::to_string(norms[j]));
-    auto product = boost::dynamic_pointer_cast<CompositeFunction>(
+    auto product = std::dynamic_pointer_cast<CompositeFunction>(
         FunctionFactory::Instance().createFunction("ProductFunction"));
     product->addFunction(norm);
     product->addFunction(inBrace);
-    auto composite = boost::dynamic_pointer_cast<CompositeFunction>(
+    auto composite = std::dynamic_pointer_cast<CompositeFunction>(
         FunctionFactory::Instance().createFunction("CompositeFunction"));
     constant = FunctionFactory::Instance().createInitialized(
         "name = ExpDecayMuon, A = 0.0, Lambda = -" +
@@ -397,7 +395,7 @@ ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(
     }
   }
 
-  return boost::dynamic_pointer_cast<IFunction>(multi);
+  return std::dynamic_pointer_cast<IFunction>(multi);
 }
 } // namespace Muon
 } // namespace Mantid

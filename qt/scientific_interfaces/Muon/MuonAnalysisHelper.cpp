@@ -98,10 +98,10 @@ void setDoubleValidator(QLineEdit *field, bool allowEmpty) {
  * @param ws :: Run workspace
  */
 MatrixWorkspace_sptr firstPeriod(const Workspace_sptr &ws) {
-  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+  if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+    return std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
   } else {
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    return std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   }
 }
 
@@ -111,7 +111,7 @@ MatrixWorkspace_sptr firstPeriod(const Workspace_sptr &ws) {
  * @return Number of periods
  */
 size_t numPeriods(const Workspace_sptr &ws) {
-  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+  if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
     return group->size();
   } else {
     return 1;
@@ -717,18 +717,18 @@ std::vector<std::string> findLogValues(const Workspace_sptr &ws,
   MatrixWorkspace_sptr matrixWS;
 
   // Try casting input to a MatrixWorkspace_sptr directly
-  matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   if (matrixWS) {
     if (matrixWS->run().hasProperty(logName)) {
       values.emplace_back(matrixWS->run().getProperty(logName)->value());
     }
   } else {
     // It could be a workspace group
-    auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    auto groupWS = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
     if (groupWS && groupWS->getNumberOfEntries() > 0) {
       for (int index = 0; index < groupWS->getNumberOfEntries(); index++) {
-        matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
-            groupWS->getItem(index));
+        matrixWS =
+            std::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(index));
         if (matrixWS) {
           if (matrixWS->run().hasProperty(logName)) {
             values.emplace_back(matrixWS->run().getProperty(logName)->value());
@@ -807,14 +807,14 @@ void appendTimeSeriesLogs(const Workspace_sptr &toAppend,
   auto getWorkspaces = [](const Workspace_sptr &ws) {
     std::vector<MatrixWorkspace_sptr> workspaces;
     MatrixWorkspace_sptr matrixWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+        std::dynamic_pointer_cast<MatrixWorkspace>(ws);
     if (matrixWS) {
       workspaces.emplace_back(matrixWS);
     } else { // it's a workspace group
-      auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+      auto groupWS = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
       if (groupWS && groupWS->getNumberOfEntries() > 0) {
         for (int index = 0; index < groupWS->getNumberOfEntries(); index++) {
-          matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(
               groupWS->getItem(index));
           if (matrixWS) {
             workspaces.emplace_back(matrixWS);
@@ -907,8 +907,8 @@ QString runNumberString(const std::string &workspaceName,
  * @throws std::invalid_argument if loadedWorkspace is null
  */
 bool isReloadGroupingNecessary(
-    const boost::shared_ptr<Mantid::API::Workspace> &currentWorkspace,
-    const boost::shared_ptr<Mantid::API::Workspace> &loadedWorkspace) {
+    const std::shared_ptr<Mantid::API::Workspace> &currentWorkspace,
+    const std::shared_ptr<Mantid::API::Workspace> &loadedWorkspace) {
   if (!loadedWorkspace) {
     throw std::invalid_argument("No loaded workspace to get grouping for!");
   }
@@ -1136,19 +1136,19 @@ getWorkspaceColors(const std::vector<Workspace_sptr> &workspaces) {
   for (const auto &ws : workspaces) {
     size_t nRuns = 0;
     std::vector<std::string> params;
-    if (const auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+    if (const auto group = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
       for (size_t i = 0; i < group->size(); ++i) {
         const auto &wsInGroup = group->getItem(i);
         if (wsInGroup->getName().find("_Parameters") != std::string::npos) {
           params = getKeysFromTable(
-              boost::dynamic_pointer_cast<ITableWorkspace>(wsInGroup));
+              std::dynamic_pointer_cast<ITableWorkspace>(wsInGroup));
         } else if (wsInGroup->getName().find("_Workspace") !=
                    std::string::npos) {
           ++nRuns;
         }
       }
     } else if (const auto table =
-                   boost::dynamic_pointer_cast<ITableWorkspace>(ws)) {
+                   std::dynamic_pointer_cast<ITableWorkspace>(ws)) {
       nRuns = 1;
       params = getKeysFromTable(table);
     } else {

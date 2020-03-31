@@ -35,8 +35,8 @@ public:
 
   IFunction_sptr clone() const override;
 
-  void setWorkspace(boost::shared_ptr<const Workspace> ws) override;
-  void setMatrixWorkspace(boost::shared_ptr<const MatrixWorkspace> workspace,
+  void setWorkspace(std::shared_ptr<const Workspace> ws) override;
+  void setMatrixWorkspace(std::shared_ptr<const MatrixWorkspace> workspace,
                           size_t wi, double startX, double endX) override;
 
   /// Set i-th parameter of decorated function.
@@ -136,7 +136,7 @@ protected:
 };
 
 using FunctionParameterDecorator_sptr =
-    boost::shared_ptr<FunctionParameterDecorator>;
+    std::shared_ptr<FunctionParameterDecorator>;
 
 } // namespace API
 } // namespace Mantid

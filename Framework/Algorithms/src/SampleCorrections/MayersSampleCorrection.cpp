@@ -171,7 +171,7 @@ Kernel::IValidator_sptr MayersSampleCorrection::createInputWSValidator() const {
   using API::InstrumentValidator;
   using API::SampleValidator;
   using Kernel::CompositeValidator;
-  auto validator = boost::make_shared<CompositeValidator>();
+  auto validator = std::make_shared<CompositeValidator>();
 
   unsigned int requires = (InstrumentValidator::SamplePosition |
                            InstrumentValidator::SourcePosition);

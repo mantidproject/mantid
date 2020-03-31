@@ -22,9 +22,8 @@ public:
 
   std::string name() const override { return "PoldiSpectrumPawleyFunction"; }
 
-  void
-  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
+                          size_t wi, double startX, double endX) override;
 
   void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
                           API::FunctionValues &values) const override;

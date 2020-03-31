@@ -820,7 +820,7 @@ MatrixWorkspace::getDetector(const size_t workspaceIndex) const {
   }
   // Else need to construct a DetectorGroup and return that
   auto dets_ptr = localInstrument->getDetectors(dets);
-  return boost::make_shared<Geometry::DetectorGroup>(dets_ptr);
+  return std::make_shared<Geometry::DetectorGroup>(dets_ptr);
 }
 
 /** Returns the signed 2Theta scattering angle for a detector
@@ -1264,7 +1264,7 @@ void MatrixWorkspace::setMaskedBins(const size_t workspaceIndex,
  *  @param monitorWS The workspace containing the monitor data.
  */
 void MatrixWorkspace::setMonitorWorkspace(
-    const boost::shared_ptr<MatrixWorkspace> &monitorWS) {
+    const std::shared_ptr<MatrixWorkspace> &monitorWS) {
   if (monitorWS.get() == this) {
     throw std::runtime_error(
         "To avoid memory leak, monitor workspace"
@@ -1275,7 +1275,7 @@ void MatrixWorkspace::setMonitorWorkspace(
 
 /** Returns a pointer to the internal monitor workspace.
  */
-boost::shared_ptr<MatrixWorkspace> MatrixWorkspace::monitorWorkspace() const {
+std::shared_ptr<MatrixWorkspace> MatrixWorkspace::monitorWorkspace() const {
   return m_monitorWorkspace;
 }
 
@@ -1624,25 +1624,25 @@ private:
   const Geometry::MDFrame_const_uptr m_frame;
 };
 
-boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+std::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimension(size_t index) const {
   if (index == 0) {
-    return boost::make_shared<MWXDimension>(this, xDimensionId);
+    return std::make_shared<MWXDimension>(this, xDimensionId);
   } else if (index == 1) {
     Axis *yAxis = this->getAxis(1);
-    return boost::make_shared<MWDimension>(yAxis, yDimensionId);
+    return std::make_shared<MWDimension>(yAxis, yDimensionId);
   } else
     throw std::invalid_argument("MatrixWorkspace only has 2 dimensions.");
 }
 
-boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+std::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimensionWithId(std::string id) const {
   int nAxes = this->axes();
-  boost::shared_ptr<IMDDimension> dim;
+  std::shared_ptr<IMDDimension> dim;
   for (int i = 0; i < nAxes; i++) {
     const std::string knownId = getDimensionIdFromAxis(i);
     if (knownId == id) {
-      dim = boost::make_shared<MWDimension>(this->getAxis(i), id);
+      dim = std::make_shared<MWDimension>(this->getAxis(i), id);
       break;
     }
   }
@@ -1899,7 +1899,7 @@ MantidImage_sptr MatrixWorkspace::getImage(
   }
 
   // initialize the image
-  auto image = boost::make_shared<MantidImage>(height);
+  auto image = std::make_shared<MantidImage>(height);
   if (!isHisto)
     ++indexEnd;
 

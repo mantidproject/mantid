@@ -177,7 +177,7 @@ public:
       TS_ASSERT(ws);
       TS_ASSERT(reference_out_ws);
       auto ws_cast =
-          boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(
+          std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace_sptr>(
               reference_out_ws);
 
       // Compare the loaded and original workspace
@@ -218,7 +218,7 @@ public:
     gon.pushAxis("Psi", 0, 1, 0);
     // add experiment infos
     for (int i = 0; i < 80; i++) {
-      ExperimentInfo_sptr ei = boost::make_shared<ExperimentInfo>();
+      ExperimentInfo_sptr ei = std::make_shared<ExperimentInfo>();
       ei->mutableRun().addProperty("Psi", double(i));
       ei->mutableRun().addProperty("Ei", 400.);
       ei->mutableRun().setGoniometer(gon, true);

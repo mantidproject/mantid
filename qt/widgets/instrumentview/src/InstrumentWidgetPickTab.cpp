@@ -613,8 +613,7 @@ void InstrumentWidgetPickTab::initSurface() {
 /**
  * Return current ProjectionSurface.
  */
-boost::shared_ptr<ProjectionSurface>
-InstrumentWidgetPickTab::getSurface() const {
+std::shared_ptr<ProjectionSurface> InstrumentWidgetPickTab::getSurface() const {
   return m_instrWidget->getSurface();
 }
 
@@ -1650,7 +1649,7 @@ void DetectorPlotController::savePlotToWorkspace() {
     if (!detids.empty()) {
       // set up spectra - detector mapping
       Mantid::API::MatrixWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
               Mantid::API::AnalysisDataService::Instance().retrieve("Curves"));
       if (!ws) {
         throw std::runtime_error("Failed to create Curves workspace");
@@ -1793,7 +1792,7 @@ void DetectorPlotController::addPeak(double x, double y) {
         Mantid::API::AnalysisDataService::Instance().add(peakTableName, tw);
         newPeaksWorkspace = true;
       } else {
-        tw = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(
+        tw = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 peakTableName));
         if (!tw) {
@@ -1807,7 +1806,7 @@ void DetectorPlotController::addPeak(double x, double y) {
       auto unwrappedSurface = dynamic_cast<UnwrappedSurface *>(surface.get());
       if (unwrappedSurface) {
         unwrappedSurface->setPeaksWorkspace(
-            boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
+            std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
       }
     }
 

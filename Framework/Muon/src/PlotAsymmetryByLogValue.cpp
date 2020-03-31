@@ -109,13 +109,13 @@ void PlotAsymmetryByLogValue::init() {
                                             Direction::Output),
       "The name of the output workspace containing the resulting asymmetries.");
   declareProperty("LogValue", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the log values which will be used as the x-axis "
                   "in the output workspace.");
 
   std::vector<std::string> optionsLog{"Mean", "Min", "Max", "First", "Last"};
   declareProperty(
-      "Function", "Last", boost::make_shared<StringListValidator>(optionsLog),
+      "Function", "Last", std::make_shared<StringListValidator>(optionsLog),
       "The function to apply: 'Mean', 'Min', 'Max', 'First' or 'Last'.");
 
   declareProperty("Red", 1, "The period number for the 'red' data.");
@@ -124,7 +124,7 @@ void PlotAsymmetryByLogValue::init() {
 
   std::vector<std::string> options{"Integral", "Differential"};
   declareProperty("Type", "Integral",
-                  boost::make_shared<StringListValidator>(options),
+                  std::make_shared<StringListValidator>(options),
                   "The calculation type: 'Integral' or 'Differential'.");
   declareProperty(
       "TimeMin", EMPTY_DBL(),
@@ -148,7 +148,7 @@ void PlotAsymmetryByLogValue::init() {
                                              "FromSpecifiedFile"};
 
   declareProperty("DeadTimeCorrType", deadTimeCorrTypes[0],
-                  boost::make_shared<StringListValidator>(deadTimeCorrTypes),
+                  std::make_shared<StringListValidator>(deadTimeCorrTypes),
                   "Type of Dead Time Correction to apply.");
 
   declareProperty(std::make_unique<FileProperty>("DeadTimeCorrFile", "",
@@ -593,14 +593,14 @@ Workspace_sptr
 PlotAsymmetryByLogValue::createCustomGrouping(const std::vector<int> &fwd,
                                               const std::vector<int> &bwd) {
 
-  ITableWorkspace_sptr group = boost::make_shared<TableWorkspace>();
+  ITableWorkspace_sptr group = std::make_shared<TableWorkspace>();
   group->addColumn("vector_int", "group");
   TableRow row = group->appendRow();
   row << fwd;
   row = group->appendRow();
   row << bwd;
 
-  return boost::dynamic_pointer_cast<Workspace>(group);
+  return std::dynamic_pointer_cast<Workspace>(group);
 }
 
 /**  Group detectors from table
@@ -635,12 +635,12 @@ void PlotAsymmetryByLogValue::doAnalysis(const Workspace_sptr &loadedWs,
 
   // Check if workspace is a workspace group
   WorkspaceGroup_sptr group =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
+      std::dynamic_pointer_cast<WorkspaceGroup>(loadedWs);
 
   // If it is not, we only have 'red' data
   if (!group) {
     MatrixWorkspace_sptr ws_red =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(loadedWs);
+        std::dynamic_pointer_cast<MatrixWorkspace>(loadedWs);
 
     double Y, E;
     calcIntAsymmetry(ws_red, Y, E);
@@ -654,8 +654,8 @@ void PlotAsymmetryByLogValue::doAnalysis(const Workspace_sptr &loadedWs,
     // Process red data
     MatrixWorkspace_sptr ws_red;
     try {
-      ws_red = boost::dynamic_pointer_cast<MatrixWorkspace>(
-          group->getItem(m_red - 1));
+      ws_red =
+          std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(m_red - 1));
     } catch (std::out_of_range &) {
       throw std::out_of_range("Red period out of range");
     }
@@ -670,7 +670,7 @@ void PlotAsymmetryByLogValue::doAnalysis(const Workspace_sptr &loadedWs,
       // Process green period if supplied by user
       MatrixWorkspace_sptr ws_green;
       try {
-        ws_green = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        ws_green = std::dynamic_pointer_cast<MatrixWorkspace>(
             group->getItem(m_green - 1));
       } catch (std::out_of_range &) {
         throw std::out_of_range("Green period out of range");

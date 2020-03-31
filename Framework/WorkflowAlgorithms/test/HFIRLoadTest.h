@@ -39,7 +39,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("output_ws")))
 
     TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
@@ -88,7 +88,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("output_ws")))
 
     TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
@@ -123,7 +123,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("output_ws")))
 
     TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(
@@ -164,7 +164,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("output_ws")))
     // In the fire but ignored for the final property!
     TS_ASSERT_EQUALS(result->run().getPropertyValueAsType<double>(

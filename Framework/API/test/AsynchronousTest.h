@@ -237,13 +237,11 @@ private:
   }
 
   WorkspaceGroup_sptr makeGroupWorkspace() {
-    boost::shared_ptr<WorkspaceTester> ws0 =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws0 = std::make_shared<WorkspaceTester>();
     ws0->initialize(2, 4, 3);
     AnalysisDataService::Instance().addOrReplace("ws0", ws0);
 
-    boost::shared_ptr<WorkspaceTester> ws1 =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws1 = std::make_shared<WorkspaceTester>();
     ws1->initialize(2, 4, 3);
     AnalysisDataService::Instance().addOrReplace("ws1", ws1);
 

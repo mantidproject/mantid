@@ -107,7 +107,7 @@ private:
   /// name of the event type
   std::string m_eventType;
   /// shared pointer to multiple experiment info stored within the workspace
-  boost::shared_ptr<API::MultipleExperimentInfos> m_mEI;
+  std::shared_ptr<API::MultipleExperimentInfos> m_mEI;
 
 public:
   static ::NeXus::File *createOrOpenMDWSgroup(const std::string &fileName,
@@ -121,10 +121,10 @@ public:
                                   const API::IMDEventWorkspace_const_sptr &ws);
   // load experiment infos, previously saved through the the saveExperimentInfo
   // function
-  static void loadExperimentInfos(
-      ::NeXus::File *const file, const std::string &filename,
-      const boost::shared_ptr<API::MultipleExperimentInfos> &mei,
-      bool lazy = false);
+  static void
+  loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
+                      std::shared_ptr<API::MultipleExperimentInfos> mei,
+                      bool lazy = false);
 
   static void
   saveAffineTransformMatricies(::NeXus::File *const file,

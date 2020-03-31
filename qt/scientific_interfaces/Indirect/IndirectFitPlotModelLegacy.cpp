@@ -46,8 +46,7 @@ IFunction_sptr firstFunctionWithParameter(IFunction_sptr function,
   if (function->category() == category && function->hasParameter(parameterName))
     return function;
 
-  const auto composite =
-      boost::dynamic_pointer_cast<CompositeFunction>(function);
+  const auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     return firstFunctionWithParameter(composite, category, parameterName);
   return nullptr;
@@ -97,7 +96,7 @@ void setFunctionParameters(const IFunction_sptr &function,
   if (function->category() == category && function->hasParameter(parameterName))
     function->setParameter(parameterName, value);
 
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     setFunctionParameters(composite, category, parameterName, value);
 }
@@ -108,7 +107,7 @@ void setFirstBackground(IFunction_sptr function, double value) {
 }
 
 MatrixWorkspace_sptr castToMatrixWorkspace(const Workspace_sptr &workspace) {
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
 } // namespace
@@ -245,8 +244,7 @@ bool IndirectFitPlotModelLegacy::canCalculateGuess() const {
   if (!function)
     return false;
 
-  const auto composite =
-      boost::dynamic_pointer_cast<CompositeFunction>(function);
+  const auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   const auto isEmptyModel = composite && composite->nFunctions() == 0;
   return getWorkspace() && !isEmptyModel;
 }
@@ -322,8 +320,7 @@ MatrixWorkspace_sptr IndirectFitPlotModelLegacy::createGuessWorkspace(
   createWsAlg->execute();
   Workspace_sptr outputWorkspace = createWsAlg->getProperty("OutputWorkspace");
   return extractSpectra(
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          outputWorkspace),
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWorkspace),
       1, 1, startX, endX);
 }
 

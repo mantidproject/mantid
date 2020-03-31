@@ -41,11 +41,11 @@ void InvertMDDim::exec() {
       IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
   std::vector<IMDDimension_sptr> dimensions;
   for (int i = static_cast<int>(inWS->getNumDims()) - 1; i >= 0; i--) {
-    boost::shared_ptr<const IMDDimension> dimi = inWS->getDimension(i);
-    dimensions.emplace_back(boost::const_pointer_cast<IMDDimension>(dimi));
+    std::shared_ptr<const IMDDimension> dimi = inWS->getDimension(i);
+    dimensions.emplace_back(std::const_pointer_cast<IMDDimension>(dimi));
   }
 
-  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
+  auto outWS = std::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
 
   auto rank = static_cast<int>(inWS->getNumDims());
@@ -65,7 +65,7 @@ void InvertMDDim::exec() {
 void InvertMDDim::recurseDim(const IMDHistoWorkspace_sptr &inWS,
                              const IMDHistoWorkspace_sptr &outWS,
                              int currentDim, int *idx, int rank) {
-  boost::shared_ptr<const IMDDimension> dimi = inWS->getDimension(currentDim);
+  std::shared_ptr<const IMDDimension> dimi = inWS->getDimension(currentDim);
   if (currentDim == rank - 1) {
     for (int i = 0; i < static_cast<int>(dimi->getNBins()); i++) {
       idx[currentDim] = i;

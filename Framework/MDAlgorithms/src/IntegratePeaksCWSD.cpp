@@ -431,7 +431,7 @@ void IntegratePeaksCWSD::mergePeaks() {
 DataObjects::PeaksWorkspace_sptr IntegratePeaksCWSD::createOutputs() {
   // clone the original peaks workspace
   DataObjects::PeaksWorkspace_sptr outws =
-      boost::shared_ptr<DataObjects::PeaksWorkspace>(
+      std::shared_ptr<DataObjects::PeaksWorkspace>(
           m_peaksWS->clone().release());
 
   size_t num_peaks = outws->getNumberPeaks();
@@ -457,7 +457,7 @@ DataObjects::PeaksWorkspace_sptr IntegratePeaksCWSD::createPeakworkspace(
   g_log.notice("Create peak workspace for output ... ...");
   // new peak workspace
   DataObjects::PeaksWorkspace_sptr peakws =
-      boost::make_shared<DataObjects::PeaksWorkspace>();
+      std::make_shared<DataObjects::PeaksWorkspace>();
 
   // get number of runs
   size_t numruns = mdws->getNumExperimentInfo();

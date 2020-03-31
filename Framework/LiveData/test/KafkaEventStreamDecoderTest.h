@@ -89,7 +89,7 @@ public:
     // -- Workspace checks --
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TSM_ASSERT(
         "Expected an EventWorkspace from extractData(). Found something else",
         eventWksp);
@@ -130,7 +130,7 @@ public:
     // --- Workspace checks ---
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
     TSM_ASSERT(
         "Expected a WorkspaceGroup from extractData(). Found something else.",
         group);
@@ -138,7 +138,7 @@ public:
     TS_ASSERT_EQUALS(2, group->size());
     for (size_t i = 0; i < 2; ++i) {
       auto eventWksp =
-          boost::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
+          std::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
       TSM_ASSERT("Expected an EventWorkspace for each member of the group",
                  eventWksp);
       checkWorkspaceMetadata(*eventWksp);
@@ -191,7 +191,7 @@ public:
     // --- Workspace checks ---
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
     TSM_ASSERT(
         "Expected a WorkspaceGroup from extractData(). Found something else.",
         group);
@@ -199,7 +199,7 @@ public:
     TS_ASSERT_EQUALS(2, group->size());
     for (size_t i = 0; i < 2; ++i) {
       auto eventWksp =
-          boost::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
+          std::dynamic_pointer_cast<EventWorkspace>(group->getItem(i));
       TSM_ASSERT("Expected an EventWorkspace for each member of the group",
                  eventWksp);
       checkWorkspaceMetadata(*eventWksp);
@@ -236,7 +236,7 @@ public:
     // -- Workspace checks --
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TSM_ASSERT(
         "Expected an EventWorkspace from extractData(). Found something else",
         eventWksp);
@@ -275,7 +275,7 @@ public:
     // -- Workspace checks --
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TSM_ASSERT(
         "Expected an EventWorkspace from extractData(). Found something else",
         eventWksp);
@@ -309,7 +309,7 @@ public:
     // -- Workspace checks --
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TSM_ASSERT(
         "Expected an EventWorkspace from extractData(). Found something else",
         eventWksp);
@@ -358,7 +358,7 @@ public:
     // Check we did process the event message and extract the events
     TSM_ASSERT("Expected non-null workspace pointer from extractData()",
                workspace);
-    auto eventWksp = boost::dynamic_pointer_cast<EventWorkspace>(workspace);
+    auto eventWksp = std::dynamic_pointer_cast<EventWorkspace>(workspace);
     TSM_ASSERT(
         "Expected an EventWorkspace from extractData(). Found something else",
         eventWksp);

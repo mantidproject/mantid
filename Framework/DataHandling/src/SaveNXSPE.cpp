@@ -48,8 +48,8 @@ SaveNXSPE::SaveNXSPE() : API::Algorithm() {}
  * Initialise the algorithm
  */
 void SaveNXSPE::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
-  wsValidator->add(boost::make_shared<API::WorkspaceUnitValidator>("DeltaE"));
+  auto wsValidator = std::make_shared<CompositeValidator>();
+  wsValidator->add(std::make_shared<API::WorkspaceUnitValidator>("DeltaE"));
   wsValidator->add<API::CommonBinsValidator>();
   wsValidator->add<API::HistogramValidator>();
 

@@ -38,14 +38,14 @@ void FFTSmooth::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "The name of the output workspace.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex", 0, mustBePositive,
                   "Workspace index for smoothing");
 
   std::vector<std::string> type{"Zeroing"};
   declareProperty("Filter", "Zeroing",
-                  boost::make_shared<StringListValidator>(type),
+                  std::make_shared<StringListValidator>(type),
                   "The type of the applied filter");
   declareProperty("Params", "", "The filter parameters");
 }

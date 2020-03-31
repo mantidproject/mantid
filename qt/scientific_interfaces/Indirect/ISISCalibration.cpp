@@ -452,7 +452,7 @@ void ISISCalibration::calPlotRaw() {
     return;
   }
 
-  const auto input = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  const auto input = std::dynamic_pointer_cast<MatrixWorkspace>(
       AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
   m_uiForm.ppCalibration->clear();
@@ -493,7 +493,7 @@ void ISISCalibration::calPlotEnergy() {
     return;
   }
 
-  MatrixWorkspace_sptr energyWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr energyWs = std::dynamic_pointer_cast<MatrixWorkspace>(
       reductionOutputGroup->getItem(0));
   if (!energyWs) {
     g_log.warning("No result workspaces, cannot plot energy preview.");

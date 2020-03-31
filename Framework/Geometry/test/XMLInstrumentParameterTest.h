@@ -11,9 +11,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -21,7 +20,7 @@ using namespace Mantid::Kernel;
 
 class XMLInstrumentParameterTest : public CxxTest::TestSuite {
 private:
-  using XMLInstrumentParameter_sptr = boost::shared_ptr<XMLInstrumentParameter>;
+  using XMLInstrumentParameter_sptr = std::shared_ptr<XMLInstrumentParameter>;
 
   /**
   Construction logic for the XMLInstrumentParameter type isn't great, so this
@@ -30,8 +29,8 @@ private:
   XMLInstrumentParameter_sptr make_logfile_object(const std::string &filterBy) {
     const std::string logfileID = "1";
     const std::string value;
-    const boost::shared_ptr<Kernel::Interpolation> interpolation =
-        boost::make_shared<Interpolation>();
+    const std::shared_ptr<Kernel::Interpolation> &interpolation =
+        std::make_shared<Interpolation>();
     const std::string formula;
     const std::string formulaUnit;
     const std::string resultUnit;
@@ -45,7 +44,7 @@ private:
     const Geometry::IComponent *comp = nullptr;
     double angleConvertConst = 0.0;
 
-    return boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
+    return std::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
         logfileID, value, interpolation, formula, formulaUnit, resultUnit,
         paramName, type, tie, constraint, penaltyFactor, fitFunc, filterBy, eq,
         comp, angleConvertConst, ""));
@@ -175,7 +174,7 @@ public:
     std::vector<std::string> constr;
     std::string penaltyFactor;
     XMLInstrumentParameter testPar(
-        "logfileID", "value", boost::make_shared<Interpolation>(), "formula",
+        "logfileID", "value", std::make_shared<Interpolation>(), "formula",
         "sourceFU", "resultFU", "testPar", "aType", "noTie", constr,
         penaltyFactor, "aFitFunc", "FilterBy", "eqTo", nullptr, 0.0,
         "test string.     Long test string.");

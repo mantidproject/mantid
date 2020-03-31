@@ -39,8 +39,8 @@ PropertyHandler::PropertyHandler(const Mantid::API::IFunction_sptr &fun,
                                  FitPropertyBrowser *browser,
                                  QtBrowserItem *item)
     : FunctionHandler(fun), m_browser(browser),
-      m_cf(boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun)),
-      m_pf(boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(fun)),
+      m_cf(std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun)),
+      m_pf(std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(fun)),
       m_parent(std::move(parent)), m_type(nullptr), m_item(item),
       m_isMultispectral(false), m_workspace(nullptr), m_workspaceIndex(nullptr),
       m_base(0), m_ci(0), m_hasPlot(false) {}
@@ -113,7 +113,7 @@ void PropertyHandler::init() {
   if (m_cf && m_cf->nFunctions() > 0) {
     for (size_t i = 0; i < m_cf->nFunctions(); i++) {
       Mantid::API::IFunction_sptr f =
-          boost::dynamic_pointer_cast<Mantid::API::IFunction>(
+          std::dynamic_pointer_cast<Mantid::API::IFunction>(
               m_cf->getFunction(i));
       if (!f) {
         throw std::runtime_error(
@@ -356,8 +356,8 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
   m_browser->m_changeSlotsEnabled = false;
 
   // Check if it's a peak and set its width
-  boost::shared_ptr<Mantid::API::IPeakFunction> pf =
-      boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(f);
+  std::shared_ptr<Mantid::API::IPeakFunction> pf =
+      std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(f);
   if (pf) {
     if (!m_browser->workspaceName().empty() &&
         m_browser->workspaceIndex() >= 0 && pf->centre() == 0.) {
@@ -368,7 +368,7 @@ PropertyHandler *PropertyHandler::addFunction(const std::string &fnName) {
   Mantid::API::MatrixWorkspace_sptr ws;
 
   try {
-    ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(
             m_browser->workspaceName()));
   } catch (...) {
@@ -1212,7 +1212,7 @@ void PropertyHandler::removeTie(const QString &parName) {
 */
 double PropertyHandler::EstimateFwhm() const {
   double fwhm = 0.;
-  auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+  auto ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
       m_browser->getWorkspace());
   if (ws) {
     size_t wi = m_browser->workspaceIndex();
@@ -1259,7 +1259,7 @@ void PropertyHandler::calcBase() {
   if (!m_browser->m_autoBackground)
     return;
 
-  auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+  auto ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
       m_browser->getWorkspace());
   if (ws) {
     size_t wi = m_browser->workspaceIndex();
@@ -1317,7 +1317,7 @@ void PropertyHandler::setCentre(const double &c) {
     m_pf->setCentre(c);
 
     //  find m_ci: x-index of the peakcentre
-    auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+    auto ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
         m_browser->getWorkspace());
     if (ws) {
       size_t wi = m_browser->workspaceIndex();
@@ -1600,7 +1600,7 @@ void PropertyHandler::setFunctionWorkspace() {
       Mantid::API::Workspace_sptr ws =
           Mantid::API::AnalysisDataService::Instance().retrieve(wsName);
       int wsIndex = m_browser->m_intManager->value(m_workspaceIndex);
-      auto mws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+      auto mws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
       if (mws) {
         ifun()->setMatrixWorkspace(mws, size_t(wsIndex), m_browser->startX(),
                                    m_browser->endX());

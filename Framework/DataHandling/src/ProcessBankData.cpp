@@ -17,11 +17,11 @@ namespace DataHandling {
 
 ProcessBankData::ProcessBankData(
     DefaultEventLoader &m_loader, std::string entry_name, API::Progress *prog,
-    boost::shared_array<uint32_t> event_id,
-    boost::shared_array<float> event_time_of_flight, size_t numEvents,
-    size_t startAt, boost::shared_ptr<std::vector<uint64_t>> event_index,
-    boost::shared_ptr<BankPulseTimes> thisBankPulseTimes, bool have_weight,
-    boost::shared_array<float> event_weight, detid_t min_event_id,
+    std::shared_ptr<std::vector<uint32_t>> event_id,
+    std::shared_ptr<std::vector<float>> event_time_of_flight, size_t numEvents,
+    size_t startAt, std::shared_ptr<std::vector<uint64_t>> event_index,
+    std::shared_ptr<BankPulseTimes> thisBankPulseTimes, bool have_weight,
+    std::shared_ptr<std::vector<float>> event_weight, detid_t min_event_id,
     detid_t max_event_id)
     : Task(), m_loader(m_loader), entry_name(std::move(entry_name)),
       pixelID_to_wi_vector(m_loader.pixelID_to_wi_vector),
@@ -42,7 +42,7 @@ namespace {
 // one so we only need to search forward
 inline size_t
 getPulseIndex(const size_t event_index, const size_t last_pulse_index,
-              const boost::shared_ptr<std::vector<uint64_t>> &event_index_vec) {
+              const std::shared_ptr<std::vector<uint64_t>> &event_index_vec) {
   if (last_pulse_index + 1 >= event_index_vec->size())
     return last_pulse_index;
 
@@ -84,7 +84,7 @@ void ProcessBankData::run() { // override {
 
     std::vector<size_t> counts(m_max_id - m_min_id + 1, 0);
     for (size_t i = 0; i < numEvents; i++) {
-      const auto thisId = detid_t(event_id[i]);
+      const auto thisId = detid_t((*event_id)[i]);
       if (thisId >= m_min_id && thisId <= m_max_id)
         counts[thisId - m_min_id]++;
     }
@@ -161,10 +161,11 @@ void ProcessBankData::run() { // override {
          ++eventIndex) {
       // We cached a pointer to the vector<tofEvent> -> so retrieve it and add
       // the event
-      const detid_t detId = event_id[eventIndex];
+      const detid_t detId = (*event_id)[eventIndex];
       if (detId >= m_min_id && detId <= m_max_id) {
         // Create the tofevent
-        const auto tof = static_cast<double>(event_time_of_flight[eventIndex]);
+        const auto tof =
+            static_cast<double>((*event_time_of_flight)[eventIndex]);
         // this is fancy for check if value is in range
         if ((tof - TOF_MIN) * (tof - TOF_MAX) <= 0.) {
           // Handle simulated data if present
@@ -173,7 +174,8 @@ void ProcessBankData::run() { // override {
                 m_loader.weightedEventVectors[periodIndex][detId];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
-              const auto weight = static_cast<double>(event_weight[eventIndex]);
+              const auto weight =
+                  static_cast<double>((*event_weight)[eventIndex]);
               const double errorSq = weight * weight;
               eventVector->emplace_back(tof, pulsetime, weight, errorSq);
             } else {

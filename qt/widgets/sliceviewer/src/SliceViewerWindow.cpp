@@ -64,7 +64,7 @@ SliceViewerWindow::SliceViewerWindow(const QString &wsName,
 
   // Get the workspace
   m_wsName = wsName.toStdString();
-  m_ws = boost::dynamic_pointer_cast<IMDWorkspace>(
+  m_ws = std::dynamic_pointer_cast<IMDWorkspace>(
       AnalysisDataService::Instance().retrieve(m_wsName));
 
   // Watch for the deletion of the associated workspace
@@ -412,7 +412,7 @@ void SliceViewerWindow::changePlanarWidth(double width) {
 /** Signal to close this window if the workspace has just been deleted */
 void SliceViewerWindow::preDeleteHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   Mantid::API::IMDWorkspace *ws_ptr =
       dynamic_cast<Mantid::API::IMDWorkspace *>(ws.get());
   if (ws_ptr) {
@@ -421,7 +421,7 @@ void SliceViewerWindow::preDeleteHandle(
     }
   } else {
     Mantid::API::IPeaksWorkspace_sptr expired_peaks_ws =
-        boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
+        std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
     if (expired_peaks_ws) {
       // Delegate the deletion/removal issue to the slicer
       m_peaksViewer->removePeaksWorkspace(expired_peaks_ws);
@@ -439,7 +439,7 @@ void SliceViewerWindow::renameHandle(const std::string &oldName,
                                      const std::string &newName) {
 
   if (oldName == m_wsName) {
-    IMDWorkspace_sptr new_md_ws = boost::dynamic_pointer_cast<IMDWorkspace>(
+    IMDWorkspace_sptr new_md_ws = std::dynamic_pointer_cast<IMDWorkspace>(
         AnalysisDataService::Instance().retrieve(newName));
     if (new_md_ws) {
       m_ws = new_md_ws;
@@ -459,9 +459,9 @@ void SliceViewerWindow::renameHandle(const std::string &oldName,
  * one */
 void SliceViewerWindow::afterReplaceHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   Mantid::API::IMDWorkspace_sptr new_md_ws =
-      boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws);
+      std::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(ws);
   if (new_md_ws) {
     if (new_md_ws.get() == m_ws.get() || wsName == m_wsName) {
       m_ws = new_md_ws;
@@ -469,7 +469,7 @@ void SliceViewerWindow::afterReplaceHandle(
     }
   } else {
     Mantid::API::IPeaksWorkspace_sptr new_peaks_ws =
-        boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
+        std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
     if (new_peaks_ws) {
       // Delegate the replacement issue to the slicer
       m_slicer->peakWorkspaceChanged(wsName, new_peaks_ws);

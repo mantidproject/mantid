@@ -139,23 +139,23 @@ public:
 
     WorkspaceGroup_sptr work_out;
     TS_ASSERT_THROWS_NOTHING(
-        work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        work_out = std::dynamic_pointer_cast<WorkspaceGroup>(
             AnalysisDataService::Instance().retrieve("test_out")));
     MatrixWorkspace_sptr work_out1;
     TS_ASSERT_THROWS_NOTHING(
-        work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        work_out1 = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("test_out_1")));
     MatrixWorkspace_sptr work_out2;
     TS_ASSERT_THROWS_NOTHING(
-        work_out2 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        work_out2 = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("test_out_2")));
     MatrixWorkspace_sptr work_out3;
     TS_ASSERT_THROWS_NOTHING(
-        work_out3 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        work_out3 = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("test_out_3")));
     MatrixWorkspace_sptr work_out4;
     TS_ASSERT_THROWS_NOTHING(
-        work_out4 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        work_out4 = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("test_out_4")));
 
     if (!work_out1)
@@ -245,17 +245,17 @@ public:
     // Get back the output workspace
     WorkspaceGroup_sptr work_out;
     TS_ASSERT_THROWS_NOTHING(
-        work_out = boost::dynamic_pointer_cast<WorkspaceGroup>(
+        work_out = std::dynamic_pointer_cast<WorkspaceGroup>(
             AnalysisDataService::Instance().retrieve("testdead_out")));
 
     MatrixWorkspace_sptr work_out1;
     TS_ASSERT_THROWS_NOTHING(
-        work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        work_out1 = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("testdead_out_1")));
 
     MatrixWorkspace_sptr work_out2;
     TS_ASSERT_THROWS_NOTHING(
-        work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        work_out1 = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("testdead_out_2")));
 
     // Get back the output property

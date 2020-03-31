@@ -266,7 +266,7 @@ public:
   static void destroySuite(RemoveBinsTestPerformance *suite) { delete suite; }
 
   RemoveBinsTestPerformance() {
-    auto wksp = boost::make_shared<Workspace2D>();
+    auto wksp = std::make_shared<Workspace2D>();
     wksp->setTitle("input");
     wksp->initialize(numHists, 10000, 9999);
     BinEdges edges(10000, LinearGenerator(0, 10));

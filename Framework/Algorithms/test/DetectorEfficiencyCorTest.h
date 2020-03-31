@@ -128,7 +128,7 @@ private:
     bool addTypeTag = true;
     auto shape = ShapeFactory().createShape(xmlShape, addTypeTag);
 
-    boost::shared_ptr<Instrument> instrument = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> instrument = std::make_shared<Instrument>();
     const int ndets(2);
     std::vector<Detector *> detectors;
     for (int i = 0; i < ndets; ++i) {

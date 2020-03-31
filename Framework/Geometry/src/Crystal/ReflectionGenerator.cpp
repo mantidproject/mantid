@@ -43,8 +43,8 @@ const CrystalStructure &ReflectionGenerator::getCrystalStructure() const {
 /// cell.
 HKLFilter_const_sptr ReflectionGenerator::getDRangeFilter(double dMin,
                                                           double dMax) const {
-  return boost::make_shared<const HKLFilterDRange>(m_crystalStructure.cell(),
-                                                   dMin, dMax);
+  return std::make_shared<const HKLFilterDRange>(m_crystalStructure.cell(),
+                                                 dMin, dMax);
 }
 
 /// Returns a reflection condition HKLFilter based on the supplied enum.
@@ -52,15 +52,15 @@ HKLFilter_const_sptr ReflectionGenerator::getReflectionConditionFilter(
     ReflectionConditionFilter filter) {
   switch (filter) {
   case ReflectionConditionFilter::Centering:
-    return boost::make_shared<const HKLFilterCentering>(
+    return std::make_shared<const HKLFilterCentering>(
         m_crystalStructure.centering());
     break;
   case ReflectionConditionFilter::SpaceGroup:
-    return boost::make_shared<const HKLFilterSpaceGroup>(
+    return std::make_shared<const HKLFilterSpaceGroup>(
         m_crystalStructure.spaceGroup());
     break;
   case ReflectionConditionFilter::StructureFactor:
-    return boost::make_shared<const HKLFilterStructureFactor>(m_sfCalculator);
+    return std::make_shared<const HKLFilterStructureFactor>(m_sfCalculator);
   default:
     return HKLFilter_const_sptr();
   }

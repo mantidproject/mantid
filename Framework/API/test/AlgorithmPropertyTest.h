@@ -63,8 +63,7 @@ private:
     const std::string summary() const override { return "Test summary"; }
     void init() override {
       declareProperty(std::make_unique<AlgorithmProperty>(
-          "CalculateStep",
-          boost::make_shared<AlgorithmHasProperty>("Output1")));
+          "CalculateStep", std::make_shared<AlgorithmHasProperty>("Output1")));
     }
     void exec() override {}
   };

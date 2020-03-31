@@ -67,12 +67,11 @@ public:
 
   void testSubstituteSurf() {
     auto uTree = createAUnionTree();
-    TS_ASSERT_EQUALS(uTree->substituteSurf(11, 13, boost::make_shared<Cone>()),
+    TS_ASSERT_EQUALS(uTree->substituteSurf(11, 13, std::make_shared<Cone>()),
                      1);
     TS_ASSERT_EQUALS(uTree->display(), "10 : 10 : 12 : 13");
-    TS_ASSERT_EQUALS(
-        uTree->substituteSurf(10, 14, boost::make_shared<Sphere>()),
-        2); // its suppose to return 2
+    TS_ASSERT_EQUALS(uTree->substituteSurf(10, 14, std::make_shared<Sphere>()),
+                     2); // its suppose to return 2
     TS_ASSERT_EQUALS(uTree->display(), "14 : 14 : 12 : 13");
   }
 
@@ -83,13 +82,13 @@ private:
                                              // A Node
     // SurfPoint *A, *B, *C;
     auto A = std::make_unique<SurfPoint>();
-    A->setKey(boost::make_shared<Plane>());
+    A->setKey(std::make_shared<Plane>());
     A->setKeyN(10);
     auto B = std::make_unique<SurfPoint>();
-    B->setKey(boost::make_shared<Sphere>());
+    B->setKey(std::make_shared<Sphere>());
     B->setKeyN(11);
     auto C = std::make_unique<SurfPoint>();
-    C->setKey(boost::make_shared<Cylinder>());
+    C->setKey(std::make_shared<Cylinder>());
     C->setKeyN(12);
 
     auto Left = std::make_unique<Union>(A->clone(), A->clone());
@@ -100,13 +99,13 @@ private:
   std::unique_ptr<Rule> createAIntersectionTree() { // A B C A
     // A Node
     auto A = std::make_unique<SurfPoint>();
-    A->setKey(boost::make_shared<Plane>());
+    A->setKey(std::make_shared<Plane>());
     A->setKeyN(10);
     auto B = std::make_unique<SurfPoint>();
-    B->setKey(boost::make_shared<Sphere>());
+    B->setKey(std::make_shared<Sphere>());
     B->setKeyN(11);
     auto C = std::make_unique<SurfPoint>();
-    C->setKey(boost::make_shared<Cylinder>());
+    C->setKey(std::make_shared<Cylinder>());
     C->setKeyN(12);
 
     auto Left = std::make_unique<Intersection>();
@@ -121,13 +120,13 @@ private:
 
   std::unique_ptr<Rule> createAMixedTree() { // A B : C A
     auto A = std::make_unique<SurfPoint>();
-    A->setKey(boost::make_shared<Plane>());
+    A->setKey(std::make_shared<Plane>());
     A->setKeyN(10);
     auto B = std::make_unique<SurfPoint>();
-    B->setKey(boost::make_shared<Sphere>());
+    B->setKey(std::make_shared<Sphere>());
     B->setKeyN(11);
     auto C = std::make_unique<SurfPoint>();
-    C->setKey(boost::make_shared<Cylinder>());
+    C->setKey(std::make_shared<Cylinder>());
     C->setKeyN(12);
 
     auto Root = std::make_unique<Union>();

@@ -157,7 +157,7 @@ public:
         alg->initialize();
         alg->setPropertyValue("InstrumentName", instrumentName);
         alg->setPropertyValue("InstrumentXML", instrumentXML);
-        alg->setProperty("Workspace", boost::shared_ptr<Workspace2D>(
+        alg->setProperty("Workspace", std::shared_ptr<Workspace2D>(
                                           &ws, [](Workspace2D *) {}));
         alg->setProperty("RewriteSpectraMap",
                          Mantid::Kernel::OptionalBool(false));
@@ -174,8 +174,8 @@ public:
   }
 };
 
-boost::shared_ptr<Mantid::API::Workspace> makeWorkspace2D() {
-  return boost::make_shared<Workspace2D>();
+std::shared_ptr<Mantid::API::Workspace> makeWorkspace2D() {
+  return std::make_shared<Workspace2D>();
 }
 
 void export_Workspace2D() {

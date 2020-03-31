@@ -236,7 +236,7 @@ void AccumulateMD::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
           "DataSources",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),
+          std::make_shared<MandatoryValidator<std::vector<std::string>>>(),
           Direction::Input),
       "Input workspaces to process, or filenames to load and process");
 
@@ -247,32 +247,30 @@ void AccumulateMD::init() {
   std::vector<std::string> e_mode_options{"Elastic", "Direct", "Indirect"};
 
   declareProperty("Emode", "Direct",
-                  boost::make_shared<StringListValidator>(e_mode_options),
+                  std::make_shared<StringListValidator>(e_mode_options),
                   "Analysis mode ['Elastic', 'Direct', 'Indirect'].");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "Alatt",
-          boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          "Alatt", std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice parameters");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "Angdeg",
-          boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          "Angdeg", std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice angles");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "u", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          "u", std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector parallel to neutron beam");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "v", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          "v", std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector perpendicular to neutron beam in the horizontal plane");
 

@@ -12,7 +12,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/Exception.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -48,15 +48,14 @@ public:
   }
 
   void test_Constructor_Throws_With_Invalid_Pointers() {
-    TS_ASSERT_THROWS(Instrument(boost::shared_ptr<Instrument>(),
-                                boost::shared_ptr<ParameterMap>()),
+    TS_ASSERT_THROWS(Instrument(std::shared_ptr<Instrument>(),
+                                std::shared_ptr<ParameterMap>()),
                      const std::invalid_argument &);
-    // boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
-    // TS_ASSERT_THROWS(Instrument(instr,boost::shared_ptr<ParameterMap>()),const
+    // std::shared_ptr<Instrument> instr = std::make_shared<Instrument>();
+    // TS_ASSERT_THROWS(Instrument(instr,std::shared_ptr<ParameterMap>()),const
     // std::invalid_argument &);
-    boost::shared_ptr<ParameterMap> paramMap =
-        boost::make_shared<ParameterMap>();
-    TS_ASSERT_THROWS(Instrument(boost::shared_ptr<Instrument>(), paramMap),
+    std::shared_ptr<ParameterMap> paramMap = std::make_shared<ParameterMap>();
+    TS_ASSERT_THROWS(Instrument(std::shared_ptr<Instrument>(), paramMap),
                      const std::invalid_argument &);
   }
 
@@ -107,7 +106,7 @@ public:
   }
 
 private:
-  boost::shared_ptr<Instrument> instrument;
+  std::shared_ptr<Instrument> instrument;
   Mantid::Geometry::ParameterMap_sptr pmap;
   Detector *det;
   Detector *det2;

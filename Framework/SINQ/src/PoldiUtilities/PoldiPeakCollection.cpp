@@ -63,7 +63,7 @@ PoldiPeakCollection::PoldiPeakCollection(
 
 PoldiPeakCollection_sptr PoldiPeakCollection::clone() {
   PoldiPeakCollection_sptr clone =
-      boost::make_shared<PoldiPeakCollection>(m_intensityType);
+      std::make_shared<PoldiPeakCollection>(m_intensityType);
   clone->setProfileFunctionName(m_profileFunctionName);
   clone->setPointGroup(m_pointGroup);
   clone->setUnitCell(m_unitCell);
@@ -129,7 +129,7 @@ void PoldiPeakCollection::setUnitCell(const UnitCell &unitCell) {
 UnitCell PoldiPeakCollection::unitCell() const { return m_unitCell; }
 
 TableWorkspace_sptr PoldiPeakCollection::asTableWorkspace() {
-  TableWorkspace_sptr peaks = boost::dynamic_pointer_cast<TableWorkspace>(
+  TableWorkspace_sptr peaks = std::dynamic_pointer_cast<TableWorkspace>(
       WorkspaceFactory::Instance().createTable());
 
   prepareTable(peaks);

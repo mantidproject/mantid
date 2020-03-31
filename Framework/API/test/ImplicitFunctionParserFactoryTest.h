@@ -14,7 +14,7 @@
 #include "MantidAPI/ImplicitFunctionParser.h"
 #include "MantidAPI/ImplicitFunctionParserFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class ImplicitFunctionParserFactoryTest : public CxxTest::TestSuite {
 private:

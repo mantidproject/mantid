@@ -228,7 +228,7 @@ private:
 
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
     Mantid::API::IAlgorithm_sptr alg =
-        boost::make_shared<VesuvioCalculateGammaBackground>();
+        std::make_shared<VesuvioCalculateGammaBackground>();
     alg->initialize();
     alg->setChild(true);
     alg->setPropertyValue("CorrectedWorkspace", "__UNUSED__");

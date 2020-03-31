@@ -25,7 +25,7 @@ using std::size_t;
  */
 SpectraAxis::SpectraAxis(const MatrixWorkspace *const parentWorkspace)
     : Axis(), m_parentWS(parentWorkspace), m_edges() {
-  this->unit() = boost::make_shared<Kernel::Units::Label>("Spectrum", "");
+  this->unit() = std::make_shared<Kernel::Units::Label>("Spectrum", "");
 }
 
 /** Virtual constructor

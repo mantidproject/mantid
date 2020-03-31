@@ -8,8 +8,8 @@
 #include "boost/function.hpp"
 #include "boost/tuple/tuple.hpp"
 #include <QAbstractTableModel>
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 #include <vector>
 
 // Forward declarations
@@ -37,8 +37,7 @@ class EXPORT_OPT_MANTIDQT_SLICEVIEWER QPeaksTableModel
     : public QAbstractTableModel {
   Q_OBJECT
 public:
-  QPeaksTableModel(
-      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
+  QPeaksTableModel(std::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index, int role) const override;
@@ -49,7 +48,7 @@ public:
   std::vector<int> defaultHideCols();
   ~QPeaksTableModel() override;
   void setPeaksWorkspace(
-      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
+      std::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
 signals:
   void peaksSorted(const std::string & /*_t1*/, const bool /*_t2*/);
 
@@ -157,7 +156,7 @@ private:
   std::vector<QString (*)(const Mantid::Geometry::IPeak &)>
       m_formattedValueLookup;
   /// Collection of data for viewing.
-  boost::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;
+  std::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;
   /// Map of column indexes to names
   ColumnIndexNameMap m_columnNameMap;
 };

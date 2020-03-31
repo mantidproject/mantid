@@ -19,7 +19,7 @@ NumericAxisValidator::NumericAxisValidator(const int &axisNumber)
 
 /// Clone the current state
 Kernel::IValidator_sptr NumericAxisValidator::clone() const {
-  return boost::make_shared<NumericAxisValidator>(*this);
+  return std::make_shared<NumericAxisValidator>(*this);
 }
 
 /** Checks that the axis stated

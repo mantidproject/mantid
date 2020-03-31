@@ -169,7 +169,7 @@ ReplicateMD::transposeMD(MDHistoWorkspace_sptr &toTranspose,
   transposeMD->setProperty("Axes", axes);
   transposeMD->execute();
   IMDHistoWorkspace_sptr outputWS = transposeMD->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<const MDHistoWorkspace>(outputWS);
+  return std::dynamic_pointer_cast<const MDHistoWorkspace>(outputWS);
 }
 
 /**
@@ -261,7 +261,7 @@ MDHistoWorkspace_sptr ReplicateMD::getShapeWorkspace() const {
   MDHistoWorkspace_sptr shapeWS;
   {
     IMDHistoWorkspace_sptr temp = this->getProperty("ShapeWorkspace");
-    shapeWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(temp);
+    shapeWS = std::dynamic_pointer_cast<MDHistoWorkspace>(temp);
   }
 
   return shapeWS;
@@ -275,7 +275,7 @@ MDHistoWorkspace_sptr ReplicateMD::getDataWorkspace() const {
   MDHistoWorkspace_sptr dataWS;
   {
     IMDHistoWorkspace_sptr temp = this->getProperty("DataWorkspace");
-    dataWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(temp);
+    dataWS = std::dynamic_pointer_cast<MDHistoWorkspace>(temp);
   }
 
   return dataWS;

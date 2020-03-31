@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <unordered_set>
 
 using Mantid::CurveFitting::Functions::ComptonProfile;
@@ -66,7 +66,7 @@ private:
   };
 
   Mantid::API::IFunction_sptr createFunction() {
-    auto profile = boost::make_shared<FakeComptonProfile>();
+    auto profile = std::make_shared<FakeComptonProfile>();
     profile->initialize();
     return profile;
   }

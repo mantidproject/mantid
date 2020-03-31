@@ -13,8 +13,7 @@
 #include "MantidVatesAPI/ViewFrustum.h"
 #include <cxxtest/TestSuite.h>
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <stdexcept>
 
 #include "MockObjects.h"
@@ -63,18 +62,18 @@ public:
     FarPlane farPlane(0.0, 0.0, 1.0, 1.0);
     NearPlane nearPlane(0.0, 0.0, -1.0, 1.0);
     ViewFrustum_const_sptr frustum =
-        boost::make_shared<const Mantid::VATES::ViewFrustum>(
+        std::make_shared<const Mantid::VATES::ViewFrustum>(
             left, right, bottom, top, farPlane, nearPlane);
 
-    boost::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr =
-        boost::make_shared<MockPeaksWorkspaceComposite>();
+    std::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr =
+        std::make_shared<MockPeaksWorkspaceComposite>();
 
     std::string name = "pw1";
     PeaksPresenterVsi_sptr p1(
         new ConcretePeaksPresenterVsi(pw_ptr, frustum, frame));
 
-    boost::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr2 =
-        boost::make_shared<MockPeaksWorkspaceComposite>();
+    std::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr2 =
+        std::make_shared<MockPeaksWorkspaceComposite>();
     std::string name2 = "pw2";
     PeaksPresenterVsi_sptr p2(
         new ConcretePeaksPresenterVsi(pw_ptr2, frustum, frame));
@@ -103,17 +102,17 @@ public:
     FarPlane farPlane(0.0, 0.0, 1.0, 1.0);
     NearPlane nearPlane(0.0, 0.0, -1.0, 1.0);
     ViewFrustum_const_sptr frustum =
-        boost::make_shared<const Mantid::VATES::ViewFrustum>(
+        std::make_shared<const Mantid::VATES::ViewFrustum>(
             left, right, bottom, top, farPlane, nearPlane);
 
-    boost::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr =
-        boost::make_shared<MockPeaksWorkspaceComposite>();
+    std::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr =
+        std::make_shared<MockPeaksWorkspaceComposite>();
     std::string name = "pw1";
     PeaksPresenterVsi_sptr p1(
         new ConcretePeaksPresenterVsi(pw_ptr, frustum, frame));
 
-    boost::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr2 =
-        boost::make_shared<MockPeaksWorkspaceComposite>();
+    std::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr2 =
+        std::make_shared<MockPeaksWorkspaceComposite>();
     std::string name2 = "pw2";
     PeaksPresenterVsi_sptr p2(
         new ConcretePeaksPresenterVsi(pw_ptr2, frustum, frame));

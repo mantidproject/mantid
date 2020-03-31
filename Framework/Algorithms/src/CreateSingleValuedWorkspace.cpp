@@ -23,7 +23,7 @@ void CreateSingleValuedWorkspace::init() {
                                                         Direction::Output),
                   "Name to use for the output workspace");
   declareProperty("DataValue", 0.0, "The value to place in the workspace");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("ErrorValue", 0.0, mustBePositive,
                   "The error value to place in the workspace (default 0.0)");

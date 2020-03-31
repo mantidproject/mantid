@@ -66,7 +66,7 @@ void ExtractUnmaskedSpectra::exec() {
   // Define the mask
   API::MatrixWorkspace_sptr mask;
   if (maskedWorkspace) {
-    if (boost::dynamic_pointer_cast<API::IMaskWorkspace>(maskedWorkspace)) {
+    if (std::dynamic_pointer_cast<API::IMaskWorkspace>(maskedWorkspace)) {
       mask = maskedWorkspace;
     } else {
       auto extractMask = createChildAlgorithm("ExtractMask");

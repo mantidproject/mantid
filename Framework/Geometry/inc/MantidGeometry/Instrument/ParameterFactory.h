@@ -40,8 +40,8 @@ class MANTID_GEOMETRY_DLL ParameterFactory {
 public:
   template <class C> static void subscribe(const std::string &className);
 
-  static boost::shared_ptr<Parameter> create(const std::string &className,
-                                             const std::string &name);
+  static std::shared_ptr<Parameter> create(const std::string &className,
+                                           const std::string &name);
 
 private:
   /// Private default constructor

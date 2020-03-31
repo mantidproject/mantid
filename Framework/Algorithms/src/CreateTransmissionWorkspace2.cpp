@@ -51,7 +51,7 @@ const std::string CreateTransmissionWorkspace2::category() const {
 /** Initialize the algorithm's properties.
  */
 void CreateTransmissionWorkspace2::init() {
-  auto inputValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
+  auto inputValidator = std::make_shared<WorkspaceUnitValidator>("TOF");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
@@ -69,20 +69,20 @@ void CreateTransmissionWorkspace2::init() {
 
   declareProperty(std::make_unique<PropertyWithValue<std::string>>(
                       "ProcessingInstructions", "",
-                      boost::make_shared<MandatoryValidator<std::string>>(),
+                      std::make_shared<MandatoryValidator<std::string>>(),
                       Direction::Input),
                   "Grouping pattern on spectrum numbers to yield only "
                   "the detectors of interest. See GroupDetectors for details.");
 
   declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "WavelengthMin", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
+                      std::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength minimum in angstroms");
 
   declareProperty(std::make_unique<PropertyWithValue<double>>(
                       "WavelengthMax", Mantid::EMPTY_DBL(),
-                      boost::make_shared<MandatoryValidator<double>>(),
+                      std::make_shared<MandatoryValidator<double>>(),
                       Direction::Input),
                   "Wavelength maximum in angstroms");
 

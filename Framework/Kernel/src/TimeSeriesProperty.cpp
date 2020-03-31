@@ -1388,7 +1388,7 @@ TimeSeriesProperty<TYPE>::setValueFromJson(const Json::Value & /*unused*/) {
  */
 template <typename TYPE>
 std::string TimeSeriesProperty<TYPE>::setDataItem(
-    const boost::shared_ptr<DataItem> /*unused*/) {
+    const std::shared_ptr<DataItem> & /*unused*/) {
   throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - "
                                        "Cannot extract TimeSeries from "
                                        "DataItem");

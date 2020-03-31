@@ -70,7 +70,7 @@ private:
 
   /// ISISRAW class instance which does raw file reading. Shared pointer to
   /// prevent memory leak when an exception is thrown.
-  boost::shared_ptr<ISISRAW2> isisRaw;
+  std::shared_ptr<ISISRAW2> isisRaw;
   /// The name and path of the input file
   std::string m_filename;
 

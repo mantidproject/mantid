@@ -47,7 +47,7 @@ public:
   const std::string id() const override;
 
   /// Copy the set up from another workspace
-  void copyFrom(boost::shared_ptr<const SpecialWorkspace2D> sourcews) override;
+  void copyFrom(std::shared_ptr<const SpecialWorkspace2D> sourcews) override;
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -69,10 +69,10 @@ private:
 };
 
 /// shared pointer to the MaskWorkspace class
-using MaskWorkspace_sptr = boost::shared_ptr<MaskWorkspace>;
+using MaskWorkspace_sptr = std::shared_ptr<MaskWorkspace>;
 
 /// shared pointer to a const MaskWorkspace
-using MaskWorkspace_const_sptr = boost::shared_ptr<const MaskWorkspace>;
+using MaskWorkspace_const_sptr = std::shared_ptr<const MaskWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid

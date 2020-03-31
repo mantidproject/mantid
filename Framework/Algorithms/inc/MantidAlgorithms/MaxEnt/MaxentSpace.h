@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAlgorithms/DllConfig.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -31,7 +31,7 @@ public:
   fromComplex(const std::vector<double> &values) = 0;
 };
 
-using MaxentSpace_sptr = boost::shared_ptr<MaxentSpace>;
+using MaxentSpace_sptr = std::shared_ptr<MaxentSpace>;
 
 } // namespace Algorithms
 } // namespace Mantid

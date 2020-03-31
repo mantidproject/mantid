@@ -42,7 +42,7 @@ void CalculateEfficiency::init() {
                                             Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty(
       "MinEfficiency", EMPTY_DBL(), positiveDouble,
@@ -100,7 +100,7 @@ void CalculateEfficiency::exec() {
   MatrixWorkspace_sptr outputWS; // = getProperty("OutputWorkspace");
 
   // DataObjects::EventWorkspace_const_sptr inputEventWS =
-  // boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  // std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
   // Sum up all the wavelength bins
   IAlgorithm_sptr childAlg = createChildAlgorithm("Integration", 0.0, 0.2);
@@ -293,8 +293,8 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
                                         const std::string &componentName) {
   auto instrument = ws.getInstrument();
   try {
-    boost::shared_ptr<const Geometry::ICompAssembly> component =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+    std::shared_ptr<const Geometry::ICompAssembly> component =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
             instrument->getComponentByName(componentName));
     if (!component) {
       g_log.warning("Component " + componentName +
@@ -304,11 +304,11 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
     }
     std::vector<detid_t> detectorList;
     for (int x = 0; x < component->nelements(); x++) {
-      boost::shared_ptr<Geometry::ICompAssembly> xColumn =
-          boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*component)[x]);
+      std::shared_ptr<Geometry::ICompAssembly> xColumn =
+          std::dynamic_pointer_cast<Geometry::ICompAssembly>((*component)[x]);
       for (int y = 0; y < xColumn->nelements(); y++) {
-        boost::shared_ptr<Geometry::Detector> detector =
-            boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+        std::shared_ptr<Geometry::Detector> detector =
+            std::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
         if (detector) {
           auto detID = detector->getID();
           detectorList.emplace_back(detID);
@@ -342,13 +342,11 @@ void CalculateEfficiency::maskEdges(const MatrixWorkspace_sptr &ws, int left,
 
   auto instrument = ws->getInstrument();
 
-  boost::shared_ptr<Mantid::Geometry::RectangularDetector> component;
+  std::shared_ptr<Mantid::Geometry::RectangularDetector> component;
   try {
-    component =
-        boost::const_pointer_cast<Mantid::Geometry::RectangularDetector>(
-            boost::dynamic_pointer_cast<
-                const Mantid::Geometry::RectangularDetector>(
-                instrument->getComponentByName(componentName)));
+    component = std::const_pointer_cast<Mantid::Geometry::RectangularDetector>(
+        std::dynamic_pointer_cast<const Mantid::Geometry::RectangularDetector>(
+            instrument->getComponentByName(componentName)));
   } catch (std::exception &) {
     g_log.warning("Expecting the component " + componentName +
                   " to be a RectangularDetector. maskEdges not executed.");

@@ -44,7 +44,7 @@ void ConvertTableToMatrixWorkspaceDialog::fillColumnNames(
   if (wsName.empty())
     return;
   Mantid::API::ITableWorkspace_sptr tws =
-      boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
   if (!tws)
     return;                             // just in case

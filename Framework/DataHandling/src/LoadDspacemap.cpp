@@ -44,7 +44,7 @@ void LoadDspacemap::init() {
   std::vector<std::string> propOptions{"POWGEN", "VULCAN-ASCII",
                                        "VULCAN-Binary"};
   declareProperty("FileType", "POWGEN",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The type of file being read.");
 
   declareProperty(std::make_unique<WorkspaceProperty<OffsetsWorkspace>>(
@@ -177,7 +177,7 @@ void LoadDspacemap::CalculateOffsetsFromVulcanFactors(
   for (it = allDetectors.begin(); it != allDetectors.end(); it++){
     int32_t detid = it->first;
 
-    // def boost::shared_ptr<const Mantid::Geometry::IDetector>
+    // def std::shared_ptr<const Mantid::Geometry::IDetector>
   IDetector_const_sptr;
 
     std::string parentname =

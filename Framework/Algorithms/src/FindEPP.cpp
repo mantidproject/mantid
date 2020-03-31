@@ -189,7 +189,7 @@ void FindEPP::fitGaussian(int64_t index) {
  */
 void FindEPP::initWorkspace() {
 
-  m_outWS = boost::make_shared<TableWorkspace>();
+  m_outWS = std::make_shared<TableWorkspace>();
 
   const std::vector<std::string> columns = {
       "PeakCentre", "PeakCentreError", "Sigma", "SigmaError",

@@ -28,11 +28,11 @@ public:
                   QWidget *parent, const int plotXIndex, const int plotYIndex,
                   const size_t colorNumber = 0);
   virtual ~PeakViewFactory();
-  boost::shared_ptr<PeakOverlayView> createView(
+  std::shared_ptr<PeakOverlayView> createView(
       PeaksPresenter *const presenter,
       Mantid::Geometry::PeakTransform_const_sptr transform) const override;
   void swapPeaksWorkspace(
-      boost::shared_ptr<Mantid::API::IPeaksWorkspace> &peaksWS) override;
+      std::shared_ptr<Mantid::API::IPeaksWorkspace> &peaksWS) override;
   void getNonOrthogonalInfo(NonOrthogonalAxis &info) override;
 
 private:

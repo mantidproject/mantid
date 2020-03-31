@@ -205,7 +205,7 @@ private:
   */
 };
 
-using LeBailFunction_sptr = boost::shared_ptr<LeBailFunction>;
+using LeBailFunction_sptr = std::shared_ptr<LeBailFunction>;
 
 } // namespace Algorithms
 } // namespace CurveFitting

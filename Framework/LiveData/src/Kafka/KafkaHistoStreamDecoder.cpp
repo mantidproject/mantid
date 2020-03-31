@@ -221,7 +221,7 @@ void KafkaHistoStreamDecoder::initLocalCaches(
     const auto nspec = ws->getInstrument()->getNumberDetectors();
 
     // Create buffer
-    histoBuffer = boost::static_pointer_cast<DataObjects::Workspace2D>(
+    histoBuffer = std::static_pointer_cast<DataObjects::Workspace2D>(
         API::WorkspaceFactory::Instance().create("Workspace2D", nspec, 2, 1));
     histoBuffer->getAxis(0)->unit() =
         Kernel::UnitFactory::Instance().create("TOF");

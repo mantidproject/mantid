@@ -28,7 +28,7 @@ bool checkPeriodInWorkspaceGroup(const int &period,
 }
 
 int countPeriods(const Workspace_const_sptr &ws) {
-  if (auto tmp = boost::dynamic_pointer_cast<const WorkspaceGroup>(ws)) {
+  if (auto tmp = std::dynamic_pointer_cast<const WorkspaceGroup>(ws)) {
     return tmp->getNumberOfEntries();
   } else {
     return 1;
@@ -51,7 +51,7 @@ bool checkConsistentPeriods(const Workspace_const_sptr &ws1,
 MatrixWorkspace_sptr getWorkspace(const WorkspaceGroup_sptr &group,
                                   const int &index) {
   auto ws = group->getItem(index);
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(ws);
 }
 
 MatrixWorkspace_sptr groupDetectors(const MatrixWorkspace_sptr &workspace,
@@ -88,10 +88,10 @@ WorkspaceGroup_sptr workspaceToWorkspaceGroup(const Workspace_sptr &workspace) {
 
   WorkspaceGroup_sptr ws1;
   if (workspace->isGroup()) {
-    ws1 = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    ws1 = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
   } else {
-    ws1 = boost::make_shared<WorkspaceGroup>();
-    ws1->addWorkspace(boost::dynamic_pointer_cast<MatrixWorkspace>(workspace));
+    ws1 = std::make_shared<WorkspaceGroup>();
+    ws1->addWorkspace(std::dynamic_pointer_cast<MatrixWorkspace>(workspace));
   }
   return ws1;
 }
@@ -120,9 +120,9 @@ void MuonPairingAsymmetry::init() {
                   "character.",
                   Direction::Input);
 
-  declareProperty(
-      "Alpha", 1.0, boost::make_shared<MandatoryValidator<double>>(),
-      "Alpha parameter used in the asymmetry calculation.", Direction::Input);
+  declareProperty("Alpha", 1.0, std::make_shared<MandatoryValidator<double>>(),
+                  "Alpha parameter used in the asymmetry calculation.",
+                  Direction::Input);
 
   declareProperty("SpecifyGroupsManually", false,
                   "Specify the pair of groups manually");
@@ -270,8 +270,8 @@ void MuonPairingAsymmetry::validateGroupsWorkspaces(
                                 "inconsistent numbers of periods.";
   }
   if (ws1->isGroup() && ws2->isGroup()) {
-    validatePeriods(boost::dynamic_pointer_cast<WorkspaceGroup>(ws1), errors);
-    validatePeriods(boost::dynamic_pointer_cast<WorkspaceGroup>(ws2), errors);
+    validatePeriods(std::dynamic_pointer_cast<WorkspaceGroup>(ws1), errors);
+    validatePeriods(std::dynamic_pointer_cast<WorkspaceGroup>(ws2), errors);
   }
 }
 
@@ -287,7 +287,7 @@ void MuonPairingAsymmetry::exec() {
     outWS = execGroupWorkspaceInput();
   }
 
-  // outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);
+  // outWS = std::dynamic_pointer_cast<MatrixWorkspace>(outWS);
 
   setPairAsymmetrySampleLogs(outWS);
   if (!outWS->isGroup()) {
@@ -302,7 +302,7 @@ MatrixWorkspace_sptr MuonPairingAsymmetry::execGroupWorkspaceInput() {
   Workspace_sptr tmpWS2 = getProperty("InputWorkspace2");
   WorkspaceGroup_sptr ws1 = workspaceToWorkspaceGroup(tmpWS1);
   WorkspaceGroup_sptr ws2 = workspaceToWorkspaceGroup(tmpWS2);
-  WorkspaceGroup_sptr groupedPeriods = boost::make_shared<WorkspaceGroup>();
+  WorkspaceGroup_sptr groupedPeriods = std::make_shared<WorkspaceGroup>();
   for (int i = 0; i < countPeriods(ws1); i++) {
     groupedPeriods->addWorkspace(
         appendSpectra(getWorkspace(ws1, i), getWorkspace(ws2, i)));
@@ -363,13 +363,13 @@ MuonPairingAsymmetry::createGroupWorkspace(const WorkspaceGroup_sptr &inputWS) {
 
   std::vector<int> group1 = this->getProperty("Group1");
   std::vector<int> group2 = this->getProperty("Group2");
-  auto groupedPeriods = boost::make_shared<WorkspaceGroup>();
+  auto groupedPeriods = std::make_shared<WorkspaceGroup>();
   // for each period
   for (auto &&workspace : *inputWS) {
     auto groupWS1 = groupDetectors(
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace), group1);
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace), group1);
     auto groupWS2 = groupDetectors(
-        boost::dynamic_pointer_cast<MatrixWorkspace>(workspace), group2);
+        std::dynamic_pointer_cast<MatrixWorkspace>(workspace), group2);
     groupedPeriods->addWorkspace(appendSpectra(groupWS1, groupWS2));
   }
   return groupedPeriods;

@@ -13,7 +13,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/optional.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {

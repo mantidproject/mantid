@@ -22,7 +22,7 @@
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #endif
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QApplication>
 #include <QSpinBox>

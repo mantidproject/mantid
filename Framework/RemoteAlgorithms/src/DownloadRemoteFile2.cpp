@@ -26,14 +26,14 @@ using namespace Mantid::API;
 void DownloadRemoteFile2::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
-  auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
+  auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
                                           .getFacility()
                                           .computeResources();
   declareProperty(
-      "ComputeResource", "", boost::make_shared<StringListValidator>(computes),
+      "ComputeResource", "", std::make_shared<StringListValidator>(computes),
       "The name of the remote computer holding the file", Direction::Input);
 
   // The transaction ID comes from the StartRemoteTransaction algortithm

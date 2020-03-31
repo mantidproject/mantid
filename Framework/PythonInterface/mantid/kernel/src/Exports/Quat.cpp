@@ -25,7 +25,7 @@ using Mantid::Kernel::V3D;
  * Python exports of the Mantid::Kernel::Quat class.
  */
 void export_Quat() {
-  boost::python::register_ptr_to_python<boost::shared_ptr<Quat>>();
+  boost::python::register_ptr_to_python<std::shared_ptr<Quat>>();
 
   // Quat class
   class_<Quat>(

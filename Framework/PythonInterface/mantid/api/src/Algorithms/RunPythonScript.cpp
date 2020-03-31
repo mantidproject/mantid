@@ -169,7 +169,7 @@ std::string RunPythonScript::scriptCode() const {
  * @return A pointer to the output workspace if one was generated. If one was
  * not then this is an empty pointer
  */
-boost::shared_ptr<API::Workspace>
+std::shared_ptr<API::Workspace>
 RunPythonScript::executeScript(const std::string &script) const {
   using namespace API;
   using namespace boost::python;
@@ -239,7 +239,7 @@ boost::python::dict RunPythonScript::buildLocals() const {
  * @return A pointer to the output workspace if created, otherwise an empty
  * pointer
  */
-boost::shared_ptr<API::Workspace> RunPythonScript::extractOutputWorkspace(
+std::shared_ptr<API::Workspace> RunPythonScript::extractOutputWorkspace(
     const boost::python::dict &locals) const {
   using namespace API;
   using namespace boost::python;

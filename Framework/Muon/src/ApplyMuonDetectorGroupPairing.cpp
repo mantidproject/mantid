@@ -391,7 +391,7 @@ MatrixWorkspace_sptr ApplyMuonDetectorGroupPairing::createPairWorkspaceManually(
   alg->execute();
 
   Workspace_sptr outWS = alg->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(outWS);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(outWS);
 }
 
 /*
@@ -448,16 +448,16 @@ void ApplyMuonDetectorGroupPairing::setMuonProcessPeriodProperties(
     IAlgorithm &alg, const Workspace_sptr &inputWS,
     const Muon::AnalysisOptions &options) const {
 
-  auto inputGroup = boost::make_shared<WorkspaceGroup>();
+  auto inputGroup = std::make_shared<WorkspaceGroup>();
   // If is a group, will need to handle periods
-  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
+  if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
     for (int i = 0; i < group->getNumberOfEntries(); i++) {
-      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+      auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
       inputGroup->addWorkspace(ws);
     }
     alg.setProperty("SummedPeriodSet", options.summedPeriods);
     alg.setProperty("SubtractedPeriodSet", options.subtractedPeriods);
-  } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+  } else if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
     // Put this single WS into a group and set it as the input property
     inputGroup->addWorkspace(ws);
     alg.setProperty("SummedPeriodSet", "1");

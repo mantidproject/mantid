@@ -13,7 +13,7 @@
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
 #include <boost/variant/static_visitor.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 #include <cctype>
 

@@ -42,7 +42,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
 
     Mantid::DataObjects::WorkspaceSingleValue_sptr single =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(
             ws);
 
     TS_ASSERT(ws.get() != nullptr);
@@ -84,7 +84,7 @@ public:
             Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
 
     Mantid::DataObjects::WorkspaceSingleValue_sptr single =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::WorkspaceSingleValue>(
             ws);
 
     TS_ASSERT(ws.get() != nullptr);

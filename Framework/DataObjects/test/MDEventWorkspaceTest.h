@@ -153,7 +153,7 @@ public:
   }
 
   void test_clone_clear_workspace_name() {
-    auto ws = boost::make_shared<MDEventWorkspace<MDLeanEvent<3>, 3>>();
+    auto ws = std::make_shared<MDEventWorkspace<MDLeanEvent<3>, 3>>();
     Mantid::Geometry::GeneralFrame frame("m", "m");
     for (size_t i = 0; i < 3; i++) {
       ws->addDimension(MDHistoDimension_sptr(
@@ -236,7 +236,7 @@ public:
   //-------------------------------------------------------------------------------------
   /** Create an IMDIterator */
   void test_createIterator() {
-    auto ew = boost::make_shared<MDEventWorkspace3>();
+    auto ew = std::make_shared<MDEventWorkspace3>();
     BoxController_sptr bc = ew->getBoxController();
     bc->setSplitInto(4);
     ew->splitBox();
@@ -254,7 +254,7 @@ public:
   //-------------------------------------------------------------------------------------
   /** Create several IMDIterators to run them in parallel */
   void test_createIterators() {
-    auto ew = boost::make_shared<MDEventWorkspace3>();
+    auto ew = std::make_shared<MDEventWorkspace3>();
     BoxController_sptr bc = ew->getBoxController();
     bc->setSplitInto(4);
     ew->splitBox();
@@ -732,7 +732,7 @@ public:
     auto eventSetting = Mantid::API::NoNormalization;
     auto histoSetting = Mantid::API::NumEventsNormalization;
     // Act
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDLeanEvent<3>, 3>>
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDLeanEvent<3>, 3>>
         ew(new Mantid::DataObjects::MDEventWorkspace<MDLeanEvent<3>, 3>(
             eventSetting, histoSetting));
     // Assert

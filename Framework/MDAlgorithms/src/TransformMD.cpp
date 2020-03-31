@@ -117,7 +117,7 @@ void TransformMD::exec() {
   outWS = getProperty("OutputWorkspace");
   std::string outName = getPropertyValue("OutputWorkspace");
 
-  if (boost::dynamic_pointer_cast<MatrixWorkspace>(inWS))
+  if (std::dynamic_pointer_cast<MatrixWorkspace>(inWS))
     throw std::runtime_error("TransformMD can only transform a "
                              "MDHistoWorkspace or a MDEventWorkspace.");
 
@@ -155,9 +155,9 @@ void TransformMD::exec() {
   outWS->transformDimensions(m_scaling, m_offset);
 
   MDHistoWorkspace_sptr histo =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
+      std::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
   IMDEventWorkspace_sptr event =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
 
   if (histo) {
     // Recalculate all the values since the dimensions changed.
@@ -208,7 +208,7 @@ void TransformMD::exec() {
     event->refreshCache();
     // Set the special coordinate system.
     IMDEventWorkspace_sptr inEvent =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
+        std::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
     event->setCoordinateSystem(inEvent->getSpecialCoordinateSystem());
 
     if (m_scaling[0] < 0) {
@@ -269,7 +269,7 @@ TransformMD::transposeMD(MDHistoWorkspace_sptr &toTranspose,
   transposeMD->setProperty("Axes", axes);
   transposeMD->execute();
   IMDHistoWorkspace_sptr outputWS = transposeMD->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+  return std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
 
 } // namespace MDAlgorithms

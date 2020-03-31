@@ -35,7 +35,7 @@
 // clang-format on
 
 #include "MantidDataObjects/Workspace2D.h"
-#include <boost/shared_array.hpp>
+#include <memory>
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 class MANTID_SINQ_DLL LoadFlexiNexus : public Mantid::API::Algorithm {

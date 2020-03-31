@@ -85,7 +85,7 @@ void vtkGeometryCacheWriter::createVTKFileHeader() {
  */
 void vtkGeometryCacheWriter::addObject(CSGObject *obj) {
   // First check whether Object can be written to the file
-  boost::shared_ptr<GeometryHandler> handle = obj->getGeometryHandler();
+  std::shared_ptr<GeometryHandler> handle = obj->getGeometryHandler();
   if (!(handle->canTriangulate()))
     return; // Cannot add the object to the file
   std::stringstream buf;

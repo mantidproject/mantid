@@ -14,7 +14,7 @@ namespace IDA {
 
 using ResolutionCollectionType =
     IndexCollectionType<TableDatasetIndex,
-                        boost::weak_ptr<Mantid::API::MatrixWorkspace>>;
+                        std::weak_ptr<Mantid::API::MatrixWorkspace>>;
 using ExtendedResolutionType =
     IndexCollectionType<TableDatasetIndex, std::string>;
 

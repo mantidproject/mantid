@@ -10,7 +10,7 @@
 #include "MantidCrystal/ICluster.h"
 #include "MantidKernel/System.h"
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Crystal {
@@ -23,13 +23,12 @@ public:
   CompositeCluster(const CompositeCluster &) = delete;
   CompositeCluster &operator=(const CompositeCluster &) = delete;
   /// integrate the cluster
-  ICluster::ClusterIntegratedValues
-  integrate(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws)
-      const override;
+  ICluster::ClusterIntegratedValues integrate(
+      std::shared_ptr<const Mantid::API::IMDHistoWorkspace> ws) const override;
 
   /// Apply labels to the workspace
   void
-  writeTo(boost::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const override;
+  writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> ws) const override;
 
   /// Original label
   size_t getOriginalLabel() const override;
@@ -47,7 +46,7 @@ public:
   void toUniformMinimum(std::vector<DisjointElement> &disjointSet) override;
 
   /// Own.
-  void add(boost::shared_ptr<ICluster> &toOwn);
+  void add(std::shared_ptr<ICluster> &toOwn);
 
   /// Set the root cluster
   void setRootCluster(ICluster const *root) override;
@@ -67,7 +66,7 @@ private:
   /// Label used by cluster
   mutable boost::optional<size_t> m_label;
   /// Attached clusters.
-  std::vector<boost::shared_ptr<ICluster>> m_ownedClusters;
+  std::vector<std::shared_ptr<ICluster>> m_ownedClusters;
 };
 
 } // namespace Crystal

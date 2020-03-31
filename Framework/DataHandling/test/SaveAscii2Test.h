@@ -100,7 +100,7 @@ public:
 
   void testExec_DXNoData() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       std::vector<double> &X = wsToSave->dataX(i);
@@ -122,7 +122,7 @@ public:
 
   void testExec_DX() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       auto &X = wsToSave->mutableX(i);
@@ -942,7 +942,7 @@ public:
 private:
   void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave,
                      const bool &isSpectra = true) {
-    wsToSave = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+    wsToSave = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       auto &X = wsToSave->mutableX(i);

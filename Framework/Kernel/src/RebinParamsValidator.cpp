@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/RebinParamsValidator.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Kernel {
@@ -13,7 +13,7 @@ RebinParamsValidator::RebinParamsValidator(bool allowEmpty, bool allowRange)
     : m_allowEmpty(allowEmpty), m_allowRange(allowRange) {}
 
 IValidator_sptr RebinParamsValidator::clone() const {
-  return boost::make_shared<RebinParamsValidator>(*this);
+  return std::make_shared<RebinParamsValidator>(*this);
 }
 
 /** Check on the inputed bin boundaries and widths.

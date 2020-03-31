@@ -38,7 +38,7 @@ public:
     Mantid::DataObjects::MaskWorkspace_sptr ws1(
         new Mantid::DataObjects::MaskWorkspace(inst1));
     Mantid::DataObjects::MaskWorkspace_const_sptr cws1 =
-        boost::dynamic_pointer_cast<const Mantid::DataObjects::MaskWorkspace>(
+        std::dynamic_pointer_cast<const Mantid::DataObjects::MaskWorkspace>(
             ws1);
 
     Mantid::Geometry::Instrument_sptr inst2 =

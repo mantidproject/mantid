@@ -265,7 +265,7 @@ Poco::File addLockFile(const Poco::Path &lockFilePath) {
  */
 bool checkIfEmptyGroup(const Mantid::API::Workspace_sptr &ws) {
   if (auto groupWS =
-          boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
+          std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws)) {
     if (groupWS->isEmpty()) {
       g_log.debug("Empty group was present when recovery ran so was removed");
       return true;

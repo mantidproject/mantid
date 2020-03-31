@@ -81,7 +81,7 @@ public:
                 const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     paramMap.addString(comp->getComponentID(), pName, value);
   }
 
@@ -89,7 +89,7 @@ public:
                 double value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     paramMap.addDouble(comp->getComponentID(), pName, value);
   }
 
@@ -105,7 +105,7 @@ public:
                    const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     auto param = ParameterFactory::create("fitting", pName);
     param->fromString(value);
     paramMap.add(comp.get(), param);
@@ -115,7 +115,7 @@ public:
                   std::string value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     std::string param = paramMap.getString(comp.get(), pName);
     TS_ASSERT_EQUALS(value, param);
   }
@@ -124,7 +124,7 @@ public:
                   double value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     std::vector<double> values = paramMap.getDouble(cName, pName);
     TS_ASSERT_DELTA(value, values.front(), 0.0001);
   }
@@ -142,7 +142,7 @@ public:
                      const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     auto param = paramMap.get(comp.get(), pName, "fitting");
     const Mantid::Geometry::FitParameter &fitParam =
         param->value<FitParameter>();
@@ -182,7 +182,7 @@ public:
     std::string wsName = "SaveParameterFileTestIDF2";
     Workspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
@@ -194,7 +194,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
     TS_ASSERT(loaderIDF2.isExecuted());
 
-    m_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws2D);
+    m_ws = std::dynamic_pointer_cast<MatrixWorkspace>(ws2D);
   }
 
 private:

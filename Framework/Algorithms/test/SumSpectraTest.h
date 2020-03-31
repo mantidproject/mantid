@@ -150,7 +150,7 @@ public:
         output = AnalysisDataService::Instance().retrieve(outputSpace1));
 
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
     size_t max = 0;
     TS_ASSERT_EQUALS(max = inputSpace->blocksize(), output2D->blocksize());
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
@@ -211,7 +211,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace2));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -410,7 +410,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace2));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -483,7 +483,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace2));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -580,7 +580,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outName));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -642,7 +642,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outWsName));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     const auto &outYVals = output2D->y(0);
     // We expect one less because of inf and NaN
@@ -679,7 +679,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outWsName));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     const auto &outYVals = output2D->y(0);
     // We expect a NaN and an Inf to propagate here

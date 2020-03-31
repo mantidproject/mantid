@@ -28,7 +28,7 @@ FuncMinimizerFactoryImpl::FuncMinimizerFactoryImpl()
  *   and optionally properties: "type,prop1=value1,prop2=value2"
  * @return A pointer to the created minimizer
  */
-boost::shared_ptr<IFuncMinimizer>
+std::shared_ptr<IFuncMinimizer>
 FuncMinimizerFactoryImpl::createMinimizer(const std::string &str) const {
   // check if there are any properties defined - look for a comma
   if (str.find(',') ==

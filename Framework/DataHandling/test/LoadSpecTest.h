@@ -39,7 +39,7 @@ public:
 
     MatrixWorkspace_const_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        ws = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outWS)));
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 4); // number of spectrum
@@ -77,7 +77,7 @@ public:
 
     MatrixWorkspace_const_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        ws = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outWS)));
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 4); // number of spectrum

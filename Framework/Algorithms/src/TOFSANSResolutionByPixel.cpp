@@ -37,14 +37,14 @@ TOFSANSResolutionByPixel::TOFSANSResolutionByPixel()
 void TOFSANSResolutionByPixel::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
+                      std::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Name the workspace to calculate the resolution for, for "
                   "each pixel and wavelength");
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
                                                      Direction::Output),
       "Name of the newly created workspace which contains the Q resolution.");
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty("DeltaR", 0.0, positiveDouble,
                   "Virtual ring width on the detector (mm).");
@@ -54,7 +54,7 @@ void TOFSANSResolutionByPixel::init() {
                   "Source aperture radius, R1 (mm).");
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "SigmaModerator", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
+                      std::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Moderator time spread (microseconds) as a"
                   "function of wavelength (Angstroms).");
   declareProperty("CollimationLength", 0.0, positiveDouble,
@@ -215,7 +215,7 @@ MatrixWorkspace_sptr TOFSANSResolutionByPixel::setupOutputWorkspace(
   duplicate->setProperty<Workspace_sptr>("InputWorkspace", inputWorkspace);
   duplicate->execute();
   Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 }
 
 /**

@@ -89,7 +89,7 @@ void SaveFITS::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<>>(
           PROP_INPUT_WS, "", Kernel::Direction::Input,
-          boost::make_shared<API::WorkspaceUnitValidator>("Label")),
+          std::make_shared<API::WorkspaceUnitValidator>("Label")),
       "Workspace holding an image (with one spectrum per pixel row).");
 
   declareProperty(std::make_unique<API::FileProperty>(
@@ -98,7 +98,7 @@ void SaveFITS::init() {
                   "Name of the output file where the image is saved.");
 
   declareProperty(PROP_BIT_DEPTH, 16,
-                  boost::make_shared<Kernel::ListValidator<int>>(g_bitDepths),
+                  std::make_shared<Kernel::ListValidator<int>>(g_bitDepths),
                   "The bit depth or number of bits per pixel to use for the "
                   "output image(s). Only 16 bits is supported at the "
                   "moment.",

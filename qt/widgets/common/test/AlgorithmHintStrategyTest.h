@@ -41,7 +41,7 @@ class AlgorithmHintStrategyTest : public CxxTest::TestSuite {
       declareProperty("BoolValue", false);
       declareProperty("StringValue", "Empty");
       auto mustBePositive =
-          boost::make_shared<Mantid::Kernel::BoundedValidator<int>>();
+          std::make_shared<Mantid::Kernel::BoundedValidator<int>>();
       mustBePositive->setLower(0);
       declareProperty("PositiveIntValue", 0, mustBePositive);
       declareProperty("PositiveIntValue1", 0, mustBePositive);

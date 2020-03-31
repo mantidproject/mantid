@@ -56,7 +56,7 @@ void SliceMD::init() {
   declareProperty("TakeMaxRecursionDepthFromInput", true,
                   "Copy the maximum recursion depth from the input workspace.");
 
-  auto mustBePositiveInteger = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositiveInteger = std::make_shared<BoundedValidator<int>>();
   mustBePositiveInteger->setLower(0);
 
   declareProperty("MaxRecursionDepth", 1000, mustBePositiveInteger,
@@ -284,7 +284,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Pass on the display normalization from the input event workspace to the
   // output event workspace
   IMDEventWorkspace_sptr outEvent =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
   outEvent->setDisplayNormalization(ws->displayNormalization());
   outEvent->setDisplayNormalizationHisto(ws->displayNormalizationHisto());
   // return the size of the input workspace write buffer to its initial value

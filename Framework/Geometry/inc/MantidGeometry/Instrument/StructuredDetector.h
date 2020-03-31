@@ -55,7 +55,7 @@ public:
   //! Make a clone of the present component
   IComponent *clone() const override;
 
-  boost::shared_ptr<Detector> getAtXY(const size_t x, const size_t y) const;
+  std::shared_ptr<Detector> getAtXY(const size_t x, const size_t y) const;
 
   detid_t getDetectorIDAtXY(const size_t X, const size_t Y) const;
   std::pair<size_t, size_t> getXYForDetectorID(const detid_t detectorID) const;
@@ -82,7 +82,7 @@ public:
   /// maximum detector id
   detid_t maxDetectorID();
 
-  boost::shared_ptr<const IComponent>
+  std::shared_ptr<const IComponent>
   getComponentByName(const std::string &cname, int nlevels = 0) const override;
 
   // This should inherit the getBoundingBox implementation from  CompAssembly
@@ -123,7 +123,7 @@ public:
   void initDraw() const override;
 
   /// Returns the shape of the Object
-  const boost::shared_ptr<const IObject> shape() const override;
+  const std::shared_ptr<const IObject> shape() const override;
   /// Returns the material of the detector
   const Kernel::Material material() const override;
 
@@ -176,8 +176,7 @@ private:
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
                                              const StructuredDetector &);
 
-using StructuredDetector_sptr = boost::shared_ptr<StructuredDetector>;
-using StructuredDetector_const_sptr =
-    boost::shared_ptr<const StructuredDetector>;
+using StructuredDetector_sptr = std::shared_ptr<StructuredDetector>;
+using StructuredDetector_const_sptr = std::shared_ptr<const StructuredDetector>;
 } // namespace Geometry
 } // namespace Mantid

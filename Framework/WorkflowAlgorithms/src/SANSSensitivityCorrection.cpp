@@ -51,7 +51,7 @@ void SANSSensitivityCorrection::init() {
           "DarkCurrentFile", "", API::FileProperty::OptionalLoad, fileExts),
       "The name of the input file to load as dark current.");
 
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty(
       "MinEfficiency", EMPTY_DBL(), positiveDouble,
@@ -126,12 +126,12 @@ void SANSSensitivityCorrection::exec() {
 
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
+  std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
     reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
-    reductionManager = boost::make_shared<PropertyManager>();
+    reductionManager = std::make_shared<PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
                                                         reductionManager);
   }
@@ -153,7 +153,7 @@ void SANSSensitivityCorrection::exec() {
 
   if (reductionManager->existsProperty(entryName)) {
     std::string wsName = reductionManager->getPropertyValue(entryName);
-    floodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    floodWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
     m_output_message += "   |Using " + wsName + "\n";
     g_log.debug()
@@ -170,7 +170,7 @@ void SANSSensitivityCorrection::exec() {
       loadAlg->setProperty("Filename", fileName);
       loadAlg->executeAsChildAlg();
       Workspace_sptr floodWS_ws = loadAlg->getProperty("OutputWorkspace");
-      floodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(floodWS_ws);
+      floodWS = std::dynamic_pointer_cast<MatrixWorkspace>(floodWS_ws);
 
       // Check that it's really a sensitivity file
       if (!floodWS->run().hasProperty("is_sensitivity")) {
@@ -211,7 +211,7 @@ void SANSSensitivityCorrection::exec() {
         loadAlg->setPropertyValue("OutputWorkspace", rawFloodWSName);
         loadAlg->executeAsChildAlg();
         Workspace_sptr tmpWS = loadAlg->getProperty("OutputWorkspace");
-        rawFloodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
+        rawFloodWS = std::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
         m_output_message += "   | Loaded " + fileName + " (Load algorithm)\n";
       } else {
         // Get load algorithm as a string so that we can create a completely

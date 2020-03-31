@@ -115,7 +115,7 @@ void CreateMD::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
           "DataSources",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),
+          std::make_shared<MandatoryValidator<std::vector<std::string>>>(),
           Direction::Input),
       "Input workspaces to process, or filenames to load and process");
 
@@ -126,32 +126,30 @@ void CreateMD::init() {
   std::vector<std::string> e_mode_options{"Elastic", "Direct", "Indirect"};
 
   declareProperty("Emode", "Direct",
-                  boost::make_shared<StringListValidator>(e_mode_options),
+                  std::make_shared<StringListValidator>(e_mode_options),
                   "Analysis mode ['Elastic', 'Direct', 'Indirect'].");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "Alatt",
-          boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          "Alatt", std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice parameters");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "Angdeg",
-          boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          "Angdeg", std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice angles");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "u", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          "u", std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector parallel to neutron beam");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "v", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          "v", std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector perpendicular to neutron beam in the horizontal plane");
 
@@ -240,10 +238,10 @@ void CreateMD::exec() {
       // Create workspace name of form {filename}_md_{n}
       ws_name << filename_noext << "_md_" << counter;
       to_merge_name = ws_name.str();
-      workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           loadWs(data_sources[entry_number], to_merge_name));
     } else {
-      workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      workspace = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           AnalysisDataService::Instance().retrieve(data_sources[entry_number]));
       ws_name << data_sources[entry_number] << "_md";
       to_merge_name = ws_name.str();

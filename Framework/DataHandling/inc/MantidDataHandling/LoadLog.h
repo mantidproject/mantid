@@ -125,7 +125,7 @@ private:
                          const std::string &logFileName);
 
   /// TimeSeriesProperty<int> containing data periods. Created by LogParser
-  boost::shared_ptr<Kernel::Property> m_periods;
+  std::shared_ptr<Kernel::Property> m_periods;
 };
 
 } // namespace DataHandling

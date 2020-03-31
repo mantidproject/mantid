@@ -241,12 +241,12 @@ const std::string ReflectometrySumInQ::summary() const {
 /** Initialize the algorithm's properties.
  */
 void ReflectometrySumInQ::init() {
-  auto inputWSValidator = boost::make_shared<Kernel::CompositeValidator>();
+  auto inputWSValidator = std::make_shared<Kernel::CompositeValidator>();
   inputWSValidator->add<API::WorkspaceUnitValidator>("Wavelength");
   inputWSValidator->add<API::InstrumentValidator>();
-  auto mandatoryNonnegative = boost::make_shared<Kernel::CompositeValidator>();
+  auto mandatoryNonnegative = std::make_shared<Kernel::CompositeValidator>();
   mandatoryNonnegative->add<Kernel::MandatoryValidator<double>>();
-  auto nonnegative = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto nonnegative = std::make_shared<Kernel::BoundedValidator<double>>();
   nonnegative->setLower(0.);
   mandatoryNonnegative->add(nonnegative);
   declareWorkspaceInputProperties<API::MatrixWorkspace,

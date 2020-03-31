@@ -46,17 +46,17 @@ void CreateTransmissionWorkspaceAuto::init() {
   analysis_modes.emplace_back("PointDetectorAnalysis");
   analysis_modes.emplace_back("MultiDetectorAnalysis");
   declareProperty("AnalysisMode", analysis_modes.at(0),
-                  boost::make_shared<StringListValidator>(analysis_modes),
+                  std::make_shared<StringListValidator>(analysis_modes),
                   "Analysis Mode to Choose", Direction::Input);
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("TOF")),
+                      std::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "SecondTransmissionRun", "", Direction::Input,
                       PropertyMode::Optional,
-                      boost::make_shared<WorkspaceUnitValidator>("TOF")),
+                      std::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Second transmission run workspace in TOF.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
@@ -64,7 +64,7 @@ void CreateTransmissionWorkspaceAuto::init() {
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "Params", boost::make_shared<RebinParamsValidator>(true)),
+          "Params", std::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "These parameters are used for stitching together transmission runs. "
       "Values are in wavelength (angstroms). This input is only needed if a "

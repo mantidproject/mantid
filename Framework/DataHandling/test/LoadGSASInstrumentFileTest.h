@@ -58,7 +58,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("Test1BankTable"));
     TS_ASSERT(outws);
 
@@ -102,7 +102,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("Test2BankTable"));
     TS_ASSERT(outws);
 
@@ -156,7 +156,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("TestAGSTable"));
     TS_ASSERT(outws);
 
@@ -236,9 +236,9 @@ public:
     // First, check first workspace
     WorkspaceGroup_sptr gws;
     gws = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
-    auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
+    auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(0));
     const auto &paramMap = ws->constInstrumentParameters();
-    boost::shared_ptr<const Mantid::Geometry::Instrument> instr =
+    std::shared_ptr<const Mantid::Geometry::Instrument> instr =
         ws->getInstrument();
 
     // To check parameters in workspace
@@ -278,7 +278,7 @@ public:
     TS_ASSERT_EQUALS(fitParam.getValue(0.0), 0.0);
 
     // Now check second workspace
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(1));
+    ws = std::dynamic_pointer_cast<MatrixWorkspace>(gws->getItem(1));
     const auto &paramMap2 = ws->constInstrumentParameters();
     instr = ws->getInstrument();
 
@@ -504,7 +504,7 @@ public:
     for (size_t i = 0; i < numberOfWorkspaces; ++i) {
       Workspace_sptr ws =
           WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-      Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+      Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
       gws->addWorkspace(ws2D);
     }
 

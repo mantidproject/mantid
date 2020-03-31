@@ -121,7 +121,7 @@ public:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve("peaks")));
     TS_ASSERT(ws)
     if (!ws)
@@ -144,7 +144,7 @@ public:
 
     PeaksWorkspace_sptr ws2;
     TS_ASSERT_THROWS_NOTHING(
-        ws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        ws2 = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve("peaks2")))
     TS_ASSERT(ws2)
     if (!ws2)

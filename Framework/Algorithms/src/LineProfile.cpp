@@ -318,16 +318,16 @@ const std::string LineProfile::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LineProfile::init() {
-  const auto mandatoryDouble = boost::make_shared<MandatoryValidator<double>>();
-  const auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  const auto mandatoryDouble = std::make_shared<MandatoryValidator<double>>();
+  const auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   positiveDouble->setLowerExclusive(true);
-  const auto mandatoryPositiveDouble = boost::make_shared<CompositeValidator>();
+  const auto mandatoryPositiveDouble = std::make_shared<CompositeValidator>();
   mandatoryPositiveDouble->add(mandatoryDouble);
   mandatoryPositiveDouble->add(positiveDouble);
-  const auto inputWorkspaceValidator = boost::make_shared<CompositeValidator>();
-  inputWorkspaceValidator->add(boost::make_shared<CommonBinsValidator>());
-  inputWorkspaceValidator->add(boost::make_shared<IncreasingAxisValidator>());
+  const auto inputWorkspaceValidator = std::make_shared<CompositeValidator>();
+  inputWorkspaceValidator->add(std::make_shared<CommonBinsValidator>());
+  inputWorkspaceValidator->add(std::make_shared<IncreasingAxisValidator>());
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       PropertyNames::INPUT_WORKSPACE, "", Direction::Input,
                       inputWorkspaceValidator),
@@ -343,7 +343,7 @@ void LineProfile::init() {
   const std::array<std::string, 2> directions = {
       {DirectionChoices::HORIZONTAL, DirectionChoices::VERTICAL}};
   declareProperty(PropertyNames::DIRECTION, DirectionChoices::HORIZONTAL,
-                  boost::make_shared<ListValidator<std::string>>(directions),
+                  std::make_shared<ListValidator<std::string>>(directions),
                   "Orientation of the profile line.");
   declareProperty(PropertyNames::START, EMPTY_DBL(),
                   "Starting point of the line.");
@@ -351,7 +351,7 @@ void LineProfile::init() {
   const std::array<std::string, 2> modes = {
       {ModeChoices::AVERAGE, ModeChoices::SUM}};
   declareProperty(PropertyNames::MODE, ModeChoices::AVERAGE,
-                  boost::make_shared<ListValidator<std::string>>(modes),
+                  std::make_shared<ListValidator<std::string>>(modes),
                   "How the profile is calculated over the line width.");
   declareProperty(PropertyNames::IGNORE_INFS, false,
                   "If true, ignore infinities when calculating the profile.");

@@ -24,7 +24,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ApplyAbsorptionCorrections");
 
 template <typename T = MatrixWorkspace>
-boost::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
+std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {
   return AnalysisDataService::Instance().retrieveWS<T>(workspaceName);
 }
 
@@ -261,7 +261,7 @@ void ApplyAbsorptionCorrections::run() {
   bool interpolateAll = false;
   for (std::size_t i = 0; i < corrections->size(); i++) {
     MatrixWorkspace_sptr factorWs =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+        std::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
 
     // Check for matching binning
     const auto factorBlocksize = factorWs->blocksize();

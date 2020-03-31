@@ -26,7 +26,7 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/date_time/gregorian/gregorian.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
@@ -75,7 +75,7 @@ void LoadRawHelper::init() {
   m_cache_options.emplace_back("Always");
   m_cache_options.emplace_back("Never");
   declareProperty("Cache", "If Slow",
-                  boost::make_shared<StringListValidator>(m_cache_options),
+                  std::make_shared<StringListValidator>(m_cache_options),
                   "An option allowing the algorithm to cache a remote file on "
                   "the local drive before loading. When \"If Slow\" is set the "
                   "download speed is estimated and if is deemed as slow the "
@@ -223,7 +223,7 @@ LoadRawHelper::createWorkspace(const DataObjects::Workspace2D_sptr &ws_sptr,
   if (!ws_sptr)
     return empty;
   DataObjects::Workspace2D_sptr workspace =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create(ws_sptr, nVectors, xLengthIn,
                                               yLengthIn));
   return workspace;
@@ -243,7 +243,7 @@ LoadRawHelper::createWorkspace(int64_t nVectors, int64_t xlengthIn,
                                int64_t ylengthIn, const std::string &title) {
   DataObjects::Workspace2D_sptr workspace;
   if (nVectors > 0) {
-    workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+    workspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", nVectors, xlengthIn,
                                             ylengthIn));
     // Set the units
@@ -352,7 +352,7 @@ void LoadRawHelper::setWorkspaceProperty(
   outws = outputWorkspace + "_" + suffix.str();
   pAlg->declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(
       outws, wsName, Direction::Output));
-  pAlg->setProperty(outws, boost::static_pointer_cast<Workspace>(ws_sptr));
+  pAlg->setProperty(outws, std::static_pointer_cast<Workspace>(ws_sptr));
   grpws_sptr->addWorkspace(ws_sptr);
 }
 
@@ -383,10 +383,10 @@ void LoadRawHelper::setWorkspaceProperty(
   ws_sptr->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   if (numberOfPeriods > 1) {
     pAlg->setProperty(propertyName,
-                      boost::dynamic_pointer_cast<Workspace>(grpws_sptr));
+                      std::dynamic_pointer_cast<Workspace>(grpws_sptr));
   } else {
     pAlg->setProperty(propertyName,
-                      boost::dynamic_pointer_cast<Workspace>(ws_sptr));
+                      std::dynamic_pointer_cast<Workspace>(ws_sptr));
   }
 }
 
@@ -401,7 +401,7 @@ void LoadRawHelper::setWorkspaceProperty(
  */
 void LoadRawHelper::setWorkspaceData(
     const DataObjects::Workspace2D_sptr &newWorkspace,
-    const std::vector<boost::shared_ptr<HistogramData::HistogramX>>
+    const std::vector<std::shared_ptr<HistogramData::HistogramX>>
         &timeChannelsVec,
     int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
     int64_t lengthIn, int64_t binStart) {
@@ -490,20 +490,20 @@ bool LoadRawHelper::isAscii(FILE *file) const {
  *  @return The vector(s) containing the time channel boundaries, in a vector of
  * shared ptrs
  */
-std::vector<boost::shared_ptr<HistogramData::HistogramX>>
+std::vector<std::shared_ptr<HistogramData::HistogramX>>
 LoadRawHelper::getTimeChannels(const int64_t &regimes,
                                const int64_t &lengthIn) {
   auto const timeChannels = new float[lengthIn];
   isisRaw().getTimeChannels(timeChannels, static_cast<int>(lengthIn));
 
-  std::vector<boost::shared_ptr<HistogramData::HistogramX>> timeChannelsVec;
+  std::vector<std::shared_ptr<HistogramData::HistogramX>> timeChannelsVec;
   if (regimes >= 2) {
     g_log.debug() << "Raw file contains " << regimes << " time regimes\n";
     // If more than 1 regime, create a timeChannelsVec for each regime
     auto &isisRawRef = isisRaw();
     for (int64_t i = 0; i < regimes; ++i) {
       // Create a vector with the 'base' time channels
-      boost::shared_ptr<HistogramData::HistogramX> channelsVec(
+      std::shared_ptr<HistogramData::HistogramX> channelsVec(
           new HistogramData::HistogramX(timeChannels, timeChannels + lengthIn));
       const double shift = isisRawRef.daep.tr_shift[i];
       g_log.debug() << "Time regime " << i + 1 << " shifted by " << shift
@@ -528,7 +528,7 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
     }
   } else // Just need one in this case
   {
-    boost::shared_ptr<HistogramData::HistogramX> channelsVec(
+    std::shared_ptr<HistogramData::HistogramX> channelsVec(
         new HistogramData::HistogramX(timeChannels, timeChannels + lengthIn));
     timeChannelsVec.emplace_back(channelsVec);
   }
@@ -589,7 +589,7 @@ void LoadRawHelper::runLoadInstrument(
     const auto &pmap = localWorkspace->constInstrumentParameters();
     if (pmap.contains(localWorkspace->getInstrument()->getComponentID(),
                       "det-pos-source")) {
-      boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(
+      std::shared_ptr<Geometry::Parameter> updateDets = pmap.get(
           localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
       std::string value = updateDets->value<std::string>();
       if (value.substr(0, 8) == "datafile") {
@@ -1103,7 +1103,7 @@ void LoadRawHelper::calculateWorkspacesizes(
 void LoadRawHelper::loadSpectra(
     FILE *file, const int &period, const int &total_specs,
     const DataObjects::Workspace2D_sptr &ws_sptr,
-    const std::vector<boost::shared_ptr<HistogramData::HistogramX>>
+    const std::vector<std::shared_ptr<HistogramData::HistogramX>>
         &timeChannelsVec) {
   double progStart = m_prog;
   double progEnd = 1.0; // Assume this function is called last

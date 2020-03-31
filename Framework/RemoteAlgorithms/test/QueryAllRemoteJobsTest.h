@@ -34,8 +34,8 @@ public:
 
   void test_castAlgorithm() {
     // can create
-    boost::shared_ptr<QueryAllRemoteJobs> a;
-    TS_ASSERT(a = boost::make_shared<QueryAllRemoteJobs>());
+    std::shared_ptr<QueryAllRemoteJobs> a;
+    TS_ASSERT(a = std::make_shared<QueryAllRemoteJobs>());
 
     // can cast to inherited interfaces and base classes
     TS_ASSERT(

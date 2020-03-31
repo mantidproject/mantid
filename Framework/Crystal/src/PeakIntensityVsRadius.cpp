@@ -56,7 +56,7 @@ void PeakIntensityVsRadius::init() {
 
   declareProperty("RadiusStart", 0.0, "Radius at which to start integrating.");
   declareProperty("RadiusEnd", 1.0, "Radius at which to stop integrating.");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "NumSteps", 10, mustBePositive,

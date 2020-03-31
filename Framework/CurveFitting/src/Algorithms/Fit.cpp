@@ -22,7 +22,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/StartsWithValidator.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -44,7 +44,7 @@ void Fit::initConcrete() {
       "the fitting function.");
   declareProperty("Constraints", "", Kernel::Direction::Input);
   getPointerToProperty("Constraints")->setDocumentation("List of constraints");
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "MaxIterations", 500, mustBePositive->clone(),
@@ -61,7 +61,7 @@ void Fit::initConcrete() {
   std::vector<std::string> minimizerOptions =
       API::FuncMinimizerFactory::Instance().getKeys();
   Kernel::IValidator_sptr minimizerValidator =
-      boost::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
+      std::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
 
   declareProperty("Minimizer", "Levenberg-Marquardt", minimizerValidator,
                   "Minimizer to use for fitting.");
@@ -70,14 +70,14 @@ void Fit::initConcrete() {
       API::CostFunctionFactory::Instance().getKeys();
   // select only CostFuncFitting variety
   for (auto &costFuncOption : costFuncOptions) {
-    auto costFunc = boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+    auto costFunc = std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
         API::CostFunctionFactory::Instance().create(costFuncOption));
     if (!costFunc) {
       costFuncOption = "";
     }
   }
   Kernel::IValidator_sptr costFuncValidator =
-      boost::make_shared<Kernel::ListValidator<std::string>>(costFuncOptions);
+      std::make_shared<Kernel::ListValidator<std::string>>(costFuncOptions);
   declareProperty(
       "CostFunction", "Least squares", costFuncValidator,
       "The cost function to be used for the fit, default is Least squares",
@@ -157,7 +157,7 @@ void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
 size_t Fit::runMinimizer() {
   const int64_t nsteps =
       m_maxIterations * m_function->estimateNoProgressCalls();
-  auto prog = boost::make_shared<API::Progress>(this, 0.0, 1.0, nsteps);
+  auto prog = std::make_shared<API::Progress>(this, 0.0, 1.0, nsteps);
   m_function->setProgressReporter(prog);
 
   // do the fitting until success or iteration limit is reached

@@ -40,7 +40,7 @@ MatrixWorkspace_sptr IMuonAsymmetryCalculator::sumPeriods(
   MatrixWorkspace_sptr outWS;
   if (!periodsToSum.empty()) {
     auto LHSWorkspace = m_inputWS->getItem(periodsToSum[0] - 1);
-    outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
+    outWS = std::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
     if (outWS != nullptr && periodsToSum.size() > 1) {
       auto numPeriods = static_cast<int>(periodsToSum.size());
       for (int i = 1; i < numPeriods; i++) {

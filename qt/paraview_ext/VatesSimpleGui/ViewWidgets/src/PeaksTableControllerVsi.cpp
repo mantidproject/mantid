@@ -56,9 +56,8 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 #include <utility>
@@ -77,17 +76,17 @@ Mantid::Kernel::Logger g_log("PeakViewerVsi");
  * @param parent A pointer to a QWidget parent.
  */
 PeaksTableControllerVsi::PeaksTableControllerVsi(
-    boost::shared_ptr<CameraManager> cameraManager, QWidget *parent)
+    std::shared_ptr<CameraManager> cameraManager, QWidget *parent)
     : QWidget(parent), m_cameraManager(cameraManager),
       m_presenter(new Mantid::VATES::CompositePeaksPresenterVsi()),
       m_peaksTabWidget(nullptr), m_peakMarker(nullptr),
       m_coordinateSystem(Mantid::Kernel::SpecialCoordinateSystem::QLab) {
   m_peakTransformSelector.registerCandidate(
-      boost::make_shared<Mantid::Geometry::PeakTransformHKLFactory>());
+      std::make_shared<Mantid::Geometry::PeakTransformHKLFactory>());
   m_peakTransformSelector.registerCandidate(
-      boost::make_shared<Mantid::Geometry::PeakTransformQSampleFactory>());
+      std::make_shared<Mantid::Geometry::PeakTransformQSampleFactory>());
   m_peakTransformSelector.registerCandidate(
-      boost::make_shared<Mantid::Geometry::PeakTransformQLabFactory>());
+      std::make_shared<Mantid::Geometry::PeakTransformQLabFactory>());
 }
 
 PeaksTableControllerVsi::~PeaksTableControllerVsi() {
@@ -164,7 +163,7 @@ void PeaksTableControllerVsi::addWorkspace(pqPipelineSource *source,
     std::string frame = transform->getFriendlyName();
 
     m_presenter->addPresenter(
-        boost::make_shared<Mantid::VATES::ConcretePeaksPresenterVsi>(
+        std::make_shared<Mantid::VATES::ConcretePeaksPresenterVsi>(
             peaksWorkspace, m_cameraManager->getCurrentViewFrustum(), frame));
 
     // If the tab widget is visible, then update it

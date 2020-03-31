@@ -33,7 +33,7 @@ ComptonProfile::ComptonProfile()
       m_wsIndex(0), m_startX(0.0), m_endX(0.0), m_voigt(),
       m_resolutionFunction(), m_yspace(), m_modQ(), m_e0(), m_mass(0.0) {
   using namespace Mantid::API;
-  m_resolutionFunction = boost::dynamic_pointer_cast<VesuvioResolution>(
+  m_resolutionFunction = std::dynamic_pointer_cast<VesuvioResolution>(
       FunctionFactory::Instance().createFunction("VesuvioResolution"));
 }
 
@@ -63,7 +63,7 @@ void ComptonProfile::function1D(double *out, const double *xValues,
 void ComptonProfile::setUpForFit() {
 
   using namespace Mantid::API;
-  m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(
+  m_voigt = std::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction("Voigt"));
   m_resolutionFunction->setUpForFit();
 }
@@ -76,7 +76,7 @@ void ComptonProfile::setUpForFit() {
  * @param endX Ending x-vaue (unused).
  */
 void ComptonProfile::setMatrixWorkspace(
-    boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wsIndex,
+    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wsIndex,
     double startX, double endX) {
   auto inst = workspace->getInstrument();
   auto sample = inst->getSample();

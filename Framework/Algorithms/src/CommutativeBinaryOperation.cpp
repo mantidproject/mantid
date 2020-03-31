@@ -23,8 +23,8 @@ std::string CommutativeBinaryOperation::checkSizeCompatibility(
     const API::MatrixWorkspace_const_sptr rhs) const {
   // Don't allow this for EventWorkspaces. See for instance
   // Multiply::checkSizeCompatability
-  if (boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(lhs) ||
-      boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(rhs)) {
+  if (std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(lhs) ||
+      std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(rhs)) {
     // call the base routine
     return BinaryOperation::checkSizeCompatibility(lhs, rhs);
   }

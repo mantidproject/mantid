@@ -41,7 +41,7 @@ void SelectCellOfType::init() {
   type_list.emplace_back(ReducedCell::TRICLINIC());
 
   declareProperty("CellType", type_list[0],
-                  boost::make_shared<Kernel::StringListValidator>(type_list),
+                  std::make_shared<Kernel::StringListValidator>(type_list),
                   "The conventional cell type to use");
 
   std::vector<std::string> centering_list;
@@ -51,10 +51,9 @@ void SelectCellOfType::init() {
   centering_list.emplace_back(ReducedCell::P_CENTERED());
   centering_list.emplace_back(ReducedCell::R_CENTERED());
 
-  declareProperty(
-      "Centering", centering_list[3],
-      boost::make_shared<Kernel::StringListValidator>(centering_list),
-      "The centering for the conventional cell");
+  declareProperty("Centering", centering_list[3],
+                  std::make_shared<Kernel::StringListValidator>(centering_list),
+                  "The centering for the conventional cell");
 
   this->declareProperty("Apply", false, "Update UB and re-index the peaks");
   this->declareProperty("Tolerance", 0.12, "Indexing Tolerance");

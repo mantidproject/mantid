@@ -7,17 +7,17 @@
 #pragma once
 
 #include "MantidAPI/Workspace_fwd.h"
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 #include <map>
+#include <memory>
+#include <string>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
 class WorkspaceProviderNotifiable;
 
-using Presenter_sptr = boost::shared_ptr<WorkspaceProviderNotifiable>;
-using Presenter_wptr = boost::weak_ptr<WorkspaceProviderNotifiable>;
+using Presenter_sptr = std::shared_ptr<WorkspaceProviderNotifiable>;
+using Presenter_wptr = std::weak_ptr<WorkspaceProviderNotifiable>;
 
 /**
 \class  WorkspaceProvider

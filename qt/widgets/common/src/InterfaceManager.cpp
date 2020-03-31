@@ -74,7 +74,7 @@ Mantid::Kernel::AbstractInstantiator<MantidHelpInterface>
  * @returns An AlgorithmDialog object
  */
 AlgorithmDialog *InterfaceManager::createDialog(
-    const boost::shared_ptr<Mantid::API::IAlgorithm> &alg, QWidget *parent,
+    const std::shared_ptr<Mantid::API::IAlgorithm> &alg, QWidget *parent,
     bool forScript, const QHash<QString, QString> &presetValues,
     const QString &optionalMsg, const QStringList &enabled,
     const QStringList &disabled) {

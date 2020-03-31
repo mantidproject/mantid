@@ -263,8 +263,7 @@ bool WorkspaceSelector::checkEligibility(
   } else if (!hasValidNumberOfBins(object)) {
     return false;
   } else if (!m_showGroups) {
-    auto group =
-        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(object);
+    auto group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(object);
     if (group != nullptr)
       return false;
   }
@@ -290,7 +289,7 @@ bool WorkspaceSelector::hasValidNumberOfBins(
     const Mantid::API::Workspace_sptr &object) const {
   if (m_binLimits.first != 0 || m_binLimits.second != -1) {
     if (auto const workspace =
-            boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object)) {
+            std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object)) {
       auto const numberOfBins = static_cast<int>(workspace->y(0).size());
       if (m_binLimits.second != -1)
         return numberOfBins >= m_binLimits.first &&

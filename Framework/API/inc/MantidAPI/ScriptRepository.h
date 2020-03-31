@@ -589,6 +589,6 @@ public:
 };
 
 /// shared pointer to the function base class
-using ScriptRepository_sptr = boost::shared_ptr<ScriptRepository>;
+using ScriptRepository_sptr = std::shared_ptr<ScriptRepository>;
 } // namespace API
 } // namespace Mantid

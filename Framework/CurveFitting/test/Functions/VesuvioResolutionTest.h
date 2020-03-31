@@ -59,8 +59,8 @@ public:
   }
 
 private:
-  boost::shared_ptr<VesuvioResolution> createFunction() {
-    auto func = boost::make_shared<VesuvioResolution>();
+  std::shared_ptr<VesuvioResolution> createFunction() {
+    auto func = std::make_shared<VesuvioResolution>();
     func->initialize();
     func->setAttributeValue("Mass", 1.0);
     func->setUpForFit();

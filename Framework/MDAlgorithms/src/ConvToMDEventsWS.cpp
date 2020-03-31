@@ -103,12 +103,12 @@ workspaces
 */
 size_t
 ConvToMDEventsWS::initialize(const MDWSDescription &WSD,
-                             boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
+                             std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                              bool ignoreZeros) {
   size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros);
 
   m_EventWS =
-      boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_InWS2D);
+      std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_InWS2D);
   if (!m_EventWS)
     throw(std::logic_error(
         " ConvertToMDEventWS should work with defined event workspace"));

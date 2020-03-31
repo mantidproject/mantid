@@ -273,7 +273,7 @@ void LoadEventPreNexus2::init() {
                   "A list of individual spectra (pixel IDs) to read, specified "
                   "as e.g. 10:20. Only used if set.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
                   "If loading the file by sections ('chunks'), this is the "
@@ -289,7 +289,7 @@ void LoadEventPreNexus2::init() {
 
   std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"
                   "  Auto: Use serial loading for small data sets, parallel "
                   "for large data sets.\n"
@@ -309,7 +309,7 @@ void LoadEventPreNexus2::init() {
                   "Workspace with number of events per pulse");
 
   // Some debugging options
-  auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
+  auto mustBeNonNegative = std::make_shared<BoundedValidator<int>>();
   mustBeNonNegative->setLower(0);
   declareProperty("DBOutputBlockNumber", EMPTY_INT(), mustBeNonNegative,
                   "Index of the loading block for debugging output. ");
@@ -502,7 +502,7 @@ LoadEventPreNexus2::generateEventDistribtionWorkspace() {
   size_t nspec = 2;
   size_t sizex = event_indices.size();
   size_t sizey = sizex;
-  MatrixWorkspace_sptr disws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr disws = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", nspec, sizex, sizey));
 
   g_log.debug() << "Event indexes size = " << event_indices.size() << ", "

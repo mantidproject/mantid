@@ -53,10 +53,10 @@ private:
 };
 
 /// shared pointer to the OffsetsWorkspace class
-using OffsetsWorkspace_sptr = boost::shared_ptr<OffsetsWorkspace>;
+using OffsetsWorkspace_sptr = std::shared_ptr<OffsetsWorkspace>;
 
 /// shared pointer to a const OffsetsWorkspace
-using OffsetsWorkspace_const_sptr = boost::shared_ptr<const OffsetsWorkspace>;
+using OffsetsWorkspace_const_sptr = std::shared_ptr<const OffsetsWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid

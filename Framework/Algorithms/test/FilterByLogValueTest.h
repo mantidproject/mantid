@@ -180,7 +180,7 @@ public:
     EventWorkspace_sptr ew = createInputWS(add_proton_charge);
     std::string inputName = "input_filtering";
     AnalysisDataService::Instance().addOrReplace(
-        inputName, boost::dynamic_pointer_cast<MatrixWorkspace>(ew));
+        inputName, std::dynamic_pointer_cast<MatrixWorkspace>(ew));
 
     // Save some of the starting values
     size_t start_blocksize = ew->blocksize();

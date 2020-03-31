@@ -145,7 +145,7 @@ void SaveMD2::doSaveHisto(
   // Write out the affine matrices
   if (getProperty("SaveSample"))
     MDBoxFlatTree::saveAffineTransformMatricies(
-        file.get(), boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+        file.get(), std::dynamic_pointer_cast<const IMDWorkspace>(ws));
 
   // Check that the typedef has not been changed. The NeXus types would need
   // changing if it does!
@@ -223,9 +223,9 @@ void SaveMD2::doSaveHisto(
 void SaveMD2::exec() {
   IMDWorkspace_sptr ws = getProperty("InputWorkspace");
   IMDEventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(ws);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(ws);
   MDHistoWorkspace_sptr histoWS =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(ws);
+      std::dynamic_pointer_cast<MDHistoWorkspace>(ws);
 
   if (eventWS) {
     // If event workspace use SaveMD version 1.

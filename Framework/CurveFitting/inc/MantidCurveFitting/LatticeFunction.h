@@ -47,7 +47,7 @@ private:
   Functions::PawleyParameterFunction_sptr m_cellParameters;
 };
 
-using LatticeFunction_sptr = boost::shared_ptr<LatticeFunction>;
+using LatticeFunction_sptr = std::shared_ptr<LatticeFunction>;
 
 } // namespace CurveFitting
 } // namespace Mantid

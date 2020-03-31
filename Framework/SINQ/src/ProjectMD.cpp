@@ -27,7 +27,7 @@ void ProjectMD::init() {
       "InputWorkspace", "", Direction::Input));
   std::vector<std::string> projectOptions{"X", "Y", "Z", "K"};
   this->declareProperty("ProjectDirection", "Z",
-                        boost::make_shared<StringListValidator>(projectOptions),
+                        std::make_shared<StringListValidator>(projectOptions),
                         "The project direction");
 
   declareProperty("StartIndex", 0, Direction::Input);
@@ -62,9 +62,9 @@ void ProjectMD::exec() {
   for (size_t i = 0; i < inWS->getNumDims(); i++) {
     if (i != dimNo) {
       dimensions.emplace_back(
-          boost::const_pointer_cast<IMDDimension>(inWS->getDimension(i)));
+          std::const_pointer_cast<IMDDimension>(inWS->getDimension(i)));
     } else {
-      boost::shared_ptr<const IMDDimension> dimi = inWS->getDimension(i);
+      std::shared_ptr<const IMDDimension> dimi = inWS->getDimension(i);
       if (start < 0) {
         start = 0;
       }
@@ -76,7 +76,7 @@ void ProjectMD::exec() {
     }
   }
 
-  auto outWS = boost::make_shared<MDHistoWorkspace>(dimensions);
+  auto outWS = std::make_shared<MDHistoWorkspace>(dimensions);
   outWS->setTo(.0, .0, .0);
 
   memset(targetDim, 0, MAXDIM * sizeof(int));
@@ -152,7 +152,7 @@ void ProjectMD::sumData(const IMDHistoWorkspace_sptr &inWS,
                         const IMDHistoWorkspace_sptr &outWS, int *sourceDim,
                         int *targetDim, int targetDimCount, int dimNo,
                         int start, int end, int currentDim) {
-  boost::shared_ptr<const IMDDimension> dimi;
+  std::shared_ptr<const IMDDimension> dimi;
 
   /*
      when we have recursed through  all dimensions

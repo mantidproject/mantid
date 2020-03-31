@@ -18,7 +18,7 @@ DECLARE_ALGORITHM(DeleteWorkspaces)
 /// Initialize the algorithm properties
 void DeleteWorkspaces::init() {
   declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
-                      "WorkspaceList", boost::make_shared<API::ADSValidator>()),
+                      "WorkspaceList", std::make_shared<API::ADSValidator>()),
                   "A list of the workspaces to delete.");
 }
 

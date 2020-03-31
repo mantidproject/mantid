@@ -11,9 +11,9 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
-#include <boost/make_shared.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 #include <string>
 
 using namespace Mantid;
@@ -212,7 +212,7 @@ private:
 
   Component *createSingleParameterizedComponent() {
     m_parentComp = new Component("Parent", V3D(1, 1, 1));
-    m_paramMap = boost::make_shared<ParameterMap>();
+    m_paramMap = std::make_shared<ParameterMap>();
 
     m_paramMap->add("string", m_parentComp, m_strName, m_strValue);
     m_paramMap->add("double", m_parentComp, m_dblName, m_dblValue);
@@ -220,13 +220,13 @@ private:
     m_paramMap->add("Quat", m_parentComp, m_quatName, m_quatValue);
 
     ParameterMap_const_sptr const_pmap =
-        boost::dynamic_pointer_cast<const ParameterMap>(m_paramMap);
+        std::dynamic_pointer_cast<const ParameterMap>(m_paramMap);
     return new Component(m_parentComp, const_pmap.get());
   }
 
   void createParameterizedTree() {
     m_parentComp = new Component("Parent", V3D(1, 1, 1));
-    m_paramMap = boost::make_shared<ParameterMap>();
+    m_paramMap = std::make_shared<ParameterMap>();
 
     m_paramMap->add("string", m_parentComp, m_strName, m_strValue);
     m_paramMap->add("double", m_parentComp, m_dblName, m_dblValue);

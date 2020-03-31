@@ -22,9 +22,8 @@ using namespace Mantid::HistogramData;
 
 class MatrixWorkspaceMDIteratorTest : public CxxTest::TestSuite {
 public:
-  boost::shared_ptr<MatrixWorkspace> makeFakeWS() {
-    boost::shared_ptr<MatrixWorkspace> ws =
-        boost::make_shared<WorkspaceTester>();
+  std::shared_ptr<MatrixWorkspace> makeFakeWS() {
+    std::shared_ptr<MatrixWorkspace> ws = std::make_shared<WorkspaceTester>();
     // Matrix with 4 spectra, 5 bins each
     ws->initialize(4, 6, 5);
     auto ax1 = std::make_unique<NumericAxis>(4);
@@ -56,7 +55,7 @@ public:
   }
 
   void test_iterating() {
-    boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
+    std::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
     std::unique_ptr<IMDIterator> it;
     TS_ASSERT_THROWS_NOTHING(it = ws->createIterator(nullptr));
     TS_ASSERT_EQUALS(it->getDataSize(), 20);
@@ -92,7 +91,7 @@ public:
 
   /** Create a set of iterators that can be applied in parallel */
   void test_parallel_iterators() {
-    boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
+    std::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
     // The number of output cannot be larger than the number of histograms
     auto it = ws->createIterators(10, nullptr);
     TS_ASSERT_EQUALS(it.size(), 4);
@@ -122,7 +121,7 @@ public:
   }
 
   void test_get_is_masked() {
-    boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
+    std::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
     auto it = ws->createIterator(nullptr);
     const auto &spectrumInfo = ws->spectrumInfo();
     for (size_t i = 0; i < ws->getNumberHistograms(); ++i) {
@@ -132,7 +131,7 @@ public:
   }
 
   void testUnequalBins() {
-    boost::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
+    std::shared_ptr<MatrixWorkspace> ws = makeFakeWS();
     // set the first spectrum to be different
     ws->setHistogram(0, BinEdges({0, 1, 2}), Counts({10, 20}));
 

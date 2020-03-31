@@ -64,7 +64,7 @@ MantidQt::API::IProjectSerialisable *InstrumentWindow::loadFromProject(
 
   const auto name = tsv.asQString(1);
   const auto workspace = app->mantidUI->getWorkspace(name);
-  const auto ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
+  const auto ws = std::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
 
   if (!ws)
     return nullptr;

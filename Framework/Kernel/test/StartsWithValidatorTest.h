@@ -97,6 +97,6 @@ public:
     IValidator_sptr v(new StartsWithValidator);
     IValidator_sptr vv = v->clone();
     TS_ASSERT_DIFFERS(v, vv);
-    TS_ASSERT(boost::dynamic_pointer_cast<StartsWithValidator>(vv));
+    TS_ASSERT(std::dynamic_pointer_cast<StartsWithValidator>(vv));
   }
 };

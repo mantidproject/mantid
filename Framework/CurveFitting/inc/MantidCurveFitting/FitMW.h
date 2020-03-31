@@ -13,8 +13,8 @@
 #include "MantidCurveFitting/IMWDomainCreator.h"
 #include "MantidKernel/cow_ptr.h"
 
-#include <boost/weak_ptr.hpp>
 #include <list>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -47,14 +47,14 @@ public:
   void declareDatasetProperties(const std::string &suffix = "",
                                 bool addProp = true) override;
   /// Create a domain from the input workspace
-  void createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                    boost::shared_ptr<API::FunctionValues> &values,
+  void createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                    std::shared_ptr<API::FunctionValues> &values,
                     size_t i0 = 0) override;
   /// Create an output workspace.
-  boost::shared_ptr<API::Workspace> createOutputWorkspace(
+  std::shared_ptr<API::Workspace> createOutputWorkspace(
       const std::string &baseName, API::IFunction_sptr function,
-      boost::shared_ptr<API::FunctionDomain> domain,
-      boost::shared_ptr<API::FunctionValues> values,
+      std::shared_ptr<API::FunctionDomain> domain,
+      std::shared_ptr<API::FunctionValues> values,
       const std::string &outputWorkspacePropertyName) override;
   /// Set max size for Sequantial and Parallel domains
   /// @param maxSize :: Maximum size of each simple domain

@@ -35,7 +35,7 @@ public:
   bool connect(const Poco::Net::SocketAddress &address) override;
   void start(
       Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
-  boost::shared_ptr<API::Workspace> extractData() override;
+  std::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;
   ILiveListener::RunStatus runStatus() override;

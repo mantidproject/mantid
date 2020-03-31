@@ -46,7 +46,7 @@ void LoadSpec::init() {
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
   units.insert(units.begin(), "MomemtumTransfer");
   declareProperty("Unit", "Energy",
-                  boost::make_shared<Kernel::StringListValidator>(units),
+                  std::make_shared<Kernel::StringListValidator>(units),
                   "The unit to assign to the X axis (anything known to the "
                   "[[Unit Factory]] or \"Dimensionless\")");
 }
@@ -66,7 +66,7 @@ void LoadSpec::exec() {
   std::vector<double> input;
 
   const size_t nSpectra = readNumberOfSpectra(file);
-  auto localWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  auto localWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 2, 1));
 
   localWorkspace->getAxis(0)->unit() =

@@ -32,7 +32,7 @@ public:
     fft->setPropertyValue("OutputWorkspace", "FFTDerivative_out");
     fft->execute();
 
-    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("FFTDerivative_out"));
 
     auto &X = fWS->x(0);
@@ -62,7 +62,7 @@ public:
     fft->setPropertyValue("Order", "2");
     fft->execute();
 
-    MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr fWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("FFTDerivative_out"));
 
     auto &X = fWS->x(0);
@@ -83,7 +83,7 @@ public:
 private:
   MatrixWorkspace_sptr createWS(int n, int dn, const std::string &name) {
     Mantid::DataObjects::Workspace2D_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 1, n + dn, n));
 
     const double dX = 10.0 / (n - 1);

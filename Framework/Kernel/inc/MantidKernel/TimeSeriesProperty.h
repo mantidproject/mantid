@@ -249,7 +249,7 @@ public:
   /// Set a property from a string
   std::string setValueFromJson(const Json::Value &) override;
   /// Set a property from a DataItem
-  std::string setDataItem(const boost::shared_ptr<DataItem>) override;
+  std::string setDataItem(const std::shared_ptr<DataItem> &) override;
 
   /// Deletes the series of values in the property
   void clear() override;

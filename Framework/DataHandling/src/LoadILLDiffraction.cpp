@@ -107,7 +107,7 @@ void LoadILLDiffraction::init() {
                   "The output workspace.");
   std::vector<std::string> calibrationOptions{"Auto", "Raw", "Calibrated"};
   declareProperty("DataType", "Auto",
-                  boost::make_shared<StringListValidator>(calibrationOptions),
+                  std::make_shared<StringListValidator>(calibrationOptions),
                   "Select the type of data, with or without calibration "
                   "already applied. If Auto then the calibrated data is "
                   "loaded if available, otherwise the raw data is loaded.");

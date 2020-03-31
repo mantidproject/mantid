@@ -370,7 +370,7 @@ private:
   void createWorkspaceGroup(const std::string &groupName,
                             const std::vector<std::string> &workspaceNames) {
     AnalysisDataService::Instance().add(groupName,
-                                        boost::make_shared<WorkspaceGroup>());
+                                        std::make_shared<WorkspaceGroup>());
     createWorkspaces(workspaceNames);
     for (auto name : workspaceNames)
       AnalysisDataService::Instance().addToGroup(groupName, name);

@@ -50,7 +50,7 @@ public:
     // Get back the saved workspace
     Mantid::API::MatrixWorkspace_const_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(outWS)));
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 3);

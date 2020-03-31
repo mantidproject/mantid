@@ -19,8 +19,8 @@
 #include "MantidKernel/System.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -271,7 +271,7 @@ void CutMD::init() {
                   "MDHistoWorkspace as output. This is DND "
                   "only in Horace terminology.");
 
-  auto mustBePositiveInteger = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositiveInteger = std::make_shared<BoundedValidator<int>>();
   mustBePositiveInteger->setLower(0);
 
   declareProperty("MaxRecursionDepth", 1, mustBePositiveInteger,
@@ -293,7 +293,7 @@ void CutMD::init() {
   std::string help(buffer);
   boost::algorithm::trim(help);
   declareProperty("InterpretQDimensionUnits", AutoMethod,
-                  boost::make_shared<StringListValidator>(propOptions), help);
+                  std::make_shared<StringListValidator>(propOptions), help);
 }
 
 void CutMD::exec() {
@@ -311,7 +311,7 @@ void CutMD::exec() {
   Workspace_sptr sliceWS; // output workspace
 
   // Histogram workspaces can be sliced axis-aligned only.
-  if (auto histInWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
+  if (auto histInWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
 
     g_log.information("Integrating using binning parameters only.");
     auto integrateAlg =
@@ -327,7 +327,7 @@ void CutMD::exec() {
     sliceWS = temp;
   } else { // We are processing an MDEventWorkspace
 
-    auto eventInWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
+    auto eventInWS = std::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
     const bool noPix = getProperty("NoPix");
 
     // Check Projection format
@@ -474,7 +474,7 @@ void CutMD::exec() {
     sliceWS = cutAlg->getProperty("OutputWorkspace");
 
     MultipleExperimentInfos_sptr sliceInfo =
-        boost::dynamic_pointer_cast<MultipleExperimentInfos>(sliceWS);
+        std::dynamic_pointer_cast<MultipleExperimentInfos>(sliceWS);
 
     if (!sliceInfo)
       throw std::runtime_error(
@@ -488,7 +488,7 @@ void CutMD::exec() {
     }
   }
 
-  auto geometry = boost::dynamic_pointer_cast<Mantid::API::MDGeometry>(sliceWS);
+  auto geometry = std::dynamic_pointer_cast<Mantid::API::MDGeometry>(sliceWS);
 
   /* Original workspace and transformation information does not make sense for
    * self-contained Horace-style
