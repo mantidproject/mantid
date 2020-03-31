@@ -12,8 +12,7 @@ using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
+namespace MantidQt { namespace Widgets {
 namespace MplCpp {
 
 /**
