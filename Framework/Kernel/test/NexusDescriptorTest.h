@@ -64,12 +64,12 @@ public:
   //======================================
   void test_isReadable_Returns_False_For_Non_HDF_Filename() {
     TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath));
-    TS_ASSERT(
-        !NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::AnyVersion));
-    TS_ASSERT(
-        !NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::Version4));
-    TS_ASSERT(
-        !NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::Version5));
+    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath,
+                                           NexusDescriptor::AnyVersion));
+    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath,
+                                           NexusDescriptor::Version4));
+    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath,
+                                           NexusDescriptor::Version5));
   }
 
   void test_isReadable_Defaults_To_All_Versions() {
@@ -80,19 +80,20 @@ public:
   void test_isReadable_With_Version4_Returns_True_Only_For_HDF4() {
     TS_ASSERT(
         NexusDescriptor::isReadable(m_testHDF4Path, NexusDescriptor::Version4));
-    TS_ASSERT(
-        !NexusDescriptor::isReadable(m_testHDF5Path, NexusDescriptor::Version4));
+    TS_ASSERT(!NexusDescriptor::isReadable(m_testHDF5Path,
+                                           NexusDescriptor::Version4));
   }
 
   void test_isReadable_With_Version5_Returns_True_Only_For_HDF4() {
     TS_ASSERT(
         NexusDescriptor::isReadable(m_testHDF5Path, NexusDescriptor::Version5));
-    TS_ASSERT(
-        !NexusDescriptor::isReadable(m_testHDF4Path, NexusDescriptor::Version5));
+    TS_ASSERT(!NexusDescriptor::isReadable(m_testHDF4Path,
+                                           NexusDescriptor::Version5));
   }
 
   void test_isReadable_Throws_With_Invalid_Filename() {
-    TS_ASSERT_THROWS(NexusDescriptor::isReadable(""), const std::invalid_argument &);
+    TS_ASSERT_THROWS(NexusDescriptor::isReadable(""),
+                     const std::invalid_argument &);
   }
 
   //=================================== NexusDescriptor methods
