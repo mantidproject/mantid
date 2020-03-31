@@ -136,3 +136,6 @@ class DrillModel(object):
     def get_rows_contents(self):
         return self.data
 
+    def get_supported_techniques(self):
+        return [technique for technique in RundexSettings.ALGORITHMS]
+

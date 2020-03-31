@@ -14,6 +14,7 @@ class DrillPresenter(DrillEventListener):
         self.model = model
         self.view = view
         self.view.add_listener(self)
+        self.view.set_header(self.model.get_supported_techniques())
         self.update_view_from_model()
 
     def on_add_row(self, position):

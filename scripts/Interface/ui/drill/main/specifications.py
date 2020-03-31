@@ -8,20 +8,42 @@
 
 class RundexSettings(object):
 
-    TECHNIQUE_MAP = {'D11': 'sans', 'D16': 'sans', 'D22': 'sans', 'D33': 'sans',
-                     'D17': 'refl', 'FIGARO': 'refl'}
+    TECHNIQUE_MAP = {
+            'D11':    'SANS',
+            'D16':    'SANS',
+            'D22':    'SANS',
+            'D33':    'SANS',
+            'D17':    'Reflectometry',
+            'FIGARO': 'Reflectometry'
+            }
 
     COLUMNS = {
-        'sans': ["SampleRuns", "SampleTransmissionRuns", "AbsorberRuns", "BeamRuns", "FluxRuns", "ContainerRuns",
-                 "ContainerTransmissionRuns", "TransmissionAbsorberRuns", "TransmissionBeamRuns", "MaskFiles",
-                 "ReferenceFiles", "CustomOptions"],
-        'refl': ["DirectBeam", "ReflectedBeam", "AngleOption", "Method"]
-    }
+            'SANS': [
+                "SampleRuns",
+                "SampleTransmissionRuns",
+                "AbsorberRuns",
+                "BeamRuns",
+                "FluxRuns",
+                "ContainerRuns",
+                "ContainerTransmissionRuns",
+                "TransmissionAbsorberRuns",
+                "TransmissionBeamRuns",
+                "MaskFiles",
+                "ReferenceFiles",
+                "CustomOptions"
+                ],
+            'Reflectometry': [
+                "DirectBeam",
+                "ReflectedBeam",
+                "AngleOption",
+                "Method"
+                ]
+            }
 
     ALGORITHMS = {
-        'sans': "SANSILLAutoProcess",
-        'refl': "ReflectometryILLAutoProcess"
-    }
+            'SANS':          "SANSILLAutoProcess",
+            'Reflectometry': "ReflectometryILLAutoProcess"
+            }
 
     @staticmethod
     def get_technique(instrument):

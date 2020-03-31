@@ -331,6 +331,9 @@ class DrillView(QMainWindow):
     # for model calls                                                         #
     ###########################################################################
 
+    def set_header(self, techniques):
+        self.instrumentselector.setTechniques(techniques)
+
     def set_table(self, columns, rows_contents):
         self.table.clear()
         self.table.setRowCount(0)

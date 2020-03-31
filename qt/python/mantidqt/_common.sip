@@ -444,6 +444,7 @@ class InstrumentSelector : QWidget {
 %End
 public:
   InstrumentSelector(QWidget *parent /TransferThis/ = nullptr);
+  void setTechniques(const QStringList &techniques);
 };
 
 // ---------------------------------
