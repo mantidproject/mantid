@@ -56,7 +56,8 @@ MatrixWorkspace_sptr createPopulatedworkspace(int const &numberOfSpectra) {
 
 IndirectFitData getIndirectFitData(int const &numberOfSpectra) {
   auto const workspace = createWorkspace(numberOfSpectra);
-  Spectra const spec = Spectra(0, workspace->getNumberHistograms() - 1);
+  Spectra const spec =
+      Spectra(0, static_cast<int>(workspace->getNumberHistograms()) - 1);
   IndirectFitData data(workspace, spec);
   return data;
 }

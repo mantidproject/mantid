@@ -80,18 +80,6 @@ void setFittingFunction(IndirectFittingModel *model,
 
 IndirectFittingModel *getEmptyDummyModel() { return new DummyModel(); }
 
-IndirectFittingModel *
-createModelWithSingleWorkspace(std::string const &workspaceName,
-                               int const &numberOfSpectra,
-                               bool setFitFunction) {
-  auto model = getEmptyDummyModel();
-  SetUpADSWithWorkspace ads(workspaceName, createWorkspace(numberOfSpectra));
-  model->addWorkspace(workspaceName);
-  setFittingFunction(model, getFittingFunctionString(workspaceName),
-                     setFitFunction, numberOfSpectra);
-  return model;
-}
-
 void addWorkspaceToModel(IndirectFittingModel *model,
                          int const &numberOfSpectra,
                          std::string workspaceName) {
