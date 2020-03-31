@@ -4,10 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceGroupProperty,
-                        Progress, mtd, SpectraAxis, WorkspaceGroup, WorkspaceProperty)
+from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceGroupProperty, SpectraAxis,
+                        WorkspaceGroup, WorkspaceProperty)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, IntBoundedValidator,
-                           FloatBoundedValidator, Direction, logger, LogicOperator, config)
+                           FloatBoundedValidator, Direction, LogicOperator)
+from mantid.simpleapi import (config, logger)
 import math
 import numpy as np
 import os.path
@@ -404,8 +405,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                     sample_material['CoherentXSection'] = self._sample_coherent_cross_section
                     sample_material['IncoherentXSection'] = self._sample_incoherent_cross_section
                     sample_material['AttenuationXSection'] = self._sample_attenuation_cross_section
-                    sample_material['ScatteringXSection'] = self._sample_coherent_cross_section + \
-                                                            self._sample_incoherent_cross_section
+                    sample_material['ScatteringXSection'] = self._sample_coherent_cross_section + self._sample_incoherent_cross_section
 
                 if self._sample_density_type == 'Mass Density':
                     sample_material['SampleMassDensity'] = self._sample_density
