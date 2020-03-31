@@ -7,16 +7,24 @@
 #include "MantidDataHandling/NexusFileLoader.h"
 
 namespace Mantid::DataHandling {
-void NexusFileLoader::exec() { execLoader(); }
+void NexusFileLoader::exec() {
+  // make sure the descriptor is initialized
+  if (!m_fileInfo) {
+    const std::string filename = this->getPropertyValue("Filename"); // TODO be more generic
+    m_fileInfo = std::make_shared<Mantid::Kernel::NexusHDF5Descriptor>(filename);
+  }
+
+  // execute the algorithm as normal
+  execLoader();
+}
 boost::shared_ptr<Mantid::API::Algorithm> NexusFileLoader::createChildAlgorithm(
     const std::string &name, const double startProgress,
     const double endProgress, const bool enableLogging, const int &version) {
-  auto child = API::IFileLoader<
-      Mantid::Kernel::NexusHDF5Descriptor>::createChildAlgorithm(name,
-                                                                 startProgress,
-                                                                 endProgress,
-                                                                 enableLogging,
-                                                                 version);
+  auto child = IFileLoader::createChildAlgorithm(name,
+                                                 startProgress, endProgress,
+                                                 enableLogging, version);
+
+  // set the NexusHDF5Descriptor on the child algorithm
   auto nfl = boost::dynamic_pointer_cast<NexusFileLoader>(child);
   if (nfl) {
     nfl->setFileInfo(m_fileInfo);

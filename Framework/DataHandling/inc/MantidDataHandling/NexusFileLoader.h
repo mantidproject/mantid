@@ -15,7 +15,8 @@ namespace Mantid::DataHandling {
 class DLLExport NexusFileLoader
     : public API::IFileLoader<Mantid::Kernel::NexusHDF5Descriptor> {
 public:
-  void exec() override;
+  void exec() override final;  // makes sure the NexusHDF5Descriptor is initialized
+  virtual void execLoader() = 0;  // what would normally be called exec
   boost::shared_ptr<Algorithm> createChildAlgorithm(
       const std::string &name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging = true,

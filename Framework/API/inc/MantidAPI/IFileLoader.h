@@ -24,7 +24,6 @@ public:
   /// Returns a value indicating whether or not loader wants to load multiple
   /// files into a single workspace
   virtual bool loadMutipleAsOne() { return false; }
-  virtual void execLoader() {}
 };
 
 } // namespace API
