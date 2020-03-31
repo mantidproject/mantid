@@ -8,7 +8,6 @@ from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, PropertyMode, 
                         Progress, mtd, SpectraAxis, WorkspaceGroup, WorkspaceProperty)
 from mantid.kernel import (VisibleWhenProperty, PropertyCriterion, StringListValidator, IntBoundedValidator,
                            FloatBoundedValidator, Direction, logger, LogicOperator, config)
-
 import math
 import numpy as np
 import os.path
@@ -299,65 +298,60 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
     def PyExec(self):
 
-        nreports = 3 if self._container_ws else 1
-        prog = Progress(self, 0, 1, nreports)
-
         sample_wave_ws = self._convert_to_wavelength(self._sample_ws)
         self._set_beam(sample_wave_ws)
-        self._set_sample(sample_wave_ws)
 
-        monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True)
-        monte_carlo_alg.setProperty("InputWorkspace", sample_wave_ws)
-        self._set_algorithm_properties(ss_monte_carlo_alg, sample_kwargs)
-        ss_monte_carlo_alg.execute()
-        ass_ws = ss_monte_carlo_alg.getProperty("OutputWorkspace").value
+        if not self._container_ws:
+            self._set_sample(sample_wave_ws, ['Sample'])
+            monte_carlo_alg = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
+                                                        startProgress=0, endProgress=1)
+            self._set_algorithm_properties(monte_carlo_alg, self._monte_carlo_kwargs)
+            monte_carlo_alg.setProperty("InputWorkspace", sample_wave_ws)
+            monte_carlo_alg.setProperty("OutputWorkspace", self._ass_ws_name)
+            monte_carlo_alg.execute()
+            ass_ws = monte_carlo_alg.getProperty("OutputWorkspace").value
+            ass_ws = self._convert_from_wavelength(ass_ws)
+            self._output_ws = self._group_ws([ass_ws])
 
-        sample_log_names = []
-        sample_log_values = []
+        else:
+            self._set_sample(sample_wave_ws, ['Sample', 'Container'])
+            monte_carlo_alg_ssc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
+                                                            startProgress=0, endProgress=0.33)
+            self._set_algorithm_properties(monte_carlo_alg_ssc, self._monte_carlo_kwargs)
+            monte_carlo_alg_ssc.setProperty("InputWorkspace", sample_wave_ws)
+            monte_carlo_alg_ssc.setProperty("OutputWorkspace", self._assc_ws_name)
+            monte_carlo_alg_ssc.setProperty("ScatteringPointIn", "Sample")
+            monte_carlo_alg_ssc.execute()
+            assc_ws = monte_carlo_alg_ssc.getProperty("OutputWorkspace").value
+            assc_ws = self._convert_from_wavelength(assc_ws)
 
-        for log_name, log_value in sample_kwargs.items():
-            sample_log_names.append("sample_" + log_name.lower())
-            sample_log_values.append(log_value)
+            can_wave_ws = self._convert_to_wavelength(self._container_ws)
+            self._set_beam(can_wave_ws)
 
-        ass_ws = self._convert_from_wavelength(ass_ws)
-        self._add_sample_log_multiple(ass_ws, sample_log_names, sample_log_values)
-
-        if not self.isChild():
-            mtd.addOrReplace(self._ass_ws_name, ass_ws)
-
-        if self._container_ws:
-
-            if self._shape == 'FlatPlate':
-                offset_front = 0.5 * (self._container_front_thickness + self._sample_thickness)
-                ss_monte_carlo_alg.setProperty("InputWorkspace", container_wave_1)
-                ss_monte_carlo_alg.setProperty("Width", self._sample_width)
-                ss_monte_carlo_alg.setProperty("Angle", self._sample_angle)
-                ss_monte_carlo_alg.setProperty("Thickness", self._container_front_thickness)
-                ss_monte_carlo_alg.setProperty("Center", -offset_front)
-                ss_monte_carlo_alg.execute()
-                acc_1 = ss_monte_carlo_alg.getProperty("OutputWorkspace").value
-
-                offset_back = 0.5 * (self._container_back_thickness + self._sample_thickness)
-                ss_monte_carlo_alg.setProperty("InputWorkspace", container_wave_2)
-                ss_monte_carlo_alg.setProperty("Thickness", self._container_back_thickness)
-                ss_monte_carlo_alg.setProperty("Center", offset_back)
-                ss_monte_carlo_alg.execute()
-                acc_2 = ss_monte_carlo_alg.getProperty("OutputWorkspace").value
-
-            for log_name, log_value in container_kwargs.items():
-                sample_log_names.append("container_" + log_name.lower())
-                sample_log_values.append(log_value)
-
+            # make sure the sample is not defined at this point, otherwise it will also attenuate
+            self._set_sample(can_wave_ws, ['Container'])
+            monte_carlo_alg_cc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
+                                                           startProgress=0.33, endProgress=0.66)
+            self._set_algorithm_properties(monte_carlo_alg_cc, self._monte_carlo_kwargs)
+            monte_carlo_alg_cc.setProperty("InputWorkspace", can_wave_ws)
+            monte_carlo_alg_cc.setProperty("OutputWorkspace", self._acc_ws_name)
+            monte_carlo_alg_cc.setProperty("ScatteringPointIn", "Environment")
+            monte_carlo_alg_cc.execute()
+            acc_ws = monte_carlo_alg_cc.getProperty("OutputWorkspace").value
             acc_ws = self._convert_from_wavelength(acc_ws)
 
-            self._add_sample_log_multiple(acc_ws, sample_log_names, sample_log_values)
+            self._set_sample(can_wave_ws, ['Sample', 'Container'])
+            monte_carlo_alg_csc = self.createChildAlgorithm("MonteCarloAbsorption", enableLogging=True,
+                                                            startProgress=0.66, endProgress=0.99)
+            self._set_algorithm_properties(monte_carlo_alg_csc, self._monte_carlo_kwargs)
+            monte_carlo_alg_csc.setProperty("InputWorkspace", can_wave_ws)
+            monte_carlo_alg_csc.setProperty("OutputWorkspace", self._acsc_ws_name)
+            monte_carlo_alg_csc.setProperty("ScatteringPointIn", "Environment")
+            monte_carlo_alg_csc.execute()
+            acsc_ws = monte_carlo_alg_csc.getProperty("OutputWorkspace").value
+            acsc_ws = self._convert_from_wavelength(acsc_ws)
 
-            if not self.isChild():
-                mtd.addOrReplace(self._acc_ws_name, acc_ws)
-
-            self._output_ws = self._group_ws([ass_ws, acc_ws])
-        else:
-            self._output_ws = self._group_ws([ass_ws])
+            self._output_ws = self._group_ws([assc_ws, acsc_ws, acc_ws])
 
         self.setProperty('CorrectionsWorkspace', self._output_ws)
 
@@ -370,69 +364,76 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                                               'Height': self._beam_height})
         set_beam_alg.execute()
 
-    def _set_sample(self, ws):
+    def _set_sample(self, ws, define):
 
         set_sample_alg = self.createChildAlgorithm("SetSample", enableLogging=False)
         set_sample_alg.setProperty("InputWorkspace", ws)
 
-        sample_geometry = dict()
-        sample_geometry['Height'] = self._height
+        if 'Sample' in define:
+            sample_geometry = dict()
+            sample_geometry['Height'] = self._height
 
-        if self._shape == 'FlatPlate':
-            sample_geometry['Shape'] = 'FlatPlate'
-            sample_geometry['Width'] = self._sample_width
-            sample_geometry['Thick'] = self._sample_thickness
-            sample_geometry['Center'] = [0.0, 0.0, self._sample_center]
-            sample_geometry['Angle'] = self._sample_angle
+            if self._shape == 'FlatPlate':
+                sample_geometry['Shape'] = 'FlatPlate'
+                sample_geometry['Width'] = self._sample_width
+                sample_geometry['Thick'] = self._sample_thickness
+                sample_geometry['Center'] = [0.0, 0.0, self._sample_center]
+                sample_geometry['Angle'] = self._sample_angle
 
-        if self._shape == 'Cylinder':
-            sample_geometry['Shape'] = 'Cylinder'
-            sample_geometry['Radius'] = self._sample_radius
-            sample_geometry['Center'] = [0.0, 0.0, 0.0]
+            if self._shape == 'Cylinder':
+                sample_geometry['Shape'] = 'Cylinder'
+                sample_geometry['Radius'] = self._sample_radius
 
-        if self._shape == 'Annulus':
-            sample_geometry['Shape'] = 'HollowCylinder'
-            sample_geometry['InnerRadius'] = self._sample_inner_radius
-            sample_geometry['OuterRadius'] = self._sample_outer_radius
-            sample_geometry['Center'] = [0.0, 0.0, 0.0]
+            if self._shape == 'Annulus':
+                sample_geometry['Shape'] = 'HollowCylinder'
+                sample_geometry['InnerRadius'] = self._sample_inner_radius
+                sample_geometry['OuterRadius'] = self._sample_outer_radius
 
-        set_sample_alg.setProperty("Geometry", sample_geometry)
+            set_sample_alg.setProperty("Geometry", sample_geometry)
 
-        if not self._sample_material_defined:
-            sample_material = dict()
-            if self._set_sample_method == 'Chemical Formula':
-                sample_material['ChemicalFormula'] = self._sample_chemical_formula
-            else:
-                sample_material['CoherentXSection'] = self._sample_coherent_cross_section
-                sample_material['IncoherentXSection'] = self._sample_incoherent_cross_section
-                sample_material['AttenuationXSection'] = self._sample_attenuation_cross_section
-                sample_material['ScatteringXSection'] = self._sample_coherent_cross_section + \
-                                                        self._sample_incoherent_cross_section
+            if not self._sample_material_defined:
+                sample_material = dict()
+                if self._set_sample_method == 'Chemical Formula':
+                    sample_material['ChemicalFormula'] = self._sample_chemical_formula
+                else:
+                    sample_material['CoherentXSection'] = self._sample_coherent_cross_section
+                    sample_material['IncoherentXSection'] = self._sample_incoherent_cross_section
+                    sample_material['AttenuationXSection'] = self._sample_attenuation_cross_section
+                    sample_material['ScatteringXSection'] = self._sample_coherent_cross_section + \
+                                                            self._sample_incoherent_cross_section
 
-            if self._sample_density_type == 'Mass Density':
-                sample_material['SampleMassDensity'] = self._sample_density
-            if self._sample_density_type == 'Number Density':
-                sample_material['SampleNumberDensity'] = self._sample_density
-                sample_material['NumberDensityUnit'] = self._sample_number_density_unit
-            set_sample_alg.setProperty("Material", sample_material)
+                if self._sample_density_type == 'Mass Density':
+                    sample_material['SampleMassDensity'] = self._sample_density
+                if self._sample_density_type == 'Number Density':
+                    sample_material['SampleNumberDensity'] = self._sample_density
+                    sample_material['NumberDensityUnit'] = self._sample_number_density_unit
+                set_sample_alg.setProperty("Material", sample_material)
 
-        if self._container_ws:
+        if 'Container' in define:
             container_geometry = dict()
             container_geometry['Height'] = self._height
+
+            if self._shape == 'FlatPlate':
+                container_geometry['Shape'] = 'FlatPlateHolder'
+                container_geometry['Width'] = self._sample_width
+                # yes, this is the sample thickness!
+                container_geometry['Thick'] = self._sample_thickness
+                container_geometry['Center'] = [0.0, 0.0, self._sample_center]
+                container_geometry['Angle'] = self._sample_angle
+                container_geometry['FrontTick'] = self._container_front_thickness
+                container_geometry['BackTick'] = self._container_back_thickness
 
             if self._shape == 'Cylinder':
                 container_geometry['Shape'] = 'HollowCylinder'
                 container_geometry['InnerRadius'] = self._sample_radius
                 container_geometry['OuterRadius'] = self._container_radius
-                container_geometry['Center'] = [0.0, 0.0, 0.0]
-
-            if self._shape == 'FlatPlate':
-                container_geometry['Shape'] = 'CSG'
-                container_geometry['Value'] = self._get_flat_plate_container_xml()
 
             if self._shape == 'Annulus':
-                container_geometry['Shape'] = 'CSG'
-                container_geometry['Value'] = self._get_annulus_container_xml()
+                container_geometry['Shape'] = 'HollowCylinderHolder'
+                container_geometry['InnerRadius'] = self._container_inner_radius
+                container_geometry['InnerOuterRadius'] = self._sample_inner_radius
+                container_geometry['OuterInnerRadius'] = self._sample_outer_radius
+                container_geometry['OuterRadius'] = self._container_outer_radius
 
             set_sample_alg.setProperty("ContainerGeometry", container_geometry)
 
@@ -452,32 +453,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
         set_sample_alg.execute()
 
-    def _get_flat_plate_container_xml(self):
-        offset_front = 0.5 * (self._container_front_thickness + self._sample_thickness)
-        offset_back = 0.5 * (self._container_back_thickness + self._sample_thickness)
-        flat_wall = """<cuboid id="{0}">
-                        <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
-                        <left-front-top-point  x="0.0025" y="-0.1" z="0.02"  />
-                        <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
-                        <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
-                      </cuboid>"""
-        front = flat_wall.format('front')
-        back = flat_wall.format('back')
-        return inner+outer+"<algebra val='front:back'/>"
-
-    def _get_annulus_container_xml(self):
-
-        annular_wall = """<hollow-cylinder id="{0}">
-                            <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
-                            <axis x="0.0" y="1.0" z="0" />
-                            <inner-radius val="{1}" />
-                            <outer-radius val="{2}" />
-                            <height val="{3}" />
-                          </hollow-cylinder>"""
-        inner = annular_wall.format('inner', self._container_inner_radius, self._sample_inner_radius, self._height)
-        outer = annular_wall.format('outer', self._sample_outer_radius, self._container_outer_radius, self._height)
-        return inner+outer+"<algebra val='inner:outer'/>"
-
     def _setup(self):
 
         self._sample_ws = self.getProperty("SampleWorkspace").value
@@ -493,10 +468,11 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
 
         self._beam_height = self.getProperty('BeamHeight').value
         self._beam_width = self.getProperty('BeamWidth').value
-        self._general_kwargs = {'NumberOfWavelengthPoints': self.getProperty('NumberOfWavelengthPoints').value,
-                                'EventsPerPoint': self.getProperty('EventsPerPoint').value,
-                                'Interpolation': self.getProperty('Interpolation').value,
-                                'MaxScatterPtAttempts': self.getProperty('MaxScatterPtAttempts').value}
+
+        self._monte_carlo_kwargs = {'NumberOfWavelengthPoints': self.getProperty('NumberOfWavelengthPoints').value,
+                                    'EventsPerPoint': self.getProperty('EventsPerPoint').value,
+                                    'Interpolation': self.getProperty('Interpolation').value,
+                                    'MaxScatterPtAttempts': self.getProperty('MaxScatterPtAttempts').value}
 
         self._shape = self.getProperty('Shape').value
         self._height = self.getProperty('Height').value
@@ -680,7 +656,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             return workspace
 
     # ------------------------------- Converting IndirectElastic to wavelength ------------------------------
-
     def _create_waves_indirect_elastic(self, workspace):
         """
         Creates a wavelength workspace, from the workspace with the specified input workspace
@@ -799,8 +774,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         crop_alg.execute()
         return crop_alg.getProperty("OutputWorkspace").value
 
-    # ------------------------------- Child algorithms -------------------------------
-
     def _clone_ws(self, input_ws):
         """
         Clones the specified input workspace.
@@ -813,20 +786,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         clone_alg.execute()
         return clone_alg.getProperty("OutputWorkspace").value
 
-    def _multiply(self, lhs_ws, rhs_ws):
-        """
-        Multiplies the specified workspaces together.
-
-        :param lhs_ws:  The left hand workspace multiplicand.
-        :param rhs_ws:  The right hand workspace multiplicand.
-        :return:        The product of the specified workspaces.
-        """
-        multiply_alg = self.createChildAlgorithm("Multiply", enableLogging=False)
-        multiply_alg.setProperty("LHSWorkspace", lhs_ws)
-        multiply_alg.setProperty("RHSWorkspace", rhs_ws)
-        multiply_alg.execute()
-        return multiply_alg.getProperty('OutputWorkspace').value
-
     def _group_ws(self, workspaces):
         """
         Groups the specified input workspaces.
@@ -838,21 +797,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         group_alg.setProperty("InputWorkspaces", workspaces)
         group_alg.execute()
         return group_alg.getProperty("OutputWorkspace").value
-
-    def _add_sample_log_multiple(self, input_ws, log_names, log_values):
-        """
-        Adds sample logs to the specified input workspace using the specified
-        log names and values.
-
-        :param input_ws:    The workspace to add sample logs to.
-        :param log_names:   The names of each sample log to add (ordered).
-        :param log_values:  The values of each sample log to add (ordered).
-        """
-        sample_log_mult_alg = self.createChildAlgorithm("AddSampleLogMultiple", enableLogging=False)
-        sample_log_mult_alg.setProperty("Workspace", input_ws)
-        sample_log_mult_alg.setProperty("LogNames", log_names)
-        sample_log_mult_alg.setProperty("LogValues", log_values)
-        sample_log_mult_alg.execute()
 
     def _convert_units(self, workspace, target_unit, emode, efixed=None):
         """
@@ -910,14 +854,14 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         return transpose_alg.getProperty("OutputWorkspace").value
 
     # ------------------------------- Utility algorithms -------------------------------
-    def _set_algorithm_properties(self, algorithm, properties):
+    @staticmethod
+    def _set_algorithm_properties(algorithm, properties):
         """
         Sets the specified algorithm's properties using the given properties.
 
         :param algorithm:   The algorithm whose properties to set.
         :param properties:  The dictionary of properties to set.
         """
-
         for key, value in properties.items():
             algorithm.setProperty(key, value)
 
