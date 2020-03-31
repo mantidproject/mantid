@@ -10,14 +10,75 @@
 
 # 3rdparty imports
 from matplotlib.path import Path
-from matplotlib.patches import Circle, PathPatch, Wedge
+from matplotlib.patches import Circle, Ellipse, Patch, PathPatch, Wedge
+from matplotlib.transforms import Affine2D, IdentityTransform
+import numpy as np
+
+
+class EllipticalShell(Patch):
+    """
+    Elliptical shell patch.
+    """
+
+    def __str__(self):
+        return f"EllipticalShell(center={self.center}, width={self.width}, height={self.height}, thick={self.thick}, angle={self.angle})"
+
+    def __init__(self, center, width, height, thick, angle=0.0, **kwargs):
+        """
+        Draw an elliptical ring centered at *x*, *y* center with outer width (horizontal diameter)
+        *width* and outer height (vertical diameter) *height* with a ring thickness of *thick*
+        Valid kwargs are:
+        %(Patch)s
+        """
+        super().__init__(**kwargs)
+        self.center = center
+        self.height, self.width = height, width
+        self.thick = thick
+        self.angle = angle
+        self._recompute_path()
+        # Note: This cannot be calculated until this is added to an Axes
+        self._patch_transform = IdentityTransform()
+
+    def _recompute_path(self):
+        # Form the outer ring
+        arc = Path.arc(theta1=0.0, theta2=360.0)
+        # Draw the outer unit circle followed by a reversed and scaled inner circle
+        v1 = arc.vertices
+        v2 = arc.vertices[::-1] * float(1.0 - self.thick)
+        v = np.vstack([v1, v2, v1[0, :], (0, 0)])
+        c = np.hstack([arc.codes, arc.codes, Path.MOVETO, Path.CLOSEPOLY])
+        c[len(arc.codes)] = Path.MOVETO
+        # Final shape acheieved through axis transformation. See _recompute_transform
+        self._path = Path(v, c)
+
+    def _recompute_transform(self):
+        """NOTE: This cannot be called until after this has been added
+                 to an Axes, otherwise unit conversion will fail. This
+                 makes it very important to call the accessor method and
+                 not directly access the transformation member variable.
+        """
+        center = (self.convert_xunits(self.center[0]), self.convert_yunits(self.center[1]))
+        width = self.convert_xunits(self.width)
+        height = self.convert_yunits(self.height)
+        self._patch_transform = Affine2D() \
+            .scale(width * 0.5, height * 0.5) \
+            .rotate_deg(self.angle) \
+            .translate(*center)
+
+    def get_patch_transform(self):
+        self._recompute_transform()
+        return self._patch_transform
+
+    def get_path(self):
+        if self._path is None:
+            self._recompute_path()
+        return self._path
 
 
 class MplPainter(object):
     """
     Implementation of a PeakPainter that uses matplotlib to draw
     """
-    SNAP_WIDTH = 0.5
 
     def __init__(self, axes):
         """
@@ -58,6 +119,30 @@ class MplPainter(object):
                  (x + half_width, y + half_width), (x - half_width, y - half_width))
         codes = (Path.MOVETO, Path.LINETO, Path.MOVETO, Path.LINETO)
         return self._axes.add_patch(PathPatch(Path(verts, codes), **kwargs))
+
+    def ellipse(self, x, y, width, height, angle=0.0, **kwargs):
+        """Draw an ellipse at the given location
+        :param x: X coordinate of the center
+        :param y: Y coordinate of the center
+        :param width: Size in X dimension
+        :param height: Size in Y dimension
+        :param angle: Angle in degrees w.r.t X axis
+        :param kwargs: Additional matplotlib properties to pass to the call
+        """
+        return self._axes.add_patch(Ellipse((x, y), width, height, angle, **kwargs))
+
+    def elliptical_shell(self, x, y, outer_width, outer_height, thick, angle=0.0, **kwargs):
+        """Draw an ellipse at the given location
+        :param x: X coordinate of the center
+        :param y: Y coordinate of the center
+        :param outer_width: Size in X dimension of outer ellipse
+        :param height: Size in Y dimension of outer ellipse
+        :param thick: Thickness of shell
+        :param angle: Angle in degrees w.r.t X axis
+        :param kwargs: Additional matplotlib properties to pass to the call
+        """
+        return self._axes.add_patch(
+            EllipticalShell((x, y), outer_width, outer_height, thick, angle, **kwargs))
 
     def shell(self, x, y, outer_radius, thick, **kwargs):
         """Draw a wedge on the Axes

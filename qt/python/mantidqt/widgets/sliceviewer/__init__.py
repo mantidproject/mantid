@@ -16,40 +16,5 @@
 # ws = LoadMD('ExternalData/Testing/SystemTests/tests/analysis/reference/ConvertWANDSCDtoQTest_HKL.nxs')
 # app = QApplication([])
 # window = SliceViewer(ws)
+# window.show()
 # app.exec_()
-if __name__ == "__main__":
-    from mantidqt.widgets.sliceviewer.presenter import SliceViewer
-    from mantid.simpleapi import *
-    from qtpy.QtWidgets import QApplication
-
-    SXD23767 = Load(Filename='SXD23767.raw', LoadMonitors='Exclude', SpectrumMax=1000)
-    mdws = ConvertToMD(
-        InputWorkspace=SXD23767,
-        QDimensions="Q3D",
-        dEAnalysisMode="Elastic",
-        QConversionScales="Q in A^-1",
-        LorentzCorrection='1',
-        MinValues=[-15, -15, -15],
-        MaxValues=[15, 15, 15],
-        SplitInto='2',
-        SplitThreshold='50',
-        MaxRecursionDepth='14')
-    peaksws = Load('peaks_qLab.nxs')
-    while peaksws.getNumberPeaks() > 1:
-        DeleteTableRows(peaksws, Rows=peaksws.getNumberPeaks() - 1)
-    IntegratePeaksMD(
-        InputWorkspace=mdws,
-        PeaksWorkspace=peaksws,
-        PeakRadius=0.5,
-        OutputWorkspace='peaksws_sphere_nobkgd')
-    IntegratePeaksMD(
-        InputWorkspace=mdws,
-        PeaksWorkspace=peaksws,
-        PeakRadius=0.5,
-        BackgroundInnerRadius=1.1,
-        BackgroundOuterRadius=1.4,
-        OutputWorkspace='peaksws_sphere_withbkgd')
-
-    app = QApplication([])
-    sv = SliceViewer(mdws)
-    app.exec_()

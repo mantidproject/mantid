@@ -54,16 +54,29 @@ class MplPainterTest(unittest.TestCase):
         artist = painter.cross(x, y, half_width)
 
         axes.add_patch.assert_called_once()
-        self.assertTrue(artist is not None)
+        self._verify_patch(patch=axes.add_patch.call_args[0][0], nvertices=4, alpha=None)
 
     def test_cross_passes_kwargs_to_mpl(self):
         axes = MagicMock()
         painter = MplPainter(axes)
         x, y, half_width = 1, 2, 0.1
+        alpha = 0.8
 
-        painter.cross(x, y, half_width, alpha=1)
+        painter.cross(x, y, half_width, alpha=alpha)
 
         axes.add_patch.assert_called_once()
+        self._verify_patch(patch=axes.add_patch.call_args[0][0], nvertices=4, alpha=alpha)
+
+    def test_ellipticalshell(self):
+        axes = MagicMock()
+        painter = MplPainter(axes)
+        x, y, outer_width, outer_height, thick = 1, 2, 0.8, 1.0, 0.2
+        alpha = 1.0
+
+        painter.elliptical_shell(x, y, outer_width, outer_height, thick, alpha=alpha)
+
+        axes.add_patch.assert_called_once()
+        self._verify_patch(patch=axes.add_patch.call_args[0][0], nvertices=100, alpha=alpha)
 
     def test_shell_adds_patch(self):
         axes = MagicMock()
@@ -73,6 +86,7 @@ class MplPainterTest(unittest.TestCase):
         painter.shell(x, y, outer_radius, thick)
 
         axes.add_patch.assert_called_once()
+        self._verify_patch(patch=axes.add_patch.call_args[0][0], nvertices=100, alpha=None)
 
     def test_update_properties_passes_keywords_to_set(self):
         axes = MagicMock()
@@ -86,6 +100,14 @@ class MplPainterTest(unittest.TestCase):
     # --------------- failure tests -----------------
     def test_construction_raises_error_if_given_non_axes_instance(self):
         self.assertRaises(ValueError, MplPainter, 1)
+
+    # private helpers
+    def _verify_patch(self, patch, nvertices, alpha):
+        path = patch.get_path()
+        self.assertEqual(nvertices, len(path.vertices))
+        self.assertEqual(nvertices, len(path.codes))
+        if alpha is not None:
+            self.assertEqual(alpha, patch.get_alpha())
 
 
 if __name__ == '__main__':
