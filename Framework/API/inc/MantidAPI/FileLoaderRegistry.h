@@ -8,6 +8,8 @@
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/FileDescriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/SingletonHolder.h"
 
 #ifndef Q_MOC_RUN

@@ -12,6 +12,8 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/NexusDescriptor.h"
+
 #include <hdf5.h>
 
 namespace Mantid {
@@ -60,26 +62,27 @@ public:
 
 protected:
   /// Add a workspace to the group and register in the analysis data service
-  void registerWorkspace(API::WorkspaceGroup_sptr gws, const std::string wsName,
-                         DataObjects::Workspace2D_sptr ws,
+  void registerWorkspace(const API::WorkspaceGroup_sptr &gws,
+                         const std::string &wsName,
+                         const DataObjects::Workspace2D_sptr &ws,
                          const std::string &description);
   /// Read info about one HDF5 dataset, log if error
-  herr_t dataSetInfo(const hid_t &h5file, const std::string setName,
+  herr_t dataSetInfo(const hid_t &h5file, const std::string &setName,
                      hsize_t *dims) const;
   /// Read dataset data to a buffer ot type double
-  herr_t dataSetDouble(const hid_t &h5file, const std::string setName,
+  herr_t dataSetDouble(const hid_t &h5file, const std::string &setName,
                        std::vector<double> &buf);
   /// Load qvectors dataset, calculate modulus of vectors
   HistogramData::Points loadQvectors(const hid_t &h5file,
-                                     API::WorkspaceGroup_sptr gws,
+                                     const API::WorkspaceGroup_sptr &gws,
                                      std::vector<int> &sorting_indexes);
   /// Load structure factor asa function of q-vector modulus
-  void loadFQ(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-              const std::string setName, const HistogramData::Points &qvmod,
+  void loadFQ(const hid_t &h5file, const API::WorkspaceGroup_sptr &gws,
+              const std::string &setName, const HistogramData::Points &qvmod,
               const std::vector<int> &sorting_indexes);
   /// Load time-dependent structure factor
-  void loadFQT(const hid_t &h5file, API::WorkspaceGroup_sptr gws,
-               const std::string setName, const HistogramData::Points &qvmod,
+  void loadFQT(const hid_t &h5file, const API::WorkspaceGroup_sptr &gws,
+               const std::string &setName, const HistogramData::Points &qvmod,
                const std::vector<int> &sorting_indexes);
 
 private:

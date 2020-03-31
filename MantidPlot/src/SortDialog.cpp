@@ -36,7 +36,8 @@
 #include <QLayout>
 #include <QPushButton>
 
-SortDialog::SortDialog(QWidget *parent, Qt::WFlags fl) : QDialog(parent, fl) {
+SortDialog::SortDialog(QWidget *parent, const Qt::WFlags &fl)
+    : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot - Sorting Options"));
   setSizeGripEnabled(true);
 

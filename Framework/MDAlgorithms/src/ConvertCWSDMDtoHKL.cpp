@@ -169,7 +169,8 @@ void ConvertCWSDMDtoHKL::getUBMatrix() {
  * number of detectors
  */
 void ConvertCWSDMDtoHKL::exportEvents(
-    IMDEventWorkspace_sptr mdws, std::vector<Kernel::V3D> &vec_event_qsample,
+    const IMDEventWorkspace_sptr &mdws,
+    std::vector<Kernel::V3D> &vec_event_qsample,
     std::vector<signal_t> &vec_event_signal,
     std::vector<detid_t> &vec_event_det) {
   // Set the size of the output vectors
@@ -373,7 +374,7 @@ API::IMDEventWorkspace_sptr ConvertCWSDMDtoHKL::createHKLMDWorkspace(
   return mdws;
 }
 
-void ConvertCWSDMDtoHKL::getRange(const std::vector<Kernel::V3D> vec_hkl,
+void ConvertCWSDMDtoHKL::getRange(const std::vector<Kernel::V3D> &vec_hkl,
                                   std::vector<double> &extentMins,
                                   std::vector<double> &extentMaxs) {
   assert(extentMins.size() == 3);

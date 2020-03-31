@@ -68,7 +68,7 @@ Kernel::IValidator_sptr CompositeValidator::clone() const {
 /** Adds a validator to the group of validators to check
  *  @param child :: A pointer to the validator to add
  */
-void CompositeValidator::add(Kernel::IValidator_sptr child) {
+void CompositeValidator::add(const Kernel::IValidator_sptr &child) {
   m_children.emplace_back(child);
 }
 
@@ -106,7 +106,7 @@ std::string CompositeValidator::checkAny(const boost::any &value) const {
   // capture its error message to a stream so we can potentially print it out
   // to the user if required.
   const auto checkIfValid = [&errorStream,
-                             &value](const IValidator_sptr validator) {
+                             &value](const IValidator_sptr &validator) {
     const auto errorMessage = validator->check(value);
     if (errorMessage.empty()) {
       return true;

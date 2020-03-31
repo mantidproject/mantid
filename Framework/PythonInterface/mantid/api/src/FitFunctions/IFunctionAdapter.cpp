@@ -10,6 +10,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
+#include <utility>
 
 #define PY_ARRAY_UNIQUE_SYMBOL API_ARRAY_API
 #define NO_IMPORT_ARRAY
@@ -80,7 +81,7 @@ IFunction::Attribute createAttributeFromPythonValue(const object &value) {
 IFunctionAdapter::IFunctionAdapter(PyObject *self, std::string functionMethod,
                                    std::string derivMethod)
     : m_self(self), m_functionName(std::move(functionMethod)),
-      m_derivName(derivMethod),
+      m_derivName(std::move(derivMethod)),
       m_derivOveridden(typeHasAttribute(self, m_derivName.c_str())) {
   if (!typeHasAttribute(self, "init"))
     throw std::runtime_error("Function does not define an init method.");

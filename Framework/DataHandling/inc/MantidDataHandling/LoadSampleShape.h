@@ -51,7 +51,7 @@ private:
   void exec() override;
 };
 void DLLExport rotate(Geometry::MeshObject &sampleMesh,
-                      API::MatrixWorkspace_const_sptr inputWS);
+                      const API::MatrixWorkspace_const_sptr &inputWS);
 
 } // namespace DataHandling
 } // namespace Mantid

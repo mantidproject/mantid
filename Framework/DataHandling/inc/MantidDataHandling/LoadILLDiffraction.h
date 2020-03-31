@@ -6,10 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <utility>
+
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/V3D.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -44,7 +47,8 @@ private:
     std::string unit;
 
     ScannedVariables(std::string n, std::string p, std::string u)
-        : axis(0), scanned(0), name(n), property(p), unit(u) {}
+        : axis(0), scanned(0), name(std::move(n)), property(std::move(p)),
+          unit(std::move(u)) {}
 
     void setAxis(int a) { axis = a; }
     void setScanned(int s) { scanned = s; }

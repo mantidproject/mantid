@@ -9,8 +9,6 @@
 #
 """ Utility functions to deal with fetching fonts
 """
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
 import os
 import os.path as osp

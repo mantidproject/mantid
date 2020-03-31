@@ -186,7 +186,7 @@ public:
       foundAlg = ("Cat" == descItr->category) &&
                  ("ToyAlgorithm" == descItr->name) &&
                  ("Dog" == descItr->alias) && (1 == descItr->version);
-      descItr++;
+      ++descItr;
     }
     TS_ASSERT(foundAlg);
 

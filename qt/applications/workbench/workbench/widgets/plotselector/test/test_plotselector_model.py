@@ -7,11 +7,9 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import absolute_import, division, print_function
-
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from workbench.plotting.globalfiguremanager import FigureAction
 from workbench.widgets.plotselector.model import PlotSelectorModel
 from workbench.widgets.plotselector.presenter import PlotSelectorPresenter

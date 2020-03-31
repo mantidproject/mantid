@@ -104,10 +104,9 @@ void ParallaxCorrection::init() {
  * @param parallax : the correction formula for the bank
  * @param direction : the tube direction in the bank
  */
-void ParallaxCorrection::performCorrection(API::MatrixWorkspace_sptr outWS,
-                                           const std::vector<size_t> &indices,
-                                           const std::string &parallax,
-                                           const std::string &direction) {
+void ParallaxCorrection::performCorrection(
+    const API::MatrixWorkspace_sptr &outWS, const std::vector<size_t> &indices,
+    const std::string &parallax, const std::string &direction) {
   double t;
   mu::Parser muParser;
   muParser.DefineVar("t", &t);

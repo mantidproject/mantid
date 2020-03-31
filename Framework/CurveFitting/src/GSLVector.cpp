@@ -168,18 +168,16 @@ GSLVector &GSLVector::operator*=(const GSLVector &v) {
 /// Multiply by a number
 /// @param d :: The number
 GSLVector &GSLVector::operator*=(const double d) {
-  for (auto &x : m_data) {
-    x *= d;
-  }
+  std::transform(m_data.begin(), m_data.end(), m_data.begin(),
+                 [d](double x) { return x * d; });
   return *this;
 }
 
 /// Add a number
 /// @param d :: The number
 GSLVector &GSLVector::operator+=(const double d) {
-  for (auto &x : m_data) {
-    x += d;
-  }
+  std::transform(m_data.begin(), m_data.end(), m_data.begin(),
+                 [d](double x) { return x + d; });
   return *this;
 }
 

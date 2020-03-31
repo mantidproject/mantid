@@ -8,6 +8,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
 #include <algorithm>
+#include <utility>
 
 namespace Mantid {
 namespace Poldi {
@@ -16,15 +17,15 @@ using namespace Geometry;
 
 PoldiDeadWireDecorator::PoldiDeadWireDecorator(
     std::set<int> deadWires,
-    boost::shared_ptr<Poldi::PoldiAbstractDetector> detector)
-    : PoldiDetectorDecorator(detector), m_deadWireSet(deadWires),
+    const boost::shared_ptr<Poldi::PoldiAbstractDetector> &detector)
+    : PoldiDetectorDecorator(detector), m_deadWireSet(std::move(deadWires)),
       m_goodElements() {
   setDecoratedDetector(detector);
 }
 
 PoldiDeadWireDecorator::PoldiDeadWireDecorator(
     const Geometry::DetectorInfo &poldiDetectorInfo,
-    boost::shared_ptr<PoldiAbstractDetector> detector)
+    const boost::shared_ptr<PoldiAbstractDetector> &detector)
     : PoldiDetectorDecorator(detector), m_deadWireSet(), m_goodElements() {
   setDecoratedDetector(detector);
 
@@ -42,7 +43,7 @@ PoldiDeadWireDecorator::PoldiDeadWireDecorator(
 }
 
 void PoldiDeadWireDecorator::setDeadWires(std::set<int> deadWires) {
-  m_deadWireSet = deadWires;
+  m_deadWireSet = std::move(deadWires);
 
   detectorSetHook();
 }

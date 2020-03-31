@@ -37,7 +37,7 @@ public:
       : ws1Name("ConjoinWorkspacesTest_grp1"),
         ws2Name("ConjoinWorkspacesTest_grp2") {}
 
-  MatrixWorkspace_sptr getWSFromADS(std::string wsName) {
+  MatrixWorkspace_sptr getWSFromADS(const std::string &wsName) {
     auto out = boost::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(wsName));
     TS_ASSERT(out);

@@ -26,7 +26,7 @@ using Mantid::Crystal::FindClusterFaces;
 
 namespace {
 // Helper function to create a peaks workspace.
-IPeaksWorkspace_sptr create_peaks_WS(Instrument_sptr inst) {
+IPeaksWorkspace_sptr create_peaks_WS(const Instrument_sptr &inst) {
   PeaksWorkspace *pPeaksWS = new PeaksWorkspace();
   pPeaksWS->setCoordinateSystem(Mantid::Kernel::HKL);
   IPeaksWorkspace_sptr peakWS(pPeaksWS);

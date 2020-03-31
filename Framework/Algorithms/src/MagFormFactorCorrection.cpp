@@ -96,9 +96,11 @@ void MagFormFactorCorrection::exec() {
   // Gets the vector of form factor values
   std::vector<double> FF;
   FF.reserve(Qvals.size());
-  for (double Qval : Qvals) {
-    FF.emplace_back(ion.analyticalFormFactor(Qval * Qval));
-  }
+
+  std::transform(
+      Qvals.begin(), Qvals.end(), std::back_inserter(FF),
+      [&ion](double qval) { return ion.analyticalFormFactor(qval * qval); });
+
   if (!ffwsStr.empty()) {
     HistogramBuilder builder;
     builder.setX(Qvals.size());

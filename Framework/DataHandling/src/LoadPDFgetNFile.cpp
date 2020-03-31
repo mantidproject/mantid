@@ -106,7 +106,7 @@ void LoadPDFgetNFile::exec() {
  * 1. a 2D vector for column data
  * 2. a 1D string vector for column name
  */
-void LoadPDFgetNFile::parseDataFile(std::string filename) {
+void LoadPDFgetNFile::parseDataFile(const std::string &filename) {
   // 1. Open file
   std::ifstream ifile;
   ifile.open((filename.c_str()));
@@ -257,7 +257,7 @@ void LoadPDFgetNFile::parseDataLine(string line) {
 }
 
 //----------------------------------------------------------------------------------------------
-void LoadPDFgetNFile::setUnit(Workspace2D_sptr ws) {
+void LoadPDFgetNFile::setUnit(const Workspace2D_sptr &ws) {
   // 1. Set X
   string xcolname = mColumnNames[0];
 

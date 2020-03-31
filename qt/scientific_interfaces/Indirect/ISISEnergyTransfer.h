@@ -60,8 +60,8 @@ private slots:
 
   void updateRunButton(bool enabled = true,
                        std::string const &enableOutputButtons = "unchanged",
-                       QString const message = "Run",
-                       QString const tooltip = "");
+                       QString const &message = "Run",
+                       QString const &tooltip = "");
 
 private:
   void setInstrumentDefault(QMap<QString, QString> const &instDetails);

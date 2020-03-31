@@ -50,9 +50,9 @@ protected:
   }
 
   // Add a fake peak to an MDEventWorkspace
-  void add_fake_md_peak(IMDEventWorkspace_sptr mdws, const size_t &nEvents,
-                        const double &h, const double &k, const double &l,
-                        const double &radius) {
+  void add_fake_md_peak(const IMDEventWorkspace_sptr &mdws,
+                        const size_t &nEvents, const double &h, const double &k,
+                        const double &l, const double &radius) {
     auto fakeMDEventDataAlg =
         AlgorithmManager::Instance().createUnmanaged("FakeMDEventData");
     fakeMDEventDataAlg->setChild(true);

@@ -9,7 +9,6 @@
 Test the SNS inelatic reduction scripts.
 """
 
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 import os
 import shutil

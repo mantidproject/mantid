@@ -31,7 +31,7 @@ private:
   int NUMPIXELS;
   int NUMBINS;
 
-  void makeFakeEventWorkspace(std::string wsName) {
+  void makeFakeEventWorkspace(const std::string &wsName) {
     // Make an event workspace with 2 events in each bin.
     EventWorkspace_sptr test_in = WorkspaceCreationHelper::createEventWorkspace(
         NUMPIXELS, NUMBINS, NUMBINS, 0.0, BIN_DELTA, 2);

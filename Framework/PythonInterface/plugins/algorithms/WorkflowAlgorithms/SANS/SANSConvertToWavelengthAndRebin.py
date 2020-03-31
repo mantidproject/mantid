@@ -8,8 +8,6 @@
 
 """ SANSConvertToWavelengthAndRebin algorithm converts to wavelength units and performs a rebin."""
 
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         Progress)
 from mantid.dataobjects import EventWorkspace

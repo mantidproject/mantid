@@ -226,7 +226,7 @@ void LoadPreNexusMonitors::exec() {
  * geometry
  */
 void LoadPreNexusMonitors::runLoadInstrument(
-    const std::string &instrument, MatrixWorkspace_sptr localWorkspace) {
+    const std::string &instrument, const MatrixWorkspace_sptr &localWorkspace) {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 

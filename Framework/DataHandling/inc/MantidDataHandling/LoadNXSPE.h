@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {

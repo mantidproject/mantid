@@ -21,7 +21,7 @@ using namespace Mantid::Algorithms;
 class SmoothNeighboursTest : public CxxTest::TestSuite {
 
 public:
-  void doTestWithNumberOfNeighbours(std::string WeightedSum = "Flat") {
+  void doTestWithNumberOfNeighbours(const std::string &WeightedSum = "Flat") {
     MatrixWorkspace_sptr inWS =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(100, 10);
 
@@ -75,7 +75,7 @@ public:
   }
 
   void do_test_non_uniform(EventType type, double *expectedY,
-                           std::string WeightedSum = "Parabolic",
+                           const std::string &WeightedSum = "Parabolic",
                            bool PreserveEvents = true, double Radius = 0.001,
                            bool ConvertTo2D = false,
                            int numberOfNeighbours = 8) {
@@ -158,7 +158,7 @@ public:
   }
 
   void do_test_rectangular(EventType type, double *expectedY,
-                           std::string WeightedSum = "Parabolic",
+                           const std::string &WeightedSum = "Parabolic",
                            bool PreserveEvents = true,
                            bool ConvertTo2D = false) {
     // Pixels will be spaced 0.008 apart.

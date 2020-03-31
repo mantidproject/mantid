@@ -18,7 +18,7 @@ UnwrappedDetector::UnwrappedDetector()
   color = GLColor(0, 0, 0);
 }
 
-UnwrappedDetector::UnwrappedDetector(GLColor color, size_t detIndex)
+UnwrappedDetector::UnwrappedDetector(const GLColor &color, size_t detIndex)
     : u(0), v(0), width(0), height(0), uscale(0), vscale(0),
       detIndex(detIndex) {
   this->color = color;

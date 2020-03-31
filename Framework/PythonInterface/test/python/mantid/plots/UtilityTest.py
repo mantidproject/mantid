@@ -11,12 +11,10 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import, division
-
 import unittest
 
 from mantid.plots.utility import legend_set_draggable
-from mantid.py3compat.mock import create_autospec
+from unittest.mock import create_autospec
 from matplotlib.legend import Legend
 
 

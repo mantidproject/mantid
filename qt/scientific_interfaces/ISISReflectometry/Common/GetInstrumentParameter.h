@@ -17,28 +17,28 @@ template <typename T> class InstrumentParameter;
 template <> class InstrumentParameter<std::string> {
 public:
   static std::vector<std::string>
-  get(Mantid::Geometry::Instrument_const_sptr instrument,
+  get(const Mantid::Geometry::Instrument_const_sptr &instrument,
       std::string const &parameterName);
 };
 
 template <> class InstrumentParameter<double> {
 public:
   static std::vector<double>
-  get(Mantid::Geometry::Instrument_const_sptr instrument,
+  get(const Mantid::Geometry::Instrument_const_sptr &instrument,
       std::string const &parameterName);
 };
 
 template <> class InstrumentParameter<int> {
 public:
   static std::vector<int>
-  get(Mantid::Geometry::Instrument_const_sptr instrument,
+  get(const Mantid::Geometry::Instrument_const_sptr &instrument,
       std::string const &parameterName);
 };
 
 template <> class InstrumentParameter<bool> {
 public:
   static std::vector<bool>
-  get(Mantid::Geometry::Instrument_const_sptr instrument,
+  get(const Mantid::Geometry::Instrument_const_sptr &instrument,
       std::string const &parameterName);
 };
 
@@ -73,7 +73,7 @@ template <typename T1, typename T2>
 class InstrumentParameter<boost::variant<T1, T2>> {
 public:
   static boost::variant<std::vector<T1>, std::vector<T2>>
-  get(Mantid::Geometry::Instrument_const_sptr instrument,
+  get(const Mantid::Geometry::Instrument_const_sptr &instrument,
       std::string const &parameterName) {
     try {
       return InstrumentParameter<T1>::get(instrument, parameterName);
@@ -106,7 +106,7 @@ class InstrumentParameter<boost::variant<T1, T2, T3, Ts...>> {
 public:
   static boost::variant<std::vector<T1>, std::vector<T2>, std::vector<T3>,
                         std::vector<Ts>...>
-  get(Mantid::Geometry::Instrument_const_sptr instrument,
+  get(const Mantid::Geometry::Instrument_const_sptr &instrument,
       std::string const &parameterName) {
     try {
       return InstrumentParameter<T1>::get(instrument, parameterName);
@@ -124,8 +124,9 @@ public:
 };
 
 template <typename T>
-auto getInstrumentParameter(Mantid::Geometry::Instrument_const_sptr instrument,
-                            std::string const &parameterName)
+auto getInstrumentParameter(
+    const Mantid::Geometry::Instrument_const_sptr &instrument,
+    std::string const &parameterName)
     -> decltype(InstrumentParameter<T>::get(
         std::declval<Mantid::Geometry::Instrument_const_sptr>(),
         std::declval<std::string const &>())) {

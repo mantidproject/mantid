@@ -11,8 +11,6 @@
 # Here we run the calibration of a selected part of MAPS consisting of several components
 # specifying them in an array of strings.
 
-from __future__ import absolute_import, division, print_function
-
 import tube
 import mantid.simpleapi as mantid
 

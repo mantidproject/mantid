@@ -157,8 +157,8 @@ void HFIRDarkCurrentSubtraction::exec() {
 
 /// Get the counting time from a workspace
 /// @param inputWS :: workspace to read the counting time from
-double
-HFIRDarkCurrentSubtraction::getCountingTime(MatrixWorkspace_sptr inputWS) {
+double HFIRDarkCurrentSubtraction::getCountingTime(
+    const MatrixWorkspace_sptr &inputWS) {
   // First, look whether we have the information in the log
   if (inputWS->run().hasProperty("timer")) {
     return inputWS->run().getPropertyValueAsType<double>("timer");

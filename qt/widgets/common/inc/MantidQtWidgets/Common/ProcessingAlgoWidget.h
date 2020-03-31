@@ -34,7 +34,7 @@ public:
   /// @return the info string displayed at the top
   QString infoString() { return ui.lblInfo->text(); }
   /// Sets the info string displayed at the top
-  void infoString(QString text) { return ui.lblInfo->setText(text); }
+  void infoString(const QString &text) { return ui.lblInfo->setText(text); }
 
   /// @return true if the script editor is visible
   bool editorVisible() { return ui.editorContainer->isVisible(); }
@@ -55,7 +55,7 @@ public:
   /// @return the text in the script editor
   QString getScriptText();
   /// Set the script editor text
-  void setScriptText(QString text);
+  void setScriptText(const QString &text);
 
   void saveInput();
   /// Sets the AlgorithmInputHistory object recording the algorithm properties

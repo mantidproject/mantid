@@ -1680,9 +1680,8 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr
-  createFloodWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
-                       size_t n = 4) {
+  MatrixWorkspace_sptr createFloodWorkspace(
+      const Mantid::Geometry::Instrument_const_sptr &instrument, size_t n = 4) {
     size_t detid = 1;
     auto flood = create2DWorkspace(int(n), 1);
     if (n == 4) {

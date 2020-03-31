@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.py3compat import mock
-from mantid.py3compat.mock import patch
+from unittest import mock
+from unittest.mock import patch
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication, QMessageBox, QWidget
 
@@ -20,12 +20,15 @@ from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
 
 # this class is required to keep track of error signal emissions since the output is garbage collected by the time
 # we reach the equal assertion
+
+
 class MockSignalHandler(object):
     def __init__(self, parent=None):
         self.call_count = 0
 
     def signalReceived(self):
         self.call_count+=1
+
 
 @start_qapplication
 class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):

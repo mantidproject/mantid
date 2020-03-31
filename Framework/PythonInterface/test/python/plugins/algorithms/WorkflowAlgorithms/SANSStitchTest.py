@@ -4,13 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.api import AlgorithmManager, MatrixWorkspace
 import numpy as np
 
 from SANSStitch import QErrorCorrectionForMergedWorkspaces
+
 
 class SANSStitchTest(unittest.TestCase):
     def test_initalize(self):

@@ -7,8 +7,6 @@
 #  This file is part of the mantid package
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 import numpy
 
 from mantid.plots.datafunctions import (get_axes_labels, get_normalization, get_distribution,

@@ -32,7 +32,8 @@ namespace {
 //----------------------------------------------------------------------------------------------
 /** Import data from a column data file by calling LoadAscii
  */
-void importDataFromColumnFile(string filename, string datawsname) {
+void importDataFromColumnFile(const string &filename,
+                              const string &datawsname) {
   // 1. Call LoadAscii
   DataHandling::LoadAscii2 loader;
   loader.initialize();
@@ -96,7 +97,7 @@ API::MatrixWorkspace_sptr createInputDataWorkspace(int option) {
 //----------------------------------------------------------------------------------------------
 /** Create the Bragg peak parameters table for LaB6, PG3, Bank1
  */
-void createLaB6PG3Bank1BraggPeaksTable(TableWorkspace_sptr tablews) {
+void createLaB6PG3Bank1BraggPeaksTable(const TableWorkspace_sptr &tablews) {
   TableRow newrow0 = tablews->appendRow();
   newrow0 << 6 << 3 << 1 << .6129000 << 13962.47 << 0.20687 << 0.10063
           << 62.64174 << 0.00000;
@@ -266,7 +267,7 @@ DataObjects::TableWorkspace_sptr createReflectionWorkspace(int option) {
 //----------------------------------------------------------------------------------------------
 /** Add rows for input table workspace for PG3 bank1
  */
-void createPG3Bank1ParameterTable(TableWorkspace_sptr tablews) {
+void createPG3Bank1ParameterTable(const TableWorkspace_sptr &tablews) {
   TableRow newrow0 = tablews->appendRow();
   newrow0 << "Alph0" << 2.708;
   TableRow newrow1 = tablews->appendRow();

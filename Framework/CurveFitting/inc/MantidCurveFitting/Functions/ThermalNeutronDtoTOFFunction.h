@@ -40,7 +40,7 @@ public:
 
   /// Calculate function values
   void function1D(std::vector<double> &out,
-                  const std::vector<double> xValues) const;
+                  const std::vector<double> &xValues) const;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters

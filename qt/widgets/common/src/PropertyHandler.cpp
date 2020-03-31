@@ -26,6 +26,7 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
 #include <QMessageBox>
+#include <utility>
 
 using std::size_t;
 
@@ -33,16 +34,16 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 // Constructor
-PropertyHandler::PropertyHandler(Mantid::API::IFunction_sptr fun,
+PropertyHandler::PropertyHandler(const Mantid::API::IFunction_sptr &fun,
                                  Mantid::API::CompositeFunction_sptr parent,
                                  FitPropertyBrowser *browser,
                                  QtBrowserItem *item)
     : FunctionHandler(fun), m_browser(browser),
       m_cf(boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun)),
       m_pf(boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(fun)),
-      m_parent(parent), m_type(nullptr), m_item(item), m_isMultispectral(false),
-      m_workspace(nullptr), m_workspaceIndex(nullptr), m_base(0), m_ci(0),
-      m_hasPlot(false) {}
+      m_parent(std::move(parent)), m_type(nullptr), m_item(item),
+      m_isMultispectral(false), m_workspace(nullptr), m_workspaceIndex(nullptr),
+      m_base(0), m_ci(0), m_hasPlot(false) {}
 
 /// Destructor
 PropertyHandler::~PropertyHandler() {}
@@ -606,7 +607,7 @@ PropertyHandler *PropertyHandler::findHandler(QtProperty *prop) {
 }
 
 PropertyHandler *
-PropertyHandler::findHandler(Mantid::API::IFunction_const_sptr fun) {
+PropertyHandler::findHandler(const Mantid::API::IFunction_const_sptr &fun) {
   if (fun == function())
     return this;
   if (m_cf) {
@@ -1156,7 +1157,8 @@ void PropertyHandler::fix(const QString &parName) {
  * @param globalName :: Name of the parameter in compoite function
  * (e.g. f1.omega)
  */
-void PropertyHandler::removeTie(QtProperty *prop, std::string globalName) {
+void PropertyHandler::removeTie(QtProperty *prop,
+                                const std::string &globalName) {
   QString parName = m_ties.key(prop, "");
   if (parName.isEmpty())
     return;

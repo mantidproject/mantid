@@ -8,8 +8,6 @@
 
 """A base class to share functionality between SANSSingleReduction versions."""
 
-from __future__ import (absolute_import, division, print_function)
-
 from collections import defaultdict
 
 from mantid.api import (DistributedDataProcessorAlgorithm,

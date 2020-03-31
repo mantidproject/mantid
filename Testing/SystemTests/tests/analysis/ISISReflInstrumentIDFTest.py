@@ -9,15 +9,13 @@
 These system tests are to verify that the IDF and parameter files for POLREF, CRISP, INTER and SURF are read properly
 """
 
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 from mantid.simpleapi import *
 import os
 from abc import ABCMeta, abstractmethod
-from six import with_metaclass
 
 
-class ISISReflInstrumentIDFTest(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class ISISReflInstrumentIDFTest(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
     @abstractmethod
     def get_IDF_name(self):

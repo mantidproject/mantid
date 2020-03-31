@@ -25,7 +25,7 @@ class Track;
 */
 class MANTID_GEOMETRY_DLL SampleEnvironment {
 public:
-  SampleEnvironment(std::string name, Container_const_sptr getContainer);
+  SampleEnvironment(std::string name, const Container_const_sptr &getContainer);
 
   /// @return The name of kit
   inline const std::string name() const { return m_name; }

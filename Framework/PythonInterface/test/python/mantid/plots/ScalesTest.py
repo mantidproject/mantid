@@ -11,14 +11,13 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from matplotlib.scale import scale_factory
 from mantid.plots.scales import PowerScale, SquareScale
 import numpy as np
 import testhelpers
+
 
 class ScalesTest(unittest.TestCase):
 

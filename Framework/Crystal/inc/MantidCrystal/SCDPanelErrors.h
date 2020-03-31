@@ -44,7 +44,8 @@ public:
   /// Move detectors with parameters
   void moveDetector(double x, double y, double z, double rotx, double roty,
                     double rotz, double scalex, double scaley,
-                    std::string detname, API::Workspace_sptr inputW) const;
+                    std::string detname,
+                    const API::Workspace_sptr &inputW) const;
 
 private:
   /// Call the appropriate load function

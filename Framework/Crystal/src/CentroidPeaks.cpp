@@ -323,7 +323,7 @@ void CentroidPeaks::exec() {
   }
 }
 
-int CentroidPeaks::findPixelID(std::string bankName, int col, int row) {
+int CentroidPeaks::findPixelID(const std::string &bankName, int col, int row) {
   boost::shared_ptr<const IComponent> parent =
       inst->getComponentByName(bankName);
   if (parent->type() == "RectangularDetector") {

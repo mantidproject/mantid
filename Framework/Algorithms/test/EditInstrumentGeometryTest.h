@@ -158,7 +158,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Check detector parameter
    */
-  void checkDetectorParameters(API::MatrixWorkspace_sptr workspace,
+  void checkDetectorParameters(const API::MatrixWorkspace_sptr &workspace,
                                size_t wsindex, double realr, double realtth,
                                double realphi) {
 
@@ -175,8 +175,8 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Check detector parameter
    */
-  void checkDetectorID(API::MatrixWorkspace_sptr workspace, size_t wsindex,
-                       detid_t detid) {
+  void checkDetectorID(const API::MatrixWorkspace_sptr &workspace,
+                       size_t wsindex, detid_t detid) {
 
     const auto &spectrumInfo = workspace->spectrumInfo();
     TS_ASSERT_EQUALS(spectrumInfo.hasUniqueDetector(wsindex), true);

@@ -39,8 +39,8 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void runTest(Workspace2D_sptr inputWS, OffsetsWorkspace_sptr offsetsWS,
-               std::string &outWSName) {
+  void runTest(const Workspace2D_sptr &inputWS,
+               const OffsetsWorkspace_sptr &offsetsWS, std::string &outWSName) {
 
     CalculateDIFC alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())

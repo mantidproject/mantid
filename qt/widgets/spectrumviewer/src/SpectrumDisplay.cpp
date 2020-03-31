@@ -10,6 +10,8 @@
 #include <QImage>
 #include <QString>
 #include <QVector>
+#include <utility>
+
 #include <qwt_scale_engine.h>
 
 #include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
@@ -97,7 +99,7 @@ void SpectrumDisplay::setupSpectrumPlotItem() {
  *                    and information for the table.
  */
 void SpectrumDisplay::setDataSource(SpectrumDataSource_sptr dataSource) {
-  m_dataSource = dataSource;
+  m_dataSource = std::move(dataSource);
 
   m_hGraphDisplay->setDataSource(m_dataSource);
   m_vGraphDisplay->setDataSource(m_dataSource);

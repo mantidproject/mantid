@@ -23,9 +23,10 @@ class MatrixProperty : public PropertyWithValue<Matrix<TYPE>> {
 
 public:
   /// Constructor
-  MatrixProperty(const std::string &propName,
-                 IValidator_sptr validator = IValidator_sptr(new NullValidator),
-                 unsigned int direction = Direction::Input);
+  MatrixProperty(
+      const std::string &propName,
+      const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
+      unsigned int direction = Direction::Input);
   /// Copy constructor
   MatrixProperty(const MatrixProperty &rhs);
   // Unhide base class members (at minimum, avoids Intel compiler warning)

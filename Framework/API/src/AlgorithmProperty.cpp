@@ -12,6 +12,8 @@
 
 #include <json/value.h>
 
+#include <utility>
+
 namespace Mantid {
 namespace API {
 
@@ -29,8 +31,8 @@ namespace API {
 AlgorithmProperty::AlgorithmProperty(const std::string &propName,
                                      Kernel::IValidator_sptr validator,
                                      unsigned int direction)
-    : Kernel::PropertyWithValue<HeldType>(propName, HeldType(), validator,
-                                          direction),
+    : Kernel::PropertyWithValue<HeldType>(propName, HeldType(),
+                                          std::move(validator), direction),
       m_algmStr() {}
 
 /**

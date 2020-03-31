@@ -4,9 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
-from six import iteritems
 from isis_powder.routines import yaml_parser
 import warnings
 
@@ -190,7 +187,7 @@ def _get_enum_values(enum_cls):
     """
     enum_known_vals = []
 
-    for k, enum_val in iteritems(enum_cls.__dict__):
+    for k, enum_val in enum_cls.__dict__.items():
         # Get all class attribute and value pairs except enum_friendly_name
         if k.startswith("__") or k.lower() == "enum_friendly_name":
             continue

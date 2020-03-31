@@ -24,6 +24,7 @@
 #include <boost/make_shared.hpp>
 #include <nexus/NeXusFile.hpp>
 #include <queue>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Exception::InstrumentDefinitionError;
@@ -59,8 +60,8 @@ Instrument::Instrument(const std::string &name)
  *  @param instr :: instrument for parameter inclusion
  *  @param map :: parameter map to include
  */
-Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
-                       boost::shared_ptr<ParameterMap> map)
+Instrument::Instrument(const boost::shared_ptr<const Instrument> &instr,
+                       const boost::shared_ptr<ParameterMap> &map)
     : CompAssembly(instr.get(), map.get()), m_sourceCache(instr->m_sourceCache),
       m_sampleCache(instr->m_sampleCache), m_defaultView(instr->m_defaultView),
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
@@ -1037,7 +1038,7 @@ Setter for the reference frame.
 @param frame : reference frame object to use.
 */
 void Instrument::setReferenceFrame(boost::shared_ptr<ReferenceFrame> frame) {
-  m_referenceFrame = frame;
+  m_referenceFrame = std::move(frame);
 }
 
 /**

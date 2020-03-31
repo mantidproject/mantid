@@ -28,6 +28,7 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream> // used to get ifstream
 #include <sstream>
+#include <utility>
 
 using Mantid::Types::Core::DateAndTime;
 
@@ -202,8 +203,8 @@ void LoadLog::loadTwoColumnLogFile(std::ifstream &logFileStream,
     }
 
     try {
-      Property *log =
-          LogParser::createLogProperty(m_filename, stringToLower(logFileName));
+      Property *log = LogParser::createLogProperty(
+          m_filename, stringToLower(std::move(logFileName)));
       if (log) {
         run.addLogData(log);
       }
@@ -220,7 +221,8 @@ void LoadLog::loadTwoColumnLogFile(std::ifstream &logFileStream,
  * @param run :: The run information object
  */
 void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
-                                     std::string logFileName, API::Run &run) {
+                                     const std::string &logFileName,
+                                     API::Run &run) {
   std::string str;
   std::string propname;
   std::map<std::string, std::unique_ptr<Kernel::TimeSeriesProperty<double>>>

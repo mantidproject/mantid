@@ -311,7 +311,7 @@ void LoadRaw3::exec() {
  */
 void LoadRaw3::excludeMonitors(FILE *file, const int &period,
                                const std::vector<specnum_t> &monitorList,
-                               DataObjects::Workspace2D_sptr ws_sptr) {
+                               const DataObjects::Workspace2D_sptr &ws_sptr) {
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
   auto histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
@@ -358,7 +358,7 @@ void LoadRaw3::excludeMonitors(FILE *file, const int &period,
  *@param ws_sptr :: shared pointer to workspace
  */
 void LoadRaw3::includeMonitors(FILE *file, const int64_t &period,
-                               DataObjects::Workspace2D_sptr ws_sptr) {
+                               const DataObjects::Workspace2D_sptr &ws_sptr) {
 
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
@@ -404,8 +404,8 @@ void LoadRaw3::includeMonitors(FILE *file, const int64_t &period,
 
 void LoadRaw3::separateMonitors(FILE *file, const int64_t &period,
                                 const std::vector<specnum_t> &monitorList,
-                                DataObjects::Workspace2D_sptr ws_sptr,
-                                DataObjects::Workspace2D_sptr mws_sptr) {
+                                const DataObjects::Workspace2D_sptr &ws_sptr,
+                                const DataObjects::Workspace2D_sptr &mws_sptr) {
   int64_t histCurrent = -1;
   int64_t wsIndex = 0;
   int64_t mwsIndex = 0;

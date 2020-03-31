@@ -28,6 +28,11 @@ namespace API {
  */
 using AlgorithmID = void *;
 
+/// The current state of the algorithm object
+enum class ExecutionState { Uninitialized, Initialized, Running, Finished };
+/// The validity of the results of the algorithm object
+enum class ResultState { NotFinished, Failed, Success };
+
 /**
  IAlgorithm is the interface implemented by the Algorithm base class.
  Concrete algorithms, derived from the Algorithm base class are controlled
@@ -109,9 +114,15 @@ public:
   /// Execute as a Child Algorithm, with try/catch
   virtual void executeAsChildAlg() = 0;
 
+  /// Gets the current execution state
+  virtual ExecutionState executionState() const = 0;
+
+  /// Gets the currnet result State
+  virtual ResultState resultState() const = 0;
+
   /// Check whether the algorithm is initialized properly
   virtual bool isInitialized() const = 0;
-  /// Check whether the algorithm has already been executed
+  /// Check whether the algorithm has been executed sucessfully
   virtual bool isExecuted() const = 0;
 
   /// Raises the cancel flag. interuption_point() method if called inside exec()

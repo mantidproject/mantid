@@ -30,7 +30,7 @@ class LayerDialog : public QDialog {
   Q_OBJECT
 
 public:
-  LayerDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  LayerDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
   void setMultiLayer(MultiLayer *g);
 
 protected slots:

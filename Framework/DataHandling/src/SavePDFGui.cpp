@@ -92,7 +92,7 @@ void SavePDFGui::exec() {
 }
 
 void SavePDFGui::writeMetaData(std::ofstream &out,
-                               API::MatrixWorkspace_const_sptr inputWS) {
+                               const API::MatrixWorkspace_const_sptr &inputWS) {
   out << "#Comment: neutron";
   auto run = inputWS->run();
   if (run.hasProperty("Qmin")) {
@@ -120,7 +120,7 @@ void SavePDFGui::writeMetaData(std::ofstream &out,
 }
 
 void SavePDFGui::writeWSData(std::ofstream &out,
-                             API::MatrixWorkspace_const_sptr inputWS) {
+                             const API::MatrixWorkspace_const_sptr &inputWS) {
   const auto &x = inputWS->points(0);
   const auto &y = inputWS->y(0);
   const auto &dy = inputWS->e(0);

@@ -33,12 +33,13 @@ public:
   void test_Initialized_Function_Has_Expected_Parameters_In_Right_Order() {
     Mantid::API::IFunction_sptr profile = createFunction();
     static const size_t nparams(3);
-    const char *expectedParams[nparams] = {"Mass", "Width", "Intensity"};
 
     auto currentNames = profile->getParameterNames();
     const size_t nnames = currentNames.size();
     TS_ASSERT_EQUALS(nparams, nnames);
+
     if (nnames == nparams) {
+      const char *expectedParams[nparams] = {"Mass", "Width", "Intensity"};
       for (size_t i = 0; i < nnames; ++i) {
         TS_ASSERT_EQUALS(expectedParams[i], currentNames[i]);
       }

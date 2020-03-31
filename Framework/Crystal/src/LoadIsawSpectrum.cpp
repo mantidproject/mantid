@@ -56,7 +56,6 @@ void LoadIsawSpectrum::exec() {
   const V3D pos = inst->getSource()->getPos() - samplePos;
   double l1 = pos.norm();
 
-  std::vector<double> spec(11);
   std::string STRING;
   std::ifstream infile;
   std::string spectraFile = getPropertyValue("SpectraFile");

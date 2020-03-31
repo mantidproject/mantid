@@ -141,8 +141,9 @@ inline double fixZero(const double value) {
  * @param wksp The workspace to modify.
  * @param prog The progress.
  */
-void ResetNegatives::pushMinimum(MatrixWorkspace_const_sptr minWS,
-                                 MatrixWorkspace_sptr wksp, Progress &prog) {
+void ResetNegatives::pushMinimum(const MatrixWorkspace_const_sptr &minWS,
+                                 const MatrixWorkspace_sptr &wksp,
+                                 Progress &prog) {
   int64_t nHist = minWS->getNumberHistograms();
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp, *minWS))
   for (int64_t i = 0; i < nHist; i++) {
@@ -151,9 +152,9 @@ void ResetNegatives::pushMinimum(MatrixWorkspace_const_sptr minWS,
     if (minValue <= 0) {
       minValue *= -1.;
       auto &y = wksp->mutableY(i);
-      for (double &value : y) {
-        value = fixZero(value + minValue);
-      }
+      std::transform(y.begin(), y.end(), y.begin(), [minValue](double value) {
+        return fixZero(value + minValue);
+      });
     }
     prog.report();
     PARALLEL_END_INTERUPT_REGION
@@ -171,9 +172,9 @@ void ResetNegatives::pushMinimum(MatrixWorkspace_const_sptr minWS,
  * @param wksp The workspace to modify.
  * @param prog The progress.
  */
-void ResetNegatives::changeNegatives(MatrixWorkspace_const_sptr minWS,
+void ResetNegatives::changeNegatives(const MatrixWorkspace_const_sptr &minWS,
                                      const double spectrumNegativeValues,
-                                     MatrixWorkspace_sptr wksp,
+                                     const MatrixWorkspace_sptr &wksp,
                                      Progress &prog) {
   int64_t nHist = wksp->getNumberHistograms();
   PARALLEL_FOR_IF(Kernel::threadSafe(*minWS, *wksp))

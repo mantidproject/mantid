@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as ms
@@ -15,8 +14,6 @@ import copy
 import numpy as np
 import os
 import re
-import six
-
 RUN_PROP = "Filename"
 WKSP_PROP = "OutputWorkspace"
 MODE_PROP = "Mode"
@@ -396,7 +393,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """Given a string containing either a filename/partial filename or run number find the correct
         file prefix"""
         vesuvio = config.getInstrument("VESUVIO")
-        if isinstance(run_or_filename, six.integer_types):
+        if isinstance(run_or_filename, int):
             run_no = run_or_filename
             return vesuvio.filePrefix(int(run_no)) + str(run_or_filename)
         else:

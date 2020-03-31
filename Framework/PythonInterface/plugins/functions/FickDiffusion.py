@@ -10,7 +10,6 @@
 @date December 05, 2013
 '''
 
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import IFunction1D, FunctionFactory
 
 

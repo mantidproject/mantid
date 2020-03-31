@@ -72,8 +72,8 @@ protected:
                           API::MatrixWorkspace_sptr &whiteBeam2,
                           double &variation, int &minSpec, int &maxSpec);
   /// Apply the detector test criterion
-  int doDetectorTests(API::MatrixWorkspace_const_sptr counts1,
-                      API::MatrixWorkspace_const_sptr counts2,
+  int doDetectorTests(const API::MatrixWorkspace_const_sptr &counts1,
+                      const API::MatrixWorkspace_const_sptr &counts2,
                       const double average, double variation);
 
 private:

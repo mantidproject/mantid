@@ -369,7 +369,7 @@ void AddSampleLog::setTimeSeriesData(Run &run_obj,
  * @return
  */
 std::vector<Types::Core::DateAndTime>
-AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
+AddSampleLog::getTimes(const API::MatrixWorkspace_const_sptr &dataws,
                        int workspace_index, bool is_epoch, bool is_second,
                        API::Run &run_obj) {
   // get run start time
@@ -421,7 +421,7 @@ Types::Core::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
  * @return
  */
 std::vector<double>
-AddSampleLog::getDblValues(API::MatrixWorkspace_const_sptr dataws,
+AddSampleLog::getDblValues(const API::MatrixWorkspace_const_sptr &dataws,
                            int workspace_index) {
   std::vector<double> valuevec;
   size_t vecsize = dataws->readY(workspace_index).size();
@@ -439,7 +439,7 @@ AddSampleLog::getDblValues(API::MatrixWorkspace_const_sptr dataws,
  * @return
  */
 std::vector<int>
-AddSampleLog::getIntValues(API::MatrixWorkspace_const_sptr dataws,
+AddSampleLog::getIntValues(const API::MatrixWorkspace_const_sptr &dataws,
                            int workspace_index) {
   std::vector<int> valuevec;
   size_t vecsize = dataws->readY(workspace_index).size();
@@ -455,7 +455,7 @@ AddSampleLog::getIntValues(API::MatrixWorkspace_const_sptr dataws,
  * @param epochtime
  * @param timeunit
  */
-void AddSampleLog::getMetaData(API::MatrixWorkspace_const_sptr dataws,
+void AddSampleLog::getMetaData(const API::MatrixWorkspace_const_sptr &dataws,
                                bool &epochtime, std::string &timeunit) {
   bool auto_meta = getProperty("AutoMetaData");
   if (auto_meta) {

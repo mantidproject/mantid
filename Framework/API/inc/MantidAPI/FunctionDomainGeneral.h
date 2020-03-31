@@ -25,7 +25,7 @@ public:
   /// Get the number of columns
   size_t columnCount() const;
   /// Add a new column. All columns must have the same size.
-  void addColumn(boost::shared_ptr<Column> column);
+  void addColumn(const boost::shared_ptr<Column> &column);
   /// Get i-th column
   boost::shared_ptr<Column> getColumn(size_t i) const;
 

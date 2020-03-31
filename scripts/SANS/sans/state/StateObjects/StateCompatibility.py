@@ -12,10 +12,7 @@
    that we are dealing with a bug
 """
 
-from __future__ import (absolute_import, division, print_function)
 import copy
-
-from six import with_metaclass
 
 from sans.state.JsonSerializable import JsonSerializable
 
@@ -28,7 +25,7 @@ from sans.common.enums import SANSFacility
 from sans.state.automatic_setters import automatic_setters
 
 
-class StateCompatibility(with_metaclass(JsonSerializable)):
+class StateCompatibility(metaclass=JsonSerializable):
     def __init__(self):
         super(StateCompatibility, self).__init__()
         self.use_compatibility_mode = False  # : Bool

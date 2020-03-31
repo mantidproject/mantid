@@ -10,8 +10,6 @@
     , wavelength adjustment and pixel-and-wavelength adjustment workspaces.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
                         WorkspaceUnitValidator)
 from mantid.kernel import (Direction, StringListValidator, CompositeValidator)

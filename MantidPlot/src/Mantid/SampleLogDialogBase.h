@@ -47,7 +47,7 @@ class SampleLogDialogBase : public QDialog {
 public:
   /// Constructor
   SampleLogDialogBase(const QString &wsname, QWidget *parentContainer,
-                      Qt::WFlags flags = nullptr,
+                      const Qt::WFlags &flags = nullptr,
                       size_t experimentInfoIndex = 0);
 
   /// Virtual Destructor for derived classes

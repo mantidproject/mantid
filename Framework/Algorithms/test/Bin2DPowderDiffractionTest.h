@@ -284,7 +284,7 @@ private:
   }
 
   // creates test file with bins description
-  void createBinFile(std::string fname) {
+  void createBinFile(const std::string &fname) {
     std::ofstream binfile;
     binfile.open(fname);
     binfile << "#dp_min #dp_max\n";

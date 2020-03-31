@@ -746,7 +746,7 @@ void MDNorm::createNormalizationWS(
  */
 void MDNorm::validateBinningForTemporaryDataWorkspace(
     const std::map<std::string, std::string> &parameters,
-    const Mantid::API::IMDHistoWorkspace_sptr tempDataWS) {
+    const Mantid::API::IMDHistoWorkspace_sptr &tempDataWS) {
 
   // parse the paramters map and get extents from tempDataWS
   const std::string numBinsStr = parameters.at("OutputBins");
@@ -921,8 +921,8 @@ void MDNorm::validateBinningForTemporaryDataWorkspace(
  * All slicing algorithm properties are passed along
  * @return MDHistoWorkspace as a result of the binning
  */
-DataObjects::MDHistoWorkspace_sptr
-MDNorm::binInputWS(std::vector<Geometry::SymmetryOperation> symmetryOps) {
+DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
+    const std::vector<Geometry::SymmetryOperation> &symmetryOps) {
   Mantid::API::IMDHistoWorkspace_sptr tempDataWS =
       this->getProperty("TemporaryDataWorkspace");
   Mantid::API::Workspace_sptr outputWS;
@@ -1142,7 +1142,7 @@ void MDNorm::cacheDimensionXValues() {
  * @param soIndex - the index of symmetry operation (for progress purposes)
  */
 void MDNorm::calculateNormalization(const std::vector<coord_t> &otherValues,
-                                    Geometry::SymmetryOperation so,
+                                    const Geometry::SymmetryOperation &so,
                                     uint16_t expInfoIndex, size_t soIndex) {
   const auto &currentExptInfo = *(m_inputWS->getExperimentInfo(expInfoIndex));
   std::vector<double> lowValues, highValues;
@@ -1330,7 +1330,7 @@ m_accumulate = true;
  */
 void MDNorm::calculateIntersections(
     std::vector<std::array<double, 4>> &intersections, const double theta,
-    const double phi, Kernel::DblMatrix transform, double lowvalue,
+    const double phi, const Kernel::DblMatrix &transform, double lowvalue,
     double highvalue) {
   V3D qout(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta)),
       qin(0., 0., 1);

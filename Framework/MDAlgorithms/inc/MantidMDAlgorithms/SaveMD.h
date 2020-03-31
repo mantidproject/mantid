@@ -46,7 +46,7 @@ private:
   void doSaveEvents(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Save the MDHistoWorkspace.
-  void doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws);
+  void doSaveHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws);
 
   /// Save all the affine matricies
   void saveAffineTransformMatricies(::NeXus::File *const file,

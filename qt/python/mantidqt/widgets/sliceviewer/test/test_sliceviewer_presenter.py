@@ -7,14 +7,12 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 import matplotlib
 matplotlib.use('Agg') # noqa: E402
 import unittest
 
 import mantid.api
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
 from mantidqt.widgets.sliceviewer.view import SliceViewerView

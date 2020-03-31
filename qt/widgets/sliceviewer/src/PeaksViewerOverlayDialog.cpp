@@ -62,7 +62,7 @@ QString formattedPercentageValue(double fraction) {
  * @param parent : Parent widget
  */
 PeaksViewerOverlayDialog::PeaksViewerOverlayDialog(
-    PeaksPresenter_sptr peaksPresenter, QWidget *parent)
+    const PeaksPresenter_sptr &peaksPresenter, QWidget *parent)
     : QDialog(parent), ui(new Ui::PeaksViewerOverlayDialog),
       m_peaksPresenter(peaksPresenter) {
   ui->setupUi(this);

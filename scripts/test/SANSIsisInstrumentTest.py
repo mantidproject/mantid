@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 from mantid.simpleapi import *
@@ -40,6 +39,7 @@ class SANSIsisInstrumentTest(unittest.TestCase):
         # Assert
         self.assertEqual(None, start_Tof)
         self.assertEqual(None, end_Tof)
+
 
 class TestParameterMapModifications(unittest.TestCase):
     def create_sample_workspace(self, ws_name, types, values, names):

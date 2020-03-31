@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 from copy import copy
 from matplotlib.container import ErrorbarContainer
 
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 from mantid.simpleapi import CreateWorkspace
 from workbench.plotting.plotscriptgenerator.lines import (_get_plot_command_kwargs_from_line2d,
                                                           _get_errorbar_specific_plot_kwargs,

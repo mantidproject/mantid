@@ -196,7 +196,7 @@ JoinISISPolarizationEfficiencies::interpolateWorkspaces(
 
 MatrixWorkspace_sptr
 JoinISISPolarizationEfficiencies::interpolatePointDataWorkspace(
-    MatrixWorkspace_sptr ws, size_t const maxSize) {
+    const MatrixWorkspace_sptr &ws, size_t const maxSize) {
   auto const &x = ws->x(0);
   auto const startX = x.front();
   auto const endX = x.back();
@@ -213,7 +213,7 @@ JoinISISPolarizationEfficiencies::interpolatePointDataWorkspace(
 
 MatrixWorkspace_sptr
 JoinISISPolarizationEfficiencies::interpolateHistogramWorkspace(
-    MatrixWorkspace_sptr ws, size_t const maxSize) {
+    const MatrixWorkspace_sptr &ws, size_t const maxSize) {
   ws->setDistribution(true);
   auto const &x = ws->x(0);
   auto const dX = (x.back() - x.front()) / double(maxSize);

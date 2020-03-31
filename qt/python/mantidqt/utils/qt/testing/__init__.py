@@ -10,8 +10,6 @@
 # flake8: noqa
 """A selection of utility functions related to testing of Qt-based GUI elements.
 """
-from __future__ import absolute_import
-
 from qtpy.QtCore import Qt, QObject
 
 from .application import get_application

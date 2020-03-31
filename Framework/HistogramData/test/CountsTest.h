@@ -97,7 +97,6 @@ public:
     const BinEdges edges{1.0, 2.0};
     auto old_ptr = &frequencies[0];
     const Counts counts(std::move(frequencies), edges);
-    TS_ASSERT(!frequencies);
     TS_ASSERT_EQUALS(&counts[0], old_ptr);
   }
 
@@ -107,8 +106,6 @@ public:
     const BinEdges edges{1.0, 2.0};
     auto old_ptr = &frequencies[0];
     const Counts counts(std::move(frequencies), edges);
-    // Moved from frequencies...
-    TS_ASSERT(!frequencies);
     // ... but made a copy of data, since "copy" also held a reference.
     TS_ASSERT_DIFFERS(&counts[0], old_ptr);
   }

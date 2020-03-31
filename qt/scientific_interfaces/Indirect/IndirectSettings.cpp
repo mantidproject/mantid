@@ -54,7 +54,7 @@ void IndirectSettings::otherUserSubWindowCreated(
 }
 
 void IndirectSettings::connectIndirectInterface(
-    QPointer<UserSubWindow> window) {
+    const QPointer<UserSubWindow> &window) {
   if (auto indirectInterface = dynamic_cast<IndirectInterface *>(window.data()))
     connect(m_presenter.get(), SIGNAL(applySettings()), indirectInterface,
             SLOT(applySettings()));

@@ -381,9 +381,9 @@ void He3TubeEfficiency::logErrors() const {
  * @param idet :: the current detector
  * @return the value of the detector property
  */
-double He3TubeEfficiency::getParameter(std::string wsPropName,
+double He3TubeEfficiency::getParameter(const std::string &wsPropName,
                                        std::size_t currentIndex,
-                                       std::string detPropName,
+                                       const std::string &detPropName,
                                        const Geometry::IDetector &idet) {
   std::vector<double> wsProp = this->getProperty(wsPropName);
 

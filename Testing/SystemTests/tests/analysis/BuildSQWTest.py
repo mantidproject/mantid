@@ -13,7 +13,6 @@
     the result file that is ~30Gb. The files are not included with the standard
     repository & required to be accessible from any machine that wishes to run the test.
 """
-from __future__ import (absolute_import, division, print_function)
 import systemtesting
 import os
 from mantid.simpleapi import *

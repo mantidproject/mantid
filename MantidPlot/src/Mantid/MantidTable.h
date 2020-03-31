@@ -17,7 +17,7 @@
 class MantidTable : public Table, public MantidQt::API::WorkspaceObserver {
   Q_OBJECT
 public:
-  MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws,
+  MantidTable(ScriptingEnv *env, const Mantid::API::ITableWorkspace_sptr &ws,
               const QString &label, ApplicationWindow *parent,
               bool transpose = false);
 

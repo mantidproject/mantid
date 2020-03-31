@@ -72,7 +72,6 @@ public:
     // specify name of file to save workspace to
     outputFile = "testSaveLoadrawCSP.nxs";
     remove(outputFile.c_str());
-    std::string dataName = "spectra";
     std::string title = "Workspace from Loadraw CSP78173";
     saveNexusP.setPropertyValue("FileName", outputFile);
     outputFile = saveNexusP.getPropertyValue("Filename");

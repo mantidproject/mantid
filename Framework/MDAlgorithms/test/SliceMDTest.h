@@ -144,7 +144,7 @@ public:
                      const uint64_t expectedNumPoints,
                      const size_t expectedNumDims, bool willFail,
                      const std::string &OutputFilename,
-                     IMDEventWorkspace_sptr in_ws) {
+                     const IMDEventWorkspace_sptr &in_ws) {
     SliceMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -210,7 +210,7 @@ public:
                     const std::string &name3, const std::string &name4,
                     const uint64_t expectedNumPoints,
                     const size_t expectedNumDims, bool willFail = false,
-                    std::string OutputFilename = "") {
+                    const std::string &OutputFilename = "") {
 
     Mantid::Geometry::QSample frame;
     IMDEventWorkspace_sptr in_ws =

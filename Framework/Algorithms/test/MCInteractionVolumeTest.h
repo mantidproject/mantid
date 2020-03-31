@@ -358,7 +358,8 @@ private:
   Mantid::Kernel::Logger g_log{"MCInteractionVolumeTest"};
 
   void TestGeneratedTracks(const V3D startPos, const V3D endPos,
-                           const Track beforeScatter, const Track afterScatter,
+                           const Track &beforeScatter,
+                           const Track &afterScatter,
                            const Mantid::Geometry::IObject &shape) {
     // check the generated tracks share the same start point (the scatter point)
     TS_ASSERT_EQUALS(beforeScatter.startPoint(), afterScatter.startPoint());

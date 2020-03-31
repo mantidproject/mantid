@@ -20,7 +20,7 @@ import tempfile  # noqa
 
 from mantid.api import AnalysisDataService as ADS  # noqa
 from mantid.simpleapi import CreateSampleWorkspace  # noqa
-from mantid.py3compat import mock  # noqa
+from unittest import mock  # noqa
 from mantidqt.project import projectloader, projectsaver  # noqa
 from mantidqt.utils.qt.testing import start_qapplication  # noqa
 

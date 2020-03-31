@@ -240,7 +240,8 @@ QPointF LineOverlay::snap(QPointF original) const {
 
 //----------------------------------------------------------------------------------------------
 /** Draw a handle (for dragging) at the given plot coordinates */
-QRect LineOverlay::drawHandle(QPainter &painter, QPointF coords, QColor brush) {
+QRect LineOverlay::drawHandle(QPainter &painter, QPointF coords,
+                              const QColor &brush) {
   int size = 8;
   QPoint center = transform(coords);
   QRect marker(center.x() - size / 2, center.y() - size / 2, size, size);

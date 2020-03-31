@@ -236,7 +236,7 @@ protected:
   SpaceGroup_const_sptr getPrototype(const std::string &hmSymbol);
   void subscribe(const AbstractSpaceGroupGenerator_sptr &generator);
   SpaceGroup_const_sptr
-  constructFromPrototype(const SpaceGroup_const_sptr prototype) const;
+  constructFromPrototype(const SpaceGroup_const_sptr &prototype) const;
 
   void fillPointGroupMap();
 

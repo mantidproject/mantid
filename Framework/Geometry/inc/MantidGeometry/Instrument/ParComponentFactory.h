@@ -44,7 +44,8 @@ public:
   /// Create a parameterized component from the given base component and
   /// ParameterMap
   static boost::shared_ptr<IComponent>
-  create(boost::shared_ptr<const IComponent> base, const ParameterMap *map);
+  create(const boost::shared_ptr<const IComponent> &base,
+         const ParameterMap *map);
 };
 
 } // Namespace Geometry

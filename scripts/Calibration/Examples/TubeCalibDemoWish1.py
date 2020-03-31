@@ -12,8 +12,6 @@
 # We base the ideal tube on one tube of this door.
 #
 
-from __future__ import absolute_import, division, print_function
-
 import tube
 reload(tube) # noqa
 from tube_spec import TubeSpec

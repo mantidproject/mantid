@@ -12,7 +12,6 @@
 # was original used in connection with creating usage examples for algorithms
 # and creating an algorithm list for each developer to have a go at
 
-from __future__ import (absolute_import, division, print_function)
 import os
 
 import subprocess

@@ -544,7 +544,7 @@ private:
   }
 
   MatrixWorkspace_sptr
-  createInputWithDetectors(std::string workspaceType) const {
+  createInputWithDetectors(const std::string &workspaceType) const {
     MatrixWorkspace_sptr ws;
 
     // Set the type of underlying workspace

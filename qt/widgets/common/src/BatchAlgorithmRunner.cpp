@@ -4,6 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -20,7 +22,7 @@ namespace API {
 
 ConfiguredAlgorithm::ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
                                          AlgorithmRuntimeProps properties)
-    : m_algorithm(algorithm), m_properties(std::move(properties)) {}
+    : m_algorithm(std::move(algorithm)), m_properties(std::move(properties)) {}
 
 ConfiguredAlgorithm::~ConfiguredAlgorithm() {}
 
@@ -82,8 +84,8 @@ void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure) {
  * @param props Optional map of property name to property values to be set just
  *before execution (mainly intended for input and inout workspace names)
  */
-void BatchAlgorithmRunner::addAlgorithm(IAlgorithm_sptr algo,
-                                        AlgorithmRuntimeProps props) {
+void BatchAlgorithmRunner::addAlgorithm(const IAlgorithm_sptr &algo,
+                                        const AlgorithmRuntimeProps &props) {
   m_algorithms.emplace_back(std::make_unique<ConfiguredAlgorithm>(algo, props));
 
   g_log.debug() << "Added algorithm \""
@@ -216,7 +218,8 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(
  * @param algorithm Algorithm and properties to assign to it
  * @return False if algorithm execution failed
  */
-bool BatchAlgorithmRunner::executeAlgo(IConfiguredAlgorithm_sptr algorithm) {
+bool BatchAlgorithmRunner::executeAlgo(
+    const IConfiguredAlgorithm_sptr &algorithm) {
   try {
     m_currentAlgorithm = algorithm->algorithm();
 

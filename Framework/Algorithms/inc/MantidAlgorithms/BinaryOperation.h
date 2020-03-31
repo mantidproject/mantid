@@ -193,7 +193,7 @@ protected:
     (void)ans;
   };
 
-  OperandType getOperandType(const API::MatrixWorkspace_const_sptr ws);
+  OperandType getOperandType(const API::MatrixWorkspace_const_sptr &ws);
 
   virtual void checkRequirements();
 
@@ -255,8 +255,8 @@ private:
   void doSingleColumn();
   void do2D(bool mismatchedSpectra);
 
-  void propagateBinMasks(const API::MatrixWorkspace_const_sptr rhs,
-                         API::MatrixWorkspace_sptr out);
+  void propagateBinMasks(const API::MatrixWorkspace_const_sptr &rhs,
+                         const API::MatrixWorkspace_sptr &out);
   /// Progress reporting
   std::unique_ptr<API::Progress> m_progress = nullptr;
 };

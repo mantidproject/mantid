@@ -103,7 +103,9 @@ void ConvertTableToMatrixWorkspaceDialog::fillColumnNames(
 /// Initialize the layout
 void ConvertTableToMatrixWorkspaceDialog::initLayout() {
   m_form.setupUi(this);
-  ((QVBoxLayout *)this->layout())->addLayout(createDefaultButtonLayout());
+
+  static_cast<QVBoxLayout *>(this->layout())
+      ->addLayout(createDefaultButtonLayout());
   tie(m_form.cbInputWorkspace, "InputWorkspace", m_form.gridLayout);
   tie(m_form.leOutputWorkspace, "OutputWorkspace", m_form.gridLayout);
   tie(m_form.cbColumnX, "ColumnX", m_form.gridLayout);

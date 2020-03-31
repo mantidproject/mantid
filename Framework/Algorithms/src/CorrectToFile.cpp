@@ -186,8 +186,8 @@ MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string &corrFile) {
  *  @throw NotFoundError if requested algorithm requested doesn't exist
  *  @throw runtime_error if algorithm encounters an error
  */
-void CorrectToFile::doWkspAlgebra(API::MatrixWorkspace_sptr lhs,
-                                  API::MatrixWorkspace_sptr rhs,
+void CorrectToFile::doWkspAlgebra(const API::MatrixWorkspace_sptr &lhs,
+                                  const API::MatrixWorkspace_sptr &rhs,
                                   const std::string &algName,
                                   API::MatrixWorkspace_sptr &result) {
   g_log.information() << "Initalising the algorithm " << algName << '\n';

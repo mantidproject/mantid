@@ -473,7 +473,7 @@ bool SaveAscii2::findElementInUnorderedStringVector(
   return std::find(vector.cbegin(), vector.cend(), toFind) != vector.cend();
 }
 
-void SaveAscii2::writeTableWorkspace(ITableWorkspace_const_sptr tws,
+void SaveAscii2::writeTableWorkspace(const ITableWorkspace_const_sptr &tws,
                                      const std::string &filename,
                                      bool appendToFile, bool writeHeader,
                                      int prec, bool scientific,

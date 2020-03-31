@@ -1351,7 +1351,7 @@ private:
     }
   }
 
-  void cleanupGroup(const WorkspaceGroup_sptr group) {
+  void cleanupGroup(const WorkspaceGroup_sptr &group) {
     // group->deepRemoveAll();
     const std::string name = group->getName();
     Mantid::API::AnalysisDataService::Instance().deepRemoveGroup(name);

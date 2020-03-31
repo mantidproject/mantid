@@ -19,6 +19,7 @@
 #include <QMetaType>
 #include <deque>
 #include <mutex>
+#include <utility>
 
 namespace MantidQt {
 namespace API {
@@ -70,7 +71,7 @@ public:
 class AlgorithmCompleteNotification : public Poco::Notification {
 public:
   AlgorithmCompleteNotification(IConfiguredAlgorithm_sptr algorithm)
-      : Poco::Notification(), m_algorithm(algorithm) {}
+      : Poco::Notification(), m_algorithm(std::move(algorithm)) {}
 
   IConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
 
@@ -81,7 +82,7 @@ private:
 class AlgorithmStartedNotification : public Poco::Notification {
 public:
   AlgorithmStartedNotification(IConfiguredAlgorithm_sptr algorithm)
-      : Poco::Notification(), m_algorithm(algorithm) {}
+      : Poco::Notification(), m_algorithm(std::move(algorithm)) {}
 
   IConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
 
@@ -93,7 +94,7 @@ class AlgorithmErrorNotification : public Poco::Notification {
 public:
   AlgorithmErrorNotification(IConfiguredAlgorithm_sptr algorithm,
                              std::string const &errorMessage)
-      : Poco::Notification(), m_algorithm(algorithm),
+      : Poco::Notification(), m_algorithm(std::move(algorithm)),
         m_errorMessage(errorMessage) {}
 
   IConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
@@ -120,8 +121,9 @@ public:
   ~BatchAlgorithmRunner() override;
 
   /// Adds an algorithm to the execution queue
-  void addAlgorithm(Mantid::API::IAlgorithm_sptr algo,
-                    AlgorithmRuntimeProps props = AlgorithmRuntimeProps());
+  void
+  addAlgorithm(const Mantid::API::IAlgorithm_sptr &algo,
+               const AlgorithmRuntimeProps &props = AlgorithmRuntimeProps());
   void setQueue(std::deque<IConfiguredAlgorithm_sptr> algorithm);
   /// Clears all algorithms from queue
   void clearQueue();
@@ -151,7 +153,7 @@ private:
   /// Implementation of algorithm runner
   bool executeBatchAsyncImpl(const Poco::Void & /*unused*/);
   /// Sets up and executes an algorithm
-  bool executeAlgo(IConfiguredAlgorithm_sptr algorithm);
+  bool executeAlgo(const IConfiguredAlgorithm_sptr &algorithm);
 
   /// Handlers for notifications
   void handleBatchComplete(const Poco::AutoPtr<BatchCompleteNotification> &pNf);

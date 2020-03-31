@@ -54,8 +54,8 @@ void ChangeBinOffset::exec() {
     this->for_each<Indices::FromProperty>(
         *outputW, std::make_tuple(MatrixWorkspaceAccess::x),
         [offset](std::vector<double> &dataX) {
-          for (auto &x : dataX)
-            x += offset;
+          std::transform(dataX.begin(), dataX.end(), dataX.begin(),
+                         [offset](double x) { return x + offset; });
         });
   }
 }

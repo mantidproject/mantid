@@ -43,14 +43,16 @@ private:
   /// Execution code
   void exec() override;
 
-  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
-                    Mantid::API::IMDHistoWorkspace_sptr outws);
-  void sumData(Mantid::API::IMDHistoWorkspace_sptr inws,
-               Mantid::API::IMDHistoWorkspace_sptr outws, int *sourceDim,
+  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
+                    const Mantid::API::IMDHistoWorkspace_sptr &outws);
+  void sumData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
+               const Mantid::API::IMDHistoWorkspace_sptr &outws, int *sourceDim,
                int *targetDim, int targetDimCount, int dimNo, int start,
                int end, int currentDim);
 
-  double getValue(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
-  void putValue(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim, double val);
-  unsigned int calcIndex(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
+  double getValue(const Mantid::API::IMDHistoWorkspace_sptr &ws, int *dim);
+  void putValue(const Mantid::API::IMDHistoWorkspace_sptr &ws, int *dim,
+                double val);
+  unsigned int calcIndex(const Mantid::API::IMDHistoWorkspace_sptr &ws,
+                         int *dim);
 };

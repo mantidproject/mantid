@@ -10,6 +10,7 @@
 #include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -60,16 +61,16 @@ private:
   void exec() override;
 
   /// Reads first line of peaks file and returns first word of next line
-  std::string readHeader(Mantid::DataObjects::PeaksWorkspace_sptr outWS,
+  std::string readHeader(const Mantid::DataObjects::PeaksWorkspace_sptr &outWS,
                          std::ifstream &in, double &T0);
 
   /// Read a single peak from peaks file
-  DataObjects::Peak readPeak(DataObjects::PeaksWorkspace_sptr outWS,
+  DataObjects::Peak readPeak(const DataObjects::PeaksWorkspace_sptr &outWS,
                              std::string &lastStr, std::ifstream &in,
                              int &seqNum, std::string bankName, double qSign);
 
-  int findPixelID(Geometry::Instrument_const_sptr inst, std::string bankName,
-                  int col, int row);
+  int findPixelID(const Geometry::Instrument_const_sptr &inst,
+                  const std::string &bankName, int col, int row);
 
   /// Read the header of a peak block section, returns first word of next line
   std::string readPeakBlockHeader(std::string lastStr, std::ifstream &in,
@@ -77,20 +78,20 @@ private:
                                   double &phi, double &omega, double &monCount);
 
   /// Append peaks from given file to given workspace
-  void appendFile(Mantid::DataObjects::PeaksWorkspace_sptr outWS,
-                  std::string filename);
+  void appendFile(const Mantid::DataObjects::PeaksWorkspace_sptr &outWS,
+                  const std::string &filename);
 
   /// Compare number of peaks in given file to given workspace
   /// Throws std::length_error on mismatch
-  void checkNumberPeaks(Mantid::DataObjects::PeaksWorkspace_sptr outWS,
-                        std::string filename);
+  void checkNumberPeaks(const Mantid::DataObjects::PeaksWorkspace_sptr &outWS,
+                        const std::string &filename);
 
   /// Local cache of bank IComponents used in file
   std::map<std::string, boost::shared_ptr<const Geometry::IComponent>> m_banks;
 
   /// Retrieve cached bank (or load and cache for next time)
   boost::shared_ptr<const Geometry::IComponent> getCachedBankByName(
-      std::string bankname,
+      const std::string &bankname,
       const boost::shared_ptr<const Geometry::Instrument> &inst);
 };
 

@@ -14,6 +14,7 @@
 #include <QtOpenGL>
 
 #include <cfloat>
+#include <utility>
 
 using namespace MantidQt::CustomDialogs;
 
@@ -50,7 +51,7 @@ MantidGLWidget::~MantidGLWidget() { makeCurrent(); }
  */
 void MantidGLWidget::setDisplayObject(
     boost::shared_ptr<Mantid::Geometry::IObject> object) {
-  m_display_object = object;
+  m_display_object = std::move(object);
   m_x_rot = 0.0;
   m_y_rot = 0.0;
   m_z_rot = 0.0;

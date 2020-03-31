@@ -216,9 +216,10 @@ signals:
   void colorMapChanged() const;
 
 private:
-  void setUpWorkspace(
-      boost::shared_ptr<const Mantid::API::MatrixWorkspace> sharedWorkspace,
-      double scaleMin, double scaleMax);
+  void
+  setUpWorkspace(const boost::shared_ptr<const Mantid::API::MatrixWorkspace>
+                     &sharedWorkspace,
+                 double scaleMin, double scaleMax);
   void setupPhysicalInstrumentIfExists();
   void resetColors();
   void loadSettings();

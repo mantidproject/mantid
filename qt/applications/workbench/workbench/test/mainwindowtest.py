@@ -10,11 +10,9 @@
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import unittest
 
-from mantid.py3compat.mock import patch
+from unittest.mock import patch
 from workbench.app.mainwindow import MainWindow
 
 

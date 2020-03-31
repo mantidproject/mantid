@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -51,13 +52,13 @@ private:
   size_t getCells(std::string line, std::vector<std::string> &cols,
                   size_t expectedCommas, bool isOldTBL) const;
   /// count the number of commas in the line
-  size_t countCommas(std::string line) const;
+  size_t countCommas(const std::string &line) const;
   /// find all pairs of quotes in the line
-  size_t findQuotePairs(std::string line,
+  size_t findQuotePairs(const std::string &line,
                         std::vector<std::vector<size_t>> &quoteBounds) const;
   /// Parse more complex CSV, used when the data involves commas in the data and
   /// quoted values
-  void csvParse(std::string line, std::vector<std::string> &cols,
+  void csvParse(const std::string &line, std::vector<std::string> &cols,
                 std::vector<std::vector<size_t>> &quoteBounds,
                 size_t expectedCommas) const;
 };

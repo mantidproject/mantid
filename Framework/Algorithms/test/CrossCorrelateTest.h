@@ -161,7 +161,7 @@ private:
 
   // Run the algorithm and do some basic checks. Returns the output workspace.
   MatrixWorkspace_const_sptr
-  runAlgorithm(CrossCorrelate &alg, const MatrixWorkspace_const_sptr inWS) {
+  runAlgorithm(CrossCorrelate &alg, const MatrixWorkspace_const_sptr &inWS) {
     // run the algorithm
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());

@@ -62,9 +62,9 @@ public:
 
     std::ifstream file(tempFileName);
     std::string line;
-    int numLines = 0;
 
     if (file.is_open()) {
+      int numLines = 0;
       while (std::getline(file, line)) {
         numLines++;
       }

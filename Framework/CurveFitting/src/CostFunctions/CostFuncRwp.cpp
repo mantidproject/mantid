@@ -47,7 +47,7 @@ CostFuncRwp::getFitWeights(API::FunctionValues_sptr values) const {
 //----------------------------------------------------------------------------------------------
 /** Get weight of data point i(1/sigma)
  */
-double CostFuncRwp::getWeight(API::FunctionValues_sptr values, size_t i,
+double CostFuncRwp::getWeight(const API::FunctionValues_sptr &values, size_t i,
                               double sqrtW) const {
   return (values->getFitWeight(i) / sqrtW);
 }
@@ -55,7 +55,7 @@ double CostFuncRwp::getWeight(API::FunctionValues_sptr values, size_t i,
 //----------------------------------------------------------------------------------------------
 /** Get square root of normalization weight (W)
  */
-double CostFuncRwp::calSqrtW(API::FunctionValues_sptr values) const {
+double CostFuncRwp::calSqrtW(const API::FunctionValues_sptr &values) const {
   double weight = 0.0;
 
   // FIXME : This might give a wrong answer in case of multiple-domain

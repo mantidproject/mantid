@@ -17,7 +17,7 @@ namespace Mantid {
 namespace API {
 
 void GridDomain1D::initialize(double &startX, double &endX, size_t &n,
-                              const std::string scaling) {
+                              const std::string &scaling) {
   m_points.resize(n);
   m_points.front() = startX;
   m_points.back() = endX;

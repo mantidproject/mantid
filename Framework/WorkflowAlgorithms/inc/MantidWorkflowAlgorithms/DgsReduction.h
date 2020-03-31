@@ -32,12 +32,13 @@ public:
 private:
   void init() override;
   void exec() override;
-  API::Workspace_sptr loadInputData(const std::string prop,
+  API::Workspace_sptr loadInputData(const std::string &prop,
                                     const bool mustLoad = true);
-  API::MatrixWorkspace_sptr loadGroupingFile(const std::string prop);
+  API::MatrixWorkspace_sptr loadGroupingFile(const std::string &prop);
   API::MatrixWorkspace_sptr loadHardMask();
-  double getParameter(std::string algParam, API::MatrixWorkspace_sptr ws,
-                      std::string altParam);
+  double getParameter(const std::string &algParam,
+                      const API::MatrixWorkspace_sptr &ws,
+                      const std::string &altParam);
 
   boost::shared_ptr<Kernel::PropertyManager> reductionManager;
 };

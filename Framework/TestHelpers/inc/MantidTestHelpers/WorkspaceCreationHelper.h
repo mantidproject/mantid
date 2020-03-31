@@ -170,6 +170,13 @@ Mantid::DataObjects::Workspace2D_sptr
 create2DWorkspaceBinned(size_t nhist, size_t numVals, double x0 = 0.0,
                         double deltax = 1.0);
 
+/** Create a 2D workspace with this many point-histograms and bins.
+ * Filled with Y = 2.0 and E = M_SQRT2
+ */
+Mantid::DataObjects::Workspace2D_sptr
+create2DWorkspacePoints(size_t nhist, size_t numVals, double x0 = 0.0,
+                        double deltax = 1.0);
+
 /** Create a 2D workspace with this many histograms and bins. The bins are
  * assumed to be non-uniform and given by the input array
  * Filled with Y = 2.0 and E = sqrt(2.0)w
@@ -227,7 +234,7 @@ create2DWorkspaceFromFunction(fT yFunc, int nSpec, double x0, double x1,
 }
 
 /// Add random noise to the signalcreate2DWorkspaceWithFullInstrument
-void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise,
+void addNoise(const Mantid::API::MatrixWorkspace_sptr &ws, double noise,
               const double lower = -0.5, const double upper = 0.5);
 
 /// Create a test workspace with a fully defined instrument.
@@ -298,7 +305,8 @@ createWorkspaceSingleValue(double value);
 Mantid::DataObjects::WorkspaceSingleValue_sptr
 createWorkspaceSingleValueWithError(double value, double error);
 /** Perform some finalization on event workspace stuff */
-void eventWorkspace_Finalize(Mantid::DataObjects::EventWorkspace_sptr ew);
+void eventWorkspace_Finalize(
+    const Mantid::DataObjects::EventWorkspace_sptr &ew);
 /** Create event workspace with:
  * 500 pixels
  * 1000 histogrammed bins.
@@ -341,22 +349,23 @@ Mantid::API::MatrixWorkspace_sptr createGroupedWorkspace2DWithRingsAndBoxes(
     size_t RootOfNumHist = 10, int numBins = 10, double binDelta = 1.0);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataY(Mantid::API::MatrixWorkspace_const_sptr ws);
+void displayDataY(const Mantid::API::MatrixWorkspace_const_sptr &ws);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayData(Mantid::API::MatrixWorkspace_const_sptr ws);
+void displayData(const Mantid::API::MatrixWorkspace_const_sptr &ws);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataX(Mantid::API::MatrixWorkspace_const_sptr ws);
+void displayDataX(const Mantid::API::MatrixWorkspace_const_sptr &ws);
 // not strictly creating a workspace, but really helpful to see what one
 // contains
-void displayDataE(Mantid::API::MatrixWorkspace_const_sptr ws);
+void displayDataE(const Mantid::API::MatrixWorkspace_const_sptr &ws);
 
-void addTSPEntry(Mantid::API::Run &runInfo, std::string name, double val);
-void setOrientedLattice(Mantid::API::MatrixWorkspace_sptr ws, double a,
+void addTSPEntry(Mantid::API::Run &runInfo, const std::string &name,
+                 double val);
+void setOrientedLattice(const Mantid::API::MatrixWorkspace_sptr &ws, double a,
                         double b, double c);
-void setGoniometer(Mantid::API::MatrixWorkspace_sptr ws, double phi, double chi,
-                   double omega);
+void setGoniometer(const Mantid::API::MatrixWorkspace_sptr &ws, double phi,
+                   double chi, double omega);
 
 // create workspace which should be result of homering (transform to energy in
 // inelastic)
@@ -371,9 +380,9 @@ Mantid::API::MatrixWorkspace_sptr createProcessedInelasticWS(
     const std::vector<double> &azimutal, size_t numBins = 4, double Emin = -10,
     double Emax = 10, double Ei = 11);
 
-Mantid::DataObjects::EventWorkspace_sptr
-createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS,
-                      std::string wsname, Mantid::API::Algorithm *alg);
+Mantid::DataObjects::EventWorkspace_sptr createEventWorkspace3(
+    const Mantid::DataObjects::EventWorkspace_const_sptr &sourceWS,
+    const std::string &wsname, Mantid::API::Algorithm *alg);
 
 /// Function to create a fixed RebinnedOutput workspace
 Mantid::DataObjects::RebinnedOutput_sptr createRebinnedOutputWorkspace();
@@ -396,7 +405,8 @@ createPeaksWorkspace(const int numPeaks,
 /**Build table workspace with preprocessed detectors for existing workspace with
  * instrument */
 boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
-buildPreprocessedDetectorsWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
+buildPreprocessedDetectorsWorkspace(
+    const Mantid::API::MatrixWorkspace_sptr &ws);
 // create range of angular detectors positions
 void create2DAngles(std::vector<double> &L2, std::vector<double> &polar,
                     std::vector<double> &azim, size_t nPolar = 10,
@@ -433,7 +443,7 @@ create2DWorkspaceWithReflectometryInstrumentMultiDetector(
     const int nSpectra = 4, const int nBins = 20, const double deltaX = 5000.0);
 
 void createInstrumentForWorkspaceWithDistances(
-    Mantid::API::MatrixWorkspace_sptr workspace,
+    const Mantid::API::MatrixWorkspace_sptr &workspace,
     const Mantid::Kernel::V3D &samplePosition,
     const Mantid::Kernel::V3D &sourcePosition,
     const std::vector<Mantid::Kernel::V3D> &detectorPositions);

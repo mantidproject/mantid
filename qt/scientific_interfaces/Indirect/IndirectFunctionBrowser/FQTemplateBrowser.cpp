@@ -56,7 +56,7 @@ void FQTemplateBrowser::createProperties() {
   m_boolManager->blockSignals(false);
 }
 
-void FQTemplateBrowser::setDataType(QStringList allowedFunctionsList) {
+void FQTemplateBrowser::setDataType(const QStringList &allowedFunctionsList) {
   ScopedFalse _false(m_emitEnumChange);
   m_enumManager->setEnumNames(m_fitType, allowedFunctionsList);
   m_enumManager->setValue(m_fitType, 0);
@@ -67,8 +67,8 @@ void FQTemplateBrowser::setEnumValue(int enumIndex) {
   m_enumManager->setValue(m_fitType, enumIndex);
 }
 
-void FQTemplateBrowser::addParameter(QString parameterName,
-                                     QString parameterDescription) {
+void FQTemplateBrowser::addParameter(const QString &parameterName,
+                                     const QString &parameterDescription) {
   auto newParameter = m_parameterManager->addProperty(parameterName);
   m_parameterManager->setDescription(newParameter,
                                      parameterDescription.toStdString());
@@ -152,7 +152,7 @@ void FQTemplateBrowser::updateParameters(const IFunction &fun) {
   m_presenter.updateParameters(fun);
 }
 
-void FQTemplateBrowser::setParameterValue(QString parameterName,
+void FQTemplateBrowser::setParameterValue(const QString &parameterName,
                                           double parameterValue,
                                           double parameterError) {
   m_parameterManager->setValue(m_parameterMap[parameterName], parameterValue);

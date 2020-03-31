@@ -1508,8 +1508,8 @@ void FindPeaks::createFunctions() {
  */
 double
 FindPeaks::callFitPeak(const MatrixWorkspace_sptr &dataws, int wsindex,
-                       const API::IPeakFunction_sptr peakfunction,
-                       const API::IBackgroundFunction_sptr backgroundfunction,
+                       const API::IPeakFunction_sptr &peakfunction,
+                       const API::IBackgroundFunction_sptr &backgroundfunction,
                        const std::vector<double> &vec_fitwindow,
                        const std::vector<double> &vec_peakrange,
                        int minGuessFWHM, int maxGuessFWHM, int guessedFWHMStep,

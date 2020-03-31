@@ -463,8 +463,9 @@ private:
     return ws2;
   }
 
-  MatrixWorkspace_sptr createFitWorkspace(const size_t ny,
-                                          std::function<double(double)> fun) {
+  MatrixWorkspace_sptr
+  createFitWorkspace(const size_t ny,
+                     const std::function<double(double)> &fun) {
     MatrixWorkspace_sptr ws(new WorkspaceTester);
     size_t nx = ny + 1;
     double x0 = -1.0;

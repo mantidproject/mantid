@@ -27,7 +27,8 @@ using namespace MantidQt::Icons;
  * @param parent :: The parent of this view
  * @param makeRunsTableView :: The factory for the RunsTableView.
  */
-QtRunsView::QtRunsView(QWidget *parent, RunsTableViewFactory makeRunsTableView)
+QtRunsView::QtRunsView(QWidget *parent,
+                       const RunsTableViewFactory &makeRunsTableView)
     : MantidWidget(parent), m_notifyee(nullptr), m_timerNotifyee(nullptr),
       m_searchNotifyee(nullptr), m_searchModel(),
       m_tableView(makeRunsTableView()), m_timer() {

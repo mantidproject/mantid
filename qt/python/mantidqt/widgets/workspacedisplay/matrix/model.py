@@ -8,8 +8,6 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import MatrixWorkspace
 from mantid.dataobjects import EventWorkspace, Workspace2D
 from mantidqt.widgets.workspacedisplay.matrix.table_view_model import MatrixWorkspaceTableViewModel, \

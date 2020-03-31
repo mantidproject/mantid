@@ -10,10 +10,10 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-PostprocessingStep::PostprocessingStep(QString options)
+PostprocessingStep::PostprocessingStep(const QString &options)
     : m_options(std::move(options)) {}
-PostprocessingStep::PostprocessingStep(QString options,
-                                       PostprocessingAlgorithm algorithm,
+PostprocessingStep::PostprocessingStep(const QString &options,
+                                       const PostprocessingAlgorithm &algorithm,
                                        std::map<QString, QString> map)
     : m_options(std::move(options)), m_algorithm(std::move(algorithm)),
       m_map(std::move(map)) {}

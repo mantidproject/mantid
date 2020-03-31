@@ -41,7 +41,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource
     : public SpectrumDataSource {
 public:
   /// Construct a DataSource object around the specifed MatrixWorkspace
-  MatrixWSDataSource(Mantid::API::MatrixWorkspace_const_sptr matWs);
+  MatrixWSDataSource(const Mantid::API::MatrixWorkspace_const_sptr &matWs);
 
   ~MatrixWSDataSource() override;
 

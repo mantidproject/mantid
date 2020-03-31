@@ -365,7 +365,8 @@ size_t Bin2DPowderDiffraction::UnifyXBins(
   return max_size;
 }
 
-void Bin2DPowderDiffraction::normalizeToBinArea(MatrixWorkspace_sptr outWS) {
+void Bin2DPowderDiffraction::normalizeToBinArea(
+    const MatrixWorkspace_sptr &outWS) {
   NumericAxis *verticalAxis = dynamic_cast<NumericAxis *>(outWS->getAxis(1));
   const std::vector<double> &yValues = verticalAxis->getValues();
   auto nhist = outWS->getNumberHistograms();

@@ -46,7 +46,7 @@ MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2,
   return ws2;
 }
 
-void doTestExpDecay(MatrixWorkspace_sptr ws2) {
+void doTestExpDecay(const MatrixWorkspace_sptr &ws2) {
 
   Mantid::API::IFunction_sptr fun(new ExpDecay);
   fun->setParameter("Height", 8.);

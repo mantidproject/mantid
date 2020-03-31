@@ -27,7 +27,7 @@ Various GSL specific functions used GSL specific minimizers
 /// Structure to contain least squares data and used by GSL
 struct GSL_FitData {
   /// Constructor
-  GSL_FitData(boost::shared_ptr<CostFunctions::CostFuncLeastSquares> cf);
+  GSL_FitData(const boost::shared_ptr<CostFunctions::CostFuncLeastSquares> &cf);
   /// Destructor
   ~GSL_FitData();
   /// number of points to be fitted (size of X, Y and sqrtWeightData arrays)

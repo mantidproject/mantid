@@ -10,6 +10,7 @@
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BinaryStreamReader.h"
+#include "MantidKernel/FileDescriptor.h"
 #include <cstdint>
 
 /** LoadPSIMuonBin : Loads a bin file from the PSI facility for muon
@@ -76,7 +77,8 @@ public:
 private:
   void init() override;
   void exec() override;
-  std::string getFormattedDateTime(std::string date, std::string time);
+  std::string getFormattedDateTime(const std::string &date,
+                                   const std::string &time);
   void assignOutputWorkspaceParticulars(
       DataObjects::Workspace2D_sptr &outputWorkspace);
   void readSingleVariables(Mantid::Kernel::BinaryStreamReader &streamReader);

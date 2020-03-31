@@ -57,7 +57,7 @@ public:
   QWidget *getParent() override;
 
   MantidQt::API::AlgorithmDialog *
-  createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg);
+  createAlgorithmDialog(const Mantid::API::IAlgorithm_sptr &alg);
 
   // Plotting Methods
   MultiLayer *

@@ -9,7 +9,7 @@ from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FittingTabModel
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from mantid.api import FunctionFactory, AnalysisDataService
 from mantid.simpleapi import CreateWorkspace
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 
 

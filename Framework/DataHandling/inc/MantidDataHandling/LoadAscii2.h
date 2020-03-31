@@ -9,6 +9,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/Histogram1D.h"
+#include "MantidKernel/FileDescriptor.h"
 
 #include <list>
 

@@ -9,7 +9,7 @@ import time
 
 from mantid import ConfigService
 from mantid.api import FileFinder
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication, QWidget
 

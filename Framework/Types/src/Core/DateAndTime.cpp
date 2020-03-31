@@ -133,7 +133,7 @@ DateAndTime::DateAndTime(const std::string &ISO8601_string) : _nanoseconds(0) {
 /** Construct time from a boost::posix_time::ptime.
  * @param _ptime :: boost::posix_time::ptime
  */
-DateAndTime::DateAndTime(const boost::posix_time::ptime _ptime)
+DateAndTime::DateAndTime(const boost::posix_time::ptime &_ptime)
     : _nanoseconds(0) {
   this->set_from_ptime(_ptime);
 }
@@ -207,7 +207,7 @@ boost::posix_time::ptime DateAndTime::to_ptime() const {
  *
  * @param _ptime :: boost::posix_time::ptime date and time.
  */
-void DateAndTime::set_from_ptime(boost::posix_time::ptime _ptime) {
+void DateAndTime::set_from_ptime(const boost::posix_time::ptime &_ptime) {
   if (_ptime.is_special()) {
     // --- SPECIAL VALUES! ----
     if (_ptime.is_infinity() || _ptime.is_pos_infinity())
@@ -452,7 +452,7 @@ std::string DateAndTime::toSimpleString() const {
  * @param format : format for strftime(). Default "%Y-%b-%d %H:%M:%S"
  * @return date as string, formatted as requested
  */
-std::string DateAndTime::toFormattedString(const std::string format) const {
+std::string DateAndTime::toFormattedString(const std::string &format) const {
   char buffer[25];
   std::tm date_as_tm = this->to_tm();
   strftime(buffer, 25, format.c_str(), &date_as_tm);
@@ -688,7 +688,7 @@ DateAndTime DateAndTime::getCurrentTime() {
  * Return the number of seconds in a time_duration, as a double, including
  * fractional seconds.
  */
-double DateAndTime::secondsFromDuration(time_duration duration) {
+double DateAndTime::secondsFromDuration(const time_duration &duration) {
 #ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
   // Nanosecond resolution
   return static_cast<double>(duration.total_nanoseconds()) / 1e9;

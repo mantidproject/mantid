@@ -7,8 +7,6 @@
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 from mantidqt.utils.qt import import_qt
 
 WorkspaceTreeWidget = import_qt('..._common', 'mantidqt.widgets.workspacewidget', 'WorkspaceTreeWidgetSimple')

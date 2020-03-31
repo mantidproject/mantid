@@ -198,8 +198,8 @@ void StatisticsOfPeaksWorkspace::exec() {
  * @param ws :: any PeaksWorkspace
  * @param runName :: string to put in statistics table
  */
-void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws,
-                                           std::string runName) {
+void StatisticsOfPeaksWorkspace::doSortHKL(
+    const Mantid::API::Workspace_sptr &ws, const std::string &runName) {
   std::string pointGroup = getPropertyValue("PointGroup");
   std::string latticeCentering = getPropertyValue("LatticeCentering");
   std::string wkspName = getPropertyValue("OutputWorkspace");

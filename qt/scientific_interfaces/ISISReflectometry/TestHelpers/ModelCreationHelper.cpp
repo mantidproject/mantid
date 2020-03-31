@@ -5,6 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ModelCreationHelper.h"
+
+#include <utility>
+
 #include "../../ISISReflectometry/Reduction/Batch.h"
 
 namespace MantidQt {
@@ -55,7 +58,8 @@ Row makeRow(std::string const &run, double theta, std::string const &trans1,
             boost::optional<double> scale,
             ReductionOptionsMap const &optionsMap) {
   return Row({run}, theta, TransmissionRunPair({trans1, trans2}),
-             RangeInQ(qMin, qMax, qStep), scale, optionsMap,
+             RangeInQ(std::move(qMin), std::move(qMax), std::move(qStep)),
+             std::move(scale), optionsMap,
              ReductionWorkspaces({run}, TransmissionRunPair({trans1, trans2})));
 }
 

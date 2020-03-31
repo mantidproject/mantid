@@ -129,9 +129,9 @@ private:
 
   /// Extract the name of an algorithm
   const std::string
-  extractAlgName(const boost::shared_ptr<IAlgorithm> alg) const;
+  extractAlgName(const boost::shared_ptr<IAlgorithm> &alg) const;
   /// Extract the version of an algorithm
-  int extractAlgVersion(const boost::shared_ptr<IAlgorithm> alg) const;
+  int extractAlgVersion(const boost::shared_ptr<IAlgorithm> &alg) const;
 
   /// Create an algorithm object with the specified name
   boost::shared_ptr<Algorithm> createAlgorithm(const std::string &name,

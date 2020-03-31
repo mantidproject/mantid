@@ -4,12 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import print_function, absolute_import
-
-
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 
 import Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table as periodic_table
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table import PeriodicTableItem,\

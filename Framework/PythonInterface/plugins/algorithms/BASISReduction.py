@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # Mantid Repository : https://github.com/mantidproject/mantid
 # pylint: disable=no-init
-from __future__ import (absolute_import, division, print_function)
-
 import os
 import re
 import numpy as np

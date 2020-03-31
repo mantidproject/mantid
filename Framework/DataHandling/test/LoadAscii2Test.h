@@ -434,7 +434,7 @@ private:
     return save.getPropertyValue("Filename");
   }
 
-  void checkTableData(const Mantid::API::ITableWorkspace_sptr outputWS) {
+  void checkTableData(const Mantid::API::ITableWorkspace_sptr &outputWS) {
 
     const std::string name = "Compare_SaveAsciiWS";
     auto wsToCompare = SaveAscii2Test::writeTableWS(name);
@@ -590,7 +590,7 @@ private:
     return outputWS;
   }
 
-  void checkData(const Mantid::API::MatrixWorkspace_sptr outputWS,
+  void checkData(const Mantid::API::MatrixWorkspace_sptr &outputWS,
                  const int cols) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 4);

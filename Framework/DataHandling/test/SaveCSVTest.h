@@ -169,7 +169,8 @@ private:
     Poco::File(fileName).remove();
   }
 
-  void evaluateFileWithDX(std::string fileName, const size_t nSpec) const {
+  void evaluateFileWithDX(const std::string &fileName,
+                          const size_t nSpec) const {
     std::ifstream stream(fileName.c_str());
     std::istringstream dataStream;
     std::string line;

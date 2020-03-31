@@ -8,8 +8,7 @@
     Defines a set of aliases for the kernel module to make
     accessing certain objects easier.
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+
 
 from mantid.kernel import (ConfigServiceImpl, Logger, PropertyManagerDataServiceImpl, UnitFactoryImpl, UsageServiceImpl)
 

@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
 import mantid
 import os
@@ -16,6 +15,7 @@ from mantid.simpleapi import *
 from mantid.kernel import DateAndTime
 import random
 import math
+
 
 class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
     def test_that_gets_transmission_monitor(self):
@@ -203,6 +203,7 @@ class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
         # Assert
         self.assertEqual(0, len(ReductionSingleton().transmission_calculator.mask_files), 'The transmission mask list should be empty.')
 
+
 class TestEventWorkspaceCheck(unittest.TestCase):
     def _create_file_name(self, name):
         temp_save_dir = config['defaultsave.directory']
@@ -236,6 +237,7 @@ class TestEventWorkspaceCheck(unittest.TestCase):
         # Clean Up
         self._clean_up(file_name)
         DeleteWorkspace(ws)
+
 
 class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
     #Test the input and output mechanims for the QResolution settings
@@ -364,6 +366,7 @@ class SANSCommandInterfaceGetAndSetQResolutionSettings(unittest.TestCase):
         delta_r_expected = delta_r/1000.
         self.assertEqual(delta_r_stored, delta_r_expected)
 
+
 class TestLARMORCommand(unittest.TestCase):
     def test_that_default_idf_is_being_selected(self):
         command_iface.Clean()
@@ -397,6 +400,7 @@ class TestLARMORCommand(unittest.TestCase):
         self.assertFalse(command_iface.LARMOR(selected_idf),
                          "A non existent idf path should return false")
 
+
 class TestMaskFile(unittest.TestCase):
     def test_throws_for_user_file_with_invalid_extension(self):
         # Arrange
@@ -406,6 +410,7 @@ class TestMaskFile(unittest.TestCase):
         # Act + Assert
         args = [file_name]
         self.assertRaises(RuntimeError, command_iface.MaskFile, *args)
+
 
 class SANSCommandInterfaceGetAndSetBackgroundCorrectionSettings(unittest.TestCase):
     def _do_test_correct_setting(self, run_number, is_time, is_mon, is_mean, mon_numbers):

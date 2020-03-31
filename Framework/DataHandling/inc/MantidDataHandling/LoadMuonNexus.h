@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
 
 //----------------------------------------------------------------------
@@ -74,7 +75,7 @@ public:
 protected:
   virtual void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr) {}
   void checkOptionalProperties();
-  void runLoadInstrument(DataObjects::Workspace2D_sptr);
+  void runLoadInstrument(const DataObjects::Workspace2D_sptr &);
 
   /// The name and path of the input file
   std::string m_filename;

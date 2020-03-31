@@ -110,7 +110,7 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr runAlgorithm(Workspace2D_sptr inputWS) {
+  MatrixWorkspace_sptr runAlgorithm(const Workspace2D_sptr &inputWS) {
     IAlgorithm_sptr alg(new ConvertToHistogram());
     alg->initialize();
     alg->setRethrows(true);

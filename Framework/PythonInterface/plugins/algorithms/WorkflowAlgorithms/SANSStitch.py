@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-arguments,too-few-public-methods
 
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.simpleapi import *
 from mantid.api import ParallelDataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, Property, StringListValidator, UnitFactory, \

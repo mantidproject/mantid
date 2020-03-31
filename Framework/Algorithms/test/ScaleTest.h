@@ -127,7 +127,7 @@ private:
     }
   }
 
-  void doTestScaleWithDx(std::string type, bool outIsIn = false) {
+  void doTestScaleWithDx(const std::string &type, bool outIsIn = false) {
     // Arrange
     const double xValue = 1.222;
     const double value = 5;

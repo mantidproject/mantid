@@ -89,7 +89,7 @@ private:
 
   void execQuickStatistics();
 
-  void exportErrorLog(API::MatrixWorkspace_sptr ws,
+  void exportErrorLog(const API::MatrixWorkspace_sptr &ws,
                       std::vector<Types::Core::DateAndTime> abstimevec,
                       double dts);
 

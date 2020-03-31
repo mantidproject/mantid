@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {

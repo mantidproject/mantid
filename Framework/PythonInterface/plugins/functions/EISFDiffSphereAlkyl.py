@@ -9,8 +9,6 @@
 @author Jose Borreguero, ORNL
 @date December 06, 2017
 """
-from __future__ import (absolute_import, division, print_function)
-
 import numpy as np
 try:
     from scipy.special import spherical_jn

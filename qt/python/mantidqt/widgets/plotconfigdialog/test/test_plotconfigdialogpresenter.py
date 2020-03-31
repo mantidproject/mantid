@@ -6,15 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from __future__ import (absolute_import, unicode_literals)
-
 import unittest
 
 from matplotlib import use as mpl_use
 mpl_use('Agg')  # noqa
 from matplotlib.pyplot import figure
 
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 
 

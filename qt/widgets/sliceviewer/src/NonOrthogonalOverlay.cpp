@@ -127,7 +127,8 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
 }
 
 void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &gridPen,
-                                      int widthScreen, QwtValueList yAxisTicks,
+                                      int widthScreen,
+                                      const QwtValueList &yAxisTicks,
                                       double yAngle) {
 
   auto offset = yAngle == 0. ? 0. : widthScreen * tan(yAngle);
@@ -141,7 +142,8 @@ void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &gridPen,
 }
 
 void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen &gridPen,
-                                      int heightScreen, QwtValueList xAxisTicks,
+                                      int heightScreen,
+                                      const QwtValueList &xAxisTicks,
                                       double xAngle) {
   xAngle *= -1.f;
   auto offset = xAngle == 0. ? 0. : heightScreen * tan(xAngle);

@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets
 import Muon.GUI.Common.message_box as message_box
 from Muon.GUI.Common.plotting_widget.dockable_plot_toolbar import DockablePlotToolbar

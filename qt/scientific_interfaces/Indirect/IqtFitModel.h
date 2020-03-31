@@ -31,8 +31,8 @@ private:
                                   WorkspaceIndex spectrum) const override;
   std::unordered_map<std::string, ParameterValue>
   createDefaultParameters(TableDatasetIndex index) const override;
-  Mantid::API::MultiDomainFunction_sptr
-  createFunctionWithGlobalBeta(Mantid::API::IFunction_sptr function) const;
+  Mantid::API::MultiDomainFunction_sptr createFunctionWithGlobalBeta(
+      const Mantid::API::IFunction_sptr &function) const;
 
   bool m_makeBetaGlobal;
   bool m_constrainIntensities;
