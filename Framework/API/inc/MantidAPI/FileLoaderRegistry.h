@@ -103,7 +103,8 @@ private:
         }
         break;
       case NexusHDF5:
-        if (!std::is_base_of<IFileLoader<Kernel::NexusHDF5Descriptor>, T>::value) {
+        if (!std::is_base_of<IFileLoader<Kernel::NexusHDF5Descriptor>,
+                             T>::value) {
           throw std::runtime_error(
               std::string("FileLoaderRegistryImpl::subscribe - Class '") +
               typeid(T).name() +

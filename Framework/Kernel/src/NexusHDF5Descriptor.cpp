@@ -177,10 +177,10 @@ void getGroup(hid_t groupID,
 
 } // namespace
 
-
 bool NexusHDF5Descriptor::isReadable(const std::string &filename) {
   // use existing function to do the work
-  return NexusDescriptor::isReadable(filename, NexusDescriptor::Version::Version5);
+  return NexusDescriptor::isReadable(filename,
+                                     NexusDescriptor::Version::Version5);
 }
 
 NexusHDF5Descriptor::NexusHDF5Descriptor(const std::string &filename)
@@ -203,8 +203,8 @@ NexusHDF5Descriptor::initAllEntries() {
   hid_t fileID = H5Fopen(m_filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
   if (fileID < 0) {
     throw std::invalid_argument(
-        "ERROR: Kernel::NexusHDF5Descriptor couldn't open hdf5 file " + m_filename +
-        "\n");
+        "ERROR: Kernel::NexusHDF5Descriptor couldn't open hdf5 file " +
+        m_filename + "\n");
   }
 
   hid_t groupID = H5Gopen2(fileID, "/", H5P_DEFAULT);

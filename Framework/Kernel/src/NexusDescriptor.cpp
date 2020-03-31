@@ -97,7 +97,7 @@ bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version) {
  * @return True if the file is considered hierarchical, false otherwise
  */
 bool NexusDescriptor::isReadable(const std::string &filename,
-                            const Version version) {
+                                 const Version version) {
   FILE *fd = fopen(filename.c_str(), "rb");
   if (!fd) {
     throw std::invalid_argument(
