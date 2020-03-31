@@ -59,7 +59,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
     def seeAlso(self):
-        return ["MonteCarloAbsorption"]
+        return ["MonteCarloAbsorption", "ApplyPaalmanPingsCorrection"]
 
     def summary(self):
         return "Calculates absorption corrections in Paalman & Pings formalism for a given sample " \
@@ -73,7 +73,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
                              doc='Sample Workspace')
 
-        # Monte Carlo options
+        # Monte Carlo Options
         self.declareProperty(name='NumberOfWavelengthPoints', defaultValue=10,
                              validator=IntBoundedValidator(1),
                              doc='Number of wavelengths for calculation')
@@ -312,6 +312,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             self._set_algorithm_properties(monte_carlo_alg, self._monte_carlo_kwargs)
             monte_carlo_alg.setProperty("InputWorkspace", sample_wave_ws)
             monte_carlo_alg.setProperty("OutputWorkspace", self._ass_ws_name)
+            monte_carlo_alg.setProperty("SimulateScatteringPointIn", "SampleOnly")
             monte_carlo_alg.execute()
             ass_ws = monte_carlo_alg.getProperty("OutputWorkspace").value
             ass_ws = self._convert_from_wavelength(ass_ws)
@@ -324,7 +325,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             self._set_algorithm_properties(monte_carlo_alg_ssc, self._monte_carlo_kwargs)
             monte_carlo_alg_ssc.setProperty("InputWorkspace", sample_wave_ws)
             monte_carlo_alg_ssc.setProperty("OutputWorkspace", self._assc_ws_name)
-            monte_carlo_alg_ssc.setProperty("ScatteringPointIn", "Sample")
+            monte_carlo_alg_ssc.setProperty("SimulateScatteringPointIn", "SampleOnly")
             monte_carlo_alg_ssc.execute()
             assc_ws = monte_carlo_alg_ssc.getProperty("OutputWorkspace").value
             assc_ws = self._convert_from_wavelength(assc_ws)
@@ -339,7 +340,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             self._set_algorithm_properties(monte_carlo_alg_cc, self._monte_carlo_kwargs)
             monte_carlo_alg_cc.setProperty("InputWorkspace", can_wave_ws)
             monte_carlo_alg_cc.setProperty("OutputWorkspace", self._acc_ws_name)
-            monte_carlo_alg_cc.setProperty("ScatteringPointIn", "Environment")
+            monte_carlo_alg_cc.setProperty("SimulateScatteringPointIn", "EnvironmentOnly")
             monte_carlo_alg_cc.execute()
             acc_ws = monte_carlo_alg_cc.getProperty("OutputWorkspace").value
             acc_ws = self._convert_from_wavelength(acc_ws)
@@ -350,7 +351,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             self._set_algorithm_properties(monte_carlo_alg_csc, self._monte_carlo_kwargs)
             monte_carlo_alg_csc.setProperty("InputWorkspace", can_wave_ws)
             monte_carlo_alg_csc.setProperty("OutputWorkspace", self._acsc_ws_name)
-            monte_carlo_alg_csc.setProperty("ScatteringPointIn", "Environment")
+            monte_carlo_alg_csc.setProperty("SimulateScatteringPointIn", "EnvironmentOnly")
             monte_carlo_alg_csc.execute()
             acsc_ws = monte_carlo_alg_csc.getProperty("OutputWorkspace").value
             acsc_ws = self._convert_from_wavelength(acsc_ws)
