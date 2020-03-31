@@ -106,6 +106,9 @@ class DrillView(QMainWindow):
         self.save.setIcon(icons.get_icon("mdi.file-export"))
         self.save.clicked.connect(self.save_rundex)
 
+        self.help.setIcon(icons.get_icon("mdi.help"))
+        self.help.clicked.connect(self.display_help)
+
         self.processRows.setIcon(icons.get_icon("mdi.play"))
         self.processRows.clicked.connect(self.process_selected_rows)
 
@@ -299,6 +302,9 @@ class DrillView(QMainWindow):
         self.call_settings_listeners(
                 lambda listener: listener.on_rundex_saved(filename[0])
                 )
+
+    def display_help(self):
+        pass
 
     def keyPressEvent(self, event):
         if (event.key() == Qt.Key_C
