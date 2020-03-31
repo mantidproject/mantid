@@ -59,9 +59,9 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
 
           5) Method should calculate hash of a file with vibrational or phonon data (protected method _calculateHash).
 
-          6) Method should store vibrational or phonon data in an hdf file (using inherited method save_ab_initio_data()). The name of an hdf file is
-          foo.hdf5 (CASTEP: foo.phonon -> foo.hdf5). In order to save the data to hdf file the following fields
-          should be set:
+          6) Method should store vibrational or phonon data in an hdf file (using inherited method
+             save_ab_initio_data()). The name of an hdf file is foo.hdf5 (CASTEP: foo.phonon -> foo.hdf5). In order to
+             save the data to hdf file the following fields should be set:
 
                     self._hdf_filename
                     self._group_name

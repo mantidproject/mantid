@@ -831,14 +831,6 @@ class Abins(PythonAlgorithm):
 
     def _validate_vasp_input_file(self, filename_full_path=None):
         logger.information("Validate VASP file with vibrational or phonon data.")
-        # if found_filename_ext.lower() != expected_file_extension:
-        #     comment = "{}Output from ab initio program {} is expected." \
-        #               " The expected extension of file is .{}. Found: {}.{}".format(
-        #                   msg_err, ab_initio_program, expected_file_extension, found_filename_ext, msg_rename)
-        #     return dict(Invalid=True, Comment=comment)
-        # else:
-        #     return dict(Invalid=False, Comment="")
-
 
         if 'OUTCAR' in os.path.basename(filename_full_path):
             return dict(Invalid=False, Comment="")
