@@ -109,7 +109,7 @@ FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const {
   m_log.debug() << "Trying to find loader for '" << filename << "'\n";
 
   IAlgorithm_sptr bestLoader;
-  if (NexusDescriptor::isHDF(filename)) {
+  if (NexusDescriptor::isReadable(filename)) {
     m_log.debug()
         << filename
         << " looks like a Nexus file. Checking registered Nexus loaders\n";
@@ -163,7 +163,7 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName,
   std::multimap<std::string, int> names{{algorithmName, -1}};
   IAlgorithm_sptr loader;
   if (nexus) {
-    if (NexusDescriptor::isHDF(filename)) {
+    if (NexusDescriptor::isReadable(filename)) {
       loader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(
           filename, names, m_log);
     }
