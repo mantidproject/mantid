@@ -295,8 +295,9 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors,
       if (!existsAndNotEmptyString(geomArgs, ShapeArgs::HEIGHT)) {
         errors[flavour] =
             "For " + shape + " shape " + ShapeArgs::HEIGHT + " is required";
-      }      
-      if (shape == ShapeArgs::FLAT_PLATE || shape == ShapeArgs::FLAT_PLATE_HOLDER) {
+      }
+      if (shape == ShapeArgs::FLAT_PLATE ||
+          shape == ShapeArgs::FLAT_PLATE_HOLDER) {
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::WIDTH)) {
           errors[flavour] =
               "For " + shape + " shape " + ShapeArgs::WIDTH + " is required";
@@ -809,7 +810,7 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
 std::string
 SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
                               const Geometry::ReferenceFrame &refFrame,
-                              const std::string& id) const {
+                              const std::string &id) const {
   // Helper to take 3 coordinates and turn them to a V3D respecting the
   // current reference frame
   auto makeV3D = [&refFrame](double x, double y, double z) {
@@ -836,7 +837,8 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
     Goniometer gr;
     const auto upAxis = makeV3D(0, 1, 0);
     gr.pushAxis("up", upAxis.X(), upAxis.Y(), upAxis.Z(),
-                args.getProperty(ShapeArgs::ANGLE), Geometry::CCW, Geometry::angDegrees);
+                args.getProperty(ShapeArgs::ANGLE), Geometry::CCW,
+                Geometry::angDegrees);
     auto &rotation = gr.getR();
     lfb.rotate(rotation);
     lft.rotate(rotation);
