@@ -543,7 +543,8 @@ void SetSample::exec() {
 }
 
 /**
- * Set the requested sample environment on the workspace from the environment file
+ * Set the requested sample environment on the workspace from the environment
+ * file
  * @param exptInfo A reference to the ExperimentInfo to receive the environment
  * @param args The dictionary of flags for the environment
  * @return A pointer to the new sample environment
