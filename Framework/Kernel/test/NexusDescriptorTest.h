@@ -60,39 +60,39 @@ public:
     m_testHDF5 = boost::make_shared<NexusDescriptor>(m_testHDF5Path);
   }
 
-  //=================================== Static isHDF methods
+  //=================================== Static isReadable methods
   //======================================
-  void test_isHDF_Returns_False_For_Non_HDF_Filename() {
-    TS_ASSERT(!NexusDescriptor::isHDF(m_testNonHDFPath));
+  void test_isReadable_Returns_False_For_Non_HDF_Filename() {
+    TS_ASSERT(!NexusDescriptor::isReadable(m_testNonHDFPath));
     TS_ASSERT(
-        !NexusDescriptor::isHDF(m_testNonHDFPath, NexusDescriptor::AnyVersion));
+        !NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::AnyVersion));
     TS_ASSERT(
-        !NexusDescriptor::isHDF(m_testNonHDFPath, NexusDescriptor::Version4));
+        !NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::Version4));
     TS_ASSERT(
-        !NexusDescriptor::isHDF(m_testNonHDFPath, NexusDescriptor::Version5));
+        !NexusDescriptor::isReadable(m_testNonHDFPath, NexusDescriptor::Version5));
   }
 
-  void test_isHDF_Defaults_To_All_Versions() {
-    TS_ASSERT(NexusDescriptor::isHDF(m_testHDF4Path));
-    TS_ASSERT(NexusDescriptor::isHDF(m_testHDF5Path));
+  void test_isReadable_Defaults_To_All_Versions() {
+    TS_ASSERT(NexusDescriptor::isReadable(m_testHDF4Path));
+    TS_ASSERT(NexusDescriptor::isReadable(m_testHDF5Path));
   }
 
-  void test_isHDF_With_Version4_Returns_True_Only_For_HDF4() {
+  void test_isReadable_With_Version4_Returns_True_Only_For_HDF4() {
     TS_ASSERT(
-        NexusDescriptor::isHDF(m_testHDF4Path, NexusDescriptor::Version4));
+        NexusDescriptor::isReadable(m_testHDF4Path, NexusDescriptor::Version4));
     TS_ASSERT(
-        !NexusDescriptor::isHDF(m_testHDF5Path, NexusDescriptor::Version4));
+        !NexusDescriptor::isReadable(m_testHDF5Path, NexusDescriptor::Version4));
   }
 
-  void test_isHDF_With_Version5_Returns_True_Only_For_HDF4() {
+  void test_isReadable_With_Version5_Returns_True_Only_For_HDF4() {
     TS_ASSERT(
-        NexusDescriptor::isHDF(m_testHDF5Path, NexusDescriptor::Version5));
+        NexusDescriptor::isReadable(m_testHDF5Path, NexusDescriptor::Version5));
     TS_ASSERT(
-        !NexusDescriptor::isHDF(m_testHDF4Path, NexusDescriptor::Version5));
+        !NexusDescriptor::isReadable(m_testHDF4Path, NexusDescriptor::Version5));
   }
 
-  void test_isHDF_Throws_With_Invalid_Filename() {
-    TS_ASSERT_THROWS(NexusDescriptor::isHDF(""), const std::invalid_argument &);
+  void test_isReadable_Throws_With_Invalid_Filename() {
+    TS_ASSERT_THROWS(NexusDescriptor::isReadable(""), const std::invalid_argument &);
   }
 
   //=================================== NexusDescriptor methods
