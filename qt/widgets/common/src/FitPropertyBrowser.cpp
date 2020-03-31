@@ -711,7 +711,17 @@ void FitPropertyBrowser::executeSetupManageMenu(const QString &item) {
 }
 
 /// Destructor
-FitPropertyBrowser::~FitPropertyBrowser() { m_compositeFunction.reset(); }
+FitPropertyBrowser::~FitPropertyBrowser() {
+    m_compositeFunction.reset();
+
+    // remove the FunctionFactory Observer
+    // currently in a loop as it seems to be registered twice
+    using Mantid::API::FunctionFactory;
+    while (FunctionFactory::Instance().notificationCenter.hasObserver(m_updateObserver)) {
+      FunctionFactory::Instance().notificationCenter.removeObserver(
+          m_updateObserver);
+    }
+}
 
 /// Get handler to the root composite function
 PropertyHandler *FitPropertyBrowser::getHandler() const {
