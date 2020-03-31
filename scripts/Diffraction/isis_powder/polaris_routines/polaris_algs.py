@@ -80,7 +80,7 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
 
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
-                    sample_details=None, output_binning=None, pdf_type="G(r)", freq_params=None):
+                    sample_details=None, delta_r=None, delta_q=None, pdf_type="G(r)", freq_params=None):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
@@ -102,27 +102,23 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
                                                          WorkspaceToMatch=focused_ws)
     focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
-
+    if delta_q:
+        focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=delta_q)
     if merge_banks:
         q_min, q_max = _load_qlims(q_lims)
         merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
                                                    CalculateScale=False)
         fast_fourier_filter(merged_ws, freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", InputSofQType="S(Q)-1", PDFType=pdf_type,
-                                                Filter=True)
+                                                Filter=True, DeltaR=delta_r)
     else:
         for ws in focused_ws:
             fast_fourier_filter(ws, freq_params)
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1",
-                                                PDFType=pdf_type, Filter=True)
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1", PDFType=pdf_type,
+                                                Filter=True, DeltaR=delta_r)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
                                              PreserveEvents=True)
     common.remove_intermediate_workspace('self_scattering_correction')
-    if output_binning is not None:
-        try:
-            pdf_output = mantid.Rebin(InputWorkspace=pdf_output, Params=output_binning)
-        except RuntimeError:
-            return pdf_output
     # Rename output ws
     if 'merged_ws' in locals():
         mantid.RenameWorkspace(InputWorkspace=merged_ws, OutputWorkspace=run_number + '_merged_Q')
