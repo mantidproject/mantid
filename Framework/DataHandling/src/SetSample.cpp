@@ -51,6 +51,7 @@ using Kernel::V3D;
 
 namespace {
 constexpr double CUBIC_METRE_TO_CM = 100. * 100. * 100.;
+constexpr double degToRad(const double x) { return x * M_PI / 180.; }
 
 /// Private namespace storing property name strings
 namespace PropertyNames {
@@ -90,6 +91,10 @@ const std::string FLAT_PLATE("FlatPlate");
 const std::string CYLINDER("Cylinder");
 /// Static HollowCylinder string
 const std::string HOLLOW_CYLINDER("HollowCylinder");
+/// Static FlatPlateHolder string
+const std::string FLAT_PLATE_HOLDER("FlatPlateHolder");
+/// Static HollowCylinderHolder string
+const std::string HOLLOW_CYLINDER_HOLDER("HollowCylinderHolder");
 /// Static CSG string
 const std::string CSG("CSG");
 /// Static Width string
@@ -98,8 +103,14 @@ const std::string WIDTH("Width");
 const std::string HEIGHT("Height");
 /// Static Thick string
 const std::string THICK("Thick");
+/// Static FrontThick string
+const std::string FRONT_THICK("FrontThick");
+/// Static BackThick string
+const std::string BACK_THICK("BackThick");
 /// Static Axis string
 const std::string AXIS("Axis");
+/// Static Angle string
+const std::string ANGLE("Angle");
 /// Static Center string
 const std::string CENTER("Center");
 /// Static Radius string
@@ -108,6 +119,10 @@ const std::string RADIUS("Radius");
 const std::string INNER_RADIUS("InnerRadius");
 /// Static OuterRadius string
 const std::string OUTER_RADIUS("OuterRadius");
+/// Static InnerOuterRadius string
+const std::string INNER_OUTER_RADIUS("InnerOuterRadius");
+/// Static OuterInnerRadius string
+const std::string OUTER_INNER_RADIUS("OuterInnerRadius");
 } // namespace ShapeArgs
 
 /**
@@ -280,8 +295,8 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors,
       if (!existsAndNotEmptyString(geomArgs, ShapeArgs::HEIGHT)) {
         errors[flavour] =
             "For " + shape + " shape " + ShapeArgs::HEIGHT + " is required";
-      }
-      if (shape == ShapeArgs::FLAT_PLATE) {
+      }      
+      if (shape == ShapeArgs::FLAT_PLATE || shape == ShapeArgs::FLAT_PLATE_HOLDER) {
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::WIDTH)) {
           errors[flavour] =
               "For " + shape + " shape " + ShapeArgs::WIDTH + " is required";
@@ -297,7 +312,8 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors,
               "For " + shape + " shape " + ShapeArgs::RADIUS + " is required";
         }
       }
-      if (shape == ShapeArgs::HOLLOW_CYLINDER) {
+      if (shape == ShapeArgs::HOLLOW_CYLINDER ||
+          shape == ShapeArgs::HOLLOW_CYLINDER_HOLDER) {
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::INNER_RADIUS)) {
           errors[flavour] = "For " + shape + " shape " +
                             ShapeArgs::INNER_RADIUS + " is required";
@@ -305,6 +321,30 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors,
         if (!existsAndNotEmptyString(geomArgs, ShapeArgs::OUTER_RADIUS)) {
           errors[flavour] = "For " + shape + " shape " +
                             ShapeArgs::OUTER_RADIUS + " is required";
+        }
+      }
+      if (shape == ShapeArgs::FLAT_PLATE_HOLDER) {
+        if (!existsAndNotEmptyString(geomArgs, ShapeArgs::WIDTH)) {
+          errors[flavour] =
+              "For " + shape + " shape " + ShapeArgs::WIDTH + " is required";
+        }
+        if (!existsAndNotEmptyString(geomArgs, ShapeArgs::FRONT_THICK)) {
+          errors[flavour] = "For " + shape + " shape " +
+                            ShapeArgs::FRONT_THICK + " is required";
+        }
+        if (!existsAndNotEmptyString(geomArgs, ShapeArgs::BACK_THICK)) {
+          errors[flavour] = "For " + shape + " shape " + ShapeArgs::BACK_THICK +
+                            " is required";
+        }
+      }
+      if (shape == ShapeArgs::HOLLOW_CYLINDER_HOLDER) {
+        if (!existsAndNotEmptyString(geomArgs, ShapeArgs::INNER_OUTER_RADIUS)) {
+          errors[flavour] = "For " + shape + " shape " +
+                            ShapeArgs::INNER_OUTER_RADIUS + " is required";
+        }
+        if (!existsAndNotEmptyString(geomArgs, ShapeArgs::OUTER_INNER_RADIUS)) {
+          errors[flavour] = "For " + shape + " shape " +
+                            ShapeArgs::OUTER_INNER_RADIUS + " is required";
         }
       }
     }
@@ -393,6 +433,8 @@ std::map<std::string, std::string> SetSample::validateInputs() {
       }
     }
   } else {
+    // We cannot strictly require geometry and material to be defined
+    // simultaneously; it can be that one is defined at a later time
     if (geomArgs) {
       assertNonNegative(errors, *geomArgs, PropertyNames::GEOMETRY,
                         positiveValues);
@@ -737,12 +779,19 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
     result = createCylinderLikeXML(
         args, refFrame,
         boost::algorithm::equals(shape, ShapeArgs::HOLLOW_CYLINDER));
+  } else if (boost::algorithm::ends_with(shape, ShapeArgs::FLAT_PLATE_HOLDER)) {
+    result = createFlatPlateHolderXML(args, refFrame);
+  } else if (boost::algorithm::ends_with(shape,
+                                         ShapeArgs::HOLLOW_CYLINDER_HOLDER)) {
+    result = createHollowCylinderHolderXML(args, refFrame);
   } else {
     std::stringstream msg;
     msg << "Unknown 'Shape' argument '" << shape
         << "' provided in 'Geometry' property. Allowed values are "
         << ShapeArgs::CSG << ", " << ShapeArgs::FLAT_PLATE << ", "
-        << ShapeArgs::CYLINDER << ", " << ShapeArgs::HOLLOW_CYLINDER;
+        << ShapeArgs::CYLINDER << ", " << ShapeArgs::HOLLOW_CYLINDER << ", "
+        << ShapeArgs::FLAT_PLATE_HOLDER << ", "
+        << ShapeArgs::HOLLOW_CYLINDER_HOLDER;
     throw std::invalid_argument(msg.str());
   }
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
@@ -759,7 +808,8 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
  */
 std::string
 SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
-                              const Geometry::ReferenceFrame &refFrame) const {
+                              const Geometry::ReferenceFrame &refFrame,
+                              const std::string& id) const {
   // Helper to take 3 coordinates and turn them to a V3D respecting the
   // current reference frame
   auto makeV3D = [&refFrame](double x, double y, double z) {
@@ -782,12 +832,11 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
   auto lft = makeV3D(szX, szY, -szZ);
   auto lbb = makeV3D(szX, -szY, szZ);
   auto rfb = makeV3D(-szX, -szY, -szZ);
-  // optional rotation about the center of object
-  if (args.existsProperty("Angle")) {
+  if (args.existsProperty(ShapeArgs::ANGLE)) {
     Goniometer gr;
     const auto upAxis = makeV3D(0, 1, 0);
     gr.pushAxis("up", upAxis.X(), upAxis.Y(), upAxis.Z(),
-                args.getProperty("Angle"), Geometry::CCW, Geometry::angDegrees);
+                args.getProperty(ShapeArgs::ANGLE), Geometry::CCW, Geometry::angDegrees);
     auto &rotation = gr.getR();
     lfb.rotate(rotation);
     lft.rotate(rotation);
@@ -803,7 +852,7 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
   rfb += centrePos;
 
   std::ostringstream xmlShapeStream;
-  xmlShapeStream << " <cuboid id=\"sample-shape\"> "
+  xmlShapeStream << " <cuboid id=\"" << id << "\"> "
                  << "<left-front-bottom-point x=\"" << lfb.X() << "\" y=\""
                  << lfb.Y() << "\" z=\"" << lfb.Z() << "\"  /> "
                  << "<left-front-top-point  x=\"" << lft.X() << "\" y=\""
@@ -817,6 +866,87 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
 }
 
 /**
+ * Create the XML required to define a flat plate holder from the given args
+ * Flate plate holder is a CSG union of 2 flat plates one on each side of the
+ * sample
+ * The front and back holders are supposed to have the same width and height and
+ * angle as the sample Only the centre needs to be calculated taking into
+ * account the thichkness of the sample in between
+ * @param args A user-supplied dict of args
+ * @param refFrame Defines the reference frame for the shape
+ * @return The XML definition string
+ */
+std::string SetSample::createFlatPlateHolderXML(
+    const Kernel::PropertyManager &args,
+    const Geometry::ReferenceFrame &refFrame) const {
+
+  std::vector<double> centre =
+      getPropertyAsVectorDouble(args, ShapeArgs::CENTER);
+  const double sampleThickness = getPropertyAsDouble(args, ShapeArgs::THICK);
+  const double frontPlateThickness =
+      getPropertyAsDouble(args, ShapeArgs::FRONT_THICK);
+  const double backPlateThickness =
+      getPropertyAsDouble(args, ShapeArgs::BACK_THICK);
+  const double angle = degToRad(getPropertyAsDouble(args, ShapeArgs::ANGLE));
+  const auto pointingAlongBeam = refFrame.pointingAlongBeam();
+  const auto pointingHorizontal = refFrame.pointingHorizontal();
+  const int horizontalSign = (centre[pointingHorizontal] > 0) ? -1 : 1;
+  const double horizontalProjection = std::fabs(std::sin(angle));
+  const double alongBeamProjection = std::fabs(std::cos(angle));
+
+  auto frontPlate = args;
+  auto frontCentre = centre;
+  const double frontCentreOffset =
+      (frontPlateThickness + sampleThickness) * 0.5;
+  frontCentre[pointingAlongBeam] -= frontCentreOffset * alongBeamProjection;
+  frontCentre[pointingHorizontal] +=
+      frontCentreOffset * horizontalProjection * horizontalSign;
+  frontPlate.setProperty(ShapeArgs::CENTER, frontCentre);
+  const std::string frontPlateXML =
+      createFlatPlateXML(frontPlate, refFrame, "front");
+
+  auto backPlate = args;
+  auto backCentre = centre;
+  const double backCentreOffset = (backPlateThickness + sampleThickness) * 0.5;
+  backCentre[pointingAlongBeam] += backCentreOffset * alongBeamProjection;
+  backCentre[pointingHorizontal] -=
+      backCentreOffset * horizontalProjection * horizontalSign;
+  backPlate.setProperty(ShapeArgs::CENTER, backCentre);
+  const std::string backPlateXML =
+      createFlatPlateXML(backPlate, refFrame, "back");
+
+  return frontPlateXML + backPlateXML + "<algebra val=\"back:front\"/>";
+}
+
+/**
+ * Create the XML required to define a hollow cylinder holder from the given
+ * args Hollow cylinder holder is a CSG union of 2 hollow cylinders one inside,
+ * one outside the sample The centre, the axis and the height are assumed to be
+ * the same as for the sample Only the inner and outer radii need to be
+ * manipulated
+ * @param args A user-supplied dict of args
+ * @param refFrame Defines the reference frame for the shape
+ * @return The XML definition string
+ */
+std::string SetSample::createHollowCylinderHolderXML(
+    const Kernel::PropertyManager &args,
+    const Geometry::ReferenceFrame &refFrame) const {
+  auto innerCylinder = args;
+  const double innerOuterRadius =
+      getPropertyAsDouble(args, ShapeArgs::INNER_OUTER_RADIUS);
+  innerCylinder.setProperty(ShapeArgs::OUTER_RADIUS, innerOuterRadius);
+  const std::string innerCylinderXML =
+      createCylinderLikeXML(innerCylinder, refFrame, true, "inner");
+  auto outerCylinder = args;
+  const double outerInnerRadius =
+      getPropertyAsDouble(args, ShapeArgs::OUTER_INNER_RADIUS);
+  outerCylinder.setProperty(ShapeArgs::INNER_RADIUS, outerInnerRadius);
+  const std::string outerCylinderXML =
+      createCylinderLikeXML(outerCylinder, refFrame, true, "outer");
+  return innerCylinderXML + outerCylinderXML + "<algebra val=\"inner:outer\"/>";
+}
+
+/**
  * Create the XML required to define a cylinder from the given args
  * @param args A user-supplied dict of args
  * @param refFrame Defines the reference frame for the shape
@@ -826,7 +956,7 @@ SetSample::createFlatPlateXML(const Kernel::PropertyManager &args,
 std::string
 SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
                                  const Geometry::ReferenceFrame &refFrame,
-                                 bool hollow) const {
+                                 bool hollow, const std::string &id) const {
   const std::string tag = hollow ? "hollow-cylinder" : "cylinder";
   double height = getPropertyAsDouble(args, ShapeArgs::HEIGHT);
   double innerRadius =
@@ -865,7 +995,7 @@ SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args,
   }
 
   std::ostringstream xmlShapeStream;
-  xmlShapeStream << "<" << tag << " id=\"sample-shape\"> "
+  xmlShapeStream << "<" << tag << " id=\"" << id << "\"> "
                  << "<centre-of-bottom-base x=\"" << baseCentre.X() << "\" y=\""
                  << baseCentre.Y() << "\" z=\"" << baseCentre.Z() << "\" /> "
                  << XMLString.str() << "<height val=\"" << height << "\" /> ";

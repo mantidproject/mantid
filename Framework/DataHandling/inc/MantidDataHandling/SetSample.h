@@ -52,13 +52,19 @@ private:
   std::string
   tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
                            const Geometry::ReferenceFrame &refFrame);
+  std::string createFlatPlateXML(const Kernel::PropertyManager &args,
+                                 const Geometry::ReferenceFrame &refFrame,
+                                 const std::string &id = "sample-shape") const;
   std::string
-  createFlatPlateXML(const Kernel::PropertyManager &args,
-                     const Geometry::ReferenceFrame &refFrame) const;
-  std::string createCylinderLikeXML(const Kernel::PropertyManager &args,
-                                    const Geometry::ReferenceFrame &refFrame,
-                                    bool hollow) const;
-
+  createFlatPlateHolderXML(const Kernel::PropertyManager &args,
+                           const Geometry::ReferenceFrame &refFrame) const;
+  std::string
+  createHollowCylinderHolderXML(const Kernel::PropertyManager &args,
+                                const Geometry::ReferenceFrame &refFrame) const;
+  std::string
+  createCylinderLikeXML(const Kernel::PropertyManager &args,
+                        const Geometry::ReferenceFrame &refFrame, bool hollow,
+                        const std::string &id = "sample-shape") const;
   void runChildAlgorithm(const std::string &name,
                          API::Workspace_sptr &workspace,
                          const Kernel::PropertyManager &args);
@@ -72,9 +78,8 @@ private:
                          const Kernel::PropertyManager &args,
                          const std::string &flavour,
                          const std::vector<const std::string *> &keys);
-  void setMaterial(
-      ReadMaterial::MaterialParameters &materialParams,
-      const Kernel::PropertyManager &materialArgs);
+  void setMaterial(ReadMaterial::MaterialParameters &materialParams,
+                   const Kernel::PropertyManager &materialArgs);
 };
 
 } // namespace DataHandling
