@@ -259,7 +259,8 @@ Material MaterialBuilder::build() const {
   }
   if (m_attenuationProfileFileName) {
     AttenuationProfile materialAttenuation(m_attenuationProfileFileName.get(),
-                                           m_attenuationFileSearchPath);
+                                           m_attenuationFileSearchPath,
+                                           material.get());
     material->setAttenuationProfile(materialAttenuation);
   }
   return *material;
