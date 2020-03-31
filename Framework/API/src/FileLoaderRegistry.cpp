@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidKernel/NexusHDF5Descriptor.h"
 
 #include <Poco/File.h>
 
@@ -113,14 +112,23 @@ FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const {
     m_log.debug()
         << filename
         << " looks like a Nexus file. Checking registered Nexus loaders\n";
-    try {
-      bestLoader = searchForLoader<NexusHDF5Descriptor,
-                                   IFileLoader<NexusHDF5Descriptor>>(
-          filename, m_names[Nexus], m_log);
-    } catch (const std::invalid_argument &) {
+
+    // a large subset of NeXus files are actually HDF5 based
+    if (NexusHDF5Descriptor::isReadable(filename)) {
+      try {
+        bestLoader = searchForLoader<NexusHDF5Descriptor,
+                                     IFileLoader<NexusHDF5Descriptor>>(
+                                       filename, m_names[NexusHDF5], m_log);
+      } catch (const std::invalid_argument &e) {
+        m_log.debug() << "Error in looking for HDF5 based NeXus files: " << e.what() << '\n';
+      }
+    }
+
+    // try generic nexus loaders
+    if (!bestLoader) {
       bestLoader =
-          searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(
-              filename, m_names[Nexus], m_log);
+        searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(
+          filename, m_names[Nexus], m_log);
     }
   } else {
     m_log.debug() << "Checking registered non-HDF loaders\n";
@@ -147,15 +155,14 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName,
                                      const std::string &filename) const {
   using Kernel::FileDescriptor;
   using Kernel::NexusDescriptor;
+  using Kernel::NexusHDF5Descriptor;
 
   // Check if it is in one of our lists
-  bool nexus(false), nonHDF(false);
-  if (m_names[Nexus].find(algorithmName) != m_names[Nexus].end())
-    nexus = true;
-  else if (m_names[Generic].find(algorithmName) != m_names[Generic].end())
-    nonHDF = true;
+  const bool nexus = (m_names[Nexus].find(algorithmName) != m_names[Nexus].end());
+  const bool nexusHDF5 = (m_names[NexusHDF5].find(algorithmName) != m_names[NexusHDF5].end());
+  const bool nonHDF = (m_names[Generic].find(algorithmName) != m_names[Generic].end());
 
-  if (!nexus && !nonHDF)
+  if (!(nexus || nexusHDF5 || nonHDF))
     throw std::invalid_argument(
         "FileLoaderRegistryImpl::canLoad - Algorithm '" + algorithmName +
         "' is not registered as a loader.");
@@ -165,11 +172,21 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName,
   if (nexus) {
     if (NexusDescriptor::isReadable(filename)) {
       loader = searchForLoader<NexusDescriptor, IFileLoader<NexusDescriptor>>(
-          filename, names, m_log);
-    }
-  } else {
-    loader = searchForLoader<FileDescriptor, IFileLoader<FileDescriptor>>(
         filename, names, m_log);
+    }
+  } else if (nexusHDF5) {
+    if (NexusHDF5Descriptor::isReadable(filename)) {
+      try {
+        loader = searchForLoader<NexusHDF5Descriptor,
+                                 IFileLoader<NexusHDF5Descriptor>>(
+                                   filename, names, m_log);
+      } catch (const std::invalid_argument &e) {
+        m_log.debug() << "Error in looking for HDF5 based NeXus files: " << e.what() << '\n';
+      }
+    }
+  } else if (nonHDF) {
+    loader = searchForLoader<FileDescriptor, IFileLoader<FileDescriptor>>(
+      filename, names, m_log);
   }
   return static_cast<bool>(loader);
 }
@@ -179,10 +196,11 @@ bool FileLoaderRegistryImpl::canLoad(const std::string &algorithmName,
 //----------------------------------------------------------------------------------------------
 /**
  * Creates an empty registry
+ *
+ * m_names is initialized in the header
  */
 FileLoaderRegistryImpl::FileLoaderRegistryImpl()
-    : m_names(2, std::multimap<std::string, int>()), m_totalSize(0),
-      m_log("FileLoaderRegistry") {}
+  : m_totalSize(0), m_log("FileLoaderRegistry") {}
 
 FileLoaderRegistryImpl::~FileLoaderRegistryImpl() = default;
 
