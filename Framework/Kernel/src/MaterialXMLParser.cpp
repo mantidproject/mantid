@@ -54,6 +54,7 @@ const char *TOTSC_ATT = "totalscatterxsec";
 const char *COHSC_ATT = "cohscatterxsec";
 const char *INCOHSC_ATT = "incohscatterxsec";
 const char *ABSORB_ATT = "absorptionxsec";
+const char *ATTENPROF_ATT = "attenuationprofile";
 
 // Base type to put in a hash
 struct BuilderHandle {
@@ -116,6 +117,8 @@ const BuilderHandle &findHandle(const std::string &name) {
     insertHandle(&handles, INCOHSC_ATT,
                  &MaterialBuilder::setIncoherentXSection);
     insertHandle(&handles, ABSORB_ATT, &MaterialBuilder::setAbsorptionXSection);
+    insertHandle(&handles, ATTENPROF_ATT,
+                 &MaterialBuilder::setAttenuationProfileFilename);
   }
   auto iter = handles.find(name);
   if (iter != handles.end())
@@ -198,9 +201,12 @@ Material MaterialXMLParser::parse(std::istream &istr) const {
  * tag.
  * It reads the definition and produces a new Material object.
  * @param element A pointer to an Element node that is a "material" tag
+ * @param XMLFilePath path of the sample environment file where the material
+ * specification was read from (if any)
  * @return A new Material object
  */
-Material MaterialXMLParser::parse(Poco::XML::Element *element) const {
+Material MaterialXMLParser::parse(Poco::XML::Element *element,
+                                  const std::string &XMLFilePath) const {
   using namespace Poco::XML;
   using NamedNodeMapPtr = AutoPtr<NamedNodeMap>;
   NamedNodeMapPtr attrs = element->attributes();
@@ -213,6 +219,7 @@ Material MaterialXMLParser::parse(Poco::XML::Element *element) const {
 
   MaterialBuilder builder;
   builder.setName(id->nodeValue());
+  builder.setAttenuationSearchPath(XMLFilePath);
   const auto nattrs = attrs->length();
   for (unsigned long i = 0; i < nattrs; ++i) {
     Node *node = attrs->item(i);

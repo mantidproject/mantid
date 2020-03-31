@@ -8,7 +8,6 @@
 ################################################################################
 # Advanced Setup Widget
 ################################################################################
-from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import (QDialog, QFrame)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
 from reduction_gui.widgets.base_widget import BaseWidget

@@ -4,10 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
-from six import iteritems
-
 import mantid.simpleapi as mantid
 from Muon.GUI.Common.validate_errors import validateToErrors
 
@@ -71,7 +67,7 @@ class MaxEntModel(object):
         self.alg = mantid.AlgorithmManager.create("MuonMaxent")
         self.alg.initialize()
         self.alg.setAlwaysStoreInADS(False)
-        for name, value in iteritems(inputs):
+        for name, value in inputs.items():
             self.alg.setProperty(name, value)
         self.alg.setRethrows(True)
         validateToErrors(self.alg)
@@ -92,7 +88,7 @@ class MaxEntModel(object):
         self.alg.setAlwaysStoreInADS(False)
         self.alg.setRethrows(True)
 
-        for name, value in iteritems(inputs):
+        for name, value in inputs.items():
             self.alg.setProperty(name, value)
         # check for version 1
         if inputs["InputWorkspace"] != "MuonAnalysis" and "MuonAnalysisGrouped" in inputs["InputWorkspace"]:

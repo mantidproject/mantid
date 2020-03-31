@@ -4,12 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import, print_function
-
 from qtpy import QtWidgets
 from copy import deepcopy
 import matplotlib as mpl
-from six import iteritems
 
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
@@ -234,7 +231,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # Select a different color, if all used then use the first
         color = self.get_color(element)
 
-        for name, x_value in iteritems(data):
+        for name, x_value in data.items():
             try:
                 x_value = float(x_value)
             except ValueError:
@@ -338,7 +335,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         if data is None:
             data = self.element_widgets[element].get_checked()
         color = self.get_color(element)
-        for name, x_value in iteritems(data):
+        for name, x_value in data.items():
             if isinstance(x_value, float):
                 full_name = gen_name(element, name)
                 label = self._gen_label(full_name, x_value, element)
@@ -416,19 +413,19 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self._update_peak_data(element)
 
     def electrons_changed(self, electron_peaks):
-        for element, selector in iteritems(self.element_widgets):
+        for element, selector in self.element_widgets.items():
             self.checked_data(element, selector.electron_checkboxes, electron_peaks.isChecked())
 
     def gammas_changed(self, gamma_peaks):
-        for element, selector in iteritems(self.element_widgets):
+        for element, selector in self.element_widgets.items():
             self.checked_data(element, selector.gamma_checkboxes, gamma_peaks.isChecked())
 
     def major_peaks_changed(self, major_peaks):
-        for element, selector in iteritems(self.element_widgets):
+        for element, selector in self.element_widgets.items():
             self.checked_data(element, selector.primary_checkboxes, major_peaks.isChecked())
 
     def minor_peaks_changed(self, minor_peaks):
-        for element, selector in iteritems(self.element_widgets):
+        for element, selector in self.element_widgets.items():
             self.checked_data(element, selector.secondary_checkboxes, minor_peaks.isChecked())
 
     def add_line_by_type(self, run, _type):

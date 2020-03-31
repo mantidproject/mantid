@@ -163,7 +163,8 @@ void SampleEnvironmentSpecParser::parseMaterials(Poco::XML::Element *element) {
   Node *node = nodeIter.nextNode();
   MaterialXMLParser parser;
   while (node) {
-    auto material = parser.parse(static_cast<Poco::XML::Element *>(node));
+    auto material =
+        parser.parse(static_cast<Poco::XML::Element *>(node), m_filepath);
     m_materials.emplace(material.name(), material);
     node = nodeIter.nextNode();
   }

@@ -8,11 +8,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 
 #pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function, unicode_literals)
 from Direct.NonIDF_Properties import *
 
 from collections import OrderedDict, Iterable
-from six import iteritems, string_types
 from mantid.kernel import funcinspect
 
 
@@ -104,7 +102,7 @@ class PropertyManager(NonIDF_Properties):
         self.__dict__.update(param_dict)
 
         # use existing descriptors setter to define IDF-defined descriptor's state
-        for key,val in iteritems(descr_dict):
+        for key,val in descr_dict.items():
             object.__setattr__(self,key,val)
 
         # file properties -- the properties described files which should exist for reduction to work.
@@ -141,7 +139,7 @@ class PropertyManager(NonIDF_Properties):
 
         class_decor = '_'+type(self).__name__+'__'
 
-        for key,val in iteritems(prop_dict):
+        for key,val in prop_dict.items():
             new_key = class_decor+key
             object.__setattr__(self,new_key,val)
 
@@ -165,7 +163,7 @@ class PropertyManager(NonIDF_Properties):
         #end
 
         # replace common substitutions for string value
-        if isinstance(val, string_types):
+        if isinstance(val, str):
             val1 = val.lower()
             if val1 == 'none' or len(val1) == 0:
                 val = None
@@ -352,7 +350,7 @@ class PropertyManager(NonIDF_Properties):
                           'instr_name':'','print_diag_results':True,'mapmask_ref_ws':None}
         result = {}
 
-        for key,val in iteritems(diag_param_list):
+        for key,val in diag_param_list.items():
             try:
                 result[key] = getattr(self,key)
             except KeyError:
@@ -400,7 +398,7 @@ class PropertyManager(NonIDF_Properties):
         # Walk through descriptors list and set their values
         # Assignment to descriptors should accept the form, descriptor is written in IDF
         changed_descriptors = set()
-        for key,val in iteritems(descr_dict):
+        for key,val in descr_dict.items():
             if key not in old_changes_list:
                 try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains
                    # properties, not present in recent IDF.
@@ -444,7 +442,7 @@ class PropertyManager(NonIDF_Properties):
         self.setChangedProperties(changed_descriptors)
 
         # Walk through the complex properties first and then through simple properties
-        for key,val in iteritems(sorted_param.copy()):
+        for key,val in sorted_param.copy().items():
             # complex properties may change through their dependencies so we are setting them first
             public_name = self.is_complex_property(key, val)
 
@@ -552,7 +550,7 @@ class PropertyManager(NonIDF_Properties):
         self.setChangedProperties(set())
         # set back all changes stored earlier and may be overwritten by new IDF
         # (this is just to be sure -- should not change anything as we do not set properties changed)
-        for key,val in iteritems(old_changes):
+        for key,val in old_changes.items():
             setattr(self,key,val)
 
         # Clear changed properties list (is this wise?, may be we want to know that some defaults changed?)

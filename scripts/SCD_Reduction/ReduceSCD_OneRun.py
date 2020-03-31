@@ -41,7 +41,6 @@
 # the use of either monitor counts (True) or proton charge (False) for
 # scaling.
 
-from __future__ import (absolute_import, division, print_function)
 import os
 import sys
 import time

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from MultiPlotting.multi_plotting_context import PlottingContext
 from MultiPlotting.subplot.subplot_context import subplotContext
 from line_helper import line

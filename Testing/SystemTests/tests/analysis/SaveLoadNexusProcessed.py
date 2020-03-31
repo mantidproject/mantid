@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from abc import ABCMeta, abstractmethod
 import os
-from six import with_metaclass
-
 import systemtesting
 from mantid.simpleapi import *
 from mantid import config
@@ -22,7 +20,7 @@ def create_file_path(base_name):
     return filename
 
 
-class SaveLoadNexusProcessedTestBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class SaveLoadNexusProcessedTestBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
     filename = None
     test_ws_name = 'input_ws'

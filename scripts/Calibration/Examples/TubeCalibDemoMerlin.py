@@ -49,8 +49,6 @@ The previous calibrated instrument view:
 .. sectionauthor:: Gesner Passos - ISIS
 """
 
-from __future__ import absolute_import, division, print_function
-
 import numpy
 import mantid.simpleapi as mantid
 import tube

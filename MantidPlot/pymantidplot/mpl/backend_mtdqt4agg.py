@@ -13,8 +13,7 @@ mode for MantidPlot is to run all python scripts asynchronously.
 Providing this backend allows users to work with the standard matplotlib
 API without modification
 """
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+
 
 try:
     # Newer matplotlib has qt_compat
@@ -26,8 +25,6 @@ except ImportError:
 # Import everything from the *real* matplotlib backend
 from matplotlib.backends.backend_qt4agg import *
 from matplotlib.figure import Figure
-import six
-
 # Remove the implementations of new_figure_manager_*. We replace them below
 del new_figure_manager
 try:
@@ -71,7 +68,7 @@ class QAppThreadCall(QtCore.QObject):
             QtCore.QMetaObject.invokeMethod(self, "on_call",
                                             QtCore.Qt.BlockingQueuedConnection)
             if self._exc_info is not None:
-                six.reraise(*self._exc_info)
+                raise self._exc_info[1].with_traceback(self._exc_info[2])
             return self._result
 
     @QtCore.pyqtSlot()

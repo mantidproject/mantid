@@ -11,7 +11,6 @@ import os
 import pprint
 import re
 
-
 ######################################################################################################################
 # Script level variables
 
@@ -252,7 +251,7 @@ process_file_tree(root_path)
 if not args.noreport:
     #write out reporting files
     for reporting_filename, reporting_dict in reporting_dictionaries.items():
-        with open(reporting_filename,"w") as reporting_file:
+        with open(reporting_filename, "w") as reporting_file:
             for key, value in reporting_dict.items():
                 reporting_file.write("{0}\t{1}{2}".format(key,value,os.linesep))
 

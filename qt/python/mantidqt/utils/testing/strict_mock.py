@@ -5,11 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-from __future__ import absolute_import
-
 import unittest
 
-from mantid.py3compat.mock import Mock, PropertyMock
+from unittest.mock import Mock, PropertyMock
 
 
 class StrictMock(Mock):

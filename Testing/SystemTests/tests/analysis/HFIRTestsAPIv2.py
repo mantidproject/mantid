@@ -13,7 +13,6 @@
     The following tests were converted from the unittest framework
     that is part of python to the systemtesting framework used in Mantid.
 """
-from __future__ import (absolute_import, division, print_function)
 import types
 
 import traceback

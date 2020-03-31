@@ -6,15 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-branches
 
-from __future__ import (absolute_import, division, print_function)
-
 import os
 import tempfile
 from collections import namedtuple
 from contextlib import contextmanager
 import numpy as np
 
-from mantid.py3compat.enum import Enum
+from enum import Enum
 from mantid import config as mantid_config
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, FileProperty,
                         WorkspaceProperty, FileAction, PropertyMode, mtd,

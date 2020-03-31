@@ -13,7 +13,7 @@ matplotlib.use('Qt5Agg')  # noqa  # we need Qt for events to work
 import matplotlib.pyplot as plt
 
 from mantid import plots  # noqa  # register mantid projection
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figurewindow import FigureWindow

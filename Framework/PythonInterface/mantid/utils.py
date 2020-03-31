@@ -70,11 +70,7 @@ def _shared_cextension():
         yield
         return
 
-    import six
-    if six.PY2:
-        import DLFCN as dl
-    else:
-        import os as dl
+    import os as dl
     flags_orig = sys.getdlopenflags()
     sys.setdlopenflags(dl.RTLD_NOW | dl.RTLD_GLOBAL)
     yield

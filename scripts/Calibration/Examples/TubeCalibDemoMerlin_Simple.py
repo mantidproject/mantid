@@ -18,8 +18,6 @@
 # The workspace with calibrated instrument is saved to a Nexus file
 #
 
-from __future__ import absolute_import, division, print_function
-
 import tube
 from tube_calib_fit_params import TubeCalibFitParams
 import numpy

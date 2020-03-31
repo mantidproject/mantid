@@ -26,16 +26,11 @@ and assign it to the rebinned variable.
 
 Importing this module starts the FrameworkManager instance.
 """
-from __future__ import (absolute_import, division, print_function)
-
 # std libs
 from collections import OrderedDict, namedtuple
 import inspect
 import os
 import sys
-
-import six
-from six import iteritems
 
 import mantid
 # This is a simple API so give access to the aliases by default as well
@@ -747,10 +742,7 @@ def _get_function_spec(func):
     """
     import inspect
     try:
-        if six.PY2:
-            argspec = inspect.getargspec(func)
-        else:
-            argspec = inspect.getfullargspec(func)
+        argspec = inspect.getfullargspec(func)
     except TypeError:
         return ''
     # Algorithm functions have varargs set not args
@@ -1109,7 +1101,7 @@ def set_properties(alg_object, *args, **kwargs):
         mandatory_props = []
 
     postponed = []
-    for (key, value) in iteritems(kwargs):
+    for (key, value) in kwargs.items():
         if key in mandatory_props:
             mandatory_props.remove(key)
         if "IndexSet" in key:
@@ -1447,7 +1439,7 @@ def _translate():
 
     algs = AlgorithmFactory.getRegisteredAlgorithms(True)
     algorithm_mgr = AlgorithmManager
-    for name, versions in iteritems(algs):
+    for name, versions in algs.items():
         if specialization_exists(name):
             continue
         try:

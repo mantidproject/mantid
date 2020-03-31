@@ -5,13 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
-from __future__ import absolute_import, unicode_literals
-
 import unittest
 
 from qtpy.QtWidgets import QApplication, QWidget
 
-from mantid.py3compat.mock import MagicMock
+from unittest.mock import MagicMock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from workbench.widgets.settings.presenter import SettingsPresenter

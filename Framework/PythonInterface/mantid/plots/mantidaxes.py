@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
-from __future__ import absolute_import
-
 try:
    from collections.abc import Iterable
 except ImportError:
@@ -37,6 +35,8 @@ WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
 # -----------------------------------------------------------------------------
 # Decorators
 # -----------------------------------------------------------------------------
+
+
 def plot_decorator(func):
     def wrapper(self, *args, **kwargs):
         func_value = func(self, *args, **kwargs)
@@ -58,6 +58,8 @@ def plot_decorator(func):
 # -----------------------------------------------------------------------------
 # MantidAxes
 # -----------------------------------------------------------------------------
+
+
 class MantidAxes(Axes):
     """
     This class defines the **mantid** projection for 2d plotting. One chooses
@@ -285,7 +287,7 @@ class MantidAxes(Axes):
         Remove the artists reference by this workspace (if any) and return True
         if the axes is then empty
         :param workspace: A Workspace object
-        :return: True if the axes is empty, false if artists remain or this workspace is not associated here
+        :return: True is an artist was removed False if one was not
         """
         try:
             # pop to ensure we don't hold onto an artist reference
@@ -296,7 +298,7 @@ class MantidAxes(Axes):
         for workspace_artist in artist_info:
             workspace_artist.remove(self)
 
-        return self.is_empty(self)
+        return True
 
     def remove_artists_if(self, unary_predicate):
         """
@@ -1103,6 +1105,8 @@ class MantidAxes(Axes):
 # -----------------------------------------------------------------------------
 # MantidAxes3D
 # -----------------------------------------------------------------------------
+
+
 class MantidAxes3D(Axes3D):
     """
     This class defines the **mantid3d** projection for 3d plotting. One chooses

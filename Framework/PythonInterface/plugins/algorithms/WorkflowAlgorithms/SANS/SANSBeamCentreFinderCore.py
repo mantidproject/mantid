@@ -8,8 +8,6 @@
 
 """ Finds the beam centre."""
 
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         IEventWorkspace)
 from mantid.kernel import (Direction, StringListValidator)

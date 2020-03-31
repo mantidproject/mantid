@@ -11,8 +11,6 @@ once qtpy is universally used.
 It is intended to be used as a launcher script for a given unit test file.
 The reports are output to the current working directory.
 """
-from __future__ import (absolute_import, division, print_function)
-
 import imp
 import os
 import sys

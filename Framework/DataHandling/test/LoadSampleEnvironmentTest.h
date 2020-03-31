@@ -35,9 +35,6 @@ public:
     LoadSampleEnvironment alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-
-    TSM_ASSERT_EQUALS("should be 23 properties here", 23,
-                      (size_t)(alg.getProperties().size()));
   }
 
   void testSetMaterial() {

@@ -8,8 +8,6 @@
 #
 #
 """Provides a widget to wrap common behaviour for all plugins"""
-from __future__ import absolute_import
-
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QDockWidget, QMainWindow, QWidget
 

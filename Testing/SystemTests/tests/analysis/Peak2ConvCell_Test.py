@@ -15,7 +15,6 @@
 
 
 # import systemtesting
-from __future__ import (absolute_import, division, print_function)
 import numpy
 from numpy import matrix
 import math

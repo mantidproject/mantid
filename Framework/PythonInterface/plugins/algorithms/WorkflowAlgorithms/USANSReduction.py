@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
-from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -14,7 +13,6 @@ import numpy
 import sys
 import os
 import json
-from six import iteritems
 
 
 class USANSReduction(PythonAlgorithm):
@@ -320,7 +318,7 @@ def _execute(algorithm_name, **parameters):
     alg = AlgorithmManager.create(algorithm_name)
     alg.initialize()
     alg.setChild(True)
-    for key, value in iteritems(parameters):
+    for key, value in parameters.items():
         if value is None:
             Logger("USANSReduction").error("Trying to set %s=None" % key)
         if alg.existsProperty(key):

@@ -8,7 +8,6 @@
 """
     Script used to start the DGS reduction GUI from MantidPlot
 """
-from __future__ import (absolute_import, division, print_function)
 import os
 
 from reduction_application import ReductionGUI

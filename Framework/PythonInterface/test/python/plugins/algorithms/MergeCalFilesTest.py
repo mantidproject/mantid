@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import os
 import tempfile
@@ -18,6 +16,8 @@ from testhelpers import run_algorithm
 '''
 Helper type to represent an entry in a cal file
 '''
+
+
 class CalFileLine:
 
     _number = None
@@ -51,6 +51,8 @@ class CalFileLine:
 '''
 A helper resource managing wrapper over a new calfile object. Creates cal file and allows writing to it.
 '''
+
+
 class DisposableCalFileObject:
 
     _fullpath = None
@@ -77,6 +79,8 @@ class DisposableCalFileObject:
 '''
 A helper resource managing wrapper over an existing cal file for reading. Disposes of it after reading.
 '''
+
+
 class ReadableCalFileObject:
 
     _fullpath = None

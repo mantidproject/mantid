@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import numpy as np
 import mantid.simpleapi as api
@@ -16,6 +14,7 @@ from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 
 import os, json
+
 
 class SavePlot1DAsJsonTest(unittest.TestCase):
 

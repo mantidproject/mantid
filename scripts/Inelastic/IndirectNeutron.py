@@ -10,7 +10,6 @@
 Force for ILL backscattering raw
 """
 
-from __future__ import (absolute_import, division, print_function)
 from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder

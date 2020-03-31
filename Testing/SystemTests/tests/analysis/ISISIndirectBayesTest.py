@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init, too-few-public-methods
-from __future__ import (absolute_import, division, print_function)
-
 import warnings
 
 import systemtesting
@@ -14,8 +12,6 @@ import os
 from abc import ABCMeta, abstractmethod
 from mantid.simpleapi import *
 import platform
-from six import with_metaclass
-
 #==============================================================================
 
 
@@ -329,7 +325,7 @@ class QLWidthTest(systemtesting.MantidSystemTest):
 #==============================================================================
 
 
-class JumpFitFunctionTestBase(with_metaclass(ABCMeta, systemtesting.MantidSystemTest)):
+class JumpFitFunctionTestBase(metaclass=ABCMeta):
 
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)

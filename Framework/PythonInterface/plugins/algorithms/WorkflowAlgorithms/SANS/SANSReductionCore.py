@@ -8,8 +8,6 @@
 
 """ SANSReductionCore algorithm runs the sequence of reduction steps which are necessary to reduce a data set."""
 
-from __future__ import (absolute_import, division, print_function)
-
 from SANSReductionCoreBase import SANSReductionCoreBase
 
 from mantid.api import AlgorithmFactory, Progress

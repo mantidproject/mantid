@@ -58,8 +58,6 @@ Calibration technique: Finding tubes not well calibrated
 
 """
 
-from __future__ import absolute_import, division, print_function
-
 import mantid.simpleapi as mantid
 import tube
 import numpy

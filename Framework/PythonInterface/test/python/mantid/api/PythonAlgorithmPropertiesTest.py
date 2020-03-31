@@ -7,8 +7,6 @@
 """Defines tests for the simple property declarations types within
 Python algorithms
 """
-from __future__ import (absolute_import, division, print_function)
-
 import sys
 import unittest
 import testhelpers

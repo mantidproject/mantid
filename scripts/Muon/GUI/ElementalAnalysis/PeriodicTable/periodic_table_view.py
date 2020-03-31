@@ -4,8 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import
-
 from qtpy import QtWidgets
 
 from Muon.GUI.ElementalAnalysis.PeriodicTable import periodic_table

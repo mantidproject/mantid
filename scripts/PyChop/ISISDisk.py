@@ -12,7 +12,6 @@ Contains the ISISDisk class which calculates resolution and flux for ISIS Disk c
 spectrometer (LET) - using the functions in MulpyRep and additional tables of instrument parameters
 """
 
-from __future__ import (absolute_import, division, print_function)
 import warnings
 import numpy as np
 from . import MulpyRep

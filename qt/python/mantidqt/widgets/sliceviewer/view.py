@@ -7,8 +7,6 @@
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 from matplotlib import gridspec
 from matplotlib.figure import Figure
 from matplotlib.transforms import Bbox, BboxTransform

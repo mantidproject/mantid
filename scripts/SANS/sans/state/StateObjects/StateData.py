@@ -7,11 +7,8 @@
 # pylint: disable=too-few-public-methods
 
 """State about the actual data which is to be reduced."""
-from __future__ import (absolute_import, division, print_function)
 import json
 import copy
-
-from six import with_metaclass
 
 from sans.state.JsonSerializable import JsonSerializable
 from sans.common.enums import SANSFacility, SANSInstrument
@@ -24,7 +21,7 @@ from sans.state.state_functions import (is_pure_none_or_not_none, validation_mes
 # State
 # ----------------------------------------------------------------------------------------------------------------------
 
-class StateData(with_metaclass(JsonSerializable)):
+class StateData(metaclass=JsonSerializable):
     ALL_PERIODS = sans.common.constants.ALL_PERIODS
 
     def __init__(self):

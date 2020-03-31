@@ -10,8 +10,6 @@
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import argparse
 import atexit
 import importlib
@@ -21,7 +19,7 @@ from functools import partial
 
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
-from mantid.py3compat import setswitchinterval
+from sys import setswitchinterval
 from mantid.utils import is_required_version
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.plugins.exception_handler import exception_logger

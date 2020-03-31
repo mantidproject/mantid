@@ -9,8 +9,10 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include "MantidKernel/AttenuationProfile.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include <boost/optional/optional.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
@@ -76,6 +78,10 @@ public:
   /// Virtual destructor.
   virtual ~Material() = default;
 
+  /// Allow an explicit attenuation profile to be loaded onto the material
+  /// that overrides the standard linear absorption coefficient
+  void setAttenuationProfile(AttenuationProfile attenuationOverride);
+
   /// Returns the name of the material
   const std::string &name() const;
   const Material::ChemicalFormula &chemicalFormula() const;
@@ -98,7 +104,7 @@ public:
   double
   absorbXSection(const double lambda =
                      PhysicalConstants::NeutronAtom::ReferenceLambda) const;
-  /// Compute the attenuation at a given wavelegnth over the given distance
+  /// Compute the attenuation at a given wavelength over the given distance
   double attenuation(const double distance,
                      const double lambda =
                          PhysicalConstants::NeutronAtom::ReferenceLambda) const;
@@ -203,6 +209,8 @@ private:
   double m_pressure;
   double m_linearAbsorpXSectionByWL;
   double m_totalScatterXSection;
+
+  boost::optional<AttenuationProfile> m_attenuationOverride;
 };
 
 /// Typedef for a shared pointer

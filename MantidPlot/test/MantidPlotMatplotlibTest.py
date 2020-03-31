@@ -7,8 +7,6 @@
 """
 Test matplotlib plotting for MantidPlot. Without our custom backend matplotlib graphs crash MantidPlot.
 """
-from __future__ import print_function
-
 import mantidplottests
 from mantidplottests import *
 import time

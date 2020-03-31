@@ -7,8 +7,6 @@
 #  This file is part of the mantidqt package
 #
 #
-from __future__ import (print_function, absolute_import, unicode_literals)
-
 from qtpy.QtCore import Qt, Signal, Slot
 
 import matplotlib.pyplot

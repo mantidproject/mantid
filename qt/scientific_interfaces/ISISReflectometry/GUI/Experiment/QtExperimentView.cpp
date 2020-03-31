@@ -269,7 +269,6 @@ void QtExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.transStitchParamsEdit, "Params", alg);
   registerSettingWidget(*m_ui.transScaleRHSCheckBox, "ScaleRHSWorkspace", alg);
   registerSettingWidget(*m_ui.polCorrCheckBox, "PolarizationAnalysis", alg);
-  registerSettingWidget(stitchOptionsLineEdit(), "Params", alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
   registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins",
@@ -277,6 +276,12 @@ void QtExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.floodCorComboBox, "FloodCorrection", alg);
   registerSettingWidget(*m_ui.floodWorkspaceWsSelector, "FloodWorkspace", alg);
   registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
+
+  registerSettingWidget(stitchOptionsLineEdit(),
+                        "Properties to use for stitching the output workspaces "
+                        "in Q. Only required for groups containing multiple "
+                        "rows. Start typing to see property hints or see "
+                        "Stitch1DMany for details.");
 }
 
 void QtExperimentView::connectExperimentSettingsWidgets() {
@@ -347,6 +352,12 @@ void QtExperimentView::registerSettingWidget(
     Widget &widget, std::string const &propertyName,
     const Mantid::API::IAlgorithm_sptr &alg) {
   setToolTipAsPropertyDocumentation(widget, propertyName, alg);
+}
+
+template <typename Widget>
+void QtExperimentView::registerSettingWidget(Widget &widget,
+                                             std::string const &tooltip) {
+  widget.setToolTip(QString::fromStdString(tooltip));
 }
 
 void QtExperimentView::setToolTipAsPropertyDocumentation(

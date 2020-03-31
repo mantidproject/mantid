@@ -8,17 +8,13 @@
 """ Main view for the ISIS SANS reduction interface.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 from abc import ABCMeta, abstractmethod
 
 from qtpy.QtCore import QRegExp
 from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
 from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)
-from six import with_metaclass
-
 from mantid.kernel import (Logger, UsageService, FeatureType)
-from mantid.py3compat import Enum
+from enum import Enum
 from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
@@ -57,7 +53,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     MULTI_PERIOD_COLUMNS = ["SSP", "STP", "SDP", "CSP", "CTP", "CDP"]
 
-    class RunTabListener(with_metaclass(ABCMeta, object)):
+    class RunTabListener(metaclass=ABCMeta):
         """
         Defines the elements which a presenter can listen to in this View
         """

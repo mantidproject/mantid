@@ -114,6 +114,11 @@ void LoadSampleEnvironment::init() {
                   "Optional:  This total scattering cross-section (coherent + "
                   "incoherent) for the sample material in barns will be used "
                   "instead of tabulated");
+  const std::vector<std::string> attExtensions{".DAT"};
+  declareProperty(
+      std::make_unique<FileProperty>("AttenuationProfile", "",
+                                     FileProperty::OptionalLoad, attExtensions),
+      "The path name of the file containing the attenuation profile");
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
                   "to be used to calculate the number density.");
@@ -159,6 +164,7 @@ void LoadSampleEnvironment::init() {
   setPropertyGroup("IncoherentXSection", specificValuesGrp);
   setPropertyGroup("AttenuationXSection", specificValuesGrp);
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
+  setPropertyGroup("AttenuationProfile", specificValuesGrp);
   setPropertySettings("CoherentXSection", std::make_unique<EnabledWhenProperty>(
                                               "SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings(
@@ -169,6 +175,9 @@ void LoadSampleEnvironment::init() {
       std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
   setPropertySettings(
       "ScatteringXSection",
+      std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
+  setPropertySettings(
+      "AttenuationProfile",
       std::make_unique<EnabledWhenProperty>("SetMaterial", IS_NOT_DEFAULT));
 }
 
@@ -235,6 +244,7 @@ void LoadSampleEnvironment::exec() {
     params.incoherentXSection = getProperty("IncoherentXSection");
     params.attenuationXSection = getProperty("AttenuationXSection");
     params.scatteringXSection = getProperty("ScatteringXSection");
+    params.attenuationProfileFileName = getPropertyValue("AttenuationProfile");
     const std::string numberDensityUnit = getProperty("NumberDensityUnit");
     if (numberDensityUnit == "Atoms") {
       params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;

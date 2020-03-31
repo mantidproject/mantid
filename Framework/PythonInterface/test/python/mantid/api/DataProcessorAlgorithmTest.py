@@ -4,13 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from testhelpers import assertRaisesNothing
 from mantid.api import (Algorithm, DataProcessorAlgorithm, AlgorithmFactory,
                         AlgorithmManager, WorkspaceProperty)
 from mantid.kernel import Direction
+
 
 class TestDataProcessor(DataProcessorAlgorithm):
     def PyInit(self):
@@ -18,6 +17,7 @@ class TestDataProcessor(DataProcessorAlgorithm):
     def PyExec(self):
         pass
 # end v1 alg
+
 
 class DataProcessorAlgorithmTest(unittest.TestCase):
 

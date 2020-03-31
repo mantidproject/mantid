@@ -11,7 +11,6 @@ take considerable time because it involves loading data. Besides, it uses data t
 currently available inside the systemtests.
 """
 
-from __future__ import (absolute_import, division, print_function)
 import unittest
 import systemtesting
 from mantid.simpleapi import *
