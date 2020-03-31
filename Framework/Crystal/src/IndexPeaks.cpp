@@ -412,6 +412,23 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
     helpMsgs[Prop::PEAKSWORKSPACE] = exc.what();
   }
 
+  // get all runs which have peaksin the table
+  const bool commonUB = this->getProperty(Prop::COMMONUB);
+  if (commonUB) {
+    const auto &allPeaks = ws->getPeaks();
+    std::unordered_map<int, int> peaksPerRun;
+    auto it = allPeaks.cbegin();
+    while (peaksPerRun.size() < 2 && it != allPeaks.cend()) {
+      peaksPerRun[it->getRunNumber()] = 1;
+      ++it;
+    };
+    if (peaksPerRun.size() < 2) {
+      helpMsgs[Prop::COMMONUB] =
+          "CommonUBForAll can only be True if there are peaks from more "
+          "than one run present in the peaks worksapce";
+    };
+  };
+
   return helpMsgs;
 }
 
