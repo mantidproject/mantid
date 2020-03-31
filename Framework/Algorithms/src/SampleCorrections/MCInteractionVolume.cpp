@@ -29,6 +29,7 @@ namespace Algorithms {
  * @param logger Logger to write debug information on scatter pt stats
  * @param maxScatterAttempts The maximum number of tries to generate a random
  * point within the object. [Default=5000]
+ * @param pointsIn Where to generate the scattering point in
  */
 MCInteractionVolume::MCInteractionVolume(
     const API::Sample &sample, const Geometry::BoundingBox &activeRegion,

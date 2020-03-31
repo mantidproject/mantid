@@ -231,6 +231,7 @@ std::map<std::string, std::string> MonteCarloAbsorption::validateInputs() {
  * @param useSparseInstrument If true, use sparse instrument in simulation
  * @param maxScatterPtAttempts The maximum number of tries to generate a
  * scatter point within the object
+ * @param pointsIn Where to simulate the scattering point in
  * @return A new workspace containing the correction factors & errors
  */
 MatrixWorkspace_uptr MonteCarloAbsorption::doSimulation(

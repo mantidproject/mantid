@@ -33,7 +33,7 @@ namespace Algorithms {
  * @param regenerateTracksForEachLambda Whether to resimulate tracks for each
  * wavelength point or not
  * @param logger Logger from parent algorithm to write logging info
- * point within the object.
+ * @param pointsIn Where to simulate the scattering point
  */
 MCAbsorptionStrategy::MCAbsorptionStrategy(
     const IBeamProfile &beamProfile, const API::Sample &sample,

@@ -543,7 +543,7 @@ void SetSample::exec() {
 }
 
 /**
- * Set the requested sample environment on the workspace
+ * Set the requested sample environment on the workspace from the environment file
  * @param exptInfo A reference to the ExperimentInfo to receive the environment
  * @param args The dictionary of flags for the environment
  * @return A pointer to the new sample environment
@@ -588,6 +588,12 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromFile(
   return &(exptInfo.sample().getEnvironment());
 }
 
+/**
+ * Set the requested sample environment from shape XML string
+ * @param exptInfo A reference to the ExperimentInfo to receive the environment
+ * @param args The dictionary of flags for the environment
+ * @return A pointer to the new sample environment
+ */
 const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
     API::ExperimentInfo &exptInfo,
     const Kernel::PropertyManager_const_sptr &canGeomArgs,
@@ -616,6 +622,11 @@ const Geometry::SampleEnvironment *SetSample::setSampleEnvironmentFromXML(
   return &(exptInfo.sample().getEnvironment());
 }
 
+/**
+ * @brief SetSample::setMaterial Configures a material from the parameters
+ * @param materialParams : output material parameters object
+ * @param materialArgs : input material arguments
+ */
 void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
                             const Kernel::PropertyManager &materialArgs) {
   if (materialArgs.existsProperty("ChemicalFormula")) {
@@ -805,6 +816,7 @@ SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &args,
  * Create the XML required to define a flat plate from the given args
  * @param args A user-supplied dict of args
  * @param refFrame Defines the reference frame for the shape
+ * @param id A generic id for the shape element
  * @return The XML definition string
  */
 std::string
@@ -953,6 +965,7 @@ std::string SetSample::createHollowCylinderHolderXML(
  * @param args A user-supplied dict of args
  * @param refFrame Defines the reference frame for the shape
  * @param hollow True if an annulus is to be created
+ * @param id A generic id for the shape element
  * @return The XML definition string
  */
 std::string
