@@ -519,7 +519,6 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
             self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(valid_options)
 
 
-
 def parse_selection_str(txt, min_val=None, max_val=None, allowed_values=None):
     """Parse an input string containing plot index selection.
 
