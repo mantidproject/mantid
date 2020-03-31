@@ -41,6 +41,8 @@ public:
   Run(const Run &other);
   ~Run();
   Run &operator=(const Run &other);
+  bool operator==(const Run &other);
+  bool operator!=(const Run &other);
 
   /// Clone
   boost::shared_ptr<Run> clone();

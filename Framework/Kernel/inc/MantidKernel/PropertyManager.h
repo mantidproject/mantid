@@ -108,6 +108,9 @@ public:
   /// Return the property manager serialized as a json object.
   ::Json::Value asJson(bool withDefaultValues = false) const override;
 
+  bool operator==(const PropertyManager &other) const;
+  bool operator!=(const PropertyManager &other) const;
+
 protected:
   friend class PropertyManagerOwner;
 

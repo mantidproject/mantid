@@ -659,6 +659,43 @@ public:
     TS_ASSERT_EQUALS(i, 33);
   }
 
+  void test_operator_equals_same_contents() {
+    PropertyManager a;
+    PropertyManager b;
+
+    a.declareProperty("Prop1", 10);
+    b.declareProperty("Prop1", 10);
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_operator_not_equals_different_sizes() {
+    PropertyManager a;
+    PropertyManager b;
+
+    b.declareProperty("Prop1", 10);
+    TSM_ASSERT_DIFFERS("Unequal sizes", a, b);
+    TSM_ASSERT("Unequal sizes", !(a == b));
+  }
+
+  void test_operator_not_equals_different_keys() {
+    PropertyManager a;
+    PropertyManager b;
+    a.declareProperty("Prop1", 1);
+    b.declareProperty("Prop2", 1);
+    TSM_ASSERT_DIFFERS("Different Keys", a, b);
+    TSM_ASSERT("Different Keys", !(a == b));
+  }
+
+  void test_operator_not_equals_different_vaues() {
+    PropertyManager a;
+    PropertyManager b;
+    a.declareProperty("Prop1", 1);
+    b.declareProperty("Prop1", 2);
+    TSM_ASSERT_DIFFERS("Different Values", a, b);
+    TSM_ASSERT("Different Values", !(a == b));
+  }
+
 private:
   std::unique_ptr<PropertyManagerHelper> manager;
 };

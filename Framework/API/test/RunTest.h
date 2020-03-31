@@ -609,6 +609,65 @@ public:
     TS_ASSERT_DELTA(run3.getProtonCharge(), 1.234, 1e-5);
   }
 
+  void test_equals_when_runs_empty() {
+    Run a{};
+    Run b{a};
+    TS_ASSERT_EQUALS(a, b);
+  }
+
+  void test_equals_when_runs_identical() {
+    Run a{};
+    a.addProperty(std::make_unique<ConcreteProperty>());
+    const DblMatrix rotation_x{
+        {1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
+    a.setGoniometer(Goniometer{rotation_x}, false /*do not use log angles*/);
+    a.storeHistogramBinBoundaries({1, 2, 3, 4});
+    Run b{a};
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_not_equal_when_histogram_bin_boundaries_differ() {
+    Run a{};
+    a.addProperty(std::make_unique<ConcreteProperty>());
+    DblMatrix rotation_x{
+        {1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
+    a.setGoniometer(Goniometer{rotation_x}, false /*do not use log angles*/);
+    a.storeHistogramBinBoundaries({1, 2, 3, 4});
+    Run b{a};
+    b.storeHistogramBinBoundaries({0, 2, 3, 4});
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equal_when_properties_differ() {
+    Run a{};
+    a.addProperty(std::make_unique<ConcreteProperty>());
+    DblMatrix rotation_x{
+        {1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
+    a.setGoniometer(Goniometer{rotation_x}, false /*do not use log angles*/);
+    a.storeHistogramBinBoundaries({1, 2, 3, 4});
+    Run b{a};
+    b.removeProperty("Test");
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equal_when_goniometer_differ() {
+    Run a{};
+    a.addProperty(std::make_unique<ConcreteProperty>());
+    DblMatrix rotation_x{
+        {1, 0, 0, 0, 0, -1, 0, 1, 0}}; // 90 degrees around x axis
+    a.setGoniometer(Goniometer{rotation_x}, false /*do not use log angles*/);
+    a.storeHistogramBinBoundaries({1, 2, 3, 4});
+    Run b{a};
+    Mantid::Kernel::DblMatrix rotation_y{
+        {0, 0, 1, 0, 1, 0, -1, 0, 0}}; // 90 degrees around y axis
+    b.setGoniometer(Goniometer{rotation_y}, false /*do not use log angles*/);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
 private:
   /// Testing bins
   std::vector<double> m_test_energy_bins;

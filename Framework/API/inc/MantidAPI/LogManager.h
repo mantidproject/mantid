@@ -182,6 +182,9 @@ public:
   /// Clear the logs
   void clearLogs();
 
+  bool operator==(const LogManager &other) const;
+  bool operator!=(const LogManager &other) const;
+
 protected:
   /// Load the run from a NeXus file with a given group name
   void loadNexus(::NeXus::File *file,
