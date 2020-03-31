@@ -368,7 +368,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.toolbar.hold()
 
     def get_window_title(self):
-        return isinstance(self.window.windowTitle(), str)
+        return self.window.windowTitle()
 
     def set_window_title(self, title):
         self.window.setWindowTitle(title)
