@@ -36,6 +36,9 @@ class DrillPresenter(DrillEventListener):
         self.model.set_rundex_data(filename)
         self.update_view_from_model()
 
+    def on_rundex_saved(self, filename):
+        self.model.export_rundex_data(filename)
+
     def update_view_from_model(self):
         self.view.set_table(self.model.get_columns(),
                             self.model.get_rows_contents())

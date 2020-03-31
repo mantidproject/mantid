@@ -114,6 +114,25 @@ class DrillModel(object):
                 else:
                     self.data[sample].append("")
 
+    def export_rundex_data(self, filename):
+        json_data = dict()
+        # header TODO: to be continued
+        json_data["Instrument"] = self.instrument
+        json_data["Technique"] = self.technique
+
+        # TODO: add settings here
+
+        # samples
+        json_data["Samples"] = list()
+        for sample in self.data:
+            json_sample = dict(
+                    zip(RundexSettings.COLUMNS[self.technique], sample)
+                    )
+            json_data["Samples"].append(json_sample)
+
+        with open(filename, 'w') as json_file:
+            json.dump(json_data, json_file, indent=4)
+
     def get_rows_contents(self):
         return self.data
 

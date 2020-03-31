@@ -48,6 +48,10 @@ class DrillEventListener(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
+    def on_rundex_saved(self, filename):
+        pass
+
+    @abstractmethod
     def update_view_from_model(self):
         pass
 
@@ -100,6 +104,7 @@ class DrillView(QMainWindow):
         self.addrow.clicked.connect(self.add_row_after)
 
         self.save.setIcon(icons.get_icon("mdi.file-export"))
+        self.save.clicked.connect(self.save_rundex)
 
         self.processRows.setIcon(icons.get_icon("mdi.play"))
         self.processRows.clicked.connect(self.process_selected_rows)
@@ -285,6 +290,14 @@ class DrillView(QMainWindow):
             return
         self.call_settings_listeners(
                 lambda listener: listener.on_rundex_loaded(filename[0])
+                )
+
+    def save_rundex(self):
+        filename = QFileDialog.getSaveFileName(self, 'Save rundex')
+        if not filename[0]:
+            return
+        self.call_settings_listeners(
+                lambda listener: listener.on_rundex_saved(filename[0])
                 )
 
     def keyPressEvent(self, event):
