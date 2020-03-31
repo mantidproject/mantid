@@ -69,9 +69,104 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         return False
 
     def PyInit(self):
-        # Sample options
+        # Sample Input
         self.declareProperty(WorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
                              doc='Sample Workspace')
+
+        # Monte Carlo options
+        self.declareProperty(name='NumberOfWavelengthPoints', defaultValue=10,
+                             validator=IntBoundedValidator(1),
+                             doc='Number of wavelengths for calculation')
+        self.declareProperty(name='EventsPerPoint', defaultValue=1000,
+                             validator=IntBoundedValidator(0),
+                             doc='Number of neutron events')
+        self.declareProperty(name='Interpolation', defaultValue='Linear',
+                             validator=StringListValidator(
+                                 ['Linear', 'CSpline']),
+                             doc='Type of interpolation')
+        self.declareProperty(name='MaxScatterPtAttempts', defaultValue=5000,
+                             validator=IntBoundedValidator(0),
+                             doc='Maximum number of tries made to generate a scattering point')
+
+        self.setPropertyGroup('NumberOfWavelengthPoints', 'Monte Carlo Options')
+        self.setPropertyGroup('EventsPerPoint', 'Monte Carlo Options')
+        self.setPropertyGroup('Interpolation', 'Monte Carlo Options')
+        self.setPropertyGroup('MaxScatterPtAttempts', 'Monte Carlo Options')
+
+        # Beam Options
+        self.declareProperty(name='BeamHeight', defaultValue=1.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Height of the beam (cm)')
+        self.declareProperty(name='BeamWidth', defaultValue=1.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Width of the beam (cm)')
+
+        self.setPropertyGroup('BeamHeight', 'Beam Options')
+        self.setPropertyGroup('BeamWidth', 'Beam Options')
+
+        # Shape Options
+        self.declareProperty(name='Shape', defaultValue='FlatPlate',
+                             validator=StringListValidator(['FlatPlate', 'Cylinder', 'Annulus']),
+                             doc='Geometric shape of the sample environment')
+
+        flat_plate_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'FlatPlate')
+        cylinder_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Cylinder')
+        annulus_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Annulus')
+
+        # height is common to all, and should be the same for sample and container
+        self.declareProperty('Height', defaultValue=0.0, validator=FloatBoundedValidator(0.0),
+                             doc='Height of the sample environment (cm)')
+
+        self.setPropertyGroup('Shape', 'Shape Options')
+        self.setPropertyGroup('Height', 'Shape Options')
+
+        # Sample Shape
+        # Flat Plate
+        self.declareProperty(name='SampleWidth', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Width of the sample environment (cm)')
+        self.declareProperty(name='SampleThickness', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Thickness of the sample environment (cm)')
+        self.declareProperty(name='SampleCenter', defaultValue=0.0,
+                             doc='Center of the sample environment')
+        self.declareProperty(name='SampleAngle', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Angle of the sample environment with respect to the beam (degrees)')
+
+        self.setPropertySettings('SampleWidth', flat_plate_condition)
+        self.setPropertySettings('SampleThickness', flat_plate_condition)
+        self.setPropertySettings('SampleCenter', flat_plate_condition)
+        self.setPropertySettings('SampleAngle', flat_plate_condition)
+
+        self.setPropertyGroup('SampleWidth', 'Sample Shape')
+        self.setPropertyGroup('SampleThickness', 'Sample Shape')
+        self.setPropertyGroup('SampleCenter', 'Sample Shape')
+        self.setPropertyGroup('SampleAngle', 'Sample Shape')
+
+        # Cylinder
+        self.declareProperty(name='SampleRadius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Radius of the sample environment (cm)')
+
+        self.setPropertySettings('SampleRadius', cylinder_condition)
+        self.setPropertyGroup('SampleRadius', 'Sample Shape')
+
+        # Annulus
+        self.declareProperty(name='SampleInnerRadius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Inner radius of the sample environment (cm)')
+        self.declareProperty(name='SampleOuterRadius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Outer radius of the sample environment (cm)')
+
+        self.setPropertySettings('SampleInnerRadius', annulus_condition)
+        self.setPropertySettings('SampleOuterRadius', annulus_condition)
+
+        self.setPropertyGroup('SampleInnerRadius', 'Sample Shape')
+        self.setPropertyGroup('SampleOuterRadius', 'Sample Shape')
+
+        # Sample Material
         self.declareProperty(name='SampleMaterialAlreadyDefined', defaultValue=False,
                              doc='Select this option if sample material has already been defined')
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
@@ -98,52 +193,66 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='The value for the sample Mass density (g/cm^3) or Number density (1/Angstrom^3).')
 
-        self.setPropertyGroup('SampleWorkspace', 'Sample Options')
-        self.setPropertyGroup('SampleChemicalFormula', 'Sample Options')
-        self.setPropertyGroup('SampleCoherentXSection', 'Sample Options')
-        self.setPropertyGroup('SampleIncoherentXSection', 'Sample Options')
-        self.setPropertyGroup('SampleAttenuationXSection', 'Sample Options')
-        self.setPropertyGroup('SampleDensityType', 'Sample Options')
-        self.setPropertyGroup('SampleDensity', 'Sample Options')
+        self.setPropertyGroup('SampleMaterialAlreadyDefined', 'Sample Material')
+        self.setPropertyGroup('SampleChemicalFormula', 'Sample Material')
+        self.setPropertyGroup('SampleCoherentXSection', 'Sample Material')
+        self.setPropertyGroup('SampleIncoherentXSection', 'Sample Material')
+        self.setPropertyGroup('SampleAttenuationXSection', 'Sample Material')
+        self.setPropertyGroup('SampleDensityType', 'Sample Material')
+        self.setPropertyGroup('SampleNumberDensityUnit', 'Sample Material')
+        self.setPropertyGroup('SampleDensity', 'Sample Material')
 
-        # Beam Options
-        self.declareProperty(name='BeamHeight', defaultValue=1.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Height of the beam (cm)')
-        self.declareProperty(name='BeamWidth', defaultValue=1.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Width of the beam (cm)')
-
-        self.setPropertyGroup('BeamHeight', 'Beam Options')
-        self.setPropertyGroup('BeamWidth', 'Beam Options')
-
-        # Monte Carlo options
-        self.declareProperty(name='NumberOfWavelengthPoints', defaultValue=10,
-                             validator=IntBoundedValidator(1),
-                             doc='Number of wavelengths for calculation')
-        self.declareProperty(name='EventsPerPoint', defaultValue=1000,
-                             validator=IntBoundedValidator(0),
-                             doc='Number of neutron events')
-        self.declareProperty(name='Interpolation', defaultValue='Linear',
-                             validator=StringListValidator(
-                                 ['Linear', 'CSpline']),
-                             doc='Type of interpolation')
-        self.declareProperty(name='MaxScatterPtAttempts', defaultValue=5000,
-                             validator=IntBoundedValidator(0),
-                             doc='Maximum number of tries made to generate a scattering point')
-
-        self.setPropertyGroup('NumberOfWavelengthPoints', 'Monte Carlo Options')
-        self.setPropertyGroup('EventsPerPoint', 'Monte Carlo Options')
-        self.setPropertyGroup('Interpolation', 'Monte Carlo Options')
-        self.setPropertyGroup('MaxScatterPtAttempts', 'Monte Carlo Options')
-
-        # Container options
+        # Container Input
         self.declareProperty(WorkspaceProperty('ContainerWorkspace', '', direction=Direction.Input,
                                                optional=PropertyMode.Optional),
                              doc='Container Workspace')
 
         container_condition = VisibleWhenProperty('ContainerWorkspace', PropertyCriterion.IsNotDefault)
 
+        # Container Shape
+        container_flat_plate_condition = VisibleWhenProperty(container_condition, flat_plate_condition,
+                                                             LogicOperator.And)
+        container_cylinder_condition = VisibleWhenProperty(container_condition, cylinder_condition,
+                                                           LogicOperator.And)
+        container_annulus_condition = VisibleWhenProperty(container_condition, annulus_condition,
+                                                          LogicOperator.And)
+
+        # Flat Plate
+        self.declareProperty(name='ContainerFrontThickness', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Front thickness of the container environment (cm)')
+        self.declareProperty(name='ContainerBackThickness', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Back thickness of the container environment (cm)')
+
+        self.setPropertySettings('ContainerFrontThickness', container_flat_plate_condition)
+        self.setPropertySettings('ContainerBackThickness', container_flat_plate_condition)
+        self.setPropertyGroup('ContainerFrontThickness', 'Container Shape')
+        self.setPropertyGroup('ContainerBackThickness', 'Container Shape')
+
+        # Cylinder
+        self.declareProperty(name='ContainerRadius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Outer radius of the sample environment (cm)')
+
+        self.setPropertySettings('ContainerRadius', container_cylinder_condition)
+        self.setPropertyGroup('ContainerRadius', 'Container Shape')
+
+        # Annulus
+        self.declareProperty(name='ContainerInnerRadius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Inner radius of the container environment (cm)')
+        self.declareProperty(name='ContainerOuterRadius', defaultValue=0.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Outer radius of the container environment (cm)')
+
+        self.setPropertySettings('ContainerInnerRadius', container_annulus_condition)
+        self.setPropertySettings('ContainerOuterRadius', container_annulus_condition)
+
+        self.setPropertyGroup('ContainerInnerRadius', 'Container Shape')
+        self.setPropertyGroup('ContainerOuterRadius', 'Container Shape')
+
+        # Container Material
         self.declareProperty(name='ContainerMaterialAlreadyDefined', defaultValue=False,
                              doc='Select this option if container material has already been defined')
         self.declareProperty(name='ContainerChemicalFormula', defaultValue='',
@@ -170,131 +279,26 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='The value for the container Mass density (g/cm^3) or Number density (1/Angstrom^3).')
 
-        self.setPropertyGroup('ContainerWorkspace', 'Container Options')
-        self.setPropertyGroup('ContainerChemicalFormula', 'Container Options')
-        self.setPropertyGroup('ContainerCoherentXSection', 'Container Options')
-        self.setPropertyGroup('ContainerIncoherentXSection', 'Container Options')
-        self.setPropertyGroup('ContainerAttenuationXSection', 'Container Options')
-        self.setPropertyGroup('ContainerDensityType', 'Container Options')
-        self.setPropertyGroup('ContainerDensity', 'Container Options')
+        self.setPropertyGroup('ContainerMaterialAlreadyDefined', 'Container Material')
+        self.setPropertyGroup('ContainerChemicalFormula', 'Container Material')
+        self.setPropertyGroup('ContainerCoherentXSection', 'Container Material')
+        self.setPropertyGroup('ContainerIncoherentXSection', 'Container Material')
+        self.setPropertyGroup('ContainerAttenuationXSection', 'Container Material')
+        self.setPropertyGroup('ContainerDensityType', 'Container Material')
+        self.setPropertyGroup('ContainerNumberDensityUnit', 'Container Material')
+        self.setPropertyGroup('ContainerDensity', 'Container Material')
 
         self.setPropertySettings('ContainerMaterialAlreadyDefined', container_condition)
         self.setPropertySettings('ContainerChemicalFormula', container_condition)
         self.setPropertySettings('ContainerDensityType', container_condition)
         self.setPropertySettings('ContainerDensity', container_condition)
 
-        # Shape options
-        self.declareProperty(name='Shape', defaultValue='FlatPlate',
-                             validator=StringListValidator(['FlatPlate', 'Cylinder', 'Annulus']),
-                             doc='Geometric shape of the sample environment')
-
-        flat_plate_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'FlatPlate')
-        cylinder_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Cylinder')
-        annulus_condition = VisibleWhenProperty('Shape', PropertyCriterion.IsEqualTo, 'Annulus')
-
-        # height is common to all, and should be the same for sample and container
-        self.declareProperty('Height', defaultValue=0.0, validator=FloatBoundedValidator(0.0),
-                             doc='Height of the sample environment (cm)')
-
-        self.setPropertyGroup('Shape', 'Shape Options')
-        self.setPropertyGroup('Height', 'Shape Options')
-
-        # ---------------------------Sample---------------------------
-        # Flat Plate
-        self.declareProperty(name='SampleWidth', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Width of the sample environment (cm)')
-        self.declareProperty(name='SampleThickness', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Thickness of the sample environment (cm)')
-        self.declareProperty(name='SampleCenter', defaultValue=0.0,
-                             doc='Center of the sample environment')
-        self.declareProperty(name='SampleAngle', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Angle of the sample environment with respect to the beam (degrees)')
-
-        self.setPropertySettings('SampleWidth', flat_plate_condition)
-        self.setPropertySettings('SampleThickness', flat_plate_condition)
-        self.setPropertySettings('SampleCenter', flat_plate_condition)
-        self.setPropertySettings('SampleAngle', flat_plate_condition)
-
-        self.setPropertyGroup('SampleWidth', 'Sample Shape Options')
-        self.setPropertyGroup('SampleThickness', 'Sample Shape Options')
-        self.setPropertyGroup('SampleCenter', 'Sample Shape Options')
-        self.setPropertyGroup('SampleAngle', 'Sample Shape Options')
-
-        # Cylinder
-        self.declareProperty(name='SampleRadius', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Radius of the sample environment (cm)')
-
-        self.setPropertySettings('SampleRadius', cylinder_condition)
-        self.setPropertyGroup('SampleRadius', 'Sample Shape Options')
-
-        # Annulus
-        self.declareProperty(name='SampleInnerRadius', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Inner radius of the sample environment (cm)')
-        self.declareProperty(name='SampleOuterRadius', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Outer radius of the sample environment (cm)')
-
-        self.setPropertySettings('SampleInnerRadius', annulus_condition)
-        self.setPropertySettings('SampleOuterRadius', annulus_condition)
-
-        self.setPropertyGroup('SampleInnerRadius', 'Sample Shape Options')
-        self.setPropertyGroup('SampleOuterRadius', 'Sample Shape Options')
-
-        # ---------------------------Container---------------------------
-        container_flat_plate_condition = VisibleWhenProperty(container_condition, flat_plate_condition,
-                                                             LogicOperator.And)
-        container_cylinder_condition = VisibleWhenProperty(container_condition, cylinder_condition,
-                                                           LogicOperator.And)
-        container_annulus_condition = VisibleWhenProperty(container_condition, annulus_condition,
-                                                          LogicOperator.And)
-
-        # Flat Plate
-        self.declareProperty(name='ContainerFrontThickness', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Front thickness of the container environment (cm)')
-        self.declareProperty(name='ContainerBackThickness', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Back thickness of the container environment (cm)')
-
-        self.setPropertySettings('ContainerFrontThickness', container_flat_plate_condition)
-        self.setPropertySettings('ContainerBackThickness', container_flat_plate_condition)
-        self.setPropertyGroup('ContainerFrontThickness', 'Container Shape Options')
-        self.setPropertyGroup('ContainerBackThickness', 'Container Shape Options')
-
-        # Cylinder
-        self.declareProperty(name='ContainerRadius', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Outer radius of the sample environment (cm)')
-
-        self.setPropertySettings('ContainerRadius', container_cylinder_condition)
-        self.setPropertyGroup('ContainerRadius', 'Container Shape Options')
-
-        # Annulus
-        self.declareProperty(name='ContainerInnerRadius', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Inner radius of the container environment (cm)')
-        self.declareProperty(name='ContainerOuterRadius', defaultValue=0.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Outer radius of the container environment (cm)')
-
-        self.setPropertySettings('ContainerInnerRadius', container_annulus_condition)
-        self.setPropertySettings('ContainerOuterRadius', container_annulus_condition)
-
-        self.setPropertyGroup('ContainerInnerRadius', 'Container Shape Options')
-        self.setPropertyGroup('ContainerOuterRadius', 'Container Shape Options')
-
-        # Output
+        # Output Workspace Group
         self.declareProperty(WorkspaceGroupProperty(name='CorrectionsWorkspace',
                                                     defaultValue='corrections',
                                                     direction=Direction.Output,
                                                     optional=PropertyMode.Optional),
                              doc='Name of the workspace group to save correction factors')
-        self.setPropertyGroup('CorrectionsWorkspace', 'Output Options')
 
     def PyExec(self):
 
