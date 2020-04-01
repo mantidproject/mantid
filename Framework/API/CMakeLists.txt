@@ -106,6 +106,7 @@ set(SRC_FILES
     src/MultiPeriodGroupWorker.cpp
     src/MultipleExperimentInfos.cpp
     src/MultipleFileProperty.cpp
+    src/NexusFileLoader.cpp
     src/NotebookBuilder.cpp
     src/NotebookWriter.cpp
     src/NullCoordTransform.cpp
@@ -305,6 +306,7 @@ set(INC_FILES
     inc/MantidAPI/MultiPeriodGroupWorker.h
     inc/MantidAPI/MultipleExperimentInfos.h
     inc/MantidAPI/MultipleFileProperty.h
+    inc/MantidAPI/NexusFileLoader.h
     inc/MantidAPI/NotebookBuilder.h
     inc/MantidAPI/NotebookWriter.h
     inc/MantidAPI/NullCoordTransform.h
