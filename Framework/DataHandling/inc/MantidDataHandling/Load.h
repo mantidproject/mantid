@@ -43,9 +43,6 @@ public:
   void setPropertyValue(const std::string &name,
                         const std::string &value) override;
 
-  /// Free function to find first file property
-  static std::string findFilenamePropertyName(const IAlgorithm *loader);
-
 protected:
   Parallel::ExecutionMode getParallelExecutionMode(
       const std::map<std::string, Parallel::StorageMode> &storageModes)
