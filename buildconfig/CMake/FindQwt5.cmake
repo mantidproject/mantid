@@ -16,7 +16,7 @@ find_library ( QWT5_LIBRARY_DEBUG NAMES qwtd qwtd5 )
 
 # in REQUIRED mode: terminate if one of the above find commands failed
 include ( FindPackageHandleStandardArgs )
-find_package_handle_standard_args( Qwt DEFAULT_MSG QWT5_LIBRARY QWT5_INCLUDE_DIR )
+find_package_handle_standard_args( Qwt5 DEFAULT_MSG QWT5_LIBRARY QWT5_INCLUDE_DIR )
 
 # Parse version string from qwt_global.h
 file ( STRINGS ${QWT5_INCLUDE_DIR}/qwt_global.h QWT5_VERSION
