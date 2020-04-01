@@ -1,6 +1,6 @@
-# CMake version check. Require CMake 3.13 - Required for add_link_options
-# 3.15 is required on Windows, but is not available to RHEL yet
-cmake_minimum_required(VERSION 3.13)
+# CMake version check. 3.14 mimimum available from EPEL.
+# 3.15 is required on Windows, but is not available in EPEL yet.
+cmake_minimum_required(VERSION 3.14)
 
 # Define the project name.
 project(Mantid)
