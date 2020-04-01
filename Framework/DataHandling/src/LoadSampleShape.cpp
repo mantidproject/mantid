@@ -72,7 +72,7 @@ void LoadSampleShape::exec() {
 
   boost::shared_ptr<MeshObject> shape = nullptr;
   const std::string scaleProperty = getPropertyValue("Scale");
-  const ScaleUnits scaleType = getScaleType(scaleProperty);
+  const ScaleUnits scaleType = getScaleTypeFromStr(scaleProperty);
 
   if (filetype == "off") {
     auto offReader = LoadOff(filename, scaleType);

@@ -10,10 +10,6 @@
 #include "MantidDataHandling/MeshFileIO.h"
 #include "lib3mf_implicit.hpp"
 
-/*#include <assimp\Importer.hpp>
-#include <scene.h>
-#include <postprocess.h>*/
-
 #include <boost/shared_ptr.hpp>
 #include <memory>
 
@@ -23,6 +19,11 @@ namespace Geometry {
 class MeshObject;
 }
 namespace DataHandling {
+
+/// Typdef for a shared pointer
+using MeshObject_sptr = boost::shared_ptr<Geometry::MeshObject>;
+/// Typdef for a shared pointer to a const object
+using MeshObject_const_sptr = boost::shared_ptr<const Geometry::MeshObject>;
 
 /**
 
@@ -41,31 +42,25 @@ public:
     model = wrapper->CreateModel();
   };
   void LoadFile(std::string filename);
-  void readMeshObjects(
-      std::vector<boost::shared_ptr<Geometry::MeshObject>> &meshObjects,
-      boost::shared_ptr<Geometry::MeshObject> &sample);
+  void readMeshObjects(std::vector<MeshObject_sptr> &meshObjects,
+                       MeshObject_sptr &sample);
+  void readMeshObject(std::vector<MeshObject_sptr> &meshObjects,
+                      MeshObject_sptr &sample, uint32_t objectResourceID,
+                      sLib3MFTransform transform);
+  void readComponents(std::vector<MeshObject_sptr> &meshObjects,
+                      MeshObject_sptr &sample, uint32_t objectResourceID,
+                      sLib3MFTransform transform);
   void writeMeshObjects(std::vector<const Geometry::MeshObject *> meshObjects,
-                        const Geometry::MeshObject *sample,
+                        MeshObject_const_sptr &sample,
                         DataHandling::ScaleUnits scale);
-  /*void writeMeshObjects(
-      std::vector<boost::shared_ptr<Geometry::MeshObject>> meshObjects,
-      boost::shared_ptr<Geometry::MeshObject> &sample,
-      DataHandling::ScaleUnits scale);*/
   void setMaterialOnObject(std::string objectName, std::string materialName,
                            int materialColor);
   void saveFile(std::string filename);
 
 private:
   Lib3MF::PModel model;
-  /*std::vector<uint32_t> m_triangle;
-  std::vector<Kernel::V3D> m_vertices;*/
-  void
-  ShowComponentsObjectInformation(Lib3MF::PComponentsObject componentsObject);
-  void ShowTransform(sLib3MFTransform transform, std::string indent);
-  void ShowMetaDataInformation(Lib3MF::PMetaDataGroup metaDataGroup);
-  boost::shared_ptr<Geometry::MeshObject>
-  loadMeshObject(Lib3MF::PMeshObject meshObject,
-                 sLib3MFTransform buildTransform);
+  MeshObject_sptr loadMeshObject(Lib3MF::PMeshObject meshObject,
+                                 sLib3MFTransform buildTransform);
   void writeMeshObject(const Geometry::MeshObject &meshObject,
                        std::string name);
   void AddBaseMaterial(std::string materialName, int materialColor,

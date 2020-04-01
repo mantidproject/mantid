@@ -211,35 +211,46 @@ void SampleEnvironmentSpecParser::loadFullSpecification(
     SampleEnvironmentSpec *spec, Poco::XML::Element *element) {
   using Mantid::Geometry::Container;
   auto filename = element->getAttribute("filename");
-  Poco::Path suppliedFileName(filename);
-  std::string fileExt = suppliedFileName.getExtension();
-  std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
+  if (!filename.empty()) {
 
-  std::vector<boost::shared_ptr<Geometry::MeshObject>> environmentMeshes;
-  boost::shared_ptr<Geometry::MeshObject> sampleMesh;
+    std::string stlFileName = findFile(filename);
 
-  if (fileExt == "3MF") {
+    Poco::Path suppliedFileName(stlFileName);
+    std::string fileExt = suppliedFileName.getExtension();
+    std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
+
+    std::vector<boost::shared_ptr<Geometry::MeshObject>> environmentMeshes;
+    boost::shared_ptr<Geometry::MeshObject> sampleMesh;
+
+    if (fileExt == "3MF") {
 #ifdef ENABLE_LIB3MF
-    Mantid3MFFileIO MeshLoader;
-    MeshLoader.LoadFile(filename);
+      Mantid3MFFileIO MeshLoader;
+      MeshLoader.LoadFile(stlFileName);
 
-    MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
+      MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
 #else
-    throw std::runtime_error("3MF format not supported on this platform");
+      throw std::runtime_error("3MF format not supported on this platform");
 #endif
 
-    for (auto cpt : environmentMeshes) {
-      if (spec->ncans() == 0) {
-        auto can = boost::make_shared<Container>(cpt);
-        can->setSampleShape(sampleMesh);
-        spec->addContainer(can);
-      } else {
+      for (auto cpt : environmentMeshes) {
+        if (spec->ncans() == 0) {
+          // 3mf format doesn't nicely support multiple cans so just
+          // hardcode id to default
+          cpt->setID("default");
+          auto can = boost::make_shared<Container>(cpt);
+          can->setSampleShape(sampleMesh);
+          spec->addContainer(can);
+        } else {
 
-        spec->addComponent(cpt);
+          spec->addComponent(cpt);
+        }
       }
+    } else {
+      throw std::runtime_error("Full specification must be a .3mf file");
     }
   } else {
-    throw std::runtime_error("Full specification must be a .3mf file");
+    throw std::runtime_error(
+        "fullspecification element supplied without a filename");
   }
 }
 
@@ -340,6 +351,36 @@ std::vector<double> SampleEnvironmentSpecParser::parseTranslationVector(
   return translationVector;
 }
 
+std::string SampleEnvironmentSpecParser::findFile(std::string filename) const {
+  Poco::Path suppliedStlFileName(filename);
+  Poco::Path stlFileName;
+  if (suppliedStlFileName.isRelative()) {
+    bool useSearchDirectories = true;
+    if (!m_filepath.empty()) {
+      // if environment spec xml came from a file, search in the same
+      // directory as the file
+      stlFileName = Poco::Path(Poco::Path(m_filepath).parent(), filename);
+      if (Poco::File(stlFileName).exists()) {
+        useSearchDirectories = false;
+      }
+    }
+
+    if (useSearchDirectories) {
+      // ... and if that doesn't work look in the search directories
+      std::string foundFile =
+          Mantid::API::FileFinder::Instance().getFullPath(filename);
+      if (!foundFile.empty()) {
+        stlFileName = Poco::Path(foundFile);
+      } else {
+        stlFileName = suppliedStlFileName;
+      }
+    }
+  } else {
+    stlFileName = suppliedStlFileName;
+  }
+  return stlFileName.toString();
+}
+
 /**
  * Create a mesh shape from an STL input file. This can't be in the ShapeFactory
  * because that is in Geometry. This function needs acccess to the STL readers
@@ -351,32 +392,8 @@ SampleEnvironmentSpecParser::loadMeshFromSTL(Element *stlFileElement) const {
   std::string filename = stlFileElement->getAttribute("filename");
   if (!filename.empty()) {
 
-    Poco::Path suppliedStlFileName(filename);
-    Poco::Path stlFileName;
-    if (suppliedStlFileName.isRelative()) {
-      bool useSearchDirectories = true;
-      if (!m_filepath.empty()) {
-        // if environment spec xml came from a file, search in the same
-        // directory as the file
-        stlFileName = Poco::Path(Poco::Path(m_filepath).parent(), filename);
-        if (Poco::File(stlFileName).exists()) {
-          useSearchDirectories = false;
-        }
-      }
+    std::string stlFileName = findFile(filename);
 
-      if (useSearchDirectories) {
-        // ... and if that doesn't work look in the search directories
-        std::string foundFile =
-            Mantid::API::FileFinder::Instance().getFullPath(filename);
-        if (!foundFile.empty()) {
-          stlFileName = Poco::Path(foundFile);
-        } else {
-          stlFileName = suppliedStlFileName;
-        }
-      }
-    } else {
-      stlFileName = suppliedStlFileName;
-    }
     if (Poco::File(stlFileName).exists()) {
 
       std::string scaleStr = stlFileElement->getAttribute("scale");
@@ -384,10 +401,10 @@ SampleEnvironmentSpecParser::loadMeshFromSTL(Element *stlFileElement) const {
         throw std::runtime_error("Scale must be supplied for stl file:" +
                                  filename);
       }
-      const ScaleUnits scaleType = getScaleType(scaleStr);
+      const ScaleUnits scaleType = getScaleTypeFromStr(scaleStr);
 
       std::unique_ptr<LoadStl> reader =
-          LoadStlFactory::createReader(stlFileName.toString(), scaleType);
+          LoadStlFactory::createReader(stlFileName, scaleType);
 
       boost::shared_ptr<Geometry::MeshObject> comp = reader->readStl();
 

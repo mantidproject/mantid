@@ -624,6 +624,9 @@ if(ENABLE_LIB3MF)
   list(APPEND
     SRC_FILES
     src/Mantid3MFFileIO.cpp)
+  list(APPEND
+    TEST_FILES
+    Mantid3MFFileIOTest.h)
   find_package(Lib3mf REQUIRED)
 endif()
 

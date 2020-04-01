@@ -9,12 +9,18 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
+#ifdef ENABLE_LIB3MF
+#include "MantidDataHandling/Mantid3MFFileIO.h"
+#endif
 #include "MantidDataHandling/SaveStl.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
 #include <memory>
+
+#include <Poco/Path.h>
+
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory
@@ -34,13 +40,36 @@ void SaveSampleEnvironmentAndShape::init() {
       "The name of the workspace containing the environment to save ");
 
   // Environment file
-  const std::vector<std::string> extensions{".stl"};
+  const std::vector<std::string> extensions{".stl", ".3mf"};
   declareProperty(std::make_unique<FileProperty>(
                       "Filename", "", FileProperty::Save, extensions),
                   "The path name of the file to save");
 
   // scale to use for stl
   declareProperty("Scale", "m", "The scale of the stl: m, cm, or mm");
+}
+
+void SaveSampleEnvironmentAndShape::mergeSampleEnvironmentIntoSingleMesh(
+    const MeshObject &sampleShape,
+    const std::vector<const Geometry::MeshObject *> &environmentPieces) {
+
+  if (environmentPieces.size() > 0) {
+
+    // get the sample vertices and triangles and add them into the vector
+    addMeshToVector(sampleShape);
+
+    // keep track of the current number of vertices added
+    size_t offset = sampleShape.numberOfVertices();
+
+    // go through the environment, adding the triangles and vertices to the
+    // vector
+    for (size_t i = 0; i < environmentPieces.size(); ++i) {
+      offset = addMeshToVector(*environmentPieces[i], offset);
+    }
+  } else {
+    // get the sample vertices and triangles and add them into the vector
+    addMeshToVector(sampleShape);
+  }
 }
 
 void SaveSampleEnvironmentAndShape::exec() {
@@ -57,12 +86,13 @@ void SaveSampleEnvironmentAndShape::exec() {
   numVertices += sampleShape.numberOfVertices();
   numTriangles += (sampleShape.numberOfTriangles() * 3);
 
+  // Setup vector to store the pieces of the environment
+  std::vector<const MeshObject *> environmentPieces;
+
   if (inputWS->sample().hasEnvironment()) {
     // get the environment
     auto environment = inputWS->sample().getEnvironment();
 
-    // Setup vector to store the pieces of the environment
-    std::vector<const MeshObject *> environmentPieces;
     auto numElements = environment.nelements();
     environmentPieces.reserve(numElements);
 
@@ -87,38 +117,33 @@ void SaveSampleEnvironmentAndShape::exec() {
     if (!environmentValid) {
       throw std::invalid_argument("Environment Shape is not complete");
     }
-
-    // setup vectors to store all triangles and vertices
-    m_vertices.reserve(numVertices);
-    m_triangle.reserve(numTriangles);
-
-    // get the sample vertices and triangles and add them into the vector
-    addMeshToVector(sampleShape);
-
-    // keep track of the current number of vertices added
-    size_t offset = sampleShape.numberOfVertices();
-
-    // go through the environment, adding the triangles and vertices to the
-    // vector
-    for (size_t i = 0; i < environmentPieces.size(); ++i) {
-      offset = addMeshToVector(*environmentPieces[i], offset);
-    }
-  } else {
-    // setup vectors to store all triangles and vertices
-    m_vertices.reserve(numVertices);
-    m_triangle.reserve(numTriangles);
-
-    // get the sample vertices and triangles and add them into the vector
-    addMeshToVector(sampleShape);
   }
   // get the scale to use
   auto scale = getPropertyValue("Scale");
-  auto scaleType = getScaleType(scale);
+  auto scaleType = getScaleTypeFromStr(scale);
 
   // Save out the shape
   auto filename = getPropertyValue("Filename");
-  SaveStl writer = SaveStl(filename, m_triangle, m_vertices, scaleType);
-  writer.writeStl();
+  std::string fileExt = Poco::Path(filename).getExtension();
+  std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
+
+  if (fileExt == "STL") {
+    // setup vectors to store all triangles and vertices
+    m_vertices.reserve(numVertices);
+    m_triangle.reserve(numTriangles);
+    mergeSampleEnvironmentIntoSingleMesh(sampleShape, environmentPieces);
+    SaveStl writer = SaveStl(filename, m_triangle, m_vertices, scaleType);
+    writer.writeStl();
+  } else {
+#ifdef ENABLE_LIB3MF
+    Mantid3MFFileIO Mesh3MF;
+    Mesh3MF.writeMeshObjects(environmentPieces,
+                             MeshObject_const_sptr(&sampleShape), scaleType);
+    Mesh3MF.saveFile(filename);
+#else
+    throw std::runtime_error("3MF format not supported on this platform");
+#endif
+  }
 }
 
 /**

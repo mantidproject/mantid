@@ -8,24 +8,30 @@
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/MaterialXMLParser.h"
 #include "MantidKernel/Matrix.h"
+#include "MantidKernel/StringTokenizer.h"
+#include "Poco/DOM/AutoPtr.h"
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+#include "Poco/DOM/NodeList.h"
+#include <Poco/DOM/Element.h>
 #include <boost/make_shared.hpp>
 #include <iostream>
 
 namespace {
-constexpr auto SAMPLE_OBJECT_NAME = "sample";
+constexpr auto SAMPLE_OBJECT_NAME = "SAMPLE";
 constexpr double M_TOLERANCE = 0.000001;
 } // namespace
 
 namespace Mantid {
 namespace DataHandling {
 
+/**
+ * Load 3MF format file
+ * @param filename The name of the 3MF file
+ */
 void Mantid3MFFileIO::LoadFile(std::string filename) {
-
-  /*Assimp::Importer importer;
-
-  const aiScene *pScene = importer.ReadFile(
-      filename, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded);*/
 
   // Import Model from 3MF File
   {
@@ -47,7 +53,10 @@ void Mantid3MFFileIO::LoadFile(std::string filename) {
       scale = ScaleUnits::metres;
       break;
     default:
-      throw "Units not supported";
+      // reader defaults to mm for unknown units. For non-metric do likewise
+      // here
+      g_log.warning("Only m, cm and mm are supported in Mantid");
+      scale = ScaleUnits::millimetres;
     };
     setScaleType(scale);
 
@@ -55,13 +64,21 @@ void Mantid3MFFileIO::LoadFile(std::string filename) {
          iWarning++) {
       Lib3MF_uint32 nErrorCode;
       std::string sWarningMessage = reader->GetWarning(iWarning, nErrorCode);
-      std::cout << "Encountered warning #" << nErrorCode << " : "
-                << sWarningMessage << std::endl;
+      std::stringstream ss;
+      ss << "Encountered warning #" << nErrorCode << " : " << sWarningMessage
+         << std::endl;
+      g_log.warning(ss.str());
     }
   }
 }
 
-boost::shared_ptr<Geometry::MeshObject>
+/**
+ * Load a single mesh object into a Mantid Geometry::MeshObject
+ * @param meshObject A Lib3mf pointer to the mesh object
+ * @param buildTransform The rotation/translation to be applied to the object
+ * @return A pointer to the Geometry::MeshObject
+ */
+MeshObject_sptr
 Mantid3MFFileIO::loadMeshObject(Lib3MF::PMeshObject meshObject,
                                 sLib3MFTransform buildTransform) {
 
@@ -117,33 +134,30 @@ Mantid3MFFileIO::loadMeshObject(Lib3MF::PMeshObject meshObject,
       if ((openBracket != std::string::npos) &&
           (closeBracket != std::string::npos)) {
         materialName = fullMaterialName.substr(0, openBracket);
-        params.chemicalSymbol = materialName;
+        materialName.erase(
+            std::remove_if(materialName.begin(), materialName.end(), ::isspace),
+            materialName.end());
         std::string materialSpec = fullMaterialName.substr(
             openBracket + 1, closeBracket - openBracket - 1);
-        std::stringstream materialSpecSS(materialSpec);
-        std::string materialProperty;
-        while (std::getline(materialSpecSS, materialProperty, ',')) {
-          size_t equalsPos = materialProperty.find("=");
-          if (equalsPos != std::string::npos) {
-            std::string materialPropertyName =
-                materialProperty.substr(0, equalsPos);
-            std::string materialPropertyValue = materialProperty.substr(
-                equalsPos + 1, materialProperty.length() - equalsPos - 1);
-            double materialPropertyValueDouble;
-            try {
-              materialPropertyValueDouble = std::stoi(materialPropertyValue);
-            } catch (std::exception) {
-              g_log.debug("Unable to convert material property value + " +
-                          materialPropertyValue + " to a double");
-            }
-            if (materialPropertyName == "MassDensity") {
-              params.sampleMassDensity = materialPropertyValueDouble;
-            }
-          }
+        Poco::XML::DOMParser parser;
+        Poco::XML::AutoPtr<Poco::XML::Document> doc;
+        try {
+          doc = parser.parseString("<material id=\"" + materialName +
+                                   "\" formula=\"" + materialName + "\" " +
+                                   materialSpec + "></material>");
+          Poco::XML::AutoPtr<Poco::XML::NodeList> materialElements =
+              doc->getElementsByTagName("material");
+          Kernel::MaterialXMLParser materialParser;
+          material = materialParser.parse(
+              static_cast<Poco::XML::Element *>(materialElements->item(0)));
+        } catch (std::exception) {
+          g_log.warning("Unable to parse material properties for " +
+                        fullMaterialName + " so material will be ignored");
         }
-        ReadMaterial reader;
-        reader.setMaterialParameters(params);
-        material = *(reader.buildMaterial());
+      } else {
+        g_log.warning(
+            "Material name " + fullMaterialName +
+            " found without any properties so material will be ignored");
       }
     }
   };
@@ -182,44 +196,76 @@ Mantid3MFFileIO::loadMeshObject(Lib3MF::PMeshObject meshObject,
   return mesh;
 }
 
-void Mantid3MFFileIO::readMeshObjects(
-    std::vector<boost::shared_ptr<Geometry::MeshObject>> &meshObjects,
-    boost::shared_ptr<Geometry::MeshObject> &sample) {
-
-  std::vector<boost::shared_ptr<Geometry::MeshObject>> retVal;
+/**
+ * Read a set of mesh objects from the in memory lib3mf model object
+ * @param meshObjects A vector to store the meshes for env components
+ * @param sample A parameter to store a mesh for the sample
+ */
+void Mantid3MFFileIO::readMeshObjects(std::vector<MeshObject_sptr> &meshObjects,
+                                      MeshObject_sptr &sample) {
   Lib3MF::PBuildItemIterator buildItemIterator = model->GetBuildItems();
   while (buildItemIterator->MoveNext()) {
     Lib3MF::PBuildItem buildItem = buildItemIterator->GetCurrent();
     uint32_t objectResourceID = buildItem->GetObjectResourceID();
-    // no general GetObjectByID in the lib3MF library??
-    try {
-      Lib3MF::PMeshObject meshObject =
-          model->GetMeshObjectByID(objectResourceID);
-      sLib3MFTransform transform = buildItem->GetObjectTransform();
-      if (meshObject->GetName() == SAMPLE_OBJECT_NAME) {
-        sample = loadMeshObject(meshObject, transform);
-      } else {
-        meshObjects.push_back(loadMeshObject(meshObject, transform));
-      }
-    } catch (std::exception) {
-      Lib3MF::PComponentsObject componentsObject =
-          model->GetComponentsObjectByID(objectResourceID);
-      for (Lib3MF_uint32 nIndex = 0;
-           nIndex < componentsObject->GetComponentCount(); nIndex++) {
-        Lib3MF::PComponent component = componentsObject->GetComponent(nIndex);
-        Lib3MF::PMeshObject meshObject =
-            model->GetMeshObjectByID(component->GetObjectResourceID());
-        sLib3MFTransform transform = buildItem->GetObjectTransform();
-        if (meshObject->GetName() == SAMPLE_OBJECT_NAME) {
-          sample = loadMeshObject(meshObject, {0});
-        } else {
-          meshObjects.push_back(loadMeshObject(meshObject, transform));
-        }
-      }
-    }
+    sLib3MFTransform transform = buildItem->GetObjectTransform();
+    readMeshObject(meshObjects, sample, objectResourceID, transform);
   }
 }
 
+/**
+ * Attempt to read a single mesh from a specified lib3mf resource id. If the
+ * resource id points at a component instead then read them
+ * @param meshObjects A vector to store the meshes for env components
+ * @param sample A parameter to store a mesh for the sample
+ * @param objectResourceID Integer identifier of the object to read in
+ * @param transform Rotation/translation matrix for the object
+ */
+void Mantid3MFFileIO::readMeshObject(std::vector<MeshObject_sptr> &meshObjects,
+                                     MeshObject_sptr &sample,
+                                     uint32_t objectResourceID,
+                                     sLib3MFTransform transform) {
+  // no general GetObjectByID in the lib3MF library??
+  try {
+    Lib3MF::PMeshObject meshObject = model->GetMeshObjectByID(objectResourceID);
+    std::string objectName = meshObject->GetName();
+    std::transform(objectName.begin(), objectName.end(), objectName.begin(),
+                   toupper);
+    if (objectName == SAMPLE_OBJECT_NAME) {
+      sample = loadMeshObject(meshObject, transform);
+    } else {
+      meshObjects.push_back(loadMeshObject(meshObject, transform));
+    }
+  } catch (std::exception) {
+    readComponents(meshObjects, sample, objectResourceID, transform);
+  }
+}
+/*
+ * Read in the set of mesh objects pointed to by a component object
+ * @param meshObjects A vector to store the meshes for env components
+ * @param sample A parameter to store a mesh for the sample
+ * @param objectResourceID Integer identifier of the object to read in
+ * @param transform Rotation/translation matrix for the object
+ */
+void Mantid3MFFileIO::readComponents(std::vector<MeshObject_sptr> &meshObjects,
+                                     MeshObject_sptr &sample,
+                                     uint32_t objectResourceID,
+                                     sLib3MFTransform transform) {
+  Lib3MF::PComponentsObject componentsObject =
+      model->GetComponentsObjectByID(objectResourceID);
+  for (Lib3MF_uint32 nIndex = 0; nIndex < componentsObject->GetComponentCount();
+       nIndex++) {
+    Lib3MF::PComponent component = componentsObject->GetComponent(nIndex);
+    readMeshObject(meshObjects, sample, component->GetObjectResourceID(),
+                   transform);
+  }
+}
+
+/*
+ * Write a Mantid Geometry::MeshObjects to the lib3mf model object as part
+ * of processing of writing to a 3mf format file
+ * @param mantidMeshObject MeshObject to write out
+ * @param name Name of the mesh object
+ */
 void Mantid3MFFileIO::writeMeshObject(
     const Geometry::MeshObject &mantidMeshObject, std::string name) {
   Lib3MF::PMeshObject meshObject = model->AddMeshObject();
@@ -282,12 +328,16 @@ void Mantid3MFFileIO::writeMeshObject(
 
   // Set up one to one mapping between build items and mesh objects
   // Don't bother setting up any components
-  // sLib3MFTransform mMatrix{0.0};
   sLib3MFTransform mMatrix = {
       {{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}, {0.0, 0.0, 0.0}}};
   model->AddBuildItem(meshObject.get(), mMatrix);
 }
 
+/*
+ * Generate a random colour - to be used for a mesh object
+ * being written out to a .3mf format file
+ * @return RGB colour value
+ */
 int Mantid3MFFileIO ::generateRandomColor() {
 
   int rColor = (rand() % 256) << 16;
@@ -295,17 +345,20 @@ int Mantid3MFFileIO ::generateRandomColor() {
   int bColor = (rand() % 256) << 0;
 
   return rColor | gColor | bColor;
-  // return rand() % static_cast<int>(pow(16, 6));
 }
 
-// basic write to 3MF. Since Mantid is storing each instance of a shape
-// as a separate mesh there's no possiblity of reusing meshes as supported
-// by 3MF
+/* Basic write to 3MF. Since Mantid is storing each instance of a shape
+ * as a separate mesh there's no possiblity of reusing meshes as supported
+ * by 3MF
+ * @param meshObjects vector of Mantid mesh objects for environment components
+ * to write out to file
+ * @param sample Mesh Object representing sample
+ * @param scaleType Units to write out coordinates in eg mm
+ */
 void Mantid3MFFileIO::writeMeshObjects(
     std::vector<const Geometry::MeshObject *> meshObjects,
-    const Geometry::MeshObject *sample, DataHandling::ScaleUnits scaleType) {
+    MeshObject_const_sptr &sample, DataHandling::ScaleUnits scaleType) {
 
-  // auto scaleType = getScaleType(scaleStr);
   Lib3MF::eModelUnit scale;
   switch (scaleType) {
   case ScaleUnits::millimetres:
@@ -329,6 +382,15 @@ void Mantid3MFFileIO::writeMeshObjects(
   }
 }
 
+/*
+ * Add a new material to the lib3mf model object in preparation for writing
+ * a 3mf format file
+ * @param materialName Name of material to be added
+ * @param materialColor RGB colour to be used to display material in CAD
+ * applications
+ * @param resourceID Out parameter representing object id of material created
+ * @param materialPropertyID Out parameter representing id of material created
+ */
 void Mantid3MFFileIO::AddBaseMaterial(std::string materialName,
                                       int materialColor, int &resourceID,
                                       Lib3MF_uint32 &materialPropertyID) {
@@ -338,7 +400,7 @@ void Mantid3MFFileIO::AddBaseMaterial(std::string materialName,
   Lib3MF::PBaseMaterialGroupIterator materialIterator =
       model->GetBaseMaterialGroups();
   Lib3MF::PBaseMaterialGroup groupToAddTo;
-  // Lib3MF_uint32 materialPropertyID;
+
   if (materialIterator->Count() == 0) {
     groupToAddTo = model->AddBaseMaterialGroup();
   } else {
@@ -373,6 +435,14 @@ void Mantid3MFFileIO::AddBaseMaterial(std::string materialName,
   resourceID = groupToAddTo->GetResourceID();
 }
 
+/*
+ * Assign a material to a mesh object. If master material definition doesn't
+ * already exist then create it first. Note that we don't write out the full
+ * material properties (eg density), only the colour
+ * @param objectName Name of object that material is to be assigned to
+ * @param materialName Name of material to be assigned to the object
+ * @param materialColor Colour of the material to be written into 3mf file
+ */
 void Mantid3MFFileIO::setMaterialOnObject(std::string objectName,
                                           std::string materialName,
                                           int materialColor) {
@@ -429,60 +499,10 @@ void Mantid3MFFileIO::setMaterialOnObject(std::string objectName,
   }
 }
 
-void Mantid3MFFileIO::ShowTransform(sLib3MFTransform transform,
-                                    std::string indent) {
-  std::cout << indent << "Transformation:  [ " << transform.m_Fields[0][0]
-            << " " << transform.m_Fields[1][0] << " "
-            << transform.m_Fields[2][0] << " " << transform.m_Fields[3][0]
-            << " ]" << std::endl;
-  std::cout << indent << "                 [ " << transform.m_Fields[0][1]
-            << " " << transform.m_Fields[1][1] << " "
-            << transform.m_Fields[2][1] << " " << transform.m_Fields[3][1]
-            << " ]" << std::endl;
-  std::cout << indent << "                 [ " << transform.m_Fields[0][2]
-            << " " << transform.m_Fields[1][2] << " "
-            << transform.m_Fields[2][2] << " " << transform.m_Fields[3][2]
-            << " ]" << std::endl;
-}
-
-void Mantid3MFFileIO::ShowComponentsObjectInformation(
-    Lib3MF::PComponentsObject componentsObject) {
-  std::cout << "components object #" << componentsObject->GetResourceID()
-            << ": " << std::endl;
-
-  // ShowObjectProperties(componentsObject);
-  std::cout << "   Component count:    "
-            << componentsObject->GetComponentCount() << std::endl;
-  for (Lib3MF_uint32 nIndex = 0; nIndex < componentsObject->GetComponentCount();
-       nIndex++) {
-    Lib3MF::PComponent component = componentsObject->GetComponent(nIndex);
-
-    std::cout << "   Component " << nIndex
-              << ":    Object ID:   " << component->GetObjectResourceID()
-              << std::endl;
-    if (component->HasTransform()) {
-      ShowTransform(component->GetTransform(), "                   ");
-    } else {
-      std::cout << "                   Transformation:  none" << std::endl;
-    }
-  }
-}
-
-void Mantid3MFFileIO::ShowMetaDataInformation(
-    Lib3MF::PMetaDataGroup metaDataGroup) {
-  Lib3MF_uint32 nMetaDataCount = metaDataGroup->GetMetaDataCount();
-
-  for (Lib3MF_uint32 iMeta = 0; iMeta < nMetaDataCount; iMeta++) {
-
-    Lib3MF::PMetaData metaData = metaDataGroup->GetMetaData(iMeta);
-    std::string sMetaDataValue = metaData->GetValue();
-    std::string sMetaDataName = metaData->GetName();
-    std::cout << "Metadatum: " << iMeta << ":" << std::endl;
-    std::cout << "Name  = \"" << sMetaDataName << "\"" << std::endl;
-    std::cout << "Value = \"" << sMetaDataValue << "\"" << std::endl;
-  }
-}
-
+/*
+ * Write the 3mf data in the lib3mf model object out to a 3mf file
+ * @param filename Name of the 3mf file to be created
+ */
 void Mantid3MFFileIO::saveFile(std::string filename) {
   Lib3MF::PWriter writer = model->QueryWriter("3mf");
   writer->WriteToFile(filename);

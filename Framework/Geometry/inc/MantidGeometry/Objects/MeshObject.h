@@ -15,6 +15,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include "MantidKernel/Material.h"
+#include "MantidKernel/Matrix.h"
 #include <map>
 #include <memory>
 

@@ -7,8 +7,12 @@
 #include "MantidDataHandling/LoadSampleEnvironment.h"
 #include "MantidDataHandling/LoadAsciiStl.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
+#ifdef ENABLE_LIB3MF
+#include "MantidDataHandling/Mantid3MFFileIO.h"
+#endif
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidGeometry/Instrument/Container.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
@@ -24,6 +28,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+#include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 
@@ -50,7 +55,7 @@ void LoadSampleEnvironment::init() {
                   "the Environment");
 
   // Environment file
-  const std::vector<std::string> extensions{".stl"};
+  const std::vector<std::string> extensions{".stl", ".3mf"};
   declareProperty(std::make_unique<FileProperty>(
                       "Filename", "", FileProperty::Load, extensions),
                   "The path name of the file containing the Environment");
@@ -197,28 +202,26 @@ std::map<std::string, std::string> LoadSampleEnvironment::validateInputs() {
   return result;
 }
 
-void LoadSampleEnvironment::exec() {
-
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-
-  if (inputWS != outputWS) {
-    outputWS = inputWS->clone();
-  }
-
-  const std::string filename = getProperty("Filename");
-  const std::ifstream file(filename.c_str());
-  if (!file) {
-    g_log.error("Unable to open file: " + filename);
-    throw Exception::FileError("Unable to open file: ", filename);
-  }
-
+/**
+ * Load a sample environment definition from a .stl file
+ * @param inputWS Workspace containing optional goniometer info
+ * @param filename Name of the .stl file
+ * @param sample The sample object that any sample geometry present will be
+ * loaded into
+ * @param add Flag to control whether the component in the .stl file will
+ * be added to any pre-existing components already in the environment
+ * @param debugString Debug string that can be appended to by this function
+ */
+void LoadSampleEnvironment::loadEnvironmentFromSTL(
+    MatrixWorkspace_const_sptr inputWS, const std::string filename,
+    Sample &sample, const bool add, std::string debugString) {
+  std::unique_ptr<SampleEnvironment> environment = nullptr;
   boost::shared_ptr<MeshObject> environmentMesh = nullptr;
 
   std::unique_ptr<LoadAsciiStl> asciiStlReader = nullptr;
   std::unique_ptr<LoadBinaryStl> binaryStlReader = nullptr;
   const std::string scaleProperty = getPropertyValue("Scale");
-  const ScaleUnits scaleType = getScaleType(scaleProperty);
+  const ScaleUnits scaleType = getScaleTypeFromStr(scaleProperty);
 
   bool isBinary;
   if (LoadBinaryStl::isBinarySTL(filename)) {
@@ -277,9 +280,6 @@ void LoadSampleEnvironment::exec() {
   environmentMesh = reader->translate(environmentMesh, translationVector);
 
   std::string name = getProperty("EnvironmentName");
-  const bool add = getProperty("Add");
-  Sample &sample = outputWS->mutableSample();
-  std::unique_ptr<SampleEnvironment> environment = nullptr;
   if (add) {
     environment = std::make_unique<SampleEnvironment>(sample.getEnvironment());
     environment->add(environmentMesh);
@@ -287,12 +287,8 @@ void LoadSampleEnvironment::exec() {
     auto can = boost::make_shared<Container>(environmentMesh);
     environment = std::make_unique<SampleEnvironment>(name, can);
   }
+
   // Put Environment into sample.
-
-  std::string debugString =
-      "Environment has: " + std::to_string(environment->nelements()) +
-      " elements.";
-
   sample.setEnvironment(std::move(environment));
 
   auto translatedVertices = environmentMesh->getVertices();
@@ -306,6 +302,95 @@ void LoadSampleEnvironment::exec() {
       }
     }
   }
+}
+
+/**
+ * Load a sample environment definition from a .3mf file
+ * @param inputWS Workspace containing optional goniometer info
+ * @param filename Name of the .3mf file
+ * @param sample The sample object that any sample geometry present will be
+ * loaded into
+ * @param add Flag to control whether the components in the .3mf file will
+ * be added to any pre-existing components already in the environment
+ * @param debugString Debug string that can be appended to by this function
+ */
+void LoadSampleEnvironment::loadEnvironmentFrom3MF(
+    MatrixWorkspace_const_sptr inputWS, const std::string filename,
+    Sample &sample, const bool add, std::string debugString) {
+#ifdef ENABLE_LIB3MF
+  std::unique_ptr<Geometry::SampleEnvironment> environment = nullptr;
+  Mantid3MFFileIO MeshLoader;
+  MeshLoader.LoadFile(filename);
+  boost::shared_ptr<MeshObject> environmentMesh = nullptr;
+  std::string name = getProperty("EnvironmentName");
+  std::vector<boost::shared_ptr<Geometry::MeshObject>> environmentMeshes;
+  boost::shared_ptr<Geometry::MeshObject> sampleMesh;
+
+  MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
+
+  if (sampleMesh) {
+    sampleMesh->rotate(inputWS->run().getGoniometer().getR());
+    sample.setShape(sampleMesh);
+  }
+
+  for (auto environmentMesh : environmentMeshes) {
+    if (!environment) {
+      if (add) {
+        environment =
+            std::make_unique<SampleEnvironment>(sample.getEnvironment());
+        environment->add(environmentMesh);
+      } else {
+        auto can = boost::make_shared<Container>(environmentMesh);
+        environment = std::make_unique<SampleEnvironment>(name, can);
+      }
+    } else {
+      environment->add(environmentMesh);
+    }
+
+    debugString +=
+        "Environment has: " + std::to_string(environment->nelements()) +
+        " elements.";
+  }
+
+  // Put Environment into sample.
+  sample.setEnvironment(std::move(environment));
+#else
+  throw std::runtime_error("3MF format not supported on this platform");
+#endif
+}
+
+void LoadSampleEnvironment::exec() {
+
+  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+
+  if (inputWS != outputWS) {
+    outputWS = inputWS->clone();
+  }
+
+  const std::string filename = getProperty("Filename");
+  const std::ifstream file(filename.c_str());
+  if (!file) {
+    g_log.error("Unable to open file: " + filename);
+    throw Exception::FileError("Unable to open file: ", filename);
+  }
+
+  const bool add = getProperty("Add");
+  std::string debugString;
+  Sample &sample = outputWS->mutableSample();
+
+  std::string fileExt = Poco::Path(filename).getExtension();
+
+  std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
+
+  if (fileExt == "STL") {
+    loadEnvironmentFromSTL(inputWS, filename, sample, add, debugString);
+  } else if (fileExt == "3MF") {
+    loadEnvironmentFrom3MF(inputWS, filename, sample, add, debugString);
+  } else {
+    throw "Invalid file extension";
+  }
+
   // get the material name and number density for debug
   const auto outMaterial =
       outputWS->sample().getEnvironment().getContainer().material();
@@ -318,7 +403,7 @@ void LoadSampleEnvironment::exec() {
   // Set output workspace
   setProperty("OutputWorkspace", outputWS);
   g_log.debug(debugString);
-} // namespace DataHandling
+}
 
 } // namespace DataHandling
 } // namespace Mantid
