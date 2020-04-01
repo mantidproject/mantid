@@ -114,15 +114,6 @@ Group_const_sptr SpaceGroup::getSiteSymmetryGroup(const V3D &position) const {
   return GroupFactory::create<Group>(siteSymmetryOps);
 }
 
-bool SpaceGroup::operator==(const SpaceGroup &other) const {
-  return Group::operator==(other) && this->m_number == other.m_number &&
-         this->m_hmSymbol == other.hmSymbol();
-}
-
-bool SpaceGroup::operator!=(const SpaceGroup &other) const {
-  return !this->operator==(other);
-}
-
 std::ostream &operator<<(std::ostream &stream, const SpaceGroup &self) {
   stream << "Space group with Hermann-Mauguin symbol: " << self.hmSymbol();
   return stream;

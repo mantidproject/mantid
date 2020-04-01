@@ -77,8 +77,6 @@ public:
 
   PointGroup_sptr getPointGroup() const;
   Group_const_sptr getSiteSymmetryGroup(const Kernel::V3D &position) const;
-  bool operator==(const SpaceGroup &other) const;
-  bool operator!=(const SpaceGroup &other) const;
 
 protected:
   size_t m_number;
