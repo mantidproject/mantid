@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NEXUSFILEIO_H
-#define NEXUSFILEIO_H
+#pragma once
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
@@ -84,7 +83,7 @@ public:
       float *errorSquareds, int64_t *pulsetimes, bool compress) const;
 
   int writeEventList(const DataObjects::EventList &el,
-                     std::string group_name) const;
+                     const std::string &group_name) const;
 
   template <class T>
   void writeEventListData(std::vector<T> events, bool writeTOF,
@@ -104,7 +103,7 @@ public:
                  const int &spectra) const;
 
   /// write bin masking information
-  bool writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const;
+  bool writeNexusBinMasking(const API::MatrixWorkspace_const_sptr &ws) const;
 
   /// Reset the pointer to the progress object.
   void resetProgress(Mantid::API::Progress *prog);
@@ -172,7 +171,7 @@ private:
   int findMantidWSEntries() const;
   /// convert posix time to time_t
   std::time_t
-  to_time_t(boost::posix_time::ptime t) ///< convert posix time to time_t
+  to_time_t(const boost::posix_time::ptime &t) ///< convert posix time to time_t
   {
     /**
     Take the input Posix time, subtract the unix epoch, and return the seconds
@@ -203,7 +202,7 @@ private:
 
   /// Writes given vector column to the currently open Nexus file
   template <typename VecType, typename ElemType>
-  void writeNexusVectorColumn(API::Column_const_sptr col,
+  void writeNexusVectorColumn(const API::Column_const_sptr &col,
                               const std::string &columnName, int nexusType,
                               const std::string &interpret_as) const;
 
@@ -417,5 +416,3 @@ using NexusFileIO_sptr = boost::shared_ptr<NexusFileIO>;
 
 } // namespace NeXus
 } // namespace Mantid
-
-#endif /* NEXUSFILEIO_H */

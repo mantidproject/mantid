@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -71,7 +69,7 @@ def needs_processing(property_value, process_reduction_type):
 
 class SANSILLAutoProcess(DataProcessorAlgorithm):
     """
-    Performs complete treatment of ILL SANS data; instruments D11, D22, D33.
+    Performs complete treatment of ILL SANS data; instruments D11, D16, D22, D33.
     """
     progress = None
     reduction_type = None
@@ -94,6 +92,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
     normalise = None
     radius = None
     thickness = None
+    theta_dependent = None
 
     def category(self):
         return 'ILL\\SANS;ILL\\Auto'
@@ -167,6 +166,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.output = self.getPropertyValue('OutputWorkspace')
         self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
         self.normalise = self.getPropertyValue('NormaliseBy')
+        self.theta_dependent = self.getProperty('ThetaDependent').value
         self.radius = self.getProperty('BeamRadius').value
         self.dimensionality = len(self.sample)
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10 * self.dimensionality)
@@ -234,6 +234,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('ContainerTransmissionRuns', 'Transmissions')
         self.setPropertyGroup('TransmissionBeamRuns', 'Transmissions')
         self.setPropertyGroup('TransmissionAbsorberRuns', 'Transmissions')
+        self.copyProperties('SANSILLReduction',
+                            ['ThetaDependent'])
+        self.setPropertyGroup('ThetaDependent', 'Transmissions')
 
         self.declareProperty(MultipleFileProperty('SensitivityMaps',
                                                   action=FileAction.OptionalLoad,
@@ -258,14 +261,13 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='The output sensitivity map workspace.')
 
-        self.copyProperties('SANSILLReduction',
-                            ['NormaliseBy'])
+        self.copyProperties('SANSILLReduction', ['NormaliseBy'])
 
         self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.),
                              doc='Sample thickness [cm]')
 
         self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.),
-                             doc='Beam raduis [m]; used for beam center finding, transmission and flux calculations.')
+                             doc='Beam radius [m]; used for beam center finding, transmission and flux calculations.')
 
         self.declareProperty('WaterCrossSection', 1., doc='Provide water cross-section; '
                                                           'used only if the absolute scale is done by dividing to water.')
@@ -403,6 +405,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              BeamInputWorkspace=beam_name,
                              CacheSolidAngle=True,
                              TransmissionInputWorkspace=container_transmission_name,
+                             ThetaDependent=self.theta_dependent,
                              NormaliseBy=self.normalise)
 
         # this is the default mask, the same for all the distance configurations
@@ -454,6 +457,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                          SensitivityOutputWorkspace=self.output_sens,
                          FluxInputWorkspace=flux_name,
                          NormaliseBy=self.normalise,
+                         ThetaDependent=self.theta_dependent,
                          SampleThickness=self.getProperty('SampleThickness').value,
                          WaterCrossSection=self.getProperty('WaterCrossSection').value)
         panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
@@ -471,5 +475,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                            WedgeOffset=self.getProperty('WedgeOffset').value,
                            AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
                            PanelOutputWorkspaces=panel_ws_group)
+
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)

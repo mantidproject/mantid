@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_SAVEWORKSPACES_H_
-#define MANTIDQTMANTIDWIDGETS_SAVEWORKSPACES_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/MantidDialog.h"
@@ -78,7 +77,7 @@ private:
                    QHash<QString, QString> workspaceMap);
   QHash<QString, QString>
   provideZeroFreeWorkspaces(const QListWidget *workspaces);
-  void removeZeroFreeWorkspaces(QHash<QString, QString> workspaces);
+  void removeZeroFreeWorkspaces(const QHash<QString, QString> &workspaces);
   bool isValid();
 private slots:
   void saveSel();
@@ -87,5 +86,3 @@ private slots:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDQTMANTIDWIDGETS_SAVEWORKSPACES_H_

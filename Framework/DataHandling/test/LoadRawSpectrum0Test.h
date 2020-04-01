@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LoadRawSpectrum0Test_H_
-#define LoadRawSpectrum0Test_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -111,7 +110,7 @@ public:
     wsNamevec = sptrWSGrp->getNames();
     int period = 1;
     std::vector<std::string>::const_iterator it = wsNamevec.begin();
-    for (; it != wsNamevec.end(); it++) {
+    for (; it != wsNamevec.end(); ++it) {
       std::stringstream count;
       count << period;
       std::string wsName = "multiperiod_" + count.str();
@@ -120,7 +119,7 @@ public:
     }
     std::vector<std::string>::const_iterator itr1 = wsNamevec.begin();
     int expectedPeriod = 0;
-    for (; itr1 != wsNamevec.end(); itr1++) {
+    for (; itr1 != wsNamevec.end(); ++itr1) {
       MatrixWorkspace_sptr outsptr;
       TS_ASSERT_THROWS_NOTHING(
           outsptr = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -147,7 +146,7 @@ public:
 private:
   /// Helper method to run common set of tests on a workspace in a multi-period
   /// group.
-  void doTestMultiPeriodWorkspace(MatrixWorkspace_sptr workspace,
+  void doTestMultiPeriodWorkspace(const MatrixWorkspace_sptr &workspace,
                                   int expected_period) {
     // Check the current period property.
     const Mantid::API::Run &run = workspace->run();
@@ -169,5 +168,3 @@ private:
   std::string inputFile;
   std::string outputSpace;
 };
-
-#endif /*LoadRawSpectrum0Test_H_*/

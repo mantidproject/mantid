@@ -19,6 +19,21 @@ if(NOT CMAKE_CONFIGURATION_TYPES)
   endif()
 endif()
 
+find_package(CxxTest)
+if(CXXTEST_FOUND)
+  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
+  make_directory(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Testing)
+  message(STATUS "Added target ('check') for unit tests")
+else()
+  message(STATUS "Could NOT find CxxTest - unit testing not available")
+endif()
+
+# Avoid the linker failing by including GTest before marking all libs as shared
+# and before we set our warning flags in GNUSetup
+include(GoogleTest)
+include(PyUnitTest)
+enable_testing()
+
 # We want shared libraries everywhere
 set(BUILD_SHARED_LIBS On)
 
@@ -265,19 +280,13 @@ endif()
 include(VersionNumber)
 
 # ##############################################################################
-# Look for OpenMP and set compiler flags if found
+# Look for OpenMP
 # ##############################################################################
-
-find_package(OpenMP)
-if(OPENMP_FOUND)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  if(NOT WIN32)
-    set(CMAKE_MODULE_LINKER_FLAGS
-        "${CMAKE_MODULE_LINKER_FLAGS} ${OpenMP_CXX_FLAGS}"
-    )
-  endif()
+find_package(OpenMP COMPONENTS CXX)
+if(OpenMP_CXX_FOUND)
+  link_libraries(OpenMP::OpenMP_CXX)
 endif()
+
 
 # ##############################################################################
 # Add linux-specific things
@@ -376,19 +385,6 @@ include(PylintSetup)
 # ##############################################################################
 # Set up the unit tests target
 # ##############################################################################
-
-find_package(CxxTest)
-if(CXXTEST_FOUND)
-  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND})
-  make_directory(${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Testing)
-  message(STATUS "Added target ('check') for unit tests")
-else()
-  message(STATUS "Could NOT find CxxTest - unit testing not available")
-endif()
-
-include(GoogleTest)
-include(PyUnitTest)
-enable_testing()
 
 # GUI testing via Squish
 find_package(Squish)

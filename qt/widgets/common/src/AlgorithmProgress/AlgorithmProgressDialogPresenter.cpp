@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -47,9 +46,11 @@ void AlgorithmProgressDialogPresenter::algorithmStartedSlot(
   // original algorithm has already finished, before we got a shared pointer.
   // This ensures that the tracking only looks after an algorithm that has not
   // finished
-  if (algInstance) {
-    auto treeItem = m_view->addAlgorithm(algInstance);
-    m_progressBars.insert(std::make_pair(alg, treeItem));
+  if (m_progressBars.find(alg) == m_progressBars.end()) {
+    if (algInstance) {
+      auto treeItem = m_view->addAlgorithm(algInstance);
+      m_progressBars.insert(std::make_pair(alg, treeItem));
+    }
   }
 }
 /// This slot is triggered whenever an algorithm reports progress.

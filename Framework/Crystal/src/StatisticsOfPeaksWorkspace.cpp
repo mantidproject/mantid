@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/StatisticsOfPeaksWorkspace.h"
 #include "MantidAPI/FileProperty.h"
@@ -198,8 +198,8 @@ void StatisticsOfPeaksWorkspace::exec() {
  * @param ws :: any PeaksWorkspace
  * @param runName :: string to put in statistics table
  */
-void StatisticsOfPeaksWorkspace::doSortHKL(Mantid::API::Workspace_sptr ws,
-                                           std::string runName) {
+void StatisticsOfPeaksWorkspace::doSortHKL(
+    const Mantid::API::Workspace_sptr &ws, const std::string &runName) {
   std::string pointGroup = getPropertyValue("PointGroup");
   std::string latticeCentering = getPropertyValue("LatticeCentering");
   std::string wkspName = getPropertyValue("OutputWorkspace");

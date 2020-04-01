@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef POLDIDGRIDTEST_H
-#define POLDIDGRIDTEST_H
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -15,6 +14,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 
 #include <stdexcept>
+#include <utility>
 
 using ::testing::Return;
 using namespace Mantid::Poldi;
@@ -29,7 +29,8 @@ class TestablePoldiDGrid : public PoldiDGrid {
           boost::shared_ptr<PoldiAbstractChopper>(),
       double deltaT = 0.0,
       std::pair<double, double> wavelengthRange = std::pair<double, double>())
-      : PoldiDGrid(detector, chopper, deltaT, wavelengthRange) {}
+      : PoldiDGrid(std::move(detector), std::move(chopper), deltaT,
+                   wavelengthRange) {}
 };
 
 class PoldiDGridTest : public CxxTest::TestSuite {
@@ -130,5 +131,3 @@ public:
     TS_ASSERT_EQUALS(grid.m_hasCachedCalculation, true);
   }
 };
-
-#endif // POLDIDGRIDTEST_H

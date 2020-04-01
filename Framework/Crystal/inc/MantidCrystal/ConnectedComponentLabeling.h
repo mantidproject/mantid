@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELING_H_
-#define MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELING_H_
+#pragma once
 
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidCrystal/DisjointElement.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <boost/optional.hpp>
@@ -45,12 +45,13 @@ class BackgroundStrategy;
 /** ConnectedComponentLabelling : Implements connected component labeling on
  MDHistoWorkspaces.
  */
-class DLLExport ConnectedComponentLabeling {
+class MANTID_CRYSTAL_DLL ConnectedComponentLabeling {
 
 public:
   /// Constructor
-  ConnectedComponentLabeling(const size_t &startId = 1,
-                             const boost::optional<int> nThreads = boost::none);
+  ConnectedComponentLabeling(
+      const size_t &startId = 1,
+      const boost::optional<int> &nThreads = boost::none);
 
   /// Getter for the start label id
   size_t getStartLabelId() const;
@@ -79,7 +80,7 @@ private:
 
   /// Calculate the disjoint element tree across the image.
   ConnectedComponentMappingTypes::ClusterMap
-  calculateDisjointTree(Mantid::API::IMDHistoWorkspace_sptr ws,
+  calculateDisjointTree(const Mantid::API::IMDHistoWorkspace_sptr &ws,
                         BackgroundStrategy *const baseStrategy,
                         Mantid::API::Progress &progress) const;
 
@@ -92,5 +93,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_CONNECTEDCOMPONENTLABELING_H_ */

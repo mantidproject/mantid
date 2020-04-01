@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROJECT_SERIALISER_H
-#define PROJECT_SERIALISER_H
+#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -60,7 +59,7 @@ public:
   bool save(const QString &projectName, bool compress = false,
             bool saveAll = true);
   /// Load a project file from disk
-  bool load(std::string filepath, const int fileVersion,
+  bool load(const std::string &filepath, const int fileVersion,
             const bool isTopLevel = true);
   /// Open the script window and load scripts from string
   void openScriptWindow(const QStringList &files);
@@ -163,5 +162,3 @@ private:
 };
 } // namespace API
 } // namespace MantidQt
-
-#endif // PROJECT_SERIALISER_H

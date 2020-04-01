@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/CommonBinsValidator.h"
@@ -324,7 +324,7 @@ void SumSpectra::determineIndices(const size_t numberOfSpectra) {
  * @return The minimum spectrum No for all the spectra being summed.
  */
 specnum_t
-SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
+SumSpectra::getOutputSpecNo(const MatrixWorkspace_const_sptr &localworkspace) {
   // initial value - any included spectrum will do
   specnum_t specId =
       localworkspace->getSpectrum(*(m_indices.begin())).getSpectrumNo();
@@ -435,7 +435,7 @@ bool useSpectrum(const SpectrumInfo &spectrumInfo, const size_t wsIndex,
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
-void SumSpectra::doSimpleSum(MatrixWorkspace_sptr outputWorkspace,
+void SumSpectra::doSimpleSum(const MatrixWorkspace_sptr &outputWorkspace,
                              Progress &progress, size_t &numSpectra,
                              size_t &numMasked, size_t &numZeros) {
   // Clean workspace of any NANs or Inf values
@@ -510,7 +510,7 @@ void SumSpectra::doSimpleSum(MatrixWorkspace_sptr outputWorkspace,
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
-void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
+void SumSpectra::doFractionalSum(const MatrixWorkspace_sptr &outputWorkspace,
                                  Progress &progress, size_t &numSpectra,
                                  size_t &numMasked, size_t &numZeros) {
   // First, we need to clean the input workspace for nan's and inf's in order
@@ -608,7 +608,7 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
-void SumSpectra::execEvent(MatrixWorkspace_sptr outputWorkspace,
+void SumSpectra::execEvent(const MatrixWorkspace_sptr &outputWorkspace,
                            Progress &progress, size_t &numSpectra,
                            size_t &numMasked, size_t &numZeros) {
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");

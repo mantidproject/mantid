@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INDIRECTFITPROPERTYBROWSER_H_
-#define INDIRECTFITPROPERTYBROWSER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
@@ -15,7 +14,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <QDockWidget>
-
 #include <boost/optional.hpp>
 #include <unordered_map>
 
@@ -41,6 +39,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitPropertyBrowser : public QDockWidget {
 
 public:
   IndirectFitPropertyBrowser(QWidget *parent = nullptr);
+
   void init();
   void setFunctionTemplateBrowser(FunctionTemplateBrowser *templateBrowser);
   void setFunction(const QString &funStr);
@@ -63,10 +62,11 @@ public:
   void setFitEnabled(bool enable);
   void setCurrentDataset(TableRowIndex i);
   TableRowIndex currentDataset() const;
-  void updateFunctionBrowserData(TableRowIndex nData,
-                                 const QStringList &datasetNames,
-                                 const std::vector<double> &qValues);
-  void updatePlotGuess(MatrixWorkspace_const_sptr sampleWorkspace);
+  void updateFunctionBrowserData(
+      TableRowIndex nData, const QStringList &datasetNames,
+      const std::vector<double> &qValues,
+      const std::vector<std::pair<std::string, int>> &fitResolutions);
+  void updatePlotGuess(const MatrixWorkspace_const_sptr &sampleWorkspace);
   void setErrorsEnabled(bool enabled);
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);
@@ -116,5 +116,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*INDIRECTFITPROPERTYBROWSER_H_*/

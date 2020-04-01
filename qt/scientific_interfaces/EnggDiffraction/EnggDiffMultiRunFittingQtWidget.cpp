@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "EnggDiffMultiRunFittingQtWidget.h"
 
+#include <utility>
+
 namespace {
 
 MantidQt::CustomInterfaces::RunLabel
@@ -27,7 +29,7 @@ namespace CustomInterfaces {
 
 EnggDiffMultiRunFittingQtWidget::EnggDiffMultiRunFittingQtWidget(
     boost::shared_ptr<IEnggDiffractionPythonRunner> pythonRunner)
-    : m_pythonRunner(pythonRunner) {
+    : m_pythonRunner(std::move(pythonRunner)) {
   setupUI();
 
   m_zoomTool = std::make_unique<QwtPlotZoomer>(

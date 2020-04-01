@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/SequentialFitDialog.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -88,7 +88,7 @@ void SequentialFitDialog::addWorkspace() {
   }
 }
 
-bool SequentialFitDialog::addWorkspaces(const QStringList wsNames) {
+bool SequentialFitDialog::addWorkspaces(const QStringList &wsNames) {
   if (wsNames.isEmpty())
     return false;
   int row = ui.tWorkspaces->rowCount();
@@ -191,7 +191,7 @@ void SequentialFitDialog::removeItem() {
   }
 }
 
-bool SequentialFitDialog::validateLogs(const QString wsName) {
+bool SequentialFitDialog::validateLogs(const QString &wsName) {
   Mantid::API::MatrixWorkspace_sptr ws =
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(

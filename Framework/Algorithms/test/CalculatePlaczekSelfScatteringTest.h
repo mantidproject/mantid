@@ -1,11 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
 // Copyright &copy; 201p ISIS Rutherford Appleton Laboratory UKRI,
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CALCULATEPLACZEKSELFSCATTERINGTEST_H_
-#define MANTID_ALGORITHMS_CALCULATEPLACZEKSELFSCATTERINGTEST_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -182,5 +187,3 @@ private:
     return a;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_CALCULATEPLACZEKSELFSCATTERINGTEST_H_ */

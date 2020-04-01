@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INTEGRATE_3D_EVENTS_H
-#define INTEGRATE_3D_EVENTS_H
+#pragma once
 
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
@@ -81,7 +80,7 @@ public:
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
   boost::shared_ptr<const Mantid::Geometry::PeakShape> ellipseIntegrateEvents(
-      std::vector<Kernel::V3D> E1Vec, Mantid::Kernel::V3D const &peak_q,
+      const std::vector<Kernel::V3D> &E1Vec, Mantid::Kernel::V3D const &peak_q,
       bool specify_size, double peak_radius, double back_inner_radius,
       double back_outer_radius, std::vector<double> &axes_radii, double &inti,
       double &sigi);
@@ -89,7 +88,7 @@ public:
   /// Find the net integrated intensity of a modulated peak, using ellipsoidal
   /// volumes
   boost::shared_ptr<const Mantid::Geometry::PeakShape>
-  ellipseIntegrateModEvents(std::vector<Kernel::V3D> E1Vec,
+  ellipseIntegrateModEvents(const std::vector<Kernel::V3D> &E1Vec,
                             Mantid::Kernel::V3D const &peak_q,
                             Mantid::Kernel::V3D const &hkl,
                             Mantid::Kernel::V3D const &mnp, bool specify_size,
@@ -112,7 +111,9 @@ public:
                     double &sigi);
 
   double estimateSignalToNoiseRatio(const IntegrationParameters &params,
-                                    const Mantid::Kernel::V3D &center);
+                                    const Mantid::Kernel::V3D &center,
+                                    bool forceSpherical = false,
+                                    double sphericityTol = 0.02);
 
 private:
   /// Get a list of events for a given Q
@@ -150,13 +151,8 @@ private:
 
   /// Calculate the eigen vectors of a 3x3 real symmetric matrix
   static void getEigenVectors(Kernel::DblMatrix const &cov_matrix,
-                              std::vector<Mantid::Kernel::V3D> &eigen_vectors);
-
-  /// Calculate the standard deviation of 3D events in a specified direction
-  static double
-  stdDev(std::vector<std::pair<std::pair<double, double>,
-                               Mantid::Kernel::V3D>> const &events,
-         Mantid::Kernel::V3D const &direction, double radius);
+                              std::vector<Mantid::Kernel::V3D> &eigen_vectors,
+                              std::vector<double> &eigen_values);
 
   /// Form a map key as 10^12*h + 10^6*k + l from the integers h, k, l
   static int64_t getHklKey(int h, int k, int l);
@@ -180,7 +176,7 @@ private:
   /// Find the net integrated intensity of a list of Q's using ellipsoids
   boost::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid>
   ellipseIntegrateEvents(
-      std::vector<Kernel::V3D> E1Vec, Kernel::V3D const &peak_q,
+      const std::vector<Kernel::V3D> &E1Vec, Kernel::V3D const &peak_q,
       std::vector<std::pair<std::pair<double, double>,
                             Mantid::Kernel::V3D>> const &ev_list,
       std::vector<Mantid::Kernel::V3D> const &directions,
@@ -189,7 +185,7 @@ private:
       std::vector<double> &axes_radii, double &inti, double &sigi);
 
   /// Compute if a particular Q falls on the edge of a detector
-  double detectorQ(std::vector<Kernel::V3D> E1Vec,
+  double detectorQ(const std::vector<Kernel::V3D> &E1Vec,
                    const Mantid::Kernel::V3D QLabFrame,
                    const std::vector<double> &r);
 
@@ -214,5 +210,3 @@ private:
 } // namespace MDAlgorithms
 
 } // namespace Mantid
-
-#endif // INTEGRATE_3D_EVENTS_H

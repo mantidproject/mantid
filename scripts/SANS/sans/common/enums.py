@@ -1,13 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ The elements of this module define typed enums which are used in the SANS reduction framework."""
 
-from __future__ import (absolute_import, division, print_function)
-from mantid.py3compat import Enum
+from enum import Enum
 from sans.state.JsonSerializable import json_serializable
 
 
@@ -46,6 +45,21 @@ class CanonicalCoordinates(Enum):
     X = "X"
     Y = "Y"
     Z = "Z"
+
+
+@json_serializable
+class CorrectionType(Enum):
+    X = "X"
+    Y = "Y"
+    Z = "Z"
+
+    X_TILT = "X_TILT"
+    Y_TILT = "Y_TILT"
+
+    RADIUS = "RADIUS"
+    ROTATION = "ROTATION"
+    SIDE = "SIDE"
+    TRANSLATION = "TRANSLATION"
 
 
 @json_serializable
@@ -104,6 +118,7 @@ class DetectorType(Enum):
     """
     Defines the detector type
     """
+    BOTH = "BOTH"
     HAB = "HAB"
     LAB = "LAB"
 

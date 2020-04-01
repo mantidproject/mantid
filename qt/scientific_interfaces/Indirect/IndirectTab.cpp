@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectTab.h"
 
@@ -51,7 +51,7 @@ std::string castToString(int value) {
 }
 
 template <typename Predicate>
-void setPropertyIf(Algorithm_sptr algorithm, std::string const &propName,
+void setPropertyIf(const Algorithm_sptr &algorithm, std::string const &propName,
                    std::string const &value, Predicate const &condition) {
   if (condition)
     algorithm->setPropertyValue(propName, value);
@@ -154,8 +154,6 @@ IndirectTab::IndirectTab(QObject *parent)
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-IndirectTab::~IndirectTab() {}
-
 void IndirectTab::runTab() {
   if (validate()) {
     m_tabStartTime = DateAndTime::getCurrentTime();
@@ -505,7 +503,7 @@ void IndirectTab::setRangeSelectorMax(QtProperty *minProperty,
  * @param ws Pointer to the workspace
  * @return Energy mode
  */
-std::string IndirectTab::getEMode(Mantid::API::MatrixWorkspace_sptr ws) {
+std::string IndirectTab::getEMode(const Mantid::API::MatrixWorkspace_sptr &ws) {
   Mantid::Kernel::Unit_sptr xUnit = ws->getAxis(0)->unit();
   std::string xUnitName = xUnit->caption();
 
@@ -523,7 +521,7 @@ std::string IndirectTab::getEMode(Mantid::API::MatrixWorkspace_sptr ws) {
  * @param ws Pointer to the workspace
  * @return eFixed value
  */
-double IndirectTab::getEFixed(Mantid::API::MatrixWorkspace_sptr ws) {
+double IndirectTab::getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws) {
   Mantid::Geometry::Instrument_const_sptr inst = ws->getInstrument();
   if (!inst)
     throw std::runtime_error("No instrument on workspace");
@@ -569,7 +567,7 @@ bool IndirectTab::getResolutionRangeFromWs(const QString &workspace,
  *found)
  */
 bool IndirectTab::getResolutionRangeFromWs(
-    Mantid::API::MatrixWorkspace_const_sptr workspace,
+    const Mantid::API::MatrixWorkspace_const_sptr &workspace,
     QPair<double, double> &res) {
   if (workspace) {
     auto const instrument = workspace->getInstrument();
@@ -603,7 +601,8 @@ IndirectTab::getXRangeFromWorkspace(std::string const &workspaceName,
 }
 
 QPair<double, double> IndirectTab::getXRangeFromWorkspace(
-    Mantid::API::MatrixWorkspace_const_sptr workspace, double precision) const {
+    const Mantid::API::MatrixWorkspace_const_sptr &workspace,
+    double precision) const {
   auto const xValues = workspace->x(0);
   return roundRangeToPrecision(xValues.front(), xValues.back(), precision);
 }
@@ -613,7 +612,7 @@ QPair<double, double> IndirectTab::getXRangeFromWorkspace(
  *
  * @param algorithm :: The algorithm to be run
  */
-void IndirectTab::runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm) {
+void IndirectTab::runAlgorithm(const Mantid::API::IAlgorithm_sptr &algorithm) {
   algorithm->setRethrows(true);
 
   // There should never really be unexecuted algorithms in the queue, but it is
@@ -648,7 +647,7 @@ void IndirectTab::algorithmFinished(bool error) {
  * @param no_output Enable to ignore any output
  * @returns What was printed to stdout
  */
-QString IndirectTab::runPythonCode(QString code, bool no_output) {
+QString IndirectTab::runPythonCode(const QString &code, bool no_output) {
   return m_pythonRunner.runPythonCode(code, no_output);
 }
 
@@ -677,7 +676,7 @@ bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName,
 }
 
 std::unordered_map<std::string, size_t> IndirectTab::extractAxisLabels(
-    Mantid::API::MatrixWorkspace_const_sptr workspace,
+    const Mantid::API::MatrixWorkspace_const_sptr &workspace,
     const size_t &axisIndex) const {
   Axis *axis = workspace->getAxis(axisIndex);
   if (!axis->isText())

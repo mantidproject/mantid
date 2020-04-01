@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <cmath>
 #include <cstdio>
@@ -305,7 +305,7 @@ void LoadBBY::exec() {
                eventAssigner);
   }
 
-  auto getParam = [&allParams](std::string tag, double defValue) {
+  auto getParam = [&allParams](const std::string &tag, double defValue) {
     try {
       return std::stod(allParams[tag]);
     } catch (const std::invalid_argument &) {

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -186,7 +186,7 @@ void ConvertUnits::exec() {
  * @return A pointer to a MatrixWorkspace_sptr that contains the converted units
  */
 MatrixWorkspace_sptr
-ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
+ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr &inputWS) {
 
   // A WS holding BinEdges cannot have less than 2 values, as a bin has
   // 2 edges, having less than 2 values would mean that the WS contains Points
@@ -251,7 +251,7 @@ ConvertUnits::executeUnitConversion(const API::MatrixWorkspace_sptr inputWS) {
  *  @param inputWS The input workspace
  */
 void ConvertUnits::setupMemberVariables(
-    const API::MatrixWorkspace_const_sptr inputWS) {
+    const API::MatrixWorkspace_const_sptr &inputWS) {
   m_numberOfSpectra = inputWS->getNumberHistograms();
   // In the context of this algorithm, we treat things as a distribution if
   // the flag is set AND the data are not dimensionless
@@ -271,7 +271,7 @@ void ConvertUnits::setupMemberVariables(
  *  @param inputWS The input workspace
  */
 API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(
-    const API::MatrixWorkspace_const_sptr inputWS) {
+    const API::MatrixWorkspace_const_sptr &inputWS) {
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   // If input and output workspaces are NOT the same, create a new workspace
@@ -328,7 +328,7 @@ void ConvertUnits::storeEModeOnWorkspace(API::MatrixWorkspace_sptr outputWS) {
  *  @returns A shared pointer to the output workspace
  */
 MatrixWorkspace_sptr
-ConvertUnits::convertQuickly(API::MatrixWorkspace_const_sptr inputWS,
+ConvertUnits::convertQuickly(const API::MatrixWorkspace_const_sptr &inputWS,
                              const double &factor, const double &power) {
   Progress prog(this, 0.2, 1.0, m_numberOfSpectra);
   auto numberOfSpectra_i =
@@ -603,7 +603,7 @@ ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit,
 
 /// Calls Rebin as a Child Algorithm to align the bins
 API::MatrixWorkspace_sptr
-ConvertUnits::alignBins(API::MatrixWorkspace_sptr workspace) {
+ConvertUnits::alignBins(const API::MatrixWorkspace_sptr &workspace) {
   if (communicator().size() != 1)
     throw std::runtime_error(
         "ConvertUnits: Parallel support for aligning bins not implemented.");
@@ -623,7 +623,7 @@ ConvertUnits::alignBins(API::MatrixWorkspace_sptr workspace) {
 /// The Rebin parameters should cover the full range of the converted unit,
 /// with the same number of bins
 const std::vector<double> ConvertUnits::calculateRebinParams(
-    const API::MatrixWorkspace_const_sptr workspace) const {
+    const API::MatrixWorkspace_const_sptr &workspace) const {
   const auto &spectrumInfo = workspace->spectrumInfo();
   // Need to loop round and find the full range
   double XMin = DBL_MAX, XMax = DBL_MIN;
@@ -650,7 +650,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(
 /** Reverses the workspace if X values are in descending order
  *  @param WS The workspace to operate on
  */
-void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
+void ConvertUnits::reverse(const API::MatrixWorkspace_sptr &WS) {
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
   auto isInputEvents = static_cast<bool>(eventWS);
   size_t numberOfSpectra = WS->getNumberHistograms();
@@ -700,7 +700,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS) {
  *  @return The workspace after bins have been removed
  */
 API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
-    const Mantid::API::MatrixWorkspace_const_sptr workspace) {
+    const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
   MatrixWorkspace_sptr result;
 
   const auto &spectrumInfo = workspace->spectrumInfo();
@@ -786,7 +786,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(
 /** Divide by the bin width if workspace is a distribution
  *  @param outputWS The workspace to operate on
  */
-void ConvertUnits::putBackBinWidth(const API::MatrixWorkspace_sptr outputWS) {
+void ConvertUnits::putBackBinWidth(const API::MatrixWorkspace_sptr &outputWS) {
   const size_t outSize = outputWS->blocksize();
 
   for (size_t i = 0; i < m_numberOfSpectra; ++i) {

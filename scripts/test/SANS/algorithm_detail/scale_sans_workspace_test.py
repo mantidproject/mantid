@@ -1,19 +1,17 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import math
 import unittest
 
 from mantid.simpleapi import CreateSampleWorkspace
 from sans.algorithm_detail.scale_sans_workspace import scale_workspace, _divide_by_sample_volume, _multiply_by_abs_scale
 from sans.common.enums import (SANSFacility, SampleShape, SANSInstrument)
-from sans.state.data import get_data_builder
-from sans.state.scale import get_scale_builder
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateScale import get_scale_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 from sans.test_helper.test_director import TestDirector
 

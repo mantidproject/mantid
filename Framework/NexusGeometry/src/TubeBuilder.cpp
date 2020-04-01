@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexusGeometry/TubeBuilder.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -17,7 +17,7 @@ namespace NexusGeometry {
 namespace detail {
 
 TubeBuilder::TubeBuilder(const Mantid::Geometry::IObject &pixelShape,
-                         Eigen::Vector3d firstDetectorPosition,
+                         const Eigen::Vector3d &firstDetectorPosition,
                          int firstDetectorId)
     : m_pixelHeight(pixelShape.getGeometryHandler()->shapeInfo().height()),
       m_pixelRadius(pixelShape.getGeometryHandler()->shapeInfo().radius()) {

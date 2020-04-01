@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CarpenterSampleCorrection.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -131,8 +131,8 @@ WorkspaceGroup_sptr CarpenterSampleCorrection::calculateCorrection(
 }
 
 MatrixWorkspace_sptr
-CarpenterSampleCorrection::minus(const MatrixWorkspace_sptr lhsWS,
-                                 const MatrixWorkspace_sptr rhsWS) {
+CarpenterSampleCorrection::minus(const MatrixWorkspace_sptr &lhsWS,
+                                 const MatrixWorkspace_sptr &rhsWS) {
   auto minus = this->createChildAlgorithm("Minus", 0.5, 0.75);
   minus->setProperty("LHSWorkspace", lhsWS);
   minus->setProperty("RHSWorkspace", rhsWS);
@@ -142,8 +142,8 @@ CarpenterSampleCorrection::minus(const MatrixWorkspace_sptr lhsWS,
 }
 
 MatrixWorkspace_sptr
-CarpenterSampleCorrection::multiply(const MatrixWorkspace_sptr lhsWS,
-                                    const MatrixWorkspace_sptr rhsWS) {
+CarpenterSampleCorrection::multiply(const MatrixWorkspace_sptr &lhsWS,
+                                    const MatrixWorkspace_sptr &rhsWS) {
   auto multiply = this->createChildAlgorithm("Multiply", 0.75, 1.0);
   multiply->setProperty("LHSWorkspace", lhsWS);
   multiply->setProperty("RHSWorkspace", rhsWS);

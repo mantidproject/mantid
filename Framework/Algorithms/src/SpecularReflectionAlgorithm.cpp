@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
 
@@ -123,7 +123,7 @@ void SpecularReflectionAlgorithm::initCommonProperties() {
  */
 Mantid::Geometry::IComponent_const_sptr
 SpecularReflectionAlgorithm::getSurfaceSampleComponent(
-    Mantid::Geometry::Instrument_const_sptr inst) const {
+    const Mantid::Geometry::Instrument_const_sptr &inst) const {
   std::string sampleComponent = "some-surface-holder";
   if (!isPropertyDefault("SampleComponentName")) {
     sampleComponent = this->getPropertyValue("SampleComponentName");
@@ -148,7 +148,7 @@ SpecularReflectionAlgorithm::getSurfaceSampleComponent(
  */
 boost::shared_ptr<const Mantid::Geometry::IComponent>
 SpecularReflectionAlgorithm::getDetectorComponent(
-    MatrixWorkspace_sptr workspace, const bool isPointDetector) const {
+    const MatrixWorkspace_sptr &workspace, const bool isPointDetector) const {
   boost::shared_ptr<const IComponent> searchResult;
   if (!isPropertyDefault("SpectrumNumbersOfDetectors")) {
     const std::vector<int> spectrumNumbers =

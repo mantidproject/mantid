@@ -1,5 +1,5 @@
-set(SRC_FILES 
-    src/ComponentInfo.cpp 
+set(SRC_FILES
+    src/ComponentInfo.cpp
 	src/DetectorInfo.cpp
 	src/SpectrumInfo.cpp)
 
@@ -54,6 +54,7 @@ target_link_libraries(Beamline
                       LINK_PRIVATE
                       ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
+                      Kernel
                       ${MANTIDLIBS})
 
 # Add the unit tests directory
@@ -61,7 +62,7 @@ add_subdirectory(test)
 
 # Auto-generate exports header
 target_include_directories(Beamline PUBLIC ${CMAKE_BINARY_DIR}/Framework/Beamline)
-generate_mantid_export_header(Beamline)
+generate_mantid_export_header(Beamline FALSE)
 
 # Installation settings
 mtd_install_targets(TARGETS

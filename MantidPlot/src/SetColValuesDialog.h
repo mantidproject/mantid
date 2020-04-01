@@ -29,8 +29,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef VALUESDIALOG_H
-#define VALUESDIALOG_H
+#pragma once
 
 #include "Scripted.h"
 #include "ScriptingEnv.h"
@@ -53,7 +52,8 @@ class SetColValuesDialog : public QDialog, public Scripted {
   Q_OBJECT
 
 public:
-  SetColValuesDialog(ScriptingEnv *env, Table *t, Qt::WFlags fl = nullptr);
+  SetColValuesDialog(ScriptingEnv *env, Table *t,
+                     const Qt::WFlags &fl = nullptr);
 
 private slots:
   bool apply();
@@ -82,5 +82,3 @@ private:
   QSpinBox *start, *end;
   QLabel *colNameLabel;
 };
-
-#endif //

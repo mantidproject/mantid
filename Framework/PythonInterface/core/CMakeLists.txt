@@ -11,6 +11,7 @@ set(
   src/GlobalInterpreterLock.cpp
   src/NDArray.cpp
   src/ReleaseGlobalInterpreterLock.cpp
+  src/UninstallTrace.cpp
   src/WrapperHelpers.cpp
   src/Converters/CloneToNDArray.cpp
   src/Converters/DateAndTime.cpp
@@ -39,6 +40,7 @@ set(
   inc/MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h
   inc/MantidPythonInterface/core/StlExportDefinitions.h
   inc/MantidPythonInterface/core/TypedValidatorExporter.h
+  inc/MantidPythonInterface/core/UninstallTrace.h
   inc/MantidPythonInterface/core/VersionCompat.h
   inc/MantidPythonInterface/core/WrapperHelpers.h
   inc/MantidPythonInterface/core/WrapPython.h
@@ -76,6 +78,16 @@ target_include_directories(
   ${_target_name}
   SYSTEM
   PUBLIC ${Boost_INCLUDE_DIRS}
+)
+# PythonInterfaceCore includes a header from API even though it's not a dependency
+# so include directories aren't picked up from API target
+target_include_directories(
+  ${_target_name}
+  PUBLIC ${CMAKE_SOURCE_DIR}/Framework/API
+)
+target_include_directories(
+  ${_target_name}
+  PUBLIC ${CMAKE_BINARY_DIR}/Framework/API
 )
 # Set the name of the generated library
 set_target_properties(

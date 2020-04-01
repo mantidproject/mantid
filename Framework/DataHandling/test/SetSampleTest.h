@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SETSAMPLETEST_H_
-#define MANTID_DATAHANDLING_SETSAMPLETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -577,7 +576,8 @@ private:
       return false;
   }
 
-  void setTestReferenceFrame(Mantid::API::MatrixWorkspace_sptr workspace) {
+  void
+  setTestReferenceFrame(const Mantid::API::MatrixWorkspace_sptr &workspace) {
     using Mantid::Geometry::Instrument;
     using Mantid::Geometry::ReferenceFrame;
     // Use Z=up,Y=across,X=beam so we test it listens to the reference frame
@@ -767,5 +767,3 @@ private:
   const std::string m_instName = "ISIS_Histogram";
   const std::string m_envName = "TestEnv";
 };
-
-#endif /* MANTID_ALGORITHMS_SETSAMPLETEST_H_ */

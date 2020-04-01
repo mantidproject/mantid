@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -57,8 +57,6 @@ void PoldiAutoCorrelation5::init() {
   m_core = boost::shared_ptr<PoldiAutoCorrelationCore>(
       new PoldiAutoCorrelationCore(g_log));
 }
-
-/** ***************************************************************** */
 
 /** Executes the algorithm. Reading in the file and creating and populating
  *  the output workspace
@@ -115,8 +113,8 @@ void PoldiAutoCorrelation5::exec() {
 }
 
 void PoldiAutoCorrelation5::logConfigurationInformation(
-    boost::shared_ptr<PoldiDeadWireDecorator> cleanDetector,
-    PoldiAbstractChopper_sptr chopper) {
+    const boost::shared_ptr<PoldiDeadWireDecorator> &cleanDetector,
+    const PoldiAbstractChopper_sptr &chopper) {
   if (cleanDetector && chopper) {
     g_log.information()
         << "____________________________________________________ \n";

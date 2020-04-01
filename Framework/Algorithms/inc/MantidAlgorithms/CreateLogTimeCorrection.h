@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CREATELOGTIMECORRECTION_H_
-#define MANTID_ALGORITHMS_CREATELOGTIMECORRECTION_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 #include <vector>
 
 namespace Mantid {
@@ -29,7 +28,7 @@ namespace Algorithms {
   and the input event workspace contains the neutron with time recorded at the
   detector.
 */
-class DLLExport CreateLogTimeCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateLogTimeCorrection : public API::Algorithm {
 public:
   const std::string name() const override { return "CreateLogTimeCorrection"; }
   /// Summary of algorithms purpose
@@ -66,12 +65,10 @@ private:
                           const std::vector<double> &corrections) const;
 
   /// Write correction map to a text file
-  void writeCorrectionToFile(const std::string filename,
+  void writeCorrectionToFile(const std::string &filename,
                              const Geometry::DetectorInfo &detectorInfo,
                              const std::vector<double> &corrections) const;
 };
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CREATELOGTIMECORRECTION_H_ */

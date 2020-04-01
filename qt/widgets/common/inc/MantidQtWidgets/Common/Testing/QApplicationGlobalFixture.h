@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_WIDGETS_COMMON_QAPPLICATIONHOLDER_H
-#define MANTIDQT_WIDGETS_COMMON_QAPPLICATIONHOLDER_H
+#pragma once
 
 #include <cxxtest/GlobalFixture.h>
 
@@ -36,5 +35,3 @@ public:
   GNU_DIAG_ON("pedantic")
   QApplication *m_app;
 };
-
-#endif // MANTIDQT_WIDGETS_COMMON_QAPPLICATIONHOLDER_H

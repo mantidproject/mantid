@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReflectometryReductionOne2.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -17,6 +17,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
@@ -24,6 +25,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -156,16 +158,10 @@ void ReflectometryReductionOne2::init() {
                       Direction::Input),
                   "Wavelength maximum in angstroms");
 
-  // Init properties for monitors
   initMonitorProperties();
-
-  // Init properties for transmission normalization
+  initBackgroundProperties();
   initTransmissionProperties();
-
-  // Init properties for algorithmic corrections
   initAlgorithmicProperties();
-
-  // Init properties for diagnostics
   initDebugProperties();
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
@@ -177,6 +173,11 @@ void ReflectometryReductionOne2::init() {
                       "OutputWorkspaceWavelength", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output Workspace IvsLam. Intermediate workspace.");
+  setPropertySettings(
+      "OutputWorkspaceWavelength",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+
+  initTransmissionOutputProperties();
 }
 
 /** Validate inputs
@@ -185,6 +186,9 @@ std::map<std::string, std::string>
 ReflectometryReductionOne2::validateInputs() {
 
   std::map<std::string, std::string> results;
+
+  const auto background = validateBackgroundProperties();
+  results.insert(background.begin(), background.end());
 
   const auto reduction = validateReductionProperties();
   results.insert(reduction.begin(), reduction.end());
@@ -260,6 +264,7 @@ void ReflectometryReductionOne2::exec() {
   // Convert to Q
   auto IvsQ = convertToQ(IvsLam);
 
+  // Set outputs
   if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
     setProperty("OutputWorkspaceWavelength", IvsLam);
   }
@@ -340,7 +345,7 @@ std::string ReflectometryReductionOne2::createDebugWorkspaceName(
  * and is incremented after the workspace is output
  */
 void ReflectometryReductionOne2::outputDebugWorkspace(
-    MatrixWorkspace_sptr ws, const std::string &wsName,
+    const MatrixWorkspace_sptr &ws, const std::string &wsName,
     const std::string &wsSuffix, const bool debug, int &step) {
   // Nothing to do if debug is not enabled
   if (debug) {
@@ -397,9 +402,16 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::makeIvsLam() {
     result = cropWavelength(result, true, wavelengthMin(), wavelengthMax());
     outputDebugWorkspace(result, wsName, "_cropped", debug, step);
   } else {
+    g_log.debug("Extracting ROI\n");
+    result = makeDetectorWS(result, false, false);
+    outputDebugWorkspace(result, wsName, "_lambda", debug, step);
+    // Background subtraction
+    result = backgroundSubtraction(result);
+    outputDebugWorkspace(result, wsName, "_lambda_subtracted_bkg", debug, step);
+    // Sum in lambda
     if (m_sum) {
       g_log.debug("Summing in wavelength\n");
-      result = makeDetectorWS(result, m_convertUnits);
+      result = makeDetectorWS(result, m_convertUnits, true);
       outputDebugWorkspace(result, wsName, "_summed", debug, step);
     }
     // Now the workspace is in wavelength, find the min/max wavelength
@@ -458,6 +470,31 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
   return IvsLam;
 }
 
+MatrixWorkspace_sptr ReflectometryReductionOne2::backgroundSubtraction(
+    MatrixWorkspace_sptr detectorWS) {
+  bool subtractBackground = getProperty("SubtractBackground");
+  if (!subtractBackground)
+    return detectorWS;
+  auto alg = this->createChildAlgorithm("ReflectometryBackgroundSubtraction");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", detectorWS);
+  alg->setProperty("InputWorkspaceIndexType", "SpectrumNumber");
+  alg->setProperty("ProcessingInstructions",
+                   getPropertyValue("BackgroundProcessingInstructions"));
+  alg->setProperty("BackgroundCalculationMethod",
+                   getPropertyValue("BackgroundCalculationMethod"));
+  alg->setProperty("DegreeOfPolynomial",
+                   getPropertyValue("DegreeOfPolynomial"));
+  alg->setProperty("CostFunction", getPropertyValue("CostFunction"));
+  // For our case, the peak range is the same as the main processing
+  // instructions, and we do the summation separately so don't sum the peak
+  alg->setProperty("PeakRange", getPropertyValue("ProcessingInstructions"));
+  alg->setProperty("SumPeak", false);
+  alg->execute();
+  MatrixWorkspace_sptr corrected = alg->getProperty("OutputWorkspace");
+  return corrected;
+}
+
 /**
  * Perform either transmission or algorithmic correction according to the
  * settings.
@@ -467,7 +504,7 @@ ReflectometryReductionOne2::monitorCorrection(MatrixWorkspace_sptr detectorWS) {
  * @return : corrected workspace
  */
 MatrixWorkspace_sptr ReflectometryReductionOne2::transOrAlgCorrection(
-    MatrixWorkspace_sptr detectorWS, const bool detectorWSReduced) {
+    const MatrixWorkspace_sptr &detectorWS, const bool detectorWSReduced) {
 
   MatrixWorkspace_sptr normalized;
   MatrixWorkspace_sptr transRun = getProperty("FirstTransmissionRun");
@@ -490,9 +527,10 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transOrAlgCorrection(
  * @return :: the input workspace normalized by transmission
  */
 MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
-    MatrixWorkspace_sptr detectorWS, const bool detectorWSReduced) {
+    const MatrixWorkspace_sptr &detectorWS, const bool detectorWSReduced) {
 
   MatrixWorkspace_sptr transmissionWS = getProperty("FirstTransmissionRun");
+  auto transmissionWSName = transmissionWS->getName();
 
   // Reduce the transmission workspace, if not already done (assume that if
   // the workspace is in wavelength then it has already been reduced)
@@ -510,6 +548,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
           getPropertyValue("TransmissionProcessingInstructions");
     }
 
+    bool const isDebug = getProperty("Debug");
     MatrixWorkspace_sptr secondTransmissionWS =
         getProperty("SecondTransmissionRun");
     auto alg = this->createChildAlgorithm("CreateTransmissionWorkspace");
@@ -535,18 +574,14 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
     alg->setProperty("ProcessingInstructions", transmissionCommands);
     alg->setProperty("NormalizeByIntegratedMonitors",
                      getPropertyValue("NormalizeByIntegratedMonitors"));
-    alg->setPropertyValue("Debug", getPropertyValue("Debug"));
+    alg->setProperty("Debug", isDebug);
     alg->execute();
     transmissionWS = alg->getProperty("OutputWorkspace");
+    transmissionWSName = alg->getPropertyValue("OutputWorkspace");
 
-    // Add the output transmission workspace to the ADS otherwise it gets
-    // swallowed by this algorithm as it's not one of the output properties (it
-    // might be better to make it an output property but currently users always
-    // accept the default name so are unlikely to use it)
-    auto transmissionWSName = alg->getPropertyValue("OutputWorkspace");
-    if (!transmissionWSName.empty())
-      AnalysisDataService::Instance().addOrReplace(transmissionWSName,
-                                                   transmissionWS);
+    // Set interim workspace outputs
+    setWorkspacePropertyFromChild(alg, "OutputWorkspaceFirstTransmission");
+    setWorkspacePropertyFromChild(alg, "OutputWorkspaceSecondTransmission");
   }
 
   // Rebin the transmission run to be the same as the input.
@@ -564,6 +599,13 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
   }
 
   MatrixWorkspace_sptr normalized = divide(detectorWS, transmissionWS);
+
+  // Set output transmission workspace
+  if (isDefault("OutputWorkspaceTransmission") && !transmissionWSName.empty()) {
+    setPropertyValue("OutputWorkspaceTransmission", transmissionWSName);
+  }
+  setProperty("OutputWorkspaceTransmission", transmissionWS);
+
   return normalized;
 }
 
@@ -574,7 +616,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::transmissionCorrection(
  * @return : corrected workspace
  */
 MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
-    MatrixWorkspace_sptr detectorWS) {
+    const MatrixWorkspace_sptr &detectorWS) {
 
   const std::string corrAlgName = getProperty("CorrectionAlgorithm");
 
@@ -602,7 +644,7 @@ MatrixWorkspace_sptr ReflectometryReductionOne2::algorithmicCorrection(
  * @return : output workspace in Q
  */
 MatrixWorkspace_sptr
-ReflectometryReductionOne2::convertToQ(MatrixWorkspace_sptr inputWS) {
+ReflectometryReductionOne2::convertToQ(const MatrixWorkspace_sptr &inputWS) {
   bool const moreThanOneDetector = inputWS->getDetector(0)->nDets() > 1;
   bool const shouldCorrectAngle =
       !(*getProperty("ThetaIn")).isDefault() && !summingInQ();
@@ -668,7 +710,7 @@ void ReflectometryReductionOne2::findDetectorGroups() {
   // Sort the groups by the first spectrum number in the group (to give the same
   // output order as GroupDetectors)
   std::sort(m_detectorGroups.begin(), m_detectorGroups.end(),
-            [](const std::vector<size_t> a, const std::vector<size_t> b) {
+            [](const std::vector<size_t> &a, const std::vector<size_t> &b) {
               return a.front() < b.front();
             });
 
@@ -766,7 +808,7 @@ size_t ReflectometryReductionOne2::twoThetaRDetectorIdx(
 }
 
 void ReflectometryReductionOne2::findWavelengthMinMax(
-    MatrixWorkspace_sptr inputWS) {
+    const MatrixWorkspace_sptr &inputWS) {
 
   // Get the max/min wavelength of region of interest
   const double lambdaMin = getProperty("WavelengthMin");
@@ -838,8 +880,8 @@ size_t ReflectometryReductionOne2::findIvsLamRangeMaxDetector(
 }
 
 double ReflectometryReductionOne2::findIvsLamRangeMin(
-    MatrixWorkspace_sptr detectorWS, const std::vector<size_t> &detectors,
-    const double lambda) {
+    const MatrixWorkspace_sptr &detectorWS,
+    const std::vector<size_t> &detectors, const double lambda) {
   double projectedMin = 0.0;
 
   const size_t spIdx = findIvsLamRangeMinDetector(detectors);
@@ -857,8 +899,8 @@ double ReflectometryReductionOne2::findIvsLamRangeMin(
 }
 
 double ReflectometryReductionOne2::findIvsLamRangeMax(
-    MatrixWorkspace_sptr detectorWS, const std::vector<size_t> &detectors,
-    const double lambda) {
+    const MatrixWorkspace_sptr &detectorWS,
+    const std::vector<size_t> &detectors, const double lambda) {
   double projectedMax = 0.0;
 
   const size_t spIdx = findIvsLamRangeMaxDetector(detectors);
@@ -887,9 +929,9 @@ double ReflectometryReductionOne2::findIvsLamRangeMax(
  * @param projectedMax [out] : the end of the resulting projected range
  */
 void ReflectometryReductionOne2::findIvsLamRange(
-    MatrixWorkspace_sptr detectorWS, const std::vector<size_t> &detectors,
-    const double lambdaMin, const double lambdaMax, double &projectedMin,
-    double &projectedMax) {
+    const MatrixWorkspace_sptr &detectorWS,
+    const std::vector<size_t> &detectors, const double lambdaMin,
+    const double lambdaMax, double &projectedMin, double &projectedMax) {
 
   // Get the new max and min X values of the projected (virtual) lambda range
   projectedMin = findIvsLamRangeMin(detectorWS, detectors, lambdaMin);
@@ -911,8 +953,8 @@ void ReflectometryReductionOne2::findIvsLamRange(
  *
  * @return : a 1D workspace where y values are all zero
  */
-MatrixWorkspace_sptr
-ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
+MatrixWorkspace_sptr ReflectometryReductionOne2::constructIvsLamWS(
+    const MatrixWorkspace_sptr &detectorWS) {
 
   // There is one output spectrum for each detector group
   const size_t numGroups = detectorGroups().size();
@@ -960,7 +1002,7 @@ ReflectometryReductionOne2::constructIvsLamWS(MatrixWorkspace_sptr detectorWS) {
  * @return :: the output workspace in wavelength
  */
 MatrixWorkspace_sptr
-ReflectometryReductionOne2::sumInQ(MatrixWorkspace_sptr detectorWS) {
+ReflectometryReductionOne2::sumInQ(const MatrixWorkspace_sptr &detectorWS) {
 
   // Construct the output array in virtual lambda
   MatrixWorkspace_sptr IvsLam = constructIvsLamWS(detectorWS);
@@ -1037,7 +1079,7 @@ void ReflectometryReductionOne2::sumInQProcessValue(
     const int inputIdx, const double twoTheta, const double bTwoTheta,
     const HistogramX &inputX, const HistogramY &inputY,
     const HistogramE &inputE, const std::vector<size_t> &detectors,
-    const size_t outSpecIdx, MatrixWorkspace_sptr IvsLam,
+    const size_t outSpecIdx, const MatrixWorkspace_sptr &IvsLam,
     std::vector<double> &outputE) {
 
   // Check whether there are any counts (if not, nothing to share)
@@ -1056,7 +1098,7 @@ void ReflectometryReductionOne2::sumInQProcessValue(
                           lambdaVMin, lambdaVMax);
   // Share the input counts into the output array
   sumInQShareCounts(inputCounts, inputE[inputIdx], bLambda, lambdaVMin,
-                    lambdaVMax, outSpecIdx, IvsLam, outputE);
+                    lambdaVMax, outSpecIdx, std::move(IvsLam), outputE);
 }
 
 /**
@@ -1077,7 +1119,7 @@ void ReflectometryReductionOne2::sumInQProcessValue(
 void ReflectometryReductionOne2::sumInQShareCounts(
     const double inputCounts, const double inputErr, const double bLambda,
     const double lambdaMin, const double lambdaMax, const size_t outSpecIdx,
-    MatrixWorkspace_sptr IvsLam, std::vector<double> &outputE) {
+    const MatrixWorkspace_sptr &IvsLam, std::vector<double> &outputE) {
   // Check that we have histogram data
   const auto &outputX = IvsLam->dataX(outSpecIdx);
   auto &outputY = IvsLam->dataY(outSpecIdx);
@@ -1198,7 +1240,8 @@ Check whether the spectra for the given workspaces are the same.
 exception. Otherwise a warning is generated.
 */
 void ReflectometryReductionOne2::verifySpectrumMaps(
-    MatrixWorkspace_const_sptr ws1, MatrixWorkspace_const_sptr ws2) {
+    const MatrixWorkspace_const_sptr &ws1,
+    const MatrixWorkspace_const_sptr &ws2) {
 
   bool mismatch = false;
   // Check that the number of histograms is the same

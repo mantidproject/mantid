@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
 #include "MantidAPI/Axis.h"
@@ -38,7 +38,7 @@ struct StartAndEndTime {
   Mantid::Types::Core::DateAndTime endTime;
 };
 
-StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
+StartAndEndTime getStartAndEndTimesFromRawFile(const std::string &filename) {
   FILE *rawFile = fopen(filename.c_str(), "rb");
   if (!rawFile)
     throw std::runtime_error("Cannot open RAW file for reading: " + filename);
@@ -58,7 +58,7 @@ StartAndEndTime getStartAndEndTimesFromRawFile(std::string filename) {
 }
 
 StartAndEndTime getStartAndEndTimesFromNexusFile(
-    std::string filename,
+    const std::string &filename,
     const Mantid::Types::Core::DateAndTime &startTimeDefault,
     const Mantid::Types::Core::DateAndTime &endTimeDefault) {
   StartAndEndTime startAndEndTime;
@@ -411,7 +411,7 @@ void CreateSimulationWorkspace::adjustInstrument(const std::string &filename) {
  * @param workspace: dummy workspace
  */
 void CreateSimulationWorkspace::setStartDate(
-    API::MatrixWorkspace_sptr workspace) {
+    const API::MatrixWorkspace_sptr &workspace) {
   const std::string detTableFile = getProperty("DetectorTableFilename");
   auto hasDetTableFile = !detTableFile.empty();
   auto &run = workspace->mutableRun();

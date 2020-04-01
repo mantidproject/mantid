@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
@@ -16,7 +16,7 @@ from matplotlib.patches import BoxStyle
 from matplotlib.pyplot import figure
 
 from mantid.plots.legend import LegendProperties
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties

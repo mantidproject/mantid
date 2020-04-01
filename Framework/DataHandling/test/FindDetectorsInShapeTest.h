@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FINDDETECTORSINSHAPETEST_H_
-#define FINDDETECTORSINSHAPETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -118,7 +117,7 @@ public:
     runTest(xmlShape, "320,340,360,380", false);
   }
 
-  void runTest(std::string xmlShape, std::string expectedHits,
+  void runTest(const std::string &xmlShape, std::string expectedHits,
                bool includeMonitors = true) {
     Mantid::DataHandling::FindDetectorsInShape alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -157,5 +156,3 @@ private:
   std::string inputFile;
   std::string wsName;
 };
-
-#endif /*FINDDETECTORSINSHAPETEST_H_*/

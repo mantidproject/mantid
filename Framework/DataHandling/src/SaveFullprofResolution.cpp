@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveFullprofResolution.h"
 #include "MantidAPI/FileProperty.h"
@@ -480,7 +480,7 @@ std::string SaveFullprofResolution::toProf9IrfString() {
 /** Check wether a profile parameter map has the parameter
  */
 bool SaveFullprofResolution::has_key(std::map<std::string, double> profmap,
-                                     std::string key) {
+                                     const std::string &key) {
   map<string, double>::iterator fiter;
   fiter = profmap.find(key);
   bool exist = true;

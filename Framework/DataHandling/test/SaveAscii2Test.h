@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVEASCIITEST_H_
-#define SAVEASCIITEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -115,7 +114,7 @@ public:
     }
     AnalysisDataService::Instance().add(m_name, wsToSave);
     SaveAscii2 save;
-    std::string filename = initSaveAscii2(save);
+    initSaveAscii2(save);
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WriteXError", "1"));
     TS_ASSERT_THROWS_ANYTHING(save.execute());
     AnalysisDataService::Instance().remove(m_name);
@@ -531,7 +530,7 @@ public:
     writeSampleWS(wsToSave, false);
 
     SaveAscii2 save;
-    std::string filename = initSaveAscii2(save);
+    initSaveAscii2(save);
 
     TS_ASSERT_THROWS_NOTHING(
         save.setProperty("SpectrumMetaData", "SpectrumNumber"));
@@ -837,7 +836,7 @@ public:
     writeSampleWS(wsToSave);
 
     SaveAscii2 save;
-    std::string filename = initSaveAscii2(save);
+    initSaveAscii2(save);
 
     TS_ASSERT_THROWS_NOTHING(
         save.setPropertyValue("SpectrumMetaData", "NotAValidChoice"));
@@ -1048,4 +1047,3 @@ private:
     AnalysisDataService::Instance().add(m_name, wsToSave);
   }
 };
-#endif /*SAVEASCIITEST_H_*/

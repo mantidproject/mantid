@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/RefDetectorView/RefMatrixWSImageView.h"
 #include "MantidAPI/Algorithm.h"
@@ -21,7 +21,8 @@ using namespace Mantid::API;
 /**
  * Construct an ImageView for the specified matrix workspace
  */
-RefMatrixWSImageView::RefMatrixWSImageView(MatrixWorkspace_sptr /*mat_ws*/)
+RefMatrixWSImageView::RefMatrixWSImageView(
+    const MatrixWorkspace_sptr & /*mat_ws*/)
     : m_imageView(nullptr) {
   return;
   //  RefMatrixWSDataSource* source = new RefMatrixWSDataSource( mat_ws );
@@ -31,7 +32,7 @@ RefMatrixWSImageView::RefMatrixWSImageView(MatrixWorkspace_sptr /*mat_ws*/)
   //                                         // is closed
 }
 
-RefMatrixWSImageView::RefMatrixWSImageView(QString wpsName, int peakMin,
+RefMatrixWSImageView::RefMatrixWSImageView(const QString &wpsName, int peakMin,
                                            int peakMax, int backMin,
                                            int backMax, int tofMin,
                                            int tofMax) {

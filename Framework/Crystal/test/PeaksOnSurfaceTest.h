@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_PEAKSONSURFACETEST_H_
-#define MANTID_CRYSTAL_PEAKSONSURFACETEST_H_
+#pragma once
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidCrystal/PeaksOnSurface.h"
@@ -28,7 +27,7 @@ private:
 Helper function. Creates a peaksworkspace with a single peak
 */
   PeaksWorkspace_sptr
-  createPeaksWorkspace(const std::string coordFrame,
+  createPeaksWorkspace(const std::string &coordFrame,
                        const Mantid::Kernel::V3D &peakPosition) {
     PeaksWorkspace_sptr ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
     auto detectorIds = ws->getInstrument()->getDetectorIDs();
@@ -407,5 +406,3 @@ public:
     TS_ASSERT_EQUALS(inputWS->rowCount(), outWS->rowCount());
   }
 };
-
-#endif /* MANTID_CRYSTAL_PEAKSONSURFACETEST_H_ */

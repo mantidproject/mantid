@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/FileProperty.h"
@@ -255,7 +255,8 @@ void LoadInstrument::exec() {
 //-----------------------------------------------------------------------------------------------------------------------
 /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
 void LoadInstrument::runLoadParameterFile(
-    const boost::shared_ptr<API::MatrixWorkspace> &ws, std::string filename) {
+    const boost::shared_ptr<API::MatrixWorkspace> &ws,
+    const std::string &filename) {
   g_log.debug("Loading the parameter definition...");
 
   // First search for XML parameter file in same folder as IDF file
@@ -311,8 +312,9 @@ void LoadInstrument::runLoadParameterFile(
 /// Search the directory for the Parameter IDF file and return full path name if
 /// found, else return "".
 //  directoryName must include a final '/'.
-std::string LoadInstrument::getFullPathParamIDF(std::string directoryName,
-                                                std::string filename) {
+std::string
+LoadInstrument::getFullPathParamIDF(const std::string &directoryName,
+                                    const std::string &filename) {
   Poco::Path directoryPath(directoryName);
   directoryPath.makeDirectory();
   // Remove the path from the filename

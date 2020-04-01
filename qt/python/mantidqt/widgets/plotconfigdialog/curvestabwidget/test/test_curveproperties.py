@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from __future__ import (absolute_import, unicode_literals)
 
 import unittest
 from matplotlib import use as mpl_use
@@ -97,7 +95,7 @@ class CurvePropertiesTest(unittest.TestCase):
                          'label': 'ax0',
                          'linestyle': 'dashdot',
                          'linewidth': 4.0,
-                         'marker': 'triangle_down',
+                         'marker': 'v',
                          'markeredgecolor': '#008000',
                          'markerfacecolor': '#000000',
                          'markersize': 10.0,

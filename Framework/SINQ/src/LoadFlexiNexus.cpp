@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/LoadFlexiNexus.h"
 #include "MantidAPI/Axis.h"
@@ -71,7 +71,7 @@ void LoadFlexiNexus::exec() {
   readData(&fin);
 }
 
-void LoadFlexiNexus::loadDictionary(std::string dictFile) {
+void LoadFlexiNexus::loadDictionary(const std::string &dictFile) {
   std::ifstream in(dictFile.c_str(), std::ifstream::in);
   std::string line, key, value;
 
@@ -312,8 +312,8 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
   return MDHistoDimension_sptr(
       new MDHistoDimension(name, name, frame, min, max, length));
 }
-void LoadFlexiNexus::addMetaData(NeXus::File *fin, Workspace_sptr ws,
-                                 ExperimentInfo_sptr info) {
+void LoadFlexiNexus::addMetaData(NeXus::File *fin, const Workspace_sptr &ws,
+                                 const ExperimentInfo_sptr &info) {
   std::map<std::string, std::string>::const_iterator it;
 
   // assign a title
@@ -404,7 +404,7 @@ std::unordered_set<std::string> LoadFlexiNexus::populateSpecialMap() {
   return specialMap;
 }
 
-int LoadFlexiNexus::safeOpenpath(NeXus::File *fin, std::string path) {
+int LoadFlexiNexus::safeOpenpath(NeXus::File *fin, const std::string &path) {
   try {
     fin->openPath(path);
   } catch (NeXus::Exception &) {

@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidDataHandling/SaveCSV.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -185,9 +184,10 @@ void SaveCSV::exec() {
   outCSV_File.close();
 }
 
-void SaveCSV::saveXerrors(std::ofstream &stream,
-                          const Mantid::DataObjects::Workspace2D_sptr workspace,
-                          const size_t numberOfHist) {
+void SaveCSV::saveXerrors(
+    std::ofstream &stream,
+    const Mantid::DataObjects::Workspace2D_sptr &workspace,
+    const size_t numberOfHist) {
   // If there isn't a dx values present in the first entry then return
   if (!workspace->hasDx(0)) {
     return;

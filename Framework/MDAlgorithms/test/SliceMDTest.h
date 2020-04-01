@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_SLICEMDTEST_H_
-#define MANTID_MDEVENTS_SLICEMDTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
@@ -145,7 +144,7 @@ public:
                      const uint64_t expectedNumPoints,
                      const size_t expectedNumDims, bool willFail,
                      const std::string &OutputFilename,
-                     IMDEventWorkspace_sptr in_ws) {
+                     const IMDEventWorkspace_sptr &in_ws) {
     SliceMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -211,7 +210,7 @@ public:
                     const std::string &name3, const std::string &name4,
                     const uint64_t expectedNumPoints,
                     const size_t expectedNumDims, bool willFail = false,
-                    std::string OutputFilename = "") {
+                    const std::string &OutputFilename = "") {
 
     Mantid::Geometry::QSample frame;
     IMDEventWorkspace_sptr in_ws =
@@ -407,5 +406,3 @@ public:
     do_test_transform(5, 10, 2, 100 /*# of events*/);
   }
 };
-
-#endif /* MANTID_MDEVENTS_SLICEMDTEST_H_ */

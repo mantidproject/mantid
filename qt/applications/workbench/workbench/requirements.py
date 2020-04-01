@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """Defines methods to check requirements for the application
 """
-from __future__ import absolute_import
-
 from distutils.version import LooseVersion
 
 
@@ -41,5 +39,5 @@ def check_qt():
                                                   actual_ver)
             )
     except ImportError as exc:
-        show_warning("Failed to import qtpy: '{}'\n".format(str(exc)) +
-                     "Please check the installation.")
+        show_warning("Failed to import qtpy: '{}'\n".format(str(exc))
+                     + "Please check the installation.")

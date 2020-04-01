@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
-#define MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H
+#pragma once
 
 #include "../../../ISISReflectometry/GUI/Runs/RunsPresenter.h"
 #include "../../../ISISReflectometry/Reduction/RunsTable.h"
@@ -24,6 +23,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+
+#include <utility>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::
@@ -709,7 +710,7 @@ private:
   }
 
   AlgorithmRuntimeProps defaultLiveMonitorReductionOptions(
-      std::string instrument = std::string("OFFSPEC")) {
+      const std::string &instrument = std::string("OFFSPEC")) {
     return AlgorithmRuntimeProps{
         {"GetLiveValueAlgorithm", "GetLiveInstrumentValue"},
         {"InputWorkspace", "TOF_live"},
@@ -1006,7 +1007,7 @@ private:
     expectGetUpdateInterval(updateInterval);
     EXPECT_CALL(m_mainPresenter, rowProcessingProperties())
         .Times(1)
-        .WillOnce(Return(options));
+        .WillOnce(Return(std::move(options)));
   }
 
   void expectGetLiveDataOptions(std::string const &instrument,
@@ -1067,5 +1068,3 @@ private:
   std::string m_searchString;
   SearchResult m_searchResult;
 };
-
-#endif /* MANTID_CUSTOMINTERFACES_RUNSPRESENTERTEST_H */

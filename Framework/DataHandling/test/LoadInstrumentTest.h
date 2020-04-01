@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADINSTRUMENTTEST_H_
-#define LOADINSTRUMENTTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -419,7 +418,7 @@ public:
   }
 
   /// Common initialisation for Nexus loading tests
-  MatrixWorkspace_sptr doLoadNexus(const std::string filename) {
+  MatrixWorkspace_sptr doLoadNexus(const std::string &filename) {
     LoadInstrument nexusLoader;
     nexusLoader.initialize();
     nexusLoader.setChild(true);
@@ -861,9 +860,9 @@ private:
   // @param paramFilename Expected parameter file to be loaded as part of
   // LoadInstrument
   // @param par A specific parameter to check if have been loaded
-  void doTestParameterFileSelection(std::string filename,
-                                    std::string paramFilename,
-                                    std::string par) {
+  void doTestParameterFileSelection(const std::string &filename,
+                                    const std::string &paramFilename,
+                                    const std::string &par) {
     InstrumentDataService::Instance().clear();
 
     LoadInstrument loader;
@@ -915,7 +914,7 @@ public:
     ws = WorkspaceCreationHelper::create2DWorkspace(1, 2);
   }
 
-  void doTest(std::string filename, size_t numTimes = 1) {
+  void doTest(const std::string &filename, size_t numTimes = 1) {
     for (size_t i = 0; i < numTimes; ++i) {
       // Remove any existing instruments, so each time they are loaded.
       InstrumentDataService::Instance().clear();
@@ -948,5 +947,3 @@ public:
 
   void test_SNAP() { doTest("SNAP_Definition.xml", 1); }
 };
-
-#endif /*LOADINSTRUMENTTEST_H_*/

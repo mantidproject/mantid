@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_HISTOGRAM_H_
-#define MANTID_HISTOGRAMDATA_HISTOGRAM_H_
+#pragma once
 
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/CountStandardDeviations.h"
@@ -434,5 +433,3 @@ MANTID_HISTOGRAMDATA_DLL Histogram::XMode getHistogramXMode(size_t xLength,
 
 } // namespace HistogramData
 } // namespace Mantid
-
-#endif /* MANTID_HISTOGRAMDATA_HISTOGRAM_H_ */

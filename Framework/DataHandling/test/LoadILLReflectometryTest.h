@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADILLREFLECTOMETRYTEST_H_
-#define MANTID_DATAHANDLING_LOADILLREFLECTOMETRYTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -35,7 +34,7 @@ private:
   // Name of the default output workspace
   const std::string m_outWSName{"LoadILLReflectometryTest_OutputWS"};
 
-  static void commonProperties(MatrixWorkspace_sptr output,
+  static void commonProperties(const MatrixWorkspace_sptr &output,
                                const std::string &instrName) {
     TS_ASSERT(output->isHistogramData())
     const auto &spectrumInfo = output->spectrumInfo();
@@ -60,7 +59,7 @@ private:
                      "degree")
   }
 
-  static double detCounts(MatrixWorkspace_sptr output) {
+  static double detCounts(const MatrixWorkspace_sptr &output) {
     // sum of detector counts
     double counts{0.0};
     for (size_t i = 0; i < output->getNumberHistograms(); ++i) {
@@ -697,10 +696,12 @@ public:
     auto instrument = output->getInstrument();
     auto slit1 = instrument->getComponentByName("slit2");
     auto slit2 = instrument->getComponentByName("slit3");
+    // cppcheck-suppress unreadVariable
     const double S2z =
         -output->run().getPropertyValueAsType<double>("Distance.S2toSample") *
         1e-3;
     TS_ASSERT_EQUALS(slit1->getPos(), V3D(0.0, 0.0, S2z))
+    // cppcheck-suppress unreadVariable
     const double S3z =
         -output->run().getPropertyValueAsType<double>("Distance.S3toSample") *
         1e-3;
@@ -779,5 +780,3 @@ private:
     return loader;
   }
 };
-
-#endif /* MANTID_DATAHANDLING_LOADILLREFLECTOMETRYTEST_H_ */

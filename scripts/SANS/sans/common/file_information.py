@@ -1,14 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ The elements of this module coordinate file access and information extraction from files."""
 
 # pylint: disable=too-few-public-methods, invalid-name
 
-from __future__ import (absolute_import, division, print_function)
 import os
 import h5py as h5
 import re
@@ -18,8 +17,6 @@ from mantid.kernel import (DateAndTime, ConfigService, Logger)
 from mantid.api import (AlgorithmManager, ExperimentInfo)
 from sans.common.enums import (SANSInstrument, FileType, SampleShape)
 from sans.common.general_functions import (get_instrument, instrument_name_correction, get_facility)
-from six import with_metaclass
-
 # ----------------------------------------------------------------------------------------------------------------------
 # Constants
 # ----------------------------------------------------------------------------------------------------------------------
@@ -98,23 +95,20 @@ def find_sans_file(file_name):
     :param file_name: a file name or a run number.
     :return: the full path.
     """
-    error_message = "Trying to find the SANS file {0}, but cannot find it. Make sure that " \
-                    "the relevant paths are added and the correct instrument is selected."
-    try:
-        full_path = find_full_file_path(file_name)
-        if not full_path and not file_name.endswith('.nxs'):
-            full_path = find_full_file_path(file_name + '.nxs')
-        if not full_path:
-            # TODO: If we only provide a run number for example 98843 for LOQ measurments, but have LARMOR specified as the
-            #       Mantid instrument, then the FileFinder will search itself to death. This is a general Mantid issue.
-            #       One way to handle this graceful would be a timeout option.
-            runs = FileFinder.findRuns(file_name)
-            if runs:
-                full_path = runs[0]
-    except RuntimeError:
-        raise RuntimeError(error_message.format(file_name))
+    full_path = find_full_file_path(file_name)
+    if not full_path and not file_name.endswith('.nxs'):
+        full_path = find_full_file_path(file_name + '.nxs')
+    if not full_path:
+        # TODO: If we only provide a run number for example 98843 for LOQ measurments, but have LARMOR specified as the
+        #       Mantid instrument, then the FileFinder will search itself to death. This is a general Mantid issue.
+        #       One way to handle this graceful would be a timeout option.
+        runs = FileFinder.findRuns(file_name)
+        if runs:
+            full_path = runs[0]
 
     if not full_path:
+        error_message = "Trying to find the SANS file {0}, but cannot find it. Make sure that " \
+                        "the relevant paths are added and the correct instrument is selected."
         raise RuntimeError(error_message.format(file_name))
     return full_path
 
@@ -722,7 +716,7 @@ def get_geometry_information_raw(file_name):
 # ----------------------------------------------------------------------------------------------------------------------
 # SANS file Information
 # ----------------------------------------------------------------------------------------------------------------------
-class SANSFileInformation(with_metaclass(ABCMeta, object)):
+class SANSFileInformation(metaclass=ABCMeta):
     logger = Logger("SANS")
 
     def __init__(self, full_file_name):
@@ -836,7 +830,7 @@ class SANSFileInformationBlank(SANSFileInformation):
     as we should not be creating blank information states
     """
     def __init__(self):
-        super(SANSFileInformationBlank, self).__init__(full_file_name="0")
+        super(SANSFileInformationBlank, self).__init__(full_file_name="00000")
 
     def get_file_name(self):
         raise NotImplementedError("Trying to use blank FileInformation")

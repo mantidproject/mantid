@@ -1,58 +1,46 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from mantid.kernel import PropertyManagerDataService
 from mantid.kernel import config
-from mantid.py3compat import mock
-from sans.common.enums import BatchReductionEntry, SANSInstrument
+from unittest import mock
+from sans.command_interface.batch_csv_parser import BatchCsvParser
+from sans.common.enums import SANSInstrument
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, ReductionMode,
                                RangeStepType, FitType, RowState)
-from sans.gui_logic.models.table_model import TableModel, TableIndexModel
+from sans.gui_logic.models.RowEntries import RowEntries
+from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.gui_logic.models.table_model import TableModel
 from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from sans.test_helper.common import (remove_file)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file, sample_user_file_gravity_OFF)
 
-BATCH_FILE_TEST_CONTENT_1 = [{BatchReductionEntry.SAMPLE_SCATTER: 1, BatchReductionEntry.SAMPLE_TRANSMISSION: 2,
-                              BatchReductionEntry.SAMPLE_DIRECT: 3, BatchReductionEntry.OUTPUT: 'test_file',
-                              BatchReductionEntry.USER_FILE: 'user_test_file'},
-                             {BatchReductionEntry.SAMPLE_SCATTER: 1, BatchReductionEntry.CAN_SCATTER: 2,
-                              BatchReductionEntry.OUTPUT: 'test_file2'}]
+BATCH_FILE_TEST_CONTENT_1 = [RowEntries(sample_scatter=1, sample_transmission=2,
+                                        sample_direct=3, output_name='test_file',
+                                        user_file='user_test_file'),
+                             RowEntries(sample_scatter=1, can_scatter=2, output_name="test_file2")]
 
-BATCH_FILE_TEST_CONTENT_2 = [{BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
-                              BatchReductionEntry.SAMPLE_TRANSMISSION: 'SANS2D00022048',
-                              BatchReductionEntry.SAMPLE_DIRECT: 'SANS2D00022048',
-                              BatchReductionEntry.OUTPUT: 'test_file'},
-                             {BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
-                              BatchReductionEntry.OUTPUT: 'test_file2'}]
+BATCH_FILE_TEST_CONTENT_2 = [RowEntries(sample_scatter='SANS2D00022024', sample_transmission='SANS2D00022048',
+                                        sample_direct='SANS2D00022048', output_name="test_file"),
+                             RowEntries(sample_scatter='SANS2D00022024', output_name='test_file2')]
 
-BATCH_FILE_TEST_CONTENT_3 = [{BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
-                              BatchReductionEntry.SAMPLE_SCATTER_PERIOD: '3',
-                              BatchReductionEntry.OUTPUT: 'test_file'}]
+BATCH_FILE_TEST_CONTENT_3 = [RowEntries(sample_scatter='SANS2D00022024', sample_scatter_period=3,
+                                        output_name='test_file')]
 
-BATCH_FILE_TEST_CONTENT_4 = [{BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
-                              BatchReductionEntry.SAMPLE_TRANSMISSION: 'SANS2D00022048',
-                              BatchReductionEntry.SAMPLE_DIRECT: 'SANS2D00022048',
-                              BatchReductionEntry.OUTPUT: 'test_file'},
-                             {BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
-                              BatchReductionEntry.OUTPUT: 'test_file2'}]
+BATCH_FILE_TEST_CONTENT_4 = [RowEntries(sample_scatter='SANS2D00022024', sample_transmission='SANS2D00022048',
+                                        sample_direct='SANS2D00022048', output_name='test_file'),
+                             RowEntries(sample_scatter='SANS2D00022024', output_name='test_file2')]
 
-BATCH_FILE_TEST_CONTENT_5 = [{BatchReductionEntry.SAMPLE_SCATTER: 'SANS2D00022024',
-                              BatchReductionEntry.SAMPLE_TRANSMISSION: 'SANS2D00022048',
-                              BatchReductionEntry.SAMPLE_DIRECT: 'SANS2D00022048',
-                              BatchReductionEntry.OUTPUT: 'test_file',
-                              BatchReductionEntry.SAMPLE_THICKNESS: '5',
-                              BatchReductionEntry.SAMPLE_HEIGHT: '2',
-                              BatchReductionEntry.SAMPLE_WIDTH: '8'}]
+BATCH_FILE_TEST_CONTENT_5 = [RowEntries(sample_scatter='SANS2D00022024', sample_transmission='SANS2D00022048',
+                                        sample_direct='SANS2D00022048', output_name='test_file',
+                                        sample_thickness=5, sample_height=2, sample_width=8)]
 
 
 def get_non_empty_row_mock(value):
@@ -82,13 +70,24 @@ class RunTabPresenterTest(unittest.TestCase):
 
         config["default.facility"] = "ISIS"
 
-        patcher = mock.patch('sans.gui_logic.presenter.run_tab_presenter.BatchCsvParser')
-        self.addCleanup(patcher.stop)
-        self.BatchCsvParserMock = patcher.start()
+        self._mock_model = mock.Mock(spec=StateGuiModel)
+        self._mock_table = mock.Mock(spec=TableModel)
+        self._mock_csv_parser = mock.Mock(spec=BatchCsvParser)
+        self._mock_view = mock.Mock()
 
-        self.os_patcher = mock.patch('sans.gui_logic.presenter.run_tab_presenter.os')
-        self.addCleanup(self.os_patcher.stop)
-        self.osMock = self.os_patcher.start()
+        # TODO, this top level presenter should not be creating sub presenters, instead we should use
+        # TODO  an observer pattern and common interface to exchange messages. However for the moment
+        # TODO  we will skip patching each
+        self.presenter = RunTabPresenter(SANSFacility.ISIS,
+                                         model=self._mock_model, table_model=self._mock_table, view=self._mock_view)
+
+        # The beam centre presenter will run QThreads which leads to flaky tests, so mock out
+        self.presenter._beam_centre_presenter = mock.Mock()
+
+        self.presenter._csv_parser = self._mock_csv_parser
+        # Allows us to use mock objs as the method tries to directly use int/floats
+        self.presenter.update_view_from_table_model = mock.Mock()
+
 
     def tearDown(self):
         config["default.facility"] = self._backup_facility
@@ -97,15 +96,15 @@ class RunTabPresenterTest(unittest.TestCase):
         config["defaultsave.directory2"] = self._backup_save_dir
 
     def test_that_will_load_user_file(self):
-        # Setup presenter and mock view
+        # Setup self.presenter.and mock view
         user_file_path = create_user_file(sample_user_file)
         view, settings_diagnostic_tab, _ = create_mock_view(user_file_path)
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(view)
+
+        self.presenter.set_view(view)
 
         # Act
         try:
-            presenter.on_user_file_load()
+            self.presenter.on_user_file_load()
         except RuntimeError:
             # Assert that RuntimeError from no instrument is caught
             self.fail("on_user_file_load raises a RuntimeError which should be caught")
@@ -165,158 +164,47 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(view.radius_limit_max, 15.)
         self.assertTrue(view.compatibility_mode)
 
-        # Assert that Beam Centre View is updated correctly
-        self.assertEqual(view.beam_centre.lab_pos_1, 155.45)
-        self.assertEqual(view.beam_centre.lab_pos_2, -169.6)
-        self.assertEqual(view.beam_centre.hab_pos_1, 155.45)
-        self.assertEqual(view.beam_centre.hab_pos_2, -169.6)
-
         # clean up
         remove_file(user_file_path)
 
     def test_that_checks_default_user_file(self):
-        # Setup presenter and mock view
+        # Setup self.presenter.and mock view
         view, settings_diagnostic_tab, _ = create_mock_view("")
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(view)
+
+        self.presenter.set_view(view)
 
         self.assertEqual(
-            presenter._view.set_out_default_user_file.call_count, 1,
+            self.presenter._view.set_out_default_user_file.call_count, 1,
             "Expected mock to have been called once. Called {} times.".format(
-                presenter._view.set_out_default_user_file.call_count))
+                self.presenter._view.set_out_default_user_file.call_count))
 
         self.assertEqual(
-            presenter._view._call_settings_listeners.call_count, 0,
+            self.presenter._view._call_settings_listeners.call_count, 0,
             "Expected mock to not have been called. Called {} times.".format(
-                presenter._view._call_settings_listeners.call_count))
+                self.presenter._view._call_settings_listeners.call_count))
 
     def test_fails_silently_when_user_file_does_not_exist(self):
-        self.os_patcher.stop()
         view, _, _ = create_mock_view("non_existent_user_file")
+        self.presenter.set_view(view)
 
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(view)
-
-        try:
-            presenter.on_user_file_load()
-            has_raised = False
-        except:  # noqa
-            has_raised = True
-        self.assertFalse(has_raised)
-        self.os_patcher.start()
-
-    def do_fixture_that_loads_batch_file_and_places_it_into_table(self, use_multi_period):
-        # Arrange
-        batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2,
-                                                                                              is_multi_period=use_multi_period)  # noqa
-
-        # Act
-        presenter.on_batch_file_load()
-
-        # Assert
-        self.assertEqual(view.add_row.call_count, 6)
-        if use_multi_period:
-            expected_first_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '',
-                                  '', 'test_file', '', '', '', '', '', '']
-            expected_second_row = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '',
-                                   '', '', '', '', '']
-        else:
-            expected_first_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '',
-                                  '', 'test_file', '', '', '', '', '', '']
-            expected_second_row = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', ''
-                                   , '', '', '', '']
-
-        calls = [mock.call(expected_first_row), mock.call(expected_second_row)]
-        view.add_row.assert_has_calls(calls)
-
-        # Clean up
-        self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
-
-    def test_that_loads_batch_file_and_places_it_into_table(self):
-        self.do_fixture_that_loads_batch_file_and_places_it_into_table(use_multi_period=True)
-
-    def test_that_loads_batch_file_and_places_it_into_table_when_not_multi_period_enabled(self):
-        self.do_fixture_that_loads_batch_file_and_places_it_into_table(use_multi_period=False)
-
-    def test_that_loads_batch_file_with_multi_period_settings(self):
-        # Arrange
-        batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_3,
-                                                                                              is_multi_period=False)
-        # The call pattern is
-        # False -- we are in single mode
-        # True -- we switch to multi-period mode
-        # True -- Getting table model
-        # True -- Getting table model
-        multi_period_mock = MultiPeriodMock(call_pattern=[False, True, True, True])
-        view.is_multi_period_view = mock.MagicMock(side_effect=multi_period_mock)
-
-        # Act
-        presenter.on_batch_file_load()
-
-        # Assert
-        self.assertEqual(view.add_row.call_count, 4)
-        self.assertEqual(view.show_period_columns.call_count, 2)
-
-        expected_row = ['SANS2D00022024', '3', '', '', '', '', '', '', '', '', '', '', 'test_file', '', '',
-                        '', '', '', '']
-
-        calls = [mock.call(expected_row)]
-        view.add_row.assert_has_calls(calls)
-
-    def test_fails_silently_when_batch_file_does_not_exist(self):
-        self.os_patcher.stop()
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        user_file_path = create_user_file(sample_user_file)
-        view, settings_diagnostic_tab, masking_table = create_mock_view(user_file_path, "non_existent_batch_file")
-        presenter.set_view(view)
-
-        try:
-            presenter.on_batch_file_load()
-            has_raised = False
-        except:  # noqa
-            has_raised = True
-        self.assertFalse(has_raised)
-
-        # Clean up
-        self._remove_files(user_file_path=user_file_path)
-        self.os_patcher.start()
-
-    def test_batch_file_dir_not_added_to_config_if_batch_file_load_fails(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        user_file_path = create_user_file(sample_user_file)
-        view, settings_diagnostic_tab, masking_table = create_mock_view(user_file_path, "A/Path/batch_file.csv")
-        presenter.set_view(view)
-
-        presenter.on_batch_file_load()
-        config_dirs = config["datasearch.directories"]
-        result = "A/Path/" in config_dirs
-
-        self.assertFalse(result, "We do not expect A/Path/ to be added to config, "
-                                 "datasearch.directories is now {}".format(config_dirs))
+        self.assertIsNone(self.presenter.on_user_file_load())
 
     def test_that_gets_states_from_view(self):
         # Arrange
-        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
-        presenter.on_user_file_load()
-        presenter.on_batch_file_load()
-        presenter._table_model.update_thickness_from_file_information(1, self.get_file_information_mock())
-        presenter._table_model.update_thickness_from_file_information(2, self.get_file_information_mock())
+        batch_file_path, user_file_path, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
+        self.presenter.on_user_file_load()
+        self.presenter.on_batch_file_load()
 
         # Act
-        states, errors = presenter.get_states(row_index=[0, 1])
+        states, errors = self.presenter.get_states(row_entries=BATCH_FILE_TEST_CONTENT_2)
 
         # Assert
         self.assertEqual(len(states), 2)
         for _, state in states.items():
-            try:
-                state.validate()
-                has_raised = False
-            except:  # noqa
-                has_raised = True
-            self.assertFalse(has_raised)
+            state.validate()
 
         # Check state 0
-        state0 = states[0]
+        state0 = states[BATCH_FILE_TEST_CONTENT_2[0]]
         self.assertEqual(state0.data.sample_scatter, "SANS2D00022024")
         self.assertEqual(state0.data.sample_transmission, "SANS2D00022048")
         self.assertEqual(state0.data.sample_direct, "SANS2D00022048")
@@ -325,7 +213,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(state0.data.can_direct, None)
 
         # Check state 1
-        state1 = states[1]
+        state1 = states[BATCH_FILE_TEST_CONTENT_2[1]]
         self.assertEqual(state1.data.sample_scatter, "SANS2D00022024")
         self.assertEqual(state1.data.sample_transmission, None)
         self.assertEqual(state1.data.sample_direct, None)
@@ -343,722 +231,370 @@ class RunTabPresenterTest(unittest.TestCase):
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
-    def test_that_can_get_states_from_row_user_file(self):
-        # Arrange
-        row_user_file_path = create_user_file(sample_user_file_gravity_OFF)
-        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_4,
-                                                                                           row_user_file_path = row_user_file_path)
-        presenter.on_user_file_load()
-        presenter.on_batch_file_load()
-        presenter._table_model.update_thickness_from_file_information(1, self.get_file_information_mock())
-        presenter._table_model.update_thickness_from_file_information(2, self.get_file_information_mock())
-
-
-        # Act
-        state = presenter.get_state_for_row(1)
-        state0 = presenter.get_state_for_row(0)
-        # Assert
-        self.assertFalse(state.convert_to_q.use_gravity)
-        self.assertTrue(state0.convert_to_q.use_gravity)
-
     def test_that_can_get_state_for_index_if_index_exists(self):
-        # Arrange
-        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
+        state_key = mock.NonCallableMock()
+        self._mock_table.get_row.return_value = state_key
+        expected_states, expected_errs = {state_key: "state"}, None
+        self.presenter.get_states = mock.Mock(return_value=(expected_states, expected_errs))
+        self.presenter.sans_logger = mock.Mock()
 
-        presenter.on_user_file_load()
-        presenter.on_batch_file_load()
-        presenter._table_model.update_thickness_from_file_information(1, self.get_file_information_mock())
-        presenter._table_model.update_thickness_from_file_information(2, self.get_file_information_mock())
+        state = self.presenter.get_state_for_row(0)
 
-        # Act
-        state = presenter.get_state_for_row(1)
-
-        # Assert
-        self.assertEqual(state.data.sample_scatter, "SANS2D00022024")
-        self.assertEqual(state.data.sample_transmission, None)
-        self.assertEqual(state.data.sample_direct, None)
-        self.assertEqual(state.data.can_scatter, None)
-        self.assertEqual(state.data.can_transmission, None)
-        self.assertEqual(state.data.can_direct, None)
-
-        # Clean up
-        self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
-
-    def test_that_returns_none_when_index_does_not_exist(self):
-        # Arrange
-        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
-        view, _, _ = create_mock_view(user_file_path, batch_file_path)
-        presenter.set_view(view)
-        presenter.on_user_file_load()
-        presenter.on_batch_file_load()
-
-        # Act
-        state = presenter.get_state_for_row(3)
-
-        # Assert
-        self.assertEqual(state, None)
-
-        # Clean up
-        remove_file(batch_file_path)
-        remove_file(user_file_path)
-
-    def test_that_can_add_new_masks(self):
-        # Arrange
-        self._clear_property_manager_data_service()
-        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
-
-        presenter.on_user_file_load()
-        presenter.on_batch_file_load()
-        presenter._table_model.update_thickness_from_file_information(1, self.get_file_information_mock())
-        presenter._table_model.update_thickness_from_file_information(2, self.get_file_information_mock())
-
-        # Act
-        presenter.on_mask_file_add()
-
-        # Assert
-        state = presenter.get_state_for_row(0)
-        mask_info = state.mask
-        mask_files = mask_info.mask_files
-        self.assertEqual(mask_files, [user_file_path])
-
-        # clean up
-        self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
+        self.assertEqual(expected_states[state_key], state)
 
     def test_on_data_changed_calls_update_rows(self):
-        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
-        presenter._masking_table_presenter = mock.MagicMock()
-        presenter._table_model.subscribe_to_model_changes(presenter._masking_table_presenter)
-        presenter._beam_centre_presenter = mock.MagicMock()
-        presenter._table_model.subscribe_to_model_changes(presenter._beam_centre_presenter)
-        row_entry = [''] * 16
-        presenter.on_row_inserted(0, row_entry)
+        batch_file_path, user_file_path, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_1)
+        self.presenter._masking_table_presenter = mock.MagicMock()
+        self.presenter._table_model.subscribe_to_model_changes(self.presenter._masking_table_presenter)
+        self.presenter._beam_centre_presenter = mock.MagicMock()
+        self.presenter._table_model.subscribe_to_model_changes(self.presenter._beam_centre_presenter)
 
-        presenter.on_data_changed(0, 0, '12335', '00000')
+        updated_entries = mock.NonCallableMock()
+        self.presenter.on_data_changed(0, updated_entries)
 
-        presenter._masking_table_presenter.on_update_rows.assert_called_with()
-        presenter._beam_centre_presenter.on_update_rows.assert_called_with()
+        self.presenter._masking_table_presenter.on_update_rows.assert_called_with()
+        self.presenter._beam_centre_presenter.on_update_rows.assert_called_with()
+        self.presenter.update_view_from_table_model.assert_called_with()
 
     def test_on_save_dir_changed_calls_set_out_file_directory(self):
-        batch_file_path, user_file_path, presenter, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_3,
-                                                                                              is_multi_period=False)
+        batch_file_path, user_file_path, view = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_3,
+                                                                                   is_multi_period=False)
         config["defaultsave.directory"] = "test/path"
-        presenter._view.set_out_file_directory.assert_called_with("test/path")
-
-    def test_table_model_is_initialised_upon_presenter_creation(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        expected_table_model = TableModel()
-        expected_table_model.subscribe_to_model_changes(presenter)
-        expected_table_model.subscribe_to_model_changes(presenter._masking_table_presenter)
-        expected_table_model.subscribe_to_model_changes(presenter._beam_centre_presenter)
-        self.maxDiff = None
-        self.assertEqual(presenter._table_model, expected_table_model)
+        self.presenter._view.set_out_file_directory.assert_called_with("test/path")
 
     def test_on_insert_row_updates_table_model(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(mock.MagicMock())
-        row = ['74044', '', '74044', '', '74044', '', '74044', '', '74044', '', '74044', '', 'test_reduction'
-               , 'user_file', '1.2', '']
-        index = 0
-        expected_table_index_model = TableIndexModel(*row)
-        expected_table_index_model.id = 0
-        expected_table_index_model.file_finding = False
+        self.presenter.on_row_appended()
 
-        presenter.on_row_inserted(index, row)
-
-        self.assertEqual(presenter._table_model.get_number_of_rows(), 1)
-        model_row = presenter._table_model.get_table_entry(0)
-        self.assertEqual(model_row, expected_table_index_model)
+        self._mock_table.append_table_entry.assert_called_with(mock.ANY)
+        self.presenter.update_view_from_table_model.assert_called_with()
 
     def test_that_all_columns_shown_when_multi_period_is_true(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(mock.MagicMock())
 
-        presenter.on_multiperiod_changed(True)
+        self.presenter.set_view(mock.MagicMock())
 
-        presenter._view.show_period_columns.assert_called_once_with()
+        self.presenter.on_multiperiod_changed(True)
+
+        self.presenter._view.show_period_columns.assert_called_once_with()
 
     def test_that_period_columns_hidden_when_multi_period_is_false(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(mock.MagicMock())
 
-        presenter.on_multiperiod_changed(False)
+        self.presenter.set_view(mock.MagicMock())
 
-        presenter._view.hide_period_columns.assert_called_once_with()
+        self.presenter.on_multiperiod_changed(False)
+
+        self.presenter._view.hide_period_columns.assert_called_once_with()
 
     def test_on_data_changed_updates_table_model(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(mock.MagicMock())
-        row = ['74044', '', '74044', '', '74044', '', '74044', '', '74044', '', '74044', '', 'test_reduction'
-               , 'user_file', '1.2', '']
-        expected_row = ['74044', '', '74040', '', '74044', '', '74044', '', '74044', '', '74044', '', 'test_reduction'
-                        , 'user_file', '1.2', '']
-        presenter._table_model.add_table_entry(0, TableIndexModel(*row))
-        row = 0
-        column = 2
-        value = '74040'
-        expected_table_index_model = TableIndexModel(*expected_row)
-        expected_table_index_model.id = 0
-        expected_table_index_model.file_finding = False
+        self.presenter._beam_centre_presenter = mock.Mock()
+        self.presenter._masking_table_presenter = mock.Mock()
 
-        presenter.on_data_changed(row, column, value, '')
+        expected_new_entry = mock.NonCallableMock()
+        self._mock_table.get_all_rows.return_value = [expected_new_entry]
 
-        self.assertEqual(presenter._table_model.get_number_of_rows(), 1)
-        model_row = presenter._table_model.get_table_entry(0)
-        self.assertEqual(model_row, expected_table_index_model)
+        self.presenter.on_data_changed(0, expected_new_entry)
+        self._mock_table.replace_table_entry.assert_called_with(0, expected_new_entry)
+
+        self.presenter._beam_centre_presenter.on_update_rows.assert_called_with()
+        self.presenter._masking_table_presenter.on_update_rows.assert_called_with()
+        self.presenter.update_view_from_table_model.assert_called_with()
 
     def test_on_row_removed_removes_correct_row(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(mock.MagicMock())
-        row_0 = ['74040', '', '74040', '', '74040', '', '74040', '', '74040', '', '74040', '', 'test_reduction'
-                 , 'user_file', '1.2', '']
-        row_1 = ['74041', '', '74041', '', '74041', '', '74041', '', '74041', '', '74041', '', 'test_reduction'
-                 , 'user_file', '1.2', '']
-        row_2 = ['74042', '', '74042', '', '74042', '', '74042', '', '74042', '', '74042', '', 'test_reduction'
-                 , 'user_file', '1.2', '']
-        row_3 = ['74043', '', '74043', '', '74043', '', '74043', '', '74043', '', '74043', '', 'test_reduction'
-                 , 'user_file', '1.2', '']
-        presenter._table_model.add_table_entry(0, TableIndexModel(*row_0))
-        presenter._table_model.add_table_entry(1, TableIndexModel(*row_1))
-        presenter._table_model.add_table_entry(2, TableIndexModel(*row_2))
-        presenter._table_model.add_table_entry(3, TableIndexModel(*row_3))
-        rows = [0, 2]
-        expected_row_0 = TableIndexModel(*row_1)
-        expected_row_0.id = 1
-        expected_row_0.file_finding = False
-        expected_row_1 = TableIndexModel(*row_3)
-        expected_row_1.id = 3
-        expected_row_1.file_finding = False
+        rows = [0]
+        self.presenter.on_rows_removed(rows)
 
-        presenter.on_rows_removed(rows)
-
-        self.assertEqual(presenter._table_model.get_number_of_rows(), 2)
-
-        model_row_0 = presenter._table_model.get_table_entry(0)
-        self.assertEqual(model_row_0, expected_row_0)
-
-        model_row_1 = presenter._table_model.get_table_entry(1)
-        self.assertEqual(model_row_1, expected_row_1)
-
-    def test_on_rows_removed_updates_view(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(mock.MagicMock())
-        row_0 = ['74040', '', '74040', '', '74040', '', '74040', '', '74040', '', '74040', '', 'test_reduction'
-            , 'user_file', '1.2', '']
-        row_1 = ['74041', '', '74041', '', '74041', '', '74041', '', '74041', '', '74041', '', 'test_reduction'
-            , 'user_file', '1.2', '']
-        row_2 = ['74042', '', '74042', '', '74042', '', '74042', '', '74042', '', '74042', '', 'test_reduction'
-            , 'user_file', '1.2', '']
-        row_3 = ['74043', '', '74043', '', '74043', '', '74043', '', '74043', '', '74043', '', 'test_reduction'
-            , 'user_file', '1.2', '']
-        presenter._table_model.add_table_entry(0, TableIndexModel(*row_0))
-        presenter._table_model.add_table_entry(1, TableIndexModel(*row_1))
-        presenter._table_model.add_table_entry(2, TableIndexModel(*row_2))
-        presenter._table_model.add_table_entry(3, TableIndexModel(*row_3))
-        presenter.update_view_from_table_model = mock.MagicMock()
-        rows = [0, 2]
-
-        presenter.on_rows_removed(rows)
-
-        presenter.update_view_from_table_model.assert_called_once_with()
-
-    def test_add_row_to_table_model_adds_row_to_table_model(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(mock.MagicMock())
-        parsed_data = BATCH_FILE_TEST_CONTENT_2
-
-        for item, row in enumerate(parsed_data):
-            presenter._add_row_to_table_model(row, item)
-
-        table_entry_0 = presenter._table_model.get_table_entry(0)
-        self.assertEqual(table_entry_0.output_name, 'test_file')
-        self.assertEqual(table_entry_0.sample_scatter, 'SANS2D00022024')
-        self.assertEqual(table_entry_0.sample_thickness, '')
-
-        table_entry_1 = presenter._table_model.get_table_entry(1)
-        self.assertEqual(table_entry_1.output_name, 'test_file2')
-
-    def test_add_row_to_table_model_adds_sample_geometries(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(mock.MagicMock())
-        parsed_data = BATCH_FILE_TEST_CONTENT_5
-
-        presenter._add_row_to_table_model(parsed_data[0], 0)
-
-        table_entry_0 = presenter._table_model.get_table_entry(0)
-        self.assertEqual(table_entry_0.sample_thickness, '5')
-        self.assertEqual(table_entry_0.sample_height, '2')
-        self.assertEqual(table_entry_0.sample_width, '8')
-
-    def test_update_view_from_table_model_updated_view_based_on_model(self):
-        batch_file_path, user_file_path, presenter, _ = self._get_files_and_mock_presenter(BATCH_FILE_TEST_CONTENT_2)
-        presenter.set_view(mock.MagicMock())
-        parsed_data = BATCH_FILE_TEST_CONTENT_2
-        for item, row in enumerate(parsed_data):
-            presenter._add_row_to_table_model(row, item)
-        expected_call_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                           'test_file', '', '', '', '', '', '']
-        expected_call_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '', '',
-                           '', '', '']
-
-        presenter.update_view_from_table_model()
-
-        self.assertEqual(presenter._view.add_row.call_count, 5)
-
-        presenter._view.add_row.assert_any_call(expected_call_0)
-        presenter._view.add_row.assert_any_call(expected_call_1)
+        self._mock_table.remove_table_entries.assert_called_with(rows)
+        self.presenter.update_view_from_table_model.assert_called_with()
 
     def test_setup_instrument_specific_settings(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(mock.MagicMock())
-        presenter._beam_centre_presenter = mock.MagicMock()
-        presenter._workspace_diagnostic_presenter = mock.MagicMock()
+
+        self.presenter.set_view(mock.MagicMock())
+        self.presenter._beam_centre_presenter = mock.MagicMock()
+        self.presenter._workspace_diagnostic_presenter = mock.MagicMock()
         instrument = SANSInstrument.LOQ
 
-        presenter._setup_instrument_specific_settings(SANSInstrument.LOQ)
+        self.presenter._setup_instrument_specific_settings(SANSInstrument.LOQ)
 
-        presenter._view.set_instrument_settings.called_once_with(instrument)
-        presenter._beam_centre_presenter.on_update_instrument.called_once_with(instrument)
-        presenter._workspace_diagnostic_presenter.called_once_with(instrument)
+        self.presenter._view.set_instrument_settings.called_once_with(instrument)
+        self.presenter._beam_centre_presenter.on_update_instrument.called_once_with(instrument)
+        self.presenter._workspace_diagnostic_presenter.called_once_with(instrument)
 
     def test_setup_instrument_specific_settings_sets_facility_in_config(self):
         config.setFacility('TEST_LIVE')
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(mock.MagicMock())
-        presenter._beam_centre_presenter = mock.MagicMock()
-        presenter._workspace_diagnostic_presenter = mock.MagicMock()
+
+        self.presenter.set_view(mock.MagicMock())
+        self.presenter._beam_centre_presenter = mock.MagicMock()
+        self.presenter._workspace_diagnostic_presenter = mock.MagicMock()
         instrument = SANSInstrument.LOQ
 
-        presenter._setup_instrument_specific_settings(instrument)
+        self.presenter._setup_instrument_specific_settings(instrument)
         self.assertEqual(config.getFacility().name(), 'ISIS')
 
     def test_setup_instrument_specific_settings_sets_instrument_in_config(self):
         config['default.instrument'] = 'ALF'
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(mock.MagicMock())
-        presenter._beam_centre_presenter = mock.MagicMock()
-        presenter._workspace_diagnostic_presenter = mock.MagicMock()
+
+        self.presenter.set_view(mock.MagicMock())
+        self.presenter._beam_centre_presenter = mock.MagicMock()
+        self.presenter._workspace_diagnostic_presenter = mock.MagicMock()
         instrument = SANSInstrument.LOQ
 
-        presenter._setup_instrument_specific_settings(instrument)
+        self.presenter._setup_instrument_specific_settings(instrument)
         self.assertEqual(config['default.instrument'], 'LOQ')
 
     def test_on_copy_rows_requested_adds_correct_rows_to_clipboard(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[0])
-        presenter.set_view(view)
-        test_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                    'test_file', '', '1.0', '', '', '', '']
+        self._mock_view.get_selected_rows.return_value = [0]
+        expected_clipboard = mock.NonCallableMock()
+        self._mock_table.get_row.return_value = expected_clipboard
 
-        presenter.on_row_inserted(0, test_row)
+        self.presenter.on_copy_rows_requested()
 
-        presenter.on_copy_rows_requested()
-
-        self.assertEqual(presenter._clipboard, [test_row])
+        self.assertTrue(expected_clipboard in self.presenter._clipboard)
 
     def test_on_paste_rows_requested_appends_new_row_if_no_row_selected(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[])
-        presenter.set_view(view)
-        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                      'test_file', '', '1.0', '', '', '', '']
-        test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '',
-                      '', '', '']
-        presenter.on_row_inserted(0, test_row_0)
-        presenter.on_row_inserted(1, test_row_1)
-        presenter._clipboard = [test_row_0]
+        self._mock_view.get_selected_rows.return_value = []
+        pos = 101
+        self._mock_table.get_number_of_rows.return_value = pos
 
-        presenter.on_paste_rows_requested()
+        expected = mock.NonCallableMock()
+        self.presenter._clipboard = [expected]
+        self.presenter.update_view_from_table_model = mock.MagicMock()
 
-        self.assertEqual(presenter._table_model.get_number_of_rows(), 3)
-        self.assertEqual(presenter._table_model.get_table_entry(2).to_list(), test_row_0)
+        self.presenter.on_paste_rows_requested()
+
+        self.presenter.update_view_from_table_model.assert_called_with()
+        self._mock_table.replace_table_entries.assert_called_with([pos], [expected])
 
     def test_on_paste_rows_requested_replaces_row_if_one_row_is_selected(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[1])
-        presenter.set_view(view)
-        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                      'test_file', '', '1.0', '', '', '', '']
-        test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '',
-                      '', '', '']
-        presenter.on_row_inserted(0, test_row_0)
-        presenter.on_row_inserted(1, test_row_1)
-        presenter.on_row_inserted(2, test_row_0)
-        presenter._clipboard = [test_row_0]
+        pos = [1]
+        self._mock_view.get_selected_rows.return_value = pos
 
-        presenter.on_paste_rows_requested()
+        test_row_0 = mock.NonCallableMock()
+        self.presenter._clipboard = [test_row_0]
+        self.presenter.update_view_from_table_model = mock.MagicMock()
 
-        self.assertEqual(presenter._table_model.get_number_of_rows(), 3)
-        self.assertEqual(presenter._table_model.get_table_entry(1).to_list(), test_row_0)
+        self.presenter.on_paste_rows_requested()
+
+        self.presenter.update_view_from_table_model.assert_called_with()
+        self._mock_table.replace_table_entries.assert_called_with(pos, [test_row_0])
 
     def test_on_paste_rows_requested_replaces_first_row_and_removes_rest_if_multiple_rows_selected(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[0, 2])
-        presenter.set_view(view)
-        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                      'test_file', '', '1.0', '', '', '', '']
-        test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '',
-                      '', '', '']
-        test_row_2 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file3', '', '1.0', '',
-                      '', '', '']
-        presenter.on_row_inserted(0, test_row_0)
-        presenter.on_row_inserted(1, test_row_1)
-        presenter.on_row_inserted(2, test_row_2)
-        presenter._clipboard = [test_row_2]
+        expected_pos = [0, 2]
+        self._mock_view.get_selected_rows.return_value = expected_pos
 
-        presenter.on_paste_rows_requested()
+        expected = mock.NonCallableMock()
+        self.presenter._clipboard = [expected]
+        self.presenter.update_view_from_table_model = mock.MagicMock()
 
-        self.assertEqual(presenter._table_model.get_number_of_rows(), 2)
-        self.assertEqual(presenter._table_model.get_table_entry(0).to_list(), test_row_2)
-        self.assertEqual(presenter._table_model.get_table_entry(1).to_list(), test_row_1)
+        self.presenter.on_paste_rows_requested()
 
-    def test_on_paste_rows_updates_table_in_view(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[])
-        presenter.set_view(view)
-        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                      'test_file', '', '1.0', '']
-        test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '']
-        presenter.on_row_inserted(0, test_row_0)
-        presenter.on_row_inserted(1, test_row_1)
-        presenter._clipboard = [test_row_0]
-        presenter.update_view_from_table_model = mock.MagicMock()
-
-        presenter.on_paste_rows_requested()
-
-        presenter.update_view_from_table_model.assert_called_with()
+        self.presenter.update_view_from_table_model.assert_called_with()
+        self._mock_table.replace_table_entries.assert_called_with(expected_pos, [expected])
 
     def test_on_insert_row_adds_row_to_table_model_after_selected_row(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[0])
-        presenter.set_view(view)
-        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                      'test_file', '', '1.0', '', '', '', '']
-        test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0', '',
-                      '', '', '']
-        presenter.on_row_inserted(0, test_row_0)
-        presenter.on_row_inserted(1, test_row_1)
+        self._mock_view.get_selected_rows.return_value = [100]
 
-        presenter.on_insert_row()
+        self.presenter.on_insert_row()
 
-        self.assertEqual(presenter._table_model.get_number_of_rows(), 3)
-        self.assertEqual(presenter._table_model.get_table_entry(1).to_list(), [''] * 19)
-        self.assertEqual(presenter._table_model.get_table_entry(0).to_list(), test_row_0)
-        self.assertEqual(presenter._table_model.get_table_entry(2).to_list(), test_row_1)
+        self._mock_table.insert_row_at(101, mock.ANY)
+        self.presenter.update_view_from_table_model.assert_called_with()
 
     def test_on_insert_row_updates_view(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[0])
-        presenter.set_view(view)
-        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                      'test_file', '', '1.0', '', '', '', '']
-        test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0',
-                      '', '', '', '']
-        presenter.on_row_inserted(0, test_row_0)
-        presenter.on_row_inserted(1, test_row_1)
-        presenter.update_view_from_table_model = mock.MagicMock()
+        self._mock_view.get_selected_rows.return_value = [0]
 
-        presenter.on_insert_row()
+        self.presenter.on_insert_row()
+        self.presenter.update_view_from_table_model.assert_called_once_with()
 
-        presenter.update_view_from_table_model.assert_called_once_with()
+    def test_on_erase_rows_clears_specific_rows_from_table_model(self):
+        selected_rows = [1, 2]
+        self._mock_table.get_number_of_rows.return_value = 3
+        self._mock_view.get_selected_rows.return_value = selected_rows
 
-    def test_on_erase_rows_clears_rows_from_table_model(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[1, 2])
-        presenter.set_view(view)
-        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                      'test_file', '', '1.0', '', '', '', '']
-        empty_row = TableModel.create_empty_row()
+        self.presenter.on_erase_rows()
+        self.assertEqual(len(selected_rows), self._mock_table.replace_table_entries.call_count)
+        self.presenter.update_view_from_table_model.assert_called_with()
 
-        presenter.on_row_inserted(0, test_row_0)
-        presenter.on_row_inserted(1, test_row_0)
-        presenter.on_row_inserted(2, test_row_0)
+    def test_on_erase_rows_clears_table(self):
+        selected_rows = [0, 1, 2]
+        self._mock_table.get_number_of_rows.return_value = 3
+        self._mock_view.get_selected_rows.return_value = selected_rows
 
-        presenter.on_erase_rows()
+        self.presenter.on_erase_rows()
 
-        self.assertEqual(presenter._table_model.get_number_of_rows(), 3)
-        self.assertEqual(presenter._table_model.get_table_entry(0).to_list(), test_row_0)
-        empty_row.id = 3
-        self.assertEqual(presenter._table_model.get_table_entry(1).__dict__, empty_row.__dict__)
-        empty_row.id = 4
-        self.assertEqual(presenter._table_model.get_table_entry(2).__dict__, empty_row.__dict__)
+        self._mock_table.clear_table_entries.assert_called_with()
 
-    def test_on_erase_rows_does_not_add_rows_when_table_contains_one_row(self):
-        """
-        A bug caused erase rows to add a row to a table containing only 1 row.
-        Check that this is fixed
-        """
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[0])
-        presenter.set_view(view)
+        self._mock_view.get_selected_rows.return_value = []
+        self._mock_table.clear_table_entries.reset_mock()
 
-        test_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                    'test_file', '', '1.0', '', '', '', '']
-
-        presenter.on_row_inserted(0, test_row)
-        presenter.on_erase_rows()
-
-        self.assertEqual(presenter._table_model.get_number_of_rows(), 1)
-        self.assertEqual(presenter._table_model.get_table_entry(0).to_list(), ['']*19)
-
-    def test_on_erase_rows_updates_view(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[1, 2])
-        presenter.set_view(view)
-        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                      'test_file', '', '1.0', '', '', '', '']
-        presenter.on_row_inserted(0, test_row_0)
-        presenter.on_row_inserted(1, test_row_0)
-        presenter.on_row_inserted(2, test_row_0)
-        presenter.update_view_from_table_model = mock.MagicMock()
-
-        presenter.on_erase_rows()
-
-        self.assertEqual(presenter._table_model._table_entries[0].to_list(),
-                         ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                          'test_file', '', '1.0', '', '', '', ''])
-        self.assertEqual(presenter._table_model._table_entries[1].to_list(),
-                         ['', '', '', '', '', '', '', '', '', '', '', '',
-                          '', '', '', '', '', '', ''])
-        self.assertEqual(presenter._table_model._table_entries[2].to_list(),
-                         ['', '', '', '', '', '', '', '', '', '', '', '',
-                          '', '', '', '', '', '', ''])
+        self.presenter.on_erase_rows()
+        self._mock_table.clear_table_entries.assert_called_with()
+        self.presenter.update_view_from_table_model.assert_called_with()
 
     def test_on_cut_rows_requested_updates_clipboard(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[0])
-        presenter.set_view(view)
-        test_row = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                    'test_file', '', '1.0', '', '', '', '']
+        self._mock_view.get_selected_rows.return_value = [0]
+        expected_clipboard = mock.NonCallableMock()
+        self._mock_table.get_row.return_value = expected_clipboard
 
-        presenter.on_row_inserted(0, test_row)
+        self.presenter.on_cut_rows_requested()
 
-        presenter.on_cut_rows_requested()
-
-        self.assertEqual(presenter._clipboard, [test_row])
+        self.assertTrue(expected_clipboard in self.presenter._clipboard)
 
     def test_on_cut_rows_requested_removes_selected_rows(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[0])
-        presenter.set_view(view)
-        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                      'test_file', '', '1.0', '', '', '', '']
-        test_row_1 = ['SANS2D00022024', '', '', '', '', '', '', '', '', '', '', '', 'test_file2', '', '1.0',
-                      '', '', '', '']
-        presenter.on_row_inserted(0, test_row_0)
-        presenter.on_row_inserted(1, test_row_1)
+        selected_rows = [0]
+        self._mock_view.get_selected_rows.return_value = selected_rows
 
-        presenter.on_cut_rows_requested()
+        expected = "expected_clipboard_val"
+        self._mock_table.get_row.return_value = expected
 
-        self.assertEqual(presenter._table_model.get_number_of_rows(), 1)
-        self.assertEqual(presenter._table_model.get_table_entry(0).to_list(), test_row_1)
+        self.presenter.on_cut_rows_requested()
+
+        self._mock_table.remove_table_entries.assert_called_with(selected_rows)
+        self.assertTrue(expected in self.presenter._clipboard)
 
     def test_notify_progress_increments_progress(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        presenter.set_view(view)
-        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                      'test_file', '', '1.0', '']
-        presenter.on_row_inserted(0, test_row_0)
+        self.presenter.notify_progress(0, [0.0], [1.0])
 
-        presenter.notify_progress(0, [0.0], [1.0])
-
-        self.assertEqual(presenter.progress, 1)
-        self.assertEqual(presenter._view.progress_bar_value, 1)
+        self.assertEqual(self.presenter.progress, 1)
+        self.assertEqual(self.presenter._view.progress_bar_value, 1)
 
     def test_that_notify_progress_updates_state_and_tooltip_of_row_for_scale_and_shift(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        presenter.set_view(view)
-        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                      'test_file', '', '1.0', '']
-        presenter.on_row_inserted(0, test_row_0)
+        mocked_row = mock.Mock()
 
-        presenter.notify_progress(0, [0.0], [1.0])
+        self._mock_table.get_row.return_value = mocked_row
 
-        self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.PROCESSED)
-        self.assertEqual(presenter._table_model.get_table_entry(0).options_column_model.get_options_string(),
-                         'MergeScale=1.0, MergeShift=0.0')
+        self.presenter.notify_progress(0, [0.0], [1.0])
 
-        self.assertEqual(presenter.progress, 1)
-        self.assertEqual(presenter._view.progress_bar_value, 1)
+        self.assertEqual(RowState.PROCESSED, mocked_row.state)
+        self.assertIsNone(mocked_row.tool_tip)
+        self.presenter.update_view_from_table_model.assert_called_with()
+
+        mocked_row.options.set_developer_option.assert_called_with('MergeShift', 0.0)
+
+        self.assertEqual(self.presenter.progress, 1)
+        self.assertEqual(self.presenter._view.progress_bar_value, 1)
 
     def test_that_update_progress_sets_correctly(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        presenter.set_view(view)
 
-        presenter._set_progress_bar(current=100, number_steps=200)
-        self.assertEqual(presenter.progress, 100)
+        view = mock.MagicMock()
+        self.presenter.set_view(view)
+
+        self.presenter._set_progress_bar(current=100, number_steps=200)
+        self.assertEqual(self.presenter.progress, 100)
         self.assertEqual(view.progress_bar_value, 100)
         self.assertEqual(view.progress_bar_maximum, 200)
 
     def test_that_notify_progress_updates_state_and_tooltip_of_row(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
+
         view = mock.MagicMock()
-        presenter.set_view(view)
-        test_row_0 = ['SANS2D00022024', '', 'SANS2D00022048', '', 'SANS2D00022048', '', '', '', '', '', '', '',
-                      'test_file', '', '1.0', '']
-        presenter.on_row_inserted(0, test_row_0)
+        self.presenter.set_view(view)
+        self.presenter.on_row_appended()
 
-        presenter.notify_progress(0, [], [])
+        self.presenter.notify_progress(0, [], [])
 
-        self.assertEqual(presenter._table_model.get_table_entry(0).row_state, RowState.PROCESSED)
-        self.assertEqual(presenter._table_model.get_table_entry(0).tool_tip, '')
+        self.assertEqual(self.presenter._table_model.get_row(0).state, RowState.PROCESSED)
+        self.assertEqual(self.presenter._table_model.get_row(0).tool_tip, None)
 
     def test_that_process_selected_does_nothing_if_no_states_selected(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
+
         view = mock.MagicMock()
         view.get_selected_rows = mock.MagicMock(return_value=[])
-        presenter.set_view(view)
-        presenter._process_rows = mock.MagicMock()
+        self.presenter.set_view(view)
+        self.presenter._process_rows = mock.MagicMock()
 
-        presenter.on_process_selected_clicked()
+        self.presenter.on_process_selected_clicked()
         self.assertEqual(
-            presenter._process_rows.call_count, 0,
-            "Expected presenter._process_rows to not have been called. Called {} times.".format(
-                presenter._process_rows.call_count))
+            self.presenter._process_rows.call_count, 0,
+            "Expected self.presenter._process_rows to not have been called. Called {} times.".format(
+                self.presenter._process_rows.call_count))
 
     def test_that_process_selected_only_processes_selected_rows(self):
         # Naive test. Doesn't check that we are processing the correct processed rows,
         # just that we are processing the same number of rows as we have selected.
-        # This would only really fail if on_process_selected_clicked and on_process_all_clicked 
+        # This would only really fail if on_process_selected_clicked and on_process_all_clicked
         # get muddled-up
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[0, 3, 4])
-        # Suppress plots
-        view.plot_results = False
-        
-        presenter.set_view(view)
-        presenter._table_model.reset_row_state = mock.MagicMock()
-        presenter._table_model.get_thickness_for_rows = mock.MagicMock()
-        presenter._table_model.get_non_empty_rows = mock.MagicMock(side_effect=get_non_empty_row_mock)
 
-        presenter.on_process_selected_clicked()
-        self.assertEqual(
-            presenter._table_model.reset_row_state.call_count, 3,
-            "Expected reset_row_state to have been called 3 times. Called {} times.".format(
-                presenter._table_model.reset_row_state.call_count))
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[0, 2, 3])
+
+        self.presenter.set_view(view)
+        self.presenter._process_rows = mock.Mock()
+
+        table_model = TableModel()
+
+        for i in range(5):
+            table_model.append_table_entry(RowEntries(sample_scatter='74040'))
+        self.presenter._table_model = table_model
+
+        self.presenter.on_process_selected_clicked()
+
+        expected = [table_model.get_row(0), table_model.get_row(2), table_model.get_row(3)]
+
+        self.presenter._process_rows.assert_called_with(expected)
 
     def test_that_process_selected_ignores_all_empty_rows(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
+
         view = mock.MagicMock()
         view.get_selected_rows = mock.MagicMock(return_value=[0, 1])
-        presenter.set_view(view)
+        self.presenter.set_view(view)
 
         table_model = TableModel()
-        row_entry0 = [''] * 16
-        row_entry1 = ['74040', '', '74040', '', '74040', '', '74040', '', '74040', '', '74040', '', 'test_reduction',
-                      'user_file', '1.2', '']
-        table_model.add_table_entry(0, TableIndexModel(*row_entry0))
-        table_model.add_table_entry(1, TableIndexModel(*row_entry1))
+        empty_row = RowEntries()
+        populated_row = RowEntries(sample_scatter='74040')
 
-        presenter._table_model = table_model
-        presenter._process_rows = mock.MagicMock()
+        table_model.replace_table_entry(0, empty_row)
+        table_model.replace_table_entry(1, populated_row)
 
-        presenter.on_process_selected_clicked()
-        presenter._process_rows.assert_called_with([1])
-        
-    def test_that_process_all_ignores_selected_rows(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        view.get_selected_rows = mock.MagicMock(return_value=[0, 3, 4])
+        self.presenter._table_model = table_model
+        self.presenter._process_rows = mock.MagicMock()
 
-        # Suppress plots
-        view.plot_results = False
-        
-        presenter._table_model.get_number_of_rows = mock.MagicMock(return_value=7)
-        presenter.set_view(view)
-        presenter._table_model.reset_row_state = mock.MagicMock()
-        presenter._table_model.get_thickness_for_rows = mock.MagicMock()
-        presenter._table_model.get_non_empty_rows = mock.MagicMock(side_effect=get_non_empty_row_mock)
-
-        presenter.on_process_all_clicked()
-        self.assertEqual(
-            presenter._table_model.reset_row_state.call_count, 7,
-            "Expected reset_row_state to have been called 7 times. Called {} times.".format(
-                presenter._table_model.reset_row_state.call_count))
+        self.presenter.on_process_selected_clicked()
+        self.presenter._process_rows.assert_called_with([populated_row])
 
     def test_that_process_all_ignores_empty_rows(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
+
+        view = mock.MagicMock()
+        view.get_selected_rows = mock.MagicMock(return_value=[0, 1])
+        self.presenter.set_view(view)
 
         table_model = TableModel()
-        row_entry0 = [''] * 16
-        row_entry1 = ['74040', '', '74040', '', '74040', '', '74040', '', '74040', '', '74040', '', 'test_reduction',
-                      'user_file', '1.2', '']
-        table_model.add_table_entry(0, TableIndexModel(*row_entry0))
-        table_model.add_table_entry(1, TableIndexModel(*row_entry1))
+        populated_row = RowEntries(sample_scatter=1)
+        table_model.append_table_entry(populated_row)
+        table_model.append_table_entry(RowEntries())
 
-        presenter._table_model = table_model
-        presenter._process_rows = mock.MagicMock()
+        self.presenter._table_model = table_model
+        self.presenter._process_rows = mock.MagicMock()
 
-        presenter.on_process_all_clicked()
-        presenter._process_rows.assert_called_with([1])
+        self.presenter.on_process_selected_clicked()
+        self.presenter._process_rows.assert_called_with([populated_row])
 
     def test_that_table_not_exported_if_table_is_empty(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        presenter.set_view(view)
+        self.presenter._export_table = mock.MagicMock()
+        self._mock_table.get_non_empty_rows.return_value = []
 
-        presenter._export_table = mock.MagicMock()
-
-        presenter.on_export_table_clicked()
-        self.assertEqual(presenter._export_table.call_count, 0,
+        self.presenter.on_export_table_clicked()
+        self.assertEqual(self.presenter._export_table.call_count, 0,
                          "_export table should not have been called."
-                         " It was called {} times.".format(presenter._export_table.call_count))
-
-    def test_row_created_for_batch_file_correctly(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        presenter.set_view(view)
-
-        test_row = ["SANS2D00022025", "SANS2D00022052", "SANS2D00022022",
-                    "", "", "", "another_file", "a_user_file.txt", "1.0", "5.0", "5.4"]
-
-        expected_list = ["sample_sans", "SANS2D00022025", "sample_trans", "SANS2D00022052",
-                         "sample_direct_beam", "SANS2D00022022", "can_sans", "", "can_trans", "", "can_direct_beam", "",
-                         "output_as", "another_file", "user_file", "a_user_file.txt", "sample_thickness", "1.0",
-                         "sample_height", "5.0", "sample_width", "5.4"]
-
-        actual_list = presenter._create_batch_entry_from_row(test_row)
-
-        self.assertEqual(actual_list, expected_list)
+                         " It was called {} times.".format(self.presenter._export_table.call_count))
 
     def test_buttons_enabled_after_export_table_fails(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        presenter.set_view(view)
+        self._mock_table.get_non_empty_rows.return_value = [RowEntries()]
+        self._mock_table.batch_file = ""
 
-        presenter.get_row_indices = mock.MagicMock(return_value=[0, 1, 2])
-        presenter._view.enable_buttons = mock.MagicMock()
+        self.presenter.display_save_file_box = mock.Mock(return_value="mocked_file_path")
+
+        self.presenter._view.enable_buttons = mock.Mock()
+        self.presenter._view.disable_buttons = mock.Mock()
+
         # Mock error throw on disable buttons so export fails
-        presenter._view.disable_buttons = mock.MagicMock(side_effect=RuntimeError("A test exception"))
-        try:
-            presenter.on_export_table_clicked()
-        except Exception as e:
-            self.fail("Exceptions should have been caught in the method. "
-                      "Exception thrown is {}".format(str(e)))
-        else:
-            self.assertEqual(presenter._view.enable_buttons.call_count, 1,
-                             "Expected enable buttons to be called once, "
-                             "was called {} times.".format(presenter._view.enable_buttons.call_count))
+        self.presenter._csv_parser = mock.Mock()
+        self.presenter._csv_parser.save_batch_file = mock.Mock(side_effect=RuntimeError(""))
+
+        with self.assertRaises(RuntimeError):
+            self.presenter.on_export_table_clicked()
+
+        self.assertEqual(self.presenter._view.enable_buttons.call_count, 1)
 
     def test_that_canSAS_is_disabled_if_2D_reduction(self):
         """This test checks that if you are running a 2D reduction and have canSAS output mode checked,
         the GUI will automatically uncheck canSAS to avoid data dimension errors."""
-        presenter = RunTabPresenter(SANSFacility.ISIS)
 
         view = mock.MagicMock()
         view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
@@ -1066,13 +602,12 @@ class RunTabPresenterTest(unittest.TestCase):
         view.can_sas_checkbox.setEnabled = mock.Mock()
         view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
 
-        presenter.set_view(view)
-        presenter.on_reduction_dimensionality_changed(False)
-        presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(False)
+        self.presenter.set_view(view)
+        self.presenter.on_reduction_dimensionality_changed(False)
+        self.presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(False)
 
     def test_that_canSAS_is_unchecked_if_2D_reduction(self):
         """This tests that the canSAS checkbox is unchecked when switching from 1D to 2D reduction"""
-        presenter = RunTabPresenter(SANSFacility.ISIS)
 
         view = mock.MagicMock()
         view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
@@ -1080,14 +615,13 @@ class RunTabPresenterTest(unittest.TestCase):
         view.can_sas_checkbox.setEnabled = mock.Mock()
         view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
 
-        presenter.set_view(view)
-        presenter.on_reduction_dimensionality_changed(False)
-        presenter._view.can_sas_checkbox.setChecked.assert_called_once_with(False)
+        self.presenter.set_view(view)
+        self.presenter.on_reduction_dimensionality_changed(False)
+        self.presenter._view.can_sas_checkbox.setChecked.assert_called_once_with(False)
 
     def test_that_canSAS_is_enabled_if_1D_reduction_and_not_in_memory_mode(self):
         """This test checks that if you are not in memory mode and switch to 1D reduction, then
         can sas file type is enabled."""
-        presenter = RunTabPresenter(SANSFacility.ISIS)
 
         view = mock.MagicMock()
         view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
@@ -1095,16 +629,15 @@ class RunTabPresenterTest(unittest.TestCase):
         view.can_sas_checkbox.setEnabled = mock.Mock()
         view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
 
-        presenter.set_view(view)
-        presenter.on_reduction_dimensionality_changed(True)
+        self.presenter.set_view(view)
+        self.presenter.on_reduction_dimensionality_changed(True)
 
-        presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(True)
-        presenter._view.can_sas_checkbox.setChecked.assert_not_called()
+        self.presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(True)
+        self.presenter._view.can_sas_checkbox.setChecked.assert_not_called()
 
     def test_that_canSAS_is_not_enabled_if_switch_to_1D_reduction_and_in_memory_mode(self):
         """This test checks that if you are in memory mode, the can sas file type is not
         re-enabled if you switch to 1D reduction."""
-        presenter = RunTabPresenter(SANSFacility.ISIS)
 
         view = mock.MagicMock()
         view.can_sas_checkbox.isChecked = mock.Mock(return_value=True)
@@ -1112,24 +645,24 @@ class RunTabPresenterTest(unittest.TestCase):
         view.can_sas_checkbox.setEnabled = mock.Mock()
         view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=True)
 
-        presenter.set_view(view)
-        presenter.on_reduction_dimensionality_changed(True)
+        self.presenter.set_view(view)
+        self.presenter.on_reduction_dimensionality_changed(True)
 
-        presenter._view.can_sas_checkbox.setChecked.assert_not_called()
-        presenter._view.can_sas_checkbox.setEnabled.assert_not_called()
+        self.presenter._view.can_sas_checkbox.setChecked.assert_not_called()
+        self.presenter._view.can_sas_checkbox.setEnabled.assert_not_called()
 
     def test_that_updating_default_save_directory_also_updates_add_runs_save_directory(self):
-        """This test checks that add runs presenter's save directory update method is called
+        """This test checks that add runs self.presenter.s save directory update method is called
         when the defaultsave directory is updated."""
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        view = mock.MagicMock()
-        presenter.set_view(view)
 
-        presenter._handle_output_directory_changed("a_new_directory")
-        presenter._view.add_runs_presenter.handle_new_save_directory.assert_called_once_with("a_new_directory")
+        view = mock.MagicMock()
+        self.presenter.set_view(view)
+
+        self.presenter._handle_output_directory_changed("a_new_directory")
+        self.presenter._view.add_runs_presenter.handle_new_save_directory.assert_called_once_with("a_new_directory")
 
     def test_that_validate_output_modes_raises_if_no_file_types_selected_for_file_mode(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
+
         view = mock.MagicMock()
 
         view.save_types = [SaveType.NO_TYPE]
@@ -1137,12 +670,12 @@ class RunTabPresenterTest(unittest.TestCase):
         view.output_mode_memory_radio_button.isChecked = mock.MagicMock(return_value=False)
         view.output_mode_file_radio_button.isChecked = mock.MagicMock(return_value=True)
         view.output_mode_both_radio_button.isChecked = mock.MagicMock(return_value=False)
-        presenter.set_view(view)
+        self.presenter.set_view(view)
 
-        self.assertRaises(RuntimeError, presenter._validate_output_modes)
+        self.assertRaises(RuntimeError, self.presenter._validate_output_modes)
 
     def test_that_validate_output_modes_raises_if_no_file_types_selected_for_both_mode(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
+
         view = mock.MagicMock()
 
         view.save_types = [SaveType.NO_TYPE]
@@ -1150,43 +683,43 @@ class RunTabPresenterTest(unittest.TestCase):
         view.output_mode_memory_radio_button.isChecked = mock.MagicMock(return_value=False)
         view.output_mode_file_radio_button.isChecked = mock.MagicMock(return_value=False)
         view.output_mode_both_radio_button.isChecked = mock.MagicMock(return_value=True)
-        presenter.set_view(view)
+        self.presenter.set_view(view)
 
-        self.assertRaises(RuntimeError, presenter._validate_output_modes)
+        self.assertRaises(RuntimeError, self.presenter._validate_output_modes)
 
     def test_that_validate_output_modes_does_not_raise_if_no_file_types_selected_for_memory_mode(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
+
         view = mock.MagicMock()
         view.save_types = [SaveType.NO_TYPE]
 
         view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=True)
         view.output_mode_file_radio_button.isChecked = mock.Mock(return_value=False)
         view.output_mode_both_radio_button.isChecked = mock.Mock(return_value=False)
-        presenter.set_view(view)
+        self.presenter.set_view(view)
 
         try:
-            presenter._validate_output_modes()
+            self.presenter._validate_output_modes()
         except RuntimeError:
             self.fail("Did not expect _validate_output_modes to fail when no file types are selected "
                       "for memory output mode.")
 
     def test_that_switching_to_memory_mode_disables_all_file_type_buttons(self):
         """This tests that all file type buttons are disabled when memory mode is selected."""
-        presenter = RunTabPresenter(SANSFacility.ISIS)
+
         view = mock.MagicMock()
 
         view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=True)
         view.disable_file_type_buttons = mock.Mock()
 
-        presenter.set_view(view)
+        self.presenter.set_view(view)
 
-        presenter.on_output_mode_changed()
-        presenter._view.disable_file_type_buttons.assert_called_once_with()
+        self.presenter.on_output_mode_changed()
+        self.presenter._view.disable_file_type_buttons.assert_called_once_with()
 
     def test_that_all_file_type_buttons_are_enabled_if_switching_to_non_memory_mode_and_in_1D_reduction_mode(self):
         """This tests that all file type buttons are enabled if switching to file or both mode, when reduction
         dimensionality is 1D"""
-        presenter = RunTabPresenter(SANSFacility.ISIS)
+
         view = mock.MagicMock()
 
         view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
@@ -1195,17 +728,17 @@ class RunTabPresenterTest(unittest.TestCase):
         view.nx_can_sas_checkbox.setEnabled = mock.Mock()
         view.rkh_checkbox.setEnabled = mock.Mock()
 
-        presenter.set_view(view)
+        self.presenter.set_view(view)
 
-        presenter.on_output_mode_changed()
-        presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(True)
-        presenter._view.nx_can_sas_checkbox.setEnabled.assert_called_once_with(True)
-        presenter._view.rkh_checkbox.setEnabled.assert_called_once_with(True)
+        self.presenter.on_output_mode_changed()
+        self.presenter._view.can_sas_checkbox.setEnabled.assert_called_once_with(True)
+        self.presenter._view.nx_can_sas_checkbox.setEnabled.assert_called_once_with(True)
+        self.presenter._view.rkh_checkbox.setEnabled.assert_called_once_with(True)
 
     def test_that_rkh_and_nx_can_sas_are_enabled_if_switching_to_non_memory_mode_and_in_2D_reduction_mode(self):
         """This tests that nx_can_sas and rkh file type buttons are enabled if switching to file or both mode, when
          reduction dimensionality is 1D, but can sas is not enabled"""
-        presenter = RunTabPresenter(SANSFacility.ISIS)
+
         view = mock.MagicMock()
 
         view.output_mode_memory_radio_button.isChecked = mock.Mock(return_value=False)
@@ -1214,42 +747,42 @@ class RunTabPresenterTest(unittest.TestCase):
         view.nx_can_sas_checkbox.setEnabled = mock.Mock()
         view.rkh_checkbox.setEnabled = mock.Mock()
 
-        presenter.set_view(view)
+        self.presenter.set_view(view)
 
-        presenter.on_output_mode_changed()
-        presenter._view.can_sas_checkbox.setEnabled.assert_not_called()
-        presenter._view.nx_can_sas_checkbox.setEnabled.assert_called_once_with(True)
-        presenter._view.rkh_checkbox.setEnabled.assert_called_once_with(True)
+        self.presenter.on_output_mode_changed()
+        self.presenter._view.can_sas_checkbox.setEnabled.assert_not_called()
+        self.presenter._view.nx_can_sas_checkbox.setEnabled.assert_called_once_with(True)
+        self.presenter._view.rkh_checkbox.setEnabled.assert_called_once_with(True)
 
     def test_that_on_reduction_mode_changed_calls_update_hab_if_selection_is_HAB(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter._beam_centre_presenter = mock.MagicMock()
 
-        presenter.on_reduction_mode_selection_has_changed("Hab")
-        presenter._beam_centre_presenter.update_hab_selected.assert_called_once_with()
+        self.presenter._beam_centre_presenter = mock.MagicMock()
 
-        presenter._beam_centre_presenter.reset_mock()
-        presenter.on_reduction_mode_selection_has_changed("front")
-        presenter._beam_centre_presenter.update_hab_selected.assert_called_once_with()
+        self.presenter.on_reduction_mode_selection_has_changed("Hab")
+        self.presenter._beam_centre_presenter.update_hab_selected.assert_called_once_with()
+
+        self.presenter._beam_centre_presenter.reset_mock()
+        self.presenter.on_reduction_mode_selection_has_changed("front")
+        self.presenter._beam_centre_presenter.update_hab_selected.assert_called_once_with()
 
     def test_that_on_reduction_mode_changed_calls_update_lab_if_selection_is_LAB(self):
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter._beam_centre_presenter = mock.MagicMock()
 
-        presenter.on_reduction_mode_selection_has_changed("rear")
-        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+        self.presenter._beam_centre_presenter = mock.MagicMock()
 
-        presenter._beam_centre_presenter.reset_mock()
-        presenter.on_reduction_mode_selection_has_changed("main-detector")
-        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+        self.presenter.on_reduction_mode_selection_has_changed("rear")
+        self.presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
 
-        presenter._beam_centre_presenter.reset_mock()
-        presenter.on_reduction_mode_selection_has_changed("DetectorBench")
-        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+        self.presenter._beam_centre_presenter.reset_mock()
+        self.presenter.on_reduction_mode_selection_has_changed("main-detector")
+        self.presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
 
-        presenter._beam_centre_presenter.reset_mock()
-        presenter.on_reduction_mode_selection_has_changed("rear-detector")
-        presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+        self.presenter._beam_centre_presenter.reset_mock()
+        self.presenter.on_reduction_mode_selection_has_changed("DetectorBench")
+        self.presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+
+        self.presenter._beam_centre_presenter.reset_mock()
+        self.presenter.on_reduction_mode_selection_has_changed("rear-detector")
+        self.presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
 
     @staticmethod
     def _clear_property_manager_data_service():
@@ -1259,11 +792,11 @@ class RunTabPresenterTest(unittest.TestCase):
 
     def _get_files_and_mock_presenter(self, content, is_multi_period=True, row_user_file_path=""):
         if row_user_file_path:
-            content[1].update({BatchReductionEntry.USER_FILE : row_user_file_path})
+            content[1].user_file = row_user_file_path
 
         batch_parser = mock.MagicMock()
         batch_parser.parse_batch_file = mock.MagicMock(return_value=content)
-        self.BatchCsvParserMock.return_value = batch_parser
+        self._mock_csv_parser.return_value = batch_parser
         batch_file_path = 'batch_file_path'
 
         user_file_path = create_user_file(sample_user_file)
@@ -1271,9 +804,8 @@ class RunTabPresenterTest(unittest.TestCase):
         # We just use the sample_user_file since it exists.
         view.get_mask_file = mock.MagicMock(return_value=user_file_path)
         view.is_multi_period_view = mock.MagicMock(return_value=is_multi_period)
-        presenter = RunTabPresenter(SANSFacility.ISIS)
-        presenter.set_view(view)
-        return batch_file_path, user_file_path, presenter, view
+        self.presenter.set_view(view)
+        return batch_file_path, user_file_path, view
 
     @staticmethod
     def _remove_files(user_file_path=None, batch_file_path=None):

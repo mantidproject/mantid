@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_FUNCTIONFACTORY_H_
-#define MANTID_API_FUNCTIONFACTORY_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -91,19 +90,21 @@ private:
   /// Throw an exception
   void inputError(const std::string &str = "") const;
   /// Add constraints to the created function
-  void addConstraints(boost::shared_ptr<IFunction> fun,
+  void addConstraints(const boost::shared_ptr<IFunction> &fun,
                       const Expression &expr) const;
   /// Add a single constraint to the created function
-  void addConstraint(boost::shared_ptr<IFunction> fun,
+  void addConstraint(const boost::shared_ptr<IFunction> &fun,
                      const Expression &expr) const;
   /// Add a single constraint to the created function with non-default penalty
-  void addConstraint(boost::shared_ptr<IFunction> fun,
+  void addConstraint(const boost::shared_ptr<IFunction> &fun,
                      const Expression &constraint_expr,
                      const Expression &penalty_expr) const;
   /// Add ties to the created function
-  void addTies(boost::shared_ptr<IFunction> fun, const Expression &expr) const;
+  void addTies(const boost::shared_ptr<IFunction> &fun,
+               const Expression &expr) const;
   /// Add a tie to the created function
-  void addTie(boost::shared_ptr<IFunction> fun, const Expression &expr) const;
+  void addTie(const boost::shared_ptr<IFunction> &fun,
+              const Expression &expr) const;
 
   mutable std::map<std::string, std::vector<std::string>> m_cachedFunctionNames;
   mutable std::mutex m_mutex;
@@ -163,5 +164,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
                                           .subscribe<classname>(#classname)),  \
                                      0));                                      \
   }
-
-#endif /*MANTID_API_FUNCTIONFACTORY_H_*/

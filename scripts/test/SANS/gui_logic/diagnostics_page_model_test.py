@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from sans.common.enums import SANSFacility
@@ -16,9 +14,6 @@ from sans.user_file.user_file_reader import UserFileReader
 
 
 class DiagnosticsPageModelTest(unittest.TestCase):
-    def setUp(self):
-        pass
-
     def test_that_create_state_creates_correct_state(self):
         user_file_path = create_user_file(sample_user_file)
         user_file_reader = UserFileReader(user_file_path)

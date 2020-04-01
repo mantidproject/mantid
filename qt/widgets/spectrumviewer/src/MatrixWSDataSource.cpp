@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
  *  File: MatrixWSDataSource.cpp
@@ -46,7 +46,7 @@ namespace SpectrumView {
  *
  * @param matWs  Shared pointer to the matrix workspace being "wrapped"
  */
-MatrixWSDataSource::MatrixWSDataSource(MatrixWorkspace_const_sptr matWs)
+MatrixWSDataSource::MatrixWSDataSource(const MatrixWorkspace_const_sptr &matWs)
     : SpectrumDataSource(0.0, 1.0, 0.0, 1.0, 0, 0), m_matWs(matWs),
       m_emodeHandler(nullptr), m_spectrumInfo(m_matWs->spectrumInfo()) {
   m_totalXMin = matWs->getXMin();
@@ -183,7 +183,7 @@ DataArray_const_sptr MatrixWSDataSource::getDataArray(double xMin, double xMax,
     double midY = yMin + ((double)i + 0.5) * yStep;
     SVUtils::Interpolate(m_totalYMin, m_totalYMax, midY, 0.0,
                          (double)m_totalRows, dYIndex);
-    size_t sourceRow = (size_t)dYIndex;
+    auto sourceRow = (size_t)dYIndex;
     yVals.clear();
     err.clear();
     yVals.resize(numCols, 0);

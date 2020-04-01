@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VTKNULLUNSTRUCTUREDGRID_TEST_H_
-#define VTKNULLUNSTRUCTUREDGRID_TEST_H_
+#pragma once
 
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 #include "MockObjects.h"
@@ -39,4 +38,3 @@ public:
     TSM_ASSERT("X should be in the center", coord[2] == 0.0);
   }
 };
-#endif

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTVIEWLEGACY_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTVIEWLEGACY_H_
+#pragma once
 
 #include "ui_IndirectFitPreviewPlot.h"
 
@@ -20,6 +19,7 @@
 #include <QSplitterHandle>
 #endif
 #include <QSplitter>
+#include <utility>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -31,7 +31,7 @@ class SplitterHandleLegacy : public QSplitterHandle {
 public:
   SplitterHandleLegacy(QIcon icon, Qt::Orientation orientation,
                        QSplitter *parent = nullptr)
-      : QSplitterHandle(orientation, parent), m_icon(icon) {}
+      : QSplitterHandle(orientation, parent), m_icon(std::move(icon)) {}
 
   void paintEvent(QPaintEvent *e) override {
     QSplitterHandle::paintEvent(e);
@@ -48,7 +48,7 @@ private:
 class SplitterLegacy : public QSplitter {
 public:
   SplitterLegacy(QIcon icon, QWidget *parent = nullptr)
-      : QSplitter(parent), m_icon(icon) {}
+      : QSplitter(parent), m_icon(std::move(icon)) {}
 
   QSplitterHandle *createHandle() override {
     return new SplitterHandleLegacy(m_icon, Qt::Vertical, this);
@@ -165,5 +165,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

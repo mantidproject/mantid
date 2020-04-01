@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CREATESAMPLESHAPETEST_H_
-#define CREATESAMPLESHAPETEST_H_
+#pragma once
 
 //---------------------------------------
 // Includes
@@ -84,8 +83,8 @@ public:
     TS_ASSERT_DELTA(2.6989, material.numberDensity(), 1e-04);
   }
 
-  void runStandardTest(std::string xmlShape, double x, double y, double z,
-                       bool inside) {
+  void runStandardTest(const std::string &xmlShape, double x, double y,
+                       double z, bool inside) {
     // Need a test workspace
     Mantid::API::AnalysisDataService::Instance().add(
         "TestWorkspace",
@@ -119,5 +118,3 @@ public:
         Mantid::API::AnalysisDataService::Instance().remove("TestWorkspace"));
   }
 };
-
-#endif

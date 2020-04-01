@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADEVENTPRENEXUSTEST_H_
-#define LOADEVENTPRENEXUSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -70,7 +69,7 @@ public:
     TS_ASSERT_EQUALS(sizeof(DasEvent), 8);
   }
 
-  void checkWorkspace(std::string eventfile, std::string WSName,
+  void checkWorkspace(const std::string &eventfile, const std::string &WSName,
                       int numpixels_with_events) {
     // Get the event file size
     struct stat filestatus;
@@ -144,7 +143,7 @@ public:
     do_test_LoadPreNeXus_CNCS("Parallel");
   }
 
-  void do_test_LoadPreNeXus_CNCS(std::string parallel) {
+  void do_test_LoadPreNeXus_CNCS(const std::string &parallel) {
     std::string eventfile("CNCS_7860_neutron_event.dat");
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
@@ -310,5 +309,3 @@ public:
     TS_ASSERT(loader.execute());
   }
 };
-
-#endif /* LOADEVENTPRENEXUSTEST_H_ */

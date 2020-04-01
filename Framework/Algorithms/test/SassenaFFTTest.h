@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SASSENAFFTTEST_H_
-#define MANTID_ALGORITHMS_SASSENAFFTTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
@@ -177,7 +176,6 @@ private:
     const double frErr = 1E-03; // allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv, xv;
-    double factor; // remove the detailed balance condition
     for (size_t i = 0; i < nspectra; i++) {
       double goldStandard =
           ps2meV * (1 + static_cast<double>(i)) *
@@ -187,7 +185,7 @@ private:
       size_t index =
           nbins / 2; // This position should yield ws->readX(i).at(index)==0.0
       double x = ws->readX(i).at(index);
-      factor = exp(exponentFactor * x);
+      double factor = exp(exponentFactor * x);
       double h = yv.at(index) * exp(x);
       xv = ws->readX(i);
       MantidVec::iterator itx = xv.begin();
@@ -213,9 +211,8 @@ private:
    */
   void Gaussian(MantidVec &xv, MantidVec &yv, const double &Heigth,
                 const double &sigma) {
-    double z;
     for (size_t i = 0; i < xv.size(); i++) {
-      z = xv[i] / sigma;
+      double z = xv[i] / sigma;
       yv[i] = Heigth * exp(-z * z / 2.0);
     }
   } // void Gaussian
@@ -251,12 +248,11 @@ private:
       xv.emplace_back(dt * static_cast<double>(j));
     }
 
-    double sigma;
     MantidVec yv(nbins);
     // each spectra is a gaussian of same Height but different stdev
     for (size_t i = 0; i < nspectra; i++) {
       ws->mutableX(i) = xv;
-      sigma = sigma0 / (1 + static_cast<double>(i));
+      double sigma = sigma0 / (1 + static_cast<double>(i));
       this->Gaussian(xv, yv, Heigth, sigma);
       ws->mutableY(i) = yv;
     }
@@ -303,5 +299,3 @@ private:
   const double ps2meV; // conversion factor from picosecond to micro-eV
   const size_t nbins;
 }; // class ApplyDetailedBalanceTest
-
-#endif // MANTID_ALGORITHMS_SASSENAFFTTEST_H_

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MantidHelpWindow.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -65,7 +65,8 @@ const QString COLLECTION_FILE("MantidProject.qhc");
 /**
  * Default constructor shows the @link DEFAULT_URL @endlink.
  */
-MantidHelpWindow::MantidHelpWindow(QWidget *parent, Qt::WindowFlags flags)
+MantidHelpWindow::MantidHelpWindow(QWidget *parent,
+                                   const Qt::WindowFlags &flags)
     : MantidHelpInterface(), m_collectionFile(""), m_cacheFile(""),
       m_firstRun(true) {
   // find the collection and delete the cache file if this is the first run
@@ -289,11 +290,12 @@ void MantidHelpWindow::showConcept(const QString &name) {
 void MantidHelpWindow::showFitFunction(const std::string &name) {
   if (bool(g_helpWindow)) {
     QString url(BASE_URL);
-    url += "fitfunctions/";
-    if (name.empty())
+    url += "fitting/fitfunctions/";
+    auto functionUrl = url + QString(name.c_str()) + ".html";
+    if (name.empty() || !g_helpWindow->isExistingPage(functionUrl))
       url += "index.html";
     else
-      url += QString(name.c_str()) + ".html";
+      url = functionUrl;
 
     this->showHelp(url);
   } else // qt-assistant disabled
@@ -486,7 +488,7 @@ void MantidHelpWindow::determineFileLocs() {
   }
 }
 
-void MantidHelpWindow::warning(QString msg) {
+void MantidHelpWindow::warning(const QString &msg) {
   g_log.warning(msg.toStdString());
 }
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDUNITVALIDATOR_TEST_H
-#define MANTID_MDUNITVALIDATOR_TEST_H
+#pragma once
 
 #include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
@@ -78,5 +77,3 @@ public:
                      "MDWorkspace must be in the " + QLab::QLabName + " frame.")
   };
 };
-
-#endif // MANTID_MDUNITVALIDATOR_TEST_H

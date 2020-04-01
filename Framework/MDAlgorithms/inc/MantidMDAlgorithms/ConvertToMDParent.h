@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_CONVERT_TO_MD_PARENT_H_
-#define MANTID_MDALGORITHMS_CONVERT_TO_MD_PARENT_H_
+#pragma once
 
 #include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDAlgorithms/ConvToMDBase.h"
@@ -65,5 +64,3 @@ protected:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_ */

@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
 from qtpy.QtWidgets import QMainWindow, QMessageBox
 from qtpy.QtGui import QDoubleValidator
 from qtpy import QtCore
@@ -14,7 +13,6 @@ from mantid.kernel import Logger
 from mantidqt.gui_helper import show_interface_help
 import math
 import TofConverter.convertUnits
-
 
 try:
     from mantidqt.utils.qt import load_ui
@@ -29,24 +27,24 @@ class MainWindow(QMainWindow):
     needsFlightPathInputList = ['Time of flight (microseconds)']
     needsFlightPathOutputList = ['Time of flight (microseconds)']
 
-    def thetaEnable (self, enabled):
+    def thetaEnable(self, enabled):
         self.ui.scatteringAngleInput.setEnabled(enabled)
-        if  not enabled:
+        if not enabled:
             self.ui.scatteringAngleInput.clear()
 
-    def flightPathEnable (self, enabled):
+    def flightPathEnable(self, enabled):
         self.ui.totalFlightPathInput.setEnabled(enabled)
-        if  not enabled:
+        if not enabled:
             self.ui.totalFlightPathInput.clear()
 
-    def setInstrumentInputs (self):
+    def setInstrumentInputs(self):
         #disable both
         self.thetaEnable(False)
         self.flightPathEnable(False)
 
         #get the values of the two unit strings
-        inOption=self.ui.inputUnits.currentText()
-        outOption=self.ui.outputUnits.currentText()
+        inOption = self.ui.inputUnits.currentText()
+        outOption = self.ui.outputUnits.currentText()
 
         #for theta: enable if input or output unit requires it
         if inOption in self.needsThetaInputList:
@@ -63,7 +61,7 @@ class MainWindow(QMainWindow):
             self.flightPathEnable(True)
 
     def __init__(self, parent=None):
-        QMainWindow.__init__(self,parent)
+        QMainWindow.__init__(self, parent)
         self.ui = load_ui(__file__, 'converter.ui', baseinstance=self)
         self.ui.InputVal.setValidator(QDoubleValidator(self.ui.InputVal))
         self.ui.totalFlightPathInput.setValidator(QDoubleValidator(self.ui.totalFlightPathInput))
@@ -83,7 +81,7 @@ class MainWindow(QMainWindow):
         self.assistant_process = QtCore.QProcess(self)
         # pylint: disable=protected-access
         import mantid
-        self.mantidplot_name='TOF Converter'
+        self.mantidplot_name = 'TOF Converter'
         self.collection_file = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
         version = ".".join(mantid.__version__.split(".")[:2])
         self.qt_url = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/TOF Converter.html'
@@ -92,16 +90,14 @@ class MainWindow(QMainWindow):
         try:
             import mantid
             #register startup
-            mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface,"TofConverter",False)
+            mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface,
+                                                     "TofConverter", False)
         except ImportError:
             pass
 
     def helpClicked(self):
-        show_interface_help(self.mantidplot_name,
-                            self.assistant_process,
-                            self.collection_file,
-                            self.qt_url,
-                            self.external_url)
+        show_interface_help(self.mantidplot_name, self.assistant_process, self.collection_file,
+                            self.qt_url, self.external_url)
 
     def closeEvent(self, event):
         self.assistant_process.close()
@@ -119,23 +115,24 @@ class MainWindow(QMainWindow):
                 raise RuntimeError("Input value must be greater than 0 for conversion")
             inOption = self.ui.inputUnits.currentText()
             outOption = self.ui.outputUnits.currentText()
-            if self.ui.totalFlightPathInput.text() !='':
+            if self.ui.totalFlightPathInput.text():
                 self.flightpath = float(self.ui.totalFlightPathInput.text())
             else:
                 self.flightpath = -1.0
-            if self.ui.scatteringAngleInput.text() !='':
+            if self.ui.scatteringAngleInput.text():
                 self.Theta = float(self.ui.scatteringAngleInput.text()) * math.pi / 360.0
+            else:
+                self.Theta = -1.0
 
-            self.output = TofConverter.convertUnits.doConversion(self.ui.InputVal.text(), inOption, outOption, self.Theta, self.flightpath)
+            self.output = TofConverter.convertUnits.doConversion(self.ui.InputVal.text(), inOption,
+                                                                 outOption, self.Theta,
+                                                                 self.flightpath)
 
             self.ui.convertedVal.clear()
             self.ui.convertedVal.insert(str(self.output))
-        except UnboundLocalError as ule:
-            QMessageBox.warning(self, "TofConverter", str(ule))
+        except (UnboundLocalError, ArithmeticError, ValueError, RuntimeError) as err:
+            QMessageBox.warning(self, "TofConverter", str(err))
             return
-        except ArithmeticError as ae:
-            QMessageBox.warning(self, "TofConverter", str(ae))
-            return
-        except RuntimeError as re:
-            QMessageBox.warning(self, "TofConverter", str(re))
+        except Exception as exc:
+            Logger.error(exc)
             return

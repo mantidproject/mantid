@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQTEST_H_
-#define MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -43,7 +42,7 @@ private:
   Makes the tests much more readable like this.
   */
   boost::shared_ptr<ConvertToReflectometryQ>
-  make_standard_algorithm(const std::string outputdimensions = "Q (lab frame)",
+  make_standard_algorithm(const std::string &outputdimensions = "Q (lab frame)",
                           bool outputAsMD = true) {
     MatrixWorkspace_sptr in_ws =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
@@ -373,5 +372,3 @@ public:
     TS_ASSERT_EQUALS(out->getNumDims(), 2);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_CONVERTTOREFLECTOMETRYQTEST_H_ */

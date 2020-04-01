@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadDiffCal.h"
 
@@ -132,7 +132,7 @@ bool endswith(const std::string &str, const std::string &ending) {
 }
 
 void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix,
-                        GroupingWorkspace_sptr wksp) {
+                        const GroupingWorkspace_sptr &wksp) {
   alg->declareProperty(
       std::make_unique<WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           "OutputGroupingWorkspace", prefix + "_group", Direction::Output),
@@ -141,7 +141,7 @@ void setGroupWSProperty(API::Algorithm *alg, const std::string &prefix,
 }
 
 void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix,
-                       MaskWorkspace_sptr wksp) {
+                       const MaskWorkspace_sptr &wksp) {
   alg->declareProperty(
       std::make_unique<WorkspaceProperty<DataObjects::MaskWorkspace>>(
           "OutputMaskWorkspace", prefix + "_mask", Direction::Output),
@@ -150,7 +150,7 @@ void setMaskWSProperty(API::Algorithm *alg, const std::string &prefix,
 }
 
 void setCalWSProperty(API::Algorithm *alg, const std::string &prefix,
-                      ITableWorkspace_sptr wksp) {
+                      const ITableWorkspace_sptr &wksp) {
   alg->declareProperty(
       std::make_unique<WorkspaceProperty<ITableWorkspace>>(
           "OutputCalWorkspace", prefix + "_cal", Direction::Output),

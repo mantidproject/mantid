@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CALCULATEEFFICIENCYTEST_H_
-#define CALCULATEEFFICIENCYTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -248,5 +247,3 @@ private:
   Mantid::Algorithms::CalculateEfficiency correction;
   std::string inputWS;
 };
-
-#endif /*Q1DTEST_H_*/

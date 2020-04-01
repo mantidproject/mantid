@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
 #include "MantidAPI/FileProperty.h"
@@ -19,6 +19,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <fstream>
 #include <queue>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("CreateGroupingWorkspace");
@@ -207,10 +208,9 @@ std::map<detid_t, int> readGroupingFile(const std::string &groupingFileName,
  * @param prog Progress reporter
  * @returns :: Map of detector IDs to group number
  */
-std::map<detid_t, int> makeGroupingByNumGroups(const std::string compName,
-                                               int numGroups,
-                                               Instrument_const_sptr inst,
-                                               Progress &prog) {
+std::map<detid_t, int>
+makeGroupingByNumGroups(const std::string &compName, int numGroups,
+                        const Instrument_const_sptr &inst, Progress &prog) {
   std::map<detid_t, int> detIDtoGroup;
 
   // Get detectors for given instument component
@@ -250,14 +250,14 @@ std::map<detid_t, int> makeGroupingByNumGroups(const std::string compName,
 
 bool groupnumber(std::string groupi, std::string groupj) {
   int i = 0;
-  std::string groupName = groupi;
+  std::string groupName = std::move(groupi);
   // Take out the "group" part of the group name and convert to an int
   groupName.erase(
       remove_if(groupName.begin(), groupName.end(), std::not_fn(::isdigit)),
       groupName.end());
   Strings::convert(groupName, i);
   int j = 0;
-  groupName = groupj;
+  groupName = std::move(groupj);
   // Take out the "group" part of the group name and convert to an int
   groupName.erase(
       remove_if(groupName.begin(), groupName.end(), std::not_fn(::isdigit)),
@@ -276,7 +276,7 @@ bool groupnumber(std::string groupi, std::string groupj) {
  * @returns:: map of detID to group number
  */
 std::map<detid_t, int> makeGroupingByNames(std::string GroupNames,
-                                           Instrument_const_sptr inst,
+                                           const Instrument_const_sptr &inst,
                                            Progress &prog, bool sortnames) {
   // This will contain the grouping
   std::map<detid_t, int> detIDtoGroup;
@@ -432,7 +432,6 @@ void CreateGroupingWorkspace::exec() {
       sortnames = true;
       GroupNames = "";
       int maxRecurseDepth = this->getProperty("MaxRecursionDepth");
-
       // cppcheck-suppress syntaxError
           PRAGMA_OMP(parallel for schedule(dynamic, 1) )
           for (int num = 0; num < 300; ++num) {

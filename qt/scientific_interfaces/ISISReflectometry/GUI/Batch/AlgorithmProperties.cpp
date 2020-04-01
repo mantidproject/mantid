@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "AlgorithmProperties.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -65,16 +65,9 @@ void updateFromMap(AlgorithmRuntimeProps &properties,
     update(kvp.first, kvp.second, properties);
   }
 }
-std::string getOutputWorkspace(IAlgorithm_sptr algorithm,
+std::string getOutputWorkspace(const IAlgorithm_sptr &algorithm,
                                std::string const &property) {
   auto const workspaceName = algorithm->getPropertyValue(property);
-  // The workspaces are not in the ADS by default, so add them
-  if (!workspaceName.empty()) {
-    Workspace_sptr workspace = algorithm->getProperty(property);
-    if (workspace)
-      Mantid::API::AnalysisDataService::Instance().addOrReplace(workspaceName,
-                                                                workspace);
-  }
   return workspaceName;
 }
 } // namespace AlgorithmProperties

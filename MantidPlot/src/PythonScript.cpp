@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
   File                 : PythonScript.cpp
@@ -389,11 +389,17 @@ void PythonScript::clearLocals() {
     PyObject *value = PyDict_GetItemString(localDict, "__file__");
     if (value)
       PyDict_SetItemString(cleanLocals, "__file__", value);
+
     // reset locals
     Py_DECREF(localDict);
     localDict = nullptr;
   }
   localDict = cleanLocals;
+  auto mod = PyImport_ImportModule("mantid.simpleapi");
+  PyObject_DelAttrString(mod, "plotSpectrum");
+  PyObject_DelAttrString(mod, "plotBin");
+  PyErr_Clear();
+  Py_DECREF(mod);
 }
 
 /**

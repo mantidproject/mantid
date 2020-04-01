@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SetSpecialCoordinates.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -93,9 +93,9 @@ void SetSpecialCoordinates::init() {
 }
 
 bool SetSpecialCoordinates::writeCoordinatesToMDEventWorkspace(
-    Workspace_sptr inWS, SpecialCoordinateSystem /*unused*/) {
+    const Workspace_sptr &inWS, SpecialCoordinateSystem /*unused*/) {
   bool written = false;
-  if (auto mdEventWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS)) {
+  if (boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS)) {
     g_log.warning("SetSpecialCoordinates: This algorithm cannot set the "
                   "special coordinate system for an MDEvent workspace any "
                   "longer.");
@@ -105,9 +105,9 @@ bool SetSpecialCoordinates::writeCoordinatesToMDEventWorkspace(
 }
 
 bool SetSpecialCoordinates::writeCoordinatesToMDHistoWorkspace(
-    Workspace_sptr inWS, SpecialCoordinateSystem /*unused*/) {
+    const Workspace_sptr &inWS, SpecialCoordinateSystem /*unused*/) {
   bool written = false;
-  if (auto mdHistoWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
+  if (boost::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
     g_log.warning("SetSpecialCoordinates: This algorithm cannot set the "
                   "special coordinate system for an MDHisto workspace any "
                   "longer.");
@@ -117,7 +117,7 @@ bool SetSpecialCoordinates::writeCoordinatesToMDHistoWorkspace(
 }
 
 bool SetSpecialCoordinates::writeCoordinatesToPeaksWorkspace(
-    Workspace_sptr inWS, SpecialCoordinateSystem coordinateSystem) {
+    const Workspace_sptr &inWS, SpecialCoordinateSystem coordinateSystem) {
   bool written = false;
   if (auto peaksWS = boost::dynamic_pointer_cast<IPeaksWorkspace>(inWS)) {
     peaksWS->setCoordinateSystem(coordinateSystem);

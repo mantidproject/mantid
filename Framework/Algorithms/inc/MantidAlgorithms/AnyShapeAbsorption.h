@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_ANYSHAPEABSORPTION_H_
-#define MANTID_ALGORITHMS_ANYSHAPEABSORPTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -67,7 +66,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella plc
     @date 11/03/2010
 */
-class DLLExport AnyShapeAbsorption : public AbsorptionCorrection {
+class MANTID_ALGORITHMS_DLL AnyShapeAbsorption : public AbsorptionCorrection {
 public:
   /// (Empty) Constructor
   AnyShapeAbsorption();
@@ -107,5 +106,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_ANYSHAPEABSORPTION_H_*/

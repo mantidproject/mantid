@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IFUNCTION_H_
-#define MANTID_API_IFUNCTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -25,6 +24,8 @@
 #endif
 
 #include <string>
+#include <utility>
+
 #include <vector>
 
 #ifdef _WIN32
@@ -522,7 +523,8 @@ public:
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain &domain, Jacobian &jacobian);
   /// Set the covariance matrix
-  void setCovarianceMatrix(boost::shared_ptr<Kernel::Matrix<double>> covar);
+  void
+  setCovarianceMatrix(const boost::shared_ptr<Kernel::Matrix<double>> &covar);
   /// Get the covariance matrix
   boost::shared_ptr<const Kernel::Matrix<double>> getCovarianceMatrix() const {
     return m_covar;
@@ -563,11 +565,11 @@ protected:
 
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws)
   double convertValue(double value, Kernel::Unit_sptr &outUnit,
-                      boost::shared_ptr<const MatrixWorkspace> ws,
+                      const boost::shared_ptr<const MatrixWorkspace> &ws,
                       size_t wsIndex) const;
 
   void convertValue(std::vector<double> &values, Kernel::Unit_sptr &outUnit,
-                    boost::shared_ptr<const MatrixWorkspace> ws,
+                    const boost::shared_ptr<const MatrixWorkspace> &ws,
                     size_t wsIndex) const;
 
   /// Override to declare function attributes
@@ -636,7 +638,7 @@ using IFunction_const_sptr = boost::shared_ptr<const IFunction>;
 class FunctionHandler {
 public:
   /// Constructor
-  FunctionHandler(IFunction_sptr fun) : m_fun(fun) {}
+  FunctionHandler(IFunction_sptr fun) : m_fun(std::move(fun)) {}
   /// Virtual destructor
   virtual ~FunctionHandler() = default;
   /// abstract init method. It is called after setting handler to the function
@@ -650,5 +652,3 @@ protected:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_IFUNCTION_H_*/

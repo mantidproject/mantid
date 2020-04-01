@@ -1,6 +1,12 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
 import matplotlib.image as mimage
 import matplotlib.colors
-from mantid.plots.plotfunctions import _setLabels2D
+from mantid.plots.axesfunctions import _setLabels2D
 import mantid.api
 import numpy as np
 

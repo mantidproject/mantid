@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/ISIS/ISISHistoDataListener.h"
 #include "MantidAPI/Algorithm.h"
@@ -422,7 +422,7 @@ void ISISHistoDataListener::calculateIndicesForReading(
  * @param workspaceIndex :: index in workspace to store data
  */
 void ISISHistoDataListener::getData(int period, int index, int count,
-                                    API::MatrixWorkspace_sptr workspace,
+                                    const API::MatrixWorkspace_sptr &workspace,
                                     size_t workspaceIndex) {
   const int numberOfBins = m_numberOfBins[m_timeRegime];
   const size_t bufferSize = count * (numberOfBins + 1) * sizeof(int);
@@ -466,7 +466,7 @@ void ISISHistoDataListener::loadSpectraMap() {
  *  @param iName :: The instrument name
  */
 void ISISHistoDataListener::runLoadInstrument(
-    MatrixWorkspace_sptr localWorkspace, const std::string &iName) {
+    const MatrixWorkspace_sptr &localWorkspace, const std::string &iName) {
   auto loadInst =
       API::AlgorithmFactory::Instance().create("LoadInstrument", -1);
   if (!loadInst)

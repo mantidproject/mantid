@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import re
 import AbinsModules
@@ -94,9 +93,9 @@ class LoadCASTEP(AbinsModules.GeneralAbInitioProgram):
                         symbol = "H"
                     masses_from_file.append(float(line_data[5]))
                     ion = {"symbol": symbol,
-                           "coord": np.array(float(line_data[1]) * file_data['unit_cell'][0] +
-                                             float(line_data[2]) * file_data['unit_cell'][1] +
-                                             float(line_data[3]) * file_data['unit_cell'][2]),
+                           "coord": np.array(float(line_data[1]) * file_data['unit_cell'][0]
+                                             + float(line_data[2]) * file_data['unit_cell'][1]
+                                             + float(line_data[3]) * file_data['unit_cell'][2]),
                            # at the moment it is a dummy parameter, it will mark symmetry equivalent atoms
                            "sort": indx,
                            "mass": Atom(symbol=symbol).mass}

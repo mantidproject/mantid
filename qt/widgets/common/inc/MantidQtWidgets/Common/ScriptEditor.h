@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef SCRIPTEDITOR_H_
-#define SCRIPTEDITOR_H_
+#pragma once
 
 //----------------------------------
 // Includes
@@ -123,6 +121,8 @@ public slots:
   void padMargin();
   /// Set the marker state
   void setMarkerState(bool enabled);
+  /// Update the progress marker potentially from a separate thread
+  void updateProgressMarkerFromThread(int lineno, bool error = false);
   /// Update the progress marker
   void updateProgressMarker(int lineno, bool error = false);
   /// Mark the progress arrow as an error
@@ -186,5 +186,3 @@ private:
   /// Name of group that the settings are stored under
   QString m_settingsGroup;
 };
-
-#endif // SCRIPTEDITOR_H_

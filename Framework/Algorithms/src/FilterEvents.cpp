@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FilterEvents.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -26,6 +26,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -1964,43 +1965,76 @@ void FilterEvents::generateSplitterTSPalpha(
 void FilterEvents::mapSplitterTSPtoWorkspaces(
     std::vector<std::unique_ptr<Kernel::TimeSeriesProperty<int>>>
         &split_tsp_vec) {
-  if (m_useSplittersWorkspace) {
-    g_log.debug() << "There are " << split_tsp_vec.size()
-                  << " TimeSeriesPropeties.\n";
-    std::map<int, DataObjects::EventWorkspace_sptr>::iterator miter;
-    for (miter = m_outputWorkspacesMap.begin();
-         miter != m_outputWorkspacesMap.end(); ++miter) {
-      g_log.debug() << "Output workspace index: " << miter->first << "\n";
-      if (0 <= miter->first &&
-          miter->first < static_cast<int>(split_tsp_vec.size())) {
-        DataObjects::EventWorkspace_sptr outws = miter->second;
-        outws->mutableRun().addProperty(std::move(split_tsp_vec[miter->first]),
-                                        true);
-      }
-    }
-  } else {
-    // Either Table-type or Matrix-type splitters
-    for (int itarget = 0; itarget < static_cast<int>(split_tsp_vec.size());
-         ++itarget) {
-      // use itarget to find the workspace that is mapped
-      std::map<int, DataObjects::EventWorkspace_sptr>::iterator ws_iter;
-      ws_iter = m_outputWorkspacesMap.find(itarget);
+  g_log.debug() << "There are " << split_tsp_vec.size()
+                << " TimeSeriesPropeties.\n"
+                << "There are " << m_outputWorkspacesMap.size()
+                << " Output worskpaces.\n";
 
-      // skip if an itarget does not have matched workspace
-      if (ws_iter == m_outputWorkspacesMap.end()) {
-        g_log.warning() << "iTarget " << itarget
-                        << " does not have any workspace associated.\n";
-        continue;
-      }
+  if (split_tsp_vec.size() != m_outputWorkspacesMap.size()) {
+    g_log.warning() << "Number of Splitter vector (" << split_tsp_vec.size()
+                    << ") does not match number of output workspace ("
+                    << m_outputWorkspacesMap.size() << ")"
+                    << "\n";
+  }
 
-      // get the workspace and add property
-      DataObjects::EventWorkspace_sptr outws = ws_iter->second;
-      outws->mutableRun().addProperty(std::move(split_tsp_vec[itarget]), true);
+  for (int itarget = 0; itarget < static_cast<int>(split_tsp_vec.size());
+       ++itarget) {
+    // use itarget to find the workspace that is mapped
+    std::map<int, DataObjects::EventWorkspace_sptr>::iterator ws_iter;
+    ws_iter = m_outputWorkspacesMap.find(itarget);
+
+    // skip if an itarget does not have matched workspace
+    if (ws_iter == m_outputWorkspacesMap.end()) {
+      g_log.warning() << "iTarget " << itarget
+                      << " does not have any workspace associated.\n";
+      continue;
     }
 
-  } // END-IF-ELSE (splitter-type)
+    // get the workspace
+    DataObjects::EventWorkspace_sptr outws = ws_iter->second;
+
+    // calculate the duration
+    double duration = calculate_duration(split_tsp_vec[itarget]);
+
+    // add property
+    PropertyWithValue<double> *duration_property =
+        new PropertyWithValue<double>("duration", duration);
+    outws->mutableRun().addProperty(duration_property, true);
+    // note: split_tps_vec[i], the shared pointer, will be destroyed by
+    // std::move()
+    outws->mutableRun().addProperty(std::move(split_tsp_vec[itarget]), true);
+  }
 
   return;
+}
+
+/** Calculate split-workspace's duration according to splitter time series
+ * property
+ * @brief calculate the duration from TSP "splitter"
+ * @param splitter_tsp :: TimeSeriesProperty for splitter
+ * @return
+ */
+double FilterEvents::calculate_duration(
+    std::unique_ptr<Kernel::TimeSeriesProperty<int>> &splitter_tsp) {
+  // Get the times and values
+  std::vector<int> split_values = splitter_tsp->valuesAsVector();
+  std::vector<DateAndTime> split_time = splitter_tsp->timesAsVector();
+
+  double duration = 0.;
+  for (size_t i = 0; i < split_values.size() - 1; ++i) {
+    // for splitter's value == 1 (from this till 0 will be counted in the
+    // duration)
+    if (split_values[i] == 1) {
+      // difference in nanosecond and then converted to second
+      double sub_duration =
+          1.E-9 * static_cast<double>(split_time[i + 1].totalNanoseconds() -
+                                      split_time[i].totalNanoseconds());
+      // increment
+      duration += sub_duration;
+    }
+  }
+
+  return duration;
 }
 
 /** Get all filterable logs' names (double and integer)

@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADILLSANS_H_
-#define MANTID_DATAHANDLING_LOADILLSANS_H_
+#pragma once
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/System.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -60,6 +60,7 @@ private:
 
   void initWorkSpace(NeXus::NXEntry &, const std::string &);
   void initWorkSpaceD33(NeXus::NXEntry &, const std::string &);
+  void initWorkSpaceD16(NeXus::NXEntry &, const std::string &);
   void createEmptyWorkspace(const size_t, const size_t);
 
   size_t loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
@@ -75,7 +76,8 @@ private:
   Kernel::V3D getComponentPosition(const std::string &componentName);
   void loadMetaData(const NeXus::NXEntry &, const std::string &);
   std::string getInstrumentFilePath(const std::string &) const;
-  void rotateD22(double, const std::string &);
+  void rotateInstrument(double, const std::string &);
+  void placeD16(double, double, const std::string &);
   void adjustTOF();
   void moveSource();
 
@@ -99,5 +101,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_LOADILLSANS_H_ */

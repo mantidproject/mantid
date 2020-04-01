@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -15,6 +15,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/Logger.h"
 
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 
@@ -46,11 +47,12 @@ void MultiDomainCreator::createDomain(
         "Cannot create JointDomain: number of workspaces does not match "
         "the number of creators");
   }
-  auto jointDomain = new API::JointDomain;
+  auto jointDomain = std::make_unique<API::JointDomain>();
   API::FunctionValues_sptr values;
   i0 = 0;
   for (auto &creator : m_creators) {
     if (!creator) {
+
       throw std::runtime_error("Missing domain creator");
     }
     API::FunctionDomain_sptr domain;
@@ -58,7 +60,7 @@ void MultiDomainCreator::createDomain(
     jointDomain->addDomain(domain);
     i0 += domain->size();
   }
-  domain.reset(jointDomain);
+  domain.reset(jointDomain.release());
   ivalues = values;
 }
 

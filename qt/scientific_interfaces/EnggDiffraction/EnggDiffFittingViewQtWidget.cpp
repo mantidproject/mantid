@@ -27,6 +27,7 @@
 #include <QFileDialog>
 #include <QHelpEvent>
 #include <QSettings>
+#include <utility>
 
 #include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
@@ -56,8 +57,10 @@ EnggDiffFittingViewQtWidget::EnggDiffFittingViewQtWidget(
     boost::shared_ptr<IEnggDiffractionPythonRunner> mainPythonRunner,
     boost::shared_ptr<IEnggDiffractionParam> fileSettings)
     : IEnggDiffFittingView(), m_fittedDataVector(),
-      m_fileSettings(fileSettings), m_mainMsgProvider(mainMsg),
-      m_mainSettings(mainSettings), m_mainPythonRunner(mainPythonRunner),
+      m_fileSettings(std::move(fileSettings)),
+      m_mainMsgProvider(std::move(mainMsg)),
+      m_mainSettings(std::move(mainSettings)),
+      m_mainPythonRunner(std::move(mainPythonRunner)),
       m_presenter(boost::make_shared<EnggDiffFittingPresenter>(
           this, std::make_unique<EnggDiffFittingModel>(), mainCalib,
           mainParam)) {

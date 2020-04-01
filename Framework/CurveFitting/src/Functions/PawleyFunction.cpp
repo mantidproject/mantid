@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/PawleyFunction.h"
 
@@ -405,7 +405,8 @@ double PawleyFunction::getTransformedCenter(double d) const {
   return d;
 }
 
-void PawleyFunction::setPeakPositions(std::string centreName, double zeroShift,
+void PawleyFunction::setPeakPositions(const std::string &centreName,
+                                      double zeroShift,
                                       const UnitCell &cell) const {
   for (size_t i = 0; i < m_hkls.size(); ++i) {
     double centre = getTransformedCenter(cell.d(m_hkls[i]));

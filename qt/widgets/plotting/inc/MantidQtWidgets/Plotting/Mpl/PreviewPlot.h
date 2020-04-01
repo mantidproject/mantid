@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_PLOTTING_MPL_PREVIEWPLOT_H_
-#define MANTIDQT_PLOTTING_MPL_PREVIEWPLOT_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -89,13 +88,14 @@ public:
   void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
+  void disableContextMenu();
 
 public slots:
   void clear();
   void resizeX();
   void resetView();
-  void setCanvasColour(QColor colour);
-  void setLinesWithErrors(QStringList labels);
+  void setCanvasColour(const QColor &colour);
+  void setLinesWithErrors(const QStringList &labels);
   void showLegend(bool visible);
   void replot();
 
@@ -136,7 +136,7 @@ private:
   void switchPlotTool(QAction *selected);
   void setXScaleType(QAction *selected);
   void setYScaleType(QAction *selected);
-  void setScaleType(AxisID id, QString actionName);
+  void setScaleType(AxisID id, const QString &actionName);
   void toggleLegend(const bool checked);
 
   boost::optional<char const *> overrideAxisLabel(AxisID const &axisID);
@@ -169,9 +169,8 @@ private:
   QAction *m_contextResetView;
   QActionGroup *m_contextXScale, *m_contextYScale;
   QAction *m_contextLegend;
+  bool m_context_enabled;
 };
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDQT_PLOTTING_MPL_PREVIEWPLOT_H_

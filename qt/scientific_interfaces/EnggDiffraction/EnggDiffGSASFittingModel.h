@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGMODEL_H_
-#define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGMODEL_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "EnggDiffGSASFittingWorker.h"
@@ -67,7 +66,7 @@ protected:
 
   /// Add a lattice parameter table to the map
   void addLatticeParams(const RunLabel &runLabel,
-                        Mantid::API::ITableWorkspace_sptr table);
+                        const Mantid::API::ITableWorkspace_sptr &table);
 
   /// Add a gamma value to the gamma map
   void addGamma(const RunLabel &runLabel, const double gamma);
@@ -111,7 +110,7 @@ private:
   void
   addFitResultsToMaps(const RunLabel &runLabel, const double rwp,
                       const double sigma, const double gamma,
-                      const Mantid::API::ITableWorkspace_sptr latticeParams);
+                      const Mantid::API::ITableWorkspace_sptr &latticeParams);
 
   void deleteWorkerThread();
 
@@ -131,5 +130,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASFITTINGMODEL_H_

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_CREATEMDEVENTWORKSPACETEST_H_
-#define MANTID_MDEVENTS_CREATEMDEVENTWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -92,8 +91,9 @@ public:
                    ->isExecuted());
   }
 
-  void do_test_exec(std::string Filename, bool lean, int MinRecursionDepth = 0,
-                    int expectedNumMDBoxes = 216, bool withFrames = false) {
+  void do_test_exec(const std::string &Filename, bool lean,
+                    int MinRecursionDepth = 0, int expectedNumMDBoxes = 216,
+                    bool withFrames = false) {
 
     std::string wsName = "CreateMDWorkspaceTest_out";
     CreateMDWorkspace alg;
@@ -217,5 +217,3 @@ public:
 
   void test_exec_MinRecursionDepth() { do_test_exec("", true, 2, 216 * 216); }
 };
-
-#endif /* MANTID_MDEVENTS_CREATEMDEVENTWORKSPACETEST_H_ */

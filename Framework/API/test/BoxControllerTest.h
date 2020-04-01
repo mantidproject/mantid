@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BOXPLITCONTROLLER_TEST_H
-#define BOXPLITCONTROLLER_TEST_H
+#pragma once
 
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IBoxControllerIO.h"
@@ -396,5 +395,3 @@ public:
                !pS->isOpened());
   }
 };
-
-#endif

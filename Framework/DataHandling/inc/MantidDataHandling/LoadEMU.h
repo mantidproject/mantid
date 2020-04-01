@@ -1,5 +1,10 @@
-#ifndef DATAHANDING_LOADEMU_H_
-#define DATAHANDING_LOADEMU_H_
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
 
 //---------------------------------------------------
 // Includes
@@ -11,6 +16,8 @@
 #include "MantidAPI/LogManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/FileDescriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -22,27 +29,6 @@ using ANSTO::EventVector_pt;
 Loads an ANSTO EMU event file and stores it in an event workspace.
 
 @author Geish Miladinovic (ANSTO)
-
-Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-National Laboratory & European Spallation Source
-
-This file is part of Mantid.
-
-Mantid is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-Mantid is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-File change history is stored at: <https://github.com/mantidproject/mantid>.
-Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 template <typename FD> class LoadEMU : public API::IFileLoader<FD> {
@@ -187,5 +173,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif // DATAHANDING_LOADEMU_H_

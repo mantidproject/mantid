@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 """
@@ -11,8 +11,8 @@ Controls the dynamic displaying of errors for line on the plot
 from matplotlib.container import ErrorbarContainer
 from matplotlib.lines import Line2D
 
-from mantid.plots import helperfunctions, MantidAxes
-from mantid.plots.helperfunctions import get_data_from_errorbar_container, set_errorbars_hidden
+from mantid.plots import datafunctions, MantidAxes
+from mantid.plots.datafunctions import get_data_from_errorbar_container, set_errorbars_hidden
 from mantid.plots.legend import LegendProperties
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties, remove_curve_from_ax
 
@@ -51,14 +51,14 @@ class FigureErrorsManager(object):
         new_curve = cls.replot_curve(ax, curve, plot_kwargs)
 
         if isinstance(ax, MantidAxes):
-            errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(ax)
+            errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
         else:
             errorbar_cap_lines = []
 
         ax.lines.insert(curve_index, ax.lines.pop())
 
         if isinstance(ax, MantidAxes) and ax.is_waterfall():
-            helperfunctions.convert_single_line_to_waterfall(ax, curve_index)
+            datafunctions.convert_single_line_to_waterfall(ax, curve_index)
 
         ax.lines += errorbar_cap_lines
 
@@ -98,7 +98,6 @@ class FigureErrorsManager(object):
     @staticmethod
     def update_limits_and_legend(ax, legend_props=None):
         ax.relim()
-        ax.autoscale()
         if legend_props:
             LegendProperties.create_legend(legend_props, ax)
 
@@ -111,9 +110,10 @@ class FigureErrorsManager(object):
     @classmethod
     def replot_curve(cls, ax, curve, plot_kwargs):
         if isinstance(ax, MantidAxes):
-            axis = ax.creation_args[0].get('axis', None)
-            if axis:
-                plot_kwargs['axis'] = axis
+            if ax.creation_args:
+                axis = ax.creation_args[0].get('axis', None)
+                if axis:
+                    plot_kwargs['axis'] = axis
             try:
                 new_curve = ax.replot_artist(curve, errorbars=True, **plot_kwargs)
             except ValueError:  # ValueError raised if Artist not tracked by Axes

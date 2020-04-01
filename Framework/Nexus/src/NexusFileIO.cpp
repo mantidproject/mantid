@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // NexusFileIO
 // @author Ronald Fowler
@@ -574,7 +574,7 @@ size_t getSizeOf(const Kernel::V3D & /*unused*/) { return 3; }
  */
 template <typename VecType, typename ElemType>
 void NexusFileIO::writeNexusVectorColumn(
-    Column_const_sptr col, const std::string &columnName, int nexusType,
+    const Column_const_sptr &col, const std::string &columnName, int nexusType,
     const std::string &interpret_as) const {
   ConstColumnVector<VecType> column(col);
   size_t rowCount = column.size();
@@ -893,7 +893,7 @@ void NexusFileIO::writeEventListData(std::vector<T> events, bool writeTOF,
  * @param group_name :: group_name to create.
  * */
 int NexusFileIO::writeEventList(const DataObjects::EventList &el,
-                                std::string group_name) const {
+                                const std::string &group_name) const {
   // write data entry
   NXstatus status = NXmakegroup(fileID, group_name.c_str(), "NXdata");
   if (status == NX_ERROR)
@@ -1162,7 +1162,7 @@ bool NexusFileIO::checkEntryAtLevelByAttribute(const std::string &attribute,
  * @return true for OK, false for error
  */
 bool NexusFileIO::writeNexusBinMasking(
-    API::MatrixWorkspace_const_sptr ws) const {
+    const API::MatrixWorkspace_const_sptr &ws) const {
   std::vector<int> spectra;
   std::vector<std::size_t> bins;
   std::vector<double> weights;

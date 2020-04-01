@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidAPI/Axis.h"
@@ -20,6 +20,7 @@
 
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <utility>
 
 namespace Mantid {
 namespace DataHandling {
@@ -267,7 +268,7 @@ namespace {
 // Check the numbers supplied are not in the range and erase the ones that are
 struct range_check {
   range_check(specnum_t min, specnum_t max, detid2index_map id_to_wi)
-      : m_min(min), m_max(max), m_id_to_wi(id_to_wi) {}
+      : m_min(min), m_max(max), m_id_to_wi(std::move(id_to_wi)) {}
 
   bool operator()(specnum_t x) {
     auto wi = static_cast<specnum_t>((m_id_to_wi)[x]);
@@ -292,7 +293,7 @@ private:
 void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
                                const std::string &entry_name,
                                const std::string &bankName,
-                               API::MatrixWorkspace_sptr WS,
+                               const API::MatrixWorkspace_sptr &WS,
                                const detid2index_map &id_to_wi) {
   g_log.debug() << "Loading bank " << bankName << '\n';
   // To avoid segfaults on RHEL5/6 and Fedora

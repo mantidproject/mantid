@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from sans.algorithm_detail.bundles import OutputPartsBundle
@@ -14,7 +12,7 @@ from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DataType, ReductionMode)
 from sans.common.enums import (ReductionDimensionality, FitModeForMerge)
 from sans.common.general_functions import create_unmanaged_algorithm
-from sans.state.reduction_mode import StateReductionMode
+from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.test_helper.test_director import TestDirector
 
 

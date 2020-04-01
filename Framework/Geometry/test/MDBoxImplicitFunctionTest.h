@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_MDBOXIMPLICITFUNCTIONTEST_H_
-#define MANTID_MDALGORITHMS_MDBOXIMPLICITFUNCTIONTEST_H_
+#pragma once
 
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -107,7 +106,6 @@ public:
     // The box to test.
     const coord_t boxMin = 1.1f;
     const coord_t boxMax = 1.9f;
-    std::vector<coord_t> boxVertexes;
     std::vector<Extent> extents;
     // extent
     extents.emplace_back(Extent(boxMin, boxMax));
@@ -335,5 +333,3 @@ public:
     }
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_MDBOXIMPLICITFUNCTIONTEST_H_ */

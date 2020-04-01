@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_GETALLEI_H_
-#define MANTID_ALGORITHMS_GETALLEI_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 //#include "MantidAPI/IAlgorithm.h"
 
@@ -27,7 +26,7 @@ namespace Algorithms {
 
 /** Estimate all incident energies, used by chopper instrument.
  */
-class DLLExport GetAllEi : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL GetAllEi : public API::Algorithm {
 public:
   GetAllEi();
   /// Algorithms name for identification. @see Algorithm::name
@@ -119,5 +118,3 @@ protected: // for testing, private otherwise.
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_GETALLEI_H_ */

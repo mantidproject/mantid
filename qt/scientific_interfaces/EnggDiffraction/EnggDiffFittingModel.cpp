@@ -33,14 +33,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 void EnggDiffFittingModel::addFocusedWorkspace(
-    const RunLabel &runLabel, const API::MatrixWorkspace_sptr ws,
+    const RunLabel &runLabel, const API::MatrixWorkspace_sptr &ws,
     const std::string &filename) {
   m_focusedWorkspaceMap.add(runLabel, ws);
   m_wsFilenameMap.add(runLabel, filename);
 }
 
 void EnggDiffFittingModel::addFitResults(
-    const RunLabel &runLabel, const Mantid::API::ITableWorkspace_sptr ws) {
+    const RunLabel &runLabel, const Mantid::API::ITableWorkspace_sptr &ws) {
   m_fitParamsMap.add(runLabel, ws);
 }
 
@@ -236,7 +236,7 @@ EnggDiffFittingModel::getFittedPeaksWS(const RunLabel &runLabel) const {
 
 void EnggDiffFittingModel::evaluateFunction(
     const std::string &function,
-    const Mantid::API::MatrixWorkspace_sptr inputWS,
+    const Mantid::API::MatrixWorkspace_sptr &inputWS,
     const std::string &outputWSName, const double startX, const double endX) {
 
   auto evalFunctionAlg =
@@ -280,7 +280,7 @@ void EnggDiffFittingModel::rebinToFocusedWorkspace(
 }
 
 void EnggDiffFittingModel::cloneWorkspace(
-    const Mantid::API::MatrixWorkspace_sptr inputWorkspace,
+    const Mantid::API::MatrixWorkspace_sptr &inputWorkspace,
     const std::string &outputWSName) const {
   auto cloneWSAlg =
       Mantid::API::AlgorithmManager::Instance().create("CloneWorkspace");
@@ -291,7 +291,7 @@ void EnggDiffFittingModel::cloneWorkspace(
 }
 
 void EnggDiffFittingModel::cloneWorkspace(
-    const Mantid::API::ITableWorkspace_sptr inputWorkspace,
+    const Mantid::API::ITableWorkspace_sptr &inputWorkspace,
     const std::string &outputWSName) const {
   auto cloneWSAlg =
       Mantid::API::AlgorithmManager::Instance().create("CloneWorkspace");
@@ -324,7 +324,7 @@ void EnggDiffFittingModel::appendSpectra(const std::string &ws1Name,
 }
 
 std::tuple<double, double, double> EnggDiffFittingModel::getDifcDifaTzero(
-    Mantid::API::MatrixWorkspace_const_sptr ws) {
+    const Mantid::API::MatrixWorkspace_const_sptr &ws) {
   const auto run = ws->run();
 
   const auto difc = run.getPropertyValueAsType<double>("difc");
@@ -336,7 +336,7 @@ std::tuple<double, double, double> EnggDiffFittingModel::getDifcDifaTzero(
 
 Mantid::API::ITableWorkspace_sptr
 EnggDiffFittingModel::createCalibrationParamsTable(
-    Mantid::API::MatrixWorkspace_const_sptr inputWS) {
+    const Mantid::API::MatrixWorkspace_const_sptr &inputWS) {
   double difc, difa, tzero;
   std::tie(difc, difa, tzero) = getDifcDifaTzero(inputWS);
 
@@ -357,7 +357,7 @@ EnggDiffFittingModel::createCalibrationParamsTable(
 }
 
 void EnggDiffFittingModel::convertFromDistribution(
-    Mantid::API::MatrixWorkspace_sptr inputWS) {
+    const Mantid::API::MatrixWorkspace_sptr &inputWS) {
   auto convertFromDistAlg = Mantid::API::AlgorithmManager::Instance().create(
       "ConvertFromDistribution");
   convertFromDistAlg->initialize();
@@ -374,7 +374,7 @@ void EnggDiffFittingModel::alignDetectors(const std::string &inputWSName,
 }
 
 void EnggDiffFittingModel::alignDetectors(
-    Mantid::API::MatrixWorkspace_sptr inputWS,
+    const Mantid::API::MatrixWorkspace_sptr &inputWS,
     const std::string &outputWSName) {
   const auto calibrationParamsTable = createCalibrationParamsTable(inputWS);
 
@@ -399,7 +399,7 @@ void EnggDiffFittingModel::loadWorkspace(const std::string &filename,
   loadAlg->execute();
 }
 
-void EnggDiffFittingModel::renameWorkspace(API::Workspace_sptr inputWS,
+void EnggDiffFittingModel::renameWorkspace(const API::Workspace_sptr &inputWS,
                                            const std::string &newName) const {
   auto renameAlg = API::AlgorithmManager::Instance().create("RenameWorkspace");
   renameAlg->setProperty("InputWorkspace", inputWS);
@@ -422,8 +422,8 @@ EnggDiffFittingModel::getFocusedWorkspace(const RunLabel &runLabel) const {
 }
 
 void EnggDiffFittingModel::mergeTables(
-    const API::ITableWorkspace_sptr tableToCopy,
-    API::ITableWorkspace_sptr targetTable) const {
+    const API::ITableWorkspace_sptr &tableToCopy,
+    const API::ITableWorkspace_sptr &targetTable) const {
   for (size_t i = 0; i < tableToCopy->rowCount(); ++i) {
     API::TableRow rowToCopy = tableToCopy->getRow(i);
     API::TableRow newRow = targetTable->appendRow();
@@ -526,8 +526,8 @@ std::vector<RunLabel> EnggDiffFittingModel::getRunLabels() const {
   return m_focusedWorkspaceMap.getRunLabels();
 }
 
-size_t
-EnggDiffFittingModel::guessBankID(API::MatrixWorkspace_const_sptr ws) const {
+size_t EnggDiffFittingModel::guessBankID(
+    const API::MatrixWorkspace_const_sptr &ws) const {
   const static std::string bankIDName = "bankid";
   if (ws->run().hasProperty(bankIDName)) {
     const auto log = dynamic_cast<Kernel::PropertyWithValue<int> *>(
@@ -560,7 +560,7 @@ EnggDiffFittingModel::guessBankID(API::MatrixWorkspace_const_sptr ws) const {
 }
 
 std::string EnggDiffFittingModel::createFunctionString(
-    const Mantid::API::ITableWorkspace_sptr fitFunctionParams,
+    const Mantid::API::ITableWorkspace_sptr &fitFunctionParams,
     const size_t row) {
   const auto A0 = fitFunctionParams->cell<double>(row, size_t(1));
   const auto A1 = fitFunctionParams->cell<double>(row, size_t(3));
@@ -582,7 +582,7 @@ std::string EnggDiffFittingModel::createFunctionString(
 }
 
 std::pair<double, double> EnggDiffFittingModel::getStartAndEndXFromFitParams(
-    const Mantid::API::ITableWorkspace_sptr fitFunctionParams,
+    const Mantid::API::ITableWorkspace_sptr &fitFunctionParams,
     const size_t row) {
   const auto X0 = fitFunctionParams->cell<double>(row, size_t(5));
   const auto S = fitFunctionParams->cell<double>(row, size_t(11));

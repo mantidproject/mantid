@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -244,10 +244,9 @@ makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins,
  * @param name :: optional name
  * @return the MDHisto
  */
-MDHistoWorkspace_sptr
-makeFakeMDHistoWorkspaceGeneral(size_t numDims, double signal,
-                                double errorSquared, size_t *numBins,
-                                coord_t *min, coord_t *max, std::string name) {
+MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
+    size_t numDims, double signal, double errorSquared, size_t *numBins,
+    coord_t *min, coord_t *max, const std::string &name) {
   std::vector<std::string> names{"x", "y", "z", "t"};
   // Create MDFrame of General Frame type
   Mantid::Geometry::GeneralFrame frame(
@@ -283,7 +282,7 @@ makeFakeMDHistoWorkspaceGeneral(size_t numDims, double signal,
 MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
     size_t numDims, double signal, double errorSquared, size_t *numBins,
     coord_t *min, coord_t *max, std::vector<std::string> names,
-    std::string name) {
+    const std::string &name) {
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
   // Create MDFrame of General Frame type
   Mantid::Geometry::GeneralFrame frame(
@@ -316,7 +315,7 @@ MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
  */
 Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
     double signal, size_t numDims, const Mantid::Geometry::MDFrame &frame,
-    size_t numBins, coord_t max, double errorSquared, std::string name,
+    size_t numBins, coord_t max, double errorSquared, const std::string &name,
     double numEvents) {
   // MDHistoWorkspace *ws = nullptr;
   MDHistoWorkspace_sptr ws_sptr;
@@ -365,7 +364,7 @@ Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceWithMDFrame(
  * Delete a file from disk
  * @param filename : File name to check and delete
  */
-void checkAndDeleteFile(std::string filename) {
+void checkAndDeleteFile(const std::string &filename) {
   if (!filename.empty()) {
     if (Poco::File(filename).exists()) {
       Poco::File(filename).remove();

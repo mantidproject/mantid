@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods, invalid-name, fixme, unused-argument
 # pylint: disable=R0922e
@@ -48,9 +48,7 @@ Adding to the cache(ADS) is supported for the TubeCalibration file.
 Reading from the cache is supported for all files. This avoids data reloads if the correct file is already in the
 cache.
 """
-from __future__ import (absolute_import, division, print_function)
 from abc import (ABCMeta, abstractmethod)
-from six import with_metaclass
 import os
 from mantid.kernel import config
 from mantid.api import (AnalysisDataService)
@@ -62,7 +60,7 @@ from sans.common.constants import (EMPTY_NAME, SANS_SUFFIX, TRANS_SUFFIX, MONITO
 from sans.common.enums import (SANSFacility, SANSDataType, SANSInstrument)
 from sans.common.general_functions import (create_child_algorithm)
 from sans.common.log_tagger import (set_tag, has_tag, get_tag)
-from sans.state.data import (StateData)
+from sans.state.StateObjects.StateData import (StateData)
 from sans.algorithm_detail.calibration import apply_calibration
 
 
@@ -119,8 +117,8 @@ def is_transmission_type(to_check):
     :param to_check: A SANSDataType object.
     :return: true if the SANSDataType object is a transmission object (transmission or direct) else false.
     """
-    return ((to_check is SANSDataType.SAMPLE_TRANSMISSION) or (to_check is SANSDataType.SAMPLE_DIRECT) or
-            (to_check is SANSDataType.CAN_TRANSMISSION) or (to_check is SANSDataType.CAN_DIRECT))
+    return ((to_check is SANSDataType.SAMPLE_TRANSMISSION) or (to_check is SANSDataType.SAMPLE_DIRECT)
+            or (to_check is SANSDataType.CAN_TRANSMISSION) or (to_check is SANSDataType.CAN_DIRECT))
 
 
 def get_expected_file_tags(file_information, is_transmission, period):
@@ -689,7 +687,7 @@ def load_isis(data_type, file_information, period, use_cached, calibration_file_
 # ----------------------------------------------------------------------------------------------------------------------
 # Load classes
 # ----------------------------------------------------------------------------------------------------------------------
-class SANSLoadData(with_metaclass(ABCMeta, object)):
+class SANSLoadData(metaclass=ABCMeta):
     """ Base class for all SANSLoad implementations."""
     @abstractmethod
     def do_execute(self, data_info, use_cached, publish_to_ads, progress, parent_alg):
@@ -789,7 +787,7 @@ class SANSLoadDataFactory(object):
 #  Corrections for a loaded transmission workspace
 # -------------------------------------------------
 
-class TransmissionCorrection(with_metaclass(ABCMeta, object)):
+class TransmissionCorrection(metaclass=ABCMeta):
     @abstractmethod
     def correct(self, workspaces, parent_alg):
         pass

@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_STRIPVANADIUMPEAKS2_H_
-#define MANTID_ALGORITHMS_STRIPVANADIUMPEAKS2_H_
+#pragma once
 
 #include "MantidAPI/ParallelAlgorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,7 +17,8 @@ namespace Algorithms {
   @author Wenduo Zhou
   @date 2011-10-07
 */
-class DLLExport StripVanadiumPeaks2 : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL StripVanadiumPeaks2
+    : public API::ParallelAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "StripVanadiumPeaks"; }
@@ -47,5 +47,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_STRIPVANADIUMPEAKS2_H_ */

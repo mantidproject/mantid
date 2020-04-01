@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadNexusLogs.h"
 #include "MantidAPI/FileProperty.h"
@@ -549,7 +549,7 @@ void LoadNexusLogs::exec() {
  */
 void LoadNexusLogs::loadVetoPulses(
     ::NeXus::File &file,
-    boost::shared_ptr<API::MatrixWorkspace> workspace) const {
+    const boost::shared_ptr<API::MatrixWorkspace> &workspace) const {
   try {
     file.openGroup("Veto_pulse", "NXgroup");
   } catch (::NeXus::Exception &) {
@@ -583,7 +583,7 @@ void LoadNexusLogs::loadVetoPulses(
 
 void LoadNexusLogs::loadNPeriods(
     ::NeXus::File &file,
-    boost::shared_ptr<API::MatrixWorkspace> workspace) const {
+    const boost::shared_ptr<API::MatrixWorkspace> &workspace) const {
   int value = 1; // Default to 1-period unless
   try {
     file.openGroup("periods", "IXperiods");
@@ -648,7 +648,7 @@ void LoadNexusLogs::loadNPeriods(
 void LoadNexusLogs::loadLogs(
     ::NeXus::File &file, const std::string &entry_name,
     const std::string &entry_class,
-    boost::shared_ptr<API::MatrixWorkspace> workspace) const {
+    const boost::shared_ptr<API::MatrixWorkspace> &workspace) const {
   file.openGroup(entry_name, entry_class);
   std::map<std::string, std::string> entries = file.getEntries();
   std::map<std::string, std::string>::const_iterator iend = entries.end();
@@ -677,7 +677,7 @@ void LoadNexusLogs::loadLogs(
 void LoadNexusLogs::loadNXLog(
     ::NeXus::File &file, const std::string &entry_name,
     const std::string &entry_class,
-    boost::shared_ptr<API::MatrixWorkspace> workspace) const {
+    const boost::shared_ptr<API::MatrixWorkspace> &workspace) const {
   g_log.debug() << "processing " << entry_name << ":" << entry_class << "\n";
 
   file.openGroup(entry_name, entry_class);
@@ -715,7 +715,7 @@ void LoadNexusLogs::loadNXLog(
  */
 void LoadNexusLogs::loadSELog(
     ::NeXus::File &file, const std::string &entry_name,
-    boost::shared_ptr<API::MatrixWorkspace> workspace) const {
+    const boost::shared_ptr<API::MatrixWorkspace> &workspace) const {
   // Open the entry
   file.openGroup(entry_name, "IXseblock");
   std::string propName = entry_name;

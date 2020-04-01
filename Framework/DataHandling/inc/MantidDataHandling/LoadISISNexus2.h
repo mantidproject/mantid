@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LoadISISNexus22_H_
-#define MANTID_DATAHANDLING_LoadISISNexus22_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -16,6 +15,7 @@
 #include "MantidDataHandling/DataBlockComposite.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
 
@@ -129,7 +129,7 @@ private:
   void createPeriodLogs(int64_t period,
                         DataObjects::Workspace2D_sptr &local_workspace);
   // Validate multi-period logs
-  void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
+  void validateMultiPeriodLogs(const Mantid::API::MatrixWorkspace_sptr &);
 
   // build the list of spectra numbers to load and include in the spectra list
   void buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList,
@@ -211,5 +211,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_LoadISISNexus2_H_*/

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_PLOTASYMMETRYBULOGVALUE_H_
-#define MANTID_ALGORITHM_PLOTASYMMETRYBULOGVALUE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -68,7 +67,7 @@ private:
   // Load run, apply dead time corrections and detector grouping
   API::Workspace_sptr doLoad(size_t runNumber);
   // Analyse loaded run
-  void doAnalysis(API::Workspace_sptr loadedWs, size_t index);
+  void doAnalysis(const API::Workspace_sptr &loadedWs, size_t index);
   // Parse run names
   void parseRunNames(std::string &firstFN, std::string &lastFN,
                      std::string &fnBase, std::string &fnExt, int &fnZeros);
@@ -84,10 +83,11 @@ private:
   void groupDetectors(API::Workspace_sptr &loadedWs,
                       API::Workspace_sptr grouping);
   /// Calculate the integral asymmetry for a workspace (single period)
-  void calcIntAsymmetry(API::MatrixWorkspace_sptr ws, double &Y, double &E);
+  void calcIntAsymmetry(const API::MatrixWorkspace_sptr &ws, double &Y,
+                        double &E);
   /// Calculate the integral asymmetry for a workspace (red & green)
-  void calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
-                        API::MatrixWorkspace_sptr ws_green, double &Y,
+  void calcIntAsymmetry(const API::MatrixWorkspace_sptr &ws_red,
+                        const API::MatrixWorkspace_sptr &ws_green, double &Y,
                         double &E);
   /// Group detectors
   void groupDetectors(API::MatrixWorkspace_sptr &ws,
@@ -161,5 +161,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_PLOTASYMMETRYBULOGVALUE_H_*/

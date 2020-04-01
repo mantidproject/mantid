@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_CLONEMDEVENTWORKSPACETEST_H_
-#define MANTID_MDEVENTS_CLONEMDEVENTWORKSPACETEST_H_
+#pragma once
 
 #include "LoadMDTest.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -46,7 +45,7 @@ public:
     do_test(true, "CloneMDWorkspaceTest_ws_custom_cloned_name2.nxs", true);
   }
 
-  void do_test(bool fileBacked, std::string Filename = "",
+  void do_test(bool fileBacked, const std::string &Filename = "",
                bool file_needs_updating = false) {
     // Name of the output workspace.
     std::string outWSName("CloneMDWorkspaceTest_OutputWS");
@@ -118,7 +117,7 @@ public:
   }
 
   /** Clone a workspace and check that the clone matches */
-  void do_test_MDHisto(MDHistoWorkspace_sptr ws1) {
+  void do_test_MDHisto(const MDHistoWorkspace_sptr &ws1) {
     // Name of the output workspace.
     std::string outWSName("CloneMDWorkspaceTest_OutputWS");
     // Add the input workspace
@@ -207,5 +206,3 @@ public:
     do_test_MDHisto(ws1);
   }
 };
-
-#endif /* MANTID_MDEVENTS_CLONEMDEVENTWORKSPACETEST_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_BIN2DPOWDERDIFFRACTIONTEST_H_
-#define MANTID_ALGORITHMS_BIN2DPOWDERDIFFRACTIONTEST_H_
+#pragma once
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -285,7 +284,7 @@ private:
   }
 
   // creates test file with bins description
-  void createBinFile(std::string fname) {
+  void createBinFile(const std::string &fname) {
     std::ofstream binfile;
     binfile.open(fname);
     binfile << "#dp_min #dp_max\n";
@@ -297,5 +296,3 @@ private:
     binfile.close();
   }
 };
-
-#endif /* MANTID_ALGORITHMS_BIN2DPOWDERDIFFRACTIONTEST_H_ */

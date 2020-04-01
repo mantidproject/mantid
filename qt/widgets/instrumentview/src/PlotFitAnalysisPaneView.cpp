@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -15,6 +15,8 @@
 #include <QSpacerItem>
 #include <QSplitter>
 #include <QVBoxLayout>
+#include <utility>
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -60,16 +62,16 @@ QWidget *PlotFitAnalysisPaneView::createFitPane(const double &start,
   m_fitBrowser = new MantidWidgets::FunctionBrowser(this);
   fitPaneLayout->addWidget(m_fitBrowser);
 
-  QLabel *startText = new QLabel("Fit from:");
+  auto *startText = new QLabel("Fit from:");
   m_start = new QLineEdit(QString::number(start));
   auto startValidator = new QDoubleValidator(m_start);
   auto endValidator = new QDoubleValidator(m_start);
   m_start->setValidator(startValidator);
-  QLabel *endText = new QLabel("to:");
+  auto *endText = new QLabel("to:");
   m_end = new QLineEdit(QString::number(end));
   m_end->setValidator(endValidator);
-  QWidget *range = new QWidget();
-  QHBoxLayout *rangeLayout = new QHBoxLayout(range);
+  auto *range = new QWidget();
+  auto *rangeLayout = new QHBoxLayout(range);
   rangeLayout->addWidget(startText);
   rangeLayout->addWidget(m_start);
   rangeLayout->addWidget(endText);
@@ -86,10 +88,10 @@ void PlotFitAnalysisPaneView::doFit() {
   }
 }
 
-void PlotFitAnalysisPaneView::addSpectrum(std::string wsName) {
+void PlotFitAnalysisPaneView::addSpectrum(const std::string &wsName) {
   m_plot->addSpectrum("Extracted Data", wsName.c_str(), 0, Qt::black);
 }
-void PlotFitAnalysisPaneView::addFitSpectrum(std::string wsName) {
+void PlotFitAnalysisPaneView::addFitSpectrum(const std::string &wsName) {
   m_plot->addSpectrum("Fitted Data", wsName.c_str(), 1, Qt::red);
 }
 
@@ -103,12 +105,13 @@ Mantid::API::IFunction_sptr PlotFitAnalysisPaneView::getFunction() {
   return m_fitBrowser->getFunction();
 }
 
-void PlotFitAnalysisPaneView::updateFunction(Mantid::API::IFunction_sptr func) {
+void PlotFitAnalysisPaneView::updateFunction(
+    const Mantid::API::IFunction_sptr &func) {
   m_fitBrowser->updateMultiDatasetParameters(*func);
 }
 
 void PlotFitAnalysisPaneView::addFunction(Mantid::API::IFunction_sptr func) {
-  m_fitBrowser->setFunction(func);
+  m_fitBrowser->setFunction(std::move(func));
 }
 
 void PlotFitAnalysisPaneView::fitWarning(const std::string &message) {

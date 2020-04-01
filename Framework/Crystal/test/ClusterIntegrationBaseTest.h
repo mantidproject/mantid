@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * ClusterIntegrationBaseTest.h
@@ -11,8 +11,7 @@
  *      Author: spu92482
  */
 
-#ifndef CRYSTALTEST_CLUSTERINTEGRATIONBASETEST_H_
-#define CRYSTALTEST_CLUSTERINTEGRATIONBASETEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
@@ -51,9 +50,9 @@ protected:
   }
 
   // Add a fake peak to an MDEventWorkspace
-  void add_fake_md_peak(IMDEventWorkspace_sptr mdws, const size_t &nEvents,
-                        const double &h, const double &k, const double &l,
-                        const double &radius) {
+  void add_fake_md_peak(const IMDEventWorkspace_sptr &mdws,
+                        const size_t &nEvents, const double &h, const double &k,
+                        const double &l, const double &radius) {
     auto fakeMDEventDataAlg =
         AlgorithmManager::Instance().createUnmanaged("FakeMDEventData");
     fakeMDEventDataAlg->setChild(true);
@@ -195,5 +194,3 @@ protected:
 public:
   virtual ~ClusterIntegrationBaseTest() {}
 };
-
-#endif /* CRYSTALTEST_CLUSTERINTEGRATIONBASETEST_H_ */

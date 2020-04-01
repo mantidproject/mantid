@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=F0401
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import Workspace, AnalysisDataService
 from mantid.simpleapi import RenameWorkspace, GroupWorkspaces
 
@@ -41,7 +40,6 @@ class MuonWorkspaceWrapper(object):
         self._workspace = None
         self._directory_structure = ""
         self._workspace_name = ""
-
         if isinstance(workspace, Workspace):
             self.workspace = workspace
         else:

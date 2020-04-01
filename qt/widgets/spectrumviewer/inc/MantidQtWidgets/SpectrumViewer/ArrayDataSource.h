@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ARRAY_DATA_SOURCE_H
-#define ARRAY_DATA_SOURCE_H
+#pragma once
 
 #include "MantidQtWidgets/SpectrumViewer/DataArray.h"
 #include "MantidQtWidgets/SpectrumViewer/SpectrumDataSource.h"
@@ -58,5 +57,3 @@ using ArrayDataSource_const_sptr = boost::shared_ptr<const ArrayDataSource>;
 
 } // namespace SpectrumView
 } // namespace MantidQt
-
-#endif // ARRAY_DATA_SOURCE_H

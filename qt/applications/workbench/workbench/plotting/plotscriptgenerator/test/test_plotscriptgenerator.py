@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
@@ -14,7 +14,7 @@ from matplotlib.axes import Axes
 from matplotlib.legend import Legend
 
 from mantid.plots import MantidAxes
-from mantid.py3compat.mock import Mock, patch
+from unittest.mock import Mock, patch
 from mantid.simpleapi import CreateWorkspace
 from workbench.plotting.plotscriptgenerator import generate_script
 

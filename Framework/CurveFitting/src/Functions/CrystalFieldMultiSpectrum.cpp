@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
@@ -125,10 +125,12 @@ CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
 size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
   if (!m_target) {
     buildTargetFunction();
+
+    if (!m_target) {
+      throw std::runtime_error("Failed to build target function.");
+    }
   }
-  if (!m_target) {
-    throw std::runtime_error("Failed to build target function.");
-  }
+
   return m_target->getNumberDomains();
 }
 

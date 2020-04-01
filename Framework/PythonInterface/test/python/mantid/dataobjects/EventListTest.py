@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, too-many-public-methods
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import numpy as np
 
@@ -15,6 +13,7 @@ from mantid.api import EventType
 from mantid.dataobjects import EventList
 
 gps_epoch_plus_42_nanoseconds = np.datetime64('1990-01-01T00:00:00.000000042Z', 'ns')
+
 
 class EventListTest(unittest.TestCase):
 

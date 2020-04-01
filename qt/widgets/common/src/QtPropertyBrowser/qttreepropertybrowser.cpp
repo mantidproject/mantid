@@ -381,7 +381,7 @@ QSize QtPropertyEditorDelegate::sizeHint(const QStyleOptionViewItem &option,
 
 bool QtPropertyEditorDelegate::eventFilter(QObject *object, QEvent *event) {
   if (event->type() == QEvent::FocusOut) {
-    QFocusEvent *fe = static_cast<QFocusEvent *>(event);
+    auto *fe = static_cast<QFocusEvent *>(event);
     if (fe->reason() == Qt::ActiveWindowFocusReason)
       return false;
   }
@@ -426,7 +426,7 @@ static QIcon drawIndicatorIcon(const QPalette &palette, QStyle *style) {
 void QtTreePropertyBrowserPrivate::init(QWidget *parent,
                                         const QStringList &options,
                                         bool darkTopLevel) {
-  QHBoxLayout *layout = new QHBoxLayout(parent);
+  auto *layout = new QHBoxLayout(parent);
   layout->setMargin(0);
   m_treeWidget = new QtPropertyEditorView(parent, darkTopLevel);
   m_treeWidget->setEditorPrivate(this);
@@ -726,6 +726,14 @@ void QtTreePropertyBrowserPrivate::setColumnSizes(int s0, int s1, int s2) {
       s2 = s1;
     m_treeWidget->header()->resizeSection(2, s2);
   }
+}
+
+void QtTreePropertyBrowserPrivate::hideColumn(int col) {
+  m_treeWidget->header()->hideSection(col);
+}
+
+void QtTreePropertyBrowserPrivate::showColumn(int col) {
+  m_treeWidget->header()->showSection(col);
 }
 
 /**
@@ -1090,6 +1098,10 @@ void QtTreePropertyBrowser::editItem(QtBrowserItem *item) {
 void QtTreePropertyBrowser::setColumnSizes(int s0, int s1, int s2) {
   d_ptr->setColumnSizes(s0, s1, s2);
 }
+
+void QtTreePropertyBrowser::hideColumn(int col) { d_ptr->hideColumn(col); }
+
+void QtTreePropertyBrowser::showColumn(int col) { d_ptr->showColumn(col); }
 
 QTreeWidgetItem *QtTreePropertyBrowser::getItemWidget(QtBrowserItem *item) {
   return d_ptr->getItemWidget(item);

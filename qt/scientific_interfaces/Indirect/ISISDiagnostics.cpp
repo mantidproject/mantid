@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISDiagnostics.h"
 
@@ -39,8 +39,8 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
   m_uiForm.properties->addWidget(m_propTrees["SlicePropTree"]);
 
   // Editor Factories
-  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
-  QtCheckBoxFactory *checkboxFactory = new QtCheckBoxFactory();
+  auto *doubleEditorFactory = new DoubleEditorFactory();
+  auto *checkboxFactory = new QtCheckBoxFactory();
   m_propTrees["SlicePropTree"]->setFactoryForManager(m_dblManager,
                                                      doubleEditorFactory);
   m_propTrees["SlicePropTree"]->setFactoryForManager(m_blnManager,
@@ -561,8 +561,8 @@ void ISISDiagnostics::setSaveEnabled(bool enabled) {
 
 void ISISDiagnostics::updateRunButton(bool enabled,
                                       std::string const &enableOutputButtons,
-                                      QString const message,
-                                      QString const tooltip) {
+                                      QString const &message,
+                                      QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexusGeometry/InstrumentBuilder.h"
 #include "MantidGeometry/Instrument.h"
@@ -14,6 +14,7 @@
 
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 #include <boost/make_shared.hpp>
+#include <utility>
 
 namespace Mantid {
 namespace NexusGeometry {
@@ -56,7 +57,7 @@ InstrumentBuilder::addComponent(const std::string &compName,
 */
 void InstrumentBuilder::addTubes(
     const std::string &bankName, const std::vector<detail::TubeBuilder> &tubes,
-    boost::shared_ptr<const Mantid::Geometry::IObject> pixelShape) {
+    const boost::shared_ptr<const Mantid::Geometry::IObject> &pixelShape) {
   for (size_t i = 0; i < tubes.size(); i++)
     doAddTube(bankName + "_tube_" + std::to_string(i), tubes[i], pixelShape);
 }
@@ -68,7 +69,7 @@ void InstrumentBuilder::addTubes(
 */
 void InstrumentBuilder::doAddTube(
     const std::string &compName, const detail::TubeBuilder &tube,
-    boost::shared_ptr<const Mantid::Geometry::IObject> pixelShape) {
+    const boost::shared_ptr<const Mantid::Geometry::IObject> &pixelShape) {
   auto *objComp(new Geometry::ObjCompAssembly(compName));
   const auto &pos = tube.tubePosition();
   objComp->setPos(pos(0), pos(1), pos(2));
@@ -98,7 +99,7 @@ void InstrumentBuilder::addDetectorToLastBank(
   detector->translate(Mantid::Kernel::toV3D(relativeOffset));
   // No rotation set for detector pixels of a bank. This is not possible in the
   // Nexus Geometry specification.
-  detector->setShape(shape);
+  detector->setShape(std::move(shape));
   m_lastBank->add(detector);
   m_instrument->markAsDetectorIncomplete(detector);
 }

@@ -1,15 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from abc import ABCMeta, abstractmethod
 from qtpy import QtGui, QtCore, QtWidgets
-from six import with_metaclass
-
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import messagedisplay
 
@@ -28,7 +24,7 @@ Ui_BeamCentre, _ = load_ui(__file__, "beam_centre.ui")
 
 
 class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
-    class BeamCentreListener(with_metaclass(ABCMeta, object)):
+    class BeamCentreListener(metaclass=ABCMeta):
         """
         Defines the elements which a presenter can listen to for the beam centre finder
         """
@@ -112,20 +108,14 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         self.instrument = instrument
         component_list = get_detector_strings_for_gui(self.instrument)
         self.set_component_options(component_list)
-        self.lab_centre_label.setText('Centre Position {}'.format(component_list[0]))
-        self.update_lab_check_box.setText('Update {}'.format(component_list[0]))
         if len(component_list) < 2:
             self.hab_pos_1_line_edit.setEnabled(False)
             self.hab_pos_2_line_edit.setEnabled(False)
             self.update_hab_check_box.setEnabled(False)
-            self.hab_centre_label.setText('Centre Position HAB')
-            self.update_hab_check_box.setText('Update HAB')
         else:
             self.hab_pos_1_line_edit.setEnabled(True)
             self.hab_pos_2_line_edit.setEnabled(True)
             self.update_hab_check_box.setEnabled(True)
-            self.hab_centre_label.setText('Centre Position {}'.format(component_list[1]))
-            self.update_hab_check_box.setText('Update {}'.format(component_list[1]))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Actions

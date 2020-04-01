@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADLOGTEST_H_
-#define LOADLOGTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -174,8 +173,8 @@ public:
     TS_ASSERT(ws->run().hasProperty("str3"));
   }
 
-  void do_test_SNSTextFile(std::string names, std::string units, bool willFail,
-                           bool createWorkspace = true,
+  void do_test_SNSTextFile(const std::string &names, const std::string &units,
+                           bool willFail, bool createWorkspace = true,
                            std::string expectedLastUnit = "Furlongs") {
     // Create an empty workspace and put it in the AnalysisDataService
 
@@ -314,5 +313,3 @@ private:
   std::string outputSpace;
   std::string inputSpace;
 };
-
-#endif /*LOADLOGTEST_H_*/

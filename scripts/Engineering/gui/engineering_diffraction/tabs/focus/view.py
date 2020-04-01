@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
 from qtpy import QtWidgets, QtCore
 
 from mantidqt.utils.qt import load_ui
@@ -23,6 +21,7 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
 
         self.finder_focus.setLabelText("Sample Run #")
         self.finder_focus.setInstrumentOverride(instrument)
+        self.finder_focus.allowMultipleFiles(True)
 
     # =================
     # Slot Connectors
@@ -57,8 +56,8 @@ class FocusView(QtWidgets.QWidget, Ui_focus):
     # Component Getters
     # =================
 
-    def get_focus_filename(self):
-        return self.finder_focus.getFirstFilename()
+    def get_focus_filenames(self):
+        return self.finder_focus.getFilenames()
 
     def get_focus_valid(self):
         return self.finder_focus.isValid()

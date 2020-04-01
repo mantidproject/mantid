@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MCABSORPTIONSTRATEGY_H_
-#define MANTID_ALGORITHMS_MCABSORPTIONSTRATEGY_H_
+#pragma once
 
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAlgorithms/DllConfig.h"
@@ -48,7 +47,8 @@ public:
                        Kernel::Logger &logger);
   void calculate(Kernel::PseudoRandomNumberGenerator &rng,
                  const Kernel::V3D &finalPos,
-                 Mantid::HistogramData::Points lambdas, double lambdaFixed,
+                 const Mantid::HistogramData::Points &lambdas,
+                 double lambdaFixed,
                  Mantid::API::ISpectrum &attenuationFactorsSpectrum);
 
 private:
@@ -66,5 +66,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_MCABSORPTIONSTRATEGY_H_ */

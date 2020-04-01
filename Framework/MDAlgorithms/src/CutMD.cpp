@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/CutMD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -31,7 +31,7 @@ namespace {
 // Typedef to simplify function signatures
 using MinMax = std::pair<double, double>;
 
-MinMax getDimensionExtents(IMDEventWorkspace_sptr ws, size_t index) {
+MinMax getDimensionExtents(const IMDEventWorkspace_sptr &ws, size_t index) {
   if (!ws)
     throw std::runtime_error(
         "Invalid workspace passed to getDimensionExtents.");
@@ -50,7 +50,7 @@ std::string numToStringWithPrecision(const double num) {
 DblMatrix scaleProjection(const DblMatrix &inMatrix,
                           const std::vector<std::string> &inUnits,
                           std::vector<std::string> &outUnits,
-                          IMDEventWorkspace_sptr inWS) {
+                          const IMDEventWorkspace_sptr &inWS) {
   DblMatrix ret(inMatrix);
   // Check if we actually need to do anything
   if (std::equal(inUnits.begin(), inUnits.end(), outUnits.begin()))
@@ -209,7 +209,7 @@ Determine the original q units. Assumes first 3 dimensions by index are r,l,d
 @param logger : logging object
 @return vector of markers
 */
-std::vector<std::string> findOriginalQUnits(IMDWorkspace_const_sptr inws,
+std::vector<std::string> findOriginalQUnits(const IMDWorkspace_const_sptr &inws,
                                             Mantid::Kernel::Logger &logger) {
   std::vector<std::string> unitMarkers(3);
   for (size_t i = 0; i < inws->getNumDims() && i < 3; ++i) {

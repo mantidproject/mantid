@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
@@ -29,7 +28,10 @@ AlgorithmProgressWidget::AlgorithmProgressWidget(QWidget *parent)
           &AlgorithmProgressWidget::showDetailsDialog);
 }
 
-void AlgorithmProgressWidget::algorithmStarted() {}
+void AlgorithmProgressWidget::algorithmStarted() {
+  // remove the word idle as we are doing something now
+  m_progressBar->setFormat("Running ...");
+}
 
 void AlgorithmProgressWidget::algorithmEnded() {
   m_progressBar->setValue(0);

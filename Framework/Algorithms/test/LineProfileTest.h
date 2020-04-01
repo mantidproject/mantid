@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_LINEPROFILETEST_H_
-#define MANTID_ALGORITHMS_LINEPROFILETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -569,9 +568,9 @@ public:
     TS_ASSERT_EQUALS(axis->getMax(), edges.back())
     const auto binHeight = axis->getMax() - axis->getMin();
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
-    const auto &Xs = outputWS->x(0);
+    // cppcheck-suppress unreadVariable
     const std::vector<double> profilePoints{{1., 2., 3., 4.}};
-    TS_ASSERT_EQUALS(Xs.rawData(), profilePoints)
+    TS_ASSERT_EQUALS(outputWS->x(0).rawData(), profilePoints)
     const auto &Ys = outputWS->y(0);
     const auto horizontalIntegral = (3. * 0.1 + 2. * 1. + 1. * 10.) / binHeight;
     for (const auto y : Ys) {
@@ -585,9 +584,9 @@ public:
   }
 
 private:
-  MatrixWorkspace_sptr profileOverTwoSpectra(MatrixWorkspace_sptr inputWS,
-                                             const int start, const int end,
-                                             const std::string &mode) {
+  MatrixWorkspace_sptr
+  profileOverTwoSpectra(const MatrixWorkspace_sptr &inputWS, const int start,
+                        const int end, const std::string &mode) {
     LineProfile alg;
     // Don't put output in ADS by default
     alg.setChild(true);
@@ -610,5 +609,3 @@ private:
     return outputWS;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_LINEPROFILETEST_H_ */

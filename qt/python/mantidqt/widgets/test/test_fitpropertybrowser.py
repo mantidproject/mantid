@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
@@ -10,10 +10,11 @@ import unittest
 
 import matplotlib
 matplotlib.use('AGG')  # noqa
+from numpy import zeros
 
 from mantid.api import AnalysisDataService, WorkspaceFactory
-from mantid.py3compat.mock import MagicMock, Mock, patch
-from mantid.simpleapi import CreateSampleWorkspace
+from unittest.mock import MagicMock, Mock, patch
+from mantid.simpleapi import CreateSampleWorkspace, CreateWorkspace
 from mantidqt.plotting.functions import plot
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.fitpropertybrowser.fitpropertybrowser import FitPropertyBrowser
@@ -32,8 +33,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
     def test_initialization_does_not_raise(self):
         assertRaisesNothing(self, self._create_widget)
 
-    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.normaliseData'
-           )
+    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.normaliseData')
     def test_normalise_data_set_on_fit_menu_shown(self, normaliseData_mock):
         for normalised in [True, False]:
             ws_artist_mock = Mock(is_normalized=normalised, workspace_index=0)
@@ -44,6 +44,14 @@ class FitPropertyBrowserTest(unittest.TestCase):
                     property_browser.getFitMenu().aboutToShow.emit()
             property_browser.normaliseData.assert_called_once_with(normalised)
             normaliseData_mock.reset_mock()
+
+    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.normaliseData')
+    def test_normalise_data_set_to_false_for_distribution_workspace(self, normaliseData_mock):
+        fig, canvas = self._create_and_plot_matrix_workspace('ws_name', distribution=True)
+        property_browser = self._create_widget(canvas=canvas)
+        with patch.object(property_browser, 'workspaceName', lambda: 'ws_name'):
+            property_browser.getFitMenu().aboutToShow.emit()
+        property_browser.normaliseData.assert_called_once_with(False)
 
     def test_plot_guess_plots_for_table_workspaces(self):
         table = WorkspaceFactory.createTable()
@@ -226,9 +234,9 @@ class FitPropertyBrowserTest(unittest.TestCase):
     def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):
         return FitPropertyBrowser(canvas, toolbar_manager)
 
-    def _create_and_plot_matrix_workspace(self, name = "workspace"):
-        ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=2, YLength=5, XLength=5)
-        AnalysisDataService.Instance().addOrReplace(name, ws)
+    def _create_and_plot_matrix_workspace(self, name = "workspace", distribution = False):
+        ws = CreateWorkspace(OutputWorkspace = name, DataX=zeros(10), DataY=zeros(10),
+                             NSpec=2, Distribution=distribution)
         fig = plot([ws], spectrum_nums=[1])
         canvas = fig.canvas
         return fig, canvas

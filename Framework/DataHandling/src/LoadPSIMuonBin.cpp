@@ -1,8 +1,9 @@
 
+// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//     NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadPSIMuonBin.h"
 #include "MantidAPI/Algorithm.h"
@@ -10,6 +11,9 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
@@ -107,10 +111,12 @@ void LoadPSIMuonBin::init() {
   declareProperty("TimeZero", 0.0, "The TimeZero of the OutputWorkspace",
                   Kernel::Direction::Output);
 
-  declareProperty("DataDeadTimeTable", 0,
-                  "This property should not be set and is present to work with "
-                  "the Muon GUI preprocessor.",
-                  Kernel::Direction::Output);
+  declareProperty(
+      std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
+          "DeadTimeTable", "", Mantid::Kernel::Direction::Output,
+          Mantid::API::PropertyMode::Optional),
+      "This property should only be set in the GUI and is present to work with "
+      "the Muon GUI preprocessor.");
 
   declareProperty("MainFieldDirection", 0,
                   "The field direction of the magnetic field on the instrument",
@@ -166,12 +172,11 @@ void LoadPSIMuonBin::exec() {
   // Set up for the Muon PreProcessor
   setProperty("OutputWorkspace", outputWorkspace);
 
+  // create empty dead time table
+  makeDeadTimeTable(m_histograms.size());
+
   auto largestBinValue =
       outputWorkspace->x(0)[outputWorkspace->x(0).size() - 1];
-
-  auto firstGoodDataSpecIndex = static_cast<int>(
-      *std::max_element(m_header.firstGood, m_header.firstGood + 16));
-  setProperty("FirstGoodData", outputWorkspace->x(0)[firstGoodDataSpecIndex]);
 
   // Since the arrray is all 0s before adding them this can't get min
   // element so just get first element
@@ -189,16 +194,48 @@ void LoadPSIMuonBin::exec() {
 
   // If timeZero is bigger than the largest bin assume it refers to a bin's
   // value
+  double absTimeZero = timeZero;
   if (timeZero > largestBinValue) {
-    setProperty("TimeZero",
-                outputWorkspace->x(0)[static_cast<int>(std::floor(timeZero))]);
-  } else {
-    setProperty("TimeZero", timeZero);
+    absTimeZero = outputWorkspace->x(0)[static_cast<int>(std::floor(timeZero))];
+  }
+  setProperty("TimeZero", absTimeZero);
+
+  auto firstGoodDataSpecIndex = static_cast<int>(
+      *std::max_element(m_header.firstGood, m_header.firstGood + 16));
+
+  setProperty("FirstGoodData", outputWorkspace->x(0)[firstGoodDataSpecIndex]);
+
+  // Time zero is when the pulse starts.
+  // The pulse should be at t=0 to be like ISIS data
+  // manually offset the data
+  for (auto specNum = 0u; specNum < m_histograms.size(); ++specNum) {
+    auto &xData = outputWorkspace->mutableX(specNum);
+    for (auto &xValue : xData) {
+      xValue -= absTimeZero;
+    }
   }
 }
 
-std::string LoadPSIMuonBin::getFormattedDateTime(std::string date,
-                                                 std::string time) {
+void LoadPSIMuonBin::makeDeadTimeTable(const size_t &numSpec) {
+  if (getPropertyValue("DeadTimeTable").empty())
+    return;
+  Mantid::DataObjects::TableWorkspace_sptr deadTimeTable =
+      boost::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+          Mantid::API::WorkspaceFactory::Instance().createTable(
+              "TableWorkspace"));
+  assert(deadTimeTable);
+  deadTimeTable->addColumn("int", "spectrum");
+  deadTimeTable->addColumn("double", "dead-time");
+
+  for (size_t i = 0; i < numSpec; i++) {
+    Mantid::API::TableRow row = deadTimeTable->appendRow();
+    row << static_cast<int>(i) + 1 << 0.0;
+  }
+  setProperty("DeadTimeTable", deadTimeTable);
+}
+
+std::string LoadPSIMuonBin::getFormattedDateTime(const std::string &date,
+                                                 const std::string &time) {
   std::string year;
   if (date.size() == 11) {
     year = date.substr(7, 4);
@@ -481,8 +518,8 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     g_log.warning("The date in the .bin file was invalid");
   }
 
-  addToSampleLog("run_end", startDate, outputWorkspace);
-  addToSampleLog("run_start", endDate, outputWorkspace);
+  addToSampleLog("run_end", endDate, outputWorkspace);
+  addToSampleLog("run_start", startDate, outputWorkspace);
 
   // Assume unit is at the end of the temperature
   boost::trim_right(m_header.temp);
@@ -552,8 +589,16 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   for (auto i = 0u; i < sizeOfLabels; ++i) {
     if (m_header.labelsOfHistograms[i] == "")
       break;
-    addToSampleLog("Label Spectra " + std::to_string(i),
-                   m_header.labelsOfHistograms[i], outputWorkspace);
+    std::string name = m_header.labelsOfHistograms[i];
+    // if empty name is present (i.e. just empty space)
+    // replace with default name:
+    // group_specNum
+    const bool isSpace = name.find_first_not_of(" ") == std::string::npos;
+    std::string label = isSpace ? "group_" + std::to_string(i + 1)
+                                : m_header.labelsOfHistograms[i];
+
+    addToSampleLog("Label Spectra " + std::to_string(i), std::move(label),
+                   outputWorkspace);
   }
 
   addToSampleLog("Orientation", m_header.orientation, outputWorkspace);

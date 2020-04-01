@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVENEXUSPROCESSEDTEST_H_
-#define SAVENEXUSPROCESSEDTEST_H_
+#pragma once
 
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
@@ -229,7 +228,7 @@ public:
    * @return
    */
   static EventWorkspace_sptr
-  do_testExec_EventWorkspaces(std::string filename_root, EventType type,
+  do_testExec_EventWorkspaces(const std::string &filename_root, EventType type,
                               std::string &outputFile, bool makeDifferentTypes,
                               bool clearfiles, bool PreserveEvents = true,
                               bool CompressNexus = false) {
@@ -1087,4 +1086,3 @@ private:
   std::string outputSpace;
   bool clearfiles;
 };
-#endif /*SAVENEXUSPROCESSEDTEST_H_*/

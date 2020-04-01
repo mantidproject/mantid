@@ -1,16 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
-from mantid.py3compat import mock
-from mantid.py3compat.mock import patch, MagicMock
+from unittest import mock
+from unittest.mock import patch, MagicMock
 from Engineering.gui.engineering_diffraction.tabs.focus import model, view, presenter
 from Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 
@@ -30,7 +27,7 @@ class FocusPresenterTest(unittest.TestCase):
         self.presenter.current_calibration = CalibrationInfo(vanadium_path="Fake/Path",
                                                              sample_path="Fake/Path",
                                                              instrument="ENGINX")
-        self.view.get_focus_filename.return_value = "305738"
+        self.view.get_focus_filenames.return_value = "305738"
         self.presenter.cropping_widget.get_bank.return_value = "2"
         self.presenter.cropping_widget.is_custom.return_value = False
         self.view.get_plot_output.return_value = True
@@ -46,7 +43,7 @@ class FocusPresenterTest(unittest.TestCase):
         self.presenter.current_calibration = CalibrationInfo(vanadium_path="Fake/Path",
                                                              sample_path="Fake/Path",
                                                              instrument="ENGINX")
-        self.view.get_focus_filename.return_value = "305738"
+        self.view.get_focus_filenames.return_value = "305738"
         self.presenter.cropping_widget.get_custom_spectra.return_value = "2-45"
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False

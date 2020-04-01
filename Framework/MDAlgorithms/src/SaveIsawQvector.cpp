@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SaveIsawQvector.h"
 
@@ -194,7 +194,7 @@ void SaveIsawQvector::exec() {
  *
  * @param wksp The workspace to get information from.
  */
-void SaveIsawQvector::initTargetWSDescr(EventWorkspace_sptr wksp) {
+void SaveIsawQvector::initTargetWSDescr(const EventWorkspace_sptr &wksp) {
   m_targWSDescr.setMinMax(std::vector<double>(3, -2000.),
                           std::vector<double>(3, 2000.));
   m_targWSDescr.buildFromMatrixWS(wksp, Q3D, ELASTIC);

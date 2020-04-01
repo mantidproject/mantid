@@ -15,7 +15,6 @@ add_subdirectory(Muon)
 add_subdirectory(ISISSANS)
 add_subdirectory(ISISReflectometry)
 add_subdirectory(Indirect)
-add_subdirectory(EnggDiffraction)
 add_subdirectory(DynamicPDF)
 
 # Testing - These should be split out by library
@@ -26,21 +25,12 @@ set(TEST_FILES
     test/ALCLatestFileFinderTest.h
     test/ALCPeakFittingModelTest.h
     test/ALCPeakFittingPresenterTest.h
-    test/EnggDiffGSASFittingModelTest.h
-    test/EnggDiffGSASFittingPresenterTest.h
-    test/EnggDiffMultiRunFittingWidgetModelTest.h
-    test/EnggDiffMultiRunFittingWidgetPresenterTest.h
-    test/EnggDiffFittingModelTest.h
-    test/EnggDiffFittingPresenterTest.h
-    test/EnggDiffractionPresenterTest.h
-    test/EnggVanadiumCorrectionsModelTest.h
     test/IO_MuonGroupingTest.h
     test/MuonAnalysisDataLoaderTest.h
     test/MuonAnalysisFitDataPresenterTest.h
     test/MuonAnalysisFitFunctionPresenterTest.h
     test/MuonAnalysisHelperTest.h
     test/MuonAnalysisResultTableCreatorTest.h
-    test/RunMapTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerProcessingTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerProgressBarTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerWorkspacesTest.h
@@ -76,6 +66,11 @@ set(TEST_FILES
     test/ISISReflectometry/Common/EncoderTest.h
 )
 
+set(CXXTEST_EXTRA_HEADER_INCLUDE
+    ${CMAKE_CURRENT_LIST_DIR}/test/ScientificInterfacesTestInitialization.h)
+
+find_package(BoostPython REQUIRED)
+
 mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                  QT_VERSION 4
                  SRC ${TEST_FILES}
@@ -83,6 +78,7 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ../../Framework/DataObjects/inc
                    ../../Framework/TestHelpers/inc
                    inc
+                   ${PYTHON_INCLUDE_PATH}
                  TEST_HELPER_SRCS
                    ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
                    ../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
@@ -95,8 +91,9 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ${TCMALLOC_LIBRARIES_LINKTIME}
                    ${CORE_MANTIDLIBS}
                    DataObjects
-                   ${GMOCK_LIBRARIES}
-                   ${GTEST_LIBRARIES}
+                   PythonInterfaceCore
+                   ${PYTHON_LIBRARIES}
+                   gmock
                    ${POCO_LIBRARIES}
                    ${Boost_LIBRARIES}
                  QT4_LINK_LIBS
@@ -106,7 +103,6 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    MantidScientificInterfacesDirect
                    MantidScientificInterfacesMuon
                    MantidScientificInterfacesISISReflectometry
-                   MantidScientificInterfacesEnggDiffraction
                    MantidScientificInterfacesMultiDatasetFit
                    MantidQtWidgetsCommon
                  PARENT_DEPENDENCIES
@@ -140,8 +136,6 @@ set(QT5_TEST_FILES
     test/ISISReflectometry/Common/EncoderTest.h
 )
 
-find_package(BoostPython REQUIRED)
-
 mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                  QT_VERSION 5
                  SRC ${QT5_TEST_FILES}
@@ -160,8 +154,7 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ${CORE_MANTIDLIBS}
                    DataObjects
                    PythonInterfaceCore
-                   ${GMOCK_LIBRARIES}
-                   ${GTEST_LIBRARIES}
+                   gmock
                    ${POCO_LIBRARIES}
                    ${Boost_LIBRARIES}
                    ${PYTHON_LIBRARIES}

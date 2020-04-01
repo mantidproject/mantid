@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSER_H_
-#define MANTID_ALGORITHMS_MONITOREFFICIENCYCORUSER_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -19,7 +19,7 @@ class HistogramE;
 } // namespace HistogramData
 namespace Algorithms {
 
-class DLLExport MonitorEfficiencyCorUser : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MonitorEfficiencyCorUser : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override { return "MonitorEfficiencyCorUser"; }
@@ -61,5 +61,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MONITOREFFICIENCYCORUSER_H_*/

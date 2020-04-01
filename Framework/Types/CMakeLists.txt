@@ -37,7 +37,7 @@ target_include_directories(Types SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 
 # Auto-generate exports header
 target_include_directories(Types PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
-generate_mantid_export_header(Types)
+generate_mantid_export_header(Types FALSE)
 
 # Installation settings
 mtd_install_targets(TARGETS Types INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

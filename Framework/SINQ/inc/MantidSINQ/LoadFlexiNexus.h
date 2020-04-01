@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
  * This is a flexible NeXus file loader. It takes as input a filename
@@ -24,8 +24,7 @@
  *
  */
 
-#ifndef FLEXINEXUSLOADER_H_
-#define FLEXINEXUSLOADER_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidSINQ/DllConfig.h"
@@ -65,7 +64,7 @@ private:
   // A dictionary
   std::map<std::string, std::string> dictionary;
 
-  void loadDictionary(std::string dictionaryFile);
+  void loadDictionary(const std::string &dictionaryFile);
 
   void load2DWorkspace(NeXus::File *fin);
 
@@ -81,12 +80,10 @@ private:
 
   std::unordered_set<std::string> populateSpecialMap();
 
-  void addMetaData(NeXus::File *fin, Mantid::API::Workspace_sptr ws,
-                   Mantid::API::ExperimentInfo_sptr info);
+  void addMetaData(NeXus::File *fin, const Mantid::API::Workspace_sptr &ws,
+                   const Mantid::API::ExperimentInfo_sptr &info);
 
-  int safeOpenpath(NeXus::File *fin, std::string path);
+  int safeOpenpath(NeXus::File *fin, const std::string &path);
   int calculateCAddress(int *pos, int *dim, int rank);
   int calculateF77Address(int *pos, int rank);
 };
-
-#endif /*FLEXINEXUSLOADER_H_*/

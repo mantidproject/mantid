@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADIDFFROMNEXUS_H_
-#define MANTID_DATAHANDLING_LOADIDFFROMNEXUS_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -60,7 +59,7 @@ public:
   /// Load the parameters from Nexus file if possible, else from parameter file,
   /// into workspace
   void LoadParameters(::NeXus::File *nxfile,
-                      const API::MatrixWorkspace_sptr localWorkspace);
+                      const API::MatrixWorkspace_sptr &localWorkspace);
 
   /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 1; }
@@ -78,10 +77,8 @@ private:
   /// Load Parameter File specified by full pathname into given workspace,
   /// return success
   bool loadParameterFile(const std::string &fullPathName,
-                         const API::MatrixWorkspace_sptr localWorkspace);
+                         const API::MatrixWorkspace_sptr &localWorkspace);
 };
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_LOADIDFFROMNEXUS_H_*/

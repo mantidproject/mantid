@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GetDetOffsetsMultiPeaksTEST_H_
-#define GetDetOffsetsMultiPeaksTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -431,7 +430,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate noisy data in a workspace
    */
-  void generateNoisyData(MatrixWorkspace_sptr WS) {
+  void generateNoisyData(const MatrixWorkspace_sptr &WS) {
 
     auto &Y = WS->mutableY(0);
     Y.assign(Y.size(), static_cast<double>(rand() % 5));
@@ -495,5 +494,3 @@ public:
     TS_ASSERT_DELTA(output->mutableY(0)[0], -0.00196, 0.0002);
   }
 };
-
-#endif /*GetDetOffsetsMultiPeaksTEST_H_*/

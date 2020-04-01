@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import math
 
 from mantid.kernel import *
@@ -364,7 +363,7 @@ class EnggCalibrateFull(PythonAlgorithm):
         self.log().notice("Applying calibration on the input workspace")
         alg = self.createChildAlgorithm('ApplyCalibration')
         alg.setProperty('Workspace', ws)
-        alg.setProperty('PositionTable', detPos)
+        alg.setProperty('CalibrationTable', detPos)
         alg.execute()
 
     def _V3D_from_spherical(self, R, polar, azimuth):

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SOLIDANGLETEST_H_
-#define SOLIDANGLETEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -214,7 +213,7 @@ public:
     auto spectrumInfo2 = output2D_2->spectrumInfo();
     for (size_t i = 0; i < numberOfSpectra1; i++) {
       // all values after the start point of the second workspace should match
-      if (!(spectrumInfo2.isMasked(i) || spectrumInfo2.isMasked(i))) {
+      if (!(spectrumInfo1.isMasked(i) || spectrumInfo2.isMasked(i))) {
         TS_ASSERT_EQUALS(output2D_1->y(i)[0], output2D_2->y(i)[0]);
       }
     }
@@ -248,5 +247,3 @@ private:
   SolidAngle m_testee;
   CreateSampleWorkspace m_creator;
 };
-
-#endif /*SOLIDANGLETEST_H_*/

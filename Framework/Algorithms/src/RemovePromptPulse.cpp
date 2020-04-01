@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RemovePromptPulse.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -68,7 +68,8 @@ double getMedian(const API::Run &run, const std::string &name) {
   return stats.median;
 }
 
-void getTofRange(MatrixWorkspace_const_sptr wksp, double &tmin, double &tmax) {
+void getTofRange(const MatrixWorkspace_const_sptr &wksp, double &tmin,
+                 double &tmax) {
   DataObjects::EventWorkspace_const_sptr eventWksp =
       boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp);
   if (eventWksp == nullptr) {

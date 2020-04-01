@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef INTERPOLATION_H
-#define INTERPOLATION_H
+#pragma once
 
 #include "Filter.h"
 
@@ -57,5 +56,3 @@ private:
   //! the interpolation method
   int d_method;
 };
-
-#endif

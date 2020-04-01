@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADNEXUSPROCESSEDTEST_H_
-#define LOADNEXUSPROCESSEDTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -1111,7 +1110,7 @@ public:
   }
 
 private:
-  void doHistoryTest(MatrixWorkspace_sptr matrix_ws) {
+  void doHistoryTest(const MatrixWorkspace_sptr &matrix_ws) {
     const WorkspaceHistory history = matrix_ws->getHistory();
     int nalgs = static_cast<int>(history.size());
     TS_ASSERT_EQUALS(nalgs, 4);
@@ -1202,7 +1201,7 @@ private:
    * be present
    */
   void doSpectrumListTests(LoadNexusProcessed &alg,
-                           const std::vector<int> expectedSpectra) {
+                           const std::vector<int> &expectedSpectra) {
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -1461,5 +1460,3 @@ public:
     TS_ASSERT(loader.execute());
   }
 };
-
-#endif /*LOADNEXUSPROCESSEDTESTRAW_H_*/

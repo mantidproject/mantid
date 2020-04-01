@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAK_REPRESENTATION_H
-#define MANTID_SLICEVIEWER_PEAK_REPRESENTATION_H
+#pragma once
 
 #include "MantidDataObjects/AffineMatrixParameter.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
@@ -76,5 +75,3 @@ using PeakRepresentation_sptr = std::shared_ptr<PeakRepresentation>;
 using VecPeakRepresentation = std::vector<PeakRepresentation_sptr>;
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif

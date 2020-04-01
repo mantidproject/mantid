@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <sstream>
 
@@ -296,8 +296,9 @@ void BoxController::clearFileBacked() {
  *@param fileName  -- if newFileIO comes without opened file, this is the file
  *name to open for the file based IO operations
  */
-void BoxController::setFileBacked(boost::shared_ptr<IBoxControllerIO> newFileIO,
-                                  const std::string &fileName) {
+void BoxController::setFileBacked(
+    const boost::shared_ptr<IBoxControllerIO> &newFileIO,
+    const std::string &fileName) {
   if (!newFileIO->isOpened())
     newFileIO->openFile(fileName, "w");
 

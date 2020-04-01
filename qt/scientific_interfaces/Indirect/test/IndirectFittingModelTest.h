@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDIRECTFITTINGMODELTEST_H_
-#define MANTID_INDIRECTFITTINGMODELTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 #include "IndirectFittingModelLegacy.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -107,7 +108,7 @@ void setFittingFunction(std::unique_ptr<DummyModel> &model,
   model->setFitFunction(getFunction(functionString));
 }
 
-IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
+IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
                                   std::string const &functionString) {
   auto alg = boost::make_shared<ConvolutionFitSequential>();
   alg->initialize();
@@ -126,7 +127,7 @@ IAlgorithm_sptr setupFitAlgorithm(MatrixWorkspace_sptr workspace,
 }
 
 IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<DummyModel> &model,
-                                     MatrixWorkspace_sptr workspace,
+                                     const MatrixWorkspace_sptr &workspace,
                                      std::string const &workspaceName) {
   std::string const function =
       "name=LinearBackground,A0=0,A1=0,ties=(A0=0.000000,A1=0.0);"
@@ -137,14 +138,15 @@ IAlgorithm_sptr getSetupFitAlgorithm(std::unique_ptr<DummyModel> &model,
       "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
       "0175)))";
   setFittingFunction(model, function);
-  auto alg = setupFitAlgorithm(workspace, function);
+  auto alg = setupFitAlgorithm(std::move(workspace), function);
   return alg;
 }
 
 IAlgorithm_sptr getExecutedFitAlgorithm(std::unique_ptr<DummyModel> &model,
                                         MatrixWorkspace_sptr workspace,
                                         std::string const &workspaceName) {
-  auto const alg = getSetupFitAlgorithm(model, workspace, workspaceName);
+  auto const alg =
+      getSetupFitAlgorithm(model, std::move(workspace), workspaceName);
   alg->execute();
   return alg;
 }
@@ -749,5 +751,3 @@ public:
     TS_ASSERT(!ads.doesExist("__ConvolutionFitSequential_ws1"));
   }
 };
-
-#endif // MANTID_INDIRECTFITTINGMODELTEST_H

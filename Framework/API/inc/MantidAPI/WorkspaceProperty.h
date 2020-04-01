@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_WORKSPACEPROPERTY_H_
-#define MANTID_API_WORKSPACEPROPERTY_H_
+#pragma once
 
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/Logger.h"
@@ -60,20 +59,20 @@ public:
   explicit WorkspaceProperty(
       const std::string &name, const std::string &wsName,
       const unsigned int direction,
-      Kernel::IValidator_sptr validator =
+      const Kernel::IValidator_sptr &validator =
           Kernel::IValidator_sptr(new Kernel::NullValidator));
 
   explicit WorkspaceProperty(
       const std::string &name, const std::string &wsName,
       const unsigned int direction, const PropertyMode::Type optional,
-      Kernel::IValidator_sptr validator =
+      const Kernel::IValidator_sptr &validator =
           Kernel::IValidator_sptr(new Kernel::NullValidator));
 
   explicit WorkspaceProperty(
       const std::string &name, const std::string &wsName,
       const unsigned int direction, const PropertyMode::Type optional,
       const LockMode::Type locking,
-      Kernel::IValidator_sptr validator =
+      const Kernel::IValidator_sptr &validator =
           Kernel::IValidator_sptr(new Kernel::NullValidator));
 
   WorkspaceProperty(const WorkspaceProperty &right);
@@ -119,7 +118,8 @@ public:
   void setIsMasterRank(bool isMasterRank) override;
 
 private:
-  std::string isValidGroup(boost::shared_ptr<WorkspaceGroup> wsGroup) const;
+  std::string
+  isValidGroup(const boost::shared_ptr<WorkspaceGroup> &wsGroup) const;
 
   std::string isValidOutputWs() const;
 
@@ -151,5 +151,3 @@ Kernel::Logger WorkspaceProperty<TYPE>::g_log("WorkspaceProperty");
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_WORKSPACEPROPERTY_H_*/

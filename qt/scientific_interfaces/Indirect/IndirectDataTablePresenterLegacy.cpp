@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataTablePresenterLegacy.h"
 
@@ -49,7 +49,7 @@ public:
 
   void setModelData(QWidget *editor, QAbstractItemModel *model,
                     const QModelIndex &index) const override {
-    QLineEdit *lineEdit = static_cast<QLineEdit *>(editor);
+    auto *lineEdit = static_cast<QLineEdit *>(editor);
     model->setData(index, lineEdit->text(), Qt::EditRole);
   }
 

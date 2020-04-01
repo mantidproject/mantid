@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------------------------
 // Includes
@@ -25,8 +25,6 @@ const char *MultivariateGaussianComptonProfile::SIGMA_Y_PARAM = "SigmaY";
 const char *MultivariateGaussianComptonProfile::SIGMA_Z_PARAM = "SigmaZ";
 const char *MultivariateGaussianComptonProfile::STEPS_ATTR = "IntegrationSteps";
 
-/**
- */
 MultivariateGaussianComptonProfile::MultivariateGaussianComptonProfile()
     : ComptonProfile(), m_integrationSteps(256), m_thetaStep(0.0),
       m_phiStep(0.0) {}
@@ -38,8 +36,6 @@ std::string MultivariateGaussianComptonProfile::name() const {
   return "MultivariateGaussianComptonProfile";
 }
 
-/**
- */
 void MultivariateGaussianComptonProfile::declareParameters() {
   ComptonProfile::declareParameters();
   declareParameter(AMP_PARAM, 1.0, "Gaussian intensity parameter");
@@ -48,8 +44,6 @@ void MultivariateGaussianComptonProfile::declareParameters() {
   declareParameter(SIGMA_Z_PARAM, 1.0, "Sigma Z parameter");
 }
 
-/**
- */
 void MultivariateGaussianComptonProfile::declareAttributes() {
   ComptonProfile::declareAttributes();
   declareAttribute(STEPS_ATTR, IFunction::Attribute(m_integrationSteps));
@@ -79,8 +73,6 @@ void MultivariateGaussianComptonProfile::setAttribute(const std::string &name,
   }
 }
 
-/*
- */
 std::vector<size_t>
 MultivariateGaussianComptonProfile::intensityParameterIndices() const {
   return std::vector<size_t>(1, this->parameterIndex(AMP_PARAM));
@@ -134,6 +126,9 @@ void MultivariateGaussianComptonProfile::massProfile(
 
   const auto &yspace = ySpace();
   const auto &modq = modQ();
+  if (modq.empty() || yspace.empty()) {
+    throw std::runtime_error("Y values or Q values not set");
+  }
 
   for (size_t i = 0; i < nData; i++) {
     const double y(yspace[i]);

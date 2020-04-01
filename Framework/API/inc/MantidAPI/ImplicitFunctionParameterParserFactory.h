@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IMPLICIT_FUNCTION_PARAMETER_PARSER_FACTORY_H
-#define IMPLICIT_FUNCTION_PARAMETER_PARSER_FACTORY_H
+#pragma once
 
 /** @class ImplicitFunctionFactory ImplicitFunctionFactory.h
 Kernel/ImplicitFunctionFactory.h
@@ -58,5 +57,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<
     Mantid::API::ImplicitFunctionParameterParserFactoryImpl>;
 }
 } // namespace Mantid
-
-#endif

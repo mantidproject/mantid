@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MERGERUNSTEST_H_
-#define MANTID_ALGORITHMS_MERGERUNSTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -41,8 +40,8 @@ private:
   MergeRuns merge;
 
   /// Helper method to add an 'nperiods' log value to each workspace in a group.
-  void add_periods_logs(WorkspaceGroup_sptr ws, bool calculateNPeriods = true,
-                        int nperiods = -1) {
+  void add_periods_logs(const WorkspaceGroup_sptr &ws,
+                        bool calculateNPeriods = true, int nperiods = -1) {
     if (calculateNPeriods) {
       nperiods = static_cast<int>(ws->size());
     }
@@ -269,7 +268,7 @@ private:
     return c;
   }
 
-  void do_test_treat_as_non_period_groups(WorkspaceGroup_sptr input) {
+  void do_test_treat_as_non_period_groups(const WorkspaceGroup_sptr &input) {
     MatrixWorkspace_sptr sampleInputWorkspace =
         boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
     const double uniformSignal = sampleInputWorkspace->y(0)[0];
@@ -321,7 +320,7 @@ public:
         "in6", WorkspaceCreationHelper::create2DWorkspaceBinned(3, 3, 2., 2.));
   }
 
-  void checkOutput(std::string wsname) {
+  void checkOutput(const std::string &wsname) {
     EventWorkspace_sptr output;
     TimeSeriesProperty<double> *log;
     int log1, log2, logTot;
@@ -374,6 +373,7 @@ public:
     va_start(vl, num);
     for (int i = 0; i < num; i++)
       retVal.emplace_back(va_arg(vl, int));
+    va_end(vl);
     return retVal;
   }
 
@@ -875,7 +875,8 @@ public:
     AnalysisDataService::Instance().remove("outer");
   }
 
-  void do_test_validation_throws(WorkspaceGroup_sptr a, WorkspaceGroup_sptr b) {
+  void do_test_validation_throws(const WorkspaceGroup_sptr &a,
+                                 const WorkspaceGroup_sptr &b) {
     MergeRuns alg;
     alg.setRethrows(true);
     alg.initialize();
@@ -912,7 +913,7 @@ public:
     do_test_validation_throws(aCorrupted, a);
   }
 
-  void do_test_with_multiperiod_data(WorkspaceGroup_sptr input) {
+  void do_test_with_multiperiod_data(const WorkspaceGroup_sptr &input) {
     // Extract some internal information from the nested workspaces in order to
     // run test asserts later.
     const size_t expectedNumHistograms =
@@ -1357,8 +1358,8 @@ public:
                             3);
   }
 
-  void do_test_merge_two_workspaces_then_third(std::string mergeType,
-                                               std::string result) {
+  void do_test_merge_two_workspaces_then_third(const std::string &mergeType,
+                                               const std::string &result) {
     auto ws = create_group_workspace_with_sample_logs<double>(
         mergeType, "prop1", 1.0, 2.0, 3.0, 4.0);
 
@@ -1392,8 +1393,8 @@ public:
                                             "1, 2, 5");
   }
 
-  void do_test_merging_two_workspaces_both_already_merged(std::string mergeType,
-                                                          std::string result) {
+  void do_test_merging_two_workspaces_both_already_merged(
+      const std::string &mergeType, const std::string &result) {
     auto ws = create_group_workspace_with_sample_logs<double>(
         mergeType, "prop1", 1.0, 2.0, 3.0, 4.0);
 
@@ -1885,5 +1886,3 @@ public:
 private:
   Mantid::Algorithms::MergeRuns m_mergeRuns;
 };
-
-#endif /*MANTID_ALGORITHMS_MERGERUNSTEST_H_*/

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_COMPOSITEVALIDATOR_H_
-#define MANTID_KERNEL_COMPOSITEVALIDATOR_H_
+#pragma once
 
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/System.h"
@@ -42,7 +41,7 @@ public:
   /// Clones this and the children into a new Validator
   IValidator_sptr clone() const override;
   /// Adds a validator to the group of validators to check
-  void add(IValidator_sptr child);
+  void add(const IValidator_sptr &child);
   /// Add a validator based on a template type. Useful for validators that need
   /// no arguments
   template <typename T> void add() { this->add(boost::make_shared<T>()); }
@@ -86,5 +85,3 @@ private:
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_COMPOSITEVALIDATOR_H_ */

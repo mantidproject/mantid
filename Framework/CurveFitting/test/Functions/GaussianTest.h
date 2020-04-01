@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GAUSSIANTEST_H_
-#define GAUSSIANTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -172,5 +171,3 @@ public:
     TS_ASSERT_DELTA(fn.getParameter("Height"), 0.398942, 1e-6);
   }
 };
-
-#endif /*GAUSSIANTEST_H_*/

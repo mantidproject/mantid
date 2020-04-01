@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/PlotPeakByLogValueHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -85,8 +85,8 @@ void addMatrixworkspace(
     const boost::optional<API::Workspace_sptr> &workspaceOptional,
     const boost::shared_ptr<API::MatrixWorkspace> &wsMatrix);
 /// Create a list of input workspace names
-std::vector<InputSpectraToFit> makeNames(std::string inputList, int default_wi,
-                                         int default_spec) {
+std::vector<InputSpectraToFit> makeNames(const std::string &inputList,
+                                         int default_wi, int default_spec) {
   std::vector<InputSpectraToFit> nameList;
 
   double start = 0;
@@ -212,7 +212,6 @@ std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace &ws,
       }
     }
   } else { // numeric axis
-    spectrumNumber = SpecialIndex::NOT_SET;
     if (workspaceIndex >= 0) {
       out.clear();
     } else {

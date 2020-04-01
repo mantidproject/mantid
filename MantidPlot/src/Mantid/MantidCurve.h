@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDPLOT_MANTIDCURVE_H
-#define MANTIDPLOT_MANTIDCURVE_H
+#pragma once
 
 #include "../PlotCurve.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -94,5 +93,3 @@ private:
   virtual void init(Graph *g, bool distr, GraphOptions::CurveType style,
                     bool multileSpectra = false) = 0;
 };
-
-#endif

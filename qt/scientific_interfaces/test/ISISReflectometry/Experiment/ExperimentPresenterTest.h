@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_EXPERIMENTPRESENTERTEST_H_
-#define MANTID_CUSTOMINTERFACES_EXPERIMENTPRESENTERTEST_H_
+#pragma once
 
 #include "../../../ISISReflectometry/GUI/Experiment/ExperimentPresenter.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
@@ -904,7 +903,8 @@ private:
   }
 
   void runTestForInvalidPerAngleOptions(OptionsTable const &optionsTable,
-                                        std::vector<int> rows, int column) {
+                                        const std::vector<int> &rows,
+                                        int column) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getPerAngleOptions()).WillOnce(Return(optionsTable));
     for (auto row : rows)
@@ -954,5 +954,3 @@ private:
 };
 
 GNU_DIAG_ON("missing-braces")
-
-#endif // MANTID_CUSTOMINTERFACES_EXPERIMENTPRESENTERTEST_H_

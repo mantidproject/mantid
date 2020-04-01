@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_PEAKSPACE_H_
-#define MANTID_DATAOBJECTS_PEAKSPACE_H_ 1
+#pragma once
 
 #include "MantidAPI/Column.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -289,4 +288,3 @@ using PeaksWorkspace_sptr = boost::shared_ptr<PeaksWorkspace>;
 using PeaksWorkspace_const_sptr = boost::shared_ptr<const PeaksWorkspace>;
 } // namespace DataObjects
 } // namespace Mantid
-#endif

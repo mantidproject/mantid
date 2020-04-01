@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_HKLFILTER_H_
-#define MANTID_GEOMETRY_HKLFILTER_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
@@ -156,5 +155,3 @@ operator|(const HKLFilter_const_sptr &lhs, const HKLFilter_const_sptr &rhs);
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_HKLFILTER_H_ */

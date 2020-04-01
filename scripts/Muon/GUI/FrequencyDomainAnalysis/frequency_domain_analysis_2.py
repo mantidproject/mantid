@@ -1,12 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
-from qtpy import QtWidgets, QtCore
+from qtpy import QtWidgets, QtCore, QT_VERSION
+from distutils.version import LooseVersion
 
 from mantid.kernel import ConfigServiceImpl
 
@@ -93,8 +93,12 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
                                                               plotting_widget=self.dockable_plot_widget.view)
         self.dockable_plot_widget_window.setMinimumWidth(575)
 
-        # # add dock widget to main Muon analysis window
+        # Add dock widget to main Muon analysis window
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockable_plot_widget_window)
+        # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
+        # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
+        if QT_VERSION >= LooseVersion("5.6"):
+            self.resizeDocks({self.dockable_plot_widget_window}, {40}, QtCore.Qt.Horizontal)
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
@@ -302,11 +306,13 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def setup_fitting_notifier(self):
         """Connect fitting and results tabs to inform of new fits"""
-        self.fitting_context.new_fit_notifier.add_subscriber(
+        self.fitting_context.new_fit_results_notifier.add_subscriber(
             self.results_tab.results_tab_presenter.new_fit_performed_observer)
 
-        self.fitting_context.new_fit_notifier.add_subscriber(
-            self.dockable_plot_widget.presenter.fit_observer)
+        self.fitting_context.new_fit_plotting_notifier.add_subscriber(self.dockable_plot_widget.presenter.fit_observer)
+
+        self.fitting_context.fit_removed_notifier.add_subscriber(self.dockable_plot_widget.presenter.
+                                                                 fit_removed_observer)
 
         self.fitting_context.plot_guess_notifier.add_subscriber(self.dockable_plot_widget.presenter.plot_guess_observer)
 

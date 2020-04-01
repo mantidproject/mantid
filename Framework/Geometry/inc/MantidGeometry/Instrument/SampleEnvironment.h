@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SAMPLEENVIRONMENT_H_
-#define MANTID_GEOMETRY_SAMPLEENVIRONMENT_H_
+#pragma once
 
 //------------------------------------------------------------------------------
 // Includes
@@ -26,7 +25,7 @@ class Track;
 */
 class MANTID_GEOMETRY_DLL SampleEnvironment {
 public:
-  SampleEnvironment(std::string name, Container_const_sptr getContainer);
+  SampleEnvironment(std::string name, const Container_const_sptr &getContainer);
 
   /// @return The name of kit
   inline const std::string name() const { return m_name; }
@@ -69,5 +68,3 @@ using SampleEnvironment_uptr = std::unique_ptr<SampleEnvironment>;
 using SampleEnvironment_const_uptr = std::unique_ptr<const SampleEnvironment>;
 } // namespace Geometry
 } // namespace Mantid
-
-#endif // MANTID_GEOMETRY_SAMPLEENVIRONMENT_H_

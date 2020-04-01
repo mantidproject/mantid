@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateLogPropertyTable.h"
 
@@ -195,9 +195,12 @@ retrieveMatrixWsList(const std::vector<std::string> &wsNames,
       // Retrieve pointers to all the child workspaces.
       std::vector<MatrixWorkspace_sptr> childWsList;
       childWsList.reserve(childNames.size());
-      for (const auto &childName : childNames) {
-        childWsList.emplace_back(ADS.retrieveWS<MatrixWorkspace>(childName));
-      }
+
+      std::transform(childNames.begin(), childNames.end(),
+                     std::back_inserter(childWsList),
+                     [&ADS](const auto &childName) {
+                       return ADS.retrieveWS<MatrixWorkspace>(childName);
+                     });
 
       // Deal with child workspaces according to policy.
       switch (groupPolicy) {

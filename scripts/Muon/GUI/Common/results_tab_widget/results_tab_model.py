@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import (absolute_import, division, unicode_literals)
-
 from mantid.api import AnalysisDataService as ads, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty
 from enum import Enum
@@ -55,7 +53,7 @@ class ResultsTabModel(object):
 
         self._update_selected_fit_function()
         self._new_fit_observer = GenericObserver(self._on_new_fit_performed)
-        fitting_context.new_fit_notifier.add_subscriber(self._new_fit_observer)
+        fitting_context.new_fit_results_notifier.add_subscriber(self._new_fit_observer)
 
     def results_table_name(self):
         """Return the current name of the results table"""
@@ -218,9 +216,7 @@ class ResultsTabModel(object):
                 missing_msg.append("  Fit '{}' is missing the logs {}".format(
                     fit.parameters.parameter_workspace_name, missing))
         if missing_msg:
-            raise RuntimeError(
-                "The logs for each selected fit do not match:\n" +
-                "\n".join(missing_msg))
+            raise RuntimeError("The logs for each selected fit do not match:\n" + "\n".join(missing_msg))
 
     def _raise_if_result_selection_is_invalid(self, results_selection):
         """
@@ -289,8 +285,7 @@ class ResultsTabModel(object):
     def _on_new_fit_performed(self):
         """Called when a new fit has been added to the context.
         The function name is set to the name fit if it is the first time"""
-        if self.selected_fit_function() is None:
-            self._update_selected_fit_function()
+        self._update_selected_fit_function()
 
     def _update_selected_fit_function(self):
         """

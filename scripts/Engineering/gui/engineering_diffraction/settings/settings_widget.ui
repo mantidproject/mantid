@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Engineering Diffraction Analysis</string>
+   <string>Engineering Diffraction Analysis - Settings</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QGroupBox {

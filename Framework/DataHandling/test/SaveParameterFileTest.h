@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVEPARAMETERFILETEST_H_
-#define SAVEPARAMETERFILETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -78,21 +77,23 @@ public:
                   "linear ; TOF ; TOF");
   }
 
-  void setParam(std::string cName, std::string pName, std::string value) {
+  void setParam(const std::string &cName, const std::string &pName,
+                const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     paramMap.addString(comp->getComponentID(), pName, value);
   }
 
-  void setParam(std::string cName, std::string pName, double value) {
+  void setParam(const std::string &cName, const std::string &pName,
+                double value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     paramMap.addDouble(comp->getComponentID(), pName, value);
   }
 
-  void setParamByDetID(int id, std::string pName, double value) {
+  void setParamByDetID(int id, const std::string &pName, double value) {
     ParameterMap &paramMap = m_ws->instrumentParameters();
     const auto &detectorInfo = m_ws->detectorInfo();
     const auto detectorIndex = detectorInfo.indexOf(id);
@@ -100,7 +101,8 @@ public:
     paramMap.addDouble(detector.getComponentID(), pName, value);
   }
 
-  void setFitParam(std::string cName, std::string pName, std::string value) {
+  void setFitParam(const std::string &cName, const std::string &pName,
+                   const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
@@ -109,7 +111,8 @@ public:
     paramMap.add(comp.get(), param);
   }
 
-  void checkParam(std::string cName, std::string pName, std::string value) {
+  void checkParam(const std::string &cName, const std::string &pName,
+                  std::string value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
@@ -117,7 +120,8 @@ public:
     TS_ASSERT_EQUALS(value, param);
   }
 
-  void checkParam(std::string cName, std::string pName, double value) {
+  void checkParam(const std::string &cName, const std::string &pName,
+                  double value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
@@ -125,7 +129,7 @@ public:
     TS_ASSERT_DELTA(value, values.front(), 0.0001);
   }
 
-  void checkParamByDetID(int id, std::string pName, double value) {
+  void checkParamByDetID(int id, const std::string &pName, double value) {
     ParameterMap &paramMap = m_ws->instrumentParameters();
     const auto &detectorInfo = m_ws->detectorInfo();
     const auto &detector = detectorInfo.detector(detectorInfo.indexOf(id));
@@ -134,7 +138,8 @@ public:
     TS_ASSERT_DELTA(value, pValue, 0.0001);
   }
 
-  void checkFitParam(std::string cName, std::string pName, std::string value) {
+  void checkFitParam(const std::string &cName, const std::string &pName,
+                     const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
     boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
@@ -151,7 +156,7 @@ public:
     TS_ASSERT_EQUALS(fitParam.getFormulaUnit(), values[8]);
   }
 
-  void loadParams(std::string filename) {
+  void loadParams(const std::string &filename) {
     LoadParameterFile loaderPF;
     TS_ASSERT_THROWS_NOTHING(loaderPF.initialize());
     loaderPF.setPropertyValue("Filename", filename);
@@ -160,7 +165,7 @@ public:
     TS_ASSERT(loaderPF.isExecuted());
   }
 
-  void saveParams(std::string filename) {
+  void saveParams(const std::string &filename) {
     SaveParameterFile saverPF;
     TS_ASSERT_THROWS_NOTHING(saverPF.initialize());
     saverPF.setPropertyValue("Filename", filename);
@@ -195,5 +200,3 @@ public:
 private:
   MatrixWorkspace_sptr m_ws;
 };
-
-#endif /*SAVEPARAMETERFILETEST_H_*/

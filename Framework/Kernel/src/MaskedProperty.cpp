@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/PropertyHistory.h"
@@ -22,7 +22,7 @@ namespace Kernel {
  */
 template <typename TYPE>
 MaskedProperty<TYPE>::MaskedProperty(const std::string &name, TYPE defaultvalue,
-                                     IValidator_sptr validator,
+                                     const IValidator_sptr &validator,
                                      const unsigned int direction)
     : Kernel::PropertyWithValue<TYPE>(name, defaultvalue, validator, direction),
       m_maskedValue("") {

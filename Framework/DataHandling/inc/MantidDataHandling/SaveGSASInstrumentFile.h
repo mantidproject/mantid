@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SAVEGSASINSTRUMENTFILE_H_
-#define MANTID_ALGORITHMS_SAVEGSASINSTRUMENTFILE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -67,7 +66,7 @@ private:
 
   /// Parse profile table workspace to a map
   void parseProfileTableWorkspace(
-      API::ITableWorkspace_sptr ws,
+      const API::ITableWorkspace_sptr &ws,
       std::map<unsigned int, std::map<std::string, double>> &profilemap);
 
   /// Convert to GSAS instrument file
@@ -114,7 +113,7 @@ private:
                            const std::string &paramname);
 
   /// Load fullprof resolution file.
-  void loadFullprofResolutionFile(std::string irffilename);
+  void loadFullprofResolutionFile(const std::string &irffilename);
 
   /// Calcualte d-space value.
   double calDspRange(double dtt1, double zero, double tof);
@@ -165,5 +164,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_SAVEGSASINSTRUMENTFILE_H_ */

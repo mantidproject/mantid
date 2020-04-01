@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, print_function)
-
 import unittest
 import sys
 import math
@@ -16,7 +14,6 @@ from mantid.geometry import Detector
 from mantid.kernel import Direction, V3D
 from mantid.simpleapi import CreateSampleWorkspace, Rebin
 import numpy as np
-from six.moves import range
 
 
 class MatrixWorkspaceTest(unittest.TestCase):
@@ -89,6 +86,13 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual(len(expected), len(ids))
         for i in range(len(ids)):
             self.assertEqual(expected[i], ids[i])
+
+    def test_spectrum_numbers_returned(self):
+        num_vec = 11
+        test_ws = WorkspaceFactory.create("Workspace2D", num_vec, 1, 1)
+
+        spec_nums = test_ws.getSpectrumNumbers()
+        self.assertEqual([x for x in range(1, num_vec + 1)], spec_nums)
 
     def test_detector_two_theta(self):
         det = self._test_ws.getDetector(1)
@@ -503,7 +507,27 @@ class MatrixWorkspaceTest(unittest.TestCase):
         fv = rebin.readF(1)
         self.assertAlmostEqual(fv[0], 4.0)
 
-
+    def test_findY(self):
+        # Check that zero is not present
+        idx = self._test_ws.findY(0.)
+        self.assertEquals(idx[0],-1)
+        self.assertEquals(idx[1],-1)
+        # Check that 5. is the first element
+        idx = self._test_ws.findY(5.)
+        self.assertEquals(idx[0],0)
+        self.assertEquals(idx[1],0)
+        # Check that no other elements are 5
+        idx = self._test_ws.findY(5., (0, 1))
+        self.assertEquals(idx[0],-1)
+        self.assertEquals(idx[1],-1)
+        # Check that 2. is the next element
+        idx = self._test_ws.findY(2.)
+        self.assertEquals(idx[0],0)
+        self.assertEquals(idx[1],1)
+        # Check that 2. is the next element
+        idx = self._test_ws.findY(2., (0, 2))
+        self.assertEquals(idx[0],0)
+        self.assertEquals(idx[1],2)
 
 
 if __name__ == '__main__':

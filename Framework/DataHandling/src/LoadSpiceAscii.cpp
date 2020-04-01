@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <boost/algorithm/string.hpp>
 #include <fstream>
@@ -436,7 +436,7 @@ LoadSpiceAscii::createRunInfoWS(std::map<std::string, std::string> runinfodict,
  * @param datetimeprop
  */
 void LoadSpiceAscii::setupRunStartTime(
-    API::MatrixWorkspace_sptr runinfows,
+    const API::MatrixWorkspace_sptr &runinfows,
     const std::vector<std::string> &datetimeprop) {
   // Check if no need to process run start time
   if (datetimeprop.empty()) {
@@ -596,7 +596,7 @@ std::string LoadSpiceAscii::processTimeString(const std::string &rawtime,
  * @param pvalue
  */
 template <typename T>
-void LoadSpiceAscii::addProperty(API::MatrixWorkspace_sptr ws,
+void LoadSpiceAscii::addProperty(const API::MatrixWorkspace_sptr &ws,
                                  const std::string &pname, T pvalue) {
   ws->mutableRun().addLogData(new PropertyWithValue<T>(pname, pvalue));
 }

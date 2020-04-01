@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ReflectometryReductionOneAuto3.h"
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
@@ -163,7 +163,7 @@ ReflectometryReductionOneAuto3::validateInputs() {
 }
 
 std::string ReflectometryReductionOneAuto3::getRunNumberForWorkspaceGroup(
-    WorkspaceGroup_const_sptr group) {
+    const WorkspaceGroup_const_sptr &group) {
   // Return the run number for the first child workspace
   if (!group)
     throw std::runtime_error("Invalid workspace group type");
@@ -297,16 +297,10 @@ void ReflectometryReductionOneAuto3::init() {
   declareProperty("WavelengthMax", Mantid::EMPTY_DBL(),
                   "Wavelength Max in angstroms", Direction::Input);
 
-  // Monitor properties
   initMonitorProperties();
-
-  // Init properties for transmission normalization
+  initBackgroundProperties();
   initTransmissionProperties();
-
-  // Init properties for algorithmic corrections
   initAlgorithmicProperties(true);
-
-  // Momentum transfer properties
   initMomentumTransferProperties();
 
   // Polarization correction
@@ -348,6 +342,11 @@ void ReflectometryReductionOneAuto3::init() {
                       "OutputWorkspaceWavelength", "", Direction::Output,
                       PropertyMode::Optional),
                   "Output workspace in wavelength");
+  setPropertySettings(
+      "OutputWorkspaceWavelength",
+      std::make_unique<Kernel::EnabledWhenProperty>("Debug", IS_EQUAL_TO, "1"));
+
+  initTransmissionOutputProperties();
 }
 
 /** Execute the algorithm.
@@ -358,8 +357,9 @@ void ReflectometryReductionOneAuto3::exec() {
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   auto instrument = inputWS->getInstrument();
+  bool const isDebug = getProperty("Debug");
 
-  IAlgorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
+  Algorithm_sptr alg = createChildAlgorithm("ReflectometryReductionOne");
   alg->initialize();
   // Mandatory properties
   alg->setProperty("SummationType", getPropertyValue("SummationType"));
@@ -367,7 +367,7 @@ void ReflectometryReductionOneAuto3::exec() {
   alg->setProperty("IncludePartialBins",
                    getPropertyValue("IncludePartialBins"));
   alg->setProperty("Diagnostics", getPropertyValue("Diagnostics"));
-  alg->setProperty("Debug", getPropertyValue("Debug"));
+  alg->setProperty("Debug", isDebug);
   double wavMin = checkForMandatoryInstrumentDefault<double>(
       this, "WavelengthMin", instrument, "LambdaMin");
   alg->setProperty("WavelengthMin", wavMin);
@@ -412,6 +412,16 @@ void ReflectometryReductionOneAuto3::exec() {
   if (!transRunsFound)
     populateAlgorithmicCorrectionProperties(alg, instrument);
 
+  alg->setPropertyValue("SubtractBackground",
+                        getPropertyValue("SubtractBackground"));
+  alg->setPropertyValue("BackgroundProcessingInstructions",
+                        getPropertyValue("BackgroundProcessingInstructions"));
+  alg->setPropertyValue("BackgroundCalculationMethod",
+                        getPropertyValue("BackgroundCalculationMethod"));
+  alg->setPropertyValue("DegreeOfPolynomial",
+                        getPropertyValue("DegreeOfPolynomial"));
+  alg->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
+
   alg->setProperty("InputWorkspace", inputWS);
   alg->execute();
 
@@ -433,11 +443,15 @@ void ReflectometryReductionOneAuto3::exec() {
   }
 
   // Set the output workspace in wavelength, if debug outputs are enabled
-  const bool isDebug = getProperty("Debug");
-  if (isDebug || isChild()) {
+  if (!isDefault("OutputWorkspaceWavelength") || isChild()) {
     MatrixWorkspace_sptr IvsLam = alg->getProperty("OutputWorkspaceWavelength");
     setProperty("OutputWorkspaceWavelength", IvsLam);
   }
+
+  // Set the output transmission workspaces
+  setWorkspacePropertyFromChild(alg, "OutputWorkspaceTransmission");
+  setWorkspacePropertyFromChild(alg, "OutputWorkspaceFirstTransmission");
+  setWorkspacePropertyFromChild(alg, "OutputWorkspaceSecondTransmission");
 
   // Set other properties so they can be updated in the Reflectometry interface
   setProperty("ThetaIn", theta);
@@ -457,8 +471,8 @@ void ReflectometryReductionOneAuto3::exec() {
  * @param inputWS :: the input workspace
  * @return :: the names of the detectors of interest
  */
-std::vector<std::string>
-ReflectometryReductionOneAuto3::getDetectorNames(MatrixWorkspace_sptr inputWS) {
+std::vector<std::string> ReflectometryReductionOneAuto3::getDetectorNames(
+    const MatrixWorkspace_sptr &inputWS) {
   std::vector<std::string> wsIndices;
   boost::split(wsIndices, m_processingInstructionsWorkspaceIndex,
                boost::is_any_of(":,-+"));
@@ -532,8 +546,8 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::correctDetectorPositions(
  * @param inputWS :: the input workspace
  * @return :: the angle of the detector (only the first detector is considered)
  */
-double
-ReflectometryReductionOneAuto3::calculateTheta(MatrixWorkspace_sptr inputWS) {
+double ReflectometryReductionOneAuto3::calculateTheta(
+    const MatrixWorkspace_sptr &inputWS) {
   const auto detectorsOfInterest = getDetectorNames(inputWS);
 
   // Detectors of interest may be empty. This happens for instance when we input
@@ -559,7 +573,7 @@ ReflectometryReductionOneAuto3::calculateTheta(MatrixWorkspace_sptr inputWS) {
  * @param instrument :: The instrument attached to the workspace
  */
 void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(
-    IAlgorithm_sptr alg, Instrument_const_sptr instrument) {
+    const IAlgorithm_sptr &alg, const Instrument_const_sptr &instrument) {
 
   // With algorithmic corrections, monitors should not be integrated, see below
   const std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");
@@ -621,7 +635,7 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(
 }
 
 auto ReflectometryReductionOneAuto3::getRebinParams(
-    MatrixWorkspace_sptr inputWS, const double theta) -> RebinParams {
+    const MatrixWorkspace_sptr &inputWS, const double theta) -> RebinParams {
   bool qMinIsDefault = true, qMaxIsDefault = true;
   auto const qMin = getPropertyOrDefault("MomentumTransferMin",
                                          inputWS->x(0).front(), qMinIsDefault);
@@ -638,7 +652,7 @@ auto ReflectometryReductionOneAuto3::getRebinParams(
  * @return :: the rebin step in Q, or none if it could not be found
  */
 boost::optional<double>
-ReflectometryReductionOneAuto3::getQStep(MatrixWorkspace_sptr inputWS,
+ReflectometryReductionOneAuto3::getQStep(const MatrixWorkspace_sptr &inputWS,
                                          const double theta) {
   Property *qStepProp = getProperty("MomentumTransferStep");
   double qstep;
@@ -676,7 +690,7 @@ ReflectometryReductionOneAuto3::getQStep(MatrixWorkspace_sptr inputWS,
  * @return :: the output workspace
  */
 MatrixWorkspace_sptr
-ReflectometryReductionOneAuto3::rebin(MatrixWorkspace_sptr inputWS,
+ReflectometryReductionOneAuto3::rebin(const MatrixWorkspace_sptr &inputWS,
                                       const RebinParams &params) {
   IAlgorithm_sptr algRebin = createChildAlgorithm("Rebin");
   algRebin->initialize();

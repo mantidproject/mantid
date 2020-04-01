@@ -1,12 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.Common.plotting_widget.plotting_widget_presenter import PlotWidgetPresenter
@@ -81,6 +81,14 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
                                                             workspace_indices,
                                                             errors=errors,
                                                             plot_kwargs=plot_kwargs)
+
+    def test_get_legend_label_for_maxent_returns(self):
+        workspace_name = "EMU20884 MaXEnt"
+        self.presenter._view.get_selected = mock.MagicMock(return_value="Frequency MaxEnt")
+
+        label = self.presenter.get_workspace_legend_label(workspace_name)
+
+        self.assertEqual(label, workspace_name)
 
     def test_handle_data_updated_does_nothing_if_workspace_list_has_not_changed(self):
         self.presenter.workspace_finder.get_workspaces_to_plot = mock.MagicMock(return_value=self.workspace_list)
@@ -173,7 +181,7 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
         self.context.fitting_context.fit_list.__getitem__.return_value = fit_information
         self.context.fitting_context.number_of_fits = 1
 
-        self.presenter.handle_fit_completed()
+        self.presenter.handle_fit_completed(fit_information)
 
         self.assertEqual(self.model.add_workspace_to_plot.call_count, 2)
 
@@ -342,8 +350,8 @@ class PlottingWidgetPresenterTest(unittest.TestCase):
         self.presenter.handle_error_selection_changed(errors)
 
         self.assertEqual(self.model.replot_workspace.call_count, len(workspaces))
-        self.model.replot_workspace.assert_any_call(workspaces[0], self.view.get_axes()[0],  errors, mock.ANY)
-        self.model.replot_workspace.assert_called_with(workspaces[1],  self.view.get_axes()[0], errors, mock.ANY)
+        self.model.replot_workspace.assert_any_call(workspaces[0], self.view.get_axes()[0], errors, mock.ANY)
+        self.model.replot_workspace.assert_called_with(workspaces[1], self.view.get_axes()[0], errors, mock.ANY)
 
 
 if __name__ == '__main__':

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //-------------------------------------------
 // Includes
@@ -11,7 +11,9 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #include "MantidQtWidgets/Common/NotificationService.h"
+#endif
 
 #include <QAction>
 #include <QActionGroup>
@@ -100,8 +102,6 @@ MessageDisplay::MessageDisplay(const QFont &font, QWidget *parent)
   setupTextArea(font);
 }
 
-/**
- */
 MessageDisplay::~MessageDisplay() {
   // The Channel class is ref counted and will
   // delete itself when required
@@ -240,11 +240,13 @@ void MessageDisplay::append(const Message &msg) {
     moveCursorToEnd();
 
     if (msg.priority() <= Message::Priority::PRIO_ERROR) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
       NotificationService::showMessage(
-          "Mantid Workbench",
+          parentWidget() ? parentWidget()->windowTitle() : "Mantid",
           "Sorry, there was an error, please look at the message display for "
           "details.",
           NotificationService::MessageIcon::Critical);
+#endif
       emit errorReceived(msg.text());
     }
     if (msg.priority() <= Message::Priority::PRIO_WARNING)

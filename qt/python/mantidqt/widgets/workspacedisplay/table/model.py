@@ -1,13 +1,11 @@
-# coding=utf-8
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+# coding=utf-8
 #  This file is part of the mantidqt package.
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.dataobjects import PeaksWorkspace, TableWorkspace
 from mantid.kernel import V3D
 from mantid.simpleapi import DeleteTableRows, SortPeaksWorkspace, SortTableWorkspace, StatisticsOfTableWorkspace
@@ -69,16 +67,9 @@ class TableWorkspaceDisplayModel:
             elif plot_type == TableWorkspaceColumnTypeMapping.Y:
                 self.marked_columns.add_y(col)
             elif plot_type == TableWorkspaceColumnTypeMapping.YERR:
-                # mark YErrs only if there are any columns that have been marked as Y
-                # if there are none then do not mark anything as YErr
-                if len(self.marked_columns.as_y) > len(self.marked_columns.as_y_err):
-                    # Assume all the YErrs are associated with the first available (no other YErr has it) Y column.
-                    # There isn't a way to know the correct Y column, as that information is not stored
-                    # in the table workspace - the original table workspace does not associate Y errors
-                    # columns with specific Y columns
-                    err_for_column = self.marked_columns.as_y[len(self.marked_columns.as_y_err)]
-                    label = str(len(self.marked_columns.as_y_err))
-                    self.marked_columns.add_y_err(ErrorColumn(col, err_for_column, label))
+                err_for_column = self.ws.getLinkedYCol(col)
+                if err_for_column >= 0:
+                    self.marked_columns.add_y_err(ErrorColumn(col, err_for_column))
 
     def _get_v3d_from_str(self, string):
         if '[' in string and ']' in string:
@@ -147,5 +138,5 @@ class TableWorkspaceDisplayModel:
             SortTableWorkspace(InputWorkspace=self.ws, OutputWorkspace=self.ws, Columns=column_name,
                                Ascending=sort_ascending)
 
-    def set_column_type(self, col, type):
-        self.ws.setPlotType(col, type)
+    def set_column_type(self, col, type, linked_col_index=-1):
+        self.ws.setPlotType(col, type, linked_col_index)

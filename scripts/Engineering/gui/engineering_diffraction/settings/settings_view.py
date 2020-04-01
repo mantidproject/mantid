@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
-from qtpy import QtWidgets
+from qtpy import QtWidgets, QtCore
 
 from mantidqt.utils.qt import load_ui
 
@@ -16,6 +14,7 @@ Ui_settings, _ = load_ui(__file__, "settings_widget.ui")
 class SettingsView(QtWidgets.QDialog, Ui_settings):
     def __init__(self, parent=None):
         super(SettingsView, self).__init__(parent)
+        self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.setupUi(self)
         self.setModal(True)
 

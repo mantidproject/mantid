@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MUONWORKSPACECREATIONHELPER_H_
-#define MUONWORKSPACECREATIONHELPER_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -130,5 +129,3 @@ createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorkspaces, size_t nspec,
                                            const std::string &wsGroupName);
 
 } // namespace MuonWorkspaceCreationHelper
-
-#endif /*MUONWORKSPACECREATIONHELPER_H_*/

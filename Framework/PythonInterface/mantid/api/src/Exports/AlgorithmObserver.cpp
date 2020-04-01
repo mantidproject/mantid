@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/Algorithms/AlgorithmObserverAdapter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -14,22 +14,23 @@ using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
-void observeFinish(AlgorithmObserver &self, boost::python::object alg) {
+void observeFinish(AlgorithmObserver &self, const boost::python::object &alg) {
   IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.observeFinish(calg);
 }
 
-void observeError(AlgorithmObserver &self, boost::python::object alg) {
+void observeError(AlgorithmObserver &self, const boost::python::object &alg) {
   IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.observeError(calg);
 }
 
-void observeProgress(AlgorithmObserver &self, boost::python::object alg) {
+void observeProgress(AlgorithmObserver &self,
+                     const boost::python::object &alg) {
   IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.observeProgress(calg);
 }
 
-void stopObserving(AlgorithmObserver &self, boost::python::object alg) {
+void stopObserving(AlgorithmObserver &self, const boost::python::object &alg) {
   IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);
   self.stopObserving(calg);
 }

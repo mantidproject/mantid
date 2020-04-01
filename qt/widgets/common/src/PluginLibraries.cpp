@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/PluginLibraries.h"
 #include "MantidKernel/ConfigService.h"
@@ -25,7 +25,7 @@ namespace API {
  * @param key The name of a key in the Mantid config
  * @return The value of the key
  */
-std::string qtPluginPathFromCfg(std::string key) {
+std::string qtPluginPathFromCfg(const std::string &key) {
   static std::string qtMajorVersion;
   static std::string qtTag("%V");
   if (qtMajorVersion.empty()) {
@@ -42,7 +42,7 @@ std::string qtPluginPathFromCfg(std::string key) {
  * %V to specify the Qt version
  * @return The number of libraries successfully loaded
  */
-int loadPluginsFromCfgPath(std::string key) {
+int loadPluginsFromCfgPath(const std::string &key) {
   return loadPluginsFromPath(qtPluginPathFromCfg(std::move(key)));
 }
 
@@ -50,7 +50,7 @@ int loadPluginsFromCfgPath(std::string key) {
  * Load all plugins from the path specified.
  * @return The number of libraries successfully loaded
  */
-int loadPluginsFromPath(std::string path) {
+int loadPluginsFromPath(const std::string &path) {
 // We must *NOT* load plugins compiled against a different version of Qt
 // so we set exclude flags by Qt version.
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))

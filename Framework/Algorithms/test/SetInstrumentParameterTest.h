@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SETINSTRUMENTPARAMETERTEST_H_
-#define MANTID_ALGORITHMS_SETINSTRUMENTPARAMETERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -174,10 +173,10 @@ public:
   }
 
   MatrixWorkspace_sptr
-  ExecuteAlgorithm(MatrixWorkspace_sptr testWS, std::string cmptName,
-                   std::string detList, std::string paramName,
-                   std::string paramValue, std::string paramType = "",
-                   bool fails = false) {
+  ExecuteAlgorithm(MatrixWorkspace_sptr testWS, const std::string &cmptName,
+                   const std::string &detList, const std::string &paramName,
+                   const std::string &paramValue,
+                   const std::string &paramType = "", bool fails = false) {
     // add the workspace to the ADS
     AnalysisDataService::Instance().addOrReplace(
         "SetInstrumentParameter_Temporary", testWS);
@@ -218,5 +217,3 @@ public:
     return output;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_SETINSTRUMENTPARAMETERTEST_H_ */

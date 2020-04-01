@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADNEXUSLOGS_H_
-#define MANTID_DATAHANDLING_LOADNEXUSLOGS_H_
+#pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
 #include <nexus/NeXusFile.hpp>
@@ -63,18 +62,22 @@ private:
   /// Load log data from a group
   void loadLogs(::NeXus::File &file, const std::string &entry_name,
                 const std::string &entry_class,
-                boost::shared_ptr<API::MatrixWorkspace> workspace) const;
+                const boost::shared_ptr<API::MatrixWorkspace> &workspace) const;
   /// Load an NXlog entry
-  void loadNXLog(::NeXus::File &file, const std::string &entry_name,
-                 const std::string &entry_class,
-                 boost::shared_ptr<API::MatrixWorkspace> workspace) const;
+  void
+  loadNXLog(::NeXus::File &file, const std::string &entry_name,
+            const std::string &entry_class,
+            const boost::shared_ptr<API::MatrixWorkspace> &workspace) const;
   /// Load an IXseblock entry
-  void loadSELog(::NeXus::File &file, const std::string &entry_name,
-                 boost::shared_ptr<API::MatrixWorkspace> workspace) const;
-  void loadVetoPulses(::NeXus::File &file,
-                      boost::shared_ptr<API::MatrixWorkspace> workspace) const;
-  void loadNPeriods(::NeXus::File &file,
-                    boost::shared_ptr<API::MatrixWorkspace> workspace) const;
+  void
+  loadSELog(::NeXus::File &file, const std::string &entry_name,
+            const boost::shared_ptr<API::MatrixWorkspace> &workspace) const;
+  void loadVetoPulses(
+      ::NeXus::File &file,
+      const boost::shared_ptr<API::MatrixWorkspace> &workspace) const;
+  void
+  loadNPeriods(::NeXus::File &file,
+               const boost::shared_ptr<API::MatrixWorkspace> &workspace) const;
 
   /// Progress reporting object
   boost::shared_ptr<API::Progress> m_progress;
@@ -86,5 +89,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_LOADNEXUSLOGS_H_*/

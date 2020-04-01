@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 # system imports
 import os.path as osp
 
@@ -18,24 +16,13 @@ from qtpy.QtWidgets import QVBoxLayout
 # local package imports
 from mantid.kernel import logger
 from mantidqt.widgets.codeeditor.multifileinterpreter import MultiPythonFileInterpreter
+from ..config import DEFAULT_SCRIPT_CONTENT
 from ..config.fonts import text_font
 from ..plugins.base import PluginWidget
 
 # from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 
-# Initial content
-DEFAULT_CONTENT = """# The following line helps with future compatibility with Python 3
-# print must now be used as a function, e.g print('Hello','World')
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
-# import mantid algorithms, numpy and matplotlib
-from mantid.simpleapi import *
-
-import matplotlib.pyplot as plt
-
-import numpy as np
-"""
 # Accepted extensions for drag-and-drop to editor
 ACCEPTED_FILE_EXTENSIONS = ['.py', '.pyw']
 # QSettings key for session tabs
@@ -55,7 +42,7 @@ class MultiFileEditor(PluginWidget):
 
         # layout
         self.editors = MultiPythonFileInterpreter(font=font,
-                                                  default_content=DEFAULT_CONTENT,
+                                                  default_content=DEFAULT_SCRIPT_CONTENT,
                                                   parent=self)
         layout = QVBoxLayout()
         layout.addWidget(self.editors)

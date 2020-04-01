@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_WEIGHTEDMEANMDTEST_H_
-#define MANTID_MDALGORITHMS_WEIGHTEDMEANMDTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -46,8 +45,8 @@ private:
 
   /// Helper method to run the WeightedMean algorithm on two matrix workspaces
   /// and return the result.
-  MatrixWorkspace_sptr run_matrix_weighed_mean(MatrixWorkspace_sptr a,
-                                               MatrixWorkspace_sptr b,
+  MatrixWorkspace_sptr run_matrix_weighed_mean(const MatrixWorkspace_sptr &a,
+                                               const MatrixWorkspace_sptr &b,
                                                const std::string &name) {
     AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
     IAlgorithm *alg =
@@ -62,7 +61,8 @@ private:
   }
 
   /// Helper method to run input type validation checks.
-  void do_test_workspace_input_types(IMDWorkspace_sptr a, IMDWorkspace_sptr b) {
+  void do_test_workspace_input_types(const IMDWorkspace_sptr &a,
+                                     const IMDWorkspace_sptr &b) {
     WeightedMeanMD alg;
     alg.initialize();
 
@@ -261,5 +261,3 @@ public:
     ADS.remove("weighted_mean_matrix");
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_WEIGHTEDMEANMDTEST_H_ */

@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes,too-many-public-methods
-from __future__ import (absolute_import, division, print_function)
 from qtpy import QtGui, QtCore, QtWidgets
 import sys
 import mantid
@@ -271,7 +270,6 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         self.gonfig.text(1,0,-2.5,'X',zdir=None,color='black')
         self.gonfig.plot([0,0],[-3,-3],[-2,-0.5],zdir='y',color='black',linewidth=3)
         self.gonfig.text(0,-1,-2.5,'Beam',zdir=None,color='black')
-        self.gonfig.set_aspect('equal', adjustable='datalim')
         self.gonfig.view_init(10,45)
 
         colors=['b','g','r']

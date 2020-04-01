@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from __future__ import (absolute_import, unicode_literals)
 
 import unittest
 
@@ -14,7 +12,7 @@ from matplotlib import use as mpl_use
 mpl_use('Agg')  # noqa
 from matplotlib.pyplot import figure
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_axes_names_dict
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.axestabwidget.presenter import AxesTabWidgetPresenter as Presenter

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ALGORITHMMANAGER_H_
-#define MANTID_API_ALGORITHMMANAGER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -18,6 +17,7 @@
 #include <deque>
 #include <mutex>
 #include <string>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -27,7 +27,7 @@ namespace API {
 class AlgorithmStartingNotification : public Poco::Notification {
 public:
   AlgorithmStartingNotification(IAlgorithm_sptr alg)
-      : Poco::Notification(), m_alg(alg) {}
+      : Poco::Notification(), m_alg(std::move(alg)) {}
   /// Returns the algorithm that is starting
   IAlgorithm_sptr getAlgorithm() const { return m_alg; }
 
@@ -49,11 +49,9 @@ public:
                                                const int &version = -1) const;
 
   std::size_t size() const;
-  void setMaxAlgorithms(int n);
 
   IAlgorithm_sptr getAlgorithm(AlgorithmID id) const;
   void removeById(AlgorithmID id);
-  IAlgorithm_sptr newestInstanceOf(const std::string &algorithmName) const;
 
   std::vector<IAlgorithm_const_sptr> runningInstances() const;
   std::vector<IAlgorithm_const_sptr>
@@ -80,8 +78,9 @@ private:
   /// Unimplemented assignment operator
   AlgorithmManagerImpl &operator=(const AlgorithmManagerImpl &);
 
-  /// The maximum size of the algorithm store
-  int m_max_no_algs;
+  /// Removes any finished algorithms from the list of managed algorithms
+  size_t removeFinishedAlgorithms();
+
   /// The list of managed algorithms
   std::deque<IAlgorithm_sptr>
       m_managed_algs; ///<  pointers to managed algorithms [policy???]
@@ -100,5 +99,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmManagerImpl>;
 }
 } // namespace Mantid
-
-#endif /* MANTID_API_ALGORITHMMANAGER_H_ */

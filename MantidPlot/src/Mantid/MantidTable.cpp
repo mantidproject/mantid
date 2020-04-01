@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <iomanip>
 #include <limits>
@@ -34,7 +34,7 @@ using namespace MantidQt::API;
  * @return the MantidTable created
  */
 MantidTable::MantidTable(ScriptingEnv *env,
-                         Mantid::API::ITableWorkspace_sptr ws,
+                         const Mantid::API::ITableWorkspace_sptr &ws,
                          const QString &label, ApplicationWindow *parent,
                          bool transpose)
     : Table(env,

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSampleShape.h"
 #include "MantidDataHandling/LoadAsciiStl.h"
@@ -99,7 +99,7 @@ void LoadSampleShape::exec() {
  * @param inputWS The workspace to get the rotation from
  * @returns a shared pointer to the newly rotated Shape
  */
-void rotate(MeshObject &sampleMesh, MatrixWorkspace_const_sptr inputWS) {
+void rotate(MeshObject &sampleMesh, const MatrixWorkspace_const_sptr &inputWS) {
   const std::vector<double> rotationMatrix =
       inputWS->run().getGoniometer().getR();
   sampleMesh.rotate(rotationMatrix);

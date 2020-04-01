@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_WEAKPTR_H_
-#define MANTID_PYTHONINTERFACE_WEAKPTR_H_
+#pragma once
 /*
 
   This file declares the get_pointer template function to allow
@@ -37,5 +36,3 @@ inline HeldType *get_pointer(const boost::weak_ptr<HeldType> &dataItem) {
   }
 }
 } // namespace boost
-
-#endif /* MANTID_PYTHONINTERFACE_WEAKPTR_H_ */

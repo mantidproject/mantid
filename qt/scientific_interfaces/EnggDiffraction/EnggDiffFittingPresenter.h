@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESENTER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "IEnggDiffFittingModel.h"
@@ -65,7 +64,7 @@ public:
                  const std::string &expectedPeaks);
 
   void plotFocusedFile(bool plotSinglePeaks,
-                       Mantid::API::MatrixWorkspace_sptr focusedPeaksWS);
+                       const Mantid::API::MatrixWorkspace_sptr &focusedPeaksWS);
 
   void plotAlignedWorkspace(const bool plotFittedPeaks);
 
@@ -108,7 +107,7 @@ private:
 
   void savePeakList();
 
-  std::string readPeaksFile(std::string fileDir);
+  std::string readPeaksFile(const std::string &fileDir);
 
   void fittingWriteFile(const std::string &fileDir);
 
@@ -141,4 +140,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESENTER_H_

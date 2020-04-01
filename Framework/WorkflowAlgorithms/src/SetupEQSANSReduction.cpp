@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -890,7 +890,7 @@ void SetupEQSANSReduction::exec() {
 }
 
 void SetupEQSANSReduction::setupSensitivity(
-    boost::shared_ptr<PropertyManager> reductionManager) {
+    const boost::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
 
   const std::string sensitivityFile = getPropertyValue("SensitivityFile");
@@ -957,7 +957,7 @@ void SetupEQSANSReduction::setupSensitivity(
   }
 }
 void SetupEQSANSReduction::setupTransmission(
-    boost::shared_ptr<PropertyManager> reductionManager) {
+    const boost::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Transmission options
   const bool thetaDependentTrans = getProperty("ThetaDependentTransmission");
@@ -1042,7 +1042,7 @@ void SetupEQSANSReduction::setupTransmission(
 }
 
 void SetupEQSANSReduction::setupBackground(
-    boost::shared_ptr<PropertyManager> reductionManager) {
+    const boost::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Background
   const std::string backgroundFile = getPropertyValue("BackgroundFiles");

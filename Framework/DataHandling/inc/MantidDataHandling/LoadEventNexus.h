@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADEVENTNEXUS_H_
-#define MANTID_DATAHANDLING_LOADEVENTNEXUS_H_
+#pragma once
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -16,6 +15,7 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -52,6 +52,9 @@ public:
 };
 
 bool exists(::NeXus::File &file, const std::string &name);
+
+bool exists(const std::map<std::string, std::string> &entries,
+            const std::string &name);
 
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
@@ -203,8 +206,8 @@ private:
   void createSpectraMapping(
       const std::string &nxsfile, const bool monitorsOnly,
       const std::vector<std::string> &bankNames = std::vector<std::string>());
-  void deleteBanks(EventWorkspaceCollection_sptr workspace,
-                   std::vector<std::string> bankNames);
+  void deleteBanks(const EventWorkspaceCollection_sptr &workspace,
+                   const std::vector<std::string> &bankNames);
   bool hasEventMonitors();
   void runLoadMonitors();
   /// Set the filters on TOF.
@@ -220,7 +223,7 @@ private:
   void setTopEntryName();
 
   /// to open the nexus file with specific exception handling/message
-  void safeOpenFile(const std::string fname);
+  void safeOpenFile(const std::string &fname);
 
   /// Was the instrument loaded?
   bool m_instrument_loaded_correctly;
@@ -599,8 +602,11 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   ::NeXus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
 
+  // only generating the entriesMap once
+  const std::map<std::string, std::string> entriesNxentry = file.getEntries();
+
   // get the title
-  if (exists(file, "title")) {
+  if (exists(entriesNxentry, "title")) {
     file.openData("title");
     if (file.getInfo().type == ::NeXus::CHAR) {
       std::string title = file.getStrData();
@@ -611,7 +617,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   }
 
   // get the notes
-  if (exists(file, "notes")) {
+  if (exists(entriesNxentry, "notes")) {
     file.openData("notes");
     if (file.getInfo().type == ::NeXus::CHAR) {
       std::string notes = file.getStrData();
@@ -622,7 +628,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   }
 
   // Get the run number
-  if (exists(file, "run_number")) {
+  if (exists(entriesNxentry, "run_number")) {
     file.openData("run_number");
     std::string run;
     if (file.getInfo().type == ::NeXus::CHAR) {
@@ -641,7 +647,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   }
 
   // get the experiment identifier
-  if (exists(file, "experiment_identifier")) {
+  if (exists(entriesNxentry, "experiment_identifier")) {
     file.openData("experiment_identifier");
     std::string expId;
     if (file.getInfo().type == ::NeXus::CHAR) {
@@ -655,7 +661,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
 
   // get the sample name - nested try/catch to leave the handle in an
   // appropriate state
-  if (exists(file, "sample")) {
+  if (exists(entriesNxentry, "sample")) {
     file.openGroup("sample", "NXsample");
     try {
       if (exists(file, "name")) {
@@ -686,7 +692,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   }
 
   // get the duration
-  if (exists(file, "duration")) {
+  if (exists(entriesNxentry, "duration")) {
     file.openData("duration");
     std::vector<double> duration;
     file.getDataCoerce(duration);
@@ -797,5 +803,3 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename,
 }
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_LOADEVENTNEXUS_H_*/

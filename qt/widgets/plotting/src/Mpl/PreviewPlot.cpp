@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Mpl/PreviewPlot.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -19,6 +19,7 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
+#include <utility>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace;
@@ -62,6 +63,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
   createActions();
 
   m_selectorActive = false;
+  m_context_enabled = true;
 
   m_canvas->installEventFilterToMplCanvas(this);
   watchADS(observeADS);
@@ -353,15 +355,15 @@ void PreviewPlot::resetView() {
  * Set the face colour for the canvas
  * @param colour A new colour for the figure facecolor
  */
-void PreviewPlot::setCanvasColour(QColor colour) {
-  m_canvas->gcf().setFaceColor(colour);
+void PreviewPlot::setCanvasColour(const QColor &colour) {
+  m_canvas->gcf().setFaceColor(std::move(colour));
 }
 
 /**
  * @brief PreviewPlot::setLinesWithErrors
  * @param labels A list of line labels where error bars should be shown
  */
-void PreviewPlot::setLinesWithErrors(QStringList labels) {
+void PreviewPlot::setLinesWithErrors(const QStringList &labels) {
   for (const QString &label : labels) {
     m_lines[label] = true;
   }
@@ -442,7 +444,9 @@ bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
   bool stopEvent(false);
   if (evt->button() == Qt::RightButton) {
     stopEvent = true;
-    showContextMenu(evt);
+    if (m_context_enabled) {
+      showContextMenu(evt);
+    }
   } else if (evt->button() == Qt::LeftButton) {
     const auto position = evt->pos();
     if (!position.isNull())
@@ -585,15 +589,21 @@ QStringList PreviewPlot::linesWithErrors() const {
  */
 void PreviewPlot::onWorkspaceRemoved(
     Mantid::API::WorkspacePreDeleteNotification_ptr nf) {
+  if (m_lines.isEmpty()) {
+    return;
+  }
   // Ignore non matrix workspaces
   if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
     // the artist may have already been removed. ignore the event is that is the
     // case
+    bool removed = false;
     try {
-      m_canvas->gca<MantidAxes>().removeWorkspaceArtists(ws);
+      removed = m_canvas->gca<MantidAxes>().removeWorkspaceArtists(ws);
     } catch (Mantid::PythonInterface::PythonException &) {
     }
-    this->replot();
+    if (removed) {
+      this->replot();
+    }
   }
 }
 
@@ -603,13 +613,17 @@ void PreviewPlot::onWorkspaceRemoved(
  */
 void PreviewPlot::onWorkspaceReplaced(
     Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf) {
+  if (m_lines.isEmpty()) {
+    return;
+  }
   // Ignore non matrix workspaces
   if (auto oldWS =
           boost::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
     if (auto newWS =
             boost::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
-      m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS);
-      this->replot();
+      if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS)) {
+        this->replot();
+      }
     }
   }
 }
@@ -672,7 +686,7 @@ void PreviewPlot::setYScaleType(QAction *selected) {
   setScaleType(AxisID::YLeft, selected->text());
 }
 
-void PreviewPlot::setScaleType(AxisID id, QString actionName) {
+void PreviewPlot::setScaleType(AxisID id, const QString &actionName) {
   auto scaleType = actionName.toLower().toLatin1();
   auto axes = m_canvas->gca();
   switch (id) {
@@ -699,6 +713,15 @@ void PreviewPlot::toggleLegend(const bool checked) {
     removeLegend();
   }
   this->replot();
+}
+
+void PreviewPlot::disableContextMenu() {
+  // Disable the context menu signal
+  // TODO Currently when changes are made to the plot through the context menu
+  // it is not communicated through to the perant gui which can cause issues,
+  // for now we are disabling the context menu but is should be made to
+  // communicate so it can be reactivated.
+  m_context_enabled = false;
 }
 
 } // namespace MantidWidgets

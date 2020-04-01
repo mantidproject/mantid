@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*=========================================================================
 
@@ -42,8 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  @date 19/04/2017
 */
 
-#ifndef pqCameraToolbarNonOrthogonalAxes_h
-#define pqCameraToolbarNonOrthogonalAxes_h
+#pragma once
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "pqApplicationComponentsModule.h"
@@ -80,5 +79,3 @@ private:
   void constructor();
   QAction *ZoomToDataAction;
 };
-
-#endif

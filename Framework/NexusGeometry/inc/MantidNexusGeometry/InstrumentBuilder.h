@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDNEXUSGEOMETRY_INSTRUMENTBUILDER_H
-#define MANTIDNEXUSGEOMETRY_INSTRUMENTBUILDER_H
+#pragma once
 
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -38,9 +37,10 @@ public:
   Geometry::IComponent *addComponent(const std::string &compName,
                                      const Eigen::Vector3d &position);
   /// Adds tubes (ObjComponentAssemblies) to the last registered bank
-  void addTubes(const std::string &bankName,
-                const std::vector<detail::TubeBuilder> &tubes,
-                boost::shared_ptr<const Mantid::Geometry::IObject> pixelShape);
+  void addTubes(
+      const std::string &bankName,
+      const std::vector<detail::TubeBuilder> &tubes,
+      const boost::shared_ptr<const Mantid::Geometry::IObject> &pixelShape);
   /// Adds detector to the root (instrument)
   void addDetectorToInstrument(
       const std::string &detName, detid_t detId,
@@ -70,8 +70,9 @@ public:
 
 private:
   /// Add a single tube to the last registed bank
-  void doAddTube(const std::string &compName, const detail::TubeBuilder &tube,
-                 boost::shared_ptr<const Mantid::Geometry::IObject> pixelShape);
+  void doAddTube(
+      const std::string &compName, const detail::TubeBuilder &tube,
+      const boost::shared_ptr<const Mantid::Geometry::IObject> &pixelShape);
   /// Sorts detectors
   void sortDetectors() const;
   /// product
@@ -81,4 +82,3 @@ private:
 };
 } // namespace NexusGeometry
 } // namespace Mantid
-#endif // MANTIDNEXUSGEOMETRY_INSTRUMENTBUILDER_H

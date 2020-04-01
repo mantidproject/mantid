@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CROPWORKSPACETEST_H_
-#define CROPWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -104,7 +103,7 @@ public:
     TS_ASSERT(!crop.isExecuted());
   }
 
-  void makeFakeEventWorkspace(std::string wsName) {
+  void makeFakeEventWorkspace(const std::string &wsName) {
     // Make an event workspace with 2 events in each bin.
     EventWorkspace_sptr test_in =
         WorkspaceCreationHelper::createEventWorkspace(36, 50, 50, 0.0, 2., 2);
@@ -465,5 +464,3 @@ public:
     TS_ASSERT(cropper.execute());
   }
 };
-
-#endif /*CROPWORKSPACETEST_H_*/

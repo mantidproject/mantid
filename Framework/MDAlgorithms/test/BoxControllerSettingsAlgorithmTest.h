@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_BOXCONTROLLERSETTINGSALGORITHMTEST_H_
-#define MANTID_MDEVENTS_BOXCONTROLLERSETTINGSALGORITHMTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataHandling/LoadParameterFile.h"
@@ -15,6 +14,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <boost/format.hpp>
+#include <utility>
 
 #include <cxxtest/TestSuite.h>
 
@@ -48,8 +48,9 @@ private:
   Helper function. Runs LoadParameterAlg, to get an instrument parameter
   definition from a file onto a workspace.
   */
-  void apply_instrument_parameter_file_to_workspace(MatrixWorkspace_sptr ws,
-                                                    const ScopedFile &file) {
+  void
+  apply_instrument_parameter_file_to_workspace(const MatrixWorkspace_sptr &ws,
+                                               const ScopedFile &file) {
     // Load the Instrument Parameter file over the existing test workspace +
     // instrument.
     using DataHandling::LoadParameterFile;
@@ -120,9 +121,9 @@ public:
     TS_ASSERT_EQUALS(bc->getMaxDepth(), 34);
   }
 
-  void doTest(BoxController_sptr bc, std::string SplitInto = "",
-              std::string SplitThreshold = "",
-              std::string MaxRecursionDepth = "") {
+  void doTest(const BoxController_sptr &bc, const std::string &SplitInto = "",
+              const std::string &SplitThreshold = "",
+              const std::string &MaxRecursionDepth = "") {
     BoxControllerSettingsAlgorithmImpl alg;
     alg.initBoxControllerProps();
     if (!SplitInto.empty())
@@ -131,7 +132,7 @@ public:
       alg.setPropertyValue("SplitThreshold", SplitThreshold);
     if (!MaxRecursionDepth.empty())
       alg.setPropertyValue("MaxRecursionDepth", MaxRecursionDepth);
-    alg.setBoxController(bc);
+    alg.setBoxController(std::move(bc));
   }
 
   void test_SplitInto() {
@@ -257,5 +258,3 @@ public:
     TS_ASSERT(p->isDefault());
   }
 };
-
-#endif /* MANTID_MDEVENTS_BOXCONTROLLERSETTINGSALGORITHMTEST_H_ */

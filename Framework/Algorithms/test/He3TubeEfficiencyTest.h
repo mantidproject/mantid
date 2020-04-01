@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef HE3TUBEEFFICIENCYTEST_H_
-#define HE3TUBEEFFICIENCYTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -31,7 +30,7 @@ using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 
 namespace He3TubeEffeciencyHelper {
-void createWorkspace2DInADS(const std::string inputWS) {
+void createWorkspace2DInADS(const std::string &inputWS) {
   const int nspecs(4);
   const int nbins(5);
 
@@ -59,7 +58,7 @@ void createWorkspace2DInADS(const std::string inputWS) {
   loader.execute();
 }
 
-void createEventWorkspaceInADS(const std::string inputEvWS) {
+void createEventWorkspaceInADS(const std::string &inputEvWS) {
   EventWorkspace_sptr event =
       WorkspaceCreationHelper::createEventWorkspace(4, 5, 5, 0, 0.9, 3, 0);
   event->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
@@ -214,4 +213,3 @@ private:
   const std::string inputWS;
   const std::string inputEvWS;
 };
-#endif // HE3TUBEEFFICIENCYTEST_H_

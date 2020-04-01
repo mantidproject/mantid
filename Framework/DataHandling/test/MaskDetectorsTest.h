@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MARKDEADDETECTORSTEST_H_
-#define MARKDEADDETECTORSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -650,9 +649,9 @@ public:
 
   void test_MaskWithWorkspaceWithDetectorIDs() {
     auto &ads = AnalysisDataService::Instance();
-    const std::string inputWSName("inputWS"), existingMaskName("existingMask");
     const int numInputSpec(90);
 
+    const std::string inputWSName("inputWS");
     setUpWS(false, inputWSName, false, numInputSpec);
 
     auto inputWS = ads.retrieveWS<MatrixWorkspace>(inputWSName);
@@ -718,7 +717,7 @@ public:
 
   void test_MaskWithWorkspaceWithDetectorIDsAndWsIndexRange() {
     auto &ads = AnalysisDataService::Instance();
-    const std::string inputWSName("inputWS"), existingMaskName("existingMask");
+    const std::string inputWSName("inputWS");
     const int numInputSpec(90);
 
     setUpWS(false, inputWSName, false, numInputSpec);
@@ -822,5 +821,3 @@ public:
 private:
   MaskDetectors marker;
 };
-
-#endif /*MARKDEADDETECTORSTEST_H_*/

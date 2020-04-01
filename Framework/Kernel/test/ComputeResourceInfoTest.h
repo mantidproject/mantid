@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef COMPUTERESOURCEINFOTEST_H_
-#define COMPUTERESOURCEINFOTEST_H_
+#pragma once
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -224,5 +223,3 @@ const std::string ComputeResourceInfoTest::testFacilityName = "ATestFacility";
 const std::string ComputeResourceInfoTest::fermiURL =
     "https://fermi.ornl.gov/MantidRemote";
 const std::string ComputeResourceInfoTest::fermiName = "Fermi";
-
-#endif // COMPUTERESOURCEINFOTEST_H_

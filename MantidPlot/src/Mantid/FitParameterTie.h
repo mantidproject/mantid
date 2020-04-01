@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FITPARAMETERTIE_H
-#define FITPARAMETERTIE_H
+#pragma once
 
 #include <QList>
 #include <QString>
@@ -59,5 +58,3 @@ private:
   /// The property
   QtProperty *m_prop;
 };
-
-#endif /* FITPARAMETERTIE_H */

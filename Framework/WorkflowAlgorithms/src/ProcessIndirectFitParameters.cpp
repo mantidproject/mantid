@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/ProcessIndirectFitParameters.h"
 
@@ -80,7 +80,7 @@ void extractColumnValues(Column const &column, std::size_t startRow,
 
 template <typename T, typename OutputIterator>
 void extractValuesFromColumns(std::size_t startRow, std::size_t endRow,
-                              std::vector<Column_const_sptr> columns,
+                              const std::vector<Column_const_sptr> &columns,
                               OutputIterator outputIt) {
   for (auto &&column : columns)
     extractColumnValues<T>(*column, startRow, endRow, outputIt);
@@ -104,7 +104,9 @@ std::vector<double> getNumericColumnValuesOrIndices(Column const &column,
   return getIncrementingSequence(0.0, length);
 }
 
-std::string getColumnName(Column_const_sptr column) { return column->name(); }
+std::string getColumnName(const Column_const_sptr &column) {
+  return column->name();
+}
 
 std::vector<std::string>
 extractColumnNames(std::vector<Column_const_sptr> const &columns) {

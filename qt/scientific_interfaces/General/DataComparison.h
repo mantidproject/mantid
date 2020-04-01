@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_DATACOMPARISON_H_
-#define MANTIDQTCUSTOMINTERFACES_DATACOMPARISON_H_
+#pragma once
 
 //----------------------
 // Includes
@@ -38,7 +37,7 @@ public:
   explicit DataComparison(QWidget *parent = nullptr);
 
   /// Tests if a workspace is shown in the UI
-  bool containsWorkspace(Mantid::API::MatrixWorkspace_const_sptr ws);
+  bool containsWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &ws);
 
 private slots:
   /// Add selected data to plot
@@ -73,7 +72,7 @@ private:
   /// Initialize the layout
   void initLayout() override;
   /// Adds a workspace to the data table
-  void addDataItem(Mantid::API::Workspace_const_sptr ws);
+  void addDataItem(const Mantid::API::Workspace_const_sptr &ws);
   /// Normalises spectra offsets in table
   void normaliseSpectraOffsets();
   /// Gets an initial curve colour for a new workspace
@@ -111,5 +110,3 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_DATACOMPARISON_H_

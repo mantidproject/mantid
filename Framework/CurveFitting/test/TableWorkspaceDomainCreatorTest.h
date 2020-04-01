@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_TABLEWORKSPACEDOMAINCREATORTEST_H_
-#define MANTID_CURVEFITTING_TABLEWORKSPACEDOMAINCREATORTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -771,8 +770,8 @@ private:
   }
 
   boost::shared_ptr<Fit>
-  setupBasicFitPropertiesAlgorithm(API::IFunction_sptr fun,
-                                   API::Workspace_sptr ws,
+  setupBasicFitPropertiesAlgorithm(const API::IFunction_sptr &fun,
+                                   const API::Workspace_sptr &ws,
                                    bool createOutput = true) {
     auto fit = boost::make_shared<Fit>();
     fit->initialize();
@@ -786,5 +785,3 @@ private:
     return fit;
   }
 };
-
-#endif /* MANTID_CURVEFITTING_TABLEWORKSPACEDOMAINCREATORTEST_H_ */

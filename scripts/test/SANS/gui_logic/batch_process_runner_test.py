@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from qtpy.QtCore import QThreadPool
 
-from mantid.py3compat import mock
+from unittest import mock
 from sans.common.enums import (OutputMode)
 from sans.gui_logic.models.batch_process_runner import BatchProcessRunner
 
@@ -32,23 +30,20 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.load_mock = load_patcher.start()
 
         self.batch_process_runner = BatchProcessRunner(self.notify_progress, self.notify_done, self.notify_error)
-        self.states = {0: mock.MagicMock(), 1: mock.MagicMock(), 2: mock.MagicMock()}
+
+        self._mock_rows = [(mock.Mock(), i) for i in range(3)]
 
     def test_that_notify_done_method_set_correctly(self):
         self.batch_process_runner.notify_done()
-
         self.notify_done.assert_called_once_with()
 
-    def test_that_process_states_calls_batch_reduce_for_each_row(self):
+    def test_that_process_states_calls_batch_reduce_for_specified_row(self):
         get_states_mock = mock.MagicMock()
-        states = {0: mock.MagicMock(),
-                  1: mock.MagicMock(),
-                  2: mock.MagicMock()}
+        states = {0: mock.MagicMock()}
         errors = {}
         get_states_mock.return_value = states, errors
 
-        self.batch_process_runner.process_states(self.states,
-                                                 get_thickness_for_rows_func=mock.MagicMock,
+        self.batch_process_runner.process_states(row_index_pair=self._mock_rows,
                                                  get_states_func=get_states_mock,
                                                  use_optimizations=False, output_mode=OutputMode.BOTH,
                                                  plot_results=False, output_graph='')
@@ -60,14 +55,12 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.batch_process_runner.row_processed_signal = mock.MagicMock()
         self.batch_process_runner.row_failed_signal = mock.MagicMock()
         get_states_mock = mock.MagicMock()
-        states = {0: mock.MagicMock(),
-                  1: mock.MagicMock(),
-                  2: mock.MagicMock()}
+
+        states = {0: mock.MagicMock()}
         errors = {}
         get_states_mock.return_value = states, errors
 
-        self.batch_process_runner.process_states(self.states,
-                                                 get_thickness_for_rows_func=mock.MagicMock,
+        self.batch_process_runner.process_states(row_index_pair=self._mock_rows,
                                                  get_states_func=get_states_mock,
                                                  use_optimizations=False, output_mode=OutputMode.BOTH,
                                                  plot_results=False, output_graph='')
@@ -85,14 +78,11 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.sans_batch_instance.side_effect = Exception('failure')
 
         get_states_mock = mock.MagicMock()
-        states = {0: mock.MagicMock(),
-                  1: mock.MagicMock(),
-                  2: mock.MagicMock()}
+        states = {0: mock.MagicMock()}
         errors = {}
         get_states_mock.return_value = states, errors
 
-        self.batch_process_runner.process_states(self.states,
-                                                 get_thickness_for_rows_func=mock.MagicMock,
+        self.batch_process_runner.process_states(row_index_pair=self._mock_rows,
                                                  get_states_func=get_states_mock,
                                                  use_optimizations=False, output_mode=OutputMode.BOTH,
                                                  plot_results=False, output_graph='')
@@ -108,17 +98,12 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.batch_process_runner.row_processed_signal = mock.MagicMock()
         self.batch_process_runner.row_failed_signal = mock.MagicMock()
 
-        get_thickness_func = mock.MagicMock()
-
-        states = {0: mock.MagicMock(),
-                  1: mock.MagicMock(),
-                  2: mock.MagicMock()}
+        states = {0: mock.MagicMock()}
         errors = {}
         get_states_mock = mock.MagicMock()
         get_states_mock.return_value = states, errors
 
-        self.batch_process_runner.load_workspaces(self.states, get_states_func=get_states_mock,
-                                                  get_thickness_for_rows_func=get_thickness_func)
+        self.batch_process_runner.load_workspaces(row_index_pair=self._mock_rows, get_states_func=get_states_mock)
 
         QThreadPool.globalInstance().waitForDone()
 
@@ -133,17 +118,12 @@ class BatchProcessRunnerTest(unittest.TestCase):
         self.batch_process_runner.row_failed_signal = mock.MagicMock()
         self.load_mock.side_effect = Exception('failure')
 
-        get_thickness_func = mock.MagicMock()
-
-        states = None
-        errors = {0: "failure",
-                  1: "failure",
-                  2: "failure"}
+        states = {}
+        errors = {0: "failure"}
         get_states_mock = mock.MagicMock()
         get_states_mock.return_value = states, errors
 
-        self.batch_process_runner.load_workspaces(self.states, get_states_func=get_states_mock,
-                                                  get_thickness_for_rows_func=get_thickness_func)
+        self.batch_process_runner.load_workspaces(row_index_pair=self._mock_rows, get_states_func=get_states_mock)
         QThreadPool.globalInstance().waitForDone()
 
         self.assertEqual(3, self.batch_process_runner.row_failed_signal.emit.call_count)

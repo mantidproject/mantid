@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CURVEFITTING_FITMWTEST_H_
-#define CURVEFITTING_FITMWTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/FakeObjects.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -64,7 +63,7 @@ API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram,
   return ws2;
 }
 
-void doTestExecPointData(API::MatrixWorkspace_sptr ws2,
+void doTestExecPointData(const API::MatrixWorkspace_sptr &ws2,
                          bool performance = false) {
   API::IFunction_sptr fun(new ExpDecay);
   fun->setParameter("Height", 1.);
@@ -170,7 +169,7 @@ void doTestExecPointData(API::MatrixWorkspace_sptr ws2,
     TS_ASSERT_DELTA(fun->getParameter("Lifetime"), 1.0, 1e-4);
   }
 }
-void doTestExecHistogramData(API::MatrixWorkspace_sptr ws2,
+void doTestExecHistogramData(const API::MatrixWorkspace_sptr &ws2,
                              bool performance = false) {
   API::IFunction_sptr fun(new ExpDecay);
   fun->setParameter("Height", 1.);
@@ -498,8 +497,6 @@ public:
   test_Composite_Function_With_SeparateMembers_Option_On_FitMW_Outputs_Composite_Values_Plus_Each_Member() {
     const bool histogram = true;
     auto ws2 = createTestWorkspace(histogram);
-    const std::string inputWSName = "FitMWTest_CompositeTest";
-    // AnalysisDataService::Instance().add(inputWSName, ws2);
 
     auto composite = boost::make_shared<API::CompositeFunction>();
     API::IFunction_sptr expDecay(new ExpDecay);
@@ -1353,4 +1350,3 @@ private:
   const size_t NVectors = 2000;
   const size_t YLength = 10000;
 };
-#endif /*CURVEFITTING_FITMWTEST_H_*/

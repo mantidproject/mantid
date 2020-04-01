@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -279,7 +278,7 @@ void MuonAnalysisResultTableCreator::checkSameNumberOfDatasets(
   const size_t firstNumRuns = workspacesByLabel.begin()->second.size();
   if (std::any_of(workspacesByLabel.begin(), workspacesByLabel.end(),
                   [&firstNumRuns](
-                      const std::pair<QString, std::vector<std::string>> fit) {
+                      const std::pair<QString, std::vector<std::string>> &fit) {
                     return fit.second.size() != firstNumRuns;
                   })) {
     throw std::runtime_error(
@@ -754,7 +753,7 @@ bool MuonAnalysisResultTableCreator::haveSameParameters(
  * @param table :: [input, output] Pointer to TableWorkspace to edit
  */
 void MuonAnalysisResultTableCreator::removeFixedParameterErrors(
-    const ITableWorkspace_sptr table) const {
+    const ITableWorkspace_sptr &table) const {
   assert(table);
   const size_t nRows = table->rowCount();
   const auto colNames = table->getColumnNames();

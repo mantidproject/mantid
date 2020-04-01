@@ -1,17 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import (CreateWorkspace, ReflectometryReductionOneAuto,
-                              ReflectometryReductionOneLiveData)
+from mantid.simpleapi import (CreateWorkspace, ReflectometryReductionOneLiveData)
 from testhelpers import (assertRaisesNothing, create_algorithm)
 
 
@@ -92,9 +89,9 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def test_all_child_properties_are_present(self):
         # Get the properties for the child algorithm, apart from a list of known
         # exclusions
-        child_alg = create_algorithm('ReflectometryReductionOneAuto')
-        excluded = ['ThetaIn', 'ThetaLogName', 'Diagnostics',
-                    'FirstTransmissionRun', 'SecondTransmissionRun',
+        child_alg = create_algorithm('ReflectometryISISLoadAndProcess')
+        excluded = ['InputRunList', 'ThetaIn', 'ThetaLogName', 'OutputWorkspaceTransmission',
+                    'OutputWorkspaceFirstTransmission', 'OutputWorkspaceSecondTransmission',
                     'OutputWorkspaceBinned', 'OutputWorkspaceWavelength']
         child_props = set([prop.name for prop in child_alg.getProperties() if prop.name not in excluded])
         # Check the child properties exist in the parent algorithm

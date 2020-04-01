@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import math
 import numpy as np
 from scipy import constants
@@ -113,8 +112,8 @@ HZ2INV_CM_DECOMPOSITION = math.frexp(HZ2INV_CM)
 
 CONSTANT = H_BAR_DECOMPOSITION[0] * M2_TO_ANGSTROM2_DECOMPOSITION[0] * \
     KG2AMU_DECOMPOSITION[0] * HZ2INV_CM_DECOMPOSITION[0] / math.pi
-CONSTANT *= 2 ** (H_BAR_DECOMPOSITION[1] + M2_TO_ANGSTROM2_DECOMPOSITION[1] + KG2AMU_DECOMPOSITION[1] +
-                  HZ2INV_CM_DECOMPOSITION[1] - 2)
+CONSTANT *= 2 ** (H_BAR_DECOMPOSITION[1] + M2_TO_ANGSTROM2_DECOMPOSITION[1] + KG2AMU_DECOMPOSITION[1]
+                  + HZ2INV_CM_DECOMPOSITION[1] - 2)
 
 CONSTANT_DECOMPOSITION = math.frexp(CONSTANT)
 M_N_DECOMPOSITION = math.frexp(constants.m_n)
@@ -174,7 +173,6 @@ MAX_WAVENUMBER = 5000.0  # in cm^-1
 MAX_POINTS_PER_PEAK = 1000
 MIN_POINTS_PER_PEAK = 1
 
-SMALL_S = 1e-6
 MAX_THRESHOLD = 0.3
 
 ONE_CHARACTER = 1

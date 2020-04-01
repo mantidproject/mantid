@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BOXCONTROLLER_H_
-#define BOXCONTROLLER_H_
+#pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/Exception.h"
@@ -30,7 +30,7 @@ namespace API {
  * @author Janik Zikovsky
  * @date Feb 21, 2011
  */
-class DLLExport BoxController {
+class MANTID_API_DLL BoxController {
 public:
   //-----------------------------------------------------------------------------------
   /** Constructor
@@ -399,7 +399,7 @@ public:
   IBoxControllerIO *getFileIO() { return m_fileIO.get(); }
   /// makes box controller file based by providing class, responsible for
   /// fileIO.
-  void setFileBacked(boost::shared_ptr<IBoxControllerIO> newFileIO,
+  void setFileBacked(const boost::shared_ptr<IBoxControllerIO> &newFileIO,
                      const std::string &fileName = "");
   void clearFileBacked();
   //-----------------------------------------------------------------------------------
@@ -546,5 +546,3 @@ using BoxController_const_sptr = boost::shared_ptr<const BoxController>;
 } // namespace API
 
 } // namespace Mantid
-
-#endif /* SPLITCONTROLLER_H_ */

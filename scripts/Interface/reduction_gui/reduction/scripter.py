@@ -1,15 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, bad-builtin
 """
     Reduction scripter used to take reduction parameters
     end produce a Mantid reduction script
 """
-from __future__ import (absolute_import, division, print_function)
 import xml.dom.minidom
 import sys
 import time
@@ -337,7 +336,8 @@ def execute_script_async(script, error_cb=None):
         executioner.sig_exec_error.connect(on_error)
     else:
         executioner.sig_exec_error.connect(error_cb)
-    executioner.execute_async(script, '<string>')
+
+    executioner.execute_async(script, 0)
 
 
 class BaseReductionScripter(object):

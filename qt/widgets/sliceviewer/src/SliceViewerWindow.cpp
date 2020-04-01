@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/SliceViewerWindow.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -37,7 +37,8 @@ namespace SliceViewer {
  * @return
  */
 SliceViewerWindow::SliceViewerWindow(const QString &wsName,
-                                     const QString &label, Qt::WindowFlags f)
+                                     const QString &label,
+                                     const Qt::WindowFlags &f)
     : QMainWindow(nullptr, f), WorkspaceObserver(), m_lastLinerWidth(0),
       m_lastPeaksViewerWidth(0) {
 
@@ -372,7 +373,7 @@ void SliceViewerWindow::lineChanged(QPointF start2D, QPointF end2D,
 
 /** Slot called when changing the slice point of the 2D view
  * (keeping the line in the same 2D point) */
-void SliceViewerWindow::changedSlicePoint(Mantid::Kernel::VMD slice) {
+void SliceViewerWindow::changedSlicePoint(const Mantid::Kernel::VMD &slice) {
   UNUSED_ARG(slice);
   setLineViewerValues(m_slicer->getLineOverlay()->getPointA(),
                       m_slicer->getLineOverlay()->getPointB(),

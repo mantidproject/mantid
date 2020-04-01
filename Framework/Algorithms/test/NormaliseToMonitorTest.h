@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NORMALISETOMONITORTEST_H_
-#define NORMALISETOMONITORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -469,10 +468,11 @@ public:
     for (size_t i = 0; i < specOutInfo.size(); ++i) {
       const auto &yValues = outWS->histogram(i).y();
       for (size_t j = 0; j < yValues.size(); ++j) {
-        if (specOutInfo.isMonitor(i))
+        if (specOutInfo.isMonitor(i)) {
           TS_ASSERT_DELTA(yValues[j], 3.0, 1e-12)
-        else
+        } else {
           TS_ASSERT_DELTA(yValues[j], 6.0 / double(j + 1), 1e-12)
+        }
       }
     }
   }
@@ -498,6 +498,7 @@ public:
       const auto &yValues = outWS->histogram(i).y();
       for (size_t j = 0; j < yValues.size(); ++j) {
         if (specOutInfo.isMonitor(i))
+          // cppcheck-suppress syntaxError
           TS_ASSERT_DELTA(yValues[j], double(j + 1) / 15.0, 1e-12)
         else
           TS_ASSERT_DELTA(yValues[j], 2.0 / 15.0, 1e-12)
@@ -601,4 +602,3 @@ public:
 private:
   const bool performance = true;
 };
-#endif /*NORMALISETOMONITORTEST_H_*/

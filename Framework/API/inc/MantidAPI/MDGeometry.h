@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_MDGEOMETRY_H_
-#define MANTID_API_MDGEOMETRY_H_
+#pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
@@ -34,7 +34,7 @@ class Workspace;
   @author Janik Zikovsky
   @date 2011-09-06
 */
-class DLLExport MDGeometry {
+class MANTID_API_DLL MDGeometry {
 public:
   MDGeometry();
   MDGeometry(const MDGeometry &other);
@@ -64,7 +64,8 @@ public:
 
   std::string getGeometryXML() const;
 
-  void addDimension(boost::shared_ptr<Mantid::Geometry::IMDDimension> dim);
+  void
+  addDimension(const boost::shared_ptr<Mantid::Geometry::IMDDimension> &dim);
   void addDimension(Mantid::Geometry::IMDDimension *dim);
 
   // --------------------------------------------------------------------------------------------
@@ -167,5 +168,3 @@ protected:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_MDGEOMETRY_H_ */

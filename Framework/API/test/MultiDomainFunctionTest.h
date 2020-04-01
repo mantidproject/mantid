@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MULTIDOMAINFUNCTIONTEST_H_
-#define MULTIDOMAINFUNCTIONTEST_H_
+#pragma once
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -325,7 +324,6 @@ public:
   void test_attribute_domain_range() {
     multi.clearDomainIndices();
     multi.setLocalAttributeValue(0, "domains", "0-2");
-    return;
     multi.setLocalAttributeValue(1, "domains", "i");
     multi.setLocalAttributeValue(2, "domains", "i");
 
@@ -337,7 +335,7 @@ public:
     const FunctionDomain1D &d0 =
         static_cast<const FunctionDomain1D &>(domain.getDomain(0));
     for (size_t i = 0; i < 9; ++i) {
-      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d0[i]);
+      TS_ASSERT_DELTA(values.getCalculated(i), A + B * d0[i], 1e-6);
     }
 
     A = multi.getFunction(0)->getParameter("A") +
@@ -347,7 +345,7 @@ public:
     const FunctionDomain1D &d1 =
         static_cast<const FunctionDomain1D &>(domain.getDomain(1));
     for (size_t i = 9; i < 19; ++i) {
-      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d1[i - 9]);
+      TS_ASSERT_DELTA(values.getCalculated(i), A + B * d1[i - 9], 1e-6);
     }
 
     A = multi.getFunction(0)->getParameter("A") +
@@ -357,7 +355,7 @@ public:
     const FunctionDomain1D &d2 =
         static_cast<const FunctionDomain1D &>(domain.getDomain(2));
     for (size_t i = 19; i < 30; ++i) {
-      TS_ASSERT_EQUALS(values.getCalculated(i), A + B * d2[i - 19]);
+      TS_ASSERT_DELTA(values.getCalculated(i), A + B * d2[i - 19], 1e-6);
     }
   }
 
@@ -504,5 +502,3 @@ private:
   MultiDomainFunction multi;
   JointDomain domain;
 };
-
-#endif /*MULTIDOMAINFUNCTIONTEST_H_*/

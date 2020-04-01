@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IDOMAINCREATOR_H_
-#define MANTID_API_IDOMAINCREATOR_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -37,7 +36,7 @@ data.
 @author Roman Tolchenov, Tessella plc
 @date 22/03/2012
 */
-class DLLExport IDomainCreator {
+class MANTID_API_DLL IDomainCreator {
 public:
   /// Type of domain to create.
   enum DomainType { Simple = 0, Sequential, Parallel };
@@ -150,5 +149,3 @@ using IDomainCreator_sptr = boost::shared_ptr<IDomainCreator>;
                                      .subscribe<classname>(#classname)),       \
                                 0));                                           \
   }
-
-#endif /*MANTID_API_IDOMAINCREATOR_H_*/

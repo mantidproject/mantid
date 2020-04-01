@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_GENERATEEVENTSFILTERTEST_H_
-#define MANTID_ALGORITHMS_GENERATEEVENTSFILTERTEST_H_
+#pragma once
 
 #include <Poco/File.h>
 #include <cmath>
@@ -1146,7 +1145,7 @@ public:
    * SplittingInterval objects
    */
   size_t convertMatrixSplitterToSplitters(
-      API::MatrixWorkspace_const_sptr matrixws,
+      const API::MatrixWorkspace_const_sptr &matrixws,
       std::vector<Kernel::SplittingInterval> &splitters) {
     splitters.clear();
     size_t numsplitters = 0;
@@ -1217,5 +1216,3 @@ public:
 private:
   Mantid::DataObjects::EventWorkspace_sptr inputEvent;
 };
-
-#endif /* MANTID_ALGORITHMS_GENERATEEVENTSFILTERTEST_H_ */

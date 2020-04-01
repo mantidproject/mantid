@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGONTEST_H_
-#define MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGONTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -237,6 +236,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EMode", "Indirect"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EFixed", 1.84))
     const double dE{0.3};
+    // cppcheck-suppress unreadVariable
     const std::vector<double> eBinParams{dE};
     std::vector<double> expectedEBinEdges;
     const auto firstEdge = inWS->x(0).front();
@@ -365,9 +365,10 @@ public:
    * @param twoThetaRanges input table workspace
    * @return the algorithm object
    */
-  IAlgorithm_sptr setUpAlg(
-      Mantid::API::MatrixWorkspace_sptr const inputWS,
-      boost::shared_ptr<Mantid::DataObjects::TableWorkspace> twoThetaRanges) {
+  IAlgorithm_sptr
+  setUpAlg(Mantid::API::MatrixWorkspace_sptr const &inputWS,
+           const boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
+               &twoThetaRanges) {
     const std::vector<double> qBinParams{0.023};
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("SofQWNormalisedPolygon");
@@ -385,7 +386,7 @@ public:
    * @return A pointer to the table workspace
    */
   boost::shared_ptr<Mantid::DataObjects::TableWorkspace>
-  createTableWorkspace(const std::vector<std::string> dataTypes,
+  createTableWorkspace(const std::vector<std::string> &dataTypes,
                        const int rowCount) {
     auto twoThetaRanges = boost::make_shared<TableWorkspace>();
     std::vector<std::string> names = {"Detector ID", "Max two theta",
@@ -543,5 +544,3 @@ public:
 private:
   MatrixWorkspace_sptr m_largeWS;
 };
-
-#endif /* MANTID_ALGORITHMS_SOFQW2TEST_H_ */

@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import copy
 import matplotlib.axes
 import matplotlib.cm as cm
@@ -17,9 +15,9 @@ from matplotlib import axis, ticker  # noqa
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
 from mantid.plots.legend import LegendProperties
+from mantid.plots.plotfunctions import create_subplots
 # Constants set in workbench.plotting.functions but would cause backwards reliability
 from mantidqt.plotting.functions import pcolormesh
-
 
 SUBPLOT_WSPACE = 0.5
 SUBPLOT_HSPACE = 0.5
@@ -48,9 +46,7 @@ class PlotsLoader(object):
         :param plot_dict: dictionary; A dictionary of various items intended to recreate a figure
         :param create_plot: Bool; whether or not to make the plot, or to return the figure.
         :return: matplotlib.figure; Only returns if create_plot=False
-        """
-        import matplotlib.pyplot as plt
-        # Grab creation arguments
+        """        # Grab creation arguments
         creation_args = plot_dict["creationArguments"]
 
         if len(creation_args) == 0:
@@ -59,21 +55,16 @@ class PlotsLoader(object):
                 "The original plot title was: {}".format(plot_dict["label"]))
             return
 
-        # Make a copy so it can be applied to the axes, of the plot once created.
-        creation_args_copy = copy.deepcopy(creation_args[0])
-
-        # Make initial plot
-        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
-
-        # If an overplot is necessary plot onto the same figure
-        for cargs in creation_args[0]:
-            if "workspaces" in cargs:
-                workspace_name = cargs.pop('workspaces')
-                workspace = ADS.retrieve(workspace_name)
-                self.plot_func(workspace, ax, ax.figure, cargs)
-
-        # Make sure that the axes gets it's creation_args as loading doesn't add them
-        ax.creation_args = creation_args_copy
+        fig, axes_matrix, _, _ = create_subplots(len(creation_args))
+        axes_list = axes_matrix.flatten().tolist()
+        for ax, cargs_list in zip(axes_list, creation_args):
+            creation_args_copy = copy.deepcopy(cargs_list)
+            for cargs in cargs_list:
+                if "workspaces" in cargs:
+                    workspace_name = cargs.pop("workspaces")
+                    workspace = ADS.retrieve(workspace_name)
+                    self.plot_func(workspace, ax, ax.figure, cargs)
+            ax.creation_args = creation_args_copy
 
         # Update the fig
         fig._label = plot_dict["label"]
@@ -102,10 +93,20 @@ class PlotsLoader(object):
         if "cmap" in creation_arg:
             creation_arg["cmap"] = getattr(matplotlib.cm, creation_arg["cmap"])
 
-        function_dict = {"plot": axes.plot, "scatter": axes.scatter, "errorbar": axes.errorbar,
-                         "pcolor": axes.pcolor, "pcolorfast": axes.pcolorfast, "pcolormesh": pcolormesh,
-                         "imshow": pcolormesh, "contour": axes.contour, "contourf": axes.contourf,
-                         "tripcolor": axes.tripcolor, "tricontour": axes.tricontour, "tricontourf": axes.tricontourf}
+        function_dict = {
+            "plot": axes.plot,
+            "scatter": axes.scatter,
+            "errorbar": axes.errorbar,
+            "pcolor": axes.pcolor,
+            "pcolorfast": axes.pcolorfast,
+            "pcolormesh": pcolormesh,
+            "imshow": pcolormesh,
+            "contour": axes.contour,
+            "contourf": axes.contourf,
+            "tripcolor": axes.tripcolor,
+            "tricontour": axes.tricontour,
+            "tricontourf": axes.tricontourf
+        }
 
         func = function_dict[function_to_call]
         # Plotting is done via an Axes object unless a colorbar needs to be added
@@ -124,6 +125,8 @@ class PlotsLoader(object):
             except IndexError as e:
                 if not self.color_bar_remade:
                     raise IndexError(e)
+            except KeyError:
+                logger.notice("Not adding data to blank axis.")
 
     @staticmethod
     def restore_fig_properties(fig, dic):
@@ -178,14 +181,16 @@ class PlotsLoader(object):
         ax.text(x=dic["position"][0],
                 y=dic["position"][1],
                 s=dic["text"],
-                fontdict={u'alpha': style_dic["alpha"],
-                          u'color': style_dic["color"],
-                          u'rotation': style_dic["rotation"],
-                          u'fontsize': style_dic["textSize"],
-                          u'zorder': style_dic["zOrder"],
-                          u'usetex': dic["useTeX"],
-                          u'horizontalalignment': style_dic["hAlign"],
-                          u'verticalalignment': style_dic["vAlign"]})
+                fontdict={
+                    u'alpha': style_dic["alpha"],
+                    u'color': style_dic["color"],
+                    u'rotation': style_dic["rotation"],
+                    u'fontsize': style_dic["textSize"],
+                    u'zorder': style_dic["zOrder"],
+                    u'usetex': dic["useTeX"],
+                    u'horizontalalignment': style_dic["hAlign"],
+                    u'verticalalignment': style_dic["vAlign"]
+                })
 
     @staticmethod
     def update_lines(ax, line):
@@ -301,8 +306,9 @@ class PlotsLoader(object):
         try:
             image.axes.set_cmap(cm.get_cmap(dic["cmap"]))
         except AttributeError as e:
-            logger.debug("PlotsLoader - The Image accessed did not have an axes with the ability to set the cmap: "
-                         + str(e))
+            logger.debug(
+                "PlotsLoader - The Image accessed did not have an axes with the ability to set the cmap: "
+                + str(e))
 
         # Redraw
         image.axes.figure.canvas.draw()

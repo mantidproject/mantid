@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
@@ -15,6 +15,8 @@
 
 #include <fstream>
 #include <string>
+#include <utility>
+
 #include <vector>
 
 namespace Mantid {
@@ -28,7 +30,7 @@ using namespace Mantid::API;
  * workspace has one period only - it is returned.
  * @param ws :: Run workspace
  */
-MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws) {
+MatrixWorkspace_sptr firstPeriod(const Workspace_sptr &ws) {
 
   if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
     return boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
@@ -43,7 +45,7 @@ MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws) {
  * @return :: run label
  */
 std::string getRunLabel(Mantid::API::Workspace_sptr ws) {
-  const std::vector<Mantid::API::Workspace_sptr> wsList{ws};
+  const std::vector<Mantid::API::Workspace_sptr> wsList{std::move(ws)};
   return getRunLabel(wsList);
 }
 
@@ -282,7 +284,7 @@ std::string generateWorkspaceName(const Muon::DatasetParams &params) {
  * group) and return as an ordered set.
  */
 std::set<Mantid::detid_t>
-getAllDetectorIDsFromWorkspace(Mantid::API::Workspace_sptr ws) {
+getAllDetectorIDsFromWorkspace(const Mantid::API::Workspace_sptr &ws) {
 
   std::set<Mantid::detid_t> detectorIDs;
   if (auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
@@ -296,8 +298,8 @@ getAllDetectorIDsFromWorkspace(Mantid::API::Workspace_sptr ws) {
 /**
  * Find all the detector IDs contained inside a matrix workspace
  */
-std::set<Mantid::detid_t>
-getAllDetectorIDsFromMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
+std::set<Mantid::detid_t> getAllDetectorIDsFromMatrixWorkspace(
+    const Mantid::API::MatrixWorkspace_sptr &ws) {
 
   std::set<Mantid::detid_t> detectorIDs;
   std::set<Mantid::detid_t> spectrumIDs;
@@ -312,8 +314,8 @@ getAllDetectorIDsFromMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
 /**
  * Find all the detector IDs contained inside a group workspace
  */
-std::set<Mantid::detid_t>
-getAllDetectorIDsFromGroupWorkspace(Mantid::API::WorkspaceGroup_sptr ws) {
+std::set<Mantid::detid_t> getAllDetectorIDsFromGroupWorkspace(
+    const Mantid::API::WorkspaceGroup_sptr &ws) {
 
   std::set<Mantid::detid_t> detectorIDs;
   std::set<Mantid::detid_t> detectorIDsSingleWorkspace;
@@ -348,8 +350,8 @@ std::vector<int> getAllDetectorIDsFromGroup(const Grouping &grouping) {
 // Checks if all the detectors in the groups in a Grouping are in the workspace.
 // Workspace can be matrix or group type.
 bool checkGroupDetectorsInWorkspace(const Grouping &grouping,
-                                    Workspace_sptr ws) {
-  std::set<int> detectorIDs = getAllDetectorIDsFromWorkspace(ws);
+                                    const Workspace_sptr &ws) {
+  std::set<int> detectorIDs = getAllDetectorIDsFromWorkspace(std::move(ws));
   std::vector<int> groupDetectorIDs = getAllDetectorIDsFromGroup(grouping);
   return checkItemsInSet(groupDetectorIDs, detectorIDs);
 }
@@ -605,8 +607,8 @@ MatrixWorkspace_sptr extractSpectrum(const Workspace_sptr &inputWS,
   return outWS;
 }
 
-void addSampleLog(MatrixWorkspace_sptr workspace, const std::string &logName,
-                  const std::string &logValue) {
+void addSampleLog(const MatrixWorkspace_sptr &workspace,
+                  const std::string &logName, const std::string &logValue) {
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
   alg->initialize();

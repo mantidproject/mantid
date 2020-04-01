@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_BINARYOPERATIONMDTEST_H_
-#define MANTID_MDALGORITHMS_BINARYOPERATIONMDTEST_H_
+#pragma once
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -96,8 +95,9 @@ public:
   }
 
   /// Run the mock algorithm
-  void doTest(MockBinaryOperationMD &alg, std::string lhs, std::string rhs,
-              std::string outName, bool succeeds = true) {
+  void doTest(MockBinaryOperationMD &alg, const std::string &lhs,
+              const std::string &rhs, const std::string &outName,
+              bool succeeds = true) {
     out.reset();
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -328,5 +328,3 @@ public:
     doTest(alg, "event_A", "histo_A", "other_output");
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_BINARYOPERATIONMDTEST_H_ */

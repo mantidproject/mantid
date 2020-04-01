@@ -1,15 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
-
 from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_name, get_group_data_workspace_name,
                                                          get_pair_data_workspace_name, get_base_data_directory,
                                                          get_group_asymmetry_name,
-                                                         get_group_asymmetry_unnorm_name, get_deadtime_data_workspace_name)
+                                                         get_group_asymmetry_unnorm_name,
+                                                         get_deadtime_data_workspace_name)
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
@@ -194,13 +193,13 @@ class MuonContext(object):
                 self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)['workspace'][
                     'OutputWorkspace']
             loaded_workspace_deadtime_table = self.data_context._loaded_data.get_data(
-                run=run,instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable']
+                run=run, instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable']
             directory = get_base_data_directory(
                 self,
                 run_string)
 
             deadtime_name = get_deadtime_data_workspace_name(self.data_context.instrument,
-                                                             str(run[0]),workspace_suffix=self.workspace_suffix)
+                                                             str(run[0]), workspace_suffix=self.workspace_suffix)
             MuonWorkspaceWrapper(loaded_workspace_deadtime_table).show(directory + deadtime_name)
             self.data_context._loaded_data.get_data(
                 run=run, instrument=self.data_context.instrument)['workspace']['DataDeadTimeTable'] = deadtime_name
@@ -210,7 +209,8 @@ class MuonContext(object):
                 for i, single_ws in enumerate(loaded_workspace):
                     name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
                                                                    self.data_context.is_multi_period(),
-                                                                   period=str(i + 1), workspace_suffix=self.workspace_suffix)
+                                                                   period=str(i + 1),
+                                                                   workspace_suffix=self.workspace_suffix)
                     single_ws.show(name)
             else:
                 # Single period data
@@ -222,10 +222,10 @@ class MuonContext(object):
         self.ads_observer.observeRename(True)
 
     def _do_rebin(self):
-        return (self.gui_context['RebinType'] == 'Fixed' and
-                'RebinFixed' in self.gui_context and self.gui_context['RebinFixed']) or \
-               (self.gui_context['RebinType'] == 'Variable' and
-                'RebinVariable' in self.gui_context and self.gui_context['RebinVariable'])
+        return (self.gui_context['RebinType'] == 'Fixed'
+                and 'RebinFixed' in self.gui_context and self.gui_context['RebinFixed']) or \
+               (self.gui_context['RebinType'] == 'Variable'
+                and 'RebinVariable' in self.gui_context and self.gui_context['RebinVariable'])
 
     def get_workspace_names_for_FFT_analysis(self, use_raw=True):
         workspace_options = self.get_names_of_workspaces_to_fit(
@@ -375,7 +375,12 @@ class MuonContext(object):
         return equivalent_list
 
     def remove_workspace(self, workspace):
-        workspace_name = workspace.name()
+        # required as the renameHandler returns a name instead of a workspace.
+        if isinstance(workspace, str):
+            workspace_name = workspace
+        else:
+            workspace_name = workspace.name()
+
         self.data_context.remove_workspace_by_name(workspace_name)
         self.group_pair_context.remove_workspace_by_name(workspace_name)
         self.phase_context.remove_workspace_by_name(workspace_name)

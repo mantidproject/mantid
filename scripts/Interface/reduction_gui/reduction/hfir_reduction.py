@@ -1,15 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
     This class holds all the necessary information to create a reduction script.
     This is a fake version of the Reducer for testing purposes.
 """
-from __future__ import (absolute_import, division, print_function)
 import time
 import os
 from reduction_gui.reduction.scripter import BaseReductionScripter

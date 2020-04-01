@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILETEST_H_
-#define MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILETEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -125,7 +124,7 @@ public:
     API::AnalysisDataService::Instance().remove(ws);
   }
 
-  ScopedFile generateAutoGroupIDGroupXMLFile(std::string xmlfilename) {
+  ScopedFile generateAutoGroupIDGroupXMLFile(const std::string &xmlfilename) {
     std::ostringstream os;
 
     os << "<?xml version=\"1.0\"?>\n";
@@ -174,7 +173,7 @@ public:
     API::AnalysisDataService::Instance().remove(ws);
   }
 
-  ScopedFile generateSpectrumIDXMLFile(std::string xmlfilename) {
+  ScopedFile generateSpectrumIDXMLFile(const std::string &xmlfilename) {
     std::ostringstream os;
 
     os << "<?xml version=\"1.0\"?>\n";
@@ -223,7 +222,7 @@ public:
     API::AnalysisDataService::Instance().remove(ws);
   }
 
-  ScopedFile generateOldSpectrumIDXMLFile(std::string xmlfilename) {
+  ScopedFile generateOldSpectrumIDXMLFile(const std::string &xmlfilename) {
     std::ostringstream os;
 
     os << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n";
@@ -467,5 +466,3 @@ public:
     TS_ASSERT_EQUALS(gws->getNumberHistograms(), 32);
   }
 };
-
-#endif /* MANTID_DATAHANDLING_LOADDETECTORSGROUPINGFILETEST_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFunctionModel.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -69,7 +69,7 @@ void ConvFunctionModel::setFunction(IFunction_sptr fun) {
   m_model.setFunction(fun);
 }
 
-void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
+void ConvFunctionModel::checkConvolution(const IFunction_sptr &fun) {
   bool isFitTypeSet = false;
   bool isResolutionSet = false;
   for (size_t i = 0; i < fun->nFunctions(); ++i) {
@@ -102,7 +102,7 @@ void ConvFunctionModel::checkConvolution(IFunction_sptr fun) {
   }
 }
 
-void ConvFunctionModel::checkSingleFunction(IFunction_sptr fun,
+void ConvFunctionModel::checkSingleFunction(const IFunction_sptr &fun,
                                             bool &isFitTypeSet) {
   assert(fun->nFunctions() == 0);
   auto const name = fun->name();
@@ -609,7 +609,7 @@ void ConvFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
 }
 
 void ConvFunctionModel::applyParameterFunction(
-    std::function<void(ParamID)> paramFun) const {
+    const std::function<void(ParamID)> &paramFun) const {
   applyToFitType(m_fitType, paramFun);
   applyToBackground(m_backgroundType, paramFun);
   applyToDelta(m_hasDeltaFunction, paramFun);

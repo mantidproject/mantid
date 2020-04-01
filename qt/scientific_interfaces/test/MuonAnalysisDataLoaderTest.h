@@ -1,15 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADERTEST_H_
-#define MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADERTEST_H_
+#pragma once
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 #include "../Muon/MuonAnalysisDataLoader.h"
 #include "MantidAPI/Algorithm.h"
@@ -43,9 +44,10 @@ public:
                  const QStringList &instruments,
                  const std::string &deadTimesFile = "")
       : MuonAnalysisDataLoader(deadTimesType, instruments, deadTimesFile){};
-  void setProcessAlgorithmProperties(IAlgorithm_sptr alg,
+  void setProcessAlgorithmProperties(const IAlgorithm_sptr &alg,
                                      const AnalysisOptions &options) const {
-    MuonAnalysisDataLoader::setProcessAlgorithmProperties(alg, options);
+    MuonAnalysisDataLoader::setProcessAlgorithmProperties(std::move(alg),
+                                                          options);
   }
 };
 
@@ -374,4 +376,3 @@ private:
     }
   }
 };
-#endif /* MANTIDQT_CUSTOMINTERFACES_MUONANALYSISDATALOADERTEST_H_ */

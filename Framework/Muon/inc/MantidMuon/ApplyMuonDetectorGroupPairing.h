@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MUON_APPLYMUONDETECTORGROUPPAIRING_H_
-#define MANTID_MUON_APPLYMUONDETECTORGROUPPAIRING_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -57,14 +56,16 @@ public:
 
   /// return a workspace for a pair of detector groups, specified in options.
   API::MatrixWorkspace_sptr
-  createPairWorkspaceManually(API::Workspace_sptr inputWS, const bool noRebin);
+  createPairWorkspaceManually(const API::Workspace_sptr &inputWS,
+                              const bool noRebin);
 
   /// Store the input properties in options.
   Muon::AnalysisOptions getUserInput();
 
   /// Set MuonProcess properties (input workspace and period properties).
   void
-  setMuonProcessPeriodProperties(IAlgorithm &alg, API::Workspace_sptr inputWS,
+  setMuonProcessPeriodProperties(IAlgorithm &alg,
+                                 const API::Workspace_sptr &inputWS,
                                  const Muon::AnalysisOptions &options) const;
 
   /// Set MuonProcess properties according to the given options.
@@ -73,10 +74,9 @@ public:
                                     const Muon::AnalysisOptions &options) const;
 
   /// Apply the asymmetry calculation to two workspaces.
-  API::MatrixWorkspace_sptr
-  createPairWorkspaceFromGroupWorkspaces(API::MatrixWorkspace_sptr inputWS1,
-                                         API::MatrixWorkspace_sptr inputWS2,
-                                         const double &alpha);
+  API::MatrixWorkspace_sptr createPairWorkspaceFromGroupWorkspaces(
+      const API::MatrixWorkspace_sptr &inputWS1,
+      const API::MatrixWorkspace_sptr &inputWS2, const double &alpha);
 
   /// Set grouping properties of MuonProcess
   void setMuonProcessAlgorithmGroupingProperties(
@@ -102,5 +102,3 @@ private:
 
 } // namespace Muon
 } // namespace Mantid
-
-#endif /* MANTID_MUON_APPLYMUONDETECTORGROUPPAIRING_H_ */

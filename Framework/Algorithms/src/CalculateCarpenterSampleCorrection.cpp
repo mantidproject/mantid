@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateCarpenterSampleCorrection.h"
 #include "MantidAPI/HistoWorkspace.h"
@@ -413,7 +413,7 @@ void CalculateCarpenterSampleCorrection::calculate_ms_correction(
 }
 
 MatrixWorkspace_sptr CalculateCarpenterSampleCorrection::createOutputWorkspace(
-    const MatrixWorkspace_sptr &inputWksp, const std::string ylabel) const {
+    const MatrixWorkspace_sptr &inputWksp, const std::string &ylabel) const {
   MatrixWorkspace_sptr outputWS = create<HistoWorkspace>(*inputWksp);
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
@@ -424,7 +424,7 @@ MatrixWorkspace_sptr CalculateCarpenterSampleCorrection::createOutputWorkspace(
 }
 
 MatrixWorkspace_sptr CalculateCarpenterSampleCorrection::setUncertainties(
-    MatrixWorkspace_sptr workspace) {
+    const MatrixWorkspace_sptr &workspace) {
   auto alg = this->createChildAlgorithm("SetUncertainties");
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);
@@ -433,7 +433,7 @@ MatrixWorkspace_sptr CalculateCarpenterSampleCorrection::setUncertainties(
 }
 
 void CalculateCarpenterSampleCorrection::deleteWorkspace(
-    MatrixWorkspace_sptr workspace) {
+    const MatrixWorkspace_sptr &workspace) {
   auto alg = this->createChildAlgorithm("DeleteWorkspace");
   alg->initialize();
   alg->setChild(true);

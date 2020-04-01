@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 The WorkHandler class handles the multi-threading of function calls; used to keep the GUI
@@ -14,11 +14,8 @@ The "worker" handles running the function via a unique process ID; "listeners" m
 each process which are then notified upon certain actions (such as an error being thrown by the
 worker, or the worker finishing its task) using the nested class WorkListener.
 """
-from __future__ import absolute_import
-
 from qtpy.QtCore import Slot, QThreadPool
 from abc import ABCMeta, abstractmethod
-from six import with_metaclass
 import functools
 import uuid
 
@@ -34,7 +31,7 @@ class WorkHandler(object):
      an ID which is then used to identify the Worker through the API.
     """
 
-    class WorkListener(with_metaclass(ABCMeta, object)):
+    class WorkListener(metaclass=ABCMeta):
         """
         This abstract base class defines methods which must be overriden and which
         handle responses to certain worker actions such as raised errors, or completion.
@@ -58,7 +55,7 @@ class WorkHandler(object):
         self.thread_pool = QThreadPool()
 
     def _add_listener(self, listener, process_id, id):
-        if not isinstance(listener, WorkHandler.WorkListener):
+        if not isinstance(listener, self.WorkListener):
             raise ValueError("The listener is not of type "
                              "WorkListener but rather {}".format(type(listener)))
         self._listener.update({process_id: {'id': id, 'listener': listener}})

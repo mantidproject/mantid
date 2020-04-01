@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FindSXPeaks.h"
 #include "MantidAPI/Axis.h"
@@ -369,8 +369,8 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv, Progress &progress) {
  * @param workspace :: the workspace to check x-axis units on
  * @return enum of type XAxisUnit with the value of TOF or DSPACING
  */
-XAxisUnit
-FindSXPeaks::getWorkspaceXAxisUnit(MatrixWorkspace_const_sptr workspace) const {
+XAxisUnit FindSXPeaks::getWorkspaceXAxisUnit(
+    const MatrixWorkspace_const_sptr &workspace) const {
   const auto xAxis = workspace->getAxis(0);
   const auto unitID = xAxis->unit()->unitID();
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVERTUNITSTEST_H_
-#define CONVERTUNITSTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -714,7 +713,7 @@ public:
    * sorting flips the direction
    */
   void do_testExecEvent_RemainsSorted(EventSortType sortType,
-                                      std::string targetUnit) {
+                                      const std::string &targetUnit) {
     EventWorkspace_sptr ws =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
                                                                         false);
@@ -894,5 +893,3 @@ private:
   MatrixWorkspace_sptr histWS;
   MatrixWorkspace_sptr eventWS;
 };
-
-#endif /*CONVERTUNITSTEST_H_*/

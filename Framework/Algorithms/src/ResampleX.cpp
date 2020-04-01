@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ResampleX.h"
 #include "MantidAPI/Axis.h"
@@ -117,8 +117,8 @@ map<string, string> ResampleX::validateInputs() {
  *everything
  * went according to plan.
  */
-string determineXMinMax(MatrixWorkspace_sptr inputWS, vector<double> &xmins,
-                        vector<double> &xmaxs) {
+string determineXMinMax(const MatrixWorkspace_sptr &inputWS,
+                        vector<double> &xmins, vector<double> &xmaxs) {
   const size_t numSpectra = inputWS->getNumberHistograms();
 
   // pad out the ranges by copying the first value to the rest that are needed

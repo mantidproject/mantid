@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_
-#define MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_
+#pragma once
 #include "../../../ISISReflectometry/Common/Parse.h"
 #include "../../../ISISReflectometry/Reduction/ValidateRow.h"
 #include <cxxtest/TestSuite.h>
@@ -236,4 +235,3 @@ public:
     TS_ASSERT_EQUALS(expected, result);
   }
 };
-#endif // MANTID_CUSTOMINTERFACES_VALIDATEROWTEST_H_

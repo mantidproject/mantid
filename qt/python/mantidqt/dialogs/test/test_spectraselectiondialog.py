@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 import unittest
@@ -10,7 +10,7 @@ from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QDialogButtonBox
 
 from mantid.api import WorkspaceFactory
-from mantid.py3compat import mock
+from unittest import mock
 from mantid.simpleapi import ExtractSpectra
 from mantidqt.dialogs import spectraselectordialog
 from mantidqt.dialogs.spectraselectordialog import parse_selection_str, SpectraSelectionDialog
@@ -62,6 +62,30 @@ class SpectraSelectionDialogTest(unittest.TestCase):
             cropped_ws.getSpectrum(i).setSpectrumNo(51 + i)
         dlg = SpectraSelectionDialog([cropped_ws, self._multi_spec_ws])
         self.assertEqual("valid range: 51-100", dlg._ui.specNums.placeholderText())
+        self.assertEqual("valid range: 0-49", dlg._ui.wkspIndices.placeholderText())
+
+    def test_filling_workspace_details_single_workspace_with_spectra_gaps(self):
+        gappy_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=50, XLength=1, YLength=1)
+        for i in range(10):
+            gappy_ws.getSpectrum(i).setSpectrumNo(1 + i)
+        for i in range(10, 16):
+            gappy_ws.getSpectrum(i).setSpectrumNo(1 + (2*i))
+        for i in range(17, 20):
+            gappy_ws.getSpectrum(i).setSpectrumNo(1 + i)
+        for i in range(20, gappy_ws.getNumberHistograms()):
+            gappy_ws.getSpectrum(i).setSpectrumNo(51 + i)
+        dlg = SpectraSelectionDialog([gappy_ws])
+        self.assertEqual("valid range: 1-10, 17-21, 23, 25, 27, 29, 31, 71-100", dlg._ui.specNums.placeholderText())
+        self.assertEqual("valid range: 0-49", dlg._ui.wkspIndices.placeholderText())
+
+    def test_filling_workspace_details_multiple_workspace_with_spectra_gaps(self):
+        gappy_ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=50, XLength=1, YLength=1)
+        for i in range(20):
+            gappy_ws.getSpectrum(i).setSpectrumNo(1 + i)
+        for i in range(20,gappy_ws.getNumberHistograms()):
+            gappy_ws.getSpectrum(i).setSpectrumNo(161 + i)
+        dlg = SpectraSelectionDialog([gappy_ws, self._multi_spec_ws])
+        self.assertEqual("valid range: 1-20, 181-200", dlg._ui.specNums.placeholderText())
         self.assertEqual("valid range: 0-49", dlg._ui.wkspIndices.placeholderText())
 
     def test_valid_text_in_boxes_activates_ok(self):

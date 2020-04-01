@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/Common/MantidAlgorithmMetatype.h"
 
 #include <boost/algorithm/string/join.hpp>
+#include <utility>
 
 using namespace Mantid;
 
@@ -63,7 +64,7 @@ EnggDiffGSASFittingModel::~EnggDiffGSASFittingModel() {
 
 void EnggDiffGSASFittingModel::addFitResultsToMaps(
     const RunLabel &runLabel, const double rwp, const double sigma,
-    const double gamma, const API::ITableWorkspace_sptr latticeParams) {
+    const double gamma, const API::ITableWorkspace_sptr &latticeParams) {
   addRwp(runLabel, rwp);
   addSigma(runLabel, sigma);
   addGamma(runLabel, gamma);
@@ -71,7 +72,7 @@ void EnggDiffGSASFittingModel::addFitResultsToMaps(
 }
 
 void EnggDiffGSASFittingModel::addLatticeParams(
-    const RunLabel &runLabel, API::ITableWorkspace_sptr table) {
+    const RunLabel &runLabel, const API::ITableWorkspace_sptr &table) {
   m_latticeParamsMap.add(runLabel, table);
 }
 
@@ -240,7 +241,7 @@ void EnggDiffGSASFittingModel::processRefinementsComplete(
     Mantid::API::IAlgorithm_sptr alg,
     const std::vector<GSASIIRefineFitPeaksOutputProperties>
         &refinementResultSets) {
-  m_observer->notifyRefinementsComplete(alg, refinementResultSets);
+  m_observer->notifyRefinementsComplete(std::move(alg), refinementResultSets);
 }
 
 void EnggDiffGSASFittingModel::processRefinementFailed(
@@ -257,7 +258,7 @@ void EnggDiffGSASFittingModel::processRefinementSuccessful(
                       refinementResults.sigma, refinementResults.gamma,
                       refinementResults.latticeParamsWS);
   if (m_observer) {
-    m_observer->notifyRefinementSuccessful(successfulAlgorithm,
+    m_observer->notifyRefinementSuccessful(std::move(successfulAlgorithm),
                                            refinementResults);
   }
 }

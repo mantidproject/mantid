@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SANSDiagnostics.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -1185,7 +1185,7 @@ void SANSDiagnostics::saveSettings() {
  * @param orientation - orientation of the detector
  */
 bool SANSDiagnostics::executeSumRowColumn(
-    const std::vector<unsigned int> &values, const QString ipws,
+    const std::vector<unsigned int> &values, const QString &ipws,
     const QString &opws, const QString &orientation) {
   if (values.empty()) {
     return false;
@@ -1229,7 +1229,7 @@ bool SANSDiagnostics::executeSumRowColumn(
  * @param hvMin minimum value of
  * @param hvMax
  */
-bool SANSDiagnostics::runsumRowColumn(const QString ipwsName,
+bool SANSDiagnostics::runsumRowColumn(const QString &ipwsName,
                                       const QString &opwsName,
                                       const QString &orientation,
                                       const QString &hvMin,
@@ -1431,8 +1431,8 @@ void SANSDiagnostics::enableMaskFileControls() {
  * @returns an output workspace name
  */
 QString SANSDiagnostics::createOutputWorkspaceName(
-    QString originalWorkspaceName, QString detectorName,
-    QString integrationType, QString min, QString max) {
+    const QString &originalWorkspaceName, const QString &detectorName,
+    const QString &integrationType, const QString &min, const QString &max) {
   // Get run number from the loaded workspace
   boost::optional<int> runNumber = boost::none;
   try {

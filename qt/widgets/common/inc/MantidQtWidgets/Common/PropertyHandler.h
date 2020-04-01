@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROPERTY_HANDLER_H
-#define PROPERTY_HANDLER_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/IFunction.h"
@@ -43,7 +42,7 @@ class EXPORT_OPT_MANTIDQT_COMMON PropertyHandler
   Q_OBJECT
 public:
   // Constructor
-  PropertyHandler(Mantid::API::IFunction_sptr fun,
+  PropertyHandler(const Mantid::API::IFunction_sptr &fun,
                   boost::shared_ptr<Mantid::API::CompositeFunction> parent,
                   FitPropertyBrowser *browser, QtBrowserItem *item = nullptr);
 
@@ -95,7 +94,7 @@ public:
 
   PropertyHandler *findHandler(QtProperty *prop);
 
-  PropertyHandler *findHandler(Mantid::API::IFunction_const_sptr fun);
+  PropertyHandler *findHandler(const Mantid::API::IFunction_const_sptr &fun);
   PropertyHandler *findHandler(const Mantid::API::IFunction *fun);
 
   /**
@@ -185,7 +184,7 @@ public:
 
   void addTie(const QString &tieStr);
   void fix(const QString &parName);
-  void removeTie(QtProperty *prop, std::string globalName);
+  void removeTie(QtProperty *prop, const std::string &globalName);
   void removeTie(QtProperty *prop);
   void removeTie(const QString &propName);
   void addConstraint(QtProperty *parProp, bool lo, bool up, double loBound,
@@ -276,5 +275,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /* PROPERTY_HANDLER_H */

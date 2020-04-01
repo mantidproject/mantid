@@ -85,8 +85,7 @@
 **
 ****************************************************************************/
 
-#ifndef QTTREEPROPERTYBROWSER_H
-#define QTTREEPROPERTYBROWSER_H
+#pragma once
 
 #include "qtpropertybrowser.h"
 
@@ -150,6 +149,9 @@ public:
 
   bool isItemVisible(QtBrowserItem *item) const;
   void setItemVisible(QtBrowserItem *item, bool visible);
+
+  void hideColumn(int col);
+  void showColumn(int col);
 
   void setBackgroundColor(QtBrowserItem *item, const QColor &color);
   QColor backgroundColor(QtBrowserItem *item) const;
@@ -275,6 +277,8 @@ public:
   void disableItem(QTreeWidgetItem *item) const;
   void enableItem(QTreeWidgetItem *item) const;
   bool hasValue(QTreeWidgetItem *item) const;
+  void hideColumn(int col);
+  void showColumn(int col);
 
   void slotCollapsed(const QModelIndex &index);
   void slotExpanded(const QModelIndex &index);
@@ -377,6 +381,4 @@ private:
 
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
-#endif
-
 #endif

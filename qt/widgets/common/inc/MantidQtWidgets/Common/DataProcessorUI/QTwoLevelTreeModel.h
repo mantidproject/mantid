@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODEL_H_
-#define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODEL_H_
+#pragma once
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
@@ -37,7 +36,7 @@ number of items in the WhiteList.
 class EXPORT_OPT_MANTIDQT_COMMON QTwoLevelTreeModel : public AbstractTreeModel {
   Q_OBJECT
 public:
-  QTwoLevelTreeModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
+  QTwoLevelTreeModel(const Mantid::API::ITableWorkspace_sptr &tableWorkspace,
                      const WhiteList &whitelist);
   ~QTwoLevelTreeModel() override;
 
@@ -113,7 +112,7 @@ private:
                            const std::map<QString, QString> &rowValues);
   void insertRowAndGroupWithValues(const std::map<QString, QString> &rowValues);
   bool rowIsEmpty(int row, int parent) const;
-  void setupModelData(Mantid::API::ITableWorkspace_sptr table);
+  void setupModelData(const Mantid::API::ITableWorkspace_sptr &table);
   bool insertGroups(int position, int count);
   bool removeGroups(int position, int count);
   bool removeRows(int position, int count, int parent);
@@ -154,5 +153,3 @@ using QTwoLevelTreeModel_sptr = boost::shared_ptr<QTwoLevelTreeModel>;
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORTWOLEVELTREEMODEL_H_ */

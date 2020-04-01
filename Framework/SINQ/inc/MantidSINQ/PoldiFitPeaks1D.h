@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDIFITPEAKS1D_H_
-#define MANTID_SINQ_POLDIFITPEAKS1D_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
@@ -44,9 +43,10 @@ protected:
 
   API::IFunction_sptr getPeakProfile(const PoldiPeak_sptr &poldiPeak) const;
   void
-  setValuesFromProfileFunction(PoldiPeak_sptr poldiPeak,
+  setValuesFromProfileFunction(const PoldiPeak_sptr &poldiPeak,
                                const API::IFunction_sptr &fittedFunction) const;
-  double getFwhmWidthRelation(API::IPeakFunction_sptr peakFunction) const;
+  double
+  getFwhmWidthRelation(const API::IPeakFunction_sptr &peakFunction) const;
 
   API::IAlgorithm_sptr
   getFitAlgorithm(const DataObjects::Workspace2D_sptr &dataWorkspace,
@@ -67,5 +67,3 @@ private:
 
 } // namespace Poldi
 } // namespace Mantid
-
-#endif /* MANTID_SINQ_POLDIFITPEAKS1D_H_ */

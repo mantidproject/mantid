@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SANSBEAMFINDER_H_
-#define MANTID_ALGORITHMS_SANSBEAMFINDER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -41,8 +40,8 @@ private:
   void exec() override;
   API::MatrixWorkspace_sptr
   loadBeamFinderFile(const std::string &beamCenterFile);
-  void maskEdges(API::MatrixWorkspace_sptr beamCenterWS, int high, int low,
-                 int left, int right,
+  void maskEdges(const API::MatrixWorkspace_sptr &beamCenterWS, int high,
+                 int low, int left, int right,
                  const std::string &componentName = "detector1");
 
   boost::shared_ptr<Kernel::PropertyManager> m_reductionManager;
@@ -51,5 +50,3 @@ private:
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_SANSBEAMFINDER_H_*/

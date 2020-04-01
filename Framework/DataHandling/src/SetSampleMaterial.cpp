@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SetSampleMaterial.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -74,6 +75,11 @@ void SetSampleMaterial::init() {
                   "Optional:  This total scattering cross-section (coherent + "
                   "incoherent) for the sample material in barns will be used "
                   "instead of tabulated");
+  const std::vector<std::string> extensions{".DAT"};
+  declareProperty(
+      std::make_unique<FileProperty>("AttenuationProfile", "",
+                                     FileProperty::OptionalLoad, extensions),
+      "The path name of the file containing the attenuation profile");
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
                   "to be used to calculate the number density.");
@@ -110,6 +116,7 @@ void SetSampleMaterial::init() {
   setPropertyGroup("IncoherentXSection", specificValuesGrp);
   setPropertyGroup("AttenuationXSection", specificValuesGrp);
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
+  setPropertyGroup("AttenuationProfile", specificValuesGrp);
 
   // Extra property settings
   setPropertySettings("ChemicalFormula",
@@ -140,6 +147,7 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
   params.incoherentXSection = getProperty("IncoherentXSection");
   params.attenuationXSection = getProperty("AttenuationXSection");
   params.scatteringXSection = getProperty("ScatteringXSection");
+  params.attenuationProfileFileName = getPropertyValue("AttenuationProfile");
   const std::string numberDensityUnit = getProperty("NumberDensityUnit");
   if (numberDensityUnit == "Atoms") {
     params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;

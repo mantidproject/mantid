@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATAHANDLING_XMLHANDLER_H_
-#define DATAHANDLING_XMLHANDLER_H_
+#pragma once
 
 #include "DllConfig.h"
 
@@ -22,7 +21,7 @@ namespace DataHandling {
 class MANTID_DATAHANDLING_DLL XmlHandler {
 public:
   XmlHandler() = default;
-  XmlHandler(std::string);
+  XmlHandler(const std::string &);
 
   std::map<std::string, std::string>
   get_metadata(const std::vector<std::string> &tags_to_ignore);
@@ -36,5 +35,3 @@ private:
 };
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* DATAHANDLING_XMLHANDLER_H_ */

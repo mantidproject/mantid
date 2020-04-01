@@ -1,5 +1,9 @@
-from __future__ import (absolute_import, division, print_function)
-from six import iteritems
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
 from mantid import plots
 from copy import copy
 
@@ -53,10 +57,10 @@ class subplotContext(object):
             plot_kwargs = {'specNum': spec_num, 'distribution': distribution, 'color': color}
 
         # make plot/get label
-        line, = plots.plotfunctions.plot(self._subplot, ws, **plot_kwargs)
+        line, = plots.axesfunctions.plot(self._subplot, ws, **plot_kwargs)
         label = line.get_label()
         if self._errors:
-            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot, ws, **plot_kwargs)
+            line, cap_lines, bar_lines = plots.axesfunctions.errorbar(self._subplot, ws, **plot_kwargs)
             all_lines = [line]
             all_lines.extend(cap_lines)
             all_lines.extend(bar_lines)
@@ -81,7 +85,7 @@ class subplotContext(object):
         del self._lines[label]
         # replot the line
         if self._errors:
-            line, cap_lines, bar_lines = plots.plotfunctions.errorbar(self._subplot,
+            line, cap_lines, bar_lines = plots.axesfunctions.errorbar(self._subplot,
                                                                       self.get_ws(label),
                                                                       specNum=self.specNum[label],
                                                                       color=colour,
@@ -93,7 +97,7 @@ class subplotContext(object):
             all_lines.extend(bar_lines)
             self._lines[label] = all_lines
         else:
-            line, = plots.plotfunctions.plot(self._subplot,
+            line, = plots.axesfunctions.plot(self._subplot,
                                              self.get_ws(label),
                                              specNum=self.specNum[label],
                                              color=colour,
@@ -187,7 +191,7 @@ class subplotContext(object):
         del self._specNum[name]
         # remove line for ws
         to_delete = []
-        for key, list in iteritems(self._ws):
+        for key, list in self._ws.items():
             if name in list:
                 list.remove(name)
                 if len(list) == 0:

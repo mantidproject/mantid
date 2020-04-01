@@ -827,8 +827,7 @@ void EnggDiffractionPresenter::startAsyncCalibWorker(
     const std::string &ceriaNo, const std::string &specNos) {
   delete m_workerThread;
   m_workerThread = new QThread(this);
-  EnggDiffWorker *worker =
-      new EnggDiffWorker(this, outFilename, vanNo, ceriaNo, specNos);
+  auto *worker = new EnggDiffWorker(this, outFilename, vanNo, ceriaNo, specNos);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(calibrate()));
@@ -1939,7 +1938,7 @@ void EnggDiffractionPresenter::startAsyncRebinningTimeWorker(
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
-  EnggDiffWorker *worker = new EnggDiffWorker(this, runNo, bin, outWSName);
+  auto *worker = new EnggDiffWorker(this, runNo, bin, outWSName);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(rebinTime()));
@@ -2029,8 +2028,7 @@ void EnggDiffractionPresenter::startAsyncRebinningPulsesWorker(
 
   delete m_workerThread;
   m_workerThread = new QThread(this);
-  EnggDiffWorker *worker =
-      new EnggDiffWorker(this, runNo, nperiods, timeStep, outWSName);
+  auto *worker = new EnggDiffWorker(this, runNo, nperiods, timeStep, outWSName);
   worker->moveToThread(m_workerThread);
 
   connect(m_workerThread, SIGNAL(started()), worker, SLOT(rebinPulses()));
@@ -2074,7 +2072,8 @@ void EnggDiffractionPresenter::rebinningFinished() {
  *
  * @param outWSName title of the focused workspace
  */
-void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
+void EnggDiffractionPresenter::plotFocusedWorkspace(
+    const std::string &outWSName) {
   const bool plotFocusedWS = m_view->focusedOutWorkspace();
   enum PlotMode { REPLACING = 0, WATERFALL = 1, MULTIPLE = 2 };
 
@@ -2109,10 +2108,9 @@ void EnggDiffractionPresenter::plotFocusedWorkspace(std::string outWSName) {
  * @param tzero vector of double to plot graph
  * @param specNos string carrying cropped calib info
  */
-void EnggDiffractionPresenter::plotCalibWorkspace(std::vector<double> difa,
-                                                  std::vector<double> difc,
-                                                  std::vector<double> tzero,
-                                                  std::string specNos) {
+void EnggDiffractionPresenter::plotCalibWorkspace(
+    const std::vector<double> &difa, const std::vector<double> &difc,
+    const std::vector<double> &tzero, const std::string &specNos) {
   const bool plotCalibWS = m_view->plotCalibWorkspace();
   if (plotCalibWS) {
     std::string pyCode = vanadiumCurvesPlotFactory();
@@ -2390,8 +2388,8 @@ std::string EnggDiffractionPresenter::TOFFitWorkspaceFactory(
     const std::vector<double> &tzero, const std::string &specNo,
     const std::string &customisedBankName) const {
 
-  size_t bank1 = size_t(0);
-  size_t bank2 = size_t(1);
+  auto bank1 = size_t(0);
+  auto bank2 = size_t(1);
   std::string pyRange;
   std::string plotSpecNum = "False";
 

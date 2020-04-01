@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -115,7 +115,6 @@ void PaddingAndApodization::exec() {
   fptr apodizationFunction = getApodizationFunction(method);
   // Do the specified spectra only
   auto specLength = static_cast<int>(spectra.size());
-  std::vector<double> norm(specLength, 0.0);
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < specLength; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -145,7 +144,7 @@ using fptr = double (*)(const double, const double);
  * @param method :: [input] The name of the chosen function
  * @returns :: pointer to the function
  */
-fptr PaddingAndApodization::getApodizationFunction(const std::string method) {
+fptr PaddingAndApodization::getApodizationFunction(const std::string &method) {
   if (method == "None") {
     return ApodizationFunctions::none;
   } else if (method == "Lorentz") {

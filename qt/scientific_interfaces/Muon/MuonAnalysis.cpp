@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MuonAnalysis.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -60,6 +60,7 @@
 #include <QVariant>
 
 #include <fstream>
+#include <utility>
 
 // Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
@@ -604,7 +605,7 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
   options.timeLimits.second = finishTime();
   options.rebinArgs = isRaw ? "" : rebinParams(loadedWS);
   options.plotType = plotType;
-  options.wsName = wsName;
+  options.wsName = std::move(wsName);
   const auto *table =
       itemType == ItemType::Group ? m_uiForm.groupTable : m_uiForm.pairTable;
   options.groupPairName = table->item(tableRow, 0)->text().toStdString();
@@ -1089,8 +1090,7 @@ void MuonAnalysis::updatePairTable() {
   }
 
   // get previous number of groups as listed in the pair comboboxes
-  QComboBox *qwF =
-      static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(0, 1));
+  auto *qwF = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(0, 1));
   int previousNumGroups =
       qwF->count(); // how many groups listed in pair combobox
   int newNumGroups = numGroups();
@@ -1098,8 +1098,7 @@ void MuonAnalysis::updatePairTable() {
   // reset context of combo boxes
   for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++) {
     qwF = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 1));
-    QComboBox *qwB =
-        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 2));
+    auto *qwB = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 2));
 
     if (previousNumGroups < newNumGroups) {
       // then need to increase the number of entrees in combo box
@@ -1182,8 +1181,8 @@ void MuonAnalysis::handleInputFileChanges() {
  * @param loadResult :: Various loaded parameters as returned by load()
  * @return Used grouping for populating grouping table
  */
-boost::shared_ptr<GroupResult>
-MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
+boost::shared_ptr<GroupResult> MuonAnalysis::getGrouping(
+    const boost::shared_ptr<LoadResult> &loadResult) const {
   auto result = boost::make_shared<GroupResult>();
 
   boost::shared_ptr<Mantid::API::Grouping> groupingToUse;
@@ -1468,9 +1467,9 @@ void MuonAnalysis::guessAlphaClicked() {
   m_updating = true;
 
   if (getPairNumberFromRow(m_pairTableRowInFocus) >= 0) {
-    QComboBox *qwF = static_cast<QComboBox *>(
+    auto *qwF = static_cast<QComboBox *>(
         m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus, 1));
-    QComboBox *qwB = static_cast<QComboBox *>(
+    auto *qwB = static_cast<QComboBox *>(
         m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus, 2));
 
     if (!qwF || !qwB)
@@ -1512,7 +1511,7 @@ void MuonAnalysis::guessAlphaClicked() {
 
     const QString alpha = QString::number(alphaValue);
 
-    QComboBox *qwAlpha = static_cast<QComboBox *>(
+    auto *qwAlpha = static_cast<QComboBox *>(
         m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus, 3));
     if (qwAlpha)
       m_uiForm.pairTable->item(m_pairTableRowInFocus, 3)->setText(alpha);
@@ -2189,7 +2188,7 @@ void MuonAnalysis::startUpLook() {
   for (int i = 0; i < m_uiForm.groupTable->rowCount(); i++) {
     QTableWidgetItem *item = m_uiForm.groupTable->item(i, 2);
     if (!item) {
-      QTableWidgetItem *it = new QTableWidgetItem("");
+      auto *it = new QTableWidgetItem("");
       it->setFlags(it->flags() & (~Qt::ItemIsEditable));
       m_uiForm.groupTable->setItem(i, 2, it);
     } else {
@@ -2197,7 +2196,7 @@ void MuonAnalysis::startUpLook() {
     }
     item = m_uiForm.groupTable->item(i, 0);
     if (!item) {
-      QTableWidgetItem *it = new QTableWidgetItem("");
+      auto *it = new QTableWidgetItem("");
       m_uiForm.groupTable->setItem(i, 0, it);
     }
   }
@@ -2222,13 +2221,13 @@ double MuonAnalysis::timeZero() {
  * size
  * @return Params string to pass to rebin
  */
-std::string MuonAnalysis::rebinParams(Workspace_sptr wsForRebin) {
+std::string MuonAnalysis::rebinParams(const Workspace_sptr &wsForRebin) {
   MuonAnalysisOptionTab::RebinType rebinType = m_optionTab->getRebinType();
 
   if (rebinType == MuonAnalysisOptionTab::NoRebin) {
     return "";
   } else if (rebinType == MuonAnalysisOptionTab::FixedRebin) {
-    MatrixWorkspace_sptr ws = firstPeriod(wsForRebin);
+    MatrixWorkspace_sptr ws = firstPeriod(std::move(wsForRebin));
     double binSize = ws->x(0)[1] - ws->x(0)[0];
 
     double stepSize = m_optionTab->getRebinStep();
@@ -2751,7 +2750,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
 
   m_currentTab = newTab;
 }
-void MuonAnalysis::updateNormalization(QString name) {
+void MuonAnalysis::updateNormalization(const QString &name) {
   m_uiForm.fitBrowser->setNormalization(name.toStdString());
 }
 

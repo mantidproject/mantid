@@ -1,14 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ The elements of this module contain various general-purpose functions for the SANS reduction framework."""
 
 # pylint: disable=invalid-name
 
-from __future__ import (absolute_import, division, print_function)
 from math import (acos, sqrt, degrees)
 import re
 from copy import deepcopy
@@ -238,31 +237,6 @@ def get_charge_and_time(workspace):
     time_passed = int((charges.times[-1] - charges.times[0]) / np.timedelta64(1, 'us'))  # microseconds
     time_passed = float(time_passed) / 1e6
     return total_charge, time_passed
-
-
-def add_to_sample_log(workspace, log_name, log_value, log_type):
-    """
-    Adds a sample log to the workspace
-
-    :param workspace: the workspace to which the sample log is added
-    :param log_name: the name of the log
-    :param log_value: the value of the log in string format
-    :param log_type: the log value type which can be String, Number, Number Series
-    """
-    if log_type not in ["String", "Number", "Number Series"]:
-        raise ValueError("Tryint go add {0} to the sample logs but it was passed "
-                         "as an unknown type of {1}".format(log_value, log_type))
-    if not isinstance(log_value, str):
-        raise TypeError("The value which is added to the sample logs needs to be passed as a string,"
-                        " but it is passed as {0}".format(type(log_value)))
-
-    add_log_name = "AddSampleLog"
-    add_log_options = {"Workspace": workspace,
-                       "LogName": log_name,
-                       "LogText": log_value,
-                       "LogType": log_type}
-    add_log_alg = create_unmanaged_algorithm(add_log_name, **add_log_options)
-    add_log_alg.execute()
 
 
 def append_to_sans_file_tag(workspace, to_append):

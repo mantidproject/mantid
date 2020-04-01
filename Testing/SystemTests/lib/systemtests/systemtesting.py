@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 Mantid system testing framework. This module contains all of the necessary code
@@ -11,8 +11,6 @@ or by importing them into MantidPlot.
 
 File change history is stored at: <https://github.com/mantidproject/systemtests>.
 """
-from __future__ import (absolute_import, division, print_function)
-
 # == for testing conda build of mantid-framework ==========
 import os
 
@@ -21,7 +19,6 @@ if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
     import matplotlib
 
 # =========================================================
-from six import PY3
 import datetime
 import difflib
 import imp
@@ -764,9 +761,8 @@ class TestSuite(object):
         self._result.status = status
         self._result.addItem(['status', status])
         # Dump std out so we know what happened
-        if PY3:
-            if isinstance(output, bytes):
-                output = output.decode()
+        if isinstance(output, bytes):
+            output = output.decode()
         self._result.output = '\n' + output
         all_lines = output.split('\n')
         # Find the test results

@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from functools import (partial, wraps)
 import inspect
 
@@ -44,9 +43,9 @@ def update_the_method(builder_instance,  new_methods, setter_name, attribute_nam
     setter_name_copy.append(attribute_name)
     try:
         method_name = "_".join(setter_name_copy)
-    except TypeError as e:
-        # An enum is being used for a key - the dev needs to switch to a value rather than the enum type
-        raise TypeError("You are likely trying to use an enum as a dict key which is not supported.\n {0}".format(e))
+    except TypeError:
+        # An enum is being used for a key - the dev needs to create a manual setter
+        return
 
     attribute_name_list_copy = list(attribute_name_list)
     attribute_name_list_copy.append(attribute_name)

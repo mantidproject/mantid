@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from sans.common.enums import (SANSFacility, SANSInstrument, RebinType, RangeStepType)
-from sans.state.data import get_data_builder
-from sans.state.wavelength import (StateWavelength, get_wavelength_builder)
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateWavelength import (StateWavelength, get_wavelength_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

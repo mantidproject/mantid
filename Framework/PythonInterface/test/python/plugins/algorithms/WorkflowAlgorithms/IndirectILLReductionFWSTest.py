@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.simpleapi import mtd
 from testhelpers import run_algorithm
@@ -102,6 +100,26 @@ class IndirectILLReductionFWS(unittest.TestCase):
 
         self.assertEquals(run.getLogData('MonitorLeftPeak').value, 2)
         self.assertEquals(run.getLogData('MonitorRightPeak').value, 508)
+
+    def test_ifws_manual_peaks(self):
+
+        args = {'Run': '170304',
+                'ManualInelasticPeakChannels': [3, 507],
+                'OutputWorkspace': 'out'}
+
+        alg_test = run_algorithm('IndirectILLReductionFWS', **args)
+
+        self.assertTrue(alg_test.isExecuted(), "IndirectILLReductionFWS not executed")
+
+        self._check_workspace_group(mtd['out_red'], 1, 18, 1)
+
+        run = mtd['out_red'].getItem(0).getRun()
+
+        self.assertTrue(run.hasProperty('ManualInelasticLeftPeak'))
+        self.assertTrue(run.hasProperty('ManualInelasticRightPeak'))
+
+        self.assertEquals(run.getLogData('ManualInelasticLeftPeak').value, 3)
+        self.assertEquals(run.getLogData('ManualInelasticRightPeak').value, 507)
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
 

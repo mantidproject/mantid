@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 
 #include <QFile>
@@ -59,7 +58,7 @@ public:
     return toString.call(obj).toString();
   }
 
-  QMap<QString, QVariant> decodeInner(QScriptValue object) {
+  QMap<QString, QVariant> decodeInner(const QScriptValue &object) {
     QMap<QString, QVariant> map;
     QScriptValueIterator it(object);
     while (it.hasNext()) {
@@ -80,7 +79,7 @@ public:
     return map;
   }
 
-  QList<QVariant> decodeInnerToList(QScriptValue arrayValue) {
+  QList<QVariant> decodeInnerToList(const QScriptValue &arrayValue) {
     QList<QVariant> list;
     QScriptValueIterator it(arrayValue);
     while (it.hasNext()) {

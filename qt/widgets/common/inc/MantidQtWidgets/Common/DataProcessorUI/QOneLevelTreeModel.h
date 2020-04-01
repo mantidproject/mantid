@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_QDATAPROCESSORONELEVELTREEMODEL_H_
-#define MANTIDQTMANTIDWIDGETS_QDATAPROCESSORONELEVELTREEMODEL_H_
+#pragma once
 
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
@@ -32,7 +31,7 @@ the same number of columns as the number of items in the WhiteList.
 class EXPORT_OPT_MANTIDQT_COMMON QOneLevelTreeModel : public AbstractTreeModel {
   Q_OBJECT
 public:
-  QOneLevelTreeModel(Mantid::API::ITableWorkspace_sptr tableWorkspace,
+  QOneLevelTreeModel(const Mantid::API::ITableWorkspace_sptr &tableWorkspace,
                      const WhiteList &whitelist);
   ~QOneLevelTreeModel() override;
 
@@ -107,5 +106,3 @@ using QOneLevelTreeModel_sptr = boost::shared_ptr<QOneLevelTreeModel>;
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /* MANTIDQTMANTIDWIDGETS_QDATAPROCESSORONELEVELTREEMODEL_H_ */

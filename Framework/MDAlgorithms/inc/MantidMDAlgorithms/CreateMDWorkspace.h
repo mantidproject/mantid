@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_CREATEMDWORKSPACE_H_
-#define MANTID_MDALGORITHMS_CREATEMDWORKSPACE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -58,13 +57,11 @@ private:
 
   template <typename MDE, size_t nd>
   void finish(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
-  Mantid::Geometry::MDFrame_uptr createMDFrame(std::string frame,
-                                               std::string unit);
+  Mantid::Geometry::MDFrame_uptr createMDFrame(const std::string &frame,
+                                               const std::string &unit);
   bool checkIfFrameValid(const std::string &frame,
                          const std::vector<std::string> &targetFrames);
 };
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_CREATEMDWORKSPACE_H_ */

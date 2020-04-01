@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
@@ -10,8 +10,6 @@
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import argparse
 import atexit
 import importlib
@@ -21,7 +19,7 @@ from functools import partial
 
 from mantid.api import FrameworkManagerImpl
 from mantid.kernel import (ConfigService, UsageService, logger, version_str as mantid_version_str)
-from mantid.py3compat import setswitchinterval
+from sys import setswitchinterval
 from mantid.utils import is_required_version
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.plugins.exception_handler import exception_logger
@@ -244,6 +242,10 @@ class MainWindow(QMainWindow):
         self.workspacewidget.workspacewidget.enableDeletePrompt(bool(prompt))
         self.widgets.append(self.workspacewidget)
 
+        # set the link between the algorithm and workspace widget
+        self.algorithm_selector.algorithm_selector.set_get_selected_workspace_fn(
+            self.workspacewidget.workspacewidget.getSelectedWorkspaceNames)
+
         # Set up the project, recovery and interface manager objects
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
         self.project_recovery = ProjectRecovery(globalfiguremanager=GlobalFigureManager,
@@ -264,6 +266,7 @@ class MainWindow(QMainWindow):
         """Run any setup that requires mantid
         to have been initialized
         """
+        self.redirect_python_warnings()
         self.populate_menus()
         self.algorithm_selector.refresh()
 
@@ -376,7 +379,7 @@ class MainWindow(QMainWindow):
     def launch_custom_python_gui(self, filename):
         self.interface_executor.execute(open(filename).read(), filename)
 
-    def launch_custom_cpp_gui(self, interface_name, submenu = None):
+    def launch_custom_cpp_gui(self, interface_name, submenu=None):
         """Create a new interface window if one does not already exist,
         else show existing window"""
         object_name = 'custom-cpp-interface-' + interface_name
@@ -415,18 +418,30 @@ class MainWindow(QMainWindow):
                     if '.py' in name:
                         action = submenu.addAction(name.replace('.py', '').replace('_', ' '))
                         script = os.path.join(interface_dir, name)
-                        action.triggered.connect(lambda checked_py, script=script: self.launch_custom_python_gui(script))
+                        action.triggered.connect(
+                            lambda checked_py, script=script: self.launch_custom_python_gui(script))
                     else:
                         action = submenu.addAction(name)
                         action.triggered.connect(lambda checked_cpp, name=name, key=key:
                                                  self.launch_custom_cpp_gui(name, key))
 
+    def redirect_python_warnings(self):
+        """By default the warnings module writes warnings to sys.stderr. stderr is assumed to be
+        an error channel so we don't confuse warnings with errors this redirects warnings
+        from the warnings module to mantid.logger.warning
+        """
+        import warnings
+
+        def to_mantid_warning(*args, **kwargs):
+            logger.warning(warnings.formatwarning(*args, **kwargs))
+
+        warnings.showwarning = to_mantid_warning
+
     def _discover_python_interfaces(self, interface_dir):
         """Return a dictionary mapping a category to a set of named Python interfaces"""
         items = ConfigService['mantidqt.python_interfaces'].split()
         # list of custom interfaces that are not qt4/qt5 compatible
-        GUI_BLACKLIST = ['ISIS_Reflectometry_Old.py',
-                         'Frequency_Domain_Analysis_Old.py']
+        GUI_BLACKLIST = ['Frequency_Domain_Analysis_Old.py']
 
         # detect the python interfaces
         interfaces = {}
@@ -513,7 +528,7 @@ class MainWindow(QMainWindow):
                 [[editor, ipython]],
                 # column 2
                 [[logmessages]]
-                ],
+            ],
             'width-fraction': [0.25,  # column 0 width
                                0.50,  # column 1 width
                                0.25],  # column 2 width
@@ -775,6 +790,11 @@ def start_workbench(app, command_line_options):
     # The ordering here is very delicate. Test thoroughly when
     # changing anything!
     main_window = MainWindow()
+
+    # Set the mainwindow as the parent for additional QMainWindow instances
+    from workbench.config import set_additional_windows_parent
+    set_additional_windows_parent(main_window)
+
     # decorates the excepthook callback with the reference to the main window
     # this is used in case the user wants to terminate the workbench from the error window shown
     sys.excepthook = partial(exception_logger, main_window)

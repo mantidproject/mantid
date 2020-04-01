@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_
-#define MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -120,8 +119,7 @@ public:
     TS_ASSERT_EQUALS(outXs.size(), inXs.size())
     TS_ASSERT(outputWS->hasDx(0))
     const auto &inYs = inputWS->y(0);
-    const auto &outYs = outputWS->y(0);
-    TS_ASSERT_EQUALS(outYs.rawData(), inYs.rawData())
+    TS_ASSERT_EQUALS(outputWS->y(0).rawData(), inYs.rawData())
     const auto &inEs = inputWS->e(0);
     const auto &outEs = outputWS->e(0);
     TS_ASSERT_EQUALS(outEs.rawData(), inEs.rawData())
@@ -284,7 +282,7 @@ private:
     TS_ASSERT(!alg->isExecuted())
   }
 
-  static API::Algorithm_sptr make_alg(API::MatrixWorkspace_sptr inputWS,
+  static API::Algorithm_sptr make_alg(const API::MatrixWorkspace_sptr &inputWS,
                                       const std::string &sumType,
                                       const std::vector<int> &foreground) {
     auto alg = boost::make_shared<Algorithms::ReflectometryMomentumTransfer>();
@@ -523,5 +521,3 @@ private:
   API::IAlgorithm_sptr m_algorithm;
   API::MatrixWorkspace_sptr m_reflectedWS;
 };
-
-#endif /* MANTID_ALGORITHMS_REFLECTOMETRYMOMENTUMTRANSFERTEST_H_ */

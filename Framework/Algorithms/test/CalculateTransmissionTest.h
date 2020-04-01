@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CALCULATETRANSMISSIONTEST_H_
-#define CALCULATETRANSMISSIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -362,10 +361,9 @@ public:
       auto &fitted_x = fitted->x(0);
 
       //  TS_ASSERT_EQUALS(fitted_y.size(), unfitted_y.size());
-      double x;
 
       for (unsigned int i = 0; i < fitted_y.size(); ++i) {
-        x = fitted_x[i]; //(fitted_x[i] + fitted_x[i+1])* 0.5;
+        double x = fitted_x[i]; //(fitted_x[i] + fitted_x[i+1])* 0.5;
         TS_ASSERT_DELTA(fitted_y[i],
                         26.6936 - 9.31494 * x + 1.11532 * x * x -
                             0.044502 * x * x * x,
@@ -406,10 +404,9 @@ public:
       auto &fitted_x = fitted->x(0);
 
       //  TS_ASSERT_EQUALS(fitted_y.size(), unfitted_y.size());
-      double x;
 
       for (unsigned int i = 0; i < fitted_y.size(); ++i) {
-        x = (fitted_x[i] + fitted_x[i + 1]) * 0.5;
+        double x = (fitted_x[i] + fitted_x[i + 1]) * 0.5;
         TS_ASSERT_DELTA(fitted_y[i],
                         26.6936 - 9.31494 * x + 1.11532 * x * x -
                             0.044502 * x * x * x,
@@ -478,5 +475,3 @@ private:
   /// these are the names of some sample data workspaces
   std::string m_dirWS, m_transWS;
 };
-
-#endif /*CALCULATETRANSMISSIONTEST_H_*/

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INPUTHISTORY_H
-#define INPUTHISTORY_H
+#pragma once
 
 #include "MantidKernel/SingletonHolder.h"
 #include <boost/shared_ptr.hpp>
@@ -39,7 +38,7 @@ class InputHistoryImpl {
 public:
   InputHistoryImpl(const InputHistoryImpl &) = delete;
   InputHistoryImpl &operator=(const InputHistoryImpl &) = delete;
-  void updateAlgorithm(Mantid::API::IAlgorithm_sptr alg);
+  void updateAlgorithm(const Mantid::API::IAlgorithm_sptr &alg);
   /// The name:value map of non-default properties with which algorithm algName
   /// was called last time.
   QMap<QString, QString> algorithmProperties(const QString &algName);
@@ -74,5 +73,3 @@ private:
 };
 
 using InputHistory = Mantid::Kernel::SingletonHolder<InputHistoryImpl>;
-
-#endif /* INPUTHISTORY_H */

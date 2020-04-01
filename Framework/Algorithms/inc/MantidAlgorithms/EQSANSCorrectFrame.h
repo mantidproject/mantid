@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_EQSANSCORRECTFRAME_H_
-#define MANTID_ALGORITHMS_EQSANSCORRECTFRAME_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -25,7 +25,7 @@ namespace Algorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport EQSANSCorrectFrame : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL EQSANSCorrectFrame : public API::Algorithm {
 public:
   /// Default constructor
   EQSANSCorrectFrame();
@@ -51,5 +51,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_EQSANSCORRECTFRAME_H_*/

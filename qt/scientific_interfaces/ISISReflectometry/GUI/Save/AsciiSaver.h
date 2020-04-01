@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_ASCIISAVER_H
-#define MANTID_ISISREFLECTOMETRY_ASCIISAVER_H
+#pragma once
 #include "IAsciiSaver.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -29,7 +28,7 @@ public:
 private:
   Mantid::API::IAlgorithm_sptr
   setUpSaveAlgorithm(std::string const &saveDirectory,
-                     Mantid::API::Workspace_sptr workspace,
+                     const Mantid::API::Workspace_sptr &workspace,
                      std::vector<std::string> const &logParameters,
                      FileFormatOptions const &fileFormat) const;
 
@@ -39,7 +38,7 @@ private:
                                std::string const &extension) const;
 
   Mantid::API::Workspace_sptr workspace(std::string const &workspaceName) const;
-  void save(Mantid::API::Workspace_sptr workspace,
+  void save(const Mantid::API::Workspace_sptr &workspace,
             std::string const &saveDirectory,
             std::vector<std::string> const &logParameters,
             FileFormatOptions const &fileFormat) const;
@@ -47,4 +46,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_ISISREFLECTOMETRY_ASCIISAVER_H

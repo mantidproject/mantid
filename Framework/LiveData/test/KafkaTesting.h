@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_ISISKAFKATESTING_H_
-#define MANTID_LIVEDATA_ISISKAFKATESTING_H_
+#pragma once
 
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -221,7 +220,7 @@ void fakeReceiveASampleEnvMessage(std::string *buffer) {
 void fakeReceiveARunStartMessage(std::string *buffer, int32_t runNumber,
                                  const std::string &startTime,
                                  const std::string &instName, int32_t nPeriods,
-                                 std::string nexusStructure = "") {
+                                 const std::string &nexusStructure = "") {
   // Convert date to time_t
   auto mantidTime = Mantid::Types::Core::DateAndTime(startTime);
   auto startTimestamp =
@@ -756,5 +755,3 @@ private:
   std::vector<int32_t> m_detid = {1001, 1002, 1100, 901000, 10100};
 };
 } // namespace KafkaTesting
-
-#endif // MANTID_LIVEDATA_ISISKAFKAEVENTSTREAMDECODERTESTMOCKS_H_

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADSPICE2DTEST_H
-#define LOADSPICE2DTEST_H
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -223,7 +222,8 @@ public:
     TS_ASSERT_DELTA(ws2d->x(192 + nmon)[0], 4.5, tolerance);
   }
 
-  void assertDetectorDistances(Mantid::DataObjects::Workspace2D_sptr ws2d) {
+  void
+  assertDetectorDistances(const Mantid::DataObjects::Workspace2D_sptr &ws2d) {
     Mantid::Kernel::Property *prop =
         ws2d->run().getProperty("sample-detector-distance");
     Mantid::Kernel::PropertyWithValue<double> *sdd =
@@ -247,4 +247,3 @@ private:
   std::string inputFile;
   Mantid::DataHandling::LoadSpice2D spice2d;
 };
-#endif

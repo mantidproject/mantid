@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FINDCENTEROFMASSPOSITIONTEST2_H_
-#define FINDCENTEROFMASSPOSITIONTEST2_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
@@ -59,7 +58,7 @@ public:
         // Set tube extrema to special values
         if (iy == 0 || iy == SANSInstrumentCreationHelper::nBins - 1)
           Y[0] =
-              iy % 2 ? std::nan("") : std::numeric_limits<double>::infinity();
+              (iy % 2) ? std::nan("") : std::numeric_limits<double>::infinity();
         E[0] = 1;
       }
     }
@@ -228,5 +227,3 @@ private:
   double pixel_size;
   DataObjects::Workspace2D_sptr ws;
 };
-
-#endif /*FINDCENTEROFMASSPOSITIONTEST2_H_*/

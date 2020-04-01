@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILETEST_H_
-#define MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILETEST_H_
+#pragma once
 
 #include "MantidCurveFitting/Functions/GaussianComptonProfile.h"
 #include <cxxtest/TestSuite.h>
@@ -34,12 +33,13 @@ public:
   void test_Initialized_Function_Has_Expected_Parameters_In_Right_Order() {
     Mantid::API::IFunction_sptr profile = createFunction();
     static const size_t nparams(3);
-    const char *expectedParams[nparams] = {"Mass", "Width", "Intensity"};
 
     auto currentNames = profile->getParameterNames();
     const size_t nnames = currentNames.size();
     TS_ASSERT_EQUALS(nparams, nnames);
+
     if (nnames == nparams) {
+      const char *expectedParams[nparams] = {"Mass", "Width", "Intensity"};
       for (size_t i = 0; i < nnames; ++i) {
         TS_ASSERT_EQUALS(expectedParams[i], currentNames[i]);
       }
@@ -103,5 +103,3 @@ private:
     return profile;
   }
 };
-
-#endif /* MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILETEST_H_ */

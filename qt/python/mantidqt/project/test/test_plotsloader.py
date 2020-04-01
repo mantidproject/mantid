@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import matplotlib
 matplotlib.use('AGG')
 
@@ -17,10 +15,10 @@ import matplotlib.figure  # noqa
 import matplotlib.text  # noqa
 
 from mantidqt.project.plotsloader import PlotsLoader  # noqa
-import mantid.plots.plotfunctions  # noqa
+import mantid.plots.axesfunctions  # noqa
 from mantid.api import AnalysisDataService as ADS  # noqa
 from mantid.dataobjects import Workspace2D  # noqa
-from mantid.py3compat import mock  # noqa
+from unittest import mock  # noqa
 
 
 def pass_func():
@@ -31,7 +29,7 @@ class PlotsLoaderTest(unittest.TestCase):
     def setUp(self):
         self.plots_loader = PlotsLoader()
         plt.plot = mock.MagicMock()
-        mantid.plots.plotfunctions.plot = mock.MagicMock()
+        mantid.plots.axesfunctions.plot = mock.MagicMock()
         self.dictionary = {u'legend': {u'exists': False}, u'lines': [],
                            u'properties': {u'axisOn': True, u'bounds': (0.0, 0.0, 0.0, 0.0), u'dynamic': True,
                                            u'frameOn': True, u'visible': True,

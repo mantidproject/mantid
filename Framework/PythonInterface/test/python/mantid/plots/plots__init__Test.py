@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import matplotlib
 
 matplotlib.use('AGG')  # noqa
@@ -16,11 +14,11 @@ import numpy as np
 import unittest
 
 from mantid.kernel import config
-from mantid.plots import helperfunctions
+from mantid.plots import datafunctions
 from mantid.plots.legend import convert_color_to_hex
-from mantid.plots.plotfunctions import get_colorplot_extents
 from mantid.plots.utility import MantidAxType
-from mantid.py3compat.mock import Mock, patch
+from mantid.plots.axesfunctions import get_colorplot_extents
+from unittest.mock import Mock, patch
 from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace,
                               RemoveSpectra, AnalysisDataService as ADS)
 from mantidqt.plotting.markers import SingleMarker
@@ -76,14 +74,15 @@ class Plots__init__Test(unittest.TestCase):
 
     def test_remove_workspace_artist_for_known_workspace_removes_plot(self):
         self.ax.plot(self.ws2d_histo, specNum=2, linewidth=6)
-        is_empty = self.ax.remove_workspace_artists(self.ws2d_histo)
-        self.assertEqual(True, is_empty)
+        workspace_removed = self.ax.remove_workspace_artists(self.ws2d_histo)
+        self.assertEqual(True, workspace_removed)
         self.assertEqual(0, len(self.ax.lines))
 
     def test_remove_workspace_artist_for_unknown_workspace_does_nothing(self):
         self.ax.plot(self.ws2d_histo, specNum=2, linewidth=6)
         unknown_ws = CreateSampleWorkspace()
-        self.ax.remove_workspace_artists(unknown_ws)
+        workspace_removed  = self.ax.remove_workspace_artists(unknown_ws)
+        self.assertEqual(False, workspace_removed)
         self.assertEqual(1, len(self.ax.lines))
 
     def test_remove_workspace_artist_for_removes_only_specified_workspace(self):
@@ -92,7 +91,8 @@ class Plots__init__Test(unittest.TestCase):
         line_second_ws = self.ax.plot(second_ws, specNum=5)[0]
         self.assertEqual(2, len(self.ax.lines))
 
-        self.ax.remove_workspace_artists(self.ws2d_histo)
+        workspace_removed = self.ax.remove_workspace_artists(self.ws2d_histo)
+        self.assertEqual(True, workspace_removed)
         self.assertEqual(1, len(self.ax.lines))
         self.assertTrue(line_ws2d_histo not in self.ax.lines)
         self.assertTrue(line_second_ws in self.ax.lines)
@@ -316,21 +316,21 @@ class Plots__init__Test(unittest.TestCase):
         self.assertFalse(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
-        self.ax.plot(non_dist_ws, specNum=1)
         auto_dist = (config['graph1d.autodistribution'] == 'On')
+        self.ax.plot(non_dist_ws, specNum=1)
         self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
-    def test_artists_normalization_state_labeled_correctly_for_non_dist_workspace_with_uneven_spectra(self):
+    def test_artists_normalization_state_labeled_correctly_for_non_dist_workspace_and_global_setting_off(self):
         non_dist_ws = CreateWorkspace(DataX=[10, 20, 25, 30],
                                       DataY=[2, 3, 4, 5],
                                       DataE=[1, 2, 1, 2],
                                       NSpec=1,
                                       Distribution=False,
                                       OutputWorkspace='non_dist_workpace')
-        self.ax.plot(non_dist_ws, specNum=1)
         config['graph1d.autodistribution'] = 'Off'
-        self.assertTrue(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
+        self.ax.plot(non_dist_ws, specNum=1)
+        self.assertFalse(self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
     def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_dist_workspace(self):
@@ -392,13 +392,13 @@ class Plots__init__Test(unittest.TestCase):
                                          Distribution=False,
                                          OutputWorkspace='non_dist_workpace')
         for plot_func in plot_funcs:
+            auto_dist = (config['graph1d.autodistribution'] == 'On')
             func = getattr(self.ax, plot_func)
             func(non_dist_2d_ws)
-            auto_dist = (config['graph1d.autodistribution'] == 'On')
             self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
-    def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_non_dist_workspace_with_uneven_spectra(self):
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_off(self):
         plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
                       'contour', 'contourf', 'tricontour', 'tricontourf']
         non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 25, 30, 10, 20, 25, 30],
@@ -408,10 +408,10 @@ class Plots__init__Test(unittest.TestCase):
                                          Distribution=False,
                                          OutputWorkspace='non_dist_workpace')
         for plot_func in plot_funcs:
+            config['graph1d.autodistribution'] = 'Off'
             func = getattr(self.ax, plot_func)
             func(non_dist_2d_ws)
-            config['graph1d.autodistribution'] = 'Off'
-            self.assertTrue(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            self.assertFalse(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
     def test_check_axes_distribution_consistency_mixed_normalization(self):
@@ -481,6 +481,8 @@ class Plots__init__Test(unittest.TestCase):
         self.ax.plot(ws)
         ws_artist = self.ax.tracked_workspaces[ws_name][0]
         self.assertEqual(1, ws_artist.spec_num)
+        self.assertTrue('specNum' in self.ax.creation_args[0])
+        self.assertFalse('wkspIndex' in self.ax.creation_args[0])
 
     def test_that_plotting_ws_without_giving_spec_num_raises_if_ws_has_more_than_1_histogram(self):
         self.assertRaises(RuntimeError, self.ax.plot, self.ws2d_histo)
@@ -574,7 +576,7 @@ class Plots__init__Test(unittest.TestCase):
         # Add filled areas.
         ax.set_waterfall_fill(True)
 
-        fills = helperfunctions.get_waterfall_fills(ax)
+        fills = datafunctions.get_waterfall_fills(ax)
         self.assertEqual(len(fills), 2)
 
     def test_remove_fill_removes_fills_for_waterfall_plots(self):
@@ -620,8 +622,8 @@ class Plots__init__Test(unittest.TestCase):
 
         # Plot another line and make it join the waterfall.
         ax.plot([0, 1], [0,1], color='#00fff0')
-        helperfunctions.convert_single_line_to_waterfall(ax, 2)
-        helperfunctions.waterfall_update_fill(ax)
+        datafunctions.convert_single_line_to_waterfall(ax, 2)
+        datafunctions.waterfall_update_fill(ax)
 
         # Check that there are now three filled areas and the new line colour matches the new fill colour.
         self.assertEqual(convert_color_to_hex(ax.collections[2].get_facecolor()[0]), ax.lines[2].get_color())
@@ -641,11 +643,26 @@ class Plots__init__Test(unittest.TestCase):
 
         # Plot another line and make it join the waterfall.
         ax.plot([0, 1], [0, 1])
-        helperfunctions.convert_single_line_to_waterfall(ax, 2)
-        helperfunctions.waterfall_update_fill(ax)
+        datafunctions.convert_single_line_to_waterfall(ax, 2)
+        datafunctions.waterfall_update_fill(ax)
 
         # Check that there are now three filled areas and the new fill colour matches the others.
         self.assertTrue((ax.collections[2].get_facecolor() == [1, 0, 0, 1]).all())
+
+    def test_fills_not_created_if_waterfall_plot_already_has_filled_areas(self):
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        ax.plot([0, 1], [0, 1])
+        ax.plot([0, 1], [0, 1])
+
+        # Make a waterfall plot
+        ax.set_waterfall(True)
+
+        # Add filled areas twice
+        ax.set_waterfall_fill(True)
+        ax.set_waterfall_fill(True)
+
+        # There should still be only two filled areas (one for each line)
+        self.assertEqual(len(datafunctions.get_waterfall_fills(ax)), 2)
 
     def _run_check_axes_distribution_consistency(self, normalization_states):
         mock_tracked_workspaces = {

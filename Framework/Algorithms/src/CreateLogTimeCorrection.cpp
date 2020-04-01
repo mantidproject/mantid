@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateLogTimeCorrection.h"
 #include "MantidAPI/FileProperty.h"
@@ -149,7 +149,7 @@ TableWorkspace_sptr CreateLogTimeCorrection::generateCorrectionTable(
 /** Write correction map to a text file
  */
 void CreateLogTimeCorrection::writeCorrectionToFile(
-    const string filename, const Geometry::DetectorInfo &detectorInfo,
+    const string &filename, const Geometry::DetectorInfo &detectorInfo,
     const std::vector<double> &corrections) const {
   ofstream ofile;
   ofile.open(filename.c_str());

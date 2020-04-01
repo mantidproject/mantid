@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 This module defines a function-style API for running Mantid
@@ -26,16 +26,11 @@ and assign it to the rebinned variable.
 
 Importing this module starts the FrameworkManager instance.
 """
-from __future__ import (absolute_import, division, print_function)
-
 # std libs
 from collections import OrderedDict, namedtuple
 import inspect
 import os
 import sys
-
-import six
-from six import iteritems
 
 import mantid
 # This is a simple API so give access to the aliases by default as well
@@ -48,8 +43,10 @@ from mantid.kernel.packagesetup import update_sys_paths as _update_sys_paths
 # register matplotlib projection
 try:
     from mantid import plots  # noqa
+    from mantid.plots._compatability import plotSpectrum, plotBin  # noqa
 except ImportError:
     pass  # matplotlib is unavailable
+
 from mantid.kernel._aliases import *
 from mantid.api._aliases import *
 from mantid.fitfunctions import *
@@ -164,6 +161,16 @@ def _create_generic_signature_legacy(algm_object):
     return "\b%s" % arg_str, "\b\bVersion=%d" % algm_object.version()
 
 
+def _show_dialog_fn_deprecation_warning(name):
+    """Raise a deprecation warning for a *Dialog being used.
+    """
+    import warnings
+    help_msg = "{} has been deprecated. " \
+               "All Dialog functions will be removed in a future release.".format(name)
+    warnings.warn(help_msg, UserWarning)
+    logger.warning(help_msg)
+
+
 def Load(*args, **kwargs):
     """
     Load is a more flexible algorithm than other Mantid algorithms.
@@ -259,6 +266,8 @@ def LoadDialog(*args, **kwargs):
       - Disable :: A CSV list of properties to disable in the dialog
       - Message :: An optional message string
     """
+    _show_dialog_fn_deprecation_warning("LoadDialog")
+
     arguments = {}
     filename = None
     wkspace = None
@@ -733,10 +742,7 @@ def _get_function_spec(func):
     """
     import inspect
     try:
-        if six.PY2:
-            argspec = inspect.getargspec(func)
-        else:
-            argspec = inspect.getfullargspec(func)
+        argspec = inspect.getfullargspec(func)
     except TypeError:
         return ''
     # Algorithm functions have varargs set not args
@@ -1095,7 +1101,7 @@ def set_properties(alg_object, *args, **kwargs):
         mandatory_props = []
 
     postponed = []
-    for (key, value) in iteritems(kwargs):
+    for (key, value) in kwargs.items():
         if key in mandatory_props:
             mandatory_props.remove(key)
         if "IndexSet" in key:
@@ -1313,7 +1319,7 @@ def set_properties_dialog(algm_object, *args, **kwargs):
 
     # finally run the configured dialog
     import mantidplot
-    dialog_accepted = mantidplot.createScriptInputDialog(algm_object.name(), presets, message,
+    dialog_accepted = mantidplot.createScriptInputDialog(algm_object, presets, message,
                                                          enabled_list, disabled_list)
     if not dialog_accepted:
         raise RuntimeError('Algorithm input cancelled')
@@ -1331,6 +1337,8 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
     """
 
     def algorithm_wrapper(*args, **kwargs):
+        _show_dialog_fn_deprecation_warning("{}Dialog".format(algorithm))
+
         _version = version
         if "Version" in kwargs:
             _version = kwargs["Version"]
@@ -1431,7 +1439,7 @@ def _translate():
 
     algs = AlgorithmFactory.getRegisteredAlgorithms(True)
     algorithm_mgr = AlgorithmManager
-    for name, versions in iteritems(algs):
+    for name, versions in algs.items():
         if specialization_exists(name):
             continue
         try:

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_WORKSPACEGROUPTEST_H_
-#define MANTID_API_WORKSPACEGROUPTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
@@ -51,7 +50,7 @@ public:
 class WorkspaceGroupTest : public CxxTest::TestSuite {
 private:
   /// Helper method to add an 'nperiods' log value to each workspace in a group.
-  void add_periods_logs(WorkspaceGroup_sptr ws, int nperiods = -1) {
+  void add_periods_logs(const WorkspaceGroup_sptr &ws, int nperiods = -1) {
     for (size_t i = 0; i < ws->size(); ++i) {
       MatrixWorkspace_sptr currentWS =
           boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
@@ -484,5 +483,3 @@ public:
     TS_ASSERT(group0->containsInChildren("wsInput"));
   }
 };
-
-#endif /* MANTID_API_WORKSPACEGROUPTEST_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_THRESHOLDMDTEST_H_
-#define MANTID_MDALGORITHMS_THRESHOLDMDTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -52,7 +51,7 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  IMDHistoWorkspace_sptr doExecute(IMDHistoWorkspace_sptr inWS,
+  IMDHistoWorkspace_sptr doExecute(const IMDHistoWorkspace_sptr &inWS,
                                    const std::string &condition,
                                    const double &referenceValue) {
     const std::string outWSName = "OutWS";
@@ -138,5 +137,3 @@ public:
     // Don't touch these.
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_THRESHOLDMDTEST_H_ */

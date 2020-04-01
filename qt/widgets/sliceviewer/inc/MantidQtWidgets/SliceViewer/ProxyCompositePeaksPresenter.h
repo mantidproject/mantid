@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PROXYCOMPOSITEPEAKSPRESENTER_H_
-#define MANTID_SLICEVIEWER_PROXYCOMPOSITEPEAKSPRESENTER_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/SliceViewer/CompositePeaksPresenter.h"
@@ -35,11 +34,11 @@ public:
 
   void
   setForegroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                     PeakViewColor /*color*/);
+                     const PeakViewColor & /*color*/);
   /// Change the background representation for the peaks of this workspace
   void
   setBackgroundColor(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
-                     PeakViewColor /*color*/);
+                     const PeakViewColor & /*color*/);
   /// Get the foreground colour corresponding to the workspace
   PeakViewColor getForegroundPeakViewColor(
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
@@ -88,8 +87,9 @@ public:
   /// Get optional zoomed peak index.
   int getZoomedPeakIndex() const;
   /// Set the edit mode.
-  void editCommand(EditMode editMode,
-                   boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  void editCommand(
+      EditMode editMode,
+      const boost::weak_ptr<const Mantid::API::IPeaksWorkspace> &target);
   /// Set the peaks size within the current projection
   void setPeakSizeOnProjection(const double fraction);
   /// Set the peaks size into the current projection
@@ -107,5 +107,3 @@ private:
 };
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif

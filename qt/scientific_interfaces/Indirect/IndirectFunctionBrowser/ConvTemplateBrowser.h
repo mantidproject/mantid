@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INDIRECT_CONVTEMPLATEBROWSER_H_
-#define INDIRECT_CONVTEMPLATEBROWSER_H_
+#pragma once
 
 #include "ConvTemplatePresenter.h"
 #include "ConvTypes.h"
@@ -113,5 +112,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*INDIRECT_CONVTEMPLATEBROWSER_H_*/

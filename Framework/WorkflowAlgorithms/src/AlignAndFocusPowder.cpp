@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/AlignAndFocusPowder.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -823,9 +823,9 @@ void AlignAndFocusPowder::exec() {
 /** Call edit instrument geometry
  */
 API::MatrixWorkspace_sptr AlignAndFocusPowder::editInstrument(
-    API::MatrixWorkspace_sptr ws, std::vector<double> polars,
-    std::vector<specnum_t> specids, std::vector<double> l2s,
-    std::vector<double> phis) {
+    API::MatrixWorkspace_sptr ws, const std::vector<double> &polars,
+    const std::vector<specnum_t> &specids, const std::vector<double> &l2s,
+    const std::vector<double> &phis) {
   g_log.information() << "running EditInstrumentGeometry started at "
                       << Types::Core::DateAndTime::getCurrentTime() << "\n";
 
@@ -884,7 +884,7 @@ AlignAndFocusPowder::diffractionFocus(API::MatrixWorkspace_sptr ws) {
  */
 API::MatrixWorkspace_sptr
 AlignAndFocusPowder::convertUnits(API::MatrixWorkspace_sptr matrixws,
-                                  std::string target) {
+                                  const std::string &target) {
   g_log.information() << "running ConvertUnits(Target=" << target
                       << ") started at "
                       << Types::Core::DateAndTime::getCurrentTime() << "\n";
@@ -955,8 +955,8 @@ AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws) {
 /** Add workspace2 to workspace1 by adding spectrum.
  */
 MatrixWorkspace_sptr
-AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
-                                       API::MatrixWorkspace_sptr ws2,
+AlignAndFocusPowder::conjoinWorkspaces(const API::MatrixWorkspace_sptr &ws1,
+                                       const API::MatrixWorkspace_sptr &ws2,
                                        size_t offset) {
   // Get information from ws1: maximum spectrum number, and store original
   // spectrum Nos
@@ -1129,7 +1129,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFilename,
  *
  * @param ws :: any Workspace. Does nothing if not EventWorkspace.
  */
-void AlignAndFocusPowder::doSortEvents(Mantid::API::Workspace_sptr ws) {
+void AlignAndFocusPowder::doSortEvents(const Mantid::API::Workspace_sptr &ws) {
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
   if (!eventWS)
     return;

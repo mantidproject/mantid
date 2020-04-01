@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef CURVESDIALOG_H
-#define CURVESDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <QMap>
@@ -46,7 +45,8 @@ class CurvesDialog : public QDialog {
   Q_OBJECT
 
 public:
-  CurvesDialog(ApplicationWindow *app, Graph *g, Qt::WFlags fl = nullptr);
+  CurvesDialog(ApplicationWindow *app, Graph *g,
+               const Qt::WFlags &fl = nullptr);
   ~CurvesDialog() override;
 
 private slots:
@@ -91,5 +91,3 @@ private:
   QCheckBox *boxShowCurrentFolder;
   QMap<QString, PlotCurve *> d_plotCurves;
 };
-
-#endif // CurvesDialog_H

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/EQSANSQ2D.h"
 #include "MantidAPI/Run.h"
@@ -39,7 +39,8 @@ void EQSANSQ2D::init() {
 /// Returns the value of a run property from a given workspace
 /// @param inputWS :: input workspace
 /// @param pname :: name of the property to retrieve
-double getRunProperty(MatrixWorkspace_sptr inputWS, const std::string &pname) {
+double getRunProperty(const MatrixWorkspace_sptr &inputWS,
+                      const std::string &pname) {
   return inputWS->run().getPropertyValueAsType<double>(pname);
 }
 

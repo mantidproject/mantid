@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_UNWRAPMONITORTEST_H_
-#define MANTID_ALGORITHMS_UNWRAPMONITORTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -176,7 +175,7 @@ private:
 
   // Run the algorithm and do some basic checks. Returns the output workspace.
   MatrixWorkspace_const_sptr
-  runAlgorithm(UnwrapMonitor &algo, const MatrixWorkspace_const_sptr inWS) {
+  runAlgorithm(UnwrapMonitor &algo, const MatrixWorkspace_const_sptr &inWS) {
     // run the algorithm
     TS_ASSERT(algo.execute());
     TS_ASSERT(algo.isExecuted());
@@ -190,5 +189,3 @@ private:
     return outWS;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_UNWRAPMONITORTEST_H_ */

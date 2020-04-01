@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument.h"
@@ -58,7 +58,7 @@ ParComponentFactory::createInstrument(boost::shared_ptr<const Instrument> base,
  * @returns A pointer to a parameterized component
  */
 IComponent_sptr
-ParComponentFactory::create(boost::shared_ptr<const IComponent> base,
+ParComponentFactory::create(const boost::shared_ptr<const IComponent> &base,
                             const ParameterMap *map) {
   boost::shared_ptr<const IDetector> det_sptr =
       boost::dynamic_pointer_cast<const IDetector>(base);

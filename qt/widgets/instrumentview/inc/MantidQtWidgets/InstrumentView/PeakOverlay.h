@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDPLOT_PEAKOVERLAY_H_
-#define MANTIDPLOT_PEAKOVERLAY_H_
+#pragma once
 
 #include "PeakMarker2D.h"
 #include "Shape2DCollection.h"
@@ -123,7 +122,7 @@ class PeakOverlay : public Shape2DCollection,
   Q_OBJECT
 public:
   PeakOverlay(UnwrappedSurface *surface,
-              boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
+              const boost::shared_ptr<Mantid::API::IPeaksWorkspace> &pws);
   ~PeakOverlay() override {}
   /// Override the drawing method
   void draw(QPainter &painter) const override;
@@ -147,7 +146,7 @@ public:
   void setShowLabelsFlag(bool yes) { m_showLabels = yes; }
   void setShowRelativeIntensityFlag(bool yes);
   static PeakMarker2D::Style getDefaultStyle(int index);
-  void setPeakVisibility(double xmin, double xmax, QString units);
+  void setPeakVisibility(double xmin, double xmax, const QString &units);
 
 signals:
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr /*_t1*/);
@@ -178,5 +177,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*MANTIDPLOT_PEAKOVERLAY_H_*/

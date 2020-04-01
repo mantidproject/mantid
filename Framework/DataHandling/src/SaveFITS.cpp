@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveFITS.h"
 
@@ -143,7 +143,7 @@ void SaveFITS::exec() {
  * @param img matrix workspace (one spectrum per row)
  * @param filename relative or full path, should be already checked
  */
-void SaveFITS::saveFITSImage(const API::MatrixWorkspace_sptr img,
+void SaveFITS::saveFITSImage(const API::MatrixWorkspace_sptr &img,
                              const std::string &filename) {
   std::ofstream outfile(filename, std::ofstream::binary);
 
@@ -151,7 +151,7 @@ void SaveFITS::saveFITSImage(const API::MatrixWorkspace_sptr img,
   writeFITSImageMatrix(img, outfile);
 }
 
-void SaveFITS::writeFITSHeaderBlock(const API::MatrixWorkspace_sptr img,
+void SaveFITS::writeFITSHeaderBlock(const API::MatrixWorkspace_sptr &img,
                                     std::ofstream &file) {
   // minimal sequence of standard headers
   writeFITSHeaderEntry(g_FITSHdrFirst, file);
@@ -169,7 +169,7 @@ void SaveFITS::writeFITSHeaderBlock(const API::MatrixWorkspace_sptr img,
   writePaddingFITSHeaders(entriesPerHDU - 9, file);
 }
 
-void SaveFITS::writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
+void SaveFITS::writeFITSImageMatrix(const API::MatrixWorkspace_sptr &img,
                                     std::ofstream &file) {
   const size_t sizeX = img->blocksize();
   const size_t sizeY = img->getNumberHistograms();
@@ -213,7 +213,7 @@ void SaveFITS::writeFITSHeaderEntry(const std::string &hdr,
   file.write(blanks.data(), g_maxLenHdr - count);
 }
 
-void SaveFITS::writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr img,
+void SaveFITS::writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr &img,
                                         std::ofstream &file) {
   const std::string sizeX = std::to_string(img->blocksize());
   const std::string sizeY = std::to_string(img->getNumberHistograms());

@@ -199,7 +199,6 @@ set(INC_FILES
     inc/MantidAPI/DeprecatedAlgorithm.h
     inc/MantidAPI/DetectorSearcher.h
     inc/MantidAPI/DistributedAlgorithm.h
-    inc/MantidAPI/DllConfig.h
     inc/MantidAPI/DomainCreatorFactory.h
     inc/MantidAPI/EnabledWhenWorkspaceIsType.h
     inc/MantidAPI/EqualBinSizesValidator.h
@@ -370,7 +369,6 @@ if(PROFILE_ALGORITHM_LINUX)
 else()
   set(SRC_FILES "${SRC_FILES}" "src/AlgorithmExecute.cpp")
 endif()
-unset(PROFILE_ALGORITHM_LINUX CACHE)
 
 set(TEST_FILES
     ADSValidatorTest.h
@@ -543,6 +541,10 @@ target_link_libraries(API
 
 # Add the unit tests directory
 add_subdirectory(test)
+
+# Auto-generate exports header
+target_include_directories(API PUBLIC ${CMAKE_BINARY_DIR}/Framework/API)
+generate_mantid_export_header(API TRUE)
 
 # Installation settings
 

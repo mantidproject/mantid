@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALGORITHMPROXYTEST_H_
-#define ALGORITHMPROXYTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -18,6 +17,7 @@
 #include <Poco/Thread.h>
 
 #include <boost/lexical_cast.hpp>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -122,7 +122,8 @@ public:
   TestProxyObserver()
       : AlgorithmObserver(), start(false), progress(false), finish(false) {}
   TestProxyObserver(IAlgorithm_const_sptr alg)
-      : AlgorithmObserver(alg), start(false), progress(false), finish(false) {}
+      : AlgorithmObserver(std::move(alg)), start(false), progress(false),
+        finish(false) {}
   void startHandle(const IAlgorithm *) override { start = true; }
   void progressHandle(const IAlgorithm *, double p,
                       const std::string &msg) override {
@@ -153,6 +154,8 @@ public:
     alg->setProperty("prop2", 17);
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Finished, alg->executionState());
+    TS_ASSERT_EQUALS(ResultState::Success, alg->resultState());
     int out = alg->getProperty("out");
     TS_ASSERT_EQUALS(out, 28);
   }
@@ -259,5 +262,3 @@ public:
     TS_ASSERT_EQUALS(val, val2);
   }
 };
-
-#endif /*ALGORITHMPROXYTEST_H_*/

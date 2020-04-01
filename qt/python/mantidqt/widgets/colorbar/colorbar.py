@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
-from mantid.plots.utility import mpl_version_info
+from mantid.plots.utility import mpl_version_info, get_current_cmap
 from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
@@ -103,7 +101,7 @@ class ColorbarWidget(QWidget):
         """
         self.ax.clear()
         try: # Use current cmap
-            cmap = self.colorbar.get_cmap()
+            cmap = get_current_cmap(self.colorbar)
         except AttributeError:
             try: # else use viridis
                 cmap = cm.viridis
@@ -113,7 +111,9 @@ class ColorbarWidget(QWidget):
         self.cmin_value, self.cmax_value = mappable.get_clim()
         self.update_clim_text()
         self.cmap_changed(cmap)
-        self.cmap.setCurrentIndex(sorted(cm.cmap_d.keys()).index(mappable.get_cmap().name))
+
+        mappable_cmap = get_current_cmap(mappable)
+        self.cmap.setCurrentIndex(sorted(cm.cmap_d.keys()).index(mappable_cmap.name))
         self.redraw()
 
     def cmap_index_changed(self):
@@ -132,7 +132,7 @@ class ColorbarWidget(QWidget):
         Updates the colormap and min/max values of the colorbar
         when the plot changes via settings.
         """
-        mappable_cmap = self.colorbar.mappable.get_cmap()
+        mappable_cmap = get_current_cmap(self.colorbar.mappable)
         low, high = self.colorbar.mappable.get_clim()
         self.cmin_value = low
         self.cmax_value = high
@@ -193,7 +193,7 @@ class ColorbarWidget(QWidget):
                 try:
                     self.cmin_value = data[~data.mask].min()
                     self.cmax_value = data[~data.mask].max()
-                except AttributeError:
+                except (AttributeError, IndexError):
                     self.cmin_value = np.nanmin(data)
                     self.cmax_value = np.nanmax(data)
             except (ValueError, RuntimeWarning):

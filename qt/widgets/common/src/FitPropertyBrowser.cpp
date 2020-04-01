@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
@@ -55,6 +55,7 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
+#include <utility>
 
 namespace MantidQt {
 using API::MantidDesktopServices;
@@ -66,7 +67,7 @@ Mantid::Kernel::Logger g_log("FitPropertyBrowser");
 
 using namespace Mantid::API;
 
-int getNumberOfSpectra(MatrixWorkspace_sptr workspace) {
+int getNumberOfSpectra(const MatrixWorkspace_sptr &workspace) {
   return static_cast<int>(workspace->getNumberHistograms());
 }
 
@@ -301,7 +302,7 @@ void FitPropertyBrowser::initLayout(QWidget *w) { initBasicLayout(w); }
  * @return push botton for the fit menu
  */
 QPushButton *FitPropertyBrowser::createFitMenuButton(QWidget *w) {
-  QPushButton *btnFit = new QPushButton("Fit");
+  auto *btnFit = new QPushButton("Fit");
   m_tip = new QLabel("", w);
 
   m_fitMapper = new QSignalMapper(this);
@@ -390,11 +391,11 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   connect(m_vectorSizeManager, SIGNAL(propertyChanged(QtProperty *)), this,
           SLOT(vectorSizeChanged(QtProperty *)));
 
-  QVBoxLayout *layout = new QVBoxLayout(w);
+  auto *layout = new QVBoxLayout(w);
   layout->setObjectName("vlayout");
-  QGridLayout *buttonsLayout = new QGridLayout();
+  auto *buttonsLayout = new QGridLayout();
 
-  QPushButton *btnDisplay = new QPushButton("Display");
+  auto *btnDisplay = new QPushButton("Display");
   btnDisplay->setObjectName("button_Display");
   QMenu *displayMenu = new QMenu(this);
   displayMenu->setObjectName("menu_Display");
@@ -424,7 +425,7 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   displayMenu->addAction(m_displayActionQuality);
   btnDisplay->setMenu(displayMenu);
 
-  QPushButton *btnSetup = new QPushButton("Setup");
+  auto *btnSetup = new QPushButton("Setup");
   btnSetup->setObjectName("button_Setup");
   QMenu *setupMenu = new QMenu(this);
   setupMenu->setObjectName("menu_Setup");
@@ -757,6 +758,9 @@ void FitPropertyBrowser::acceptFit() {
   if (!cf)
     return;
   auto function = m_fitSelector->getFunction();
+  if (function.isEmpty()) {
+    return;
+  }
   PropertyHandler *h = getHandler()->findHandler(cf);
   h->addFunction(function.toStdString());
   emit functionChanged();
@@ -771,7 +775,7 @@ void FitPropertyBrowser::closeFit() { m_fitSelector->close(); }
  * @param func :: [input] Pointer to function
  */
 void FitPropertyBrowser::createCompositeFunction(
-    const Mantid::API::IFunction_sptr func) {
+    const Mantid::API::IFunction_sptr &func) {
   if (m_compositeFunction) {
     emit functionRemoved();
     m_autoBackground = nullptr;
@@ -1060,7 +1064,7 @@ void FitPropertyBrowser::deleteFunction() {
   removeFunction(h);
 }
 
-//***********************************************************************************//
+//
 
 // Get the default function name
 std::string FitPropertyBrowser::defaultFunctionType() const {
@@ -1140,7 +1144,7 @@ void FitPropertyBrowser::setWorkspaceName(const QString &wsName) {
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
     }
     if (mws) {
-      size_t wi = static_cast<size_t>(workspaceIndex());
+      auto wi = static_cast<size_t>(workspaceIndex());
       if (wi < mws->getNumberHistograms() && !mws->x(wi).empty()) {
         setStartX(mws->x(wi).front());
         setEndX(mws->x(wi).back());
@@ -1595,8 +1599,8 @@ void FitPropertyBrowser::setCurrentFunction(PropertyHandler *h) const {
  * @param f :: New current function
  */
 void FitPropertyBrowser::setCurrentFunction(
-    Mantid::API::IFunction_const_sptr f) const {
-  setCurrentFunction(getHandler()->findHandler(f));
+    const Mantid::API::IFunction_const_sptr &f) const {
+  setCurrentFunction(getHandler()->findHandler(std::move(f)));
 }
 
 /**
@@ -2557,7 +2561,7 @@ QtProperty *FitPropertyBrowser::addStringProperty(const QString &name) const {
  */
 void FitPropertyBrowser::setStringPropertyValue(QtProperty *prop,
                                                 const QString &value) const {
-  QtStringPropertyManager *manager =
+  auto *manager =
       dynamic_cast<QtStringPropertyManager *>(prop->propertyManager());
   if (manager) {
     manager->setValue(prop, value);
@@ -2565,7 +2569,7 @@ void FitPropertyBrowser::setStringPropertyValue(QtProperty *prop,
 }
 
 QString FitPropertyBrowser::getStringPropertyValue(QtProperty *prop) const {
-  QtStringPropertyManager *manager =
+  auto *manager =
       dynamic_cast<QtStringPropertyManager *>(prop->propertyManager());
   if (manager)
     return manager->value(prop);
@@ -2713,7 +2717,7 @@ void FitPropertyBrowser::reset() {
 }
 
 void FitPropertyBrowser::setWorkspace(
-    Mantid::API::IFunction_sptr function) const {
+    const Mantid::API::IFunction_sptr &function) const {
   std::string wsName = workspaceName();
   if (!wsName.empty()) {
     try {
@@ -2858,7 +2862,7 @@ void FitPropertyBrowser::removeLogValue() {
 }
 
 void FitPropertyBrowser::sequentialFit() {
-  SequentialFitDialog *dlg = new SequentialFitDialog(this, m_mantidui);
+  auto *dlg = new SequentialFitDialog(this, m_mantidui);
   std::string wsName = workspaceName();
   if (!wsName.empty() &&
       dlg->addWorkspaces(QStringList(QString::fromStdString(wsName)))) {
@@ -2976,7 +2980,7 @@ bool FitPropertyBrowser::rawData() const {
   return m_boolManager->value(m_rawData);
 }
 
-void FitPropertyBrowser::setTextPlotGuess(const QString text) {
+void FitPropertyBrowser::setTextPlotGuess(const QString &text) {
   m_displayActionPlotGuess->setText(text);
 }
 
@@ -3012,7 +3016,7 @@ QStringList FitPropertyBrowser::getWorkspaceNames() { return m_workspaceNames; }
  * Call MultifitSetupDialog to populate MultiBG function.
  */
 void FitPropertyBrowser::setupMultifit() {
-  MultifitSetupDialog *dlg = new MultifitSetupDialog(this);
+  auto *dlg = new MultifitSetupDialog(this);
   dlg->exec();
   QStringList ties = dlg->getParameterTies();
 
@@ -3384,7 +3388,7 @@ QStringList FitPropertyBrowser::getParameterNames() const {
 void FitPropertyBrowser::functionHelp() {
   PropertyHandler *handler = currentHandler();
   if (handler) {
-    MantidQt::API::HelpWindow::showFitFunction(this->nativeParentWidget(),
+    MantidQt::API::HelpWindow::showFitFunction(nullptr,
                                                handler->ifun()->name());
   }
 }

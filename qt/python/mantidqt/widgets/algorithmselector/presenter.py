@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import, print_function
-
 from collections import namedtuple
 
 from .model import AlgorithmSelectorModel
@@ -58,3 +56,6 @@ class AlgorithmSelectorPresenter(object):
     def refresh(self):
         algorithm_data = self.model.get_algorithm_data()
         self.view.populate_ui(algorithm_data)
+
+    def find_input_workspace_property(self, algorithm):
+        return self.model.find_input_workspace_property(algorithm)

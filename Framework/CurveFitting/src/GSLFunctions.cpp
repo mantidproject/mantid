@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -163,7 +163,7 @@ int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J) {
  * @param cf :: ICostFunction
  */
 GSL_FitData::GSL_FitData(
-    boost::shared_ptr<CostFunctions::CostFuncLeastSquares> cf)
+    const boost::shared_ptr<CostFunctions::CostFuncLeastSquares> &cf)
     : function(cf->getFittingFunction()), costFunction(cf) {
   gsl_set_error_handler_off();
   // number of active parameters

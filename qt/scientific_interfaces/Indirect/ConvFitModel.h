@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_CONVFITMODEL_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_CONVFITMODEL_H_
+#pragma once
 
 #include "IndirectFittingModel.h"
 
@@ -42,13 +41,14 @@ public:
                     const Spectra &spectra) override;
   void removeWorkspace(TableDatasetIndex index) override;
   void setResolution(const std::string &name, TableDatasetIndex index);
-  void setResolution(Mantid::API::MatrixWorkspace_sptr resolution,
+  void setResolution(const Mantid::API::MatrixWorkspace_sptr &resolution,
                      TableDatasetIndex index);
   void setFitTypeString(const std::string &fitType);
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
-  std::vector<std::pair<std::string, int>> getResolutionsForFit() const;
+  std::vector<std::pair<std::string, int>>
+  getResolutionsForFit() const override;
 
 private:
   Mantid::API::IAlgorithm_sptr sequentialFitAlgorithm() const override;
@@ -105,5 +105,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

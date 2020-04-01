@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -280,16 +280,16 @@ void SCDCalibratePanels::exec() {
   saveNexus(tofFilename, TofWksp);
 }
 
-void SCDCalibratePanels::saveNexus(std::string outputFile,
-                                   MatrixWorkspace_sptr outputWS) {
+void SCDCalibratePanels::saveNexus(const std::string &outputFile,
+                                   const MatrixWorkspace_sptr &outputWS) {
   IAlgorithm_sptr save = this->createChildAlgorithm("SaveNexus");
   save->setProperty("InputWorkspace", outputWS);
   save->setProperty("FileName", outputFile);
   save->execute();
 }
 
-void SCDCalibratePanels::findL1(int nPeaks,
-                                DataObjects::PeaksWorkspace_sptr peaksWs) {
+void SCDCalibratePanels::findL1(
+    int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs) {
   MatrixWorkspace_sptr L1WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * nPeaks,
                                                3 * nPeaks));
@@ -329,8 +329,8 @@ void SCDCalibratePanels::findL1(int nPeaks,
                  << fitL1Status << " Chi2overDoF " << chisqL1 << "\n";
 }
 
-void SCDCalibratePanels::findT0(int nPeaks,
-                                DataObjects::PeaksWorkspace_sptr peaksWs) {
+void SCDCalibratePanels::findT0(
+    int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs) {
   MatrixWorkspace_sptr T0WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, 3 * nPeaks,
                                                3 * nPeaks));
@@ -385,7 +385,8 @@ void SCDCalibratePanels::findT0(int nPeaks,
   }
 }
 
-void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
+void SCDCalibratePanels::findU(
+    const DataObjects::PeaksWorkspace_sptr &peaksWs) {
   IAlgorithm_sptr ub_alg;
   try {
     ub_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
@@ -442,7 +443,7 @@ void SCDCalibratePanels::findU(DataObjects::PeaksWorkspace_sptr peaksWs) {
 void SCDCalibratePanels::saveIsawDetCal(
     boost::shared_ptr<Instrument> &instrument,
     boost::container::flat_set<string> &AllBankName, double T0,
-    string filename) {
+    const string &filename) {
   // having a filename triggers doing the work
   if (filename.empty())
     return;
@@ -633,8 +634,9 @@ void SCDCalibratePanels::saveXmlFile(
   oss3.flush();
   oss3.close();
 }
-void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
-                                DataObjects::PeaksWorkspace_sptr peaksWs) {
+void SCDCalibratePanels::findL2(
+    boost::container::flat_set<string> MyBankNames,
+    const DataObjects::PeaksWorkspace_sptr &peaksWs) {
   bool changeSize = getProperty("ChangePanelSize");
   Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
 

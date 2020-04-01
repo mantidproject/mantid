@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDGLWIDGET_H_
-#define MANTIDGLWIDGET_H_
+#pragma once
 
 #include "MantidGeometry/IComponent.h"
 
@@ -31,7 +30,7 @@ public:
   void setSurface(boost::shared_ptr<ProjectionSurface> surface);
   boost::shared_ptr<ProjectionSurface> getSurface() { return m_surface; }
 
-  void setBackgroundColor(QColor /*input*/);
+  void setBackgroundColor(const QColor & /*input*/);
   QColor currentBackgroundColor() const;
   void saveToFile(const QString &filename);
   // int getLightingState() const {return m_lightingState;}
@@ -72,5 +71,3 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*MANTIDGLWIDGET_H_*/

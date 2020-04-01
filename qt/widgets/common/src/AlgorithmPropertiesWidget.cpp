@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AlgorithmPropertiesWidget.h"
 
@@ -23,6 +23,8 @@
 #include <QScrollArea>
 
 #include <algorithm>
+#include <utility>
+
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -47,7 +49,7 @@ AlgorithmPropertiesWidget::AlgorithmPropertiesWidget(QWidget *parent)
   m_viewport = new QWidget(this);
 
   // Put everything in a vertical box and put it inside the m_scroll area
-  QVBoxLayout *mainLay = new QVBoxLayout();
+  auto *mainLay = new QVBoxLayout();
   m_viewport->setLayout(mainLay);
   // The property boxes
   mainLay->addLayout(m_inputGrid);
@@ -64,7 +66,7 @@ AlgorithmPropertiesWidget::AlgorithmPropertiesWidget(QWidget *parent)
   m_scroll->setAlignment(Qt::Alignment(Qt::AlignLeft & Qt::AlignTop));
 
   // Add a layout for the whole widget, containing just the m_scroll area
-  QVBoxLayout *dialog_layout = new QVBoxLayout();
+  auto *dialog_layout = new QVBoxLayout();
   dialog_layout->addWidget(m_scroll);
   setLayout(dialog_layout);
 
@@ -98,7 +100,7 @@ Mantid::API::IAlgorithm_sptr AlgorithmPropertiesWidget::getAlgorithm() {
  *
  * @param algo :: IAlgorithm bare ptr */
 void AlgorithmPropertiesWidget::setAlgorithm(
-    Mantid::API::IAlgorithm_sptr algo) {
+    const Mantid::API::IAlgorithm_sptr &algo) {
   if (!algo)
     return;
   saveInput();
@@ -118,7 +120,7 @@ QString AlgorithmPropertiesWidget::getAlgorithmName() const {
  * @param name :: The algorithm name*/
 void AlgorithmPropertiesWidget::setAlgorithmName(QString name) {
   FrameworkManager::Instance();
-  m_algoName = name;
+  m_algoName = std::move(name);
   try {
     Algorithm_sptr alg =
         AlgorithmManager::Instance().createUnmanaged(m_algoName.toStdString());

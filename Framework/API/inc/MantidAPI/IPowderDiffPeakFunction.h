@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IPOWDERDIFFPEAKFUNCTION_H_
-#define MANTID_API_IPOWDERDIFFPEAKFUNCTION_H_
+#pragma once
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
@@ -151,5 +150,3 @@ std::complex<double> MANTID_API_DLL E1(std::complex<double> z);
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_IPOWDERDIFFPEAKFUNCTION_H_*/

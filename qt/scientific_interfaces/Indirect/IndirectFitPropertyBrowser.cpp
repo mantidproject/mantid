@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPropertyBrowser.h"
 #include "FunctionTemplateBrowser.h"
@@ -318,7 +318,8 @@ void IndirectFitPropertyBrowser::clear() {
  * Updates the plot guess feature in this indirect fit property browser.
  * @param sampleWorkspace :: The workspace loaded as sample
  */
-void IndirectFitPropertyBrowser::updatePlotGuess(MatrixWorkspace_const_sptr) {}
+void IndirectFitPropertyBrowser::updatePlotGuess(
+    const MatrixWorkspace_const_sptr &) {}
 
 void IndirectFitPropertyBrowser::setErrorsEnabled(bool enabled) {
   m_functionBrowser->setErrorsEnabled(enabled);
@@ -354,12 +355,14 @@ TableRowIndex IndirectFitPropertyBrowser::currentDataset() const {
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(
     TableRowIndex nData, const QStringList &datasetNames,
-    const std::vector<double> &qValues) {
+    const std::vector<double> &qValues,
+    const std::vector<std::pair<std::string, int>> &fitResolutions) {
   m_functionBrowser->setNumberOfDatasets(nData.value);
   m_functionBrowser->setDatasetNames(datasetNames);
   m_templateBrowser->setNumberOfDatasets(nData.value);
   m_templateBrowser->setDatasetNames(datasetNames);
   m_templateBrowser->setQValues(qValues);
+  m_templateBrowser->setResolution(fitResolutions);
 }
 
 void IndirectFitPropertyBrowser::setFitEnabled(bool) {}

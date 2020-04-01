@@ -1,17 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef ISISREFLECTOMETRY_TEST_DECODER_TEST_H_
-#define ISISREFLECTOMETRY_TEST_DECODER_TEST_H_
+#pragma once
 
 #include "../../../ISISReflectometry/GUI/Common/Decoder.h"
 #include "../ReflMockObjects.h"
 #include "CoderCommonTester.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidPythonInterface/core/WrapPython.h"
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 
 #include <cxxtest/TestSuite.h>
@@ -168,7 +166,10 @@ public:
   static DecoderTest *createSuite() { return new DecoderTest(); }
   static void destroySuite(DecoderTest *suite) { delete suite; }
 
-  void setUp() override { Mantid::API::FrameworkManager::Instance(); }
+  DecoderTest() {
+    PyRun_SimpleString("import mantid.api as api\n"
+                       "api.FrameworkManager.Instance()");
+  }
 
   void test_decode() {
     CoderCommonTester tester;
@@ -194,5 +195,3 @@ public:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* ISISREFLECTOMETRY_TEST_DECODER_TEST_H_ */

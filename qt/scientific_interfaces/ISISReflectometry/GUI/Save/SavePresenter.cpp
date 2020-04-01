@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SavePresenter.h"
 #include "GUI/Batch/IBatchPresenter.h"
@@ -135,7 +135,7 @@ void SavePresenter::filterWorkspaceNames() {
       boost::regex rgx(filter);
       it = std::copy_if(
           wsNames.begin(), wsNames.end(), validNames.begin(),
-          [rgx](std::string s) { return boost::regex_search(s, rgx); });
+          [rgx](const std::string &s) { return boost::regex_search(s, rgx); });
       m_view->showFilterEditValid();
     } catch (boost::regex_error &) {
       m_view->showFilterEditInvalid();
@@ -143,7 +143,7 @@ void SavePresenter::filterWorkspaceNames() {
   } else {
     // Otherwise simply add names where the filter string is found in
     it = std::copy_if(wsNames.begin(), wsNames.end(), validNames.begin(),
-                      [filter](std::string s) {
+                      [filter](const std::string &s) {
                         return s.find(filter) != std::string::npos;
                       });
   }

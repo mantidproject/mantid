@@ -1,20 +1,21 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_IMWDOMAINCREATOR_H_
-#define MANTID_CURVEFITTING_IMWDOMAINCREATOR_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IDomainCreator.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <boost/weak_ptr.hpp>
 #include <list>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -30,7 +31,7 @@ namespace CurveFitting {
 A base class for domain creators taking 1D data from a spectrum of a matrix
 workspace.
 */
-class DLLExport IMWDomainCreator : public API::IDomainCreator {
+class MANTID_CURVEFITTING_DLL IMWDomainCreator : public API::IDomainCreator {
 public:
   /// Constructor
   IMWDomainCreator(Kernel::IPropertyManager *fit,
@@ -53,7 +54,7 @@ public:
   /// Set the workspace
   /// @param ws :: workspace to set.
   void setWorkspace(boost::shared_ptr<API::MatrixWorkspace> ws) {
-    m_matrixWorkspace = ws;
+    m_matrixWorkspace = std::move(ws);
   }
   /// Set the workspace index
   /// @param wi :: workspace index to set.
@@ -92,7 +93,7 @@ protected:
       const API::IFunction_sptr &function,
       boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
       const boost::shared_ptr<API::FunctionDomain> &domain,
-      boost::shared_ptr<API::FunctionValues> resultValues) const;
+      const boost::shared_ptr<API::FunctionValues> &resultValues) const;
 
   /// Store workspace property name
   std::string m_workspacePropertyName;
@@ -119,5 +120,3 @@ protected:
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_IMWDOMAINCREATOR_H_*/

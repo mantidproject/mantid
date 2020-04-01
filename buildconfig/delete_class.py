@@ -6,8 +6,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Utility for deleting a class file """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import argparse
 import datetime
 import os
@@ -23,6 +21,8 @@ def delete_one(oldfilename):
     os.system(cmd)
 
 #======================================================================
+
+
 def delete_all(subproject, classname, args):
 
     # Directory at base of subproject

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef UNITTEST_H_
-#define UNITTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -1537,5 +1536,3 @@ private:
   Units::Temperature temperature;
   Units::AtomicDistance atomicDistance;
 };
-
-#endif /*UNITTEST_H_*/

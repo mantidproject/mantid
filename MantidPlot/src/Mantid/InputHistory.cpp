@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InputHistory.h"
 #include "MantidAPI/Algorithm.h"
@@ -68,7 +68,8 @@ void InputHistoryImpl::save() {
      Upadates the non-default algorithm properties in the history.
      @param alg :: Pointer to the algorthm
 */
-void InputHistoryImpl::updateAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
+void InputHistoryImpl::updateAlgorithm(
+    const Mantid::API::IAlgorithm_sptr &alg) {
   const std::vector<Property *> &props = alg->getProperties();
   QList<PropertyData> prop_hist_list;
   for (std::vector<Property *>::const_iterator prop = props.begin();

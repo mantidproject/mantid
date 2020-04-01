@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTPRESENTERLEGACY_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTPRESENTERLEGACY_H_
+#pragma once
 
 #include "DllConfig.h"
 
@@ -86,13 +85,14 @@ private:
   void plotInput(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotInput(Mantid::API::MatrixWorkspace_sptr workspace,
                  std::size_t spectrum);
-  void plotFit(Mantid::API::MatrixWorkspace_sptr workspace);
+  void plotFit(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void plotFit(Mantid::API::MatrixWorkspace_sptr workspace,
                std::size_t spectrum);
   void plotDifference(Mantid::API::MatrixWorkspace_sptr workspace,
                       std::size_t spectrum);
   void plotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
-  void plotGuessInSeparateWindow(Mantid::API::MatrixWorkspace_sptr workspace);
+  void
+  plotGuessInSeparateWindow(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void plotLines();
   void updatePlotRange(const std::pair<double, double> &range);
   void clearGuess();
@@ -114,5 +114,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

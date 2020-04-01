@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -240,8 +240,8 @@ void CalculateTransmissionBeamSpreader::exec() {
  *  @param WS ::    The workspace containing the spectrum to sum
  *  @return A Workspace2D containing the sum
  */
-API::MatrixWorkspace_sptr
-CalculateTransmissionBeamSpreader::sumSpectra(API::MatrixWorkspace_sptr WS) {
+API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::sumSpectra(
+    const API::MatrixWorkspace_sptr &WS) {
   Algorithm_sptr childAlg = createChildAlgorithm("SumSpectra");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<bool>("IncludeMonitors", false);
@@ -255,9 +255,8 @@ CalculateTransmissionBeamSpreader::sumSpectra(API::MatrixWorkspace_sptr WS) {
  *  @param index :: The workspace index of the spectrum to extract
  *  @return A Workspace2D containing the extracted spectrum
  */
-API::MatrixWorkspace_sptr
-CalculateTransmissionBeamSpreader::extractSpectrum(API::MatrixWorkspace_sptr WS,
-                                                   const size_t index) {
+API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(
+    const API::MatrixWorkspace_sptr &WS, const size_t index) {
   // Check that given spectra are monitors
   if (!WS->spectrumInfo().isMonitor(index)) {
     g_log.information(
@@ -277,8 +276,8 @@ CalculateTransmissionBeamSpreader::extractSpectrum(API::MatrixWorkspace_sptr WS,
  *  @param WS :: The single-spectrum workspace to fit
  *  @return A workspace containing the fit
  */
-API::MatrixWorkspace_sptr
-CalculateTransmissionBeamSpreader::fitToData(API::MatrixWorkspace_sptr WS) {
+API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::fitToData(
+    const API::MatrixWorkspace_sptr &WS) {
   g_log.information("Fitting the experimental transmission curve");
   Algorithm_sptr childAlg = createChildAlgorithm("Linear", 0.6, 1.0);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);

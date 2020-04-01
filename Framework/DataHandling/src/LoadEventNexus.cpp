@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidAPI/Axis.h"
@@ -62,7 +62,12 @@ const std::string NULL_STR("NULL");
  * @return true only if it exists
  */
 bool exists(::NeXus::File &file, const std::string &name) {
-  auto entries = file.getEntries();
+  const auto entries = file.getEntries();
+  return exists(entries, name);
+}
+
+bool exists(const std::map<std::string, std::string> &entries,
+            const std::string &name) {
   return entries.find(name) != entries.end();
 }
 
@@ -1172,8 +1177,8 @@ bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(
  * @param workspace :: The workspace to contain the spectra mapping
  * @param bankNames :: Bank names that are in Nexus file
  */
-void LoadEventNexus::deleteBanks(EventWorkspaceCollection_sptr workspace,
-                                 std::vector<std::string> bankNames) {
+void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
+                                 const std::vector<std::string> &bankNames) {
   Instrument_sptr inst = boost::const_pointer_cast<Instrument>(
       workspace->getInstrument()->baseInstrument());
   // Build a list of Rectangular Detectors
@@ -1532,7 +1537,7 @@ void LoadEventNexus::loadSampleDataISIScompatibility(
  *
  * @param fname name of the nexus file to open
  */
-void LoadEventNexus::safeOpenFile(const std::string fname) {
+void LoadEventNexus::safeOpenFile(const std::string &fname) {
   try {
     m_file = std::make_unique<::NeXus::File>(m_filename, NXACC_READ);
   } catch (std::runtime_error &e) {

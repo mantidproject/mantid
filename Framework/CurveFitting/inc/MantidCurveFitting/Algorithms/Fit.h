@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_FIT_H_
-#define MANTID_CURVEFITTING_FIT_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -76,7 +75,7 @@ to create a workspace
 @author Roman Tolchenov, Tessella plc
 @date 06/12/2011
 */
-class DLLExport Fit : public IFittingAlgorithm {
+class MANTID_CURVEFITTING_DLL Fit : public IFittingAlgorithm {
 public:
   /// Default constructor
   Fit();
@@ -113,5 +112,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_FIT_H_*/

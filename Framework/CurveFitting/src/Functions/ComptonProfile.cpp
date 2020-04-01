@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ComptonProfile.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -28,8 +28,6 @@ const char *MASS_NAME = "Mass";
 ///@endcond
 } // namespace
 
-/**
- */
 ComptonProfile::ComptonProfile()
     : API::ParamFunction(), API::IFunction1D(), m_log("ComptonProfile"),
       m_wsIndex(0), m_startX(0.0), m_endX(0.0), m_voigt(),
@@ -150,8 +148,6 @@ void ComptonProfile::cacheYSpaceValues(
   }
 }
 
-/**
- */
 void ComptonProfile::declareParameters() {
   declareParameter(MASS_NAME, 0.0, "Atomic mass (amu)");
 }

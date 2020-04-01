@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MagFormFactorCorrection.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -96,9 +96,11 @@ void MagFormFactorCorrection::exec() {
   // Gets the vector of form factor values
   std::vector<double> FF;
   FF.reserve(Qvals.size());
-  for (double Qval : Qvals) {
-    FF.emplace_back(ion.analyticalFormFactor(Qval * Qval));
-  }
+
+  std::transform(
+      Qvals.begin(), Qvals.end(), std::back_inserter(FF),
+      [&ion](double qval) { return ion.analyticalFormFactor(qval * qval); });
+
   if (!ffwsStr.empty()) {
     HistogramBuilder builder;
     builder.setX(Qvals.size());

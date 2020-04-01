@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DataComparison.h"
 
@@ -139,7 +139,7 @@ void DataComparison::addData() {
  *
  * @param ws Pointer to workspace to add.
  */
-void DataComparison::addDataItem(Workspace_const_sptr ws) {
+void DataComparison::addDataItem(const Workspace_const_sptr &ws) {
   // Check that the workspace is the correct type
   MatrixWorkspace_const_sptr matrixWs =
       boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
@@ -162,7 +162,7 @@ void DataComparison::addDataItem(Workspace_const_sptr ws) {
   m_uiForm.twCurrentData->insertRow(currentRows);
 
   // Insert the colour selector
-  QComboBox *colourCombo = new QComboBox();
+  auto *colourCombo = new QComboBox();
   // Add colours
   colourCombo->addItem("Black", QVariant(Qt::black));
   colourCombo->addItem("Red", QVariant(Qt::red));
@@ -189,12 +189,12 @@ void DataComparison::addDataItem(Workspace_const_sptr ws) {
   m_uiForm.twCurrentData->setCellWidget(currentRows, COLOUR, colourCombo);
 
   // Insert the workspace name
-  QTableWidgetItem *wsNameItem = new QTableWidgetItem(tr(wsName.c_str()));
+  auto *wsNameItem = new QTableWidgetItem(tr(wsName.c_str()));
   wsNameItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
   m_uiForm.twCurrentData->setItem(currentRows, WORKSPACE_NAME, wsNameItem);
 
   // Insert the spectra offset
-  QSpinBox *offsetSpin = new QSpinBox();
+  auto *offsetSpin = new QSpinBox();
   offsetSpin->setMinimum(0);
   offsetSpin->setMaximum(INT_MAX);
   connect(offsetSpin, SIGNAL(valueChanged(int)), this,
@@ -202,7 +202,7 @@ void DataComparison::addDataItem(Workspace_const_sptr ws) {
   m_uiForm.twCurrentData->setCellWidget(currentRows, SPEC_OFFSET, offsetSpin);
 
   // Insert the current displayed spectra
-  QTableWidgetItem *currentSpecItem = new QTableWidgetItem(tr("n/a"));
+  auto *currentSpecItem = new QTableWidgetItem(tr("n/a"));
   currentSpecItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
   m_uiForm.twCurrentData->setItem(currentRows, CURRENT_SPEC, currentSpecItem);
 }
@@ -212,7 +212,7 @@ void DataComparison::addDataItem(Workspace_const_sptr ws) {
  *
  * @param ws Pointer to the workspace
  */
-bool DataComparison::containsWorkspace(MatrixWorkspace_const_sptr ws) {
+bool DataComparison::containsWorkspace(const MatrixWorkspace_const_sptr &ws) {
   QString testWsName = QString::fromStdString(ws->getName());
 
   int numRows = m_uiForm.twCurrentData->rowCount();
@@ -242,7 +242,7 @@ int DataComparison::getInitialColourIndex() {
   // Build a list of used colours
   QList<int> usedColours;
   for (int row = 0; row < numRows - 1; row++) {
-    QComboBox *colourSelector = dynamic_cast<QComboBox *>(
+    auto *colourSelector = dynamic_cast<QComboBox *>(
         m_uiForm.twCurrentData->cellWidget(row, COLOUR));
     int index = colourSelector->currentIndex();
     usedColours << index;
@@ -378,7 +378,7 @@ void DataComparison::plotWorkspaces() {
     if (m_curves.contains(workspaceName))
       m_curves[workspaceName]->attach(nullptr);
 
-    QComboBox *colourSelector = dynamic_cast<QComboBox *>(
+    auto *colourSelector = dynamic_cast<QComboBox *>(
         m_uiForm.twCurrentData->cellWidget(row, COLOUR));
     QColor curveColour =
         colourSelector->itemData(colourSelector->currentIndex())
@@ -414,7 +414,7 @@ void DataComparison::normaliseSpectraOffsets() {
 
   // Find the lowest offset in the data table
   for (int row = 0; row < numRows; row++) {
-    QSpinBox *specOffsetSpin = dynamic_cast<QSpinBox *>(
+    auto *specOffsetSpin = dynamic_cast<QSpinBox *>(
         m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
     int specOffset = specOffsetSpin->value();
     if (specOffset < lowestOffset)
@@ -424,7 +424,7 @@ void DataComparison::normaliseSpectraOffsets() {
   // Subtract the lowest offset from all offsets to ensure at least one offset
   // is zero
   for (int row = 0; row < numRows; row++) {
-    QSpinBox *specOffsetSpin = dynamic_cast<QSpinBox *>(
+    auto *specOffsetSpin = dynamic_cast<QSpinBox *>(
         m_uiForm.twCurrentData->cellWidget(row, SPEC_OFFSET));
     int specOffset = specOffsetSpin->value();
     specOffset -= lowestOffset;

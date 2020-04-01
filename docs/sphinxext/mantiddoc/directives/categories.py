@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
     Provides directives for dealing with category pages.
@@ -12,12 +12,10 @@
     creates "index" pages that lists the contents of each category. The display of each
     "index" page is controlled by a jinja2 template.
 """
-from __future__ import (absolute_import, division, print_function)
 from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version #pylint: disable=unused-import
 from sphinx.util.osutil import relative_uri
 import os
 import posixpath
-from six import iteritems, itervalues
 
 CATEGORY_PAGE_TEMPLATE = "category.html"
 ALG_CATEGORY_PAGE_TEMPLATE = "algorithmcategories.html"
@@ -28,6 +26,7 @@ CATEGORIES_DIR = "categories"
 # When this category is encountered an additional index.html is written to both the
 # directory of the document and the category directory
 INDEX_CATEGORIES = ["Algorithms", "FitFunctions", "Concepts", "Techniques", "Interfaces"]
+
 
 class LinkItem(object):
     """
@@ -83,6 +82,7 @@ class LinkItem(object):
 
 # endclass
 
+
 class PageRef(LinkItem):
     """
     Store details of a single page reference
@@ -92,6 +92,7 @@ class PageRef(LinkItem):
         super(PageRef, self).__init__(name, location)
 
 #endclass
+
 
 class Category(LinkItem):
     """
@@ -315,6 +316,7 @@ def to_unix_style_path(path):
 
 #---------------------------------------------------------------------------------
 
+
 def html_collect_pages(app):
     """
     Callback for the 'html-collect-pages' Sphinx event. Adds category
@@ -333,6 +335,7 @@ def html_collect_pages(app):
         yield (name, context, template)
 # enddef
 
+
 def create_category_pages(app):
     """
     Returns an iterable of (category_name, context, "category.html")
@@ -345,7 +348,7 @@ def create_category_pages(app):
     template = CATEGORY_PAGE_TEMPLATE
 
     categories = env.categories
-    for name, category in iteritems(categories):
+    for name, category in categories.items():
         context = {}
         # First write out the named page
         context["title"] = category.name
@@ -393,6 +396,8 @@ def create_category_pages(app):
 # enddef
 
 #-----------------------------------------------------------------------------------------------------------
+
+
 def create_top_algorithm_category(categories):
     """
     Returns a tuple of (category_name, context, "category.html")
@@ -409,7 +414,7 @@ def create_top_algorithm_category(categories):
     all_top_categories = []
     category_src_dir = ''
     # If the category is a top category it will not contain "\\"
-    for top_name, top_category in iteritems(categories):
+    for top_name, top_category in categories.items():
         #Add all the top level categories
         if "\\" not in top_name and top_category.section == 'algorithms':
             #get additional text for each category
@@ -445,6 +450,7 @@ def create_top_algorithm_category(categories):
     top_html_path_noext = posixpath.join('algorithms', 'index')
     return (top_html_path_noext, top_context, template)
 
+
 def extract_matching_categories(input_categories,filepath):
     """
     Extract entries with a name matching that included the supplied file.
@@ -466,6 +472,8 @@ def extract_matching_categories(input_categories,filepath):
         input_categories[:] = [category for category in input_categories if category.name not in name_list] 
     
     return extracted_list
+
+
 def purge_categories(app, env, docname):
     """
     Purge information about the given document name from the tracked algorithms
@@ -485,12 +493,14 @@ def purge_categories(app, env, docname):
         return
 
     deadref = PageRef(name, docname)
-    for category in itervalues(categories):
+    for category in categories.values():
         pages = category.pages
         if deadref in pages:
             pages.remove(deadref)
 
 #------------------------------------------------------------------------------
+
+
 def setup(app):
     # Add categories directive
     app.add_directive('categories', CategoriesDirective)

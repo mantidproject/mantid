@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_
-#define MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_
+#pragma once
 
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/SerialAlgorithm.h"
@@ -75,8 +74,9 @@ protected:
   void exec() override;
 
 private:
-  void getWSIndexList(std::vector<int> &indices,
-                      Mantid::API::MatrixWorkspace_const_sptr matrixWorkspace);
+  void getWSIndexList(
+      std::vector<int> &indices,
+      const Mantid::API::MatrixWorkspace_const_sptr &matrixWorkspace);
 
   template <class T>
   static void appendEventListData(const std::vector<T> &events, size_t offset,
@@ -89,7 +89,7 @@ private:
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName,
                           const std::string &propertyValue,
                           int perioidNum) override;
-  void doExec(Mantid::API::Workspace_sptr inputWorkspace,
+  void doExec(const Mantid::API::Workspace_sptr &inputWorkspace,
               boost::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
               const bool keepFile = false,
               boost::optional<size_t> entryNumber = boost::optional<size_t>());
@@ -106,5 +106,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_SAVENEXUSPROCESSED_H_*/

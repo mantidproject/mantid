@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -531,7 +531,7 @@ createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
 //----------------------------------------------------------------------------------------------
 
 void addRectangularBank(Instrument &testInstrument, int idStart, int pixels,
-                        double pixelSpacing, std::string bankName,
+                        double pixelSpacing, const std::string &bankName,
                         const V3D &bankPos, const Quat &bankRot) {
 
   const double cylRadius(pixelSpacing / 2);

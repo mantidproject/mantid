@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
-#define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "EnggDiffFittingViewQtWidget.h"
@@ -49,7 +48,7 @@ public:
   /// Default Constructor
   EnggDiffractionViewQtGUI(QWidget *parent = nullptr);
   /// Interface name
-  static std::string name() { return "Engineering Diffraction"; }
+  static std::string name() { return "Engineering Diffraction (Old)"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Diffraction"; }
 
@@ -248,7 +247,7 @@ private:
   Ui::EnggDiffractionQtTabSettings m_uiTabSettings;
 
   /// converts QList to a vector
-  std::vector<std::string> qListToVector(QStringList list,
+  std::vector<std::string> qListToVector(const QStringList &list,
                                          bool validator) const;
 
   /// instrument selected (ENGIN-X, etc.)
@@ -258,7 +257,7 @@ private:
   void userSelectInstrument(const QString &prefix);
 
   /// setting the instrument prefix ahead of the run number
-  void setPrefix(std::string prefix);
+  void setPrefix(const std::string &prefix);
 
   // TODO: The values of these three next static members (bank name,
   // type, run mode) can be obtained from widgets when requested/required.  They
@@ -300,5 +299,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFRACTIONVIEWQTGUI_H_

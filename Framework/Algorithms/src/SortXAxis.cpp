@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SortXAxis.h"
 #include "MantidAPI/Algorithm.h"
@@ -118,7 +118,7 @@ void sortByXValue(std::vector<std::size_t> &workspaceIndicies,
 }
 
 void SortXAxis::sortIndicesByX(
-    std::vector<std::size_t> &workspaceIndicies, std::string order,
+    std::vector<std::size_t> &workspaceIndicies, const std::string &order,
     const Mantid::API::MatrixWorkspace &inputWorkspace, unsigned int specNum) {
   if (order == "Ascending") {
     sortByXValue(workspaceIndicies, inputWorkspace, specNum,

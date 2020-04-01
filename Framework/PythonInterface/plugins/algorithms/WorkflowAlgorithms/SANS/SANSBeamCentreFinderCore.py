@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
 """ Finds the beam centre."""
-
-from __future__ import (absolute_import, division, print_function)
 
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         IEventWorkspace)
@@ -119,16 +117,14 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         state.mask.phi_max = -90.0
         state.mask.use_mask_phi_mirror = True
 
-        # Set compatibility mode
-        # state.compatibility.use_compatibility_mode = self.getProperty('CompatibilityMode').value
+        component_as_string = self.getProperty("Component").value
 
         # Set test centre
-        state.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = \
+        state.move.detectors[component_as_string].sample_centre_pos1 = \
             self.getProperty("Centre1").value
-        state.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = \
+        state.move.detectors[component_as_string].sample_centre_pos2 = \
             self.getProperty("Centre2").value
 
-        component_as_string = self.getProperty("Component").value
         progress = self._get_progress()
 
         # --------------------------------------------------------------------------------------------------------------

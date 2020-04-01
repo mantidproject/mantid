@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_PRCONJUGATEGRADIENTMINIMIZER_H_
-#define MANTID_CURVEFITTING_PRCONJUGATEGRADIENTMINIMIZER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -23,7 +22,8 @@ namespace FuncMinimisers {
     @author Anders Markvardsen, ISIS, RAL
     @date 13/1/2010
 */
-class DLLExport PRConjugateGradientMinimizer : public DerivMinimizer {
+class MANTID_CURVEFITTING_DLL PRConjugateGradientMinimizer
+    : public DerivMinimizer {
 public:
   /// Constructor.
   PRConjugateGradientMinimizer() : DerivMinimizer() {}
@@ -40,5 +40,3 @@ protected:
 } // namespace FuncMinimisers
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_PRCONJUGATEGRADIENTMINIMIZER_H_*/

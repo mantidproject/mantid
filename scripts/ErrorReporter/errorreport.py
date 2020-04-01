@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, print_function)
-
 import qtpy
 
 if qtpy.PYQT5:  # noqa
@@ -108,8 +106,8 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
     def check_placeholder_text(self):
         if not self.free_text_edited:
-            self.input_free_text.setPlainText("")
             self.free_text_edited = True
+            self.input_free_text.setPlainText("")
 
     def launch_privacy_policy(self, link):
         self.interface_manager.showWebPage(link)

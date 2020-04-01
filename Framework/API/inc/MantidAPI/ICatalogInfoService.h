@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ICATLOGINFOSERVICE_H_
-#define MANTID_API_ICATLOGINFOSERVICE_H_
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -20,7 +19,7 @@ namespace API {
  @author Jay Rainey, ISIS Rutherford Appleton Laboratory
  @date 24/02/2010
  */
-class DLLExport ICatalogInfoService {
+class ICatalogInfoService {
 public:
   // Virtual destructor
   virtual ~ICatalogInfoService() = default;
@@ -42,5 +41,3 @@ using ICatalogInfoService_const_sptr =
     boost::shared_ptr<const ICatalogInfoService>;
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_ICATLOGINFOSERVICE_H_*/

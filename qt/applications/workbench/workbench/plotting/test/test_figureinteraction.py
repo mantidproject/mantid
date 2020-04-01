@@ -1,13 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+
 
 # system imports
 import unittest
@@ -24,10 +23,10 @@ from testhelpers import assert_almost_equal
 
 # local package imports
 from mantid.plots import MantidAxes
-from mantid.py3compat.mock import MagicMock, PropertyMock, call, patch
+from unittest.mock import MagicMock, PropertyMock, call, patch
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.plotting.figuretype import FigureType
-from mantidqt.plotting.functions import plot
+from mantidqt.plotting.functions import plot, pcolormesh_from_names
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.plotting.figureinteraction import FigureInteraction
 
@@ -217,9 +216,9 @@ class FigureInteractionTest(unittest.TestCase):
 
         ax = fig.axes[0]
         fig_interactor._toggle_normalization(ax)
-        self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
+        self.assertEqual(r"Counts ($\AA$)$^{-1}$", ax.get_ylabel())
         plot([self.ws1], spectrum_nums=[1], errors=errors, overplot=True, fig=fig)
-        self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
+        self.assertEqual(r"Counts ($\AA$)$^{-1}$", ax.get_ylabel())
 
     def test_normalization_toggle_with_no_autoscale_on_update_no_errors(self):
         self._test_toggle_normalization(errorbars_on=False,
@@ -296,6 +295,35 @@ class FigureInteractionTest(unittest.TestCase):
         self.assertTrue(
             any(FigureInteraction.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
 
+    def test_context_menu_includes_plot_type_if_plot_has_multiple_lines(self):
+        fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.ax.plot([0, 1], [0, 1])
+        self.ax.plot([0, 1], [0, 1])
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        self.interactor._add_plot_type_option_menu(main_menu, self.ax)
+
+        added_menu = main_menu.children()[1]
+        self.assertEqual(added_menu.children()[0].text(), "Plot Type")
+
+    def test_context_menu_does_not_include_plot_type_if_plot_has_one_line(self):
+        fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.ax.errorbar([0, 1], [0, 1], capsize=1)
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        self.interactor._add_plot_type_option_menu(main_menu, self.ax)
+
+        # Number of children should remain unchanged
+        self.assertEqual(1, len(main_menu.children()))
+
     def test_scripted_plot_show_and_hide_all(self):
         self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
         self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
@@ -313,6 +341,13 @@ class FigureInteractionTest(unittest.TestCase):
         self.interactor.add_error_bars_menu(anonymous_menu, self.ax)
         self.interactor.errors_manager.toggle_all_errors(self.ax, make_visible=True)
         self.assertTrue(self.ax.containers[0][2][0].get_visible())
+
+    def test_no_normalisation_options_on_non_workspace_plot(self):
+        fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.ax.plot([1, 2], [1, 2], label="myLabel")
+
+        anonymous_menu = QMenu()
+        self.assertEqual(None, self.interactor._add_normalization_option_menu(anonymous_menu, self.ax))
 
     # Failure tests
     def test_construction_with_non_qt_canvas_raises_exception(self):
@@ -341,6 +376,19 @@ class FigureInteractionTest(unittest.TestCase):
         fig_interactor._quick_change_axes(scale_types, ax)
         current_scale_types2 = (ax.get_xscale(), ax.get_yscale())
         self.assertNotEqual(current_scale_types2, current_scale_types1)
+
+    def test_scale_on_ragged_workspaces_maintained_when_toggling_normalisation(self):
+        ws = CreateWorkspace(DataX=[1, 2, 3, 4, 2, 4, 6, 8], DataY=[2] * 8, NSpec=2, OutputWorkspace="ragged_ws")
+        fig = pcolormesh_from_names([ws])
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+        fig_interactor._toggle_normalization(fig.axes[0])
+
+        clim = fig.axes[0].images[0].get_clim()
+        fig_interactor._toggle_normalization(fig.axes[0])
+        self.assertEqual(clim, fig.axes[0].images[0].get_clim())
+        self.assertNotEqual((-0.1, 0.1), fig.axes[0].images[0].get_clim())
 
     # Private methods
     def _create_mock_fig_manager_to_accept_right_click(self):

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_
-#define MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_
+#pragma once
 
 #include "MantidCrystal/DisjointElement.h"
 #include <boost/make_shared.hpp>
@@ -184,5 +183,3 @@ public:
     TS_ASSERT_EQUALS(9, vecElements[9]->getRoot());
   }
 };
-
-#endif /* MANTID_CRYSTAL_DISJOINTELEMENTTEST_H_ */

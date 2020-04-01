@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_LIVELISTENERFACTORYIMPL_H_
-#define MANTID_API_LIVELISTENERFACTORYIMPL_H_
+#pragma once
 
 /* Used to register unit classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator
@@ -79,5 +78,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
     Kernel::SingletonHolder<Mantid::API::LiveListenerFactoryImpl>;
 }
 } // namespace Mantid
-
-#endif /* MANTID_API_LIVELISTENERFACTORYIMPL_H_ */

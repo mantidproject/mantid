@@ -134,8 +134,7 @@ mtd_add_qt_tests(
     DataObjects
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
+    gmock
   QT4_LINK_LIBS Qwt5
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_SPECIALWORKSPACE2D_H_
-#define MANTID_DATAOBJECTS_SPECIALWORKSPACE2D_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -32,9 +31,9 @@ public:
 class DLLExport SpecialWorkspace2D : public Workspace2D {
 public:
   SpecialWorkspace2D() = default;
-  SpecialWorkspace2D(Geometry::Instrument_const_sptr inst,
+  SpecialWorkspace2D(const Geometry::Instrument_const_sptr &inst,
                      const bool includeMonitors = false);
-  SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent);
+  SpecialWorkspace2D(const API::MatrixWorkspace_const_sptr &parent);
 
   /// Returns a clone of the workspace
   std::unique_ptr<SpecialWorkspace2D> clone() const {
@@ -74,7 +73,7 @@ private:
   SpecialWorkspace2D *doCloneEmpty() const override {
     return new SpecialWorkspace2D();
   }
-  bool isCompatible(boost::shared_ptr<const SpecialWorkspace2D> ws);
+  bool isCompatible(const boost::shared_ptr<const SpecialWorkspace2D> &ws);
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.
@@ -87,9 +86,9 @@ protected:
   /// Return human-readable string
   const std::string toString() const override;
 
-  void binaryAND(boost::shared_ptr<const SpecialWorkspace2D> ws);
-  void binaryOR(boost::shared_ptr<const SpecialWorkspace2D> ws);
-  void binaryXOR(boost::shared_ptr<const SpecialWorkspace2D> ws);
+  void binaryAND(const boost::shared_ptr<const SpecialWorkspace2D> &ws);
+  void binaryOR(const boost::shared_ptr<const SpecialWorkspace2D> &ws);
+  void binaryXOR(const boost::shared_ptr<const SpecialWorkspace2D> &ws);
   void binaryNOT();
 
   /// Map with key = detector ID, and value = workspace index.
@@ -105,5 +104,3 @@ using SpecialWorkspace2D_const_sptr =
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_SPECIALWORKSPACE2D_H_ */

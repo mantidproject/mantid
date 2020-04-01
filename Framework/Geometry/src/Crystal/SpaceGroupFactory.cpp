@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidGeometry/Crystal/SymmetryOperationSymbolParser.h"
@@ -405,7 +405,7 @@ std::string SpaceGroupFactoryImpl::getTransformedSymbolOrthorhombic(
 /// Returns a copy-constructed instance of the supplied space group prototype
 /// object.
 SpaceGroup_const_sptr SpaceGroupFactoryImpl::constructFromPrototype(
-    const SpaceGroup_const_sptr prototype) const {
+    const SpaceGroup_const_sptr &prototype) const {
   return boost::make_shared<const SpaceGroup>(*prototype);
 }
 

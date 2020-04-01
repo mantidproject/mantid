@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateFloodWorkspace.h"
 #include "MantidAPI/FileProperty.h"
@@ -129,7 +129,8 @@ std::string CreateFloodWorkspace::getBackgroundFunction() {
   return funMap.at(getPropertyValue(Prop::BACKGROUND));
 }
 
-MatrixWorkspace_sptr CreateFloodWorkspace::integrate(MatrixWorkspace_sptr ws) {
+MatrixWorkspace_sptr
+CreateFloodWorkspace::integrate(const MatrixWorkspace_sptr &ws) {
   auto alg = createChildAlgorithm("Integration");
   alg->setProperty("InputWorkspace", ws);
   alg->setProperty("OutputWorkspace", "dummy");
@@ -145,7 +146,8 @@ MatrixWorkspace_sptr CreateFloodWorkspace::integrate(MatrixWorkspace_sptr ws) {
   return alg->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr CreateFloodWorkspace::transpose(MatrixWorkspace_sptr ws) {
+MatrixWorkspace_sptr
+CreateFloodWorkspace::transpose(const MatrixWorkspace_sptr &ws) {
   auto alg = createChildAlgorithm("Transpose");
   alg->setProperty("InputWorkspace", ws);
   alg->setProperty("OutputWorkspace", "dummy");

@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 System Test for ISIS Reflectometry autoreduction
@@ -178,7 +178,7 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
                 if not mtd.doesExist(runno + '_IvsQ'):
                     th = angle
                     if len(transRun) > 1 and angle > 2.25:
-                        wq, wq_binned = \
+                        wq, wq_unbinned, wlam, wtrans = \
                             ReflectometryISISLoadAndProcess(
                                 InputRunList=ws,
                                 FirstTransmissionRunList=transRun[1],
@@ -188,7 +188,7 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
                                 OutputWorkspace=runno + '_IvsQ',
                                 OutputWorkspaceBinned=runno + '_IvsQ_binned')
                     else:
-                        wq, wqbinned = \
+                        wq, wq_unbinned, wlam, wtrans = \
                             ReflectometryISISLoadAndProcess(
                                 InputRunList=ws,
                                 FirstTransmissionRunList=transRun[0],
@@ -197,6 +197,8 @@ def AutoReduce(transRun=[], runRange=[], oldList=[]):
                                 EndOverlap=12,
                                 OutputWorkspace=runno + '_IvsQ',
                                 OutputWorkspaceBinned=runno + '_IvsQ_binned')
+                    mtd.remove('wlam')
+                    mtd.remove('wtrans')
                 else:
                     wq = mtd[runno + '_IvsQ']
                     th = angle
@@ -247,10 +249,7 @@ def MakeTuples(rlist):
         if len(split_title) != 3:
             split_title = re.split("~", idx)
             if len(split_title) != 2:
-                logger.warning(
-                    'cannot transfer ' +
-                    idx +
-                    ' title is not in the right form ')
+                logger.warning('cannot transfer ' + idx + ' title is not in the right form ')
             else:
                 theta = 0
                 split_title.append(theta)  # Append a dummy theta value.

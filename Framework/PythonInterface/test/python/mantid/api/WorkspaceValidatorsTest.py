@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
    Test construction of the WorkspaceValidators
 """
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import testhelpers
 from mantid.kernel import IValidator
@@ -17,6 +15,7 @@ from mantid.api import (WorkspaceUnitValidator, HistogramValidator,
                         SpectraAxisValidator, NumericAxisValidator,
                         InstrumentValidator, MDFrameValidator,
                         OrientedLatticeValidator)
+
 
 class WorkspaceValidatorsTest(unittest.TestCase):
 

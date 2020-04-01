@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #-------------------------------------------------------------------------------
 # mantidplotrc.py
@@ -23,11 +23,13 @@ if __name__ == '__main__':
     except ImportError:
         pass
 
-    from six import iteritems as _iteritems
-
     # Import MantidPlot python commands
     import mantidplot
     from mantidplot import *
+    # cache plotSpectrum and plotBin as the will be overwritten when we import simpleapi
+    _plotSpectrum_saved = plotSpectrum
+    _plotBin_saved = plotBin
+    
     try:
         # The MantidPlot namespace is not ready for the python3-style range function
         # so we ensure we revert back to the current built-in version
@@ -44,6 +46,13 @@ if __name__ == '__main__':
     from mantid.api import *
     from mantid.simpleapi import *
 
+    #restore the mantidplot plotSpectrum and plotBin
+    #they have just been overwritten by the workbench variants
+    plotSpectrum = _plotSpectrum_saved
+    plotBin = _plotBin_saved
+    del _plotSpectrum_saved
+    del _plotBin_saved
+
     # Common imports (here for backwards compatibility)
     import os
     import sys
@@ -59,7 +68,7 @@ if __name__ == '__main__':
             return []
         from mantid.simpleapi import _get_function_spec
         keywords = []
-        for name,obj in _iteritems(definitions):
+        for name,obj in definitions.items():
             if name.startswith('_') : continue
             if _inspect.isclass(obj) or _inspect.ismodule(obj):
                 continue

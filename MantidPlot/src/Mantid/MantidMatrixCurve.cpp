@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMatrixCurve.h"
 
@@ -289,7 +289,7 @@ void MantidMatrixCurve::itemChanged() {
  */
 QString MantidMatrixCurve::createCurveName(
     const QString &prefix,
-    const boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws) {
+    const boost::shared_ptr<const Mantid::API::MatrixWorkspace> &ws) {
   QString name = "";
 
   if (prefix.isEmpty())

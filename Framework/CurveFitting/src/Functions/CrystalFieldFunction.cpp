@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/CrystalFieldFunction.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
@@ -26,6 +26,7 @@
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <limits>
+#include <utility>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -122,7 +123,7 @@ void CrystalFieldFunction::function(const FunctionDomain &domain,
 /// Set the source function
 /// @param source :: New source function.
 void CrystalFieldFunction::setSource(IFunction_sptr source) const {
-  m_source = source;
+  m_source = std::move(source);
 }
 
 size_t CrystalFieldFunction::getNumberDomains() const {

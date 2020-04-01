@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/LeBailFunction.h"
 #include "MantidAPI/Algorithm.h"
@@ -14,6 +14,7 @@
 #include "MantidKernel/System.h"
 
 #include <sstream>
+#include <utility>
 
 #include <gsl/gsl_sf_erf.h>
 
@@ -42,7 +43,7 @@ Kernel::Logger g_log("LeBailFunction");
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LeBailFunction::LeBailFunction(std::string peaktype) {
+LeBailFunction::LeBailFunction(const std::string &peaktype) {
   // Set initial values to some class variables
   CompositeFunction_sptr m_function(new CompositeFunction());
   m_compsiteFunction = m_function;
@@ -169,7 +170,7 @@ HistogramY LeBailFunction::calPeak(size_t ipk,
 /** Check whether a parameter is a profile parameter
  * @param paramname :: parameter name to check with
  */
-bool LeBailFunction::hasProfileParameter(std::string paramname) {
+bool LeBailFunction::hasProfileParameter(const std::string &paramname) {
   auto fiter = lower_bound(m_orderedProfileParameterNames.cbegin(),
                            m_orderedProfileParameterNames.cend(), paramname);
 
@@ -619,8 +620,8 @@ bool LeBailFunction::calculateGroupPeakIntensities(
  * @param peakheight: height of the peak
  * @param setpeakheight:  boolean as the option to set peak height or not.
  */
-void LeBailFunction::setPeakParameters(IPowderDiffPeakFunction_sptr peak,
-                                       map<string, double> parammap,
+void LeBailFunction::setPeakParameters(const IPowderDiffPeakFunction_sptr &peak,
+                                       const map<string, double> &parammap,
                                        double peakheight, bool setpeakheight) {
   UNUSED_ARG(peak);
   UNUSED_ARG(parammap);
@@ -855,7 +856,7 @@ void LeBailFunction::groupPeaks(
  * @param endx :: background's EndX.  Used by Chebyshev
  */
 void LeBailFunction::addBackgroundFunction(
-    string backgroundtype, const unsigned int &order,
+    const string &backgroundtype, const unsigned int &order,
     const std::vector<std::string> &vecparnames,
     const std::vector<double> &vecparvalues, double startx, double endx) {
   // Check
@@ -911,8 +912,8 @@ void LeBailFunction::addBackgroundFunction(
  * @param minvalue :: lower boundary
  * @param maxvalue :: upper boundary
  */
-void LeBailFunction::setFitProfileParameter(string paramname, double minvalue,
-                                            double maxvalue) {
+void LeBailFunction::setFitProfileParameter(const string &paramname,
+                                            double minvalue, double maxvalue) {
   // Make ties in composition function
   for (size_t ipk = 1; ipk < m_numPeaks; ++ipk) {
     stringstream ss1, ss2;
@@ -939,7 +940,8 @@ void LeBailFunction::setFitProfileParameter(string paramname, double minvalue,
  * @param paramname :: name of parameter
  * @param paramvalue :: value of parameter to be fixed to
  */
-void LeBailFunction::fixPeakParameter(string paramname, double paramvalue) {
+void LeBailFunction::fixPeakParameter(const string &paramname,
+                                      double paramvalue) {
   for (size_t ipk = 0; ipk < m_numPeaks; ++ipk) {
     stringstream ss1, ss2;
     ss1 << "f" << ipk << "." << paramname;
@@ -987,7 +989,7 @@ void LeBailFunction::setFixPeakHeights() {
 /** Reset all peaks' height
  * @param inheights :: list of peak heights corresponding to each peak
  */
-void LeBailFunction::setPeakHeights(std::vector<double> inheights) {
+void LeBailFunction::setPeakHeights(const std::vector<double> &inheights) {
   UNUSED_ARG(inheights);
   throw runtime_error("It is not implemented properly.");
   /*
@@ -1026,7 +1028,7 @@ IPowderDiffPeakFunction_sptr LeBailFunction::getPeak(size_t peakindex) {
 /** Get value of one specific peak's parameter
  */
 double LeBailFunction::getPeakParameter(std::vector<int> hkl,
-                                        std::string parname) const {
+                                        const std::string &parname) const {
   // Search peak in map
   map<vector<int>, IPowderDiffPeakFunction_sptr>::const_iterator fiter;
   fiter = m_mapHKLPeak.find(hkl);
@@ -1040,7 +1042,7 @@ double LeBailFunction::getPeakParameter(std::vector<int> hkl,
 
   IPowderDiffPeakFunction_sptr peak = fiter->second;
 
-  double parvalue = getPeakParameterValue(peak, parname);
+  double parvalue = getPeakParameterValue(peak, std::move(parname));
 
   return parvalue;
 }
@@ -1049,7 +1051,7 @@ double LeBailFunction::getPeakParameter(std::vector<int> hkl,
 /** Get value of one specific peak's parameter
  */
 double LeBailFunction::getPeakParameter(size_t index,
-                                        std::string parname) const {
+                                        const std::string &parname) const {
   if (index >= m_numPeaks) {
     stringstream errss;
     errss << "getPeakParameter() tries to reach a peak with index " << index
@@ -1060,7 +1062,7 @@ double LeBailFunction::getPeakParameter(size_t index,
   }
 
   IPowderDiffPeakFunction_sptr peak = m_vecPeaks[index];
-  double value = getPeakParameterValue(peak, parname);
+  double value = getPeakParameterValue(peak, std::move(parname));
 
   return value;
 }
@@ -1070,9 +1072,9 @@ double LeBailFunction::getPeakParameter(size_t index,
  * @param peak :: shared pointer to peak function
  * @param parname :: name of the peak parameter
  */
-double
-LeBailFunction::getPeakParameterValue(API::IPowderDiffPeakFunction_sptr peak,
-                                      std::string parname) const {
+double LeBailFunction::getPeakParameterValue(
+    const API::IPowderDiffPeakFunction_sptr &peak,
+    const std::string &parname) const {
   // Locate the category of the parameter name
   auto vsiter = lower_bound(m_orderedProfileParameterNames.cbegin(),
                             m_orderedProfileParameterNames.cend(), parname);

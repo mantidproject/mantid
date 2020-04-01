@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import os
 import math
 import numpy as np
@@ -400,6 +398,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 self._reduce_one_wing_doppler(self._ws)
                 GroupWorkspaces(InputWorkspaces=[self._ws],OutputWorkspace=self._red_ws)
 
+        if self._normalise_to == 'Monitor':
+            for ws in mtd[self._red_ws]:
+                AddSampleLog(Workspace=ws, LogName="NormalisedTo", LogType="String",
+                             LogText="Monitor", EnableLogging=False)
+
         self.setProperty('OutputWorkspace',self._red_ws)
 
     def _create_elastic_channel_ws(self, epp_ws, run, epp_equator_ws=None):
@@ -608,6 +611,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=rebin_ws, OutputWorkspace=ws)
         if self._group_detectors:
             self._do_group_detectors(ws)
+        if self._normalise_to == 'Monitor':
+            mtd[ws].setDistribution(True)
         GroupWorkspaces(InputWorkspaces=[ws],OutputWorkspace=self._red_ws)
         DeleteWorkspaces([rebin_ws])
 
@@ -764,6 +769,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws,
                              NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(IndirectILLEnergyTransfer)

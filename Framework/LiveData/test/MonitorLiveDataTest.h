@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_MONITORLIVEDATATEST_H_
-#define MANTID_LIVEDATA_MONITORLIVEDATATEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -62,10 +61,10 @@ public:
 
   /** Create but don't start a MonitorLiveData thread */
   boost::shared_ptr<MonitorLiveData>
-  makeAlgo(std::string output, std::string accumWS = "",
-           std::string AccumulationMethod = "Replace",
-           std::string RunTransitionBehavior = "Restart",
-           std::string UpdateEvery = "1") {
+  makeAlgo(const std::string &output, const std::string &accumWS = "",
+           const std::string &AccumulationMethod = "Replace",
+           const std::string &RunTransitionBehavior = "Restart",
+           const std::string &UpdateEvery = "1") {
     auto alg = boost::dynamic_pointer_cast<MonitorLiveData>(
         AlgorithmManager::Instance().create("MonitorLiveData", -1, false));
     alg->setPropertyValue("Instrument", "TestDataListener");
@@ -168,7 +167,7 @@ public:
   /** Executes the given algorithm asynchronously, until you reach the given
    * chunk number.
    * @return false if test failed*/
-  bool runAlgoUntilChunk(boost::shared_ptr<MonitorLiveData> alg1,
+  bool runAlgoUntilChunk(const boost::shared_ptr<MonitorLiveData> &alg1,
                          size_t stopAtChunk) {
     Poco::ActiveResult<bool> res1 = alg1->executeAsync();
     Poco::Thread::sleep(50);
@@ -247,5 +246,3 @@ public:
     }
   }
 };
-
-#endif /* MANTID_LIVEDATA_MONITORLIVEDATATEST_H_ */

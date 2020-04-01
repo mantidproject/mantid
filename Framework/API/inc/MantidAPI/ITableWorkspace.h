@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ITABLEWORKSPACE_H_
-#define MANTID_API_ITABLEWORKSPACE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -23,6 +22,7 @@
 #endif
 
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 
@@ -350,7 +350,7 @@ public:
     }
   }
   /// Construct directly from column
-  ColumnVector(Column_sptr column) : m_column(column) {
+  ColumnVector(Column_sptr column) : m_column(std::move(column)) {
     if (!m_column->isType<T>()) {
       std::stringstream mess;
       mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name()
@@ -388,7 +388,7 @@ public:
     }
   }
   /// Construct directly from column
-  ConstColumnVector(Column_const_sptr column) : m_column(column) {
+  ConstColumnVector(Column_const_sptr column) : m_column(std::move(column)) {
     if (!m_column->isType<T>()) {
       std::stringstream mess;
       mess << "Type mismatch when creating a ColumnVector<" << typeid(T).name()
@@ -410,4 +410,3 @@ private:
 
 } // namespace API
 } // Namespace Mantid
-#endif /*MANTID_API_ITABLEWORKSPACE_H_*/

@@ -1,36 +1,33 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from sans.test_helper.mock_objects import create_mock_beam_centre_tab
 from sans.test_helper.mock_objects import (create_run_tab_presenter_mock)
+from ui.sans_isis.work_handler import WorkHandler
 
 
 class BeamCentrePresenterTest(unittest.TestCase):
 
     def setUp(self):
         self.parent_presenter = create_run_tab_presenter_mock(use_fake_state = False)
-        self.parent_presenter._file_information = mock.MagicMock()
-        self.parent_presenter._file_information.get_instrument = mock.MagicMock(return_value = SANSInstrument.LARMOR)
         self.view = create_mock_beam_centre_tab()
         self.WorkHandler = mock.MagicMock()
         self.BeamCentreModel = mock.MagicMock()
         self.SANSCentreFinder = mock.MagicMock()
-        self.presenter = BeamCentrePresenter(self.parent_presenter, self.WorkHandler, self.BeamCentreModel,
-                                             self.SANSCentreFinder)
+        self.presenter = BeamCentrePresenter(self.parent_presenter, self.SANSCentreFinder,
+                                             work_handler=self.WorkHandler, beam_centre_model=self.BeamCentreModel)
         self.presenter.connect_signals = mock.Mock()
+        self.presenter.set_view(self.view)
 
     def test_that_on_run_clicked_calls_find_beam_centre(self):
-        self.presenter.set_view(self.view)
         self.presenter.on_run_clicked()
 
         self.assertEqual(self.presenter._work_handler.process.call_count, 1)
@@ -50,20 +47,18 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter._beam_centre_model.lab_pos_1, 0.1)
         self.assertEqual(self.presenter._beam_centre_model.lab_pos_2, -0.1)
 
-    def test_that_set_options_is_called_on_update_rows(self):
-        self.presenter.set_view(self.view)
-
-        self.view.set_options.assert_called_once_with(self.presenter._beam_centre_model)
-
+    def test_on_update_rows_skips_no_rows(self):
+        self.parent_presenter.num_rows.return_value = 0
+        self.assertFalse(self.WorkHandler.process.called)
         self.presenter.on_update_rows()
-        self.assertEqual(self.view.set_options.call_count,  2)
 
-    def test_that_model_reset_to_defaults_for_instrument_is_called_on_update_rows(self):
-        self.presenter.set_view(self.view)
+    def test_reset_inst_defaults_called_on_update_rows(self):
+        self.parent_presenter.num_rows.return_value = 1
+        self.parent_presenter.instrument = SANSInstrument.SANS2D
 
         self.presenter.on_update_rows()
 
-        self.assertEqual(self.presenter._beam_centre_model.reset_to_defaults_for_instrument.call_count, 1)
+        self.BeamCentreModel.reset_inst_defaults.assert_called_with(SANSInstrument.SANS2D)
 
     def test_that_set_scaling_is_called_on_update_instrument(self):
         self.presenter.set_view(self.view)
@@ -77,48 +72,26 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.presenter.on_update_instrument(SANSInstrument.LARMOR)
         self.view.on_update_instrument.assert_called_once_with(SANSInstrument.LARMOR)
 
-    def test_that_on_processing_finished_updates_view_and_model(self):
+    def test_that_on_processing_finished_updates_view(self):
         self.presenter.set_view(self.view)
-        result = {'pos1': 0.1, 'pos2': -0.1}
-        self.presenter._beam_centre_model.scale_1 = 1000
-        self.presenter._beam_centre_model.scale_2 = 1000
-        self.presenter._beam_centre_model.update_lab = True
-        self.presenter._beam_centre_model.update_hab = True
 
-        self.presenter.on_processing_finished_centre_finder(result)
-        self.assertEqual(result['pos1'], self.presenter._beam_centre_model.lab_pos_1)
-        self.assertEqual(result['pos2'], self.presenter._beam_centre_model.lab_pos_2)
-        self.assertEqual(self.view.lab_pos_1, self.presenter._beam_centre_model.scale_1*result['pos1'])
-        self.assertEqual(self.view.lab_pos_2, self.presenter._beam_centre_model.scale_2*result['pos2'])
-        self.assertEqual(result['pos1'], self.presenter._beam_centre_model.hab_pos_1)
-        self.assertEqual(result['pos2'], self.presenter._beam_centre_model.hab_pos_2)
-        self.assertEqual(self.view.hab_pos_1, self.presenter._beam_centre_model.scale_1 * result['pos1'])
-        self.assertEqual(self.view.hab_pos_2, self.presenter._beam_centre_model.scale_2 * result['pos2'])
+        self.BeamCentreModel.lab_pos_1 = 1
+        self.BeamCentreModel.lab_pos_2 = 2
+        self.BeamCentreModel.hab_pos_1 = 3
+        self.BeamCentreModel.hab_pos_2 = 4
+
+        scale_1 = 1000
+        scale_2 = 2000
+        self.BeamCentreModel.scale_1 = scale_1
+        self.BeamCentreModel.scale_2 = scale_2
+
+        self.presenter.on_processing_finished_centre_finder()
+        self.assertEqual(self.BeamCentreModel.lab_pos_1 * scale_1, self.view.lab_pos_1)
+        self.assertEqual(self.BeamCentreModel.lab_pos_2 * scale_2, self.view.lab_pos_2)
+
+        self.assertEqual(self.BeamCentreModel.hab_pos_1 * scale_1, self.view.hab_pos_1)
+        self.assertEqual(self.BeamCentreModel.hab_pos_2 * scale_2, self.view.hab_pos_2)
         self.view.set_run_button_to_normal.assert_called_once_with()
-
-    def test_that_on_processing_finished_updates_does_not_update_view_and_model_when_update_disabled(self):
-        self.presenter.set_view(self.view)
-        result = {'pos1': 0.1, 'pos2': -0.1}
-        result_1 = {'pos1': 0.2, 'pos2': -0.2}
-        self.presenter._beam_centre_model.scale_1 = 1000
-        self.presenter._beam_centre_model.scale_2 = 1000
-        self.presenter._beam_centre_model.update_lab = True
-        self.presenter._beam_centre_model.update_hab = True
-        self.presenter.on_processing_finished_centre_finder(result)
-        self.presenter._beam_centre_model.update_lab = False
-        self.presenter._beam_centre_model.update_hab = False
-
-        self.presenter.on_processing_finished_centre_finder(result_1)
-
-        self.assertEqual(result['pos1'], self.presenter._beam_centre_model.lab_pos_1)
-        self.assertEqual(result['pos2'], self.presenter._beam_centre_model.lab_pos_2)
-        self.assertEqual(self.view.lab_pos_1, self.presenter._beam_centre_model.scale_1*result['pos1'])
-        self.assertEqual(self.view.lab_pos_2, self.presenter._beam_centre_model.scale_2*result['pos2'])
-        self.assertEqual(result['pos1'], self.presenter._beam_centre_model.hab_pos_1)
-        self.assertEqual(result['pos2'], self.presenter._beam_centre_model.hab_pos_2)
-        self.assertEqual(self.view.hab_pos_1, self.presenter._beam_centre_model.scale_1 * result['pos1'])
-        self.assertEqual(self.view.hab_pos_2, self.presenter._beam_centre_model.scale_2 * result['pos2'])
-        self.assertEqual(self.view.set_run_button_to_normal.call_count, 2)
 
     def test_that_update_hab_selected_enabled_hab_and_disabled_lab(self):
         self.presenter.set_view(self.view)

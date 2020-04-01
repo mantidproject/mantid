@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegratePeaksMD2.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -721,8 +721,8 @@ double IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
 }
 
 void IntegratePeaksMD2::runMaskDetectors(
-    Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property,
-    std::string values) {
+    const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+    const std::string &property, const std::string &values) {
   // For CORELLI do not count as edge if next to another detector bank
   if (property == "Tube" && peakWS->getInstrument()->getName() == "CORELLI") {
     IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
@@ -750,7 +750,7 @@ void IntegratePeaksMD2::runMaskDetectors(
 }
 
 void IntegratePeaksMD2::checkOverlap(
-    int i, Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
+    int i, const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
     Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse, double radius) {
   // Get a direct ref to that peak.
   IPeak &p1 = peakWS->getPeak(i);

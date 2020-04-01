@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_GSLFUNCTIONS_H_
-#define MANTID_CURVEFITTING_GSLFUNCTIONS_H_
+#pragma once
 
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFunction.h"
@@ -28,7 +27,7 @@ Various GSL specific functions used GSL specific minimizers
 /// Structure to contain least squares data and used by GSL
 struct GSL_FitData {
   /// Constructor
-  GSL_FitData(boost::shared_ptr<CostFunctions::CostFuncLeastSquares> cf);
+  GSL_FitData(const boost::shared_ptr<CostFunctions::CostFuncLeastSquares> &cf);
   /// Destructor
   ~GSL_FitData();
   /// number of points to be fitted (size of X, Y and sqrtWeightData arrays)
@@ -53,5 +52,3 @@ int gsl_fdf(const gsl_vector *x, void *params, gsl_vector *f, gsl_matrix *J);
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_GSLFUNCTIONS_H_*/

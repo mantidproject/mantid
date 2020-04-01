@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_READGROUPSFROMFILE_H_
-#define MANTID_ALGORITHMS_READGROUPSFROMFILE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <unordered_map>
 
@@ -56,7 +56,7 @@ namespace Algorithms {
     @author Laurent Chapon, ISIS Facility, Rutherford Appleton Laboratory
     @date 09/03/2009
 */
-class DLLExport ReadGroupsFromFile : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ReadGroupsFromFile : public API::Algorithm {
 public:
   /// (Empty) Constructor
   ReadGroupsFromFile();
@@ -111,5 +111,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_READGROUPFROMFILES*/

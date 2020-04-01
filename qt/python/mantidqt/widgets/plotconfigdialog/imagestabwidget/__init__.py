@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib.collections import QuadMesh
 from matplotlib.colors import LogNorm
@@ -24,7 +22,8 @@ class ImageProperties(dict):
     def from_image(cls, image):
         props = dict()
         props['label'] = image.get_label()
-        props['colormap'] = image.get_cmap().name
+        cmap_name = image.cmap.name if hasattr(image,"cmap") else image.get_cmap().name
+        props['colormap'] = cmap_name
         props['reverse_colormap'] = False
         if props['colormap'].endswith('_r'):
             props['colormap'] = props['colormap'][:-2]

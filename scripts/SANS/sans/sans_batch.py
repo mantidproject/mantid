@@ -1,13 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """ SANBatchReduction algorithm is the starting point for any new type reduction, event single reduction"""
-from __future__ import (absolute_import, division, print_function)
-from sans.state.state import State
+from sans.state.AllStates import AllStates
 from sans.algorithm_detail.batch_execution import (single_reduction_for_batch)
 from sans.common.enums import (OutputMode, FindDirectionEnum, DetectorType)
 from sans.algorithm_detail.centre_finder_new import centre_finder_new, centre_finder_mass
@@ -55,7 +54,7 @@ class SANSBatchReduction(object):
             raise RuntimeError("The provided states are not in a list. They have to be in a list.")
 
         for state in states:
-            if not isinstance(state, State):
+            if not isinstance(state, AllStates):
                 raise RuntimeError("The entries have to be sans state objects. "
                                    "The provided type is {0}".format(type(state)))
 
@@ -138,7 +137,7 @@ class SANSCentreFinder(object):
         # 3. xstart, ystart have to be floats
         # 4. max_iter has to be an integer
 
-        if not isinstance(state, State):
+        if not isinstance(state, AllStates):
             raise RuntimeError("The entries have to be sans state objects. "
                                "The provided type is {0}".format(type(state)))
 

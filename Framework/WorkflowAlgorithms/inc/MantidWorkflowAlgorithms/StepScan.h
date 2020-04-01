@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_WORKFLOWALGORITHMS_ROCKINGCURVE_H_
-#define MANTID_WORKFLOWALGORITHMS_ROCKINGCURVE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -36,16 +35,14 @@ private:
   void exec() override;
 
   DataObjects::EventWorkspace_sptr
-  getMonitorWorkspace(API::MatrixWorkspace_sptr inputWS);
+  getMonitorWorkspace(const API::MatrixWorkspace_sptr &inputWS);
   DataObjects::EventWorkspace_sptr
-  cloneInputWorkspace(API::Workspace_sptr inputWS);
-  void runMaskDetectors(API::MatrixWorkspace_sptr inputWS,
-                        API::MatrixWorkspace_sptr maskWS);
-  void runFilterByXValue(API::MatrixWorkspace_sptr inputWS, const double xmin,
-                         const double xmax);
+  cloneInputWorkspace(const API::Workspace_sptr &inputWS);
+  void runMaskDetectors(const API::MatrixWorkspace_sptr &inputWS,
+                        const API::MatrixWorkspace_sptr &maskWS);
+  void runFilterByXValue(const API::MatrixWorkspace_sptr &inputWS,
+                         const double xmin, const double xmax);
 };
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_WORKFLOWALGORITHMS_ROCKINGCURVE_H_ */

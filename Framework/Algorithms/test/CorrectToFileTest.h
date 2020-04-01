@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CORRECTTOFILE_H_
-#define CORRECTTOFILE_H_
+#pragma once
 
 //-------------------
 // Includes
@@ -143,7 +142,7 @@ public:
     AnalysisDataService::Instance().remove(data->getName());
   }
 
-  MatrixWorkspace_sptr executeAlgorithm(MatrixWorkspace_sptr testInput,
+  MatrixWorkspace_sptr executeAlgorithm(const MatrixWorkspace_sptr &testInput,
                                         const std::string &unit,
                                         const std::string &operation,
                                         bool newWksp = true) {
@@ -201,5 +200,3 @@ private:
   Mantid::Algorithms::CorrectToFile correctToFile;
   std::string inputFile;
 };
-
-#endif // CORRECTTOFILE_H_

@@ -1,10 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitDataPresenter.h"
+
+#include <utility>
+
 #include "IndirectAddWorkspaceDialog.h"
 
 namespace MantidQt {
@@ -35,9 +38,7 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(
           SIGNAL(multipleDataViewSelected()));
 
   connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
-          SLOT(setModelWorkspace(const QString &)));
-  connect(m_view, SIGNAL(sampleLoaded(const QString &)), this,
-          SIGNAL(dataChanged()));
+          SLOT(handleSampleLoaded(const QString &)));
 
   connect(m_view, SIGNAL(addClicked()), this,
           SIGNAL(requestedAddWorkspaceDialog()));
@@ -182,6 +183,14 @@ void IndirectFitDataPresenter::setResolutionHidden(bool hide) {
   m_view->setResolutionHidden(hide);
 }
 
+void IndirectFitDataPresenter::handleSampleLoaded(
+    const QString &workspaceName) {
+  setModelWorkspace(workspaceName);
+  emit dataChanged();
+  updateRanges();
+  emit dataChanged();
+}
+
 void IndirectFitDataPresenter::setModelWorkspace(const QString &name) {
   observeReplace(false);
   setSingleModelData(name.toStdString());
@@ -202,8 +211,8 @@ void IndirectFitDataPresenter::replaceHandle(const std::string &workspaceName,
 
 DataForParameterEstimationCollection
 IndirectFitDataPresenter::getDataForParameterEstimation(
-    EstimationDataSelector selector) const {
-  return m_model->getDataForParameterEstimation(selector);
+    const EstimationDataSelector &selector) const {
+  return m_model->getDataForParameterEstimation(std::move(selector));
 }
 
 void IndirectFitDataPresenter::selectReplacedWorkspace(
@@ -272,6 +281,9 @@ void IndirectFitDataPresenter::addDataToModel(
 void IndirectFitDataPresenter::setSingleModelData(const std::string &name) {
   m_model->clearWorkspaces();
   addModelData(name);
+}
+
+void IndirectFitDataPresenter::updateRanges() {
   auto const dataIndex = TableDatasetIndex{0};
   auto const spectra = m_model->getSpectra(dataIndex);
   if (!spectra.empty()) {

@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_IQTRANSFORM_H_
-#define MANTID_ALGORITHMS_IQTRANSFORM_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -48,7 +48,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella
     @date 03/02/2011
 */
-class DLLExport IQTransform : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL IQTransform : public API::Algorithm {
 public:
   IQTransform();
   const std::string name() const override { return "IQTransform"; }
@@ -67,10 +67,11 @@ private:
   void exec() override;
 
   inline API::MatrixWorkspace_sptr
-  subtractBackgroundWS(API::MatrixWorkspace_sptr ws,
-                       API::MatrixWorkspace_sptr background);
+  subtractBackgroundWS(const API::MatrixWorkspace_sptr &ws,
+                       const API::MatrixWorkspace_sptr &background);
 
-  using TransformFunc = void (IQTransform::*)(API::MatrixWorkspace_sptr);
+  using TransformFunc =
+      void (IQTransform::*)(const API::MatrixWorkspace_sptr &);
   using TransformMap = std::map<std::string, TransformFunc>;
   TransformMap
       m_transforms; ///< A map of transformation name and function pointers
@@ -78,19 +79,17 @@ private:
   boost::shared_ptr<Kernel::Units::Label> m_label;
 
   // A function for each transformation
-  void guinierSpheres(API::MatrixWorkspace_sptr ws);
-  void guinierRods(API::MatrixWorkspace_sptr ws);
-  void guinierSheets(API::MatrixWorkspace_sptr ws);
-  void zimm(API::MatrixWorkspace_sptr ws);
-  void debyeBueche(API::MatrixWorkspace_sptr ws);
-  void kratky(API::MatrixWorkspace_sptr ws);
-  void porod(API::MatrixWorkspace_sptr ws);
-  void holtzer(API::MatrixWorkspace_sptr ws);
-  void logLog(API::MatrixWorkspace_sptr ws);
-  void general(API::MatrixWorkspace_sptr ws);
+  void guinierSpheres(const API::MatrixWorkspace_sptr &ws);
+  void guinierRods(const API::MatrixWorkspace_sptr &ws);
+  void guinierSheets(const API::MatrixWorkspace_sptr &ws);
+  void zimm(const API::MatrixWorkspace_sptr &ws);
+  void debyeBueche(const API::MatrixWorkspace_sptr &ws);
+  void kratky(const API::MatrixWorkspace_sptr &ws);
+  void porod(const API::MatrixWorkspace_sptr &ws);
+  void holtzer(const API::MatrixWorkspace_sptr &ws);
+  void logLog(const API::MatrixWorkspace_sptr &ws);
+  void general(const API::MatrixWorkspace_sptr &ws);
 };
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_IQTRANSFORM_H_*/

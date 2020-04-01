@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADMUONNEXUS2TEST_H_
-#define LOADMUONNEXUS2TEST_H_
+#pragma once
 
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
@@ -34,7 +33,7 @@ using Mantid::Types::Core::DateAndTime;
 
 class LoadMuonNexus2Test : public CxxTest::TestSuite {
 public:
-  void check_spectra_and_detectors(MatrixWorkspace_sptr output) {
+  void check_spectra_and_detectors(const MatrixWorkspace_sptr &output) {
 
     //----------------------------------------------------------------------
     // Tests to check that spectra-detector mapping is done correctly
@@ -491,5 +490,3 @@ public:
 private:
   LoadMuonNexus2 loader;
 };
-
-#endif /*LOADMUONNEXUS2TEST_H_*/

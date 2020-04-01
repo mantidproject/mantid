@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CYLINDERABSORPTIONTEST_H_
-#define CYLINDERABSORPTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -306,9 +305,9 @@ private:
   void configureAbsCommon(Mantid::Algorithms::CylinderAbsorption &alg,
                           MatrixWorkspace_sptr &inputWS,
                           const std::string &outputWSname,
-                          std::string numberOfSlices = "2",
-                          std::string numberOfAnnuli = "2",
-                          std::string cylinderAxis = "0,1,0") {
+                          const std::string &numberOfSlices = "2",
+                          const std::string &numberOfAnnuli = "2",
+                          const std::string &cylinderAxis = "0,1,0") {
     if (!alg.isInitialized())
       alg.initialize();
 
@@ -340,5 +339,3 @@ private:
         alg.setPropertyValue("SampleNumberDensity", "0.07192"));
   }
 };
-
-#endif /*CYLINDERABSORPTIONTEST_H_*/

@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
 import unittest
 # Need to import mantid before we import SANSUtility
 import mantid
@@ -33,10 +31,12 @@ TEST_STRING_MON2 = TEST_STRING_MON + '_2'
 TEST_STRING_DATA3 = TEST_STRING_DATA + '_3'
 TEST_STRING_MON3 = TEST_STRING_MON + '_3'
 
+
 def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name, out_ws_name):
     CreateWorkspace(DataX = [1,2,3], DataY = [2,3,4], OutputWorkspace = monitor_ws_name)
     CreateSampleWorkspace(WorkspaceType= 'Event', OutputWorkspace = event_ws_name)
     GroupWorkspaces(InputWorkspaces = [event_ws_name, monitor_ws_name ], OutputWorkspace = out_ws_name)
+
 
 def addSampleLogEntry(log_name, ws, start_time, extra_time_shift, make_linear = False):
     number_of_times = 10
@@ -49,6 +49,7 @@ def addSampleLogEntry(log_name, ws, start_time, extra_time_shift, make_linear = 
         date +=  int(i*1e9)
         date += int(extra_time_shift*1e9)
         AddTimeSeriesLog(ws, Name=log_name, Time=date.__str__().strip(), Value=val)
+
 
 def provide_event_ws_with_entries(name, start_time,number_events =0, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False, log_names= None, make_linear = False):
      # Create the event workspace
@@ -69,16 +70,20 @@ def provide_event_ws_with_entries(name, start_time,number_events =0, extra_time_
             addSampleLogEntry(name, ws, start_time, extra_time_shift, make_linear)
     return ws
 
+
 def provide_event_ws_custom(name, start_time, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False):
     return provide_event_ws_with_entries(name=name, start_time=start_time,
                                          number_events = 100, extra_time_shift = extra_time_shift,
                                          proton_charge=proton_charge, proton_charge_empty=proton_charge_empty)
 
+
 def provide_event_ws(name, start_time, extra_time_shift):
     return provide_event_ws_custom(name = name, start_time = start_time, extra_time_shift = extra_time_shift,  proton_charge = True)
 
+
 def provide_event_ws_wo_proton_charge(name, start_time, extra_time_shift):
     return provide_event_ws_custom(name = name, start_time = start_time, extra_time_shift = extra_time_shift,  proton_charge = False)
+
 
 def provide_histo_workspace_with_one_spectrum(ws_name, x_start, x_end, bin_width):
     CreateSampleWorkspace(OutputWorkspace = ws_name,
@@ -205,6 +210,7 @@ class SANSUtilityTest(unittest.TestCase):
         self.assertEqual([[1, 3], [5, 5], [7, 9]], su._merge_to_ranges([1, 2, 3, 5, 7, 8, 9]))
         self.assertEqual([[1, 1]],                 su._merge_to_ranges([1]))
 
+
 class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):
     def _prepare_workspaces(self, names):
         CreateSampleWorkspace(WorkspaceType = 'Event', OutputWorkspace = names[0])
@@ -258,6 +264,7 @@ class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):
 
         if os.path.exists(file_names[0]):
             os.remove(file_names[0])
+
 
 class TestLoadingAddedEventWorkspaceNameParsing(unittest.TestCase):
 
@@ -323,6 +330,7 @@ class TestLoadingAddedEventWorkspaceNameParsing(unittest.TestCase):
         event_name3 = TEST_STRING_DATA3
         monitor_name3 = TEST_STRING_MON3
         self.do_test_load_check(event_name = event_name3, monitor_name = monitor_name3)
+
 
 class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
     _appendix = '_monitors'
@@ -568,6 +576,7 @@ class TestCombineWorkspacesFactory(unittest.TestCase):
         alg = factory.create_add_algorithm(False)
         self.assertTrue(isinstance(alg, su.PlusWorkspaces))
 
+
 class TestOverlayWorkspaces(unittest.TestCase):
     def test_time_from_proton_charge_log_is_recovered(self):
         # Arrange
@@ -650,6 +659,7 @@ class TestOverlayWorkspaces(unittest.TestCase):
             if name in mtd.getObjectNames():
                 DeleteWorkspace(name)
 
+
 class TestTimeShifter(unittest.TestCase):
     def test_zero_shift_when_out_of_range(self):
         # Arrange
@@ -672,6 +682,7 @@ class TestTimeShifter(unittest.TestCase):
         self.assertEqual(time_shifter.get_Nth_time_shift(1), 0.0)
         self.assertEqual(time_shifter.get_Nth_time_shift(2), -232.0)
         self.assertEqual(time_shifter.get_Nth_time_shift(3), 0.0)
+
 
 class TestZeroErrorFreeWorkspace(unittest.TestCase):
     def _setup_workspace(self, name, type):
@@ -857,6 +868,7 @@ class TestRenameMonitorsForMultiPeriodEventData(unittest.TestCase):
             if element in mtd:
                 DeleteWorkspace(element)
 
+
 class TestConvertibleToInteger(unittest.TestCase):
     def test_converts_true_to_integer_when_integer(self):
         # Arrange
@@ -881,6 +893,7 @@ class TestConvertibleToInteger(unittest.TestCase):
         result = su.is_convertible_to_int(input)
         # Assert
         self.assertFalse(result)
+
 
 class TestConvertibleToFloat(unittest.TestCase):
     def test_converts_true_to_float_when_float(self):
@@ -907,6 +920,7 @@ class TestConvertibleToFloat(unittest.TestCase):
         # Assert
         self.assertFalse(result)
 
+
 class TestValidXmlFileList(unittest.TestCase):
     def test_finds_valid_xml_file_list(self):
         # Arrange
@@ -932,6 +946,7 @@ class TestValidXmlFileList(unittest.TestCase):
         # Assert
         self.assertFalse(result)
 
+
 class TestConvertToAndFromPythonStringList(unittest.TestCase):
     def test_converts_from_string_to_list(self):
         # Arrange
@@ -950,12 +965,14 @@ class TestConvertToAndFromPythonStringList(unittest.TestCase):
         expected = "test1.xml,test2.xml,test3.xml"
         self.assertEqual(expected, result)
 
+
 class HelperRescaleShift(object):
     def __init__(self, hasValues=True, min= 1, max= 2):
         super(HelperRescaleShift, self).__init__()
         self.qRangeUserSelected = hasValues
         self.qMin = min
         self.qMax = max
+
 
 class TestExtractionOfQRange(unittest.TestCase):
     def _delete_workspace(self, workspace_name):
@@ -1246,6 +1263,7 @@ class TestGetQResolutionForMergedWorkspaces(unittest.TestCase):
         DeleteWorkspace(front)
         DeleteWorkspace(rear)
         DeleteWorkspace(result)
+
 
 class TestDetectingValidUserFileExtensions(unittest.TestCase):
     def _do_test(self, file_name, expected):

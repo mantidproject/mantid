@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from sans.algorithm_detail.centre_finder_new import centre_finder_new, centre_finder_mass
 from sans.common.enums import (SANSDataType, FindDirectionEnum, DetectorType)
 from sans.test_helper.test_director import TestDirector

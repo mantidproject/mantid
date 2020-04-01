@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataProcessorUI/ProcessingAlgorithmBase.h"
 #include <QStringList>
@@ -14,16 +14,17 @@ namespace DataProcessor {
 
 /** Constructor */
 ProcessingAlgorithmBase::ProcessingAlgorithmBase(
-    const QString &name, const std::set<QString> &blacklist)
-    : m_algName(name), m_blacklist(blacklist), m_inputWsProperties(),
-      m_inputStrListProperties(), m_OutputWsProperties() {
+    const QString &name, const std::set<QString> &blacklist, const int version)
+    : m_algName(name), m_version(version), m_blacklist(blacklist),
+      m_inputWsProperties(), m_inputStrListProperties(),
+      m_OutputWsProperties() {
 
   countWsProperties();
 }
 
 /** Default constructor (nothing to do) */
 ProcessingAlgorithmBase::ProcessingAlgorithmBase()
-    : m_algName(), m_blacklist(), m_inputWsProperties(),
+    : m_algName(), m_version(-1), m_blacklist(), m_inputWsProperties(),
       m_inputStrListProperties(), m_OutputWsProperties() {}
 
 /** Destructor */
@@ -33,7 +34,8 @@ ProcessingAlgorithmBase::~ProcessingAlgorithmBase() {}
 void ProcessingAlgorithmBase::countWsProperties() {
 
   Mantid::API::IAlgorithm_sptr alg =
-      Mantid::API::AlgorithmManager::Instance().create(m_algName.toStdString());
+      Mantid::API::AlgorithmManager::Instance().create(m_algName.toStdString(),
+                                                       m_version);
 
   auto properties = alg->getProperties();
   for (auto &prop : properties) {

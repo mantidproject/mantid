@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
-
-from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
@@ -16,8 +14,8 @@ from sans.algorithm_detail.move_sans_instrument_component import move_component,
 from sans.algorithm_detail.move_workspaces import (create_mover, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle,
                                                    SANSMoveZOOM)
 from sans.common.enums import (SANSFacility, DetectorType, SANSInstrument)
-from sans.state.data import get_data_builder
-from sans.state.move import get_move_builder
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

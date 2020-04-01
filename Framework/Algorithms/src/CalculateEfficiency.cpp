@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateEfficiency.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -156,9 +156,9 @@ void CalculateEfficiency::exec() {
  * @param error: error on sum (counts)
  * @param nPixels: number of unmasked detector pixels that contributed to sum
  */
-void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
-                                               double &sum, double &error,
-                                               int &nPixels) {
+void CalculateEfficiency::sumUnmaskedDetectors(
+    const MatrixWorkspace_sptr &rebinnedWS, double &sum, double &error,
+    int &nPixels) {
   // Number of spectra
   const auto numberOfSpectra =
       static_cast<int>(rebinnedWS->getNumberHistograms());
@@ -200,11 +200,10 @@ void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
  * @param nPixels: number of unmasked detector pixels that contributed to sum
  */
 
-void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
-                                             MatrixWorkspace_sptr outputWS,
-                                             double sum, double error,
-                                             int nPixels, double min_eff,
-                                             double max_eff) {
+void CalculateEfficiency::normalizeDetectors(
+    const MatrixWorkspace_sptr &rebinnedWS,
+    const MatrixWorkspace_sptr &outputWS, double sum, double error, int nPixels,
+    double min_eff, double max_eff) {
   // Number of spectra
   const size_t numberOfSpectra = rebinnedWS->getNumberHistograms();
 
@@ -337,7 +336,7 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
  * @param low :: number of rows to mask Bottom
  * @param componentName :: Must be a RectangularDetector
  */
-void CalculateEfficiency::maskEdges(MatrixWorkspace_sptr ws, int left,
+void CalculateEfficiency::maskEdges(const MatrixWorkspace_sptr &ws, int left,
                                     int right, int high, int low,
                                     const std::string &componentName) {
 

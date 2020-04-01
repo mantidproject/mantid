@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FUNCTIONCURVE_H
-#define FUNCTIONCURVE_H
+#pragma once
 
 #include "PlotCurve.h"
 
@@ -85,8 +84,9 @@ public:
 
   void loadData(int points = 0);
 
-  void loadMantidData(boost::shared_ptr<const Mantid::API::MatrixWorkspace> ws,
-                      size_t wi, int peakRadius = 0);
+  void loadMantidData(
+      const boost::shared_ptr<const Mantid::API::MatrixWorkspace> &ws,
+      size_t wi, int peakRadius = 0);
 
   /// No error bars on this curve: Always return an empty list.
   QList<ErrorBarSettings *> errorBarSettingsList() const override {
@@ -108,5 +108,3 @@ private:
   /// Equal null where the curve is not plotting an IFunction
   const Mantid::API::IFunction *m_identifier;
 };
-
-#endif

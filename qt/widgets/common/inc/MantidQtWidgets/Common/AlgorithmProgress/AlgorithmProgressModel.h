@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALGORITHMPROGRESSMODEL_H
-#define ALGORITHMPROGRESSMODEL_H
+#pragma once
 
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h"
@@ -65,5 +64,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // ALGORITHMPROGRESSMODEL_H

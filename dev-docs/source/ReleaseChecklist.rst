@@ -67,11 +67,14 @@ Unscripted and Final Testing (technical tasks)
 *  Run
    `open-release-testing <http://builds.mantidproject.org/view/All/job/open-release-testing/>`__
    to create the release branch and prepare build jobs
-*  Enable and update the release branch name for
-   `merge\_release\_into\_master <http://builds.mantidproject.org/view/All/job/merge_release_into_master/>`__
-*  Check state of all open pull requests for this milestone and update
-   the base branch to the new release branch accordingly.
-*  Create a skeleton set of release notes for the next version using the `python helper tool <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_
+*  Check state of all open pull requests for this milestone and decide which should be kept for the release, liase with PM on this. Move any pull requests not targeted for release out of the milestone and run `update-pr-base-branch.py <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__ to update the base branches of those pull requests.
+*  Inform other developers that release-next has been created by adapting/posting the following announcement:
+
+  .. code
+  
+  The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/master-branch workflow before then please take a moment to familiarise yourself with the process: http://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as master.
+
+*  Create a skeleton set of release notes for the next version using the `python helper tool <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_ and open a pull request to put them on ``master``.
 *  Perform unscripted testing following the instructions described
    `here <https://www.mantidproject.org/Unscripted_Manual_Testing>`__.
 
@@ -169,6 +172,7 @@ Once the unscripted testing has passed:
 * Kick off the build for ``mantidXY`` on RHEL7 for SNS:
   http://builds.mantidproject.org/job/release_clean-rhel7/ with suffix
   ``XY``
+* **ISIS**: If in cycle add a calendar reminder for when the current cycle ends for mantid to be updated on IDAaaS and cabin PCs. If out of cycle do this immediately.
 
 Finalise
 ========

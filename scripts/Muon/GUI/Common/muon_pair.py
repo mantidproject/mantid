@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=C0111
-from __future__ import (absolute_import, division, print_function)
-
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
@@ -41,8 +39,8 @@ class MuonPair(object):
         if isinstance(new_workspace, MuonWorkspaceWrapper):
             self._workspace = new_workspace
         else:
-            raise AttributeError("Attempting to set workspace to type " + str(type(new_workspace)) +
-                                 " but should be MuonWorkspaceWrapper")
+            raise AttributeError("Attempting to set workspace to type " + str(type(new_workspace))
+                                 + " but should be MuonWorkspaceWrapper")
 
     @property
     def name(self):

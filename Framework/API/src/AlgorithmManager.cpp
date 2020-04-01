@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -22,15 +22,6 @@ Kernel::Logger g_log("AlgorithmManager");
 
 /// Private Constructor for singleton class
 AlgorithmManagerImpl::AlgorithmManagerImpl() : m_managed_algs() {
-  auto max_no_algs =
-      Kernel::ConfigService::Instance().getValue<int>("algorithms.retained");
-
-  m_max_no_algs = max_no_algs.get_value_or(0);
-
-  if (m_max_no_algs < 1) {
-    m_max_no_algs = 100; // Default to keeping 100 algorithms if not specified
-  }
-
   g_log.debug() << "Algorithm Manager created.\n";
 }
 
@@ -82,39 +73,15 @@ IAlgorithm_sptr AlgorithmManagerImpl::create(const std::string &algName,
     else
       alg = unmanagedAlg;
 
-    // If this takes us beyond the maximum size, then remove the oldest one(s)
-    while (m_managed_algs.size() >=
-           static_cast<std::deque<IAlgorithm_sptr>::size_type>(m_max_no_algs)) {
-      std::deque<IAlgorithm_sptr>::iterator it;
-      it = m_managed_algs.begin();
-
-      // Look for the first (oldest) algo that is NOT running right now.
-      while (it != m_managed_algs.end()) {
-        if (!(*it)->isRunning())
-          break;
-        ++it;
-      }
-
-      if (it == m_managed_algs.end()) {
-        // Unusual case where ALL algorithms are running
-        g_log.warning()
-            << "All algorithms in the AlgorithmManager are running. "
-            << "Cannot pop oldest algorithm. "
-            << "You should increase your 'algorithms.retained' value. "
-            << m_managed_algs.size() << " in queue.\n";
-        break;
-      } else {
-        // Normal; erase that algorithm
-        g_log.debug() << "Popping out oldest algorithm " << (*it)->name()
-                      << '\n';
-        m_managed_algs.erase(it);
-      }
-    }
+    auto count = removeFinishedAlgorithms();
+    g_log.debug()
+        << count
+        << " Finished algorithms removed from the managed algorithms list. "
+        << m_managed_algs.size() << " remaining.\n";
 
     // Add to list of managed ones
     m_managed_algs.emplace_back(alg);
     alg->initialize();
-
   } catch (std::runtime_error &ex) {
     g_log.error() << "AlgorithmManager:: Unable to create algorithm " << algName
                   << ' ' << ex.what() << '\n';
@@ -139,19 +106,6 @@ void AlgorithmManagerImpl::clear() {
 }
 
 std::size_t AlgorithmManagerImpl::size() const { return m_managed_algs.size(); }
-
-/**
- * Set new maximum number of algorithms that can be stored.
- *
- * @param n :: The new maximum.
- */
-void AlgorithmManagerImpl::setMaxAlgorithms(int n) {
-  if (n < 0) {
-    throw std::runtime_error("Maximum number of algorithms stored in "
-                             "AlgorithmManager cannot be negative.");
-  }
-  m_max_no_algs = n;
-}
 
 /**
  * Returns a shared pointer by algorithm id
@@ -205,18 +159,6 @@ void AlgorithmManagerImpl::notifyAlgorithmStarting(AlgorithmID id) {
   notificationCenter.postNotification(new AlgorithmStartingNotification(alg));
 }
 
-/// Returns the most recently created instance of the named algorithm (or null
-/// if not found)
-IAlgorithm_sptr
-AlgorithmManagerImpl::newestInstanceOf(const std::string &algorithmName) const {
-  for (auto it = m_managed_algs.rbegin(); it != m_managed_algs.rend(); ++it) {
-    if ((*it)->name() == algorithmName)
-      return *it;
-  }
-
-  return IAlgorithm_sptr();
-}
-
 /// Returns all running (& managed) occurances of the named algorithm, oldest
 /// first
 std::vector<IAlgorithm_const_sptr> AlgorithmManagerImpl::runningInstancesOf(
@@ -251,6 +193,28 @@ void AlgorithmManagerImpl::cancelAll() {
     if (managed_alg->isRunning())
       managed_alg->cancel();
   }
+}
+
+/// Removes all of the finished algorithms
+/// this does not lock the mutex as the locking is already assumed to be in
+/// place
+size_t AlgorithmManagerImpl::removeFinishedAlgorithms() {
+  std::vector<IAlgorithm_const_sptr> theCompletedInstances;
+  std::copy_if(
+      m_managed_algs.cbegin(), m_managed_algs.cend(),
+      std::back_inserter(theCompletedInstances), [](const auto &algorithm) {
+        return (algorithm->executionState() == ExecutionState::Finished);
+      });
+  for (auto completedAlg : theCompletedInstances) {
+    auto itend = m_managed_algs.end();
+    for (auto it = m_managed_algs.begin(); it != itend; ++it) {
+      if ((**it).getAlgorithmID() == completedAlg->getAlgorithmID()) {
+        m_managed_algs.erase(it);
+        break;
+      }
+    }
+  }
+  return theCompletedInstances.size();
 }
 
 void AlgorithmManagerImpl::shutdown() { clear(); }

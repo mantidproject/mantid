@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INDIRECT_FUNCTIONTEMPLATEBROWSER_H_
-#define INDIRECT_FUNCTIONTEMPLATEBROWSER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
@@ -41,6 +40,7 @@ class MANTIDQT_INDIRECT_DLL FunctionTemplateBrowser : public QWidget {
   Q_OBJECT
 public:
   FunctionTemplateBrowser(QWidget *parent);
+  virtual ~FunctionTemplateBrowser() = default;
   void init();
 
   virtual void setFunction(const QString &funStr) = 0;
@@ -108,5 +108,3 @@ protected:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*INDIRECT_FUNCTIONTEMPLATEBROWSER_H_*/

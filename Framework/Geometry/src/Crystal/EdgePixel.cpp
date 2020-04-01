@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/EdgePixel.h"
 #include "MantidGeometry/Instrument/Component.h"
@@ -20,8 +20,8 @@ namespace Geometry {
   @param  Edge         Number of edge points for each bank
   @return True if peak is on edge
 */
-bool edgePixel(Mantid::Geometry::Instrument_const_sptr inst,
-               std::string bankName, int col, int row, int Edge) {
+bool edgePixel(const Mantid::Geometry::Instrument_const_sptr &inst,
+               const std::string &bankName, int col, int row, int Edge) {
   if (bankName == "None")
     return false;
   boost::shared_ptr<const Geometry::IComponent> parent =

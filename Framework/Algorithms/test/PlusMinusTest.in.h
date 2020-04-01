@@ -1,12 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // clang-format off
-#ifndef @PLUSMINUSTEST_CLASS@_H_
-#define @PLUSMINUSTEST_CLASS@_H_
+#pragma once
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 
@@ -26,10 +25,10 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
 
-/*****************************************************************************************/
+
 /********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
 /********** Source = PlusMinusTest.in.h **************************************************/
-/*****************************************************************************************/
+
 
 class @PLUSMINUSTEST_CLASS@ : public CxxTest::TestSuite
 {
@@ -393,7 +392,7 @@ public:
     MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
     // You have to specify the expected output value because in1 gets changed.
     performTest(work_in1,work_in2, true, false /*not event out*/,
-        DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+        DO_PLUS ? 4.0 : 0.0, 2.0);
   }
 
   void test_Event_2D()
@@ -469,7 +468,7 @@ public:
     MatrixWorkspace_sptr work_in1 = eventWS_5x10_50;
     MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
     MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, false /*inPlace*/, true /*outputIsEvent*/,
-        DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+        DO_PLUS ? 4.0 : 0.0, 2.0);
   }
 
   void test_Event_Event_inPlace()
@@ -478,7 +477,7 @@ public:
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
     MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
     MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, true, true /*outputIsEvent*/,
-        DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+        DO_PLUS ? 4.0 : 0.0, 2.0);
   }
 
   void test_Event_EventSingleSpectrum_fails()
@@ -503,7 +502,7 @@ public:
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
-          DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+          DO_PLUS ? 4.0 : 0.0, 2.0);
     }
   }
 
@@ -515,7 +514,7 @@ public:
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist,1,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
-          DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+          DO_PLUS ? 4.0 : 0.0, 2.0);
     }
   }
 
@@ -526,7 +525,7 @@ public:
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(5,1,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = eventWS_5x10_50;
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
-          DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+          DO_PLUS ? 4.0 : 0.0, 2.0);
     }
   }
 
@@ -538,7 +537,7 @@ public:
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::createEventWorkspace(nHist,nBins,50,0.0,1.0,2);
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
-          DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+          DO_PLUS ? 4.0 : 0.0, 2.0);
     }
   }
 
@@ -568,7 +567,7 @@ public:
       TS_ASSERT( work_in2->getSpectrum(0).hasDetectorID(100) );
 
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
-          DO_PLUS ? 3.0 : -1.0,   DO_PLUS ? 1.7320 : 1.7320);
+          DO_PLUS ? 3.0 : -1.0, 1.7320);
 
       //Ya, its an event workspace
       TS_ASSERT(work_out);
@@ -1117,5 +1116,4 @@ public:
 
 }; // end of class @PLUSMINUSTEST_CLASS@Performance
 
-#endif
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_TYPEDVALIDATORTEST_H_
-#define MANTID_KERNEL_TYPEDVALIDATORTEST_H_
+#pragma once
 
 #include "MantidKernel/DataItem.h"
 #include "MantidKernel/TypedValidator.h"
@@ -70,12 +69,10 @@ public:
 private:
   template <typename HeldType>
   void checkIsValidReturnsEmptyString(
-      const Mantid::Kernel::IValidator_sptr valueChecker,
+      const Mantid::Kernel::IValidator_sptr &valueChecker,
       const HeldType &value) {
     std::string error;
     TS_ASSERT_THROWS_NOTHING(error = valueChecker->isValid(value));
     TS_ASSERT_EQUALS(error, "");
   }
 };
-
-#endif /* MANTID_KERNEL_TYPEDVALIDATORTEST_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IMDWORKSPACE_H_
-#define MANTID_API_IMDWORKSPACE_H_
+#pragma once
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -166,4 +165,3 @@ using IMDWorkspace_sptr = boost::shared_ptr<IMDWorkspace>;
 using IMDWorkspace_const_sptr = boost::shared_ptr<const IMDWorkspace>;
 } // namespace API
 } // namespace Mantid
-#endif // MANTID_API_IMDWORKSPACE_H_

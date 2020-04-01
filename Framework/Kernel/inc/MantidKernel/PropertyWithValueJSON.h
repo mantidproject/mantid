@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROPERTYWITHVALUEJSON_H
-#define PROPERTYWITHVALUEJSON_H
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
@@ -167,5 +166,3 @@ Json::Value encodeAsJson(const Kernel::Matrix<ValueType> &) {
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif // PROPERTYWITHVALUEJSON_H

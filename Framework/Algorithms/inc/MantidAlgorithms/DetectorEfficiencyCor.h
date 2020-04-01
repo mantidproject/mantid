@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_DETECTEFFICIENCYCOR_H_
-#define MANTID_ALGORITHM_DETECTEFFICIENCYCOR_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/V3D.h"
@@ -67,7 +67,7 @@ namespace Algorithms {
     @author Steve Williams based on code by T.G.Perring
     @date 6/10/2009
 */
-class DLLExport DetectorEfficiencyCor : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DetectorEfficiencyCor : public API::Algorithm {
 public:
   DetectorEfficiencyCor();
   /// Algorithm's name for identification overriding a virtual method
@@ -141,5 +141,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_DETECTEFFICIENCYCOR_H_*/

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_EventWorkspaceCollection_H_
-#define MANTID_DATAHANDLING_EventWorkspaceCollection_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -60,7 +59,7 @@ public:
   void setThickness(const float flag);
   void setHeight(const float flag);
   void setWidth(const float flag);
-  void setSpectrumNumbersFromUniqueSpectra(const std::set<int> uniqueSpectra);
+  void setSpectrumNumbersFromUniqueSpectra(const std::set<int> &uniqueSpectra);
   void setSpectrumNumberForAllPeriods(const size_t spectrumNumber,
                                       const specnum_t specid);
   void setDetectorIdsForAllPeriods(const size_t spectrumNumber,
@@ -89,8 +88,9 @@ public:
   void
   setMonitorWorkspace(const boost::shared_ptr<API::MatrixWorkspace> &monitorWS);
   void updateSpectraUsing(const API::SpectrumDetectorMapping &map);
-  void setTitle(std::string title);
-  void applyFilter(boost::function<void(API::MatrixWorkspace_sptr)> func);
+  void setTitle(const std::string &title);
+  void
+  applyFilter(const boost::function<void(API::MatrixWorkspace_sptr)> &func);
   virtual bool threadSafe() const;
 };
 
@@ -100,5 +100,3 @@ using EventWorkspaceCollection_uptr = std::unique_ptr<EventWorkspaceCollection>;
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_EventWorkspaceCollection_H_ */

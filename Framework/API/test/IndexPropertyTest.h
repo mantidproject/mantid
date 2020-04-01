@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_INDEXPROPERTYTEST_H_
-#define MANTID_API_INDEXPROPERTYTEST_H_
+#pragma once
 
 #include "MantidAPI/IndexProperty.h"
 #include "MantidAPI/IndexTypeProperty.h"
@@ -132,8 +131,10 @@ public:
     auto error = indexProp.setValue("30:35");
 
     TS_ASSERT(
-        error.find("Indices provided to IndexProperty are out of range.") !=
+        error.find("Indices provided to IndexProperty are out of range") !=
         std::string::npos);
+
+    TS_ASSERT(error.find("following value") != std::string::npos);
   }
 
   void testIndexAccessWithOperator() {
@@ -195,5 +196,3 @@ private:
   WorkspaceProperty<MatrixWorkspace> m_wkspProp;
   IndexTypeProperty m_itypeProp;
 };
-
-#endif /* MANTID_API_INDEXPROPERTYTEST_H_ */

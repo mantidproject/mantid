@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_H_
-#define MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include <boost/optional.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -25,7 +24,8 @@ namespace Algorithms {
  Fredrikze, H, et al. "Calibration of a polarized neutron reflectometer" Physica
  B 297 (2001)
  */
-class DLLExport PolarizationCorrectionFredrikze : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL PolarizationCorrectionFredrikze
+    : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -41,9 +41,9 @@ private:
   boost::shared_ptr<Mantid::API::MatrixWorkspace>
   getEfficiencyWorkspace(const std::string &label);
   boost::shared_ptr<Mantid::API::WorkspaceGroup>
-  execPA(boost::shared_ptr<Mantid::API::WorkspaceGroup> inWS);
+  execPA(const boost::shared_ptr<Mantid::API::WorkspaceGroup> &inWS);
   boost::shared_ptr<Mantid::API::WorkspaceGroup>
-  execPNR(boost::shared_ptr<Mantid::API::WorkspaceGroup> inWS);
+  execPNR(const boost::shared_ptr<Mantid::API::WorkspaceGroup> &inWS);
   boost::shared_ptr<Mantid::API::MatrixWorkspace>
   add(boost::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
       const double &rhs);
@@ -54,5 +54,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_POLARIZATIONCORRECTIONFREDRIKZE_H_ */

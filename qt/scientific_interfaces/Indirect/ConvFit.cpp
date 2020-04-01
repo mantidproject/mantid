@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFit.h"
 #include "ConvFitDataPresenter.h"
@@ -63,15 +63,13 @@ void ConvFit::setupFitTab() {
   setConvolveMembers(true);
 
   // Initialise fitTypeStrings
-  m_fitStrings["None"] = "";
-  m_fitStrings["One Lorentzian"] = "1L";
-  m_fitStrings["Two Lorentzians"] = "2L";
+  m_fitStrings["Lorentzian"] = "L";
   m_fitStrings["InelasticDiffSphere"] = "IDS";
   m_fitStrings["InelasticDiffRotDiscreteCircle"] = "IDC";
   m_fitStrings["ElasticDiffSphere"] = "EDS";
   m_fitStrings["ElasticDiffRotDiscreteCircle"] = "EDC";
   m_fitStrings["StretchedExpFT"] = "SFT";
-  m_fitStrings["Teixeira Water"] = "TxWater";
+  m_fitStrings["TeixeiraWaterSQE"] = "TxWater";
 
   auto &functionFactory = FunctionFactory::Instance();
   auto lorentzian = functionFactory.createFunction("Lorentzian");
@@ -140,15 +138,20 @@ void ConvFit::fitFunctionChanged() {
  * Assertions used to guard against any future changes that don't take
  * workspace naming into account.
  *
- * @returns the generated QString.
+ * @returns the generated string.
  */
 std::string ConvFit::fitTypeString() const {
   std::string fitType;
+  for (auto fitFunctionName : m_fitStrings) {
+    auto occurances = numberOfCustomFunctions(fitFunctionName.first);
+    if (occurances > 0) {
+      fitType += std::to_string(occurances) + fitFunctionName.second;
+    }
+  }
 
-  if (numberOfCustomFunctions("DeltaFunction") > 0)
+  if (numberOfCustomFunctions("DeltaFunction") > 0) {
     fitType += "Delta";
-
-  fitType += m_fitStrings[selectedFitType()];
+  }
 
   return fitType;
 }

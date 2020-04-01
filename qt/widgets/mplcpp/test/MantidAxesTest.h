@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_MANTIDAXESTEST_H
-#define MPLCPP_MANTIDAXESTEST_H
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -56,8 +55,9 @@ public:
     const std::string wsName{"myname"};
     const auto ws = createWorkspaceInADS(wsName, {1, 2, 4});
     axes.plot(ws, 0, "red", "mylabel");
-    axes.removeWorkspaceArtists(ws);
+    auto removed = axes.removeWorkspaceArtists(ws);
 
+    TS_ASSERT_EQUALS(removed, true);
     TS_ASSERT_EQUALS(0, Python::Len(axes.pyobj().attr("lines")));
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -68,11 +68,43 @@ public:
     const auto wsOld = createWorkspaceInADS(wsName, {1, 2, 4});
     axes.plot(wsOld, 0, "red", "mylabel");
     const auto wsNew = createWorkspaceInADS(wsName, {2, 3, 5});
-    axes.replaceWorkspaceArtists(wsNew);
+    auto replaces = axes.replaceWorkspaceArtists(wsNew);
 
     auto newLine = axes.pyobj().attr("lines")[0];
     TS_ASSERT_EQUALS(2.5, newLine.attr("get_xdata")()[0]);
     TS_ASSERT_EQUALS("red", newLine.attr("get_color")());
+    TS_ASSERT_EQUALS(replaces, true);
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void testRemovingWorkspaceNotOnPlotReturnsFalse() {
+    MantidAxes axes{pyAxes()};
+    const std::string wsName{"myname"};
+    const std::string wsName2{"mynamenotPlotted"};
+    const auto ws = createWorkspaceInADS(wsName, {1, 2, 4});
+    const auto wsNotPlotted = createWorkspaceInADS(wsName2, {1, 2, 4});
+    axes.plot(ws, 0, "red", "mylabel");
+    auto removed = axes.removeWorkspaceArtists(wsNotPlotted);
+
+    TS_ASSERT_EQUALS(removed, false);
+    TS_ASSERT_EQUALS(1, Python::Len(axes.pyobj().attr("lines")));
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void testReplacingWorkspaceNotOnPlotReturnsFalse() {
+    MantidAxes axes{pyAxes()};
+    const std::string wsName{"myname"};
+    const std::string wsName2{"myname2"};
+    const auto wsOld = createWorkspaceInADS(wsName, {2, 3, 5});
+    axes.plot(wsOld, 0, "red", "mylabel");
+    const auto wsNew = createWorkspaceInADS(wsName2, {1, 2, 4});
+    auto replaces = axes.replaceWorkspaceArtists(wsNew);
+
+    auto newLine = axes.pyobj().attr("lines")[0];
+    TS_ASSERT_EQUALS(2.5, newLine.attr("get_xdata")()[0]);
+    TS_ASSERT_EQUALS("red", newLine.attr("get_color")());
+    TS_ASSERT_EQUALS(replaces, false);
 
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -112,5 +144,3 @@ private:
     return ws;
   }
 };
-
-#endif // MPLCPP_MANTIDAXESTEST_H

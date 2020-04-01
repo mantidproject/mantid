@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
-#define MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_
+#pragma once
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -35,7 +34,7 @@ private:
   /// Mock Type to act as IDF files.
   class MockIDFObject : public Mantid::Geometry::IDFObject {
   public:
-    MockIDFObject(const std::string fileName)
+    MockIDFObject(const std::string &fileName)
         : Mantid::Geometry::IDFObject(fileName) {}
     MOCK_CONST_METHOD0(exists, bool());
   };
@@ -43,7 +42,7 @@ private:
   /// Mock Type to act as IDF files.
   class MockIDFObjectWithParentDirectory : public Mantid::Geometry::IDFObject {
   public:
-    MockIDFObjectWithParentDirectory(const std::string fileName)
+    MockIDFObjectWithParentDirectory(const std::string &fileName)
         : Mantid::Geometry::IDFObject(fileName) {}
     MOCK_CONST_METHOD0(exists, bool());
     MOCK_CONST_METHOD0(getParentDirectory, const Poco::Path());
@@ -55,7 +54,7 @@ private:
   */
   struct IDFEnvironment {
     IDFEnvironment(const ScopedFile &idf, const ScopedFile &vtp,
-                   const std::string xmlText, const std::string instName)
+                   const std::string &xmlText, const std::string &instName)
         : _idf(idf), _vtp(vtp), _xmlText(xmlText), _instName(instName){};
 
     ScopedFile _idf;
@@ -981,8 +980,8 @@ public:
     TS_ASSERT_DELTA(instr->getDetector(5)->getPos().Z(), 3.0, 1.0E-8);
   }
 
-  void checkDetectorRot(IDetector_const_sptr det, double deg, double axisx,
-                        double axisy, double axisz) {
+  void checkDetectorRot(const IDetector_const_sptr &det, double deg,
+                        double axisx, double axisy, double axisz) {
     double detDeg, detAxisX, detAxisY, detAxisZ;
     det->getRotation().getAngleAxis(detDeg, detAxisX, detAxisY, detAxisZ);
 
@@ -1133,5 +1132,3 @@ private:
     return std::move(std::get<1>(instrument.makeBeamline(pmap)));
   }
 };
-
-#endif /* MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
-#define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
+#pragma once
 
 #include "../EnggDiffraction/EnggDiffFittingPresenter.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -16,6 +15,8 @@
 #include "EnggDiffFittingViewMock.h"
 #include "EnggDiffractionParamMock.h"
 #include <cxxtest/TestSuite.h>
+#include <utility>
+
 #include <vector>
 
 using namespace MantidQt::CustomInterfaces;
@@ -42,7 +43,8 @@ public:
   EnggDiffFittingPresenterNoThread(
       IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
       boost::shared_ptr<IEnggDiffractionParam> mainParam)
-      : EnggDiffFittingPresenter(view, std::move(model), nullptr, mainParam) {}
+      : EnggDiffFittingPresenter(view, std::move(model), nullptr,
+                                 std::move(mainParam)) {}
 
 private:
   // not async at all
@@ -760,5 +762,3 @@ const std::string EnggDiffFittingPresenterTest::g_focusedFittingRunNo =
     "241391-241394";
 
 const std::string EnggDiffFittingPresenterTest::EMPTY = "";
-
-#endif // MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H

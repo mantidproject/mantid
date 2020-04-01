@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IMD_MATRIX_WORKSPACETEST_H_
-#define IMD_MATRIX_WORKSPACETEST_H_
+#pragma once
 
 // Tests the MatrixWorkspace as an IMDWorkspace.
 
@@ -148,5 +147,3 @@ public:
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
-
-#endif /*IMD_MATRIX_WORKSPACETEST_H_*/

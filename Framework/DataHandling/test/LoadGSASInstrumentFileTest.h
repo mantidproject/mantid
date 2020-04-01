@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADGSASINSTRUMENTFILETEST_H_
-#define MANTID_DATAHANDLING_LOADGSASINSTRUMENTFILETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -323,7 +322,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Parse a TableWorkspace to a map
    */
-  void parseTableWorkspace(TableWorkspace_sptr tablews,
+  void parseTableWorkspace(const TableWorkspace_sptr &tablews,
                            map<string, double> &parammap) {
     parammap.clear();
 
@@ -342,7 +341,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Parse a TableWorkspace's 2nd bank to a map
    */
-  void parseTableWorkspace2(TableWorkspace_sptr tablews,
+  void parseTableWorkspace2(const TableWorkspace_sptr &tablews,
                             map<string, double> &parammap) {
     parammap.clear();
 
@@ -361,7 +360,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate a 1 bank .prm file
    */
-  void generate1BankPrmFile(string filename) {
+  void generate1BankPrmFile(const string &filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
 
@@ -403,7 +402,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate a 2 bank .irf file
    */
-  void generate2BankPrmFile(string filename) {
+  void generate2BankPrmFile(const string &filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
 
@@ -457,7 +456,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Generate a 1 bank .prm file
    */
-  void generateBadHistogramTypePrmFile(string filename) {
+  void generateBadHistogramTypePrmFile(const string &filename) {
     ofstream ofile;
     ofile.open(filename.c_str());
 
@@ -498,7 +497,7 @@ public:
   /** Create a workspace group with specified number of workspaces.
    */
   void createWorkspaceGroup(size_t numberOfWorkspaces,
-                            std::string workspaceName) {
+                            const std::string &workspaceName) {
     // create a workspace with some sample data
     WorkspaceGroup_sptr gws(new API::WorkspaceGroup);
 
@@ -527,5 +526,3 @@ public:
 private:
   std::string wsName; // For workspace property
 };
-
-#endif /* MANTID_DATAHANDLING_LOADGSASINSTRUMENTFILETEST_H_ */

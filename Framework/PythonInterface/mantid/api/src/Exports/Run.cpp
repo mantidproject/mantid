@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -16,6 +16,7 @@
 #include <boost/python/list.hpp>
 #include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <utility>
 
 using Mantid::API::LogManager;
 using Mantid::API::Run;
@@ -103,7 +104,7 @@ void addOrReplaceProperty(Run &self, const std::string &name,
  * @param key The key
  * @param default_ The default to return if it does not exist
  */
-bpl::object getWithDefault(bpl::object self, bpl::object key,
+bpl::object getWithDefault(bpl::object self, const bpl::object &key,
                            bpl::object default_) {
   bpl::object exists(self.attr("__contains__"));
   if (extract<bool>(exists(key))()) {
@@ -119,8 +120,8 @@ bpl::object getWithDefault(bpl::object self, bpl::object key,
  * @param self The bpl::object called on
  * @param key The key
  */
-bpl::object get(bpl::object self, bpl::object key) {
-  return getWithDefault(self, key, bpl::object());
+bpl::object get(bpl::object self, const bpl::object &key) {
+  return getWithDefault(std::move(self), std::move(key), bpl::object());
 }
 
 /**

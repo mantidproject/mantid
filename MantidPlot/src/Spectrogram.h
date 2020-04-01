@@ -26,8 +26,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef SPECTROGRAM_H
-#define SPECTROGRAM_H
+#pragma once
 
 #include "Matrix.h"
 #include "PlotCurve.h"
@@ -363,5 +362,3 @@ private:
   //! Min and max values in the source data matrix
   double min_z, max_z;
 };
-
-#endif

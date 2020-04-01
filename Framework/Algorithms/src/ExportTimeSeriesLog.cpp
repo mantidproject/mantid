@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ExportTimeSeriesLog.h"
 #include "MantidAPI/Axis.h"
@@ -131,7 +131,7 @@ void ExportTimeSeriesLog::exec() {
  * @param cal_first_deriv :: flag to calcualte the first derivative
  */
 void ExportTimeSeriesLog::exportLog(const std::string &logname,
-                                    const std::string timeunit,
+                                    const std::string &timeunit,
                                     const double &starttime,
                                     const double &stoptime,
                                     const bool exportepoch, bool outputeventws,

@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
 from qtpy import QtCore, QtWidgets
 
 from .tabs.calibration.model import CalibrationModel
@@ -29,14 +28,14 @@ Ui_main_window, _ = load_ui(__file__, "main_window.ui")
 
 class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
     """
-    The engineering diffraction interface v2.0
+    The engineering diffraction interface
     """
     def __init__(self, parent=None):
         super(EngineeringDiffractionGui, self).__init__(parent)
 
         # Main Window
         self.setupUi(self)
-        self.doc = "Engineering Diffraction 2"
+        self.doc = "Engineering Diffraction"
         self.tabs = self.tab_main
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.calibration_presenter = None
@@ -56,6 +55,16 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
         # Setup notifiers
         self.setup_calibration_notifier()
+
+        # Usage Reporting
+        try:
+            import mantid
+
+            # register startup
+            mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface,
+                                                     "Engineering Diffraction", False)
+        except ImportError:
+            pass
 
     def setup_settings(self):
         model = SettingsModel()

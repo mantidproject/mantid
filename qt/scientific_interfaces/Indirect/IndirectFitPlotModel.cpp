@@ -1,10 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotModel.h"
+
+#include <utility>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -25,9 +27,10 @@ IFunction_sptr firstFunctionWithParameter(IFunction_sptr function,
                                           const std::string &category,
                                           const std::string &parameterName);
 
-IFunction_sptr firstFunctionWithParameter(CompositeFunction_sptr composite,
-                                          const std::string &category,
-                                          const std::string &parameterName) {
+IFunction_sptr
+firstFunctionWithParameter(const CompositeFunction_sptr &composite,
+                           const std::string &category,
+                           const std::string &parameterName) {
   for (auto i = 0u; i < composite->nFunctions(); ++i) {
     const auto value = firstFunctionWithParameter(composite->getFunction(i),
                                                   category, parameterName);
@@ -50,7 +53,7 @@ IFunction_sptr firstFunctionWithParameter(IFunction_sptr function,
   return nullptr;
 }
 
-boost::optional<double> firstParameterValue(IFunction_sptr function,
+boost::optional<double> firstParameterValue(const IFunction_sptr &function,
                                             const std::string &category,
                                             const std::string &parameterName) {
   if (!function)
@@ -63,22 +66,24 @@ boost::optional<double> firstParameterValue(IFunction_sptr function,
   return boost::none;
 }
 
-boost::optional<double> findFirstPeakCentre(IFunction_sptr function) {
-  return firstParameterValue(function, "Peak", "PeakCentre");
+boost::optional<double> findFirstPeakCentre(const IFunction_sptr &function) {
+  return firstParameterValue(std::move(function), "Peak", "PeakCentre");
 }
 
-boost::optional<double> findFirstFWHM(IFunction_sptr function) {
-  return firstParameterValue(function, "Peak", "FWHM");
+boost::optional<double> findFirstFWHM(const IFunction_sptr &function) {
+  return firstParameterValue(std::move(function), "Peak", "FWHM");
 }
 
-boost::optional<double> findFirstBackgroundLevel(IFunction_sptr function) {
-  return firstParameterValue(function, "Background", "A0");
+boost::optional<double>
+findFirstBackgroundLevel(const IFunction_sptr &function) {
+  return firstParameterValue(std::move(function), "Background", "A0");
 }
 
-void setFunctionParameters(IFunction_sptr function, const std::string &category,
+void setFunctionParameters(const IFunction_sptr &function,
+                           const std::string &category,
                            const std::string &parameterName, double value);
 
-void setFunctionParameters(CompositeFunction_sptr composite,
+void setFunctionParameters(const CompositeFunction_sptr &composite,
                            const std::string &category,
                            const std::string &parameterName, double value) {
   for (auto i = 0u; i < composite->nFunctions(); ++i)
@@ -86,7 +91,8 @@ void setFunctionParameters(CompositeFunction_sptr composite,
                           value);
 }
 
-void setFunctionParameters(IFunction_sptr function, const std::string &category,
+void setFunctionParameters(const IFunction_sptr &function,
+                           const std::string &category,
                            const std::string &parameterName, double value) {
   if (function->category() == category && function->hasParameter(parameterName))
     function->setParameter(parameterName, value);
@@ -96,7 +102,7 @@ void setFunctionParameters(IFunction_sptr function, const std::string &category,
     setFunctionParameters(composite, category, parameterName, value);
 }
 
-void setFunctionParameters(MultiDomainFunction_sptr function,
+void setFunctionParameters(const MultiDomainFunction_sptr &function,
                            const std::string &category,
                            const std::string &parameterName, double value) {
   for (size_t i = 0u; i < function->nFunctions(); ++i)
@@ -105,11 +111,11 @@ void setFunctionParameters(MultiDomainFunction_sptr function,
 }
 
 void setFirstBackground(IFunction_sptr function, double value) {
-  firstFunctionWithParameter(function, "Background", "A0")
+  firstFunctionWithParameter(std::move(function), "Background", "A0")
       ->setParameter("A0", value);
 }
 
-MatrixWorkspace_sptr castToMatrixWorkspace(Workspace_sptr workspace) {
+MatrixWorkspace_sptr castToMatrixWorkspace(const Workspace_sptr &workspace) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
 
@@ -297,9 +303,9 @@ MatrixWorkspace_sptr IndirectFitPlotModel::getGuessWorkspace() const {
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::appendGuessToInput(
-    MatrixWorkspace_sptr guessWorkspace) const {
+    const MatrixWorkspace_sptr &guessWorkspace) const {
   const auto range = getGuessRange();
-  return createInputAndGuessWorkspace(getWorkspace(), guessWorkspace,
+  return createInputAndGuessWorkspace(getWorkspace(), std::move(guessWorkspace),
                                       m_activeSpectrum.value, range.first,
                                       range.second);
 }
@@ -311,8 +317,9 @@ std::pair<double, double> IndirectFitPlotModel::getGuessRange() const {
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
-    MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr guessWorkspace,
-    int spectrum, double startX, double endX) const {
+    const MatrixWorkspace_sptr &inputWS,
+    const MatrixWorkspace_sptr &guessWorkspace, int spectrum, double startX,
+    double endX) const {
   guessWorkspace->setInstrument(inputWS->getInstrument());
   guessWorkspace->replaceAxis(
       0,
@@ -331,10 +338,9 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
   return inputAndGuess;
 }
 
-MatrixWorkspace_sptr
-IndirectFitPlotModel::createGuessWorkspace(MatrixWorkspace_sptr inputWorkspace,
-                                           IFunction_const_sptr func,
-                                           double startX, double endX) const {
+MatrixWorkspace_sptr IndirectFitPlotModel::createGuessWorkspace(
+    const MatrixWorkspace_sptr &inputWorkspace,
+    const IFunction_const_sptr &func, double startX, double endX) const {
   IAlgorithm_sptr createWsAlg =
       AlgorithmManager::Instance().create("EvaluateFunction");
   createWsAlg->initialize();
@@ -354,7 +360,7 @@ IndirectFitPlotModel::createGuessWorkspace(MatrixWorkspace_sptr inputWorkspace,
 }
 
 std::vector<double>
-IndirectFitPlotModel::computeOutput(IFunction_const_sptr func,
+IndirectFitPlotModel::computeOutput(const IFunction_const_sptr &func,
                                     const std::vector<double> &dataX) const {
   if (dataX.empty())
     return std::vector<double>();
@@ -385,7 +391,7 @@ IAlgorithm_sptr IndirectFitPlotModel::createWorkspaceAlgorithm(
 }
 
 MatrixWorkspace_sptr
-IndirectFitPlotModel::extractSpectra(MatrixWorkspace_sptr inputWS,
+IndirectFitPlotModel::extractSpectra(const MatrixWorkspace_sptr &inputWS,
                                      int startIndex, int endIndex,
                                      double startX, double endX) const {
   auto extractSpectraAlg =
@@ -403,9 +409,9 @@ IndirectFitPlotModel::extractSpectra(MatrixWorkspace_sptr inputWS,
   return extractSpectraAlg->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-IndirectFitPlotModel::appendSpectra(MatrixWorkspace_sptr inputWS,
-                                    MatrixWorkspace_sptr spectraWS) const {
+MatrixWorkspace_sptr IndirectFitPlotModel::appendSpectra(
+    const MatrixWorkspace_sptr &inputWS,
+    const MatrixWorkspace_sptr &spectraWS) const {
   auto appendSpectraAlg = AlgorithmManager::Instance().create("AppendSpectra");
   appendSpectraAlg->initialize();
   appendSpectraAlg->setChild(true);
@@ -418,8 +424,8 @@ IndirectFitPlotModel::appendSpectra(MatrixWorkspace_sptr inputWS,
 }
 
 MatrixWorkspace_sptr
-IndirectFitPlotModel::cropWorkspace(MatrixWorkspace_sptr inputWS, double startX,
-                                    double endX, int startIndex,
+IndirectFitPlotModel::cropWorkspace(const MatrixWorkspace_sptr &inputWS,
+                                    double startX, double endX, int startIndex,
                                     int endIndex) const {
   const auto cropAlg = AlgorithmManager::Instance().create("CropWorkspace");
   cropAlg->initialize();

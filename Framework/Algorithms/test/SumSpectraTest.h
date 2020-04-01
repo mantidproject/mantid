@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SUMSPECTRATEST_H_
-#define SUMSPECTRATEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -278,8 +277,8 @@ public:
                      const std::runtime_error &);
   }
 
-  void dotestExecEvent(std::string inName, std::string outName,
-                       std::string indices_list) {
+  void dotestExecEvent(const std::string &inName, const std::string &outName,
+                       const std::string &indices_list) {
     int numPixels = 100;
     int numBins = 20;
     int numEvents = 20;
@@ -569,7 +568,6 @@ public:
     testSig = std::sqrt(testSig);
     // Set the properties
     alg2.setProperty("InputWorkspace", tws);
-    const std::string outputSpace2 = "SumSpectraOut2";
     alg2.setPropertyValue("OutputWorkspace", outName);
     alg2.setProperty("IncludeMonitors", false);
     alg2.setProperty("WeightedSum", true);
@@ -739,5 +737,3 @@ private:
   MatrixWorkspace_sptr input;
   EventWorkspace_sptr inputEvent;
 };
-
-#endif /*SUMSPECTRATEST_H_*/

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MONTECARLOABSORPTIONTEST_H_
-#define MONTECARLOABSORPTIONTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileFinder.h"
@@ -41,7 +40,7 @@ struct TestWorkspaceDescriptor {
   double beamHeight;
 };
 
-void addSample(Mantid::API::MatrixWorkspace_sptr ws,
+void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
                const Environment environment, double beamWidth = 0.,
                double beamHeight = 0.) {
   using namespace Mantid::API;
@@ -88,7 +87,6 @@ void addSample(Mantid::API::MatrixWorkspace_sptr ws,
     ws->mutableSample().setShape(sampleShape);
 
     if (environment == Environment::SamplePlusContainer) {
-      const std::string id("container");
       constexpr double containerWallThickness{0.002};
       constexpr double containerInnerRadius{1.2 * sampleHeight};
       constexpr double containerOuterRadius{containerInnerRadius +
@@ -404,7 +402,7 @@ private:
   }
 
   Mantid::API::MatrixWorkspace_const_sptr
-  getOutputWorkspace(Mantid::API::IAlgorithm_sptr alg) {
+  getOutputWorkspace(const Mantid::API::IAlgorithm_sptr &alg) {
     using Mantid::API::MatrixWorkspace_sptr;
     MatrixWorkspace_sptr output = alg->getProperty("OutputWorkspace");
     TS_ASSERT(output);
@@ -413,8 +411,9 @@ private:
     return output;
   }
 
-  void verifyDimensions(TestWorkspaceDescriptor wsProps,
-                        Mantid::API::MatrixWorkspace_const_sptr outputWS) {
+  void
+  verifyDimensions(TestWorkspaceDescriptor wsProps,
+                   const Mantid::API::MatrixWorkspace_const_sptr &outputWS) {
     TS_ASSERT_EQUALS(wsProps.nspectra, outputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(wsProps.nbins, outputWS->blocksize());
   }
@@ -490,5 +489,3 @@ private:
   Mantid::API::Workspace_sptr inputIndirect;
   Mantid::API::Workspace_sptr inputElasticMesh;
 };
-
-#endif

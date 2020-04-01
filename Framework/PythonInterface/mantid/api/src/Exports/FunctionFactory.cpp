@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -13,6 +13,7 @@
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmAdapter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/PythonObjectInstantiator.h"
+#include "MantidPythonInterface/core/UninstallTrace.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -29,6 +30,7 @@ using Mantid::API::IBackgroundFunction;
 using Mantid::API::IFunction;
 using Mantid::API::IPeakFunction;
 using Mantid::PythonInterface::PythonObjectInstantiator;
+using Mantid::PythonInterface::UninstallTrace;
 
 using namespace boost::python;
 
@@ -172,11 +174,10 @@ std::recursive_mutex FUNCTION_REGISTER_MUTEX;
  * @param classObject A Python class derived from IFunction
  */
 void subscribe(FunctionFactoryImpl &self, PyObject *classObject) {
+  UninstallTrace uninstallTrace;
   std::lock_guard<std::recursive_mutex> lock(FUNCTION_REGISTER_MUTEX);
   static auto *baseClass = const_cast<PyTypeObject *>(
       converter::registered<IFunction>::converters.to_python_target_type());
-  // object mantidapi(handle<>(PyImport_ImportModule("mantid.api")));
-  // object ifunction = mantidapi.attr("IFunction");
 
   // obj should be a class deriving from IFunction
   // PyObject_IsSubclass can set the error handler if classObject

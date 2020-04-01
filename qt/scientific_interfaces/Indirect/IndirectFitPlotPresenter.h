@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITPLOTPRESENTER_H_
+#pragma once
 
 #include "DllConfig.h"
 
@@ -56,6 +55,8 @@ public slots:
   void updateGuessAvailability();
   void enablePlotGuessInSeparateWindow();
   void disablePlotGuessInSeparateWindow();
+  void disableSpectrumPlotSelection();
+  void handlePlotSpectrumChanged(WorkspaceIndex spectrum);
 
 signals:
   void selectedFitDataChanged(TableDatasetIndex /*_t1*/);
@@ -74,7 +75,6 @@ private slots:
   void setModelHWHM(double minimum, double maximum);
   void setModelBackground(double background);
   void setActiveIndex(TableDatasetIndex index);
-  void setActiveSpectrum(WorkspaceIndex spectrum);
   void setHWHMMaximum(double minimum);
   void setHWHMMinimum(double maximum);
   void plotGuess(bool doPlotGuess);
@@ -82,6 +82,8 @@ private slots:
   void plotCurrentPreview();
   void emitFitSingleSpectrum();
   void emitFWHMChanged(double minimum, double maximum);
+  void setActiveSpectrum(WorkspaceIndex spectrum);
+  void handleSelectedFitDataChanged(TableDatasetIndex index);
 
 private:
   void disableAllDataSelection();
@@ -89,7 +91,7 @@ private:
   void plotInput(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotInput(Mantid::API::MatrixWorkspace_sptr workspace,
                  WorkspaceIndex spectrum);
-  void plotFit(Mantid::API::MatrixWorkspace_sptr workspace);
+  void plotFit(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void plotFit(Mantid::API::MatrixWorkspace_sptr workspace,
                WorkspaceIndex spectrum);
   void plotDifference(Mantid::API::MatrixWorkspace_sptr workspace,
@@ -98,7 +100,8 @@ private:
   void clearFit();
   void clearDifference();
   void plotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
-  void plotGuessInSeparateWindow(Mantid::API::MatrixWorkspace_sptr workspace);
+  void
+  plotGuessInSeparateWindow(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void plotLines();
   void updatePlotRange(const std::pair<double, double> &range);
   void clearGuess();
@@ -120,5 +123,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

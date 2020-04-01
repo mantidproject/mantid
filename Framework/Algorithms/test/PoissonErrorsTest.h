@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef POISSONERRORSTEST_H_
-#define POISSONERRORSTEST_H_
+#pragma once
 
 #include <cmath>
+#include <utility>
+
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -239,15 +240,18 @@ public:
   }
 
 private:
-  void checkData(MatrixWorkspace_sptr work_in1, MatrixWorkspace_sptr work_in2,
-                 MatrixWorkspace_sptr work_out1) {
+  void checkData(const MatrixWorkspace_sptr &work_in1,
+                 const MatrixWorkspace_sptr &work_in2,
+                 const MatrixWorkspace_sptr &work_out1) {
     // default to a horizontal loop orientation
-    checkData(work_in1, work_in2, work_out1, 0);
+    checkData(std::move(work_in1), std::move(work_in2), std::move(work_out1),
+              0);
   }
 
   // loopOrientation 0=Horizontal, 1=Vertical
-  void checkData(MatrixWorkspace_sptr work_in1, MatrixWorkspace_sptr work_in2,
-                 MatrixWorkspace_sptr work_out1, int loopOrientation) {
+  void checkData(const MatrixWorkspace_sptr &work_in1,
+                 const MatrixWorkspace_sptr &work_in2,
+                 const MatrixWorkspace_sptr &work_out1, int loopOrientation) {
     size_t ws2LoopCount = 0;
     if (work_in2->size() > 0) {
       ws2LoopCount = work_in1->size() / work_in2->size();
@@ -268,9 +272,9 @@ private:
     }
   }
 
-  void checkDataItem(MatrixWorkspace_sptr work_in1,
-                     MatrixWorkspace_sptr work_in2,
-                     MatrixWorkspace_sptr work_out1, size_t i,
+  void checkDataItem(const MatrixWorkspace_sptr &work_in1,
+                     const MatrixWorkspace_sptr &work_in2,
+                     const MatrixWorkspace_sptr &work_out1, size_t i,
                      size_t ws2Index) {
     // printf("I=%d\tws2Index=%d\n",i,ws2Index);
     double sig1 =
@@ -302,5 +306,3 @@ private:
   std::string inputProp2;
   std::string outputProp;
 };
-
-#endif /*POISSONERRORSTEST_H_*/

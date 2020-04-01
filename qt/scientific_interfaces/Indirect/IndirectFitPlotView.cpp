@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotView.h"
 
@@ -92,11 +92,13 @@ void IndirectFitPlotView::createSplitter() {
 
 PreviewPlot *IndirectFitPlotView::createTopPlot() {
   m_topPlot = std::make_unique<PreviewPlot>(m_splitter.get());
+  m_topPlot->disableContextMenu();
   return createPlot(m_topPlot.get(), QSize(0, 125), 0, 10);
 }
 
 PreviewPlot *IndirectFitPlotView::createBottomPlot() {
   m_bottomPlot = std::make_unique<PreviewPlot>(m_splitter.get());
+  m_bottomPlot->disableContextMenu();
   return createPlot(m_bottomPlot.get(), QSize(0, 75), 0, 6);
 }
 
@@ -207,7 +209,16 @@ void IndirectFitPlotView::setMaximumSpectrum(int maximum) {
 
 void IndirectFitPlotView::setPlotSpectrum(WorkspaceIndex spectrum) {
   MantidQt::API::SignalBlocker blocker(m_plotForm->spPlotSpectrum);
+  MantidQt::API::SignalBlocker comboBlocker(m_plotForm->cbPlotSpectrum);
   m_plotForm->spPlotSpectrum->setValue(spectrum.value);
+  auto index =
+      m_plotForm->cbPlotSpectrum->findText(QString::number(spectrum.value));
+  m_plotForm->cbPlotSpectrum->setCurrentIndex(index);
+}
+
+void IndirectFitPlotView::disableSpectrumPlotSelection() {
+  m_plotForm->spPlotSpectrum->setEnabled(false);
+  m_plotForm->cbPlotSpectrum->setEnabled(false);
 }
 
 void IndirectFitPlotView::setBackgroundLevel(double value) {

@@ -1,24 +1,27 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
-from __future__ import absolute_import
-
-from collections import namedtuple
+# std imports
+import math
+import numpy as np
+import collections
 from contextlib import contextmanager
-
-from matplotlib import cm, __version__ as mpl_version_str
-from matplotlib.container import ErrorbarContainer
-from matplotlib.legend import Legend
-
 from enum import Enum
 
+# 3rd party imports
+from matplotlib.legend import Legend
+from matplotlib import cm, __version__ as mpl_version_str
+from matplotlib.container import ErrorbarContainer
 
+# -----------------------------------------------------------------------------
+# Constants
+# -----------------------------------------------------------------------------
 # matplotlib version information
-MPLVersionInfo = namedtuple("MPLVersionInfo", ("major", "minor", "patch"))
+MPLVersionInfo = collections.namedtuple("MPLVersionInfo", ("major", "minor", "patch"))
 MATPLOTLIB_VERSION_INFO = MPLVersionInfo._make(map(int, mpl_version_str.split(".")))
 
 
@@ -137,6 +140,16 @@ def legend_set_draggable(legend, state, use_blit=False, update='loc'):
     See matplotlib documentation for argument descriptions
     """
     getattr(legend, SET_DRAGGABLE_METHOD)(state, use_blit, update)
+
+
+def get_current_cmap(object):
+    """Utility function to support varying get_cmap api across
+    the versions of matplotlib we support.
+    """
+    if hasattr(object, "cmap"):
+        return object.cmap
+    else:
+        return object.get_cmap()
 
 
 def mpl_version_info():

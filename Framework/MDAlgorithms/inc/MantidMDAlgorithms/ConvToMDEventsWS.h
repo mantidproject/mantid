@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_CONV_TOMD_EVENTSWS_H
-#define MANTID_MDALGORITHMS_CONV_TOMD_EVENTSWS_H
+#pragma once
 //
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -61,5 +60,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif

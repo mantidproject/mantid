@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------------------
 // Includes
@@ -585,7 +585,7 @@ void LoadRKH::skipLines(std::istream &strm, int nlines) {
  *  @param[out] toCenter an array that is one shorter than oldBoundaries, the
  * values of the means of pairs of values from the input
  */
-void LoadRKH::binCenter(const MantidVec oldBoundaries,
+void LoadRKH::binCenter(const MantidVec &oldBoundaries,
                         MantidVec &toCenter) const {
   VectorHelper::convertToBinCentre(oldBoundaries, toCenter);
 }

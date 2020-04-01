@@ -80,7 +80,6 @@ Usage
     print("TZERO: %.0f" %round(tzero,-1))
     tbl = mtd[out_tbl_name]
     print("The output table has %d row(s)" % tbl.rowCount())
-    print("Parameters from the table, DIFA: %.1f, DIFC: %.0f, TZERO: %.0f" % (tbl.cell(0,0), round(tbl.cell(0,1),-1), round(tbl.cell(0,2),-1)))
     print("Number of peaks fitted: {0}".format(peaks_tbl.rowCount()))
     print("First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0]))
     print("First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0]))
@@ -94,12 +93,12 @@ Output:
    DeleteWorkspace(out_tbl_name)
 
 .. testoutput:: ExTwoPeaks
+   :options: +ELLIPSIS
 
-   DIFA: 815.7
-   DIFC: 15980
-   TZERO: 1700
+   DIFA: ...
+   DIFC: ...
+   TZERO: ...
    The output table has 1 row(s)
-   Parameters from the table, DIFA: 815.7, DIFC: 15980, TZERO: 1700
    Number of peaks fitted: 3
    First peak expected (dSpacing): 0.8
    First fitted peak center (ToF): 15006.0

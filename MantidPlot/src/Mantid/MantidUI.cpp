@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidUI.h"
 #include "AlgorithmDockWidget.h"
@@ -1716,7 +1716,7 @@ void MantidUI::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
  * This creates an algorithm dialog (the default property entry thingie).
  */
 MantidQt::API::AlgorithmDialog *
-MantidUI::createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg) {
+MantidUI::createAlgorithmDialog(const Mantid::API::IAlgorithm_sptr &alg) {
   QHash<QString, QString> presets;
   QStringList enabled;
 
@@ -1759,7 +1759,7 @@ MantidUI::createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg) {
  * @param algorithm :: A pointer to the algorithm instance
  */
 QString MantidUI::findInputWorkspaceProperty(
-    Mantid::API::IAlgorithm_sptr algorithm) const {
+    const Mantid::API::IAlgorithm_sptr &algorithm) const {
   // Iterate through the properties and find the first input one
   std::vector<Mantid::Kernel::Property *> props = algorithm->getProperties();
   std::vector<Mantid::Kernel::Property *>::const_iterator pend = props.end();
@@ -2363,13 +2363,11 @@ MantidMatrix *MantidUI::getMantidMatrix(const QString &wsName) {
   return m;
 }
 
-bool MantidUI::createScriptInputDialog(const QString &alg_name,
+bool MantidUI::createScriptInputDialog(const IAlgorithm_sptr &alg,
                                        const QString &preset_values,
                                        const QString &optional_msg,
                                        const QStringList &enabled,
                                        const QStringList &disabled) {
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().newestInstanceOf(alg_name.toStdString());
   if (!alg) {
     return false;
   }
@@ -2976,7 +2974,7 @@ MultiLayer *MantidUI::createGraphFromTable(Table *t, int type) {
 */
 void MantidUI::setUpBinGraph(
     MultiLayer *ml, const QString &Name,
-    Mantid::API::MatrixWorkspace_const_sptr workspace) {
+    const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
   Graph *g = ml->activeGraph();
   g->setTitle(tr("Workspace ") + Name);
   QString xtitle;
@@ -3744,7 +3742,8 @@ MultiLayer *MantidUI::plotSubplots(const QStringList &wsNames,
 }
 
 Table *MantidUI::createTableFromBins(
-    const QString &wsName, Mantid::API::MatrixWorkspace_const_sptr workspace,
+    const QString &wsName,
+    const Mantid::API::MatrixWorkspace_const_sptr &workspace,
     const QList<int> &bins, bool errs, int fromRow, int toRow) {
   if (bins.empty())
     return nullptr;

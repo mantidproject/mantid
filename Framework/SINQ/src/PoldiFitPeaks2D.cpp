@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiFitPeaks2D.h"
 
@@ -381,9 +381,8 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getCountPeakCollection(
 }
 
 /// Creates a PoldiPeak from the given profile function/hkl pair.
-PoldiPeak_sptr
-PoldiFitPeaks2D::getPeakFromPeakFunction(IPeakFunction_sptr profileFunction,
-                                         const V3D &hkl) {
+PoldiPeak_sptr PoldiFitPeaks2D::getPeakFromPeakFunction(
+    const IPeakFunction_sptr &profileFunction, const V3D &hkl) {
 
   // Use EstimatePeakErrors to calculate errors of FWHM and so on
   IAlgorithm_sptr errorAlg = createChildAlgorithm("EstimatePeakErrors");
@@ -466,7 +465,7 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
  * @return :: A Poldi2DFunction with peak profile functions.
  */
 Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
-    std::string profileFunctionName,
+    const std::string &profileFunctionName,
     const PoldiPeakCollection_sptr &peakCollection) const {
   auto mdFunction = boost::make_shared<Poldi2DFunction>();
 
@@ -519,7 +518,7 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
  * @return :: A Poldi2DFunction with a PawleyFunction.
  */
 Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
-    std::string profileFunctionName,
+    const std::string &profileFunctionName,
     const PoldiPeakCollection_sptr &peakCollection) {
   auto mdFunction = boost::make_shared<Poldi2DFunction>();
 
@@ -1048,7 +1047,7 @@ PoldiFitPeaks2D::getFunction(const IAlgorithm_sptr &fitAlgorithm) const {
  * @param poldi2DFunction :: Poldi2DFunction to which the background is added.
  */
 void PoldiFitPeaks2D::addBackgroundTerms(
-    Poldi2DFunction_sptr poldi2DFunction) const {
+    const Poldi2DFunction_sptr &poldi2DFunction) const {
   bool addConstantBackground = getProperty("FitConstantBackground");
   if (addConstantBackground) {
     IFunction_sptr constantBackground =

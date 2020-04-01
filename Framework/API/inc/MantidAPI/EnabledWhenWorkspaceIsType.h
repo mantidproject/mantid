@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ENABLEDWHENWORKSPACEISTYPE_H_
-#define MANTID_API_ENABLEDWHENWORKSPACEISTYPE_H_
+#pragma once
+
+#include <utility>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -36,7 +37,7 @@ public:
    */
   EnabledWhenWorkspaceIsType(std::string otherPropName,
                              bool enabledSetting = true)
-      : IPropertySettings(), m_otherPropName(otherPropName),
+      : IPropertySettings(), m_otherPropName(std::move(otherPropName)),
         m_enabledSetting(enabledSetting) {}
 
   //--------------------------------------------------------------------------------------------
@@ -105,5 +106,3 @@ protected:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_ENABLEDWHENWORKSPACEISTYPE_H_ */

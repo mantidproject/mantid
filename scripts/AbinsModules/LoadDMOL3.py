@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import AbinsModules
 import io
-import six
 import numpy as np
 from math import sqrt
 from mantid.kernel import Atom
@@ -129,8 +127,8 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
         zdisp = []
 
         # parse block with frequencies and atomic displacements
-        while not (self._parser.block_end(file_obj=file_obj, msg=end_msgs) or
-                   self._parser.file_end(file_obj=file_obj)):
+        while not (self._parser.block_end(file_obj=file_obj, msg=end_msgs)
+                   or self._parser.file_end(file_obj=file_obj)):
 
             self._read_freq_block(file_obj=file_obj, freq=freq)
             self._read_coord_block(file_obj=file_obj, xdisp=xdisp, ydisp=ydisp, zdisp=zdisp)
@@ -255,9 +253,8 @@ class LoadDMOL3(AbinsModules.GeneralAbInitioProgram):
 
         end_msg = "Molecular Mass:"
         key = "Atom"
-        if not six.PY2:
-            end_msg = bytes(end_msg, "utf8")
-            key = bytes(key, "utf8")
+        end_msg = bytes(end_msg, "utf8")
+        key = bytes(key, "utf8")
 
         while not self._parser.file_end(file_obj=obj_file):
             line = obj_file.readline()

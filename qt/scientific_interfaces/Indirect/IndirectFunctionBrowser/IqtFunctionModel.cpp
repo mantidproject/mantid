@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtFunctionModel.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -133,7 +133,7 @@ void IqtFunctionModel::addFunction(const QString &prefix,
     setBackground(QString::fromStdString(name));
     newPrefix = *getBackgroundPrefix();
   } else {
-    throw std::runtime_error("Cannot add funtion " + name);
+    throw std::runtime_error("Cannot add function " + name);
   }
   auto newFun = getFunctionWithPrefix(newPrefix, getSingleFunction(0));
   copyParametersAndErrors(*fun, *newFun);
@@ -565,7 +565,7 @@ void IqtFunctionModel::setCurrentValues(const QMap<ParamID, double> &values) {
 }
 
 void IqtFunctionModel::applyParameterFunction(
-    std::function<void(ParamID)> paramFun) const {
+    const std::function<void(ParamID)> &paramFun) const {
   if (m_numberOfExponentials > 0) {
     paramFun(ParamID::EXP1_HEIGHT);
     paramFun(ParamID::EXP1_LIFETIME);

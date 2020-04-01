@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/EventWorkspaceHelpers.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -20,8 +20,8 @@ namespace DataObjects {
  * @param inputMatrixW :: input event workspace
  * @return a MatrixWorkspace_sptr
  */
-MatrixWorkspace_sptr
-EventWorkspaceHelpers::convertEventTo2D(MatrixWorkspace_sptr inputMatrixW) {
+MatrixWorkspace_sptr EventWorkspaceHelpers::convertEventTo2D(
+    const MatrixWorkspace_sptr &inputMatrixW) {
   EventWorkspace_sptr inputW =
       boost::dynamic_pointer_cast<EventWorkspace>(inputMatrixW);
   if (!inputW)

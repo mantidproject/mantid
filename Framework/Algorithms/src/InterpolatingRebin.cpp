@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/InterpolatingRebin.h"
 #include "MantidAPI/Axis.h"
@@ -144,9 +144,9 @@ void InterpolatingRebin::exec() {
  * the histograms must corrospond with the number of x-values in XValues_new
  */
 void InterpolatingRebin::outputYandEValues(
-    API::MatrixWorkspace_const_sptr inputW,
+    const API::MatrixWorkspace_const_sptr &inputW,
     const HistogramData::BinEdges &XValues_new,
-    API::MatrixWorkspace_sptr outputW) {
+    const API::MatrixWorkspace_sptr &outputW) {
   g_log.debug()
       << "Preparing to calculate y-values using splines and estimate errors\n";
 

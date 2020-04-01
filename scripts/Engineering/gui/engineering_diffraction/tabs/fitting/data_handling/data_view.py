@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 from qtpy import QtWidgets, QtCore
 
 from mantidqt.utils.qt import load_ui
@@ -50,14 +49,25 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_load_button_enabled(self, enabled):
         self.button_load.setEnabled(enabled)
 
-    def add_table_row(self, run_no, bank):
+    def add_table_row(self, run_no, bank, checked):
         row_no = self.table_selection.rowCount()
         self.table_selection.insertRow(row_no)
-        self.table_selection.setItem(row_no, 0, QtWidgets.QTableWidgetItem(str(run_no)))
-        self.table_selection.setItem(row_no, 1, QtWidgets.QTableWidgetItem(str(bank)))
+
+        name_item = QtWidgets.QTableWidgetItem(str(run_no))
+        name_item.setFlags(name_item.flags() & ~QtCore.Qt.ItemIsEditable)
+        self.table_selection.setItem(row_no, 0, name_item)
+
+        bank_item = QtWidgets.QTableWidgetItem(str(bank))
+        bank_item.setFlags(name_item.flags() & ~QtCore.Qt.ItemIsEditable)
+        self.table_selection.setItem(row_no, 1, bank_item)
+
         check_box = QtWidgets.QTableWidgetItem()
-        check_box.setCheckState(QtCore.Qt.Unchecked)
+        check_box.setFlags(check_box.flags() & ~QtCore.Qt.ItemIsEditable)
         self.table_selection.setItem(row_no, 2, check_box)
+        if checked:
+            check_box.setCheckState(QtCore.Qt.Checked)
+        else:
+            check_box.setCheckState(QtCore.Qt.Unchecked)
 
     def remove_table_row(self, row_no):
         self.table_selection.removeRow(row_no)
@@ -86,6 +96,12 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
 
     def get_selected_rows(self):
         return set(index.row() for index in self.table_selection.selectedIndexes())
+
+    def get_table_item(self, row, col):
+        return self.table_selection.item(row, col)
+
+    def get_item_checked(self, row, col):
+        return self.get_table_item(row, col).checkState() == QtCore.Qt.Checked
 
     # =================
     # State Getters

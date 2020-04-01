@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_KAFKAHISTOSTREAMDECODERTEST_H_
-#define MANTID_LIVEDATA_KAFKAHISTOSTREAMDECODERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -95,8 +94,8 @@ public:
   }
 
 private:
-  std::unique_ptr<Mantid::LiveData::KafkaHistoStreamDecoder>
-  createTestDecoder(std::shared_ptr<Mantid::LiveData::IKafkaBroker> broker) {
+  std::unique_ptr<Mantid::LiveData::KafkaHistoStreamDecoder> createTestDecoder(
+      const std::shared_ptr<Mantid::LiveData::IKafkaBroker> &broker) {
     using namespace Mantid::LiveData;
     return std::make_unique<KafkaHistoStreamDecoder>(broker, "", "", "", "",
                                                      "");
@@ -185,5 +184,3 @@ private:
   std::condition_variable m_callbackCondition;
   uint8_t m_niterations = 0;
 };
-
-#endif /* MANTID_LIVEDATA_KAFKAHISTOSTREAMDECODERTEST_H_ */

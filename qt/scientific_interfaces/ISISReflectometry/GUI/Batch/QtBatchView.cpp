@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtBatchView.h"
 #include "GUI/Event/QtEventView.h"
@@ -14,6 +14,7 @@
 
 #include <QMessageBox>
 #include <QMetaType>
+#include <utility>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -105,17 +106,17 @@ void QtBatchView::onBatchComplete(bool error) {
 void QtBatchView::onBatchCancelled() { m_notifyee->notifyBatchCancelled(); }
 
 void QtBatchView::onAlgorithmStarted(API::IConfiguredAlgorithm_sptr algorithm) {
-  m_notifyee->notifyAlgorithmStarted(algorithm);
+  m_notifyee->notifyAlgorithmStarted(std::move(algorithm));
 }
 
 void QtBatchView::onAlgorithmComplete(
     API::IConfiguredAlgorithm_sptr algorithm) {
-  m_notifyee->notifyAlgorithmComplete(algorithm);
+  m_notifyee->notifyAlgorithmComplete(std::move(algorithm));
 }
 
 void QtBatchView::onAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm,
-                                   std::string message) {
-  m_notifyee->notifyAlgorithmError(algorithm, message);
+                                   const std::string &message) {
+  m_notifyee->notifyAlgorithmError(std::move(algorithm), message);
 }
 
 std::unique_ptr<QtRunsView> QtBatchView::createRunsTab() {
@@ -130,7 +131,7 @@ std::unique_ptr<QtEventView> QtBatchView::createEventTab() {
 
 IAlgorithm_sptr QtBatchView::createReductionAlg() {
   return Mantid::API::AlgorithmManager::Instance().create(
-      "ReflectometryReductionOneAuto");
+      "ReflectometryISISLoadAndProcess");
 }
 
 std::unique_ptr<QtSaveView> QtBatchView::createSaveTab() {

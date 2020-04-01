@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "JumpFitDataTablePresenter.h"
 
@@ -28,7 +28,7 @@ namespace IDA {
 
 JumpFitDataTablePresenter::JumpFitDataTablePresenter(JumpFitModel *model,
                                                      QTableWidget *dataTable)
-    : IndirectDataTablePresenterLegacy(model, dataTable, jumpFitHeaders()),
+    : IndirectDataTablePresenter(model, dataTable, jumpFitHeaders()),
       m_jumpFitModel(model) {
   auto header = dataTable->horizontalHeader();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -46,9 +46,10 @@ int JumpFitDataTablePresenter::endXColumn() const { return 4; }
 
 int JumpFitDataTablePresenter::excludeColumn() const { return 5; }
 
-void JumpFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
-                                              std::size_t spectrum, int row) {
-  IndirectDataTablePresenterLegacy::addTableEntry(dataIndex, spectrum, row);
+void JumpFitDataTablePresenter::addTableEntry(TableDatasetIndex dataIndex,
+                                              WorkspaceIndex spectrum,
+                                              TableRowIndex row) {
+  IndirectDataTablePresenter::addTableEntry(dataIndex, spectrum, row);
 
   const auto parameter =
       m_jumpFitModel->getFitParameterName(dataIndex, spectrum);
@@ -60,10 +61,10 @@ void JumpFitDataTablePresenter::addTableEntry(std::size_t dataIndex,
   setCell(std::move(cell), row, 1);
 }
 
-void JumpFitDataTablePresenter::updateTableEntry(std::size_t dataIndex,
-                                                 std::size_t spectrum,
-                                                 int row) {
-  IndirectDataTablePresenterLegacy::updateTableEntry(dataIndex, spectrum, row);
+void JumpFitDataTablePresenter::updateTableEntry(TableDatasetIndex dataIndex,
+                                                 WorkspaceIndex spectrum,
+                                                 TableRowIndex row) {
+  IndirectDataTablePresenter::updateTableEntry(dataIndex, spectrum, row);
 
   const auto parameter =
       m_jumpFitModel->getFitParameterName(dataIndex, spectrum);

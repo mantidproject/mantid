@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CHECKWORKSPACESMATCHTEST_H_
-#define CHECKWORKSPACESMATCHTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -1141,7 +1140,7 @@ private:
     TS_ASSERT_EQUALS(matcher.getPropertyValue("Result"), expectedResult);
   }
 
-  void cleanupGroup(const WorkspaceGroup_sptr group) {
+  void cleanupGroup(const WorkspaceGroup_sptr &group) {
     // group->deepRemoveAll();
     const std::string name = group->getName();
     Mantid::API::AnalysisDataService::Instance().deepRemoveGroup(name);
@@ -1151,5 +1150,3 @@ private:
   Mantid::Algorithms::CheckWorkspacesMatch checker;
   const Mantid::API::MatrixWorkspace_sptr ws1;
 };
-
-#endif /*CHECKWORKSPACESMATCHTEST_H_*/

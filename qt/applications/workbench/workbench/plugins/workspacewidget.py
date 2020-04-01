@@ -1,14 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
-#    This file is part of the mantid workbench.
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 from functools import partial
 from qtpy.QtWidgets import QApplication, QMessageBox, QVBoxLayout
 
@@ -93,8 +90,10 @@ class WorkspaceWidget(PluginWidget):
             if not compatible:
                 QMessageBox.warning(self, "", error_msg)
                 return
-
-        plot_from_names(names, errors, overplot)
+        try:
+            plot_from_names(names, errors, overplot)
+        except RuntimeError as re:
+            logger.error(str(re))
 
     def _do_plot_bin(self, names, errors, overplot):
         """
@@ -138,8 +137,8 @@ class WorkspaceWidget(PluginWidget):
             except Exception as exception:
                 logger.warning("Could not open sample logs for workspace '{}'."
                                "".format(ws.name()))
-                logger.debug("{}: {}".format(type(exception).__name__,
-                                             exception))
+                logger.warning("{}: {}".format(type(exception).__name__,
+                                               exception))
 
     def _do_slice_viewer(self, names):
         """
@@ -231,7 +230,7 @@ class WorkspaceWidget(PluginWidget):
             TableWorkspaceDisplay.supports(ws)
             self._do_show_data([name])
         except ValueError:
-            if ws.blocksize() == 1:
+            if hasattr(ws, 'blocksize') and ws.blocksize() == 1:
                 #this is just single bin data, it makes more sense to plot the bin
                 plot_kwargs = {"axis": MantidAxType.BIN}
                 plot([ws],errors=False, overplot=False, wksp_indices=[0], plot_kwargs=plot_kwargs)

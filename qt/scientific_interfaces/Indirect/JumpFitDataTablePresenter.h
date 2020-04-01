@@ -1,13 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_JUMPFITDATATABLEPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_JUMPFITDATATABLEPRESENTER_H_
+#pragma once
 
-#include "IndirectDataTablePresenterLegacy.h"
+#include "IndirectDataTablePresenter.h"
 #include "JumpFitModel.h"
 
 #include <QTableWidget>
@@ -22,17 +21,16 @@ namespace IDA {
 /**
   Presenter for a table of data containing Widths/EISF.
 */
-class DLLExport JumpFitDataTablePresenter
-    : public IndirectDataTablePresenterLegacy {
+class DLLExport JumpFitDataTablePresenter : public IndirectDataTablePresenter {
   Q_OBJECT
 public:
   JumpFitDataTablePresenter(JumpFitModel *model, QTableWidget *dataTable);
 
 protected:
-  void addTableEntry(std::size_t dataIndex, std::size_t spectrum,
-                     int row) override;
-  void updateTableEntry(std::size_t dataIndex, std::size_t spectrum,
-                        int row) override;
+  void addTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum,
+                     TableRowIndex row) override;
+  void updateTableEntry(TableDatasetIndex dataIndex, WorkspaceIndex spectrum,
+                        TableRowIndex row) override;
 
 private:
   int workspaceIndexColumn() const override;
@@ -46,5 +44,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACES_JUMPFITDATATABLEPRESENTER_H_ */

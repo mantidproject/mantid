@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_
-#define MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_
+#pragma once
 #include "Common/DllConfig.h"
 #include "ProcessingInstructions.h"
 #include "RangeInQ.h"
@@ -43,19 +42,11 @@ public:
     RUN_SPECTRA = 8
   };
 
-  // The property name associated with each column. Unfortunately in
-  // QtBatchView we are still using ReflectometryReductionOneAuto to get the
-  // tooltips rather than ReflectometryISISLoadAndProcess. If we change it we
-  // will break the Encoder and Decoder unit tests because C++ tests cannot use
-  // python algorithms. The code needs to be reorganised to avoid creating the
-  // algorithm, or the tests rewritten in python. This only affects tooltips
-  // for a couple of the properties so is not an urgent fix, so for now just
-  // make the properties here match RROA.
   static auto constexpr ColumnPropertyName =
       std::array<const char *, OPTIONS_TABLE_COLUMN_COUNT>{
           "ThetaIn",
-          "FirstTransmissionRun",  // FirstTransmissionRunList in RILAP
-          "SecondTransmissionRun", // SecondTransmissionRunList in RILAP
+          "FirstTransmissionRunList",
+          "SecondTransmissionRunList",
           "TransmissionProcessingInstructions",
           "MomentumTransferMin",
           "MomentumTransferMax",
@@ -97,4 +88,3 @@ perThetaDefaultsToArray(PerThetaDefaults const &perThetaDefaults);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_PERTHETADEFAULTS_H_

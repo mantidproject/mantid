@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * IntegratePeakTimeSlicesTest.h
@@ -11,8 +11,7 @@
  *      Author: ruth
  */
 
-#ifndef INTEGRATEPEAKTIMESLICESTEST_H_
-#define INTEGRATEPEAKTIMESLICESTEST_H_
+#pragma once
 
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -239,7 +238,7 @@ private:
   /**
    *   Calculates Q
    */
-  double calcQ(RectangularDetector_const_sptr bankP,
+  double calcQ(const RectangularDetector_const_sptr &bankP,
                const DetectorInfo &detectorInfo, int row, int col,
                double time) {
     boost::shared_ptr<Detector> detP = bankP->getAtXY(col, row);
@@ -287,4 +286,3 @@ private:
     return wsPtr;
   }
 };
-#endif /* INTEGRATEPEAKTIMESLICESTEST_H_ */

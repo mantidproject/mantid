@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/ExtractQENSMembers.h"
 
@@ -158,7 +158,7 @@ std::vector<double> ExtractQENSMembers::getQValues(
  * @return          The retrieved axis labels.
  */
 std::vector<std::string>
-ExtractQENSMembers::getAxisLabels(MatrixWorkspace_sptr workspace,
+ExtractQENSMembers::getAxisLabels(const MatrixWorkspace_sptr &workspace,
                                   size_t axisIndex) const {
   auto axis = workspace->getAxis(axisIndex);
   std::vector<std::string> labels;
@@ -201,7 +201,7 @@ std::vector<std::string> ExtractQENSMembers::renameConvolvedMembers(
  * @return          A workspace containing the extracted spectrum.
  */
 MatrixWorkspace_sptr
-ExtractQENSMembers::extractSpectrum(MatrixWorkspace_sptr inputWS,
+ExtractQENSMembers::extractSpectrum(const MatrixWorkspace_sptr &inputWS,
                                     size_t spectrum) {
   auto extractAlg = createChildAlgorithm("ExtractSpectra", -1.0, -1.0, false);
   extractAlg->setProperty("InputWorkspace", inputWS);
@@ -221,9 +221,9 @@ ExtractQENSMembers::extractSpectrum(MatrixWorkspace_sptr inputWS,
  * @param inputWS           The input workspace to append to.
  * @param spectraWorkspace  The workspace whose spectra to append.
  */
-MatrixWorkspace_sptr
-ExtractQENSMembers::appendSpectra(MatrixWorkspace_sptr inputWS,
-                                  MatrixWorkspace_sptr spectraWorkspace) {
+MatrixWorkspace_sptr ExtractQENSMembers::appendSpectra(
+    const MatrixWorkspace_sptr &inputWS,
+    const MatrixWorkspace_sptr &spectraWorkspace) {
   auto appendAlg = createChildAlgorithm("AppendSpectra", -1.0, -1.0, false);
   appendAlg->setProperty("InputWorkspace1", inputWS);
   appendAlg->setProperty("InputWorkspace2", spectraWorkspace);
@@ -256,7 +256,8 @@ WorkspaceGroup_sptr ExtractQENSMembers::groupWorkspaces(
  * @return          A vector of the created members workspaces.
  */
 std::vector<MatrixWorkspace_sptr> ExtractQENSMembers::createMembersWorkspaces(
-    MatrixWorkspace_sptr initialWS, const std::vector<std::string> &members) {
+    const MatrixWorkspace_sptr &initialWS,
+    const std::vector<std::string> &members) {
   std::vector<MatrixWorkspace_sptr> memberWorkspaces;
   memberWorkspaces.reserve(members.size());
   for (auto i = 0u; i < members.size(); ++i)
@@ -272,7 +273,7 @@ std::vector<MatrixWorkspace_sptr> ExtractQENSMembers::createMembersWorkspaces(
  * @param members   A vector containing the member workspaces.
  */
 void ExtractQENSMembers::appendToMembers(
-    MatrixWorkspace_sptr resultWS,
+    const MatrixWorkspace_sptr &resultWS,
     std::vector<Mantid::API::MatrixWorkspace_sptr> &members) {
   for (auto i = 0u; i < members.size(); ++i)
     members[i] = appendSpectra(members[i], extractSpectrum(resultWS, i));

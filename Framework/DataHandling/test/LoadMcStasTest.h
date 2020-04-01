@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef LOADMCSTASTEST_H_
-#define LOADMCSTASTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -166,7 +164,7 @@ public:
   }
 
 private:
-  double extractSumAndTest(MatrixWorkspace_sptr workspace,
+  double extractSumAndTest(const MatrixWorkspace_sptr &workspace,
                            const double &expectedSum) {
     TS_ASSERT_EQUALS(workspace->getNumberHistograms(), 8192);
     auto sum = 0.0;
@@ -177,8 +175,8 @@ private:
     return sum;
   }
 
-  boost::shared_ptr<WorkspaceGroup> load_test(std::string fileName,
-                                              std::string outputName) {
+  boost::shared_ptr<WorkspaceGroup> load_test(const std::string &fileName,
+                                              const std::string &outputName) {
 
     // specify name of file to load workspace from
     algToBeTested.setProperty("Filename", fileName);
@@ -225,5 +223,3 @@ public:
 private:
   LoadMcStas loadFile;
 };
-
-#endif /*LoadMcStasTEST_H_*/

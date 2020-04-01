@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef GRAPH_H
-#define GRAPH_H
+#pragma once
 
 #include <QEvent>
 #include <QList>
@@ -159,7 +158,7 @@ class Graph : public QWidget {
 
 public:
   Graph(int x = 0, int y = 0, int width = 500, int height = 400,
-        QWidget *parent = nullptr, Qt::WFlags f = nullptr);
+        QWidget *parent = nullptr, const Qt::WFlags &f = nullptr);
   ~Graph() override;
 
   enum Ticks { NoTicks = 0, Out = 1, InOut = 2, In = 3 };
@@ -266,7 +265,7 @@ public slots:
                          const QString &yColName, int style, int startRow = 0,
                          int endRow = -1);
   PlotCurve *
-  insertCurve(QString workspaceName, int index, bool err = false,
+  insertCurve(const QString &workspaceName, int index, bool err = false,
               GraphOptions::CurveType style = GraphOptions::Unspecified,
               bool distribution = false);
   PlotCurve *insertCurve(PlotCurve *c, int lineWidth = -1,
@@ -339,7 +338,7 @@ public slots:
   void setCurveStyle(int index, int s);
   void setCurveFullRange(int curveIndex);
   void setCurveLineColor(int curveIndex, int colorIndex);
-  void setCurveLineColor(int curveIndex, QColor qColor);
+  void setCurveLineColor(int curveIndex, const QColor &qColor);
   void setCurveLineStyle(int curveIndex, Qt::PenStyle style);
   void setCurveLineWidth(int curveIndex, double width);
   void setGrayScale();
@@ -418,7 +417,7 @@ public slots:
                 bool log10AfterBreak = false, int breakWidth = 4,
                 bool breakDecoration = true, double nth_power = 2.0);
   void setScale(QwtPlot::Axis axis, ScaleTransformation::Type scaleType);
-  void setScale(QwtPlot::Axis axis, QString logOrLin);
+  void setScale(QwtPlot::Axis axis, const QString &logOrLin);
   double axisStep(int axis) { return d_user_step[axis]; };
   //! Set the axis scale
   void setAxisScale(int axis, double start, double end, int scaleType = -1,
@@ -988,5 +987,3 @@ private:
 };
 
 Q_DECLARE_METATYPE(GraphOptions::CurveType)
-
-#endif // GRAPH_H

@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef EXPDECAYDIALOG_H
-#define EXPDECAYDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -45,7 +44,8 @@ class ExpDecayDialog : public QDialog {
   Q_OBJECT
 
 public:
-  ExpDecayDialog(int type, QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  ExpDecayDialog(int type, QWidget *parent = nullptr,
+                 const Qt::WFlags &fl = nullptr);
 
 public slots:
   void fit();
@@ -79,5 +79,3 @@ private:
   QLabel *thirdLabel, *dampingLabel;
   ColorBox *boxColor;
 };
-
-#endif

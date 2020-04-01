@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/MuonPreProcess.h"
 #include "MantidAPI/Algorithm.h"
@@ -155,7 +155,7 @@ void MuonPreProcess::exec() {
  * @return Corrected workspaces
  */
 WorkspaceGroup_sptr
-MuonPreProcess::correctWorkspaces(WorkspaceGroup_sptr wsGroup) {
+MuonPreProcess::correctWorkspaces(const WorkspaceGroup_sptr &wsGroup) {
   WorkspaceGroup_sptr outWS = boost::make_shared<WorkspaceGroup>();
   for (auto &&workspace : *wsGroup) {
     if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace)) {
@@ -191,7 +191,7 @@ MatrixWorkspace_sptr MuonPreProcess::correctWorkspace(MatrixWorkspace_sptr ws) {
 }
 
 MatrixWorkspace_sptr MuonPreProcess::applyDTC(MatrixWorkspace_sptr ws,
-                                              TableWorkspace_sptr dt) {
+                                              const TableWorkspace_sptr &dt) {
   if (dt != nullptr) {
     IAlgorithm_sptr dtc = this->createChildAlgorithm("ApplyDeadTimeCorr");
     dtc->setProperty("InputWorkspace", ws);
@@ -248,7 +248,8 @@ MuonPreProcess::applyRebinning(MatrixWorkspace_sptr ws,
   }
 }
 
-MatrixWorkspace_sptr MuonPreProcess::cloneWorkspace(MatrixWorkspace_sptr ws) {
+MatrixWorkspace_sptr
+MuonPreProcess::cloneWorkspace(const MatrixWorkspace_sptr &ws) {
   IAlgorithm_sptr cloneWorkspace = this->createChildAlgorithm("CloneWorkspace");
   cloneWorkspace->setProperty("InputWorkspace", ws);
   cloneWorkspace->execute();
@@ -256,7 +257,7 @@ MatrixWorkspace_sptr MuonPreProcess::cloneWorkspace(MatrixWorkspace_sptr ws) {
   return boost::dynamic_pointer_cast<MatrixWorkspace>(wsClone);
 }
 
-void MuonPreProcess::addPreProcessSampleLogs(WorkspaceGroup_sptr group) {
+void MuonPreProcess::addPreProcessSampleLogs(const WorkspaceGroup_sptr &group) {
   const std::string numPeriods = std::to_string(group->getNumberOfEntries());
 
   for (auto &&workspace : *group) {

@@ -224,7 +224,7 @@ private:
 
 //-----------------------------------------------------------------------------
 pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
-                           Qt::WindowFlags parentFlags)
+                           const Qt::WindowFlags& parentFlags)
     : Superclass(parentObject, parentFlags), m_helpEngine(engine) {
   Q_ASSERT(engine != nullptr);
   // Take ownership of the engine
@@ -238,9 +238,9 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
                    SIGNAL(helpWarnings(const QString &)));
 
   // add a navigation toolbar
-  QToolBar *navigation = new QToolBar("Navigation");
-  QPushButton *home = new QPushButton("Home");
-  QPushButton *print = new QPushButton("Print...");
+  auto *navigation = new QToolBar("Navigation");
+  auto *home = new QPushButton("Home");
+  auto *print = new QPushButton("Print...");
   print->setToolTip("Print the current page");
 
   m_forward = new QToolButton();
@@ -269,8 +269,8 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
   ui.indexDock->setWidget(this->m_helpEngine->indexWidget());
 
   // setup the search tab
-  QWidget *searchPane = new QWidget(this);
-  QVBoxLayout *vbox = new QVBoxLayout();
+  auto *searchPane = new QWidget(this);
+  auto *vbox = new QVBoxLayout();
   searchPane->setLayout(vbox);
   vbox->addWidget(this->m_helpEngine->searchEngine()->queryWidget());
   vbox->addWidget(this->m_helpEngine->searchEngine()->resultWidget());
@@ -292,8 +292,7 @@ pqHelpWindow::pqHelpWindow(QHelpEngine *engine, QWidget *parentObject,
 #if defined(USE_QTWEBKIT)
   m_browser = new QWebView(this);
   QNetworkAccessManager *oldManager = m_browser->page()->networkAccessManager();
-  pqNetworkAccessManager *newManager =
-      new pqNetworkAccessManager(m_helpEngine, oldManager, this);
+  auto *newManager = new pqNetworkAccessManager(m_helpEngine, oldManager, this);
   m_browser->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
   m_browser->page()->setNetworkAccessManager(newManager);
   m_browser->page()->setForwardUnsupportedContent(false);
@@ -427,4 +426,9 @@ void pqHelpWindow::showHomePage(const QString &namespace_name) {
     }
   }
   errorMissingPage(QUrl("Could not locate index.html"));
+}
+
+//-----------------------------------------------------------------------------
+bool pqHelpWindow::isExistingPage(const QUrl& url) {
+  return this->m_helpEngine->findFile(url).isValid();
 }

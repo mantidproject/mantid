@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_FILTEREVENTSTEST_H_
-#define MANTID_ALGORITHMS_FILTEREVENTSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -253,6 +252,26 @@ public:
     TS_ASSERT_EQUALS(splitter2->nthTime(6),
                      Types::Core::DateAndTime(20465000000));
     TS_ASSERT_EQUALS(splitter2->nthValue(6), 0);
+
+    // verify the log: duration
+    std::string duration0str =
+        filteredws0->run().getProperty("duration")->value();
+    double duration0 = std::stod(duration0str);
+    TS_ASSERT_DELTA(duration0, 35000000 * 1.E-9, 1.E-9);
+
+    std::string duration1str =
+        filteredws1->run().getProperty("duration")->value();
+    double duration1 = std::stod(duration1str);
+    TS_ASSERT_DELTA(duration1, (20195000000 - 20035000000) * 1.E-9, 1.E-9);
+
+    std::string duration2str =
+        filteredws2->run().getProperty("duration")->value();
+    double duration2 = std::stod(duration2str);
+    TS_ASSERT_DELTA(duration2,
+                    (20265000000 - 20200000000 + 20365000000 - 20300000000 +
+                     20465000000 - 20400000000) *
+                        1.E-9,
+                    1.E-9);
 
     // Clean up
     AnalysisDataService::Instance().remove("Test02");
@@ -1046,6 +1065,7 @@ public:
       // a new TSP splitter is added by FilterEvents. So there will be exactly
       // same number, but some different, sample logs in the input and output
       // workspaces
+
       TS_ASSERT_EQUALS(num_original_logs,
                        childworkspace->run().getProperties().size());
     }
@@ -1324,6 +1344,8 @@ public:
     eventWS->mutableRun().addProperty(
         new Kernel::PropertyWithValue<std::string>("Title",
                                                    "Testing EventWorkspace"));
+    eventWS->mutableRun().addProperty(
+        new Kernel::PropertyWithValue<double>("duration", 1000.));
 
     // add an integer slow log
     auto int_tsp =
@@ -1731,7 +1753,8 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Create the time correction table
    */
-  TableWorkspace_sptr createTimeCorrectionTable(MatrixWorkspace_sptr inpws) {
+  TableWorkspace_sptr
+  createTimeCorrectionTable(const MatrixWorkspace_sptr &inpws) {
     // 1. Generate an empty table
     auto corrtable = boost::make_shared<TableWorkspace>();
     corrtable->addColumn("int", "DetectorID");
@@ -1853,5 +1876,3 @@ public:
     return spws;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_FILTEREVENTSTEST_H_ */

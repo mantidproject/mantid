@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
 #include "MantidAPI/Axis.h"
@@ -206,7 +206,7 @@ void PolarizationCorrectionFredrikze::init() {
 }
 
 WorkspaceGroup_sptr
-PolarizationCorrectionFredrikze::execPA(WorkspaceGroup_sptr inWS) {
+PolarizationCorrectionFredrikze::execPA(const WorkspaceGroup_sptr &inWS) {
 
   size_t itemIndex = 0;
   MatrixWorkspace_sptr Ipp =
@@ -276,7 +276,7 @@ PolarizationCorrectionFredrikze::execPA(WorkspaceGroup_sptr inWS) {
 }
 
 WorkspaceGroup_sptr
-PolarizationCorrectionFredrikze::execPNR(WorkspaceGroup_sptr inWS) {
+PolarizationCorrectionFredrikze::execPNR(const WorkspaceGroup_sptr &inWS) {
   size_t itemIndex = 0;
   MatrixWorkspace_sptr Ip =
       boost::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(itemIndex++));

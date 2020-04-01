@@ -128,17 +128,22 @@ else ()
   set (PARAVIEW_PYTHON_PATHS "" )
 endif ()
 
+set(MSVC_BIN_DIR ${PROJECT_BINARY_DIR}/bin/$<CONFIG>)
+
 configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
     ${PROJECT_BINARY_DIR}/mantidpython.bat.in @ONLY )
 # place it in the appropriate directory
 file(GENERATE
      OUTPUT
-     ${PROJECT_BINARY_DIR}/bin/$<$<CONFIG:Release>:Release>$<$<CONFIG:Debug>:Debug>/mantidpython.bat
+     ${MSVC_BIN_DIR}/mantidpython.bat
      INPUT
      ${PROJECT_BINARY_DIR}/mantidpython.bat.in
   )
 # install version
 set ( MANTIDPYTHON_PREAMBLE "set PYTHONHOME=%_BIN_DIR%\nset PATH=%_BIN_DIR%;%_BIN_DIR%\\..\\plugins;%_BIN_DIR%\\..\\PVPlugins;%PATH%" )
+
+#  Semi-colon gen exp prevents future generators converting to CMake lists
+set ( MSVC_IDE_ENV "PYTHONPATH=${MSVC_BIN_DIR}$<SEMICOLON>PYTHONHOME=${MSVC_PYTHON_EXECUTABLE_DIR}" )
 
 if (MAKE_VATES)
   set ( PV_LIBS "%_BIN_DIR%\\..\\lib\\paraview-${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}")
@@ -150,6 +155,17 @@ endif ()
 configure_file ( ${PACKAGING_DIR}/mantidpython.bat.in
     ${PROJECT_BINARY_DIR}/mantidpython.bat.install @ONLY )
 
+##########################################################################
+# Custom targets to fix-up and run Python entry point code
+##########################################################################
+
+add_custom_target(SystemTests)
+add_dependencies(SystemTests Framework StandardTestData SystemTestData)
+set_target_properties(SystemTests PROPERTIES
+                    VS_DEBUGGER_COMMAND "${PYTHON_EXECUTABLE}"
+                    VS_DEBUGGER_COMMAND_ARGUMENTS "${CMAKE_SOURCE_DIR}/Testing/SystemTests/scripts/runSystemTests.py --executable \"${MSVC_BIN_DIR}/mantidpython.bat\" --exec-args \" --classic\""
+                    VS_DEBUGGER_ENVIRONMENT "${MSVC_IDE_ENV}"
+ )
 ###########################################################################
 # (Fake) installation variables to keep windows sweet
 ###########################################################################

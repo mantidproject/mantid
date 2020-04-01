@@ -1,15 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_THREADSCHEDULERMUTEXESTEST_H_
-#define MANTID_KERNEL_THREADSCHEDULERMUTEXESTEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <boost/make_shared.hpp>
+#include <utility>
+
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/ThreadSchedulerMutexes.h"
@@ -25,7 +26,7 @@ public:
   class TaskWithMutex : public Task {
   public:
     TaskWithMutex(boost::shared_ptr<std::mutex> mutex, double cost) {
-      m_mutex = mutex;
+      m_mutex = std::move(mutex);
       m_cost = cost;
     }
 
@@ -169,5 +170,3 @@ public:
     TS_ASSERT_EQUALS(sc.size(), 0);
   }
 };
-
-#endif /* MANTID_KERNEL_THREADSCHEDULERMUTEXESTEST_H_ */

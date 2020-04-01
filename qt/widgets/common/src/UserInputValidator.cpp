@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -33,7 +33,7 @@ bool doesExistInADS(std::string const &workspaceName) {
 }
 
 boost::optional<std::string>
-containsInvalidWorkspace(WorkspaceGroup_const_sptr group) {
+containsInvalidWorkspace(const WorkspaceGroup_const_sptr &group) {
   if (group->isEmpty())
     return "The group workspace " + group->getName() + " is empty.";
 
@@ -337,7 +337,7 @@ bool UserInputValidator::checkWorkspaceNumberOfHistograms(
  * @return True if the workspace has the correct size
  */
 bool UserInputValidator::checkWorkspaceNumberOfHistograms(
-    MatrixWorkspace_sptr workspace, std::size_t const &validSize) {
+    const MatrixWorkspace_sptr &workspace, std::size_t const &validSize) {
   if (workspace->getNumberHistograms() != validSize) {
     addErrorMessage(
         QString::fromStdString(workspace->getName()) + " should contain " +
@@ -370,7 +370,7 @@ bool UserInputValidator::checkWorkspaceNumberOfBins(
  * @return True if the workspace has the correct size
  */
 bool UserInputValidator::checkWorkspaceNumberOfBins(
-    MatrixWorkspace_sptr workspace, std::size_t const &validSize) {
+    const MatrixWorkspace_sptr &workspace, std::size_t const &validSize) {
   if (workspace->x(0).size() != validSize) {
     addErrorMessage(
         QString::fromStdString(workspace->getName()) + " should contain " +

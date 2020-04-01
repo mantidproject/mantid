@@ -1,18 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
 
 # 3rdparty imports
-from mantid.plots.helperfunctions import update_colorbar_scale
+from mantid.plots.datafunctions import update_colorbar_scale
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt import load_ui
 from matplotlib.collections import QuadMesh
@@ -20,7 +18,7 @@ from matplotlib.colors import LogNorm, Normalize
 from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
-SYMLOG_LIN_THRESHOLD = 0.01
+TREAT_LOG_NEGATIVE_VALUES = 'clip'
 
 
 class PropertiesEditorBase(QDialog):
@@ -94,7 +92,6 @@ class LabelEditor(PropertiesEditorBase):
 
 
 class AxisEditorModel(object):
-
     min = None
     max = None
     log = None
@@ -122,9 +119,10 @@ class AxisEditor(PropertiesEditorBase):
 
         self.axes = axes
         self.axis_id = axis_id
+        self.lim_getter = getattr(axes, 'get_{}lim'.format(axis_id))
         self.lim_setter = getattr(axes, 'set_{}lim'.format(axis_id))
         self.scale_setter = getattr(axes, 'set_{}scale'.format(axis_id))
-        self.linthresholdkw = 'linthres' + axis_id
+        self.nonposkw = 'nonpos' + axis_id
         # Grid has no direct accessor from the axes
         self.axis = axes.xaxis if axis_id == 'x' else axes.yaxis
 
@@ -133,8 +131,7 @@ class AxisEditor(PropertiesEditorBase):
         self._memento = memento
         memento.min, memento.max = getattr(self.axes, 'get_{}lim'.format(self.axis_id))()
         memento.log = getattr(self.axes, 'get_{}scale'.format(self.axis_id))() != 'linear'
-        memento.grid = self.axis.majorTicks[0].gridOn
-
+        memento.grid = self.axis._gridOnMajor
         self._fill(memento)
 
     def changes_accepted(self):
@@ -143,11 +140,15 @@ class AxisEditor(PropertiesEditorBase):
         axes = self.axes
 
         self.limit_min, self.limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
-        self.lim_setter(self.limit_min, self.limit_max)
+
         if self.ui.logBox.isChecked():
-            self.scale_setter('symlog', **{self.linthresholdkw: SYMLOG_LIN_THRESHOLD})
+            self.scale_setter('log', **{self.nonposkw: TREAT_LOG_NEGATIVE_VALUES})
+            self.limit_min, self.limit_max = self._check_log_limits(self.limit_min, self.limit_max)
         else:
             self.scale_setter('linear')
+
+        self.lim_setter(self.limit_min, self.limit_max)
+
         axes.grid(self.ui.gridBox.isChecked(), axis=self.axis_id)
 
     def error_occurred(self, exc):
@@ -162,6 +163,16 @@ class AxisEditor(PropertiesEditorBase):
         self.ui.editor_max.setText(str(model.max))
         self.ui.logBox.setChecked(model.log)
         self.ui.gridBox.setChecked(model.grid)
+
+    def _check_log_limits(self, editor_min, editor_max):
+        # Check that the limits from the editor are sensible for a log graph
+        # These limits are not necessarily in numeric order we have to check both
+        lim_min, lim_max = self.lim_getter()
+        if editor_min <= 0:
+            editor_min = lim_min
+        if editor_max <= 0:
+            editor_max = lim_max
+        return editor_min, editor_max
 
 
 class XAxisEditor(AxisEditor):
@@ -190,11 +201,19 @@ class ColorbarAxisEditor(AxisEditor):
         self.create_model()
 
     def changes_accepted(self):
-        super(ColorbarAxisEditor, self).changes_accepted()
+        self.ui.errors.hide()
+
+        limit_min, limit_max = float(self.ui.editor_min.text()), float(self.ui.editor_max.text())
+
         scale = Normalize
         if isinstance(self.images[0].norm, LogNorm):
             scale = LogNorm
-        update_colorbar_scale(self.canvas.figure, self.images[0], scale, self.limit_min, self.limit_max)
+
+        if scale == LogNorm and (limit_min <= 0 or limit_max <= 0):
+            raise ValueError("Limits must be positive\nwhen scale is logarithmic.")
+
+        self.lim_setter(limit_min, limit_max)
+        update_colorbar_scale(self.canvas.figure, self.images[0], scale, limit_min, limit_max)
 
     def create_model(self):
         memento = AxisEditorModel()

@@ -28,7 +28,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 // Add this class to the list of specialised dialogs in this namespace
-DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
+// Hidden for release of 5.0 to be removed as a maintainance issue.
+// DECLARE_SUBWINDOW(EnggDiffractionViewQtGUI)
 
 const double EnggDiffractionViewQtGUI::g_defaultRebinWidth = -0.0005;
 
@@ -930,7 +931,7 @@ EnggDiffractionViewQtGUI::focusingTextureRunNo() const {
 }
 
 std::vector<std::string>
-EnggDiffractionViewQtGUI::qListToVector(QStringList list,
+EnggDiffractionViewQtGUI::qListToVector(const QStringList &list,
                                         bool validator) const {
   std::vector<std::string> vec;
   if (validator) {
@@ -1037,7 +1038,7 @@ void EnggDiffractionViewQtGUI::userSelectInstrument(const QString &prefix) {
   setPrefix(prefix.toStdString());
 }
 
-void EnggDiffractionViewQtGUI::setPrefix(std::string prefix) {
+void EnggDiffractionViewQtGUI::setPrefix(const std::string &prefix) {
   QString prefixInput = QString::fromStdString(prefix);
   // focus tab
   m_uiTabFocus.MWRunFiles_run_num->setInstrumentOverride(prefixInput);

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_FITPEAKTEST_H_
-#define MANTID_ALGORITHMS_FITPEAKTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -359,8 +358,6 @@ public:
   /** Generate a workspace contains PG3_4866 5-th peak
    */
   MatrixWorkspace_sptr gen_PG3DiamondData() {
-    vector<double> vecx, vecy, vece;
-
     size_t NVectors = 1;
     size_t size = 53;
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
@@ -412,5 +409,3 @@ public:
     return;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_FITPEAKTEST_H_ */

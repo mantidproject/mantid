@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
-from __future__ import (absolute_import, unicode_literals)
-
 import sys
 from functools import wraps
 
@@ -23,8 +21,7 @@ from qtpy.QtWidgets import QApplication, QLabel, QFileDialog
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
-from mantid.plots import helperfunctions, MantidAxes
-from mantid.py3compat import text_type
+from mantid.plots import datafunctions, MantidAxes
 from mantidqt.io import open_a_file_dialog
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
@@ -33,6 +30,7 @@ from mantidqt.widgets.plotconfigdialog import curve_in_ax
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
+from workbench.config import get_window_config
 from workbench.plotting.figureinteraction import FigureInteraction
 from workbench.plotting.figurewindow import FigureWindow
 from workbench.plotting.plotscriptgenerator import generate_script
@@ -41,6 +39,7 @@ from workbench.plotting.toolbar import WorkbenchNavigationToolbar, ToolbarStateM
 
 def _catch_exceptions(func):
     """Catch all exceptions in method and print a traceback to stderr"""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         try:
@@ -90,9 +89,12 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
         # managed via a workspace.
         # See https://github.com/mantidproject/mantid/issues/25135.
         empty_axes = []
+        redraw = False
         for ax in all_axes:
             if isinstance(ax, MantidAxes):
-                ax.remove_workspace_artists(workspace)
+                to_redraw = ax.remove_workspace_artists(workspace)
+            else:
+                to_redraw = False
             # We check for axes type below as a pseudo check for an axes being
             # a colorbar. Creating a colorfill plot creates 2 axes: one linked
             # to a workspace, the other a colorbar. Deleting the workspace
@@ -102,10 +104,11 @@ class FigureManagerADSObserver(AnalysisDataServiceObserver):
             # Axes object being closed.
             if type(ax) is not Axes:
                 empty_axes.append(MantidAxes.is_empty(ax))
+            redraw = redraw | to_redraw
 
         if all(empty_axes):
             self.window.emit_close()
-        else:
+        elif redraw:
             self.canvas.draw()
 
     @_catch_exceptions
@@ -159,6 +162,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         The qt.QMainWindow
 
     """
+
     def __init__(self, canvas, num):
         QObject.__init__(self)
         FigureManagerBase.__init__(self, canvas, num)
@@ -174,7 +178,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.fig_visibility_changed_orig = self.fig_visibility_changed
         self.fig_visibility_changed = QAppThreadCall(self.fig_visibility_changed_orig)
 
-        self.window = FigureWindow(canvas)
+        parent, flags = get_window_config()
+        self.window = FigureWindow(canvas, parent=parent, window_flags=flags)
         self.window.activated.connect(self._window_activated)
         self.window.closing.connect(canvas.close_event)
         self.window.closing.connect(self.destroy)
@@ -212,9 +217,12 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.sig_generate_plot_script_file_triggered.connect(
                 self.generate_plot_script_file)
             self.toolbar.sig_home_clicked.connect(self.set_figure_zoom_to_display_all)
-            self.toolbar.sig_waterfall_reverse_order_triggered.connect(self.waterfall_reverse_line_order)
-            self.toolbar.sig_waterfall_offset_amount_triggered.connect(self.launch_waterfall_offset_options)
-            self.toolbar.sig_waterfall_fill_area_triggered.connect(self.launch_waterfall_fill_area_options)
+            self.toolbar.sig_waterfall_reverse_order_triggered.connect(
+                self.waterfall_reverse_line_order)
+            self.toolbar.sig_waterfall_offset_amount_triggered.connect(
+                self.launch_waterfall_offset_options)
+            self.toolbar.sig_waterfall_fill_area_triggered.connect(
+                self.launch_waterfall_fill_area_options)
             self.toolbar.sig_waterfall_conversion.connect(self.update_toolbar_waterfall_plot)
             self.toolbar.setFloatable(False)
             tbs_height = self.toolbar.sizeHint().height()
@@ -292,11 +300,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # For plot-to-script button to show, we must have a MantidAxes with lines in it
         # Plot-to-script currently doesn't work with waterfall plots so the button is hidden for that plot type.
         if not any((isinstance(ax, MantidAxes) and curve_in_ax(ax))
-                   for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes()[0].is_waterfall():
+                   for ax in self.canvas.figure.get_axes()) or self.canvas.figure.get_axes(
+        )[0].is_waterfall():
             self.toolbar.set_generate_plot_script_enabled(False)
 
         # Only show options specific to waterfall plots if the axes is a MantidAxes and is a waterfall plot.
-        if not isinstance(self.canvas.figure.get_axes()[0], MantidAxes) or not self.canvas.figure.get_axes()[0].is_waterfall():
+        if not isinstance(self.canvas.figure.get_axes()[0], MantidAxes) or \
+                not self.canvas.figure.get_axes()[0].is_waterfall():
             self.toolbar.set_waterfall_options_enabled(False)
 
     def destroy(self, *args):
@@ -312,6 +322,11 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.toolbar.destroy()
         self._ads_observer.observeAll(False)
         del self._ads_observer
+        # disconnect window events before calling Gcf.destroy. window.close is not guaranteed to
+        # delete the object and do this for us. On macOS it was observed that closing the figure window
+        # would produce an extraneous activated event that would add a new figure to the plots list
+        # right after deleted the old one.
+        self.window.disconnect()
         self._fig_interaction.disconnect()
         self.window.close()
 
@@ -353,7 +368,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         self.toolbar.hold()
 
     def get_window_title(self):
-        return text_type(self.window.windowTitle())
+        return self.window.windowTitle()
 
     def set_window_title(self, title):
         self.window.setWindowTitle(title)
@@ -386,20 +401,17 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def generate_plot_script_file(self):
         script = generate_script(self.canvas.figure)
-        filepath = open_a_file_dialog(
-            parent=self.canvas,
-            default_suffix=".py",
-            file_filter="Python Files (*.py)",
-            accept_mode=QFileDialog.AcceptSave,
-            file_mode=QFileDialog.AnyFile
-        )
+        filepath = open_a_file_dialog(parent=self.canvas,
+                                      default_suffix=".py",
+                                      file_filter="Python Files (*.py)",
+                                      accept_mode=QFileDialog.AcceptSave,
+                                      file_mode=QFileDialog.AnyFile)
         if filepath:
             try:
                 with open(filepath, 'w') as f:
                     f.write(script)
             except IOError as io_error:
-                logger.error("Could not write file: {}\n{}"
-                             "".format(filepath, io_error))
+                logger.error("Could not write file: {}\n{}" "".format(filepath, io_error))
 
     def set_figure_zoom_to_display_all(self):
         axes = self.canvas.figure.get_axes()
@@ -418,10 +430,10 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def waterfall_reverse_line_order(self):
         ax = self.canvas.figure.get_axes()[0]
         x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
-        fills = helperfunctions.get_waterfall_fills(ax)
+        fills = datafunctions.get_waterfall_fills(ax)
         ax.update_waterfall(0, 0)
 
-        errorbar_cap_lines = helperfunctions.remove_and_return_errorbar_cap_lines(ax)
+        errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
 
         ax.lines.reverse()
         ax.lines += errorbar_cap_lines
@@ -441,6 +453,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
     def update_toolbar_waterfall_plot(self, is_waterfall):
         self.toolbar.set_waterfall_options_enabled(is_waterfall)
         self.toolbar.set_generate_plot_script_enabled(not is_waterfall)
+
 
 # -----------------------------------------------------------------------------
 # Figure control

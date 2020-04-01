@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 import os
@@ -14,9 +14,9 @@ from sans.algorithm_detail.mask_sans_workspace import mask_workspace
 from sans.common.enums import SANSFacility
 from sans.common.file_information import SANSFileInformationFactory
 from sans.state.Serializer import Serializer
-from sans.state.data import get_data_builder
-from sans.state.mask import get_mask_builder
-from sans.state.move import get_move_builder
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
+from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.test_helper.test_director import TestDirector
 
 

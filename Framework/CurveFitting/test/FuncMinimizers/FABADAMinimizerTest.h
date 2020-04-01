@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_FABADAMINIMIZERTEST_H_
-#define MANTID_CURVEFITTING_FABADAMINIMIZERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -47,7 +46,7 @@ MatrixWorkspace_sptr createTestWorkspace(size_t NVectors = 2,
   return ws2;
 }
 
-void doTestExpDecay(MatrixWorkspace_sptr ws2) {
+void doTestExpDecay(const MatrixWorkspace_sptr &ws2) {
 
   Mantid::API::IFunction_sptr fun(new ExpDecay);
   fun->setParameter("Height", 8.);
@@ -475,4 +474,3 @@ public:
 private:
   MatrixWorkspace_sptr ws;
 };
-#endif /* MANTID_CURVEFITTING_FABADAMINIMIZERTEST_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -65,6 +65,7 @@
 
 #include <numeric>
 #include <stdexcept>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -72,6 +73,26 @@ using namespace MantidQt::API;
 
 namespace MantidQt {
 namespace MantidWidgets {
+namespace {
+/**
+ * An object to correctly set the flag marking workspace replacement
+ */
+struct WorkspaceReplacementFlagHolder {
+  /**
+   * @param :: reference to the workspace replacement flag
+   */
+  explicit WorkspaceReplacementFlagHolder(bool &replacementFlag)
+      : m_worskpaceReplacementFlag(replacementFlag) {
+    m_worskpaceReplacementFlag = true;
+  }
+  ~WorkspaceReplacementFlagHolder() { m_worskpaceReplacementFlag = false; }
+
+private:
+  WorkspaceReplacementFlagHolder();
+  bool &m_worskpaceReplacementFlag;
+};
+} // namespace
+
 // Name of the QSettings group to store the InstrumentWindw settings
 const char *InstrumentWidgetSettingsGroup = "Mantid/InstrumentWidget";
 
@@ -102,10 +123,10 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
       mViewChanged(false), m_blocked(false),
       m_instrumentDisplayContextMenuOn(false),
       m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}),
-      m_help(nullptr) {
+      m_wsReplace(false), m_help(nullptr) {
   setFocusPolicy(Qt::StrongFocus);
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
-  QSplitter *controlPanelLayout = new QSplitter(Qt::Horizontal);
+  auto *controlPanelLayout = new QSplitter(Qt::Horizontal);
 
   // Add Tab control panel
   mControlsTab = new QTabWidget(this);
@@ -138,7 +159,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
           SLOT(setIntegrationRange(double, double)));
 
   // Set the mouse/keyboard operation info and help button
-  QHBoxLayout *infoLayout = new QHBoxLayout();
+  auto *infoLayout = new QHBoxLayout();
   mInteractionInfo = new QLabel();
   infoLayout->addWidget(mInteractionInfo);
   m_help = new QPushButton("?");
@@ -399,7 +420,7 @@ void InstrumentWidget::setSurfaceType(int type) {
 
   if (type < RENDERMODE_SIZE) {
     QApplication::setOverrideCursor(Qt::WaitCursor);
-    SurfaceType surfaceType = SurfaceType(type);
+    auto surfaceType = SurfaceType(type);
     if (!m_instrumentActor)
       return;
 
@@ -873,7 +894,8 @@ void InstrumentWidget::executeAlgorithm(const QString & /*unused*/,
   // emit execMantidAlgorithm(alg_name, param_list, this);
 }
 
-void InstrumentWidget::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
+void InstrumentWidget::executeAlgorithm(
+    const Mantid::API::IAlgorithm_sptr &alg) {
   try {
     alg->executeAsync();
   } catch (Poco::NoThreadAvailableException &) {
@@ -1094,6 +1116,10 @@ ProjectionSurface_sptr InstrumentWidget::getSurface() const {
   return ProjectionSurface_sptr();
 }
 
+bool MantidQt::MantidWidgets::InstrumentWidget::isWsBeingReplaced() const {
+  return m_wsReplace;
+}
+
 /**
  * Set newly created projection surface
  * @param surface :: Pointer to the new surace.
@@ -1108,8 +1134,7 @@ void InstrumentWidget::setSurface(ProjectionSurface *surface) {
     m_simpleDisplay->setSurface(sharedSurface);
     m_simpleDisplay->update();
   }
-  UnwrappedSurface *unwrappedSurface =
-      dynamic_cast<UnwrappedSurface *>(surface);
+  auto *unwrappedSurface = dynamic_cast<UnwrappedSurface *>(surface);
   if (unwrappedSurface) {
     m_renderTab->flipUnwrappedView(unwrappedSurface->isFlippedView());
   }
@@ -1161,8 +1186,8 @@ void InstrumentWidget::updateInstrumentDetectors() {
 }
 
 void InstrumentWidget::deletePeaksWorkspace(
-    Mantid::API::IPeaksWorkspace_sptr pws) {
-  this->getSurface()->deletePeaksWorkspace(pws);
+    const Mantid::API::IPeaksWorkspace_sptr &pws) {
+  this->getSurface()->deletePeaksWorkspace(std::move(pws));
   updateInstrumentView();
 }
 
@@ -1313,34 +1338,25 @@ bool InstrumentWidget::hasWorkspace(const std::string &wsName) const {
 }
 
 void InstrumentWidget::handleWorkspaceReplacement(
-    const std::string &wsName, const boost::shared_ptr<Workspace> workspace) {
-  // Replace current workspace
-  if (hasWorkspace(wsName)) {
-    if (m_instrumentActor) {
-      // Check if it's still the same workspace underneath (as well as having
-      // the same name)
-      auto matrixWS =
-          boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
-      if (!matrixWS || matrixWS->detectorInfo().size() == 0) {
-        emit preDeletingHandle();
-        close();
-        return;
-      }
-      // try to detect if the instrument changes (unlikely if the workspace
-      // hasn't, but theoretically possible)
-      bool resetGeometry =
-          matrixWS->detectorInfo().size() != m_instrumentActor->ndetectors();
-      try {
-        if (matrixWS == m_instrumentActor->getWorkspace() && !resetGeometry) {
-          m_instrumentActor->updateColors();
-          setupColorMap();
-          updateInstrumentView();
-        }
-      } catch (std::runtime_error &) {
-        resetInstrument(resetGeometry);
-      }
-    }
+    const std::string &wsName, const boost::shared_ptr<Workspace> &workspace) {
+  if (!hasWorkspace(wsName) || !m_instrumentActor) {
+    return;
   }
+  // Replace current workspace
+  WorkspaceReplacementFlagHolder wsReplace(m_wsReplace);
+  // Check if it's still the same workspace underneath (as well as having
+  // the same name)
+  auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(workspace);
+  if (!matrixWS || matrixWS->detectorInfo().size() == 0) {
+    emit preDeletingHandle();
+    close();
+    return;
+  }
+  // try to detect if the instrument changes (unlikely if the workspace
+  // hasn't, but theoretically possible)
+  bool resetGeometry =
+      matrixWS->detectorInfo().size() != m_instrumentActor->ndetectors();
+  resetInstrument(resetGeometry);
 }
 
 /**
@@ -1386,10 +1402,10 @@ void InstrumentWidget::clearADSHandle() {
  * Overlay a peaks workspace on the surface projection
  * @param ws :: peaks workspace to overlay
  */
-void InstrumentWidget::overlayPeaksWorkspace(IPeaksWorkspace_sptr ws) {
+void InstrumentWidget::overlayPeaksWorkspace(const IPeaksWorkspace_sptr &ws) {
   auto surface = getUnwrappedSurface();
   if (surface) {
-    surface->setPeaksWorkspace(ws);
+    surface->setPeaksWorkspace(std::move(ws));
     updateInstrumentView();
   }
 }
@@ -1398,7 +1414,7 @@ void InstrumentWidget::overlayPeaksWorkspace(IPeaksWorkspace_sptr ws) {
  * Overlay a mask workspace on the surface projection
  * @param ws :: mask workspace to overlay
  */
-void InstrumentWidget::overlayMaskedWorkspace(IMaskWorkspace_sptr ws) {
+void InstrumentWidget::overlayMaskedWorkspace(const IMaskWorkspace_sptr &ws) {
   auto &actor = getInstrumentActor();
   actor.setMaskMatrixWorkspace(
       boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
@@ -1411,7 +1427,7 @@ void InstrumentWidget::overlayMaskedWorkspace(IMaskWorkspace_sptr ws) {
  * Overlay a table workspace containing shape parameters
  * @param ws :: a workspace of shape parameters to create
  */
-void InstrumentWidget::overlayShapesWorkspace(ITableWorkspace_sptr ws) {
+void InstrumentWidget::overlayShapesWorkspace(const ITableWorkspace_sptr &ws) {
   auto surface = getUnwrappedSurface();
   if (surface) {
     surface->loadShapesFromTableWorkspace(ws);

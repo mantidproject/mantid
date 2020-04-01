@@ -1,18 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from mantid.dataobjects import Workspace2D
 from mantid.kernel import DateAndTime
 from mantid.simpleapi import AddTimeSeriesLog, CreateSampleWorkspace
 from sans.algorithm_detail.slice_sans_event import slice_sans_event
-from sans.state.slice_event import get_slice_event_builder
+from sans.state.StateObjects.StateSliceEvent import get_slice_event_builder
 from sans.test_helper.test_director import TestDirector
 
 

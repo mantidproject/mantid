@@ -1,12 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, too-many-instance-attributes, too-many-branches, too-few-public-methods
 
-from __future__ import (absolute_import, division, print_function)
 import abc
 import re
 from math import copysign
@@ -169,23 +168,23 @@ class BackParser(UserFileComponentParser):
 
         # All Monitors
         self._all_mons = "\\s*MON\\s*/\\s*TIMES\\s*"
-        self._all_mons_pattern = re.compile(start_string + self._all_mons + space_string + float_number +
-                                            space_string + float_number + end_string)
+        self._all_mons_pattern = re.compile(start_string + self._all_mons + space_string + float_number
+                                            + space_string + float_number + end_string)
 
         # Single Monitor
         self._mon_id = "M"
         self._single_monitor = "\\s*" + self._mon_id + integer_number + "\\s*"
-        self._single_monitor_pattern = re.compile(start_string + self._single_monitor +
-                                                  "(\\s*" + self._times + "\\s*)?" + space_string + float_number +
-                                                  space_string + float_number + end_string)
+        self._single_monitor_pattern = re.compile(start_string + self._single_monitor
+                                                  + "(\\s*" + self._times + "\\s*)?" + space_string + float_number
+                                                  + space_string + float_number + end_string)
 
         # Off
         self._off_pattern = re.compile(start_string + self._single_monitor + "\\s*/\\s*OFF\\s*" + end_string)
 
         # Trans
         self._trans = "TRANS"
-        self._trans_pattern = re.compile(start_string + self._trans + space_string + float_number +
-                                         space_string + float_number)
+        self._trans_pattern = re.compile(start_string + self._trans + space_string + float_number
+                                         + space_string + float_number)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
@@ -345,8 +344,8 @@ class DetParser(UserFileComponentParser):
         self._rotation = "\\s*ROT\\s*"
         self._rotation_pattern = re.compile(start_string + self._rotation + space_string + float_number + end_string)
         self._translation = "\\s*SIDE\\s*"
-        self._translation_pattern = re.compile(start_string + self._translation + space_string +
-                                               float_number + end_string)
+        self._translation_pattern = re.compile(start_string + self._translation + space_string
+                                               + float_number + end_string)
         self._x_tilt = "\\s*XTILT\\s*"
         self._x_tilt_pattern = re.compile(start_string + self._x_tilt + space_string + float_number + end_string)
         self._y_tilt = "\\s*YTILT\\s*"
@@ -556,47 +555,47 @@ class LimitParser(UserFileComponentParser):
         # Angle limits
         self._phi_no_mirror = "\\s*/\\s*NOMIRROR\\s*"
         self._phi = "\\s*PHI\\s*(" + self._phi_no_mirror + ")?\\s*"
-        self._phi_pattern = re.compile(start_string + self._phi + space_string +
-                                       float_number + space_string +
-                                       float_number + end_string)
+        self._phi_pattern = re.compile(start_string + self._phi + space_string
+                                       + float_number + space_string
+                                       + float_number + end_string)
 
         # Event time limits
         self._events_time = "\\s*EVENTSTIME\\s*"
-        self._events_time_pattern = re.compile(start_string + self._events_time +
-                                               space_string + rebin_string_no_comma + end_string)
+        self._events_time_pattern = re.compile(start_string + self._events_time
+                                               + space_string + rebin_string_no_comma + end_string)
 
-        self._events_time_pattern_simple_pattern = re.compile(start_string + self._events_time +
-                                                              space_string + self._simple_range + end_string)
+        self._events_time_pattern_simple_pattern = re.compile(start_string + self._events_time
+                                                              + space_string + self._simple_range + end_string)
 
         # Q Limits
         self._q = "\\s*Q\\s*"
-        self._q_simple_pattern = re.compile(start_string + self._q + space_string +
-                                            self._simple_range + end_string)
+        self._q_simple_pattern = re.compile(start_string + self._q + space_string
+                                            + self._simple_range + end_string)
 
         self._q_complex_pattern = re.compile(start_string + self._q + space_string + self._complex_range + end_string)
-        self._q_complex_pattern_2 = re.compile(start_string + self._q + space_string + self._complex_range_2 +
-                                               end_string)
+        self._q_complex_pattern_2 = re.compile(start_string + self._q + space_string + self._complex_range_2
+                                               + end_string)
 
         # Qxy limits
         self._qxy = "\\s*QXY\\s*"
         self._qxy_simple_pattern = re.compile(start_string + self._qxy + space_string + self._simple_range + end_string)
-        self._qxy_complex_pattern = re.compile(start_string + self._qxy + space_string +
-                                               self._complex_range + end_string)
+        self._qxy_complex_pattern = re.compile(start_string + self._qxy + space_string
+                                               + self._complex_range + end_string)
 
         # Wavelength limits
         self._wavelength = "\\s*WAV\\s*"
-        self._wavelength_simple_pattern = re.compile(start_string + self._wavelength + space_string +
-                                                     self._simple_range + end_string)
-        self._wavelength_complex_pattern = re.compile(start_string + self._wavelength + space_string +
-                                                      self._complex_range + end_string)
+        self._wavelength_simple_pattern = re.compile(start_string + self._wavelength + space_string
+                                                     + self._simple_range + end_string)
+        self._wavelength_complex_pattern = re.compile(start_string + self._wavelength + space_string
+                                                      + self._complex_range + end_string)
 
         # Cut limits
         self._radius_cut = "\\s*Q\\s*/\\s*RCUT\\s*"
-        self._radius_cut_pattern = re.compile(start_string + self._radius_cut + space_string +
-                                              float_number + end_string)
+        self._radius_cut_pattern = re.compile(start_string + self._radius_cut + space_string
+                                              + float_number + end_string)
         self._wavelength_cut = "\\s*Q\\s*/\\s*WCUT\\s*"
-        self._wavelength_cut_pattern = re.compile(start_string + self._wavelength_cut +
-                                                  space_string + float_number + end_string)
+        self._wavelength_cut_pattern = re.compile(start_string + self._wavelength_cut
+                                                  + space_string + float_number + end_string)
 
         # Radius limits
         # Note that we have to account for an undocumented potential step size (which is ignored
@@ -859,8 +858,8 @@ class MaskParser(UserFileComponentParser):
 
         # Line Mask
         self._line = "\\s*LINE\\s*"
-        self._line_pattern = re.compile(start_string + self._line + space_string + self._two_floats +
-                                        self._optional_two_floats + end_string)
+        self._line_pattern = re.compile(start_string + self._line + space_string + self._two_floats
+                                        + self._optional_two_floats + end_string)
 
         # Clear Mask
         self._clear = "\\s*CLEAR\\s*"
@@ -869,8 +868,8 @@ class MaskParser(UserFileComponentParser):
         # Spectrum Mask
         self._spectrum = "\\s*S\\s*"
         self._additional_spectrum = "(\\s*>" + self._spectrum + integer_number+")"
-        self._spectrum_range_pattern = re.compile(start_string + self._spectrum + integer_number +
-                                                  self._additional_spectrum + end_string)
+        self._spectrum_range_pattern = re.compile(start_string + self._spectrum + integer_number
+                                                  + self._additional_spectrum + end_string)
         self._spectrum_single_pattern = re.compile(start_string + self._spectrum + integer_number + end_string)
 
         # Strip Masks
@@ -881,25 +880,25 @@ class MaskParser(UserFileComponentParser):
         # Vertical strip Mask
         self._v = "\\s*V\\s*"
         self._additional_v = "(\\s*>" + self._v + integer_number + ")"
-        self._single_vertical_strip_pattern = re.compile(start_string + self._detector + self._v +
-                                                         integer_number + end_string)
-        self._range_vertical_strip_pattern = re.compile(start_string + self._detector + self._v +
-                                                        integer_number + self._additional_v + end_string)
+        self._single_vertical_strip_pattern = re.compile(start_string + self._detector + self._v
+                                                         + integer_number + end_string)
+        self._range_vertical_strip_pattern = re.compile(start_string + self._detector + self._v
+                                                        + integer_number + self._additional_v + end_string)
 
         # Horizontal strip Mask
         self._h = "\\s*H\\s*"
         self._additional_h = "(\\s*>" + self._h + integer_number + ")"
-        self._single_horizontal_strip_pattern = re.compile(start_string + self._detector + self._h +
-                                                           integer_number + end_string)
-        self._range_horizontal_strip_pattern = re.compile(start_string + self._detector + self._h +
-                                                          integer_number + self._additional_h + end_string)
+        self._single_horizontal_strip_pattern = re.compile(start_string + self._detector + self._h
+                                                           + integer_number + end_string)
+        self._range_horizontal_strip_pattern = re.compile(start_string + self._detector + self._h
+                                                          + integer_number + self._additional_h + end_string)
 
         # Time Mask
         self._time_or_t = "\\s*(TIME|T)\\s*"
         self._detector_time = "\\s*((" + self._hab + "|" + self._lab + ")"+"\\s*)?\\s*"
-        self._time_pattern = re.compile(start_string + self._detector_time + "/?" + self._time_or_t + space_string +
-                                        self._two_floats + end_string + "|" + start_string + self._time_or_t +
-                                        "/?" + self._detector_time + space_string + self._two_floats + end_string)
+        self._time_pattern = re.compile(start_string + self._detector_time + "/?" + self._time_or_t + space_string
+                                        + self._two_floats + end_string + "|" + start_string + self._time_or_t
+                                        + "/?" + self._detector_time + space_string + self._two_floats + end_string)
 
         # Block mask
         self._v_plus_h = "\\s*" + self._v + integer_number + "\\s*\\+\\s*" + self._h + integer_number
@@ -1040,13 +1039,13 @@ class MaskParser(UserFileComponentParser):
         if has_hab is not None or has_lab is not None:
             key = MaskId.TIME_DETECTOR
             detector_type = DetectorType.HAB if has_hab is not None else DetectorType.LAB
-            regex_string = "\s*(" + self._hab + ")\s*" if has_hab else "\s*(" + self._lab + ")\s*"
+            regex_string = r"\s*(" + self._hab + r")\s*" if has_hab else r"\s*(" + self._lab + r")\s*"
             min_and_max_time_range = re.sub(regex_string, "", line)
         else:
             key = MaskId.TIME
             detector_type = None
             min_and_max_time_range = line
-        min_and_max_time_range = re.sub("\s*/\s*", "", min_and_max_time_range)
+        min_and_max_time_range = re.sub(r"\s*/\s*", "", min_and_max_time_range)
         min_and_max_time_range = re.sub(self._time_or_t, "", min_and_max_time_range)
         min_and_max_time = extract_float_range(min_and_max_time_range)
         return {key: range_entry_with_detector(start=min_and_max_time[0], stop=min_and_max_time[1],
@@ -1193,23 +1192,23 @@ class SetParser(UserFileComponentParser):
 
         # Scales
         self._scales = "\\s*SCALES\\s*"
-        self._scales_pattern = re.compile(start_string + self._scales + space_string + float_number + space_string +
-                                          float_number + space_string + float_number + space_string + float_number +
-                                          space_string + float_number + end_string)
+        self._scales_pattern = re.compile(start_string + self._scales + space_string + float_number + space_string
+                                          + float_number + space_string + float_number + space_string + float_number
+                                          + space_string + float_number + end_string)
 
         # Centre
         self._centre = "\\s*CENTRE\\s*"
         self._hab = "\\s*(HAB|FRONT)\\s*"
         self._lab = "\\s*(LAB|REAR|MAIN)\\s*"
         self._hab_or_lab = "\\s*(/" + self._hab + "|/" + self._lab + ")\\s*"
-        self._centre_pattern = re.compile(start_string + self._centre + "\\s*(/" + self._lab + space_string +
-                                          ")?\\s*" + float_number + space_string + float_number +
-                                          "\\s*(" + space_string + float_number + space_string + float_number +
-                                          ")?\\s*" + end_string)
-        self._centre_pattern_HAB = re.compile(start_string + self._centre + "\\s*(/" + self._hab + space_string +
-                                              ")?\\s*" + float_number + space_string + float_number +
-                                              "\\s*(" + space_string + float_number + space_string + float_number +
-                                              ")?\\s*" + end_string)
+        self._centre_pattern = re.compile(start_string + self._centre + "\\s*(/" + self._lab + space_string
+                                          + ")?\\s*" + float_number + space_string + float_number
+                                          + "\\s*(" + space_string + float_number + space_string + float_number
+                                          + ")?\\s*" + end_string)
+        self._centre_pattern_HAB = re.compile(start_string + self._centre + "\\s*(/" + self._hab + space_string
+                                              + ")?\\s*" + float_number + space_string + float_number
+                                              + "\\s*(" + space_string + float_number + space_string + float_number
+                                              + ")?\\s*" + end_string)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
@@ -1292,13 +1291,12 @@ class TransParser(UserFileComponentParser):
 
         # Trans Spec
         self._trans_spec = "\\s*TRANSPEC\\s*=\\s*"
-        self._trans_spec_pattern = re.compile(start_string + self._trans_spec + integer_number +
-                                              end_string)
+        self._trans_spec_pattern = re.compile(start_string + self._trans_spec + integer_number + end_string)
 
         # Trans Spec Shift
         self._shift = "\\s*/\\s*SHIFT\\s*=\\s*"
-        self._trans_spec_shift_pattern = re.compile(start_string + self._trans_spec + integer_number + self._shift +
-                                                    float_number + end_string)
+        self._trans_spec_shift_pattern = re.compile(start_string + self._trans_spec + integer_number + self._shift
+                                                    + float_number + end_string)
 
         # Radius
         self._radius = "\\s*RADIUS\\s*=\\s*"
@@ -1314,12 +1312,11 @@ class TransParser(UserFileComponentParser):
 
         # CanWS
         self._can_workspace = "\\s*CANWS\\s*=\\s*"
-        self._can_workspace_pattern = re.compile(start_string + self._can_workspace + self._workspace +
-                                                 end_string)
+        self._can_workspace_pattern = re.compile(start_string + self._can_workspace + self._workspace + end_string)
         # SampleWS
         self._sample_workspace = "\\s*SAMPLEWS\\s*=\\s*"
-        self._sample_workspace_pattern = re.compile(start_string + self._sample_workspace + self._workspace +
-                                                    end_string)
+        self._sample_workspace_pattern = re.compile(start_string + self._sample_workspace + self._workspace
+                                                    + end_string)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
@@ -1551,8 +1548,8 @@ class QResolutionParser(UserFileComponentParser):
 
         # Collimation Length
         self._collimation_length = "\\s*LCOLLIM\\s*=\\s*"
-        self._collimation_length_pattern = re.compile(start_string + self._collimation_length +
-                                                      float_number + end_string)
+        self._collimation_length_pattern = re.compile(start_string + self._collimation_length
+                                                      + float_number + end_string)
 
         # A1
         self._a1 = "\\s*A1\\s*=\\s*"
@@ -1731,13 +1728,13 @@ class FitParser(UserFileComponentParser):
         self._lin_or_log_or_poly_to_remove = "\\s*(" + self._lin + "|" + self._log + "|" + self._polynomial + ")\\s*"
         self._wavelength_optional = "\\s*(" + float_number + space_string + float_number + ")?\\s*"
 
-        self._general_fit_pattern = re.compile(start_string + self._trans_prefix + self._optional_can_or_sample +
-                                               self._lin_or_log_or_poly + self._wavelength_optional + end_string)
+        self._general_fit_pattern = re.compile(start_string + self._trans_prefix + self._optional_can_or_sample
+                                               + self._lin_or_log_or_poly + self._wavelength_optional + end_string)
 
         # Monitor times
         self._monitor = "\\s*MONITOR\\s*"
-        self._monitor_pattern = re.compile(start_string + self._monitor + space_string + float_number + space_string +
-                                           float_number + end_string)
+        self._monitor_pattern = re.compile(start_string + self._monitor + space_string + float_number + space_string
+                                           + float_number + end_string)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
@@ -2035,30 +2032,30 @@ class MonParser(UserFileComponentParser):
         # Length
         self._length = "\\s*LENGTH\\s*=\\s*"
         self._interpolate = "\\s*/\\s*INTERPOLATE\\s*"
-        self._length_pattern = re.compile(start_string + self._length + float_number + space_string + integer_number +
-                                          "(\\s*" + self._interpolate + "\\s*)?" + end_string)
+        self._length_pattern = re.compile(start_string + self._length + float_number + space_string + integer_number
+                                          + "(\\s*" + self._interpolate + "\\s*)?" + end_string)
 
         # Direct
         self._direct = "\\s*DIRECT\\s*"
-        self._direct_pattern = re.compile(start_string + self._direct + self._optional_detector +
-                                          self._equal + self._file_path + end_string)
+        self._direct_pattern = re.compile(start_string + self._direct + self._optional_detector
+                                          + self._equal + self._file_path + end_string)
 
         # Flat
         self._flat = "\\s*FLAT\\s*"
-        self._flat_pattern = re.compile(start_string + self._flat + self._optional_detector +
-                                        self._equal + self._file_path + end_string)
+        self._flat_pattern = re.compile(start_string + self._flat + self._optional_detector
+                                        + self._equal + self._file_path + end_string)
 
         # Flat
         self._hab_file = "\\s*HAB\\s*"
-        self._hab_pattern = re.compile(start_string + self._hab_file + self._optional_detector +
-                                       self._equal + self._file_path + end_string)
+        self._hab_pattern = re.compile(start_string + self._hab_file + self._optional_detector
+                                       + self._equal + self._file_path + end_string)
 
         # Spectrum
         self._spectrum = "\\s*SPECTRUM\\s*"
         self._trans = "\\s*TRANS\\s*"
-        self._spectrum_pattern = re.compile(start_string + "(\\s*" + self._trans + "\\s*/\\s*)?" + self._spectrum +
-                                            self._equal + integer_number + "(\\s*" + self._interpolate + "\\s*)?" +
-                                            end_string)
+        self._spectrum_pattern = re.compile(start_string + "(\\s*" + self._trans + "\\s*/\\s*)?" + self._spectrum
+                                            + self._equal + integer_number + "(\\s*" + self._interpolate + "\\s*)?"
+                                            + end_string)
 
     def parse_line(self, line):
         # Get the settings, ie remove command
@@ -2147,11 +2144,11 @@ class MonParser(UserFileComponentParser):
         direct = re.sub(self._equal, "", direct)
         direct = direct.strip()
         # We need to escape special characters
-        direct = direct.replace("$", "\$")
-        direct = direct.replace(".", "\.")
-        direct = direct.replace("[", "\[")
-        direct = direct.replace("]", "\]")
-        direct = direct.replace(":", "\:")
+        direct = direct.replace("$", r"\$")
+        direct = direct.replace(".", r"\.")
+        direct = direct.replace("[", r"\[")
+        direct = direct.replace("]", r"\]")
+        direct = direct.replace(":", r"\:")
 
         # for VMS compatibility ignore anything in "[]", those are normally VMS drive specifications
         file_path = re.search(direct, original_line, re.IGNORECASE).group(0)
@@ -2347,9 +2344,9 @@ class IgnoredParser(object):
         self._yc_pattern = re.compile(self._yc)
 
         # Box mask
-        self._mask_pattern = re.compile(start_string + "\\s*MASK\\s*" + integer_number + space_string +
-                                        integer_number + space_string + integer_number + space_string +
-                                        integer_number + end_string)
+        self._mask_pattern = re.compile(start_string + "\\s*MASK\\s*" + integer_number + space_string
+                                        + integer_number + space_string + integer_number + space_string
+                                        + integer_number + end_string)
 
         # Habeff
         self._habeff_pattern = re.compile("\\s*MON\\s*/\\s*HABEFF\\s*")
@@ -2358,19 +2355,19 @@ class IgnoredParser(object):
         self._habpath_pattern = re.compile("\\s*MON\\s*/\\s*HABPATH\\s*")
 
         # Bad monitor description
-        self._back_mon_pattern = re.compile("\\s*BACK\\s*/\\s*M\\s*" + integer_number +
-                                            "\." + integer_number + "\\s*/\\s*TIMES\\s*")
+        self._back_mon_pattern = re.compile("\\s*BACK\\s*/\\s*M\\s*" + integer_number
+                                            + r"\." + integer_number + "\\s*/\\s*TIMES\\s*")
 
     def is_ignored(self, line):
         ignore = False
 
         line = line.upper()
-        if (does_pattern_match(self._spy_on_off_pattern, line) or does_pattern_match(self._read_pattern, line) or
-            does_pattern_match(self._centre_pattern, line) or does_pattern_match(self._mid_pattern, line) or
-            does_pattern_match(self._mid_hab_pattern, line) or does_pattern_match(self._sp_pattern, line) or
-            does_pattern_match(self._notab_pattern, line) or does_pattern_match(self._yc_pattern, line) or
-            does_pattern_match(self._mask_pattern, line) or does_pattern_match(self._habeff_pattern, line) or
-            does_pattern_match(self._habpath_pattern, line) or does_pattern_match(self._back_mon_pattern, line)):  # noqa
+        if (does_pattern_match(self._spy_on_off_pattern, line) or does_pattern_match(self._read_pattern, line)
+                or does_pattern_match(self._centre_pattern, line) or does_pattern_match(self._mid_pattern, line)
+                or does_pattern_match(self._mid_hab_pattern, line) or does_pattern_match(self._sp_pattern, line)
+                or does_pattern_match(self._notab_pattern, line) or does_pattern_match(self._yc_pattern, line)
+                or does_pattern_match(self._mask_pattern, line) or does_pattern_match(self._habeff_pattern, line)
+                or does_pattern_match(self._habpath_pattern, line) or does_pattern_match(self._back_mon_pattern, line)):  # noqa
             ignore = True
         return ignore
 

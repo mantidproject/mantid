@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_LEBAILFITTEST_H_
-#define MANTID_CURVEFITTING_LEBAILFITTEST_H_
+#pragma once
 
 #include "MantidCurveFitting/Algorithms/LeBailFunction.h"
 #include <cxxtest/TestSuite.h>
@@ -217,7 +216,7 @@ public:
          << imax111 << "-th points.\n";
 
     // Calculate diffraction patters
-    auto out = lebailfunction.function(vecX, true, false);
+    lebailfunction.function(vecX, true, false);
     TS_ASSERT_THROWS_ANYTHING(lebailfunction.function(vecX, true, true));
 
     vector<string> vecbkgdparnames(2);
@@ -229,7 +228,7 @@ public:
     lebailfunction.addBackgroundFunction("Polynomial", 2, vecbkgdparnames,
                                          bkgdvec, vecX.front(), vecX.back());
 
-    out = lebailfunction.function(vecX, true, true);
+    auto out = lebailfunction.function(vecX, true, true);
 
     double v1 = out[imax111];
     double v2 = out[imax110];
@@ -429,7 +428,8 @@ public:
     return ws;
   }
 
-  void importDataFromColumnFile(std::string filename, std::vector<double> &vecX,
+  void importDataFromColumnFile(const std::string &filename,
+                                std::vector<double> &vecX,
                                 std::vector<double> &vecY,
                                 std::vector<double> &vecE) {
     std::ifstream ins;
@@ -441,7 +441,6 @@ public:
       if (line[0] != '#') {
         double x, y;
         std::stringstream ss;
-        std::string dataline(line);
         ss.str(line);
         ss >> x >> y;
         vecX.emplace_back(x);
@@ -693,5 +692,3 @@ public:
     return;
   }
 };
-
-#endif /* MANTID_CURVEFITTING_LEBAILFITTEST_H_ */

@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REBINBYPULSETIMES_H_
-#define MANTID_ALGORITHMS_REBINBYPULSETIMES_H_
+#pragma once
 
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/RebinByTimeBase.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,7 +15,7 @@ namespace Algorithms {
 /** RebinByPulseTimes : Rebin an input EventWorkspace according to the pulse
  times of the events.
  */
-class DLLExport RebinByPulseTimes : public RebinByTimeBase {
+class MANTID_ALGORITHMS_DLL RebinByPulseTimes : public RebinByTimeBase {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -49,5 +48,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_REBINBYPULSETIMES_H_ */

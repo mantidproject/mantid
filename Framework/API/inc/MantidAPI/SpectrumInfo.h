@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SPECTRUMINFO_H_
-#define MANTID_API_SPECTRUMINFO_H_
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/SpectrumInfoIterator.h"
@@ -57,6 +56,7 @@ public:
   ~SpectrumInfo();
 
   size_t size() const;
+  size_t detectorCount() const;
 
   const SpectrumDefinition &spectrumDefinition(const size_t index) const;
   const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &
@@ -110,5 +110,3 @@ using SpectrumInfoConstIt = SpectrumInfoIterator<const SpectrumInfo>;
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_SPECTRUMINFO_H_ */

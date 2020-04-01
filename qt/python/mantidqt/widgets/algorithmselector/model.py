@@ -1,12 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import, print_function
-
-from mantid.api import AlgorithmFactory
+from mantid.api import AlgorithmFactory, AlgorithmManager, IWorkspaceProperty
+from mantid.kernel import Direction
 
 CATEGORY_SEP = '\\'
 
@@ -81,3 +80,12 @@ class AlgorithmSelectorModel(object):
         unique_alg_names = set(descr.name
                                for descr in algm_factory.getDescriptors(True))
         return sorted(unique_alg_names), data
+
+    def find_input_workspace_property(self, algorithm):
+        algm_manager = AlgorithmManager.Instance()
+        alg_instance = algm_manager.createUnmanaged(algorithm[0], algorithm[1])
+        alg_instance.initialize()
+        for prop in alg_instance.getProperties():
+            if isinstance(prop, IWorkspaceProperty) and prop.direction in [Direction.Input, Direction.InOut]:
+                return prop.name
+        return None

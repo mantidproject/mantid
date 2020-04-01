@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SmoothMD.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -175,7 +175,7 @@ const std::string SmoothMD::summary() const {
  * @return Smoothed MDHistoWorkspace
  */
 IMDHistoWorkspace_sptr
-SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
+SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
                     const WidthVector &widthVector,
                     OptionalIMDHistoWorkspace_const_sptr weightingWS) {
 
@@ -278,7 +278,7 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
  * @return Smoothed MDHistoWorkspace
  */
 IMDHistoWorkspace_sptr
-SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
+SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
                          const WidthVector &widthVector,
                          OptionalIMDHistoWorkspace_const_sptr weightingWS) {
 

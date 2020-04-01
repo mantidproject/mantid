@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Stitch1DMany.h"
 #include "MantidAPI/ADSValidator.h"
@@ -269,8 +269,10 @@ void Stitch1DMany::exec() {
       for (size_t i = 0; i < m_inputWSMatrix.front().size(); ++i) {
         std::vector<MatrixWorkspace_sptr> inMatrix;
         inMatrix.reserve(m_inputWSMatrix.size());
-        for (const auto &ws : m_inputWSMatrix)
-          inMatrix.emplace_back(ws[i]);
+
+        std::transform(m_inputWSMatrix.begin(), m_inputWSMatrix.end(),
+                       std::back_inserter(inMatrix),
+                       [i](const auto &ws) { return ws[i]; });
 
         outName = groupName;
         Workspace_sptr outStitchedWS;

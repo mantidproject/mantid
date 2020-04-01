@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
 from mantid import config
@@ -57,7 +55,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
             'IvsLam_38415_sliced_2400_3600', 'IvsQ_binned_38415_sliced_2400_3600', 'TOF_38415',
             'TOF_38415_monitors', 'TOF_38415_sliced', 'TOF_38415_sliced_0_1200',
             'TOF_38415_sliced_1200_2400', 'TOF_38415_sliced_2400_3600', 'TOF']
-        
+
         self._expected_real_time_sliced_outputs = [
             'IvsQ_38415', 'IvsQ_38415_sliced_0_210', 'IvsQ_38415_sliced_210_420',
             'IvsQ_38415_sliced_420_610', 'IvsQ_binned_38415', 'IvsQ_binned_38415_sliced_0_210',
@@ -458,9 +456,6 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         GroupWorkspaces('TOF_13463, 12345', OutputWorkspace='mixed_unit_group')
         args = self._default_options
         args['InputRunList'] = '13460, mixed_unit_group'
-        outputs = ['IvsQ_13460+13463', 'IvsQ_binned_13460+13463', 'TOF', 'TOF_13460+13463', 'TOF_13460',
-                   'TOF_13463', '12345']
-
         self._assert_run_algorithm_throws(args)
 
     def test_no_TOF_input_workspace_groups_remain_unchanged(self):
@@ -470,8 +465,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         args = self._default_options
         args['InputRunList'] = '12345, 67890'
         outputs = ['no_TOF_group', 'TOF_12345+67890', '12345', '67890']
-
-        self._assert_run_algorithm_succeeds(args)
+        self._assert_run_algorithm_succeeds(args, outputs)
 
     def test_group_TOF_workspaces_succeeds_with_only_TOF_workspaces(self):
         self._create_workspace(13460, 'TOF_')
@@ -569,6 +563,12 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         else:
             algNames = [alg.name() for alg in history]
         self.assertEqual(algNames, expected)
+
+    def _check_history_algorithm_properties(self, ws, toplevel_idx, child_idx, property_values):
+        parent_hist = ws.getHistory().getAlgorithmHistory(toplevel_idx)
+        child_hist = parent_hist.getChildHistories()[child_idx]
+        for prop, val in property_values.items():
+            self.assertEqual(child_hist.getPropertyValue(prop), val)
 
     def _assert_run_algorithm_succeeds(self, args, expected = None):
         """Run the algorithm with the given args and check it succeeds,

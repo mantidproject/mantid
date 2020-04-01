@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PARAMETERMAP_H_
-#define PARAMETERMAP_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
@@ -380,5 +379,3 @@ using ParameterMap_const_sptr = boost::shared_ptr<const ParameterMap>;
 } // Namespace Geometry
 
 } // Namespace Mantid
-
-#endif /*PARAMETERMAP_H_*/

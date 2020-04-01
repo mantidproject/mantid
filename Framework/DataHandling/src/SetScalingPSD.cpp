@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // @author Ronald Fowler
 #include "MantidDataHandling/SetScalingPSD.h"
@@ -293,7 +293,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
  * @param detID :: Vector of detector numbers
  * @param pos :: V3D of detector positions corresponding to detID
  */
-void SetScalingPSD::getDetPositionsFromRaw(std::string rawfile,
+void SetScalingPSD::getDetPositionsFromRaw(const std::string &rawfile,
                                            std::vector<int> &detID,
                                            std::vector<Kernel::V3D> &pos) {
   (void)rawfile; // Avoid compiler warning

@@ -1,11 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/CreateTransmissionWorkspace.h"
+#include <utility>
+
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
+#include "MantidAlgorithms/CreateTransmissionWorkspace.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
@@ -45,7 +47,7 @@ void CreateTransmissionWorkspace::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "FirstTransmissionRun", "", Direction::Input,
                       PropertyMode::Mandatory, inputValidator->clone()),
-                  "First transmission run, or the low wavelength transmision "
+                  "First transmission run, or the low wavelength transmission "
                   "run if SecondTransmissionRun is also provided.");
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
@@ -154,7 +156,7 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
     const OptionalMinMax &wavelengthMonitorBackgroundInterval,
     const OptionalMinMax &wavelengthMonitorIntegrationInterval,
     const OptionalInteger &i0MonitorIndex,
-    MatrixWorkspace_sptr firstTransmissionRun,
+    const MatrixWorkspace_sptr &firstTransmissionRun,
     OptionalMatrixWorkspace_sptr secondTransmissionRun,
     const OptionalDouble &stitchingStart, const OptionalDouble &stitchingDelta,
     const OptionalDouble &stitchingEnd,
@@ -163,7 +165,7 @@ MatrixWorkspace_sptr CreateTransmissionWorkspace::makeTransmissionCorrection(
   /*make struct of optional inputs to refactor method arguments*/
   /*make a using statements defining OptionalInteger for MonitorIndex*/
   auto trans1InLam =
-      toLam(firstTransmissionRun, processingCommands, i0MonitorIndex,
+      toLam(std::move(firstTransmissionRun), processingCommands, i0MonitorIndex,
             wavelengthInterval, wavelengthMonitorBackgroundInterval);
   MatrixWorkspace_sptr trans1Detector = trans1InLam.get<0>();
   MatrixWorkspace_sptr trans1Monitor = trans1InLam.get<1>();

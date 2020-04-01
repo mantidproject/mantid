@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MUON_MUONPAIRINGASYMMETRYTEST_H_
-#define MANTID_MUON_MUONPAIRINGASYMMETRYTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -28,7 +27,7 @@ namespace {
 // algorithm (a MatrixWorkspace).
 class setUpADSWithWorkspace {
 public:
-  setUpADSWithWorkspace(Workspace_sptr ws) {
+  setUpADSWithWorkspace(const Workspace_sptr &ws) {
     AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
   };
   ~setUpADSWithWorkspace() { AnalysisDataService::Instance().clear(); };
@@ -56,7 +55,7 @@ IAlgorithm_sptr algorithmWithoutOptionalPropertiesSet(
 
 // Set up algorithm without any optional properties.
 IAlgorithm_sptr
-setUpAlgorithmWithoutOptionalProperties(WorkspaceGroup_sptr ws,
+setUpAlgorithmWithoutOptionalProperties(const WorkspaceGroup_sptr &ws,
                                         const std::string &name) {
   const std::vector<int> group1 = {1, 2};
   const std::vector<int> group2 = {3, 4};
@@ -68,7 +67,7 @@ setUpAlgorithmWithoutOptionalProperties(WorkspaceGroup_sptr ws,
 }
 
 // Set up algorithm with groupings
-IAlgorithm_sptr setUpAlgorithmWithGroups(WorkspaceGroup_sptr ws,
+IAlgorithm_sptr setUpAlgorithmWithGroups(const WorkspaceGroup_sptr &ws,
                                          const std::vector<int> &group1,
                                          const std::vector<int> &group2) {
   setUpADSWithWorkspace setup(ws);
@@ -79,8 +78,8 @@ IAlgorithm_sptr setUpAlgorithmWithGroups(WorkspaceGroup_sptr ws,
 
 // Set up algorithm to accept two group workspaces
 IAlgorithm_sptr
-setUpAlgorithmWithGroupWorkspaces(MatrixWorkspace_sptr groupedWS1,
-                                  MatrixWorkspace_sptr groupedWS2) {
+setUpAlgorithmWithGroupWorkspaces(const MatrixWorkspace_sptr &groupedWS1,
+                                  const MatrixWorkspace_sptr &groupedWS2) {
   auto alg = boost::make_shared<MuonPairingAsymmetry>();
   alg->initialize();
   alg->setProperty("SpecifyGroupsManually", false);
@@ -95,8 +94,8 @@ setUpAlgorithmWithGroupWorkspaces(MatrixWorkspace_sptr groupedWS1,
 
 // Set up MuonPairingAsymmetry algorithm to accept two WorkspaceGroups
 IAlgorithm_sptr
-setUpAlgorithmWithGroupWorkspaceGroups(WorkspaceGroup_sptr groupedWS1,
-                                       WorkspaceGroup_sptr groupedWS2) {
+setUpAlgorithmWithGroupWorkspaceGroups(const WorkspaceGroup_sptr &groupedWS1,
+                                       const WorkspaceGroup_sptr &groupedWS2) {
   auto alg = boost::make_shared<MuonPairingAsymmetry>();
   alg->setRethrows(true);
   alg->initialize();
@@ -111,7 +110,7 @@ setUpAlgorithmWithGroupWorkspaceGroups(WorkspaceGroup_sptr groupedWS1,
 }
 
 // Retrieve the output workspace from an executed algorithm
-MatrixWorkspace_sptr getOutputWorkspace(IAlgorithm_sptr alg) {
+MatrixWorkspace_sptr getOutputWorkspace(const IAlgorithm_sptr &alg) {
   MatrixWorkspace_sptr outputWS = alg->getProperty("OutputWorkspace");
   return outputWS;
 }
@@ -513,5 +512,3 @@ public:
     TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.122684, 0.0001);
   }
 };
-
-#endif /* MANTID_MUON_MUONPAIRINGASYMMETRYTEST_H_ */

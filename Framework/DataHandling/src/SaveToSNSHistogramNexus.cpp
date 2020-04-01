@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // SaveToSNSHistogramNexus
 // @author Freddie Akeroyd, STFC ISIS Faility
@@ -187,9 +187,9 @@ int SaveToSNSHistogramNexus::copy_file(const char *inFile, int nx__access,
  * @return error code
  */
 int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
-    Geometry::RectangularDetector_const_sptr det, int x_pixel_slab,
+    const Geometry::RectangularDetector_const_sptr &det, int x_pixel_slab,
     const char *field_name, const char *errors_field_name, bool doErrors,
-    bool doBoth, int is_definition, std::string bank) {
+    bool doBoth, int is_definition, const std::string &bank) {
   int dataRank, dataDimensions[NX_MAXRANK];
   int slabDimensions[NX_MAXRANK], slabStartIndices[NX_MAXRANK];
 
@@ -412,7 +412,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(
  * @param is_definition
  * @return error code
  */
-int SaveToSNSHistogramNexus::WriteDataGroup(std::string bank,
+int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank,
                                             int is_definition) {
   int dataType, dataRank, dataDimensions[NX_MAXRANK];
   NXname name;

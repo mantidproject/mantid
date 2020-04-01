@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/CatalogSearch.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -576,7 +576,7 @@ bool CatalogSearch::validateDates() {
   return ret;
 }
 
-void CatalogSearch::correctedToolTip(std::string text, QLabel *label) {
+void CatalogSearch::correctedToolTip(const std::string &text, QLabel *label) {
 #ifdef Q_OS_WIN
   label->setToolTip(QString::fromStdString("<span style=\"color: black;\">" +
                                            text + "</span>"));
@@ -1049,7 +1049,7 @@ void CatalogSearch::addCheckBoxColumn(QTableWidget *table) {
 
   // Add a checkbox to all rows in the first column.
   for (int row = 0; row < table->rowCount(); row++) {
-    QTableWidgetItem *newItem = new QTableWidgetItem();
+    auto *newItem = new QTableWidgetItem();
     // Allow the widget to take on checkbox functionality.
     newItem->setCheckState(Qt::Unchecked);
     // Allow the user to select and check the box.
@@ -1121,7 +1121,7 @@ void CatalogSearch::updateDataFileLabels(QTableWidgetItem *item) {
  * @return A set containing all file extensions.
  */
 std::unordered_set<std::string>
-CatalogSearch::getDataFileExtensions(Mantid::API::Column_sptr column) {
+CatalogSearch::getDataFileExtensions(const Mantid::API::Column_sptr &column) {
   std::unordered_set<std::string> extensions;
 
   // For every filename in the column...
@@ -1368,7 +1368,7 @@ void CatalogSearch::sortByFileSize(int column) {
     // Convert cell value to int within the datamodel.
     // This allows us to sort by the specific column.
     for (int row = 0; row < table->rowCount(); row++) {
-      QTableWidgetItem *item = new QTableWidgetItem;
+      auto *item = new QTableWidgetItem;
       item->setData(Qt::EditRole, table->item(row, byteColumn)->text().toInt());
       table->setItem(row, byteColumn, item);
     }

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FIND_SX_PEAKSTEST_H_
-#define FIND_SX_PEAKSTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidCrystal/FindSXPeaks.h"
@@ -25,7 +24,7 @@ using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;
 
 // Helper method to overwrite spectra.
-void overWriteSpectraY(size_t histo, Workspace2D_sptr workspace,
+void overWriteSpectraY(size_t histo, const Workspace2D_sptr &workspace,
                        const std::vector<double> &Yvalues) {
 
   workspace->dataY(histo) = Yvalues;
@@ -33,7 +32,7 @@ void overWriteSpectraY(size_t histo, Workspace2D_sptr workspace,
 
 // Helper method to make what will be recognised as a single peak.
 void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
-                 Workspace2D_sptr workspace) {
+                 const Workspace2D_sptr &workspace) {
   size_t nBins = workspace->y(0).size();
   std::vector<double> peaksInY(nBins);
 
@@ -54,7 +53,8 @@ void makeOnePeak(size_t histo, double peak_intensity, size_t at_bin,
  * @param startIndex :: the workspace index to start searching from
  * @param endIndex :: the workspace index to stop searching from
  */
-std::unique_ptr<FindSXPeaks> createFindSXPeaks(Workspace2D_sptr workspace) {
+std::unique_ptr<FindSXPeaks>
+createFindSXPeaks(const Workspace2D_sptr &workspace) {
   auto alg = std::make_unique<FindSXPeaks>();
   alg->setRethrows(true);
   alg->initialize();
@@ -415,5 +415,3 @@ public:
     TSM_ASSERT("Should have found many peaks!", 0 < result->rowCount());
   }
 };
-
-#endif

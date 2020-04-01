@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,k
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
-
 from Muon.GUI.Common.plotting_widget.plotting_widget_view import PlotWidgetView
 from Muon.GUI.Common.plotting_widget.plotting_widget_presenter import PlotWidgetPresenter
 from Muon.GUI.Common.plotting_widget.plotting_widget_model import PlotWidgetModel

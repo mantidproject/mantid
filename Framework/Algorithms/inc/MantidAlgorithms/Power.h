@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef MANTID_ALGORITHM_POWER_H_
-#define MANTID_ALGORITHM_POWER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -31,7 +29,7 @@ namespace Algorithms {
  @date 12/04/2010
  */
 
-class DLLExport Power : public UnaryOperation {
+class MANTID_ALGORITHMS_DLL Power : public UnaryOperation {
 public:
   /// Default constructor
   Power();
@@ -65,5 +63,3 @@ private:
 };
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * Helper file to gather common routines to the Loaders
@@ -119,7 +119,7 @@ double LoadHelper::calculateTOF(double distance, double wavelength) {
  */
 double
 LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &workspace,
-                                  std::string s) {
+                                  const std::string &s) {
   std::vector<std::string> prop =
       workspace->getInstrument()->getStringParameter(s);
   if (prop.empty()) {
@@ -509,7 +509,7 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID,
  *  @param dateToParse :: date as string
  *  @return date as required in Mantid
  */
-std::string LoadHelper::dateTimeInIsoFormat(std::string dateToParse) {
+std::string LoadHelper::dateTimeInIsoFormat(const std::string &dateToParse) {
   namespace bt = boost::posix_time;
   // parsing format
   const std::locale format = std::locale(
@@ -535,7 +535,7 @@ std::string LoadHelper::dateTimeInIsoFormat(std::string dateToParse) {
  * @param componentName The name of the component of the instrument
  * @param newPos New position of the component
  */
-void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws,
+void LoadHelper::moveComponent(const API::MatrixWorkspace_sptr &ws,
                                const std::string &componentName,
                                const V3D &newPos) {
   Geometry::IComponent_const_sptr component =
@@ -557,7 +557,7 @@ void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws,
  * @param rot Rotations defined by setting a quaternion from an angle in degrees
  * and an axis
  */
-void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws,
+void LoadHelper::rotateComponent(const API::MatrixWorkspace_sptr &ws,
                                  const std::string &componentName,
                                  const Kernel::Quat &rot) {
   Geometry::IComponent_const_sptr component =
@@ -578,7 +578,7 @@ void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws,
  * @param componentName The Name of the component of the instrument
  * @return The position of the component
  */
-V3D LoadHelper::getComponentPosition(API::MatrixWorkspace_sptr ws,
+V3D LoadHelper::getComponentPosition(const API::MatrixWorkspace_sptr &ws,
                                      const std::string &componentName) {
   Geometry::IComponent_const_sptr component =
       ws->getInstrument()->getComponentByName(componentName);

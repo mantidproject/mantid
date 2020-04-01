@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CALCULATEDIFCTEST_H_
-#define MANTID_ALGORITHMS_CALCULATEDIFCTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -40,8 +39,8 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void runTest(Workspace2D_sptr inputWS, OffsetsWorkspace_sptr offsetsWS,
-               std::string &outWSName) {
+  void runTest(const Workspace2D_sptr &inputWS,
+               const OffsetsWorkspace_sptr &offsetsWS, std::string &outWSName) {
 
     CalculateDIFC alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -141,5 +140,3 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_CALCULATEDIFCTEST_H_ */

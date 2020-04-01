@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IBACKGROUNDFUNCTION_H_
-#define MANTID_API_IBACKGROUNDFUNCTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -20,7 +19,7 @@ namespace API {
     @author Anders Markvardsen, ISIS, RAL
     @date 2/11/2009
 */
-class DLLExport IBackgroundFunction : public IFunctionWithLocation {
+class IBackgroundFunction : public IFunctionWithLocation {
 public:
   /// Fits the function
   /// @param X :: a vector of x values
@@ -33,5 +32,3 @@ using IBackgroundFunction_sptr = boost::shared_ptr<IBackgroundFunction>;
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_IBACKGROUNDFUNCTION_H_*/

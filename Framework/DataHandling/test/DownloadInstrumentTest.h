@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_DOWNLOADINSTRUMENTTEST_H_
-#define MANTID_DATAHANDLING_DOWNLOADINSTRUMENTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -106,7 +105,7 @@ public:
   }
   static void destroySuite(DownloadInstrumentTest *suite) { delete suite; }
 
-  void createDirectory(Poco::Path path) {
+  void createDirectory(const Poco::Path &path) {
     Poco::File file(path);
     if (file.createDirectory()) {
       m_directoriesToRemove.emplace_back(file);
@@ -191,9 +190,6 @@ public:
   }
 
   int runDownloadInstrument() {
-    // Name of the output workspace.
-    std::string outWSName("DownloadInstrumentTest_OutputWS");
-
     MockedDownloadInstrument alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -207,5 +203,3 @@ public:
   std::vector<std::string> m_originalInstDir;
   std::vector<Poco::File> m_directoriesToRemove;
 };
-
-#endif /* MANTID_DATAHANDLING_DOWNLOADINSTRUMENTTEST_H_ */

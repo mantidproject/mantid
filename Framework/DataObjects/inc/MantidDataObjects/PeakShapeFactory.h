@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_PEAKSHAPEFACTORY_H_
-#define MANTID_DATAOBJECTS_PEAKSHAPEFACTORY_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
@@ -39,5 +38,3 @@ using PeakShapeFactory_const_sptr = boost::shared_ptr<const PeakShapeFactory>;
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_PEAKSHAPEFACTORY_H_ */

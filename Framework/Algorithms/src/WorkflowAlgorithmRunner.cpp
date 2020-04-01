@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/WorkflowAlgorithmRunner.h"
 
@@ -59,7 +59,8 @@ std::string tidyWorkspaceName(const std::string &s) {
  * @throw std::runtime_error in case of errorneous entries in `table`
  */
 template <typename MAP>
-void cleanPropertyTable(ITableWorkspace_sptr table, const MAP &ioMapping) {
+void cleanPropertyTable(const ITableWorkspace_sptr &table,
+                        const MAP &ioMapping) {
   // Some output columns may be processed several times, but this should
   // not be a serious performance hit.
   for (const auto &ioPair : ioMapping) {

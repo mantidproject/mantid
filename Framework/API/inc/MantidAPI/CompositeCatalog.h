@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ICAT_COMPOSITECATALOG_H_
-#define MANTID_ICAT_COMPOSITECATALOG_H_
+#pragma once
 
 #include "MantidAPI/ICatalog.h"
 
@@ -26,7 +25,7 @@ public:
   /// Constructor
   CompositeCatalog();
   /// Adds a catalog to the list of catalogs (m_catalogs)
-  void add(const ICatalog_sptr catalog);
+  void add(const ICatalog_sptr &catalog);
   /// Log the user into the catalog system.
   CatalogSession_sptr login(const std::string &username,
                             const std::string &password,
@@ -61,4 +60,3 @@ private:
 };
 } // namespace API
 } // namespace Mantid
-#endif /* MANTID_ICAT_COMPOSITECATALOG_H_ */

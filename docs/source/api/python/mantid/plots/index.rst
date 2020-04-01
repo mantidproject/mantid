@@ -243,7 +243,7 @@ When using ``mantid3d`` projection
 Functions to use when **mantid** projection is not available
 ------------------------------------------------------------
 
-.. automodule:: mantid.plots.plotfunctions
+.. automodule:: mantid.plots.axesfunctions
    :members: plot, errorbar, scatter, contour, contourf, pcolor,
              pcolorfast, pcolormesh, tripcolor, tricontour, tricontourf
 
@@ -251,13 +251,13 @@ Functions to use when **mantid** projection is not available
 Functions to use when **mantid3d** projection is not available
 --------------------------------------------------------------
 
-.. automodule:: mantid.plots.plotfunctions3D
+.. automodule:: mantid.plots.axesfunctions3D
    :members: plot, scatter, plot_wireframe, plot_surface,
              contour, contourf
 
 Helper functions
 ----------------
-.. automodule:: mantid.plots.helperfunctions
+.. automodule:: mantid.plots.datafunctions
    :members: get_distribution, get_normalization,
              points_from_boundaries, boundaries_from_points,
              get_wksp_index_dist_and_label, get_md_data, get_md_data1d,

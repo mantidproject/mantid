@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WBVMEDIANTESTTEST_H_
-#define WBVMEDIANTESTTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -250,5 +249,3 @@ private:
   Workspace2D_sptr m_2DWS;
   double m_YSum;
 };
-
-#endif /*WBVMEDIANTESTTEST_H_*/

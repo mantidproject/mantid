@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>610</width>
-    <height>584</height>
+    <height>583</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -123,6 +123,67 @@
      </property>
     </spacer>
    </item>
+   <item row="0" column="0" colspan="4">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="4">
+      <widget class="QLabel" name="global_fit_status_label">
+       <property name="frameShape">
+        <enum>QFrame::Panel</enum>
+       </property>
+       <property name="text">
+        <string>No Fit</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="4">
+      <widget class="QPushButton" name="select_workspaces_to_fit_button">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="text">
+        <string>Select data to fit</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="undo_fit_button">
+       <property name="text">
+        <string>Undo Fits</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QPushButton" name="fit_button">
+       <property name="text">
+        <string>Fit</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QCheckBox" name="plot_guess_checkbox">
+       <property name="text">
+        <string>Plot guess</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QComboBox" name="simul_fit_by_combo"/>
+     </item>
+     <item row="4" column="2">
+      <widget class="QComboBox" name="simul_fit_by_specifier"/>
+     </item>
+     <item row="4" column="0">
+      <widget class="QCheckBox" name="simul_fit_checkbox">
+       <property name="text">
+        <string>Simultaneous fit over</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="4" column="0" colspan="4">
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
@@ -194,78 +255,6 @@
       </property>
      </widget>
     </widget>
-   </item>
-   <item row="0" column="0" colspan="4">
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="4">
-      <widget class="QLabel" name="global_fit_status_label">
-       <property name="frameShape">
-        <enum>QFrame::Panel</enum>
-       </property>
-       <property name="text">
-        <string>No Fit</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="4">
-      <widget class="QPushButton" name="select_workspaces_to_fit_button">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="text">
-        <string>Select data to fit</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="1">
-      <widget class="QRadioButton" name="sequential_fit_radio">
-       <property name="text">
-        <string>Sequential Fit</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="2">
-      <widget class="QRadioButton" name="simul_fit_radio">
-       <property name="text">
-        <string>Simultaneous Fit</string>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QRadioButton" name="single_fit_radio">
-       <property name="text">
-        <string>Single Fit</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QPushButton" name="undo_fit_button">
-       <property name="text">
-        <string>Undo Latest Fit</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QPushButton" name="fit_button">
-       <property name="text">
-        <string>Fit</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QCheckBox" name="plot_guess_checkbox">
-       <property name="text">
-        <string>Plot guess</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
   </layout>
   <zorder>splitter</zorder>

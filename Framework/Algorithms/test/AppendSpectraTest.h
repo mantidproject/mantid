@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_APPENDSPECTRATEST_H_
-#define MANTID_ALGORITHMS_APPENDSPECTRATEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -433,9 +432,9 @@ private:
   }
   /** Creates a 2D workspace with 5 histograms
    */
-  void createWorkspaceWithAxisAndLabel(const std::string outputName,
+  void createWorkspaceWithAxisAndLabel(const std::string &outputName,
                                        const std::string &axisType,
-                                       const std::string axisValue) {
+                                       const std::string &axisValue) {
     int nspec = 5;
     std::vector<std::string> YVals;
     std::vector<double> dataX;
@@ -478,5 +477,3 @@ private:
   const std::string ws1Name;
   const std::string ws2Name;
 };
-
-#endif /* MANTID_ALGORITHMS_APPENDSPECTRATEST_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TSVSERIALISER_H_
-#define MANTID_TSVSERIALISER_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidKernel/CaseInsensitiveMap.h"
@@ -111,7 +110,7 @@ public:
 
   void storeDouble(const double val);
   void storeInt(const int val);
-  void storeString(const std::string val);
+  void storeString(const std::string &val);
   void storeBool(const bool val);
 
   double readDouble();
@@ -173,5 +172,3 @@ private:
 };
 } // namespace API
 } // namespace MantidQt
-
-#endif

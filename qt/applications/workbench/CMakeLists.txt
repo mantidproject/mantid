@@ -12,6 +12,12 @@ add_python_package(workbench
   INSTALL_BIN_DIR "${WORKBENCH_BIN_DIR}"
 )
 
+set_target_properties(workbench PROPERTIES
+                      VS_DEBUGGER_COMMAND $<$<BOOL:${WIN32}>:${PYTHON_EXECUTABLE}>
+                      VS_DEBUGGER_COMMAND_ARGUMENTS $<$<BOOL:${WIN32}>:${MSVC_BIN_DIR}/workbench-script.pyw>
+                      VS_DEBUGGER_ENVIRONMENT $<$<BOOL:${WIN32}>:${MSVC_IDE_ENV}>
+                      )
+
 set(_images_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 
 if (WIN32)
@@ -77,6 +83,7 @@ set(TEST_FILES
     workbench/plotting/test/test_figuremanager.py
     workbench/plotting/test/test_figurewindow.py
     workbench/plotting/test/test_globalfiguremanager.py
+    workbench/plotting/test/test_propertiesdialog.py
     workbench/plugins/test/test_editor.py
     workbench/plugins/test/test_exception_handler.py
     workbench/plugins/test/test_jupyterconsole.py

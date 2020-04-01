@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -152,7 +152,7 @@ void LoadMuonNexus::checkOptionalProperties() {
 
 /// Run the Child Algorithm LoadInstrument
 void LoadMuonNexus::runLoadInstrument(
-    DataObjects::Workspace2D_sptr localWorkspace) {
+    const DataObjects::Workspace2D_sptr &localWorkspace) {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 

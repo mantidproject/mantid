@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import os
 
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
@@ -54,6 +52,7 @@ def get_default_grouping(workspace, instrument, main_field_direction):
                 grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
             else:
                 grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
+
         except IndexError:
             return [], [], ''
     else:

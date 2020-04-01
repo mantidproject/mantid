@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MENU_WITH_TOOLTIPS
-#define MENU_WITH_TOOLTIPS
+#pragma once
 
 #include <QMenu>
 
@@ -19,5 +18,3 @@ public:
   MenuWithToolTips(const QString &title, QWidget *parent = nullptr);
   bool event(QEvent *e) override;
 };
-
-#endif // MENU_WITH_TOOLTIPS

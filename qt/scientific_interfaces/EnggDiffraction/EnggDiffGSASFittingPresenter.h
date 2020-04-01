@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFGSASFITTINGPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFGSASFITTINGPRESENTER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "GSASIIRefineFitPeaksOutputProperties.h"
@@ -71,7 +70,7 @@ private:
   /// presenter's various children
   GSASIIRefineFitPeaksParameters
   collectInputParameters(const RunLabel &runLabel,
-                         const Mantid::API::MatrixWorkspace_sptr ws) const;
+                         const Mantid::API::MatrixWorkspace_sptr &ws) const;
 
   /**
    Perform refinements on a number of runs
@@ -99,5 +98,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFGSASFITTINGPRESENTER_H_

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_
-#define MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_
+#pragma once
 #include "../../../ISISReflectometry/GUI/Batch/RowProcessingAlgorithm.h"
 #include "../../../ISISReflectometry/Reduction/Batch.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
@@ -225,4 +224,3 @@ private:
   RunsTable m_runsTable;
   Slicing m_slicing;
 };
-#endif // MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_

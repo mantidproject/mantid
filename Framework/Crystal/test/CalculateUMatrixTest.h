@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_CALCULATEUMATRIXTEST_H_
-#define MANTID_CRYSTAL_CALCULATEUMATRIXTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
@@ -182,7 +181,7 @@ private:
     return atan2(-QYUB(H, K, L), -QXUB(H, K, L));
   }
 
-  void generatePeaks(std::string WSName) {
+  void generatePeaks(const std::string &WSName) {
     setupUB();
 
     double Hpeaks[9] = {0, 1, 1, 0, -1, -1, 1, -3, -2};
@@ -209,5 +208,3 @@ private:
     AnalysisDataService::Instance().addOrReplace(WSName, pw);
   }
 };
-
-#endif /* MANTID_CRYSTAL_CALCULATEUMATRIXTEST_H_ */

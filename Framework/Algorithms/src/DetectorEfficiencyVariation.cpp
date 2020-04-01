@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DetectorEfficiencyVariation.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -187,8 +187,8 @@ void DetectorEfficiencyVariation::retrieveProperties(
  * @return number of detectors for which tests failed
  */
 int DetectorEfficiencyVariation::doDetectorTests(
-    API::MatrixWorkspace_const_sptr counts1,
-    API::MatrixWorkspace_const_sptr counts2, const double average,
+    const API::MatrixWorkspace_const_sptr &counts1,
+    const API::MatrixWorkspace_const_sptr &counts2, const double average,
     double variation) {
   // DIAG in libISIS did this.  A variation of less than 1 doesn't make sense in
   // this algorithm

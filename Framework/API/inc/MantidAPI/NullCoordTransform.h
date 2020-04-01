@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDAPI_NULLCOORDTRANSFORM_H
-#define MANTIDAPI_NULLCOORDTRANSFORM_H
+#pragma once
 
 #include "MantidAPI/CoordTransform.h"
 
@@ -18,7 +17,7 @@ namespace API {
  * @author Owen Arnold
  * @date 14/09/2011
  */
-class DLLExport NullCoordTransform : public Mantid::API::CoordTransform {
+class MANTID_API_DLL NullCoordTransform : public Mantid::API::CoordTransform {
 public:
   NullCoordTransform(size_t ndims = 3);
   std::string toXMLString() const override;
@@ -33,5 +32,3 @@ private:
 };
 } // namespace API
 } // namespace Mantid
-
-#endif

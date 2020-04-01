@@ -1032,8 +1032,11 @@ set(TEST_FILES
     WorkspaceGroupTest.h)
 
 set(TEST_PY_FILES
-    NormaliseToUnityTest.py
-    ReflectometryBackgroundSubtractionTest.py)
+    test/NormaliseToUnityTest.py
+    test/ReflectometryBackgroundSubtractionTest.py
+    test/ReflectometryReductionOne2Test.py)
+
+  pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python ${TEST_PY_FILES})
 
 if(COVERALLS)
   foreach(loop_var ${SRC_FILES} ${C_SRC_FILES} ${INC_FILES})
@@ -1077,6 +1080,10 @@ target_link_libraries(Algorithms
 
 # Add the unit tests directory
 add_subdirectory(test)
+
+# Auto-generate exports header
+target_include_directories(Algorithms PUBLIC ${CMAKE_BINARY_DIR}/Framework/Algorithms)
+generate_mantid_export_header(Algorithms FALSE)
 
 # Installation settings
 

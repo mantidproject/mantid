@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ChangeBinOffset.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -54,8 +54,8 @@ void ChangeBinOffset::exec() {
     this->for_each<Indices::FromProperty>(
         *outputW, std::make_tuple(MatrixWorkspaceAccess::x),
         [offset](std::vector<double> &dataX) {
-          for (auto &x : dataX)
-            x += offset;
+          std::transform(dataX.begin(), dataX.end(), dataX.begin(),
+                         [offset](double x) { return x + offset; });
         });
   }
 }

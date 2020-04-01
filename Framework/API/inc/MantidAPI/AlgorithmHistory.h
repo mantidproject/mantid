@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ALGORITHMHISTORY_H_
-#define MANTID_API_ALGORITHMHISTORY_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -64,7 +63,7 @@ public:
                    bool isdefault, const unsigned int &direction = 99);
 
   /// add a child algorithm history record to this history object
-  void addChildHistory(AlgorithmHistory_sptr childHist);
+  void addChildHistory(const AlgorithmHistory_sptr &childHist);
   // get functions
   /// get name of algorithm in history const
   const std::string &name() const { return m_name; }
@@ -151,5 +150,3 @@ MANTID_API_DLL std::ostream &operator<<(std::ostream &,
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_ALGORITHMHISTORY_H_*/

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MD_CONVERT2_QxyzDE_TEST_H_
-#define MANTID_MD_CONVERT2_QxyzDE_TEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Sample.h"
@@ -60,7 +59,7 @@ public:
   /** Calculate min-max value defaults*/
   Mantid::API::IAlgorithm *
   calcMinMaxValDefaults(const std::string &QMode, const std::string &QFrame,
-                        std::string OtherProperties = std::string("")) {
+                        const std::string &OtherProperties = std::string("")) {
 
     Mantid::API::IAlgorithm *childAlg =
         Mantid::API::FrameworkManager::Instance().createAlgorithm(
@@ -375,5 +374,3 @@ public:
     }
   }
 };
-
-#endif /* MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST_H_ */

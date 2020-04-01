@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
-
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 
 
@@ -83,7 +81,6 @@ def _get_pre_processing_params(context, run, rebin):
             pre_process_params["DeadTimeTable"] = dead_time_table
     except KeyError:
         pass
-
     return pre_process_params
 
 

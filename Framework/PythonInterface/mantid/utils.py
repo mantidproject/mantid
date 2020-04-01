@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from contextlib import contextmanager
 from importlib import import_module
@@ -70,11 +70,7 @@ def _shared_cextension():
         yield
         return
 
-    import six
-    if six.PY2:
-        import DLFCN as dl
-    else:
-        import os as dl
+    import os as dl
     flags_orig = sys.getdlopenflags()
     sys.setdlopenflags(dl.RTLD_NOW | dl.RTLD_GLOBAL)
     yield

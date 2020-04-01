@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_WS_SELECTOR_H
-#define MANTID_MDALGORITHMS_WS_SELECTOR_H
+#pragma once
 
 #include "MantidMDAlgorithms/ConvToMDBase.h"
 
@@ -34,7 +33,7 @@ public:
   /// function which selects the convertor depending on workspace type and
   /// (possibly, in a future) some workspace properties
   boost::shared_ptr<ConvToMDBase>
-  convSelector(API::MatrixWorkspace_sptr inputWS,
+  convSelector(const API::MatrixWorkspace_sptr &inputWS,
                boost::shared_ptr<ConvToMDBase> &currentSolver) const;
 
 private:
@@ -42,5 +41,3 @@ private:
 };
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif

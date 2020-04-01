@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDICALCULATESPECTRUM2DTEST_H_
-#define MANTID_SINQ_POLDICALCULATESPECTRUM2DTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -482,8 +481,8 @@ private:
   PoldiInstrumentAdapter_sptr m_instrument;
   PoldiTimeTransformer_sptr m_timeTransformer;
 
-  void compareIntensities(PoldiPeakCollection_sptr first,
-                          PoldiPeakCollection_sptr second,
+  void compareIntensities(const PoldiPeakCollection_sptr &first,
+                          const PoldiPeakCollection_sptr &second,
                           double relativePrecision) {
     for (size_t i = 0; i < first->peakCount(); ++i) {
       PoldiPeak_sptr peak = first->peak(i);
@@ -509,5 +508,3 @@ private:
     ~TestablePoldiFitPeaks2D() override {}
   };
 };
-
-#endif // MANTID_SINQ_POLDICALCULATESPECTRUM2DTEST_H_

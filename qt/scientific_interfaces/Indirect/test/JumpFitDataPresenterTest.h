@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_JUMPFITDATAPRESENTERTEST_H_
-#define MANTIDQT_JUMPFITDATAPRESENTERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IIndirectFitDataViewLegacy.h"
+#include "IIndirectFitDataView.h"
+#include "IndirectFunctionBrowser/FQTemplateBrowser.h"
 #include "JumpFitDataPresenter.h"
 #include "JumpFitModel.h"
 
@@ -70,7 +70,7 @@ std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockJumpFitDataView : public IIndirectFitDataViewLegacy {
+class MockJumpFitDataView : public IIndirectFitDataView {
 public:
   /// Public Methods
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
@@ -78,6 +78,9 @@ public:
   MOCK_CONST_METHOD0(isResolutionHidden, bool());
   MOCK_METHOD1(setResolutionHidden, void(bool hide));
   MOCK_METHOD1(setStartAndEndHidden, void(bool hidden));
+  MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
+  MOCK_METHOD1(setStartX, void(double startX));
+  MOCK_METHOD1(setEndX, void(double endX));
   MOCK_METHOD0(disableMultipleDataTab, void());
 
   MOCK_CONST_METHOD0(getSelectedSample, std::string());
@@ -102,6 +105,11 @@ public:
 
   /// Public slots
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
+};
+
+class FQTemplateBrowserMock : public IFQFitObserver {
+  MOCK_METHOD1(updateDataType, void(DataType dataType));
+  MOCK_METHOD1(spectrumChanged, void(int spec));
 };
 
 /// Mock object to mock the model
@@ -129,6 +137,7 @@ public:
     m_ParameterCombo = createComboBox(getJumpParameters());
     m_ParameterTypeLabel = createLabel(PARAMETER_TYPE_LABEL);
     m_ParameterLabel = createLabel(PARAMETER_LABEL);
+    m_FQTemplateBrowser = std::make_unique<FQTemplateBrowserMock>();
 
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
 
@@ -137,7 +146,7 @@ public:
         std::move(m_ParameterTypeCombo.get()),
         std::move(m_ParameterCombo.get()),
         std::move(m_ParameterTypeLabel.get()),
-        std::move(m_ParameterLabel.get()));
+        std::move(m_ParameterLabel.get()), m_FQTemplateBrowser.get());
 
     SetUpADSWithWorkspace m_ads(
         "WorkspaceName", createWorkspaceWithTextAxis(6, getTextAxisLabels()));
@@ -188,7 +197,7 @@ public:
 
   void
   test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), 1);
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
   }
 
   ///----------------------------------------------------------------------
@@ -201,9 +210,9 @@ private:
   std::unique_ptr<QComboBox> m_ParameterCombo;
   std::unique_ptr<QLabel> m_ParameterTypeLabel;
   std::unique_ptr<QLabel> m_ParameterLabel;
+  std::unique_ptr<FQTemplateBrowserMock> m_FQTemplateBrowser;
 
   std::unique_ptr<MockJumpFitDataView> m_view;
   std::unique_ptr<MockJumpFitModel> m_model;
   std::unique_ptr<JumpFitDataPresenter> m_presenter;
 };
-#endif

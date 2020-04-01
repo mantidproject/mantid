@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADILLTOF2TEST_H_
-#define LOADILLTOF2TEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -47,7 +46,7 @@ public:
    * The elastic peak is obtained on the fly from the sample data.
    */
   MatrixWorkspace_sptr
-  loadDataFile(const std::string dataFile, const size_t numberOfHistograms,
+  loadDataFile(const std::string &dataFile, const size_t numberOfHistograms,
                const size_t numberOfMonitors, const size_t numberOfChannels,
                const double tofDelay, const double tofChannelWidth) {
     LoadILLTOF2 loader;
@@ -209,6 +208,17 @@ public:
       TS_ASSERT(value.first >= 0)
     }
   }
+
+  void test_PANTHER_load() {
+    // From the input test file.
+    const double tofDelay = 350;
+    const double tofChannelWidth = 4.88;
+    const size_t channelCount = 512;
+    const size_t histogramCount = 73729;
+    const size_t monitorCount = 1;
+    loadDataFile("ILL/PANTHER/001723.nxs", histogramCount, monitorCount,
+                 channelCount, tofDelay, tofChannelWidth);
+  }
 };
 
 //------------------------------------------------------------------------------
@@ -232,5 +242,3 @@ public:
 private:
   std::string m_dataFile;
 };
-
-#endif /*LOADILLTOF2TEST_H_*/

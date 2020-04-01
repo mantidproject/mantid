@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "LoadRaw/isisraw2.h"
@@ -216,7 +216,7 @@ void LoadRawHelper::readworkspaceParameters(specnum_t &numberOfSpectra,
  * @return an empty workspace of the given parameters
  */
 DataObjects::Workspace2D_sptr
-LoadRawHelper::createWorkspace(DataObjects::Workspace2D_sptr ws_sptr,
+LoadRawHelper::createWorkspace(const DataObjects::Workspace2D_sptr &ws_sptr,
                                int64_t nVectors, int64_t xLengthIn,
                                int64_t yLengthIn) {
   DataObjects::Workspace2D_sptr empty;
@@ -270,7 +270,7 @@ void LoadRawHelper::createMonitorWorkspace(
     DataObjects::Workspace2D_sptr &normalws_sptr,
     WorkspaceGroup_sptr &mongrp_sptr, const int64_t mwsSpecs,
     const int64_t nwsSpecs, const int64_t numberOfPeriods,
-    const int64_t lengthIn, const std::string title,
+    const int64_t lengthIn, const std::string &title,
     API::Algorithm *const pAlg) {
   try {
     // create monitor group workspace
@@ -328,10 +328,10 @@ void LoadRawHelper::exec() {}
  *  @param bmonitors :: boolean flag to name  the workspaces
  *  @param pAlg      :: pointer to algorithm this method works with.
  */
-void LoadRawHelper::setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,
-                                         WorkspaceGroup_sptr grpws_sptr,
-                                         const int64_t period, bool bmonitors,
-                                         API::Algorithm *const pAlg) {
+void LoadRawHelper::setWorkspaceProperty(
+    const DataObjects::Workspace2D_sptr &ws_sptr,
+    const WorkspaceGroup_sptr &grpws_sptr, const int64_t period, bool bmonitors,
+    API::Algorithm *const pAlg) {
   if (!ws_sptr)
     return;
   if (!grpws_sptr)
@@ -366,12 +366,11 @@ void LoadRawHelper::setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,
  * workspace
  *  @param pAlg         :: pointer to algorithm this method works with.
  */
-void LoadRawHelper::setWorkspaceProperty(const std::string &propertyName,
-                                         const std::string &title,
-                                         WorkspaceGroup_sptr grpws_sptr,
-                                         DataObjects::Workspace2D_sptr ws_sptr,
-                                         int64_t numberOfPeriods, bool bMonitor,
-                                         API::Algorithm *const pAlg) {
+void LoadRawHelper::setWorkspaceProperty(
+    const std::string &propertyName, const std::string &title,
+    const WorkspaceGroup_sptr &grpws_sptr,
+    const DataObjects::Workspace2D_sptr &ws_sptr, int64_t numberOfPeriods,
+    bool bMonitor, API::Algorithm *const pAlg) {
   UNUSED_ARG(bMonitor);
   Property *ws = pAlg->getProperty("OutputWorkspace");
   if (!ws)
@@ -401,7 +400,7 @@ void LoadRawHelper::setWorkspaceProperty(const std::string &propertyName,
  *  @param binStart :: start of bin
  */
 void LoadRawHelper::setWorkspaceData(
-    DataObjects::Workspace2D_sptr newWorkspace,
+    const DataObjects::Workspace2D_sptr &newWorkspace,
     const std::vector<boost::shared_ptr<HistogramData::HistogramX>>
         &timeChannelsVec,
     int64_t wsIndex, specnum_t nspecNum, int64_t noTimeRegimes,
@@ -544,8 +543,9 @@ LoadRawHelper::getTimeChannels(const int64_t &regimes,
 /// @param progStart :: progress at start
 /// @param progEnd :: progress at end
 void LoadRawHelper::runLoadInstrument(
-    const std::string &fileName, DataObjects::Workspace2D_sptr localWorkspace,
-    double progStart, double progEnd) {
+    const std::string &fileName,
+    const DataObjects::Workspace2D_sptr &localWorkspace, double progStart,
+    double progEnd) {
   g_log.debug("Loading the instrument definition...");
   m_prog = progStart;
   progress(m_prog, "Loading the instrument geometry...");
@@ -631,7 +631,8 @@ void LoadRawHelper::runLoadInstrument(
 /// @param fileName :: the raw file filename
 /// @param localWorkspace :: The workspace to load the instrument for
 void LoadRawHelper::runLoadInstrumentFromRaw(
-    const std::string &fileName, DataObjects::Workspace2D_sptr localWorkspace) {
+    const std::string &fileName,
+    const DataObjects::Workspace2D_sptr &localWorkspace) {
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrumentFromRaw");
   loadInst->setPropertyValue("Filename", fileName);
   // Set the workspace property to be the same one filled above
@@ -659,7 +660,8 @@ void LoadRawHelper::runLoadInstrumentFromRaw(
 /// @param fileName :: the raw file filename
 /// @param localWorkspace :: The workspace to load the mapping table for
 void LoadRawHelper::runLoadMappingTable(
-    const std::string &fileName, DataObjects::Workspace2D_sptr localWorkspace) {
+    const std::string &fileName,
+    const DataObjects::Workspace2D_sptr &localWorkspace) {
   g_log.debug("Loading the spectra-detector mapping...");
   progress(m_prog, "Loading the spectra-detector mapping...");
   // Now determine the spectra to detector map calling Child Algorithm
@@ -685,9 +687,10 @@ void LoadRawHelper::runLoadMappingTable(
 /// @param localWorkspace :: The workspace to load the logs for
 /// @param progStart :: starting progress fraction
 /// @param progEnd :: ending progress fraction
-void LoadRawHelper::runLoadLog(const std::string &fileName,
-                               DataObjects::Workspace2D_sptr localWorkspace,
-                               double progStart, double progEnd) {
+void LoadRawHelper::runLoadLog(
+    const std::string &fileName,
+    const DataObjects::Workspace2D_sptr &localWorkspace, double progStart,
+    double progEnd) {
   // search for the log file to load, and save their names in a set.
   std::list<std::string> logFiles = searchForLogFiles(fileName);
 
@@ -773,7 +776,7 @@ std::string LoadRawHelper::extractLogName(const std::string &path) {
  * @param local_workspace :: workspace to add period log data to.
  */
 void LoadRawHelper::createPeriodLogs(
-    int64_t period, DataObjects::Workspace2D_sptr local_workspace) {
+    int64_t period, const DataObjects::Workspace2D_sptr &local_workspace) {
   m_logCreator->addPeriodLogs(static_cast<int>(period),
                               local_workspace->mutableRun());
 }
@@ -785,8 +788,9 @@ void LoadRawHelper::createPeriodLogs(
  * @param localWorkspace :: The workspace to attach the information to
  * @param rawFile :: The handle to an ISIS Raw file
  */
-void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace,
-                                      ISISRAW *const rawFile) const {
+void LoadRawHelper::loadRunParameters(
+    const API::MatrixWorkspace_sptr &localWorkspace,
+    ISISRAW *const rawFile) const {
   ISISRAW &localISISRaw = [this, rawFile]() -> ISISRAW & {
     if (rawFile)
       return *rawFile;
@@ -1098,8 +1102,9 @@ void LoadRawHelper::calculateWorkspacesizes(
 
 void LoadRawHelper::loadSpectra(
     FILE *file, const int &period, const int &total_specs,
-    DataObjects::Workspace2D_sptr ws_sptr,
-    std::vector<boost::shared_ptr<HistogramData::HistogramX>> timeChannelsVec) {
+    const DataObjects::Workspace2D_sptr &ws_sptr,
+    const std::vector<boost::shared_ptr<HistogramData::HistogramX>>
+        &timeChannelsVec) {
   double progStart = m_prog;
   double progEnd = 1.0; // Assume this function is called last
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVENXSPETEST_H_
-#define SAVENXSPETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -176,7 +175,7 @@ private:
       boost::tuple<boost::shared_array<hsize_t>, boost::shared_array<double>,
                    boost::shared_array<double>>;
 
-  DataHolder saveAndReloadWorkspace(const MatrixWorkspace_sptr inputWS) {
+  DataHolder saveAndReloadWorkspace(const MatrixWorkspace_sptr &inputWS) {
     SaveNXSPE saver;
     saver.initialize();
     saver.setChild(true);
@@ -229,5 +228,3 @@ private:
     return boost::make_tuple(dims, signal, error);
   }
 };
-
-#endif /*SAVENXSPETEST_H_*/

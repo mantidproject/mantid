@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SCDPANELERRORS_H_
-#define MANTID_CRYSTAL_SCDPANELERRORS_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -13,6 +12,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidKernel/System.h"
 #include <cmath>
 
@@ -22,8 +22,8 @@ namespace Crystal {
 @author Vickie Lynch, SNS
 @date 7/25/2016
 */
-class DLLExport SCDPanelErrors : public API::ParamFunction,
-                                 public API::IFunction1D {
+class MANTID_CRYSTAL_DLL SCDPanelErrors : public API::ParamFunction,
+                                          public API::IFunction1D {
 public:
   /// Constructor
   SCDPanelErrors();
@@ -44,7 +44,8 @@ public:
   /// Move detectors with parameters
   void moveDetector(double x, double y, double z, double rotx, double roty,
                     double rotz, double scalex, double scaley,
-                    std::string detname, API::Workspace_sptr inputW) const;
+                    std::string detname,
+                    const API::Workspace_sptr &inputW) const;
 
 private:
   /// Call the appropriate load function
@@ -83,5 +84,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /*MANTID_CRYSTAL_SCDPANELERRORS_H_*/

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/LeBailFit.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
@@ -763,7 +763,8 @@ void LeBailFit::createLeBailFunction() {
  * @param wsindex: workspace index of the data to fit against
  */
 API::MatrixWorkspace_sptr
-LeBailFit::cropWorkspace(API::MatrixWorkspace_sptr inpws, size_t wsindex) {
+LeBailFit::cropWorkspace(const API::MatrixWorkspace_sptr &inpws,
+                         size_t wsindex) {
   // Process input property 'FitRegion' for range of data to fit/calculate
   std::vector<double> fitrange = this->getProperty("FitRegion");
 
@@ -1143,9 +1144,9 @@ void LeBailFit::parseBraggPeaksParametersTable() {
 /** Parse table workspace (from Fit()) containing background parameters to a
  * vector
  */
-void LeBailFit::parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws,
-                                              vector<string> &bkgdparnames,
-                                              vector<double> &bkgdorderparams) {
+void LeBailFit::parseBackgroundTableWorkspace(
+    const TableWorkspace_sptr &bkgdparamws, vector<string> &bkgdparnames,
+    vector<double> &bkgdorderparams) {
   g_log.debug() << "DB1105A Parsing background TableWorkspace.\n";
 
   // Clear (output) map
@@ -1746,7 +1747,7 @@ void LeBailFit::doMarkovChain(
  * @param tablews :: TableWorkspace containing the Monte Carlo setup
  */
 void LeBailFit::setupRandomWalkStrategyFromTable(
-    DataObjects::TableWorkspace_sptr tablews) {
+    const DataObjects::TableWorkspace_sptr &tablews) {
   g_log.information("Set up random walk strategy from table.");
 
   // Scan the table
@@ -1941,7 +1942,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
  *list
  */
 void LeBailFit::addParameterToMCMinimize(vector<string> &parnamesforMC,
-                                         string parname) {
+                                         const string &parname) {
   map<string, Parameter>::iterator pariter;
   pariter = m_funcParameters.find(parname);
   if (pariter == m_funcParameters.end()) {
@@ -2094,7 +2095,7 @@ bool LeBailFit::calculateDiffractionPattern(const HistogramX &vecX,
  *proposed new values in
  *         this group
  */
-bool LeBailFit::proposeNewValues(vector<string> mcgroup, Rfactor r,
+bool LeBailFit::proposeNewValues(const vector<string> &mcgroup, Rfactor r,
                                  map<string, Parameter> &curparammap,
                                  map<string, Parameter> &newparammap,
                                  bool prevBetterRwp) {
@@ -2414,7 +2415,7 @@ LeBailFit::convertToDoubleMap(std::map<std::string, Parameter> &inmap) {
 /** Write a set of (XY) data to a column file
  */
 void writeRfactorsToFile(vector<double> vecX, vector<Rfactor> vecR,
-                         string filename) {
+                         const string &filename) {
   ofstream ofile;
   ofile.open(filename.c_str());
 

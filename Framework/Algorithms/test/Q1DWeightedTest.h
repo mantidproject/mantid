@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef Q1DWEIGHTEDTEST_H_
-#define Q1DWEIGHTEDTEST_H_
+#pragma once
 
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/MaskBinsIf.h"
@@ -374,5 +373,3 @@ public:
 private:
   Q1DWeighted m_alg;
 };
-
-#endif /*Q1DWEIGHTEDTEST_H_*/

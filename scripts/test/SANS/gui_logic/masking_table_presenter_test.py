@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from sans.gui_logic.presenter.masking_table_presenter import (MaskingTablePresenter, masking_information)
 from sans.test_helper.mock_objects import (FakeState, create_mock_masking_table, create_run_tab_presenter_mock)
 
@@ -20,16 +18,19 @@ class MaskingTablePresenterTest(unittest.TestCase):
         state = presenter.get_state(3)
         self.assertTrue(isinstance(state, FakeState))
 
-    def test_that_sets_table_when_row_changes(self):
+    def test_that_sets_table_when_update_called(self):
         # Arrange
         parent_presenter = create_run_tab_presenter_mock(use_fake_state=False)
         view = create_mock_masking_table()
         presenter = MaskingTablePresenter(parent_presenter)
-        # Act + Assert
+        presenter._work_handler = mock.Mock()
+
         presenter.set_view(view)
-        self.assertEqual(view.set_table.call_count, 1)
-        presenter.on_row_changed()
-        self.assertEqual(view.set_table.call_count, 2)
+
+        self.assertEqual(1, view.set_table.call_count)
+        presenter.on_display()
+
+        self.assertEqual(2, view.set_table.call_count)
         first_call = mock.call([])
         second_call = mock.call([masking_information(first='Beam stop', second='', third='infinite-cylinder, r = 10.0'),
                                  masking_information(first='Corners', second='', third='infinite-cylinder, r = 20.0'),

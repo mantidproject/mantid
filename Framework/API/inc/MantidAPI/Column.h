@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ICOLUMN_H_
-#define MANTID_API_ICOLUMN_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -150,6 +149,10 @@ public:
   /// Set plot type where
   void setPlotType(int t);
 
+  int getLinkedYCol() const { return m_linkedYCol; }
+
+  void setLinkedYCol(const int yCol);
+
   /**
    * Fills a std vector with values from the column if the types are compatible.
    * @param maxSize :: Set size to less than the full column.
@@ -202,6 +205,9 @@ protected:
   /// X = 1, Y = 2, Z = 3, xErr = 4, yErr = 5, Label = 6
   int m_plotType;
 
+  /// For error columns - the index of the related data column
+  int m_linkedYCol = -1;
+
   /// Column read-only flag
   bool m_isReadOnly;
 
@@ -238,4 +244,3 @@ using Column_const_sptr = boost::shared_ptr<const Column>;
 
 } // namespace API
 } // Namespace Mantid
-#endif /*MANTID_API_ICOLUMN_H_*/

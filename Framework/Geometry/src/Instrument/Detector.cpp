@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidBeamline/DetectorInfo.h"
@@ -45,7 +45,7 @@ Detector::Detector(const std::string &name, int id, IComponent *parent)
  *  @param parent :: The parent component
  */
 Detector::Detector(const std::string &name, int id,
-                   boost::shared_ptr<IObject> shape, IComponent *parent)
+                   const boost::shared_ptr<IObject> &shape, IComponent *parent)
     : IDetector(), ObjComponent(name, shape, parent), m_id(id) {}
 
 /** Gets the detector id

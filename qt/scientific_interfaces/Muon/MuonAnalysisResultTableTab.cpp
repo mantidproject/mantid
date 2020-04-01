@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MuonAnalysisResultTableTab.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -111,18 +111,18 @@ void MuonAnalysisResultTableTab::helpResultsClicked() {
 void MuonAnalysisResultTableTab::selectAllLogs(bool state) {
   if (state) {
     for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++) {
-      QTableWidgetItem *temp =
+      auto *temp =
           static_cast<QTableWidgetItem *>(m_uiForm.valueTable->item(i, 0));
       // If there is an item there then check the box
       if (temp != nullptr) {
-        QCheckBox *includeCell =
+        auto *includeCell =
             static_cast<QCheckBox *>(m_uiForm.valueTable->cellWidget(i, 1));
         includeCell->setChecked(true);
       }
     }
   } else {
     for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++) {
-      QCheckBox *includeCell =
+      auto *includeCell =
           static_cast<QCheckBox *>(m_uiForm.valueTable->cellWidget(i, 1));
       includeCell->setChecked(false);
     }
@@ -135,18 +135,18 @@ void MuonAnalysisResultTableTab::selectAllLogs(bool state) {
 void MuonAnalysisResultTableTab::selectAllFittings(bool state) {
   if (state) {
     for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++) {
-      QTableWidgetItem *temp = static_cast<QTableWidgetItem *>(
+      auto *temp = static_cast<QTableWidgetItem *>(
           m_uiForm.fittingResultsTable->item(i, 0));
       // If there is an item there then check the box
       if (temp != nullptr) {
-        QCheckBox *includeCell = static_cast<QCheckBox *>(
+        auto *includeCell = static_cast<QCheckBox *>(
             m_uiForm.fittingResultsTable->cellWidget(i, 1));
         includeCell->setChecked(true);
       }
     }
   } else {
     for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++) {
-      QCheckBox *includeCell = static_cast<QCheckBox *>(
+      auto *includeCell = static_cast<QCheckBox *>(
           m_uiForm.fittingResultsTable->cellWidget(i, 1));
       includeCell->setChecked(false);
     }
@@ -165,7 +165,7 @@ void MuonAnalysisResultTableTab::storeUserSettings() {
   // Find which logs have been selected by the user.
   for (int row = 0; row < m_uiForm.valueTable->rowCount(); ++row) {
     if (QTableWidgetItem *log = m_uiForm.valueTable->item(row, 0)) {
-      QCheckBox *logCheckBox =
+      auto *logCheckBox =
           static_cast<QCheckBox *>(m_uiForm.valueTable->cellWidget(row, 1));
       m_savedLogsState[log->text()] = logCheckBox->checkState();
     }
@@ -177,7 +177,7 @@ void MuonAnalysisResultTableTab::storeUserSettings() {
   for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); ++row) {
     QTableWidgetItem *temp = m_uiForm.fittingResultsTable->item(row, 0);
     if (temp) {
-      QCheckBox *fittingChoice = static_cast<QCheckBox *>(
+      auto *fittingChoice = static_cast<QCheckBox *>(
           m_uiForm.fittingResultsTable->cellWidget(row, 1));
       if (!fittingChoice->isChecked())
         m_unselectedFittings += temp->text();
@@ -676,7 +676,7 @@ bool MuonAnalysisResultTableTab::logNameLessThan(const QString &logName1,
  */
 void MuonAnalysisResultTableTab::populateFittings(
     const QStringList &names,
-    std::function<Workspace_sptr(const QString &)> wsFromName) {
+    const std::function<Workspace_sptr(const QString &)> &wsFromName) {
   // Add number of rows for the amount of fittings.
   m_uiForm.fittingResultsTable->setRowCount(names.size());
 
@@ -800,10 +800,10 @@ QStringList MuonAnalysisResultTableTab::getSelectedItemsToFit() {
 QStringList MuonAnalysisResultTableTab::getSelectedLogs() {
   QStringList logsSelected;
   for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++) {
-    QCheckBox *includeCell =
+    auto *includeCell =
         static_cast<QCheckBox *>(m_uiForm.valueTable->cellWidget(i, 1));
     if (includeCell->isChecked()) {
-      QTableWidgetItem *logParam =
+      auto *logParam =
           static_cast<QTableWidgetItem *>(m_uiForm.valueTable->item(i, 0));
       logsSelected.push_back(logParam->text());
     }

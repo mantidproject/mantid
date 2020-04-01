@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_NORMALISEBYCURRENT_H_
-#define MANTID_ALGORITHMS_NORMALISEBYCURRENT_H_
+#pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include <boost/shared_ptr.hpp>
 namespace Mantid {
 namespace API {
@@ -32,7 +32,8 @@ namespace Algorithms {
     @author Russell Taylor, Tessella Support Services plc
     @date 25/08/2008
 */
-class DLLExport NormaliseByCurrent : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL NormaliseByCurrent
+    : public API::DistributedAlgorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "NormaliseByCurrent"; }
@@ -54,11 +55,10 @@ private:
   void init() override;
   void exec() override;
   // Extract the charge value from the logs.
-  double extractCharge(boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWS,
-                       const bool integratePCharge) const;
+  double
+  extractCharge(const boost::shared_ptr<Mantid::API::MatrixWorkspace> &inputWS,
+                const bool integratePCharge) const;
 };
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_NORMALISEBYCURRENT_H_ */

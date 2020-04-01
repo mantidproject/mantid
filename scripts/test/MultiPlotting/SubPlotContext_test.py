@@ -1,12 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from MultiPlotting.subplot.subplot_context import subplotContext
 from mantid import plots
 
@@ -46,7 +46,7 @@ class SubPlotContextTest(unittest.TestCase):
 
     def test_add_line_no_erros(self):
         ws = mock.MagicMock()
-        with mock.patch("mantid.plots.plotfunctions.plot") as patch:
+        with mock.patch("mantid.plots.axesfunctions.plot") as patch:
             patch.return_value = tuple([line()])
             self.context.addLine(ws, 3)
             self.assertEqual(patch.call_count, 1)
@@ -56,9 +56,9 @@ class SubPlotContextTest(unittest.TestCase):
         ws = mock.MagicMock()
         self.context.change_errors(True)
         lines = line()
-        with mock.patch("mantid.plots.plotfunctions.plot") as plot:
+        with mock.patch("mantid.plots.axesfunctions.plot") as plot:
             plot.return_value = tuple([lines])
-            with mock.patch("mantid.plots.plotfunctions.errorbar") as patch:
+            with mock.patch("mantid.plots.axesfunctions.errorbar") as patch:
                 patch.return_value = errors()
                 self.context.addLine(ws, 3)
                 self.assertEqual(plot.call_count, 1)
@@ -73,9 +73,9 @@ class SubPlotContextTest(unittest.TestCase):
         self.context.change_errors(True)
         lines = line()
         # add first line
-        with mock.patch("mantid.plots.plotfunctions.plot") as plot:
+        with mock.patch("mantid.plots.axesfunctions.plot") as plot:
             plot.return_value = tuple([lines])
-            with mock.patch("mantid.plots.plotfunctions.errorbar") as patch:
+            with mock.patch("mantid.plots.axesfunctions.errorbar") as patch:
                 patch.return_value = errors()
                 self.context.addLine(ws, 3)
                 self.assertEqual(plot.call_count, 1)
@@ -93,7 +93,7 @@ class SubPlotContextTest(unittest.TestCase):
 
     def test_redraw_no_errors(self):
         ws = mock.MagicMock()
-        with mock.patch("mantid.plots.plotfunctions.plot") as patch:
+        with mock.patch("mantid.plots.axesfunctions.plot") as patch:
             lines = line()
             patch.return_value = tuple([lines])
             self.context.addLine(ws, 3)
@@ -142,7 +142,7 @@ class SubPlotContextTest(unittest.TestCase):
         ws2.name = mock.Mock(return_value="not used")
         self.context.redraw = mock.Mock()
 
-        with mock.patch("mantid.plots.plotfunctions.plot") as patch:
+        with mock.patch("mantid.plots.axesfunctions.plot") as patch:
             patch.return_value = tuple([line()])
             self.context.addLine(ws, 3)
             self.context.addLine(ws2, 3)
@@ -169,7 +169,7 @@ class SubPlotContextTest(unittest.TestCase):
         ws2.name = mock.Mock(return_value="not used")
         self.context.redraw = mock.Mock()
 
-        with mock.patch("mantid.plots.plotfunctions.plot") as patch:
+        with mock.patch("mantid.plots.axesfunctions.plot") as patch:
             patch.return_value = tuple([line()])
             self.context.addLine(ws, 1)
             self.context.addLine(ws2, 2)

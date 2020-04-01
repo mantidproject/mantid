@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LIVELISTENERFACTORYTEST_H_
-#define LIVELISTENERFACTORYTEST_H_
+#pragma once
 
 #include "LiveListenerTest.h"
 #include "MantidAPI/Algorithm.h"
@@ -14,6 +13,8 @@
 #include "MantidKernel/Instantiator.h"
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -30,7 +31,7 @@ class MockLiveListenerInstantiator
 public:
   MockLiveListenerInstantiator(
       boost::shared_ptr<Mantid::API::ILiveListener> product)
-      : product(product) {}
+      : product(std::move(product)) {}
 
   boost::shared_ptr<Mantid::API::ILiveListener>
   createInstance() const override {
@@ -169,5 +170,3 @@ public:
     factory.unsubscribe("MockLiveListener");
   }
 };
-
-#endif /* LIVELISTENERFACTORYTEST_H_ */

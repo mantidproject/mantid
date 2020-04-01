@@ -1,9 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidQtWidgets/Plotting/Qwt/QwtHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -24,7 +26,7 @@ namespace QwtHelper {
  * @param wsIndex :: Workspace index to use
  * @return Pointer to created QwtData
  */
-boost::shared_ptr<QwtData> curveDataFromWs(MatrixWorkspace_const_sptr ws,
+boost::shared_ptr<QwtData> curveDataFromWs(const MatrixWorkspace_const_sptr &ws,
                                            size_t wsIndex) {
   const double *x = &ws->x(wsIndex)[0];
   const double *y = &ws->y(wsIndex)[0];
@@ -40,7 +42,7 @@ boost::shared_ptr<QwtData> curveDataFromWs(MatrixWorkspace_const_sptr ws,
  * @return Pointer to created Vector QwtData
  */
 std::vector<boost::shared_ptr<QwtData>>
-curveDataFromWs(MatrixWorkspace_const_sptr ws) {
+curveDataFromWs(const MatrixWorkspace_const_sptr &ws) {
 
   std::vector<boost::shared_ptr<QwtData>> dataVector;
   auto histograms = ws->getNumberHistograms();
@@ -58,7 +60,7 @@ curveDataFromWs(MatrixWorkspace_const_sptr ws) {
  * @param wsIndex :: Workspace index to use
  * @return Vector of errors
  */
-std::vector<double> curveErrorsFromWs(MatrixWorkspace_const_sptr ws,
+std::vector<double> curveErrorsFromWs(const MatrixWorkspace_const_sptr &ws,
                                       size_t wsIndex) {
   return ws->e(wsIndex).rawData();
 }
@@ -72,9 +74,9 @@ std::vector<double> curveErrorsFromWs(MatrixWorkspace_const_sptr ws,
  * @return Pointer to create QwtData
  */
 boost::shared_ptr<QwtData>
-curveDataFromFunction(IFunction_const_sptr func,
+curveDataFromFunction(const IFunction_const_sptr &func,
                       const std::vector<double> &xValues) {
-  MatrixWorkspace_sptr ws = createWsFromFunction(func, xValues);
+  MatrixWorkspace_sptr ws = createWsFromFunction(std::move(func), xValues);
   return curveDataFromWs(ws, 0);
 }
 
@@ -85,7 +87,7 @@ curveDataFromFunction(IFunction_const_sptr func,
  * @param xValues :: X values to use
  * @return Single-spectrum workspace with calculated function values
  */
-MatrixWorkspace_sptr createWsFromFunction(IFunction_const_sptr func,
+MatrixWorkspace_sptr createWsFromFunction(const IFunction_const_sptr &func,
                                           const std::vector<double> &xValues) {
   auto inputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", 1, xValues.size(),

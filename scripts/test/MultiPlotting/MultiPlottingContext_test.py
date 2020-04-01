@@ -1,12 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from MultiPlotting.multi_plotting_context import PlottingContext
 from MultiPlotting.subplot.subplot_context import subplotContext
 from line_helper import line
@@ -85,7 +85,7 @@ class MultiPlottingContextTest(unittest.TestCase):
         no_lines = 1
 
         ws = mock.MagicMock()
-        with mock.patch("mantid.plots.plotfunctions.plot") as patch:
+        with mock.patch("mantid.plots.axesfunctions.plot") as patch:
             patch.return_value = tuple([line()])
 
             for name in names:

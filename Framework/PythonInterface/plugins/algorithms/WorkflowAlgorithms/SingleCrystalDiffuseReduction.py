@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import (DataProcessorAlgorithm, mtd, AlgorithmFactory,
                         FileProperty, FileAction,
                         MultipleFileProperty, WorkspaceProperty,
@@ -334,7 +332,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         if self._load_inst:
             LoadInstrument(Workspace=ws_name, Filename=self.getProperty("LoadInstrument").value, RewriteSpectraMap=False)
         if self._apply_cal:
-            ApplyCalibration(Workspace=ws_name, PositionTable=self.getProperty("ApplyCalibration").value)
+            ApplyCalibration(Workspace=ws_name, CalibrationTable=self.getProperty("ApplyCalibration").value)
         if self._detcal:
             LoadIsawDetCal(InputWorkspace=ws_name, Filename=self.getProperty("DetCal").value)
         if self._copy_params:

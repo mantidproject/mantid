@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_QTRUNSVIEW_H_
-#define MANTID_ISISREFLECTOMETRY_QTRUNSVIEW_H_
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "GUI/RunsTable/QtRunsTableView.h"
@@ -34,7 +33,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtRunsView
       public IRunsView {
   Q_OBJECT
 public:
-  QtRunsView(QWidget *parent, RunsTableViewFactory makeView);
+  QtRunsView(QWidget *parent, const RunsTableViewFactory &makeView);
 
   void subscribe(RunsViewSubscriber *notifyee) override;
   void subscribeTimer(RunsViewTimerSubscriber *notifyee) override;
@@ -130,5 +129,3 @@ private slots:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_ISISREFLECTOMETRY_QTRUNSVIEW_H_ */

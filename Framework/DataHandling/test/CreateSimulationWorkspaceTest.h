@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACETEST_H_
-#define MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -179,7 +178,7 @@ private:
         .retrieveWS<MatrixWorkspace>(m_wsName);
   }
 
-  void doBinCheck(Mantid::API::MatrixWorkspace_sptr outputWS,
+  void doBinCheck(const Mantid::API::MatrixWorkspace_sptr &outputWS,
                   const size_t expectedSize) {
     TS_ASSERT_EQUALS(outputWS->readX(0).size(), expectedSize);
     // Check bins are correct
@@ -190,7 +189,7 @@ private:
     }
   }
 
-  void doInstrumentCheck(Mantid::API::MatrixWorkspace_sptr outputWS,
+  void doInstrumentCheck(const Mantid::API::MatrixWorkspace_sptr &outputWS,
                          const std::string &name, const size_t ndets) {
     Mantid::Geometry::Instrument_const_sptr instr = outputWS->getInstrument();
 
@@ -209,7 +208,7 @@ private:
   }
 
   void compareSimulationWorkspaceIDFWithFileIDF(
-      Mantid::API::MatrixWorkspace_sptr simulationWorkspace,
+      const Mantid::API::MatrixWorkspace_sptr &simulationWorkspace,
       const std::string &filename, const std::string &algorithmName) {
     std::string outputWSName = "outWSIDFCompareNexus";
     auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
@@ -236,10 +235,6 @@ private:
 class CreateSimulationWorkspaceTestPerformance : public CxxTest::TestSuite {
 public:
   void setUp() override {
-
-    // Starting bin, bin width, last bin
-    const std::string binParams("-30,3,279");
-
     alg.initialize();
 
     alg.setPropertyValue("Instrument", "HET");
@@ -262,4 +257,3 @@ private:
 
   const std::string outWsName = "outTestWs";
 };
-#endif /* MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACETEST_H_ */

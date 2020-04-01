@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // Includes
 //----------------------------------------------------------------------
@@ -409,7 +409,7 @@ void IMWDomainCreator::addFunctionValuesToWS(
     const API::IFunction_sptr &function,
     boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
     const boost::shared_ptr<API::FunctionDomain> &domain,
-    boost::shared_ptr<API::FunctionValues> resultValues) const {
+    const boost::shared_ptr<API::FunctionValues> &resultValues) const {
   const size_t nData = resultValues->size();
   resultValues->zeroCalculated();
 

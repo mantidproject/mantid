@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVOLUTIONTEST_H_
-#define CONVOLUTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -181,8 +180,7 @@ public:
     linear->setParameter(0, 0.1);
     linear->setParameter(1, 0.2);
 
-    size_t iFun = 10000;
-    iFun = conv.addFunction(linear);
+    size_t iFun = conv.addFunction(linear);
     TS_ASSERT_EQUALS(iFun, 0);
     iFun = conv.addFunction(gauss1);
     TS_ASSERT_EQUALS(iFun, 1);
@@ -409,5 +407,3 @@ public:
     TS_ASSERT(categories[0] == "General");
   }
 };
-
-#endif /*CONVOLUTIONTEST_H_*/

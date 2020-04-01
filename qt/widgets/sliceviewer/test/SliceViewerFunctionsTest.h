@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SLICE_VIEWER_SLICE_VIEWER_FUNCTIONS_TEST_H_
-#define SLICE_VIEWER_SLICE_VIEWER_FUNCTIONS_TEST_H_
+#pragma once
 
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -39,7 +38,7 @@ SliceDefinition get_slice_definition(const size_t numberOfDimensions,
 
 std::vector<Mantid::Geometry::MDHistoDimension_sptr> get_dimensions_collection(
     const size_t numberOfDimensions, const Mantid::Kernel::VMD_t minValue,
-    const Mantid::Kernel::VMD_t maxValue, const std::string sliceLies) {
+    const Mantid::Kernel::VMD_t maxValue, const std::string &sliceLies) {
 
   std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions(
       numberOfDimensions);
@@ -76,7 +75,7 @@ std::vector<Mantid::Geometry::MDHistoDimension_sptr> get_dimensions_collection(
 class SliceViewerFunctionsTest : public CxxTest::TestSuite {
 public:
   bool do_test_slice_lies_in_workspace_boundaries(
-      const std::string sliceLiesWithinWorkspaceBoundary) {
+      const std::string &sliceLiesWithinWorkspaceBoundary) {
     // Arrange
     const size_t numberOfDimensions = 3;
     Mantid::Kernel::VMD_t minValue = 1;
@@ -118,7 +117,5 @@ public:
                liesInside);
   }
 };
-
-#endif
 
 // end SLICE_VIEWER_SLICE_VIEWER_FUNCTIONS_TEST_H_

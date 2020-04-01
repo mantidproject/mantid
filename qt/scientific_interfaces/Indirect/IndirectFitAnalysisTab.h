@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_
+#pragma once
 
 #include "IndirectDataAnalysisTab.h"
 #include "IndirectFitDataPresenter.h"
@@ -38,6 +37,7 @@ class MANTIDQT_INDIRECT_DLL IndirectFitAnalysisTab
 public:
   IndirectFitAnalysisTab(IndirectFittingModel *model,
                          QWidget *parent = nullptr);
+  virtual ~IndirectFitAnalysisTab() override = default;
 
   void setFitDataPresenter(std::unique_ptr<IndirectFitDataPresenter> presenter);
   void setPlotView(IIndirectFitPlotView *view);
@@ -71,7 +71,8 @@ protected:
   void setSampleSuffixes(std::string const &tab, bool filter);
   void setResolutionSuffixes(std::string const &tab, bool filter);
 
-  void setAlgorithmProperties(Mantid::API::IAlgorithm_sptr fitAlgorithm) const;
+  void setAlgorithmProperties(
+      const Mantid::API::IAlgorithm_sptr &fitAlgorithm) const;
   void runFitAlgorithm(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   void runSingleFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
   virtual void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm);
@@ -79,6 +80,8 @@ protected:
   virtual void setRunIsRunning(bool running) = 0;
   virtual void setRunEnabled(bool enable) = 0;
   void setEditResultVisible(bool visible);
+  std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
+  std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
 
 signals:
   void functionChanged();
@@ -154,16 +157,13 @@ private:
   void updateParameterEstimationData();
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
-  std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
-  std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
   std::unique_ptr<IndirectSpectrumSelectionPresenter> m_spectrumPresenter;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
+  TableDatasetIndex m_currentTableDatasetIndex;
 };
 
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_IFATAB_H_ */

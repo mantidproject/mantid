@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITPLOTVIEW_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_IINDIRECTFITPLOTVIEW_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "IndexTypes.h"
@@ -79,6 +78,7 @@ public:
   virtual void setHWHMRangeVisible(bool visible) = 0;
 
   virtual void displayMessage(const std::string &message) const = 0;
+  virtual void disableSpectrumPlotSelection() = 0;
 
 public slots:
   virtual void clearTopPreview() = 0;
@@ -104,5 +104,3 @@ signals:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

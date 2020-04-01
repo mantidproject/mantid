@@ -1,4 +1,10 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+
 
 # Resource object code
 #
@@ -3575,5 +3581,6 @@ def qInitResources():
 
 def qCleanupResources():
     QtCore.qUnregisterResourceData(rcc_version, qt_resource_struct, qt_resource_name, qt_resource_data)
+
 
 qInitResources()

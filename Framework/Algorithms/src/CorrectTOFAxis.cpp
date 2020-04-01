@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CorrectTOFAxis.h"
 
@@ -105,7 +105,7 @@ template <typename Map> size_t mapIndex(const int index, const Map &indexMap) {
  *  @return A workspace index corresponding to index.
  */
 size_t toWorkspaceIndex(const int index, const std::string &indexType,
-                        API::MatrixWorkspace_const_sptr ws) {
+                        const API::MatrixWorkspace_const_sptr &ws) {
   if (indexType == IndexTypes::DETECTOR_ID) {
     const auto indexMap = ws->getDetectorIDToWorkspaceIndexMap();
     return mapIndex(index, indexMap);
@@ -345,7 +345,8 @@ void CorrectTOFAxis::exec() {
  *  corrected workspace.
  *  @param outputWs The corrected workspace
  */
-void CorrectTOFAxis::useReferenceWorkspace(API::MatrixWorkspace_sptr outputWs) {
+void CorrectTOFAxis::useReferenceWorkspace(
+    const API::MatrixWorkspace_sptr &outputWs) {
   const auto histogramCount =
       static_cast<int64_t>(m_referenceWs->getNumberHistograms());
   PARALLEL_FOR_IF(threadSafe(*m_referenceWs, *outputWs))
@@ -377,7 +378,8 @@ void CorrectTOFAxis::useReferenceWorkspace(API::MatrixWorkspace_sptr outputWs) {
  *  specifically, also adjusts the 'Ei' and 'wavelength' sample logs.
  *  @param outputWs The corrected workspace
  */
-void CorrectTOFAxis::correctManually(API::MatrixWorkspace_sptr outputWs) {
+void CorrectTOFAxis::correctManually(
+    const API::MatrixWorkspace_sptr &outputWs) {
   const auto &spectrumInfo = m_inputWs->spectrumInfo();
   const double l1 = spectrumInfo.l1();
   double l2 = 0;

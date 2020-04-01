@@ -1,12 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.Common.plotting_widget.plotting_widget_presenter import PlotWidgetPresenter
 from Muon.GUI.Common.contexts.fitting_context import FitInformation
@@ -41,6 +41,7 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
                                                   ['62264'], ['62265'], ['62266'], ['62267']]
         self.view.plot_options.get_errors = mock.MagicMock(return_value=True)
         self.presenter.get_x_limits = mock.MagicMock(return_value=[0, 15])
+        self.presenter.get_y_limits = mock.MagicMock(return_value=[0, 1])
         self.presenter.get_x_lim_from_subplot = mock.MagicMock(return_value=[0, 15])
         self.presenter.get_y_lim_from_subplot = mock.MagicMock(return_value=[-1, 1])
 
@@ -278,7 +279,7 @@ class PlottingWidgetPresenterTestTiled(unittest.TestCase):
         self.context.fitting_context.fit_list.__getitem__.return_value = fit_information
         self.context.fitting_context.number_of_fits = 1
 
-        self.presenter.handle_fit_completed()
+        self.presenter.handle_fit_completed(fit_information)
 
         # 2 fit workspaces per plotted workspace
         self.assertEqual(self.model.add_workspace_to_plot.call_count, 2 * len(self.group_workspace_list))
