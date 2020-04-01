@@ -8,8 +8,6 @@ import collections.abc
 import numbers
 from typing import Any, Dict, List, overload, Sequence
 import re
-
->>>>>>> Abins AtomsData: Rework to be immutable
 import numpy as np
 import abins
 
@@ -62,6 +60,7 @@ class AtomsData(collections.abc.Sequence):
 
         # "sort"
         sort = item["sort"]
+
         if not isinstance(sort, numbers.Integral):
             raise ValueError("Parameter 'sort' should be integer.")
 
