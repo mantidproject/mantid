@@ -29,6 +29,7 @@ set(SRC_FILES
     src/GroupDetectors2.cpp
     src/H5Util.cpp
     src/ISISDataArchive.cpp
+    src/ISISJournal.cpp
     src/ISISRunLogs.cpp
     src/JoinISISPolarizationEfficiencies.cpp
     src/Load.cpp
@@ -235,6 +236,7 @@ set(INC_FILES
     inc/MantidDataHandling/GroupDetectors2.h
     inc/MantidDataHandling/H5Util.h
     inc/MantidDataHandling/ISISDataArchive.h
+    inc/MantidDataHandling/ISISJournal.h
     inc/MantidDataHandling/ISISRunLogs.h
     inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
     inc/MantidDataHandling/Load.h
@@ -440,6 +442,7 @@ set(TEST_FILES
     GroupDetectorsTest.h
     H5UtilTest.h
     ISISDataArchiveTest.h
+    ISISJournalTest.h
     InstrumentRayTracerTest.h
     JoinISISPolarizationEfficienciesTest.h
     LoadAscii2Test.h
