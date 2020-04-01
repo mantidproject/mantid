@@ -11,8 +11,8 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -268,9 +268,8 @@ void InstrumentActor::invertMaskWorkspace() const {
   const std::string maskName = "__InstrumentActor_MaskWorkspace_invert";
   Mantid::API::AnalysisDataService::Instance().addOrReplace(
       maskName, getMaskMatrixWorkspace());
-  Mantid::API::IAlgorithm *invertAlg =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm(
-          "BinaryOperateMasks", -1);
+  auto invertAlg =
+      AlgorithmManager::Instance().create("BinaryOperateMasks", -1);
   invertAlg->setChild(true);
   invertAlg->setPropertyValue("InputWorkspace1", maskName);
   invertAlg->setPropertyValue("OutputWorkspace", maskName);
@@ -313,9 +312,7 @@ void InstrumentActor::applyMaskWorkspace() {
   if (m_maskWorkspace) {
     // Mask detectors
     try {
-      Mantid::API::IAlgorithm *alg =
-          Mantid::API::FrameworkManager::Instance().createAlgorithm(
-              "MaskDetectors", -1);
+      auto alg = AlgorithmManager::Instance().create("MaskDetectors", -1);
       alg->setPropertyValue("Workspace", wsName);
       alg->setProperty("MaskedWorkspace", m_maskWorkspace);
       alg->execute();
@@ -604,8 +601,7 @@ void InstrumentActor::sumDetectorsRagged(const std::vector<size_t> &dets,
 
   try {
     // rebin all spectra to the same binning
-    Mantid::API::IAlgorithm *alg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("Rebin", -1);
+    auto alg = AlgorithmManager::Instance().create("Rebin", -1);
     alg->setProperty("InputWorkspace", dws);
     alg->setPropertyValue("OutputWorkspace", outName);
     alg->setPropertyValue("Params", params);
@@ -786,9 +782,7 @@ void InstrumentActor::setAutoscaling(bool on) {
  */
 Mantid::API::MatrixWorkspace_sptr InstrumentActor::extractCurrentMask() const {
   const std::string maskName = "__InstrumentActor_MaskWorkspace";
-  Mantid::API::IAlgorithm *alg =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",
-                                                                -1);
+  auto alg = AlgorithmManager::Instance().create("ExtractMask", -1);
   alg->setPropertyValue("InputWorkspace", getWorkspace()->getName());
   alg->setPropertyValue("OutputWorkspace", maskName);
   alg->setLogging(false);

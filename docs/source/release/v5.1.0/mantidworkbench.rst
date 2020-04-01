@@ -13,6 +13,8 @@ Improvements
 
 - The plot selection dialog now correctly shows the full range of valid spectra to plot, not just the min to max range.
 - Tile plots are now reloaded correctly by project recovery.
+- When you stop a script running in workbench it will now automatically attempt to cancel the algorithm the script is running, rather than wait for the current algorthm to end.
+  This is similar to what Mantidplot does, and should result in the script stopping much sooner.
 - Fixed an issue where some scripts were running slower if a  plot was open at the same time.
 
 

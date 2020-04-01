@@ -9,9 +9,9 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/ConvertToDistribution.h"
 #include "MantidAlgorithms/ConvertUnits.h"
@@ -838,10 +838,14 @@ public:
   static void destroySuite(ConvertUnitsTestPerformance *suite) { delete suite; }
 
   void setUp() override {
-    FrameworkManager::Instance().exec(
-        "Load", "Filename=HET15869;OutputWorkspace=hist_tof");
-    FrameworkManager::Instance().exec(
-        "Load", "Filename=CNCS_7860_event;OutputWorkspace=event_tof");
+    auto algo = AlgorithmManager::Instance().create("Load");
+    algo->setPropertyValue("Filename", "HET15869");
+    algo->setPropertyValue("OutputWorkspace", "hist_tof");
+    algo->execute();
+    algo = AlgorithmManager::Instance().create("Load");
+    algo->setPropertyValue("Filename", "CNCS_7860_event");
+    algo->setPropertyValue("OutputWorkspace", "event_tof");
+    algo->execute();
     std::string WSname = "inputWS";
     setup_Points_WS(WSname);
   }
@@ -866,26 +870,32 @@ public:
   }
 
   void test_histogram_workspace() {
-    IAlgorithm *alg;
-    alg = FrameworkManager::Instance().exec(
-        "ConvertUnits",
-        "InputWorkspace=hist_tof;OutputWorkspace=hist_wave;Target=Wavelength");
+    auto alg = AlgorithmManager::Instance().create("ConvertUnits");
+    alg->setPropertyValue("InputWorkspace", "hist_tof");
+    alg->setPropertyValue("OutputWorkspace", "hist_wave");
+    alg->setPropertyValue("Target", "Wavelength");
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
-    alg = FrameworkManager::Instance().exec(
-        "ConvertUnits", "InputWorkspace=hist_wave;OutputWorkspace=hist_"
-                        "dSpacing;Target=dSpacing");
+    alg = AlgorithmManager::Instance().create("ConvertUnits");
+    alg->setPropertyValue("InputWorkspace", "hist_tof");
+    alg->setPropertyValue("OutputWorkspace", "hist_dSpacing");
+    alg->setPropertyValue("Target", "dSpacing");
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
   }
 
   void test_event_workspace() {
-    IAlgorithm *alg;
-    alg = FrameworkManager::Instance().exec(
-        "ConvertUnits", "InputWorkspace=event_tof;OutputWorkspace=event_wave;"
-                        "Target=Wavelength");
+    auto alg = AlgorithmManager::Instance().create("ConvertUnits");
+    alg->setPropertyValue("InputWorkspace", "event_tof");
+    alg->setPropertyValue("OutputWorkspace", "event_wave");
+    alg->setPropertyValue("Target", "Wavelength");
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
-    alg = FrameworkManager::Instance().exec(
-        "ConvertUnits", "InputWorkspace=event_wave;OutputWorkspace=event_"
-                        "dSpacing;Target=dSpacing");
+    alg = AlgorithmManager::Instance().create("ConvertUnits");
+    alg->setPropertyValue("InputWorkspace", "event_tof");
+    alg->setPropertyValue("OutputWorkspace", "event_dSpacing");
+    alg->setPropertyValue("Target", "dSpacing");
+    alg->execute();
     TS_ASSERT(alg->isExecuted());
   }
 

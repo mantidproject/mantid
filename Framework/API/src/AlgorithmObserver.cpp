@@ -113,13 +113,7 @@ void AlgorithmObserver::stopObservingManager() {
 /** Handler of the progress notifications. Must be overriden in inherited
 classes.
 The default handler is provided (doing nothing).
-@param alg :: Pointer to the algorithm sending the notification. Note that
-this can
-point to a different object than the argument of a observeZZZ(...) method,
-e.g.
-an observer can be connected to an AlgorithmProxy instance and receive
-notifications from
-the corresponding Algorithm type object.
+@param alg :: Pointer to the algorithm sending the notification.
 @param p :: Progress reported by the algorithm, 0 <= p <= 1
 @param msg :: Optional message string sent by the algorithm
 */
@@ -138,37 +132,19 @@ void AlgorithmObserver::startingHandle(IAlgorithm_sptr alg) { UNUSED_ARG(alg) }
 
 /** Handler of the start notifications. Must be overriden in inherited classes.
 The default handler is provided (doing nothing).
-@param alg :: Pointer to the algorithm sending the notification. Note that
-this can
-point to a different object than the argument of a observeZZZ(...) method,
-e.g.
-an observer can be connected to an AlgorithmProxy instance and receive
-notifications from
-the corresponding Algorithm type object.
+@param alg :: Pointer to the algorithm sending the notification.
 */
 void AlgorithmObserver::startHandle(const IAlgorithm *alg) { UNUSED_ARG(alg) }
 
 /** Handler of the finish notifications. Must be overriden in inherited classes.
  The default handler is provided (doing nothing).
- @param alg :: Pointer to the algorithm sending the notification. Note that
-this can
- point to a different object than the argument of a observeZZZ(...) method,
-e.g.
- an observer can be connected to an AlgorithmProxy instance and receive
-notifications from
- the corresponding Algorithm type object.
+ @param alg :: Pointer to the algorithm sending the notification.
 */
 void AlgorithmObserver::finishHandle(const IAlgorithm *alg) { UNUSED_ARG(alg) }
 
 /** Handler of the error notifications. Must be overriden in inherited classes.
 The default handler is provided (doing nothing).
-@param alg :: Pointer to the algorithm sending the notification. Note that
-this can
-point to a different object than the argument of a observeZZZ(...) method,
-e.g.
-an observer can be connected to an AlgorithmProxy instance and receive
-notifications from
-the corresponding Algorithm type object.
+@param alg :: Pointer to the algorithm sending the notification.
 @param what :: The error message
 */
 void AlgorithmObserver::errorHandle(const IAlgorithm *alg,

@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/AppendSpectra.h"
 #include "MantidDataHandling/LoadRaw3.h"
@@ -418,8 +418,7 @@ private:
                                          const std::string &inputWorkspace2,
                                          const std::string &outputWorkspace) {
     auto appendSpectra =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "AppendSpectra");
+        Mantid::API::AlgorithmManager::Instance().create("AppendSpectra");
     TS_ASSERT_THROWS_NOTHING(appendSpectra->setRethrows(true));
     TS_ASSERT_THROWS_NOTHING(
         appendSpectra->setProperty("InputWorkspace1", inputWorkspace1));
@@ -449,8 +448,8 @@ private:
       dataY.emplace_back(double(i));
     }
 
-    auto createWS = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-        "CreateWorkspace");
+    auto createWS =
+        Mantid::API::AlgorithmManager::Instance().create("CreateWorkspace");
     TS_ASSERT_THROWS_NOTHING(createWS->setProperty("OutputWorkspace", "we"));
     TS_ASSERT_THROWS_NOTHING(createWS->setProperty("DataX", dataX));
     TS_ASSERT_THROWS_NOTHING(createWS->setProperty("DataY", dataY));
@@ -464,8 +463,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(createWS->execute());
 
     // we do a rebin so we can have nice bins
-    auto rebin =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("Rebin");
+    auto rebin = Mantid::API::AlgorithmManager::Instance().create("Rebin");
     TS_ASSERT_THROWS_NOTHING(rebin->setProperty("InputWorkspace", "we"));
     TS_ASSERT_THROWS_NOTHING(
         rebin->setProperty("Params", std::vector<double>{1}));

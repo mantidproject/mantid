@@ -13,7 +13,7 @@ import sys
 import threading
 import time
 from traceback import extract_tb
-
+from mantid.api import IAlgorithm
 from enum import Enum
 
 
@@ -83,6 +83,10 @@ class AsyncTask(threading.Thread):
         # https://stackoverflow.com/questions/5019436/python-how-to-terminate-a-blocking-thread
         ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.ident),
                                                    ctypes.py_object(KeyboardInterrupt))
+        #now try and cancel the running algorithm
+        alg = IAlgorithm._algorithmInThread(self.ident)
+        if alg is not None:
+            alg.cancel()
         time.sleep(0.1)
 
 
@@ -147,6 +151,10 @@ class BlockingAsyncTaskWithCallback(AsyncTask):
         # https://stackoverflow.com/questions/5019436/python-how-to-terminate-a-blocking-thread
         ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_long(self.task.ident),
                                                    ctypes.py_object(KeyboardInterrupt))
+        #now try and cancel the running algorithm
+        alg = IAlgorithm._algorithmInThread(self.task.ident)
+        if alg is not None:
+            alg.cancel()
         time.sleep(0.1)
 
 

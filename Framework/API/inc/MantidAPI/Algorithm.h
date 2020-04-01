@@ -51,7 +51,6 @@ namespace API {
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
-class AlgorithmProxy;
 class AlgorithmHistory;
 class WorkspaceHistory;
 
@@ -331,9 +330,6 @@ protected:
 
   void cacheWorkspaceProperties();
   void cacheInputWorkspaceHistories();
-
-  friend class AlgorithmProxy;
-  void initializeFromProxy(const AlgorithmProxy &);
 
   void setExecutionState(
       const ExecutionState state); ///< Sets the current execution state

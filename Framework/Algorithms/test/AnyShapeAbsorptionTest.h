@@ -8,8 +8,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/AnyShapeAbsorption.h"
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidAlgorithms/FlatPlateAbsorption.h"
@@ -17,8 +17,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using Mantid::API::AlgorithmManager;
 using Mantid::API::AnalysisDataService;
-using Mantid::API::FrameworkManager;
 using Mantid::API::MatrixWorkspace_sptr;
 
 class AnyShapeAbsorptionTest : public CxxTest::TestSuite {
@@ -272,7 +272,7 @@ public:
 
     // set the sample/can geometry
     auto setSampleAlg =
-        FrameworkManager::Instance().createAlgorithm("SetSample");
+        AlgorithmManager::Instance().createUnmanaged("SetSample");
     setSampleAlg->setRethrows(true);
     setSampleAlg->initialize();
     setSampleAlg->setPropertyValue("InputWorkspace", "bobby");

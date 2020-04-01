@@ -16,9 +16,9 @@
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
@@ -50,6 +50,8 @@
 #include <vector>
 
 #include <boost/math/constants/constants.hpp>
+
+using Mantid::API::AlgorithmManager;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -1810,8 +1812,7 @@ void DetectorPlotController::addPeak(double x, double y) {
     }
 
     // Run the AddPeak algorithm
-    auto alg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("AddPeak");
+    auto alg = AlgorithmManager::Instance().create("AddPeak");
     const auto &detIDs =
         m_instrWidget->getInstrumentActor().detectorInfo().detectorIDs();
     alg->setPropertyValue("RunWorkspace", ws->getName());
@@ -1832,8 +1833,7 @@ void DetectorPlotController::addPeak(double x, double y) {
 
     // if there is a UB available calculate HKL for the new peak
     if (tw->sample().hasOrientedLattice()) {
-      alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-          "CalculatePeaksHKL");
+      alg = AlgorithmManager::Instance().create("CalculatePeaksHKL");
       alg->setPropertyValue("PeaksWorkspace", peakTableName);
       alg->execute();
     }

@@ -66,7 +66,7 @@ public:
            const std::string &RunTransitionBehavior = "Restart",
            const std::string &UpdateEvery = "1") {
     auto alg = boost::dynamic_pointer_cast<MonitorLiveData>(
-        AlgorithmManager::Instance().create("MonitorLiveData", -1, false));
+        AlgorithmManager::Instance().create("MonitorLiveData", -1));
     alg->setPropertyValue("Instrument", "TestDataListener");
     alg->setPropertyValue("UpdateEvery", UpdateEvery);
     alg->setPropertyValue("AccumulationMethod", AccumulationMethod);
