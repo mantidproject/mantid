@@ -1,8 +1,8 @@
 .. _06_formatting_plots:
 
-================
-Formatting Plots 
-================
+==========================================
+Formatting Plots with the User Interface
+==========================================
 
 Plot Toolbar
 ============
@@ -56,5 +56,10 @@ Plots Settings
    :alt: Plot Settings
    :align: center
 
+
+**Other Plotting Documentation**
+
+* :ref:`scripting_plots`
+* :ref:`plotting`
 
 .. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
