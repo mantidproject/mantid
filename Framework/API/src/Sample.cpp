@@ -423,5 +423,37 @@ void Sample::clearOrientedLattice() {
     m_lattice.reset(nullptr);
   }
 }
+
+bool Sample::operator==(const Sample &other) const {
+  if (m_samples.size() != other.m_samples.size())
+    return false;
+  for (size_t i = 0; i < m_samples.size(); ++i) {
+    if (*m_samples[i] != *other.m_samples[i])
+      return false;
+  }
+  auto compare = [](const auto &a, const auto &b, auto call_on) {
+    // both null or both not null
+    if (bool(a) ^ bool(b))
+      return false;
+    if (a)
+      return call_on(a) == call_on(b);
+    else
+      return true;
+
+  };
+  return *m_lattice == *other.m_lattice && this->m_name == other.m_name &&
+         this->m_height == other.m_height && this->m_width == other.m_width &&
+         this->m_thick == other.m_thick && m_geom_id == other.m_geom_id &&
+         compare(m_environment, other.m_environment,
+                 [](const auto &x) { return x->name(); }) &&
+         compare(m_shape, other.m_shape,
+                 [](const auto &x) { return x->shape(); }) &&
+         compare(m_crystalStructure, other.m_crystalStructure,
+                 [](const auto &x) { return *(x->spaceGroup()); });
+}
+
+bool Sample::operator!=(const Sample &other) const {
+  return !this->operator==(other);
+}
 } // namespace API
 } // namespace Mantid
