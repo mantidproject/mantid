@@ -137,7 +137,6 @@ target_link_libraries(PythonAPIModule
                               Indexing
                               Kernel
                               Types
-                              ${PYTHON_LIBRARIES}
                               ${POCO_LIBRARIES}
                               ${Boost_LIBRARIES})
 

@@ -179,8 +179,6 @@ set(
   inc/MantidQtWidgets/Plotting/PreviewPlot.ui
 )
 
-find_package(BoostPython)
-
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsPlotting
   QT_VERSION 5
@@ -195,8 +193,6 @@ mtd_add_qt_library(
     ${CORE_MANTIDLIBS}
     PythonInterfaceCore
     ${POCO_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
     MantidQtWidgetsMplCpp

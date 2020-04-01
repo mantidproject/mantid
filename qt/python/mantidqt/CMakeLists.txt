@@ -18,13 +18,11 @@ set(
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/JobTreeView.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h)
 
-find_package(BoostPython REQUIRED)
-
 list(APPEND common_link_libs
             ${TCMALLOC_LIBRARIES_LINKTIME}
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
-            ${PYTHON_LIBRARIES})
+            PythonInterfaceCore)
 
 # Wrapper module linked against Qt4
 if(ENABLE_MANTIDPLOT)
@@ -37,14 +35,12 @@ if(ENABLE_MANTIDPLOT)
                      INCLUDE_DIRS
                        ${CMAKE_CURRENT_LIST_DIR}
                        ${COMMON_SIP_DIR}
-                       ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
                      LINK_LIBS
                        ${common_link_libs}
                        MantidQtWidgetsCommonQt4
                        Qt4::QtCore
                        Qt4::QtGui
                        Qt4::Qscintilla
-                       ${Boost_LIBRARIES}
                        API
                      INSTALL_DIR
                        ${LIB_DIR}/mantidqt
@@ -68,8 +64,7 @@ if(ENABLE_WORKBENCH)
                      INCLUDE_DIRS
                        ${CMAKE_CURRENT_LIST_DIR}
                        ${COMMON_SIP_DIR}
-                       ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
-                     LINK_LIBS
+                                 LINK_LIBS
                        MantidQtWidgetsCommonQt5
                        ${common_link_libs}
                        Qt5::Core
@@ -77,7 +72,6 @@ if(ENABLE_WORKBENCH)
                        Qt5::Gui
                        Qt5::Qscintilla
                        API
-                       ${Boost_LIBRARIES}
                      INSTALL_DIR
                        ${WORKBENCH_LIB_DIR}/mantidqt
                      LINUX_INSTALL_RPATH

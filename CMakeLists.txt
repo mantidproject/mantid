@@ -133,7 +133,7 @@ if(ENABLE_MANTIDPLOT)
     message(FATAL_ERROR "Qwt version 5 is required, found: ${QWT5_VERSION}")
   endif()
 
-  if(PYTHON_VERSION_MAJOR EQUAL 3 AND
+  if(Python_VERSION_MAJOR EQUAL 3 AND
      UNIX_DIST MATCHES "RedHatEnterprise" AND UNIX_RELEASE MATCHES "7\..*")
     set(USE_PRIVATE_SIPPYQT4 ON)
     include(ExternalSipPyQt4)
@@ -245,7 +245,7 @@ if (ENABLE_DOCS)
   find_package(Sphinx 1.2)
   if(SPHINX_FOUND)
     # run python to see if the theme is installed
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
+    execute_process(COMMAND ${Python_EXECUTABLE} -c
                             "import sphinx_bootstrap_theme"
                     OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
                     ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
@@ -253,7 +253,7 @@ if (ENABLE_DOCS)
                     ERROR_STRIP_TRAILING_WHITESPACE)
     if(SPHINX_BOOTSTRAP_THEME_ERR)
       message(ERROR " Did not find sphinx_bootstrap_theme")
-      message(STATUS "${PYTHON_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
+      message(STATUS "${Python_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
       message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
       message(
         FATAL_ERROR
@@ -403,7 +403,7 @@ if(ENABLE_CPACK)
           "${CPACK_RPM_PACKAGE_REQUIRES},qt5-qtbase,qscintilla-qt5")
     endif()
 
-    if(PYTHON_VERSION_MAJOR EQUAL 3)
+    if(Python_VERSION_MAJOR EQUAL 3)
       set(
         CPACK_RPM_PACKAGE_REQUIRES
         "${CPACK_RPM_PACKAGE_REQUIRES},"
@@ -506,7 +506,7 @@ if(ENABLE_CPACK)
       endif()
     endif()
 
-    if(PYTHON_VERSION_MAJOR EQUAL 3)
+    if(Python_VERSION_MAJOR EQUAL 3)
       set(CPACK_DEBIAN_PACKAGE_DEPENDS
           "${CPACK_DEBIAN_PACKAGE_DEPENDS},python3-h5py,"
           "python3-numpy,"

@@ -863,9 +863,12 @@ mtd_add_qt_library(
     QSCINTILLA_DLL
     QT4_DEFS
     USE_QTWEBKIT
-  INCLUDE_DIRS inc
-  SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBS ${TARGET_LIBRARIES}
+  INCLUDE_DIRS
+    inc
+  SYSTEM_INCLUDE_DIRS
+    ${Boost_INCLUDE_DIRS}
+  LINK_LIBS
+    ${TARGET_LIBRARIES}
   QT4_LINK_LIBS
     Qt4::QtHelp
     Qt4::QtNetwork
@@ -879,11 +882,6 @@ mtd_add_qt_library(
     @loader_path/../MacOS
     @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
-)
-
-find_package(
-  BoostPython
-  REQUIRED
 )
 
 mtd_add_qt_library(
@@ -900,14 +898,12 @@ mtd_add_qt_library(
     ${_webengine_def}
   INCLUDE_DIRS
     inc
-    ../../../Framework/PythonInterface/core/inc
-    ${PYTHON_INCLUDE_PATH}
-  SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+  SYSTEM_INCLUDE_DIRS
+    ${Boost_INCLUDE_DIRS}
   LINK_LIBS
     ${TARGET_LIBRARIES}
+    PUBLIC
     PythonInterfaceCore
-    ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
   QT5_LINK_LIBS
     Qt5::Concurrent
     Qt5::Help
@@ -1087,7 +1083,6 @@ mtd_add_qt_tests(
     ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
   LINK_LIBS
     ${TARGET_LIBRARIES}
-    ${PYTHON_LIBRARIES}
     ${Boost_LIBRARIES}
     PythonInterfaceCore
     DataObjects

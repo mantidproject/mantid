@@ -10,8 +10,7 @@
 
 #include <boost/python/object_fwd.hpp>
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 struct DLLExport ExtractWorkspace {
   ExtractWorkspace(const boost::python::object &pyvalue);
@@ -21,5 +20,5 @@ struct DLLExport ExtractWorkspace {
 private:
   API::Workspace_sptr m_value;
 };
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface
+

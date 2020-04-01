@@ -12,8 +12,7 @@
 #include <boost/python/extract.hpp>
 #include <memory>
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 using namespace API;
 
@@ -56,5 +55,4 @@ const API::Workspace_sptr ExtractWorkspace::operator()() const {
         "Unable to extract std::shared_ptr<Workspace> from Python object");
   }
 }
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

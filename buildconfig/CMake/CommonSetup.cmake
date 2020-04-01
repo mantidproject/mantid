@@ -111,7 +111,7 @@ if(CMAKE_HOST_WIN32)
     COMPONENTS CXX HL
     REQUIRED CONFIGS hdf5-config.cmake
   )
-  set (HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
+  set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
 else()
   find_package(ZLIB REQUIRED)
   find_package(
@@ -286,7 +286,6 @@ find_package(OpenMP COMPONENTS CXX)
 if(OpenMP_CXX_FOUND)
   link_libraries(OpenMP::OpenMP_CXX)
 endif()
-
 
 # ##############################################################################
 # Add linux-specific things

@@ -105,7 +105,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
       -E
       env
       PYTHONPATH=${_egg_link_dir}
-      ${PYTHON_EXECUTABLE}
+      ${Python_EXECUTABLE}
       ${_setup_py}
       develop
       --install-dir
@@ -129,7 +129,7 @@ CustomInstallLib = patch_setuptools_command('install_lib')
   # directories so we can have a flat structure
   install(
     CODE
-      "execute_process(COMMAND ${PYTHON_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})"
+      "execute_process(COMMAND ${Python_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})"
   )
 
   # Registers the "installed" components with CMake so it will carry them over

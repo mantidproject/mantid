@@ -1,8 +1,6 @@
 # ##############################################################################
 # Configure required dependencies if necessary
 # ##############################################################################
-option(WITH_PYTHON3 "If true build against Python 3, else use Python 2" ON)
-
 if(MSVC)
   # Git LFS does not work properly with <= 1.9
   find_package(Git 1.9.5 REQUIRED)
@@ -92,21 +90,17 @@ if(MSVC)
   unset(_tmp_dir)
 
   # Print out where we are looking for 3rd party stuff
-  if(WITH_PYTHON3)
-    set(PYTHON_VERSION_MAJOR 3)
-    set(PYTHON_VERSION_MINOR 8)
-  else()
-    set(PYTHON_VERSION_MAJOR 2)
-    set(PYTHON_VERSION_MINOR 7)
-  endif()
+  set(Python_VERSION_MAJOR 3)
+  set(Python_VERSION_MINOR 8)
+  set(Python_FIND_REGISTRY NEVER)
   # used in later parts for MSVC to bundle Python
   set(MSVC_PYTHON_EXECUTABLE_DIR
-      ${THIRD_PARTY_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}
+      ${THIRD_PARTY_DIR}/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}
   )
-  set(PYTHON_EXECUTABLE
-      ${THIRD_PARTY_DIR}/lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/python.exe
+  set(Python_EXECUTABLE
+      ${THIRD_PARTY_DIR}/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/python.exe
   )
-  set(PYTHONW_EXECUTABLE
+  set(Python_W_EXECUTABLE
       "${MSVC_PYTHON_EXECUTABLE_DIR}/pythonw.exe"
       CACHE
         FILEPATH
@@ -131,19 +125,6 @@ if(MSVC)
   set(BOOST_LIBRARYDIR "${CMAKE_LIBRARY_PATH}")
   set(Boost_NO_SYSTEM_PATHS TRUE)
 else()
-  unset(PYTHON_EXECUTABLE CACHE)
-  if(WITH_PYTHON3)
-    find_program(PYTHON_EXECUTABLE python3)
-    if(NOT PYTHON_EXECUTABLE)
-      message(FATAL_ERROR "Unable to find python3 executable")
-    endif()
-  else()
-    find_program(PYTHON_EXECUTABLE python)
-    if(NOT PYTHON_EXECUTABLE)
-      message(FATAL_ERROR "Unable to find python executable")
-    endif()
-  endif()
-
   if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     # Homebrew adds qt4 here and we require it to be unlinked from /usr/local to
     # avoid qt4/qt5 cross talk
@@ -154,12 +135,12 @@ endif()
 
 # Clean out python variables set from a previous build so they can be
 # rediscovered again
-function(unset_cached_python_variables)
+function(unset_cached_Python_variables)
   foreach(
     _var
-    PYTHON_INCLUDE_DIR
-    PYTHON_LIBRARY
-    PYTHON_NUMPY_INCLUDE_DIR
+    Python_INCLUDE_DIR
+    Python_LIBRARY
+    Python_NUMPY_INCLUDE_DIR
     SIP_INCLUDE_DIR
     PYQT4_PYUIC
     PYQT4_SIP_DIR
@@ -180,21 +161,19 @@ function(unset_cached_python_variables)
 endfunction()
 
 # Find python interpreter
-find_package(PythonInterp REQUIRED)
-message(
-  STATUS "Python version is "
-         ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}.${PYTHON_VERSION_PATCH}
-)
-# Ensure FindPythonLibs finds the correct libraries
-set(Python_ADDITIONAL_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+set(MINIMUM_PYTHON_VERSION 3.6)
+find_package(Python ${MINIMUM_PYTHON_VERSION} REQUIRED
+             COMPONENTS Interpreter Development NumPy)
+# If anything external uses find_package(PythonInterp) then make sure it finds the correct version
+set(Python_ADDITIONAL_VERSIONS ${Python_VERSION_MAJOR}.${Python_VERSION_MINOR})
 
-# Handle switching between previously configured Python 2 & Python 3 builds
-if(PYTHON_INCLUDE_DIR
-   AND NOT PYTHON_INCLUDE_DIR MATCHES
-       ".*${PYTHON_VERSION_MAJOR}\.${PYTHON_VERSION_MINOR}.*"
+# Handle switching between previously configured Python verions
+if(Python_INCLUDE_DIR
+   AND NOT Python_INCLUDE_DIR MATCHES
+       ".*${Python_VERSION_MAJOR}\.${Python_VERSION_MINOR}.*"
 )
   message(
     STATUS "Python version has changed. Clearing previous Python configuration."
   )
-  unset_cached_python_variables()
+  unset_cached_Python_variables()
 endif()
