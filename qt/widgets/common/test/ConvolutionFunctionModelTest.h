@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -19,8 +20,8 @@ using namespace Mantid::API;
 class ConvolutionFunctionModelTest : public CxxTest::TestSuite {
 
 public:
-  ConvolutionFunctionModelTest() {
-    // To make sure API is initialized properly
+  void setUp() override {
+    // Needs other algorithms and functions to be registered
     FrameworkManager::Instance();
   }
 
@@ -205,7 +206,7 @@ public:
   }
 
   void test_resolution_workspace() {
-    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
     algo->initialize();
     algo->setPropertyValue("DataX", "1,2,3");
     algo->setPropertyValue("DataY", "1,2,3");
@@ -225,7 +226,7 @@ public:
   }
 
   void test_resolution_workspace_index() {
-    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
     algo->initialize();
     algo->setPropertyValue("DataX", "1,2,3");
     algo->setPropertyValue("DataY", "1,2,3");
@@ -245,7 +246,7 @@ public:
   }
 
   void test_setModel_with_resolution_workspace_list_creates_correct_function() {
-    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
     algo->initialize();
     algo->setPropertyValue("DataX", "1,2,3");
     algo->setPropertyValue("DataY", "1,2,3");
@@ -273,7 +274,7 @@ public:
   }
 
   void test_setModel_with_delta_function_correct() {
-    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
     algo->initialize();
     algo->setPropertyValue("DataX", "1,2,3");
     algo->setPropertyValue("DataY", "1,2,3");
@@ -303,8 +304,7 @@ public:
   }
 
   void test_setModel_with_delta_function_TeixeiraWaterSQE_correct() {
-    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
-    algo->initialize();
+    auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
     algo->setPropertyValue("DataX", "1,2,3");
     algo->setPropertyValue("DataY", "1,2,3");
     algo->setPropertyValue("OutputWorkspace", "abc");
@@ -340,7 +340,7 @@ public:
   }
 
   void test_setModel_with_delta_function_TwoLorenztian_correct() {
-    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
     algo->initialize();
     algo->setPropertyValue("DataX", "1,2,3");
     algo->setPropertyValue("DataY", "1,2,3");
@@ -376,7 +376,7 @@ public:
   }
 
   void test_setModel_with_delta_function_TwoLorenztian_correctWithTemp() {
-    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
     algo->initialize();
     algo->setPropertyValue("DataX", "1,2,3");
     algo->setPropertyValue("DataY", "1,2,3");
@@ -418,7 +418,7 @@ public:
   }
 
   void test_component_prefixes_set_correctly_without_temp_correction() {
-    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
     algo->initialize();
     algo->setPropertyValue("DataX", "1,2,3");
     algo->setPropertyValue("DataY", "1,2,3");
@@ -447,7 +447,7 @@ public:
   }
 
   void test_component_prefixes_set_correctly_with_temp_correction() {
-    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
     algo->initialize();
     algo->setPropertyValue("DataX", "1,2,3");
     algo->setPropertyValue("DataY", "1,2,3");
@@ -476,7 +476,7 @@ public:
   }
 
   void test_component_prefixes_if_only_temp_set() {
-    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
     algo->initialize();
     algo->setPropertyValue("DataX", "1,2,3");
     algo->setPropertyValue("DataY", "1,2,3");
@@ -499,7 +499,7 @@ public:
   }
 
   void test_component_prefixes_one_lorenzian_temp_set() {
-    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
     algo->initialize();
     algo->setPropertyValue("DataX", "1,2,3");
     algo->setPropertyValue("DataY", "1,2,3");
@@ -524,7 +524,7 @@ public:
   }
 
   void test_component_prefixes_if_temp_and_delta_set() {
-    auto algo = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto algo = AlgorithmManager::Instance().create("CreateWorkspace");
     algo->initialize();
     algo->setPropertyValue("DataX", "1,2,3");
     algo->setPropertyValue("DataY", "1,2,3");

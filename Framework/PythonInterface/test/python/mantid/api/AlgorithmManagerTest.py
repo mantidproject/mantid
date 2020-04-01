@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import testhelpers
-from mantid.api import (AlgorithmManager, Algorithm, AlgorithmProxy,
+from mantid.api import (AlgorithmManager, Algorithm,
                         FrameworkManagerImpl, IAlgorithm)
 
 
@@ -32,10 +32,6 @@ class AlgorithmManagerTest(unittest.TestCase):
     def test_created_alg_isinstance_of_IAlgorithm(self):
         alg = AlgorithmManager.create("ConvertUnits")
         self.assertTrue(isinstance(alg, IAlgorithm))
-
-    def test_managed_cppalg_isinstance_of_AlgorithmProxy(self):
-        alg = AlgorithmManager.create("ConvertUnits")
-        self.assertTrue(isinstance(alg, AlgorithmProxy))
 
     def test_unmanaged_cppalg_isinstance_of_Algorithm(self):
         alg = AlgorithmManager.createUnmanaged("ConvertUnits")

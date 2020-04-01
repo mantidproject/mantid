@@ -9,8 +9,8 @@
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/FFT.h"
@@ -22,7 +22,6 @@ using namespace Mantid::API;
 // Anonymous namespace to share methods with Performance test
 namespace {
 void setupWorkspaces(int N, double dX) {
-  FrameworkManager::Instance();
   Mantid::DataObjects::Workspace2D_sptr ws =
       boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", 1, N, N));
@@ -63,15 +62,14 @@ void setupWorkspaces(int N, double dX) {
 }
 
 void deleteWorkspacesFromADS() {
-  FrameworkManager::Instance().deleteWorkspace("RealFFT_WS");
-  FrameworkManager::Instance().deleteWorkspace("RealFFT_WS_hist");
-  FrameworkManager::Instance().deleteWorkspace("RealFFT_WS_forward");
-  FrameworkManager::Instance().deleteWorkspace("RealFFT_WS_backward");
+  AnalysisDataService::Instance().remove("RealFFT_WS");
+  AnalysisDataService::Instance().remove("RealFFT_WS_hist");
+  AnalysisDataService::Instance().remove("RealFFT_WS_forward");
+  AnalysisDataService::Instance().remove("RealFFT_WS_backward");
 }
 
 void doTestForward(const int N, const double XX, bool performance = false) {
-  IAlgorithm *fft =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
+  auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
   fft->setPropertyValue("InputWorkspace", "RealFFT_WS");
   fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward");
@@ -102,8 +100,7 @@ void doTestForward(const int N, const double XX, bool performance = false) {
 }
 
 void doTestBackward(const int N, const double dX, bool performance = false) {
-  IAlgorithm *fft =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
+  auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
   fft->setPropertyValue("InputWorkspace", "RealFFT_WS_forward");
   fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_backward");
@@ -131,8 +128,7 @@ void doTestBackward(const int N, const double dX, bool performance = false) {
 
 void doTestForwardHistogram(const int N, const double XX,
                             bool performance = false) {
-  IAlgorithm *fft =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
+  auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
   fft->setPropertyValue("InputWorkspace", "RealFFT_WS_hist");
   fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_forward_hist");
@@ -164,8 +160,7 @@ void doTestForwardHistogram(const int N, const double XX,
 
 void doTestBackwardHistogram(const int N, const double dX,
                              bool performance = false) {
-  IAlgorithm *fft =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
+  auto fft = Mantid::API::AlgorithmManager::Instance().create("RealFFT");
   fft->initialize();
   fft->setPropertyValue("InputWorkspace", "RealFFT_WS_forward_hist");
   fft->setPropertyValue("OutputWorkspace", "RealFFT_WS_backward_hist");

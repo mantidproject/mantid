@@ -12,6 +12,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
@@ -207,8 +208,8 @@ public:
   Mantid::API::IMDHistoWorkspace_sptr
   makeHistoWorkspace(const std::vector<int> &shape) {
 
-    IAlgorithm *create =
-        FrameworkManager::Instance().createAlgorithm("CreateMDHistoWorkspace");
+    auto create =
+        AlgorithmManager::Instance().createUnmanaged("CreateMDHistoWorkspace");
     create->setChild(true);
     create->initialize();
 

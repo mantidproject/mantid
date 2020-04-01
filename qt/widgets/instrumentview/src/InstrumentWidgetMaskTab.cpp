@@ -69,6 +69,8 @@
 #include <fstream>
 #include <numeric>
 
+using Mantid::API::AlgorithmManager;
+
 namespace MantidQt {
 namespace MantidWidgets {
 InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
@@ -679,9 +681,7 @@ InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) const {
   Mantid::API::MatrixWorkspace_sptr outputWS;
   const std::string outputWorkspaceName = generateMaskWorkspaceName(temp);
 
-  Mantid::API::IAlgorithm *alg =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",
-                                                                -1);
+  auto alg = AlgorithmManager::Instance().create("ExtractMask", -1);
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
   alg->execute();
@@ -691,9 +691,8 @@ InstrumentWidgetMaskTab::createMaskWorkspace(bool invertMask, bool temp) const {
           outputWorkspaceName));
 
   if (invertMask) {
-    Mantid::API::IAlgorithm *invertAlg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "BinaryOperateMasks", -1);
+    auto invertAlg =
+        AlgorithmManager::Instance().create("BinaryOperateMasks", -1);
     invertAlg->setPropertyValue("InputWorkspace1", outputWorkspaceName);
     invertAlg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
     invertAlg->setPropertyValue("OperationType", "NOT");
@@ -745,9 +744,7 @@ void InstrumentWidgetMaskTab::extractDetsToWorkspace() {
   std::string fname = mapFile();
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
-    Mantid::API::IAlgorithm *alg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "GroupDetectors");
+    auto alg = AlgorithmManager::Instance().create("GroupDetectors");
     alg->setPropertyValue("InputWorkspace", workspaceName);
     alg->setPropertyValue("MapFile", fname);
     alg->setPropertyValue("OutputWorkspace", workspaceName + "_selection");
@@ -769,9 +766,7 @@ void InstrumentWidgetMaskTab::sumDetsToWorkspace() {
 
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
-    Mantid::API::IAlgorithm *alg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "GroupDetectors");
+    auto alg = AlgorithmManager::Instance().create("GroupDetectors");
     alg->setPropertyValue("InputWorkspace", workspaceName);
     alg->setPropertyValue("MapFile", fname);
     alg->setPropertyValue("OutputWorkspace", workspaceName + "_sum");
@@ -972,9 +967,7 @@ void InstrumentWidgetMaskTab::saveMaskingToTableWorkspace(bool invertMask) {
   std::cout << "[DB] MaskTableWorkspace is found? = " << overwrite << ". "
             << ".\n";
 
-  Mantid::API::IAlgorithm *alg =
-      Mantid::API::FrameworkManager::Instance().createAlgorithm(
-          "ExtractMaskToTable", -1);
+  auto alg = AlgorithmManager::Instance().create("ExtractMaskToTable", -1);
   alg->setProperty("InputWorkspace", inputWS);
   if (overwrite)
     alg->setPropertyValue("MaskTableWorkspace", outputWorkspaceName);

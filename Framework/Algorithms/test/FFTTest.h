@@ -9,9 +9,9 @@
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -51,8 +51,7 @@ public:
 
     const auto inputWS = createWS(N, 0);
 
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inputWS);
@@ -88,8 +87,7 @@ public:
 
     MatrixWorkspace_sptr inputWS = createWS(N, 0);
 
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inputWS);
@@ -100,7 +98,7 @@ public:
     MatrixWorkspace_sptr intermediate = fft->getProperty("OutputWorkspace");
     TS_ASSERT(intermediate);
 
-    fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", intermediate);
@@ -131,8 +129,7 @@ public:
 
     auto inputWS = createWS(N, 1);
 
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inputWS);
@@ -168,8 +165,7 @@ public:
 
     MatrixWorkspace_sptr inWS = createWS(N, 1);
 
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inWS);
@@ -180,7 +176,7 @@ public:
     MatrixWorkspace_sptr intermediate = fft->getProperty("OutputWorkspace");
     TS_ASSERT(intermediate);
 
-    fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", intermediate);
@@ -211,8 +207,7 @@ public:
 
     const auto inWS = createWS(N, 0);
 
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inWS);
@@ -248,8 +243,7 @@ public:
 
     const MatrixWorkspace_sptr inWS = createWS(N, 0);
 
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inWS);
@@ -261,7 +255,7 @@ public:
         fft->getProperty("OutputWorkspace");
     TS_ASSERT(intermediate);
 
-    fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", intermediate);
@@ -292,8 +286,7 @@ public:
 
     const auto inWS = createWS(N, 1);
 
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inWS);
@@ -329,8 +322,7 @@ public:
 
     const MatrixWorkspace_sptr inWS = createWS(N, 1);
 
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inWS);
@@ -342,7 +334,7 @@ public:
         fft->getProperty("OutputWorkspace");
     TS_ASSERT(intermediate);
 
-    fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", intermediate);
@@ -373,8 +365,7 @@ public:
     const auto realWS = createWS(N, 0);
     const auto imagWS = createWS(N, 0);
 
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", realWS);
@@ -423,8 +414,7 @@ public:
     inWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Energy");
 
-    IAlgorithm *fft =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = Mantid::API::AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inWS);
@@ -462,7 +452,7 @@ public:
     double aveX = (X[51] + X[49]) / 2.0;
     X[50] = aveX + 0.01;
 
-    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inputWS);
@@ -480,7 +470,7 @@ public:
     double aveX = (X[51] + X[49]) / 2.0;
     X[50] = aveX + 0.01;
 
-    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inputWS);
@@ -493,7 +483,7 @@ public:
   // Test that algorithm will not accept an empty input workspace
   void testEmptyInputWorkspace_Throws() {
     auto inputWS = createWS(1, 0);
-    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inputWS);
@@ -504,7 +494,7 @@ public:
 
   void testRealOutOfRange_Throws() {
     auto inputWS = createWS(100, 0);
-    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inputWS);
@@ -515,7 +505,7 @@ public:
 
   void testImaginaryOutOfRange_Throws() {
     auto inputWS = createWS(100, 0);
-    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inputWS);
@@ -528,7 +518,7 @@ public:
   void testRealImaginarySizeMismatch_Throws() {
     auto inputWS = createWS(100, 0);
     auto inImagWS = createWS(99, 0);
-    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inputWS);
@@ -576,7 +566,7 @@ public:
     auto fftAutoShiftWithOffset = doFFT(offsetWS, false, true);
 
     // perform transforms for manual shift
-    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+    auto fft = AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setPropertyValue("OutputWorkspace", "__NotUsed");
@@ -719,7 +709,7 @@ public:
 private:
   MatrixWorkspace_sptr doRebin(const MatrixWorkspace_sptr &inputWS,
                                const std::string &params) {
-    auto rebin = FrameworkManager::Instance().createAlgorithm("Rebin");
+    auto rebin = AlgorithmManager::Instance().create("Rebin");
     rebin->initialize();
     rebin->setChild(true);
     rebin->setProperty("InputWorkspace", inputWS);
@@ -729,9 +719,9 @@ private:
     return rebin->getProperty("OutputWorkspace");
   }
 
-  MatrixWorkspace_sptr doFFT(const MatrixWorkspace_sptr &inputWS,
-                             const bool complex, const bool phaseShift) {
-    auto fft = FrameworkManager::Instance().createAlgorithm("FFT");
+  MatrixWorkspace_sptr doFFT(MatrixWorkspace_sptr inputWS, const bool complex,
+                             const bool phaseShift) {
+    auto fft = AlgorithmManager::Instance().create("FFT");
     fft->initialize();
     fft->setChild(true);
     fft->setProperty("InputWorkspace", inputWS);
@@ -797,14 +787,13 @@ private:
   }
 
   MatrixWorkspace_sptr createWS(int n, int dn, const std::string &name) {
-    FrameworkManager::Instance();
     MatrixWorkspace_sptr ws = createWS(n, dn);
     AnalysisDataService::Instance().add("FFT_WS_" + name, ws);
     return ws;
   }
 
-  MatrixWorkspace_sptr offsetWorkspace(const MatrixWorkspace_sptr &workspace) {
-    auto scaleX = FrameworkManager::Instance().createAlgorithm("ScaleX");
+  MatrixWorkspace_sptr offsetWorkspace(MatrixWorkspace_sptr workspace) {
+    auto scaleX = AlgorithmManager::Instance().create("ScaleX");
     scaleX->initialize();
     scaleX->setChild(true);
     scaleX->setProperty("InputWorkspace", workspace);
@@ -836,8 +825,7 @@ private:
       Y.emplace_back(sin(omega * x));
       E.emplace_back(0.1);
     }
-    auto create =
-        FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto create = AlgorithmManager::Instance().create("CreateWorkspace");
     create->initialize();
     create->setChild(true);
     create->setProperty("DataX", X);
@@ -875,8 +863,7 @@ private:
       Y.emplace_back(y);
       E.emplace_back(0.1);
     }
-    auto create =
-        FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto create = AlgorithmManager::Instance().create("CreateWorkspace");
     create->initialize();
     create->setChild(true);
     create->setProperty("DataX", X);
@@ -923,8 +910,7 @@ private:
       E.emplace_back(0.1);
     }
     // create workspace
-    auto create =
-        FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto create = AlgorithmManager::Instance().create("CreateWorkspace");
     create->initialize();
     create->setChild(true);
     create->setProperty("DataX", X);
@@ -938,7 +924,7 @@ private:
 
   MatrixWorkspace_sptr doCrop(const MatrixWorkspace_sptr &inputWS, double lower,
                               double higher) {
-    auto crop = FrameworkManager::Instance().createAlgorithm("CropWorkspace");
+    auto crop = AlgorithmManager::Instance().create("CropWorkspace");
     crop->initialize();
     crop->setChild(true);
     crop->setProperty("InputWorkspace", inputWS);
@@ -970,8 +956,7 @@ private:
       Y.emplace_back(y);
     }
     // create workspace
-    auto create =
-        FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto create = AlgorithmManager::Instance().create("CreateWorkspace");
     create->initialize();
     create->setChild(true);
     create->setProperty("DataX", X);

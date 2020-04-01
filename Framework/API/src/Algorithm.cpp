@@ -8,7 +8,6 @@
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IWorkspaceProperty.h"
@@ -994,21 +993,6 @@ IAlgorithm_sptr Algorithm::fromJson(const Json::Value &serialized) {
   alg->initialize();
   alg->setProperties(serialized["properties"]);
   return alg;
-}
-
-//-------------------------------------------------------------------------
-/** Initialize using proxy algorithm.
- * Call the main initialize method and then copy in the property values.
- * @param proxy :: Initialising proxy algorithm  */
-void Algorithm::initializeFromProxy(const AlgorithmProxy &proxy) {
-  initialize();
-  copyPropertiesFrom(proxy);
-  m_algorithmID = proxy.getAlgorithmID();
-  setLogging(proxy.isLogging());
-  setLoggingOffset(proxy.getLoggingOffset());
-  setAlgStartupLogging(proxy.getAlgStartupLogging());
-  setChild(proxy.isChild());
-  setAlwaysStoreInADS(proxy.getAlwaysStoreInADS());
 }
 
 /** Fills History, Algorithm History and Algorithm Parameters

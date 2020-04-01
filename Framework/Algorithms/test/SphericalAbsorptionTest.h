@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/SphericalAbsorption.h"
@@ -23,31 +24,29 @@ using Mantid::API::MatrixWorkspace_sptr;
 class SphericalAbsorptionTest : public CxxTest::TestSuite {
 public:
   void testName() {
-    IAlgorithm *atten =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SphericalAbsorption");
+    auto atten =
+        Mantid::API::AlgorithmManager::Instance().create("SphericalAbsorption");
     TS_ASSERT_EQUALS(atten->name(), "SphericalAbsorption");
   }
 
   void testVersion() {
-    IAlgorithm *atten =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SphericalAbsorption");
+    auto atten =
+        Mantid::API::AlgorithmManager::Instance().create("SphericalAbsorption");
     TS_ASSERT_EQUALS(atten->version(), 1);
   }
 
   void testInit() {
-    IAlgorithm *atten =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SphericalAbsorption");
+    auto atten =
+        Mantid::API::AlgorithmManager::Instance().create("SphericalAbsorption");
     TS_ASSERT_THROWS_NOTHING(atten->initialize());
     TS_ASSERT(atten->isInitialized());
   }
 
   void testExec() {
-    IAlgorithm *atten =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm(
-            "SphericalAbsorption");
+    // register all the algorithms
+    FrameworkManager::Instance();
+    auto atten =
+        Mantid::API::AlgorithmManager::Instance().create("SphericalAbsorption");
     if (!atten->isInitialized())
       atten->initialize();
 
