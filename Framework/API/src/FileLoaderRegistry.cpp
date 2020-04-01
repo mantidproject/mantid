@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/NexusFileLoader.h"
 
 #include <Poco/File.h>
 
@@ -26,6 +27,20 @@ template <> struct DescriptorCallback<Kernel::FileDescriptor> {
 };
 /// @endcond
 
+/// @cond
+template <typename T> struct DescriptorSetter {
+  // general one does nothing
+  void apply(boost::shared_ptr<NexusFileLoader> & /*unused*/,
+             std::shared_ptr<T> & /*unused*/) {}
+};
+template <> struct DescriptorSetter<Kernel::NexusHDF5Descriptor> {
+  void apply(boost::shared_ptr<NexusFileLoader> &loader,
+             std::shared_ptr<Kernel::NexusHDF5Descriptor> &descriptor) {
+    loader->setFileInfo(descriptor);
+  }
+};
+/// @endcond
+
 /**
  * @param filename A string giving a filename
  * @param names The collection of names to search through
@@ -42,9 +57,10 @@ searchForLoader(const std::string &filename,
   const auto &factory = AlgorithmFactory::Instance();
   IAlgorithm_sptr bestLoader;
   int maxConfidence(0);
-  //Mantid::Kernel::NexusHDF5Descriptor>(filename);
+  // Mantid::Kernel::NexusHDF5Descriptor>(filename);
   auto descriptor = std::make_shared<DescriptorType>(filename);
   DescriptorCallback<DescriptorType> callback;
+  DescriptorSetter<DescriptorType> setdescriptor;
 
   auto iend = names.end();
   for (auto it = names.begin(); it != iend; ++it) {
@@ -71,6 +87,10 @@ searchForLoader(const std::string &filename,
     }
     callback.apply(descriptor);
   }
+
+  auto nxsLoader = boost::dynamic_pointer_cast<NexusFileLoader>(bestLoader);
+  if (nxsLoader)
+    setdescriptor.apply(nxsLoader, descriptor);
 
   return bestLoader;
 }
