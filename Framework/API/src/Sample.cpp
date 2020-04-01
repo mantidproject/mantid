@@ -439,7 +439,6 @@ bool Sample::operator==(const Sample &other) const {
       return call_on(a) == call_on(b);
     else
       return true;
-
   };
   return *m_lattice == *other.m_lattice && this->m_name == other.m_name &&
          this->m_height == other.m_height && this->m_width == other.m_width &&

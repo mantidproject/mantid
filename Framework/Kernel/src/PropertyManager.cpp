@@ -586,7 +586,7 @@ std::string PropertyManager::asString(bool withDefaultValues) const {
 bool PropertyManager::operator==(const PropertyManager &other) const {
   if (other.m_properties.size() != m_properties.size())
     return false;
-  for (const auto & [ key, value ] : m_properties) {
+  for (const auto &[key, value] : m_properties) {
     if (other.m_properties.count(key) != 1)
       return false;
     if (*other.m_properties.at(key) != *value)
