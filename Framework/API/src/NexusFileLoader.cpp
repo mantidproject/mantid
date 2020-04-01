@@ -10,7 +10,8 @@ namespace Mantid::API {
 void NexusFileLoader::exec() {
   // make sure the descriptor is initialized
   if (!m_fileInfo) {
-    const std::string filename = this->getPropertyValue(this->getFilenamePropertyName());
+    const std::string filename =
+        this->getPropertyValue(this->getFilenamePropertyName());
     m_fileInfo =
         std::make_shared<Mantid::Kernel::NexusHDF5Descriptor>(filename);
   }
@@ -35,4 +36,4 @@ void NexusFileLoader::setFileInfo(
     std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo) {
   m_fileInfo = std::move(fileInfo);
 }
-} // namespace Mantid::DataHandling
+} // namespace Mantid::API

@@ -18,7 +18,8 @@ public:
   void
   exec() override final; // makes sure the NexusHDF5Descriptor is initialized
   virtual void execLoader() = 0; // what would normally be called exec
-  // the name of the property that the NexusHDF5Descriptor should be created against
+  // the name of the property that the NexusHDF5Descriptor should be created
+  // against
   virtual std::string getFilenamePropertyName() const = 0;
   boost::shared_ptr<Algorithm> createChildAlgorithm(
       const std::string &name, const double startProgress = -1.,
@@ -30,4 +31,4 @@ public:
 private:
   std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> m_fileInfo;
 };
-} // namespace Mantid::DataHandling
+} // namespace Mantid::API
