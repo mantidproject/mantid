@@ -10,7 +10,7 @@
 #include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/System.h"
 
-namespace Mantid::DataHandling {
+namespace Mantid::API {
 
 class DLLExport NexusFileLoader
     : public API::IFileLoader<Mantid::Kernel::NexusHDF5Descriptor> {

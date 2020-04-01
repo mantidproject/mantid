@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/NexusFileLoader.h"
 
-namespace Mantid::DataHandling {
+namespace Mantid::API {
 void NexusFileLoader::exec() {
   // make sure the descriptor is initialized
   if (!m_fileInfo) {
