@@ -161,6 +161,8 @@ public:
   double volume() const;
   double recVolume() const;
   virtual void recalculateFromGstar(const Kernel::Matrix<double> &NewGstar);
+  bool operator==(const UnitCell &other) const;
+  bool operator!=(const UnitCell &other) const;
 
 protected:
   /// Lattice parameter a,b,c,alpha,beta,gamma (in \f$ \mbox{ \AA } \f$ and
