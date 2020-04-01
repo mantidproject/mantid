@@ -7,7 +7,9 @@
 #include "MantidDataHandling/SampleEnvironmentSpecParser.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/LoadStlFactory.h"
+#ifdef ENABLE_LIB3MF
 #include "MantidDataHandling/Mantid3MFFileIO.h"
+#endif
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
@@ -208,24 +210,35 @@ void SampleEnvironmentSpecParser::loadFullSpecification(
     SampleEnvironmentSpec *spec, Poco::XML::Element *element) {
   using Mantid::Geometry::Container;
   auto filename = element->getAttribute("filename");
-  Mantid3MFFileIO MeshLoader;
-  MeshLoader.LoadFile(filename);
+  Poco::Path suppliedFileName(filename);
+  std::string fileExt = suppliedFileName.getExtension();
+  std::transform(fileExt.begin(), fileExt.end(), fileExt.begin(), toupper);
 
   std::vector<boost::shared_ptr<Geometry::MeshObject>> environmentMeshes;
-
   boost::shared_ptr<Geometry::MeshObject> sampleMesh;
 
-  MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
+  if (fileExt == "3MF") {
+#ifdef ENABLE_LIB3MF
+    Mantid3MFFileIO MeshLoader;
+    MeshLoader.LoadFile(filename);
 
-  for (auto cpt : environmentMeshes) {
-    if (spec->ncans() == 0) {
-      auto can = boost::make_shared<Container>(cpt);
-      can->setSampleShape(sampleMesh);
-      spec->addContainer(can);
-    } else {
+    MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
+#else
+    throw std::runtime_error("3MF format not supported on this platform");
+#endif
 
-      spec->addComponent(cpt);
+    for (auto cpt : environmentMeshes) {
+      if (spec->ncans() == 0) {
+        auto can = boost::make_shared<Container>(cpt);
+        can->setSampleShape(sampleMesh);
+        spec->addContainer(can);
+      } else {
+
+        spec->addComponent(cpt);
+      }
     }
+  } else {
+    throw std::runtime_error("Full specification must be a .3mf file");
   }
 }
 
