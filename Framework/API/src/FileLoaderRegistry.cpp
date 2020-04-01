@@ -17,11 +17,11 @@ namespace {
 //----------------------------------------------------------------------------------------------
 /// @cond
 template <typename T> struct DescriptorCallback {
-  void apply(T & /*unused*/) {} // general one does nothing
+  void apply(std::shared_ptr<T> & /*unused*/) {} // general one does nothing
 };
 template <> struct DescriptorCallback<Kernel::FileDescriptor> {
-  void apply(Kernel::FileDescriptor &descriptor) {
-    descriptor.resetStreamToStart();
+  void apply(std::shared_ptr<Kernel::FileDescriptor> &descriptor) {
+    descriptor->resetStreamToStart();
   }
 };
 /// @endcond
@@ -42,7 +42,8 @@ searchForLoader(const std::string &filename,
   const auto &factory = AlgorithmFactory::Instance();
   IAlgorithm_sptr bestLoader;
   int maxConfidence(0);
-  DescriptorType descriptor(filename);
+  //Mantid::Kernel::NexusHDF5Descriptor>(filename);
+  auto descriptor = std::make_shared<DescriptorType>(filename);
   DescriptorCallback<DescriptorType> callback;
 
   auto iend = names.end();
@@ -56,7 +57,7 @@ searchForLoader(const std::string &filename,
     auto alg = boost::static_pointer_cast<FileLoaderType>(
         factory.create(name, version)); // highest version
     try {
-      const int confidence = alg->confidence(descriptor);
+      const int confidence = alg->confidence(*(descriptor.get()));
       logger.debug() << name << " returned with confidence=" << confidence
                      << '\n';
       if (confidence > maxConfidence) // strictly greater
@@ -70,6 +71,7 @@ searchForLoader(const std::string &filename,
     }
     callback.apply(descriptor);
   }
+
   return bestLoader;
 }
 } // namespace
