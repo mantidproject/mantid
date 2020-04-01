@@ -110,12 +110,14 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
                                                    CalculateScale=False)
         fast_fourier_filter(merged_ws, freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", InputSofQType="S(Q)-1", PDFType=pdf_type,
-                                                Filter=True, DeltaR=delta_r)
+                                                Filter=True, DeltaR=delta_r,
+                                                rho0=sample_details.material_object.crystal_density)
     else:
         for ws in focused_ws:
             fast_fourier_filter(ws, freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1", PDFType=pdf_type,
-                                                Filter=True, DeltaR=delta_r)
+                                                Filter=True, DeltaR=delta_r,
+                                                rho0=sample_details.material_object.crystal_density)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
                                              PreserveEvents=True)
     common.remove_intermediate_workspace('self_scattering_correction')
