@@ -91,7 +91,7 @@ std::unique_ptr<IndirectFitOutput>
 createFitOutput(const WorkspaceGroup_sptr &resultGroup,
                 const ITableWorkspace_sptr &parameterTable,
                 const WorkspaceGroup_sptr &resultWorkspace,
-                IndirectFitData *fitData, std::size_t spectrum) {
+                IndirectFitData *fitData, int spectrum) {
   return std::make_unique<IndirectFitOutput>(
       resultGroup, parameterTable, resultWorkspace, fitData, spectrum);
 }

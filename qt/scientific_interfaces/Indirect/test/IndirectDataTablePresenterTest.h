@@ -70,6 +70,10 @@ public:
                                IDA::WorkspaceIndex spectrum));
   MOCK_METHOD3(setEndX, void(double endX, TableDatasetIndex dataIndex,
                              IDA::WorkspaceIndex spectrum));
+
+  MOCK_METHOD2(setStartX, void(double startX, TableDatasetIndex dataIndex));
+  MOCK_METHOD2(setEndX, void(double endX, TableDatasetIndex dataIndex));
+
   MOCK_METHOD3(setExcludeRegion,
                void(std::string const &exclude, TableDatasetIndex dataIndex,
                     IDA::WorkspaceIndex spectrum));
