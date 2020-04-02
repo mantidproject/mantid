@@ -11,29 +11,6 @@
 #include <QTimer>
 #include <utility>
 
-namespace {
-using MantidQt::CustomInterfaces::IDA::IIndirectFitPlotView;
-using MantidQt::CustomInterfaces::IDA::Spectra;
-using MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
-
-struct UpdateAvailableSpectra : public boost::static_visitor<> {
-public:
-  explicit UpdateAvailableSpectra(IIndirectFitPlotView *view) : m_view(view) {}
-
-  void operator()(const Spectra &spectra) {
-    if (spectra.isContinuous()) {
-      auto const minmax = spectra.getMinMax();
-      m_view->setAvailableSpectra(minmax.first, minmax.second);
-    } else {
-      m_view->setAvailableSpectra(spectra.begin(), spectra.end());
-    }
-  }
-
-private:
-  IIndirectFitPlotView *m_view;
-};
-} // namespace
-
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
@@ -231,8 +208,13 @@ void IndirectFitPlotPresenter::updateDataSelection() {
 void IndirectFitPlotPresenter::updateAvailableSpectra() {
   if (m_model->getWorkspace()) {
     enableAllDataSelection();
-    auto updateSpectra = UpdateAvailableSpectra(m_view);
-    updateSpectra(m_model->getSpectra());
+    auto spectra = m_model->getSpectra();
+    if (spectra.isContinuous()) {
+      auto const minmax = spectra.getMinMax();
+      m_view->setAvailableSpectra(minmax.first, minmax.second);
+    } else {
+      m_view->setAvailableSpectra(spectra.begin(), spectra.end());
+    }
     setActiveSpectrum(m_view->getSelectedSpectrum());
   } else
     disableAllDataSelection();
