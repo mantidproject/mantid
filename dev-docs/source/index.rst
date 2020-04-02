@@ -191,13 +191,13 @@ GUI Development
 .. toctree::
    :hidden:
 
-   GUIDesignGuidelines
+   MVPDesign
    MVPTutorial/index
    QtDesignerForPython
    MantidUsedIconsTable
    ISISReflectometryInterface
 
-:doc:`GUIDesignGuidelines`
+:doc:`MVPDesign`
    Gives some guidelines to consider when developing a new graphical user interface.
 
 :doc:`MVP Tutorial <MVPTutorial/index>`
