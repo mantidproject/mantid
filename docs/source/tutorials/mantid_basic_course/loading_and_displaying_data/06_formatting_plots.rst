@@ -16,9 +16,8 @@ Plot Toolbar
    :alt: Plot Toolbar
    :align: center
 
-
-We will cover use of the Fitting Tab later...
-
+|
+| We will cover use of the Fitting Tab later...
 |
 |
 
@@ -53,7 +52,7 @@ Click Menus
    :align: center
 
 
-| **NOTE**: Change a Legend entry by editing `Set curve label` on the Curves tab. 
+| **TIP**: Change a Legend entry by editing `Set curve label` on the Curves tab. 
   Then on the Legend tab there are Color and Font options.
 |
 |
@@ -72,6 +71,9 @@ Click Menus
 
 File > Settings
 ===============
+
+|
+|
 
 .. figure:: /images/PlotSettings.png
    :alt: Plot Settings

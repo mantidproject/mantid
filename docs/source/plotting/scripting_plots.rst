@@ -4,7 +4,7 @@
 Formatting Plots with a script
 ==============================
 
-**Sometimes the easiest way to find out how to control part of a plot with Matplotlib is to search online for their** `documentation <https://matplotlib.org/3.2.1/index.html>`_**! Below are some useful commands and a handful of links**
+**Sometimes the easiest way to find out how to control part of a plot with Matplotlib is to search online for their** `documentation <https://matplotlib.org/3.2.1/index.html>`_ **! Below are some useful commands and a handful of links**
 
 .. contents:: Table of contents
     :local:
@@ -166,8 +166,8 @@ On a 1D or tiled plot in workbench, click the generate a script button |Generate
 **NOTE** *It is very possible that the Generate a Script and Figure Options buttons on the plot toolbar will not work when that plot has been produced by a complex script*.
 
 
-Useful links:
-=============
+Useful links
+============
 
 For further info, including code for producing 2D colorfill plots see:
 
@@ -178,7 +178,6 @@ For further info, including code for producing 2D colorfill plots see:
 
 Example Script
 ==============
-
 
 .. plot::
    :include-source:
@@ -228,7 +227,7 @@ Example Script
    plt.tight_layout()
    fig.legend(loc='center right').set_draggable(True)
 
-   fig.show()
+   #fig.show()
 
 
 **Other Plotting Documentation**
