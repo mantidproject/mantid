@@ -4,11 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-from qtpy.QtCore import Qt
 from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableView import SequentialTableView
-from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableModel import (SequentialTableModel, FIT_STATUS_COLUMN)
-from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FitQualityDelegate, FIT_STATUSES
+from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableModel import SequentialTableModel
+from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FIT_STATUSES
 from collections import namedtuple
 
 WorkspaceInfo = namedtuple('Workspace', 'runs groups')
@@ -16,13 +14,10 @@ WorkspaceInfo = namedtuple('Workspace', 'runs groups')
 
 class SequentialTableWidget(object):
 
-    def __init__(self, parent):
-        self._view = SequentialTableView(parent)
-        self._model = SequentialTableModel()
+    def __init__(self, parent, view=None, model=None):
+        self._view = view if view else SequentialTableView(parent)
+        self._model = model if model else SequentialTableModel()
         self._view.setModel(self._model)
-        self._view.setItemDelegateForColumn(FIT_STATUS_COLUMN, FitQualityDelegate(self._view))
-        self._view.resizeColumnsToContents()
-        self._view.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
 
     @property
     def widget(self):
@@ -34,15 +29,17 @@ class SequentialTableWidget(object):
     def get_number_of_fits(self):
         return self._model.number_of_fits
 
-    def set_parameters_and_values(self, parameters, values=None):
+    def set_parameters_and_values(self, parameters, values):
+        if not self._check_parameter_and_values_length(parameters, values):
+            return
         self.block_signals(True)
         self._model.set_fit_parameters_and_values(parameters, values)
         self.block_signals(False)
         self._view.resizeColumnsToContents()
 
-    def set_parameter_values_for_row(self, row, parameters):
+    def set_parameter_values_for_row(self, row, parameter_values):
         self.block_signals(True)
-        self._model.set_fit_parameter_values_for_row(row, parameters)
+        self._model.set_fit_parameter_values_for_row(row, parameter_values)
         self.block_signals(False)
         self._view.resizeColumnsToContents()
 
@@ -119,3 +116,11 @@ class SequentialTableWidget(object):
             return accepted_statuses[1]
         else:
             return accepted_statuses[0]
+
+    # values is a list of lists
+    @staticmethod
+    def _check_parameter_and_values_length(parameters, parameter_values_for_fits):
+        for parameter_values in parameter_values_for_fits:
+            if len(parameter_values) != len(parameters):
+                return False
+        return True

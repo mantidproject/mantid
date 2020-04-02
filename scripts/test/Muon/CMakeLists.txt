@@ -9,6 +9,7 @@ set ( TEST_PY_FILES
    fitting_tab_widget/fitting_tab_presenter_test.py
    fitting_tab_widget/fitting_tab_model_test.py
    seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
+   seq_fitting_tab_widget/sequential_table_test.py
    fit_information_test.py
    fit_parameters_test.py
    fitting_context_test.py
@@ -90,6 +91,7 @@ set ( TEST_PY_FILES_QT4
    fitting_tab_widget/fitting_tab_presenter_test.py
    fitting_tab_widget/fitting_tab_model_test.py
    seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
+   seq_fitting_tab_widget/sequential_table_test.py
    fit_information_test.py
    fit_parameters_test.py
    fitting_context_test.py

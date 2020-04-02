@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from qtpy.QtCore import QAbstractTableModel, Qt, Signal, QModelIndex
 
 default_table_columns = ["Run", "Group/Pairs", "Fit status", "Chi squared"]
@@ -13,7 +12,6 @@ GROUP_COLUMN = 1
 FIT_STATUS_COLUMN = 2
 FIT_QUALITY_COLUMN = 3
 NUM_DEFAULT_COLUMNS = len(default_table_columns)
-DEFAULT_VALUE = 0.0
 default_fit_status = "No fit"
 default_chi_squared = 0.0
 
@@ -80,7 +78,7 @@ class SequentialTableModel(QAbstractTableModel):
         else:
             return False
 
-    def insertRows(self, position, rows, parent):
+    def insertRows(self, position, rows, parent=None):
         self.beginInsertRows(parent or QModelIndex(), position, position + rows - 1)
         for i in range(rows):
             default_row = [''] * len(default_table_columns)
@@ -116,15 +114,11 @@ class SequentialTableModel(QAbstractTableModel):
             self._defaultData[row][FIT_QUALITY_COLUMN] = default_chi_squared
         self.dataChanged.emit(leftIndex, rightIndex)
 
-    def set_fit_parameters_and_values(self, parameters, parameter_values=None):
+    def set_fit_parameters_and_values(self, parameters, parameter_values):
         self._parameterData = []
         self._parameterHeaders = []
         for i in range(self.rowCount()):
-            if parameter_values:
-                default_values = parameter_values[i]
-            else:
-                default_values = [DEFAULT_VALUE] * len(parameters)
-            self._parameterData.insert(i, default_values)
+            self._parameterData.insert(i, parameter_values[i])
 
         for i, parameter in enumerate(parameters):
             self.setHeaderData(len(default_table_columns) + i, Qt.Horizontal, parameter)
