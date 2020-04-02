@@ -105,13 +105,14 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         selection.plot_type = self._ui.plotType.currentIndex()
 
         if self._advanced:
-            self.errors = self._ui.advanced_options_widget.ui.error_bars_check_box.isChecked()
-            self.log_name = self._ui.advanced_options_widget.ui.log_value_combo_box.currentText()
-            self.axis_name = self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text()
+            selection.errors = self._ui.advanced_options_widget.ui.error_bars_check_box.isChecked()
+            selection.log_name = self._ui.advanced_options_widget.ui.log_value_combo_box.currentText()
+            selection.axis_name = self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text()
 
-            if self.log_name == CUSTOM and not self._ui.advanced_options_widget.\
-                    _validate_custom_logs(self._ui.advanced_options_widget.ui.custom_log_line_edit.text(),
-                                          plot_all=True):
+            custom_log_text = self._ui.advanced_options_widget.ui.custom_log_line_edit.text()
+            if self._ui.advanced_options_widget._validate_custom_logs(custom_log_text, plot_all=True):
+                selection.custom_log_values = custom_log_text.split(',')
+            else:
                 return
 
         if self._check_number_of_plots(selection):
@@ -449,7 +450,7 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
 
         self.ui.log_value_combo_box.addItem(CUSTOM)
 
-    def _validate_custom_logs(self, text: str, plot_all: bool = False) -> None:
+    def _validate_custom_logs(self, text: str, plot_all: bool = False) -> bool:
         if self.ui.log_value_combo_box.currentText() == CUSTOM:
             valid_options = True
             values = text.split(',')
@@ -517,6 +518,9 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
                     self._parent.selection.custom_log_values = values
 
             self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(valid_options)
+            return valid_options
+        else:
+            return True
 
 
 def parse_selection_str(txt, min_val=None, max_val=None, allowed_values=None):

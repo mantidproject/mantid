@@ -330,6 +330,19 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         ssd._ui.wkspIndices.setText("1,2")
         self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
 
+    def test_plot_all_sets_correct_selection_values(self):
+        workspaces = [self._multi_spec_ws] * 3
+        ssd = SpectraSelectionDialog(workspaces, advanced=True)
+
+        ssd._ui.plotType.setCurrentIndex(2)
+        ssd._ui.buttonBox.button(QDialogButtonBox.YesToAll).click()
+
+        self.assertEqual(ssd.selection.wksp_indices, range(0, 200))
+        self.assertEqual(ssd.selection.plot_type, 2)
+        self.assertEqual(ssd.selection.errors, False)
+        self.assertEqual(ssd.selection.log_name, "Workspace name")
+        self.assertEqual(ssd.selection.axis_name, "Workspace name")
+
     # --------------- failure tests -----------
 
     def test_set_placeholder_text_raises_error_if_workspaces_have_no_common_spectra(self):
