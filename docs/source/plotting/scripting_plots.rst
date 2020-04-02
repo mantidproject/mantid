@@ -4,7 +4,7 @@
 Formatting Plots with a script
 ==============================
 
-**Sometimes the easiest way to find out how to control part of a plot with Matplotlib is to search online for their** `documentation <https://matplotlib.org/3.2.1/index.html>`_ **! Below are some useful commands and a handful of links**
+**Sometimes the easiest way to find out how to control part of a plot with Matplotlib is to search online for their** `documentation <https://matplotlib.org/3.2.1/index.html>`_**! Below are some useful commands and a handful of links**
 
 .. contents:: Table of contents
     :local:
@@ -20,7 +20,7 @@ Required imports:
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
 
-Access a workspaceloaded in the Workspace Toolbox inside a script:
+Access a workspace,loaded in the Workspace Toolbox, inside a script:
 
 .. code-block:: python
 
@@ -38,7 +38,7 @@ Create a Figure and access its Axes for plotting:
 
 (including the Mantid projection allows for plotting in the Mantid way, such as selecting a SpectrumNumber)
 
-Actually plot the 1st spectrum of the workspace "ws" and control `many options <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.axes.Axes.plot.html>`_:
+**Actually plot** the 1st spectrum of the workspace "ws" and control `many options <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.axes.Axes.plot.html>`_:
 
 .. code-block:: python
 
@@ -96,13 +96,13 @@ Edit `tick options <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axe
 
 .. code-block:: python
 
-    axes.tick_params(which='minor', width = 0.5, length=4, color='b', direction=‘in’, top=‘on’)
+   axes.tick_params(which='minor', width = 0.5, length=4, color='b', direction=‘in’, top=‘on’)
 
 Even add `gridlines <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.grid.html>`_ :
 
 .. code-block:: python
 
-    axes.grid(True, which = both, axis = both) # major/minor, x/y
+   axes.grid(True, which = both, axis = both) # major/minor, x/y
 
 Notice how `gridlines are linked to the axis ticks <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.tick_params.html>`_:
 
@@ -154,7 +154,7 @@ Add an `inset plot using the mantid projection <https://matplotlib.org/3.2.1/api
 Generate a Script
 =================
 
-On a 1D or tiled plot in workbench, click the generate a script button |GenerateAScript.png|, which will give more insite into the options for plotting from a script.
+On a 1D or tiled plot in workbench, click the generate a script button |GenerateAScript.png| which will give more insite into the options for plotting from a script.
 
 
 **NOTE** *It is very possible that the Generate a Script and Figure Options buttons on the plot toolbar will not work when that plot has been produced by a complex script*.
@@ -167,7 +167,7 @@ For further info, including code for producing 2D colorfill plots see:
 
 * `Mantid Plotting Examples <https://docs.mantidproject.org/nightly/plotting/index.html>`_
 * `Matplotlib Gallery <https://matplotlib.org/3.1.1/gallery/index.html>`_
-* `Mantid script plotting <https://docs.mantidproject.org/nightly/api/python/mantid/plots/index.html>`_
+* `Mantid Script Plotting <https://docs.mantidproject.org/nightly/api/python/mantid/plots/index.html>`_
 
 
 Example Script
@@ -175,52 +175,53 @@ Example Script
 
 
 .. plot::
-    :include-source:
+   :include-source:
 
-    from mantid.simpleapi import *
-    import matplotlib.pyplot as plt
-    from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
-    from matplotlib import rcParams
+   from mantid.simpleapi import *
+   import matplotlib.pyplot as plt
+   from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
+   from matplotlib import rcParams
 
-    # set font to Helvetica
-    rcParams['font.family'] = 'sans-serif'
-    rcParams['font.sans-serif'] = ['Helvetica']
+   # set font to Helvetica
+   rcParams['font.family'] = 'sans-serif'
+   rcParams['font.sans-serif'] = ['Helvetica']
 
-    #Example data
-    exp_decay = CreateSampleWorkspace(Function='User Defined',
-                                      UserDefinedFunction='\
-                                      name=ExpDecay,Lifetime = 20,Height = 200;name=Gaussian,\
-                                      PeakCentre=50, Height=10, Sigma=3',
-                                      XMax=100, BinWidth=2)       
-    #Create figure and axes
-    fig, axes = plt.subplots(ncols=2,nrows=1,subplot_kw={'projection': 'mantid'})
+   #Example data
+   exp_decay = CreateSampleWorkspace(Function='User Defined',
+                                     UserDefinedFunction='\
+                                     name=ExpDecay,Lifetime = 20,Height = 200;name=Gaussian,\
+                                     PeakCentre=50, Height=10, Sigma=3',
+                                     XMax=100, BinWidth=2)       
 
-    # Plot with errorbars on the left set of axes
-    axes[0].plot(exp_decay, specNum=1, color='red', label='400 K', linewidth=1.0, drawstyle='steps')
-    axes[0].set_title('Steps and Grids')
-    axes[0].xaxis.set_minor_locator(AutoMinorLocator())
-    axes[0].tick_params(which='minor', grid_color='orange', grid_alpha=0.5)
-    axes[0].tick_params(which='major', grid_color='b')
-    axes[0].grid(True, which = 'both', axis = 'both') # major/minor, x/y
+   #Create figure and axes
+   fig, axes = plt.subplots(ncols=2,nrows=1,subplot_kw={'projection': 'mantid'})
 
-    # Add an inset, use trial and error to find the right location
-    inset = fig.add_axes([0.76, 0.70, 0.18, 0.18],projection='mantid') #[left, bottom, width, height]
-    inset.plot(exp_decay, specNum=5, color='blue', label='Log Peak', marker ='.')
-    plt.yscale('log') #only affects the most recently called axes
-    inset.set_xlim(40, 60), inset.set_ylim(5, 20)
-    inset.xaxis.set_minor_locator(AutoMinorLocator()) #inserts 5 minor b/w each major
-    inset.tick_params(which='minor', width = 0.5, length=4, color='b', direction='in', top='on')
+   # Plot with errorbars on the left set of axes
+   axes[0].plot(exp_decay, specNum=1, color='red', label='400 K', linewidth=1.0, drawstyle='steps')
+   axes[0].set_title('Steps and Grids')
+   axes[0].xaxis.set_minor_locator(AutoMinorLocator())
+   axes[0].tick_params(which='minor', grid_color='orange', grid_alpha=0.5)
+   axes[0].tick_params(which='major', grid_color='b')
+   axes[0].grid(True, which = 'both', axis = 'both') # major/minor, x/y
 
-    #Plot on the right set of axes
-    axes[1].errorbar(exp_decay, specNum=1, capsize=2.0, errorevery=5, color='green', label='spec 1', linestyle='--')
-    axes[1].set_xlabel('Time-of-flight ($\mu s$)'), axes[1].set_ylabel('Counts ($\mu s$)$^{-1}$')
-    axes[1].set_title('Errorbars and Insets')
+   # Add an inset, use trial and error to find the right location
+   inset = fig.add_axes([0.76, 0.70, 0.18, 0.18],projection='mantid') #[left, bottom, width, height]
+   inset.plot(exp_decay, specNum=5, color='blue', label='Log Peak', marker ='.')
+   plt.yscale('log') #only affects the most recently called axes
+   inset.set_xlim(40, 60), inset.set_ylim(5, 20)
+   inset.xaxis.set_minor_locator(AutoMinorLocator()) #inserts 5 minor b/w each major
+   inset.tick_params(which='minor', width = 0.5, length=4, color='b', direction='in', top='on')
 
-    #Use tight layout for subplots and create a legend
-    plt.tight_layout()
-    fig.legend(loc='center right').set_draggable(True)
+   #Plot on the right set of axes
+   axes[1].errorbar(exp_decay, specNum=1, capsize=2.0, errorevery=5, color='green', label='spec 1', linestyle='--')
+   axes[1].set_xlabel('Time-of-flight ($\mu s$)'), axes[1].set_ylabel('Counts ($\mu s$)$^{-1}$')
+   axes[1].set_title('Errorbars and Insets')
 
-    fig.show()
+   #Use tight layout for subplots and create a legend
+   plt.tight_layout()
+   fig.legend(loc='center right').set_draggable(True)
+
+   fig.show()
 
 
 **Other Plotting Documentation**
@@ -229,4 +230,4 @@ Example Script
 * :ref:`06_formatting_plots`
 
 .. |GenerateAScript.png| image:: /images/GenerateAScript.png  
-   :width: 25px
+   :width: 30px
