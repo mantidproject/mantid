@@ -40,7 +40,7 @@ using namespace ::NeXus;
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEventNexus)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadEventNexus)
 
 using namespace Kernel;
 using namespace DateAndTimeHelpers;
