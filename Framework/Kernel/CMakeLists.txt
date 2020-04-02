@@ -527,7 +527,7 @@ target_link_libraries(Kernel
                       ${MANTIDLIBS}
                       ${NETWORK_LIBRARIES}
                       span
-		      ${HDF5_LIBRARIES}
+                      ${HDF5_LIBRARIES}
                       )
 if(WIN32)
   target_link_libraries(Kernel LINK_PRIVATE Psapi.lib) # For memory usage

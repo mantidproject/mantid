@@ -57,7 +57,6 @@ searchForLoader(const std::string &filename,
   const auto &factory = AlgorithmFactory::Instance();
   IAlgorithm_sptr bestLoader;
   int maxConfidence(0);
-  // Mantid::Kernel::NexusHDF5Descriptor>(filename);
   auto descriptor = std::make_shared<DescriptorType>(filename);
   DescriptorCallback<DescriptorType> callback;
   DescriptorSetter<DescriptorType> setdescriptor;

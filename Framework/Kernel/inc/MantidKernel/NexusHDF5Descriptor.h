@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 
 #include <map>
 #include <set>
@@ -14,7 +14,7 @@
 
 namespace Mantid::Kernel {
 
-class DLLExport NexusHDF5Descriptor {
+class MANTID_KERNEL_DLL NexusHDF5Descriptor {
 
 public:
   /**

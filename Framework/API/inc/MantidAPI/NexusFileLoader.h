@@ -7,12 +7,12 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/NexusHDF5Descriptor.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid::API {
 
-class DLLExport NexusFileLoader
+class MANTID_API_DLL NexusFileLoader
     : public API::IFileLoader<Mantid::Kernel::NexusHDF5Descriptor> {
 public:
   void
