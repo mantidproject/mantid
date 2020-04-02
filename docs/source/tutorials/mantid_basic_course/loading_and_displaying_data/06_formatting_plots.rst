@@ -6,6 +6,11 @@ Formatting Plots with the User Interface
 
 .. TO UPDATE find these images in a .pptx file at https://github.com/mantidproject/documents/blob/master/Images/Images_for_Docs/formatting_plots.pptx
 
+.. contents:: Table of contents
+    :local:
+
+
+
 Plot Toolbar
 ============
 
@@ -13,7 +18,10 @@ Plot Toolbar
    :alt: Plot Toolbar
    :align: center
 
+
 We will cover use of the Fitting Tab later...
+
+
 
 
 Plots Toolbox
@@ -22,6 +30,10 @@ Plots Toolbox
 .. figure:: /images/PlotsWindow.png
    :alt: Plot Toolbox
    :align: center
+   :width: 700px
+
+
+
 
 
 Click Menus
@@ -30,33 +42,56 @@ Click Menus
 .. figure:: /images/PlotClickMenus.png
    :alt: Click Menus
    :align: center
+   :width: 1200px
+
+
+
+
 
 
 |FigureOptionsGear.png| ptions Menu
 ===================================
 
+
+
 .. figure:: /images/PlotOptions.png
    :alt: Plot Options Axes Legend
    :align: center
 
-Change a Legend entry by editing `Set curve label` on the Curves tab. 
-Then on the Legend tab there Color and Font options.
+
+**NOTE**: Change a Legend entry by editing `Set curve label` on the Curves tab. 
+Then on the Legend tab there ares Color and Font options.
+
+
+
 
 .. figure:: /images/PlotOptionsCurves.png
    :alt: Plot Options Axes Legend
    :align: center
 
+
+
 .. figure:: /images/PlotOptionsColorfill.png
    :alt: Plot Options Colorfill
    :align: center
+   :width: 750px
 
 
-Plots Settings
+
+
+
+File > Settings
 ==============
+
+
 
 .. figure:: /images/PlotSettings.png
    :alt: Plot Settings
    :align: center
+   :width: 850px
+
+
+
 
 
 **Other Plotting Documentation**
@@ -65,3 +100,4 @@ Plots Settings
 * :ref:`plotting`
 
 .. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
+   :width: 100px

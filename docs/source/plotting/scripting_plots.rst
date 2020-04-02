@@ -4,7 +4,10 @@
 Formatting Plots with a script
 ==============================
 
-**Sometimes the easiest way to find out how to control part of a plot with Matplotlib is to search online for their documentation! Below are some useful commands and a handful of links**
+**Sometimes the easiest way to find out how to control part of a plot with Matplotlib is to search online for their** `documentation <https://matplotlib.org/3.2.1/index.html>`_ **! Below are some useful commands and a handful of links**
+
+.. contents:: Table of contents
+    :local:
 
 
 General
@@ -65,7 +68,7 @@ Add axis labels:
 
 .. code-block:: python
 
-    axes.xlabel(‘Wavelength / nm’), axes.ylabel(‘Time Delay / ps’)
+    axes.set_xlabel('Time-of-flight ($\mu s$)'), axes.set_ylabel('Counts ($\mu s$)$^{-1}$')
 
 
 Plotting with Errorbars
@@ -95,13 +98,13 @@ Edit `tick options <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axe
 
     axes.tick_params(which='minor', width = 0.5, length=4, color='b', direction=‘in’, top=‘on’)
 
-Even add `gridlines <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.grid.html>`_:
+Even add `gridlines <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.grid.html>`_ :
 
 .. code-block:: python
 
     axes.grid(True, which = both, axis = both) # major/minor, x/y
 
-Notice how `gridlines are linked to the axis ticks <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.tick_params.html>`_ :
+Notice how `gridlines are linked to the axis ticks <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.tick_params.html>`_:
 
 .. code-block:: python
 
@@ -112,7 +115,7 @@ Notice how `gridlines are linked to the axis ticks <https://matplotlib.org/3.1.1
 Fonts
 =====
 
-Alter the font `text <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.text.html#matplotlib.pyplot.text>`_:
+Alter the `font <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.text.html#matplotlib.pyplot.text>`_ on labels, axes, titles:
 
 .. code-block:: python
 
@@ -121,7 +124,7 @@ Alter the font `text <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot
 
 Some `more info <https://matplotlib.org/3.1.0/gallery/text_labels_and_annotations/fonts_demo_kw.html>`_, such as making bold/italic.
 
-Here's `how to find available fonts <http://jonathansoma.com/lede/data-studio/matplotlib/list-all-fonts-available-in-matplotlib-plus-samples/>`_.
+Here's `how to find available fonts <http://jonathansoma.com/lede/data-studio/matplotlib/list-all-fonts-available-in-matplotlib-plus-samples/>`_ .
 
 
 Subplots and Inset plots
@@ -140,7 +143,7 @@ Create a `tiled plot <https://matplotlib.org/devdocs/gallery/subplots_axes_and_f
     #for subplots it is useful to include the following line
     plt.tight_layout()
 
-Add an `inset plot using the mantid projection <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.figure.Figure.html?highlight=add_axes#matplotlib.figure.Figure.add_axes>`_ (`without it <https://matplotlib.org/3.1.1/api/_as_gen/mpl_toolkits.axes_grid1.inset_locator.inset_axes.html>`_):
+Add an `inset plot using the mantid projection <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.figure.Figure.html?highlight=add_axes#matplotlib.figure.Figure.add_axes>`_ (`without it <https://matplotlib.org/3.1.1/api/_as_gen/mpl_toolkits.axes_grid1.inset_locator.inset_axes.html>`_ ):
 
 .. code-block:: python
 
@@ -153,6 +156,7 @@ Generate a Script
 
 On a 1D or tiled plot in workbench, click the generate a script button |GenerateAScript.png|, which will give more insite into the options for plotting from a script.
 
+
 **NOTE** *It is very possible that the Generate a Script and Figure Options buttons on the plot toolbar will not work when that plot has been produced by a complex script*.
 
 
@@ -161,9 +165,13 @@ Useful links:
 
 For further info, including code for producing 2D colorfill plots see:
 
-`Mantid Plotting Examples <https://docs.mantidproject.org/nightly/plotting/index.html>`_
-`Matplotlib Gallery <https://matplotlib.org/3.1.1/gallery/index.html>`_
-`Mantid script plotting <https://docs.mantidproject.org/nightly/api/python/mantid/plots/index.html>`_
+* `Mantid Plotting Examples <https://docs.mantidproject.org/nightly/plotting/index.html>`_
+* `Matplotlib Gallery <https://matplotlib.org/3.1.1/gallery/index.html>`_
+* `Mantid script plotting <https://docs.mantidproject.org/nightly/api/python/mantid/plots/index.html>`_
+
+
+Example Script
+==============
 
 
 .. plot::
@@ -205,7 +213,7 @@ For further info, including code for producing 2D colorfill plots see:
 
     #Plot on the right set of axes
     axes[1].errorbar(exp_decay, specNum=1, capsize=2.0, errorevery=5, color='green', label='spec 1', linestyle='--')
-    axes[1].set_xlabel('Time-of-flight ($\mu s$)'), axes[0].set_ylabel('Counts ($\mu s$)$^{-1}$')
+    axes[1].set_xlabel('Time-of-flight ($\mu s$)'), axes[1].set_ylabel('Counts ($\mu s$)$^{-1}$')
     axes[1].set_title('Errorbars and Insets')
 
     #Use tight layout for subplots and create a legend
@@ -221,3 +229,4 @@ For further info, including code for producing 2D colorfill plots see:
 * :ref:`06_formatting_plots`
 
 .. |GenerateAScript.png| image:: /images/GenerateAScript.png  
+   :width: 25px
