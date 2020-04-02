@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
+from Muon.GUI.Common.plotting_widget.external_plotting_model import ExternalPlottingModel
+from Muon.GUI.Common.plotting_widget.external_plotting_view import ExternalPlottingView
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver, GenericObserverWithArgPassing
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
@@ -21,7 +23,7 @@ default_xlimits = {"Frequency": [0, 50], "Time": [0, 15]}
 
 class PlotWidgetPresenter(HomeTabSubWidget):
 
-    def __init__(self, view, model, context):
+    def __init__(self, view, model, context, plotting_view=None, plotting_model=None):
         """
         :param view: A reference to the QWidget object for plotting
         :param model: A reference to a model which contains the plotting logic
@@ -36,6 +38,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self._view.on_plot_type_changed(self.handle_plot_type_changed)
         self._view.on_tiled_by_type_changed(self.handle_tiled_by_changed_on_view)
         self._view.on_plot_tiled_changed(self.handle_plot_tiled_changed)
+        self._view.on_external_plot_pressed(self.handle_external_plot_requested)
 
         self.input_workspace_observer = GenericObserver(self.handle_data_updated)
         self.added_group_or_pair_observer = GenericObserverWithArgPassing(
@@ -67,6 +70,9 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             self._view.addItem(FREQ_PLOT_TYPE + "All")
         self.instrument_observer = GenericObserver(self.handle_instrument_changed)
 
+        self._plotting_view = plotting_view if plotting_view else ExternalPlottingView()
+        self._plotting_model = plotting_model if plotting_model else ExternalPlottingModel()
+
     def show(self):
         """
         Calls show on the view QtWidget
@@ -90,13 +96,12 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self._view.plot_options.set_plot_y_range([ymin, ymax])
 
         self._view.plot_options.clear_subplots()
-        for i in range(self._model.number_of_axes):
+        for i in range(self._view.num_axes()):
             self._view.plot_options.add_subplot(str(i + 1))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Handle user making plotting related changes from GUI
     # ------------------------------------------------------------------------------------------------------------------
-
     def handle_data_updated(self):
         """
         Handles the group, pair calculation finishing. Checks whether the list of workspaces has changed before doing
@@ -112,8 +117,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         self._model.clear_plot_model(self._view.get_axes())
 
         if self._view.is_tiled_plot():
-            self.update_model_tile_plot_positions()
-            self.new_plot_figure(self._model.number_of_axes)
+            num_axes = self.update_model_tile_plot_positions()
+            self.new_plot_figure(num_axes)
 
         self.plot_all_selected_workspaces(autoscale=False)
 
@@ -122,8 +127,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         Handles the workspace being deleted from ads
         """
         if self._view.is_tiled_plot():
-            self.update_model_tile_plot_positions()
-            self.new_plot_figure(self._model.number_of_axes)
+            num_axes = self.update_model_tile_plot_positions()
+            self.new_plot_figure(num_axes)
             self.plot_all_selected_workspaces(autoscale=False)
             return
 
@@ -244,13 +249,12 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         data_workspaces = self._model.plotted_workspaces
         fit_workspaces = self._model.plotted_fit_workspaces
         if state == 2:  # tiled plot
-            self.update_model_tile_plot_positions()
-            self.new_plot_figure(self._model.number_of_axes)
-            self.plot_data_and_fit_workspaces(data_workspaces, fit_workspaces)
+            num_axes = self.update_model_tile_plot_positions()
+            self.new_plot_figure(num_axes)
+            self.plot_all_selected_workspaces(autoscale=True)
         if state == 0:  # not tiled plot
             self.new_plot_figure(num_axes=1)
-            self._model.number_of_axes = 1
-            self.plot_data_and_fit_workspaces(data_workspaces, fit_workspaces)
+            self.plot_all_selected_workspaces(autoscale=True)
 
         self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
         self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
@@ -278,8 +282,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
         # if tiled by group, we will need to recreate the tiles
         if self._view.is_tiled_plot() and self._view.get_tiled_by_type() == 'group':
-            self.update_model_tile_plot_positions()
-            self.new_plot_figure(self._model.number_of_axes)
+            num_axes = self.update_model_tile_plot_positions()
+            self.new_plot_figure(num_axes)
             self.plot_all_selected_workspaces(autoscale=True)
             self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
             self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
@@ -293,8 +297,8 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         Handles a group or pair being removed in grouping widget analysis table
         """
         if self._view.is_tiled_plot() and self._view.get_tiled_by_type() == 'group':
-            self.update_model_tile_plot_positions()
-            self.new_plot_figure(self._model.number_of_axes)
+            num_axes = self.update_model_tile_plot_positions()
+            self.new_plot_figure(num_axes)
             self.plot_all_selected_workspaces(autoscale=True)
             self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
             self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
@@ -364,9 +368,12 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         data_workspaces = self._model.plotted_workspaces
         fit_workspaces = self._model.plotted_fit_workspaces
         if self._view.is_tiled_plot():
-            self.update_model_tile_plot_positions()
-            self.new_plot_figure(self._model.number_of_axes)
-            self.plot_data_and_fit_workspaces(data_workspaces, fit_workspaces)
+            if index == 0:
+                num_axes = self.update_model_tile_plot_positions()
+            else:
+                num_axes = self.update_model_tile_plot_positions()
+            self.new_plot_figure(num_axes)
+            self.plot_all_selected_workspaces(autoscale=True)
             self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
             self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
 
@@ -379,12 +386,20 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
         if self.context.fitting_context.plot_guess and self.context.fitting_context.guess_ws is not None:
             self._model.add_workspace_to_plotted_fit_workspaces(self.context.fitting_context.guess_ws)
-            for i in range(self._model.number_of_axes):
+            for i in range(self._view.num_axes()):
                 self._model.add_workspace_to_plot(self._view.get_axes()[i], self.context.fitting_context.guess_ws,
                                                   workspace_indices=[1], errors=False,
                                                   plot_kwargs={'distribution': True, 'autoscale_on_update': False,
                                                                'label': 'Fit Function Guess'})
         self._view.force_redraw()
+
+    def handle_external_plot_requested(self):
+        axes = self._view.get_axes()
+        external_fig = self._plotting_view.create_external_plot_window(axes)
+        data = self._plotting_model.get_plotted_workspaces_and_indices_from_axes(axes)
+        self._plotting_view.plot_data(external_fig, data)
+        self._plotting_view.copy_axes_setup(external_fig, axes)
+        self._plotting_view.show(external_fig)
 
     # Every time a new figure is generated these signals will have
     # to be reconnected (e.g switching to tiled plotting).
@@ -556,7 +571,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
                                         + self.context.group_pair_context.selected_pairs):
                 self._model.tiled_plot_positions[grppair] = i
 
-        self._model.number_of_axes = len(self._model.tiled_plot_positions)
+        return len(self._model.tiled_plot_positions)
 
     def new_plot_figure(self, num_axes):
         self._model.clear_plot_model(self._view.get_axes())
@@ -680,7 +695,6 @@ class PlotWidgetPresenter(HomeTabSubWidget):
 
     # Note: These methods should be implemented as lower level properties
     # as currently they are specialised methods dependent on the workspace name format.
-
     # The number following the instrument name is the run
     def _get_run_number_from_workspace(self, workspace_name):
         instrument = self.context.data_context.instrument
