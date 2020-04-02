@@ -9,7 +9,7 @@ from math import sqrt, ceil, floor
 
 from distutils.version import LooseVersion
 
-from qtpy import QT_VERSION, QtGui
+from qtpy import QT_VERSION
 
 from Muon.GUI.Common.plotting_widget.external_plotting_model import PlotInformation
 from mantid.plots.utility import legend_set_draggable
@@ -95,18 +95,16 @@ class ExternalPlottingView(object):
     # private Mantidplot methods
     def _plot_data_mantidplot(self, fig_window, data):
         from mantidplot import plotSpectrum
-        for i, plot_info in enumerate(data):
+        for plot_info in data:
             distr_state = self._get_distr_state_mantid_plot(plot_info.normalised)
             if self.number_of_axes == 1:
                 plotSpectrum(plot_info.workspace, plot_info.specNum - 1,
                              distribution=distr_state, window=fig_window)
             else:
-                lay = fig_window.layer(plot_info.axis + 1)
-                fig_window.setActiveLayer(lay)
+                row, col = self._get_row_and_col_number(plot_info.axis)
+                window = fig_window.getWidget(row, col)
                 plotSpectrum(plot_info.workspace, plot_info.specNum - 1,
-                             distribution=distr_state, window=fig_window, type=0)
-        if self.number_of_axes != 1:
-            fig_window.arrangeLayers(False, False)
+                             distribution=distr_state, window=window)
 
     def _create_external_mantidplot_fig_window(self):
         from mantidplot import newGraph
@@ -118,14 +116,13 @@ class ExternalPlottingView(object):
         return graph_window
 
     def _create_tiled_external_mantidplot_fig_window(self):
-        from mantidplot import newGraph
+        from mantidplot import newTiledWindow, newGraph
         ncols = ceil(sqrt(self.number_of_axes))
-        nrows = ceil(self.number_of_axes / ncols)
-        graph_window = newGraph()
-        graph_window.setCols(ncols)
-        graph_window.setRows(nrows)
-        graph_window.setLayerCanvasSize(100, 100)
-        graph_window.setNumLayers(self.number_of_axes)
+        graph_window = newTiledWindow(ncols=ncols)
+        for fig_number in range(self.number_of_axes):
+            window = newGraph(layers=1)
+            row, col = self._get_row_and_col_number(fig_number)
+            graph_window.insertWidget(window, row, col)
 
         return graph_window
 
@@ -137,17 +134,12 @@ class ExternalPlottingView(object):
 
     def _copy_axes_setup_mantidplot(self, fig_window, internal_axes):
         if self.number_of_axes == 1:
-            # remove old legend as we are going to make a new one
-            fig_window.activeLayer().removeLegend()
             self._set_mantid_plot_axis_display(fig_window, internal_axes[0])
             return
         for i, internal_axis in enumerate(internal_axes):  # else tiled plot
-            layer = fig_window.layer(i + 1)
-            if i == 0:
-                layer.removeLegend()
-            fig_window.setActiveLayer(layer)
-            self._set_mantid_plot_axis_display(fig_window, internal_axis)
-        fig_window.arrangeLayers(False, False)
+            row, col = self._get_row_and_col_number(i)
+            window = fig_window.getWidget(row, col)
+            self._set_mantid_plot_axis_display(window, internal_axis)
 
     @staticmethod
     def _set_mantid_plot_axis_display(window, internal_axis):
@@ -156,14 +148,11 @@ class ExternalPlottingView(object):
         title = internal_axis.get_title()
         ylim = internal_axis.get_ylim()
         active_layer = window.activeLayer()
-        active_layer.setAxisTitleFont(0, QtGui.QFont("normal", 8))
-        active_layer.setAxisTitleFont(2, QtGui.QFont("normal", 8))
-        active_layer.setTitleFont(QtGui.QFont("normal", 8))
         active_layer.setAutoScale()
         active_layer.setAxisScale(Layer.Bottom, xlim[0], xlim[1])
         active_layer.setAxisScale(Layer.Left, ylim[0], ylim[1])
         active_layer.setTitle(title)
-        active_layer.newLegend("")
+
 
     @staticmethod
     def _get_distr_state_mantid_plot(is_normalised):

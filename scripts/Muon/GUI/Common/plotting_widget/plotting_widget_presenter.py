@@ -251,8 +251,10 @@ class PlotWidgetPresenter(HomeTabSubWidget):
         if state == 2:  # tiled plot
             num_axes = self.update_model_tile_plot_positions()
             self.new_plot_figure(num_axes)
+            self.plot_all_selected_workspaces(autoscale=True)
         if state == 0:  # not tiled plot
             self.new_plot_figure(num_axes=1)
+            self.plot_all_selected_workspaces(autoscale=True)
 
         self.plot_data_and_fit_workspaces(data_workspaces, fit_workspaces)
         self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
@@ -372,7 +374,7 @@ class PlotWidgetPresenter(HomeTabSubWidget):
             else:
                 num_axes = self.update_model_tile_plot_positions()
             self.new_plot_figure(num_axes)
-            self.plot_data_and_fit_workspaces(data_workspaces, fit_workspaces)
+            self.plot_all_selected_workspaces(autoscale=True)
             self.connect_xlim_changed_in_figure_view(self.handle_x_axis_limits_changed_in_figure_view)
             self.connect_ylim_changed_in_figure_view(self.handle_y_axis_limits_changed_in_figure_view)
 

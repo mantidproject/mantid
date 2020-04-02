@@ -383,6 +383,13 @@ class MainWindow(QMainWindow):
     def launch_custom_python_gui(self, filename):
         self.interface_executor.execute(open(filename).read(), filename)
 
+        # If Muon Analysis 2 window set parent manually
+        python_filename = filename.split('/')[-1]
+        if python_filename == "Muon_Analysis.py":
+            window = find_window("MuonAnalysis2", None)
+            window.setParent(self, window.windowFlags())
+            window.show()
+
     def launch_custom_cpp_gui(self, interface_name, submenu=None):
         """Create a new interface window if one does not already exist,
         else show existing window"""
