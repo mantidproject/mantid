@@ -293,6 +293,18 @@ public:
   }
 
   void
+  test_that_selectedFitDataChanged_signal_will_enable_selectors_when_workspace_presenter() {
+    TableDatasetIndex const index(0);
+    ON_CALL(*m_fittingModel, getWorkspace(index))
+        .WillByDefault(Return(m_ads->retrieveWorkspace("WorkspaceName")));
+
+    EXPECT_CALL(*m_view, enableSpectrumSelection(true)).Times(1);
+    EXPECT_CALL(*m_view, enableFitRangeSelection(true)).Times(1);
+
+    m_view->emitSelectedFitDataChanged(index);
+  }
+
+  void
   test_that_the_selectedFitDataChanged_signal_will_disable_selectors_when_there_is_no_workspace() {
     TableDatasetIndex const index(0);
     ON_CALL(*m_fittingModel, getWorkspace(index))
