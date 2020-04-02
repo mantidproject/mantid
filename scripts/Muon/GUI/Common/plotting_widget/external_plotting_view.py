@@ -153,7 +153,6 @@ class ExternalPlottingView(object):
         active_layer.setAxisScale(Layer.Left, ylim[0], ylim[1])
         active_layer.setTitle(title)
 
-
     @staticmethod
     def _get_distr_state_mantid_plot(is_normalised):
         from mantidplot import DistrFlag
