@@ -16,6 +16,7 @@ Improvements
 - When you stop a script running in workbench it will now automatically attempt to cancel the algorithm the script is running, rather than wait for the current algorthm to end.
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
 - Fixed an issue where some scripts were running slower if a  plot was open at the same time.
+- The axes tab in the figure options can now be used to set the limits, label, and scale of the z-axis on 3D plots.
 
 
 Bugfixes
