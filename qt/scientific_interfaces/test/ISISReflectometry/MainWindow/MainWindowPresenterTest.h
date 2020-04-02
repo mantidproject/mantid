@@ -252,6 +252,7 @@ public:
 
   void testChangeInstrumentRequestedUpdatesInstrumentInChildPresenters() {
     auto presenter = makePresenter();
+    setupInstrument(presenter, "INTER");
     auto const instrument = std::string("POLREF");
     EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
         .Times(1);
@@ -261,13 +262,24 @@ public:
     verifyAndClear();
   }
 
-  void testUpdateInstrumentUpdatesInstrumentInChildPresenters() {
+  void testChangeInstrumentRequestedDoesNotUpdateInstrumentIfNotChanged() {
     auto presenter = makePresenter();
     auto const instrument = setupInstrument(presenter, "POLREF");
     EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
-        .Times(1);
+        .Times(0);
     EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
-        .Times(1);
+        .Times(0);
+    presenter.notifyChangeInstrumentRequested(instrument);
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentDoesNotUpdateInstrumentInChildPresenters() {
+    auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "POLREF");
+    EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument))
+        .Times(0);
+    EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
+        .Times(0);
     presenter.notifyUpdateInstrumentRequested();
     verifyAndClear();
   }
@@ -316,32 +328,16 @@ public:
 
   void testSaveBatch() {
     auto presenter = makePresenter();
-    auto const filename = std::string("test.json");
-    auto const map = QMap<QString, QVariant>();
     auto const batchIndex = 1;
-    EXPECT_CALL(m_messageHandler, askUserForSaveFileName("JSON (*.json)"))
-        .Times(1)
-        .WillOnce(Return(filename));
-    EXPECT_CALL(*m_encoder, encodeBatch(&m_view, batchIndex, false))
-        .Times(1)
-        .WillOnce(Return(map));
-    EXPECT_CALL(m_fileHandler, saveJSONToFile(filename, map)).Times(1);
+    expectBatchIsSavedToFile(batchIndex);
     presenter.notifySaveBatchRequested(batchIndex);
     verifyAndClear();
   }
 
   void testLoadBatch() {
     auto presenter = makePresenter();
-    auto const filename = std::string("test.json");
-    auto const map = QMap<QString, QVariant>();
     auto const batchIndex = 1;
-    EXPECT_CALL(m_messageHandler, askUserForLoadFileName("JSON (*.json)"))
-        .Times(1)
-        .WillOnce(Return(filename));
-    EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename))
-        .Times(1)
-        .WillOnce(Return(map));
-    EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
+    expectBatchIsLoadedFromFile(batchIndex);
     presenter.notifyLoadBatchRequested(batchIndex);
     verifyAndClear();
   }
@@ -487,6 +483,30 @@ private:
     EXPECT_CALL(*m_slitCalculator, setCurrentInstrumentName(instrument))
         .Times(1);
     EXPECT_CALL(*m_slitCalculator, processInstrumentHasBeenChanged()).Times(1);
+  }
+
+  void expectBatchIsSavedToFile(int batchIndex) {
+    auto const filename = std::string("test.json");
+    auto const map = QMap<QString, QVariant>();
+    EXPECT_CALL(m_messageHandler, askUserForSaveFileName("JSON (*.json)"))
+        .Times(1)
+        .WillOnce(Return(filename));
+    EXPECT_CALL(*m_encoder, encodeBatch(&m_view, batchIndex, false))
+        .Times(1)
+        .WillOnce(Return(map));
+    EXPECT_CALL(m_fileHandler, saveJSONToFile(filename, map)).Times(1);
+  }
+
+  void expectBatchIsLoadedFromFile(int batchIndex) {
+    auto const filename = std::string("test.json");
+    auto const map = QMap<QString, QVariant>();
+    EXPECT_CALL(m_messageHandler, askUserForLoadFileName("JSON (*.json)"))
+        .Times(1)
+        .WillOnce(Return(filename));
+    EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename))
+        .Times(1)
+        .WillOnce(Return(map));
+    EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
   }
 
   void assertFirstBatchWasRemovedFromModel(
