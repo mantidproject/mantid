@@ -8,7 +8,7 @@
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QDoubleValidator
-from qtpy.QtWidgets import QWidget, QMessageBox
+from qtpy.QtWidgets import QWidget
 
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties

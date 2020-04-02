@@ -8,6 +8,7 @@
 
 from mpl_toolkits.mplot3d import Axes3D
 
+
 class AxProperties(dict):
     """
     An object to store the properties that can be set in the Axes
