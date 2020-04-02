@@ -1,10 +1,10 @@
 .. _06_formatting_plots:
 
-.. TO UPDATE find these images in a .pptx file at https://github.com/mantidproject/documents/blob/master/Images/Images_for_Docs/formatting_plots.pptx
-
 ==========================================
 Formatting Plots with the User Interface
 ==========================================
+
+.. TO UPDATE find these images in a .pptx file at https://github.com/mantidproject/documents/blob/master/Images/Images_for_Docs/formatting_plots.pptx
 
 Plot Toolbar
 ============

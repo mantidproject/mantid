@@ -13,12 +13,14 @@ General
 Required imports:
 
 .. code-block:: python
+
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
 
 Access a workspaceloaded in the Workspace Toolbox inside a script:
 
 .. code-block:: python
+
     ws = mtd['ws']
     
     #or you could use:
@@ -28,29 +30,41 @@ Access a workspaceloaded in the Workspace Toolbox inside a script:
 Create a Figure and access its Axes for plotting:
 
 .. code-block:: python
+
     fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
 
 (including the Mantid projection allows for plotting in the Mantid way, such as selecting a SpectrumNumber)
 
 Actually plot the 1st spectrum of the workspace "ws" and control `many options <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.axes.Axes.plot.html>`_:
+
 .. code-block:: python
+
     axes.plot(ws, specNum=1, color='red', label='spec 1 - ws', linewidth=1.0, linestyle='--', drawstyle='steps', marker = 'x')
 
-Add a `legend <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.pyplot.legend.html>`_containing the plotted data labels:
+Add a `legend <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.pyplot.legend.html>`_ containing the plotted data labels:
+
 .. code-block:: python
+
     plt.legend()
 
 Adjust the `scale to logarithmic <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.yscale.html>`_, or the `axis limits <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_xlim.html>`_:
+
 .. code-block:: python
+
     axes.yscale('log')
     axes.set_xlim(0.0, 80.)
     # x and y can be swapped to alter the other axis
+
 Add a title:
+
 .. code-block:: python
+
     axes.title("My Wonderful Plot", fontsize=20, verticalalignment='bottom')
 
 Add axis labels:
+
 .. code-block:: python
+
     axes.xlabel(‘Wavelength / nm’), axes.ylabel(‘Time Delay / ps’)
 
 
@@ -58,7 +72,9 @@ Plotting with Errorbars
 =======================
 
 Simply use "`errorbar <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.errorbar.html>`_" instead of "plot":
+
 .. code-block:: python
+
     axes.errorbar(exp_decay,specNum=3, capsize=2.0, label='spec 3', linewidth=1.0)
 
 
@@ -68,20 +84,27 @@ Tick Marks and Grid lines
 Add `minor tick marks <https://matplotlib.org/3.2.1/gallery/ticks_and_spines/major_minor_demo.html>`_, here to the x-axis:
 
 .. code-block:: python
+
     from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
     axes.xaxis.set_minor_locator(MultipleLocator(5)) # minor ticks every 5 units
     #axes.xaxis.set_minor_locator(AutoMinorLocator()) # python decides for you
 
 Edit `tick options <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.tick_params.html>`_ such as direction in/out:
+
 .. code-block:: python
+
     axes.tick_params(which='minor', width = 0.5, length=4, color='b', direction=‘in’, top=‘on’)
 
 Even add `gridlines <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.grid.html>`_:
+
 .. code-block:: python
+
     axes.grid(True, which = both, axis = both) # major/minor, x/y
 
-Notice how `gridlines are links to the axis ticks <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.tick_params.html>`_s:
+Notice how `gridlines are linked to the axis ticks <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.tick_params.html>`_ :
+
 .. code-block:: python
+
     axes.tick_params(which='minor', grid_color='r', grid_alpha=0.5)
     axes.tick_params(which='major', grid_color='b')
 
@@ -90,7 +113,9 @@ Fonts
 =====
 
 Alter the font `text <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.text.html#matplotlib.pyplot.text>`_:
+
 .. code-block:: python
+
     from matplotlib import rc
     rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 
@@ -102,8 +127,10 @@ Here's `how to find available fonts <http://jonathansoma.com/lede/data-studio/ma
 Subplots and Inset plots
 ========================
 
-Create a `tiled plot <https://matplotlib.org/devdocs/gallery/subplots_axes_and_figures/subplots_demo.html>`_(subplot)
+Create a `tiled plot <https://matplotlib.org/devdocs/gallery/subplots_axes_and_figures/subplots_demo.html>`_ (subplot)
+
 .. code-block:: python
+
     fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
     # You've created 2x2 arrangement of plots, now plot in them:
     axes[0][0].plot(exp_decay,specNum=1)
@@ -114,7 +141,9 @@ Create a `tiled plot <https://matplotlib.org/devdocs/gallery/subplots_axes_and_f
     plt.tight_layout()
 
 Add an `inset plot using the mantid projection <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.figure.Figure.html?highlight=add_axes#matplotlib.figure.Figure.add_axes>`_ (`without it <https://matplotlib.org/3.1.1/api/_as_gen/mpl_toolkits.axes_grid1.inset_locator.inset_axes.html>`_):
+
 .. code-block:: python
+
     ax_sub = fig.add_axes([0.50, 0.50, 0.3, 0.25],projection='mantid') #[left, bottom, width, height]
     ax_sub.plot(exp_decay, specNum=5)
 
@@ -138,9 +167,8 @@ For further info, including code for producing 2D colorfill plots see:
 
 
 .. plot::
+    :include-source:
 
-
-    # import mantid algorithms, numpy and matplotlib
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
     from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
