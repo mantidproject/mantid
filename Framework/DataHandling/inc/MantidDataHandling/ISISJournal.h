@@ -8,37 +8,58 @@
 
 #include "MantidKernel/System.h"
 
+#include <Poco/AutoPtr.h>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
+namespace Poco::XML {
+class Document;
+}
+
 namespace Mantid {
+namespace Kernel {
+class InternetHelper;
+}
+
 namespace DataHandling {
 namespace ISISJournal {
 /**
-  Defines functions to aid in fetching ISIS specific run information from
-  journal files
+ * ISISJournal: Helper class to aid in fetching ISIS specific run information
+ * from journal files
  */
 
-using ISISJournalTags = std::vector<std::string>;
-using ISISJournalFilters = std::map<std::string, std::string>;
-using ISISJournalData = std::map<std::string, std::string>;
+class DLLExport ISISJournal {
+public:
+  using RunData = std::map<std::string, std::string>;
 
-std::vector<ISISJournalData> DLLExport
-getRunDataFromFile(std::string const &fileContents,
-                   ISISJournalTags const &tags = ISISJournalTags(),
-                   ISISJournalFilters const &filters = ISISJournalFilters());
+  ISISJournal(std::string const &instrument, std::string const &cycle,
+              std::unique_ptr<Kernel::InternetHelper> internetHelper =
+                  std::make_unique<Kernel::InternetHelper>());
+  virtual ~ISISJournal();
 
-std::vector<ISISJournalData> DLLExport
-getRunData(std::string const &instrument, std::string const &cycle,
-           ISISJournalTags const &tags = ISISJournalTags(),
-           ISISJournalFilters const &filters = ISISJournalFilters());
+  ISISJournal(ISISJournal const &rhs) = delete;
+  ISISJournal(ISISJournal &&rhs);
+  ISISJournal const &operator=(ISISJournal const &rhs) = delete;
+  ISISJournal &operator=(ISISJournal &&rhs);
 
-std::vector<std::string>
-    DLLExport getCycleListFromFile(std::string const &fileContents);
+  /// Get the list of cycle names
+  std::vector<std::string> getCycleNames();
+  /// Get data for runs that match the given filters
+  std::vector<RunData>
+  getRuns(std::vector<std::string> const &valuesToLookup = {},
+          RunData const &filters = RunData());
 
-std::vector<std::string> DLLExport getCycleList(std::string const &instrument);
+private:
+  std::unique_ptr<Kernel::InternetHelper> m_internetHelper;
+  std::string m_runsFileURL;
+  std::string m_indexFileURL;
+  Poco::AutoPtr<Poco::XML::Document> m_runsDocument;
+  Poco::AutoPtr<Poco::XML::Document> m_indexDocument;
 
+  std::string getURLContents(std::string const &url);
+};
 } // namespace ISISJournal
 } // namespace DataHandling
 } // namespace Mantid

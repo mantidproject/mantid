@@ -10,7 +10,6 @@
 #include "MantidKernel/InternetHelper.h"
 
 #include "Poco/SAX/SAXException.h"
-#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeFilter.h>
@@ -34,59 +33,41 @@ using Poco::XML::NodeFilter;
 using Poco::XML::TreeWalker;
 
 namespace {
-static constexpr const char *URL_PREFIX = "http://data.isis.rl.ac.uk/";
-static constexpr const char *INSTRUMENT_PREFIX = "journals/ndx";
-static constexpr const char *JOURNAL_INDEX_FILE = "main";
-static constexpr const char *JOURNAL_PREFIX = "journal_";
+static constexpr const char *URL_PREFIX =
+    "http://data.isis.rl.ac.uk/journals/ndx";
+static constexpr const char *INDEX_FILE_NAME = "main";
+static constexpr const char *JOURNAL_PREFIX = "/journal_";
 static constexpr const char *JOURNAL_EXT = ".xml";
 static constexpr const char *NXROOT_TAG = "NXroot";
 static constexpr const char *NXENTRY_TAG = "NXentry";
 static constexpr const char *JOURNAL_TAG = "journal";
 static constexpr const char *FILE_TAG = "file";
 
-/* Construct the URL for a journal file containing run data for a particular
+/** Construct the URL for a journal file containing run data for a particular
  * instrument and cycle, e.g.
  *   http://data.isis.rl.ac.uk/journals/ndxinter/journal_19_4.xml
+ * @param instrument : the ISIS instrument name (case insensitive)
+ * @param name : the file name excluding the "journal_" prefix and extension,
+ * e.g. "19_4" for "journal_19_4.xml"
+ * @returns : the URL as a string
  */
-std::string constructRunsFileURL(std::string const &instrument,
-                                 std::string const &cycle) {
-  std::stringstream url;
-  url << URL_PREFIX << INSTRUMENT_PREFIX << instrument << "/" << JOURNAL_PREFIX
-      << cycle << JOURNAL_EXT;
+std::string constructURL(std::string instrument, std::string const &name) {
+  boost::algorithm::to_lower(instrument);
+  std::ostringstream url;
+  url << URL_PREFIX << instrument << JOURNAL_PREFIX << name << JOURNAL_EXT;
   return url.str();
 }
 
-/* Construct the URL for the journal index file for a particular instrument,
- * e.g. http://data.isis.rl.ac.uk/journals/ndxinter/journal_main.xml
+/** Parse a given XML string into a Document object
+ * @param xmlString : the XML file contents as a string
+ * @returns : the XML Document
+ * @throws : if there was an error parsing the file
  */
-std::string constructIndexFileURL(std::string const &instrument) {
-  std::stringstream url;
-  url << URL_PREFIX << INSTRUMENT_PREFIX << instrument << "/" << JOURNAL_PREFIX
-      << JOURNAL_INDEX_FILE << JOURNAL_EXT;
-  return url.str();
-}
-
-/* Get the contents of a file at a given URL
- */
-std::string getURLContents(std::string const &url) {
-  Kernel::InternetHelper inetHelper;
-  std::stringstream serverReply;
-  auto const statusCode = inetHelper.sendRequest(url, serverReply);
-  if (statusCode != Poco::Net::HTTPResponse::HTTP_OK) {
-    throw Kernel::Exception::InternetError(
-        std::string("Failed to access journal file: ") +
-        std::to_string(statusCode));
-  }
-  return serverReply.str();
-}
-
-/* Parse a given XML file contents into a Document object
- */
-Poco::AutoPtr<Document> parse(std::string const &fileContents) {
+Poco::AutoPtr<Document> parse(std::string const &xmlString) {
   DOMParser domParser;
   Poco::AutoPtr<Document> xmldoc;
   try {
-    xmldoc = domParser.parseString(fileContents);
+    xmldoc = domParser.parseString(xmlString);
   } catch (Poco::XML::SAXParseException const &ex) {
     std::ostringstream msg;
     msg << "ISISJournal: Error parsing file: " << ex.what();
@@ -95,26 +76,30 @@ Poco::AutoPtr<Document> parse(std::string const &fileContents) {
   return xmldoc;
 }
 
-/* Check the given element is not null and has the given name and throw if not
+/** Check the given element is valid.
+ * @param expectedName : the node name that the element is expected to have
+ * @throws : if the element is null or does not match the expected name
  */
-void validateElement(Element *element, const char *expectedName) {
+void throwIfNotValid(Element *element, const char *expectedName) {
   if (!element) {
     std::ostringstream msg;
-    msg << "ISISJournal::validateElement() - invalid element for '"
-        << NXROOT_TAG << "'\n";
+    msg << "ISISJournal::throwIfNotValid() - invalid element for '"
+        << expectedName << "'\n";
     throw std::invalid_argument(msg.str());
   }
 
   if (element->nodeName() != expectedName) {
     std::ostringstream msg;
-    msg << "ISISJournal::validateElement() - Element tag does not match '"
-        << NXROOT_TAG << "'. Found " << element->nodeName() << "\n";
+    msg << "ISISJournal::throwIfNotValid() - Element name does not match '"
+        << expectedName << "'. Found " << element->nodeName() << "\n";
     throw std::invalid_argument(msg.str());
   }
 }
 
-/* Return the text value contained in the given node, or an empty string if it
- * does not contain a text value.
+/** Get the text contained in a node.
+ * @param node : the node
+ * @returns : the value contained in the child #text node, or an empty string if
+ * it does not contain a text value.
  */
 std::string getTextValue(Node *node) {
   if (!node)
@@ -130,12 +115,14 @@ std::string getTextValue(Node *node) {
   return std::string();
 }
 
-/* Check if an element matches a set of filter criteria. Checks for a child
- * element with the filter name and checks that its value matches the given
- * filter value.
+/** Check if an element matches a set of filter criteria.
+ * @param element : the element to check
+ * @param filters : a map of names and values to check against
+ * @returns : true if, for all filters, the element has a child node with
+ * the filter name that contains text matching the filter value
  */
-bool matchesAllFilters(Element *element, ISISJournalFilters const &filters) {
-  for (auto filterKvp : filters) {
+bool matchesAllFilters(Element *element, ISISJournal::RunData const &filters) {
+  for (auto const &filterKvp : filters) {
     auto const childElement = element->getChildElement(filterKvp.first);
     if (getTextValue(childElement) != filterKvp.second)
       return false;
@@ -143,61 +130,87 @@ bool matchesAllFilters(Element *element, ISISJournalFilters const &filters) {
   return true;
 }
 
-/* Extract a list of named "tag" values for the given element. Gets the text
- * values of the child elements with the given names and returns a map of the
- * tag name to the value. Also always adds the element name to the list so there
- * is always a results for every run.
+/** Utility function to create the run data for an element.
+ * @param element : the element to get run data for
+ * @returns : a map of name->value pairs initialised with the mandatory data
+ * that is returned for all runs (currently just the name attribute, e.g.
+ * "name": "INTER00013460")
  */
-ISISJournalData getTagsForNode(Element *element, ISISJournalTags const &tags) {
-  auto result = ISISJournalData{};
-  // Add the run name
-  result["name"] = element->getAttribute("name");
-  // Add any tags in the tags list
-  for (auto &tag : tags)
-    result[tag] = getTextValue(element->getChildElement(tag));
-  return result;
+ISISJournal::RunData createRunDataForElement(Element *element) {
+  return ISISJournal::RunData{{"name", element->getAttribute("name")}};
 }
 
-/* Extract a list of "tag" values for all child nodes in the given "root" or
- * parent element. Here, a "tag" is a name for a child element in the element
- * we're checking i.e. a grandchild of the root node.
+/** Extract a list of named values for the given element.
+ * @param element : the element to extract values for
+ * @param valuesToLookup : a list of values to extract (which may be empty if
+ * nothing is requested)
+ * @param result : a map of names to values to which we add key-value pairs for
+ * each requested value
  */
-std::vector<ISISJournalData>
-getTagsForAllNodes(Element *root, ISISJournalTags const &tags,
-                   ISISJournalFilters const &filters) {
-  auto results = std::vector<ISISJournalData>{};
+void addValuesForElement(Element *element,
+                         std::vector<std::string> const &valuesToLookup,
+                         ISISJournal::RunData &result) {
+  for (auto &name : valuesToLookup)
+    result[name] = getTextValue(element->getChildElement(name));
+}
 
-  auto nodeIter = TreeWalker(root, NodeFilter::SHOW_ELEMENT);
+/** Extract a list of named values for all child nodes in the given parent
+ * element.
+ * @param parentElement : the element containing all child nodes we want to
+ * check
+ * @param valuesToLookup : the names of the values to extract from within the
+ * child nodes
+ * @param filters : a map of names and values to filter the results by
+ * @returns : a map of name->value pairs containing mandatory run data as well
+ * as the values that were requested
+ */
+std::vector<ISISJournal::RunData>
+getValuesForAllElements(Element *parentElement,
+                        std::vector<std::string> const &valuesToLookup,
+                        ISISJournal::RunData const &filters) {
+  auto results = std::vector<ISISJournal::RunData>{};
+
+  auto nodeIter = TreeWalker(parentElement, NodeFilter::SHOW_ELEMENT);
   for (auto node = nodeIter.nextNode(); node; node = nodeIter.nextSibling()) {
     auto element = dynamic_cast<Element *>(node);
-    validateElement(element, NXENTRY_TAG);
-    if (matchesAllFilters(element, filters))
-      results.emplace_back(getTagsForNode(element, tags));
+    throwIfNotValid(element, NXENTRY_TAG);
+
+    if (matchesAllFilters(element, filters)) {
+      auto result = createRunDataForElement(element);
+      addValuesForElement(element, valuesToLookup, result);
+      results.emplace_back(std::move(result));
+    }
   }
 
   return results;
 }
 
-/* Get the text values for all direct child elements of a given parent
- * element. The child elements should all have the given tag name - throws if
- * not.
+/** Extract an attribute value for all direct children of a given element.
+ * @param parentElement : the element containing the child nodes to check
+ * @param childElementName : the name that the child elements should have
+ * @returns : the attribute values for all of the child elements
+ * @throws : if any of the child elements does not have the expected name
  */
-std::vector<std::string> getTagValuesForChildElements(Element *root,
-                                                      const char *tag) {
+std::vector<std::string>
+getAttributeForAllChildElements(Element *parentElement,
+                                const char *childElementName,
+                                const char *attributeName) {
   auto results = std::vector<std::string>{};
 
-  auto nodeIter = TreeWalker(root, NodeFilter::SHOW_ELEMENT);
+  auto nodeIter = TreeWalker(parentElement, NodeFilter::SHOW_ELEMENT);
   for (auto node = nodeIter.nextNode(); node; node = nodeIter.nextSibling()) {
     auto element = dynamic_cast<Element *>(node);
-    validateElement(element, tag);
-    results.emplace_back(element->getAttribute("name"));
+    throwIfNotValid(element, childElementName);
+    results.emplace_back(element->getAttribute(attributeName));
   }
 
   return results;
 }
 
-/* Convert a cycle filename to the cycle name or return an empty string if it
- * doesn't match the required pattern
+/** Convert a cycle filename to the cycle name
+ * @param filename : a filename e.g. journal_19_4.xml
+ * @return the cycle name e.g. 19_4, or an empty string if the name
+ * does not match the required pattern
  */
 std::string convertFilenameToCycleName(std::string const &filename) {
   boost::regex pattern("[0-9]+_[0-9]+");
@@ -210,9 +223,11 @@ std::string convertFilenameToCycleName(std::string const &filename) {
   return std::string();
 }
 
-/* Convert a list of cycle filenames to a list of cycle names e.g.
- * journal_19_4.xml -> 19_4. Also exlcudes files from the list if they do not
- * match the required pattern.
+/** Convert a list of cycle filenames to a list of cycle names.
+ * @param filenames : the list of filenames e.g. journal_main.xml,
+ * journal_19_4.xml
+ * @returns : the list of cycle names for all valid journal files e.g. 19_4
+ * (note that this excludes files that do not match the journal-file pattern).
  */
 std::vector<std::string>
 convertFilenamesToCycleNames(std::vector<std::string> const &filenames) {
@@ -227,62 +242,78 @@ convertFilenamesToCycleNames(std::vector<std::string> const &filenames) {
 }
 } // namespace
 
-/** Get specified data from a journal file for all runs that match given filter
- * criteria.
- *
- * @param fileContents : the XML journal file contents
- * @param tags : the tag names of the required values to be returned e.g.
- * "run_number"
- * @param filters : optional tag names and values to filter the results by
- */
-std::vector<ISISJournalData>
-getRunDataFromFile(std::string const &fileContents, ISISJournalTags const &tags,
-                   ISISJournalFilters const &filters) {
-  auto xmldoc = parse(fileContents);
-  auto root = xmldoc->documentElement();
-  validateElement(root, NXROOT_TAG);
-  return getTagsForAllNodes(root, tags, filters);
-}
-
-/** Get specified data for all runs in a specific instrument and cycle that
- * match given filter criteria.
- *
- * @param instrument : the instrument to request data for
+/** Construct the journal class for a specific instrument and cycle
+ * @param instrument : the ISIS instrument name to request data for e.g. "INTER"
+ * (case insensitive)
  * @param cycle : the ISIS cycle the required data is from e.g. "19_4"
- * @param tags : the tag names of the required values to be returned e.g.
- * "run_number"
- * @param filters : optional tag names and values to filter the results by
+ * @param internetHelper : class for sending internet requests
  */
-std::vector<ISISJournalData> getRunData(std::string const &instrument,
-                                        std::string const &cycle,
-                                        ISISJournalTags const &tags,
-                                        ISISJournalFilters const &filters) {
-  auto const url = constructRunsFileURL(instrument, cycle);
-  auto fileContents = getURLContents(url);
-  return getRunDataFromFile(fileContents, tags, filters);
-}
+ISISJournal::ISISJournal(std::string const &instrument,
+                         std::string const &cycle,
+                         std::unique_ptr<InternetHelper> internetHelper)
+    : m_internetHelper(std::move(internetHelper)),
+      m_runsFileURL(constructURL(instrument, cycle)),
+      m_indexFileURL(constructURL(instrument, INDEX_FILE_NAME)) {}
 
-/** Get the list of cycle names from the given index file
- * @param fileContents : the contents of the XML index file
- * @returns : a list of cycle names
+ISISJournal::~ISISJournal() = default;
+
+ISISJournal::ISISJournal(ISISJournal &&rhs) = default;
+
+ISISJournal &ISISJournal::operator=(ISISJournal &&rhs) = default;
+
+/** Get the cycle names
+ *
+ * @returns : a list of all ISIS cycle names for the instrument
+ * @throws : if there was an error fetching the runs
  */
-std::vector<std::string> getCycleListFromFile(std::string const &fileContents) {
-  auto xmldoc = parse(fileContents);
-  auto root = xmldoc->documentElement();
-  validateElement(root, JOURNAL_TAG);
-  auto filenames = getTagValuesForChildElements(root, FILE_TAG);
+std::vector<std::string> ISISJournal::getCycleNames() {
+  if (!m_indexDocument) {
+    auto xmlString = getURLContents(m_indexFileURL);
+    m_indexDocument = parse(xmlString);
+  }
+  auto rootElement = m_indexDocument->documentElement();
+  throwIfNotValid(rootElement, JOURNAL_TAG);
+  auto filenames =
+      getAttributeForAllChildElements(rootElement, FILE_TAG, "name");
   return convertFilenamesToCycleNames(filenames);
 }
 
-/** Get the list of cycle names for the given instrument
- * @param instrument : the instrument name
- * @returns : a list of cycle names
+/** Get run names and other specified data for all runs that match the given
+ * filter criteria.
+ *
+ * @param valuesToLookup : optional list of additional values to be returned
+ * e.g. "run_number", "title"
+ * @param filters : optional element names and values to filter the results by
+ * @throws : if there was an error fetching the runs
  */
-std::vector<std::string> getCycleList(std::string const &instrument) {
-  auto const url = constructIndexFileURL(instrument);
-  auto fileContents = getURLContents(url);
-  return getCycleList(fileContents);
+std::vector<ISISJournal::RunData>
+ISISJournal::getRuns(std::vector<std::string> const &valuesToLookup,
+                     ISISJournal::RunData const &filters) {
+  if (!m_runsDocument) {
+    auto xmlString = getURLContents(m_runsFileURL);
+    m_runsDocument = parse(xmlString);
+  }
+  auto rootElement = m_runsDocument->documentElement();
+  throwIfNotValid(rootElement, NXROOT_TAG);
+  return getValuesForAllElements(rootElement, valuesToLookup, filters);
 }
+
+/** Get the contents of a file at a given URL
+ * @param url : the URL to fetch
+ * @returns : the contents of the file as a string
+ * @throws : if there was an error fetching the file
+ */
+std::string ISISJournal::getURLContents(std::string const &url) {
+  std::ostringstream serverReply;
+  auto const statusCode = m_internetHelper->sendRequest(url, serverReply);
+  if (statusCode != Poco::Net::HTTPResponse::HTTP_OK) {
+    throw Kernel::Exception::InternetError(
+        std::string("Failed to access journal file: HTTP Code: ") +
+        std::to_string(statusCode));
+  }
+  return serverReply.str();
+}
+
 } // namespace ISISJournal
 } // namespace DataHandling
 } // namespace Mantid
