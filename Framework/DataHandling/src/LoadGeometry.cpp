@@ -25,7 +25,7 @@ bool LoadGeometry::isNexus(const std::string &filename) {
   if (!filename.empty() &&
       !Mantid::Kernel::FileDescriptor(filename).isAscii(filename)) {
     Mantid::Kernel::NexusDescriptor descriptor(filename);
-    return descriptor.isHDF(filename) &&
+    return descriptor.isReadable(filename) &&
            (descriptor.classTypeExists("NXcylindrical_geometry") ||
             descriptor.classTypeExists("NXoff_geometry") ||
             descriptor.classTypeExists("NXtransformations"));

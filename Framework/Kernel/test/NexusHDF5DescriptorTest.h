@@ -6,22 +6,39 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/FileFinder.h"
-#include "MantidNexus/NexusHDF5Descriptor.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
+
+#include "Poco/File.h"
+#include "Poco/Path.h"
 
 #include <cstddef> // std::size_t
 
 #include <cxxtest/TestSuite.h>
+
+namespace {
+std::string getFullPath(const std::string &filename) {
+  using Mantid::Kernel::ConfigService;
+  auto dataPaths = ConfigService::Instance().getDataSearchDirs();
+  for (auto &dataPath : dataPaths) {
+    Poco::Path hdf5Path(dataPath, filename);
+    if (Poco::File(hdf5Path).exists()) {
+      return hdf5Path.toString();
+    }
+  }
+  return std::string();
+}
+} // namespace
 
 class NexusHDF5DescriptorTest : public CxxTest::TestSuite {
 
 public:
   // test get functions getFilename and getAllEntries
   void test_nexus_hdf5_descriptor_get() {
-    const std::string filename =
-        Mantid::API::FileFinder::Instance().getFullPath("EQSANS_89157.nxs.h5");
 
-    Mantid::NeXus::NexusHDF5Descriptor nexusHDF5Descriptor(filename);
+    const std::string filename = getFullPath("EQSANS_89157.nxs.h5");
+
+    Mantid::Kernel::NexusHDF5Descriptor nexusHDF5Descriptor(filename);
 
     TS_ASSERT_EQUALS(filename, nexusHDF5Descriptor.getFilename());
 

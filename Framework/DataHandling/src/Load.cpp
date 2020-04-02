@@ -13,6 +13,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -215,25 +216,37 @@ API::IAlgorithm_sptr Load::getFileLoader(const std::string &filePath) {
 }
 
 void Load::findFilenameProperty(const API::IAlgorithm_sptr &loader) {
-  // Use the first file property as the main Filename
-  const auto &props = loader->getProperties();
-  for (auto prop : props) {
-    auto *fp = dynamic_cast<API::MultipleFileProperty *>(prop);
-    auto *fp2 = dynamic_cast<API::FileProperty *>(prop);
-    if (fp) {
-      m_filenamePropName = fp->name();
-      break;
-    }
-    if (fp2) {
-      m_filenamePropName = fp2->name();
-      break;
+  const auto nxsLoader = boost::dynamic_pointer_cast<NexusFileLoader>(loader);
+  if (nxsLoader) {
+    // NexusFileLoader has a method for giving back the name directly
+    m_filenamePropName = nxsLoader->getFilenamePropertyName();
+  } else {
+    // Use the first file property as the main Filename
+    const auto &props = loader->getProperties();
+    for (auto prop : props) {
+      auto *multiprop = dynamic_cast<API::MultipleFileProperty *>(prop);
+      auto *singleprop = dynamic_cast<API::FileProperty *>(prop);
+      if (multiprop) {
+        m_filenamePropName = multiprop->name();
+        break;
+      }
+      if (singleprop) {
+        m_filenamePropName = singleprop->name();
+        break;
+      }
     }
   }
+
+  // throw an exception if somehting nothing was found
   if (m_filenamePropName.empty()) {
+    // unset member variables
     setPropertyValue("LoaderName", "");
     setProperty("LoaderVersion", -1);
-    throw std::runtime_error("Cannot find FileProperty on " + loader->name() +
-                             " algorithm.");
+
+    std::stringstream msg;
+    msg << "Cannot find FileProperty on \"" << loader->name() << "\" v"
+        << loader->version() << " algorithm.";
+    throw std::runtime_error(msg.str());
   }
 }
 

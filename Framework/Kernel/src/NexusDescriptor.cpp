@@ -36,7 +36,7 @@ const unsigned char NexusDescriptor::HDF5Signature[8] = {
 
 namespace {
 //---------------------------------------------------------------------------------------------------------------------------
-// Anonymous helper methods to use isHDF methods to use an open file handle
+// Anonymous helper methods to use isReadable methods to use an open file handle
 //---------------------------------------------------------------------------------------------------------------------------
 
 /**
@@ -96,8 +96,8 @@ bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version) {
  * the required version
  * @return True if the file is considered hierarchical, false otherwise
  */
-bool NexusDescriptor::isHDF(const std::string &filename,
-                            const Version version) {
+bool NexusDescriptor::isReadable(const std::string &filename,
+                                 const Version version) {
   FILE *fd = fopen(filename.c_str(), "rb");
   if (!fd) {
     throw std::invalid_argument(
