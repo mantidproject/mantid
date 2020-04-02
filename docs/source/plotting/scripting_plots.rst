@@ -122,7 +122,13 @@ Alter the `font <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.text
     from matplotlib import rc
     rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 
-Some `more info <https://matplotlib.org/3.1.0/gallery/text_labels_and_annotations/fonts_demo_kw.html>`_, such as making bold/italic.
+    axes.ylabel(fontsize = 12, fontstyle = 'italic')
+
+Alternatively, you can set a title or label to have certain `font properties <https://matplotlib.org/3.1.1/api/text_api.html#matplotlib.text.Text>`_:
+
+.. code-block:: python
+
+   axes.set_xlabel('Time-of-flight ($\mu s$)', fontsize = 12, fontstyle = 'italic', fontweight = 'bold', fontfamily='serif')
 
 Here's `how to find available fonts <http://jonathansoma.com/lede/data-studio/matplotlib/list-all-fonts-available-in-matplotlib-plus-samples/>`_ .
 
@@ -214,7 +220,8 @@ Example Script
 
    #Plot on the right set of axes
    axes[1].errorbar(exp_decay, specNum=1, capsize=2.0, errorevery=5, color='green', label='spec 1', linestyle='--')
-   axes[1].set_xlabel('Time-of-flight ($\mu s$)'), axes[1].set_ylabel('Counts ($\mu s$)$^{-1}$')
+   axes[1].set_xlabel('Time-of-flight ($\mu s$)', fontsize = 12, fontstyle = 'italic', fontweight = 'bold', fontfamily='serif')
+   axes[1].set_ylabel('Counts ($\mu s$)$^{-1}$')
    axes[1].set_title('Errorbars and Insets')
 
    #Use tight layout for subplots and create a legend
