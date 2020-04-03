@@ -495,8 +495,6 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID){
     std::vector<long unsigned int> detectorId{static_cast<long unsigned int>(pickID)};
     auto &actor = m_instrWidget->getInstrumentActor();
     actor.addMaskBinsData(detectorId);
-    m_pointer->setChecked(true);
-    setActivity();
     m_instrWidget->updateInstrumentView(); // to refresh the pick image
 
     auto wsMask = actor.getMaskWorkspace();
