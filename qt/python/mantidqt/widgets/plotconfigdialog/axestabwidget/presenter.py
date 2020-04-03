@@ -101,10 +101,17 @@ class AxesTabWidgetPresenter:
 
     def update_view(self):
         """Update the properties in the view from the selected axes"""
+        self.current_view_props.clear()
         ax_props = self.get_selected_ax_properties()
 
+        plot_is_3d = "zlim" in ax_props
+
         # Enable the z-axis option if the plot is 3D.
-        self.view.z_radio_button.setEnabled("zlim" in ax_props)
+        self.view.z_radio_button.setEnabled(plot_is_3d)
+
+        # For tiled plots
+        if not plot_is_3d and self.view.z_radio_button.isChecked():
+            self.view.x_radio_button.click()
 
         # Changing the axis scale doesn't work with 3D plots, this is a known matplotlib issue,
         # so the scale option is disabled.
@@ -137,4 +144,10 @@ class AxesTabWidgetPresenter:
             self.view.set_label(self.current_view_props[f"{new_ax}label"])
             self.view.set_scale(self.current_view_props[f"{new_ax}scale"])
         else:
-            self.update_view()
+            ax_props = self.get_selected_ax_properties()
+            ax = self.view.get_axis()
+            lim = ax_props[f"{ax}lim"]
+            self.view.set_lower_limit(lim[0])
+            self.view.set_upper_limit(lim[1])
+            self.view.set_label(ax_props[f"{ax}label"])
+            self.view.set_scale(ax_props[f"{ax}scale"])

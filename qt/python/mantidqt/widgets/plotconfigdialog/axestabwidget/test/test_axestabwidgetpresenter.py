@@ -53,24 +53,25 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
         ax_mock = mock.MagicMock()
         presenter = self._generate_presenter()
         with mock.patch.object(presenter, 'get_selected_ax', lambda: ax_mock):
-            presenter.current_view_props = presenter.get_selected_ax_properties()
-            presenter.apply_properties()
-            # Mock properties object and view then test that the view's setters
-            # are called with the correct property values
-            ax_mock.set_title.assert_called_once_with(
-                presenter.current_view_props.title)
-            ax_mock.set_xlim.assert_called_once_with(
-                presenter.current_view_props.xlim)
-            ax_mock.set_xlabel.assert_called_once_with(
-                presenter.current_view_props.xlabel)
-            ax_mock.set_xscale.assert_called_once_with(
-                presenter.current_view_props.xscale)
-            ax_mock.set_ylim.assert_called_once_with(
-                presenter.current_view_props.ylim)
-            ax_mock.set_ylabel.assert_called_once_with(
-                presenter.current_view_props.ylabel)
-            ax_mock.set_yscale.assert_called_once_with(
-                presenter.current_view_props.yscale)
+            with mock.patch.object(presenter, 'update_view', lambda: None):
+                presenter.current_view_props = presenter.get_selected_ax_properties()
+                presenter.apply_properties()
+                # Mock properties object and view then test that the view's setters
+                # are called with the correct property values
+                ax_mock.set_title.assert_called_once_with(
+                    presenter.current_view_props.title)
+                ax_mock.set_xlim.assert_called_once_with(
+                    presenter.current_view_props.xlim)
+                ax_mock.set_xlabel.assert_called_once_with(
+                    presenter.current_view_props.xlabel)
+                ax_mock.set_xscale.assert_called_once_with(
+                    presenter.current_view_props.xscale)
+                ax_mock.set_ylim.assert_called_once_with(
+                    presenter.current_view_props.ylim)
+                ax_mock.set_ylabel.assert_called_once_with(
+                    presenter.current_view_props.ylabel)
+                ax_mock.set_yscale.assert_called_once_with(
+                    presenter.current_view_props.yscale)
 
     def test_get_axes_names_dict(self):
         actual_dict = get_axes_names_dict(self.fig)
