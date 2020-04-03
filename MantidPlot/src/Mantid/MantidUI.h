@@ -19,7 +19,6 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
