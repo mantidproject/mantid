@@ -130,6 +130,7 @@ class AxesTabWidgetPresenter:
     def axis_changed(self):
         ax = self.current_axis
 
+        self.current_view_props['title'] = self.view.get_title()
         self.current_view_props[f"{ax}lim"] = (self.view.get_lower_limit(), self.view.get_upper_limit())
         self.current_view_props[f"{ax}label"] = self.view.get_label()
         self.current_view_props[f"{ax}scale"] = self.view.get_scale()
