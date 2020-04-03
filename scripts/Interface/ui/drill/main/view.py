@@ -173,7 +173,7 @@ class DrillView(QMainWindow):
             return -1
 
     def get_all_rows(self):
-        return range(self.table.rowCount() - 1)
+        return range(self.table.rowCount())
 
     def get_cell_contents(self, row, column):
         cell = self.table.item(row, column)
