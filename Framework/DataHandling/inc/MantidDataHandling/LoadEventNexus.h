@@ -107,7 +107,8 @@ public:
 
   template <typename T>
   static void loadEntryMetadata(const std::string &nexusfilename, T WS,
-                                const std::string &entry_name);
+                                const std::string &entry_name,
+                                const Kernel::NexusHDF5Descriptor &descriptor);
 
   /// Load instrument from Nexus file if possible, else from IDF spacified by
   /// Nexus file
@@ -595,8 +596,9 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
 //-----------------------------------------------------------------------------
 /** Load the run number and other meta data from the given bank */
 template <typename T>
-void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
-                                       const std::string &entry_name) {
+void LoadEventNexus::loadEntryMetadata(
+    const std::string &nexusfilename, T WS, const std::string &entry_name,
+    const Kernel::NexusHDF5Descriptor &descriptor) {
   // Open the file
   ::NeXus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
@@ -605,7 +607,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   const std::map<std::string, std::string> entriesNxentry = file.getEntries();
 
   // get the title
-  if (exists(entriesNxentry, "title")) {
+  if (descriptor.isEntry("/" + entry_name + "/title", "NXentry")) {
     file.openData("title");
     if (file.getInfo().type == ::NeXus::CHAR) {
       std::string title = file.getStrData();
@@ -616,7 +618,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   }
 
   // get the notes
-  if (exists(entriesNxentry, "notes")) {
+  if (descriptor.isEntry("/" + entry_name + "/title", "NXentry")) {
     file.openData("notes");
     if (file.getInfo().type == ::NeXus::CHAR) {
       std::string notes = file.getStrData();
@@ -627,7 +629,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   }
 
   // Get the run number
-  if (exists(entriesNxentry, "run_number")) {
+  if (descriptor.isEntry("/" + entry_name + "/run_number", "NXentry")) {
     file.openData("run_number");
     std::string run;
     if (file.getInfo().type == ::NeXus::CHAR) {
@@ -646,7 +648,8 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   }
 
   // get the experiment identifier
-  if (exists(entriesNxentry, "experiment_identifier")) {
+  if (descriptor.isEntry("/" + entry_name + "/experiment_identifier",
+                         "NXentry")) {
     file.openData("experiment_identifier");
     std::string expId;
     if (file.getInfo().type == ::NeXus::CHAR) {
@@ -660,10 +663,11 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
 
   // get the sample name - nested try/catch to leave the handle in an
   // appropriate state
-  if (exists(entriesNxentry, "sample")) {
+  if (descriptor.isEntry("/" + entry_name + "/sample", "NXentry")) {
     file.openGroup("sample", "NXsample");
     try {
-      if (exists(file, "name")) {
+    
+      if (descriptor.isEntry("/" + entry_name + "/sample/name")) {
         file.openData("name");
         const auto info = file.getInfo();
         std::string name;
@@ -691,7 +695,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS,
   }
 
   // get the duration
-  if (exists(entriesNxentry, "duration")) {
+  if (descriptor.isEntry("/" + entry_name + "/duration", "NXentry")) {
     file.openData("duration");
     std::vector<double> duration;
     file.getDataCoerce(duration);
