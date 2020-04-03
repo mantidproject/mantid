@@ -6,7 +6,6 @@
 
 set(SRC_FILES
     src/ErrorHandling.cpp
-    src/ExtractWorkspace.cpp
     src/GlobalInterpreterLock.cpp
     src/NDArray.cpp
     src/ReleaseGlobalInterpreterLock.cpp
@@ -29,7 +28,7 @@ set(INC_FILES
     inc/MantidPythonInterface/core/DataServiceExporter.h
     inc/MantidPythonInterface/core/DllConfig.h
     inc/MantidPythonInterface/core/ErrorHandling.h
-    inc/MantidPythonInterface/core/ExtractWorkspace.h
+    inc/MantidPythonInterface/core/ExtractSharedPtr.h
     inc/MantidPythonInterface/core/GlobalInterpreterLock.h
     inc/MantidPythonInterface/core/IsNone.h
     inc/MantidPythonInterface/core/NDArray.h
@@ -69,12 +68,6 @@ set(_target_name PythonInterfaceCore)
 add_library(${_target_name} ${SRC_FILES} ${INC_FILES})
 target_include_directories(${_target_name} PUBLIC inc)
 target_include_directories(${_target_name} SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
-# PythonInterfaceCore includes a header from API even though it's not a
-# dependency so include directories aren't picked up from API target
-target_include_directories(
-  ${_target_name} PUBLIC ${CMAKE_SOURCE_DIR}/Framework/API
-                         ${CMAKE_BINARY_DIR}/Framework/API
-)
 
 # Set the name of the generated library
 set_target_properties(
