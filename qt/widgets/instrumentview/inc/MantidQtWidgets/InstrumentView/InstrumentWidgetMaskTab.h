@@ -66,7 +66,8 @@ public:
     DrawRectangle,
     DrawEllipticalRing,
     DrawRectangularRing,
-    DrawFree
+    DrawFree,
+    Pixel
   };
 
   explicit InstrumentWidgetMaskTab(InstrumentWidget *instrWidget);
@@ -114,6 +115,7 @@ protected slots:
   void toggleMaskGroup();
   void enableApplyButtons();
   void doubleChanged(QtProperty * /*prop*/);
+  void singlePixelPicked(size_t);
 
 protected:
   void showEvent(QShowEvent * /*unused*/) override;

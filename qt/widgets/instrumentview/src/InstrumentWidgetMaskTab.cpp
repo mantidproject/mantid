@@ -152,8 +152,6 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_ring_rectangle);
   toolBox->addWidget(m_free_draw);
   toolBox->addWidget(m_pixel);
-  toolBox->addStretch();
-  toolBox->setSpacing(2);
   toolBox->setMargin(0);
 
   connect(m_move, SIGNAL(clicked()), this, SLOT(setActivity()));
@@ -359,7 +357,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
  * Initialize the tab when new projection surface is created.
  */
 void InstrumentWidgetMaskTab::initSurface() {
-  connect(m_instrWidget->getSurface().get(), SIGNAL(singlePixelPicked(size_t)), this,
+  connect(m_instrWidget->getSurface().get(), SIGNAL(singleComponentPicked(size_t)), this,
           SLOT(singlePixelPicked(size_t)));
   connect(m_instrWidget->getSurface().get(), SIGNAL(shapeCreated()), this,
           SLOT(shapeCreated()));
@@ -482,10 +480,38 @@ void InstrumentWidgetMaskTab::setActivity() {
     m_activeTool->setText("Tool: Free draw. " + whatIsBeingSelected);
    } else if (m_pixel->isChecked()) {
     m_activity = Pixel;
-
+    m_instrWidget->getSurface()->setInteractionMode(
+        ProjectionSurface::PickSingleMode);
     m_activeTool->setText("Tool: Pixel selection. " + whatIsBeingSelected);
    }
   m_instrWidget->updateInfoText();
+}
+
+/**
+ * Slot responding on the pick of a single detector pixel for masking.
+ */
+void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID){
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    std::vector<long unsigned int> detectorId{static_cast<long unsigned int>(pickID)};
+    auto &actor = m_instrWidget->getInstrumentActor();
+    actor.addMaskBinsData(detectorId);
+    m_pointer->setChecked(true);
+    setActivity();
+    m_instrWidget->updateInstrumentView(); // to refresh the pick image
+
+    auto wsMask = actor.getMaskWorkspace();
+    Mantid::detid_t detId = actor.getDetID(pickID);
+
+    // try to mask the detector, ignore any failure
+    try {
+      wsMask->setMasked(detId);
+    } catch (...) {
+    }
+    // update detector colours
+    m_instrWidget->getInstrumentActor().updateColors();
+    m_instrWidget->updateInstrumentDetectors();
+    QApplication::restoreOverrideCursor();
+    enableApplyButtons();
 }
 
 /**
