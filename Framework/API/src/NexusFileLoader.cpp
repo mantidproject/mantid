@@ -54,8 +54,8 @@ int NexusFileLoader::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   const std::map<std::string, std::set<std::string>> &allEntries =
       descriptor.getAllEntries();
   if (allEntries.count("NXevent_data") == 1) {
-    if (descriptor.isClassEntry("NXentry", "/entry") ||
-        descriptor.isClassEntry("NXentry", "/raw_data_1")) {
+    if (descriptor.isEntry("/entry", "NXentry") ||
+        descriptor.isEntry("/raw_data_1", "NXentry")) {
       confidence = 80;
     }
   }

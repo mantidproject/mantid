@@ -224,8 +224,8 @@ NexusHDF5Descriptor::initAllEntries() {
   return allEntries;
 }
 
-bool NexusHDF5Descriptor::isClassEntry(const std::string &groupClass,
-                                       const std::string &entryName) const
+bool NexusHDF5Descriptor::isEntry(const std::string &entryName,
+                                  const std::string &groupClass) const
     noexcept {
 
   auto itClass = m_allEntries.find(groupClass);
@@ -237,6 +237,17 @@ bool NexusHDF5Descriptor::isClassEntry(const std::string &groupClass,
     return true;
   }
 
+  return false;
+}
+
+bool NexusHDF5Descriptor::isEntry(const std::string &entryName) const noexcept {
+
+  for (auto itClass = m_allEntries.cbegin(); itClass != m_allEntries.cend();
+       ++itClass) {
+    if (itClass->second.count(entryName) == 1) {
+      return true;
+    }
+  }
   return false;
 }
 

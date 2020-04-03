@@ -59,8 +59,15 @@ public:
    * @param entryName full path for an entry name /entry/NXlogs
    * @return true: entryName exists for a groupClass, otherwise false
    */
-  bool isClassEntry(const std::string &groupClass,
-                    const std::string &entryName) const noexcept;
+  bool isEntry(const std::string &entryName,
+               const std::string &groupClass) const noexcept;
+
+  /**
+   * Checks if a full-path entry exists in a Nexus dataset
+   * @param entryName full path for an entry name /entry/NXlogs
+   * @return true: entryName exists, otherwise false
+   */
+  bool isEntry(const std::string &entryName) const noexcept;
 
 private:
   /**
