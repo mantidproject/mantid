@@ -71,6 +71,15 @@ KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
  */
 KafkaHistoStreamDecoder::~KafkaHistoStreamDecoder() = default;
 
+KafkaHistoStreamDecoder::KafkaHistoStreamDecoder(
+    KafkaHistoStreamDecoder &&rval) noexcept
+    : IKafkaStreamDecoder(std::move(rval)) {
+  {
+    std::lock_guard lck(m_mutex);
+    m_buffer = std::move(rval.m_buffer);
+  }
+}
+
 /**
  * Check if there is data available to extract
  * @return True if data has been accumulated so that extractData()

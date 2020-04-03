@@ -46,6 +46,8 @@ public:
   KafkaEventStreamDecoder(const KafkaEventStreamDecoder &) = delete;
   KafkaEventStreamDecoder &operator=(const KafkaEventStreamDecoder &) = delete;
 
+  KafkaEventStreamDecoder(KafkaEventStreamDecoder &&) noexcept;
+
 public:
   ///@name Querying
   ///@{

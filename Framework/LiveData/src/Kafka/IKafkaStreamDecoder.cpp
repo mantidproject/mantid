@@ -63,6 +63,22 @@ IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
       m_runStart(), m_runId(""), m_thread(), m_capturing(false), m_exception(),
       m_extractWaiting(false), m_cbIterationEnd([] {}), m_cbError([] {}) {}
 
+IKafkaStreamDecoder::IKafkaStreamDecoder(IKafkaStreamDecoder &&o) noexcept
+    : m_broker(std::move(o.m_broker)), m_streamTopic(o.m_streamTopic),
+      m_runInfoTopic(o.m_runInfoTopic), m_spDetTopic(std::move(o.m_spDetTopic)),
+      m_sampleEnvTopic(o.m_sampleEnvTopic), m_chopperTopic(o.m_chopperTopic),
+      m_monitorTopic(o.m_monitorTopic), m_interrupt(o.m_interrupt.load()),
+      m_specToIdx(std::move(o.m_specToIdx)),
+      m_runStart(std::move(o.m_runStart)), m_runId(std::move(o.m_runId)),
+      m_thread(std::move(o.m_thread)), m_capturing(o.m_capturing.load()),
+      m_exception(std::move(o.m_exception)),
+      m_cbIterationEnd(std::move(o.m_cbIterationEnd)),
+      m_cbError(std::move(o.m_cbError)) {
+  std::scoped_lock lck(m_runStatusMutex, m_waitMutex, m_mutex);
+  m_runStatusSeen = o.m_runStatusSeen;
+  m_extractWaiting = o.m_extractWaiting.load();
+}
+
 /**
  * Destructor.
  * Stops capturing from the stream
@@ -70,11 +86,10 @@ IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker,
 IKafkaStreamDecoder::~IKafkaStreamDecoder() { stopCapture(); }
 
 /**
- * Start capturing from the stream on a separate thread. This is a non-blocking
- * call and will return after the thread has started
+ * Start capturing from the stream on a separate thread. This is a
+ * non-blocking call and will return after the thread has started
  */
 void IKafkaStreamDecoder::startCapture(bool startNow) {
-
   // If we are not starting now, then we want to start at the start of the run
   if (!startNow) {
     // Get last two messages in run topic to ensure we get a runStart message
@@ -107,8 +122,8 @@ void IKafkaStreamDecoder::startCapture(bool startNow) {
     m_spDetStream =
         m_broker->subscribe({m_spDetTopic}, SubscribeAtOption::LASTONE);
   } catch (const std::runtime_error &) {
-    g_log.debug()
-        << "No detector-spectrum map message found, will assume a 1:1 mapping.";
+    g_log.debug() << "No detector-spectrum map message found, will assume a "
+                     "1:1 mapping.";
   }
 
   m_thread = std::thread([this]() { this->captureImpl(); });
@@ -227,7 +242,6 @@ void IKafkaStreamDecoder::captureImpl() noexcept {
 void IKafkaStreamDecoder::checkIfAllStopOffsetsReached(
     const std::unordered_map<std::string, std::vector<bool>> &reachedEnd,
     bool &checkOffsets) {
-
   if (std::all_of(reachedEnd.cbegin(), reachedEnd.cend(),
                   [](const std::pair<std::string, std::vector<bool>> &kv) {
                     return std::all_of(
@@ -529,7 +543,8 @@ void IKafkaStreamDecoder::checkRunEnd(
 }
 
 int IKafkaStreamDecoder::runNumber() const noexcept {
-  /* If the run ID is empty or if any non-digit char was found in the string */
+  /* If the run ID is empty or if any non-digit char was found in the string
+   */
   if (m_runId.empty() ||
       (std::find_if_not(m_runId.cbegin(), m_runId.cend(), [](const char c) {
          return std::isdigit(c);
