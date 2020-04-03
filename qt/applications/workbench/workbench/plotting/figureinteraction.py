@@ -31,7 +31,7 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, 
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor,
                                                  SingleMarkerEditor, GlobalMarkerEditor,
-                                                 ColorbarAxisEditor)
+                                                 ColorbarAxisEditor, ZAxisEditor)
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_COLORS
 from workbench.plotting.toolbar import ToolbarStateManager
 
@@ -227,6 +227,12 @@ class FigureInteraction(object):
                     move_and_show(YAxisEditor(canvas, ax))
                 else:
                     move_and_show(ColorbarAxisEditor(canvas, ax))
+            if hasattr(ax, 'zaxis'):
+                if ax.zaxis.label.contains(event)[0]:
+                    move_and_show(LabelEditor(canvas, ax.zaxis.label))
+                elif (ax.zaxis.contains(event)[0]
+                      or any(tick.contains(event)[0] for tick in ax.get_zticklabels())):
+                    move_and_show(ZAxisEditor(canvas, ax))
 
     def _show_markers_menu(self, markers, event):
         """
@@ -765,5 +771,6 @@ class FigureInteraction(object):
         for ax in self.canvas.figure.get_axes():
             images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
             for image in images:
-                datafunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin, image.norm.vmax)
+                datafunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin,
+                                                    image.norm.vmax)
         self.canvas.draw_idle()
