@@ -130,7 +130,6 @@ class PlotWidgetView(QtWidgets.QWidget):
 
         self.widget_layout = QtWidgets.QVBoxLayout(self)
         self.widget_layout.addWidget(self.group)
-        self.vertical_layout.addWidget(self.toolBar)
         self.vertical_layout.addWidget(self.fig.canvas)
 
         self.vertical_layout.addWidget(self.plot_options.widget)
@@ -144,12 +143,6 @@ class PlotWidgetView(QtWidgets.QWidget):
     # this ensures the plot layout changes when the size of the plot widget window is changed by the user
     def resizeEvent(self, QResizeEvent):
         self.fig.tight_layout()
-
-    def if_overlay(self):
-        return self.overlay.isChecked()
-
-    def if_keep(self):
-        return self.keep.isChecked()
 
     def get_tiled_by_type(self):
         index = self.tile_type_selector.currentIndex()
