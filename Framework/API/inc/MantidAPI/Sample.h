@@ -116,6 +116,9 @@ public:
   /// Delete the oriented lattice
   void clearOrientedLattice();
 
+  bool operator==(const Sample &other) const;
+  bool operator!=(const Sample &other) const;
+
 private:
   /// The sample name
   std::string m_name;

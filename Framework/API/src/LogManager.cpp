@@ -549,6 +549,14 @@ void LogManager::loadNexus(::NeXus::File *file,
  */
 void LogManager::clearLogs() { m_manager->clear(); }
 
+bool LogManager::operator==(const LogManager &other) const {
+  return *m_manager == *(other.m_manager);
+}
+
+bool LogManager::operator!=(const LogManager &other) const {
+  return *m_manager != *(other.m_manager);
+}
+
 //-----------------------------------------------------------------------------------------------------------------------
 // Private methods
 //-----------------------------------------------------------------------------------------------------------------------

@@ -359,4 +359,126 @@ public:
 
     TS_ASSERT(loaded.getName().empty());
   }
+
+  void test_equal_when_sample_identical() {
+    Sample a;
+    Sample b;
+    TS_ASSERT_EQUALS(a, b);
+  }
+
+  void test_not_equal_when_sample_differs_in_extents() {
+    Sample a;
+    auto b = a;
+    a.setHeight(10);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+    b = a;
+    a.setWidth(10);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+    b = a;
+    a.setThickness(10);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equal_when_sample_differs_in_geom_id() {
+    Sample a;
+    auto b = a;
+    TS_ASSERT_EQUALS(a, b);
+    a.setGeometryFlag(1);
+    b.setGeometryFlag(2);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+  void test_not_equal_when_sample_differs_in_name() {
+    Sample a;
+    auto b = a;
+    b.setName("something");
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equal_when_sample_differs_in_environment() {
+    auto kit1 = std::make_unique<SampleEnvironment>(
+        "Env", boost::make_shared<const Container>(""));
+
+    auto kit2 = std::make_unique<SampleEnvironment>(
+        "Env2", boost::make_shared<const Container>(""));
+
+    // same as kit1
+    auto kit3 = std::make_unique<SampleEnvironment>(
+        kit1->name(), boost::make_shared<const Container>(""));
+
+    Sample a;
+    auto b = a;
+    b.setEnvironment(std::move(kit1));
+    // A has no environment
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // A has valid but different same environment
+    a.setEnvironment(std::move(kit2));
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // A has valid but different same environment
+    a.setEnvironment(std::move(kit3));
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_not_equal_when_sample_differs_in_shape() {
+    IObject_sptr shape1 = ComponentCreationHelper::createCappedCylinder(
+        0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
+
+    IObject_sptr shape2 = ComponentCreationHelper::createCappedCylinder(
+        0.0137, 1.0, V3D(), V3D(0.0, 0.0, 0.0), "cyl");
+
+    Sample a;
+    auto b = a;
+    a.setShape(shape1);
+    // b has no shape
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // b has different shape
+    b.setShape(shape2);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // b has same shape
+    b.setShape(IObject_sptr(shape1->clone()));
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_not_equal_when_sample_differs_in_space_group() {
+    CrystalStructure structure1("3 4 5 90 90 90", "C m m m",
+                                "Fe 0.12 0.23 0.121");
+    // Same as above
+    CrystalStructure structure2("3 4 5 90 90 90", "C m m m",
+                                "Fe 0.12 0.23 0.121");
+    // Different
+    CrystalStructure structure3("5.431 5.431 5.431", "F d -3 m",
+                                "Si 0 0 0 1.0 0.02");
+
+    Sample a;
+    auto b = a;
+    // b has no structure
+    a.setCrystalStructure(structure1);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // b has different structure
+    b.setCrystalStructure(structure3);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // b has same structure
+    b = Sample{};
+    b.setCrystalStructure(structure2);
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
 };

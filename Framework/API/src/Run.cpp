@@ -62,6 +62,14 @@ Run &Run::operator=(const Run &other) {
   return *this;
 }
 
+bool Run::operator==(const Run &other) {
+  return *m_goniometer == *other.m_goniometer &&
+         LogManager::operator==(other) &&
+         this->m_histoBins == other.m_histoBins;
+}
+
+bool Run::operator!=(const Run &other) { return !this->operator==(other); }
+
 boost::shared_ptr<Run> Run::clone() {
   auto clone = boost::make_shared<Run>();
   for (auto property : this->m_manager->getProperties()) {
