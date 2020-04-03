@@ -19,7 +19,6 @@
 #include "../MdiSubWindow.h"
 #include "../UserFunction.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
