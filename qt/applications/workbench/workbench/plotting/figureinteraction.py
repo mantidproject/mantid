@@ -20,6 +20,7 @@ from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.collections import Collection
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 # third party imports
 from mantid.api import AnalysisDataService as ads
@@ -152,6 +153,8 @@ class FigureInteraction(object):
                         self.canvas.toolbar.press_pan(event)
                     finally:
                         event.button = 3
+        elif isinstance(event.inaxes, Axes3D):
+            event.inaxes._button_press(event)
 
     def on_mouse_button_release(self, event):
         """ Stop moving the markers when the mouse button is released """
