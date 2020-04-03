@@ -32,32 +32,29 @@ class DrillModel(object):
 
     def __init__(self):
         self.set_instrument(config['default.instrument'])
-        self.data = list()
+        self.samples = list()
 
-    def convolute(self, values):
-        values = values[:-1]
-        options = dict(zip(self.columns, values))
-        custom_options = values[-1].split(',')
-        for option in custom_options:
-            key_value = option.split('=')
-            if len(key_value) == 2:
-                options.update({key_value[0]: key_value[1]})
+    def convolute(self, options):
+        if "CustomOptions" in options:
+            custom_options = options["CustomOptions"]
+            del options["CustomOptions"]
+            options.update(custom_options)
         return options
 
     def process(self, elements):
         self.threadpool = QThreadPool()
         # TODO: check the elements before algorithm submission
         for e in elements:
-            if (e < len(self.data) and len(self.data[e]) > 0):
-                kwargs = self.convolute(self.data[e])
+            if (e < len(self.samples) and len(self.samples[e]) > 0):
+                kwargs = self.convolute(self.samples[e])
                 kwargs.update(self.settings)
+                kwargs['OutputWorkspace'] = str(e) + "_" + kwargs['SampleRuns']
                 self.execute(kwargs)
 
     def process_all(self):
-        self.process(range(len(self.data)))
+        self.process(range(len(self.samples)))
 
     def execute(self, kwargs):
-        kwargs['OutputWorkspace'] = kwargs['SampleRuns']
         worker = DrillWorker(getattr(sapi, self.algorithm), **kwargs)
         worker.run()
         #self.threadpool.start(worker)
@@ -67,7 +64,7 @@ class DrillModel(object):
         t.start()
 
     def set_instrument(self, instrument):
-        self.data = list()
+        self.samples = list()
         if (instrument in RundexSettings.TECHNIQUE_MAP):
             config['default.instrument'] = instrument
             self.instrument = instrument
@@ -89,30 +86,34 @@ class DrillModel(object):
         return self.technique
 
     def add_row(self, position):
-        self.data.insert(position, [""] * len(RundexSettings.COLUMNS[self.technique]))
+        self.samples.insert(position, dict())
 
     def del_row(self, position):
-        del self.data[position]
+        del self.samples[position]
 
     def change_data(self, row, column, contents):
-        self.data[row][column] = contents
+        if (not contents):
+            if (self.columns[column] in self.samples[row]):
+                del self.samples[row][self.columns[column]]
+        elif (self.columns[column] == self.columns[-1]):
+            options = dict()
+            for option in contents.split(","):
+                options[option.split("=")[0]] = option.split("=")[1]
+            self.samples[row][self.columns[column]] = options
+        else:
+            self.samples[row][self.columns[column]] = contents
 
     def set_rundex_data(self, filename):
         with open(filename) as json_file:
             json_data = json.load(json_file)
 
-        self.data = list()
+        self.samples = list()
         self.instrument = json_data["Instrument"]
         self.technique = RundexSettings.get_technique(self.instrument)
         self.columns = RundexSettings.COLUMNS[self.technique]
-        for sample in range(len(json_data["Samples"])):
-            self.data.append(list())
-            for item in self.columns:
-                if item in json_data["Samples"][sample]:
-                    self.data[sample].append(
-                            str(json_data["Samples"][sample][item]))
-                else:
-                    self.data[sample].append("")
+
+        for sample in json_data["Samples"]:
+            self.samples.append(sample)
 
     def export_rundex_data(self, filename):
         json_data = dict()
@@ -124,17 +125,28 @@ class DrillModel(object):
 
         # samples
         json_data["Samples"] = list()
-        for sample in self.data:
-            json_sample = dict(
-                    zip(RundexSettings.COLUMNS[self.technique], sample)
-                    )
-            json_data["Samples"].append(json_sample)
+        for sample in self.samples:
+            json_data["Samples"].append(sample)
 
         with open(filename, 'w') as json_file:
             json.dump(json_data, json_file, indent=4)
 
     def get_rows_contents(self):
-        return self.data
+        rows = list()
+        for sample in self.samples:
+            row = list()
+            for column in self.columns[:-1]:
+                if column in sample:
+                    row.append(str(sample[column]))
+                else:
+                    row.append("")
+            if self.columns[-1] in sample:
+                options = str()
+                for (k, v) in sample[self.columns[-1]].items():
+                    options += str(k) + "=" + str(v)
+                row.append(options)
+            rows.append(row)
+        return rows
 
     def get_supported_techniques(self):
         return [technique for technique in RundexSettings.ALGORITHMS]
