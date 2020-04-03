@@ -23,7 +23,7 @@ creation is outlined in :ref:`issue_tracking`.
    MuonAnalysis_test_guides/index
    MuonInterface/MuonTesting
    IndirectInelastic/IndirectInelasticAcceptanceTests
-   EngineeringDiffraction/EngineeringDiffraction2TestGuide
+   EngineeringDiffraction/EngineeringDiffractionTestGuide
    ErrorReporter-ProjectRecovery/ErrorReporterTesting
    ErrorReporter-ProjectRecovery/ProjectRecoveryTesting
    LiveData/LiveDataTests
