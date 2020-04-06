@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
+from typing import Union
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QIcon
@@ -109,11 +110,12 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             selection.log_name = self._ui.advanced_options_widget.ui.log_value_combo_box.currentText()
             selection.axis_name = self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text()
 
-            custom_log_text = self._ui.advanced_options_widget.ui.custom_log_line_edit.text()
-            if self._ui.advanced_options_widget._validate_custom_logs(custom_log_text, plot_all=True):
-                selection.custom_log_values = custom_log_text.split(',')
-            else:
-                return
+            if selection.log_name == CUSTOM:
+                custom_log_text = self._ui.advanced_options_widget.ui.custom_log_line_edit.text()
+                if self._ui.advanced_options_widget._validate_custom_logs(custom_log_text, plot_all=True):
+                    selection.custom_log_values = [float(value) for value in custom_log_text.split(",")]
+                else:
+                    return
 
         if self._check_number_of_plots(selection):
             self.selection = selection
@@ -289,7 +291,10 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                 self._ui.advanced_options_widget.ui.log_value_combo_box.setItemText(0, WORKSPACE_NAME)
                 self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(True)
 
-            self._ui.advanced_options_widget.ui.log_value_combo_box.setEnabled(new_text != "Tiled")
+                self._ui.advanced_options_widget.ui.log_value_combo_box.setEnabled(new_text != "Tiled")
+
+                if new_text == "Tiled":
+                    self._ui.advanced_options_widget.ui.log_value_combo_box.setCurrentIndex(0)
 
             # Changing plot type may change what a valid input for spectrum numbers / workspace indices is so whichever
             # currently contains input is rechecked.
@@ -450,7 +455,7 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
 
         self.ui.log_value_combo_box.addItem(CUSTOM)
 
-    def _validate_custom_logs(self, text: str, plot_all: bool = False) -> bool:
+    def _validate_custom_logs(self, text: str, plot_all: bool = False) -> Union[bool, None]:
         if self.ui.log_value_combo_box.currentText() == CUSTOM:
             valid_options = True
             values = text.split(',')
@@ -489,7 +494,9 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
                                                   f"not equal to the number of workspaces ({number_of_workspaces}).")
                     valid_options = False
                 else:
-                    if plot_all:
+                    if plot_all or not (self._parent._ui.specNums.text() or self._parent._ui.wkspIndices.text()):
+                        # If the user has not entered spectrum numbers or workspace indices assume they are going to
+                        # plot all and validate for this.
                         index_length = self._parent.wi_max - self._parent.wi_min + 1
                     else:
                         if self._parent.selection:
@@ -513,14 +520,16 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
                 self.ui.logs_valid.hide()
                 self.ui.logs_valid.setToolTip("")
 
-                if self._parent.selection:
+                if self._parent.selection and not plot_all:
                     values = [float(value) for value in values]
                     self._parent.selection.custom_log_values = values
 
-            self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(valid_options)
+                if self._parent._ui.specNums.text() or self._parent._ui.wkspIndices.text():
+                    self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+            else:
+                self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+
             return valid_options
-        else:
-            return True
 
 
 def parse_selection_str(txt, min_val=None, max_val=None, allowed_values=None):
