@@ -141,7 +141,7 @@ NUM_ZERO = 10e-15
 MAX_ORDER = 4  # max quantum order event
 
 ALL_SUPPORTED_AB_INITIO_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN", "VASP"]
-AB_INITIO_FILE_EXTENSIONS = ["phonon", "out", "outmol", "log", "LOG"]
+AB_INITIO_FILE_EXTENSIONS = ["phonon", "out", "outmol", "log", "LOG", "xml"]
 
 ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA"]
 ONE_DIMENSIONAL_SPECTRUM = 1

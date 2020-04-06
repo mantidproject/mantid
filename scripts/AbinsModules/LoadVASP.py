@@ -43,6 +43,8 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
             self._num_k = 1
 
         elif 'OUTCAR' in input_filename:
+            logger.warning("Reading OUTCAR file. This feature is included for development purposes "
+                           "and may be removed in future versions. Please use the vasprun.xml file where possible.")
             data = self._read_outcar(input_filename)
             self._num_atoms = len(data['atoms'])
             self._num_k = 1
