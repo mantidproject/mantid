@@ -4,35 +4,39 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtCore import QRunnable, Slot, QThreadPool
+from qtpy.QtCore import QThread, Signal
 import threading
 import json
 from .specifications import RundexSettings
 import mantid.simpleapi as sapi
 from mantid.kernel import config, logger
 
-class DrillWorker(QRunnable):
+class DrillWorker(QThread):
 
-    def __init__(self, fn, *args, **kwargs):
+    process_done = Signal()
+
+    def __init__(self):
         super(DrillWorker, self).__init__()
-        self.fn = fn
-        self.args = args
-        self.kwargs = kwargs
+        self.processes = list()
 
-    @Slot()
+    def add_process(self, fn, *args, **kwargs):
+        self.processes.append((fn, args, kwargs))
+
     def run(self):
-        self.fn(*self.args, **self.kwargs)
+        for process in self.processes:
+            process[0](*process[1], **process[2])
+            self.process_done.emit()
 
 
 class DrillModel(object):
 
     settings = dict()
-    threadpool = None
     algorithm = None
 
     def __init__(self):
         self.set_instrument(config['default.instrument'])
         self.samples = list()
+        self.thread = None
 
     def convolute(self, options):
         if "CustomOptions" in options:
@@ -42,26 +46,15 @@ class DrillModel(object):
         return options
 
     def process(self, elements):
-        self.threadpool = QThreadPool()
+        self.thread = DrillWorker()
         # TODO: check the elements before algorithm submission
         for e in elements:
             if (e < len(self.samples) and len(self.samples[e]) > 0):
                 kwargs = self.convolute(self.samples[e])
                 kwargs.update(self.settings)
                 kwargs['OutputWorkspace'] = str(e) + "_" + kwargs['SampleRuns']
-                self.execute(kwargs)
-
-    def process_all(self):
-        self.process(range(len(self.samples)))
-
-    def execute(self, kwargs):
-        worker = DrillWorker(getattr(sapi, self.algorithm), **kwargs)
-        worker.run()
-        #self.threadpool.start(worker)
-
-    def process_on_thread(self, elements):
-        t = threading.Thread(target=self.process, args=(elements,))
-        t.start()
+                self.thread.add_process(getattr(sapi, self.algorithm), **kwargs)
+        self.thread.start()
 
     def set_instrument(self, instrument):
         self.samples = list()
