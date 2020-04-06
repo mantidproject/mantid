@@ -208,7 +208,6 @@ private:
       const std::vector<std::string> &bankNames = std::vector<std::string>());
   void deleteBanks(const EventWorkspaceCollection_sptr &workspace,
                    const std::vector<std::string> &bankNames);
-  bool hasEventMonitors();
   void runLoadMonitors();
   /// Set the filters on TOF.
   void setTimeFilters(const bool monitors);
