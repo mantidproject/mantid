@@ -486,15 +486,17 @@ MSDFunctionModel::getParameterId(const QString &parName) {
 }
 
 std::string MSDFunctionModel::buildGaussianFunctionString() const {
-  return "name=MsdGauss,Height=1,Msd=0.05,constraints=(Height>0)";
+  return "name=MsdGauss,Height=1,Msd=0.05,constraints=(Height>0, Msd>0)";
 }
 
 std::string MSDFunctionModel::buildPetersFunctionString() const {
-  return "name=MsdPeters,Height=1,Msd=0.05,Beta=1,constraints=(Height>0)";
+  return "name=MsdPeters,Height=1,Msd=0.05,Beta=1,constraints=(Height>0, "
+         "Msd>0, Beta>0)";
 }
 
 std::string MSDFunctionModel::buildYiFunctionString() const {
-  return "name=MsdYi,Height=1,Msd=0.05,Sigma=1,constraints=(Height>0)";
+  return "name=MsdYi,Height=1,Msd=0.05,Sigma=1,constraints=(Height>0, Msd>0, "
+         "Sigma>0)";
 }
 
 QString MSDFunctionModel::buildFunctionString() const {
