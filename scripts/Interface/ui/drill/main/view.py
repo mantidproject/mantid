@@ -355,3 +355,7 @@ class DrillView(QMainWindow):
     def set_technique(self, technique):
         self.technique = technique
 
+    def set_progress(self, n, nmax):
+        self.progressBar.setMaximum(nmax)
+        self.progressBar.setValue(n)
+

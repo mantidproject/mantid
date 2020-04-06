@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtCore import QThread, Signal
+from qtpy.QtCore import QObject, QThread, Signal
 import threading
 import json
 from .specifications import RundexSettings
@@ -28,15 +28,19 @@ class DrillWorker(QThread):
             self.process_done.emit()
 
 
-class DrillModel(object):
+class DrillModel(QObject):
 
     settings = dict()
     algorithm = None
+    process_done = Signal()
 
     def __init__(self):
+        super(DrillModel, self).__init__()
         self.set_instrument(config['default.instrument'])
         self.samples = list()
         self.thread = None
+        self.processes_running = 0
+        self.processes_done = 0
 
     def convolute(self, options):
         if "CustomOptions" in options:
@@ -47,6 +51,8 @@ class DrillModel(object):
 
     def process(self, elements):
         self.thread = DrillWorker()
+        self.processes_running = 0
+        self.processes_done = 0
         # TODO: check the elements before algorithm submission
         for e in elements:
             if (e < len(self.samples) and len(self.samples[e]) > 0):
@@ -54,7 +60,13 @@ class DrillModel(object):
                 kwargs.update(self.settings)
                 kwargs['OutputWorkspace'] = str(e) + "_" + kwargs['SampleRuns']
                 self.thread.add_process(getattr(sapi, self.algorithm), **kwargs)
+                self.processes_running += 1
+        self.thread.process_done.connect(self.on_process_done)
         self.thread.start()
+
+    def on_process_done(self):
+        self.processes_done += 1
+        self.process_done.emit()
 
     def set_instrument(self, instrument):
         self.samples = list()
@@ -143,4 +155,7 @@ class DrillModel(object):
 
     def get_supported_techniques(self):
         return [technique for technique in RundexSettings.ALGORITHMS]
+
+    def get_processing_progress(self):
+        return self.processes_done, self.processes_running
 

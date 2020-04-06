@@ -15,6 +15,10 @@ class DrillPresenter(DrillEventListener):
         self.view = view
         self.view.add_listener(self)
         self.view.set_header(self.model.get_supported_techniques())
+
+        # signals connections
+        self.model.process_done.connect(self.on_process_done)
+
         self.update_view_from_model()
 
     def on_add_row(self, position):
@@ -39,6 +43,10 @@ class DrillPresenter(DrillEventListener):
 
     def on_rundex_saved(self, filename):
         self.model.export_rundex_data(filename)
+
+    def on_process_done(self):
+        n, nmax = self.model.get_processing_progress()
+        self.view.set_progress(n, nmax)
 
     def update_view_from_model(self):
         self.view.set_table(self.model.get_columns(),
