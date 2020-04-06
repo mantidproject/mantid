@@ -6,14 +6,19 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from itertools import chain
+import logging
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 from xml.etree import ElementTree
+
+import mantid.kernel
 
 import numpy as np
 import AbinsModules
 from AbinsModules.AbinsData import AbinsData
 from AbinsModules.AbinsConstants import COMPLEX_TYPE, FLOAT_TYPE, HZ2INV_CM, VASP_FREQ_TO_THZ
+
+Logger = Union[logging.Logger,mantid.kernel.Logger]
 
 
 class LoadVASP(AbinsModules.GeneralAbInitioProgram):
@@ -34,7 +39,9 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
         super().__init__(input_ab_initio_filename=input_ab_initio_filename)
         self._ab_initio_program = "VASP"
 
-    def read_vibrational_or_phonon_data(self) -> AbinsData:
+    def read_vibrational_or_phonon_data(self,
+                                        logger: Logger = None,
+                                        ) -> AbinsData:
         input_filename = self._clerk.get_input_filename()
 
         if input_filename[-4:] == '.xml':
@@ -43,6 +50,10 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
             self._num_k = 1
 
         elif 'OUTCAR' in input_filename:
+            if logger is None:
+                import mantid.kernel
+                mantid_logger: mantid.kernel.Logger = mantid.kernel.logger
+                logger = mantid_logger
             logger.warning("Reading OUTCAR file. This feature is included for development purposes "
                            "and may be removed in future versions. Please use the vasprun.xml file where possible.")
             data = self._read_outcar(input_filename)
@@ -109,8 +120,17 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
         # The rest of the file data can now be gathered in one pass.
         with open(filename, 'rb') as fd:
             symbol_lines = [parser.find_first(file_obj=fd, msg='VRHFIN') for _ in ion_counts]
-            ion_count_symbols = [re.match(r'^\s+VRHFIN =(\w+):', line.decode("utf-8")).groups()[0]
-                                 for line in symbol_lines]
+
+            def _ion_count_or_error(line: bytes) -> str:
+                match = re.match(r'^\s+VRHFIN =(\w+):', line.decode("utf-8"))
+                if match:
+                    return match.groups()[0]
+                else:
+                    raise ValueError("Could not identify VRHFIN value")
+
+            # Get sequence of symbols corresponding to ion counts e.g. C, H
+            ion_count_symbols = map(_ion_count_or_error, symbol_lines)
+            # Expand to full symbol list e.g. [C, C, H, H, H, H]
             symbols = list(chain(*[[symbol] * ion_count
                                    for symbol, ion_count in zip(ion_count_symbols, ion_counts)]))
 
@@ -187,10 +207,10 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
         represented by returning the negative number -866.902290
 
         """
-        line = line.decode("utf-8")
+        line_str = line.decode("utf-8")
         # Keep the value reported in cm-1
-        imaginary_factor = -1 if 'f/i' in line else 1
-        return float(line.split()[-4]) * imaginary_factor
+        imaginary_factor = -1 if 'f/i' in line_str else 1
+        return float(line_str.split()[-4]) * imaginary_factor
 
     @staticmethod
     def _read_vasprun(filename: str,
@@ -203,10 +223,10 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
 
         root = ElementTree.parse(filename).getroot()
 
-        def _find_or_error(etree: ElementTree,
+        def _find_or_error(etree: ElementTree.Element,
                            tag: str,
                            name: Optional[str] = None,
-                           message: Optional[str] = None) -> ElementTree:
+                           message: Optional[str] = None) -> ElementTree.Element:
             for element in etree.findall(tag):
                 if name is None:
                     return element
@@ -219,17 +239,23 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
                 else:
                     raise ValueError(message)
 
+        def _to_text(item: ElementTree.Element) -> str:
+            """wraps the  Element.text property to avoid confusing type errors"""
+            if item.text is None:
+                raise ValueError(f"XML Element {item} didn't contain expected text")
+            return item.text
+
         structure_block = _find_or_error(root, 'structure', name='finalpos')
         varray = _find_or_error(_find_or_error(structure_block, 'crystal'),
                                 'varray', name='basis')
 
-        lattice_vectors = [list(map(float, v.text.split())) for v in varray.findall('v')]
+        lattice_vectors = [list(map(float, _to_text(v).split())) for v in varray.findall('v')]
         file_data['unit_cell'] = np.asarray(lattice_vectors, dtype=FLOAT_TYPE)
         if file_data['unit_cell'].shape != (3, 3):
             raise AssertionError("Lattice vectors in XML 'finalpos' don't look like a 3x3 matrix")
 
         varray = _find_or_error(structure_block, 'varray', name='positions')
-        positions = np.asarray([list(map(float, v.text.split())) for v in varray.findall('v')],
+        positions = np.asarray([list(map(float, _to_text(v).split())) for v in varray.findall('v')],
                                dtype=FLOAT_TYPE)
         if len(positions.shape) != 2 or positions.shape[1] != 3:
             raise AssertionError("Positions in XML 'finalpos' don't look like an Nx3 array.")
@@ -237,14 +263,17 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
         atom_info = _find_or_error(root, 'atominfo')
 
         # Get list of atoms by type e.g. [1, 1, 2, 2, 2, 2, 2, 2] for C2H6
-        atom_types = [int(rc.findall('c')[1].text)
-                      for rc in _find_or_error(_find_or_error(atom_info, 'array', name='atoms'),'set').findall('rc')]
+        def _rc_to_atom_type(rc_element: ElementTree.Element) -> int:
+            atom_type = _to_text(rc_element.findall('c')[1])
+            return int(atom_type)
+        atom_types = [_rc_to_atom_type(rc) for rc in
+                      _find_or_error(_find_or_error(atom_info, 'array', name='atoms'),'set').findall('rc')]
 
         # Get symbols and masses corresponding to these types, and construct full lists of atom properties
         atom_data = [rc.findall('c')
                      for rc in _find_or_error(_find_or_error(atom_info, 'array', name='atomtypes'), 'set').findall('rc')]
-        type_symbols = [data_row[1].text.strip() for data_row in atom_data]
-        type_masses = [float(data_row[2].text) for data_row in atom_data]
+        type_symbols = [_to_text(data_row[1]).strip() for data_row in atom_data]
+        type_masses = [float(_to_text(data_row[2])) for data_row in atom_data]
         symbols = [type_symbols[i - 1] for i in atom_types]
         masses = [type_masses[i - 1] for i in atom_types]
 
@@ -258,7 +287,7 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
         calculation = _find_or_error(root, 'calculation')
         dynmat = _find_or_error(calculation, 'dynmat')
         # vasprun.xml reports raw eigenvectors in atomic units: convert to frequencies in cm-1
-        eigenvalues = _find_or_error(dynmat, 'v', name='eigenvalues').text.split()
+        eigenvalues = _to_text(_find_or_error(dynmat, 'v', name='eigenvalues')).split()
         frequencies = np.sqrt(-np.asarray(list(map(float, eigenvalues)),
                                           dtype=complex)) * VASP_FREQ_TO_THZ * 1e12 * HZ2INV_CM
         # store imaginary frequencies as -ve
@@ -266,7 +295,7 @@ class LoadVASP(AbinsModules.GeneralAbInitioProgram):
 
         eigenvectors_block = _find_or_error(dynmat, 'varray', name='eigenvectors')
         # Read data in (mode, atoms * 3) format
-        eigenvectors = [list(map(float, row.text.split())) for row in eigenvectors_block.findall('v')]
+        eigenvectors = [list(map(float, _to_text(row).split())) for row in eigenvectors_block.findall('v')]
         # Rearrange XYZ components onto a new axis to get (mode, atom, direction) indices
         eigenvectors = [np.array(row).reshape(-1,3) for row in eigenvectors]
 
