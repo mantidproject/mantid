@@ -67,7 +67,8 @@ public:
     DrawEllipticalRing,
     DrawRectangularRing,
     DrawFree,
-    Pixel
+    Pixel,
+    Tube
   };
 
   explicit InstrumentWidgetMaskTab(InstrumentWidget *instrWidget);
@@ -169,6 +170,7 @@ protected:
   QPushButton *m_ring_rectangle;
   QPushButton *m_pixel;
   QPushButton *m_free_draw;
+  QPushButton *m_tube;
 
   QPushButton *m_applyToData;
   QPushButton *m_applyToView;

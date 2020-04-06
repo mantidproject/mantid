@@ -20,6 +20,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 // #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
@@ -120,7 +121,13 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   m_pixel->setCheckable(true);
   m_pixel->setAutoExclusive(true);
   m_pixel->setIcon(QIcon(":/PickTools/selection-pointer.png"));
-  m_pixel->setToolTip("Mask a pixel");		  
+  m_pixel->setToolTip("Mask a pixel");
+
+  m_tube = new QPushButton();
+  m_tube->setCheckable(true);
+  m_tube->setAutoExclusive(true);
+  m_tube->setIcon(QIcon(":/PickTools/selection-tube.png"));
+  m_tube->setToolTip("Mask a tube/bank");
 
   m_ring_ellipse = new QPushButton();
   m_ring_ellipse->setCheckable(true);
@@ -152,6 +159,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   toolBox->addWidget(m_ring_rectangle);
   toolBox->addWidget(m_free_draw);
   toolBox->addWidget(m_pixel);
+  toolBox->addWidget(m_tube);
   toolBox->setMargin(0);
 
   connect(m_move, SIGNAL(clicked()), this, SLOT(setActivity()));
@@ -161,6 +169,7 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
   connect(m_ring_ellipse, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_ring_rectangle, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_free_draw, SIGNAL(clicked()), this, SLOT(setActivity()));
+  connect(m_tube, SIGNAL(clicked()), this, SLOT(setActivity()));
   connect(m_pixel, SIGNAL(clicked()), this, SLOT(setActivity()));
   m_move->setChecked(true);
   auto *toolGroup = new QFrame();
@@ -357,7 +366,8 @@ InstrumentWidgetMaskTab::InstrumentWidgetMaskTab(InstrumentWidget *instrWidget)
  * Initialize the tab when new projection surface is created.
  */
 void InstrumentWidgetMaskTab::initSurface() {
-  connect(m_instrWidget->getSurface().get(), SIGNAL(singleComponentPicked(size_t)), this,
+  connect(m_instrWidget->getSurface().get(),
+          SIGNAL(singleComponentPicked(size_t)), this,
           SLOT(singlePixelPicked(size_t)));
   connect(m_instrWidget->getSurface().get(), SIGNAL(shapeCreated()), this,
           SLOT(shapeCreated()));
@@ -419,6 +429,9 @@ void InstrumentWidgetMaskTab::selectTool(Activity tool) {
   case Pixel:
     m_pixel->setChecked(true);
     break;
+  case Tube:
+    m_tube->setChecked(true);
+    break;
   default:
     throw std::invalid_argument("Invalid tool type.");
   }
@@ -478,26 +491,39 @@ void InstrumentWidgetMaskTab::setActivity() {
     m_instrWidget->getSurface()->setInteractionMode(
         ProjectionSurface::DrawFreeMode);
     m_activeTool->setText("Tool: Free draw. " + whatIsBeingSelected);
-   } else if (m_pixel->isChecked()) {
+  } else if (m_pixel->isChecked()) {
     m_activity = Pixel;
     m_instrWidget->getSurface()->setInteractionMode(
         ProjectionSurface::PickSingleMode);
-    m_activeTool->setText("Tool: Pixel selection. " + whatIsBeingSelected);
-   }
+    m_activeTool->setText("Tool: Pixel mask. " + whatIsBeingSelected);
+  } else if (m_tube->isChecked()) {
+    m_activity = Tube;
+    m_instrWidget->getSurface()->setInteractionMode(
+        ProjectionSurface::PickTubeMode);
+    m_activeTool->setText("Tool: Tube/bank mask. " + whatIsBeingSelected);
+  }
   m_instrWidget->updateInfoText();
 }
 
 /**
  * Slot responding on the pick of a single detector pixel for masking.
+ * Can be used either to mask the picked pixel or its parent.
  */
-void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID){
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    std::vector<long unsigned int> detectorId{static_cast<long unsigned int>(pickID)};
-    auto &actor = m_instrWidget->getInstrumentActor();
-    actor.addMaskBinsData(detectorId);
-    m_instrWidget->updateInstrumentView(); // to refresh the pick image
+void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
+  auto &actor = m_instrWidget->getInstrumentActor();
+  const auto &componentInfo = actor.componentInfo();
+  if (!componentInfo.isDetector(pickID)) {
+    return;
+  }
 
-    auto wsMask = actor.getMaskWorkspace();
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  std::vector<long unsigned int> detectorId{
+      static_cast<long unsigned int>(pickID)};
+  m_instrWidget->updateInstrumentView(); // to refresh the pick image
+  auto wsMask = actor.getMaskWorkspace();
+  if (m_pixel->isChecked()) {
+    actor.addMaskBinsData(detectorId);
+
     Mantid::detid_t detId = actor.getDetID(pickID);
 
     // try to mask the detector, ignore any failure
@@ -505,11 +531,27 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID){
       wsMask->setMasked(detId);
     } catch (...) {
     }
-    // update detector colours
-    m_instrWidget->getInstrumentActor().updateColors();
-    m_instrWidget->updateInstrumentDetectors();
-    QApplication::restoreOverrideCursor();
-    enableApplyButtons();
+  } else if (m_tube->isChecked()) {
+    if (!componentInfo.hasParent(pickID)) {
+      return;
+    }
+    auto parent = componentInfo.parent(pickID);
+    auto detectors = componentInfo.detectorsInSubtree(parent);
+    actor.addMaskBinsData(detectors);
+
+    for (auto det : detectors) {
+      Mantid::detid_t detId = actor.getDetID(det);
+      try {
+        wsMask->setMasked(detId);
+      } catch (...) {
+      }
+    }
+  }
+  // update detector colours
+  m_instrWidget->getInstrumentActor().updateColors();
+  m_instrWidget->updateInstrumentDetectors();
+  QApplication::restoreOverrideCursor();
+  enableApplyButtons();
 }
 
 /**
