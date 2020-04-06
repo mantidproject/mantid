@@ -10,12 +10,11 @@
 #include "ISearcher.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-
-class IMainWindowView;
 
 /** @class QtCatalogSearcher
 
@@ -33,15 +32,12 @@ public:
 
   // ISearcher overrides
   void subscribe(SearcherSubscriber *notifyee) override;
-  Mantid::API::ITableWorkspace_sptr search(const std::string &text,
-                                           const std::string &instrument,
-                                           SearchType searchType) override;
+  SearchResults search(const std::string &text, const std::string &instrument,
+                       SearchType searchType) override;
   bool startSearchAsync(const std::string &text, const std::string &instrument,
                         SearchType searchType) override;
   bool searchInProgress() const override;
   SearchResult const &getSearchResult(int index) const override;
-  void setSearchResultError(int index,
-                            const std::string &errorMessage) override;
   void reset() override;
   bool searchSettingsChanged(const std::string &text,
                              const std::string &instrument,
@@ -73,6 +69,8 @@ private:
   Mantid::API::IAlgorithm_sptr createSearchAlgorithm(const std::string &text);
   ISearchModel &results() const;
   void searchAsync();
+  SearchResults
+  convertTableToSearchResults(Mantid::API::ITableWorkspace_sptr tableWorkspace);
 };
 bool hasActiveCatalogSession();
 } // namespace ISISReflectometry
