@@ -424,27 +424,63 @@ void LoadNexusLogs::execLoader() {
 
   readStartAndEndTime(file, workspace->mutableRun());
 
-  // print out the entry level fields
-  std::map<std::string, std::string> entries = file.getEntries();
-  std::map<std::string, std::string>::const_iterator iend = entries.end();
-  for (std::map<std::string, std::string>::const_iterator it = entries.begin();
-       it != iend; ++it) {
-    std::string group_name(it->first);
-    std::string group_class(it->second);
-    if (group_name == "DASlogs" || group_class == "IXrunlog" ||
-        group_class == "IXselog" || group_name == "framelog") {
+  const std::map<std::string, std::set<std::string>> &allEntries =
+      getFileInfo()->getAllEntries();
+
+  auto lf_LoadLogsByClass = [&](const std::string &group_class,
+                                const bool isLog) {
+    auto itGroupClass = allEntries.find(group_class);
+    if (itGroupClass == allEntries.end()) {
+      return;
+    }
+    const std::set<std::string> &entries = itGroupClass->second;
+    // still a linear search
+    for (const std::string &entry : entries) {
+      // match for 2nd level entry /a/b
+      if (std::count(entry.begin(), entry.end(), '/') == 2) {
+        if (isLog) {
+          const std::string group_name =
+              entry.substr(entry.find_last_of("/") + 1);
+          loadLogs(file, group_name, group_class, workspace);
+          // loadLogs(file, entry, group_class, workspace);
+        } else {
+          loadNPeriods(file, workspace);
+        }
+      }
+    }
+  };
+  lf_LoadLogsByClass("IXselog", true);
+  lf_LoadLogsByClass("IXrunlog", true);
+  lf_LoadLogsByClass("IXperiods", false);
+
+  auto lf_LoadLogsByName = [&](const std::string &group_name) {
+    for (auto itGroupClass = allEntries.begin();
+         itGroupClass != allEntries.end(); ++itGroupClass) {
+
+      const std::string &group_class = itGroupClass->first;
+      const std::set<std::string> &entries = itGroupClass->second;
+
+      const std::string absoluteGroupName = "/" + entry_name + "/" + group_name;
+      auto itGroupName = entries.find(absoluteGroupName);
+      if (itGroupName == entries.end()) {
+        continue;
+      }
+      // here we must search only in NxLogs and NXpositioner sets
       loadLogs(file, group_name, group_class, workspace);
+      // loadLogs(file, absoluteGroupName, group_class, workspace);
     }
-    if (group_class == "IXperiods") {
-      loadNPeriods(file, workspace);
-    }
-  }
+  };
+
+  lf_LoadLogsByName("DASlogs");
+  lf_LoadLogsByName("framelog");
 
   // If there's measurement information, load that info as logs.
   loadAndApplyMeasurementInfo(&file, *workspace);
   // If there's title information, load that info as logs.
   loadAndApplyRunTitle(&file, *workspace);
 
+  // TODO: remove
+  std::map<std::string, std::string> entries = file.getEntries();
   // Freddie Akeroyd 12/10/2011
   // current ISIS implementation contains an additional indirection between
   // collected frames via an
@@ -463,22 +499,22 @@ void LoadNexusLogs::execLoader() {
       // Find the bank/name corresponding to the first event data entry, i.e.
       // one with type NXevent_data.
       file.openPath("/" + entry_name);
-      entries = file.getEntries();
-      std::string eventEntry;
-      const auto found =
-          std::find_if(entries.cbegin(), entries.cend(), [](const auto &entry) {
-            return entry.second == "NXevent_data";
-          });
-      if (found != entries.cend()) {
-        eventEntry = found->first;
+      auto itEventData = allEntries.find("NXevent_data");
+      if (itEventData != allEntries.end()) {
+        const std::set<std::string> &events = itEventData->second;
+        for (const std::string &event : events) {
+          const std::string eventEntry =
+              event.substr(event.find_last_of("/") + 1);
+
+          this->getLogger().debug()
+              << "Opening"
+              << " /" + entry_name + "/" + eventEntry + "/event_frame_number"
+              << " to find the event_frame_number\n";
+          file.openPath("/" + entry_name + "/" + eventEntry +
+                        "/event_frame_number");
+          file.getData(event_frame_number);
+        }
       }
-      this->getLogger().debug()
-          << "Opening"
-          << " /" + entry_name + "/" + eventEntry + "/event_frame_number"
-          << " to find the event_frame_number\n";
-      file.openPath("/" + entry_name + "/" + eventEntry +
-                    "/event_frame_number");
-      file.getData(event_frame_number);
     } catch (const ::NeXus::Exception &) {
       this->getLogger().warning()
           << "Unable to load event_frame_number - "

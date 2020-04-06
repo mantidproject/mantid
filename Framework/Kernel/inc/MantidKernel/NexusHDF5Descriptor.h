@@ -87,7 +87,7 @@ private:
    *          (e.g. /entry/log)
    * </pre>
    */
-  std::map<std::string, std::set<std::string>> m_allEntries;
+  const std::map<std::string, std::set<std::string>> m_allEntries;
 };
 
 } // namespace Mantid::Kernel
