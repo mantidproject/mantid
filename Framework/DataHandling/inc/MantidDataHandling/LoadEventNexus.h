@@ -603,7 +603,6 @@ void LoadEventNexus::loadEntryMetadata(
   ::NeXus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
 
-  // only generating the entriesMap once
   const std::map<std::string, std::string> entriesNxentry = file.getEntries();
 
   // get the title
@@ -618,7 +617,7 @@ void LoadEventNexus::loadEntryMetadata(
   }
 
   // get the notes
-  if (descriptor.isEntry("/" + entry_name + "/title", "NXentry")) {
+  if (descriptor.isEntry("/" + entry_name + "/notes", "NXentry")) {
     file.openData("notes");
     if (file.getInfo().type == ::NeXus::CHAR) {
       std::string notes = file.getStrData();
@@ -666,8 +665,7 @@ void LoadEventNexus::loadEntryMetadata(
   if (descriptor.isEntry("/" + entry_name + "/sample", "NXentry")) {
     file.openGroup("sample", "NXsample");
     try {
-    
-      if (descriptor.isEntry("/" + entry_name + "/sample/name")) {
+      if (exists(file, "name")) {
         file.openData("name");
         const auto info = file.getInfo();
         std::string name;

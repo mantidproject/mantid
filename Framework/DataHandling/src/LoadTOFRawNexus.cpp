@@ -73,28 +73,21 @@ void LoadTOFRawNexus::init() {
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadTOFRawNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
   int confidence(0);
-
-  const std::map<std::string, std::set<std::string>> &allEntries =
-      descriptor.getAllEntries();
-
-  if (descriptor.isEntry("/entry", "NXentry") ||
-      descriptor.isEntry("/entry-state0", "NXentry")) {
-
-    const bool hasEventData =
-        (allEntries.count("NXevent_data") == 1) ? true : false;
-    const bool hasData = (allEntries.count("NXdata") == 1) ? true : false;
-    if (hasData && hasEventData) {
+  if (descriptor.pathOfTypeExists("/entry", "NXentry") ||
+      descriptor.pathOfTypeExists("/entry-state0", "NXentry")) {
+    const bool hasEventData = descriptor.classTypeExists("NXevent_data");
+    const bool hasData = descriptor.classTypeExists("NXdata");
+    if (hasData && hasEventData)
       // Event data = this is event NXS
       confidence = 20;
-    } else if (hasData && !hasEventData) {
+    else if (hasData && !hasEventData)
       // No event data = this is the one
       confidence = 80;
-    } else {
+    else
       // No data ?
       confidence = 10;
-    }
   }
   return confidence;
 }
@@ -482,7 +475,7 @@ std::string LoadTOFRawNexus::getEntryName(const std::string &filename) {
  *  @throw std::invalid_argument If the optional properties are set to invalid
  *values
  */
-void LoadTOFRawNexus::execLoader() {
+void LoadTOFRawNexus::exec() {
   // The input properties
   std::string filename = getPropertyValue("Filename");
   m_signalNo = getProperty("Signal");
@@ -526,9 +519,10 @@ void LoadTOFRawNexus::execLoader() {
   // Load the meta data, but don't stop on errors
   prog->report("Loading metadata");
   g_log.debug() << "Loading metadata\n";
-  try {
+  Kernel::NexusHDF5Descriptor descriptor(filename);
 
-    LoadEventNexus::loadEntryMetadata(filename, WS, entry_name, *m_fileInfo);
+  try {
+    LoadEventNexus::loadEntryMetadata(filename, WS, entry_name, descriptor);
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }

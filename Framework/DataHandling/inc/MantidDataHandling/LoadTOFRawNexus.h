@@ -10,7 +10,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
-#include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -27,7 +26,8 @@ namespace DataHandling {
  Loads a NeXus file that conforms to the TOFRaw instrument definition format and
  stores it in a 2D workspace.
  */
-class DLLExport LoadTOFRawNexus : public API::NexusFileLoader {
+class DLLExport LoadTOFRawNexus
+    : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Default Constructor
   LoadTOFRawNexus();
@@ -52,7 +52,7 @@ public:
   static std::string getEntryName(const std::string &filename);
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
+  int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
   void countPixels(const std::string &nexusfilename,
                    const std::string &entry_name,
@@ -66,7 +66,7 @@ public:
 
 protected:
   void init() override;
-  void execLoader() override;
+  void exec() override;
 
   /// Validate the optional input properties
   void checkOptionalProperties();

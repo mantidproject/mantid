@@ -29,6 +29,11 @@ public:
   virtual void
   setFileInfo(std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo);
 
+  /// Required to pass m_fileInfo to static functions
+  /// Keeping it shared_ptr to match setFileInfo signature (although passing
+  /// ownership is not the main goal).
+  virtual std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> getFileInfo();
+
   virtual int
   confidence(Kernel::NexusHDF5Descriptor &descriptor) const override = 0;
 

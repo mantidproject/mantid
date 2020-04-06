@@ -785,8 +785,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   try {
     // this is a static method that is why it is passing the
     // file object and the file path
-    loadEntryMetadata<EventWorkspaceCollection_sptr>(m_filename, m_ws,
-                                                     m_top_entry_name);
+    const std::shared_ptr<NexusHDF5Descriptor> descriptor = getFileInfo();
+
+    loadEntryMetadata<EventWorkspaceCollection_sptr>(
+        m_filename, m_ws, m_top_entry_name, *descriptor);
   } catch (std::runtime_error &e) {
     // Missing metadata is not a fatal error. Log and go on with your life
     g_log.error() << "Error loading metadata: " << e.what() << '\n';
