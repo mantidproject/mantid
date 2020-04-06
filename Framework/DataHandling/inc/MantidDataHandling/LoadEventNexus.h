@@ -603,10 +603,8 @@ void LoadEventNexus::loadEntryMetadata(
   ::NeXus::File file(nexusfilename);
   file.openGroup(entry_name, "NXentry");
 
-  const std::map<std::string, std::string> entriesNxentry = file.getEntries();
-
   // get the title
-  if (descriptor.isEntry("/" + entry_name + "/title", "NXentry")) {
+  if (descriptor.isEntry("/" + entry_name + "/title", "SDS")) {
     file.openData("title");
     if (file.getInfo().type == ::NeXus::CHAR) {
       std::string title = file.getStrData();
@@ -617,7 +615,7 @@ void LoadEventNexus::loadEntryMetadata(
   }
 
   // get the notes
-  if (descriptor.isEntry("/" + entry_name + "/notes", "NXentry")) {
+  if (descriptor.isEntry("/" + entry_name + "/notes", "SDS")) {
     file.openData("notes");
     if (file.getInfo().type == ::NeXus::CHAR) {
       std::string notes = file.getStrData();
@@ -628,7 +626,7 @@ void LoadEventNexus::loadEntryMetadata(
   }
 
   // Get the run number
-  if (descriptor.isEntry("/" + entry_name + "/run_number", "NXentry")) {
+  if (descriptor.isEntry("/" + entry_name + "/run_number", "SDS")) {
     file.openData("run_number");
     std::string run;
     if (file.getInfo().type == ::NeXus::CHAR) {
@@ -647,8 +645,7 @@ void LoadEventNexus::loadEntryMetadata(
   }
 
   // get the experiment identifier
-  if (descriptor.isEntry("/" + entry_name + "/experiment_identifier",
-                         "NXentry")) {
+  if (descriptor.isEntry("/" + entry_name + "/experiment_identifier", "SDS")) {
     file.openData("experiment_identifier");
     std::string expId;
     if (file.getInfo().type == ::NeXus::CHAR) {
@@ -662,10 +659,10 @@ void LoadEventNexus::loadEntryMetadata(
 
   // get the sample name - nested try/catch to leave the handle in an
   // appropriate state
-  if (descriptor.isEntry("/" + entry_name + "/sample", "NXentry")) {
+  if (descriptor.isEntry("/" + entry_name + "/sample", "NXsample")) {
     file.openGroup("sample", "NXsample");
     try {
-      if (exists(file, "name")) {
+      if (descriptor.isEntry("/" + entry_name + "/sample/name", "SDS")) {
         file.openData("name");
         const auto info = file.getInfo();
         std::string name;
@@ -693,7 +690,7 @@ void LoadEventNexus::loadEntryMetadata(
   }
 
   // get the duration
-  if (descriptor.isEntry("/" + entry_name + "/duration", "NXentry")) {
+  if (descriptor.isEntry("/" + entry_name + "/duration", "SDS")) {
     file.openData("duration");
     std::vector<double> duration;
     file.getDataCoerce(duration);
