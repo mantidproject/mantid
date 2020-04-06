@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtRunsView.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"

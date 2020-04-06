@@ -395,14 +395,11 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
 
     for (auto rowIndex : rowsToTransfer) {
       auto const &result = m_searcher->getSearchResult(rowIndex);
+      if (result.hasError())
+        continue;
       auto row = validateRowFromRunAndTheta(result.runNumber(), result.theta());
-      if (row.is_initialized()) {
-        mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance,
-                          result.groupName());
-      } else {
-        m_searcher->setSearchResultError(
-            rowIndex, "Theta was not specified in the description.");
-      }
+      assert(row.is_initialized());
+      mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance, result.groupName());
     }
 
     tablePresenter()->mergeAdditionalJobs(jobs);

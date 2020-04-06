@@ -14,7 +14,6 @@
 #include "../RunsTable/MockRunsTableView.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MantidQtWidgets/Common/MockAlgorithmRunner.h"
@@ -29,7 +28,6 @@
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::
     ModelCreationHelper;
-using Mantid::DataObjects::TableWorkspace;
 using testing::_;
 using testing::AtLeast;
 using testing::Mock;
@@ -53,7 +51,7 @@ public:
         m_view(), m_runsTableView(), m_progressView(), m_messageHandler(),
         m_searcher(nullptr), m_pythonRunner(), m_runNotifier(nullptr),
         m_runsTable(m_instruments, m_thetaTolerance, ReductionJobs()),
-        m_searchString("test search string"), m_searchResult("", "", "") {
+        m_searchString("test search string"), m_searchResult("", "") {
     Mantid::API::FrameworkManager::Instance();
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
@@ -458,8 +456,7 @@ public:
     EXPECT_CALL(m_view, getAllSearchRows())
         .Times(1)
         .WillOnce(Return(rowsToTransfer));
-    auto searchResult =
-        SearchResult("12345", "Test run th=0.5", "test location");
+    auto searchResult = SearchResult("12345", "Test run th=0.5");
     for (auto rowIndex : rowsToTransfer)
       EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
           .Times(1)
@@ -497,15 +494,6 @@ public:
     expectGetValidSearchRowSelection();
     expectIsNotAutoreducing();
     expectCreatePercentageProgressIndicator();
-    presenter.notifyTransfer();
-    verifyAndClear();
-  }
-
-  void testTransferSetsErrorForInvalidRows() {
-    auto presenter = makePresenter();
-    expectGetValidSearchRowSelection();
-    EXPECT_CALL(*m_searcher, setSearchResultError(3, _)).Times(1);
-    EXPECT_CALL(*m_searcher, setSearchResultError(5, _)).Times(1);
     presenter.notifyTransfer();
     verifyAndClear();
   }
@@ -855,7 +843,7 @@ private:
     EXPECT_CALL(m_view, getSelectedSearchRows())
         .Times(1)
         .WillOnce(Return(selectedRows));
-    m_searchResult = SearchResult("", "", "");
+    m_searchResult = SearchResult("", "");
     for (auto rowIndex : selectedRows)
       EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
           .Times(1)
@@ -876,7 +864,7 @@ private:
         .WillOnce(Return(selectedRows));
     // Set the expected result from the search results model
     auto const title = groupName + std::string("th=") + std::to_string(theta);
-    m_searchResult = SearchResult(run, title, "");
+    m_searchResult = SearchResult(run, title);
     EXPECT_CALL(*m_searcher, getSearchResult(rowIndex))
         .Times(1)
         .WillOnce(ReturnRef(m_searchResult));

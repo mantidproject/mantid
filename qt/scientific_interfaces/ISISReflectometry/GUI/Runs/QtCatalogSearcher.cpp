@@ -14,6 +14,8 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 
+#include <boost/regex.hpp>
+
 using namespace Mantid::API;
 
 namespace MantidQt {
@@ -37,6 +39,38 @@ void removeResultsWithoutFilenameExtension(
   for (auto row = toRemove.rbegin(); row != toRemove.rend(); ++row)
     results->removeRow(*row);
 }
+
+bool runHasCorrectInstrument(std::string const &run,
+                             std::string const &instrument) {
+  // Return false if the run appears to be from another instruement
+  return (run.substr(0, instrument.size()) == instrument);
+}
+
+std::string trimRunName(std::string const &runFile,
+                        std::string const &instrument) {
+  // Trim the instrument prefix and ".raw" suffix
+  auto run = runFile;
+  run = run.substr(instrument.size(), run.size() - (instrument.size() + 4));
+
+  // Also get rid of any leading zeros
+  size_t numZeros = 0;
+  while (run[numZeros] == '0')
+    numZeros++;
+  run = run.substr(numZeros, run.size() - numZeros);
+
+  return run;
+}
+
+bool resultExists(SearchResult const &result, SearchResults const &runDetails) {
+  auto resultIter = std::find(runDetails.cbegin(), runDetails.cend(), result);
+  return resultIter != runDetails.cend();
+}
+
+bool knownFileType(std::string const &filename) {
+  boost::regex pattern("raw$", boost::regex::icase);
+  boost::smatch match; // Unused.
+  return boost::regex_search(filename, match, pattern);
+}
 } // unnamed namespace
 
 QtCatalogSearcher::QtCatalogSearcher(IRunsView *view)
@@ -49,19 +83,42 @@ void QtCatalogSearcher::subscribe(SearcherSubscriber *notifyee) {
   m_notifyee = notifyee;
 }
 
-ITableWorkspace_sptr
-QtCatalogSearcher::search(const std::string &text,
-                          const std::string &instrument,
-                          ISearcher::SearchType searchType) {
+SearchResults QtCatalogSearcher::search(const std::string &text,
+                                        const std::string &instrument,
+                                        ISearcher::SearchType searchType) {
   m_searchText = text;
   m_instrument = instrument;
   m_searchType = searchType;
   auto algSearch = createSearchAlgorithm(text);
   algSearch->execute();
-  ITableWorkspace_sptr results = algSearch->getProperty("OutputWorkspace");
-  // Now, tidy up the data
-  removeResultsWithoutFilenameExtension(results);
-  return results;
+  ITableWorkspace_sptr resultsTable = algSearch->getProperty("OutputWorkspace");
+  removeResultsWithoutFilenameExtension(resultsTable);
+  auto searchResults = convertTableToSearchResults(resultsTable);
+  return searchResults;
+}
+
+SearchResults QtCatalogSearcher::convertTableToSearchResults(
+    ITableWorkspace_sptr tableWorkspace) {
+  auto searchResults = SearchResults();
+  searchResults.reserve(tableWorkspace->rowCount());
+
+  for (size_t i = 0; i < tableWorkspace->rowCount(); ++i) {
+    const std::string runFile = tableWorkspace->String(i, 0);
+
+    if (!runHasCorrectInstrument(runFile, m_instrument))
+      continue;
+
+    if (!knownFileType(runFile))
+      continue;
+
+    auto const run = trimRunName(runFile, m_instrument);
+    const std::string description = tableWorkspace->String(i, 6);
+    auto result = SearchResult(run, description);
+
+    if (!resultExists(result, searchResults))
+      searchResults.emplace_back(std::move(result));
+  }
+  return searchResults;
 }
 
 void QtCatalogSearcher::searchAsync() {
@@ -114,8 +171,10 @@ void QtCatalogSearcher::notifySearchComplete() {
   IAlgorithm_sptr searchAlg = algRunner->getAlgorithm();
 
   if (searchAlg->isExecuted()) {
-    ITableWorkspace_sptr table = searchAlg->getProperty("OutputWorkspace");
-    results().addDataFromTable(table, m_instrument);
+    ITableWorkspace_sptr resultsTable =
+        searchAlg->getProperty("OutputWorkspace");
+    auto resultsList = convertTableToSearchResults(resultsTable);
+    results().mergeNewResults(resultsList);
   }
 
   m_notifyee->notifySearchComplete();
@@ -125,11 +184,6 @@ bool QtCatalogSearcher::searchInProgress() const { return m_searchInProgress; }
 
 SearchResult const &QtCatalogSearcher::getSearchResult(int index) const {
   return results().getRowData(index);
-}
-
-void QtCatalogSearcher::setSearchResultError(int index,
-                                             const std::string &errorMessage) {
-  results().setError(index, errorMessage);
 }
 
 void QtCatalogSearcher::reset() {
