@@ -203,7 +203,7 @@ Example Script
     axes[0].grid(True, which = 'both', axis = 'both') # major/minor, x/y
 
     # Add an inset, use trial and error to find the right location
-    inset = fig.add_axes([0.76, 0.70, 0.18, 0.18],projection='mantid') #[left, bottom, width, height]
+    inset = fig.add_axes([0.77, 0.70, 0.18, 0.18],projection='mantid') #[left, bottom, width, height]
     inset.plot(exp_decay, specNum=5, color='blue', label='Log Peak', marker ='.')
     plt.yscale('log') #only affects the most recently called axes
     inset.set_xlim(40, 60), inset.set_ylim(5, 20)
