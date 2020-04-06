@@ -6,7 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/DistributedAlgorithm.h"
+
+#include "MantidAPI/NexusFileLoader.h"
 #include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
@@ -32,7 +33,7 @@ data.</LI>
 
 @author Martyn Gigg, Tessella plc
 */
-class DLLExport LoadNexusLogs : public API::DistributedAlgorithm {
+class DLLExport LoadNexusLogs : public API::NexusFileLoader {
 public:
   /// Default constructor
   LoadNexusLogs();
@@ -54,11 +55,15 @@ public:
     return "DataHandling\\Logs;DataHandling\\Nexus";
   }
 
+  int confidence(Kernel::NexusHDF5Descriptor & /*descriptor*/) const override {
+    return 0;
+  }
+
 private:
   /// Overwrites Algorithm method.
   void init() override;
   /// Overwrites Algorithm method
-  void exec() override;
+  void execLoader() override;
   /// Load log data from a group
   void loadLogs(::NeXus::File &file, const std::string &entry_name,
                 const std::string &entry_class,

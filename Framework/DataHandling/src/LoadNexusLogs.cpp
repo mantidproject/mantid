@@ -366,7 +366,7 @@ void LoadNexusLogs::init() {
  *  @throw std::invalid_argument If the optional properties are set to invalid
  *values
  */
-void LoadNexusLogs::exec() {
+void LoadNexusLogs::execLoader() {
   std::string filename = getPropertyValue("Filename");
   MatrixWorkspace_sptr workspace = getProperty("Workspace");
 
