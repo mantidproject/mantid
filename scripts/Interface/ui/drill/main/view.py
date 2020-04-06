@@ -359,3 +359,19 @@ class DrillView(QMainWindow):
         self.progressBar.setMaximum(nmax)
         self.progressBar.setValue(n)
 
+    def set_disabled(self, state):
+        self.instrumentselector.setDisabled(state)
+        self.datadirs.setDisabled(state)
+        self.load.setDisabled(state)
+        self.settings.setDisabled(state)
+        self.paste.setDisabled(state)
+        self.copy.setDisabled(state)
+        self.cut.setDisabled(state)
+        self.erase.setDisabled(state)
+        self.deleterow.setDisabled(state)
+        self.addrow.setDisabled(state)
+        self.save.setDisabled(state)
+        self.processRows.setDisabled(state)
+        self.processAll.setDisabled(state)
+        self.table.setDisabled(state)
+

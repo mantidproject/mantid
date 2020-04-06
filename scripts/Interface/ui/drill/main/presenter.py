@@ -32,6 +32,7 @@ class DrillPresenter(DrillEventListener):
 
     def on_process(self, rows):
         self.model.process(rows)
+        self.view.set_disabled(True)
 
     def on_instrument_changed(self, instrument):
         self.model.set_instrument(instrument)
@@ -47,6 +48,8 @@ class DrillPresenter(DrillEventListener):
     def on_process_done(self):
         n, nmax = self.model.get_processing_progress()
         self.view.set_progress(n, nmax)
+        if (n == nmax):
+            self.view.set_disabled(False)
 
     def update_view_from_model(self):
         self.view.set_table(self.model.get_columns(),
