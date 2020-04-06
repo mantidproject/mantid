@@ -53,6 +53,7 @@ void MSDFit::setupFitTab() {
   auto yi = functionFactory.createFunction("MSDYi");
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
+  connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }
 
 void MSDFit::runClicked() { runTab(); }
@@ -68,6 +69,33 @@ EstimationDataSelector MSDFit::getEstimationDataSelector() const {
             const std::vector<double> &) -> DataForParameterEstimation {
     return DataForParameterEstimation{};
   };
+}
+
+void MSDFit::fitFunctionChanged() {
+  m_msdFittingModel->setFitTypeString(fitTypeString());
+}
+
+std::string MSDFit::fitTypeString() const {
+  // This function attempts to work out which fit type is being done. It will
+  // currently only recognise the three default types.
+  const auto numberOfGauss = numberOfCustomFunctions("MsdGauss");
+  const auto numberOfPeters = numberOfCustomFunctions("MsdPeters");
+  const auto numberOfYi = numberOfCustomFunctions("MsdYi");
+
+  if (numberOfGauss + numberOfPeters + numberOfYi != 1) {
+    return "UserDefined";
+  }
+
+  if (numberOfGauss == 1)
+    return "Gauss";
+
+  if (numberOfPeters == 1)
+    return "Peters";
+
+  if (numberOfYi == 1)
+    return "Yi";
+
+  return "UserDefined";
 }
 
 } // namespace IDA

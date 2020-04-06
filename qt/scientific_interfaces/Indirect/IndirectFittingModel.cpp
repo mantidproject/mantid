@@ -315,8 +315,8 @@ namespace IDA {
 
 std::unordered_map<FittingMode, std::string> fitModeToName =
     std::unordered_map<FittingMode, std::string>(
-        {{FittingMode::SEQUENTIAL, "Sequential"},
-         {FittingMode::SIMULTANEOUS, "Simultaneous"}});
+        {{FittingMode::SEQUENTIAL, "Seq"},
+         {FittingMode::SIMULTANEOUS, "Sim"}});
 
 PrivateFittingData::PrivateFittingData() : m_data() {}
 
