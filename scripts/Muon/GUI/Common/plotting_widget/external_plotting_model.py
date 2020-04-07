@@ -13,7 +13,6 @@ class PlotInformation(NamedTuple):
     specNum: int
     axis: int
     normalised: bool
-    errors: bool
 
 
 class ExternalPlottingModel(object):

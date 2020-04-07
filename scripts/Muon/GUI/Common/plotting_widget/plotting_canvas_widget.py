@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import List
 
+from MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
 from Muon.GUI.Common.plotting_widget.plotting_canvas_model import PlottingCanvasModel
 from Muon.GUI.Common.plotting_widget.plotting_canvas_presenter import PlottingCanvasPresenter
 from Muon.GUI.Common.plotting_widget.plotting_canvas_view import PlottingCanvasView
@@ -13,16 +14,18 @@ from Muon.GUI.Common.plotting_widget.plotting_canvas_view import PlottingCanvasV
 
 class PlottingCanvasWidget(object):
 
-    def __init__(self, parent, view=None, model=None):
+    def __init__(self, parent, context):
 
-        self._view = view if view else PlottingCanvasView(parent)
-        self._model = model if model else PlottingCanvasModel()
-        self._presenter = PlottingCanvasPresenter(self._view, self._model)
+        self._figure_options = QuickEditWidget(parent)
+        self._plotting_view = PlottingCanvasView(parent)
+        self._plotting_view.add_widget(self._figure_options.widget)
+        self._model = PlottingCanvasModel(context)
+        self._presenter = PlottingCanvasPresenter(self._plotting_view, self._model, self._figure_options)
 
+    @property
+    def presenter(self):
+        return self._presenter
+
+    @property
     def widget(self):
-        return self._view
-
-    def plot_workspace_data(self, workspace_names: List[str], workspace_indicies: List[int],
-                            errors: bool, overplot: bool):
-        self._presenter.handle_plot_workspaces(workspace_names, workspace_indicies,
-                                               errors, overplot)
+        return self._plotting_view

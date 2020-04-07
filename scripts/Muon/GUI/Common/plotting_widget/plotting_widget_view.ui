@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>819</width>
-    <height>802</height>
+    <width>821</width>
+    <height>809</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,15 +23,19 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="QComboBox" name="comboBox_2"/>
+      <widget class="QComboBox" name="plot_type_combo"/>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox"/>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QCheckBox" name="tiled_plot_checkbox">
        <property name="text">
-        <string>CheckBox</string>
+        <string>Tiled plot</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="tiled_by_combo">
+       <property name="currentIndex">
+        <number>-1</number>
        </property>
       </widget>
      </item>
@@ -78,34 +82,10 @@
      <property name="sizeConstraint">
       <enum>QLayout::SetDefaultConstraint</enum>
      </property>
-     <item>
-      <widget class="QuickEditView" name="quick_edit_options" native="true">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QuickEditView</class>
-   <extends>QWidget</extends>
-   <header>MultiPlotting.QuickEdit.quickEdit_view</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

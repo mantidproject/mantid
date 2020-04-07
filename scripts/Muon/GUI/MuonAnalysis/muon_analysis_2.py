@@ -88,7 +88,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         # create the dockable widget
         self.dockable_plot_widget = PlottingWidget(self.context, parent=self)
         self.dockable_plot_widget1 = PlottingWidget1(self.context, parent=self)
-        self.alt_dock_window = PlotWidgetView1()
         self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
                                                               plotting_widget=self.dockable_plot_widget1.view)
         self.dockable_plot_widget_window.setMinimumWidth(575)
