@@ -58,10 +58,35 @@ void JumpFit::setupFitTab() {
   m_uiForm->cbParameter->setEnabled(false);
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
+  connect(this, SIGNAL(functionChanged()), this,
+          SLOT(updateModelFitTypeString()));
 }
 
 void JumpFit::updateModelFitTypeString() {
-  m_jumpFittingModel->setFitType(selectedFitType().toStdString());
+  m_jumpFittingModel->setFitType(fitTypeString());
+}
+
+std::string JumpFit::fitTypeString() const {
+  // This function attempts to work out which fit type is being done. It will
+  // currently only recognise the three default types.
+  const auto numberOfGauss = numberOfCustomFunctions("MsdGauss");
+  const auto numberOfPeters = numberOfCustomFunctions("MsdPeters");
+  const auto numberOfYi = numberOfCustomFunctions("MsdYi");
+
+  if (numberOfGauss + numberOfPeters + numberOfYi != 1) {
+    return "UserDefined";
+  }
+
+  if (numberOfGauss == 1)
+    return "Gauss";
+
+  if (numberOfPeters == 1)
+    return "Peters";
+
+  if (numberOfYi == 1)
+    return "Yi";
+
+  return "UserDefined";
 }
 
 void JumpFit::runClicked() { runTab(); }

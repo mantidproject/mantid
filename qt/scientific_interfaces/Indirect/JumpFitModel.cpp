@@ -369,12 +369,14 @@ JumpFitModel::getEISFSpectrum(std::size_t eisfIndex,
 
 std::string JumpFitModel::sequentialFitOutputName() const {
   if (isMultiFit())
-    return "MultiFofQFit_" + m_fitType + "_Results";
-  return constructOutputName();
+    return "MultiFofQFit_seq" + m_fitType + "_Results";
+  return constructOutputName("seq");
 }
 
 std::string JumpFitModel::simultaneousFitOutputName() const {
-  return sequentialFitOutputName();
+  if (isMultiFit())
+    return "MultiFofQFit_sim" + m_fitType + "_Results";
+  return constructOutputName("sim");
 }
 
 std::string JumpFitModel::singleFitOutputName(TableDatasetIndex index,
@@ -387,9 +389,9 @@ std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
 
 std::string JumpFitModel::getResultLogName() const { return "SourceName"; }
 
-std::string JumpFitModel::constructOutputName() const {
-  auto const name =
-      createOutputName("%1%_FofQFit_" + m_fitType, "", TableDatasetIndex{0});
+std::string JumpFitModel::constructOutputName(std::string batchType) const {
+  auto const name = createOutputName(
+      "%1%_FofQFit_" + batchType + "_" + m_fitType, "", TableDatasetIndex{0});
   auto const position = name.find("_Result");
   if (position != std::string::npos)
     return name.substr(0, position) + name.substr(position + 7, name.size());

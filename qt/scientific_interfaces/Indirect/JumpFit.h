@@ -41,6 +41,7 @@ private:
 
   JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::JumpFit> m_uiForm;
+  std::string fitTypeString() const;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
