@@ -102,7 +102,7 @@ Even add `gridlines <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.
 
 .. code-block:: python
 
-   axes.grid(True, which = both, axis = both) # major/minor, x/y
+   axes.grid(True, which = 'both', axis = 'both') # major/minor, x/y
 
 Notice how `gridlines are linked to the axis ticks <https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.tick_params.html>`_:
 
@@ -160,7 +160,7 @@ Add an `inset plot using the mantid projection <https://matplotlib.org/3.2.1/api
 Generate a Script
 =================
 
-On a 1D or tiled plot in workbench, click the generate a script button |GenerateAScript.png| which will give more insite into the options for plotting from a script.
+On a 1D or tiled plot in workbench, click the generate a script button |GenerateAScript.png| which will give more insight into the options for plotting from a script.
 
 
 **NOTE** *It is very possible that the Generate a Script and Figure Options buttons on the plot toolbar will not work when that plot has been produced by a complex script*.
