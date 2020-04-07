@@ -43,11 +43,12 @@ class DrillModel(QObject):
         self.processes_done = 0
 
     def convolute(self, options):
-        if "CustomOptions" in options:
-            custom_options = options["CustomOptions"]
-            del options["CustomOptions"]
-            options.update(custom_options)
-        return options
+        local_options = dict()
+        local_options.update(options)
+        if "CustomOptions" in local_options:
+            local_options.update(local_options["CustomOptions"])
+            del local_options["CustomOptions"]
+        return local_options
 
     def process(self, elements):
         self.thread = DrillWorker()
