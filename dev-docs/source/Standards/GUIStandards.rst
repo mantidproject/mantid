@@ -21,7 +21,7 @@ Preface
 This document is structured as both a quick reference guide and detailed
 descriptions as follows:
 
-- The standards are are the header titles and can be used standalone.
+- The standards are the header titles and can be used standalone.
 
 For most developers looking for something to link to / follow at a glance 
 the table of contents will have everything you need.
@@ -47,7 +47,7 @@ Existing GUIs in Mantid may differ, so developers should follow the existing con
 
 This document should not be used as a reason to rewrite swathes of GUI code, except for cases where the effort to match established patterns, now or in the future, exceeds the work required to move to these standards.
 
-Developers should follow this guidelines when writing new interfaces as closely as possible. There may be times where its more appropriate to deviate from these standards, but like all standards this must be justified on a case-by-case basis in the associated PR.
+Developers should follow these guidelines when writing new interfaces as closely as possible. There may be times where it's more appropriate to deviate from these standards, but like all standards this must be justified on a case-by-case basis in the associated PR.
 
 **********
 Standards
@@ -63,7 +63,7 @@ UX design reviews must be done beforehand
 Other developers will recognise potential pitfalls or problems with your GUI,
 or maybe even adapt a thing or two on theirs.
 
-- These don't need to be persisted it's an informal process
+- These don't need to be saved or published, as it's an informal process
 - Don't verbally describe, always sketch something
 
 Feel free to do these on whatever medium works best for you, be it tools
@@ -71,7 +71,7 @@ like Balsamiq (licenses available), the back of the envelope, a whiteboard
 or crop circles in a field. The point is have a visual reference that
 other people can see, as no two people will imagine the same thing.
 
-- Pretend to use it with said mockup
+- Use this mockup to pretend you're interacting with the actual GUI.
 
 Go through the process you expect a user to do, show drop downs, radio buttons
 and tabs. You'll be surprised how many clunky design choices this will show
@@ -93,8 +93,8 @@ First and foremost we are a scientific tool. It's easier to validate the results
 we produce in a separate PR without trying to figure out what the GUI
 might have broke. 
 
-Don't be tempted to work on the GUI alongside for yourself and your users
-benefit. Having something they can run from Python whilst your putting the
+Don't be tempted to work on the GUI simultaneously, for your users' and your
+benefit. Having something they can run from Python whilst you're putting the
 finishing touches to the GUI will allow them to process data for their users
 and allow you to deliver a fantastic product.
 
@@ -113,8 +113,8 @@ work should be completed beforehand, how the code will be structured and
 what responsibilities each interface will have.
 
 - Look for scope creep
-
-Is your GUI doing too much, is there a "god" class/tab developing
+- Is your GUI doing too much? 
+- Is there a "god" class/tab developing?
 
 Users and developers alike will sometimes push to have everything in one
 single page for accessibility. This `article <https://blog.codinghorror.com/this-is-what-happens-when-you-let-developers-create-ui/>`__ shows you (and
@@ -144,18 +144,18 @@ for the last N sprints.
 Existing GUIs
 =============
 
-Assess if the MVP code getting too large
------------------------------------------
+Assess if the MVP code is getting too large
+-------------------------------------------
 
 - Anecdotally one common cause of bugs is "...logic kept getting added to existing code"
-- It's hard to step back and assess if your doing scope creep, so do it often
+- It's hard to step back and assess if you're suffering from scope creep, so do it often
  
-As developers enjoy writing new features (well at least most of us), so we get
+As developers enjoy writing new features (well at least most of us), we get
 into `Go Fever <https://en.wikipedia.org/wiki/Go_fever>`__ and don't stop
-on what we've worked on. 
+to reflect on what we're working on. 
 
-Periodically step back, look at your design documents and ask does this fit in.
-Better still talk to your nearest co-developer, interested user or rubber duck
+Periodically step back, look at your design documents and ask, "does this fit in?"
+Better still talk to a nearby co-developer, interested user or rubber duck
 debugging device. Describe what features were already there and tell them about
 this new feature, do they sound like they fit in the same place?
 
@@ -167,41 +167,41 @@ split it out early. Especially with UI files, the later you leave it the
 harder it becomes to unpick everything. 
 
 If you split, then it turns out the work completed wasn't as large as anticipated
-it's as simple as moving your imports, then cutting and pasting your code
+it's as simple as moving your imports, then cutting and pasting code
 and tests across. This is much easier than the other way where you have to
-unpick all your callers in the same file and shared variables.
+unpick all the callers in the same file and shared variables.
 
 - Feel free to create helper classes where required
 
 Especially with models, the logic can grow quickly and become difficult to
 test too. If you can justify the scope of the model then look into delegating
-work out to classes which all have a single responsibility. 
+work to classes which each have a single responsibility. 
 
 For example, if you have a lot of logic to work out what titles to put on
 various plot windows consider moving it to a PlottingWindowTitles helper class
-with it's own associated test.
+with its own associated test.
 
 Work on existing GUIs should follow maintenance docs
 ----------------------------------------------------
 - Follow the conventions in the guide
 - Don't rewrite the world because you don't like how it looks
-- Look at the maintenance docs and check new work confirms during the PR process
+- Look at the maintenance docs and check new work conforms during the PR process
 
 Each GUI should have an associated maintenance guide with it. The conventions
 might be incorrect, weird or downright wrong. However, consistency is key to
-helping future you and everyone else who works on it maintain some level of
+helping future you and everyone else who works on the GUI maintain some level of
 understanding.
 
 One temptation we get as developers is to rewrite something we don't understand,
 this isn't to deny the fact that some code is....difficult... These
-standards are a result of those mistakes, but we don't have to time to go back
+standards are a result of those mistakes, but we don't have time to go back
 and put the world to right.
 
-- If your spending excessive time fixing bugs / maintaining code discuss modernising
+- If you're spending excessive time fixing bugs / maintaining code discuss modernising
 
 This is beyond the scope of these standards, but don't feel like everything
 is set in stone and you've been prescribed to draw proverbial blood from said stone.
-If your spending excessive time fixing bugs or maintaining code raise
+If you're spending excessive time fixing bugs or maintaining code raise
 these concerns in the project management chain for the possibility of rewriting.
 
 Model
@@ -212,16 +212,16 @@ Model
 No matter how small, logic goes into the model
 ----------------------------------------------
 
-- Avoid stumbling into the trap of I'll just get the presenter to do this
-- Just an "if statement" can grow into a whole model in the presenter
-- You'll save when writing your testing in the long-term
+- Avoid stumbling into the trap of, "I'll just get the presenter to do this"
+- "Just an if statement" can grow into a whole model in the presenter
+- You'll save time writing testing in the long-term
 
-It's been said the best developers write the least code, however in this case
-it works against them. That simple if statement which toggles disables a
-check-box should be in the model. Often a simple if statement in the presenter
-gets some new checks added...etc. till it becomes a hidden model elsewhere.
+It's been said that the best developers write the least code, however in this case
+it works against them. That simple if statement which changes whether a
+check-box is enabled should be in the model. Often a simple if statement in the 
+presenter gets some new checks added...etc. until it becomes a hidden model.
 
-Suddenly you'll end up having to pry out a model which grew in the presenter
+Suddenly you'll end up having to pry out a model from the presenter,
 taking significantly more time than that first bit of work saved.
 
 The GUI must map 1:1 to a workflow alg.
@@ -242,13 +242,13 @@ The GUI must work with workspace history
 ----------------------------------------
 
 - Keep an eye out for reduction logic creeping into your MVP code
-- If your GUI is making decisions about data (beyond where is it), move it to an alg.
+- Any decisions the GUI makes about data (beyond browsing to it), goes into an alg.
 
 Any steps performed outside of the algorithm disappear from the workspace
 history. This breaks the reproducibility of data since running a script
 skirts around any code in your model.
 
-- Keeping workflow separate, so the GUI should becomes a way to run a workflow
+- Keep the workflow separate, the GUI should become a way to run a workflow
 - Run your workflow algorithm from the GUI, then re-run it as a script
 
 Imagine your GUI could be swapped for a CLI for users, would it still work on the back-end?
@@ -258,8 +258,8 @@ Presenter
 
 .. _notifications_through_single_point:
 
-All notifications need to go through single point
--------------------------------------------------
+All notifications need to go through a single point
+---------------------------------------------------
 
 - Becomes obvious when it's starting to grow outwards
 - Prevents dead code paths, and multiple code paths to do the same thing
@@ -269,13 +269,13 @@ Firstly, having a single method in your presenter handle every notification
 means you can put a single break-point when debugging. Imagine a future dev
 trying to figure out why that field in the GUI keeps changing, 
 but no breakpoints hit because you made another notification handler. Now
-imagine your that future dev.....
+imagine you're that future dev.....
 
 The other aspect is having a single method that's growing beyond 30 lines
 is painfully obvious. Maybe you have some dead code paths that need to be 
 trimmed out, maybe you are suffering from scope creep or maybe your notifier
-is doing model logic. Either way it's obvious to spot now rather than in 5
-different places.
+is doing model logic. In any case it's easier to spot now rather than 
+in 5 different places.
 
 Do not let Qt types in
 -----------------------
@@ -284,23 +284,22 @@ Do not let Qt types in
 - Some debuggers can't see what these type values are
 - You then only have to think about one type instead of doing conversions everywhere
 
-To use abuse analogy, when you have a hammer suddenly everything looks like a
+To use stretch a metaphor, when you have a hammer suddenly everything looks like a
 nail: Many developers will use conversions (hammer) at the last second to 
 coerce their type (nail) into something "standard" which the rest of the 
 code-base uses at the point they need it. 
 
-You only notice something is wrong when you've put so many conversions in that
+You only notice something is wrong when you've put in so many conversions that
 it's either hard to keep track of what the type is at this point (Python), or
 you can't see into them debugging (C++). It dawns on you that the wooden chair
-you were building is 90% nails and your not sure which hold it together and
+you were building is 90% nails and you're not sure which ones hold it together and
 which are responsible for it being incredibly uncomfortable.
 
 - Convert to a standard type in the view, not the presenter
 
 The view is the boundary between your code and external code you have no control
-of. Keep your conversions in there at the point your about to return something,
-that way it's obvious that when your in the presenter your working with
-sane types.
+of. Do the conversion at the point return something, that way it's obvious 
+in the presenter which types you're working with.
 
 If the structure is quite complex such as a class containing multiple related
 fields consider packing it into your own struct (C++) or POD class (Python).
@@ -312,12 +311,12 @@ If you can't test it, put it in the view
 
 - Don't let Qt / Plotting bleed in
 
-It's tempting to check if plotting still plots, or Qt still Qt's. But leave
+It's tempting to check if plotting still plots, or Qt still Qts. But leave
 that to the project / teams responsible and test up to the API call only.
 
 Keep your API calls to things you cannot test in the view, and keep the logic
 in the model. The idea is that the presenter should be doing calls like,
-"here is a workspace and figure, got plot that workspace on that figure".
+"here is a workspace and figure, go plot that workspace on that figure".
 The dumber the logic the less likely it will break.
 
 - Can you test with only mocks?
@@ -360,7 +359,7 @@ problems: was 1 this signal or that, what does a blank string mean? ...etc.
 This is used in combination with having a single notification point, if you
 need multiple enums or your current enum class is growing you are likely 
 suffering scope creep. Step back and consider if your GUI has gone beyond
-it's initial design.
+its initial design.
 
 
 .. _use_non_qt_comms_presenter:
@@ -397,7 +396,7 @@ Training
 Discuss estimates within teams
 ------------------------------
 
-- One of the hardest thing to do is give an accurate estimates
+- One of the hardest things to do is give an accurate estimate
 - Being accurate means our users can prioritise work better
 - Some users will take estimations as deadlines too
 - This practises the estimation process
@@ -407,18 +406,18 @@ tend to require most careful consideration since things will catch you out.
 For example, what happens if you need to redo some of your UX design, or
 it turns out that new feature Y will require us splitting our work from GUI X?
 
-Take the time to talk to other developers within your time about the work you
+Take the time to talk to other developers within your team about the work you
 think will be required, and what might come up in the best and worst case.
 
 Likewise after the work is completed feedback on what you were right and wrong
-about and take it forward to your next chunk of GUI work. Maybe your on the
+about and take it forward to your next chunk of GUI work. Maybe you're on the
 cusp of having to split a file and any extra features will force you to do it
 or you've spent extra time refactoring last time so it should be quicker next.
 
 Encourage newer staff to raise queries
 --------------------------------------
 
-- Are you solving a symptom for a user, rather than their actual problem
+- Are you solving a symptom for a user, rather than their actual problem?
 
 What separates a good product from a great one from a user perspective is
 recognising what problem someone is trying to solve rather than the symptoms.
@@ -431,16 +430,16 @@ true except for once a year? In this case can we add an option to the
 workflow alg but not the GUI, that way most users can't get it wrong. Then write
 a script which does it once a year for those power users who need that feature.
 
-- Newer devs: talk to more experienced devs, ask if there is a better way to do stuff?
+- Newer devs: talk to more experienced devs, ask if there is a better way to do stuff
 
-Invite them along to your user meetings to sit back and help. They're should not
+Invite them along to your user meetings to sit back and help. They should not
 be there to run your meeting or take over. Instead they might recognise something
-that another group might have done, or a potential problem or even a hidden
+that another group has done, a potential problem or even a hidden
 solution.
 
-Feel comfortable to say no (in gentler terms) whenever you think something is
+Feel comfortable saying no (in gentler terms) whenever you think something is
 unreasonable, raise concerns and suggest alternatives. Users would rather not
-see multi months wasted on something they thought was trivial to do, as
+see multiple months wasted on something they thought was trivial to do, as
 there can be a disconnect between perceived and actual difficulty.
 An extreme example might be a bespoke GUI for a single user when a script
 would be perfectly adequate.
@@ -464,7 +463,7 @@ the sprint planning mechanism.
 Periodically revise best UX practice
 ------------------------------------
   
-- Ask experienced UX Devlopers
+- Ask experienced UX Developers for guidance
 - Multiple online resources exist:
 - `NNGroup <https://www.nngroup.com/ux-conference/>`__
 
@@ -474,23 +473,23 @@ Testing
 If you have too many dependencies to inject...
 ----------------------------------------------
 
-- First consider if your making the problem worse by adding
-- Having too many deps is a sign your doing too much
+- First consider if you're making the problem worse by adding
+- Having too many deps is a sign you're doing too much
 
-Check if your suffering from scope creep that you can resolve, not adding
+Check if you're suffering from scope creep that you can resolve, not adding
 DI and relying on mechanisms such as patching disguises this problem.
 
 - Look at using a factory pattern if you really must pass lots of args through
 
-If your adding tests to existing code or require major refactoring work
+If you're adding tests to existing code or require major refactoring work
 consider adding a factory class which allows you to get all your dependencies.
 This is injected instead and the constructor calls a builder method for each
 dependency, the testing class will inherit and override to inject mocks.
 
 - Last resort is to create a test class as a friend of the presenter
 
-This should be considered a last resort as it also opens to avenue to manipulate
-the internals of the class under test. Tests which manipulate internals are
+This should be considered a last resort as it also opens an avenue for manipulating
+the internals of the class under test conditions. Tests which manipulate internals are
 no longer testing a public API and are usually a sign you have a helper class 
 lurking inside.
 
@@ -508,16 +507,16 @@ If you have a constructor which has several args due to DI your MVP code has
 probably started suffering scope creep. Can you either create new classes
 to encapsulate multiple dependencies, or create a new MVP set?
 
-- You may have an problem with the entry point code for production
+- You may have a problem with the entry point code for production
 
 Look at the maintenance guide or dev documentation, some interfaces will use
-a top window view which creates the real instances to inject into it's children.
+a top window view which creates the real instances to inject into its children.
 By keeping it in the view (not model or presenter) we follow the standard,
 if you can't test it put it in the view.
 
 Use dependency injection in Python too
 --------------------------------------
-- Should DI in Python too! This will also future proof you for growth too.
+- You should use DI in Python too! This will also future proof you for growth too.
 - Use this over patching wherever possible
 
 Patching can be difficult to get right, resulting in lots of copy and paste
@@ -526,8 +525,8 @@ This will make it easier to add new tests in the future too since you've
 already done the work in your setup.
 
 Getting the path right can be difficult and developers have to learn
-various rules about how things are imported into different namespace which
-is only really used for these tests.
+various rules about how things are imported into different namespaces, which
+are only really used for patching tests.
 
 - For existing code can you let init run then replace it?
 
@@ -583,16 +582,16 @@ If you can test it, take it out of the view
 - A view API should have everything prepared for it and be as "dumb" as possible
 
 It's very easy to have a for loop in a view which starts off iterating 
-through a list then adding extra steps whilst your there. The view should
+through a list then adding extra steps while you're there. The view should
 have this all pre-prepared for it in a way that any for loops take an object,
 unpack it and forward it to an API only.
 
 For example, if you need to group 12 items into 3 boxes of 4 in the view
 don't put the grouping into the view. Instead pack them into a list of lists
-or create new struct (C++) / POD class (Python) to hold this and iterate through
-that instead.
+or create a new struct (C++) / POD class (Python) to hold this and iterate
+through that instead.
 
-- Go line by line and think, "could I test just this line alone"?
+- Go line by line and think, "could I test just this line alone?"
 
 For certain lines such as calling Qt there would be no possible way to tell
 if a test passed or not, or if they use view only types
@@ -607,7 +606,7 @@ One signal per slot, never multiple
 - Signals should always have a 1:1 mapping with slots
 - Makes it obvious if the combo is broken
 
-Signals and slots should always be paired up, but never more. It can look
+Signals and slots should always be paired up, but never more than 1:1. It can look
 like one signal and slot is working as tested, which then hides the fact
 you unintentionally broke 3 other slots.
 
@@ -646,7 +645,7 @@ Docs
 =====
 - Look at writing a document detailing how each GUI is structured for next maintenance period
 - Add structure to dev-docs, and add files into that. Move maintenance guides into there
-- Add examples where could should be broken down
+- Add examples where code should have been broken down
 - Shared code examples where problems have been solved or how to do stuff
 
 Possible Training
