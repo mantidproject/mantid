@@ -713,6 +713,12 @@ void FitPropertyBrowser::executeSetupManageMenu(const QString &item) {
 /// Destructor
 FitPropertyBrowser::~FitPropertyBrowser() {
   m_compositeFunction.reset();
+
+  // remove the FunctionFactory Observer
+  using Mantid::API::FunctionFactory;
+  FunctionFactory::Instance().notificationCenter.removeObserver(
+      m_updateObserver);
+
   m_browser->unsetFactoryForManager(m_enumManager);
   m_browser->unsetFactoryForManager(m_boolManager);
   m_browser->unsetFactoryForManager(m_intManager);

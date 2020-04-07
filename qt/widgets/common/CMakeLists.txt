@@ -931,6 +931,7 @@ set(TEST_FILES
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h
     test/FindFilesWorkerTest.h
+    test/FitPropertyBrowserTest.h
     test/FunctionModelTest.h
     test/FunctionMultiDomainPresenterTest.h
     test/FunctionBrowserUtilsTest.h
@@ -976,6 +977,7 @@ set(
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
+  test/FitPropertyBrowserTest.h
   test/FunctionModelTest.h
   test/FunctionMultiDomainPresenterTest.h
   test/FunctionBrowserUtilsTest.h
@@ -1047,6 +1049,7 @@ set(
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
+  test/FitPropertyBrowserTest.h
   test/InterfaceManagerTest.h
   test/QtJSONUtilsTest.h
   test/RepoModelTest.h
