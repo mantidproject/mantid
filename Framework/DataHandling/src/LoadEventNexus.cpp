@@ -817,7 +817,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     // LoadInstrument are made to use the same Nexus/HDF5 library
     m_file->close();
     m_instrument_loaded_correctly =
-        loadInstrument(m_filename, m_ws, m_top_entry_name, this);
+        loadInstrument(m_filename, m_ws, m_top_entry_name, this, descriptor);
 
     if (!m_instrument_loaded_correctly)
       throw std::runtime_error("Instrument was not initialized correctly! "
@@ -1183,10 +1183,11 @@ template <>
 bool LoadEventNexus::runLoadInstrument<EventWorkspaceCollection_sptr>(
     const std::string &nexusfilename,
     EventWorkspaceCollection_sptr localWorkspace,
-    const std::string &top_entry_name, Algorithm *alg) {
+    const std::string &top_entry_name, Algorithm *alg,
+    const std::shared_ptr<NexusHDF5Descriptor> &descriptor) {
   auto ws = localWorkspace->getSingleHeldWorkspace();
-  auto hasLoaded = runLoadInstrument<MatrixWorkspace_sptr>(nexusfilename, ws,
-                                                           top_entry_name, alg);
+  auto hasLoaded = runLoadInstrument<MatrixWorkspace_sptr>(
+      nexusfilename, ws, top_entry_name, alg, descriptor);
   localWorkspace->setInstrument(ws->getInstrument());
   return hasLoaded;
 }

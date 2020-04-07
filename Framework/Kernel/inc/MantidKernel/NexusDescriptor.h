@@ -47,7 +47,7 @@ public:
 
 public:
   /// Constructor accepting a filename
-  NexusDescriptor(const std::string &filename);
+  NexusDescriptor(const std::string &filename, const bool init = true);
   /// Destructor
   ~NexusDescriptor();
 

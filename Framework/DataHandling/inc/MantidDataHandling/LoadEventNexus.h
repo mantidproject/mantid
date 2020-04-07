@@ -113,8 +113,11 @@ public:
   /// Load instrument from Nexus file if possible, else from IDF spacified by
   /// Nexus file
   template <typename T>
-  static bool loadInstrument(const std::string &nexusfilename, T localWorkspace,
-                             const std::string &top_entry_name, Algorithm *alg);
+  static bool loadInstrument(
+      const std::string &nexusfilename, T localWorkspace,
+      const std::string &top_entry_name, Algorithm *alg,
+      const std::shared_ptr<Kernel::NexusHDF5Descriptor> &descriptor =
+          std::shared_ptr<Kernel::NexusHDF5Descriptor>());
 
   /// Load instrument for Nexus file
   template <typename T>
@@ -124,9 +127,11 @@ public:
 
   /// Load instrument from IDF file specified by Nexus file
   template <typename T>
-  static bool
-  runLoadInstrument(const std::string &nexusfilename, T localWorkspace,
-                    const std::string &top_entry_name, Algorithm *alg);
+  static bool runLoadInstrument(
+      const std::string &nexusfilename, T localWorkspace,
+      const std::string &top_entry_name, Algorithm *alg,
+      const std::shared_ptr<Kernel::NexusHDF5Descriptor> &descriptor =
+          std::shared_ptr<Kernel::NexusHDF5Descriptor>());
 
   static void loadSampleDataISIScompatibility(::NeXus::File &file,
                                               EventWorkspaceCollection &WS);
@@ -469,15 +474,20 @@ void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace,
  *  @return true if successful
  */
 template <typename T>
-bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename,
-                                       T localWorkspace,
-                                       const std::string &top_entry_name,
-                                       Algorithm *alg) {
+bool LoadEventNexus::runLoadInstrument(
+    const std::string &nexusfilename, T localWorkspace,
+    const std::string &top_entry_name, Algorithm *alg,
+    const std::shared_ptr<Kernel::NexusHDF5Descriptor> &descriptor) {
   std::string instrument;
   std::string instFilename;
 
+  const bool isNexus =
+      descriptor
+          ? LoadGeometry::isNexus(nexusfilename, descriptor->getAllEntries())
+          : LoadGeometry::isNexus(nexusfilename);
+
   // Check if the geometry can be loaded directly from the Nexus file
-  if (LoadGeometry::isNexus(nexusfilename)) {
+  if (isNexus) {
     instFilename = nexusfilename;
   } else {
     // Get the instrument name
@@ -730,10 +740,10 @@ void LoadEventNexus::loadEntryMetadata(
  *  @return true if successful
  */
 template <typename T>
-bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
-                                    T localWorkspace,
-                                    const std::string &top_entry_name,
-                                    Algorithm *alg) {
+bool LoadEventNexus::loadInstrument(
+    const std::string &nexusfilename, T localWorkspace,
+    const std::string &top_entry_name, Algorithm *alg,
+    const std::shared_ptr<Kernel::NexusHDF5Descriptor> &descriptor) {
 
   bool loadNexusInstrumentXML = true;
   if (alg->existsProperty("LoadNexusInstrumentXML"))
@@ -745,7 +755,7 @@ bool LoadEventNexus::loadInstrument(const std::string &nexusfilename,
                                              top_entry_name, alg);
   if (!foundInstrument)
     foundInstrument = runLoadInstrument<T>(nexusfilename, localWorkspace,
-                                           top_entry_name, alg);
+                                           top_entry_name, alg, descriptor);
   return foundInstrument;
 }
 
