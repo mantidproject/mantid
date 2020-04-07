@@ -12,6 +12,19 @@ Reflectometry Changes
 ISIS Reflectometry Interface
 ############################
 
+New
+---
+
+.. figure:: ../../images/ISISReflectometryInterface/background_subtraction.png
+  :class: screenshot
+  :width: 700px
+  :align: right
+  :alt: Background subtraction on the ISIS Reflectometry Interface
+
+  *Background subtraction on the ISIS Reflectometry Interface*
+
+- Background subtraction options have been added to the ISIS Reflectometry Interface. The subtraction is performed using :ref:`algm-ReflectometryBackgroundSubtraction`.
+
 Bug fixes
 ---------
 

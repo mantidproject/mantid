@@ -145,6 +145,20 @@ public:
     runTestInvalidCells(table, expectedErrors({0}, {8}));
   }
 
+  void testValidBackgroundProcessingInstructions() {
+    auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "1-3"})});
+    auto results = runTestValid(table);
+    TS_ASSERT_EQUALS(results.size(), 1);
+    TS_ASSERT(results[0].backgroundProcessingInstructions().is_initialized());
+    TS_ASSERT_EQUALS(results[0].backgroundProcessingInstructions().get(),
+                     "1-3");
+  }
+
+  void testInvalidBackgroundProcessingInstructions() {
+    auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "bad"})});
+    runTestInvalidCells(table, expectedErrors({0}, {9}));
+  }
+
   void testAnglesThatDifferByTolerance() {
     auto table = Table({Cells({"0.5"}), Cells({"0.501"})});
     auto results = runTestValid(table);
