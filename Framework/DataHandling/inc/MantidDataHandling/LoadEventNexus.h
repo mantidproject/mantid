@@ -363,13 +363,23 @@ void makeTimeOfFlightDataFuzzy(::NeXus::File &file, T localWorkspace,
  * @param classType :: The type of the events: either detector or monitor
  */
 template <typename T>
-void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace,
-                                  const std::string &entry_name,
-                                  const std::string &classType) {
+void adjustTimeOfFlightISISLegacy(
+    ::NeXus::File &file, T localWorkspace, const std::string &entry_name,
+    const std::string &classType,
+    const std::shared_ptr<Kernel::NexusHDF5Descriptor> &descriptor =
+        std::shared_ptr<Kernel::NexusHDF5Descriptor>()) {
   bool done = false;
   // Go to the root, and then top entry
   file.openPath("/");
   file.openGroup(entry_name, "NXentry");
+
+  // NexusHDF5Descriptor
+  if (descriptor) {
+    // not an ISIS file
+    if (!descriptor->isEntry("/" + entry_name + "/detector_1_events")) {
+      return;
+    }
+  }
 
   using string_map_t = std::map<std::string, std::string>;
   string_map_t entries = file.getEntries();
