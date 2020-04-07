@@ -17,6 +17,8 @@ Improvements
   This is similar to what Mantidplot does, and should result in the script stopping much sooner.
 - Fixed an issue where some scripts were running slower if a  plot was open at the same time.
 
+- On 3D plots you can now double-click on the z-axis to change its limits or label.
+
 
 Bugfixes
 ########
