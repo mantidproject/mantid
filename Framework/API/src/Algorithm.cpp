@@ -675,8 +675,10 @@ bool Algorithm::executeInternal() {
           " seconds\n");
       reportCompleted(duration);
     } catch (std::runtime_error &ex) {
-      setResultState(ResultState::Failed);
+      notificationCenter().postNotification(
+          new ErrorNotification(this, ex.what()));
       this->unlockWorkspaces();
+      setResultState(ResultState::Failed);
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
@@ -684,11 +686,12 @@ bool Algorithm::executeInternal() {
             << "Error in execution of algorithm " << this->name() << '\n'
             << ex.what() << '\n';
       }
+
+    } catch (std::logic_error &ex) {
       notificationCenter().postNotification(
           new ErrorNotification(this, ex.what()));
-    } catch (std::logic_error &ex) {
-      setResultState(ResultState::Failed);
       this->unlockWorkspaces();
+      setResultState(ResultState::Failed);
       if (m_isChildAlgorithm || m_runningAsync || m_rethrow)
         throw;
       else {
@@ -696,16 +699,14 @@ bool Algorithm::executeInternal() {
             << "Logic Error in execution of algorithm " << this->name() << '\n'
             << ex.what() << '\n';
       }
-      notificationCenter().postNotification(
-          new ErrorNotification(this, ex.what()));
     }
   } catch (CancelException &ex) {
-    setResultState(ResultState::Failed);
     m_runningAsync = false;
     getLogger().warning() << this->name() << ": Execution cancelled by user.\n";
     notificationCenter().postNotification(
         new ErrorNotification(this, ex.what()));
     this->unlockWorkspaces();
+    setResultState(ResultState::Failed);
     throw;
   }
   // Gaudi also specifically catches GaudiException & std:exception.
@@ -724,7 +725,6 @@ bool Algorithm::executeInternal() {
 
   catch (...) {
     // Execution failed with an unknown exception object
-    setResultState(ResultState::Failed);
     m_runningAsync = false;
 
     notificationCenter().postNotification(
@@ -732,6 +732,7 @@ bool Algorithm::executeInternal() {
     getLogger().error() << this->name()
                         << ": UNKNOWN Exception is caught in exec()\n";
     this->unlockWorkspaces();
+    setResultState(ResultState::Failed);
     throw;
   }
 
@@ -739,11 +740,11 @@ bool Algorithm::executeInternal() {
   this->unlockWorkspaces();
 
   // Only gets to here if algorithm ended normally
+  notificationCenter().postNotification(
+      new FinishedNotification(this, algIsExecuted));
   if (algIsExecuted) {
     setResultState(ResultState::Success);
   }
-  notificationCenter().postNotification(
-      new FinishedNotification(this, algIsExecuted));
   return algIsExecuted;
 }
 
