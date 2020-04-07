@@ -837,7 +837,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
   ::NeXus::Info info;
   bool oldNeXusFileNames(false);
-  bool hasTotalCounts(true);
   bool haveWeights = false;
   auto firstPulseT = DateAndTime::maximum();
 
@@ -868,8 +867,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
         }
         // get the number of events
         const std::string prefix = "/" + m_top_entry_name + "/" + entry_name;
-        std::size_t num = numEvents(*m_file, hasTotalCounts, oldNeXusFileNames,
-                                    prefix, *descriptor);
+        std::size_t num =
+            numEvents(*m_file, true, oldNeXusFileNames, prefix, *descriptor);
         bankNames.emplace_back(entry_name);
         bankNumEvents.emplace_back(num);
 
