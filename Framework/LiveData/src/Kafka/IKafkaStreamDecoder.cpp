@@ -202,13 +202,19 @@ API::Workspace_sptr IKafkaStreamDecoder::extractData() {
     throw std::runtime_error(*m_exception);
   }
 
-  m_extractWaiting = true;
-  m_cv.notify_one();
+  {
+    std::lock_guard lck(m_waitMutex);
+    m_extractWaiting = true;
+    m_cv.notify_one();
+  }
 
   auto workspace_ptr = extractDataImpl();
 
-  m_extractWaiting = false;
-  m_cv.notify_one();
+  {
+    std::lock_guard lck(m_waitMutex);
+    m_extractWaiting = false;
+    m_cv.notify_one();
+  }
 
   return workspace_ptr;
 }
@@ -255,7 +261,10 @@ void IKafkaStreamDecoder::checkIfAllStopOffsetsReached(
     // Otherwise we can end up with data from two different runs in the
     // same buffer workspace which is problematic if the user wanted the
     // "Stop" or "Rename" run transition option.
-    m_extractedEndRunData = false;
+    {
+      std::lock_guard lck(m_waitMutex);
+      m_extractedEndRunData = false;
+    }
     checkOffsets = false;
     g_log.notice("Reached end of run in data streams.");
   }
@@ -312,18 +321,23 @@ IKafkaStreamDecoder::getStopOffsets(
  * then we wait for it to finish
  */
 void IKafkaStreamDecoder::waitForDataExtraction() {
-  {
-    std::unique_lock<std::mutex> readyLock(m_waitMutex);
+  std::unique_lock<std::mutex> readyLock(m_waitMutex);
+  if (m_extractWaiting) { // Might have extracted whilst we were grabbing
+                          // mutex
     m_cv.wait(readyLock, [&] { return !m_extractWaiting; });
   }
 }
 
 void IKafkaStreamDecoder::waitForRunEndObservation() {
-  m_extractWaiting = true;
+  {
+    std::lock_guard lck(m_waitMutex);
+    m_extractWaiting = true;
+  }
   // Mark extractedEndRunData true before waiting on the extraction to ensure
   // an immediate request for run status after extracting the data will return
   // the correct value - avoids race condition in MonitorLiveData and tests
   m_extractedEndRunData = true;
+  m_cbIterationEnd();
   waitForDataExtraction();
 
   // Wait until MonitorLiveData has seen that end of run was

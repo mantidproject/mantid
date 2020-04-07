@@ -176,11 +176,9 @@ public:
     TSM_ASSERT("testInstance should not have create data buffers yet",
                !testInstance->hasData());
     // Run start, Event, Run stop, Run start, (2 period)
-    for (size_t i = 0; i < (nCallsOne + 1); i++) {
+    for (size_t i = 0; i < 5; i++) {
       testInstance.runKafkaOneStep();
     }
-
-    testInstance.runStepWithoutBlocking();
 
     Workspace_sptr workspace;
     // Extract the data from single period and inform the testWrapper
@@ -190,10 +188,9 @@ public:
     // (one extra iteration to ensure stop signal is acted on before data
     // extraction)
 
-    for (size_t i = 0; i < (nCallsTwo + 1); i++) {
+    for (size_t i = 0; i < 4; i++) {
       testInstance.runKafkaOneStep();
     }
-    testInstance.runStepWithoutBlocking();
 
     TS_ASSERT_THROWS_NOTHING(workspace = testInstance->extractData());
     TS_ASSERT(testInstance->hasReachedEndOfRun());
@@ -241,7 +238,7 @@ public:
       testInstance.runKafkaOneStep();
     }
 
-    testInstance.runStepWithoutBlocking();
+    testInstance.runKafkaOneStep(); // End of run
 
     Workspace_sptr workspace;
     // Extract data should only get data from the first run
@@ -281,11 +278,9 @@ public:
                !testInstance->hasData());
     // 4 iterations to get first run, consisting of a run start message, an
     // event message, a run stop message, lastly another event message
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
       testInstance.runKafkaOneStep();
     }
-
-    testInstance.runStepWithoutBlocking();
 
     Workspace_sptr workspace;
     // Extract data should only get data from the first run

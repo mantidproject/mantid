@@ -11,6 +11,7 @@
 
 #include <chrono>
 #include <condition_variable>
+#include <future>
 #include <mutex>
 #include <thread>
 
@@ -41,7 +42,7 @@ public:
   KafkaTestThreadHelper(KafkaT &&testInstance)
       : instance(std::move(testInstance)) {
     instance.registerIterationEndCb([this] { callback(); });
-    instance.registerErrorCb([this]() { errCallback(); });
+    instance.registerErrorCb([this] { errCallback(); });
   }
 
   ~KafkaTestThreadHelper() {
@@ -74,27 +75,43 @@ public:
     // Kafka is now blocked test can resume
   }
 
-  void runStepWithoutBlocking() {
-    assert(isCapturing);
-    {
-      std::unique_lock lock(mutex);
-      blockedThread = Threads::NONE;
-    }
-    cv.notify_all();
-  }
-
   void stopCapture() {
-    // Kafka uses a blocking call on the test thread whilst waiting for
-    // its worker thread, which we currently have paused. We can't use
-    // the callback mechanism either. So we need to mark both threads
-    // free to avoid deadlock. So it's a bit race-y here.
-    {
-      std::unique_lock lock(mutex);
-      blockedThread = Threads::NONE;
+    // Kafka spins the calling thread whilst waiting for
+    // its worker thread, which is currently have paused.
+    //
+    // We need a third thread to spin, whilst this thread
+    // keeps everything moving along nicely
+
+    auto stopCaptureThread = std::async(std::launch::async, [this] {
+      instance.stopCapture();
+      {
+        std::lock_guard lock(mutex);
+        blockedThread = Threads::NONE;
+        isCapturing = false;
+      }
+      cv.notify_all();
+    });
+
+    while (true) {
+      Threads blockedThreadCopy;
+      {
+        std::lock_guard lck(mutex);
+        // Take a copy since only we or Kafka can change this var
+        // so if Kafka is in a wait it can't change under us
+        // But makes locking easier
+        blockedThreadCopy = blockedThread;
+      }
+
+      if (blockedThreadCopy == Threads::NONE) {
+        break;
+      }
+
+      if (blockedThreadCopy == Threads::KAFKA) {
+        runKafkaOneStep();
+      }
     }
-    cv.notify_all();
-    isCapturing = false;
-    instance.stopCapture(); // Blocks test thread until we exit out
+
+    stopCaptureThread.wait();
   }
 
 private:
