@@ -7,9 +7,9 @@ GUI Standards
 .. contents:: Contents
     :local:
 
-********************
-Perquisite Knowledge
-********************
+**********************
+Prerequisite Knowledge
+**********************
 
 - MVP Design Pattern :ref:`MVPDesign`
 - `Dependency Injection and Basic Mocking <https://vladris.com/blog/2016/07/06/dependency-injection-in-c.html>`__
@@ -23,7 +23,7 @@ descriptions as follows:
 
 - The standards are the header titles and can be used standalone.
 
-For most developers looking for something to link to / follow at a glance 
+For most developers looking for something to link to / follow at a glance
 the table of contents will have everything you need.
 
 - Each standard has bullet points accompanying it for quick guidance if required.
@@ -91,7 +91,7 @@ Workflow alg. must be completed first
 
 First and foremost we are a scientific tool. It's easier to validate the results
 we produce in a separate PR without trying to figure out what the GUI
-might have broke. 
+might have broke.
 
 Don't be tempted to work on the GUI simultaneously, for your users' and your
 benefit. Having something they can run from Python whilst you're putting the
@@ -109,11 +109,11 @@ New work requires design documentation
 
 New work should have an associated design document completed and reviewed
 by another developer before any code is written. This should layout what
-work should be completed beforehand, how the code will be structured and 
+work should be completed beforehand, how the code will be structured and
 what responsibilities each interface will have.
 
 - Look for scope creep
-- Is your GUI doing too much? 
+- Is your GUI doing too much?
 - Is there a "god" class/tab developing?
 
 Users and developers alike will sometimes push to have everything in one
@@ -149,10 +149,10 @@ Assess if the MVP code is getting too large
 
 - Anecdotally one common cause of bugs is "...logic kept getting added to existing code"
 - It's hard to step back and assess if you're suffering from scope creep, so do it often
- 
+
 As developers enjoy writing new features (well at least most of us), we get
 into `Go Fever <https://en.wikipedia.org/wiki/Go_fever>`__ and don't stop
-to reflect on what we're working on. 
+to reflect on what we're working on.
 
 Periodically step back, look at your design documents and ask, "does this fit in?"
 Better still talk to a nearby co-developer, interested user or rubber duck
@@ -164,7 +164,7 @@ this new feature, do they sound like they fit in the same place?
 
 When you think the scope of your current file / directory is growing too far
 split it out early. Especially with UI files, the later you leave it the
-harder it becomes to unpick everything. 
+harder it becomes to unpick everything.
 
 If you split, then it turns out the work completed wasn't as large as anticipated
 it's as simple as moving your imports, then cutting and pasting code
@@ -175,7 +175,7 @@ unpick all the callers in the same file and shared variables.
 
 Especially with models, the logic can grow quickly and become difficult to
 test too. If you can justify the scope of the model then look into delegating
-work to classes which each have a single responsibility. 
+work to classes which each have a single responsibility.
 
 For example, if you have a lot of logic to work out what titles to put on
 various plot windows consider moving it to a PlottingWindowTitles helper class
@@ -218,7 +218,7 @@ No matter how small, logic goes into the model
 
 It's been said that the best developers write the least code, however in this case
 it works against them. That simple if statement which changes whether a
-check-box is enabled should be in the model. Often a simple if statement in the 
+check-box is enabled should be in the model. Often a simple if statement in the
 presenter gets some new checks added...etc. until it becomes a hidden model.
 
 Suddenly you'll end up having to pry out a model from the presenter,
@@ -229,8 +229,8 @@ The GUI must map 1:1 to a workflow alg.
 
 - Always have a 1:1 mapping between GUI and algorithm
 
-Reflectometry used the N algs to one GUI mapping. This initially appears like 
-a good idea, since it reduces the code per workflow algorithm. 
+Reflectometry used the N algs to one GUI mapping. This initially appears like
+a good idea, since it reduces the code per workflow algorithm.
 However, long-term you now have N entry points to test separately and
 maintain.
 
@@ -267,38 +267,36 @@ All notifications need to go through a single point
 
 Firstly, having a single method in your presenter handle every notification
 means you can put a single break-point when debugging. Imagine a future dev
-trying to figure out why that field in the GUI keeps changing, 
+trying to figure out why that field in the GUI keeps changing,
 but no breakpoints hit because you made another notification handler. Now
 imagine you're that future dev.....
 
 The other aspect is having a single method that's growing beyond 30 lines
-is painfully obvious. Maybe you have some dead code paths that need to be 
+is painfully obvious. Maybe you have some dead code paths that need to be
 trimmed out, maybe you are suffering from scope creep or maybe your notifier
-is doing model logic. In any case it's easier to spot now rather than 
+is doing model logic. In any case it's easier to spot now rather than
 in 5 different places.
 
 Do not let Qt types in
 -----------------------
 
-- Keep non-standard types contained outside the view
+- Keep non-standard types contained inside the view
 - Some debuggers can't see what these type values are
 - You then only have to think about one type instead of doing conversions everywhere
 
-To use stretch a metaphor, when you have a hammer suddenly everything looks like a
-nail: Many developers will use conversions (hammer) at the last second to 
-coerce their type (nail) into something "standard" which the rest of the 
-code-base uses at the point they need it. 
+To use a cliché, when you have a hammer suddenly everything looks like a
+nail: Many developers will use conversions (hammer) at the last second to
+coerce their type (nail) into something "standard" which the rest of the
+code-base uses at the point they need it.
 
 You only notice something is wrong when you've put in so many conversions that
 it's either hard to keep track of what the type is at this point (Python), or
-you can't see into them debugging (C++). It dawns on you that the wooden chair
-you were building is 90% nails and you're not sure which ones hold it together and
-which are responsible for it being incredibly uncomfortable.
+you can't see into them debugging (C++).
 
 - Convert to a standard type in the view, not the presenter
 
 The view is the boundary between your code and external code you have no control
-of. Do the conversion at the point return something, that way it's obvious 
+of. Do the conversion at the point return something, that way it's obvious
 in the presenter which types you're working with.
 
 If the structure is quite complex such as a class containing multiple related
@@ -323,11 +321,11 @@ The dumber the logic the less likely it will break.
 
 This is a good litmus test, a presenter should not have tests that do
 ASSERT_EQUAL, as that's probably doing logic. The model (which you've tested
-previously), should just return the right thing. 
+previously), should just return the right thing.
 
 Your tests should check that the presenter blindly accepts from the model or
 view and forwards to the opposite, unmodified. The easiest way is to mock a
-return value from the view/model, and check that's passed in as a parameter to 
+return value from the view/model, and check that's passed in as a parameter to
 the model/view as is.
 
 Limit chains of observers notifying each other
@@ -345,7 +343,7 @@ changes yet more values and cascades.
 Existing GUIs (such as Reflectometry) avoids this by having a presenter which
 handles all notifications. It's obvious who is notifying who, and how far
 the chain can extend.
-  
+
 
 Notify must use enums to signal
 -------------------------------
@@ -357,7 +355,7 @@ As the number of signals you accept grows using primitives can quickly cause
 problems: was 1 this signal or that, what does a blank string mean? ...etc.
 
 This is used in combination with having a single notification point, if you
-need multiple enums or your current enum class is growing you are likely 
+need multiple enums or your current enum class is growing you are likely
 suffering scope creep. Step back and consider if your GUI has gone beyond
 its initial design.
 
@@ -366,7 +364,7 @@ its initial design.
 
 Presenters must use non-Qt communication patterns
 --------------------------------------------------
-  
+
 - This avoids the pain point of "Qthings" propagating
 - A signal can trigger another signal without you being able to see it easily
 
@@ -426,7 +424,7 @@ sometimes yield better solutions, such as writing a script or tweaking a
 workflow algorithm.
 
 For example, are they asking for a tick box for something which is almost always
-true except for once a year? In this case can we add an option to the 
+true except for once a year? In this case can we add an option to the
 workflow alg but not the GUI, that way most users can't get it wrong. Then write
 a script which does it once a year for those power users who need that feature.
 
@@ -446,23 +444,23 @@ would be perfectly adequate.
 
 When in doubt raise it through your management chain, they're there to help!
 
-- Experienced devs: check the dialogue is happening 
+- Experienced devs: check the dialogue is happening
 
 Ask to go to meetings with newer devs until you feel like they can recognise
 the various components and tools available from Mantid for solving problems.
 
 Check that the requirement gathering, estimation process and UX design steps
 are being done with the group. Encourage developers to partake in negotiating
-what work is appropriate and where it should be scheduled. 
+what work is appropriate and where it should be scheduled.
 
-Watch out for things being added mid-sprint silently, newer devs can feel 
+Watch out for things being added mid-sprint silently, newer devs can feel
 obligated to complete the planned work in addition to the extra work. This
 can cause burn out and setup an unofficial mechanism where requests will bypass
 the sprint planning mechanism.
 
 Periodically revise best UX practice
 ------------------------------------
-  
+
 - Ask experienced UX Developers for guidance
 - Multiple online resources exist:
 - `NNGroup <https://www.nngroup.com/ux-conference/>`__
@@ -490,7 +488,7 @@ dependency, the testing class will inherit and override to inject mocks.
 
 This should be considered a last resort as it also opens an avenue for manipulating
 the internals of the class under test conditions. Tests which manipulate internals are
-no longer testing a public API and are usually a sign you have a helper class 
+no longer testing a public API and are usually a sign you have a helper class
 lurking inside.
 
 
@@ -581,7 +579,7 @@ If you can test it, take it out of the view
 - For loops in the view are somewhere logic usually gets hidden in
 - A view API should have everything prepared for it and be as "dumb" as possible
 
-It's very easy to have a for loop in a view which starts off iterating 
+It's very easy to have a for loop in a view which starts off iterating
 through a list then adding extra steps while you're there. The view should
 have this all pre-prepared for it in a way that any for loops take an object,
 unpack it and forward it to an API only.
@@ -597,7 +595,7 @@ For certain lines such as calling Qt there would be no possible way to tell
 if a test passed or not, or if they use view only types
 (see :ref:`keep_qt_in_view` ) then they can stay.
 
-If a line would have an expected output it might need moving to the model 
+If a line would have an expected output it might need moving to the model
 instead. Consider using mocks if the input types it expects are difficult.
 
 One signal per slot, never multiple
@@ -621,10 +619,10 @@ since the side effects are invisible to the presenter unless more signals
 are then chained up.
 
 In addition it can lead to logic ending up in the view which goes against
-:ref:`logic_goes_into_the_model` . This should be combined with 
+:ref:`logic_goes_into_the_model` . This should be combined with
 :ref:`notifications_through_single_point` in your presenter which
 should then switch to a non-Qt notification method
-:ref:`use_non_qt_comms_presenter`. Combining all of 
+:ref:`use_non_qt_comms_presenter`. Combining all of
 these patterns ensures that everything can be tested in an automated fashion.
 
 ************
