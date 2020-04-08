@@ -25,7 +25,7 @@ def plot(plot_type: SpectraSelection, plot_index: int, axis_name: str, log_name:
         matrix_ws = _create_workspace_for_group_plot(plot_type, workspaces, plot_index, log_name, custom_log_values)
 
         workspace_names = [ws.name() for ws in workspaces]
-        title = f" plot for {', '.join(workspace_names)}, index {plot_index}"
+        title = _construct_title(workspace_names, plot_index)
 
         if plot_type == SpectraSelection.Surface:
             fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
@@ -132,3 +132,12 @@ def _validate_workspace_choices(workspaces: List[Workspace], spectrum: int) -> N
 
     if not _group_contents_have_same_x(workspaces, spectrum):
         raise RuntimeError("Input WorkspaceGroup must have same X data for all workspaces.")
+
+
+def _construct_title(workspace_names, plot_index):
+    title = f" plot for {', '.join(workspace_names)}, index {plot_index}"
+
+    if len(title) > 50:
+        title = f" plot for {workspace_names[0]} - {workspace_names[-1]}, index {plot_index}"
+
+    return title
