@@ -33,11 +33,11 @@ class FQTemplateBrowser;
 class MANTIDQT_INDIRECT_DLL FQTemplatePresenter : public QObject {
   Q_OBJECT
 public:
-  explicit FQTemplatePresenter(FQTemplateBrowser *view,
-                               std::unordered_map<std::string, std::string>
-                                   functionInitialisationStrings);
-  void updateAvailableFunctions(std::unordered_map<std::string, std::string>
-                                    functionInitialisationStrings);
+  explicit FQTemplatePresenter(
+      FQTemplateBrowser *view,
+      std::map<std::string, std::string> functionInitialisationStrings);
+  void updateAvailableFunctions(
+      std::map<std::string, std::string> functionInitialisationStrings);
   void setFitType(const QString &name);
   void init();
 

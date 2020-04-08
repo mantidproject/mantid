@@ -22,8 +22,7 @@ using namespace Mantid::API;
 FQFunctionModel::FQFunctionModel() {}
 
 void FQFunctionModel::updateAvailableFunctions(
-    std::unordered_map<std::string, std::string>
-        functionInitialisationStrings) {
+    std::map<std::string, std::string> functionInitialisationStrings) {
   m_functionStore.clear();
   m_globalParameterStore.clear();
   for (auto functionInfo : functionInitialisationStrings) {

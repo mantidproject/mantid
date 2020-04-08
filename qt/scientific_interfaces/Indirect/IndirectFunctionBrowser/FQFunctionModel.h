@@ -28,8 +28,8 @@ class MANTIDQT_INDIRECT_DLL FQFunctionModel : public FunctionModel {
 public:
   FQFunctionModel();
   void setFunction(IFunction_sptr fun) override;
-  void updateAvailableFunctions(std::unordered_map<std::string, std::string>
-                                    functionInitialisationStrings);
+  void updateAvailableFunctions(
+      std::map<std::string, std::string> functionInitialisationStrings);
 
   void setFitType(const QString &name);
   QString getFitType();

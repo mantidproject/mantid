@@ -6,16 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-enum DataType {
-  WIDTH,
-  EISF,
-  ALL,
-};
-
 class IFQFitObserver {
 public:
   virtual ~IFQFitObserver() = default;
-  virtual void
-  updateAvailableFunctions(std::unordered_map<std::string, std::string>
-                               functionInitialisationStrings) = 0;
+  virtual void updateAvailableFunctions(
+      std::map<std::string, std::string> functionInitialisationStrings) = 0;
 };

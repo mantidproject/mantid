@@ -21,7 +21,7 @@ using namespace MantidWidgets;
  */
 FQTemplatePresenter::FQTemplatePresenter(
     FQTemplateBrowser *view,
-    std::unordered_map<std::string, std::string> functionInitialisationStrings)
+    std::map<std::string, std::string> functionInitialisationStrings)
     : QObject(view), m_view(view), m_model() {
   connect(m_view, SIGNAL(localParameterButtonClicked(const QString &)), this,
           SLOT(editLocalParameter(const QString &)));
@@ -37,8 +37,7 @@ void FQTemplatePresenter::init() {
 }
 
 void FQTemplatePresenter::updateAvailableFunctions(
-    std::unordered_map<std::string, std::string>
-        functionInitialisationStrings) {
+    std::map<std::string, std::string> functionInitialisationStrings) {
   m_model.updateAvailableFunctions(functionInitialisationStrings);
   m_view->setDataType(m_model.getFunctionList());
   setFitType(m_model.getFitType());

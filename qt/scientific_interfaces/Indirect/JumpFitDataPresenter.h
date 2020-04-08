@@ -11,6 +11,7 @@
 #include "IndirectFunctionBrowser/FQTemplateBrowser.h"
 #include "JumpFitAddWorkspaceDialog.h"
 #include "JumpFitModel.h"
+#include "FQFitConstants.h"
 #include "Notifier.h"
 
 #include <QComboBox>

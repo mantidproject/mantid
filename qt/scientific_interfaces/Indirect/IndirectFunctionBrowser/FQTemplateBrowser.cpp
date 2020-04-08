@@ -37,7 +37,7 @@ namespace IDA {
  * @param parent :: The parent widget.
  */
 FQTemplateBrowser::FQTemplateBrowser(
-    std::unordered_map<std::string, std::string> functionInitialisationStrings,
+    std::map<std::string, std::string> functionInitialisationStrings,
     QWidget *parent)
     : FunctionTemplateBrowser(parent),
       m_presenter(this, functionInitialisationStrings) {
@@ -46,8 +46,7 @@ FQTemplateBrowser::FQTemplateBrowser(
 }
 
 void FQTemplateBrowser::updateAvailableFunctions(
-    std::unordered_map<std::string, std::string>
-        functionInitialisationStrings) {
+    std::map<std::string, std::string> functionInitialisationStrings) {
   m_presenter.updateAvailableFunctions(functionInitialisationStrings);
 }
 

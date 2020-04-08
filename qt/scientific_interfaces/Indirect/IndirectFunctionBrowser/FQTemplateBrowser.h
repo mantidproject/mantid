@@ -10,6 +10,7 @@
 #include "FQTemplatePresenter.h"
 #include "FunctionTemplateBrowser.h"
 #include "IFQFitObserver.h"
+#include "FQFitConstants.h"
 
 #include <QMap>
 #include <QWidget>
@@ -29,11 +30,11 @@ class MANTIDQT_INDIRECT_DLL FQTemplateBrowser : public FunctionTemplateBrowser,
                                                 public IFQFitObserver {
   Q_OBJECT
 public:
-  explicit FQTemplateBrowser(std::unordered_map<std::string, std::string>
+  explicit FQTemplateBrowser(std::map<std::string, std::string>
                                  functionInitialisationStrings,
                              QWidget *parent = nullptr);
   virtual ~FQTemplateBrowser() = default;
-  void updateAvailableFunctions(std::unordered_map<std::string, std::string>
+  void updateAvailableFunctions(std::map<std::string, std::string>
                                     functionInitialisationStrings) override;
   void setFunction(const QString &funStr) override;
   IFunction_sptr getGlobalFunction() const override;

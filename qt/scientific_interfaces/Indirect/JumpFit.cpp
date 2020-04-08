@@ -4,14 +4,19 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
+
 #include "JumpFit.h"
 #include "IndirectFunctionBrowser/FQTemplateBrowser.h"
 #include "JumpFitDataPresenter.h"
+#include "FQFitConstants.h"
+
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -35,11 +40,7 @@ JumpFit::JumpFit(QWidget *parent)
 
   m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
   auto templateBrowser =
-      new FQTemplateBrowser(std::unordered_map<std::string, std::string>(
-          {{"ChudleyElliot", "name=ChudleyElliot"},
-           {"HallRoss", "name=Hallross"},
-           {"FickDiffusion", "name=FickDiffusion"},
-           {"TeixeiraWater", "name=TeixeiraWater"}}));
+      new FQTemplateBrowser(widthFits);
   setPlotView(m_uiForm->pvFitPlotView);
   setFitDataPresenter(std::make_unique<JumpFitDataPresenter>(
       m_jumpFittingModel, m_uiForm->fitDataView, m_uiForm->cbParameterType,
@@ -72,26 +73,12 @@ void JumpFit::updateModelFitTypeString() {
 }
 
 std::string JumpFit::fitTypeString() const {
-  // This function attempts to work out which fit type is being done. It will
-  // currently only recognise the three default types.
-  const auto numberOfGauss = numberOfCustomFunctions("MsdGauss");
-  const auto numberOfPeters = numberOfCustomFunctions("MsdPeters");
-  const auto numberOfYi = numberOfCustomFunctions("MsdYi");
-
-  if (numberOfGauss + numberOfPeters + numberOfYi != 1) {
-    return "UserDefined";
+  auto fun = m_jumpFittingModel->getFittingFunction()->getFunction(0);
+  if (fun->nFunctions() == 0) {
+    return fun->name();
+  } else {
+    return "UserDefinedCompositeFunction";
   }
-
-  if (numberOfGauss == 1)
-    return "Gauss";
-
-  if (numberOfPeters == 1)
-    return "Peters";
-
-  if (numberOfYi == 1)
-    return "Yi";
-
-  return "UserDefined";
 }
 
 void JumpFit::runClicked() { runTab(); }
