@@ -66,13 +66,17 @@ void ContourPreviewPlot::watchADS(bool on) {
 void ContourPreviewPlot::onWorkspaceRemoved(
     Mantid::API::WorkspacePreDeleteNotification_ptr nf) {
   if (auto workspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
+          std::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
     // If the artist has already been removed, ignore.
+    bool workspaceRemoved = false;
     try {
-      m_canvas->gca<MantidAxes>().removeWorkspaceArtists(workspace);
+      workspaceRemoved =
+          m_canvas->gca<MantidAxes>().removeWorkspaceArtists(workspace);
     } catch (Mantid::PythonInterface::PythonException &) {
     }
-    m_canvas->draw();
+    if (workspaceRemoved) {
+      m_canvas->draw();
+    }
   }
 }
 
@@ -83,11 +87,12 @@ void ContourPreviewPlot::onWorkspaceRemoved(
 void ContourPreviewPlot::onWorkspaceReplaced(
     Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf) {
   if (auto oldWorkspace =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
+          std::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
     if (auto newWorkspace =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
-      m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWorkspace);
-      m_canvas->draw();
+            std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
+      if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWorkspace)) {
+        m_canvas->draw();
+      }
     }
   }
 }

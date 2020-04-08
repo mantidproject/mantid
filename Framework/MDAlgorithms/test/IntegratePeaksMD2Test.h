@@ -316,7 +316,7 @@ public:
     // Old workspace is unchanged
     TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
 
-    PeaksWorkspace_sptr newPW = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    PeaksWorkspace_sptr newPW = std::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "IntegratePeaksMD2Test_peaks_out"));
     TS_ASSERT(newPW);

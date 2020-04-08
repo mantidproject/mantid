@@ -121,7 +121,7 @@ void CreateChunkingFromInstrument::init() {
                   "If empty, then an empty GroupingWorkspace will be created.");
   vector<string> grouping{"", "All", "Group", "Column", "bank"};
   declareProperty(
-      PARAM_CHUNK_BY, "", boost::make_shared<StringListValidator>(grouping),
+      PARAM_CHUNK_BY, "", std::make_shared<StringListValidator>(grouping),
       "Only used if GroupNames is empty: All detectors as one group, Groups "
       "(East,West for SNAP), Columns for SNAP, detector banks");
 

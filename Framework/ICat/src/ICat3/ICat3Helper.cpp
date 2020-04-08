@@ -37,7 +37,7 @@ CICatHelper::CICatHelper() : m_session() {}
  * @param response :: response object
  */
 int CICatHelper::doSearch(ICATPortBindingProxy &icat,
-                          boost::shared_ptr<ns1__searchByAdvanced> &request,
+                          std::shared_ptr<ns1__searchByAdvanced> &request,
                           ns1__searchByAdvancedResponse &response) {
   setICATProxySettings(icat);
 
@@ -382,8 +382,8 @@ void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr &ws_sptr) {
   std::string sessionID = m_session->getSessionId();
   request.sessionId = &sessionID;
   // investigation include
-  boost::shared_ptr<ns1__investigationInclude> invstInculde_sptr =
-      boost::make_shared<ns1__investigationInclude>();
+  std::shared_ptr<ns1__investigationInclude> invstInculde_sptr =
+      std::make_shared<ns1__investigationInclude>();
   request.investigationInclude = invstInculde_sptr.get();
   *request.investigationInclude =
       ns1__investigationInclude__INVESTIGATORS_USCORESHIFTS_USCOREAND_USCORESAMPLES;
@@ -604,7 +604,7 @@ API::CatalogSession_sptr CICatHelper::doLogin(const std::string &username,
                                               const std::string &password,
                                               const std::string &endpoint,
                                               const std::string &facility) {
-  m_session = boost::make_shared<API::CatalogSession>("", facility, endpoint);
+  m_session = std::make_shared<API::CatalogSession>("", facility, endpoint);
 
   // Obtain the ICAT proxy that has been securely set, including soap-endpoint.
   ICATPortBindingProxy icat;

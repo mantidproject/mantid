@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MuonSequentialFitDialog.h"
 
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -80,7 +79,7 @@ MuonSequentialFitDialog::MuonSequentialFitDialog(
 
   // Set initial run to be run number of the workspace selected in fit browser
   // when starting seq. fit dialog
-  const auto fitWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(
+  const auto fitWS = std::dynamic_pointer_cast<const MatrixWorkspace>(
       m_fitPropBrowser->getWorkspace());
   m_ui.runs->setText(QString::number(fitWS->getRunNumber()) + "-");
   // Set the file finder to the correct instrument (not Mantid's default
@@ -142,7 +141,7 @@ std::string MuonSequentialFitDialog::isValidLabel(const std::string &label) {
  */
 std::string
 MuonSequentialFitDialog::getRunTitle(const Workspace_const_sptr &ws) {
-  auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  auto matrixWS = std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
   if (!matrixWS)
     return "";
@@ -411,7 +410,7 @@ void MuonSequentialFitDialog::continueFit() {
   }
 
   // Create a group for label
-  ads.add(labelGroupName, boost::make_shared<WorkspaceGroup>());
+  ads.add(labelGroupName, std::make_shared<WorkspaceGroup>());
 
   // Tell progress bar how many iterations we will need to make and reset it
   m_ui.progress->setRange(0, runFilenames.size());
@@ -559,7 +558,7 @@ void MuonSequentialFitDialog::finishAfterRun(
         ads.retrieveWS<WorkspaceGroup>(wsBaseName + "_Workspaces");
     for (size_t i = 0; i < fitWSGroup->size(); i++) {
       auto fitWs =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(fitWSGroup->getItem(i));
+          std::dynamic_pointer_cast<MatrixWorkspace>(fitWSGroup->getItem(i));
       if (fitWs) {
         fitWs->copyExperimentInfoFrom(firstWS.get());
       }
@@ -587,13 +586,13 @@ void MuonSequentialFitDialog::finishAfterRun(
           "Could not find output parameters table for simultaneous fit");
     }
     // Group output together
-    ads.add(wsBaseName, boost::make_shared<WorkspaceGroup>());
+    ads.add(wsBaseName, std::make_shared<WorkspaceGroup>());
     ads.addToGroup(wsBaseName, wsBaseName + "_NormalisedCovarianceMatrix");
     ads.addToGroup(wsBaseName, wsBaseName + "_Parameters");
     ads.addToGroup(wsBaseName, wsBaseName + "_Workspaces");
     ads.addToGroup(labelGroupName, wsBaseName);
   } else {
-    ads.add(wsBaseName, boost::make_shared<WorkspaceGroup>());
+    ads.add(wsBaseName, std::make_shared<WorkspaceGroup>());
     ads.addToGroup(wsBaseName, wsBaseName + "_NormalisedCovarianceMatrix");
     ads.addToGroup(wsBaseName, wsBaseName + "_Parameters");
     ads.addToGroup(wsBaseName, wsBaseName + "_Workspace");

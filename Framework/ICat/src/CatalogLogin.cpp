@@ -59,21 +59,21 @@ std::string defaultFacility() {
 /// Init method to declare algorithm properties
 void CatalogLogin::init() {
   auto requireValue =
-      boost::make_shared<Kernel::MandatoryValidator<std::string>>();
+      std::make_shared<Kernel::MandatoryValidator<std::string>>();
   declareProperty("Username", "", requireValue,
                   "The username to log into the catalog.");
   declareProperty(std::make_unique<Kernel::MaskedProperty<std::string>>(
                       "Password", "", requireValue),
                   "The password of the related username to use.");
   declareProperty("FacilityName", defaultFacility(),
-                  boost::make_shared<Kernel::StringListValidator>(
+                  std::make_shared<Kernel::StringListValidator>(
                       namesOfFacilitiesWithICAT()),
                   "Select a facility to log in to.");
   declareProperty(
       "KeepSessionAlive", true,
       "Keeps the session of the catalog alive if login was successful.");
   declareProperty(std::make_unique<API::AlgorithmProperty>(
-                      "KeepAlive", boost::make_shared<Kernel::NullValidator>(),
+                      "KeepAlive", std::make_shared<Kernel::NullValidator>(),
                       Kernel::Direction::Output),
                   "A handle to the KeepAlive algorithm instance that continues "
                   "to keep the catalog alive after this algorithm completes.");

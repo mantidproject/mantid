@@ -46,7 +46,7 @@ public:
   const std::string category() const override;
 
 private:
-  void saveIsawDetCal(boost::shared_ptr<Geometry::Instrument> &instrument,
+  void saveIsawDetCal(std::shared_ptr<Geometry::Instrument> &instrument,
                       boost::container::flat_set<std::string> &AllBankName,
                       double T0, const std::string &filename);
 

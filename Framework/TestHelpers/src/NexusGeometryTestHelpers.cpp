@@ -12,7 +12,7 @@
 using namespace Mantid::NexusGeometry;
 
 namespace NexusGeometryTestHelpers {
-boost::shared_ptr<const Mantid::Geometry::IObject> createShape() {
+std::shared_ptr<const Mantid::Geometry::IObject> createShape() {
   Eigen::Matrix<double, 3, 3> pointsDef;
   // Vector to base positioned at center of cylinder
   pointsDef.col(0) = Eigen::Vector3d(-0.00101, 0.0, 0.0);

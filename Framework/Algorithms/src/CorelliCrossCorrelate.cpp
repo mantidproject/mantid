@@ -36,7 +36,7 @@ DECLARE_ALGORITHM(CorelliCrossCorrelate)
 /** Initialize the algorithm's properties.
  */
 void CorelliCrossCorrelate::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<InstrumentValidator>();
 
@@ -48,7 +48,7 @@ void CorelliCrossCorrelate::init() {
                   "An output workspace.");
 
   declareProperty("TimingOffset", EMPTY_INT(),
-                  boost::make_shared<MandatoryValidator<int>>(),
+                  std::make_shared<MandatoryValidator<int>>(),
                   "Correlation chopper TDC timing offset in nanoseconds.");
 }
 

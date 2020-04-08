@@ -16,7 +16,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(ICompAssembly)
 
 void export_ICompAssembly() {
-  register_ptr_to_python<boost::shared_ptr<ICompAssembly>>();
+  register_ptr_to_python<std::shared_ptr<ICompAssembly>>();
 
   class_<ICompAssembly, boost::python::bases<IComponent>, boost::noncopyable>(
       "ICompAssembly", no_init)

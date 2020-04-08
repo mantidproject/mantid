@@ -72,7 +72,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Get ouput
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("ReducedData"));
     TS_ASSERT(outws);
 
@@ -136,7 +136,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Get ouput
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("ReducedData"));
     TS_ASSERT(outws);
 
@@ -181,7 +181,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Get ouput
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("ReducedData"));
     TS_ASSERT(outws);
 
@@ -222,12 +222,12 @@ public:
 
     // Retrieve the workspaces as the inputs of ConvertSpiceDataToRealSpace
     ITableWorkspace_sptr datatablews =
-        boost::dynamic_pointer_cast<ITableWorkspace>(
+        std::dynamic_pointer_cast<ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("DataTable"));
     TS_ASSERT(datatablews);
 
     MatrixWorkspace_sptr parentlogws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("LogParentWS"));
     TS_ASSERT(parentlogws);
 
@@ -245,9 +245,9 @@ public:
     TS_ASSERT(loader.isExecuted());
 
     // Get on hold of MDWorkspaces for test
-    m_dataMD = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+    m_dataMD = std::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve("HB2A_MD"));
-    m_monitorMD = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+    m_monitorMD = std::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve("MonitorMDW"));
     TS_ASSERT(m_dataMD);
     TS_ASSERT(m_monitorMD);
@@ -289,7 +289,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Get ouput
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("ReducedData"));
     TS_ASSERT(outws);
 

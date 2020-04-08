@@ -103,7 +103,7 @@ void MDNorm::init() {
                   "Use reciprocal lattice units. If false, use Q_sample");
   setPropertyGroup("RLU", "Q projections RLU");
 
-  auto mustBe3D = boost::make_shared<Kernel::ArrayLengthValidator<double>>(3);
+  auto mustBe3D = std::make_shared<Kernel::ArrayLengthValidator<double>>(3);
   std::vector<double> Q0(3, 0.), Q1(3, 0), Q2(3, 0);
   Q0[0] = 1.;
   Q1[1] = 1.;
@@ -134,7 +134,7 @@ void MDNorm::init() {
   setPropertyGroup("QDimension2", "Q projections RLU");
 
   // vanadium
-  auto fluxValidator = boost::make_shared<CompositeValidator>();
+  auto fluxValidator = std::make_shared<CompositeValidator>();
   fluxValidator->add<InstrumentValidator>();
   fluxValidator->add<CommonBinsValidator>();
   auto solidAngleValidator = fluxValidator->clone();
@@ -166,7 +166,7 @@ void MDNorm::init() {
                         propName, defaultName, Direction::Input),
                     "Name for the " + Strings::toString(i) +
                         "th dimension. Leave blank for NONE.");
-    auto atMost3 = boost::make_shared<ArrayLengthValidator<double>>(0, 3);
+    auto atMost3 = std::make_shared<ArrayLengthValidator<double>>(0, 3);
     std::vector<double> temp;
     declareProperty(
         std::make_unique<ArrayProperty<double>>(propBinning, temp, atMost3),
@@ -371,7 +371,7 @@ std::map<std::string, std::string> MDNorm::validateInputs() {
     }
   }
   // validate accumulation workspaces, if provided
-  boost::shared_ptr<IMDHistoWorkspace> tempNormWS =
+  std::shared_ptr<IMDHistoWorkspace> tempNormWS =
       this->getProperty("TemporaryNormalizationWorkspace");
   Mantid::API::IMDHistoWorkspace_sptr tempDataWS =
       this->getProperty("TemporaryDataWorkspace");
@@ -725,9 +725,9 @@ std::map<std::string, std::string> MDNorm::getBinParameters() {
 void MDNorm::createNormalizationWS(
     const DataObjects::MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  boost::shared_ptr<IMDHistoWorkspace> tmp =
+  std::shared_ptr<IMDHistoWorkspace> tmp =
       this->getProperty("TemporaryNormalizationWorkspace");
-  m_normWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
+  m_normWS = std::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
   if (!m_normWS) {
     m_normWS = dataWS.clone();
     m_normWS->setTo(0., 0., 0.);
@@ -1028,11 +1028,11 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
 
     // set the temporary workspace to be the output workspace, so it keeps
     // adding different symmetries
-    tempDataWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+    tempDataWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
     soIndex += 1;
   }
 
-  auto outputMDHWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+  auto outputMDHWS = std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
   // set MDUnits for Q dimensions
   if (m_isRLU) {
     Mantid::Geometry::MDFrameArgument argument(
@@ -1040,9 +1040,9 @@ DataObjects::MDHistoWorkspace_sptr MDNorm::binInputWS(
     auto mdFrameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
     Mantid::Geometry::MDFrame_uptr hklFrame = mdFrameFactory->create(argument);
     for (size_t i : qDimensionIndices) {
-      auto mdHistoDimension = boost::const_pointer_cast<
+      auto mdHistoDimension = std::const_pointer_cast<
           Mantid::Geometry::MDHistoDimension>(
-          boost::dynamic_pointer_cast<const Mantid::Geometry::MDHistoDimension>(
+          std::dynamic_pointer_cast<const Mantid::Geometry::MDHistoDimension>(
               outputMDHWS->getDimension(i)));
       mdHistoDimension->setMDFrame(*hklFrame);
     }

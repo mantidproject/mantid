@@ -245,23 +245,23 @@ void ProcessIndirectFitParameters::init() {
                   "The table workspace to convert to a MatrixWorkspace.");
 
   declareProperty(
-      "ColumnX", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "ColumnX", "", std::make_shared<MandatoryValidator<std::string>>(),
       "The column in the table to use for the x values.", Direction::Input);
 
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
           "ParameterNames",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+          std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "List of the parameter names to add to the workspace.");
 
   declareProperty("IncludeChiSquared", false,
                   "Add Chi-squared to the output workspace.");
 
   declareProperty("XAxisUnit", "",
-                  boost::make_shared<StringListValidator>(unitOptions),
+                  std::make_shared<StringListValidator>(unitOptions),
                   "The unit to assign to the X Axis");
 
-  auto positiveInt = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<Kernel::BoundedValidator<int>>();
   positiveInt->setLower(0);
   declareProperty(
       "StartRowIndex", EMPTY_INT(), positiveInt,

@@ -14,7 +14,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -41,7 +41,7 @@ MeshObject::MeshObject(std::vector<uint32_t> &&faces,
 void MeshObject::initialize() {
 
   MeshObjectCommon::checkVertexLimit(m_vertices.size());
-  m_handler = boost::make_shared<GeometryHandler>(*this);
+  m_handler = std::make_shared<GeometryHandler>(*this);
 }
 
 /**
@@ -453,8 +453,7 @@ bool MeshObject::searchForObject(Kernel::V3D &point) const {
  * @param[in] h is pointer to the geometry handler. don't delete this pointer in
  * the calling function.
  */
-void MeshObject::setGeometryHandler(
-    const boost::shared_ptr<GeometryHandler> &h) {
+void MeshObject::setGeometryHandler(const std::shared_ptr<GeometryHandler> &h) {
   if (h == nullptr)
     return;
   m_handler = h;
@@ -486,7 +485,7 @@ void MeshObject::initDraw() const {
 /**
  * Returns the geometry handler
  */
-boost::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
+std::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
   // Check if the geometry handler is upto dated with the cache, if not then
   // cache it now.
   return m_handler;

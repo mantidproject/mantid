@@ -13,8 +13,7 @@
 #include <set>
 #include <vector>
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -180,15 +179,15 @@ protected:
   CoordinateSystem m_axisSystem;
 };
 
-using Group_sptr = boost::shared_ptr<Group>;
-using Group_const_sptr = boost::shared_ptr<const Group>;
+using Group_sptr = std::shared_ptr<Group>;
+using Group_const_sptr = std::shared_ptr<const Group>;
 
 namespace GroupFactory {
 /// Creates a Group sub-class of type T if T has a constructor that takes a
 /// string.
 template <typename T>
 Group_const_sptr create(const std::string &initializationString) {
-  return boost::make_shared<const T>(initializationString);
+  return std::make_shared<const T>(initializationString);
 }
 
 /// Creates a Group sub-class of type T if T has a constructor that takes a
@@ -196,7 +195,7 @@ Group_const_sptr create(const std::string &initializationString) {
 template <typename T>
 Group_const_sptr
 create(const std::vector<SymmetryOperation> &symmetryOperations) {
-  return boost::make_shared<const T>(symmetryOperations);
+  return std::make_shared<const T>(symmetryOperations);
 }
 } // namespace GroupFactory
 

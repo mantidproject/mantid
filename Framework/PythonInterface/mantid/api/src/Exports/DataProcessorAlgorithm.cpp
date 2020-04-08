@@ -25,7 +25,7 @@ template <class Base> void do_export(const std::string &name) {
   using Adapter = DataProcessorAdapter<Base>;
 
   class_<GenericDataProcessorAlgorithm<Base>, bases<Base>,
-         boost::shared_ptr<Adapter>, boost::noncopyable>(
+         std::shared_ptr<Adapter>, boost::noncopyable>(
       name.c_str(), "Base class workflow-type algorithms")
 
       .def("setLoadAlg", &Adapter::setLoadAlgProxy, (arg("self"), arg("alg")),

@@ -45,7 +45,7 @@ PredictSatellitePeaks::PredictSatellitePeaks()
 
 /// Initialise the properties
 void PredictSatellitePeaks::init() {
-  auto latticeValidator = boost::make_shared<OrientedLatticeValidator>();
+  auto latticeValidator = std::make_shared<OrientedLatticeValidator>();
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
           "Peaks", "", Direction::Input, latticeValidator),
@@ -167,7 +167,7 @@ void PredictSatellitePeaks::exec() {
 
   const auto instrument = Peaks->getInstrument();
 
-  outPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+  outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(
       WorkspaceFactory::Instance().createPeaks());
   outPeaks->setInstrument(instrument);
   outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
@@ -183,7 +183,7 @@ void PredictSatellitePeaks::exec() {
   const double dMin = getProperty("MinDSpacing");
   const double dMax = getProperty("MaxDSpacing");
   Geometry::HKLGenerator gen(outPeaks->sample().getOrientedLattice(), dMin);
-  auto dSpacingFilter = boost::make_shared<HKLFilterDRange>(
+  auto dSpacingFilter = std::make_shared<HKLFilterDRange>(
       outPeaks->sample().getOrientedLattice(), dMin, dMax);
 
   V3D hkl = *(gen.begin());
@@ -284,7 +284,7 @@ void PredictSatellitePeaks::exec_peaks() {
 
   const auto instrument = Peaks->getInstrument();
 
-  outPeaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+  outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(
       WorkspaceFactory::Instance().createPeaks());
   outPeaks->setInstrument(instrument);
   outPeaks->mutableSample().setOrientedLattice(std::move(lattice));

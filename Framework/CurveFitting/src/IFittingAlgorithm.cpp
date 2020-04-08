@@ -61,7 +61,7 @@ std::unique_ptr<IDomainCreator> createDomainCreator(
   } else if (auto gfun = dynamic_cast<const IFunctionGeneral *>(fun)) {
     creator = std::make_unique<GeneralDomainCreator>(*gfun, *manager,
                                                      workspacePropertyName);
-  } else if (boost::dynamic_pointer_cast<ITableWorkspace>(ws)) {
+  } else if (std::dynamic_pointer_cast<ITableWorkspace>(ws)) {
     creator = std::make_unique<TableWorkspaceDomainCreator>(
         manager, workspacePropertyName, domainType);
   } else {
@@ -221,8 +221,8 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
       setFunction();
     }
     if (fun->getNumberDomains() > 1) {
-      auto multiCreator = boost::make_shared<MultiDomainCreator>(
-          this, m_workspacePropertyNames);
+      auto multiCreator =
+          std::make_shared<MultiDomainCreator>(this, m_workspacePropertyNames);
       creator->declareDatasetProperties(suffix, addProperties);
       multiCreator->setCreator(index, creator.release());
       m_domainCreator = multiCreator;
@@ -232,8 +232,8 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
     }
   } else {
     if (fun->getNumberDomains() > 1) {
-      boost::shared_ptr<MultiDomainCreator> multiCreator =
-          boost::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
+      std::shared_ptr<MultiDomainCreator> multiCreator =
+          std::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
       if (!multiCreator) {
         auto &reference = *m_domainCreator;
         throw std::runtime_error(
@@ -279,7 +279,7 @@ void IFittingAlgorithm::addWorkspaces() {
         m_domainCreator.reset(creator.release());
       }
       auto multiCreator =
-          boost::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
+          std::dynamic_pointer_cast<MultiDomainCreator>(m_domainCreator);
       if (multiCreator) {
         multiCreator->setCreator(index, creator.release());
       }
@@ -306,7 +306,7 @@ std::vector<std::string> IFittingAlgorithm::getCostFunctionNames() const {
   auto names = factory.getKeys();
   out.reserve(names.size());
   for (auto &name : names) {
-    if (boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+    if (std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
             factory.create(name))) {
       out.emplace_back(name);
     }
@@ -317,7 +317,7 @@ std::vector<std::string> IFittingAlgorithm::getCostFunctionNames() const {
 /// Declare a "CostFunction" property.
 void IFittingAlgorithm::declareCostFunctionProperty() {
   Kernel::IValidator_sptr costFuncValidator =
-      boost::make_shared<Kernel::ListValidator<std::string>>(
+      std::make_shared<Kernel::ListValidator<std::string>>(
           getCostFunctionNames());
   declareProperty(
       "CostFunction", "Least squares", costFuncValidator,
@@ -327,7 +327,7 @@ void IFittingAlgorithm::declareCostFunctionProperty() {
 
 /// Create a cost function from the "CostFunction" property
 /// and make it ready for evaluation.
-boost::shared_ptr<CostFunctions::CostFuncFitting>
+std::shared_ptr<CostFunctions::CostFuncFitting>
 IFittingAlgorithm::getCostFunctionInitialized() const {
   // Function may need some preparation.
   m_function->sortTies();
@@ -350,10 +350,9 @@ IFittingAlgorithm::getCostFunctionInitialized() const {
   m_domainCreator->initFunction(m_function);
 
   // get the cost function which must be a CostFuncFitting
-  auto costFunction =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
-          API::CostFunctionFactory::Instance().create(
-              getPropertyValue("CostFunction")));
+  auto costFunction = std::dynamic_pointer_cast<CostFunctions::CostFuncFitting>(
+      API::CostFunctionFactory::Instance().create(
+          getPropertyValue("CostFunction")));
 
   costFunction->setFittingFunction(m_function, domain, values);
 
@@ -364,7 +363,6 @@ IFittingAlgorithm::getCostFunctionInitialized() const {
 /// Execute the algorithm.
 void IFittingAlgorithm::exec() {
 
-  // This is to make it work with AlgorithmProxy
   if (!m_domainCreator) {
     setFunction();
     addWorkspaces();

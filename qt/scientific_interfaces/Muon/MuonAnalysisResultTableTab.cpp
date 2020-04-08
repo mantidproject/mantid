@@ -23,7 +23,7 @@
 #include "MuonSequentialFitDialog.h"
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <QFileInfo>
 #include <QHash>
@@ -474,7 +474,7 @@ void MuonAnalysisResultTableTab::populateTables() {
       auto wsFromName = [](const QString &qs) {
         const auto &wsGroup = retrieveWSChecked<WorkspaceGroup>(
             MuonFitPropertyBrowser::SIMULTANEOUS_PREFIX + qs.toStdString());
-        return boost::dynamic_pointer_cast<Workspace>(wsGroup);
+        return std::dynamic_pointer_cast<Workspace>(wsGroup);
       };
       populateFittings(getFitLabels().second, wsFromName);
     } else {
@@ -482,7 +482,7 @@ void MuonAnalysisResultTableTab::populateTables() {
       auto wsFromName = [](const QString &qs) {
         const auto &tab = retrieveWSChecked<ITableWorkspace>(qs.toStdString() +
                                                              PARAMS_POSTFIX);
-        return boost::dynamic_pointer_cast<Workspace>(tab);
+        return std::dynamic_pointer_cast<Workspace>(tab);
       };
       populateFittings(fittedWsList, wsFromName);
     }

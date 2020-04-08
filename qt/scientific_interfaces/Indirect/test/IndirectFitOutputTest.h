@@ -81,7 +81,7 @@ ITableWorkspace_sptr getPopulatedTable(std::size_t const &size) {
 }
 
 WorkspaceGroup_sptr getPopulatedGroup(std::size_t const &size) {
-  WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+  WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
   for (auto i = 0u; i < size; ++i)
     group->addWorkspace(createPopulatedworkspace(5));
   return group;

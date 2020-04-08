@@ -9,7 +9,7 @@
 #include "MantidAPI/DllConfig.h"
 
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include <map>
@@ -215,7 +215,7 @@ private:
    * @return True if it is true
    */
   bool is_op_symbol(const char c) const;
-  boost::shared_ptr<Operators> m_operators; ///< pointer ot the operators
+  std::shared_ptr<Operators> m_operators; ///< pointer ot the operators
 };
 
 } // namespace API

@@ -8,8 +8,8 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Strings.h"
-#include <boost/make_shared.hpp>
 #include <list>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -31,7 +31,7 @@ std::string InstrumentValidator::getType() const { return "Instrument"; }
  * @return A copy of the current state of the object
  */
 Kernel::IValidator_sptr InstrumentValidator::clone() const {
-  return boost::make_shared<InstrumentValidator>(*this);
+  return std::make_shared<InstrumentValidator>(*this);
 }
 
 /** Checks that the workspace has an instrument defined
@@ -39,7 +39,7 @@ Kernel::IValidator_sptr InstrumentValidator::clone() const {
  *  @return A user-level description if a problem exists or ""
  */
 std::string InstrumentValidator::checkValidity(
-    const boost::shared_ptr<ExperimentInfo> &value) const {
+    const std::shared_ptr<ExperimentInfo> &value) const {
   const auto inst = value->getInstrument();
   if (!inst)
     return "The workspace must have an instrument defined";

@@ -33,7 +33,7 @@ boost::python::list getNonIntegratedDimensionsAsPyList(const MDGeometry &self) {
   boost::python::list nonIntegrated;
   for (auto &dimension : dimensions) {
     nonIntegrated.append(
-        boost::const_pointer_cast<Mantid::Geometry::IMDDimension>(dimension));
+        std::const_pointer_cast<Mantid::Geometry::IMDDimension>(dimension));
   }
   return nonIntegrated;
 }

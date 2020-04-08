@@ -57,13 +57,13 @@ void ALCBaselineModellingModel::fit(IFunction_const_sptr function,
   IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
   clone->setChild(true);
   clone->setProperty("InputWorkspace",
-                     boost::const_pointer_cast<MatrixWorkspace>(m_data));
+                     std::const_pointer_cast<MatrixWorkspace>(m_data));
   clone->setProperty("OutputWorkspace", "__NotUsed__");
   clone->execute();
 
   Workspace_sptr cloned = clone->getProperty("OutputWorkspace");
   MatrixWorkspace_sptr dataToFit =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(cloned);
+      std::dynamic_pointer_cast<MatrixWorkspace>(cloned);
   assert(dataToFit); // CloneWorkspace should take care of that
 
   disableUnwantedPoints(dataToFit, sections);
@@ -170,7 +170,7 @@ MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace() {
 
     // Export results only if data have been fit, that is,
     // if m_data has three histograms
-    return boost::const_pointer_cast<MatrixWorkspace>(m_data);
+    return std::const_pointer_cast<MatrixWorkspace>(m_data);
 
   } else {
 
@@ -224,23 +224,21 @@ void ALCBaselineModellingModel::setFittedFunction(
 
 MatrixWorkspace_sptr ALCBaselineModellingModel::data() const {
   if (m_data) {
-    return extractSpectrum(boost::const_pointer_cast<MatrixWorkspace>(m_data),
-                           0);
+    return extractSpectrum(std::const_pointer_cast<MatrixWorkspace>(m_data), 0);
   }
   return MatrixWorkspace_sptr();
 }
 
 MatrixWorkspace_sptr ALCBaselineModellingModel::correctedData() const {
   if (m_data && (m_data->getNumberHistograms() == 3)) {
-    return extractSpectrum(boost::const_pointer_cast<MatrixWorkspace>(m_data),
-                           2);
+    return extractSpectrum(std::const_pointer_cast<MatrixWorkspace>(m_data), 2);
   }
   return MatrixWorkspace_sptr();
 }
 
 MatrixWorkspace_sptr ALCBaselineModellingModel::baselineData(
     IFunction_const_sptr function, const std::vector<double> &xValues) const {
-  const auto inputWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  const auto inputWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", 1, xValues.size(),
                                           xValues.size()));
 

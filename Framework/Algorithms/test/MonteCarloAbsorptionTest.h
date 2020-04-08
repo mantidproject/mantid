@@ -56,7 +56,7 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
     ReadMaterial::MaterialParameters params;
     params.chemicalSymbol = "V";
     auto binaryStlReader = LoadBinaryStl(samplePath, scaleType, params);
-    boost::shared_ptr<MeshObject> shape = binaryStlReader.readStl();
+    std::shared_ptr<MeshObject> shape = binaryStlReader.readStl();
     ws->mutableSample().setShape(shape);
 
     std::string envPath =
@@ -65,10 +65,9 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
     params.chemicalSymbol = "Ti-Zr";
     params.sampleMassDensity = 5.23;
     auto binaryStlReaderEnv = LoadBinaryStl(envPath, scaleType, params);
-    boost::shared_ptr<MeshObject> environmentShape =
-        binaryStlReaderEnv.readStl();
+    std::shared_ptr<MeshObject> environmentShape = binaryStlReaderEnv.readStl();
 
-    auto can = boost::make_shared<Container>(environmentShape);
+    auto can = std::make_shared<Container>(environmentShape);
     std::unique_ptr<SampleEnvironment> environment =
         std::make_unique<SampleEnvironment>("PearlEnvironment", can);
 
@@ -97,7 +96,7 @@ void addSample(const Mantid::API::MatrixWorkspace_sptr &ws,
       // Set material assuming it's a CSG Object
       canShape->setMaterial(Material(
           "CanMaterial", PhysicalConstants::getNeutronAtom(26, 0), 0.01));
-      auto can = boost::make_shared<Container>(canShape);
+      auto can = std::make_shared<Container>(canShape);
       ws->mutableSample().setEnvironment(
           std::make_unique<SampleEnvironment>("can", can));
     } else if (environment == Environment::UserBeamSize) {
@@ -392,7 +391,7 @@ private:
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
     using Mantid::Algorithms::MonteCarloAbsorption;
     using Mantid::API::IAlgorithm;
-    auto alg = boost::make_shared<MonteCarloAbsorption>();
+    auto alg = std::make_shared<MonteCarloAbsorption>();
     alg->initialize();
     alg->setRethrows(true);
     alg->setChild(true);

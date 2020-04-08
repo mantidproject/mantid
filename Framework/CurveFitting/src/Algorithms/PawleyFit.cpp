@@ -46,8 +46,8 @@ const std::string PawleyFit::summary() const {
 
 /// Transforms the specified value from d-spacing to the supplied unit.
 double PawleyFit::getTransformedCenter(double d, const Unit_sptr &unit) const {
-  if (boost::dynamic_pointer_cast<Units::Empty>(unit) ||
-      boost::dynamic_pointer_cast<Units::dSpacing>(unit)) {
+  if (std::dynamic_pointer_cast<Units::Empty>(unit) ||
+      std::dynamic_pointer_cast<Units::dSpacing>(unit)) {
     return d;
   }
 
@@ -184,7 +184,7 @@ ITableWorkspace_sptr PawleyFit::getPeakParametersFromFunction(
 /// background if enabled in the algorithm.
 IFunction_sptr PawleyFit::getCompositeFunction(
     const Functions::PawleyFunction_sptr &pawleyFn) const {
-  CompositeFunction_sptr composite = boost::make_shared<CompositeFunction>();
+  CompositeFunction_sptr composite = std::make_shared<CompositeFunction>();
   composite->addFunction(pawleyFn);
 
   bool enableChebyshev = getProperty("EnableChebyshevBackground");
@@ -218,7 +218,7 @@ void PawleyFit::init() {
       "Orthorhombic", "Monoclinic", "Triclinic"};
 
   auto latticeSystemValidator =
-      boost::make_shared<StringListValidator>(latticeSystems);
+      std::make_shared<StringListValidator>(latticeSystems);
 
   declareProperty("LatticeSystem", latticeSystems.back(),
                   latticeSystemValidator,
@@ -239,7 +239,7 @@ void PawleyFit::init() {
                   "same unit as the spectrum is "
                   "refined.");
 
-  auto peakFunctionValidator = boost::make_shared<StringListValidator>(
+  auto peakFunctionValidator = std::make_shared<StringListValidator>(
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>());
 
   declareProperty("PeakProfileFunction", "Gaussian", peakFunctionValidator,
@@ -286,7 +286,7 @@ void PawleyFit::init() {
 void PawleyFit::exec() {
   // Setup PawleyFunction with cell from input parameters
   Functions::PawleyFunction_sptr pawleyFn =
-      boost::dynamic_pointer_cast<Functions::PawleyFunction>(
+      std::dynamic_pointer_cast<Functions::PawleyFunction>(
           FunctionFactory::Instance().createFunction("PawleyFunction"));
   g_log.information() << "Setting up Pawley function...\n";
 
@@ -355,7 +355,7 @@ void PawleyFit::exec() {
   Algorithm_sptr fit = createChildAlgorithm("Fit", -1, -1, true);
   fit->setProperty("Function", getCompositeFunction(pawleyFn));
   fit->setProperty("InputWorkspace",
-                   boost::const_pointer_cast<MatrixWorkspace>(ws));
+                   std::const_pointer_cast<MatrixWorkspace>(ws));
   fit->setProperty("StartX", startX);
   fit->setProperty("EndX", endX);
   fit->setProperty("WorkspaceIndex", wsIndex);

@@ -88,7 +88,7 @@ void DgsAbsoluteUnitsReduction::exec() {
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
+  std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
     reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);

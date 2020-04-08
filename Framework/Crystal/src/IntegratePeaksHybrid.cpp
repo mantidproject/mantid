@@ -113,7 +113,7 @@ void IntegratePeaksHybrid::init() {
                       "PeaksWorkspace", "", Direction::Input),
                   "A PeaksWorkspace containing the peaks to integrate.");
 
-  auto positiveIntValidator = boost::make_shared<BoundedValidator<int>>();
+  auto positiveIntValidator = std::make_shared<BoundedValidator<int>>();
   positiveIntValidator->setExclusive(true);
   positiveIntValidator->setLower(0);
 
@@ -123,12 +123,12 @@ void IntegratePeaksHybrid::init() {
                   "Number of bins to use while creating each local image. "
                   "Defaults to 20. Increase to reduce pixelation");
 
-  auto compositeValidator = boost::make_shared<CompositeValidator>();
-  auto positiveDoubleValidator = boost::make_shared<BoundedValidator<double>>();
+  auto compositeValidator = std::make_shared<CompositeValidator>();
+  auto positiveDoubleValidator = std::make_shared<BoundedValidator<double>>();
   positiveDoubleValidator->setExclusive(true);
   positiveDoubleValidator->setLower(0);
   compositeValidator->add(positiveDoubleValidator);
-  compositeValidator->add(boost::make_shared<MandatoryValidator<double>>());
+  compositeValidator->add(std::make_shared<MandatoryValidator<double>>());
 
   declareProperty(
       std::make_unique<PropertyWithValue<double>>(
@@ -176,7 +176,7 @@ void IntegratePeaksHybrid::exec() {
   }
 
   PeakClusterProjection projection(mdWS);
-  auto outImageResults = boost::make_shared<WorkspaceGroup>();
+  auto outImageResults = std::make_shared<WorkspaceGroup>();
 
   Progress progress(this, 0.0, 1.0, peakWS->getNumberPeaks());
 
@@ -208,7 +208,7 @@ void IntegratePeaksHybrid::exec() {
     binMDAlg->execute();
     Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
     IMDHistoWorkspace_sptr localImage =
-        boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+        std::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
     API::MDNormalization normalization = NoNormalization;
     auto iterator = localImage->createIterator();
     iterator->setNormalization(normalization);

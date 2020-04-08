@@ -35,7 +35,7 @@
 // clang-format on
 
 #include <boost/iterator/counting_iterator.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/scoped_array.hpp>
 
 #include <Poco/Path.h>
@@ -183,7 +183,7 @@ void LoadMuonNexus1::exec() {
 
   // Create the 2D workspace for the output
   DataObjects::Workspace2D_sptr localWorkspace =
-      boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create("Workspace2D", total_specs,
                                               lengthIn, lengthIn - 1));
   localWorkspace->setTitle(title);
@@ -200,8 +200,8 @@ void LoadMuonNexus1::exec() {
   }
   // Set the unit on the workspace to muon time, for now in the form of a Label
   // Unit
-  boost::shared_ptr<Kernel::Units::Label> lblUnit =
-      boost::dynamic_pointer_cast<Kernel::Units::Label>(
+  std::shared_ptr<Kernel::Units::Label> lblUnit =
+      std::dynamic_pointer_cast<Kernel::Units::Label>(
           UnitFactory::Instance().create("Label"));
   lblUnit->setLabel("Time", Units::Symbol::Microsecond);
   localWorkspace->getAxis(0)->unit() = lblUnit;
@@ -230,7 +230,7 @@ void LoadMuonNexus1::exec() {
       localWorkspace->populateInstrumentParameters();
     } else // We are working on a higher period of a multiperiod raw file
     {
-      localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      localWorkspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create(localWorkspace));
       localWorkspace->setTitle(title);
       localWorkspace->setComment(notes);
@@ -289,12 +289,12 @@ void LoadMuonNexus1::exec() {
       TableWorkspace_sptr groupingTable;
 
       if (auto table =
-              boost::dynamic_pointer_cast<TableWorkspace>(loadedGrouping)) {
+              std::dynamic_pointer_cast<TableWorkspace>(loadedGrouping)) {
         groupingTable = table;
-      } else if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
+      } else if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(
                      loadedGrouping)) {
         groupingTable =
-            boost::dynamic_pointer_cast<TableWorkspace>(group->getItem(period));
+            std::dynamic_pointer_cast<TableWorkspace>(group->getItem(period));
       }
       std::vector<int> specIDs, detecIDs;
       for (size_t i = 0; i < localWorkspace->getNumberHistograms(); i++) {
@@ -328,7 +328,7 @@ void LoadMuonNexus1::exec() {
 
   if (m_numberOfPeriods > 1) {
     setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
+                std::dynamic_pointer_cast<Workspace>(wsGrpSptr));
   }
 }
 
@@ -414,7 +414,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
       } else {
         // More complex case - different dead times for different periods
 
-        WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
+        WorkspaceGroup_sptr tableGroup = std::make_shared<WorkspaceGroup>();
 
         for (int64_t i = 0; i < m_numberOfPeriods; i++) {
 
@@ -537,7 +537,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
       } else {
         // More complex case - grouping information for every period
 
-        WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
+        WorkspaceGroup_sptr tableGroup = std::make_shared<WorkspaceGroup>();
 
         for (int i = 0; i < m_numberOfPeriods; i++) {
 
@@ -577,7 +577,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
     return idfGrouping->toTable();
   } catch (const std::runtime_error &) {
     g_log.warning("Loading dummy grouping");
-    auto dummyGrouping = boost::make_shared<Grouping>();
+    auto dummyGrouping = std::make_shared<Grouping>();
     if (inst->getNumberDetectors() != 0) {
       dummyGrouping = groupLoader.getDummyGrouping();
     } else {
@@ -601,9 +601,8 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(
 TableWorkspace_sptr
 LoadMuonNexus1::createDeadTimeTable(std::vector<int> specToLoad,
                                     std::vector<double> deadTimes) {
-  TableWorkspace_sptr deadTimeTable =
-      boost::dynamic_pointer_cast<TableWorkspace>(
-          WorkspaceFactory::Instance().createTable("TableWorkspace"));
+  TableWorkspace_sptr deadTimeTable = std::dynamic_pointer_cast<TableWorkspace>(
+      WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
   deadTimeTable->addColumn("int", "spectrum");
   deadTimeTable->addColumn("double", "dead-time");
@@ -626,7 +625,7 @@ LoadMuonNexus1::createDeadTimeTable(std::vector<int> specToLoad,
 TableWorkspace_sptr
 LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
                                             std::vector<int> grouping) {
-  auto detectorGroupingTable = boost::dynamic_pointer_cast<TableWorkspace>(
+  auto detectorGroupingTable = std::dynamic_pointer_cast<TableWorkspace>(
       WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
   detectorGroupingTable->addColumn("vector_int", "Detectors");

@@ -58,7 +58,7 @@ void UnaryOperationMD::exec() {
   m_out = getProperty(outputPropName());
 
   // For MatrixWorkspace's ...
-  if (boost::dynamic_pointer_cast<MatrixWorkspace>(m_in)) {
+  if (std::dynamic_pointer_cast<MatrixWorkspace>(m_in)) {
     // Pass-through to the same function without "MD"
     std::string matrixAlg = this->name();
     matrixAlg = matrixAlg.substr(0, matrixAlg.size() - 2);
@@ -71,14 +71,14 @@ void UnaryOperationMD::exec() {
     alg->execute();
     // Copy the output too
     MatrixWorkspace_sptr outMW = alg->getProperty("OutputWorkspace");
-    IMDWorkspace_sptr out = boost::dynamic_pointer_cast<IMDWorkspace>(outMW);
+    IMDWorkspace_sptr out = std::dynamic_pointer_cast<IMDWorkspace>(outMW);
     setProperty("OutputWorkspace", out);
     return;
   }
 
   // Check for validity
-  m_in_event = boost::dynamic_pointer_cast<IMDEventWorkspace>(m_in);
-  m_in_histo = boost::dynamic_pointer_cast<MDHistoWorkspace>(m_in);
+  m_in_event = std::dynamic_pointer_cast<IMDEventWorkspace>(m_in);
+  m_in_histo = std::dynamic_pointer_cast<MDHistoWorkspace>(m_in);
   this->checkInputs();
 
   if (m_out != m_in) {
@@ -96,9 +96,9 @@ void UnaryOperationMD::exec() {
     throw std::runtime_error("Error creating the output workspace");
 
   IMDEventWorkspace_sptr m_out_event =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(m_out);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(m_out);
   MDHistoWorkspace_sptr m_out_histo =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(m_out);
+      std::dynamic_pointer_cast<MDHistoWorkspace>(m_out);
 
   // Call the appropriate sub-function
   if (m_out_event)

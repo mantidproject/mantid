@@ -54,7 +54,7 @@ void StructureFactorCalculatorSummation::updateUnitCellScatterers(
 
     for (size_t i = 0; i < scatterersInAsymmetricUnit->nScatterers(); ++i) {
       BraggScattererInCrystalStructure_sptr current =
-          boost::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
+          std::dynamic_pointer_cast<BraggScattererInCrystalStructure>(
               scatterersInAsymmetricUnit->getScatterer(i));
 
       if (current) {

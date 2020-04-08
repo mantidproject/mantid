@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -48,6 +49,8 @@ without exception producing an output workspace..
 MatrixWorkspace_sptr
 do_test_doesnt_throw_on_execution(const MatrixWorkspace_sptr &inputWS,
                                   bool parallel = true) {
+  // Needs other algorithms and functions to be registered
+  FrameworkManager::Instance();
   NormaliseByDetector alg(parallel);
   alg.setRethrows(true);
   alg.initialize();
@@ -75,8 +78,7 @@ private:
   */
   MatrixWorkspace_sptr create_workspace_with_no_fitting_functions() {
     const std::string outWSName = "test_ws";
-    IAlgorithm *workspaceAlg =
-        FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    auto workspaceAlg = AlgorithmManager::Instance().create("CreateWorkspace");
     workspaceAlg->initialize();
     workspaceAlg->setPropertyValue("DataX", "1, 2, 3, 4"); // 4 bins.
     workspaceAlg->setPropertyValue(
@@ -228,8 +230,7 @@ private:
  */
   MatrixWorkspace_sptr
   create_workspace_with_incomplete_detector_level_only_fit_functions(
-      const MatrixWorkspace_sptr &original =
-          boost::shared_ptr<MatrixWorkspace>()) {
+      MatrixWorkspace_sptr original = std::shared_ptr<MatrixWorkspace>()) {
     MatrixWorkspace_sptr ws = original;
     if (original == nullptr) {
       // Create a default workspace with no-fitting functions.
@@ -574,8 +575,7 @@ public:
   void setUp() override {
     if (!ws) {
       // Load some data
-      IAlgorithm *loadalg =
-          FrameworkManager::Instance().createAlgorithm("Load");
+      auto loadalg = AlgorithmManager::Instance().create("Load");
       loadalg->setRethrows(true);
       loadalg->initialize();
       loadalg->setPropertyValue("Filename", "POLREF00004699.nxs");
@@ -583,8 +583,7 @@ public:
       loadalg->execute();
 
       // Convert units to wavelength
-      IAlgorithm *unitsalg =
-          FrameworkManager::Instance().createAlgorithm("ConvertUnits");
+      auto unitsalg = AlgorithmManager::Instance().create("ConvertUnits");
       unitsalg->initialize();
       unitsalg->setPropertyValue("InputWorkspace", "testws");
       unitsalg->setPropertyValue("OutputWorkspace", "testws");
@@ -592,8 +591,8 @@ public:
       unitsalg->execute();
 
       // Convert the specturm axis ot signed_theta
-      IAlgorithm *specaxisalg =
-          FrameworkManager::Instance().createAlgorithm("ConvertSpectrumAxis");
+      auto specaxisalg =
+          AlgorithmManager::Instance().create("ConvertSpectrumAxis");
       specaxisalg->initialize();
       specaxisalg->setPropertyValue("InputWorkspace", "testws");
       specaxisalg->setPropertyValue("OutputWorkspace", "testws");
@@ -603,7 +602,7 @@ public:
       WorkspaceGroup_sptr wsGroup =
           API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
               "testws");
-      ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
+      ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
 
       const std::string instrumentName = ws->getInstrument()->getName();
 

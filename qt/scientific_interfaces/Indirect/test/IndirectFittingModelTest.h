@@ -110,7 +110,7 @@ void setFittingFunction(std::unique_ptr<DummyModel> &model,
 
 IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
                                   std::string const &functionString) {
-  auto alg = boost::make_shared<ConvolutionFitSequential>();
+  auto alg = std::make_shared<ConvolutionFitSequential>();
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);
   alg->setProperty("Function", functionString);
@@ -462,7 +462,7 @@ public:
 
   void test_that_hasZeroSpectra_returns_true_if_workspace_has_zero_spectra() {
     auto model = getEmptyModel();
-    auto const workspace = boost::make_shared<Workspace2D>();
+    auto const workspace = std::make_shared<Workspace2D>();
     SetUpADSWithWorkspace ads("WorkspaceEmpty", workspace);
 
     model->addWorkspace("WorkspaceEmpty");

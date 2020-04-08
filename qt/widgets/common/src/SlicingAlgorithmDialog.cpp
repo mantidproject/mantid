@@ -74,7 +74,7 @@ void SlicingAlgorithmDialog::initLayout() {
   auto names = AnalysisDataService::Instance().getObjectNames();
   auto it = names.begin();
   while (it != names.end()) {
-    IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+    IMDEventWorkspace_sptr ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve(*it));
     if (ws) {
       ui.workspace_selector->addItem((*it).c_str());
@@ -309,7 +309,7 @@ void SlicingAlgorithmDialog::makeDimensionInputs(
 
   const QString &txt = getCurrentInputWorkspaceName();
   if (!txt.isEmpty()) {
-    IMDWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDWorkspace>(
+    IMDWorkspace_sptr ws = std::dynamic_pointer_cast<IMDWorkspace>(
         AnalysisDataService::Instance().retrieve(txt.toStdString()));
 
     size_t nDimensions = ws->getNumDims();

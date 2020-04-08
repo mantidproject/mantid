@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -28,7 +28,7 @@ public:
   // Deliver a new peaks workspace for replacement of an existing one.
   virtual void updatePeaksWorkspace(
       const std::string &toName,
-      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace) = 0;
+      std::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace) = 0;
   // Destructor
   virtual ~UpdateableOnDemand() {}
 };

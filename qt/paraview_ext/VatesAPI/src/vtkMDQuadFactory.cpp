@@ -16,7 +16,7 @@
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 #include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vtkCellData.h>
 #include <vtkFloatArray.h>
 #include <vtkNew.h>

@@ -32,10 +32,10 @@ public:
   MDHistoWorkspace_sptr createInputWorkspace(signal_t signal,
                                              signal_t errorSQ = 0,
                                              const int nBins = 1) {
-    MDHistoDimension_sptr dim = boost::make_shared<MDHistoDimension>(
+    MDHistoDimension_sptr dim = std::make_shared<MDHistoDimension>(
         "X", "X", frame, static_cast<coord_t>(0), static_cast<coord_t>(10),
         static_cast<size_t>(nBins));
-    MDHistoWorkspace_sptr histo = boost::make_shared<MDHistoWorkspace>(dim);
+    MDHistoWorkspace_sptr histo = std::make_shared<MDHistoWorkspace>(dim);
     auto signals = histo->mutableSignalArray();
     auto errorsSQ = histo->mutableErrorSquaredArray();
     for (int i = 0; i < nBins; ++i) {

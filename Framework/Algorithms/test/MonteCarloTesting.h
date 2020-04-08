@@ -14,8 +14,8 @@
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
+#include <memory>
 
 /*
  * A set of testing classes commonly used by the classes involved in
@@ -97,18 +97,18 @@ inline Mantid::API::Sample createSamplePlusContainer() {
       annulusXML(innerRadius, outerRadius, height, upAxis));
   // CSG Object assumed
   if (auto csgObj =
-          boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(canShape)) {
+          std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(canShape)) {
     csgObj->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
   }
-  auto can = boost::make_shared<Container>(canShape);
+  auto can = std::make_shared<Container>(canShape);
   auto environment =
       std::make_unique<SampleEnvironment>("Annulus Container", can);
   // Sample volume
   auto sampleCell = ComponentCreationHelper::createCappedCylinder(
       innerRadius, height, centre, upAxis, "sample");
   // CSG Object assumed
-  if (auto csgObj = boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(
-          sampleCell)) {
+  if (auto csgObj =
+          std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(sampleCell)) {
     csgObj->setMaterial(Material("Si", getNeutronAtom(14), 0.15));
   }
 
@@ -144,7 +144,7 @@ inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
     }
     // CSG Object assumed
     if (auto csgObj =
-            boost::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(shape)) {
+            std::dynamic_pointer_cast<Mantid::Geometry::CSGObject>(shape)) {
       csgObj->setMaterial(Material("Vanadium", getNeutronAtom(23), 0.02));
     }
     testSample.setShape(shape);
@@ -152,16 +152,16 @@ inline Mantid::API::Sample createTestSample(TestSampleType sampleType) {
   return testSample;
 }
 
-inline boost::shared_ptr<Mantid::Geometry::SampleEnvironment> createTestKit() {
+inline std::shared_ptr<Mantid::Geometry::SampleEnvironment> createTestKit() {
   using namespace Mantid::Geometry;
   using namespace Mantid::Kernel;
 
   // at centre
   ShapeFactory factory;
-  auto can = boost::make_shared<Container>(factory.createShape(
+  auto can = std::make_shared<Container>(factory.createShape(
       ComponentCreationHelper::sphereXML(0.01, V3D(0, 0, 0), "sp-1")));
   can->setID("8mm");
-  auto kit = boost::make_shared<SampleEnvironment>("TestKit", can);
+  auto kit = std::make_shared<SampleEnvironment>("TestKit", can);
   // before sample
   kit->add(ComponentCreationHelper::createSphere(0.1, V3D(-0.25, 0.0, 0.0)));
   // after sample

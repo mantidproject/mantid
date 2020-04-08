@@ -197,7 +197,7 @@ public:
     pmap->addPositionCoordinate(sample.get(), "y", sampPos.Y());
     pmap->addPositionCoordinate(sample.get(), "z", sampPos.Z());
     auto newInst =
-        boost::make_shared<const Instrument>(inst->baseInstrument(), pmap);
+        std::make_shared<const Instrument>(inst->baseInstrument(), pmap);
 
     for (int i = 0; i < modPeaksNoFix->getNumberPeaks(); ++i) {
       modPeaksNoFix->getPeak(i).setInstrument(newInst);
@@ -241,7 +241,7 @@ private:
     loadUB.setProperty("Filename", "ls5637.mat");
     loadUB.execute();
     Workspace_sptr ows = loadUB.getProperty("InputWorkspace");
-    return boost::dynamic_pointer_cast<PeaksWorkspace>(ows);
+    return std::dynamic_pointer_cast<PeaksWorkspace>(ows);
   }
 
   PeaksWorkspace_sptr m_inputPeaksWS;

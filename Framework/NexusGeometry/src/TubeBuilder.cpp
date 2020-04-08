@@ -51,7 +51,7 @@ const std::vector<Eigen::Vector3d> &TubeBuilder::detPositions() const {
 
 const std::vector<int> &TubeBuilder::detIDs() const { return m_detIDs; }
 
-boost::shared_ptr<const Mantid::Geometry::IObject> TubeBuilder::shape() const {
+std::shared_ptr<const Mantid::Geometry::IObject> TubeBuilder::shape() const {
   using namespace Eigen;
   Matrix<double, 3, 3> points;
   // calcualte height vector;

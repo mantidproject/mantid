@@ -122,7 +122,7 @@ public:
 
     // Check result
     API::MatrixWorkspace_sptr outws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             API::AnalysisDataService::Instance().retrieve("TestWS"));
     TS_ASSERT(outws);
     if (!outws)

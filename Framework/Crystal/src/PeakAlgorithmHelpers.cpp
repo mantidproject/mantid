@@ -43,7 +43,7 @@ double qConventionFactor() {
  * @param alg A pointer to the algorithm that will receive the properties
  */
 void ModulationProperties::appendTo(API::IAlgorithm *alg) {
-  auto mustBeLengthThree = boost::make_shared<ArrayLengthValidator<double>>(3);
+  auto mustBeLengthThree = std::make_shared<ArrayLengthValidator<double>>(3);
   alg->declareProperty(
       std::make_unique<ArrayProperty<double>>(ModulationProperties::ModVector1,
                                               "0.0,0.0,0.0", mustBeLengthThree),
@@ -56,7 +56,7 @@ void ModulationProperties::appendTo(API::IAlgorithm *alg) {
       std::make_unique<ArrayProperty<double>>(ModulationProperties::ModVector3,
                                               "0.0,0.0,0.0", mustBeLengthThree),
       "Modulation Vector 3: dh, dk, dl");
-  auto mustBePositiveOrZero = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositiveOrZero = std::make_shared<BoundedValidator<int>>();
   mustBePositiveOrZero->setLower(0);
   alg->declareProperty(ModulationProperties::MaxOrder, 0, mustBePositiveOrZero,
                        "Maximum order to apply Modulation Vectors. Default = 0",

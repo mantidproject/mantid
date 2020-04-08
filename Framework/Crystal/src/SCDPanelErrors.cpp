@@ -80,9 +80,9 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
     return;
   // CORELLI has sixteenpack under bank
   DataObjects::PeaksWorkspace_sptr inputP =
-      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(inputW);
+      std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(inputW);
   Geometry::Instrument_sptr inst =
-      boost::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
+      std::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
   if (inst->getName().compare("CORELLI") == 0.0 && detname != "moderator")
     detname.append("/sixteenpack");
 
@@ -151,8 +151,8 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx,
   }
   if (scalex != 1.0 || scaley != 1.0) {
     Geometry::IComponent_const_sptr comp = inst->getComponentByName(detname);
-    boost::shared_ptr<const Geometry::RectangularDetector> rectDet =
-        boost::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+    std::shared_ptr<const Geometry::RectangularDetector> rectDet =
+        std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
     if (rectDet) {
       Geometry::ParameterMap &pmap = inputP->instrumentParameters();
       auto oldscalex = pmap.getDouble(rectDet->getName(), "scalex");
@@ -184,12 +184,11 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
 
   setupData();
 
-  boost::shared_ptr<API::Workspace> cloned = m_workspace->clone();
+  std::shared_ptr<API::Workspace> cloned = m_workspace->clone();
   moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex,
                scaley, m_bank, cloned);
 
-  auto inputP =
-      boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(cloned);
+  auto inputP = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(cloned);
   IAlgorithm_sptr alg =
       Mantid::API::AlgorithmFactory::Instance().create("IndexPeaks", -1);
   alg->initialize();
@@ -323,7 +322,7 @@ void SCDPanelErrors::load(const std::string &fname) {
 
   Workspace_sptr ws = loadAlg->getProperty("OutputWorkspace");
   API::Workspace_sptr resData =
-      boost::dynamic_pointer_cast<Mantid::API::Workspace>(ws);
+      std::dynamic_pointer_cast<Mantid::API::Workspace>(ws);
   loadWorkspace(resData);
 }
 
@@ -340,7 +339,7 @@ void SCDPanelErrors::loadWorkspace(const std::string &wsName) const {
  * Load the points from a PeaksWorkspace
  * @param ws :: The workspace to load from
  */
-void SCDPanelErrors::loadWorkspace(boost::shared_ptr<API::Workspace> ws) const {
+void SCDPanelErrors::loadWorkspace(std::shared_ptr<API::Workspace> ws) const {
   m_workspace = std::move(ws);
   m_setupFinished = false;
 }

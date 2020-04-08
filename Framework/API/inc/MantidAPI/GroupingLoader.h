@@ -48,12 +48,12 @@ public:
                  const std::string &mainFieldDirection);
   virtual ~GroupingLoader();
   /// Load the grouping from the instrument's IDF
-  boost::shared_ptr<Grouping> getGroupingFromIDF() const;
+  std::shared_ptr<Grouping> getGroupingFromIDF() const;
   /// Loads grouping from the XML file specified
   static void loadGroupingFromXML(const std::string &filename,
                                   Grouping &grouping);
   /// Returns a "dummy" grouping of a single group with all the detectors in it
-  boost::shared_ptr<Grouping> getDummyGrouping();
+  std::shared_ptr<Grouping> getDummyGrouping();
 
 private:
   /// Instrument to load grouping from

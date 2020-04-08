@@ -11,7 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <iosfwd>
 #include <string>
@@ -80,8 +80,8 @@ private:
 };
 
 // typedefs for property history pointers
-using PropertyHistory_sptr = boost::shared_ptr<PropertyHistory>;
-using PropertyHistory_const_sptr = boost::shared_ptr<const PropertyHistory>;
+using PropertyHistory_sptr = std::shared_ptr<PropertyHistory>;
+using PropertyHistory_const_sptr = std::shared_ptr<const PropertyHistory>;
 using PropertyHistories = std::vector<PropertyHistory_sptr>;
 
 MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &,

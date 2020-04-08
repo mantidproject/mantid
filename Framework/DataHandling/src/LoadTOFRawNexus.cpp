@@ -53,7 +53,7 @@ void LoadTOFRawNexus::init() {
                   "Some NXS files have multiple data fields giving binning in "
                   "other units (e.g. d-spacing or momentum).\n"
                   "Enter the right signal number for your desired field.");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty(
       std::make_unique<PropertyWithValue<specnum_t>>("SpectrumMin", 1,

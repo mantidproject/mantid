@@ -86,7 +86,7 @@ public:
                                   ReflectionConditionFilter::StructureFactor);
 
     std::vector<V3D> hklsCentering = generator.getUniqueHKLs(
-        0.6, 10.0, boost::make_shared<HKLFilterCentering>(si.centering()));
+        0.6, 10.0, std::make_shared<HKLFilterCentering>(si.centering()));
 
     std::vector<V3D> hklsStructureFactors = generator.getUniqueHKLs(0.6, 10.0);
 

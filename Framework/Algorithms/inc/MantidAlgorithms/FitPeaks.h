@@ -117,12 +117,12 @@ private:
   enum PeakFitResult { NOSIGNAL, LOWPEAK, OUTOFBOUND, GOOD };
 
   /// suites of method to fit peaks
-  std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fitPeaks();
+  std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fitPeaks();
 
   /// fit peaks in a same spectrum
   void fitSpectrumPeaks(
       size_t wi, const std::vector<double> &expected_peak_centers,
-      const boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
+      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
 
   /// fit background
   bool fitBackground(const size_t &ws_index,
@@ -215,11 +215,11 @@ private:
       size_t wsindex, size_t peakindex, const double cost,
       const std::vector<double> &expected_peak_positions,
       const FitPeaksAlgorithm::FitFunction &fitfunction,
-      const boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
+      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
 
   /// calculate peak+background for fitted
   void calculateFittedPeaks(
-      std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+      std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
           fit_results);
 
   /// Get the parameter name for peak height (I or height or etc)
@@ -227,14 +227,14 @@ private:
       const API::IPeakFunction_const_sptr &peak_function);
 
   /// Set the workspaces and etc to output properties
-  void processOutputs(
-      std::vector<boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
-          fit_result_vec);
+  void
+  processOutputs(std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
+                     fit_result_vec);
 
   /// Write result of peak fit per spectrum to output analysis workspaces
   void writeFitResult(
       size_t wi, const std::vector<double> &expected_positions,
-      const boost::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
+      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
 
   /// check whether FitPeaks supports observation on a certain peak profile's
   /// parameters (width!)

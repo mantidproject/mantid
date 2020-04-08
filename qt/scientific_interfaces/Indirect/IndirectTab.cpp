@@ -682,7 +682,7 @@ std::unordered_map<std::string, size_t> IndirectTab::extractAxisLabels(
   if (!axis->isText())
     return std::unordered_map<std::string, size_t>();
 
-  TextAxis *textAxis = boost::static_pointer_cast<TextAxis>(axis);
+  auto *textAxis = static_cast<TextAxis *>(axis);
   std::unordered_map<std::string, size_t> labels;
 
   for (size_t i = 0; i < textAxis->length(); ++i)

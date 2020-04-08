@@ -91,7 +91,7 @@ void ExtractQENSMembers::exec() {
   auto inputWorkspaces = getInputWorkspaces();
   WorkspaceGroup_sptr resultWS = getProperty("ResultWorkspace");
   MatrixWorkspace_sptr initialWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(resultWS->getItem(0));
+      std::dynamic_pointer_cast<MatrixWorkspace>(resultWS->getItem(0));
   const auto qValues = getQValues(inputWorkspaces);
   auto members = getAxisLabels(initialWS, 1);
 
@@ -103,7 +103,7 @@ void ExtractQENSMembers::exec() {
 
   for (auto i = 1u; i < resultWS->size(); ++i)
     appendToMembers(
-        boost::dynamic_pointer_cast<MatrixWorkspace>(resultWS->getItem(i)),
+        std::dynamic_pointer_cast<MatrixWorkspace>(resultWS->getItem(i)),
         memberWorkspaces);
   setNumericAxis(memberWorkspaces, qValues, 1);
 

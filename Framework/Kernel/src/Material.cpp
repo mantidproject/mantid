@@ -9,7 +9,7 @@
 #include "MantidKernel/StringTokenizer.h"
 #include <NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <numeric>
 
 namespace Mantid {
@@ -54,13 +54,13 @@ inline double scatteringXS(const double realLength, const double imagLength) {
 } // namespace
 
 Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
-    const boost::shared_ptr<PhysicalConstants::Atom> &atom,
+    const std::shared_ptr<PhysicalConstants::Atom> &atom,
     const double multiplicity)
     : atom(atom), multiplicity(multiplicity) {}
 
 Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
     const PhysicalConstants::Atom &atom, const double multiplicity)
-    : atom(boost::make_shared<PhysicalConstants::Atom>(atom)),
+    : atom(std::make_shared<PhysicalConstants::Atom>(atom)),
       multiplicity(multiplicity) {}
 
 /**
@@ -574,7 +574,7 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
       file->readData("coh_scatt_length", neutron.coh_scatt_length);
       file->readData("inc_scatt_length", neutron.inc_scatt_length);
 
-      m_chemicalFormula.emplace_back(boost::make_shared<Atom>(neutron), 1);
+      m_chemicalFormula.emplace_back(std::make_shared<Atom>(neutron), 1);
     }
     // the other option is empty which does not need to be addressed
   } else {

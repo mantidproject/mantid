@@ -36,8 +36,8 @@ public:
   virtual ITableWorkspace_sptr getPublishInvestigations() = 0;
 };
 
-using ICatalogInfoService_sptr = boost::shared_ptr<ICatalogInfoService>;
+using ICatalogInfoService_sptr = std::shared_ptr<ICatalogInfoService>;
 using ICatalogInfoService_const_sptr =
-    boost::shared_ptr<const ICatalogInfoService>;
+    std::shared_ptr<const ICatalogInfoService>;
 } // namespace API
 } // namespace Mantid

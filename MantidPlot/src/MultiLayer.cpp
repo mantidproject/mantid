@@ -1329,7 +1329,7 @@ void MultiLayer::dropOntoMDCurve(Graph *g, MantidMDCurve *originalCurve,
     // Capability query the candidate workspaces
     Workspace_sptr ws =
         AnalysisDataService::Instance().retrieve(allWsNames[i].toStdString());
-    IMDWorkspace_sptr imdWS = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
+    IMDWorkspace_sptr imdWS = std::dynamic_pointer_cast<IMDWorkspace>(ws);
     // Only process IMDWorkspaces
     if (imdWS) {
       QString currentName(imdWS->getName().c_str());

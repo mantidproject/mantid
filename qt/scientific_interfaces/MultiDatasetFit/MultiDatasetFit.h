@@ -109,7 +109,7 @@ protected:
 
 private:
   void createPlotToolbar();
-  boost::shared_ptr<Mantid::API::IFunction> createFunction() const;
+  std::shared_ptr<Mantid::API::IFunction> createFunction() const;
   void updateParameters(const Mantid::API::IFunction &fun);
   void showInfo(const QString &text);
   bool eventFilter(QObject *widget, QEvent *evn) override;
@@ -139,7 +139,7 @@ private:
   /// Name of the output workspace
   QString m_outputWorkspaceName;
   /// Fit algorithm runner
-  boost::shared_ptr<API::AlgorithmRunner> m_fitRunner;
+  std::shared_ptr<API::AlgorithmRunner> m_fitRunner;
   /// Remembers setting for just current session
   int m_fitAllSettings;
   /// Fit output status

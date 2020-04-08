@@ -142,7 +142,7 @@ void LoadNexusMonitors2::init() {
 
   std::vector<std::string> options{"", LOAD_EVENTS, LOAD_HISTO};
   declareProperty("LoadOnly", "",
-                  boost::make_shared<Kernel::StringListValidator>(options),
+                  std::make_shared<Kernel::StringListValidator>(options),
                   "If multiple repesentations exist, which one to load. "
                   "Default is to load the one that is present, and Histogram "
                   "if both are present.");
@@ -258,7 +258,7 @@ void LoadNexusMonitors2::exec() {
   if (useEventMon) // set the x-range to be the range for min/max events
   {
     EventWorkspace_sptr eventWS =
-        boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
+        std::dynamic_pointer_cast<EventWorkspace>(m_workspace);
     double xmin, xmax;
     eventWS->getEventXMinMax(xmin, xmax);
 
@@ -684,7 +684,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file,
                                                size_t ws_index) {
   // setup local variables
   EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(m_workspace);
+      std::dynamic_pointer_cast<EventWorkspace>(m_workspace);
   std::string tof_units, event_time_zero_units;
 
   // read in the data

@@ -54,7 +54,7 @@ void setUpWorkspace(int histograms = 3, int bins = 10) {
   input->getSpectrum(0).setSpectrumNo(0);
   input->getSpectrum(1).setSpectrumNo(1);
   input->getSpectrum(2).setSpectrumNo(2);
-  boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
+  std::shared_ptr<Instrument> instr = std::make_shared<Instrument>();
   Mantid::Geometry::Detector *mon =
       new Mantid::Geometry::Detector("monitor", 0, nullptr);
   instr->add(mon);
@@ -135,7 +135,7 @@ void dotestExec(bool events, bool sameOutputWS, bool performance = false) {
 
     if (events) {
       EventWorkspace_const_sptr eventOut =
-          boost::dynamic_pointer_cast<const EventWorkspace>(output);
+          std::dynamic_pointer_cast<const EventWorkspace>(output);
       TS_ASSERT(eventOut);
     }
     TS_ASSERT_THROWS_NOTHING(
@@ -414,7 +414,7 @@ public:
     // create ws without monitors.
     MatrixWorkspace_sptr input =
         WorkspaceCreationHelper::create2DWorkspace123(3, 10, 1);
-    boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> instr = std::make_shared<Instrument>();
     input->setInstrument(instr);
     AnalysisDataService::Instance().add("someWS", input);
 

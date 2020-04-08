@@ -9,8 +9,8 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -93,13 +93,13 @@ public:
   virtual const std::string &id() const = 0;
   virtual void setID(const std::string &id) = 0;
 
-  virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() const = 0;
+  virtual std::shared_ptr<GeometryHandler> getGeometryHandler() const = 0;
 };
 
 /// Typdef for a shared pointer
-using IObject_sptr = boost::shared_ptr<IObject>;
+using IObject_sptr = std::shared_ptr<IObject>;
 /// Typdef for a shared pointer to a const object
-using IObject_const_sptr = boost::shared_ptr<const IObject>;
+using IObject_const_sptr = std::shared_ptr<const IObject>;
 /// Typdef for a unique pointer
 using IObject_uptr = std::unique_ptr<IObject>;
 /// Typdef for a unique pointer to a const object

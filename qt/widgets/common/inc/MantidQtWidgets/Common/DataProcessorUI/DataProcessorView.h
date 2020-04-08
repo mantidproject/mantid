@@ -8,7 +8,6 @@
 
 #include "MantidKernel/System.h"
 
-#include <boost/shared_ptr.hpp>
 #include <map>
 #include <memory>
 #include <set>
@@ -39,7 +38,7 @@ public:
   virtual void addActions(std::vector<std::unique_ptr<Command>> commands) = 0;
 
   // Connect the model
-  virtual void showTable(boost::shared_ptr<AbstractTreeModel> model) = 0;
+  virtual void showTable(std::shared_ptr<AbstractTreeModel> model) = 0;
 
   // Dialog/Prompt methods
   virtual QString requestNotebookPath() = 0;

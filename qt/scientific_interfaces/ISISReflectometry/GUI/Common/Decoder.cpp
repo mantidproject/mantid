@@ -77,14 +77,18 @@ void Decoder::decodeBatch(const IMainWindowView *mwv, int batchIndex,
   auto runsTablePresenter =
       dynamic_cast<RunsTablePresenter *>(runsPresenter->m_tablePresenter.get());
   auto reductionJobs = &runsTablePresenter->m_model.m_reductionJobs;
+  // We must do the Runs tab first because this sets the instrument, which
+  // other settings may need to be correct. There is also a notification to set
+  // defaults for this instrument so we need to do that before other settings
+  // or it will override them.
+  decodeRuns(gui->m_runs.get(), reductionJobs, runsTablePresenter,
+             map[QString("runsView")].toMap());
   decodeEvent(gui->m_eventHandling.get(), map[QString("eventView")].toMap());
   decodeExperiment(gui->m_experiment.get(),
                    map[QString("experimentView")].toMap());
   decodeInstrument(gui->m_instrument.get(),
                    map[QString("instrumentView")].toMap());
   decodeSave(gui->m_save.get(), map[QString("saveView")].toMap());
-  decodeRuns(gui->m_runs.get(), reductionJobs, runsTablePresenter,
-             map[QString("runsView")].toMap());
 }
 
 void Decoder::decodeExperiment(const QtExperimentView *gui,
@@ -107,6 +111,14 @@ void Decoder::decodeExperiment(const QtExperimentView *gui,
       map[QString("transStitchParamsEdit")].toString());
   gui->m_ui.transScaleRHSCheckBox->setChecked(
       map[QString("transScaleRHSCheckBox")].toBool());
+  gui->m_ui.subtractBackgroundCheckBox->setChecked(
+      map[QString("subtractBackgroundCheckBox")].toBool());
+  gui->m_ui.backgroundMethodComboBox->setCurrentIndex(
+      map[QString("backgroundMethodComboBox")].toInt());
+  gui->m_ui.polynomialDegreeSpinBox->setValue(
+      map[QString("polynomialDegreeSpinBox")].toInt());
+  gui->m_ui.costFunctionComboBox->setCurrentIndex(
+      map[QString("costFunctionComboBox")].toInt());
   gui->m_ui.polCorrCheckBox->setChecked(
       map[QString("polCorrCheckBox")].toBool());
   gui->m_ui.floodCorComboBox->setCurrentIndex(

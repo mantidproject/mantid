@@ -45,7 +45,7 @@ public:
 
   /// test the clone function
   void testClone() {
-    boost::shared_ptr<ArrayLengthValidator<int>> vi(
+    std::shared_ptr<ArrayLengthValidator<int>> vi(
         new ArrayLengthValidator<int>);
     IValidator_sptr vvi = vi->clone();
     TS_ASSERT_DIFFERS(vi, vvi);

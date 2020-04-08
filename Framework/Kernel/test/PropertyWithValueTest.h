@@ -457,7 +457,7 @@ public:
 
   void testMandatoryValidator() {
     PropertyWithValue<std::string> p(
-        "test", "", boost::make_shared<MandatoryValidator<std::string>>());
+        "test", "", std::make_shared<MandatoryValidator<std::string>>());
     TS_ASSERT_EQUALS(p.isValid(), "A value must be entered for this parameter");
     TS_ASSERT_EQUALS(p.setValue("I'm here"), "");
     TS_ASSERT_EQUALS(p.isValid(), "");
@@ -474,7 +474,7 @@ public:
 
     // int tests
     PropertyWithValue<int> pi("test", 11,
-                              boost::make_shared<BoundedValidator<int>>(1, 10));
+                              std::make_shared<BoundedValidator<int>>(1, 10));
     TS_ASSERT_EQUALS(pi.isValid(), start + "11" + greaterThan + "10" + end);
     TS_ASSERT(pi.setValue("0").find(start + "0" + lessThan + "1" + end) !=
               std::string::npos);
@@ -498,7 +498,7 @@ public:
 
     // double tests
     PropertyWithValue<double> pd(
-        "test", 11.0, boost::make_shared<BoundedValidator<double>>(1.0, 10.0));
+        "test", 11.0, std::make_shared<BoundedValidator<double>>(1.0, 10.0));
     TS_ASSERT_EQUALS(pd.isValid(), start + "11" + greaterThan + "10" + end);
     TS_ASSERT(pd.setValue("0.9").find(start + "0.9" + lessThan + "1" + end) !=
               std::string::npos);
@@ -515,8 +515,7 @@ public:
 
     // string tests
     PropertyWithValue<std::string> ps(
-        "test", "",
-        boost::make_shared<BoundedValidator<std::string>>("B", "T"));
+        "test", "", std::make_shared<BoundedValidator<std::string>>("B", "T"));
     TS_ASSERT_EQUALS(ps.isValid(), start + "" + lessThan + "B" + end);
     TS_ASSERT(ps.setValue("AZ").find(start + "AZ" + lessThan + "B" + end) !=
               std::string::npos);
@@ -534,7 +533,7 @@ public:
     // int64 tests
     PropertyWithValue<int64_t> pl(
         "test", 987987987987LL,
-        boost::make_shared<BoundedValidator<int64_t>>(0, 789789789789LL));
+        std::make_shared<BoundedValidator<int64_t>>(0, 789789789789LL));
     TS_ASSERT_EQUALS(pl.isValid(), start + "987987987987" + greaterThan +
                                        "789789789789" + end);
     TS_ASSERT(pl.setValue("-1").find(start + "-1" + lessThan + "0" + end) !=
@@ -556,12 +555,12 @@ public:
 
     std::vector<std::string> empt, vec;
     PropertyWithValue<std::string> empty(
-        "test", "", boost::make_shared<StringListValidator>(empt));
+        "test", "", std::make_shared<StringListValidator>(empt));
     TS_ASSERT_EQUALS(empty.isValid(), "Select a value");
     vec.emplace_back("one");
     vec.emplace_back("two");
     PropertyWithValue<std::string> p(
-        "test", "", boost::make_shared<StringListValidator>(vec));
+        "test", "", std::make_shared<StringListValidator>(vec));
     TS_ASSERT_EQUALS(p.isValid(), "Select a value");
     TS_ASSERT_EQUALS(p.setValue("one"), "");
     TS_ASSERT_EQUALS(p.isValid(), "");
@@ -673,7 +672,7 @@ public:
     std::array<std::string, 2> allowedValues = {{"Hello", "World"}};
     std::map<std::string, std::string> alias{{"1", "Hello"}, {"0", "World"}};
     auto validator =
-        boost::make_shared<ListValidator<std::string>>(allowedValues, alias);
+        std::make_shared<ListValidator<std::string>>(allowedValues, alias);
     PropertyWithValue<std::string> prop("String", "", validator);
     TS_ASSERT_THROWS_NOTHING(prop = "Hello");
     std::string value = prop;

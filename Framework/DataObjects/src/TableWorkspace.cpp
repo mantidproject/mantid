@@ -41,11 +41,11 @@ TableWorkspace::TableWorkspace(const TableWorkspace &other)
 
   auto it = other.m_columns.cbegin();
   while (it != other.m_columns.cend()) {
-    addColumn(boost::shared_ptr<API::Column>((*it)->clone()));
+    addColumn(std::shared_ptr<API::Column>((*it)->clone()));
     ++it;
   }
   // copy logs/properties.
-  m_LogManager = boost::make_shared<API::LogManager>(*(other.m_LogManager));
+  m_LogManager = std::make_shared<API::LogManager>(*(other.m_LogManager));
 }
 
 size_t TableWorkspace::getMemorySize() const {
@@ -200,7 +200,7 @@ std::vector<std::string> TableWorkspace::getColumnNames() const {
   return nameList;
 }
 
-void TableWorkspace::addColumn(const boost::shared_ptr<API::Column> &column) {
+void TableWorkspace::addColumn(const std::shared_ptr<API::Column> &column) {
   auto ci = std::find_if(m_columns.begin(), m_columns.end(),
                          FindName(column->name()));
   if (ci != m_columns.end()) {
@@ -301,12 +301,12 @@ TableWorkspace::doCloneColumns(const std::vector<std::string> &colNames) const {
   while (it != m_columns.cend()) {
     if (colNames.end() !=
         std::find(colNames.begin(), colNames.end(), (**it).name())) {
-      ws->addColumn(boost::shared_ptr<API::Column>((*it)->clone()));
+      ws->addColumn(std::shared_ptr<API::Column>((*it)->clone()));
     }
     ++it;
   }
   // copy logs/properties.
-  ws->m_LogManager = boost::make_shared<API::LogManager>(*(m_LogManager));
+  ws->m_LogManager = std::make_shared<API::LogManager>(*(m_LogManager));
   return ws;
 }
 

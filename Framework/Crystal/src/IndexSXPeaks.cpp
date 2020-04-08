@@ -28,10 +28,10 @@ using namespace Kernel;
  *
  */
 void IndexSXPeaks::init() {
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  auto reasonable_angle = boost::make_shared<BoundedValidator<double>>();
+  auto reasonable_angle = std::make_shared<BoundedValidator<double>>();
   reasonable_angle->setLower(5.0);
   reasonable_angle->setUpper(175.0);
 

@@ -12,9 +12,9 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <map>
+#include <memory>
 #include <unordered_set>
 
 namespace Mantid {
@@ -34,8 +34,7 @@ using PositionToLabelIdMap = std::map<Mantid::Kernel::V3D, size_t>;
 using VecIndexes = std::vector<size_t>;
 using VecElements = std::vector<DisjointElement>;
 using SetIds = std::unordered_set<size_t>;
-using ClusterMap =
-    std::map<size_t, boost::shared_ptr<Mantid::Crystal::ICluster>>;
+using ClusterMap = std::map<size_t, std::shared_ptr<Mantid::Crystal::ICluster>>;
 using ClusterTuple =
     boost::tuple<Mantid::API::IMDHistoWorkspace_sptr, ClusterMap>;
 } // namespace ConnectedComponentMappingTypes
@@ -60,7 +59,7 @@ public:
   void startLabelingId(const size_t &id);
 
   /// Execute and return clusters
-  boost::shared_ptr<Mantid::API::IMDHistoWorkspace>
+  std::shared_ptr<Mantid::API::IMDHistoWorkspace>
   execute(Mantid::API::IMDHistoWorkspace_sptr ws,
           BackgroundStrategy *const strategy,
           Mantid::API::Progress &progress) const;

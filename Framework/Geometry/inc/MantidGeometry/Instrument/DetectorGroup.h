@@ -189,13 +189,12 @@ protected:
   // functions inherited from IComponent
   Component *clone() const override { return nullptr; }
   ComponentID getComponentID() const override { return nullptr; }
-  boost::shared_ptr<const IComponent> getParent() const override {
-    return boost::shared_ptr<const IComponent>();
+  std::shared_ptr<const IComponent> getParent() const override {
+    return std::shared_ptr<const IComponent>();
   }
   const IComponent *getBareParent() const override { return nullptr; }
-  std::vector<boost::shared_ptr<const IComponent>>
-  getAncestors() const override {
-    return std::vector<boost::shared_ptr<const IComponent>>();
+  std::vector<std::shared_ptr<const IComponent>> getAncestors() const override {
+    return std::vector<std::shared_ptr<const IComponent>>();
   }
   std::string getName() const override;
   std::string getFullName() const override;
@@ -230,8 +229,8 @@ protected:
   void initDraw() const override {}
 
   /// Returns the shape of the Object
-  const boost::shared_ptr<const IObject> shape() const override {
-    return boost::shared_ptr<const IObject>();
+  const std::shared_ptr<const IObject> shape() const override {
+    return std::shared_ptr<const IObject>();
   }
   /// Returns the material of the Object
   const Kernel::Material material() const override;
@@ -247,9 +246,9 @@ private:
 };
 
 /// Typedef for shared pointer
-using DetectorGroup_sptr = boost::shared_ptr<DetectorGroup>;
+using DetectorGroup_sptr = std::shared_ptr<DetectorGroup>;
 /// Typedef for shared pointer to a const object
-using DetectorGroup_const_sptr = boost::shared_ptr<const DetectorGroup>;
+using DetectorGroup_const_sptr = std::shared_ptr<const DetectorGroup>;
 
 } // namespace Geometry
 } // namespace Mantid

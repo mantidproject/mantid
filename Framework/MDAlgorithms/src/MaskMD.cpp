@@ -89,7 +89,7 @@ void MaskMD::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
           "Dimensions",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),
+          std::make_shared<MandatoryValidator<std::vector<std::string>>>(),
           Direction::Input),
       "Dimension ids/names all comma separated.\n"
       "According to the dimensionality of the workspace, these names will be "
@@ -100,7 +100,7 @@ void MaskMD::init() {
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
           "Extents",
-          boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Extents {min, max} corresponding to each of the dimensions specified, "
       "according to the order those identifies have been specified.");

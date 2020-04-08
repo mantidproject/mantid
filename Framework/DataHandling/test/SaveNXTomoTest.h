@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/SaveNXTomo.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -29,56 +29,12 @@ public:
     m_inputWS = "saveNXTomo_test";
     m_outputFile = "SaveNXTomoTestFile.nxs";
     m_axisSize = 50;
-    m_saver = FrameworkManager::Instance().createAlgorithm("SaveNXTomo");
   }
 
-  void testName() { TS_ASSERT_EQUALS(m_saver->name(), "SaveNXTomo"); }
-
-  void testVersion() { TS_ASSERT_EQUALS(m_saver->version(), 1); }
-
-  void testInit() {
-    TS_ASSERT_THROWS_NOTHING(m_saver->initialize());
-    TS_ASSERT(m_saver->isInitialized());
-  }
-
-  void testWriteSingleCreating(bool deleteWhenComplete = true) {
-    // Test creating a new file from a single WS
-    // Create a small test workspace
-    Workspace_sptr input = makeWorkspaceSingle(m_inputWS);
-
-    TS_ASSERT_THROWS_NOTHING(
-        m_saver->setProperty<Workspace_sptr>("InputWorkspaces", input));
-    TS_ASSERT_THROWS_NOTHING(
-        m_saver->setPropertyValue("Filename", m_outputFile));
-    m_outputFile = m_saver->getPropertyValue("Filename"); // get absolute path
-
-    // Set to overwrite to ensure creation not append
-    TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("OverwriteFile", true));
-    TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("IncludeError", false));
-
-    TS_ASSERT_THROWS_NOTHING(m_saver->execute());
-    TS_ASSERT(m_saver->isExecuted());
-
-    // Check file exists
-    Poco::File file(m_outputFile);
-    TS_ASSERT(file.exists());
-
-    // Check that the structure of the nxTomo file is correct
-    checkNXTomoStructure();
-
-    // Check count of entries for data / run_title / rotation_angle / image_key
-    checkNXTomoDimensions(1);
-
-    // Check rotation values
-    checkNXTomoRotations(1);
-
-    // Check main data values
-    checkNXTomoData(1);
-
-    if (deleteWhenComplete) {
-      if (file.exists())
-        file.remove();
-    }
+  void testMetaData() {
+    auto saver = AlgorithmManager::Instance().create("SaveNXTomo");
+    TS_ASSERT_EQUALS(saver->name(), "SaveNXTomo");
+    TS_ASSERT_EQUALS(saver->version(), 1);
   }
 
   void testWriteGroupCreating() {
@@ -88,18 +44,18 @@ public:
     WorkspaceGroup_sptr input = makeWorkspacesInGroup(m_inputWS, wspaces);
     AnalysisDataService::Instance().add(m_inputWS + "0", input);
 
+    auto saver = AlgorithmManager::Instance().create("SaveNXTomo");
     TS_ASSERT_THROWS_NOTHING(
-        m_saver->setPropertyValue("InputWorkspaces", input->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        m_saver->setPropertyValue("Filename", m_outputFile));
-    m_outputFile = m_saver->getPropertyValue("Filename"); // get absolute path
+        saver->setPropertyValue("InputWorkspaces", input->getName()));
+    TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("Filename", m_outputFile));
+    m_outputFile = saver->getPropertyValue("Filename"); // get absolute path
 
     // Set to overwrite to ensure creation not append
-    TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("OverwriteFile", true));
-    TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("IncludeError", false));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("OverwriteFile", true));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("IncludeError", false));
 
-    TS_ASSERT_THROWS_NOTHING(m_saver->execute());
-    TS_ASSERT(m_saver->isExecuted());
+    TS_ASSERT_THROWS_NOTHING(saver->execute());
+    TS_ASSERT(saver->isExecuted());
 
     // Check file exists
     Poco::File file(m_outputFile);
@@ -122,18 +78,18 @@ public:
         makeWorkspacesInGroup(wsgName, wspaces, 0, true);
     AnalysisDataService::Instance().add(wsgName + "0", input);
 
+    auto saver = AlgorithmManager::Instance().create("SaveNXTomo");
     TS_ASSERT_THROWS_NOTHING(
-        m_saver->setPropertyValue("InputWorkspaces", input->getName()));
-    TS_ASSERT_THROWS_NOTHING(
-        m_saver->setPropertyValue("Filename", m_outputFile));
-    m_outputFile = m_saver->getPropertyValue("Filename"); // get absolute path
+        saver->setPropertyValue("InputWorkspaces", input->getName()));
+    TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("Filename", m_outputFile));
+    m_outputFile = saver->getPropertyValue("Filename"); // get absolute path
 
     // Set to overwrite to ensure creation not append
-    TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("OverwriteFile", true));
-    TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("IncludeError", false));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("OverwriteFile", true));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("IncludeError", false));
 
-    TS_ASSERT_THROWS_NOTHING(m_saver->execute());
-    TS_ASSERT(m_saver->isExecuted());
+    TS_ASSERT_THROWS_NOTHING(saver->execute());
+    TS_ASSERT(saver->isExecuted());
 
     // Check file exists
     Poco::File file(m_outputFile);
@@ -149,11 +105,11 @@ public:
 
   void testWriteGroupAppending() {
     // this needs to be called, cxxtest won't run it when it has an argument
-    testWriteSingleCreating(true);
+    checkWriteSingleCreating(true);
 
     // Run the single workspace test again, without deleting the file at the end
     // (to test append)
-    testWriteSingleCreating(false);
+    checkWriteSingleCreating(false);
 
     // Test appending a ws group to an existing file
     if (Poco::File(m_outputFile).exists()) {
@@ -165,18 +121,19 @@ public:
       AnalysisDataService::Instance().add(
           m_inputWS + boost::lexical_cast<std::string>(numberOfPriorWS), input);
 
+      auto saver = AlgorithmManager::Instance().create("SaveNXTomo");
       TS_ASSERT_THROWS_NOTHING(
-          m_saver->setPropertyValue("InputWorkspaces", input->getName()));
+          saver->setPropertyValue("InputWorkspaces", input->getName()));
       TS_ASSERT_THROWS_NOTHING(
-          m_saver->setPropertyValue("Filename", m_outputFile));
-      m_outputFile = m_saver->getPropertyValue("Filename"); // get absolute path
+          saver->setPropertyValue("Filename", m_outputFile));
+      m_outputFile = saver->getPropertyValue("Filename"); // get absolute path
 
       // Ensure append not create
-      TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("OverwriteFile", false));
-      TS_ASSERT_THROWS_NOTHING(m_saver->setProperty("IncludeError", false));
+      TS_ASSERT_THROWS_NOTHING(saver->setProperty("OverwriteFile", false));
+      TS_ASSERT_THROWS_NOTHING(saver->setProperty("IncludeError", false));
 
-      TS_ASSERT_THROWS_NOTHING(m_saver->execute());
-      TS_ASSERT(m_saver->isExecuted());
+      TS_ASSERT_THROWS_NOTHING(saver->execute());
+      TS_ASSERT(saver->isExecuted());
 
       // Check file exists
       Poco::File file(m_outputFile);
@@ -253,6 +210,46 @@ private:
     }
 
     return wsGroup;
+  }
+
+  void checkWriteSingleCreating(bool deleteWhenComplete = true) {
+    // Test creating a new file from a single WS
+    // Create a small test workspace
+    Workspace_sptr input = makeWorkspaceSingle(m_inputWS);
+
+    auto saver = AlgorithmManager::Instance().create("SaveNXTomo");
+    TS_ASSERT_THROWS_NOTHING(
+        saver->setProperty<Workspace_sptr>("InputWorkspaces", input));
+    TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("Filename", m_outputFile));
+    m_outputFile = saver->getPropertyValue("Filename"); // get absolute path
+
+    // Set to overwrite to ensure creation not append
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("OverwriteFile", true));
+    TS_ASSERT_THROWS_NOTHING(saver->setProperty("IncludeError", false));
+
+    TS_ASSERT_THROWS_NOTHING(saver->execute());
+    TS_ASSERT(saver->isExecuted());
+
+    // Check file exists
+    Poco::File file(m_outputFile);
+    TS_ASSERT(file.exists());
+
+    // Check that the structure of the nxTomo file is correct
+    checkNXTomoStructure();
+
+    // Check count of entries for data / run_title / rotation_angle / image_key
+    checkNXTomoDimensions(1);
+
+    // Check rotation values
+    checkNXTomoRotations(1);
+
+    // Check main data values
+    checkNXTomoData(1);
+
+    if (deleteWhenComplete) {
+      if (file.exists())
+        file.remove();
+    }
   }
 
   void checkNXTomoStructure() {
@@ -412,7 +409,6 @@ private:
   }
 
 private:
-  IAlgorithm *m_saver;
   std::string m_outputFile;
   std::string m_inputWS;
   int m_axisSize;

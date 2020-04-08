@@ -7,6 +7,7 @@
 #pragma once
 
 #include <atomic>
+#include <memory>
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -24,9 +25,6 @@
 
 #include "MantidParallel/ExecutionMode.h"
 #include "MantidParallel/StorageMode.h"
-namespace boost {
-template <class T> class weak_ptr;
-}
 
 namespace Poco {
 template <class R, class A, class O, class S> class ActiveMethod;
@@ -51,7 +49,6 @@ namespace API {
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
-class AlgorithmProxy;
 class AlgorithmHistory;
 class WorkspaceHistory;
 
@@ -183,7 +180,7 @@ public:
 
   template <typename T, typename = typename std::enable_if<std::is_convertible<
                             T *, MatrixWorkspace *>::value>::type>
-  std::tuple<boost::shared_ptr<T>, Indexing::SpectrumIndexSet>
+  std::tuple<std::shared_ptr<T>, Indexing::SpectrumIndexSet>
   getWorkspaceAndIndices(const std::string &name) const;
 
   template <typename T1, typename T2,
@@ -193,7 +190,7 @@ public:
                 std::is_convertible<T2 *, std::string *>::value ||
                 std::is_convertible<T2 *, std::vector<int64_t> *>::value>::type>
   void setWorkspaceInputProperties(const std::string &name,
-                                   const boost::shared_ptr<T1> &wksp,
+                                   const std::shared_ptr<T1> &wksp,
                                    IndexType type, const T2 &list);
 
   template <typename T1, typename T2,
@@ -284,20 +281,20 @@ public:
   static IAlgorithm_sptr fromHistory(const AlgorithmHistory &history);
   //@}
 
-  virtual boost::shared_ptr<Algorithm> createChildAlgorithm(
+  virtual std::shared_ptr<Algorithm> createChildAlgorithm(
       const std::string &name, const double startProgress = -1.,
       const double endProgress = -1., const bool enableLogging = true,
       const int &version = -1);
-  void setupAsChildAlgorithm(const boost::shared_ptr<Algorithm> &algorithm,
+  void setupAsChildAlgorithm(const std::shared_ptr<Algorithm> &algorithm,
                              const double startProgress = -1.,
                              const double endProgress = -1.,
                              const bool enableLogging = true);
 
   /// set whether we wish to track the child algorithm's history and pass it the
   /// parent object to fill.
-  void trackAlgorithmHistory(boost::shared_ptr<AlgorithmHistory> parentHist);
+  void trackAlgorithmHistory(std::shared_ptr<AlgorithmHistory> parentHist);
 
-  using WorkspaceVector = std::vector<boost::shared_ptr<Workspace>>;
+  using WorkspaceVector = std::vector<std::shared_ptr<Workspace>>;
 
   void findWorkspaces(WorkspaceVector &workspaces, unsigned int direction,
                       bool checkADS = false) const;
@@ -331,9 +328,6 @@ protected:
 
   void cacheWorkspaceProperties();
   void cacheInputWorkspaceHistories();
-
-  friend class AlgorithmProxy;
-  void initializeFromProxy(const AlgorithmProxy &);
 
   void setExecutionState(
       const ExecutionState state); ///< Sets the current execution state
@@ -389,14 +383,14 @@ protected:
   /// All the WorkspaceProperties that are Input or InOut. Set in execute()
   std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
   /// Pointer to the history for the algorithm being executed
-  boost::shared_ptr<AlgorithmHistory> m_history;
+  std::shared_ptr<AlgorithmHistory> m_history;
 
   /// Logger for this algorithm
   Kernel::Logger m_log;
   Kernel::Logger &g_log;
 
   /// Pointer to the parent history object (if set)
-  boost::shared_ptr<AlgorithmHistory> m_parentHistory;
+  std::shared_ptr<AlgorithmHistory> m_parentHistory;
 
   /// One vector of workspaces for each input workspace property. A group is
   /// unrolled to its constituent members
@@ -477,11 +471,11 @@ private:
   mutable double m_endChildProgress;   ///< Keeps value for algorithm's progress
                                        /// at Child Algorithm's finish
   AlgorithmID m_algorithmID;           ///< Algorithm ID for managed algorithms
-  std::vector<boost::weak_ptr<IAlgorithm>> m_ChildAlgorithms; ///< A list of
-                                                              /// weak pointers
-                                                              /// to any child
-                                                              /// algorithms
-                                                              /// created
+  std::vector<std::weak_ptr<IAlgorithm>> m_ChildAlgorithms; ///< A list of
+                                                            /// weak pointers
+                                                            /// to any child
+                                                            /// algorithms
+                                                            /// created
 
   /// Vector of all the workspaces that have been read-locked
   WorkspaceVector m_readLockedWorkspaces;
@@ -494,7 +488,7 @@ private:
   std::vector<IWorkspaceProperty *> m_pureOutputWorkspaceProps;
 
   /// Pointer to the WorkspaceGroup (if any) for each input workspace property
-  std::vector<boost::shared_ptr<WorkspaceGroup>> m_groupWorkspaces;
+  std::vector<std::shared_ptr<WorkspaceGroup>> m_groupWorkspaces;
   /// If only one input is a group, this is its index. -1 if they are all groups
   int m_singleGroup;
   /// All the groups have similar names (group_1, group_2 etc.)
@@ -511,7 +505,7 @@ private:
 };
 
 /// Typedef for a shared pointer to an Algorithm
-using Algorithm_sptr = boost::shared_ptr<Algorithm>;
+using Algorithm_sptr = std::shared_ptr<Algorithm>;
 
 } // namespace API
 } // namespace Mantid

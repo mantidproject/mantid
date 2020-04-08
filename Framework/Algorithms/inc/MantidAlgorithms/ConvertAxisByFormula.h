@@ -59,7 +59,7 @@ private:
     double value;
     bool isGeometric;
   };
-  using Variable_ptr = boost::shared_ptr<Variable>;
+  using Variable_ptr = std::shared_ptr<Variable>;
 
   void setAxisValue(const double &value, std::vector<Variable_ptr> &variables);
   void calculateValues(mu::Parser &p, std::vector<double> &vec,

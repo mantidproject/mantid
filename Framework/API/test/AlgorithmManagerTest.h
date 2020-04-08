@@ -10,7 +10,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/ActiveResult.h>
@@ -142,12 +141,12 @@ public:
     IAlgorithm_sptr alg;
     TS_ASSERT_THROWS_NOTHING(
         alg = AlgorithmManager::Instance().create("AlgTest", 1));
-    TS_ASSERT_DIFFERS(dynamic_cast<AlgorithmProxy *>(alg.get()),
-                      static_cast<AlgorithmProxy *>(nullptr));
+    TS_ASSERT_DIFFERS(dynamic_cast<Algorithm *>(alg.get()),
+                      static_cast<Algorithm *>(nullptr));
     TS_ASSERT_THROWS_NOTHING(
         alg = AlgorithmManager::Instance().create("AlgTestSecond", 1));
-    TS_ASSERT_DIFFERS(dynamic_cast<AlgorithmProxy *>(alg.get()),
-                      static_cast<AlgorithmProxy *>(nullptr));
+    TS_ASSERT_DIFFERS(dynamic_cast<Algorithm *>(alg.get()),
+                      static_cast<Algorithm *>(nullptr));
     TS_ASSERT_DIFFERS(dynamic_cast<IAlgorithm *>(alg.get()),
                       static_cast<IAlgorithm *>(nullptr));
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),
@@ -163,17 +162,6 @@ public:
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(), 1);
     TS_ASSERT_DIFFERS(Aptr.get(), static_cast<Algorithm *>(nullptr));
     TS_ASSERT_DIFFERS(Bptr.get(), static_cast<Algorithm *>(nullptr));
-  }
-
-  void testCreateNoProxy() {
-    AlgorithmManager::Instance().clear();
-    IAlgorithm_sptr Aptr, Bptr;
-    Aptr = AlgorithmManager::Instance().create("AlgTest", -1, true);
-    Bptr = AlgorithmManager::Instance().create("AlgTest", -1, false);
-    TSM_ASSERT("Was created as a AlgorithmProxy",
-               dynamic_cast<AlgorithmProxy *>(Aptr.get()));
-    TSM_ASSERT("Was NOT created as a AlgorithmProxy",
-               dynamic_cast<AlgorithmProxy *>(Bptr.get()) == nullptr);
   }
 
   // This will be called back when an algo starts
@@ -194,19 +182,12 @@ public:
     AlgorithmManager::Instance().notificationCenter.addObserver(my_observer);
 
     IAlgorithm_sptr Aptr, Bptr;
-    Aptr = AlgorithmManager::Instance().create("AlgTest", -1, true);
-    Bptr = AlgorithmManager::Instance().create("AlgTest", -1, false);
-
-    m_notificationValue = 0;
-    Poco::ActiveResult<bool> resB = Bptr->executeAsync();
-    resB.wait();
-    TSM_ASSERT_EQUALS("Notification was received.", m_notificationValue, 12345);
+    Aptr = AlgorithmManager::Instance().create("AlgTest", -1);
 
     m_notificationValue = 0;
     Poco::ActiveResult<bool> resA = Aptr->executeAsync();
     resA.wait();
-    TSM_ASSERT_EQUALS("Notification was received (proxy).", m_notificationValue,
-                      12345);
+    TSM_ASSERT_EQUALS("Notification was received.", m_notificationValue, 12345);
 
     AlgorithmManager::Instance().notificationCenter.removeObserver(my_observer);
   }
@@ -252,7 +233,7 @@ public:
     // Create another 'runs forever' algorithm (without proxy) and another
     // 'normal' one
     auto aRunningAlgorithm =
-        AlgorithmManager::Instance().create("AlgRunsForever", 1, false);
+        AlgorithmManager::Instance().create("AlgRunsForever", 1);
     TS_ASSERT(
         AlgorithmManager::Instance().runningInstancesOf("AlgTest").empty())
     TS_ASSERT_EQUALS(AlgorithmManager::Instance()
@@ -278,8 +259,8 @@ public:
     for (size_t i = 0; i < 5; i++) {
       // Create without proxy so that I can cast it to an Algorithm and get at
       // getCancel()
-      algs[i] = boost::dynamic_pointer_cast<Algorithm>(
-          AlgorithmManager::Instance().create("AlgRunsForever", 1, false));
+      algs[i] = std::dynamic_pointer_cast<Algorithm>(
+          AlgorithmManager::Instance().create("AlgRunsForever", 1));
       TS_ASSERT(!algs[i]->getCancel());
     }
 

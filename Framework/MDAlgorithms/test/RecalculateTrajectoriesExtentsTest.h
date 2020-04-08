@@ -50,7 +50,7 @@ public:
     algC.setPropertyValue("Units", "m,mm,um");
     algC.setPropertyValue("OutputWorkspace", name);
     algC.execute();
-    IMDEventWorkspace_sptr out = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+    IMDEventWorkspace_sptr out = std::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve(name));
     TS_ASSERT(out);
 

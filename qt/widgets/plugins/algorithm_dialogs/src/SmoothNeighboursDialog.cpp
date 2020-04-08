@@ -102,8 +102,7 @@ void SmoothNeighboursDialog::inputWorkspaceChanged(const QString &pName) {
       // If is a group workspace, use the first workspace to determine the
       // instrument type,
       // as most of the times it will be the same for all the workspaces
-      inWs =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(inGroupWs->getItem(0));
+      inWs = std::dynamic_pointer_cast<MatrixWorkspace>(inGroupWs->getItem(0));
     else
       // If is not a GroupWorkspace as well, do nothing
       return;

@@ -57,7 +57,7 @@ public:
     TS_ASSERT(masker.isExecuted());
 
     MatrixWorkspace_const_sptr outputWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             ads.retrieve(resultWorkspaceName));
 
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {

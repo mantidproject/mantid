@@ -53,7 +53,7 @@ protected:
   static Mantid::Kernel::Logger &g_Log;
 
   /// pointer to the class, which does the particular conversion
-  boost::shared_ptr<MDAlgorithms::ConvToMDBase> m_Convertor;
+  std::shared_ptr<MDAlgorithms::ConvToMDBase> m_Convertor;
 
   /// Template to check if a variable equal to NaN
   template <class T> inline bool isNaN(T val) {

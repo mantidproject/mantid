@@ -55,13 +55,13 @@ void CalculateMuonAsymmetry::init() {
   // list of uNonrm workspaces to fit to
   declareProperty(
       std::make_unique<Kernel::ArrayProperty<std::string>>(
-          "UnNormalizedWorkspaceList", boost::make_shared<API::ADSValidator>()),
+          "UnNormalizedWorkspaceList", std::make_shared<API::ADSValidator>()),
       "An ordered list of workspaces (to get the initial values "
       "for the normalizations).");
   // list of workspaces to output renormalized result to
   declareProperty(
       std::make_unique<Kernel::ArrayProperty<std::string>>(
-          "ReNormalizedWorkspaceList", boost::make_shared<API::ADSValidator>()),
+          "ReNormalizedWorkspaceList", std::make_shared<API::ADSValidator>()),
       "An ordered list of workspaces (to get the initial values "
       "for the normalizations).");
 
@@ -80,10 +80,10 @@ void CalculateMuonAsymmetry::init() {
   std::vector<std::string> minimizerOptions =
       API::FuncMinimizerFactory::Instance().getKeys();
   Kernel::IValidator_sptr minimizerValidator =
-      boost::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
+      std::make_shared<Kernel::StartsWithValidator>(minimizerOptions);
   declareProperty("Minimizer", "Levenberg-MarquardtMD", minimizerValidator,
                   "Minimizer to use for fitting.");
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "MaxIterations", 500, mustBePositive->clone(),
@@ -120,7 +120,7 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
         "contain the same number of workspaces.";
   }
   API::IFunction_sptr tmp = getProperty("InputFunction");
-  auto function = boost::dynamic_pointer_cast<API::CompositeFunction>(tmp);
+  auto function = std::dynamic_pointer_cast<API::CompositeFunction>(tmp);
   if (function->getNumberDomains() != normWS.size()) {
     validationOutput["InputFunction"] = "The Fitting function does not have "
                                         "the same number of domains as the "
@@ -233,12 +233,12 @@ void CalculateMuonAsymmetry::addNormalizedFits(
     API::Workspace_sptr fitWorkspace = getProperty("OutputWorkspace");
     API::MatrixWorkspace_sptr fitWorkspaceActual;
     if (fitWorkspace->isGroup()) {
-      fitWorkspaceActual = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
-          boost::static_pointer_cast<API::WorkspaceGroup>(fitWorkspace)
+      fitWorkspaceActual = std::dynamic_pointer_cast<API::MatrixWorkspace>(
+          std::static_pointer_cast<API::WorkspaceGroup>(fitWorkspace)
               ->getItem(0));
     } else {
       fitWorkspaceActual =
-          boost::dynamic_pointer_cast<API::MatrixWorkspace>(fitWorkspace);
+          std::dynamic_pointer_cast<API::MatrixWorkspace>(fitWorkspace);
     }
     API::IAlgorithm_sptr extractSpectra =
         createChildAlgorithm("ExtractSingleSpectrum");
@@ -261,7 +261,7 @@ void CalculateMuonAsymmetry::addNormalizedFits(
     if (fitWorkspace->isGroup()) {
       std::string workspaceName = fitWorkspaceActual->getName();
       auto fitWorkspaceGroupPointer =
-          boost::static_pointer_cast<API::WorkspaceGroup>(fitWorkspace);
+          std::static_pointer_cast<API::WorkspaceGroup>(fitWorkspace);
       fitWorkspaceGroupPointer->removeItem(0);
       API::AnalysisDataService::Instance().addOrReplace(workspaceName,
                                                         appendedFitWorkspace);
@@ -376,16 +376,16 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(
   try {
     if (wsNames.size() == 1) {
       // N(1+g) + exp
-      auto TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(tmp);
+      auto TFFunc = std::dynamic_pointer_cast<API::CompositeFunction>(tmp);
       norms.emplace_back(getNormValue(TFFunc));
     } else {
-      auto result = boost::dynamic_pointer_cast<API::MultiDomainFunction>(tmp);
+      auto result = std::dynamic_pointer_cast<API::MultiDomainFunction>(tmp);
       for (size_t j = 0; j < wsNames.size(); j++) {
         // get domain
-        auto TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(
+        auto TFFunc = std::dynamic_pointer_cast<API::CompositeFunction>(
             result->getFunction(j));
         // N(1+g) + exp
-        TFFunc = boost::dynamic_pointer_cast<API::CompositeFunction>(TFFunc);
+        TFFunc = std::dynamic_pointer_cast<API::CompositeFunction>(TFFunc);
         norms.emplace_back(getNormValue(TFFunc));
       }
     }
@@ -405,7 +405,7 @@ double CalculateMuonAsymmetry::getNormValue(API::CompositeFunction_sptr &func) {
 
   // getFunction(0) -> N(1+g)
   auto TFFunc =
-      boost::dynamic_pointer_cast<API::CompositeFunction>(func->getFunction(0));
+      std::dynamic_pointer_cast<API::CompositeFunction>(func->getFunction(0));
 
   // getFunction(0) -> N
   auto flat = TFFunc->getFunction(0);

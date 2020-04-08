@@ -141,10 +141,10 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
  * @param ws Pointer to workspace
  */
 void InelasticDiffRotDiscreteCircle::setWorkspace(
-    boost::shared_ptr<const API::Workspace> ws) {
+    std::shared_ptr<const API::Workspace> ws) {
   m_qValueCache.clear();
 
-  auto workspace = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
+  auto workspace = std::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
   if (!workspace)
     return;
 

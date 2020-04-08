@@ -240,9 +240,9 @@ void LoadLiveData::addChunk(const Mantid::API::Workspace_sptr &chunkWS) {
 
   // ISIS multi-period data come in workspace groups
   if (WorkspaceGroup_sptr gws =
-          boost::dynamic_pointer_cast<WorkspaceGroup>(chunkWS)) {
+          std::dynamic_pointer_cast<WorkspaceGroup>(chunkWS)) {
     WorkspaceGroup_sptr accum_gws =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
+        std::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
     if (!accum_gws) {
       throw std::runtime_error("Two workspace groups are expected.");
     }
@@ -257,7 +257,7 @@ void LoadLiveData::addChunk(const Mantid::API::Workspace_sptr &chunkWS) {
       addMatrixWSChunk(accum_gws->getItem(i), gws->getItem(i));
     }
   } else if (MatrixWorkspace_sptr mws =
-                 boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS)) {
+                 std::dynamic_pointer_cast<MatrixWorkspace>(chunkWS)) {
     // If workspace is a Matrix workspace just add the chunk
     addMatrixWSChunk(m_accumWS, chunkWS);
   } else {
@@ -277,8 +277,8 @@ void LoadLiveData::addChunk(const Mantid::API::Workspace_sptr &chunkWS) {
 void LoadLiveData::addMatrixWSChunk(const Workspace_sptr &accumWS,
                                     const Workspace_sptr &chunkWS) {
   // Handle the addition of the internal monitor workspace, if present
-  auto accumMW = boost::dynamic_pointer_cast<MatrixWorkspace>(accumWS);
-  auto chunkMW = boost::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
+  auto accumMW = std::dynamic_pointer_cast<MatrixWorkspace>(accumWS);
+  auto chunkMW = std::dynamic_pointer_cast<MatrixWorkspace>(chunkWS);
   if (accumMW && chunkMW) {
     auto accumMon = accumMW->monitorWorkspace();
     auto chunkMon = chunkMW->monitorWorkspace();
@@ -362,11 +362,11 @@ void LoadLiveData::replaceChunk(Mantid::API::Workspace_sptr chunkWS) {
 void LoadLiveData::appendChunk(const Mantid::API::Workspace_sptr &chunkWS) {
   // ISIS multi-period data come in workspace groups
   WorkspaceGroup_sptr chunk_gws =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(chunkWS);
+      std::dynamic_pointer_cast<WorkspaceGroup>(chunkWS);
 
   if (chunk_gws) {
     WorkspaceGroup_sptr accum_gws =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
+        std::dynamic_pointer_cast<WorkspaceGroup>(m_accumWS);
     if (!accum_gws) {
       throw std::runtime_error("Two workspace groups are expected.");
     }
@@ -528,12 +528,11 @@ void LoadLiveData::exec() {
   Workspace_sptr processed = this->processChunk(chunkWS);
 
   EventWorkspace_sptr processedEvent =
-      boost::dynamic_pointer_cast<EventWorkspace>(processed);
+      std::dynamic_pointer_cast<EventWorkspace>(processed);
   if (!preserveEvents && processedEvent) {
     // Convert the monitor workspace, if there is one and it's necessary
     MatrixWorkspace_sptr monitorWS = processedEvent->monitorWorkspace();
-    auto monitorEventWS =
-        boost::dynamic_pointer_cast<EventWorkspace>(monitorWS);
+    auto monitorEventWS = std::dynamic_pointer_cast<EventWorkspace>(monitorWS);
     if (monitorEventWS) {
       auto monAlg = this->createChildAlgorithm("ConvertToMatrixWorkspace");
       monAlg->setProperty("InputWorkspace", monitorEventWS);
@@ -606,7 +605,7 @@ void LoadLiveData::exec() {
 
   // Output group requires some additional handling
   WorkspaceGroup_sptr out_gws =
-      boost::dynamic_pointer_cast<WorkspaceGroup>(m_outputWS);
+      std::dynamic_pointer_cast<WorkspaceGroup>(m_outputWS);
   if (out_gws) {
     auto n = static_cast<size_t>(out_gws->getNumberOfEntries());
     for (size_t i = 0; i < n; ++i) {

@@ -81,7 +81,7 @@ private:
   void exec() override;
 
   /// Run the Child Algorithm LoadParameters
-  void runLoadParameterFile(const boost::shared_ptr<API::MatrixWorkspace> &ws,
+  void runLoadParameterFile(const std::shared_ptr<API::MatrixWorkspace> &ws,
                             const std::string &filename);
 
   /// Search directory for Parameter file, return full path name if found, else

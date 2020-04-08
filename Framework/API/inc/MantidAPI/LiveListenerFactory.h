@@ -39,12 +39,12 @@ class IAlgorithm;
 class MANTID_API_DLL LiveListenerFactoryImpl
     : public Kernel::DynamicFactory<ILiveListener> {
 public:
-  boost::shared_ptr<ILiveListener>
+  std::shared_ptr<ILiveListener>
   create(const std::string &instrumentName, bool connect = false,
          const API::IAlgorithm *callingAlgorithm = nullptr,
          const std::string &listenerConnectionName = "") const;
 
-  boost::shared_ptr<ILiveListener>
+  std::shared_ptr<ILiveListener>
   create(const Kernel::LiveListenerInfo &info, bool connect = false,
          const API::IAlgorithm *callingAlgorithm = nullptr) const;
 

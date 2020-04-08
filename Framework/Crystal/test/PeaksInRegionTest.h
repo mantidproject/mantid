@@ -450,7 +450,7 @@ public:
 
   PeaksInRegionTestPerformance() {
     int numPeaks = 4000;
-    inputWS = boost::make_shared<PeaksWorkspace>();
+    inputWS = std::make_shared<PeaksWorkspace>();
     Mantid::Geometry::Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 200);
     inputWS->setInstrument(inst);

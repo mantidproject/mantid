@@ -99,7 +99,7 @@ private:
   std::string sampleXML() override;
   void initialiseCachedDistances() override;
   /// Create the gague volume for the correction
-  boost::shared_ptr<const Geometry::IObject> constructGaugeVolume();
+  std::shared_ptr<const Geometry::IObject> constructGaugeVolume();
 
   double m_cubeSide; ///< The length of the side of an element cube in m
 };

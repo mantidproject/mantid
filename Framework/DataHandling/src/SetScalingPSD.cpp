@@ -49,7 +49,7 @@ void SetScalingPSD::init() {
       "The name of the workspace to apply the scaling to. This must be\n"
       "associated with an instrument appropriate for the scaling file");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(
       "ScalingOption", 0, mustBePositive,

@@ -44,7 +44,7 @@ const std::string MostLikelyMean::summary() const {
 /** Initialize the algorithm's properties.
  */
 void MostLikelyMean::init() {
-  auto lengthValidator = boost::make_shared<ArrayLengthValidator<double>>();
+  auto lengthValidator = std::make_shared<ArrayLengthValidator<double>>();
   lengthValidator->setLengthMin(1);
   declareProperty(std::make_unique<ArrayProperty<double>>(
                       "InputArray", lengthValidator, Direction::Input),

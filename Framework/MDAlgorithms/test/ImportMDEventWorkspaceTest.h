@@ -366,7 +366,7 @@ Performance Tests
 class ImportMDEventWorkspaceTestPerformance : public CxxTest::TestSuite {
 private:
   const size_t nRows;
-  boost::shared_ptr<MDFileObject> infile;
+  std::shared_ptr<MDFileObject> infile;
 
 public:
   static ImportMDEventWorkspaceTestPerformance *createSuite() {
@@ -391,7 +391,7 @@ public:
     }
     // Create a file from the contents.
     fileContents.setMDEventEntries(mdData);
-    infile = boost::make_shared<MDFileObject>(fileContents);
+    infile = std::make_shared<MDFileObject>(fileContents);
   }
 
   void testRead() {

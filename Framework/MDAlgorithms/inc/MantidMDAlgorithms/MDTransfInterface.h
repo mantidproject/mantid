@@ -219,8 +219,8 @@ public:
       Mantid::API::MatrixWorkspace_sptr underlyingWorkspace) const = 0;
 };
 
-using MDTransf_sptr = boost::shared_ptr<MDTransfInterface>;
-using MDTransf_const_sptr = boost::shared_ptr<const MDTransfInterface>;
+using MDTransf_sptr = std::shared_ptr<MDTransfInterface>;
+using MDTransf_const_sptr = std::shared_ptr<const MDTransfInterface>;
 
 } // namespace MDAlgorithms
 } // namespace Mantid

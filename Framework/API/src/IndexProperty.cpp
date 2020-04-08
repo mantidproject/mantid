@@ -129,7 +129,7 @@ std::string IndexProperty::generatePropertyName(const std::string &name) {
 }
 
 const Indexing::IndexInfo &IndexProperty::getIndexInfoFromWorkspace() const {
-  auto wksp = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  auto wksp = std::dynamic_pointer_cast<MatrixWorkspace>(
       m_workspaceProp.getWorkspace());
   if (!wksp)
     throw std::runtime_error("Invalid workspace type provided to "

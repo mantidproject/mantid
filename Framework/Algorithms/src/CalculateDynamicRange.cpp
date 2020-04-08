@@ -57,7 +57,7 @@ const std::string CalculateDynamicRange::summary() const {
 /** Initialize the algorithm's properties.
  */
 void CalculateDynamicRange::init() {
-  auto unitValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
+  auto unitValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "Workspace", "", Direction::InOut, unitValidator),
                   "An input workspace.");
@@ -135,8 +135,7 @@ void CalculateDynamicRange::exec() {
       instrument->getDetectorsInBank(dets, compName);
       if (dets.empty()) {
         const auto component = instrument->getComponentByName(compName);
-        const auto det =
-            boost::dynamic_pointer_cast<const IDetector>(component);
+        const auto det = std::dynamic_pointer_cast<const IDetector>(component);
         if (!det) {
           g_log.error() << "No detectors found in component '" << compName
                         << "'\n";

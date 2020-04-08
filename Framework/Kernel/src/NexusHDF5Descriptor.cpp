@@ -5,7 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidNexus/NexusHDF5Descriptor.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 
 #include <hdf5.h>
 
@@ -13,8 +14,7 @@
 #include <cstring>   // strcpy
 #include <stdexcept> // std::invalid_argument
 
-namespace Mantid {
-namespace NeXus {
+namespace Mantid::Kernel {
 
 /// hdf5 specific functions, stay in anonymous namespace to make hdf5 linking
 /// PRIVATE
@@ -177,6 +177,12 @@ void getGroup(hid_t groupID,
 
 } // namespace
 
+bool NexusHDF5Descriptor::isReadable(const std::string &filename) {
+  // use existing function to do the work
+  return NexusDescriptor::isReadable(filename,
+                                     NexusDescriptor::Version::Version5);
+}
+
 NexusHDF5Descriptor::NexusHDF5Descriptor(const std::string &filename)
     : m_filename(filename), m_allEntries(initAllEntries()) {}
 
@@ -197,8 +203,8 @@ NexusHDF5Descriptor::initAllEntries() {
   hid_t fileID = H5Fopen(m_filename.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
   if (fileID < 0) {
     throw std::invalid_argument(
-        "ERROR: NeXus::HDF5Descriptor couldn't open hdf5 file " + m_filename +
-        "\n");
+        "ERROR: Kernel::NexusHDF5Descriptor couldn't open hdf5 file " +
+        m_filename + "\n");
   }
 
   hid_t groupID = H5Gopen2(fileID, "/", H5P_DEFAULT);
@@ -213,5 +219,4 @@ NexusHDF5Descriptor::initAllEntries() {
   return allEntries;
 }
 
-} // namespace NeXus
-} // namespace Mantid
+} // namespace Mantid::Kernel

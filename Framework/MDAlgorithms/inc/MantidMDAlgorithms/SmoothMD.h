@@ -9,7 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -36,16 +36,16 @@ public:
   const std::string summary() const override;
   std::map<std::string, std::string> validateInputs() override;
 
-  boost::shared_ptr<Mantid::API::IMDHistoWorkspace> hatSmooth(
-      const boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> &toSmooth,
+  std::shared_ptr<Mantid::API::IMDHistoWorkspace> hatSmooth(
+      const std::shared_ptr<const Mantid::API::IMDHistoWorkspace> &toSmooth,
       const std::vector<double> &widthVector,
-      boost::optional<boost::shared_ptr<const Mantid::API::IMDHistoWorkspace>>
+      boost::optional<std::shared_ptr<const Mantid::API::IMDHistoWorkspace>>
           weightingWS);
 
-  boost::shared_ptr<Mantid::API::IMDHistoWorkspace> gaussianSmooth(
-      const boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> &toSmooth,
+  std::shared_ptr<Mantid::API::IMDHistoWorkspace> gaussianSmooth(
+      const std::shared_ptr<const Mantid::API::IMDHistoWorkspace> &toSmooth,
       const std::vector<double> &widthVector,
-      boost::optional<boost::shared_ptr<const Mantid::API::IMDHistoWorkspace>>
+      boost::optional<std::shared_ptr<const Mantid::API::IMDHistoWorkspace>>
           weightingWS);
 
 private:

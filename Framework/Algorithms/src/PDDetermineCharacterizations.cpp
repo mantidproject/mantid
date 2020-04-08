@@ -411,7 +411,7 @@ void PDDetermineCharacterizations::exec() {
     m_propertyManager =
         PropertyManagerDataService::Instance().retrieve(managerName);
   } else {
-    m_propertyManager = boost::make_shared<Kernel::PropertyManager>();
+    m_propertyManager = std::make_shared<Kernel::PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(managerName,
                                                         m_propertyManager);
   }

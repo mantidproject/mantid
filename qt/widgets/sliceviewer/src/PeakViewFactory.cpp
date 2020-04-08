@@ -90,7 +90,7 @@ PeakViewFactory::PeakViewFactory(Mantid::API::IMDWorkspace_sptr mdWS,
 
 PeakViewFactory::~PeakViewFactory() {}
 
-boost::shared_ptr<PeakOverlayView> PeakViewFactory::createView(
+std::shared_ptr<PeakOverlayView> PeakViewFactory::createView(
     PeaksPresenter *const presenter,
     Mantid::Geometry::PeakTransform_const_sptr transform) const {
   double largestEffectiveRadius = 0.0;
@@ -109,10 +109,10 @@ boost::shared_ptr<PeakOverlayView> PeakViewFactory::createView(
     ++index;
   }
 
-  return boost::make_shared<PeakView>(
-      presenter, m_plot, m_parent, peakRepresentations, m_plotXIndex,
-      m_plotYIndex, m_foregroundColor, m_backgroundColor,
-      largestEffectiveRadius);
+  return std::make_shared<PeakView>(presenter, m_plot, m_parent,
+                                    peakRepresentations, m_plotXIndex,
+                                    m_plotYIndex, m_foregroundColor,
+                                    m_backgroundColor, largestEffectiveRadius);
 }
 
 PeakRepresentation_sptr PeakViewFactory::createSinglePeakRepresentation(

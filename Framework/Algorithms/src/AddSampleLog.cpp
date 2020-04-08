@@ -45,7 +45,7 @@ void AddSampleLog::init() {
                       "Workspace", "", Direction::InOut),
                   "Workspace to add the log entry to");
   declareProperty("LogName", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The name that will identify the log entry");
 
   declareProperty("LogText", "", "The content of the log");
@@ -55,7 +55,7 @@ void AddSampleLog::init() {
   propOptions.emplace_back(numberLogOption);
   propOptions.emplace_back(numberSeriesLogOption);
   declareProperty("LogType", stringLogOption,
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The type that the log data will be.");
   declareProperty("LogUnit", "", "The units of the log");
 
@@ -64,7 +64,7 @@ void AddSampleLog::init() {
   typeOptions.emplace_back(doubleTypeOption);
   typeOptions.emplace_back(autoTypeOption);
   declareProperty("NumberType", autoTypeOption,
-                  boost::make_shared<StringListValidator>(typeOptions),
+                  std::make_shared<StringListValidator>(typeOptions),
                   "Force LogText to be interpreted as a number of type 'int' "
                   "or 'double'.");
 
@@ -83,7 +83,7 @@ void AddSampleLog::init() {
 
   std::vector<std::string> time_units{"Second", "Nanosecond"};
   declareProperty("TimeUnit", "Second",
-                  boost::make_shared<Kernel::StringListValidator>(time_units),
+                  std::make_shared<Kernel::StringListValidator>(time_units),
                   "The unit of the time of the input workspace");
   declareProperty("RelativeTime", true,
                   "If specified as True, then then the "
@@ -97,12 +97,11 @@ void AddSampleLog::init() {
 void AddSampleLog::exec() {
   // A pointer to the workspace to add a log to
   Workspace_sptr target_workspace = getProperty("Workspace");
-  auto expinfo_ws =
-      boost::dynamic_pointer_cast<ExperimentInfo>(target_workspace);
+  auto expinfo_ws = std::dynamic_pointer_cast<ExperimentInfo>(target_workspace);
   if (!expinfo_ws) {
     // We're dealing with an MD workspace which has multiple experiment infos
     auto infos =
-        boost::dynamic_pointer_cast<MultipleExperimentInfos>(target_workspace);
+        std::dynamic_pointer_cast<MultipleExperimentInfos>(target_workspace);
     if (!infos) {
       throw std::invalid_argument(
           "Input workspace does not support sample logs");

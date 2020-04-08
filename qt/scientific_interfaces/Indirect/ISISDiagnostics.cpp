@@ -474,8 +474,8 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
     return;
   }
 
-  MatrixWorkspace_sptr sliceWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      sliceOutputGroup->getItem(0));
+  MatrixWorkspace_sptr sliceWs =
+      std::dynamic_pointer_cast<MatrixWorkspace>(sliceOutputGroup->getItem(0));
   if (!sliceWs) {
     g_log.warning("No result workspaces, cannot plot preview.");
     return;

@@ -43,7 +43,7 @@ std::string TrustRegionMinimizer::name() const { return "Trust Region"; }
 void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
                                       size_t maxIterations) {
   m_leastSquares =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
+      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           costFunction);
   if (!m_leastSquares) {
     throw std::runtime_error(

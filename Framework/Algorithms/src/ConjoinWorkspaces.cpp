@@ -53,9 +53,9 @@ void ConjoinWorkspaces::exec() {
   MatrixWorkspace_const_sptr ws1 = getProperty("InputWorkspace1");
   MatrixWorkspace_const_sptr ws2 = getProperty("InputWorkspace2");
   DataObjects::EventWorkspace_const_sptr eventWs1 =
-      boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
+      std::dynamic_pointer_cast<const EventWorkspace>(ws1);
   DataObjects::EventWorkspace_const_sptr eventWs2 =
-      boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
+      std::dynamic_pointer_cast<const EventWorkspace>(ws2);
 
   // Make sure that we are not mis-matching EventWorkspaces and other types of
   // workspaces

@@ -68,7 +68,7 @@ private:
 };
 
 using ThermalNeutronDtoTOFFunction_sptr =
-    boost::shared_ptr<ThermalNeutronDtoTOFFunction>;
+    std::shared_ptr<ThermalNeutronDtoTOFFunction>;
 
 /// Calcualte TOF from d-spacing value for thermal neutron
 inline double calThermalNeutronTOF(double dh, double dtt1, double dtt1t,

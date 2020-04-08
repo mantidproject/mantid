@@ -77,6 +77,7 @@ set(SRC_FILES
     src/NDRandomNumberGenerator.cpp
     src/NeutronAtom.cpp
     src/NexusDescriptor.cpp
+    src/NexusHDF5Descriptor.cpp
     src/NullValidator.cpp
     src/OptionalBool.cpp
     src/ParaViewVersion.cpp
@@ -243,6 +244,7 @@ set(INC_FILES
     inc/MantidKernel/NetworkProxy.h
     inc/MantidKernel/NeutronAtom.h
     inc/MantidKernel/NexusDescriptor.h
+    inc/MantidKernel/NexusHDF5Descriptor.h
     inc/MantidKernel/NullValidator.h
     inc/MantidKernel/OptionalBool.h
     inc/MantidKernel/ParaViewVersion.h
@@ -309,7 +311,6 @@ set(INC_FILES
     inc/MantidKernel/VisibleWhenProperty.h
     inc/MantidKernel/WarningSuppressions.h
     inc/MantidKernel/WriteLock.h
-    inc/MantidKernel/XMLInstantiator.h
     inc/MantidKernel/cow_ptr.h
     inc/MantidKernel/make_cow.h
     inc/MantidKernel/normal_distribution.h)
@@ -399,6 +400,7 @@ set(TEST_FILES
     NearestNeighboursTest.h
     NeutronAtomTest.h
     NexusDescriptorTest.h
+    NexusHDF5DescriptorTest.h
     NullValidatorTest.h
     OptionalBoolTest.h
     ProgressBaseTest.h
@@ -494,7 +496,7 @@ target_include_directories(Kernel SYSTEM
                            PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS}
                                   ${JSONCPP_INCLUDE_DIR}
                            PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
-                                   ${OPENSSL_INCLUDE_DIR})
+			   ${OPENSSL_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
@@ -524,6 +526,7 @@ target_link_libraries(Kernel
                       ${MANTIDLIBS}
                       ${NETWORK_LIBRARIES}
                       span
+                      ${HDF5_LIBRARIES}
                       )
 if(WIN32)
   target_link_libraries(Kernel LINK_PRIVATE Psapi.lib) # For memory usage

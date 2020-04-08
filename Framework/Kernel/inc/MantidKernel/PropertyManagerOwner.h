@@ -121,7 +121,7 @@ public:
 
 private:
   /// Shared pointer to the 'real' property manager
-  boost::shared_ptr<PropertyManager> m_properties;
+  std::shared_ptr<PropertyManager> m_properties;
 };
 
 } // namespace Kernel

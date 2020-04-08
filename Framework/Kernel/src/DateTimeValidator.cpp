@@ -8,7 +8,7 @@
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/System.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <stdexcept>
 
 namespace Mantid {
@@ -19,7 +19,7 @@ using namespace DateAndTimeHelpers;
  * @return A clone of the current state of the validator
  */
 IValidator_sptr DateTimeValidator::clone() const {
-  return boost::make_shared<DateTimeValidator>(*this);
+  return std::make_shared<DateTimeValidator>(*this);
 }
 
 DateTimeValidator::DateTimeValidator() { m_allowedEmpty = false; }

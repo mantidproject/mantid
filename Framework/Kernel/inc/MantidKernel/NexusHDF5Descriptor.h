@@ -6,16 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 
 #include <map>
 #include <set>
 #include <string>
 
-namespace Mantid {
-namespace NeXus {
+namespace Mantid::Kernel {
 
-class DLLExport NexusHDF5Descriptor {
+class MANTID_KERNEL_DLL NexusHDF5Descriptor {
 
 public:
   /**
@@ -30,6 +29,9 @@ public:
    * Using RAII components, no need to deallocate explicitly
    */
   ~NexusHDF5Descriptor() = default;
+
+  /// Returns true if the file is considered to store data in a hierarchy
+  static bool isReadable(const std::string &filename);
 
   /**
    * Returns a copy of the current file name
@@ -71,5 +73,4 @@ private:
   std::map<std::string, std::set<std::string>> m_allEntries;
 };
 
-} // namespace NeXus
-} // namespace Mantid
+} // namespace Mantid::Kernel

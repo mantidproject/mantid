@@ -43,7 +43,7 @@ class EXPORT_OPT_MANTIDQT_COMMON PropertyHandler
 public:
   // Constructor
   PropertyHandler(const Mantid::API::IFunction_sptr &fun,
-                  boost::shared_ptr<Mantid::API::CompositeFunction> parent,
+                  std::shared_ptr<Mantid::API::CompositeFunction> parent,
                   FitPropertyBrowser *browser, QtBrowserItem *item = nullptr);
 
   /// Destructor
@@ -66,13 +66,11 @@ public:
   QString functionPrefix() const;
 
   // Return composite function
-  boost::shared_ptr<Mantid::API::CompositeFunction> cfun() const {
-    return m_cf;
-  }
+  std::shared_ptr<Mantid::API::CompositeFunction> cfun() const { return m_cf; }
   // Return peak function
-  boost::shared_ptr<Mantid::API::IPeakFunction> pfun() const { return m_pf; }
+  std::shared_ptr<Mantid::API::IPeakFunction> pfun() const { return m_pf; }
   // Return IFunction
-  boost::shared_ptr<Mantid::API::IFunction> ifun() const { return m_fun; }
+  std::shared_ptr<Mantid::API::IFunction> ifun() const { return m_fun; }
   // Return the browser item
   QtBrowserItem *item() const { return m_item; }
   // Return the parent handler
@@ -83,13 +81,13 @@ public:
    * calls findCompositeFunction recursively with all its children or
    * zero
    */
-  boost::shared_ptr<const Mantid::API::CompositeFunction>
+  std::shared_ptr<const Mantid::API::CompositeFunction>
   findCompositeFunction(QtBrowserItem *item) const;
   /** Returns 'this' if item == m_item or
    * calls findFunction recursively with all its children or
    * zero
    */
-  boost::shared_ptr<const Mantid::API::IFunction>
+  std::shared_ptr<const Mantid::API::IFunction>
   findFunction(QtBrowserItem *item) const;
 
   PropertyHandler *findHandler(QtProperty *prop);
@@ -166,7 +164,7 @@ public:
    * Change the type of the function (replace the function)
    * @param prop :: The "Type" property with new value
    */
-  boost::shared_ptr<Mantid::API::IFunction> changeType(QtProperty *prop);
+  std::shared_ptr<Mantid::API::IFunction> changeType(QtProperty *prop);
 
   void setHeight(const double &h);
   void setCentre(const double &c);
@@ -228,11 +226,11 @@ protected:
 
 private:
   FitPropertyBrowser *m_browser;
-  boost::shared_ptr<Mantid::API::CompositeFunction>
+  std::shared_ptr<Mantid::API::CompositeFunction>
       m_cf; //< if the function is composite holds pointer to it
-  boost::shared_ptr<Mantid::API::IPeakFunction>
+  std::shared_ptr<Mantid::API::IPeakFunction>
       m_pf; //< if the function is peak holds pointer to it
-  boost::shared_ptr<Mantid::API::CompositeFunction>
+  std::shared_ptr<Mantid::API::CompositeFunction>
       m_parent; //< if the function has parent holds pointer to it
   QtProperty *m_type;
   QtBrowserItem *m_item;              //< the browser item

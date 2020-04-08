@@ -87,23 +87,23 @@ void LoadIsawSpectrum::exec() {
   }
   infile.close();
   // Build a list of Rectangular Detectors
-  std::vector<boost::shared_ptr<RectangularDetector>> detList;
+  std::vector<std::shared_ptr<RectangularDetector>> detList;
   for (int i = 0; i < inst->nelements(); i++) {
-    boost::shared_ptr<RectangularDetector> det;
-    boost::shared_ptr<ICompAssembly> assem;
-    boost::shared_ptr<ICompAssembly> assem2;
+    std::shared_ptr<RectangularDetector> det;
+    std::shared_ptr<ICompAssembly> assem;
+    std::shared_ptr<ICompAssembly> assem2;
 
-    det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
+    det = std::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det) {
       detList.emplace_back(det);
     } else {
       // Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
       // We are not doing a full recursive search since that will be very long
       // for lots of pixels.
-      assem = boost::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
+      assem = std::dynamic_pointer_cast<ICompAssembly>((*inst)[i]);
       if (assem) {
         for (int j = 0; j < assem->nelements(); j++) {
-          det = boost::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
+          det = std::dynamic_pointer_cast<RectangularDetector>((*assem)[j]);
           if (det) {
             detList.emplace_back(det);
           } else {
@@ -111,10 +111,10 @@ void LoadIsawSpectrum::exec() {
             // PG3).
             // We are not doing a full recursive search since that will be very
             // long for lots of pixels.
-            assem2 = boost::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
+            assem2 = std::dynamic_pointer_cast<ICompAssembly>((*assem)[j]);
             if (assem2) {
               for (int k = 0; k < assem2->nelements(); k++) {
-                det = boost::dynamic_pointer_cast<RectangularDetector>(
+                det = std::dynamic_pointer_cast<RectangularDetector>(
                     (*assem2)[k]);
                 if (det) {
                   detList.emplace_back(det);
@@ -127,7 +127,7 @@ void LoadIsawSpectrum::exec() {
     }
   }
 
-  MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create(
           "Workspace2D", spectra.size(), spectra[0].size(), spectra[0].size()));
   outWS->setInstrument(inst);

@@ -11,7 +11,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <vector>
 
@@ -100,7 +100,7 @@ private:
   const ExperimentInfo &m_experimentInfo;
   Geometry::DetectorInfo &m_detectorInfo;
   const Beamline::SpectrumInfo &m_spectrumInfo;
-  mutable std::vector<boost::shared_ptr<const Geometry::IDetector>>
+  mutable std::vector<std::shared_ptr<const Geometry::IDetector>>
       m_lastDetector;
   mutable std::vector<size_t> m_lastIndex;
 };

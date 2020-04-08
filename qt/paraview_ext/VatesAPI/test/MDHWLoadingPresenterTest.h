@@ -12,6 +12,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
@@ -134,7 +135,7 @@ public:
     Mantid::API::Workspace_sptr ws =
         get3DWorkspace(true, false); // Integrated T Dimension
     presenter.extractMetadata(
-        *boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+        *std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
     TSM_ASSERT("This is a 4D workspace with an integrated T dimension",
                !presenter.hasTDimensionAvailable());
@@ -148,7 +149,7 @@ public:
     Mantid::API::Workspace_sptr ws =
         get3DWorkspace(false, false); // Non-integrated T Dimension
     presenter.extractMetadata(
-        *boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+        *std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
     TSM_ASSERT("This is a 4D workspace with an integrated T dimension",
                presenter.hasTDimensionAvailable());
@@ -162,7 +163,7 @@ public:
     Mantid::API::Workspace_sptr ws =
         get3DWorkspace(false, false); // Non-integrated T Dimension
     presenter.extractMetadata(
-        *boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+        *std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
 
     TSM_ASSERT_EQUALS("This is a 4D workspace with a T dimension", "D (A)",
                       presenter.getTimeStepLabel());
@@ -175,7 +176,7 @@ public:
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(true, false);
     presenter.extractMetadata(
-        *boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+        *std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
     vtkDataSet *ds = vtkUnstructuredGrid::New();
     TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
     TSM_ASSERT_EQUALS("X Label should match exactly",
@@ -193,7 +194,7 @@ public:
     // Test that it does work when setup.
     Mantid::API::Workspace_sptr ws = get3DWorkspace(false, false);
     presenter.extractMetadata(
-        *boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
+        *std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws));
     vtkDataSet *ds = vtkUnstructuredGrid::New();
     TSM_ASSERT_THROWS_NOTHING("Should pass", presenter.setAxisLabels(ds));
     TSM_ASSERT_EQUALS("X Label should match exactly",
@@ -207,8 +208,8 @@ public:
   Mantid::API::IMDHistoWorkspace_sptr
   makeHistoWorkspace(const std::vector<int> &shape) {
 
-    IAlgorithm *create =
-        FrameworkManager::Instance().createAlgorithm("CreateMDHistoWorkspace");
+    auto create =
+        AlgorithmManager::Instance().createUnmanaged("CreateMDHistoWorkspace");
     create->setChild(true);
     create->initialize();
 

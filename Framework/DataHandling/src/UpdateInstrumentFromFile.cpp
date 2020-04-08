@@ -96,7 +96,7 @@ void UpdateInstrumentFromFile::exec() {
   m_ignoreMonitors = (!moveMonitors);
 
   // Check file type
-  if (NexusDescriptor::isHDF(filename)) {
+  if (NexusDescriptor::isReadable(filename)) {
     LoadISISNexus2 isisNexus;
     LoadEventNexus eventNexus;
     boost::scoped_ptr<Kernel::NexusDescriptor> descriptor(

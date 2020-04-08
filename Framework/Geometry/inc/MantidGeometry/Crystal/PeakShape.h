@@ -9,7 +9,7 @@
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/System.h"
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 
 namespace Mantid {
@@ -39,8 +39,8 @@ public:
   virtual ~PeakShape() = default;
 };
 
-using PeakShape_sptr = boost::shared_ptr<PeakShape>;
-using PeakShape_const_sptr = boost::shared_ptr<const PeakShape>;
+using PeakShape_sptr = std::shared_ptr<PeakShape>;
+using PeakShape_const_sptr = std::shared_ptr<const PeakShape>;
 
 } // namespace Geometry
 } // namespace Mantid
