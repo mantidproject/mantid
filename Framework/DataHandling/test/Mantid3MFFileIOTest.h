@@ -28,8 +28,8 @@ public:
     std::string path = FileFinder::Instance().getFullPath("box.3mf");
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
-    std::vector<boost::shared_ptr<Geometry::MeshObject>> environmentMeshes;
-    boost::shared_ptr<Geometry::MeshObject> sampleMesh;
+    std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
+    std::shared_ptr<Geometry::MeshObject> sampleMesh;
     MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
     TS_ASSERT_EQUALS(sampleMesh, nullptr);
     TS_ASSERT_EQUALS(environmentMeshes.size(), 1);
@@ -43,8 +43,8 @@ public:
     std::string path = FileFinder::Instance().getFullPath("box_sample.3mf");
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
-    std::vector<boost::shared_ptr<Geometry::MeshObject>> environmentMeshes;
-    boost::shared_ptr<Geometry::MeshObject> sampleMesh;
+    std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
+    std::shared_ptr<Geometry::MeshObject> sampleMesh;
     MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
     TS_ASSERT_EQUALS(environmentMeshes.size(), 0);
     TS_ASSERT(sampleMesh->hasValidShape());
@@ -58,8 +58,8 @@ public:
         FileFinder::Instance().getFullPath("box_withMaterial.3mf");
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
-    std::vector<boost::shared_ptr<Geometry::MeshObject>> environmentMeshes;
-    boost::shared_ptr<Geometry::MeshObject> sampleMesh;
+    std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
+    std::shared_ptr<Geometry::MeshObject> sampleMesh;
     MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
     TS_ASSERT_EQUALS(sampleMesh, nullptr);
     TS_ASSERT_EQUALS(environmentMeshes.size(), 1);
@@ -72,8 +72,8 @@ public:
         FileFinder::Instance().getFullPath("box_withInvalidMaterial.3mf");
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
-    std::vector<boost::shared_ptr<Geometry::MeshObject>> environmentMeshes;
-    boost::shared_ptr<Geometry::MeshObject> sampleMesh;
+    std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
+    std::shared_ptr<Geometry::MeshObject> sampleMesh;
     MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
     // exception is caught and mesh loaded without material data
     TS_ASSERT_EQUALS(environmentMeshes[0]->material().name(), "");
@@ -84,8 +84,8 @@ public:
         FileFinder::Instance().getFullPath("box_withInvalidUnits.3mf");
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
-    std::vector<boost::shared_ptr<Geometry::MeshObject>> environmentMeshes;
-    boost::shared_ptr<Geometry::MeshObject> sampleMesh;
+    std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
+    std::shared_ptr<Geometry::MeshObject> sampleMesh;
     // invalid units logged as warning by Lib3MF reader and units default to mm
     TS_ASSERT_THROWS_NOTHING(
         MeshLoader.readMeshObjects(environmentMeshes, sampleMesh));
@@ -97,8 +97,8 @@ public:
         FileFinder::Instance().getFullPath("multiple_cylinders.3mf");
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
-    std::vector<boost::shared_ptr<Geometry::MeshObject>> environmentMeshes;
-    boost::shared_ptr<Geometry::MeshObject> sampleMesh;
+    std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
+    std::shared_ptr<Geometry::MeshObject> sampleMesh;
     MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
     TS_ASSERT_EQUALS(sampleMesh, nullptr);
     TS_ASSERT_EQUALS(environmentMeshes.size(), 6);
@@ -115,8 +115,8 @@ public:
     std::string path = FileFinder::Instance().getFullPath("T-Rex.3mf");
     Mantid3MFFileIO MeshLoader;
     MeshLoader.LoadFile(path);
-    std::vector<boost::shared_ptr<Geometry::MeshObject>> environmentMeshes;
-    boost::shared_ptr<Geometry::MeshObject> sampleMesh;
+    std::vector<std::shared_ptr<Geometry::MeshObject>> environmentMeshes;
+    std::shared_ptr<Geometry::MeshObject> sampleMesh;
     MeshLoader.readMeshObjects(environmentMeshes, sampleMesh);
     TS_ASSERT_EQUALS(sampleMesh, nullptr);
     TS_ASSERT_EQUALS(environmentMeshes.size(), 3);

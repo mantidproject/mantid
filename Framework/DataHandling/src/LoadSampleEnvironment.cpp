@@ -355,6 +355,11 @@ void LoadSampleEnvironment::loadEnvironmentFrom3MF(
   // Put Environment into sample.
   sample.setEnvironment(std::move(environment));
 #else
+  UNUSED_ARG(inputWS)
+  UNUSED_ARG(filename)
+  UNUSED_ARG(sample)
+  UNUSED_ARG(add)
+  UNUSED_ARG(debugString)
   throw std::runtime_error("3MF format not supported on this platform");
 #endif
 }

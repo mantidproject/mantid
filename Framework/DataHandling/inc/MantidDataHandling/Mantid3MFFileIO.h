@@ -8,7 +8,7 @@
 #define MANTID_DATAHANDLING_3MF_H_
 
 #include "MantidDataHandling/MeshFileIO.h"
-#include "lib3mf_implicit.hpp"
+#include "lib3mf/Bindings/Cpp/lib3mf_implicit.hpp"
 #include <memory>
 
 namespace Mantid {
